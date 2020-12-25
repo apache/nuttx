@@ -41,6 +41,7 @@
 
 #include <sys/epoll.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <poll.h>
 #include <errno.h>
@@ -48,6 +49,18 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct epoll_head
+{
+  int size;
+  int occupied;
+  FAR epoll_data_t *data;
+  FAR struct pollfd *poll;
+};
 
 /****************************************************************************
  * Public Functions
@@ -67,17 +80,46 @@
 int epoll_create(int size)
 {
   FAR struct epoll_head *eph =
-    (FAR struct epoll_head *)kmm_malloc(sizeof(struct epoll_head));
+    (FAR struct epoll_head *)kmm_malloc(sizeof(struct epoll_head) +
+                                        sizeof(epoll_data_t) * size +
+                                        sizeof(struct pollfd) * size);
 
   eph->size = size;
   eph->occupied = 0;
-  eph->evs = kmm_malloc(sizeof(struct epoll_event) * eph->size);
+  eph->data = (FAR epoll_data_t *)(eph + 1);
+  eph->poll = (FAR struct pollfd *)(eph->data + size);
 
   /* REVISIT: This will not work on machines where:
    * sizeof(struct epoll_head *) > sizeof(int)
    */
 
   return (int)((intptr_t)eph);
+}
+
+/****************************************************************************
+ * Name: epoll_create1
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
+int epoll_create1(int flags)
+{
+  /* For current implementation, Close-on-exec is a default behavior,
+   * the handle of epoll(2) is not a real file handle.
+   */
+
+  if (flags != EPOLL_CLOEXEC)
+    {
+      set_errno(EINVAL);
+      return -1;
+    }
+
+  return epoll_create(CONFIG_FS_NEPOLL_DESCRIPTORS);
 }
 
 /****************************************************************************
@@ -99,7 +141,6 @@ void epoll_close(int epfd)
 
   FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
 
-  kmm_free(eph->evs);
   kmm_free(eph);
 }
 
@@ -125,11 +166,12 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
   switch (op)
     {
       case EPOLL_CTL_ADD:
-        finfo("%08x CTL ADD(%d): fd=%d ev=%08x\n",
+        finfo("%08x CTL ADD(%d): fd=%d ev=%08" PRIx32 "\n",
               epfd, eph->occupied, fd, ev->events);
 
-        eph->evs[eph->occupied].events = ev->events | POLLERR | POLLHUP;
-        eph->evs[eph->occupied++].data.fd = fd;
+        eph->data[eph->occupied]        = ev->data;
+        eph->poll[eph->occupied].events = ev->events | POLLERR | POLLHUP;
+        eph->poll[eph->occupied++].fd   = fd;
         return 0;
 
       case EPOLL_CTL_DEL:
@@ -138,12 +180,14 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
 
           for (i = 0; i < eph->occupied; i++)
             {
-              if (eph->evs[i].data.fd == fd)
+              if (eph->poll[i].fd == fd)
                 {
                   if (i != eph->occupied - 1)
                     {
-                      memmove(&eph->evs[i], &eph->evs[i + 1],
-                              eph->occupied - i);
+                      memmove(&eph->data[i], &eph->data[i + 1],
+                              sizeof(epoll_data_t) * (eph->occupied - i));
+                      memmove(&eph->poll[i], &eph->poll[i + 1],
+                              sizeof(struct pollfd) * (eph->occupied - i));
                     }
 
                   eph->occupied--;
@@ -151,30 +195,103 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
                 }
             }
 
-          return -ENOENT;
+          set_errno(ENOENT);
+          return -1;
         }
 
       case EPOLL_CTL_MOD:
         {
           int i;
 
-          finfo("%08x CTL MOD(%d): fd=%d ev=%08x\n",
+          finfo("%08x CTL MOD(%d): fd=%d ev=%08" PRIx32 "\n",
                 epfd, eph->occupied, fd, ev->events);
 
           for (i = 0; i < eph->occupied; i++)
             {
-              if (eph->evs[i].data.fd == fd)
+              if (eph->poll[i].fd == fd)
                 {
-                  eph->evs[i].events = ev->events | POLLERR | POLLHUP;
+                  eph->data[i]        = ev->data;
+                  eph->poll[i].events = ev->events | POLLERR | POLLHUP;
                   return 0;
                 }
             }
 
-          return -ENOENT;
+          set_errno(ENOENT);
+          return -1;
         }
     }
 
-  return -EINVAL;
+  set_errno(EINVAL);
+  return -1;
+}
+
+/****************************************************************************
+ * Name: epoll_pwait
+ ****************************************************************************/
+
+int epoll_pwait(int epfd, FAR struct epoll_event *evs,
+                int maxevents, int timeout, FAR const sigset_t *sigmask)
+{
+  /* REVISIT: This will not work on machines where:
+   * sizeof(struct epoll_head *) > sizeof(int)
+   */
+
+  FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
+  int counter;
+  int rc;
+  int i;
+
+  if (timeout < 0)
+    {
+      rc = ppoll(eph->poll, eph->occupied, NULL, sigmask);
+    }
+  else
+    {
+      struct timespec timeout_ts;
+
+      timeout_ts.tv_sec  = timeout / 1000;
+      timeout_ts.tv_nsec = timeout % 1000 * 1000;
+
+      rc = ppoll(eph->poll, eph->occupied, &timeout_ts, sigmask);
+    }
+
+  if (rc <= 0)
+    {
+      if (rc < 0)
+        {
+          ferr("ERROR: %08x poll fail: %d for %d, %d msecs\n",
+               epfd, rc, eph->occupied, timeout);
+
+          for (i = 0; i < eph->occupied; i++)
+            {
+              ferr("  %02d: fd=%d\n", i, eph->poll[i].fd);
+            }
+        }
+
+      return rc;
+    }
+
+  /* Iterate over non NULL event fds */
+
+  if (rc > maxevents)
+    {
+      rc = maxevents;
+    }
+
+  for (i = 0, counter = 0; i < rc && counter < eph->occupied; counter++)
+    {
+      if (eph->poll[counter].revents != 0)
+        {
+          evs[i].data     = eph->data[counter];
+          evs[i++].events = eph->poll[counter].revents;
+          if (eph->poll[counter].events & EPOLLONESHOT)
+            {
+              eph->poll[counter].events = 0; /* Disable oneshot internally */
+            }
+        }
+    }
+
+  return i;
 }
 
 /****************************************************************************
@@ -188,47 +305,8 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
  *
  ****************************************************************************/
 
-int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
-               int timeout)
+int epoll_wait(int epfd, FAR struct epoll_event *evs,
+               int maxevents, int timeout)
 {
-  /* REVISIT: This will not work on machines where:
-   * sizeof(struct epoll_head *) > sizeof(int)
-   */
-
-  FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
-  int counter;
-  int rc;
-  int i;
-
-  rc = poll((FAR struct pollfd *)eph->evs, eph->occupied, timeout);
-
-  if (rc <= 0)
-    {
-      if (rc < 0)
-        {
-          ferr("ERROR: %08x poll fail: %d for %d, %d msecs\n",
-               epfd, rc, eph->occupied, timeout);
-
-          for (i = 0; i < eph->occupied; i++)
-            {
-              ferr("  %02d: fd=%d\n", i, eph->evs[i].data.fd);
-            }
-        }
-
-      return rc;
-    }
-
-  /* Iterate over non NULL event fds */
-
-  for (i = 0, counter = 0; i < rc && counter < eph->size; counter++)
-    {
-      if (eph->evs[counter].revents != 0)
-        {
-          evs[i].data.fd = eph->evs[counter].data.fd;
-          evs[i].events  = eph->evs[counter].revents;
-          i += 1;
-        }
-    }
-
-  return i;
+  return epoll_pwait(epfd, evs, maxevents, timeout, NULL);
 }

@@ -56,8 +56,10 @@
 
 #define IMXRT_VDD_SOC (0x12)
 
-/* Set Arm PLL (PLL1) to  fOut    = (24Mhz * ARM_PLL_DIV_SELECT/2) / ARM_PODF_DIVISOR
- *                        600Mhz  = (24Mhz * ARM_PLL_DIV_SELECT/2) / ARM_PODF_DIVISOR
+/* Set Arm PLL (PLL1) to  fOut    = (24Mhz * ARM_PLL_DIV_SELECT/2) /
+ *                                  ARM_PODF_DIVISOR
+ *                        600Mhz  = (24Mhz * ARM_PLL_DIV_SELECT/2) /
+ *                                  ARM_PODF_DIVISOR
  *                        ARM_PLL_DIV_SELECT = 100
  *                        ARM_PODF_DIVISOR   = 2
  *                        600Mhz  = (24Mhz * 100/2) / 2
@@ -76,7 +78,8 @@
  *                       IMXRT_IPG_PODF_DIVIDER = 4
  *                       150Mhz = 600Mhz / 4
  *
- *     PRECLK_CLOCK_ROOT          = IPG_CLOCK_ROOT / IMXRT_PERCLK_PODF_DIVIDER
+ *     PRECLK_CLOCK_ROOT          = IPG_CLOCK_ROOT /
+ *                                  IMXRT_PERCLK_PODF_DIVIDER
  *                       IMXRT_PERCLK_PODF_DIVIDER = 9
  *                       16.6Mhz  = 150Mhz / 9
  *
@@ -122,6 +125,9 @@
 
 #define IMXRT_LPI2C_CLK_SELECT     CCM_CSCDR2_LPI2C_CLK_SEL_PLL3_60M
 #define IMXRT_LSI2C_PODF_DIVIDER   5
+
+#define IMXRT_CAN_CLK_SELECT       CCM_CSCMR2_CAN_CLK_SEL_PLL3_SW_80
+#define IMXRT_CAN_PODF_DIVIDER     1
 
 #define IMXRT_SYS_PLL_SELECT       CCM_ANALOG_PLL_SYS_DIV_SELECT_22
 
@@ -206,13 +212,13 @@
  * sure shapes are square with minimal ringing.
  */
 
-#define PIN_USDHC1_D0     (GPIO_USDHC1_DATA0 | IOMUX_USDHC1_DATAX_DEFAULT)
-#define PIN_USDHC1_D1     (GPIO_USDHC1_DATA1 | IOMUX_USDHC1_DATAX_DEFAULT)
-#define PIN_USDHC1_D2     (GPIO_USDHC1_DATA2 | IOMUX_USDHC1_DATAX_DEFAULT)
-#define PIN_USDHC1_D3     (GPIO_USDHC1_DATA3 | IOMUX_USDHC1_DATAX_DEFAULT)
-#define PIN_USDHC1_DCLK   (GPIO_USDHC1_CLK   | IOMUX_USDHC1_CLK_DEFAULT)
-#define PIN_USDHC1_CMD    (GPIO_USDHC1_CMD   | IOMUX_USDHC1_CMD_DEFAULT)
-#define PIN_USDHC1_CD     (GPIO_USDHC1_CD_2  | IOMUX_USDHC1_CLK_DEFAULT)
+#define PIN_USDHC1_D0     (GPIO_USDHC1_DATA0_1 | IOMUX_USDHC1_DATAX_DEFAULT)
+#define PIN_USDHC1_D1     (GPIO_USDHC1_DATA1_1 | IOMUX_USDHC1_DATAX_DEFAULT)
+#define PIN_USDHC1_D2     (GPIO_USDHC1_DATA2_1 | IOMUX_USDHC1_DATAX_DEFAULT)
+#define PIN_USDHC1_D3     (GPIO_USDHC1_DATA3_1 | IOMUX_USDHC1_DATAX_DEFAULT)
+#define PIN_USDHC1_DCLK   (GPIO_USDHC1_CLK_1   | IOMUX_USDHC1_CLK_DEFAULT)
+#define PIN_USDHC1_CMD    (GPIO_USDHC1_CMD_1   | IOMUX_USDHC1_CMD_DEFAULT)
+#define PIN_USDHC1_CD     (GPIO_USDHC1_CD_2    | IOMUX_USDHC1_CLK_DEFAULT)
 
 /* 386 KHz for initial inquiry stuff */
 
@@ -230,39 +236,39 @@
 #define BOARD_USDHC_SD4MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
 #define BOARD_USDHC_SD4MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
 
-/* LCD *********************************************************************/
+/* LCD **********************************************************************/
 
 #ifdef CONFIG_IMXRT_LCD
 /* LCD controller */
 
-#  define GPIO_LCD_DATA23    GPIO_LCD_DATA23_1
-#  define GPIO_LCD_DATA22    GPIO_LCD_DATA22_1
-#  define GPIO_LCD_DATA21    GPIO_LCD_DATA21_1
-#  define GPIO_LCD_DATA20    GPIO_LCD_DATA20_1
-#  define GPIO_LCD_DATA19    GPIO_LCD_DATA19_1
-#  define GPIO_LCD_DATA18    GPIO_LCD_DATA18_1
-#  define GPIO_LCD_DATA17    GPIO_LCD_DATA17_1
-#  define GPIO_LCD_DATA16    GPIO_LCD_DATA16_1
-#  define GPIO_LCD_DATA15    GPIO_LCD_DATA15_1
-#  define GPIO_LCD_DATA14    GPIO_LCD_DATA14_1
-#  define GPIO_LCD_DATA13    GPIO_LCD_DATA13_1
-#  define GPIO_LCD_DATA12    GPIO_LCD_DATA12_1
-#  define GPIO_LCD_DATA11    GPIO_LCD_DATA11_1
-#  define GPIO_LCD_DATA10    GPIO_LCD_DATA10_1
-#  define GPIO_LCD_DATA09    GPIO_LCD_DATA09_1
-#  define GPIO_LCD_DATA08    GPIO_LCD_DATA08_1
-#  define GPIO_LCD_DATA07    GPIO_LCD_DATA07_1
-#  define GPIO_LCD_DATA06    GPIO_LCD_DATA06_1
-#  define GPIO_LCD_DATA05    GPIO_LCD_DATA05_1
-#  define GPIO_LCD_DATA04    GPIO_LCD_DATA04_1
-#  define GPIO_LCD_DATA03    GPIO_LCD_DATA03_1
-#  define GPIO_LCD_DATA02    GPIO_LCD_DATA02_1
-#  define GPIO_LCD_DATA01    GPIO_LCD_DATA01_1
-#  define GPIO_LCD_DATA00    GPIO_LCD_DATA00_1
-#  define GPIO_LCD_ENABLE    GPIO_LCD_ENABLE_1
-#  define GPIO_LCD_HSYNC     GPIO_LCD_HSYNC_1
-#  define GPIO_LCD_VSYNC     GPIO_LCD_VSYNC_1
-#  define GPIO_LCD_CLK       GPIO_LCD_CLK_1
+#  define GPIO_LCD_DATA23    (GPIO_LCD_DATA23_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA22    (GPIO_LCD_DATA22_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA21    (GPIO_LCD_DATA21_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA20    (GPIO_LCD_DATA20_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA19    (GPIO_LCD_DATA19_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA18    (GPIO_LCD_DATA18_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA17    (GPIO_LCD_DATA17_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA16    (GPIO_LCD_DATA16_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA15    (GPIO_LCD_DATA15_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA14    (GPIO_LCD_DATA14_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA13    (GPIO_LCD_DATA13_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA12    (GPIO_LCD_DATA12_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA11    (GPIO_LCD_DATA11_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA10    (GPIO_LCD_DATA10_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA09    (GPIO_LCD_DATA09_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA08    (GPIO_LCD_DATA08_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA07    (GPIO_LCD_DATA07_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA06    (GPIO_LCD_DATA06_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA05    (GPIO_LCD_DATA05_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA04    (GPIO_LCD_DATA04_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA03    (GPIO_LCD_DATA03_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA02    (GPIO_LCD_DATA02_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA01    (GPIO_LCD_DATA01_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_DATA00    (GPIO_LCD_DATA00_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_ENABLE    (GPIO_LCD_ENABLE_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_HSYNC     (GPIO_LCD_HSYNC_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_VSYNC     (GPIO_LCD_VSYNC_1 | IOMUX_LCD_DEFAULT)
+#  define GPIO_LCD_CLK       (GPIO_LCD_CLK_1 | IOMUX_LCD_DEFAULT)
 #endif
 
 /* ETH Disambiguation *******************************************************/
@@ -320,6 +326,14 @@
 #define GPIO_LPSPI3_MISO     (GPIO_LPSPI3_SDI_2|IOMUX_LPSPI_DEFAULT) /* GPIO_AD_B0_02 */
 #define GPIO_LPSPI3_MOSI     (GPIO_LPSPI3_SDO_2|IOMUX_LPSPI_DEFAULT) /* GPIO_AD_B0_01 */
 
+/* FlexCAN */
+
+#define GPIO_FLEXCAN2_TX     (GPIO_FLEXCAN2_TX_3|IOMUX_CAN_DEFAULT)
+#define GPIO_FLEXCAN2_RX     (GPIO_FLEXCAN2_RX_3|IOMUX_CAN_DEFAULT)
+
+#define GPIO_FLEXCAN3_TX     (GPIO_FLEXCAN3_TX_2|IOMUX_CAN_DEFAULT)
+#define GPIO_FLEXCAN3_RX     (GPIO_FLEXCAN3_RX_2|IOMUX_CAN_DEFAULT)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -338,10 +352,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

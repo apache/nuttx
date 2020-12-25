@@ -3,6 +3,7 @@
 *.asm
 *.bin
 *.d
+!*.d/
 *.dSYM
 *.elf
 *.exe
@@ -45,3 +46,4 @@
 core
 Make*.dep
 uImage
+/external

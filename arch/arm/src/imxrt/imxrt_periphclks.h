@@ -1,4 +1,4 @@
-/********************************************************************************************
+/************************************************************************************
  * arch/arm/src/imxrt/imxrt_periphclks.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,22 +31,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *********************************************************************************************/
+ ************************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_PERIPHCLKS_H
 #define __ARCH_ARM_SRC_IMXRT_IMXRT_PERIPHCLKS_H
 
-/********************************************************************************************
+/************************************************************************************
  * Included Files
- *********************************************************************************************/
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
 #include "hardware/imxrt_ccm.h"
 
-/********************************************************************************************
+/************************************************************************************
  * Pre-processor Definitions
- *********************************************************************************************/
+ ************************************************************************************/
 
 /* Clock is off during all modes. Stop enter hardware handshake is disabled. */
 
@@ -68,6 +68,8 @@
 #define imxrt_clockoff_can1_serial()      imxrt_periphclk_configure(CCM_CCGR_CAN1_SERIAL, CCM_CG_OFF)
 #define imxrt_clockoff_can2()             imxrt_periphclk_configure(CCM_CCGR_CAN2, CCM_CG_OFF)
 #define imxrt_clockoff_can2_serial()      imxrt_periphclk_configure(CCM_CCGR_CAN2_SERIAL, CCM_CG_OFF)
+#define imxrt_clockoff_can3()             imxrt_periphclk_configure(CCM_CCGR_CAN3, CCM_CG_OFF)
+#define imxrt_clockoff_can3_serial()      imxrt_periphclk_configure(CCM_CCGR_CAN3_SERIAL, CCM_CG_OFF)
 #define imxrt_clockoff_csi()              imxrt_periphclk_configure(CCM_CCGR_CSI, CCM_CG_OFF)
 #define imxrt_clockoff_csu()              imxrt_periphclk_configure(CCM_CCGR_CSU, CCM_CG_OFF)
 #define imxrt_clockoff_dcdc()             imxrt_periphclk_configure(CCM_CCGR_DCDC, CCM_CG_OFF)
@@ -177,6 +179,8 @@
 #define imxrt_clockrun_can1_serial()      imxrt_periphclk_configure(CCM_CCGR_CAN1_SERIAL, CCM_CG_RUN)
 #define imxrt_clockrun_can2()             imxrt_periphclk_configure(CCM_CCGR_CAN2, CCM_CG_RUN)
 #define imxrt_clockrun_can2_serial()      imxrt_periphclk_configure(CCM_CCGR_CAN2_SERIAL, CCM_CG_RUN)
+#define imxrt_clockrun_can3()             imxrt_periphclk_configure(CCM_CCGR_CAN3, CCM_CG_RUN)
+#define imxrt_clockrun_can3_serial()      imxrt_periphclk_configure(CCM_CCGR_CAN3_SERIAL, CCM_CG_RUN)
 #define imxrt_clockrun_csi()              imxrt_periphclk_configure(CCM_CCGR_CSI, CCM_CG_RUN)
 #define imxrt_clockrun_csu()              imxrt_periphclk_configure(CCM_CCGR_CSU, CCM_CG_RUN)
 #define imxrt_clockrun_dcdc()             imxrt_periphclk_configure(CCM_CCGR_DCDC, CCM_CG_RUN)
@@ -286,6 +290,8 @@
 #define imxrt_clockall_can1_serial()      imxrt_periphclk_configure(CCM_CCGR_CAN1_SERIAL, CCM_CG_ALL)
 #define imxrt_clockall_can2()             imxrt_periphclk_configure(CCM_CCGR_CAN2, CCM_CG_ALL)
 #define imxrt_clockall_can2_serial()      imxrt_periphclk_configure(CCM_CCGR_CAN2_SERIAL, CCM_CG_ALL)
+#define imxrt_clockall_can3()             imxrt_periphclk_configure(CCM_CCGR_CAN3, CCM_CG_ALL)
+#define imxrt_clockall_can3_serial()      imxrt_periphclk_configure(CCM_CCGR_CAN3_SERIAL, CCM_CG_ALL)
 #define imxrt_clockall_csi()              imxrt_periphclk_configure(CCM_CCGR_CSI, CCM_CG_ALL)
 #define imxrt_clockall_csu()              imxrt_periphclk_configure(CCM_CCGR_CSU, CCM_CG_ALL)
 #define imxrt_clockall_dcdc()             imxrt_periphclk_configure(CCM_CCGR_DCDC, CCM_CG_ALL)
@@ -384,11 +390,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/********************************************************************************************
- * Public Functions
- *********************************************************************************************/
-
-/********************************************************************************************
+/************************************************************************************
  * Name: imxrt_periphclk_configure
  *
  * Description:
@@ -403,7 +405,7 @@ extern "C"
  * Returned Value:
  *  None
  *
- *********************************************************************************************/
+ ************************************************************************************/
 
 void imxrt_periphclk_configure(uintptr_t regaddr, unsigned int index,
                                unsigned int value);

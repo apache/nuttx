@@ -72,6 +72,10 @@
 
 #define INTC_EN(n) (CXD56_INTC_BASE + 0x10 + (((n) >> 5) << 2))
 
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#  define INTSTACK_ALLOC (CONFIG_SMP_NCPUS * INTSTACK_SIZE)
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -96,6 +100,36 @@ volatile uint32_t *g_current_regs[1];
 static volatile int8_t g_cpu_for_irq[CXD56_IRQ_NIRQS];
 extern void up_send_irqreq(int idx, int irq, int cpu);
 #endif
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+/* In the SMP configuration, we will need custom interrupt stacks.
+ * These definitions provide the aligned stack allocations.
+ */
+
+static uint64_t g_intstack_alloc[INTSTACK_ALLOC >> 3];
+
+/* These definitions provide the "top" of the push-down stacks. */
+
+const uint32_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
+{
+  (uint32_t)g_intstack_alloc + INTSTACK_SIZE,
+#if CONFIG_SMP_NCPUS > 1
+  (uint32_t)g_intstack_alloc + (2 * INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 2
+  (uint32_t)g_intstack_alloc + (3 * INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 3
+  (uint32_t)g_intstack_alloc + (4 * INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 4
+  (uint32_t)g_intstack_alloc + (5 * INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 5
+  (uint32_t)g_intstack_alloc + (6 * INTSTACK_SIZE),
+#endif /* CONFIG_SMP_NCPUS > 5 */
+#endif /* CONFIG_SMP_NCPUS > 4 */
+#endif /* CONFIG_SMP_NCPUS > 3 */
+#endif /* CONFIG_SMP_NCPUS > 2 */
+#endif /* CONFIG_SMP_NCPUS > 1 */
+};
+#endif /* defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
 /* This is the address of the  exception vector table (determined by the
  * linker script).
@@ -243,7 +277,7 @@ static inline void cxd56_prioritize_syscall(int priority)
 }
 #endif
 
-static int excinfo(int irq, uint32_t *regaddr, uint32_t *bit)
+static int excinfo(int irq, uintptr_t *regaddr, uint32_t *bit)
 {
   *regaddr = NVIC_SYSHCON;
   switch (irq)
@@ -602,5 +636,37 @@ int up_prioritize_irq(int irq, int priority)
 
   cxd56_dumpnvic("prioritize", irq);
   return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_intstack_base
+ *
+ * Description:
+ *   Return a pointer to the "base" the correct interrupt stack allocation
+ *   for the current CPU. NOTE: Here, the base means "top" of the stack
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+uintptr_t arm_intstack_base(void)
+{
+  return g_cpu_intstack_top[up_cpu_index()];
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_intstack_alloc
+ *
+ * Description:
+ *   Return a pointer to the "alloc" the correct interrupt stack allocation
+ *   for the current CPU.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+uintptr_t arm_intstack_alloc(void)
+{
+  return g_cpu_intstack_top[up_cpu_index()] - INTSTACK_SIZE;
 }
 #endif

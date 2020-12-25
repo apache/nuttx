@@ -140,14 +140,13 @@ struct power_domain
 
 static void cxd56_img_clock_enable(void);
 static void cxd56_img_clock_disable(void);
-static void cxd56_scu_clock_ctrl(\
-  uint32_t block, uint32_t intr, int on);
-static void cxd56_scu_peri_clock_enable(\
-  FAR const struct scu_peripheral *p) __unused;
-static void cxd56_scu_peri_clock_disable(\
-  FAR const struct scu_peripheral *p) __unused;
-static void cxd56_scu_peri_clock_gating(\
-  FAR const struct scu_peripheral *p, int enable) __unused;
+static void cxd56_scu_clock_ctrl(uint32_t block, uint32_t intr, int on);
+static void cxd56_scu_peri_clock_enable(FAR const struct scu_peripheral *p)
+  __unused;
+static void cxd56_scu_peri_clock_disable(FAR const struct scu_peripheral *p)
+  __unused;
+static void cxd56_scu_peri_clock_gating(FAR const struct scu_peripheral *p,
+                                        int enable) __unused;
 
 /****************************************************************************
  * Public Data
@@ -238,7 +237,7 @@ static void clock_semtake(sem_t *id)
 {
   if (!up_interrupt_context())
     {
-      nxsem_wait(id);
+      nxsem_wait_uninterruptible(id);
     }
 }
 
@@ -2033,7 +2032,7 @@ static void cxd56_scu_peri_clock_disable(FAR const struct scu_peripheral *p)
   disable_pwd(PDID_SCU);
 }
 
-static void cxd56_scu_peri_clock_gating(\
+static void cxd56_scu_peri_clock_gating(
   FAR const struct scu_peripheral *p, int enable)
 {
   uint32_t cken = 1u << p->cken;

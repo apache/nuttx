@@ -29,6 +29,7 @@
 #include <nuttx/board.h>
 #include <nuttx/signal.h>
 #include <arch/io.h>
+#include <inttypes.h>
 #include <syscall.h>
 #include <arch/board/board.h>
 
@@ -163,7 +164,8 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
          */
 
         _alert("PANIC:\n");
-        _alert("Exception %lld occurred with error code %lld:\n",
+        _alert("Exception %" PRId64 " occurred "
+               "with error code %" PRId64 ":\n",
                irq, regs[REG_ERRCODE]);
 
         up_registerdump(regs);

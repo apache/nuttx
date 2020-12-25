@@ -3,7 +3,7 @@
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Alan Carvalho de Assis acassis@gmail.com [nuttx] <nuttx@googlegroups.com>
+ *           Alan Carvalho de Assis acassis@gmail.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -92,7 +92,7 @@ static uint8_t g_buttonirq[NUM_BUTTONS] =
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -102,6 +102,8 @@ void board_button_initialize(void)
     {
       lpc43_configgpio(g_buttoncfg[i]);
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

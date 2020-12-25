@@ -186,7 +186,7 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
   ret = inode_semtake();
   if (ret >= 0)
     {
-      ret = foreach_inodelevel(g_root_inode, info);
+      ret = foreach_inodelevel(g_root_inode->i_child, info);
       inode_semgive();
     }
 
@@ -210,7 +210,7 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
   ret = inode_semtake();
   if (ret >= 0)
     {
-      ret = foreach_inodelevel(g_root_inode, &info);
+      ret = foreach_inodelevel(g_root_inode->i_child, &info);
       inode_semgive();
     }
 

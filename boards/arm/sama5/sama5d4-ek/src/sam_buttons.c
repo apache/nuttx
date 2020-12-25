@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* A single button, PB_USER1 (PB2), is available on the SAMA5D4-EK:
  *
  * ------------------------------ ------------------- ----------------------
@@ -80,9 +81,10 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   sam_configpio(PIO_BTN_USER);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

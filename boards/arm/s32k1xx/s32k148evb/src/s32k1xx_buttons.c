@@ -73,12 +73,13 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uin32_t board_button_initialize(void)
 {
   /* Configure the GPIO pins as interrupting inputs. */
 
   s32k1xx_pinconfig(GPIO_SW3);
   s32k1xx_pinconfig(GPIO_SW4);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

@@ -40,8 +40,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
+#  include <sys/types.h>
 #  include <stdbool.h>
 #endif
 
@@ -82,18 +85,15 @@
 
 /* Check if an interrupt stack size is configured */
 
-#define HAVE_INTERRUPTSTACK 1
-
-#if !defined(CONFIG_ARCH_INTERRUPTSTACK)
+#ifndef CONFIG_ARCH_INTERRUPTSTACK
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
-#  undef  HAVE_INTERRUPTSTACK
-#elif CONFIG_ARCH_INTERRUPTSTACK < 16
-#  warning CONFIG_ARCH_INTERRUPTSTACK is to small
-#  undef  HAVE_INTERRUPTSTACK
+#else
+#  define INTSTACK_ALIGNMENT    16
+#  define INTSTACK_ALIGN_MASK   (INTSTACK_ALIGNMENT - 1)
+#  define INTSTACK_ALIGNDOWN(s) ((s) & ~INTSTACK_ALIGN_MASK)
+#  define INTSTACK_ALIGNUP(s)   (((s) + INTSTACK_ALIGN_MASK) & ~INTSTACK_ALIGN_MASK)
+#  define INTSTACK_SIZE         INTSTACK_ALIGNUP(CONFIG_ARCH_INTERRUPTSTACK)
 #endif
-
-#define INTERRUPTSTACK_SIZE  ((CONFIG_ARCH_INTERRUPTSTACK + 15) & ~15)
-#define INTERRUPT_STACKWORDS (INTERRUPTSTACK_SIZE >> 2)
 
 /* An IDLE thread stack size for CPU0 must be defined */
 
@@ -105,10 +105,6 @@
 
 #define IDLETHREAD_STACKSIZE  ((CONFIG_IDLETHREAD_STACKSIZE + 15) & ~15)
 #define IDLETHREAD_STACKWORDS (IDLETHREAD_STACKSIZE >> 2)
-
-/* Used for stack usage measurements */
-
-#define STACK_COLOR 0xdeadbeef
 
 /* In the XTENSA model, the state is copied from the stack to the TCB, but
  * only a referenced is passed to get the state from the TCB.
@@ -147,6 +143,14 @@
 #define getreg32(a)       (*(volatile uint32_t *)(a))
 #define putreg32(v,a)     (*(volatile uint32_t *)(a) = (v))
 
+/* This is the value used to mark the stack for subsequent stack monitoring
+ * logic.
+ */
+
+#define STACK_COLOR    0xdeadbeef
+#define INTSTACK_COLOR 0xdeadbeef
+#define HEAP_COLOR     'h'
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -178,10 +182,11 @@ extern volatile uint32_t *g_current_regs[1];
 
 #endif
 
-#ifdef HAVE_INTERRUPTSTACK
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
 /* The (optional) interrupt stack */
 
-extern uint32_t g_intstack[INTERRUPT_STACKWORDS];
+extern uint32_t g_intstackalloc; /* Allocated interrupt stack */
+extern uint32_t g_intstackbase;  /* Initial top of interrupt stack */
 #endif
 
 /* Address of the CPU0 IDLE thread */
@@ -342,10 +347,22 @@ void up_usbuninitialize(void);
 # define up_usbuninitialize()
 #endif
 
+/* Power management *********************************************************/
+
+#ifdef CONFIG_PM
+void xtensa_pminitialize(void);
+#else
+#  define xtensa_pminitialize()
+#endif
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
 void up_stack_color(FAR void *stackbase, size_t nbytes);
+#endif
+
+#ifdef CONFIG_XTENSA_DUMPBT_ON_ASSERT
+void xtensa_backtrace_start(uint32_t *pc, uint32_t *sp, uint32_t *next_pc);
 #endif
 
 #endif /* __ASSEMBLY__ */

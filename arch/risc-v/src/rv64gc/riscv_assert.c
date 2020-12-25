@@ -210,16 +210,8 @@ static void up_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  if (rtcb->pid == 0) /* Check for CPU0 IDLE thread */
-    {
-      ustackbase = g_idle_topstack - 8;
-      ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
-    }
-  else
-    {
-      ustackbase = (uintptr_t)rtcb->adj_stack_ptr;
-      ustacksize = (uintptr_t)rtcb->adj_stack_size;
-    }
+  ustackbase = (uintptr_t)rtcb->adj_stack_ptr;
+  ustacksize = (uintptr_t)rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */
 
@@ -287,8 +279,7 @@ static void up_dumpstate(void)
  * Name: _up_assert
  ****************************************************************************/
 
-static void _up_assert(int errorcode) noreturn_function;
-static void _up_assert(int errorcode)
+static void _up_assert(void)
 {
   /* Flush any buffered SYSLOG data */
 
@@ -323,7 +314,6 @@ static void _up_assert(int errorcode)
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 2
       board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
-      exit(errorcode);
     }
 }
 
@@ -359,7 +349,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const uint8_t *filename, int lineno)
+void up_assert(const char *filename, int lineno)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = running_task();
@@ -415,5 +405,5 @@ void up_assert(const uint8_t *filename, int lineno)
   board_crashdump(riscv_getsp(), running_task(), filename, lineno);
 #endif
 
-  _up_assert(EXIT_FAILURE);
+  _up_assert();
 }

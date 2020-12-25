@@ -162,7 +162,7 @@ static int do_getsockname_request(FAR struct usrsock_conn_s *conn,
  *   the object pointed to by address is unspecified.
  *
  * Input Parameters:
- *   conn     usrsock socket connection structure
+ *   psock    A reference to the socket structure of the socket
  *   addr     sockaddr structure to receive data [out]
  *   addrlen  Length of sockaddr structure [in/out]
  *
@@ -187,7 +187,7 @@ int usrsock_getsockname(FAR struct socket *psock,
     {
       /* Invalid state or closed by daemon. */
 
-      ninfo("usockid=%d; connect() with uninitialized usrsock.\n",
+      ninfo("usockid=%d; getsockname() with uninitialized usrsock.\n",
             conn->usockid);
 
       ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
@@ -211,7 +211,7 @@ int usrsock_getsockname(FAR struct socket *psock,
 
   usrsock_setup_datain(conn, inbufs, ARRAY_SIZE(inbufs));
 
-  /* Request user-space daemon to close socket. */
+  /* Request user-space daemon to handle request. */
 
   ret = do_getsockname_request(conn, *addrlen);
   if (ret >= 0)

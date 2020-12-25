@@ -58,7 +58,6 @@
 #define SMP_STACK_MASK       7
 #define SMP_STACK_SIZE       ((CONFIG_SMP_IDLETHREAD_STACKSIZE + 7) & ~7)
 #define SMP_STACK_WORDS      (SMP_STACK_SIZE >> 2)
-#define SMP_STACK_TOP        (SMP_STACK_SIZE - 8)
 
 /****************************************************************************
  * Public Data
@@ -122,9 +121,9 @@ void __cpu3_start(void);
  *
  * Description:
  *   Continues the C-level initialization started by the assembly language
- *   __cpu[n]_start function.  At a minimum, this function needs to initialize
- *   interrupt handling and, perhaps, wait on WFI for arm_cpu_start() to
- *   issue an SGI.
+ *   __cpu[n]_start function.  At a minimum, this function needs to
+ *   initialize interrupt handling and, perhaps, wait on WFI for
+ *   arm_cpu_start() to issue an SGI.
  *
  *   This function must be provided by the each ARMv7-A MCU and implement
  *   MCU-specific initialization logic.

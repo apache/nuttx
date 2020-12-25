@@ -1,37 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_start.c
  *
- *   Copyright 2014, 2015, 2016, 2017, 2018 Sony Video & Sound Products Inc.
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
- *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
- *   Author: Yasuhiro Osaki <Yasuhiro.Osaki@jp.sony.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -119,7 +102,10 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
 
 int icx_boot_reason;
 
-extern uint32_t _stext_sram, _etext_sram, _ftext, _svect;
+extern uint32_t _stext_sram;
+extern uint32_t _etext_sram;
+extern uint32_t _ftext;
+extern uint32_t _svect;
 
 /****************************************************************************
  * Private Function prototypes
@@ -285,8 +271,9 @@ void __start(void)
 
 #endif /* CONFIG_LC823450_SPIFI_BOOT */
 
-  /* Enable Mutex */
-  /* NOTE: modyfyreg32() can not be used because it might use spin_lock */
+  /* Enable Mutex
+   * NOTE: modyfyreg32() can not be used because it might use spin_lock.
+   */
 
   uint32_t val = getreg32(MRSTCNTBASIC);
   val |= MRSTCNTBASIC_MUTEX_RSTB;
@@ -307,8 +294,8 @@ void __start(void)
 
   modifyreg32(MCLKCNTAPB, 0, MCLKCNTAPB_PORT2_CLKEN);
   modifyreg32(MRSTCNTAPB, 0, MRSTCNTAPB_PORT2_RSTB);
-  modifyreg32(rP2DT,  0, 1 << 15  /* GPIO2F */);
-  modifyreg32(rP2DRC, 0, 1 << 15  /* GPIO2F */);
+  modifyreg32(P2DT,  0, 1 << 15  /* GPIO2F */);
+  modifyreg32(P2DRC, 0, 1 << 15  /* GPIO2F */);
 #ifdef CONFIG_DEBUG_FEATURES
 
   /* enable TXD0 for debug */
@@ -411,6 +398,6 @@ void __start(void)
 
   /* Shouldn't get here */
 
-  for (;;);
+  for (; ; );
 #endif
 }

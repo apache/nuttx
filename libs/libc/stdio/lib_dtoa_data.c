@@ -37,7 +37,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
 #include "lib_dtoa_engine.h"
 
 /****************************************************************************
@@ -69,7 +68,7 @@
  * Public Data
  ****************************************************************************/
 
-const double_t g_dtoa_scale_up[] =
+const double g_dtoa_scale_up[] =
 {
 #if DBL_MAX_10_EXP >= 1
   1e1,
@@ -124,7 +123,7 @@ const double_t g_dtoa_scale_up[] =
 #endif
 };
 
-const double_t g_dtoa_scale_down[] =
+const double g_dtoa_scale_down[] =
 {
 #if DBL_MIN_10_EXP <= -1
   1e-1,
@@ -179,7 +178,7 @@ const double_t g_dtoa_scale_down[] =
 #endif
 };
 
-const double_t g_dtoa_round[] =
+const double g_dtoa_round[] =
 {
 #if DBL_DIG >= 30
   5e30,
@@ -275,3 +274,7 @@ const double_t g_dtoa_round[] =
   5e0,
 #endif
 };
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

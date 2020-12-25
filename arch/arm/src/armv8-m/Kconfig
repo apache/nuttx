@@ -57,7 +57,7 @@ config ARMV8M_USEBASEPRI
 		Though, these hardfaults are properly handled by the RTOS, the
 		hardfaults can confuse some debuggers. With the BASEPRI
 		register, these hardfaults, will be avoided. For more details see
-		http://www.nuttx.org/doku.php?id=wiki:nxinternal:svcall
+		https://cwiki.apache.org/confluence/display/NUTTX/ARMv7-M+Hardfaults%2C+SVCALL%2C+and+Debuggers
 
 		WARNING:  If CONFIG_ARCH_HIPRI_INTERRUPT is selected, then you
 		MUST select CONFIG_ARMV8M_USEBASEPRI.  The Kconfig dependencies
@@ -153,7 +153,7 @@ config ARMV8M_TARGET2_PREL
 	bool "R_ARM_TARGET2 is PC relative"
 	default n if !CXX_EXCEPTION
 	default y if CXX_EXCEPTION
-	depends on ELF
+	depends on LIBC_ARCH_ELF
 	---help---
 		Perform a PC relative relocation for relocation type R_ARM_TARGET2
 

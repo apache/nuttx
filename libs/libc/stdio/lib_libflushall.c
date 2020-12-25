@@ -69,21 +69,19 @@ int lib_flushall(FAR struct streamlist *list)
 
   if (list)
     {
-      int i;
+      FAR FILE *stream;
 
       /* Process each stream in the thread's stream list */
 
       stream_semtake(list);
-      for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
+      stream = list->sl_head;
+      for (; stream != NULL; stream = stream->fs_next)
         {
-          FILE *stream = &list->sl_streams[i];
-
-          /* If the stream is open (i.e., assigned a non-negative file
-           * descriptor) and opened for writing, then flush all of the pending
-           * write data in the stream.
+          /* If the stream is opened for writing, then flush all of
+           * the pending write data in the stream.
            */
 
-          if (stream->fs_fd >= 0 && (stream->fs_oflags & O_WROK) != 0)
+          if ((stream->fs_oflags & O_WROK) != 0)
             {
               /* Flush the writable FILE */
 

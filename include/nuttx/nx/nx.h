@@ -205,7 +205,8 @@ struct nx_callback_s
    **************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-  void (*kbdin)(NXWINDOW hwnd, uint8_t nch, FAR const uint8_t *ch, FAR void *arg);
+  void (*kbdin)(NXWINDOW hwnd, uint8_t nch,
+                FAR const uint8_t *ch, FAR void *arg);
 #endif
 
   /**************************************************************************
@@ -270,7 +271,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -383,8 +384,8 @@ int nx_eventhandler(NXHANDLE handle);
  *   client can then call nv_eventhandler() only when incoming events are
  *   available.
  *
- *   Only one such event is issued.  Upon receipt of the signal, if the client
- *   wishes further notifications, it must call nx_eventnotify again.
+ *   Only one such event is issued.  Upon receipt of the signal, if the
+ *   client wishes further notifications, it must call nx_eventnotify again.
  *
  * Input Parameters:
  *   handle - the handle returned by nx_connect
@@ -726,7 +727,7 @@ bool nx_ishidden(NXWINDOW hwnd);
  *
  * Description:
  *  Set a single pixel in the window to the specified color.  This is simply
- *  a degenerate case of nx_fill(), but may be optimized in some architectures.
+ *  a degenerate case of nx_fill but may be optimized in some architectures.
  *
  * Input Parameters:
  *   wnd  - The window structure reference
@@ -794,7 +795,8 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  * Name: nx_filltrapezoid
  *
  * Description:
- *  Fill the specified trapezoidal region in the window with the specified color
+ *  Fill the specified trapezoidal region in the window with the specified
+ *  color
  *
  * Input Parameters:
  *   hwnd  - The window handle
@@ -944,36 +946,6 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
               FAR const struct nxgl_point_s *origin, unsigned int stride);
 
 /****************************************************************************
- * Name: nx_notify_rectangle
- *
- * Description:
- *   When CONFIG_NX_UPDATE=y, then the graphics system will callout to
- *   inform some external module that the display has been updated.  This
- *   would be useful in a couple for cases.
- *
- *   - When a serial LCD is used, but a framebuffer is used to access the
- *     LCD.  In this case, the update callout can be used to refresh the
- *     affected region of the display.
- *
- *   - When VNC is enabled.  This is case, this callout is necessary to
- *     update the remote frame buffer to match the local framebuffer.
- *
- *   When this feature is enabled, some external logic must provide this
- *   interface.  This is the function that will handle the notification.  It
- *   receives the rectangular region that was updated on the provided plane.
- *
- *   NOTE: This function is also required for use with the LCD framebuffer
- *   driver front end when CONFIG_LCD_UPDATE=y, although that use does not
- *   depend on CONFIG_NX (and this function seems misnamed in that case).
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NX_UPDATE) || defined(CONFIG_LCD_UPDATE)
-void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
-                         FAR const struct nxgl_rect_s *rect);
-#endif
-
-/****************************************************************************
  * Name: nx_kbdin
  *
  * Description:
@@ -993,13 +965,14 @@ int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
  *
  * Description:
  *   Used by a thread or interrupt handler that manages some kind of pointing
- *   hardware to report new positional data to the NX server.  That positional
+ *   hardware to report new positional data to the NX server. That positional
  *   data will be routed by the NX server to the appropriate window client.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NX_XYINPUT
-int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons);
+int nx_mousein(NXHANDLE handle, nxgl_coord_t x,
+               nxgl_coord_t y, uint8_t buttons);
 #endif
 
 /****************************************************************************
@@ -1033,7 +1006,7 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect);
  * Name: nx_constructwindow
  *
  * Description:
- *   This function is the same a nx_openwindow EXCEPT that the client provides
+ *   This function is the same as nx_openwindow EXCEPT the client provides
  *   the window structure instance.  nx_constructwindow will initialize the
  *   the pre-allocated window structure for use by NX.  This function is
  *   provided in addition to nx_openwindow in order to support a kind of
@@ -1041,7 +1014,7 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect);
  *   are not visible to NX.
  *
  *   NOTE:  hwnd must have been allocated using a user-space allocator that
- *   permits user access to the window.  Once provided to nx_constructwindow()
+ *   permits user access to the window.  Once provided to nx_constructwindow
  *   that memory is owned and managed by NX.  On certain error conditions or
  *   when the window is closed, NX will free the window.
  *

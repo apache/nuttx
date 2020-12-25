@@ -116,7 +116,7 @@ Cygwin Buildroot Toolchain
 Buildroot Instructions
 ----------------------
 
-  1. You must have already configured Nuttx in <some-dir>/nuttx.
+  1. You must have already configured NuttX in <some-dir>/nuttx.
 
      tools/configure.sh qemu-i486:<sub-dir>
 

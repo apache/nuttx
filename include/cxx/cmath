@@ -51,6 +51,9 @@
 
 namespace std
 {
+  using ::float_t;
+  using ::double_t;
+
 #ifdef CONFIG_HAVE_FLOAT
   using ::acosf;
   using ::asinf;

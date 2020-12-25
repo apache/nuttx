@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
@@ -601,7 +602,8 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   uint32_t regoffset;
   uint32_t regval;
 
-  dmainfo("paddr: %08x maddr: %08x ntransfers: %d scr: %08x\n",
+  dmainfo("paddr: %08" PRIx32 " maddr: %08" PRIx32
+          " ntransfers: %zu scr: %08" PRIx32 "\n",
           paddr, maddr, ntransfers, scr);
 
 #ifdef CONFIG_STM32F7_DMACAPABLE
@@ -875,13 +877,14 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32F7_DMACAPABLE
-bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
+bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr)
 {
   uint32_t transfer_size;
   uint32_t burst_length;
   uint32_t mend;
 
-  dmainfo("stm32_dmacapable: 0x%08x/%u 0x%08x\n", maddr, count, ccr);
+  dmainfo("stm32_dmacapable: 0x%08" PRIxPTR
+          "/%" PRIu32 " 0x%08" PRIx32 "\n", maddr, count, ccr);
 
   /* Verify that the address conforms to the memory transfer size.
    * Transfers to/from memory performed by the DMA controller are
@@ -933,10 +936,12 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
   if ((maddr & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
       ((mend + 1) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
     {
-      dmainfo("stm32_dmacapable:"
+      dmawarn("stm32_dmacapable:"
               " dcache unaligned maddr:0x%08x mend:0x%08x\n",
               maddr, mend);
+#if !defined(CONFIG_STM32F7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
       return false;
+#endif
     }
 #  endif
 
@@ -1040,7 +1045,7 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs)
 {
   struct stm32_dma_s *dmast = (struct stm32_dma_s *)handle;

@@ -36,7 +36,7 @@
 
 #include "freedom-k28f.h"
 
-#ifdef HAVE_AUTOMOUNTER
+#ifdef HAVE_SDHC_AUTOMOUNTER
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,11 +80,11 @@ struct k28_automount_config_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  k28_attach(FAR const struct automount_lower_s *lower,
+static int  k28_sdhc_attach(FAR const struct automount_lower_s *lower,
                        automount_handler_t isr, FAR void *arg);
-static void k28_enable(FAR const struct automount_lower_s *lower,
+static void k28_sdhc_enable(FAR const struct automount_lower_s *lower,
                        bool enable);
-static bool k28_inserted(FAR const struct automount_lower_s *lower);
+static bool k28_sdhc_inserted(FAR const struct automount_lower_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -100,9 +100,9 @@ static const struct k28_automount_config_s g_sdhc_config =
     .mountpoint = CONFIG_FRDMK28F_SDHC_AUTOMOUNT_MOUNTPOINT,
     .ddelay     = MSEC2TICK(CONFIG_FRDMK28F_SDHC_AUTOMOUNT_DDELAY),
     .udelay     = MSEC2TICK(CONFIG_FRDMK28F_SDHC_AUTOMOUNT_UDELAY),
-    .attach     = k28_attach,
-    .enable     = k28_enable,
-    .inserted   = k28_inserted
+    .attach     = k28_sdhc_attach,
+    .enable     = k28_sdhc_enable,
+    .inserted   = k28_sdhc_inserted
   },
   .state        = &g_sdhc_state
 };
@@ -112,7 +112,7 @@ static const struct k28_automount_config_s g_sdhc_config =
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  k28_attach
+ * Name:  k28_sdhc_attach
  *
  * Description:
  *   Attach a new SDHC event handler
@@ -127,7 +127,7 @@ static const struct k28_automount_config_s g_sdhc_config =
  *
  ****************************************************************************/
 
-static int k28_attach(FAR const struct automount_lower_s *lower,
+static int k28_sdhc_attach(FAR const struct automount_lower_s *lower,
                       automount_handler_t isr, FAR void *arg)
 {
   FAR const struct k28_automount_config_s *config;
@@ -152,7 +152,7 @@ static int k28_attach(FAR const struct automount_lower_s *lower,
 }
 
 /****************************************************************************
- * Name:  k28_enable
+ * Name:  k28_sdhc_enable
  *
  * Description:
  *   Enable card insertion/removal event detection
@@ -166,7 +166,7 @@ static int k28_attach(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static void k28_enable(FAR const struct automount_lower_s *lower,
+static void k28_sdhc_enable(FAR const struct automount_lower_s *lower,
                        bool enable)
 {
   FAR const struct k28_automount_config_s *config;
@@ -204,7 +204,7 @@ static void k28_enable(FAR const struct automount_lower_s *lower,
 }
 
 /****************************************************************************
- * Name: k28_inserted
+ * Name: k28_sdhc_inserted
  *
  * Description:
  *   Check if a card is inserted into the slot.
@@ -217,7 +217,7 @@ static void k28_enable(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static bool k28_inserted(FAR const struct automount_lower_s *lower)
+static bool k28_sdhc_inserted(FAR const struct automount_lower_s *lower)
 {
   return k28_cardinserted();
 }
@@ -225,6 +225,59 @@ static bool k28_inserted(FAR const struct automount_lower_s *lower)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name:  k28_sdhc_automount_event
+ *
+ * Description:
+ *   The SDHC card detection logic has detected an insertion or removal
+ *   event.
+ *   It has already scheduled the MMC/SD block driver operations.
+ *   Now we need to schedule the auto-mount event which will occur with a
+ *   substantial delay to make sure that everything has settle down.
+ *
+ * Input Parameters:
+ *   slotno - Identifies the SDHC0 slot: SDHC0_SLOTNO or SDHC1_SLOTNO.
+ *      There is a terminology problem here:  Each SDHC supports two slots,
+ *      slot A and slot B. Only slot A is used.
+ *      So this is not a really a slot, but an HSCMI peripheral number.
+ *   inserted - True if the card is inserted in the slot.  False otherwise.
+ *
+ *  Returned Value:
+ *    None
+ *
+ *  Assumptions:
+ *    Interrupts are disabled.
+ *
+ ****************************************************************************/
+
+void k28_sdhc_automount_event(bool inserted)
+{
+  FAR const struct k28_automount_config_s *config = &g_sdhc_config;
+  FAR struct k28_automount_state_s *state = &g_sdhc_state;
+
+  /* Is the auto-mounter interrupt attached? */
+
+  if (state->handler)
+    {
+      /* Yes.. Have we been asked to hold off interrupts? */
+
+      if (!state->enable)
+        {
+          /* Yes.. just remember that there is a pending interrupt. We will
+           * deliver the interrupt when interrupts are "re-enabled."
+           */
+
+          state->pending = true;
+        }
+      else
+        {
+          /* No.. forward the event to the handler */
+
+          state->handler(&config->lower, state->arg, inserted);
+        }
+    }
+}
 
 /****************************************************************************
  * Name:  k28_automount_initialize
@@ -255,56 +308,4 @@ void k28_automount_initialize(void)
     }
 }
 
-/****************************************************************************
- * Name:  k28_automount_event
- *
- * Description:
- *   The SDHC card detection logic has detected an insertion or removal event.
- *   It has already scheduled the MMC/SD block driver operations.
- *   Now we need to schedule the auto-mount event which will occur with a
- *   substantial delay to make sure that everything has settle down.
- *
- * Input Parameters:
- *   slotno - Identifies the SDHC0 slot: SDHC0_SLOTNO or SDHC1_SLOTNO.
- *      There is a terminology problem here:  Each SDHC supports two slots,
- *      slot A and slot B. Only slot A is used.
- *      So this is not a really a slot, but an HSCMI peripheral number.
- *   inserted - True if the card is inserted in the slot.  False otherwise.
- *
- *  Returned Value:
- *    None
- *
- *  Assumptions:
- *    Interrupts are disabled.
- *
- ****************************************************************************/
-
-void k28_automount_event(bool inserted)
-{
-  FAR const struct k28_automount_config_s *config = &g_sdhc_config;
-  FAR struct k28_automount_state_s *state = &g_sdhc_state;
-
-  /* Is the auto-mounter interrupt attached? */
-
-  if (state->handler)
-    {
-      /* Yes.. Have we been asked to hold off interrupts? */
-
-      if (!state->enable)
-        {
-          /* Yes.. just remember that there is a pending interrupt. We will
-           * deliver the interrupt when interrupts are "re-enabled."
-           */
-
-          state->pending = true;
-        }
-      else
-        {
-          /* No.. forward the event to the handler */
-
-          state->handler(&config->lower, state->arg, inserted);
-        }
-    }
-}
-
-#endif /* HAVE_AUTOMOUNTER */
+#endif /* HAVE_SDHC_AUTOMOUNTER */

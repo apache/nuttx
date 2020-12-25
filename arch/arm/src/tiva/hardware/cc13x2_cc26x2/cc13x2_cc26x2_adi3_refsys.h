@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_adi3_refsys.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a compatible BSD
+ * license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,24 +37,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_ADI3_REFSYS_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_ADI3_REFSYS_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 #include "hardware/tiva_ddi.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* ADI3 REFSYS Register Offsets *************************************************************************************/
+/* ADI3 REFSYS Register Offsets *********************************************/
 
 #define TIVA_ADI3_REFSYS_ATESTCTL1_OFFSET                     0x0001
 #define TIVA_ADI3_REFSYS_REFSYSCTL0_OFFSET                    0x0002
@@ -70,7 +71,7 @@
 #define TIVA_ADI3_REFSYS_CTL_RECHARGE_CMP0_OFFSET             0x000d  /* Recharge Comparator Control Byte 0 */
 #define TIVA_ADI3_REFSYS_CTL_RECHARGE_CMP1_OFFSET             0x000e  /* Recharge Comparator Control Byte 1 */
 
-/* ADI3 REFSYS Register Addresses ***********************************************************************************/
+/* ADI3 REFSYS Register Addresses *******************************************/
 
 #define TIVA_ADI3_REFSYS_ATESTCTL1                            (TIVA_ADI3_BASE + TIVA_ADI3_REFSYS_ATESTCTL1_OFFSET)
 #define TIVA_ADI3_REFSYS_REFSYSCTL0                           (TIVA_ADI3_BASE + TIVA_ADI3_REFSYS_REFSYSCTL0_OFFSET)
@@ -87,7 +88,9 @@
 #define TIVA_ADI3_REFSYS_CTL_RECHARGE_CMP0                    (TIVA_ADI3_BASE + TIVA_ADI3_REFSYS_CTL_RECHARGE_CMP0_OFFSET)
 #define TIVA_ADI3_REFSYS_CTL_RECHARGE_CMP1                    (TIVA_ADI3_BASE + TIVA_ADI3_REFSYS_CTL_RECHARGE_CMP1_OFFSET)
 
-/* Offsets may also be used in conjunction with access as described in cc13x2_cc26x2_ddi.h */
+/* Offsets may also be used in conjunction with access as described in
+ * cc13x2_cc26x2_ddi.h
+ */
 
 #define TIVA_ADI3_REFSYS_DIR                                  (TIVA_ADI3_BASE + TIVA_DDI_DIR_OFFSET)
 #define TIVA_ADI3_REFSYS_SET                                  (TIVA_ADI3_BASE + TIVA_DDI_SET_OFFSET)
@@ -96,7 +99,7 @@
 #define TIVA_ADI3_REFSYS_MASK8B                               (TIVA_ADI3_BASE + TIVA_DDI_MASK8B_OFFSET)
 #define TIVA_ADI3_REFSYS_MASK16B                              (TIVA_ADI3_BASE + TIVA_DDI_MASK16B_OFFSET)
 
-/* ADI3 REFSYS Bitfield Definitions *********************************************************************************/
+/* ADI3 REFSYS Bitfield Definitions *****************************************/
 
 /* TIVA_ADI3_REFSYS_ATESTCTL1 */
 
@@ -195,46 +198,46 @@
 
 /* TIVA_ADI3_REFSYS_DCDCCTL0 */
 
-#define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT                  (0)       /* Bits 0-4: Set the VDDR voltage */
-                                                                        /*           Proprietary encoding */
+#define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT                  (0)                                          /* Bits 0-4: Set the VDDR voltage */
+                                                                                                           /*           Proprietary encoding */
 #define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_MASK                   (31 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT)
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM(n)                   ((uint32_t)(n) << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT)
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_DEFAULT              (0 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT)  /* Default, about 1.63V */
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_TYPICAL              (5 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT)  /* Typical voltage after trim voltage 1.71V */
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_MAX                  (21 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) /* Max voltage 1.96V */
-#  define ADI3_REFS */YS_DCDCCTL0_VDDR_TRIM_MIN               (22 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) /* Min voltage 1.47V */
-#define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT                  (5)       /* Bits 5-7:  Set charge and re-charge current level */
-                                                                        /*            2's complement encoding */
+#  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_MIN                  (22 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) /* Min voltage 1.47V */
+#define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT                  (5)                                          /* Bits 5-7:  Set charge and re-charge current level */
+                                                                                                           /*            2's complement encoding */
 #define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_MASK                   (7 << ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT)
 #  define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC(n)                   ((uint32_t)(n) << ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT)
-#  define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_DEFAULT              (0 << ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT) /* Default 11mA */
-#  define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_MAX                  (3 << ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT) /* Max 15mA */
-#  define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_MIN                  (4 << ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT) /* Max 5mA */
+#  define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_DEFAULT              (0 << ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT)  /* Default 11mA */
+#  define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_MAX                  (3 << ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT)  /* Max 15mA */
+#  define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_MIN                  (4 << ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT)  /* Max 5mA */
 
 /* TIVA_ADI3_REFSYS_DCDCCTL1 */
 
-#define ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_SHIFT            (0)       /* Bits 0-4: Set the min VDDR voltage threshold during sleep mode */
-                                                                        /*           Proprietary encoding */
+#define ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_SHIFT            (0)                                                /* Bits 0-4: Set the min VDDR voltage threshold during sleep mode */
+                                                                                                                 /*           Proprietary encoding */
 #define ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_MASK             (31 << ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_SHIFT)
 #  define ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP(n)             ((uint32_t)(n) << ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_SHIFT)
 #  define ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_DEFAULT        (nn << ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_SHIFT) /* Default, about 1.63V */
 #  define ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_TYPICAL        (nn << ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_SHIFT) /* Typical voltage after trim voltage 1.52V */
 #  define ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_MAX            (nn << ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_SHIFT) /* Max voltage 1.96V */
 #  define ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_MIN            (nn << ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_SHIFT) /* Min voltage 1.47V */
-#define ADI3_REFSYS_DCDCCTL1_VDDR_OK_HYST                     (1 << 5)  /* Bit 5:  Increase the hysteresis for when VDDR is considered ok */
-                                                                        /*         0: Hysteresis = 60mV; 1: Hysteresis = 70mV */
-#define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT                 (6)       /* Bits 6-7: Trim GLDO bias current */
-                                                                        /*           Proprietary encoding */
+#define ADI3_REFSYS_DCDCCTL1_VDDR_OK_HYST                     (1 << 5)                                           /* Bit 5:  Increase the hysteresis for when VDDR is considered ok */
+                                                                                                                 /*         0: Hysteresis = 60mV; 1: Hysteresis = 70mV */
+#define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT                 (6)                                                /* Bits 6-7: Trim GLDO bias current */
+                                                                                                                 /*           Proprietary encoding */
 #define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_MASK                  (3 << ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT)
 #  define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM(n)                  ((uint32_t)(n) << ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT)
-#  define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_DEFAULT             (0 << ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT) /* Default */
-#  define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_INC1p3              (1 << ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT) /* Increase GLDO bias by 1.3x */
-#  define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_INC1p6              (2 << ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT) /* Increase GLDO bias by 1.6x */
-#  define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_DEC0p7              (3 << ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT) /* Decrease GLDO bias by 0.7x */
+#  define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_DEFAULT             (0 << ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT)       /* Default */
+#  define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_INC1p3              (1 << ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT)       /* Increase GLDO bias by 1.3x */
+#  define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_INC1p6              (2 << ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT)       /* Increase GLDO bias by 1.6x */
+#  define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_DEC0p7              (3 << ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT)       /* Decrease GLDO bias by 0.7x */
 
 /* TIVA_ADI3_REFSYS_DCDCCTL2 */
 
-#define ADI3_REFSYS_DCDCCTL2_TESTSEL_SHIFT                    (0)       /* Bits 0-3: Select signal for test bus, one hot */
+#define ADI3_REFSYS_DCDCCTL2_TESTSEL_SHIFT                    (0)                                       /* Bits 0-3: Select signal for test bus, one hot */
 #define ADI3_REFSYS_DCDCCTL2_TESTSEL_MASK                     (15 << ADI3_REFSYS_DCDCCTL2_TESTSEL_SHIFT)
 #  define ADI3_REFSYS_DCDCCTL2_TESTSEL(n)                     ((uint32_t)(n) << ADI3_REFSYS_DCDCCTL2_TESTSEL_SHIFT)
 #  define ADI3_REFSYS_DCDCCTL2_TESTSEL_NC                     (0 << ADI3_REFSYS_DCDCCTL2_TESTSEL_SHIFT) /* No signal connected to test bus */
@@ -242,9 +245,9 @@
 #  define ADI3_REFSYS_DCDCCTL2_TESTSEL_PASSGATE               (2 << ADI3_REFSYS_DCDCCTL2_TESTSEL_SHIFT) /* Pass transistor gate voltage connected to test bus */
 #  define ADI3_REFSYS_DCDCCTL2_TESTSEL_IB1U                   (4 << ADI3_REFSYS_DCDCCTL2_TESTSEL_SHIFT) /* 1uA bias current connected to test bus */
 #  define ADI3_REFSYS_DCDCCTL2_TESTSEL_VDDROK                 (8 << ADI3_REFSYS_DCDCCTL2_TESTSEL_SHIFT) /* VDDR_OK connected to test bus */
-#define ADI3_REFSYS_DCDCCTL2_BIAS_DIS                         (1 << 4)  /* Bit 4:  Disable dummy bias current */
-#define ADI3_REFSYS_DCDCCTL2_TEST_VDDR                        (1 << 5)  /* Bit 5:  Connect VDDR to ATEST bus */
-#define ADI3_REFSYS_DCDCCTL2_TURNON_EA_SW                     (1 << 6)  /* Bit 6: Turns on GLDO error amp switch */
+#define ADI3_REFSYS_DCDCCTL2_BIAS_DIS                         (1 << 4)                                  /* Bit 4:  Disable dummy bias current */
+#define ADI3_REFSYS_DCDCCTL2_TEST_VDDR                        (1 << 5)                                  /* Bit 5:  Connect VDDR to ATEST bus */
+#define ADI3_REFSYS_DCDCCTL2_TURNON_EA_SW                     (1 << 6)                                  /* Bit 6: Turns on GLDO error amp switch */
 
 /* TIVA_ADI3_REFSYS_DCDCCTL3 */
 
@@ -281,7 +284,7 @@
 
 /* TIVA_ADI3_REFSYS_CTL_RECHARGE_CMP0 */
 
-#define ADI3_REFSYS_CTL_RECHARGE_CMP0_TRIM_RECHARGE_COMP_REFLEVEL_SHIFT    (0)       /* Bits 0-3: Trim ref level of recharge */
+#define ADI3_REFSYS_CTL_RECHARGE_CMP0_TRIM_RECHARGE_COMP_REFLEVEL_SHIFT    (0)      /* Bits 0-3: Trim ref level of recharge */
 #define ADI3_REFSYS_CTL_RECHARGE_CMP0_TRIM_RECHARGE_COMP_REFLEVEL_MASK     (15 << ADI3_REFSYS_CTL_RECHARGE_CMP0_TRIM_RECHARGE_COMP_REFLEVEL_SHIFT)
 #  define ADI3_REFSYS_CTL_RECHARGE_CMP0_TRIM_RECHARGE_COMP_REFLEVEL(n)     ((uint32_t)(n) << ADI3_REFSYS_CTL_RECHARGE_CMP0_TRIM_RECHARGE_COMP_REFLEVEL_SHIFT)
 #  define ADI3_REFSYS_CTL_RECHARGE_CMP0_TRIM_RECHARGE_COMP_REFLEVEL_90PCT  (15 << ADI3_REFSYS_CTL_RECHARGE_CMP0_TRIM_RECHARGE_COMP_REFLEVEL_SHIFT)
@@ -290,14 +293,14 @@
 
 /* TIVA_ADI3_REFSYS_CTL_RECHARGE_CMP1 */
 
-#define ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_SHIFT   (0)       /* Bis 0-4: Trim offset of Recharge comparator */
+#define ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_SHIFT   (0)                                                                   /* Bis 0-4: Trim offset of Recharge comparator */
 #define ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_MASK    (31 << ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_SHIFT)
 #  define ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET(n)    ((uint32_t)(n) << ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_SHIFT)
-#define ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_MAXIN   (0 << ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_SHIFT) /* Maximum degeneration on input side (VDDR side) */
+#define ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_MAXIN   (0 << ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_SHIFT)  /* Maximum degeneration on input side (VDDR side) */
 #define ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_MAXREF  (31 << ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_SHIFT) /* Maximum degeneration on reference side from cap divider */
 #define ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_NOMINAL (16 << ADI3_REFSYS_CTL_RECHARGE_CMP1_TRIM_RECHARGE_COMP_OFFSET_SHIFT) /* Nominal code */
-#define ADI3_REFSYS_CTL_RECHARGE_CMP1_FORCE_SAMPLE_VDDR                 (1 << 5)  /* Bit 5:  Force Sample of VDDR on cap divider */
-#define ADI3_REFSYS_CTL_RECHARGE_CMP1_RECHARGE_BLOCK_ATEST_EN           (1 << 6)  /* Bit 6:  Enable test inputs/outputs to recharge comparator */
-#define ADI3_REFSYS_CTL_RECHARGE_CMP1_RECHARGE_BLOCK_VTRIG_EN           (1 << 7)  /* Bit 7: Enable ATEST input to VDDR input of recharge comparator */
+#define ADI3_REFSYS_CTL_RECHARGE_CMP1_FORCE_SAMPLE_VDDR                 (1 << 5)                                                              /* Bit 5:  Force Sample of VDDR on cap divider */
+#define ADI3_REFSYS_CTL_RECHARGE_CMP1_RECHARGE_BLOCK_ATEST_EN           (1 << 6)                                                              /* Bit 6:  Enable test inputs/outputs to recharge comparator */
+#define ADI3_REFSYS_CTL_RECHARGE_CMP1_RECHARGE_BLOCK_VTRIG_EN           (1 << 7)                                                              /* Bit 7: Enable ATEST input to VDDR input of recharge comparator */
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_ADI3_REFSYS_H */

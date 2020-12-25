@@ -66,7 +66,9 @@
 #define NSH_HAVEMMCSD   1
 #define NSH_HAVEUSBHOST 1
 
-/* The Mikroelektronika PIC32MX7 MMB has one SD slot on board, connected to SPI 1. */
+/* The Mikroelektronika PIC32MX7 MMB has one SD slot on board,
+ * connected to SPI 1.
+ */
 
 #ifndef CONFIG_PIC32MX_MMCSDSPIPORTNO
 #  define CONFIG_PIC32MX_MMCSDSPIPORTNO 1
@@ -312,7 +314,8 @@ static int nsh_usbhostinitialize(void)
   if (ret != OK)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+             "ERROR: Failed to register the CDC/ACM serial class: %d\n",
+             ret);
     }
 #endif
 
@@ -331,6 +334,7 @@ static int nsh_usbhostinitialize(void)
                            (main_t)nsh_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }
+
   return -ENODEV;
 }
 #else

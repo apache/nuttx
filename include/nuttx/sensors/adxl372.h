@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * include/nuttx/sensors/adxl372.h
  *
  *   Copyright (C) 2017-2018 RAF Research LLC. All rights reserved.
@@ -31,21 +31,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_SENSORS_ADXL372_H
 #define __INCLUDE_NUTTX_SENSORS_ADXL372_H
 
-/******************************************************************************
+/****************************************************************************
  * Driver usage notes:
  *
- * This driver is a "kernel sensor leaf driver" that may be used directly from
- * user applications via the file_operations interface or have selected entry
- * points called directly from a "kernel sensor cluster driver".
+ * This driver is a "kernel sensor leaf driver" that may be used directly
+ * from user applications via the file_operations interface or have selected
+ * entry points called directly from a "kernel sensor cluster driver".
  *
  * To use this driver via the file_operations interface, the board
  * initialization function should call this driver's registration function.
- * The driver will register itself with Nuttx under the /dev path that is
+ * The driver will register itself with NuttX under the /dev path that is
  * provided by the config structure.  Then user applications may access the
  * driver via the "file descriptor handle" returned by the file_operations
  * open() function.
@@ -85,10 +85,9 @@
  *
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************
- */
+ ****************************************************************************/
 
 #include <nuttx/irq.h>
 #include <nuttx/config.h>
@@ -99,10 +98,9 @@
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_ADXL372) \
     && defined(CONFIG_SPI_EXCHANGE)
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************
- */
+ ****************************************************************************/
 
 /* ADXL372 common definitions */
 
@@ -196,10 +194,10 @@ struct adxl372_dvr_entry_vector_s
 {
   struct sensor_cluster_operations_s c;
 
-  /* Extend the sensor cluster driver interface with a SPI DMA exchange transfer.
-   * The standard driver_read and driver_write perform PIO transfers.
-   * The will loop waiting on the SPI hardware and are only appropriate for
-   * short data transfers.
+  /* Extend the sensor cluster driver interface with a SPI DMA exchange
+   * transfer. The standard driver_read and driver_write perform PIO
+   * transfers. The will loop waiting on the SPI hardware and are only
+   * appropriate for short data transfers.
    * Note that the first byte in the tx buffer must be a command/address
    * byte. The exchange function does not provide one. Also note that
    * the first byte stored in the rxbuffer is a garbage byte, which

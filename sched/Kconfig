@@ -217,34 +217,6 @@ config START_DAY
 	default 1
 	range 1 31
 
-config MAX_WDOGPARMS
-	int "Maximum number of watchdog parameters"
-	default 4
-	---help---
-		Maximum number of parameters that can be passed to a watchdog handler
-
-config PREALLOC_WDOGS
-	int "Number of pre-allocated watchdog timers"
-	default 32
-	---help---
-		The number of pre-allocated watchdog structures.  The system manages
-		a pool of preallocated watchdog structures to minimize dynamic
-		allocations.  Dynamic allocations will still be made if this pool is
-		exhausted.  You will, however, get better performance and memory
-		usage if this value is tuned to minimize such allocations.
-
-config WDOG_INTRESERVE
-	int "Watchdog structures reserved for interrupt handlers"
-	default 4
-	---help---
-		Watchdog structures may be allocated from normal task and also from
-		interrupt handlers.  Interrupt handlers, however, can only use pre-
-		allocated watchdog timer.  So, in order to keep normal task
-		allocations from exhausting all watchdog structures, a small number
-		of pre-allocated watchdog timers must be reserved for exclusive use
-		by interrupt handler.  This setting determines that number of
-		reserved watchdogs.
-
 config PREALLOC_TIMERS
 	int "Number of pre-allocated POSIX timers"
 	default 8
@@ -272,7 +244,6 @@ config SPINLOCK
 config SPINLOCK_IRQ
 	bool "Support Spinlocks with IRQ control"
 	default n
-	depends on ARCH_GLOBAL_IRQDISABLE
 	---help---
 		Enables support for spinlocks with IRQ control. This feature can be
 		used to protect data in SMP mode.
@@ -357,6 +328,13 @@ config INIT_FILEPATH
 
 endchoice # Initialization task
 
+config INIT_ARGS
+	string "Application argument list"
+	depends on !INIT_NONE
+	---help---
+		The argument list for user applications. e.g.:
+		  "\"arg1\",\"arg2\",\"arg3\""
+
 if INIT_ENTRYPOINT
 config USER_ENTRYPOINT
 	string "Application entry point"
@@ -365,6 +343,13 @@ config USER_ENTRYPOINT
 		The name of the entry point for user applications.  For the example
 		applications this is of the form 'app_main' where 'app' is the application
 		name. If not defined, USER_ENTRYPOINT defaults to "main".
+
+config USERMAIN_STACKSIZE
+	int "Main thread stack size"
+	default DEFAULT_TASK_STACKSIZE
+	---help---
+		The size of the stack to allocate for the user initialization thread
+		that is started as soon as the OS completes its initialization.
 
 config USERMAIN_PRIORITY
 	int "init thread priority"
@@ -616,18 +601,6 @@ config SCHED_WAITPID
 		compliant) and will enable the waitid() and wait() interfaces as
 		well.
 
-config SCHED_EXIT_KILL_CHILDREN
-	bool "Enable kill all children when exit"
-	default n
-	depends on SCHED_HAVE_PARENT && SCHED_CHILD_STATUS
-	---help---
-		When a task exits, all of its child threads will be killed.
-
-		Caution:  This selection should not be used unless you are certain
-		of what you are doing.  Uninformed of this option can often lead to
-		memory leaks since, for example, memory allocations held by threads
-		are not automatically freed!
-
 config SCHED_USER_IDENTITY
 	bool "Support per-task User Identity"
 	default n
@@ -753,10 +726,10 @@ config SCHED_CRITMONITOR
 	---help---
 		Enables logic that monitors the duration of time that a thread keeps
 		interrupts or pre-emption disabled.  These global locks can have
-		negative consequences to real timer performance:  Disabling interrupts
-		adds jitter in the time when a interrupt request is asserted until
-		the hardware can responds with the interrupt.  Disabling pre-emption
-		adds jitter in the timer from when the event is posted in the
+		negative consequences to real time performance:  Disabling interrupts
+		adds jitter in the time when an interrupt request is asserted until
+		the hardware can respond with the interrupt.  Disabling pre-emption
+		adds jitter in the time from when the event is posted in the
 		interrupt handler until the task that responds to the event can run.
 
 		If this option is selected, then the following interfaces must be
@@ -776,7 +749,7 @@ config SCHED_CRITMONITOR
 		in unknown units) can be obtained by subtracting a start time from
 		the current time.
 
-		The second interface simple converts an elapsed time into well known
+		The second interface simply converts an elapsed time into well known
 		units for presentation by the ProcFS file system.
 
 config SCHED_CPULOAD
@@ -787,15 +760,15 @@ config SCHED_CPULOAD
 		If this option is selected, the timer interrupt handler will monitor
 		if the system is IDLE or busy at the time of that the timer interrupt
 		occurs.  This is a very coarse measurement, but over a period of time,
-		it can very accurately determined the percentage of the time that the
+		it can very accurately determine the percentage of the time that the
 		CPU is IDLE.
 
-		The statistics collected in this could be used, for example in the
+		The statistics collected in this could be used, for example, in the
 		PROCFS file system to provide CPU load measurements when read.
 
 		Note that in tickless mode of operation (SCHED_TICKLESS) there is
 		no system timer interrupt and CPU load measurements will not be
-		possible unless you provide an alternative clock to driver the
+		possible unless you provide an alternative clock to drive the
 		sampling and select SCHED_CPULOAD_EXTCLK.
 
 if SCHED_CPULOAD
@@ -941,14 +914,27 @@ config SCHED_INSTRUMENTATION
 		done in these interfaces.  For example, normal devices may not be
 		used; syslog output cannot be performed.
 
-		An option is to use SCHED_INSTRUMENTATION_BUFFER below.
-
 if SCHED_INSTRUMENTATION
+
+config SCHED_INSTRUMENTATION_EXTERNAL
+	bool "System performance monitor endpoints are external"
+	default n
+	---help---
+		When this option is enabled, the board specific logic must implment all
+		callbacks listed in SCHED_INSTRUMENTATION, SCHED_INSTRUMENTATION_CSECTION,
+		SCHED_INSTRUMENTATION_SPINLOCKS, SCHED_INSTRUMENTATION_SYSCALL and
+		SCHED_INSTRUMENTATION_IRQHANDLER. Otherwise the common code will implement
+		these callbacks and packet the arguments into note_ struct. Then the board
+		-specific logic just need to implement one callback:
+
+		  void sched_note_add(FAR const void *note, size_t notelen);
+
+		and send the data to the suitable transport hardware.
 
 config SCHED_INSTRUMENTATION_CPUSET
 	hex "CPU bit set"
 	default 0xffff
-	depends on SMP
+	depends on SMP && SCHED_INSTRUMENTATION_FILTER
 	---help---
 		Monitor only CPUs in the bitset.  Bit 0=CPU0, Bit1=CPU1, etc.
 
@@ -984,59 +970,53 @@ config SCHED_INSTRUMENTATION_SPINLOCKS
 			void sched_note_spinunlock(FAR struct tcb_s *tcb, bool state);
 			void sched_note_spinabort(FAR struct tcb_s *tcb, bool state);
 
-config SCHED_INSTRUMENTATION_BUFFER
-	bool "Buffer instrumentation data in memory"
+config SCHED_INSTRUMENTATION_SYSCALL
+	bool "System call monitor hooks"
+	default n
+	depends on ARCH_HAVE_SYSCALL_HOOKS
+	---help---
+		Enables additional hooks for entry and exit from system call.
+		Board-specific logic must provide this additional logic.
+
+			void sched_note_syscall_enter(int nr, int argc, ...);
+			void sched_note_syscall_leave(int nr, uintptr_t result);
+
+config SCHED_INSTRUMENTATION_IRQHANDLER
+	bool "Interrupt handler monitor hooks"
 	default n
 	---help---
-		If this option is selected, then in-memory buffering logic is
-		enabled to capture scheduler instrumentation data.  This has
-		the advantage that (1) the platform logic does not have to provide
-		the sched_note_* interfaces described for the previous settings.
-		Instead, the buffering logic catches all of these.  It encodes
-		timestamps the scheduler note and adds the note to an in-memory,
-		circular buffer.  And (2) buffering the scheduler instrumentation
-		data (versus performing some output operation) minimizes the impact
-		of the instrumentation on the behavior of the system.
+		Enables additional hooks for interrupt handler. Board-specific logic
+		must provide this additional logic.
 
-		If the in-memory buffer becomes full, then older notes are
-		overwritten by newer notes.  The following interface is provided:
+			void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 
-			ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
-
-		Platform specific information must call this function and dispose
-		of it quickly so that overwriting of the tail of the circular buffer
-		does not occur.  See include/nuttx/sched_note.h for additional
-		information.
-
-if SCHED_INSTRUMENTATION_BUFFER
-
-config SCHED_NOTE_BUFSIZE
-	int "Instrumentation buffer size"
-	default 2048
-	---help---
-		The size of the in-memory, circular instrumentation buffer (in
-		bytes).
-
-config SCHED_NOTE_GET
-	bool "Callable interface to get instrumentatin data"
+config SCHED_INSTRUMENTATION_HIRES
+	bool "Use Hi-Res RTC for instrumentation"
 	default n
-	depends on !SCHED_INSTRUMENTATION_CSECTION && (!SCHED_INSTRUMENTATION_SPINLOCK || !SMP)
 	---help---
-		Add support for interfaces to get the size of the next note and also
-		to extract the next note from the instrumentation buffer:
+		Use higher resolution system timer for instrumentation.
 
-			ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
-			ssize_t sched_note_size(void);
+config SCHED_INSTRUMENTATION_FILTER
+	bool "Instrumenation filter"
+	default n
+	---help---
+		Enables the filter logic for the instrumentation. If this option
+		is enabled, the instrumentation data passed to sched_note_add()
+		can be filtered by syscall and IRQ number.
+		The filter logic can be configured by sched_note_filter APIs defined in
+		include/nuttx/sched_note.h.
 
-		NOTE: This option is not available if critical sections are being
-		monitor (nor if spinlocks are being monitored in SMP configuration)
-		because there would be a logical error in the design in those cases.
-		That error is that these interfaces call enter_ and leave_critical_section
-		(and which us spinlocks in SMP mode).  That means that each call to
-		sched_note_get() causes several additional entries to be added from
-		the note buffer in order to remove one entry.
+config SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	hex "Default instrumentation filter mode"
+	depends on SCHED_INSTRUMENTATION_FILTER
+	default 0xf
+	---help---
+		Default mode of the instrumentation filter logic.
+			Bit 0 = Enable instrumentation
+			Bit 1 = Enable syscall instrumentation
+			Bit 2 = Enable IRQ instrumentation
+			Bit 3 = Enable collecting syscall arguments
 
-endif # SCHED_INSTRUMENTATION_BUFFER
 endif # SCHED_INSTRUMENTATION
 endmenu # Performance Monitoring
 
@@ -1092,11 +1072,11 @@ config NFILE_DESCRIPTORS
 	---help---
 		The maximum number of file descriptors per task (one for each open)
 
-config NFILE_STREAMS
-	int "Maximum number of FILE streams"
-	default 16
+config FILE_STREAM
+	bool "Enable FILE stream"
+	default y
 	---help---
-		The maximum number of streams that can be fopen'ed
+		Enable the standard buffered input/output support
 
 config NAME_MAX
 	int "Maximum size of a file name"
@@ -1329,6 +1309,12 @@ endmenu # RTOS hooks
 
 menu "Signal Configuration"
 
+config SIG_PREALLOC_IRQ_ACTIONS
+	int "Number of pre-allocated irq actions"
+	default 8
+	---help---
+		The number of pre-allocated irq action structures.
+
 config SIG_EVTHREAD
 	bool "Support SIGEV_THHREAD"
 	default n
@@ -1402,14 +1388,14 @@ config SIG_SIGPOLL_ACTION
 		sigaction() to ignore SIGPOLL.
 
 config SIG_SIGSTOP_ACTION
-	bool "SIGSTOP SIGSTP, and SIGCONT"
+	bool "SIGSTOP SIGTSTP, and SIGCONT"
 	default y
 	---help---
-		Enable the default action for SIGSTOP and SIGSTP (suspend the
+		Enable the default action for SIGSTOP and SIGTSTP (suspend the
 		task) and SIGCONT (resume the task).
 
 config SIG_SIGKILL_ACTION
-	bool "SIGINT and SIGKILL"
+	bool "SIGINT SIGKILL SIGQUIT and SIGTERM"
 	default y
 	---help---
 		Enable the default action for SIGINT and SIGKILL (terminate the
@@ -1468,14 +1454,12 @@ if SIG_DEFAULT
 config SIG_STOP
 	int "SIGSTOP"
 	default 6
-	depends on SIG_SIGSTOP_ACTION
 	---help---
 		Suspend/pause a task.  SIGSTOP may not be caught or ignored.
 
-config SIG_STP
-	int "SIGSTP"
+config SIG_TSTP
+	int "SIGTSTP"
 	default 7
-	depends on SIG_SIGSTOP_ACTION
 	---help---
 		Suspend/pause a task.  Unlike SIGSTOP, this signal can be caught or
 		ignored.
@@ -1483,7 +1467,6 @@ config SIG_STP
 config SIG_CONT
 	int "SIGCONT"
 	default 8
-	depends on SIG_SIGSTOP_ACTION
 	---help---
 		Resume a suspended/paused task.  SIGSTOP only has an action when
 		send to a stopped task.  SIGCONT is ignored by other task.  SIGCONT
@@ -1492,7 +1475,6 @@ config SIG_CONT
 config SIG_KILL
 	int "SIGKILL"
 	default 9
-	depends on SIG_SIGKILL_ACTION
 	---help---
 		The SIGKILL signal is sent to cause a task termination event.
 		SIGKILL may not be caught or ignored.
@@ -1500,16 +1482,29 @@ config SIG_KILL
 config SIG_INT
 	int "SIGINT"
 	default 10
-	depends on SIG_SIGKILL_ACTION
 	---help---
 		The SIGINT signal is sent to cause a task termination event.
 		SIGINT may be ignored or caught by the receiving task.
+
+config SIG_QUIT
+	int "SIGQUIT"
+	default 11
+	---help---
+		The SIGINT signal is sent to cause a task termination event.
+		SIGQUIT may be ignored or caught by the receiving task.
+
+config SIG_TERM
+	int "SIGTERM"
+	default 12
+	---help---
+		The SIGINT signal is sent to cause a task termination event.
+		SIGTERM may be ignored or caught by the receiving task.
 
 endif # SIG_DEFAULT
 
 config SIG_PIPE
 	int "SIGPIPE"
-	default 11
+	default 13
 	---help---
 		The SIGPIPE signal is sent to a task termination event.
 		This signal is generated when write on a pipe with no one to read it.
@@ -1542,10 +1537,16 @@ menu "POSIX Message Queue Options"
 
 config PREALLOC_MQ_MSGS
 	int "Number of pre-allocated messages"
-	default 32
+	default 4
 	---help---
 		The number of pre-allocated message structures.  The system manages
 		a pool of preallocated message structures to minimize dynamic allocations
+
+config PREALLOC_MQ_IRQ_MSGS
+	int "Number of pre-allocated irq messages"
+	default 8
+	---help---
+		The number of pre-allocated irq message structures.
 
 config MQ_MAXMSGSIZE
 	int "Maximum message size"
@@ -1760,13 +1761,6 @@ config IDLETHREAD_STACKSIZE
 		is the thread that (1) performs the initial boot of the system up to the
 		point where start-up application is spawned, and (2) there after is the
 		IDLE thread that executes only when there is no other thread ready to run.
-
-config USERMAIN_STACKSIZE
-	int "Main thread stack size"
-	default DEFAULT_TASK_STACKSIZE
-	---help---
-		The size of the stack to allocate for the user initialization thread
-		that is started as soon as the OS completes its initialization.
 
 config PTHREAD_STACK_MIN
 	int "Minimum pthread stack size"

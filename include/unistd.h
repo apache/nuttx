@@ -48,12 +48,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The number of functions that may be registered to be called
- * at program exit.
- */
-
-#define ATEXIT_MAX 1
-
 /* Values for seeking */
 
 #define SEEK_SET    0  /* From the start of the file */
@@ -95,8 +89,8 @@
 #  define _POSIX_SPORADIC_SERVER 1
 #  define _POSIX_THREAD_SPORADIC_SERVER 1
 #else
-#  undef  _POSIX_SPORADIC_SERVER
-#  undef  _POSIX_THREAD_SPORADIC_SERVER
+#  define _POSIX_SPORADIC_SERVER -1
+#  define _POSIX_THREAD_SPORADIC_SERVER -1
 #endif
 
 /* Execution time constants (not supported) */
@@ -109,7 +103,31 @@
 #undef  _POSIX_ASYNC_IO
 #undef  _POSIX_PRIO_IO
 
-/* Constants used with POSIX sysconf().  sysconf() will return -2 and set
+/* Constants used with POSIX pathconf().  pathconf() will return -1 and set
+ * errno to ENOSYS for most of these.
+ */
+
+#define _PC_2_SYMLINKS                   0x0001
+#define _PC_ALLOC_SIZE_MIN               0x0002
+#define _PC_ASYNC_IO                     0x0003
+#define _PC_CHOWN_RESTRICTED             0x0004
+#define _PC_FILESIZEBITS                 0x0005
+#define _PC_LINK_MAX                     0x0006
+#define _PC_MAX_CANON                    0x0007
+#define _PC_MAX_INPUT                    0x0008
+#define _PC_NAME_MAX                     0x0009
+#define _PC_NO_TRUNC                     0x000a
+#define _PC_PATH_MAX                     0x000b
+#define _PC_PIPE_BUF                     0x000c
+#define _PC_PRIO_IO                      0x000d
+#define _PC_REC_INCR_XFER_SIZE           0x000e
+#define _PC_REC_MIN_XFER_SIZE            0x000f
+#define _PC_REC_XFER_ALIGN               0x0010
+#define _PC_SYMLINK_MAX                  0x0011
+#define _PC_SYNC_IO                      0x0012
+#define _PC_VDISABLE                     0x0013
+
+/* Constants used with POSIX sysconf().  sysconf() will return -1 and set
  * errno to ENOSYS for most of these.
  */
 
@@ -237,6 +255,12 @@
 #define _SC_XOPEN_UNIX                   0x0079
 #define _SC_XOPEN_VERSION                0x007a
 
+#define _SC_PHYS_PAGES                   0x007b
+#define _SC_AVPHYS_PAGES                 0x007c
+
+#define _SC_NPROCESSORS_CONF             0x007d
+#define _SC_NPROCESSORS_ONLN             0x007e
+
 /* The following symbolic constants must be defined for file streams: */
 
 #define STDERR_FILENO                    2       /* File number of stderr */
@@ -247,8 +271,10 @@
 
 /* Helpers and legacy compatibility definitions */
 
+#define link(p1, p2)                     symlink((p1), (p2))
 #define fdatasync(f)                     fsync(f)
 #define getdtablesize(f)                 ((int)sysconf(_SC_OPEN_MAX))
+#define getpagesize(f)                   ((int)sysconf(_SC_PAGESIZE))
 
 /****************************************************************************
  * Public Data
@@ -270,10 +296,12 @@ extern "C"
 
 #ifndef __NXFLAT__
 EXTERN FAR char *optarg; /* Optional argument following option */
+EXTERN int       opterr; /* Print error message */
 EXTERN int       optind; /* Index into argv */
 EXTERN int       optopt; /* Unrecognized option character */
 #else
 #  define optarg  (*(getoptargp()))
+#  define opterr  (*(getopterrp()))
 #  define optind  (*(getoptindp()))
 #  define optopt  (*(getoptoptp()))
 #endif
@@ -286,6 +314,10 @@ EXTERN int       optopt; /* Unrecognized option character */
 
 pid_t   vfork(void);
 pid_t   getpid(void);
+pid_t   gettid(void);
+#ifdef CONFIG_SCHED_HAVE_PARENT
+pid_t   getppid(void);
+#endif
 void    _exit(int status) noreturn_function;
 unsigned int sleep(unsigned int seconds);
 int     usleep(useconds_t usec);
@@ -305,9 +337,11 @@ ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
 ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
 int     ftruncate(int fd, off_t length);
 
+#ifdef CONFIG_SERIAL_TERMIOS
 /* Check if a file descriptor corresponds to a terminal I/O file */
 
 int     isatty(int fd);
+#endif
 
 /* Memory management */
 
@@ -319,6 +353,7 @@ FAR void *sbrk(intptr_t incr);
 /* Special devices */
 
 int     pipe(int fd[2]);
+int     pipe2(int pipefd[2], int flags);
 
 /* Schedule an alarm */
 
@@ -335,11 +370,8 @@ int     access(FAR const char *path, int amode);
 int     rmdir(FAR const char *pathname);
 int     unlink(FAR const char *pathname);
 int     truncate(FAR const char *path, off_t length);
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-int     link(FAR const char *path1, FAR const char *path2);
+int     symlink(FAR const char *path1, FAR const char *path2);
 ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize);
-#endif
 
 /* Execution of programs from files */
 
@@ -362,6 +394,7 @@ int     getopt(int argc, FAR char * const argv[], FAR const char *optstring);
  */
 
 FAR char **getoptargp(void);  /* Optional argument following option */
+FAR int   *getopterrp(void);  /* Print error message */
 FAR int   *getoptindp(void);  /* Index into argv */
 FAR int   *getoptoptp(void);  /* Unrecognized option character */
 
@@ -371,6 +404,8 @@ int     sethostname(FAR const char *name, size_t size);
 /* Get configurable system variables */
 
 long    sysconf(int name);
+long    fpathconf(int fildes, int name);
+long    pathconf(FAR const char *path, int name);
 
 /* User and group identity management */
 

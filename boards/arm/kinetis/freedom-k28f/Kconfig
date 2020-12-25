@@ -33,4 +33,34 @@ config FRDMK28F_SDHC_AUTOMOUNT_UDELAY
 	default 2000
 
 endif # FRDMK28F_SDHC_AUTOMOUNT
+
+config FRDMK28F_USB_AUTOMOUNT
+	bool "USB Mass Storage automounter"
+	default n
+	depends on USBHOST_MSC && USBHOST_MSC_NOTIFIER
+
+if FRDMK28F_USB_AUTOMOUNT
+
+config FRDMK28F_USB_AUTOMOUNT_FSTYPE
+	string "USB file system type"
+	default "vfat"
+
+config FRDMK28F_USB_AUTOMOUNT_BLKDEV
+	string "USB block device prefix"
+	default "/dev/sd"
+
+config FRDMK28F_USB_AUTOMOUNT_MOUNTPOINT
+	string "USB mount point prefix"
+	default "/mnt/usb"
+
+config FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV
+	int "Number of block devices to monitor."
+	range 1 26
+	default 4
+
+config FRDMK28F_USB_AUTOMOUNT_UDELAY
+	int "USB unmount retry delay (milliseconds)"
+	default 2000
+
+endif # FRDMK28F_USB_AUTOMOUNT
 endif # ARCH_BOARD_FREEDOM_K28F

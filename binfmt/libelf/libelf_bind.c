@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
@@ -338,8 +339,9 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
           rel->r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
           berr("Section %d reloc %d: Relocation address out of range, "
-               "offset %d size %d\n",
-               relidx, i, rel->r_offset, dstsec->sh_size);
+               "offset %" PRIdPTR " size %jd\n",
+               relidx, i, (uintptr_t)rel->r_offset,
+               (uintmax_t)dstsec->sh_size);
           ret = -EINVAL;
           break;
         }
@@ -522,8 +524,9 @@ static int elf_relocateadd(FAR struct elf_loadinfo_s *loadinfo, int relidx,
           rela->r_offset > dstsec->sh_size)
         {
           berr("Section %d reloc %d: Relocation address out of range, "
-               "offset %d size %d\n",
-               relidx, i, rela->r_offset, dstsec->sh_size);
+               "offset %" PRIdPTR " size %jd\n",
+               relidx, i, (uintptr_t)rela->r_offset,
+               (uintmax_t)dstsec->sh_size);
           ret = -EINVAL;
           break;
         }

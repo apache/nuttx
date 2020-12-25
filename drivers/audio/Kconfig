@@ -40,6 +40,14 @@ if AUDIO_CXD56
 
 if AUDIO_DRIVER_SPECIFIC_BUFFERS
 
+config AUDIO_CXD56_SRC
+	bool "CXD56 audio sample rate convertor"
+	select AUDIO_SRC
+	default n
+	---help---
+		Enable support for audio playback using the CXD5247 chip on the
+		CXD56 Spresense board with sample rate convertor.
+
 config CXD56_AUDIO_NUM_BUFFERS
 	int "Number of audio buffers to use"
 	default 4
@@ -165,6 +173,39 @@ config CS43L22_CLKDEBUG
 
 endif # AUDIO_CS43L22
 
+config AUDIO_CS4344
+	bool "CS4344 audio chip"
+	default n
+	depends on AUDIO
+	---help---
+		Select to enable support for the CS4344 Audio codec by Cirrus Logic.
+		This chip is a lower level audio chip.. basically
+		an exotic D-to-A.  It includes no built-in support for audio CODECS.
+
+if AUDIO_CS4344
+
+config CS4344_INFLIGHT
+	int "CS4344 maximum in-flight audio buffers"
+	default 2
+
+config CS4344_MSG_PRIO
+	int "CS4344 message priority"
+	default 1
+
+config CS4344_BUFFER_SIZE
+	int "CS4344 preferred buffer size"
+	default 8192
+
+config CS4344_NUM_BUFFERS
+	int "CS4344 preferred number of buffers"
+	default 4
+
+config CS4344_WORKER_STACKSIZE
+	int "CS4344 worker thread stack size"
+	default 768
+
+endif # AUDIO_CS4344
+
 config AUDIO_WM8776
 	bool "WM8776 audio chip"
 	default n
@@ -192,6 +233,67 @@ config WM8776_SWAP_HPOUT
 	default n
 
 endif # AUDIO_WM8776
+
+config AUDIO_WM8994
+	bool "WM8994 audio chip"
+	default n
+	depends on AUDIO
+	---help---
+		Select to enable support for the WM8994 Audio codec by Wolfson
+		Microelectonics.  This chip is a lower level audio chip.. basically
+		an exotic D-to-A.  It includes no built-in support for audio CODECS
+		The WM8994 provides:
+
+			- Low power consumption
+			- High SNR
+			- Stereo digital microphone input
+			- Digital Dynamic Range Controller (compressor / limiter)
+			- Digital sidetone mixing
+			- Ground-referenced headphone driver
+			- Ground-referenced line outputs
+
+		NOTE: This driver also depends on both I2C and I2S support although
+		that dependency is not explicit here.
+
+if AUDIO_WM8994
+
+config WM8994_INITVOLUME
+	int "WM8994 initial volume setting"
+	default 250
+
+config WM8994_INFLIGHT
+	int "WM8994 maximum in-flight audio buffers"
+	default 2
+
+config WM8994_MSG_PRIO
+	int "WM8994 message priority"
+	default 1
+
+config WM8994_BUFFER_SIZE
+	int "WM8994 preferred buffer size"
+	default 8192
+
+config WM8994_NUM_BUFFERS
+	int "WM8994 preferred number of buffers"
+	default 4
+
+config WM8994_WORKER_STACKSIZE
+	int "WM8994 worker thread stack size"
+	default 768
+
+config WM8994_REGDUMP
+	bool "WM8994 register dump"
+	default n
+	---help---
+		Enable logic to dump the contents of all WM8994 registers.
+
+config WM8994_CLKDEBUG
+	bool "WM8994 clock analysis"
+	default n
+	---help---
+		Enable logic to analyze WM8994 clock configuation.
+
+endif # AUDIO_WM8994
 
 config AUDIO_WM8904
 	bool "WM8904 audio chip"

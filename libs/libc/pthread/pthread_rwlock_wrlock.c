@@ -100,7 +100,8 @@ int pthread_rwlock_trywrlock(FAR pthread_rwlock_t *rw_lock)
   return err;
 }
 
-int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *rw_lock,
+int pthread_rwlock_clockwrlock(FAR pthread_rwlock_t *rw_lock,
+                               clockid_t clockid,
                                FAR const struct timespec *ts)
 {
   int err = pthread_mutex_lock(&rw_lock->lock);
@@ -125,7 +126,8 @@ int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *rw_lock,
     {
       if (ts != NULL)
         {
-          err = pthread_cond_timedwait(&rw_lock->cv, &rw_lock->lock, ts);
+          err = pthread_cond_clockwait(&rw_lock->cv, &rw_lock->lock,
+                                       clockid, ts);
         }
       else
         {
@@ -137,6 +139,7 @@ int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *rw_lock,
           break;
         }
     }
+
 #ifdef CONFIG_PTHREAD_CLEANUP
   pthread_cleanup_pop(0);
 #endif
@@ -157,6 +160,12 @@ int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *rw_lock,
 exit_with_mutex:
   pthread_mutex_unlock(&rw_lock->lock);
   return err;
+}
+
+int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *rw_lock,
+                               FAR const struct timespec *ts)
+{
+  return pthread_rwlock_clockwrlock(rw_lock, CLOCK_REALTIME, ts);
 }
 
 int pthread_rwlock_wrlock(FAR pthread_rwlock_t *rw_lock)

@@ -136,6 +136,18 @@ struct mii_ioctl_data_s
   uint16_t val_out;     /* PHY output data */
 };
 
+/* Structure passed to get or set the CAN bitrate
+ * SIOCxCANBITRATE ioctl commands.
+ */
+
+struct can_ioctl_data_s
+{
+  uint16_t arbi_bitrate; /* Classic CAN / Arbitration phase bitrate kbit/s */
+  uint16_t arbi_samplep; /* Classic CAN / Arbitration phase input % */
+  uint16_t data_bitrate; /* Data phase bitrate kbit/s */
+  uint16_t data_samplep; /* Data phase sample point % */
+};
+
 /* There are two forms of the I/F request structure.  One for IPv6 and one for IPv4.
  * Notice that they are (and must be) cast compatible and really different only
  * in the size of the structure allocation.
@@ -158,17 +170,18 @@ struct lifreq
     uint8_t                   lifru_flags;              /* Interface flags */
     struct mii_ioctl_notify_s llfru_mii_notify;         /* PHY event notification */
     struct mii_ioctl_data_s   lifru_mii_data;           /* MII request data */
+    struct can_ioctl_data_s   lifru_can_data;           /* CAN bitrate request data */
   } lifr_ifru;
 };
 
-#define lifr_addr             lifr_ifru.lifru_addr      /* IP address */
-#define lifr_dstaddr          lifr_ifru.lifru_dstaddr   /* P-to-P Address */
-#define lifr_broadaddr        lifr_ifru.lifru_broadaddr /* Broadcast address */
-#define lifr_netmask          lifr_ifru.lifru_netmask   /* Interface net mask */
-#define lifr_hwaddr           lifr_ifru.lifru_hwaddr    /* MAC address */
-#define lifr_mtu              lifr_ifru.lifru_mtu       /* MTU */
-#define lifr_count            lifr_ifru.lifru_count     /* Number of devices */
-#define lifr_flags            lifr_ifru.lifru_flags     /* interface flags */
+#define lifr_addr             lifr_ifru.lifru_addr             /* IP address */
+#define lifr_dstaddr          lifr_ifru.lifru_dstaddr          /* P-to-P Address */
+#define lifr_broadaddr        lifr_ifru.lifru_broadaddr        /* Broadcast address */
+#define lifr_netmask          lifr_ifru.lifru_netmask          /* Interface net mask */
+#define lifr_hwaddr           lifr_ifru.lifru_hwaddr           /* MAC address */
+#define lifr_mtu              lifr_ifru.lifru_mtu              /* MTU */
+#define lifr_count            lifr_ifru.lifru_count            /* Number of devices */
+#define lifr_flags            lifr_ifru.lifru_flags            /* interface flags */
 #define lifr_mii_notify_pid   lifr_ifru.llfru_mii_notify.pid   /* PID to be notified */
 #define lifr_mii_notify_event lifr_ifru.llfru_mii_notify.event /* Describes notification */
 #define lifr_mii_phy_id       lifr_ifru.lifru_mii_data.phy_id  /* PHY device address */
@@ -196,6 +209,9 @@ struct lifconf
 struct ifreq
 {
   char                        ifr_name[IFNAMSIZ];       /* Network device name (e.g. "eth0") */
+#ifdef CONFIG_NETDEV_IFINDEX
+  int16_t                     ifr_ifindex;              /* Interface index */
+#endif
   union
   {
     struct sockaddr           ifru_addr;                /* IP Address */
@@ -208,17 +224,18 @@ struct ifreq
     uint8_t                   ifru_flags;               /* Interface flags */
     struct mii_ioctl_notify_s ifru_mii_notify;          /* PHY event notification */
     struct mii_ioctl_data_s   ifru_mii_data;            /* MII request data */
+    struct can_ioctl_data_s   ifru_can_data;            /* CAN bitrate request data */
   } ifr_ifru;
 };
 
-#define ifr_addr              ifr_ifru.ifru_addr        /* IP address */
-#define ifr_dstaddr           ifr_ifru.ifru_dstaddr     /* P-to-P Address */
-#define ifr_broadaddr         ifr_ifru.ifru_broadaddr   /* Broadcast address */
-#define ifr_netmask           ifr_ifru.ifru_netmask     /* Interface net mask */
-#define ifr_hwaddr            ifr_ifru.ifru_hwaddr      /* MAC address */
-#define ifr_mtu               ifr_ifru.ifru_mtu         /* MTU */
-#define ifr_count             ifr_ifru.ifru_count       /* Number of devices */
-#define ifr_flags             ifr_ifru.ifru_flags       /* interface flags */
+#define ifr_addr              ifr_ifru.ifru_addr             /* IP address */
+#define ifr_dstaddr           ifr_ifru.ifru_dstaddr          /* P-to-P Address */
+#define ifr_broadaddr         ifr_ifru.ifru_broadaddr        /* Broadcast address */
+#define ifr_netmask           ifr_ifru.ifru_netmask          /* Interface net mask */
+#define ifr_hwaddr            ifr_ifru.ifru_hwaddr           /* MAC address */
+#define ifr_mtu               ifr_ifru.ifru_mtu              /* MTU */
+#define ifr_count             ifr_ifru.ifru_count            /* Number of devices */
+#define ifr_flags             ifr_ifru.ifru_flags            /* interface flags */
 #define ifr_mii_notify_pid    ifr_ifru.ifru_mii_notify.pid   /* PID to be notified */
 #define ifr_mii_notify_event  ifr_ifru.ifru_mii_notify.event /* Describes notification */
 #define ifr_mii_phy_id        ifr_ifru.ifru_mii_data.phy_id  /* PHY device address */
@@ -226,7 +243,7 @@ struct ifreq
 #define ifr_mii_val_in        ifr_ifru.ifru_mii_data.val_in  /* PHY input data */
 #define ifr_mii_val_out       ifr_ifru.ifru_mii_data.val_out /* PHY output data */
 
-/* Used only with the SIOCGIFCONF IOCTL command*/
+/* Used only with the SIOCGIFCONF IOCTL command */
 
 struct ifconf
 {

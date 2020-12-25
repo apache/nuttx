@@ -65,30 +65,46 @@ static inline int readpseudodir(struct fs_dirent_s *idir)
 
   /* If the node has file operations, we will say that it is a file. */
 
-  idir->fd_dir.d_type = 0;
+  idir->fd_dir.d_type = DTYPE_UNKNOWN;
   if (idir->u.pseudo.fd_next->u.i_ops)
     {
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-      if (INODE_IS_BLOCK(idir->u.pseudo.fd_next) ||
-         INODE_IS_MTD(idir->u.pseudo.fd_next))
+      if (INODE_IS_BLOCK(idir->u.pseudo.fd_next))
         {
-           idir->fd_dir.d_type |= DTYPE_BLK;
+           idir->fd_dir.d_type = DTYPE_BLK;
+        }
+      else if (INODE_IS_MTD(idir->u.pseudo.fd_next))
+        {
+           idir->fd_dir.d_type = DTYPE_MTD;
         }
       else if (INODE_IS_MOUNTPT(idir->u.pseudo.fd_next))
         {
-           idir->fd_dir.d_type |= DTYPE_DIRECTORY;
+           idir->fd_dir.d_type = DTYPE_DIRECTORY;
         }
       else
 #endif
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
       if (INODE_IS_SOFTLINK(idir->u.pseudo.fd_next))
         {
-           idir->fd_dir.d_type |= DTYPE_LINK;
+           idir->fd_dir.d_type = DTYPE_LINK;
         }
       else
 #endif
+      if (INODE_IS_DRIVER(idir->u.pseudo.fd_next))
         {
-           idir->fd_dir.d_type |= DTYPE_CHR;
+           idir->fd_dir.d_type = DTYPE_CHR;
+        }
+      else if (INODE_IS_NAMEDSEM(idir->u.pseudo.fd_next))
+        {
+           idir->fd_dir.d_type = DTYPE_SEM;
+        }
+      else if (INODE_IS_MQUEUE(idir->u.pseudo.fd_next))
+        {
+           idir->fd_dir.d_type = DTYPE_MQ;
+        }
+      else if (INODE_IS_SHM(idir->u.pseudo.fd_next))
+        {
+           idir->fd_dir.d_type = DTYPE_SHM;
         }
     }
 
@@ -99,7 +115,7 @@ static inline int readpseudodir(struct fs_dirent_s *idir)
 
   if (idir->u.pseudo.fd_next->i_child || !idir->u.pseudo.fd_next->u.i_ops)
     {
-      idir->fd_dir.d_type |= DTYPE_DIRECTORY;
+      idir->fd_dir.d_type = DTYPE_DIRECTORY;
     }
 
   /* Now get the inode to visit next time that readdir() is called */

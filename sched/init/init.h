@@ -105,25 +105,6 @@ void nx_idle_trampoline(void);
 #endif
 
 /****************************************************************************
- * Name: nx_idle_task
- *
- * Description:
- *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
- *   It is equivalent to the CPU 0 IDLE logic in nx_start.c
- *
- * Input Parameters:
- *   Standard task arguments.
- *
- * Returned Value:
- *   This function does not return.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-int nx_idle_task(int argc, FAR char *argv[]);
-#endif
-
-/****************************************************************************
  * Name: nx_bringup
  *
  * Description:

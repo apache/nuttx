@@ -60,7 +60,7 @@ def send_discover(socket):
     cmd[2] = DISCOVER_ALL
     chksum = 0
     for c in cmd[:3]:
-        chksum -= c;
+        chksum -= c
     cmd[3] = chksum & 0xff
 
     socket.sendto(cmd, ('<broadcast>', PORT))
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     s = socket(AF_INET, SOCK_DGRAM)
     s.bind(('0.0.0.0', PORT))
     s.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-    s.settimeout(1.0);
+    s.settimeout(1.0)
     send_discover(s)
     devices = read_responses(s)
     socket.close(s)

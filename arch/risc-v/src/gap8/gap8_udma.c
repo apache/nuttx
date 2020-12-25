@@ -75,7 +75,10 @@
  * The peripheral driver instantiate it and register through _init()
  */
 
-static struct gap8_udma_peripheral *_peripherals[GAP8_UDMA_NR_CHANNELS] = { 0 };
+static struct gap8_udma_peripheral *_peripherals[GAP8_UDMA_NR_CHANNELS] =
+                                                                          {
+                                                                            0
+                                                                          };
 
 /****************************************************************************
  * Private Functions
@@ -294,7 +297,7 @@ int gap8_udma_rx_poll(struct gap8_udma_peripheral *instance)
  * Description:
  *   uDMA ISR
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 int gap8_udma_doirq(int irq, void *context, FAR void *arg)
 {
@@ -349,7 +352,7 @@ int gap8_udma_doirq(int irq, void *context, FAR void *arg)
     {
       /* Rx channel */
 
-       if (the_peripheral->rx.block_count > 1)
+      if (the_peripheral->rx.block_count > 1)
         {
           the_peripheral->rx.block_count--;
           the_peripheral->rx.buff += the_peripheral->rx.block_size;

@@ -121,7 +121,7 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
  *       done, the processor reserves space on the stack for the FP state,
  *       but does not save that state information to the stack.
  *
- *  Software must not change the value of the ASPEN bit or LSPEN bit while either:
+ *  Software must not change the value of the ASPEN bit or LSPEN bit either:
  *   - the CPACR permits access to CP10 and CP11, that give access to the FP
  *     extension, or
  *   - the CONTROL.FPCA bit is set to 1
@@ -155,7 +155,7 @@ static inline void lpc17_40_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -185,7 +185,7 @@ static inline void lpc17_40_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -225,7 +225,8 @@ void __start(void)
 #ifdef CONFIG_ARMV7M_STACKCHECK
   /* Set the stack limit before we attempt to call any functions */
 
-  __asm__ volatile ("sub r10, sp, %0" : : "r" (CONFIG_IDLETHREAD_STACKSIZE - 64) : );
+  __asm__ volatile("sub r10, sp, %0" : :
+                   "r"(CONFIG_IDLETHREAD_STACKSIZE - 64) :);
 #endif
 
   /* Configure the uart so that we can get debug output as soon as possible */

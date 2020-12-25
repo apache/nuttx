@@ -58,9 +58,6 @@
  *   nature of the created task.  For example:
  *
  *     - Task type may be set in the TCB flags to create kernel thread
- *     - If a custom stack is used, i.e., one allocated, managed, and freed
- *       by the caller, then TCB_FLAG_CUSTOM_STACK should be set in the
- *       TCB flags.
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
@@ -82,44 +79,57 @@
  *
  ****************************************************************************/
 
-int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
-                FAR uint32_t *stack, uint32_t stack_size,
+int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
+                FAR void *stack, uint32_t stack_size,
                 main_t entry, FAR char * const argv[])
 {
-  FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
+  uint8_t ttype = tcb->cmn.flags & TCB_FLAG_TTYPE_MASK;
   int ret;
 
   /* Only tasks and kernel threads can be initialized in this way */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  DEBUGASSERT(tcb &&
-              (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+  DEBUGASSERT(tcb && ttype != TCB_FLAG_TTYPE_PTHREAD);
 #endif
 
   /* Create a new task group */
 
-  ret = group_allocate(ttcb, tcb->flags);
+  ret = group_allocate(tcb, tcb->cmn.flags);
   if (ret < 0)
     {
-      goto errout;
+      return ret;
     }
 
   /* Associate file descriptors with the new task */
 
-  ret = group_setuptaskfiles(ttcb);
+  ret = group_setuptaskfiles(tcb);
   if (ret < 0)
     {
       goto errout_with_group;
     }
 
-  /* Configure the user provided stack region */
+  if (stack)
+    {
+      /* Use pre-allocated stack */
 
-  up_use_stack(tcb, stack, stack_size);
+      ret = up_use_stack(&tcb->cmn, stack, stack_size);
+    }
+  else
+    {
+      /* Allocate the stack for the TCB */
+
+      ret = up_create_stack(&tcb->cmn, stack_size, ttype);
+    }
+
+  if (ret < OK)
+    {
+      goto errout_with_group;
+    }
 
   /* Initialize the task control block */
 
-  ret = nxtask_setup_scheduler(ttcb, priority, nxtask_start, entry,
-                          TCB_FLAG_TTYPE_TASK);
+  ret = nxtask_setup_scheduler(tcb, priority, nxtask_start,
+                               entry, ttype);
   if (ret < OK)
     {
       goto errout_with_group;
@@ -127,22 +137,46 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Setup to pass parameters to the new task */
 
-  nxtask_setup_arguments(ttcb, name, argv);
+  nxtask_setup_arguments(tcb, name, argv);
 
   /* Now we have enough in place that we can join the group */
 
-  ret = group_initialize(ttcb);
-  if (ret < 0)
+  ret = group_initialize(tcb);
+  if (ret == OK)
     {
-      goto errout_with_group;
+      return ret;
     }
 
-  return OK;
+  /* The TCB was added to the inactive task list by
+   * nxtask_setup_scheduler().
+   */
+
+  dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
 
 errout_with_group:
-  group_leave(tcb);
 
-errout:
+  if (!stack && tcb->cmn.stack_alloc_ptr)
+    {
+#ifdef CONFIG_BUILD_KERNEL
+      /* If the exiting thread is not a kernel thread, then it has an
+       * address environment.  Don't bother to release the stack memory
+       * in this case... There is no point since the memory lies in the
+       * user memory region that will be destroyed anyway (and the
+       * address environment has probably already been destroyed at
+       * this point.. so we would crash if we even tried it).  But if
+       * this is a privileged group, when we still have to release the
+       * memory using the kernel allocator.
+       */
+
+      if (ttype == TCB_FLAG_TTYPE_KERNEL)
+#endif
+        {
+          up_release_stack(&tcb->cmn, ttype);
+        }
+    }
+
+  group_leave(&tcb->cmn);
+
   return ret;
 }
 
@@ -156,8 +190,6 @@ errout:
  *   was when a subsequent call to task_activate fails.
  *
  *   Caution:  Freeing of the TCB itself might be an unexpected side-effect.
- *   The stack will also be freed UNLESS TCB_FLAG_CUSTOM_STACK was set in
- *   in the tcb->flags field when nxtask_init() was called.
  *
  * Input Parameters:
  *   tcb - Address of the TCB initialized by task_init()
@@ -167,7 +199,7 @@ errout:
  *
  ****************************************************************************/
 
-void nxtask_uninit(FAR struct tcb_s *tcb)
+void nxtask_uninit(FAR struct task_tcb_s *tcb)
 {
   /* The TCB was added to the inactive task list by
    * nxtask_setup_scheduler().
@@ -180,5 +212,5 @@ void nxtask_uninit(FAR struct tcb_s *tcb)
    */
 
   nxsched_release_tcb((FAR struct tcb_s *)tcb,
-                      tcb->flags & TCB_FLAG_TTYPE_MASK);
+                      tcb->cmn.flags & TCB_FLAG_TTYPE_MASK);
 }

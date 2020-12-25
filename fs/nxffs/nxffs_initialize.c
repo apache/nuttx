@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -175,7 +176,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 
   /* Allocate a NXFFS volume structure */
 
-  volume = (FAR struct nxffs_volume_s *)kmm_zalloc(sizeof(struct nxffs_volume_s));
+  volume = kmm_zalloc(sizeof(struct nxffs_volume_s));
   if (!volume)
     {
       return -ENOMEM;
@@ -194,7 +195,8 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
    * from the size of a pointer).
    */
 
-  ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&volume->geo));
+  ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY,
+                  (unsigned long)((uintptr_t)&volume->geo));
   if (ret < 0)
     {
       ferr("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", -ret);
@@ -211,9 +213,9 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
       goto errout_with_volume;
     }
 
-  /* Pre-allocate one, full, in-memory erase block.  This is needed for filesystem
-   * packing (but is useful in other places as well). This buffer is not needed
-   * often, but is best to have pre-allocated and in-place.
+  /* Pre-allocate one, full, in-memory erase block.  This is needed for
+   * filesystem packing (but is useful in other places as well). This buffer
+   * is not needed often, but is best to have pre-allocated and in-place.
    */
 
   volume->pack = (FAR uint8_t *)kmm_malloc(volume->geo.erasesize);
@@ -230,7 +232,8 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 
   volume->blkper  = volume->geo.erasesize / volume->geo.blocksize;
   volume->nblocks = volume->geo.neraseblocks * volume->blkper;
-  DEBUGASSERT((off_t)volume->blkper * volume->geo.blocksize == volume->geo.erasesize);
+  DEBUGASSERT((off_t)volume->blkper * volume->geo.blocksize ==
+              volume->geo.erasesize);
 
 #ifdef CONFIG_NXFFS_SCAN_VOLUME
   /* Check if there is a valid NXFFS file system on the flash */
@@ -398,7 +401,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
       /* Save the offset to the first inode */
 
       volume->inoffset = entry.hoffset;
-      finfo("First inode at offset %d\n", volume->inoffset);
+      finfo("First inode at offset %jd\n", (intmax_t)volume->inoffset);
 
       /* Discard this entry and set the next offset. */
 
@@ -418,7 +421,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
           nxffs_freeentry(&entry);
         }
 
-      finfo("Last inode before offset %d\n", offset);
+      finfo("Last inode before offset %jd\n", (intmax_t)offset);
     }
 
   /* No inodes were found after this offset.  Now search for a block of
@@ -439,20 +442,26 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
           if (volume->ioblock + 1 >= volume->nblocks &&
               volume->iooffset + 1 >= volume->geo.blocksize)
             {
-              /* Yes.. the FLASH is full.  Force the offsets to the end of FLASH */
+              /* Yes.. the FLASH is full.  Force the offsets to the end of
+               * FLASH
+               */
 
               volume->froffset = volume->nblocks * volume->geo.blocksize;
-              finfo("Assume no free FLASH, froffset: %d\n", volume->froffset);
+              finfo("Assume no free FLASH, froffset: %jd\n",
+                    (intmax_t)volume->froffset);
               if (noinodes)
                 {
                   volume->inoffset = volume->froffset;
-                  finfo("No inodes, inoffset: %d\n", volume->inoffset);
+                  finfo("No inodes, inoffset: %jd\n",
+                        (intmax_t)volume->inoffset);
                 }
 
               return OK;
             }
 
-          /* No?  Then it is some other failure that we do not know how to handle */
+          /* No?  Then it is some other failure that we do not know how to
+           * handle
+           */
 
           ferr("ERROR: nxffs_getc failed: %d\n", -ch);
           return ch;
@@ -475,11 +484,13 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
                */
 
               volume->froffset = offset;
-              finfo("Free FLASH region begins at offset: %d\n", volume->froffset);
+              finfo("Free FLASH region begins at offset: %jd\n",
+                    (intmax_t)volume->froffset);
               if (noinodes)
                 {
                   volume->inoffset = offset;
-                  finfo("First inode at offset %d\n", volume->inoffset);
+                  finfo("First inode at offset %jd\n",
+                        (intmax_t)volume->inoffset);
                 }
 
               return OK;

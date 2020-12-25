@@ -224,7 +224,7 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
 
   /* Allocate file/socket streams for the new TCB */
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
   return group_setupstreams(tcb);
 #else
   return OK;

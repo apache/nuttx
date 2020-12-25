@@ -153,8 +153,9 @@ static const struct file_operations mtdconfig_fops =
  *
  ****************************************************************************/
 
-static int mtdconfig_readbytes(FAR struct mtdconfig_struct_s *dev, int offset,
-                               FAR uint8_t *pdata, int readlen)
+static int mtdconfig_readbytes(FAR struct mtdconfig_struct_s *dev,
+                               int offset, FAR uint8_t *pdata,
+                               int readlen)
 {
   off_t  bytestoread = readlen;
   off_t  bytesthisblock;
@@ -194,7 +195,8 @@ static int mtdconfig_readbytes(FAR struct mtdconfig_struct_s *dev, int offset,
 
       while (bytestoread > 0)
         {
-          if (bytesthisblock < dev->blocksize || bytestoread < dev->blocksize)
+          if (bytesthisblock < dev->blocksize ||
+              bytestoread < dev->blocksize)
             {
               /* Copy to temp buffer first...don't need the whole block */
 
@@ -269,7 +271,7 @@ static int mtdconfig_writebytes(FAR struct mtdconfig_struct_s *dev,
   else
 #endif
 
-    /* Perform the write using the block write method of the MTD */
+  /* Perform the write using the block write method of the MTD */
 
     {
       uint16_t  block;
@@ -681,8 +683,8 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 
               /* Now write the item to the current dst_offset location. */
 
-              ret = mtdconfig_writebytes(dev, dst_offset, (FAR uint8_t *)phdr,
-                                         sizeof(hdr));
+              ret = mtdconfig_writebytes(dev, dst_offset,
+                                         (FAR uint8_t *)phdr, sizeof(hdr));
               if (ret != sizeof(hdr))
                 {
                   /* I/O Error! */
@@ -707,8 +709,9 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 
               /* Test if enough space in dst block for another header */
 
-              if (dst_offset + sizeof(hdr) >= (dst_block + 1) * dev->erasesize ||
-                  dst_offset == (dst_block + 1) * dev->erasesize)
+              if ((dst_offset + sizeof(hdr) >= (dst_block + 1) *
+                  dev->erasesize) || (dst_offset == (dst_block + 1) *
+                  dev->erasesize))
                 {
                   dst_block++;
                   dst_offset = dst_block * dev->erasesize +
@@ -840,7 +843,8 @@ static off_t  mtdconfig_consolidate(FAR struct mtdconfig_struct_s *dev)
       /* Scan all headers and move them to the src_offset */
 
 retry_relocate:
-      bytes = MTD_READ(dev->mtd, src_offset, sizeof(hdr), (FAR uint8_t *)&hdr);
+      bytes = MTD_READ(dev->mtd, src_offset,
+                       sizeof(hdr), (FAR uint8_t *)&hdr);
       if (bytes != sizeof(hdr))
         {
           /* I/O Error! */
@@ -870,13 +874,17 @@ retry_relocate:
             }
           else
             {
-              /* Test if this entry will fit in the current destination block */
+              /* Test if this entry will fit in the current destination
+               * block.
+               */
 
               bytes_left_in_block = (dst_block + 1) * dev->erasesize -
                                     dst_offset;
               if (hdr.len + sizeof(hdr) > bytes_left_in_block)
                 {
-                  /* Item doesn't fit in the block.  Advance to the next one */
+                  /* Item doesn't fit in the block. Advance to the next
+                   * one.
+                   */
 
                   /* Update control variables */
 
@@ -893,8 +901,8 @@ retry_relocate:
 
               /* Copy this entry to the destination */
 
-              ret = mtdconfig_writebytes(dev, dst_offset, (FAR uint8_t *)&hdr,
-                                         sizeof(hdr));
+              ret = mtdconfig_writebytes(dev, dst_offset,
+                                         (FAR uint8_t *)&hdr, sizeof(hdr));
               if (ret != sizeof(hdr))
                 {
                   /* I/O Error! */
@@ -987,10 +995,13 @@ retry_relocate:
 
       if (dst_offset + sizeof(hdr) >= (dst_block + 1) * dev->erasesize)
         {
-          /* No room at end of dst block for another header.  Go to next block. */
+          /* No room at end of dst block for another header.
+           * Go to next block.
+           */
 
           dst_block++;
-          dst_offset = dst_block * dev->erasesize + CONFIGDATA_BLOCK_HDR_SIZE;
+          dst_offset = dst_block * dev->erasesize +
+                       CONFIGDATA_BLOCK_HDR_SIZE;
           DEBUGASSERT(dst_block != src_block);
         }
     }
@@ -1349,7 +1360,8 @@ retry_find:
       hdr.len = pdata->len;
       hdr.flags = MTD_ERASED_FLAGS;
 
-      ret = mtdconfig_writebytes(dev, offset, (FAR uint8_t *)&hdr, sizeof(hdr));
+      ret = mtdconfig_writebytes(dev, offset,
+                                 (FAR uint8_t *)&hdr, sizeof(hdr));
       if (ret != sizeof(hdr))
         {
           /* Cannot write even header! */
@@ -1444,6 +1456,7 @@ static int mtdconfig_getconfig(FAR struct mtdconfig_struct_s *dev,
     }
 
 errout:
+
   /* Free the buffer */
 
   kmm_free(dev->buffer);
@@ -1510,7 +1523,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
   FAR struct config_data_s *pdata;
   struct mtdconfig_header_s hdr;
   off_t bytes_to_read;
-  int ret = -ENOSYS;
+  int ret = -ENOTTY;
 
   switch (cmd)
     {
@@ -1531,6 +1544,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
         break;
 
       case CFGDIOC_DELCONFIG:
+
         /* Set the config item */
 
         pdata = (FAR struct config_data_s *)arg;
@@ -1538,6 +1552,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
         break;
 
       case CFGDIOC_FIRSTCONFIG:
+
         /* Get the the first config item */
 
         pdata = (FAR struct config_data_s *)arg;
@@ -1585,6 +1600,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
         break;
 
       case CFGDIOC_NEXTCONFIG:
+
         /* Get the next config item */
 
         pdata = (FAR struct config_data_s *)arg;
@@ -1601,7 +1617,8 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
         /* Test if the config item is valid */
 
 #ifdef CONFIG_MTD_CONFIG_NAMED
-        if (dev->readoff != 0 && hdr.name[0] != CONFIG_MTD_CONFIG_ERASEDVALUE)
+        if (dev->readoff != 0 &&
+            hdr.name[0] != CONFIG_MTD_CONFIG_ERASEDVALUE)
 #else
         if (dev->readoff != 0 && hdr.id != MTD_ERASED_ID)
 #endif
@@ -1639,6 +1656,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
         break;
 
       case MTDIOC_BULKERASE:
+
         /* Call the MTD's ioctl for this */
 
         if (dev->mtd->ioctl)
@@ -1703,7 +1721,8 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd)
        * from the size of a pointer).
        */
 
-      ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
+      ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY,
+                      (unsigned long)((uintptr_t)&geo));
       if (ret < 0)
         {
           ferr("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);

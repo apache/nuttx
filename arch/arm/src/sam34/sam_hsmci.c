@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -312,7 +313,7 @@ struct sam_dev_s
   uint32_t           cmdrmask;        /* Interrupt enables for this
                                        * particular cmd/response */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  WDOG_ID            waitwdog;        /* Watchdog that handles event timeouts */
+  struct wdog_s      waitwdog;        /* Watchdog that handles event timeouts */
 #ifdef CONFIG_SAM34_DMAC0
   bool               dmabusy;         /* TRUE: DMA is in progress */
 #endif
@@ -448,7 +449,7 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result);
 
 /* Data Transfer Helpers ****************************************************/
 
-static void sam_eventtimeout(int argc, uint32_t arg, ...);
+static void sam_eventtimeout(wdparm_t arg);
 static void sam_endwait(struct sam_dev_s *priv, sdio_eventset_t wkupevent);
 static void sam_endtransfer(struct sam_dev_s *priv,
               sdio_eventset_t wkupevent);
@@ -1077,8 +1078,7 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
  *   any other waited-for event occurring.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -1088,11 +1088,11 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
  *
  ****************************************************************************/
 
-static void sam_eventtimeout(int argc, uint32_t arg, ...)
+static void sam_eventtimeout(wdparm_t arg)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)arg;
 
-  DEBUGASSERT(argc == 1 && priv != NULL);
+  DEBUGASSERT(priv != NULL);
   DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0);
 
   /* Is a data transfer complete event expected? */
@@ -1128,7 +1128,7 @@ static void sam_endwait(struct sam_dev_s *priv, sdio_eventset_t wkupevent)
 {
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Disable event-related interrupts and save wakeup event */
 
@@ -1296,7 +1296,7 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
             {
               /* Yes.. Was it some kind of timeout error? */
 
-              mcerr("ERROR: enabled: %08x pending: %08x\n",
+              mcerr("ERROR: enabled: %08" PRIx32 " pending: %08" PRIx32 "\n",
                     enabled, pending);
 
               if ((pending & HSMCI_DATA_TIMEOUT_ERRORS) != 0)
@@ -1343,7 +1343,7 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
                 {
                   /* Yes.. Was the error some kind of timeout? */
 
-                  mcerr("ERROR: events: %08x SR: %08x\n",
+                  mcerr("ERROR: events: %08" PRIx32 " SR: %08" PRIx32 "\n",
                         priv->cmdrmask, enabled);
 
                   if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
@@ -1463,7 +1463,7 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
   priv->dmabusy    = false;  /* No DMA in progress */
 #endif
 
-  wd_cancel(priv->waitwdog); /* Cancel any timeouts */
+  wd_cancel(&priv->waitwdog); /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
 
@@ -1798,7 +1798,8 @@ static int sam_sendcmd(FAR struct sdio_dev_s *dev,
 
   /* Write the fully decorated command to CMDR */
 
-  mcinfo("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
+  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32 " regval: %08" PRIx32 "\n",
+         cmd, arg, regval);
   putreg32(regval, SAM_HSMCI_CMDR);
   sam_cmdsample1(SAMPLENDX_AFTER_CMDR);
   return OK;
@@ -1890,7 +1891,7 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
 
   /* Cancel any watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Make sure that the DMA is stopped (it will be stopped automatically
    * on normal transfers, but not necessarily when the transfer terminates
@@ -1980,7 +1981,8 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
             {
               /* Yes.. Was the error some kind of timeout? */
 
-              mcerr("ERROR: cmd: %08x events: %08x SR: %08x\n",
+              mcerr("ERROR: cmd: %08" PRIx32 " events: %08" PRIx32
+                    " SR: %08" PRIx32 "\n",
                     cmd, priv->cmdrmask, sr);
 
               if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
@@ -2012,8 +2014,9 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
        }
       else if (--timeout <= 0)
         {
-          mcerr("ERROR: Timeout cmd: %08x events: %08x SR: %08x\n",
-               cmd, priv->cmdrmask, sr);
+          mcerr("ERROR: Timeout cmd: %08" PRIx32 " events: %08" PRIx32
+                " SR: %08" PRIx32 "\n",
+                cmd, priv->cmdrmask, sr);
 
           priv->wkupevent = SDIOWAIT_TIMEOUT;
           return -ETIMEDOUT;
@@ -2328,8 +2331,8 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay, sam_eventtimeout,
-                       1, (uint32_t)priv);
+      ret   = wd_start(&priv->waitwdog, delay,
+                       sam_eventtimeout, (wdparm_t)priv);
       if (ret < 0)
         {
           mcerr("ERROR: wd_start failed: %d\n", ret);
@@ -2356,7 +2359,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
            * disable all event, and return an SDIO error.
            */
 
-          wd_cancel(priv->waitwdog);
+          wd_cancel(&priv->waitwdog);
           sam_disablexfrints(priv);
           sam_disablewaitints(priv, SDIOWAIT_ERROR);
           return SDIOWAIT_ERROR;
@@ -2513,7 +2516,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
 #ifdef CONFIG_SAM34_PDCA
   modifyreg32(SAM_HSMCI_MR, 0, HSMCI_MR_PDCMODE);
-  mcinfo("SAM_HSMCI_MR = 0x%08X\n", getreg32(SAM_HSMCI_MR));
+  mcinfo("SAM_HSMCI_MR = 0x%08" PRIX32 "\n", getreg32(SAM_HSMCI_MR));
 
   putreg32((uint32_t)buffer, SAM_HSMCI_PDC_RPR);
   putreg32(buflen / 4, SAM_HSMCI_PDC_RCR);
@@ -2583,7 +2586,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
 #ifdef CONFIG_SAM34_PDCA
   modifyreg32(SAM_HSMCI_MR, 0, HSMCI_MR_PDCMODE);
-  mcinfo("SAM_HSMCI_MR = 0x%08X\n", getreg32(SAM_HSMCI_MR));
+  mcinfo("SAM_HSMCI_MR = 0x%08" PRIX32 "\n", getreg32(SAM_HSMCI_MR));
 
   putreg32((uint32_t)buffer, SAM_HSMCI_PDC_TPR);
   putreg32(buflen / 4, SAM_HSMCI_PDC_TCR);
@@ -2720,11 +2723,6 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    */
 
   nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
-  /* Create a watchdog timer */
-
-  priv->waitwdog = wd_create();
-  DEBUGASSERT(priv->waitwdog);
 
 #ifdef CONFIG_SAM34_DMAC0
   /* Allocate a DMA channel.  A FIFO size of 8 is sufficient. */

@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* There are three LEDs on board the SAM4L Xplained Pro board:  The EDBG
  * controls two of the LEDs, a power LED and a status LED.  There is only
  * one user controllable LED, a yellow LED labeled LED0 near the SAM4L USB
@@ -77,9 +78,10 @@
  *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   sam_configgpio(GPIO_LED0);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -105,13 +107,13 @@ void board_userled(int led, bool ledon)
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled_all() is
- *  available to control the LED0 from user application logic.  NOTE:  since
+ *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled_all()
+ *  is available to control the LED0 from user application logic. NOTE: since
  *  there is only a single LED on-board, this is function is not very useful.
  *
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   board_userled(BOARD_LED0, (ledset & BOARD_LED0_BIT) != 0);
 }

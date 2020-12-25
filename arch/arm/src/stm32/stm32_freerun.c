@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
@@ -154,7 +155,8 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
 
   /* Set timer period */
 
-  STM32_TIM_SETPERIOD(freerun->tch, (uint32_t)((1ull << freerun->width) - 1));
+  STM32_TIM_SETPERIOD(freerun->tch,
+                      (uint32_t)((1ull << freerun->width) - 1));
 
   /* Start the counter */
 
@@ -237,10 +239,10 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
 
   leave_critical_section(flags);
 
-  tmrinfo("counter=%lu (%lu) overflow=%lu, pending=%i\n",
-         (unsigned long)counter,  (unsigned long)verify,
-         (unsigned long)overflow, pending);
-  tmrinfo("frequency=%u\n", freerun->frequency);
+  tmrinfo("counter=%" PRIu32 " (%" PRIu32 ") overflow=%" PRIu32
+          ", pending=%i\n",
+          counter, verify, overflow, pending);
+  tmrinfo("frequency=%" PRIu32 "\n", freerun->frequency);
 
   /* Convert the whole thing to units of microseconds.
    *
@@ -259,8 +261,8 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
   ts->tv_sec  = sec;
   ts->tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-  tmrinfo("usec=%llu ts=(%u, %lu)\n",
-          usec, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+  tmrinfo("usec=%llu ts=(%ju, %lu)\n",
+          usec, (intmax_t)ts->tv_sec, ts->tv_nsec);
 
   return OK;
 }

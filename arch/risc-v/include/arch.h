@@ -47,13 +47,14 @@
 #  include <stdint.h>
 #endif
 
+#include <arch/csr.h>
+
 #ifdef CONFIG_ARCH_RV32IM
-#  include "rv32im/csr.h"
-#  include "rv32im/arch.h"
+#  include <arch/rv32im/arch.h>
 #endif
 
 #ifdef CONFIG_ARCH_RV64GC
-#  include "rv64gc/arch.h"
+#  include <arch/rv64gc/arch.h>
 #endif
 
 /****************************************************************************

@@ -61,7 +61,7 @@ $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 .built: .tzbuilt romfs $(OBJS)
-	$(call ARCHIVE, ..$(DELIM)$(BIN), $(OBJS))
+	$(call ARCHIVE_ADD, ..$(DELIM)$(BIN), $(OBJS))
 	$(Q) touch .built
 
 # ROMFS file system containing the TZ database
@@ -98,10 +98,10 @@ tzbin:
 	mkdir tzbin
 
 tzcode-latest.tar.gz:
-	$(Q) wget --retr-symlinks ftp://ftp.iana.org/tz/tzcode-latest.tar.gz
+	$(Q) curl -L -O ftp://ftp.iana.org/tz/tzcode-latest.tar.gz
 
 tzdata-latest.tar.gz:
-	$(Q) wget --retr-symlinks ftp://ftp.iana.org/tz/tzdata-latest.tar.gz
+	$(Q) curl -L -O ftp://ftp.iana.org/tz/tzdata-latest.tar.gz
 
 .tzunpack: tzcode tzcode-latest.tar.gz tzdata-latest.tar.gz
 	$(Q) tar zx -C tzcode -f tzcode-latest.tar.gz
@@ -118,8 +118,12 @@ context: .tzbuilt romfs
 
 # Create dependencies
 
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+	$(call CATFILE, Make.dep, $^)
+	$(call DELFILE, $^)
+
+.depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
+	$(Q) $(MAKE) makedepfile
 	$(Q) touch $@
 
 depend: .depend

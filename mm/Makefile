@@ -43,6 +43,7 @@ include kmm_heap/Make.defs
 include mm_gran/Make.defs
 include shm/Make.defs
 include iob/Make.defs
+include circbuf/Make.defs
 
 BINDIR ?= bin
 
@@ -76,15 +77,23 @@ $(BIN):	$(OBJS)
 
 ifneq ($(BIN),$(KBIN))
 $(KBIN):
-	$(Q) $(MAKE) $(KBIN) BIN=$(KBIN) BINDIR=kbin TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) $(KBIN) BIN=$(KBIN) BINDIR=kbin EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 
 # Dependencies
 
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >bin/Make.dep
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+	$(call CATFILE, bin/Make.dep, $^)
+	$(call DELFILE, $^)
+
+makekdepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+	$(call CATFILE, kbin/Make.dep, $^)
+	$(call DELFILE, $^)
+
+.depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
+	$(Q) $(MAKE) makedepfile OBJPATH="bin"
 ifneq ($(CONFIG_BUILD_FLAT),y)
-	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >kbin/Make.dep
+	$(Q) $(MAKE) makekdepfile CFLAGS="$(CFLAGS) $(KDEFINE)" OBJPATH="kbin"
 endif
 	$(Q) touch $@
 
@@ -93,8 +102,8 @@ depend: .depend
 # Clean most derived files, retaining the configuration
 
 clean:
-	$(Q) $(MAKE) -C bin  clean TOPDIR=$(TOPDIR)
-	$(Q) $(MAKE) -C kbin clean TOPDIR=$(TOPDIR)
+	$(Q) $(MAKE) -C bin  clean
+	$(Q) $(MAKE) -C kbin clean
 	$(call DELFILE, $(BIN))
 	$(call DELFILE, $(KBIN))
 	$(call CLEAN)
@@ -102,8 +111,8 @@ clean:
 # Deep clean -- removes all traces of the configuration
 
 distclean: clean
-	$(Q) $(MAKE) -C bin  distclean TOPDIR=$(TOPDIR)
-	$(Q) $(MAKE) -C kbin distclean TOPDIR=$(TOPDIR)
+	$(Q) $(MAKE) -C bin  distclean
+	$(Q) $(MAKE) -C kbin distclean
 	$(call DELFILE, bin/Make.dep)
 	$(call DELFILE, kbin/Make.dep)
 	$(call DELFILE, .depend)

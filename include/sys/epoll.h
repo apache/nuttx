@@ -74,37 +74,65 @@ enum EPOLL_EVENTS
 #define EPOLLERR EPOLLERR
     EPOLLHUP = POLLHUP,
 #define EPOLLHUP EPOLLHUP
+    EPOLLRDHUP = 0x2000,
+#define EPOLLRDHUP EPOLLRDHUP
+    EPOLLWAKEUP = 1u << 29,
+#define EPOLLWAKEUP EPOLLWAKEUP
+    EPOLLONESHOT = 1u << 30,
+#define EPOLLONESHOT EPOLLONESHOT
   };
+
+/* Flags to be passed to epoll_create1.  */
+
+enum
+{
+  EPOLL_CLOEXEC = 02000000
+#define EPOLL_CLOEXEC EPOLL_CLOEXEC
+};
 
 typedef union poll_data
 {
-  int          fd;       /* The descriptor being polled */
+  FAR void    *ptr;
+  int          fd;
+  uint32_t     u32;
 } epoll_data_t;
 
 struct epoll_event
 {
+  uint32_t     events;
   epoll_data_t data;
-  FAR sem_t   *sem;      /* Pointer to semaphore used to post output event */
-  pollevent_t  events;   /* The input event flags */
-  pollevent_t  revents;  /* The output event flags */
-  FAR void    *priv;     /* For use by drivers */
 };
 
-struct epoll_head
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  int size;
-  int occupied;
-  FAR struct epoll_event *evs;
-};
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 int epoll_create(int size);
-int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev);
-int epoll_wait(int epfd, struct epoll_event *evs, int maxevents, int timeout);
+int epoll_create1(int flags);
+int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev);
+int epoll_wait(int epfd, FAR struct epoll_event *evs,
+               int maxevents, int timeout);
+int epoll_pwait(int epfd, FAR struct epoll_event *evs,
+                int maxevents, int timeout, FAR const sigset_t *sigmask);
 
 void epoll_close(int epfd);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* __INCLUDE_SYS_EPOLL_H */

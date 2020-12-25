@@ -73,7 +73,7 @@ const struct peripheral_clock_config_s g_peripheral_clockconfig0[] =
 {
   {
     .clkname = FLEXCAN0_CLK,
-#ifdef CONFIG_S32K1XX_FLEXCAN
+#ifdef CONFIG_S32K1XX_FLEXCAN0
     .clkgate = true,
 #else
     .clkgate = false,
@@ -81,7 +81,7 @@ const struct peripheral_clock_config_s g_peripheral_clockconfig0[] =
   },
   {
     .clkname = FLEXCAN1_CLK,
-#ifdef CONFIG_S32K1XX_FLEXCAN
+#ifdef CONFIG_S32K1XX_FLEXCAN1
     .clkgate = true,
 #else
     .clkgate = false,
@@ -142,6 +142,14 @@ const struct peripheral_clock_config_s g_peripheral_clockconfig0[] =
   {
     .clkname = PORTE_CLK,
     .clkgate = true,
+  },
+  {
+    .clkname = RTC0_CLK,
+#ifdef CONFIG_S32K1XX_RTC
+    .clkgate = true,
+#else
+    .clkgate = false,
+#endif
   },
 };
 

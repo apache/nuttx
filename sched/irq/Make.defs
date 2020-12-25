@@ -37,9 +37,7 @@ CSRCS += irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
 ifeq ($(CONFIG_SMP),y)
 ifeq ($(CONFIG_SPINLOCK_IRQ),y)
-ifeq ($(CONFIG_ARCH_GLOBAL_IRQDISABLE),y)
 CSRCS += irq_spinlock.c
-endif
 endif
 endif
 

@@ -447,14 +447,7 @@ config BUTTONS_LOWER
 		1. The board implementation must provide the button
 		   interfaces as defined in include/nuttx/board.h
 		2. The board implementation must support interrupts for each
-		  button.
-		3. The board.h header file must provide the definition
-		   NUM_BUTTONS, and
-		4. The board.h header file must not include any other
-		   header files that are not accessible in this context
-		   (such as those in arch/<arch>/src/<chip>) UNLESS those
-		   inclusions are conditioned on __KERNEL__.  button_lower.c
-		   will undefine __KERNEL__ before included board.h.
+		   button.
 
 		If your board does not meet these requirements, then the
 		button_lower.c file can still be copied to your your
@@ -520,5 +513,37 @@ config NUNCHUCK_NPOLLWAITERS
 	default 2
 
 endif # INPUT_NUNCHUCK
+
+config INPUT_SPQ10KBD
+	bool "Solder Party Q10 BlackBerry Keyboard"
+	default n
+	select I2C
+	---help---
+		Enable the Solder Party Q10 BlackBerry Keyboard support.  This
+		exposes itself as a standard keyboard at /dev/kbdN.
+		This keyboard exists both as a standalone module and integrated
+		into the Solder Party Keyboard FeatherWing.  Information on this
+		can be found at https://www.solder.party/docs/keyboard-pmod/
+
+if INPUT_SPQ10KBD
+
+config SPQ10KBD_DJOY
+    bool "Joystick Interface for Buttons"
+	select DJOYSTICK
+	default n
+
+config SPQ10KBD_REGDBG
+	bool "Keyboard Register Debug"
+	default n
+
+config SPQ10KBD_BUFSIZE
+	int "Keyboard Buffer Size"
+	default 10
+
+config SPQ10KBD_NPOLLWAITERS
+	int "Max Number of Poll Waiters"
+	default 2
+
+endif # INPUT_SPQ10KBD
 
 endif # INPUT

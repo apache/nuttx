@@ -252,7 +252,7 @@ if __name__ == "__main__":
                         downwordaddr=0
                         while (downwordaddr<length):
                             if (ocd.readVariable(baseaddr+downwordaddr)==LWL_SIG):
-                                break;
+                                break
                             downwordaddr=downwordaddr+4
 
                         if (downwordaddr>=length):

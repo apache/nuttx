@@ -109,6 +109,16 @@ config USBHOST_MSC
 		Enable support for the mass storage class driver.  This also depends on
 		NFILE_DESCRIPTORS > 0 && SCHED_WORKQUEUE=y
 
+config USBHOST_MSC_NOTIFIER
+	bool "Support USB Mass Storage notifications"
+	default n
+	depends on USBHOST_MSC
+	select WQUEUE_NOTIFIER
+	---help---
+		Enable building of USB MSC notifier logic that will execute a worker
+		function on the low priority work queue when a mass storage device is
+		connected or disconnected.
+
 config USBHOST_CDCACM
 	bool "CDC/ACM support"
 	default n
@@ -261,6 +271,16 @@ config USBHOST_CDCACM_TXBUFSIZE
 		data waiting for transmission.
 
 endif # USBHOST_CDCACM
+
+config USBHOST_CDCMBIM
+	bool "CDC/MBIM support"
+	default n
+	depends on USBHOST_HAVE_ASYNCH && !USBHOST_BULK_DISABLE && !USBHOST_INT_DISABLE && EXPERIMENTAL
+	select USBHOST_ASYNCH
+	select NET_MBIM
+	---help---
+		Select this option to build in host support for CDC/MBIM network
+		devices.
 
 config USBHOST_HIDKBD
 	bool "HID Keyboard Class Support"

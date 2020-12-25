@@ -38,8 +38,8 @@
  * one user controllable LED, a yellow LED labeled STATUS near the SAMD20 USB
  * connector.
  *
- * This LED is controlled by PA14 and the LED can be activated by driving PA14
- * to GND.
+ * This LED is controlled by PA14 and the LED can be activated by driving
+ * PA14 to GND.
  *
  * When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
  * control the LED.  Otherwise, the LED can be controlled from user
@@ -78,9 +78,10 @@
  *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   sam_configport(PORT_STATUS_LED);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -113,7 +114,7 @@ void board_userled(int led, bool ledon)
  *
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   board_userled(BOARD_STATUS_LED, (ledset & BOARD_STATUS_LED_BIT) != 0);
 }

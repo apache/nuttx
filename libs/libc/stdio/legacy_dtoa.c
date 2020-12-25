@@ -45,6 +45,7 @@
 
 #include <nuttx/config.h>
 
+#include <math.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -128,11 +129,12 @@ typedef struct bigint_s bigint_t;
  * Private Data
  ****************************************************************************/
 
-/* REVISIT:  __dtoa is not thread safe due to thse two global variables.
+/* REVISIT:  __dtoa is not thread safe due to these two global variables.
  * Options:
  *
  * 1. Allocate on stack.  g_freelist is rather large, however.. around 275
- *    bytes (it could be shrunk a little by using stdint types instead of int.
+ *    bytes (it could be shrunk a little by using stdint types instead of
+ *    int.
  * 2. Semaphore protect the global variables and handle interrupt level
  *    calls as a special case (perhaps refusing them?  Or having a duplicate
  *    set of variables, one for tasks and one for interrupt usage)
@@ -142,14 +144,14 @@ static FAR bigint_t *g_freelist[KMAX + 1];
 static FAR bigint_t *g_p5s;
 
 #ifdef IEEE_ARITH
-static const double_t g_bigtens[] =
+static const double g_bigtens[] =
 {
   1e16, 1e32, 1e64, 1e128, 1e256
 };
 
 #  define n_bigtens 5
 #else
-static const double_t g_bigtens[] =
+static const double g_bigtens[] =
 {
   1e16, 1e32
 };
@@ -236,6 +238,7 @@ static FAR bigint_t *multadd(FAR bigint_t *b, int m, int a)
           bfree(b);
           b  = b1;
         }
+
       b->x[wds++] = a;
       b->wds      = wds;
     }
@@ -478,11 +481,11 @@ static FAR bigint_t *pow5mult(FAR bigint_t *b, int k)
   FAR bigint_t *b1;
   FAR bigint_t *p5;
   FAR bigint_t *p51;
+  int i;
   static int p05[3] =
   {
     5, 25, 125
   };
-  int i;
 
   if ((i = k & 3) != 0)
     {
@@ -631,14 +634,14 @@ static int cmp(FAR bigint_t *a, FAR bigint_t *b)
 
 #ifdef CONFIG_DEBUG_LIB
   if (i > 1 && a->x[i - 1] == 0)
-   {
-    lerr("ERROR: cmp called with a->x[a->wds-1] == 0\n");
-   }
+    {
+      lerr("ERROR: cmp called with a->x[a->wds-1] == 0\n");
+    }
 
   if (j > 1 && b->x[j - 1] == 0)
-   {
-    lerr("ERROR: cmp called with b->x[b->wds-1] == 0\n");
-   }
+    {
+      lerr("ERROR: cmp called with b->x[b->wds-1] == 0\n");
+    }
 #endif
 
   if (i -= j)
@@ -767,7 +770,7 @@ static FAR bigint_t *diff(FAR bigint_t *a, FAR bigint_t *b)
   return c;
 }
 
-static FAR bigint_t *d2b(double_t d, int *e, int *bits)
+static FAR bigint_t *d2b(double d, int *e, int *bits)
 {
   FAR bigint_t *b;
   FAR unsigned long *x;
@@ -827,21 +830,23 @@ static FAR bigint_t *d2b(double_t d, int *e, int *bits)
   if ((y = WORD1(d)) != 0)
     {
       if ((k = lo0bits(&y)) != 0)
-        if (k >= 16)
-          {
-            x[0] = y | ((z << (32 - k)) & 0xffff);
-            x[1] = z >> (k - 16) & 0xffff;
-            x[2] = z >> k;
-            i    = 2;
-          }
-        else
-          {
-            x[0] = y & 0xffff;
-            x[1] = (y >> 16) | ((z << (16 - k)) & 0xffff);
-            x[2] = z >> k & 0xffff;
-            x[3] = z >> (k + 16);
-            i    = 3;
-          }
+        {
+          if (k >= 16)
+            {
+              x[0] = y | ((z << (32 - k)) & 0xffff);
+              x[1] = z >> (k - 16) & 0xffff;
+              x[2] = z >> k;
+              i    = 2;
+            }
+          else
+            {
+              x[0] = y & 0xffff;
+              x[1] = (y >> 16) | ((z << (16 - k)) & 0xffff);
+              x[2] = z >> k & 0xffff;
+              x[3] = z >> (k + 16);
+              i    = 3;
+            }
+        }
       else
         {
           x[0] = y & 0xffff;
@@ -859,6 +864,7 @@ static FAR bigint_t *d2b(double_t d, int *e, int *bits)
           lerr("ERROR: Zero passed to d2b\n");
         }
 #endif
+
       k = lo0bits(&z);
       if (k >= 16)
         {
@@ -900,7 +906,7 @@ static FAR bigint_t *d2b(double_t d, int *e, int *bits)
   return b;
 }
 
-static const double_t tens[] =
+static const double tens[] =
 {
   1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9,
   1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19,
@@ -1082,7 +1088,7 @@ static int quorem(FAR bigint_t *b, FAR bigint_t *s)
  *         calculation.
  */
 
-FAR char *__dtoa(double_t d, int mode, int ndigits, FAR int *decpt,
+FAR char *__dtoa(double d, int mode, int ndigits, FAR int *decpt,
                  FAR int *sign, FAR char **rve)
 {
   /* Arguments ndigits, decpt, sign are similar to those of ecvt and fcvt;
@@ -1120,9 +1126,9 @@ FAR char *__dtoa(double_t d, int mode, int ndigits, FAR int *decpt,
   FAR bigint_t *s;
   FAR char *st;
   FAR char *st0;
-  double_t d2;
-  double_t ds;
-  double_t eps;
+  double d2;
+  double ds;
+  double eps;
   long l;
   unsigned long x;
   int denorm;
@@ -1550,6 +1556,7 @@ fast_failed:
               d += ds;
             }
 #endif
+
           *st++ = '0' + (int)l;
           if (i == ilim)
             {
@@ -1760,8 +1767,8 @@ one_digit:
           mhi = lshift(mhi, m2);
         }
 
-      /* Compute mlo -- check for special case that d is a normalized power of
-       * 2.
+      /* Compute mlo -- check for special case that d is a normalized power
+       * of 2.
        */
 
       mlo = mhi;
@@ -1776,7 +1783,7 @@ one_digit:
         {
           dig = quorem(b, s) + '0';
 
-          /* Do we yet have the shortest decimal string that will round to d? */
+          /* Have we yet the shortest decimal string that will round to d? */
 
           j     = cmp(b, mlo);
           delta = diff(s, mhi);
@@ -1799,6 +1806,7 @@ one_digit:
               goto ret;
             }
 #endif
+
           if (j < 0 || (j == 0 && !mode
 #ifndef CONFIG_DTOA_ROUND_BIASED
               && ((WORD1(d) & 1) == 0)

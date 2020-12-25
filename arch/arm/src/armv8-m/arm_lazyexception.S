@@ -50,7 +50,7 @@
    * nested interrupt, the interrupt stack if no privileged task has run.
    */
 
-#  if defined(CONFIG_BUILD_PROTECTED) && CONFIG_ARCH_INTERRUPTSTACK < 4
+#  if defined(CONFIG_BUILD_PROTECTED) && CONFIG_ARCH_INTERRUPTSTACK < 8
 #    error Interrupt stack must be used with high priority interrupts in kernel mode
 #  endif
 
@@ -373,7 +373,7 @@ exception_common:
 	.bss
 	.global	g_intstackalloc
 	.global	g_intstackbase
-	.align	8
+	.balign	8
 g_intstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
 g_intstackbase:

@@ -52,6 +52,10 @@
 #  undef CONFIG_ARCH_USBDUMP
 #endif
 
+#ifndef CONFIG_BOARD_RESET_ON_ASSERT
+#  define CONFIG_BOARD_RESET_ON_ASSERT 0
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -109,7 +113,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 static void up_dumpstate(void)
 {
   struct tcb_s *rtcb = this_task();
-  uint64_t sp = up_getrsp();
+  uint64_t sp = x64_getsp();
   uint64_t ustackbase;
   uint64_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
@@ -119,16 +123,8 @@ static void up_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  if (rtcb->pid == 0)
-    {
-      ustackbase = g_idle_topstack - 8;
-      ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
-    }
-  else
-    {
-      ustackbase = (uint64_t)rtcb->adj_stack_ptr;
-      ustacksize = (uint64_t)rtcb->adj_stack_size;
-    }
+  ustackbase = (uint64_t)rtcb->adj_stack_ptr;
+  ustacksize = (uint64_t)rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */
 
@@ -208,16 +204,18 @@ static void up_dumpstate(void)
  * Name: _up_assert
  ****************************************************************************/
 
-static void _up_assert(int errorcode) noreturn_function;
-static void _up_assert(int errorcode)
+static void _up_assert(void)
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (g_current_regs || (this_task())->pid == 0)
+  if (g_current_regs || (running_task())->flink == NULL)
     {
       (void)up_irq_save();
       for (; ; )
         {
+#if CONFIG_BOARD_RESET_ON_ASSERT >= 1
+          board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
+#endif
 #ifdef CONFIG_ARCH_LEDS
           board_autoled_on(LED_PANIC);
           up_mdelay(250);
@@ -228,7 +226,11 @@ static void _up_assert(int errorcode)
     }
   else
     {
-      exit(errorcode);
+      /* Assertions in other contexts only cause the thread to exit */
+
+#if CONFIG_BOARD_RESET_ON_ASSERT >= 2
+      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
+#endif
     }
 }
 
@@ -240,7 +242,7 @@ static void _up_assert(int errorcode)
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const uint8_t *filename, int lineno)
+void up_assert(const char *filename, int lineno)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = this_task();
@@ -248,7 +250,7 @@ void up_assert(const uint8_t *filename, int lineno)
 
   board_autoled_on(LED_ASSERTION);
 
-#if CONFIG_TASK_NAME_SIZE > 0
+#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   _alert("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
@@ -259,8 +261,8 @@ void up_assert(const uint8_t *filename, int lineno)
   up_dumpstate();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getrsp(), this_task(), filename, lineno);
+  board_crashdump(x64_getsp(), this_task(), filename, lineno);
 #endif
 
-  _up_assert(EXIT_FAILURE);
+  _up_assert();
 }

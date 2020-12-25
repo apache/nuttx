@@ -48,7 +48,7 @@
  *   defined.
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED GPIOs for output */
 
@@ -56,6 +56,7 @@ void board_userled_initialize(void)
   stm32_configgpio(GPIO_LED2);
   stm32_configgpio(GPIO_LED3);
   stm32_configgpio(GPIO_LED4);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -110,7 +111,7 @@ void board_userled(int led, bool ledon)
  *           BOARD_LED4_BIT.
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   stm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) != 0);
   stm32_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) != 0);

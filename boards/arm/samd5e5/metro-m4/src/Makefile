@@ -47,4 +47,43 @@ else
 CSRCS += sam_userleds.c
 endif
 
+ifeq ($(CONFIG_USBDEV),y)
+CSRCS += sam_usbdev.c
+endif
+
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += sam_usbmsc.c
+endif
+
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += sam_composite.c
+endif
+
+ifeq ($(CONFIG_USBHOST),y)
+CSRCS += sam_usbhost.c
+endif
+
+ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
+CSRCS += sam_automount.c
+endif
+
+ifeq ($(CONFIG_SAMD5E5_SERCOM5_ISI2C),y)
+CSRCS += sam_i2c.c
+ifeq ($(CONFIG_MTD_AT24XX),y)
+CSRCS += sam_at24.c
+endif
+endif
+
+ifeq ($(CONFIG_FS_SMARTFS),y)
+CSRCS += sam_smartfs.c
+endif
+
+ifeq ($(CONFIG_BQ27426),y)
+CSRCS += sam_bq27426.c
+endif
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += sam_gpio.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

@@ -71,6 +71,7 @@
 
 struct bluetooth_frame_meta_s
 {
+  uint8_t   bm_proto;                         /* Protocol */
   bt_addr_t bm_raddr;                         /* Connected remote address */
   uint8_t bm_channel;                         /* Connection channel */
 };

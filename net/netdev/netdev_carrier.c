@@ -105,6 +105,11 @@ int netdev_carrier_off(FAR struct net_driver_s *dev)
     {
       dev->d_flags &= ~IFF_RUNNING;
       netlink_device_notify(dev);
+
+      /* Notify clients that the network has been taken down */
+
+      devif_dev_event(dev, NULL, NETDEV_DOWN);
+
       return OK;
     }
 

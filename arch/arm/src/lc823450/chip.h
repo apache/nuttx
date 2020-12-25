@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lc823450/chip.h
  *
- *   Copyright 2014, 2017 Sony Video & Sound Products Inc.
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
- *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -72,18 +56,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef __ASSEMBLY__
-
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-	.globl	g_instack_alloc
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
-
-#endif /* __ASSEMBLY__ */
-
-/****************************************************************************
  * Macro Definitions
  ****************************************************************************/
 
@@ -99,78 +71,13 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-	.macro	setintstack, tmp1, tmp2
-#if CONFIG_SMP_NCPUS > 1
-	ldr		\tmp1, =CORE_COREID
-	ldr		\tmp1, [\tmp1, 0]     /* \tmp = getreg32(coreid_reg) */
-	and		\tmp1, \tmp1, 1       /* \tmp = COREID */
-	cmp		\tmp1, #0
-	bne		1f
-	ldr		\tmp1, =g_cpu0_instack_base
-	ldr		sp, [\tmp1, 0]        /* sp = getreg32(g_cpu0_instack_base) */
-	b		2f
-1:
-	ldr		\tmp1, =g_cpu1_instack_base
-	ldr		sp, [\tmp1, 0]        /* sp = getreg32(g_cpu1_instack_base) */
-2:
-#else
-	ldr		\tmp1, =g_cpu0_instack_base
-	ldr		sp, [\tmp1, 0]        /* sp = getreg32(g_cpu0_instack_base) */
-#endif
-	.endm
+  .macro  setintstack, tmp1, tmp2
+  ldr \tmp1, =CORE_COREID
+  ldr \tmp1, [\tmp1, 0]          /* tmp1 = getreg32(CORE_COREID)  */
+  ldr \tmp2, =g_cpu_intstack_top
+  ldr sp, [\tmp2, \tmp1, lsl #2] /* sp = g_cpu_intstack_top[tmp1] */
+  .endm
 #endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
 #endif /* __ASSEMBLY__  */
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Name: arm_intstack_base
- *
- * Description:
- *   Set the current stack pointer to the "base" the correct interrupt stack
- *   allocation for the current CPU.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-static inline uintptr_t arm_intstack_base(void)
-{
-  uintptr_t base = (uintptr_t)g_instack_alloc;
-#if CONFIG_SMP_NCPUS > 1
-  uint32_t coreid = getreg32(CORE_COREID);
-
-  if ((coreid & CORE_COREID_ID) != 0)
-    {
-      base += INTSTACK_SIZE;
-    }
-#endif
-
-  return base;
-}
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#if defined(__cplusplus)
-}
-#endif
-#undef EXTERN
-
-#endif /* !__ASSEMBLY__ */
-
 #endif /* _ARCH_ARM_SRC_LC823450_CHIP_H */

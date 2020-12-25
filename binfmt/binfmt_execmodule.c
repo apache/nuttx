@@ -117,7 +117,6 @@ int exec_module(FAR const struct binary_s *binp)
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   save_addrenv_t oldenv;
 #endif
-  FAR uint32_t *stack;
   pid_t pid;
   int ret;
 
@@ -151,27 +150,17 @@ int exec_module(FAR const struct binary_s *binp)
     }
 #endif
 
-  /* Allocate the stack for the new task.
-   *
-   * REVISIT:  This allocation is currently always from the user heap.  That
-   * will need to change if/when we want to support dynamic stack allocation.
-   */
+  /* Note that tcb->flags are not modified.  0=normal task */
 
-  stack = (FAR uint32_t *)kumm_malloc(binp->stacksize);
-  if (!stack)
-    {
-      ret = -ENOMEM;
-      goto errout_with_addrenv;
-    }
+  /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
 
   /* Initialize the task */
 
-  ret = nxtask_init((FAR struct tcb_s *)tcb, binp->filename, binp->priority,
-                    stack, binp->stacksize, binp->entrypt, binp->argv);
+  ret = nxtask_init(tcb, binp->filename, binp->priority,
+                    NULL, binp->stacksize, binp->entrypt, binp->argv);
   if (ret < 0)
     {
       berr("nxtask_init() failed: %d\n", ret);
-      kumm_free(stack);
       goto errout_with_addrenv;
     }
 
@@ -182,10 +171,6 @@ int exec_module(FAR const struct binary_s *binp)
    */
 
   binfmt_freeargv((FAR struct binary_s *)binp);
-
-  /* Note that tcb->flags are not modified.  0=normal task */
-
-  /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Allocate the kernel stack */
@@ -198,7 +183,7 @@ int exec_module(FAR const struct binary_s *binp)
     }
 #endif
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_SHM)
+#ifdef CONFIG_MM_SHM
   /* Initialize the shared memory virtual page allocator */
 
   ret = shm_group_initialize(tcb->cmn.group);
@@ -254,12 +239,7 @@ int exec_module(FAR const struct binary_s *binp)
 
   /* Then activate the task at the provided priority */
 
-  ret = nxtask_activate((FAR struct tcb_s *)tcb);
-  if (ret < 0)
-    {
-      berr("nxtask_activate() failed: %d\n", ret);
-      goto errout_with_tcbinit;
-    }
+  nxtask_activate((FAR struct tcb_s *)tcb);
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Restore the address environment of the caller */
@@ -274,11 +254,12 @@ int exec_module(FAR const struct binary_s *binp)
 
   return (int)pid;
 
+#if defined(CONFIG_ARCH_ADDRENV) || defined(CONFIG_MM_SHM)
 errout_with_tcbinit:
   tcb->cmn.stack_alloc_ptr = NULL;
   nxsched_release_tcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);
-  kumm_free(stack);
   return ret;
+#endif
 
 errout_with_addrenv:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)

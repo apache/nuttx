@@ -192,15 +192,15 @@ config TTY_SIGINT
 		  INTR   SIGINT   Ctrl-C  ETX(0x03) Interrupt
 		  KILL   SIGKILL  Ctrl-U  NAK(0x15) Kill
 		  QUIT   SIGQUIT  Ctrl-\  FS (0x1c) Quit
-		  SUSP   SIGSTP   Ctrl-Z  SUB(0x1a) Suspend
-		  DSUSP  SIGSTP   Ctrl-Y  EM (0x19) Delayed suspend
+		  SUSP   SIGTSTP  Ctrl-Z  SUB(0x1a) Suspend
+		  DSUSP  SIGTSTP  Ctrl-Y  EM (0x19) Delayed suspend
 
 		Additional requirements:
 		  - SIGKILL cannot be caught or ignored.  Compared to SIGTERM which
 		    is like SIGKILL but can be caught or ignored.
 		  - SIGQUIT is like SIGINT but causes generation of a core dump
-		  - SIGSTOP cannot be caught or ignored.  SIGSTP is like SIGSTOP but
-		    can be caught or ignored ignored.
+		  - SIGSTOP cannot be caught or ignored.  SIGTSTP is like SIGSTOP but
+		    can be caught or ignored.
 		  - The delayed suspend (DSUSD) is like suspend (SUPD), except that
 		    the suspension is delayed until the next read operation
 
@@ -219,8 +219,8 @@ config TTY_SIGINT_CHAR
 		REVISIT:  Traditionally Ctrl-C would generate SIGINT.  Ctrl-D is the
 		End-of-File character that should close the stream.
 
-config TTY_SIGSTP
-	bool "Support SIGSTP"
+config TTY_SIGTSTP
+	bool "Support SIGTSTP"
 	default n
 	select CONFIG_SIG_SIGSTOP_ACTION
 	depends on SERIAL_TERMIOS
@@ -237,24 +237,24 @@ config TTY_SIGSTP
 		  INTR   SIGINT   Ctrl-C  ETX(0x03) Interrupt
 		  KILL   SIGKILL  Ctrl-U  NAK(0x15) Kill
 		  QUIT   SIGQUIT  Ctrl-\  FS (0x1c) Quit
-		  SUSP   SIGSTP   Ctrl-Z  SUB(0x1a) Suspend
-		  DSUSP  SIGSTP   Ctrl-Y  EM (0x19) Delayed suspend
+		  SUSP   SIGTSTP  Ctrl-Z  SUB(0x1a) Suspend
+		  DSUSP  SIGTSTP  Ctrl-Y  EM (0x19) Delayed suspend
 
 		Additional requirements:
 		  - SIGKILL cannot be caught or ignored.  Compared to SIGTERM which
 		    is like SIGKILL but can be caught or ignored.
 		  - SIGQUIT is like SIGINT but causes generation of a core dump
-		  - SIGSTOP cannot be caught or ignored.  SIGSTP is like SIGSTOP but
-		    can be caught or ignored ignored.
+		  - SIGSTOP cannot be caught or ignored.  SIGTSTP is like SIGSTOP but
+		    can be caught or ignored.
 		  - The delayed suspend (DSUSD) is like suspend (SUPD), except that
 		    the suspension is delayed until the next read operation
 
-config TTY_SIGSTP_CHAR
-	hex "Serial parse SIGSTP characters"
+config TTY_SIGTSTP_CHAR
+	hex "Serial parse SIGTSTP characters"
 	default 0x1a
-	depends on TTY_SIGSTP
+	depends on TTY_SIGTSTP
 	---help---
-		Use ASCII 0x1a (Ctrl-z) input to determine whether to send a SIGSTP
+		Use ASCII 0x1a (Ctrl-z) input to determine whether to send a SIGTSTP
 		event.  Other characters may also be selected.
 
 #

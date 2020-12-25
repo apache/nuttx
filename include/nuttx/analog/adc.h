@@ -95,8 +95,8 @@
 struct adc_dev_s;
 struct adc_callback_s
 {
-  /* This method is called from the lower half, platform-specific ADC logic when
-   * new ADC sample data is available.
+  /* This method is called from the lower half, platform-specific ADC logic
+   * when new ADC sample data is available.
    *
    * Input Parameters:
    *   dev  - The ADC device structure that was previously registered by
@@ -108,7 +108,8 @@ struct adc_callback_s
    *   Zero on success; a negated errno value on failure.
    */
 
-  CODE int (*au_receive)(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data);
+  CODE int (*au_receive)(FAR struct adc_dev_s *dev, uint8_t ch,
+                         int32_t data);
 };
 
 /* This describes on ADC message */
@@ -130,7 +131,7 @@ struct adc_fifo_s
   struct adc_msg_s af_buffer[CONFIG_ADC_FIFOSIZE];
 };
 
-/* This structure defines all of the operations providd by the architecture
+/* This structure defines all of the operations provided by the architecture
  * specific logic.  All fields must be provided with non-NULL function
  * pointers by the caller of adc_register().
  */
@@ -138,8 +139,8 @@ struct adc_fifo_s
 struct adc_dev_s;
 struct adc_ops_s
 {
-  /* Bind the upper-half driver callbacks to the lower-half implementation.  This
-   * must be called early in order to receive ADC event notifications.
+  /* Bind the upper-half driver callbacks to the lower-half implementation.
+   * This must be called early in order to receive ADC event notifications.
    */
 
   CODE int (*ao_bind)(FAR struct adc_dev_s *dev,
@@ -153,14 +154,14 @@ struct adc_ops_s
 
   /* Configure the ADC. This method is called the first time that the ADC
    * device is opened.  This will occur when the port is first opened.
-   * This setup includes configuring and attaching ADC interrupts.  Interrupts
-   * are all disabled upon return.
+   * This setup includes configuring and attaching ADC interrupts.
+   * Interrupts are all disabled upon return.
    */
 
   CODE int (*ao_setup)(FAR struct adc_dev_s *dev);
 
   /* Disable the ADC.  This method is called when the ADC device is closed.
-   * This method reverses the operation the setup method.
+   * This method reverses the operation of the setup method.
    */
 
   CODE void (*ao_shutdown)(FAR struct adc_dev_s *dev);
@@ -171,12 +172,13 @@ struct adc_ops_s
 
   /* All ioctl calls will be routed through this method */
 
-  CODE int (*ao_ioctl)(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
+  CODE int (*ao_ioctl)(FAR struct adc_dev_s *dev, int cmd,
+                       unsigned long arg);
 };
 
 /* This is the device structure used by the driver.  The caller of
  * adc_register() must allocate and initialize this structure.  The calling
- * logic need only set all fields to zero except:
+ * logic needs to set all fields to zero except:
  *
  *   The elements of 'ad_ops', and 'ad_priv'
  *
@@ -195,7 +197,7 @@ struct adc_dev_s
   struct adc_fifo_s           ad_recv;       /* Describes receive FIFO */
 
   /* The following is a list of poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
+   * driver events.  The 'struct pollfd' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
    */
 
@@ -295,6 +297,22 @@ FAR struct adc_dev_s *lmp92001_adc_initialize(FAR struct i2c_master_s *i2c,
 
 FAR struct adc_dev_s *ads7828_initialize(FAR struct i2c_master_s *i2c,
                                                uint8_t addr);
+
+/****************************************************************************
+ * Name: max1161x_initialize
+ *
+ * Description:
+ *   Initialize ADC
+ *
+ * Input Parameters:
+ *   i2c - Pointer to a valid I2C master struct.
+ *
+ * Returned Value:
+ *   Valid MX1161X device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct adc_dev_s *max1161x_initialize(FAR struct i2c_master_s *i2c);
 
 #if defined(__cplusplus)
 }

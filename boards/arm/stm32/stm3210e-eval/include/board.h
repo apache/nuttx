@@ -46,22 +46,24 @@
 #endif
 
 /* Logic in arch/arm/src and boards/ may need to include these file prior to
- * including board.h:  stm32_rcc.h, stm32_sdio.h, stm32.h.  They cannot be included
- * here because board.h is used in other contexts where the STM32 internal header
- * files are not available.
+ * including board.h:  stm32_rcc.h, stm32_sdio.h, stm32.h.  They cannot be
+ * included here because board.h is used in other contexts where the STM32
+ * internal header files are not available.
  */
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* On-board crystal frequency is 8MHz (HSE) */
 
 #define STM32_BOARD_XTAL        8000000ul
 
-/* PLL source is HSE/1, PLL multipler is 9: PLL frequency is 8MHz (XTAL) x 9 = 72MHz */
+/* PLL source is HSE/1, PLL multipler is 9:
+ *      PLL frequency is 8MHz (XTAL) x 9 = 72MHz
+ */
 
 #define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC
 #define STM32_CFGR_PLLXTPRE     0
@@ -111,7 +113,8 @@
 
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
  * otherwise frequency is 2xAPBx.
- * Note: TIM1,8 are on APB2, others on APB1 */
+ * Note: TIM1,8 are on APB2, others on APB1
+ */
 
 #define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM2_FREQUENCY    STM32_HCLK_FREQUENCY
@@ -152,15 +155,18 @@
 #  define SDIO_SDXFR_CLKDIV     (3 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
-/* SRAM definitions *****************************************************************/
-/* The 8 Mbit SRAM is provided on the PT3 board using the FSMC_NE3 chip select. */
+/* SRAM definitions *********************************************************/
+
+/* The 8 Mbit SRAM is provided on the PT3 board using the FSMC_NE3 chip
+ * select.
+ */
 
 /* This is the Bank1 SRAM3 address: */
 
 #define BOARD_SRAM_BASE    0x68000000     /* Bank2 SRAM3 base address */
 #define BOARD_SRAM_SIZE    (1*1024*1024)  /* 8-Mbit = 1-Mbyte */
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
 
 /* The STM3210E-EVAL board has 4 LEDs that we will encode as: */
 
@@ -213,7 +219,7 @@
 #define BUTTON_TAMPER_BIT    (1 << BUTTON_TAMPER)
 #define BUTTON_KEY_BIT       (1 << BUTTON_KEY)
 
-#ifdef CONFIG_DJOYSTICK
+#ifndef CONFIG_DJOYSTICK
 #  define JOYSTICK_SEL_BIT   (1 << JOYSTICK_SEL)
 #  define JOYSTICK_DOWN_BIT  (1 << JOYSTICK_DOWN)
 #  define JOYSTICK_LEFT_BIT  (1 << JOYSTICK_LEFT)
@@ -244,10 +250,11 @@ extern "C"
  * Name:  stm3210e_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the STM3210E-EVAL board.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface just for the STM3210E-EVAL board.
+ *   Because of the various rotations, clearing the display in the normal
+ *   way by writing a sequences of runs that covers the entire display can
+ *   be very slow.  Here the display is cleared by simply setting all GRAM
+ *   memory to the specified color.
  *
  ****************************************************************************/
 
@@ -284,7 +291,8 @@ int stm32_lm75initialize(FAR const char *devpath);
  *   arg        - The argument that will accompany the interrupt
  *
  * Returned Value:
- *   Zero (OK) returned on success; a negated errno value is returned on failure.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 

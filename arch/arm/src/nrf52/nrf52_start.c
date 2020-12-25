@@ -222,7 +222,7 @@ void __start(void)
 
   showprogress('C');
 
-#if defined(CONFIG_ARCH_FAMILY_NRF52832)
+#if defined(CONFIG_ARCH_CHIP_NRF52832)
   /* Initialize the errdata work-around */
 
   nrf52832_errdata_init();

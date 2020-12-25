@@ -138,16 +138,8 @@ void up_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  if (rtcb->pid == 0) /* Check for CPU0 IDLE thread */
-    {
-      ustackbase = g_idle_topstack - 4;
-      ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
-    }
-  else
-    {
-      ustackbase = (uint32_t)rtcb->adj_stack_ptr;
-      ustacksize = (uint32_t)rtcb->adj_stack_size;
-    }
+  ustackbase = (uint32_t)rtcb->adj_stack_ptr;
+  ustacksize = (uint32_t)rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */
 

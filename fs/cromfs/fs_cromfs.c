@@ -1,35 +1,20 @@
 /****************************************************************************
  * fs/cromfs/fs_cromfs.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -62,6 +47,12 @@
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_CROMFS)
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CROMFS_MAX_LINKS 64
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -79,19 +70,31 @@ struct cromfs_file_s
 
 typedef CODE int (*cromfs_foreach_t)(FAR const struct cromfs_volume_s *fs,
                                      FAR const struct cromfs_node_s *node,
-                                     FAR void *arg);
+                                     uint32_t offset, FAR void *arg);
 
-/* This is the form of the argument provided to the cromfs_comparenode()
+/* The cromfs_nodeinfo_s structure is an abbreviated version of
+ * cromfs_node_s structure.
+ */
+
+struct cromfs_nodeinfo_s
+{
+  uint16_t ci_mode;      /* File type, attributes, and access mode bits */
+  uint32_t ci_size;      /* Size of the uncompressed data (in bytes) */
+  uint32_t ci_child;     /* Value associated with the directory file type */
+};
+
+/* This is the form of the argument provided to the cromfs_compare_node()
  * callback.
  */
 
 struct cromfs_comparenode_s
 {
-  FAR const struct cromfs_node_s **node;   /* Location to return the node */
-  FAR const char *relpath;                 /* Full relative path */
-  FAR const char *segment;                 /* Reference to start of the
-                                            * path segment. */
-  uint16_t seglen;                         /* Length of the next path segment */
+  FAR struct cromfs_nodeinfo_s *info;   /* Location to return the node info */
+  FAR const char *relpath;              /* Full relative path */
+  FAR const char *segment;              /* Reference to start of the
+                                         * path segment. */
+  uint32_t offset;                      /* Physical offset in ROM */
+  uint16_t seglen;                      /* Length of the next path segment */
 };
 
 /****************************************************************************
@@ -101,47 +104,58 @@ struct cromfs_comparenode_s
 /* Helpers */
 
 static FAR void *cromfs_offset2addr(FAR const struct cromfs_volume_s *fs,
-                                    uint32_t offset);
+                  uint32_t offset);
 static uint32_t cromfs_addr2offset(FAR const struct cromfs_volume_s *fs,
-                                   FAR const void *addr);
+                  FAR const void *addr);
+static int      cromfs_follow_link(FAR const struct cromfs_volume_s *fs,
+                  FAR const struct cromfs_node_s **ppnode, bool follow,
+                  FAR struct cromfs_node_s *newnode);
 static int      cromfs_foreach_node(FAR const struct cromfs_volume_s *fs,
-                                    FAR const struct cromfs_node_s *node,
-                                    cromfs_foreach_t callback, FAR void *arg);
+                  FAR const struct cromfs_node_s *node,
+                  bool follow, cromfs_foreach_t callback, FAR void *arg);
 static uint16_t cromfs_seglen(FAR const char *relpath);
-static int      cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
-                                   FAR const struct cromfs_node_s *node,
-                                   FAR void *arg);
-static int      cromfs_findnode(FAR const struct cromfs_volume_s *fs,
-                                FAR const struct cromfs_node_s **node,
-                                FAR const char *relpath);
+static int      cromfs_child_node(FAR const struct cromfs_volume_s *fs,
+                  FAR const struct cromfs_node_s *node,
+                  FAR struct cromfs_nodeinfo_s *info);
+static int      cromfs_compare_node(FAR const struct cromfs_volume_s *fs,
+                  FAR const struct cromfs_node_s *node, uint32_t offset,
+                  FAR void *arg);
+static int      cromfs_find_node(FAR const struct cromfs_volume_s *fs,
+                  FAR const char *relpath,
+                  FAR struct cromfs_nodeinfo_s *info,
+                  FAR uint32_t *offset);
 
 /* Common file system methods */
 
 static int      cromfs_open(FAR struct file *filep, const char *relpath,
-                            int oflags, mode_t mode);
+                  int oflags, mode_t mode);
 static int      cromfs_close(FAR struct file *filep);
-static ssize_t  cromfs_read(FAR struct file *filep, char *buffer, size_t buflen);
-static int      cromfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static ssize_t  cromfs_read(FAR struct file *filep,
+                  char *buffer, size_t buflen);
+static int      cromfs_ioctl(FAR struct file *filep,
+                  int cmd, unsigned long arg);
 
-static int      cromfs_dup(FAR const struct file *oldp, FAR struct file *newp);
-static int      cromfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
+static int      cromfs_dup(FAR const struct file *oldp,
+                  FAR struct file *newp);
+static int      cromfs_fstat(FAR const struct file *filep,
+                  FAR struct stat *buf);
 
-static int      cromfs_opendir(struct inode *mountpt, const char *relpath,
-                               struct fs_dirent_s *dir);
+static int      cromfs_opendir(FAR struct inode *mountpt,
+                  FAR const char *relpath, FAR struct fs_dirent_s *dir);
 static int      cromfs_readdir(FAR struct inode *mountpt,
-                               FAR struct fs_dirent_s *dir);
+                  FAR struct fs_dirent_s *dir);
 static int      cromfs_rewinddir(FAR struct inode *mountpt,
-                                 FAR struct fs_dirent_s *dir);
+                  FAR struct fs_dirent_s *dir);
 
-static int      cromfs_bind(FAR struct inode *blkdriver, FAR const void *data,
-                            FAR void **handle);
+static int      cromfs_bind(FAR struct inode *blkdriver,
+                  FAR const void *data, FAR void **handle);
 static int      cromfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
-                              unsigned int flags);
+                  unsigned int flags);
 static int      cromfs_statfs(FAR struct inode *mountpt,
-                              FAR struct statfs *buf);
+                  FAR struct statfs *buf);
 
-static int      cromfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
-                            FAR struct stat *buf);
+static int      cromfs_stat(FAR struct inode *mountpt,
+                  FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
  * Public Data
@@ -199,12 +213,16 @@ extern const struct cromfs_volume_s g_cromfs_image;
 
 /****************************************************************************
  * Name: cromfs_offset2addr
+ *
+ * Description:
+ *   Convert an offset into an address in the CROMFS flat memory image.
+ *
  ****************************************************************************/
 
 static FAR void *cromfs_offset2addr(FAR const struct cromfs_volume_s *fs,
                                     uint32_t offset)
 {
-  /* Zero offset is a specials case:  It corresponds to a NULL address */
+  /* Zero offset is a special case:  It corresponds to a NULL address */
 
   if (offset == 0 || offset >= fs->cv_fsize)
     {
@@ -222,6 +240,10 @@ static FAR void *cromfs_offset2addr(FAR const struct cromfs_volume_s *fs,
 
 /****************************************************************************
  * Name: cromfs_addr2offset
+ *
+ * Description:
+ *   Convert a CROMFS flat image address into the file system offset.
+ *
  ****************************************************************************/
 
 static uint32_t cromfs_addr2offset(FAR const struct cromfs_volume_s *fs,
@@ -254,29 +276,153 @@ static uint32_t cromfs_addr2offset(FAR const struct cromfs_volume_s *fs,
 }
 
 /****************************************************************************
+ * Name: cromfs_follow_link
+ *
+ * Description:
+ *   If the node it a hardlink, then follow the node to the final target
+ *   node which will be a directory or a file.
+ *
+ ****************************************************************************/
+
+static int cromfs_follow_link(FAR const struct cromfs_volume_s *fs,
+                              FAR const struct cromfs_node_s **ppnode,
+                              bool follow,
+                              FAR struct cromfs_node_s *newnode)
+{
+  FAR const struct cromfs_node_s *linknode;
+  FAR const struct cromfs_node_s *node = *ppnode;
+  FAR const char *name;
+  int i;
+
+  /* Loop while we are redirected by hardlinks */
+
+  for (i = 0; i < CROMFS_MAX_LINKS; i++)
+    {
+      /* Check for a hard link */
+
+      if ((node->cn_mode & S_IFMT) != S_IFLNK)
+        {
+          return OK;
+        }
+
+      /* Get the link target node */
+
+      linknode = (FAR const struct cromfs_node_s *)
+                  cromfs_offset2addr(fs, node->u.cn_link);
+      DEBUGASSERT(linknode != NULL);
+
+      /* Special case:  Don't follow either "." or ".."  These will generate
+       * loops in both cases.
+       *
+       * REVISIT: This kludge is necessary due to an issue in gencromfs:
+       * The "." entry and ".." refer to the first entry in the directory
+       * list, ".", instead of to the directory entry itself.  Hence, we
+       * cannot traverse "." or ".." to determine that these are
+       * directories.  NOTE also that there is no root directory entry for
+       * the top "." to refer to.
+       */
+
+      name = (FAR const char *)cromfs_offset2addr(fs, node->cn_name);
+      if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
+        {
+          /* We assume this is a "." directory opener.  Create a directory
+           * node on the stack.
+           */
+
+          newnode->cn_mode    = S_IFDIR | (node->cn_mode & ~S_IFMT);
+          newnode->cn_pad     = 0;
+          newnode->cn_name    = node->cn_name;
+          newnode->cn_size    = 0;
+          newnode->cn_peer    = node->cn_peer;
+          newnode->u.cn_child = node->u.cn_child;
+
+          /* Switch from the original read-only in ROM to the writable copy
+           * in on the stack.
+           */
+
+          *ppnode             = newnode;
+          return OK;
+        }
+
+      /* Copy the origin node file name into the writable node copy */
+
+      newnode->cn_name   = node->cn_name;
+      newnode->cn_pad    = 0;
+
+      /* Copy all attributes of the target node, but retain the hard link
+       * file name and, possibly, the peer node reference.
+       */
+
+      newnode->cn_mode   = linknode->cn_mode;
+      newnode->cn_size   = linknode->cn_size;
+      newnode->u.cn_link = linknode->u.cn_link;
+
+      /* Copy the peer node offset, changing the peer only if we are
+       * following the hard link in the traversal.
+       */
+
+      newnode->cn_peer   = follow ? linknode->cn_peer : node->cn_peer;
+
+      /* Switch from the original read-only in ROM to the writable copy in
+       * on the stack.
+       */
+
+      *ppnode            = newnode;
+      node               = newnode;
+    }
+
+  return -ELOOP;
+}
+
+/****************************************************************************
  * Name: cromfs_foreach_node
+ *
+ * Description:
+ *   Visit each node in the file system, performing the requested callback
+ *   for each node.  The attributes of the hard link are replaced with the
+ *   attributes of the target node.  Optionally, traversal can be forced to
+ *   follow the hard link paths.
+ *
  ****************************************************************************/
 
 static int cromfs_foreach_node(FAR const struct cromfs_volume_s *fs,
                                FAR const struct cromfs_node_s *node,
-                               cromfs_foreach_t callback, FAR void *arg)
+                               bool follow, cromfs_foreach_t callback,
+                               FAR void *arg)
 {
+  FAR const struct cromfs_node_s *pnode;
+  struct cromfs_node_s newnode;
+  uint32_t offset;
   int ret = OK;
 
   /* Traverse all entries in this directory (i.e., following the 'peer'
    * links).
    */
 
-  while (node != NULL)
+  pnode  = node;
+  offset = cromfs_addr2offset(fs, node);
+
+  while (pnode != NULL)
     {
-      ret = callback(fs, node, arg);
+      /* Follow any hard links */
+
+      ret = cromfs_follow_link(fs, &pnode, follow, &newnode);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Perform the callback for the node */
+
+      ret = callback(fs, pnode, offset, arg);
       if (ret != OK)
         {
           return ret;
         }
 
-      node = (FAR const struct cromfs_node_s *)
-             cromfs_offset2addr(fs, node->cn_peer);
+      offset = pnode->cn_peer;
+      pnode  = (FAR const struct cromfs_node_s *)
+               cromfs_offset2addr(fs, offset);
     }
 
   return ret;
@@ -306,17 +452,54 @@ static uint16_t cromfs_seglen(FAR const char *relpath)
 }
 
 /****************************************************************************
- * Name: cromfs_comparenode
+ * Name: cromfs_child_node
  ****************************************************************************/
 
-static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
-                              FAR const struct cromfs_node_s *node,
-                              FAR void *arg)
+static int cromfs_child_node(FAR const struct cromfs_volume_s *fs,
+                             FAR const struct cromfs_node_s *node,
+                             FAR struct cromfs_nodeinfo_s *info)
+{
+  FAR const struct cromfs_node_s *pnode;
+  FAR const struct cromfs_node_s *child;
+  struct cromfs_node_s newnode;
+  uint32_t offset;
+  int ret;
+
+  /* Get the child node referred by the directory entry */
+
+  offset = node->u.cn_child;
+  child  = (FAR const struct cromfs_node_s *)cromfs_offset2addr(fs, offset);
+
+  /* Get the attributes of the child node by following the hard link.  This
+   * first node under the directory will be the hard link ".".
+   */
+
+  pnode  = child;
+  ret    = cromfs_follow_link(fs, &pnode, false, &newnode);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  info->ci_mode  = pnode->cn_mode;
+  info->ci_size  = pnode->cn_size;
+  info->ci_child = offset;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cromfs_compare_node
+ ****************************************************************************/
+
+static int cromfs_compare_node(FAR const struct cromfs_volume_s *fs,
+                               FAR const struct cromfs_node_s *node,
+                               uint32_t offset, FAR void *arg)
 {
   FAR struct cromfs_comparenode_s *cpnode;
   FAR const struct cromfs_node_s *child;
   FAR char *name;
   int namlen;
+  int ret;
 
   DEBUGASSERT(fs != NULL && node != NULL && arg != NULL);
   cpnode = (FAR struct cromfs_comparenode_s *)arg;
@@ -357,17 +540,37 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
 #if 1 /* REVISIT:  This seems to work, but I don't fully follow the logic. */
           if (S_ISDIR(node->cn_mode))
             {
-              *cpnode->node = (FAR const struct cromfs_node_s *)
-                              cromfs_offset2addr(fs, node->u.cn_child);
+              /* This first node under the directory will be the hard
+               * link ".".
+               */
+
+              ret = cromfs_child_node(fs, node, cpnode->info);
+              if (ret < 0)
+                {
+                  return ret;
+                }
             }
           else
             {
-              *cpnode->node = node;
+              cpnode->info->ci_mode  = node->cn_mode;
+              cpnode->info->ci_size  = node->cn_size;
+              cpnode->info->ci_child = node->u.cn_child;
             }
 #else
-          *cpnode->node = (FAR const struct cromfs_node_s *)
-                          cromfs_offset2addr(fs, node->u.cn_child);
+            {
+              /* This first node under the directory will be the hard
+               * link ".".
+               */
+
+              ret = cromfs_child_node(fs, node, cpnode->info);
+              if (ret < 0)
+                {
+                  return ret;
+                }
+            }
 #endif
+
+          cpnode->offset = offset;
           return 1;
         }
 
@@ -377,7 +580,9 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
 
       if (segment[namlen] == '/' && segment[namlen = 1] == '\0')
         {
-          *cpnode->node = node;
+          cpnode->info->ci_mode  = node->cn_mode;
+          cpnode->info->ci_size  = node->cn_size;
+          cpnode->info->ci_child = node->u.cn_child;
           return S_ISDIR(node->cn_mode) ? 1 : -ENOENT;
         }
 
@@ -413,21 +618,25 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
 
       /* Then recurse */
 
-      return cromfs_foreach_node(fs, child, cromfs_comparenode, cpnode);
+      return cromfs_foreach_node(fs, child, true, cromfs_compare_node,
+                                 cpnode);
     }
-  else
-    {
-      return 0;  /* Keep looking in this directory */
-    }
+
+  return 0;  /* Keep looking in this directory */
 }
 
 /****************************************************************************
- * Name: cromfs_findnode
+ * Name: cromfs_find_node
+ *
+ * Description:
+ *   Find the CROMFS node at the provide mountpoint relative path.
+ *
  ****************************************************************************/
 
-static int cromfs_findnode(FAR const struct cromfs_volume_s *fs,
-                           FAR const struct cromfs_node_s **node,
-                           FAR const char *relpath)
+static int cromfs_find_node(FAR const struct cromfs_volume_s *fs,
+                            FAR const char *relpath,
+                            FAR struct cromfs_nodeinfo_s *info,
+                            FAR uint32_t *offset)
 {
   struct cromfs_comparenode_s cpnode;
   FAR const struct cromfs_node_s *root;
@@ -435,7 +644,7 @@ static int cromfs_findnode(FAR const struct cromfs_volume_s *fs,
 
   finfo("relpath: %s\n", relpath);
 
-  /* Get the root node */
+  /* Get the root node.  The root is the entry "." which is a hard link. */
 
   root = (FAR const struct cromfs_node_s *)
           cromfs_offset2addr(fs, fs->cv_root);
@@ -444,7 +653,23 @@ static int cromfs_findnode(FAR const struct cromfs_volume_s *fs,
 
   if (relpath == NULL || relpath[0] == '\0')
     {
-      *node = root;
+      struct cromfs_node_s newnode;
+
+      /* Get the attributes of the root node by following the hard link.
+       * We do this even though the attributes of the root node are well
+       * defined.
+       */
+
+      ret = cromfs_follow_link(fs, &root, false, &newnode);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      info->ci_mode  = root->cn_mode;
+      info->ci_size  = root->cn_size;
+      info->ci_child = root->u.cn_child;
+      *offset        = fs->cv_root;
       return OK;
     }
 
@@ -457,14 +682,16 @@ static int cromfs_findnode(FAR const struct cromfs_volume_s *fs,
 
   /* Set up for the traversal */
 
-  cpnode.node    = node;
+  cpnode.info    = info;
   cpnode.relpath = relpath;
   cpnode.segment = relpath;
+  cpnode.offset  = fs->cv_root;
   cpnode.seglen  = (uint16_t)cromfs_seglen(relpath);
 
-  ret = cromfs_foreach_node(fs, root, cromfs_comparenode, &cpnode);
+  ret = cromfs_foreach_node(fs, root, false, cromfs_compare_node, &cpnode);
   if (ret > 0)
     {
+      *offset = cpnode.offset;
       return OK;
     }
   else if (ret == OK)
@@ -486,8 +713,9 @@ static int cromfs_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct inode *inode;
   FAR const struct cromfs_volume_s *fs;
-  FAR const struct cromfs_node_s *node;
+  struct cromfs_nodeinfo_s info;
   FAR struct cromfs_file_s *ff;
+  uint32_t offset;
   int ret;
 
   finfo("Open: %s\n", relpath);
@@ -517,20 +745,19 @@ static int cromfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Locate the node for this relative path */
 
-  node = NULL;
-  ret  = cromfs_findnode(fs, &node, relpath);
+  ret = cromfs_find_node(fs, relpath, &info, &offset);
   if (ret < 0)
     {
-      /* Nothing exists at that relative path (or a really bad error occurred) */
+      /* Nothing exists at that relative path (or a really bad error
+       * occurred)
+       */
 
       return ret;
     }
 
-  DEBUGASSERT(node != NULL);
-
   /* Verify that the node is a regular file */
 
-  if (!S_ISREG(node->cn_mode))
+  if (!S_ISREG(info.ci_mode))
     {
       return -EISDIR;
     }
@@ -556,7 +783,8 @@ static int cromfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Save the node in the open file instance */
 
-  ff->ff_node = node;
+  ff->ff_node = (FAR const struct cromfs_node_s *)
+    cromfs_offset2addr(fs, offset);
 
   /* Save the index as the open-specific state in filep->f_priv */
 
@@ -610,7 +838,7 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
   unsigned int copysize;
   unsigned int copyoffs;
 
-  finfo("Read %d bytes from offset %d\n", buflen, filep->f_pos);
+  finfo("Read %zu bytes from offset %jd\n", buflen, (intmax_t)filep->f_pos);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
@@ -662,8 +890,8 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
   while (remaining > 0)
     {
       /* Search for the next block containing the fpos file offset.  This is
-       * real search on the first time through but the remaining blocks should
-       * be contiguous so that the logic should not loop.
+       * real search on the first time through but the remaining blocks
+       * should be contiguous so that the logic should not loop.
        *
        */
 
@@ -702,7 +930,9 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
         }
       while (fpos >= (blkoffs + ulen));
 
-      /* Check if we need to decompress the next block into the user buffer. */
+      /* Check if we need to decompress the next block into the user
+       * buffer.
+       */
 
       if (currhdr->lzf_type == LZF_TYPE0_HDR)
         {
@@ -756,9 +986,10 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
                   ff->ff_ulen   = decomplen;
                 }
 
-              finfo("voloffs=%lu blkoffs=%lu ulen=%u ff_offset=%u copysize=%u\n",
-                    (unsigned long)voloffs, (unsigned long)blkoffs, ulen,
-                    ff->ff_offset, copysize);
+              finfo(
+                "voloffs=%lu blkoffs=%lu ulen=%u ff_offset=%u copysize=%u\n",
+                (unsigned long)voloffs, (unsigned long)blkoffs, ulen,
+                ff->ff_offset, copysize);
               DEBUGASSERT(ff->ff_ulen >= copysize);
             }
           else
@@ -769,7 +1000,8 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
                * decompression buffer.
                */
 
-              copyoffs = (blkoffs >= filep->f_pos) ? 0 : filep->f_pos - blkoffs;
+              copyoffs = (blkoffs >= filep->f_pos) ?
+                            0 : filep->f_pos - blkoffs;
               DEBUGASSERT(ulen > copyoffs);
               copysize = ulen - copyoffs;
 
@@ -863,7 +1095,7 @@ static int cromfs_dup(FAR const struct file *oldp, FAR struct file *newp)
    * same node.
    */
 
-  newff = (FAR struct cromfs_file_s *)kmm_zalloc(sizeof(struct cromfs_file_s));
+  newff = kmm_zalloc(sizeof(struct cromfs_file_s));
   if (newff == NULL)
     {
       return -ENOMEM;
@@ -947,7 +1179,8 @@ static int cromfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                           FAR struct fs_dirent_s *dir)
 {
   FAR const struct cromfs_volume_s *fs;
-  FAR const struct cromfs_node_s *node;
+  FAR struct cromfs_nodeinfo_s info;
+  uint32_t offset;
   int ret;
 
   finfo("relpath: %s\n", relpath);
@@ -962,28 +1195,27 @@ static int cromfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Locate the node for this relative path */
 
-  node = NULL;
-  ret  = cromfs_findnode(fs, &node, relpath);
+  ret = cromfs_find_node(fs, relpath, &info, &offset);
   if (ret < 0)
     {
-      /* Nothing exists at that relative path (or a really bad error occurred) */
+      /* Nothing exists at that relative path (or a really bad error
+       * occurred)
+       */
 
       return ret;
     }
 
-  DEBUGASSERT(node != NULL);
-
   /* Verify that the node is a directory */
 
-  if (!S_ISDIR(node->cn_mode))
+  if (!S_ISDIR(info.ci_mode))
     {
       return -ENOTDIR;
     }
 
   /* Set the start node and next node to the first entry in the directory */
 
-  dir->u.cromfs.cr_firstoffset = cromfs_addr2offset(fs, node);
-  dir->u.cromfs.cr_curroffset  = dir->u.cromfs.cr_firstoffset;
+  dir->u.cromfs.cr_firstoffset = info.ci_child;
+  dir->u.cromfs.cr_curroffset  = info.ci_child;
   return OK;
 }
 
@@ -998,8 +1230,10 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 {
   FAR const struct cromfs_volume_s *fs;
   FAR const struct cromfs_node_s *node;
+  struct cromfs_node_s newnode;
   FAR char *name;
   uint32_t offset;
+  int ret;
 
   finfo("mountpt: %p dir: %p\n", mountpt, dir);
 
@@ -1039,13 +1273,21 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
       return -ENOENT;
     }
 
+  /* Get the attributes of the node by following the hard link. */
+
+  ret = cromfs_follow_link(fs, &node, false, &newnode);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Save the filename and file type */
 
   name = (FAR char *)cromfs_offset2addr(fs, node->cn_name);
   finfo("Entry %lu: %s\n", (unsigned long)offset, name);
   strncpy(dir->fd_dir.d_name, name, NAME_MAX + 1);
 
-  switch (node->cn_mode & s_IFTGT)
+  switch (node->cn_mode & S_IFMT)
     {
       case S_IFDIR:  /* Directory */
         dir->fd_dir.d_type = DTYPE_DIRECTORY;
@@ -1056,14 +1298,37 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
         break;
 
       case S_IFIFO:  /* FIFO */
+        dir->fd_dir.d_type = DTYPE_FIFO;
+        break;
+
       case S_IFCHR:  /* Character driver */
+        dir->fd_dir.d_type = DTYPE_CHR;
+        break;
+
       case S_IFBLK:  /* Block driver */
-#if 0
-      case S_IFSOCK: /* Socket */
-#endif
+        dir->fd_dir.d_type = DTYPE_BLK;
+        break;
+
       case S_IFMQ:   /* Message queue */
+        dir->fd_dir.d_type = DTYPE_MQ;
+        break;
+
       case S_IFSEM:  /* Semaphore */
+        dir->fd_dir.d_type = DTYPE_SEM;
+        break;
+
       case S_IFSHM:  /* Shared memory */
+        dir->fd_dir.d_type = DTYPE_SHM;
+        break;
+
+      case S_IFMTD:  /* MTD driver */
+        dir->fd_dir.d_type = DTYPE_MTD;
+        break;
+
+      case S_IFSOCK: /* Socket */
+        dir->fd_dir.d_type = DTYPE_SOCK;
+        break;
+
       default:
         DEBUGPANIC();
         dir->fd_dir.d_type = DTYPE_UNKNOWN;
@@ -1177,7 +1442,8 @@ static int cromfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
                        FAR struct stat *buf)
 {
   FAR const struct cromfs_volume_s *fs;
-  FAR const struct cromfs_node_s *node;
+  struct cromfs_nodeinfo_s info;
+  uint32_t offset;
   int ret;
 
   finfo("mountpt: %p relpath: %s buf: %p\n", mountpt, relpath, buf);
@@ -1193,18 +1459,15 @@ static int cromfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Locate the node for this relative path */
 
-  node = NULL;
-  ret  = cromfs_findnode(fs, &node, relpath);
+  ret  = cromfs_find_node(fs, relpath, &info, &offset);
   if (ret >= 0)
     {
-      DEBUGASSERT(node != NULL);
-
       /* Return the struct stat info associate with this node */
 
-      buf->st_mode    = node->cn_mode;
-      buf->st_size    = node->cn_size;
+      buf->st_mode    = info.ci_mode;
+      buf->st_size    = info.ci_size;
       buf->st_blksize = fs->cv_bsize;
-      buf->st_blocks  = (node->cn_size + (fs->cv_bsize - 1)) / fs->cv_bsize;
+      buf->st_blocks  = (info.ci_size + (fs->cv_bsize - 1)) / fs->cv_bsize;
       ret             = OK;
     }
 

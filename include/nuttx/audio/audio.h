@@ -356,7 +356,10 @@ struct audio_caps_s
   uint8_t ac_len;           /* Length of the structure */
   uint8_t ac_type;          /* Capabilities (device) type */
   uint8_t ac_subtype;       /* Capabilities sub-type, if needed */
-  uint8_t ac_channels;      /* Number of channels (1, 2, 5, 7) */
+  uint8_t ac_channels;      /* Number of channels (1, 2, 3, ... 8) */
+  uint8_t ac_chmap;         /* Channel map, each ch for each bit,
+                             * zero means don't care */
+  uint8_t reserved;         /* Reserved for future use */
 
   /* Audio data format(s) for this device */
 
@@ -408,13 +411,11 @@ struct audio_info_s
  * so this info is queried from the lower-half driver.
  */
 
-#ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
 struct ap_buffer_info_s
 {
   apb_samp_t  nbuffers;     /* Preferred qty of buffers */
   apb_samp_t  buffer_size;  /* Preferred size of the buffers */
 };
-#endif
 
 /* This structure describes an Audio Pipeline Buffer */
 

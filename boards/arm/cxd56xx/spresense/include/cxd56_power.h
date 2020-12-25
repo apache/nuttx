@@ -134,6 +134,24 @@ int board_power_setup(int status);
 int board_power_control(int target, bool en);
 
 /****************************************************************************
+ * Name: board_power_control_tristate
+ *
+ * Description:
+ *   Power on/off/HiZ the device on the board.
+ *   (HiZ is available only for PMIC_TYPE_GPO.)
+ *
+ * Input Parameter:
+ *   target : PMIC channel
+ *   value : 1 (ON), 0 (OFF), -1(HiZ)
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+int board_power_control_tristate(int target, int value);
+
+/****************************************************************************
  * Name: board_power_monitor
  *
  * Description:
@@ -142,6 +160,22 @@ int board_power_control(int target, bool en);
  ****************************************************************************/
 
 bool board_power_monitor(int target);
+
+/****************************************************************************
+ * Name: board_power_monitor_tristate
+ *
+ * Description:
+ *   Get status of Power on/off/HiZ the device on the board.
+ *
+ * Input Parameter:
+ *   target : PMIC channel
+ *
+ * Returned Value:
+ *   1 (ON), 0 (OFF), -1(HiZ)
+ *
+ ****************************************************************************/
+
+int board_power_monitor_tristate(int target);
 
 /****************************************************************************
  * Name: board_flash_power_control

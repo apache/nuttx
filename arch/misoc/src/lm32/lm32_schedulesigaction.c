@@ -66,7 +66,7 @@
  *   This function is called by the OS when one or more
  *   signal handling actions have been queued for execution.
  *   The architecture specific code must configure things so
- *   that the 'igdeliver' callback is executed on the thread
+ *   that the 'sigdeliver' callback is executed on the thread
  *   specified by 'tcb' as soon as possible.
  *
  *   This function may be called from interrupt handling logic.
@@ -154,7 +154,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               g_current_regs[REG_EPC]     = (uint32_t)lm32_sigdeliver;
               g_current_regs[REG_INT_CTX] = 0;
-
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.

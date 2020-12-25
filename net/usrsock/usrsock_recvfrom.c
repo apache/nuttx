@@ -159,8 +159,9 @@ static uint16_t recvfrom_event(FAR struct net_driver_s *dev,
  * Name: do_recvfrom_request
  ****************************************************************************/
 
-static int do_recvfrom_request(FAR struct usrsock_conn_s *conn, size_t buflen,
-                               socklen_t addrlen)
+static int do_recvfrom_request(FAR struct usrsock_conn_s *conn,
+                               size_t buflen, socklen_t addrlen,
+                               int32_t flags)
 {
   struct usrsock_request_recvfrom_s req =
   {
@@ -182,6 +183,7 @@ static int do_recvfrom_request(FAR struct usrsock_conn_s *conn, size_t buflen,
 
   req.head.reqid = USRSOCK_REQUEST_RECVFROM;
   req.usockid = conn->usockid;
+  req.flags = flags;
   req.max_addrlen = addrlen;
   req.max_buflen = buflen;
 
@@ -204,12 +206,18 @@ static int do_recvfrom_request(FAR struct usrsock_conn_s *conn, size_t buflen,
  *   on return to indicate the actual size of the address stored there.
  *
  * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   psock    A reference to the socket structure of the socket
  *   buf      Buffer to receive data
  *   len      Length of buffer
  *   flags    Receive flags (ignored)
  *   from     Address of source (may be NULL)
  *   fromlen  The length of the address structure
+ *
+ * Returned Value:
+ *   On success, returns the number of characters received.  If no data is
+ *   available to be received and the peer has performed an orderly shutdown,
+ *   recvfrom() will return 0.  Otherwise, on any failure, a negated errno
+ *   value is returned.
  *
  ****************************************************************************/
 
@@ -246,7 +254,7 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     {
       /* Invalid state or closed by daemon. */
 
-      ninfo("usockid=%d; connect() with uninitialized usrsock.\n",
+      ninfo("usockid=%d; recvfrom() with uninitialized usrsock.\n",
             conn->usockid);
 
       ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
@@ -397,9 +405,13 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       usrsock_setup_datain(conn, inbufs, ARRAY_SIZE(inbufs));
 
+      /* MSG_DONTWAIT is only use in usrsock. */
+
+      flags &= ~MSG_DONTWAIT;
+
       /* Request user-space daemon to close socket. */
 
-      ret = do_recvfrom_request(conn, len, addrlen);
+      ret = do_recvfrom_request(conn, len, addrlen, flags);
       if (ret >= 0)
         {
           /* Wait for completion of request. */
@@ -418,6 +430,15 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                */
 
               outaddrlen = state.valuelen_nontrunc;
+
+              /* If the MSG_PEEK flag is enabled, it will only peek
+               * from the buffer, so remark the input as ready.
+               */
+
+              if (flags & MSG_PEEK)
+                {
+                  conn->flags |= USRSOCK_EVENT_RECVFROM_AVAIL;
+                }
             }
         }
 

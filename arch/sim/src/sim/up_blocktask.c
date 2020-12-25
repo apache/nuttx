@@ -113,12 +113,19 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
       nxsched_suspend_scheduler(rtcb);
 
+      /* TODO */
+
+      if (CURRENT_REGS)
+        {
+          ASSERT(false);
+        }
+
       /* Copy the exception context into the TCB at the (old) head of the
        * ready-to-run Task list. if up_setjmp returns a non-zero
        * value, then this is really the previously running task restarting!
        */
 
-      if (!up_setjmp(rtcb->xcp.regs))
+      else if (!up_setjmp(rtcb->xcp.regs))
         {
           /* Restore the exception context of the rtcb at the (new) head
            * of the ready-to-run task list.

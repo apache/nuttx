@@ -35,47 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
-
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)}
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip}
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)common}
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
-
-AOBJS = $(ASRCS:.asm=$(OBJEXT))
 CSRCS = rx65n_main.c
-COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
-
-all: libboard$(LIBEXT)
-
-$(AOBJS): %$(OBJEXT): %$(ASMEXT)
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-libboard$(LIBEXT): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
-
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
-
-depend: .depend
-
-clean:
-	$(call DELFILE, libboard$(LIBEXT))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
-ifneq ($(BOARD_CONTEXT),y)
-context:
-endif
-
--include Make.dep
+include $(TOPDIR)/boards/Board.mk

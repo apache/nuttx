@@ -26,6 +26,7 @@
 
 #if defined(CONFIG_NET) && defined(CONFIG_RX65N_EMAC)
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
@@ -526,9 +527,6 @@ static int  rx65n_phyinit(FAR struct rx65n_ethmac_s *priv);
 static int  rx65n_ethreset(FAR struct rx65n_ethmac_s *priv);
 static int  rx65n_macconfig(FAR struct rx65n_ethmac_s *priv);
 static void rx65n_macaddress(FAR struct rx65n_ethmac_s *priv);
-#ifdef CONFIG_NET_ICMPv6
-static void rx65n_ipv6multicast(FAR struct rx65n_ethmac_s *priv);
-#endif
 static int  rx65n_ethconfig(FAR struct rx65n_ethmac_s *priv);
 
 static void rx65n_phy_preamble (void);
@@ -625,7 +623,7 @@ static uint32_t rx65n_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          ninfo("[repeats %d more times]\n", count - 3);
+          ninfo("[repeats %" PRId32 " more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -637,7 +635,7 @@ static uint32_t rx65n_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  ninfo("%08x->%08x\n", addr, val);
+  ninfo("%08" PRIx32 "->%08" PRIx32 "\n", addr, val);
   return val;
 }
 #endif
@@ -664,7 +662,7 @@ static void rx65n_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  ninfo("%08x<-%08x\n", addr, val);
+  ninfo("%08" PRIx32 "<-%08" PRIx32 "\n", addr, val);
 
   /* Write the value */
 
@@ -853,7 +851,7 @@ static int rx65n_transmit(FAR struct rx65n_ethmac_s *priv)
   txdesc  = priv->txhead;
   txfirst = txdesc;
 
-  ninfo("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
+  ninfo("d_len: %d d_buf: %p txhead: %p tdes0: %08" PRIx32 "\n",
         priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & TACT) == 0);
@@ -1088,17 +1086,14 @@ static int rx65n_txpoll(struct net_driver_s *dev)
           rx65n_transmit(priv);
           DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
 
-          /* Check if the next TX descriptor is owned by the
-           * Ethernet DMA or CPU.
-           * We cannot perform the TX poll if we are unable to accept
+          /* Check if the next TX descriptor is owned by the Ethernet DMA or
+           * CPU. We cannot perform the TX poll if we are unable to accept
            * another packet fo transmission.
-           * In a race condition, TACT may be cleared
-           * BUT still not available
-           * because rx65n_freeframe() has not yet run.
-           * If rx65n_freeframe() has run,
-           * the buffer1 pointer (tdes2) will be nullified
-                   * (and inflight should
-           * be CONFIG_RX65N_ETH_NTXDESC).
+           *
+           * In a race condition, TACT may be cleared BUT still not available
+           * because rx65n_freeframe() has not yet run. If rx65n_freeframe()
+           * has run, the buffer1 pointer (tdes2) will be nullified (and
+           * inflight should be CONFIG_RX65N_ETH_NTXDESC).
            */
 
           if ((priv->txhead->tdes0 & TACT) != 0 ||
@@ -1167,9 +1162,9 @@ static void rx65n_dopoll(FAR struct rx65n_ethmac_s *priv)
    * another packet for transmission.
    *
    * In a race condition, TACT may be cleared BUT still not available
-   * because rx65n_freeframe() has not yet run.  If rx65n_freeframe() has
-   * run, the buffer1 pointer (tdes2) will be nullified (and inflight
-   * should be < CONFIG_RX65N_ETH_NTXDESC).
+   * because rx65n_freeframe() has not yet run. If rx65n_freeframe()
+   * has run, the buffer1 pointer (tdes2) will be nullified (and
+   * inflight should be < CONFIG_RX65N_ETH_NTXDESC).
    */
 
   if ((priv->txhead->tdes0 & TACT) == 0 &&
@@ -1186,7 +1181,7 @@ static void rx65n_dopoll(FAR struct rx65n_ethmac_s *priv)
 
       if (dev->d_buf)
         {
-          devif_poll(dev, rx65n_txpoll);
+          devif_timer(dev, 0, rx65n_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
@@ -1470,7 +1465,7 @@ static int rx65n_recvframe(FAR struct rx65n_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nerr("ERROR: Dropped, RX descriptor errors: %08x\n",
+              nerr("ERROR: Dropped, RX descriptor errors: %08" PRIx32 "\n",
                                 rxdesc->rdes0);
               rx65n_freesegment(priv, rxcurr, priv->segments);
             }
@@ -1481,10 +1476,9 @@ static int rx65n_recvframe(FAR struct rx65n_ethmac_s *priv)
       rxdesc = (struct eth_rxdesc_s *)rxdesc->rdes3;
     }
 
-  /* We get here after all of the descriptors have been scanned or
-   * when rxdesc points
-   * to the first descriptor owned by the DMA.
-   * Remember where we left off.
+  /* We get here after all of the descriptors have been scanned or when
+   * rxdesc points to the first descriptor owned by the DMA. Remember
+   * where we left off.
    */
 
   priv->rxhead = rxdesc;
@@ -1528,7 +1522,7 @@ static void rx65n_receive(FAR struct rx65n_ethmac_s *priv)
        * tap
        */
 
-      pkt_input(&priv->dev);
+     pkt_input(&priv->dev);
 #endif
 
       /* Check if the packet is a valid size for the network
@@ -1728,7 +1722,8 @@ static void rx65n_freeframe(FAR struct rx65n_ethmac_s *priv)
            * TX descriptors.
            */
 
-          ninfo("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
+          ninfo("txtail: %p tdes0: %08" PRIx32
+                " tdes2: %08" PRIx32 " tdes3: %08" PRIx32 "\n",
                 txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
 
           DEBUGASSERT(txdesc->tdes2 != 0);
@@ -1755,8 +1750,8 @@ static void rx65n_freeframe(FAR struct rx65n_ethmac_s *priv)
               priv->inflight--;
 
               /* If all of the TX descriptors were in-flight,
-               * then RX interrupts may have been disabled... we
-               * can re-enable them now.
+               * then RX interrupts may have been disabled...
+               * we can re-enable them now.
                */
 
               /* Need to check this and update the arguments of the
@@ -2062,8 +2057,7 @@ static void rx65n_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2073,7 +2067,7 @@ static void rx65n_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-void rx65n_txtimeout_expiry(int argc, uint32_t arg, ...)
+void rx65n_txtimeout_expiry(wdparm_t arg)
 {
   FAR struct rx65n_ethmac_s *priv = (FAR struct rx65n_ethmac_s *)arg;
   nerr("ERROR: Timeout!\n");
@@ -2116,15 +2110,14 @@ static void rx65n_poll_work(FAR void *arg)
   FAR struct rx65n_ethmac_s *priv = (FAR struct rx65n_ethmac_s *)arg;
   FAR struct net_driver_s *dev  = &priv->dev;
 
-  /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
-   * cannot perform the timer poll if we are unable to accept another packet
-   * for transmission.  Hmmm.. might be bug here.  Does this mean if there is
-   * a transmit in progress, we will miss TCP time state updates?
+  /* Check if the next TX descriptor is owned by the Ethernet DMA or
+   * CPU.  We cannot perform the TX poll if we are unable to accept
+   * another packet for transmission.
    *
    * In a race condition, TACT may be cleared BUT still not available
-   * because rx65n_freeframe() has not yet run.  If rx65n_freeframe() has
-   * run, the buffer1 pointer (tdes2) will be nullified (and inflight
-   * should be < CONFIG_RX65N_ETH_NTXDESC).
+   * because rx65n_freeframe() has not yet run. If rx65n_freeframe()
+   * has run, the buffer1 pointer (tdes2) will be nullified (and
+   * inflight should be < CONFIG_RX65N_ETH_NTXDESC).
    */
 
   net_lock();
@@ -2174,8 +2167,7 @@ static void rx65n_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2185,7 +2177,7 @@ static void rx65n_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-void rx65n_poll_expiry(int argc, uint32_t arg, ...)
+void rx65n_poll_expiry(wdparm_t arg)
 {
   FAR struct rx65n_ethmac_s *priv = (FAR struct rx65n_ethmac_s *)arg;
   rx65n_cmtw0_stop(rx65n_cmtw0_txpoll);
@@ -2230,8 +2222,10 @@ static int rx65n_ifup(struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 #endif
 #ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
@@ -2396,51 +2390,6 @@ static int rx65n_txavail(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: rx65n_calcethcrc
- *
- * Description:
- *   Function to calculate the CRC used by RX65N to check an ethernet frame
- *
- * Input Parameters:
- *   data   - the data to be checked
- *   length - length of the data
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static uint32_t rx65n_calcethcrc(const uint8_t *data, size_t length)
-{
-  uint32_t crc = 0xffffffff;
-  size_t i;
-  int j;
-
-  for (i = 0; i < length; i++)
-    {
-      for (j = 0; j < 8; j++)
-        {
-          if (((crc >> 31) ^ (data[i] >> j)) & 0x01)
-            {
-              /* x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1 */
-
-              crc = (crc << 1) ^ 0x04c11db7;
-            }
-          else
-            {
-              crc = crc << 1;
-            }
-        }
-    }
-
-  return ~crc;
-}
-#endif
-
-/****************************************************************************
  * Function: rx65n_addmac
  *
  * Description:
@@ -2461,19 +2410,8 @@ static uint32_t rx65n_calcethcrc(const uint8_t *data, size_t length)
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static int rx65n_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  uint32_t regval;
-  uint32_t crc;
-  uint32_t hashindex;
-  uint32_t temp;
-  uint32_t registeraddress;
-  regval = 0;
-
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
-    crc = rx65n_calcethcrc(mac, 6);
-
-  hashindex = (crc >> 26) & 0x3f;
 
   /* RX65N do not support add on mac multi cast feature because related
    * hash table mac multi cast register is not supported in RX65N.
@@ -2505,19 +2443,8 @@ static int rx65n_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_MCASTGROUP
 static int rx65n_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  uint32_t crc;
-  uint32_t hashindex;
-  uint32_t temp;
-  uint32_t registeraddress;
-
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
-  /* Remove the MAC address to the hardware multicast hash table */
-
-  crc = rx65n_calcethcrc(mac, 6);
-
-  hashindex = (crc >> 26) & 0x3f;
 
   /* RX65N do not support add on mac multi cast feature because related
    * hash table multi cast mac register not available. This function is
@@ -3791,15 +3718,6 @@ static int rx65n_macconfig(FAR struct rx65n_ethmac_s *priv)
 
   rx65n_macaddress(priv);
 
- #ifdef CONFIG_NET_ICMPv6
-  /* Set up the IPv6 multicast address */
-
-  /* Not supported So commented */
-
-  /* rx65n_ipv6multicast(priv); */
-
- #endif
-
   return OK;
 }
 
@@ -3849,80 +3767,6 @@ static void rx65n_macaddress(FAR struct rx65n_ethmac_s *priv)
              (uint32_t)dev->d_mac.ether.ether_addr_octet[5]);
   rx65n_putreg(regval, RX65N_ETH_MALR);
 }
-
-/****************************************************************************
- * Function: rx65n_ipv6multicast
- *
- * Description:
- *   Configure the IPv6 multicast MAC address.
- *
- * Input Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMPv6
-static void rx65n_ipv6multicast(FAR struct rx65n_ethmac_s *priv)
-{
-  struct net_driver_s *dev;
-  uint16_t tmp16;
-  uint8_t mac[6];
-
-  /* For ICMPv6, we need to add the IPv6 multicast address
-   *
-   * For IPv6 multicast addresses, the Ethernet MAC is derived by
-   * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
-   * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
-   * to the Ethernet MAC address 33:33:00:01:00:03.
-   *
-   * NOTES:  This appears correct for the ICMPv6 Router Solicitation
-   * Message, but the ICMPv6 Neighbor Solicitation message seems to
-   * use 33:33:ff:01:00:03.
-   */
-
-  mac[0] = 0x33;
-  mac[1] = 0x33;
-
-  dev    = &priv->dev;
-  tmp16  = dev->d_ipv6addr[6];
-  mac[2] = 0xff;
-  mac[3] = tmp16 >> 8;
-
-  tmp16  = dev->d_ipv6addr[7];
-  mac[4] = tmp16 & 0xff;
-  mac[5] = tmp16 >> 8;
-
-  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
-  (void)rx65n_addmac(dev, mac);
-
-#ifdef CONFIG_NET_ICMPv6_AUTOCONF
-  /* Add the IPv6 all link-local nodes Ethernet address.  This is the
-   * address that we expect to receive ICMPv6 Router Advertisement
-   * packets.
-   */
-
-  (void)rx65n_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
-
-#endif /* CONFIG_NET_ICMPv6_AUTOCONF */
-#ifdef CONFIG_NET_ICMPv6_ROUTER
-  /* Add the IPv6 all link-local routers Ethernet address.  This is the
-   * address that we expect to receive ICMPv6 Router Solicitation
-   * packets.
-   */
-
-  (void)rx65n_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
-
-#endif /* CONFIG_NET_ICMPv6_ROUTER */
-}
-
-#endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
  * Function: rx65n_ethconfig
@@ -4199,7 +4043,7 @@ int rx65n_ethinitialize(int intf)
 
   /* Used to recover private state from dev */
 
-  priv->dev.d_private = (void *)g_rx65nethmac;
+  priv->dev.d_private = g_rx65nethmac;
 
   /* Multi cast flag */
 

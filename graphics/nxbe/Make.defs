@@ -50,6 +50,10 @@ else ifeq ($(CONFIG_NX_HWCURSOR),y)
 CSRCS += nxbe_cursor.c
 endif
 
+ifeq ($(CONFIG_NX_UPDATE),y)
+CSRCS += nxbe_notify_rectangle.c
+endif
+
 DEPPATH += --dep-path nxbe
 CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)/graphics/nxbe}
 VPATH += :nxbe

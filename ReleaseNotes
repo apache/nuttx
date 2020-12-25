@@ -539,7 +539,7 @@ include:
 New features were also added:
 
 * New OS APIs: chdir() and getcwd()
-* The Nuttx shell (NSH) has been extended in many ways.
+* The NuttX shell (NSH) has been extended in many ways.
   - New commands: mkfatfs, mkfifo, sleep, usleep, nice, sh, cd, and pwd
   - New memory inspection commands and heap usage commands
   - New capabilities:
@@ -869,7 +869,7 @@ OS feature and corrects and extends the eZ80 port:
   * Priority Inheritance.  The basic NuttX waiting logic was extended
     to support priority inheritance. See the NuttX User Manual for
     further information:
-    http://www.nuttx.org/NuttxUserGuide.html#priorityinheritance.
+    http://nuttx.apache.org/docs/latest/reference/user/05_counting_semaphore.html.
 
   * ez80Acclaim! Corrected several critical, show-stopping bugs on that
     platform including:
@@ -929,7 +929,7 @@ NuttX-0.4.6
 This is the 38th release of NuttX.  The release features support
 for the Micromint Eagle-100 development board.  This board is based
 around, the Luminary LM3S6918 MCU.  This is the first ARM Cortex-M3
-architecture supported by Nuttx. This initial, basic port includes
+architecture supported by NuttX. This initial, basic port includes
 timer and serial console with configurations to execute the NuttX
 OS test and to run the NuttShell (NSH). Work is still underway on
 this port and current plans are to have I2C, SSI, MMC/SD, and
@@ -994,7 +994,7 @@ This is the 41st release of NuttX.  This release adds:
 
   * Support for a new binary format call NXFLAT that can be used to
     execute separately linked programs in place in a file system.
-    See http://www.nuttx.org/NuttXNxFlat.html.
+    See https://nuttx.apache.org/docs/latest/components/nxflat.html.
 
   * Several important bugs were files related to networking and ROMFS.
     See the ChangeLog for a complete list.
@@ -1034,7 +1034,7 @@ THTTPD have been tested on the Micromint Eagle-100 development board
   * Serving of files from any file system
   * Execution of CGI executable.  This release supports execution
     of NXFLAT executables on a ROMFS file system
-    (http://www.nuttx.org/NuttXNxFlat.html)
+    (https://nuttx.apache.org/docs/latest/components/nxflat.html)
 
 A standard CGI interface is used:  Information is pasted to the CGI
 program via POST commands and via environment variables.  CGI socket
@@ -1112,7 +1112,7 @@ NuttX-4.14
 This is the 46th release of NuttX.  The release extends the support
 for the STMicro STM32 microcontroller.  Minimal support for the
 STM3210E-EVAL development board based around the STM32F103ZET6 MCU
-was released in NuttX-0.4.12 and extended in Nuttx-0.4.13 to include
+was released in NuttX-0.4.12 and extended in NuttX-0.4.13 to include
 initial USB support.  This completes the STM32F103ZET6 and adds:
 
 New Generic RTOS Features:
@@ -1233,7 +1233,7 @@ two new MCU architectures in various states of development:
 
   The extended port will also include support for SDIO-based SD
   cards and USB device (and possible LCD support).  These extensions
-  may or may not happen by the Nuttx 5.2 release as my plate is
+  may or may not happen by the NuttX 5.2 release as my plate is
   kind of full now.
 
 * LPC3131 (http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/)
@@ -1294,7 +1294,7 @@ NuttX-5.4
 
 This is the 51st release of NuttX.  This release includes one new,
 important extension to th NX graphics system (See
-http://www.nuttx.org/NXGraphicsSubsystem.html).
+https://nuttx.apache.org/docs/latest/components/nxgraphics/index.html).
 
 NX was develop a couple years back on hardware that supported only
 framebuffer devices, that is, video hardware with video memory
@@ -1389,7 +1389,7 @@ for one new ARM Cortex-M3 architecture:
   * That initial basic release included timer interrupts and a
     serial console and was verified using the NuttX OS test.
   * That release includes a verified NuttShell (NSH) configuration
-    (see the http://www.nuttx.org/NuttShell.html).
+    (see the https://nuttx.apache.org/docs/latest/components/nsh/index.html).
   * Also included are unverified SPI and USB device drivers.
 
 Further efforts include:
@@ -1448,7 +1448,8 @@ implementations, and a couple of important bugfixes.
     of on-demand paging support.  This feature will allow you to
     execute large programs on a mass storage device (such as SPI
     FLASH) in a small RAM.  All of the core on-demand paging logic
-    was completed (see http://www.nuttx.org/NuttXDemandPaging.html)
+    was completed
+    (see https://nuttx.apache.org/docs/latest/components/paging.html)
     and support was implemented for the ARM-9 family.  A test
     configuration is in place for the NXP LPC3131.  It has been
     verified that this new logic does not interfere with normal
@@ -1492,9 +1493,9 @@ include:
   * On-Demand Paging Support:
     The basic logic for the On-Demand Paging feature is complete,
     implemented for the NXP LPC3131, and partially tested.  See
-    http://www.nuttx.org/NuttXDemandPaging.html.  Some additional
-    test infrastructure will be needed in order to complete the
-    verification.  See configs/ea3131/README.txt for details.
+    https://nuttx.apache.org/docs/latest/components/paging.html.
+    Some additional test infrastructure will be needed in order to complete
+    the verification.  See configs/ea3131/README.txt for details.
   * Two Pass Build Support:
     The make system now supports a two pass build where a relocatable,
     partially linked object is created on the first pass and that
@@ -1586,9 +1587,9 @@ include:
     Atmel AT32UC3B0256 MCU was (almost) fully integrated. The port
     now successfully passes the NuttX OS test (examples/ostest).
     A NuttShell (NSH) configuration is in place (see the NSH User
-    Guide at http://www.nuttx.org/NuttShell.html). Testing of that
-    NSH configuration, however, has been postponed (because it got
-    bumped by the Olimex LPC1766-STK port -- see below)
+    Guide at https://nuttx.apache.org/docs/latest/components/nsh/index.html).
+    Testing of that NSH configuration, however, has been postponed
+    (because it got bumped by the Olimex LPC1766-STK port -- see below)
 
     Current Status: I think I have a hardware problem with my serial
     port setup. There is a good chance that the NSH port is complete
@@ -1606,7 +1607,8 @@ include:
     Support for the Olimex-LPC1766 is newly added to NuttX and is
     still undergoing development, test, and integration. Verified
     configurations for the NuttX OS test and for the NuttShell (NSH,
-    see the NSH User Guide at http://www.nuttx.org/NuttShell.html.
+    see the NSH User Guide at
+    https://nuttx.apache.org/docs/latest/components/nsh/index.html .
     Additional USB configurations are in the release as well, but
     they have not yet been verified.  Goals for NuttX-5.14 include:
     (1) An Ethernet driver, (2) Verified USB support, and (3) SD
@@ -1654,11 +1656,11 @@ Additional support has been included for the Olimex-LPC1766.  Support
 for that board was added to NuttX 5.13.  This release extends that
 support with an Ethernet driver.  Verified configurations are now
 available for the NuttX OS test, for the NuttShell (NSH, see
-http://www.nuttx.org/NuttShell.html), for the NuttX network test,
-and for the THTTPD webserver. (Additional USB configurations are
-in the release as well, but those have not yet been verified.  Goals
-for NuttX-5.15 (and beyond) include: (1) Verified USB support, (2)
-SD card support, and (3) LCD support.
+https://nuttx.apache.org/docs/latest/components/nsh/index.html),
+for the NuttX network test, and for the THTTPD webserver.
+(Additional USB configurations are in the release as well, but those
+have not yet been verified.  Goals for NuttX-5.15 (and beyond) include:
+(1) Verified USB support, (2) SD card support, and (3) LCD support.
 
 NuttX-5.15
 ----------
@@ -1891,7 +1893,7 @@ functionality.  These are provided as separate tarballs:
 
 The purpose of this separation is both to better organize and
 modularize the NuttX source tree, but also to provide better support
-for incorporation of end-user applications with Nuttx.
+for incorporation of end-user applications with NuttX.
 
 The incompatibility results from the changes to the board configuration
 logic needed to supported the separable application.  The major
@@ -2111,7 +2113,7 @@ they are, ordered from the least to the most complete:
     STATUS:  The basic port was released in NuttX-6.5.  This basic
     port consists of a "Hello, World!!" example and also slightly
     simplified NuttShell (NSH) configuration (see the NSH User Guide
-    at http://www.nuttx.org/NuttShell.html).
+    at https://nuttx.apache.org/docs/latest/components/nsh/index.html).
 
     An SPI driver and a USB device driver exist for the AT90USB as
     well as a USB mass storage configuration.  However, this
@@ -2905,7 +2907,7 @@ That command will mount the remote NFS server directory <remote-path> at
 the remote server.
 
 The NFS development was the graduation project of Jose Pablo Rojas V. who
-is a student at the Instituto Tecnológico de Costa Rica (ITCR, or TEC).
+is a student at the Instituto TecnolÃ³gico de Costa Rica (ITCR, or TEC).
 A lot of effort went into understanding what a tiny, embedded NFS client should
 do and getting the target resource usage to a bare minimum.  Only around a
 kilobyte or so of memory is required to run the NFS client (and most of that
@@ -3960,7 +3962,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
 
     * Tasking:
 
-      - The wrong PID was being signalled with SIGCHILD.  It should be
+      - The wrong PID was being signalled with SIGCHLD.  It should be
         the PID of the task that create the task group, not the ID of
         the last thread to leave the task group.
       - Added logic so that some internal resources and states are recovered
@@ -5595,7 +5597,7 @@ Additional new features and extended functionality:
       - Add support for high priority, nested interrupts. This change
         effects not only core ARMv-7M logic, but all ARMv7-M MCU logic:
         LM3S, LM4F,  LPC17xx, LPC43xx, SAM3, SAM4, and STM32. See
-        http://www.nuttx.org/doku.php?id=wiki:nxinternal:highperfints
+        https://cwiki.apache.org/confluence/display/NUTTX/High+Performance%2C+Zero+Latency+Interrupts
 
     * STMicro STM32
 
@@ -5774,7 +5776,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
         doing nothing!  It turns out that that is not really important
         because up_disable_irq() is not really used for that purpose.  But
         some spurions STM32 ADC interrupts have been reported to me and this
-        turned out to be the cause in that case.  Thanks to Manuel Stühn for
+        turned out to be the cause in that case.  Thanks to Manuel StÃ¼hn for
         the tip.
 
     * STMicro STM32
@@ -5850,8 +5852,8 @@ file for build information).
   use the newer configuration, but if you have some older style configurations
   for you board, you will need to convert those configurations to use the
   kconfig-frontends tools before taking any new code from the repository. See
-  http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig for some
-  guidelines.
+  https://cwiki.apache.org/confluence/display/NUTTX/Converting+Legacy+Configurations+to+Use+kconfig-mconf
+  for some guidelines.
 
 Additional new features and extended functionality:
 
@@ -5951,7 +5953,7 @@ Additional new features and extended functionality:
     * Documentation:
 
       - Added a coding standards document.  See
-        http://www.nuttx.org/doku.php?id=documentation:codingstandard
+        https://nuttx.apache.org/docs/latest/contributing/coding_style.html
 
     * Configuration/Build System:
 
@@ -5970,8 +5972,8 @@ Additional new features and extended functionality:
         have been converted to use the newer configuration, but if you have
         some older style configurations for you board, you will need to
         convert those configurations to use the kconfig-frontends tools. See
-        http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig for some
-        guidelines.
+        https://cwiki.apache.org/confluence/display/NUTTX/Converting+Legacy+Configurations+to+Use+kconfig-mconf
+        for some guidelines.
 
     * Applications:
 
@@ -6165,7 +6167,7 @@ Additional new features and extended functionality:
 
     * STMicro STM32 Drivers:
 
-      - Add STM32 Ethernet IGMP hashing support.  From Manuel Stühn.
+      - Add STM32 Ethernet IGMP hashing support.  From Manuel StÃ¼hn.
       - OTG FS Host:  USB host tracing added by Leo.
 
     * Freescale Kinetis
@@ -6211,7 +6213,7 @@ Additional new features and extended functionality:
 
       - IGMP Example:  Fill out Kconfig file; update makefile so that the
         IGMP example can be used as an NSH built-in application. From Manuel
-        Stühn.
+        StÃ¼hn.
       - lcdrw Example:  Fill out empty Kconfig file.
       - touchscreen Example:  Add a configuration option to indicate if
         architecture-specific initialized is required, yes or no.
@@ -6232,7 +6234,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
 
     * Networking:
 
-      - IGMP-related bug fixes from Manuel Stühn.
+      - IGMP-related bug fixes from Manuel StÃ¼hn.
       - In netdev_findbyaddr(), skip network devices that are in the "down"
         state.  It does not make sense to consider an address match with a
         "down" device.  From Brennan Ashton.
@@ -6489,7 +6491,7 @@ Bugfixes.  Only the most critical bugfixes are listed here (see the ChangeLog fo
         function could not have been working correctly before???  From
         eero.nurkkala.
       - Fix typo in conditional compilation:  CONFIG_CLOCK_MONOTONIC vs.
-        CLOCK_MONOTONIC.  From Manuel Stühn.
+        CLOCK_MONOTONIC.  From Manuel StÃ¼hn.
 
     * Graphics
 
@@ -7232,7 +7234,7 @@ completed soon.
     * Processes.  Much of the work in this release is focused on the
       realization of Unix-style user processes in NuttX.  There is more to
       be done, however.  The full roadmap and status is available at:
-      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+      https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
     * XMega:  There are some fragments in place for an XMega port.  That
       port has not really started, however.
@@ -7416,12 +7418,12 @@ Additional new features and extended functionality:
 
     * File Systems/Block Drivers/MTD:
 
-      - Extend MTD support to the M25P16. From Sébastien Lorquet.
+      - Extend MTD support to the M25P16. From SÃ©bastien Lorquet.
 
     * Drivers:
 
       - BCH (Block-to-Character): Add support for seeking in BCH.  From
-        Sébastien Lorquet.
+        SÃ©bastien Lorquet.
 
     * Graphics Support/Graphics-Related Drivers:
 
@@ -7530,7 +7532,7 @@ Additional new features and extended functionality:
 
       - Add a mostly bogus wchar.h header file.  This file is mostly bogus
         because none of the wide character operations are currently
-        supported in the Nuttx C library.  The file does provide the wchar_t
+        supported in the NuttX C library.  The file does provide the wchar_t
         types needed by some software, however.
       - Add isatty() function. From  Alan Carvalho de Assis.
       - Add mktemp(), mkstemp(), tmpnam() and tempnam().
@@ -7566,7 +7568,7 @@ completed soon.
     * Processes.  Much of the work in this release is focused on the
       realization of Unix-style user processes in NuttX.  There is more to
       be done, however.  The full roadmap and status is available at:
-      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+      https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
     * XMega:  There are some fragments in place for an XMega port.  That
       port has not really started, however.
@@ -7697,7 +7699,7 @@ operation.  My thanks to the developers of cppcheck!  I am impressed!
       - The implementation of access() as vararg macro has the issue that
         any function call with the same name (even in a C++ class) will
         match with it and result in a compile error.  Replaced with a small
-        function. This resolves the compile issue, and shouldn’t have
+        function. This resolves the compile issue, and shouldn't have
         negative side effects for users of the function. From Lorenz Meier.
       - The definition of strncpy() is that empty space should be zero-
         filled, the change adds the zero filling (See the POSIX spec here:
@@ -7789,7 +7791,7 @@ Additional new features and extended functionality:
     * Drivers:
 
       - Add support for a generic EEPROM driver that accesses EEPROM as a
-        character driver (vs. an MTD driver).  From Sébastien Lorquet.
+        character driver (vs. an MTD driver).  From SÃ©bastien Lorquet.
 
     * Graphics Support:
 
@@ -7808,7 +7810,7 @@ Additional new features and extended functionality:
       - All Ethernet drivers:  Modified to support.  Most, however, are
         still missing address filtering logic required for ICMPv6 Neighbor
         Discovery Protocol.  See
-        http://www.nuttx.org/doku.php?id=wiki:howtos:ipv6#ethernet_driver_requirements
+        https://cwiki.apache.org/confluence/display/NUTTX/IPv6
       - Also added missing raw/packet socket support to all Ethernet drivers.
 
     * Host Simulation:
@@ -7942,7 +7944,7 @@ Additional new features and extended functionality:
         leave the terminal program and drop back to nsh.  This  might come
         in handy for people that have e.g. GSM modems, GPS receivers or
         other devices with text based serial communications attached to
-        their Nuttx systems. From Harald Welte
+        their NuttX systems. From Harald Welte
       - apps/interpreters/micropython:  A port of Micro Python to NuttX.
         Contributed by Dave Marples
 
@@ -7970,7 +7972,7 @@ completed soon.
     * Processes.  Much of the work in this release is focused on the
       realization of Unix-style user processes in NuttX.  There is more to
       be done, however.  The full roadmap and status is available at:
-      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+      https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
     * XMega:  There are some fragments in place for an XMega port.  That
       port has not really started, however.
@@ -8084,7 +8086,7 @@ detailed bugfix information):
       - strncpy():  Would trash a lot of memory if n == 0.  From Yasuhiro
         Osaki.
       - sscanf().  Accept %X and %F as well as %x %f as a format specifiers.
-        From Sébastien Lorquet
+        From SÃ©bastien Lorquet
 
     * Applications:
 
@@ -8297,7 +8299,7 @@ completed soon.
     * Processes.  Much of the work in this release is focused on the
       realization of Unix-style user processes in NuttX.  There is more to
       be done, however.  The full roadmap and status is available at:
-      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+      https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
     * XMega:  There are some fragments in place for an XMega port.  That
       port has not really started, however.
@@ -8618,7 +8620,7 @@ completed soon.
     * Processes.  Much of the work in this release is focused on the
       realization of Unix-style user processes in NuttX.  There is more to
       be done, however.  The full roadmap and status is available at:
-      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+      https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
     * XMega:  There are some fragments in place for an XMega port.  That
       port has not really started, however.
@@ -9032,7 +9034,7 @@ completed soon.
     * Processes.  Much of the work in this release is focused on the
       realization of Unix-style user processes in NuttX.  There is more to
       be done, however.  The full roadmap and status is available at:
-      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+      https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
     * XMega:  There are some fragments in place for an XMega port.  That
       port has not really started, however.
@@ -9361,7 +9363,7 @@ Additional new features and extended functionality:
     * Atmel SAM3/4 Drivers:
 
       - SAM4E: Add default loop optimization if EEFC_FMR is available in the
-        configuration (i.e., for SAM4S and 4E). From Marco Aurélio da Cruz.
+        configuration (i.e., for SAM4S and 4E). From Marco AurÃ©lio da Cruz.
       - crypto/ and SAM4CM: Add CFB and MAC AES modes.  From Max Neklyudov.
       - SAM3/4:  Add a TWI driver for the SAM4CM.  From  Max Neklyudov.
 
@@ -9949,7 +9951,7 @@ Additional new features and extended functionality:
         accomplishes this by creating a temporary character driver to mediate
         the character oriented accesses to the block driver.
       - HOSTFS:  Added a HOSTFS file system for use with the simulator.  The
-        HOSTFS file system mounts in the simulated Nuttx context by provides
+        HOSTFS file system mounts in the simulated NuttX context by provides
         proxied access to the file system on the host PC.  This is useful for
         providing file system content and nonvolatile storage of files in the
         simulation environment.  From Ken Pettit.
@@ -10103,7 +10105,7 @@ Additional new features and extended functionality:
     * Applications: apps/system:
 
       - apps/system/hexed:  Port the hexed command line hexadeciamal editor
-         to Nuttx.  See http://apps.venomdev.net/hexed/.
+         to NuttX.  See http://apps.venomdev.net/hexed/.
 
     * Applications: apps/fsutils:
 
@@ -10479,9 +10481,9 @@ Additional new features and extended functionality:
         interfaces to support CPU initialization and inter-actions, and
         new application interfaces to manage CPU affinity.  The changes
         are too extensive to summarize here; see the SMP Wiki page at
-        http://www.nuttx.org/doku.php?id=wiki:nxinternal:smp.  The
+        https://cwiki.apache.org/confluence/display/NUTTX/SMP.  The
         new platform interfaces are also described in the NuttX porting
-        guide: http://www.nuttx.org/doku.php?id=documentation:portingguide.
+        guide: https://nuttx.apache.org/docs/latest/quickstart/organization.html.
         Only partially verified; awaiting hardware for the complete
         verification.
       - TLS:  Basic definitions needed to support thread local storage
@@ -10923,7 +10925,7 @@ Additional new features and extended functionality:
         (NUCLEO-F746ZG).  From Mark Olsson.
       - apps/examples/media:  You can now override the default device driver
         path by providing an alternal path on the command line.  From
-        Sébastien Lorquet.
+        SÃ©bastien Lorquet.
 
 Works-In-Progress:
 
@@ -10975,7 +10977,7 @@ detailed bugfix information):
       - SAMV7 Tickless Mode: This is a fix to a problem in the handling of
         the oneshot timer. Due to a wrong assumption concerning the behavior
         directly after the start of the timer/counter the function
-        sam_oneshot_cancel(…) calculates the wrong remaining time. The code
+        sam_oneshot_cancel calculates the wrong remaining time. The code
         assumes that the counter register is zero directly after the start
         of the timer, but this is not true. To start the time/counter a
         software trigger is invoked, this trigger starts the timer/count and
@@ -10988,7 +10990,7 @@ detailed bugfix information):
         In my fix I use the freerun count value to determine if at least one
         tick passed since the start of the timer and thus if the value of
         the oneshot counter is correct. I also tried to use the function
-        up_timer_gettime(…) to achieve this but, at least if compiled with
+        up_timer_gettime to achieve this but, at least if compiled with
         no optimization the problem vanishes without using the value of the
         function, the function call takes too long.
         Another problem treated in the fix is that if the oneshot timer/counter
@@ -11229,7 +11231,7 @@ Additional new features and extended functionality:
             also do an automatic recovery if a slave got stuck (SDA stays
             low).
 
-        With the above changes I²C-Bus reliability in harsh environments (eg.
+        With the above changes I2C-Bus reliability in harsh environments (eg.
         EMC) is greatly improved. The small change in the GPIO-Driver was
         necessary because otherwise you cannot read back the correct line
         status of Open-Drain Outputs and this is needed by the twi_reset
@@ -11381,13 +11383,13 @@ Additional new features and extended functionality:
         make.defs, Add empty preconfig rules to 'leaf' makefiles, Use
         directory.mk for recursive dir makefiles, Individual app kconfig
         fixes, Recursive Kconfig autogeneration, Add kconfig files for
-        pcode and tiff, and fix a gitignore rule,  From Sébastien Lorquet.
+        pcode and tiff, and fix a gitignore rule,  From SÃ©bastien Lorquet.
       - apps/include directory structure reorganized.  There are no longer
         any header files in the apps/include/. directory.  Rather, sub-
         directories were added to match the partitioning of apps/ sub-
         directories and the header files were moved into the appropriate
         sub-directory.  This change is intended to help with some changes
-        being considered by Sébastien Lorquet.
+        being considered by SÃ©bastien Lorquet.
       - Call all includes from <apps/bla/bla.h> to "bla/bla.h". From Sebastien
         Lorquet.
       - Add apps/include to include path in top-level Make.defs file.
@@ -11753,7 +11755,7 @@ detailed bugfix information):
 
       - apps/nshilib: PS Command: When Priority Inheritance is enabled, the
         format of /proc/<PID>/status changes to show both the current
-        priority and the thread’s base priority.  This messes up the format
+        priority and the thread's base priority.  This messes up the format
         of cmd_ps. From David Alessio.
 
     * apps/netutils:
@@ -11802,7 +11804,7 @@ Additional new features and extended functionality:
 
     * File System and Block and MTD Drivers:
 
-      - Add Fujistu MB85RS256B ramtron support.  From Beat Küng.
+      - Add Fujistu MB85RS256B ramtron support.  From Beat KÃ¼ng.
       - SPI-based MTD driver for Macronix MX25L3233F or MX25L6433F.  From
         Aleksandr Vyhovanec.
 
@@ -12059,7 +12061,7 @@ detailed bugfix information):
         space.  Rather, FIONSPACE should return the free space in the send
         queue.
       - Add missing prototype for btn_lower_initialize().
-      - Make DAC sample structure packed.  From Marc Rechté.
+      - Make DAC sample structure packed.  From Marc RechtÃ©.
 
     * Networking:
 
@@ -12087,7 +12089,7 @@ detailed bugfix information):
         Likewise, enabling the pull-up resistor while the pull-down resistor
         is still enabled is not possible. In this case, the write of
         PIO_PUER for the relevant I/O line is discarded.  From Wolfgang
-        Reißnegger.
+        ReiÃŸnegger.
 
     * Atmel SAMV7 Drivers:
 
@@ -12191,7 +12193,7 @@ detailed bugfix information):
         DMA is enabled.
       - STM32 DMA2D: fix an error in up_dma2dcreatelayer where an invalid
         pointer was returned when a certain underlying function failed.
-        From Jens Gräf.
+        From Jens GrÃ¤f.
 
     * TI Tiva Drivers:
 
@@ -12205,17 +12207,17 @@ detailed bugfix information):
         problems when the syslog output is prefixed with time.  From
         Pierre-noel Bouteville.
       - libc/math: This fixes the following libc/math issues: (1) asin[f l]()
-        use Newton’s method to converge on a solution. But Newton’s method
+        use Newton's method to converge on a solution. But Newton's method
         converges very slowly (> 500,000 iterations) for values of x close to
         1.0; and, in the case of asinl(), sometimes fails to converge (loops
         forever). The attached patch uses an trig identity for values of
         x > sqrt(2). The resultant functions converge in no more than 5
         iterations, 6 for asinl().  (2) The NuttX erf[f l]() functions are
-        based on Chebyshev fitting to a good guess. The problem there’s a
+        based on Chebyshev fitting to a good guess. The problem there's a
         bug in the implementation that causes the functions to blow up with
         x near -3.0. This patch fixes that problem. It should be noted that
         this method returns the error function erf(x) with fractional error
-        less than 1.2E-07 and that’s fine for the float version erff(), but
+        less than 1.2E-07 and that's fine for the float version erff(), but
         the same method is used for double and long double version which
         will yield only slightly better precision. This patch doesn't
         address the issue of lower precision for erf() and erfl(). (3) a
@@ -12254,7 +12256,7 @@ detailed bugfix information):
         to run all of the context setup; the compiler is never invoked; no
         code is autogenerated and things work.
       - CXXFLAGS:  Add -fcheck-new whenever -fno-exceptions is used. From
-        Beat Küng.
+        Beat KÃ¼ng.
 
     * Tools
 
@@ -12431,7 +12433,7 @@ Additional new features and extended functionality:
     * NXP Freescale Kinetis:
 
       - Kinetis:  Added missing headers.  Kinetis broke out SPI to
-        kinetis/kinetis_spi.h. Broke out DMA to use the modern Nuttx chip
+        kinetis/kinetis_spi.h. Broke out DMA to use the modern NuttX chip
         inclusion - still STUBS.  Add Kinetis support for ARMV7-M Common
         Vector and FPU.  Allow CONFIG_ARMV7M_CMNVECTOR,
         CONFIG_STACK_COLORATION, CONFIG_ARCH_FPU.  Fix  i2c driver offset
@@ -12482,10 +12484,10 @@ Additional new features and extended functionality:
       - STM32 F3:  Implementation of the STM32 F37xx SDADC module. There are
         also changes to ADC, DAC modules. SDADC has only been tested in DMA
         mode and does not support external TIMER triggers. This is a work in
-        progress.  From  Marc Rechté.
+        progress.  From  Marc RechtÃ©.
       - STM32 F3:  Add PWM driver support for STMF37xx.  The changes have been
         tested successfully for TIM4 and TIM17 (different IPs).  From  Marc
-        Rechté.
+        RechtÃ©.
       - STM32 F4:  Support oversampling by 8 for the STM32 F4. From David
         Sidrane.
       - STM32 F4:  Added Timers 2-5 and control of SAI and I2S PLLs.  Added
@@ -12512,13 +12514,13 @@ Additional new features and extended functionality:
       - STM32F103 Minimum:  Add Vishay VEML6070 driver support to the
         STM32F103-Minimum board.  From Alan Carvalho de Assis.
       - Nucleo-F303RE:  Add STM32 F303RE hello configuration.   From Marc
-        Rechté.
+        RechtÃ©.
       - Nucleo-L476:  Support PWM testing on board Nucleo L476.  From
         Sebastien Lorquet.
       - Nucleo L476:  Add support for timers to Nucleo L476.  From Sebastien
         Lorquet.
       - Hymini STM32v:  Enable CONFIG_RTC in the hymini-stm32v/nsh2
-        (kitchensink) config. From Maciej Wójcik.
+        (kitchensink) config. From Maciej WÃ³jcik.
       - Olimex STM32-p407:  Add support for the Olimex STM32 P407 board.
 
     * TI Tiva Drivers:
@@ -12766,7 +12768,7 @@ detailed bugfix information):
       - All timer lower half drivers.  Port Sebastien's changes to all other
         implementations of the timer lower half.
       - USB MSC Device:  Fix length of mode6 sense reply packet.  From
-        Wolfgang Reißnegger.
+        Wolfgang ReiÃŸnegger.
       - USB Composite Host:  Fix end offset in usbhost_copyinterface().  From
         Janne Rosberg.
       - USB CDC/ACM Host:   Add CDC_SUBCLASS_ACM and CDC_PROTO_ATM to
@@ -12831,12 +12833,12 @@ detailed bugfix information):
         be cleared which will cause the next transaction to fail if DTGLE is
         1. If that happens the host will time-out and reset the bus.  Adding
         this delay may also fix the USBMSC_STALL_RACEWAR in usbmsc_scsi.c,
-        however this has not been verified yet.  From Wolfgang Reißnegger.
+        however this has not been verified yet.  From Wolfgang ReiÃŸnegger.
       - SAM3/4: Remove unused 'halted' flag from UDP driver.  From Wolfgang
-        Reißnegger.
+        ReiÃŸnegger.
       - SAM3/4: Remove 'stalled' flag from the UDP driver.  This flag is not
         necessary because the state of the endpoint can be determined using
-        'epstate' instead. From Wolfgang Reißnegger.
+        'epstate' instead. From Wolfgang ReiÃŸnegger.
 
     * Atmel SAM3/4 Boards:
 
@@ -12910,9 +12912,9 @@ detailed bugfix information):
 
       - STM32 CHxN channels are always outputs.  From Sebastien Lorquet.
       - STM32 DAC:  Fix shift value whenever there are is a DAC2 and, hence,
-        up to three interfaces.  From Marc Rechté.
-      - STM32 F1:  Add TIM8 to STM32F103V pinmap.  From Maciej Wójcik.
-      - STM32 F1: Fix for F1 RTC Clock, tested on F103.  From Maciej Wójcik.
+        up to three interfaces.  From Marc RechtÃ©.
+      - STM32 F1:  Add TIM8 to STM32F103V pinmap.  From Maciej WÃ³jcik.
+      - STM32 F1: Fix for F1 RTC Clock, tested on F103.  From Maciej WÃ³jcik.
       - STM32 F3:  STM32F303xB and STM32F303xC chips have 4 ADCs.  From Paul
         A. Patience.
       - STM32 F4:  A new implementation of the STM32 F4 I2C bottom half.  The
@@ -12957,14 +12959,14 @@ detailed bugfix information):
       - STM32F103 Minimum: Fix Timers 2 to 7 clock frequencies. From Alan
         Carvalho de Assis.
       - Nucleo-F303RE:  Remove duplicate setting from board.h.   From  Marc
-        Rechté.
+        RechtÃ©.
       - Nucleo F303RE: Various fixes to get the ADC configuration building
         again after PR.  Refresh all configurations.
       - Nucleo L476RG: Add better selection of timer.
 
     * TI Tiva Boards:
 
-      - DK-TM4C129x: Typo fix.  From Wolfgang Reißnegger.
+      - DK-TM4C129x: Typo fix.  From Wolfgang ReiÃŸnegger.
 
     * Xtensa ESP32:
 
@@ -13129,8 +13131,8 @@ Additional new features and extended functionality:
         kinetis_pinirq(), stm32_gpiosetevent(), and others.
       - IRQ subsystem:  Add support for smaller interrupt tables as
         described at
-        http://www.nuttx.org/doku.php?id=wiki:howtos:smallvectors .  This
-        is partially the work of Mark Schulte.
+        https://cwiki.apache.org/confluence/display/NUTTX/Smaller+Vector+Tables.
+        This is partially the work of Mark Schulte.
 
     * File Systems/Block and MTD Drivers
 
@@ -13167,7 +13169,7 @@ Additional new features and extended functionality:
 
     * Atmel SAM3/4:
 
-      - SAM3/4: Add support for ATSAM4S4C.  From Wolfgang Reißnegger.
+      - SAM3/4: Add support for ATSAM4S4C.  From Wolfgang ReiÃŸnegger.
 
     * NXP Freescale i.MX6 Boards:
 
@@ -13209,7 +13211,7 @@ Additional new features and extended functionality:
       - Add support for NXP Freedom-k66f development board.  From David
         Sidrane.
       - Kinetis Freedom K66F:  Add Ethernet support.  From David Sidrane.
-      - Add twr-k64f120m config.  From Marc Rechté.
+      - Add twr-k64f120m config.  From Marc RechtÃ©.
 
     * NXP Freescale LPC43xx Boards:
 
@@ -13386,7 +13388,7 @@ detailed bugfix information):
       - File System: Don't build block driver proxy if PSEUDOFS_OPERATIONS
         are disabled.
       - sendfile():  Fix error introduced with commit
-        ff73be870e38959b0aaee5961dc47b4b58dc2d86.  Noted by Maciej Wójcik.
+        ff73be870e38959b0aaee5961dc47b4b58dc2d86.  Noted by Maciej WÃ³jcik.
 
     * Graphics/Graphic Drivers:
 
@@ -13403,7 +13405,7 @@ detailed bugfix information):
       - Typos withim mtd/ with Macronix MX25L.  In
         NuttX/drivers/mtd/Make.defs letters X between M and 25 are
         missing.  Noted by Oleg Evseev.
-      - USBMSC: Always set LUN readonly flag.  From Wolfgang Reißnegger.
+      - USBMSC: Always set LUN readonly flag.  From Wolfgang ReiÃŸnegger.
       - drivers/lcd:  ssd1306_configspi() must have global scope.
       - MMC/SD SDIO:  Some drivers need to start DMA before sending CMD24
         and some AFTER.  From Alan Carvalho de Assis.
@@ -13413,9 +13415,9 @@ detailed bugfix information):
       - drivers/tone.c:  50% duty needs to be expressed a a fixed precision
         number.
       - drivers/spi/Kconfig:  There is too much SPI in the configuration
-        menu; SPI Driver Support menu is empty.  From Maciej Wójcik.
+        menu; SPI Driver Support menu is empty.  From Maciej WÃ³jcik.
       - option to enable Memory Card debug output was hidden with SD cards
-        connected through SPI.   From Maciej Wójcik.
+        connected through SPI.   From Maciej WÃ³jcik.
       - usbhost_cdcacm: fix tx outbuffer overflow and remove now invalid
         assert.  From Janne Rosberg.
 
@@ -13438,7 +13440,7 @@ detailed bugfix information):
 
     * Atmel SAM3/4 Drivers:
 
-      - SAM3/4: GPIO bit numbering typo fixes.  From Wolfgang Reißnegger.
+      - SAM3/4: GPIO bit numbering typo fixes.  From Wolfgang ReiÃŸnegger.
 
     * Atmel SAM3/4 Boards:
 
@@ -13460,7 +13462,7 @@ detailed bugfix information):
       - Kinetis:  Correct some SPI and I2C configuration issues.  From
         David Sidrane.
       - Kinetis Ethernet:  Add #define for number of loops for auto
-        negotiation to complete.  From Marc Rechté.
+        negotiation to complete.  From Marc RechtÃ©.
       - Kinetis Werial:  Fixed up_rxint - did not disable the RX
         interuppts. There was an OR where and AND NOT was needed.  From
         David Sidrane.
@@ -13536,7 +13538,7 @@ detailed bugfix information):
 
       - The CONFIG_NETUTILS_HTTPD_PATH constant is used by httpd_mmap.c and
         httpd_sendfile.c but It was not present in Kconfig menu.  From
-        Maciej Wójcik.
+        Maciej WÃ³jcik.
 
     * apps/examples:
 
@@ -14066,16 +14068,16 @@ detailed bugfix information):
         elf_sectname().  From Masayuki Ishikawa.
       - There can be a failure in IOB allocation to some asynchronous
         behavior caused by the use of sem_post().  Consider this scenario:
-        (1) Task A holds an IOB.  There are no further IOBs.  The value of
-        semcount is zero. Task B calls iob_alloc().  Since there are not
-        IOBs, it calls sem_wait().  The value of semcount is now -1.  (2)
-        Task A frees the IOB.  iob_free() adds the IOB to the free list and
+        (1) Task A holds an IOB. There are no further IOBs. The value of
+        semcount is zero. Task B calls iob_alloc(). Since there are not
+        IOBs, it calls sem_wait(). The value of semcount is now -1.  (2)
+        Task A frees the IOB. iob_free() adds the IOB to the free list and
         calls sem_post() this makes Task B ready to run and sets semcount to
-        zero NOT 1.  There is one IOB in the free list and semcount is zero.
+        zero NOT 1. There is one IOB in the free list and semcount is zero.
         When Task B wakes up it would increment the sem_count back to the
         correct value.  (3) But an interrupt or another task runs occurs
-        before Task B executes.  The interrupt or other tak takes the IOB off
-        of the free list and decrements the semcount.  But since semcount is
+        before Task B executes. The interrupt or other tak takes the IOB off
+        of the free list and decrements the semcount. But since semcount is
         then < 0, this causes the assertion because that is an invalid state
         in the interrupt handler. So I think that the root cause is that
         there the asynchrony between incrementing the semcount.  This change
@@ -14197,10 +14199,10 @@ detailed bugfix information):
       - drivers/i2c:  Fix compile issues if CONFIG_DISABLE_PSEUDOFS_OPERATIONS
         is enabled.
       - drivers/serial: I discovered a problem in the file
-        drivers/serial/serial.c concerning the function uart_close(…). In the
+        drivers/serial/serial.c concerning the function uart_close. In the
         case that a serial device is opened with the flag O_NONBLOCK the
-        function uart_close(…) blocks until all data in the buffer is
-        transmitted. The function close(…) called on an handle opened with
+        function uart_close blocks until all data in the buffer is
+        transmitted. The function close called on an handle opened with
         O_NONBLOCK should not block. The problem occurred with a CDC/ACM
         device.  From Stefan Kolb.
       - drivers:  Fix some bad NULL checks.  From Juha Niskanen.
@@ -14320,7 +14322,7 @@ detailed bugfix information):
       - STM32:  Fix erase sector number for microcontrolers with more than 11
         sectors.  Erase a sector from the second bank cause the bit 4 of SNB
         being set but never unused, so trying to erase a sector from the first
-        bank was actually eraseing a sector from the second bank.  From José
+        bank was actually eraseing a sector from the second bank.  From JosÃ©
         Roberto de Souza.
       - STM32:  Make up_progmem thread safe.  Writing to a flash sector while
         starting the erase of other sector have a undefined behavior so lets
@@ -14329,16 +14331,16 @@ detailed bugfix information):
         call stm32_flash_initialize() on initialization, so to avoid runtime
         problems it is only using semaphore and making it thread safe if
         initialized, after all boards starts to call stm32_flash_initialize()
-        we can remove the boolean and the check.  From José Roberto de Souza.
+        we can remove the boolean and the check.  From JosÃ© Roberto de Souza.
       - STM32:  Add workaround for flash data cache corruption on
         read-while-write.  This is a known hardware issue on some STM32 see
         the errata of your model and if you make use of both memory banks you
-        should enable it.  From José Roberto de Souza.
-      - STM32 Flash fixes.  From José Roberto de Souza.
+        should enable it.  From JosÃ© Roberto de Souza.
+      - STM32 Flash fixes.  From JosÃ© Roberto de Souza.
       - STM32 Flash:  Missing unlock on F1 HSI off path.  From David Sidrane.
-      - STM32 F4 I2C: I needed to use DS3231, I remember that in past it
+      - STM32 F4 I2C: I needed to use DS3231, I remember that in past it
         worked ok, but now for stm32f4xx is used another driver (chip
-        specific, stm32f40xxx_i2c.c) and DS3231 driver doesn't work.  After
+        specific, stm32f40xxx_i2c.c) and DS3231 driver doesn't work.  After
         investigating a problem I found that I2C driver (isr routine) has a
         few places there it sends stop bit even if not all messages are
         managed. So, e.g., removing stm32_i2c_sendstop (#1744) and adding
@@ -14686,7 +14688,7 @@ Additional new features and extended functionality:
       - LED Driver:  Add support for inverted LEDS.  From Jeff.
       - LED Driver:  Add lightness correction for RGB LED driver.  From Jeff.
       - LTC4151 Driver:  Add driver for LTC4151 current and voltage monitor.
-        From Giorgio Groß.
+        From Giorgio GroÃŸ.
       - Serial TERMIOS:  tcdrain() implementation based on a new term ioctl.
         From Sebastien Lorquet.
       - Serial TERMIOS:  Add support for TCFLUSH.  From Sebastien Lorquet.
@@ -14816,12 +14818,12 @@ Additional new features and extended functionality:
         STM32_RCC_CR_HSEBYP in their board.h file if they want this
         configuration.  From Jeff.
       - STM32 F4 USB:  I'm working on bringing up USB full-speed support on
-        STM32F405.  My board does not include a USB power switch, VBus
+        STM32F405. My board does not include a USB power switch, VBus
         sensing, over current detection, or ID pin.  This commit add a
-        config STM32_OTGFS_VBUS_ CONTROL which lets us selectively disable
-        VBus sensing and control.  I also sneaked in a change to disable the
+        config STM32_OTGFS_VBUS_ CONTROL which lets us selectively disable
+        VBus sensing and control.  I also sneaked in a change to disable the
         configgpio call for the ID pin, which is only used in OTG mode which
-        isn't supported yet.  The only pins that need to be initialized should
+        isn't supported yet.  The only pins that need to be initialized should
         be OTGFS_DP and OTGFS_DM.  From Jeff.
       - STM32 FLASH:  Add CONFIG_STM32_STM32F469 support. From David Sidrane.
       - STM32 COMP:  Add default INM configuration and some missing COMP
@@ -15020,7 +15022,7 @@ Additional new features and extended functionality:
       - examples/ipforward: Add an IP forwarding example using only TUN
         devices.  Test extended to test forwarding of ICMPv6 multicast messages.
       - Implement powermonitor example for ltc4151 current and voltage
-        monitor.  From Giorgio Groß.
+        monitor.  From Giorgio GroÃŸ.
       - examples/pf_ieee802154:  Add for testing PF_IEEE802154 sockets.  Add
         PANID to command line options; Cannot bind to address zero... There is
         no counterpart to INADDR_ANY for these radios (not now at least).
@@ -15326,7 +15328,7 @@ detailed bugfix information):
         of the other CAN nodes to 500000. The device is restarted and sends a
         CANopen "bootup message" to the CAN network. This results in huge
         amount of errors messages on the CAN bus, probably because of the CAN
-        feature for acknowledging error messages. The error messages can’t be
+        feature for acknowledging error messages. The error messages can't be
         read by the device because of the misconfigured CAN speed, instead the
         CAN chip reports lots of errors, which are reported to the application
         which uses the CAN driver (CONFIG_CAN_ERRORS is enabled).  The CAN
@@ -16029,7 +16031,7 @@ Additional new features and extended functionality:
         Merlino.
       - Olimex STM32-H407:  Add serial support on the on-board UEXT
         connector.  Add USART6 for UEXT connector.   Add nsh_uext
-        configuration and README update.  From Jan Pobríslo.
+        configuration and README update.  From Jan PobÅ™Ã­slo.
       - Nucleo-F410RB:  Add support for the nucleo-F410RB board.  From
         Gwenhael Goavec-Merou.
       - STM32F429i-DISCO:  Add framebuffer driver initialization.  Add a
@@ -16587,9 +16589,9 @@ detailed bugfix information):
       - Nucleo-F334R8:  Add Missing ADC trigger configuration tot he highpri
         configuration.  From Mateusz Szafoni.
       - STM3240G-EVAL:  The timer frequencies (BOARD_TIMx_FREQUENCY) are
-        incorrectly defined in board.h.  Since the APB prescalers are set to
+        incorrectly defined in board.h.  Since the APB prescalers are set to
         divide by 4 and 2 respectively, the frequencies should be "2xAPBx"
-        as said in the comment.  The correct frequencies are already defined
+        as said in the comment. The correct frequencies are already defined
         but as STM32_APBx_TIMx_CLKIN.  From Mattias Edlund.
       - STM32F429i-DISCO:  The ltdc configuration has been deleted because
         it violated the portable POSIX OS interface.  It used
@@ -17230,7 +17232,7 @@ detailed bugfix information):
       - ARP:  Fix an error introduced when ICMP and ICMP6 socket support was
         added in NuttX-7.3.  A gratuitous ARP (or solicitation) was being
         sent after receive of the ECHO replay (advertisement).
-      - ARP:  Fix IGMP multicast address computation on Nuttx network stack.
+      - ARP:  Fix IGMP multicast address computation on NuttX network stack.
         This change fixes the IGMP address computation to allow multicast
         UDP messages. The destination address was created with the incorrect
         bytes of the given IPv4 address.  From Louis Mayencourt.
@@ -17535,7 +17537,7 @@ Additional new features and extended functionality:
         allow any I2C operations after unlink, making it possible to
         deallocate the I2C bus.  From Juha Niskanen.
       - drivers/i2c:  Added support for the pca9540bdp i2cmultiplexer.  From
-        Giorgio Groß.
+        Giorgio GroÃŸ.
       - drivers/power:  Added pm_unregister  From Juha Niskanen.
       - drivers/power:  Added generic upper-half motor driver  From Mateusz
         Szafoni.
@@ -18958,9 +18960,9 @@ Additional new features and extended functionality:
       - apps/nshlib:  Add parsing support for back-slash quoted
         characters. Currently only implemented properly if
         CONFIG_NSH_ARGCAT is also selected.  This commit is in response to
-        Bitbucket Issue 11 opened by Maciej Wójcik  From Gregory Nutt.
+        Bitbucket Issue 11 opened by Maciej WÃ³jcik  From Gregory Nutt.
       - apps/nshlib:  Add inverted logic support in the form of 'if !
-        <cmd>'  From  Beat Küng.
+        <cmd>'  From  Beat KÃ¼ng.
       - apps/nshlib:  Expand reboot and poweroff commands to include a
         second, optional mode argument  From ligd.
       - apps/nshlib:  Add a force flag (-f) to mksmartfs command.  SmartFS
@@ -18991,7 +18993,7 @@ Additional new features and extended functionality:
       - apps/examples/calib_udelay:  Add tool for calibrating
         CONFIG_BOARD_LOOPSPERMSEC  From Juha Niskanen.
       - apps/examples/dhtxx: Example for the DHTxx sensor.  From Ouss4.
-      - apps/examples/dsptest:  Add unit test for Nuttx DSP library  From
+      - apps/examples/dsptest:  Add unit test for NuttX DSP library  From
         Mateusz Szafoni.
       - apps/examples/elf:  CROMFS and ROMFS configuration currently only
         usable in FLAT build.  Add configuration to use ELF objects on
@@ -19595,7 +19597,7 @@ detailed bugfix information):
         would exit immediately, while using 'until' would stay in the
         loop.  This is the opposite of how it is supposed to work.  The
         reason is that 'state' was set wrong because 'whilematch' is a
-        bool.  From Beat Küng.
+        bool.  From Beat KÃ¼ng.
       - apps/nshlib:  I was able to cause an assertion with some typos in
         testing the 'fi' command.  Not an important thing, but this will
         protect against the assertion.  From Gregory Nutt.
@@ -20389,7 +20391,7 @@ detailed bugfix information):
 
     * NXP i.MXRT Drivers:
 
-      - i.MXRT Ethernet: The board would not come up if I ran Nuttx from cold.
+      - i.MXRT Ethernet: The board would not come up if I ran NuttX from cold.
         I dumped the PHY registers to see what the differences were and the
         PHY was coming up in NANDTree mode. This is a mode for testing
         connectivity between the PHY and the MAC.  Switching this mode off in
@@ -21579,7 +21581,7 @@ detailed bugfix information):
         code if it's divided into smaller functions  From Mateusz Szafoni
       - STM32 F0 Clocking:  Fixes the problem in GPIO port clocks. Only port
         A clock was enabled although the comment states otherwise.  From Juha
-        Paalijärvi
+        PaalijÃ¤rvi
       - STM32 F7 I2C:  I2C out of bounds access on priv->msgv.  Error in if
         statement. It was checking for msgc > 0.  If message count is 1, only
         index 0 is valid on priv->msgv.  Therefore random values in memory
@@ -22415,9 +22417,9 @@ detailed bugfix information):
         and (2) once via sched_releasetcb().  this was corrected by adding
         logic to free/unload the memory once and nullify the pointer so
         that cannot be freed a second time.  This commit resolves Bitbucket
-        issue #145.  From Valmantas Palikša.
+        issue #145.  From Valmantas PalikÅ¡a.
       - NxFLAT:  File descriptor leaks when nxflat loading fails.  From
-        Valmantas Palikša.
+        Valmantas PalikÅ¡a.
       - ProcFS:  Fix typo in procfs uptime logic.  From Sebastien Lorquet.
 
     * Networking/Network Drivers:
@@ -22657,7 +22659,7 @@ detailed bugfix information):
 
     * NXP LPC17xx Drivers:
 
-      - LPC17xx CAN:  The name can_txready clashes with Nuttx CAN core
+      - LPC17xx CAN:  The name can_txready clashes with NuttX CAN core
         global function.  LPC178x has only single LPC17_SYSCON_PCLKSEL with
         only single divisor.  From Pavel Pisa.
 
@@ -22708,7 +22710,7 @@ detailed bugfix information):
         Szafoni.
       - STM32F429I-DISCO:  Handle multiple calls to the LCD
         up_fbinitialize() function.  From Gregory Nutt.
-      - STM32F769I-DISCO:  Florian R. Hölzlwimmer reports that
+      - STM32F769I-DISCO:  Florian R. HÃ¶lzlwimmer reports that
         stm32_appinitialize.c often has missing OK and NULL definitions.
         This should be fixed by including sys/types.h where they are
         defined.  From GregoryN.
@@ -22818,7 +22820,7 @@ detailed bugfix information):
       - NSH Console:  Fix copy paste errors. Some Kconfig configuration
         names needed CONFIG_ prefix.  From David Sidrane.
       - nshlib/nsh_timcmds.c:  Uninitialized struct tm caused 'date -s' to
-        fail.  From Valmantas Palikša.
+        fail.  From Valmantas PalikÅ¡a.
 
     * Examples: apps/examples:
 
@@ -23529,7 +23531,7 @@ Additional new features and extended functionality:
       - Telnet Driver:  Handle ctrl events (SIGINT, SIGSTP).  From
         Valmantas Paliksa.
       - Telnet Driver:  I/O thread now offloads reading from socket
-        from client thread to the I/O thread.  From Valmantas Palikša.
+        from client thread to the I/O thread.  From Valmantas PalikÅ¡a.
 
     * Wireless/Wireless Drivers:
 
@@ -23599,7 +23601,7 @@ Additional new features and extended functionality:
         only one port is active (either 1 or 2) it will always be numbered
         as 0, if both are active then USDHC1 will be number 0, USDHC2 will
         be 1.  From Dave Marples.
-      - i.MXRT Serial:  Add TIOCSINVERT ioctls.  From Beat Küng.
+      - i.MXRT Serial:  Add TIOCSINVERT ioctls.  From Beat KÃ¼ng.
       - i.MXRT Serial:  Implemented RS485 RX/TX switching and RTS/CTS flow
         control for the IMXRT family.  It has been tested on 1020 but I
         don't see any reason for issues on any other family member.  From
@@ -23607,7 +23609,7 @@ Additional new features and extended functionality:
 
     * NXP/Freescale Kinetis Drivers:
 
-      - Kinetis Serial:  Add UART signal inversion support  From Beat Küng.
+      - Kinetis Serial:  Add UART signal inversion support  From Beat KÃ¼ng.
 
     * NXP LPC11xx:
 
@@ -23815,7 +23817,7 @@ Additional new features and extended functionality:
       - STM32F7 Serial:  This adds the ability to invert and swap RX/TX on
         STM32F7 UARTs.  I added the TIOCGINVERT as well to reserve the IOCTL
         number, but did not implement it. This is the same as for
-        TIOCGSINGLEWIRE.  From Beat Küng.
+        TIOCGSINGLEWIRE.  From Beat KÃ¼ng.
       - STM32L4 CRS:  Make STM32L4 CRS synchronization source board
         configurable.  From Juha Niskanen.
       - STM32L4 HSI48:  Enable CRS_CR_CEN with CRS_CR_AUTOTRIMEN.  From
@@ -23827,14 +23829,14 @@ Additional new features and extended functionality:
       - STM32L4 RCC:  Use Range 1 Boost mode if SYSCLK is higher than 80
         MHz.  From Juha Niskanen.
       - STM32L4 Serial:  Add TIOCSINVERT and TIOCSSWAP ioctls.  From Beat
-        Küng.
+        KÃ¼ng.
       - STM32H7 ADC:  Added ADC Driver, ADC clocking.  From David Sidrane.
       - STM32H7 Ethernet: Fix typo in define.  From Pierre-Olivier Vauboin.
       - STM32H7 PWM:  Port PWM from STM32  From Mateusz Szafoni.
       - STM32H7 QEncoder:  Ported the QEncoder from F7 to H7.  From Eduard
         Niesner.
       - STM32H7 Serial:  Add TIOCSINVERT and TIOCSSWAP ioctls.  Ensure
-        TIOCSSINGLEWIRE is atomic and UE disabled.  From Beat Küng.
+        TIOCSSINGLEWIRE is atomic and UE disabled.  From Beat KÃ¼ng.
 
     * STMicro STM32 Boards:
 
@@ -24745,7 +24747,7 @@ Additional new features and extended functionality:
     * NXP/Freescale Kinetis Drivers:
 
       - Kinetis Serial:  Add possibility to specify pull-up instead of
-        open drain for serial single-wire mode.  From Beat Küng.
+        open drain for serial single-wire mode.  From Beat KÃ¼ng.
 
     * NXP LPC17xx/40xx:
 
@@ -25595,7 +25597,7 @@ information):
     * Tools:
 
       - tools/:  Change all occurrences of /bin/(ba)sh in shell scripts to
-        /usr/bin/env bash which appears more portable  From Manuel Stühn.
+        /usr/bin/env bash which appears more portable  From Manuel StÃ¼hn.
 
     * NSH Library: apps/nshlib:
 
@@ -26113,7 +26115,7 @@ information):
         options and SDCC no longer needs the work-around.  From Gregory
         Nutt.
       - clock_systimespec():  Fix early timespec overflow if using 32 bit
-        system timer.  From Jens Gräf.
+        system timer.  From Jens GrÃ¤f.
       - Spinlocks:  spin_trylock handle memory barrier and instrumentation
         correctly.  From Xiang Xiao.
       - Power Management:  Fix a problem where a timer cannot start when it
@@ -26652,7 +26654,7 @@ This is the first release of NuttX as Apache NuttX (Incubating) and represents o
            - Add support for the Digilent ARTY_A7 board to test the Litex port
            - Added initial support for Sipeed Maix Bit board with Kendryte K210 processor
            - New architectural support: ez80f92
-           - Flat address x86_64 port of Nuttx
+           - Flat address x86_64 port of NuttX
            - Support to run NuttX on ESP32 QEMU
            - Initial support for Sipeed Maix Bit board with Kendryte K210 processor
            - Add initial support for Kendryte K210 processor in SMP mode
@@ -26766,3 +26768,1621 @@ This is the first release of NuttX as Apache NuttX (Incubating) and represents o
            - Fix slcd to avoid using priv->fd before initializing it
            - Fix (tcp, udp)blaster to build on macOS
            - Correct the buffer type of base64 program
+
+NuttX-9.1.0 Release Notes -------------------------
+
+  * Major Changes to Core OS:
+      * New Features:
+        - PR-977 PR-987 PR-998 PR-995 PR-997 PR-1007 Thread Local Storage (TLS)
+          is now a required feature and used by all architectures
+          There is detailed information on the implementation and how this
+          impacts errno specifically in the Wiki article: Userspace errno and
+          TLS
+        - PR-957 PR-947 PR-963 PR-969 Provide nx_ versions of many functions
+          that are used internally to avoid disrupting errno in userspace
+        - PR-965 PR-980 PR-984 ioctl is now always in the variadic form.
+          Syscalls in KERNEL builds are also more efficient with this as well now.
+          Previously the ioctl prototype was normally defined as:
+
+          int ioctl(int fd, int cmd, unsigned long arg);
+
+          unless the CONFIG_LIBC_IOCTL_VARIADIC was enabled in which case it was
+
+          int ioctl(int fd, int cmd, ...); This form is now the form defined by
+          opengroup and is also inline with Linux.  Prior to this change there
+          were issues with making ioctl calls on 64-bit arch since the
+          implementation assumed that (void *) would be of size long.  There is
+          more discussion of this issue in the GitHub issue ticket here:
+
+          https://github.com/apache/incubator-nuttx/issues/959
+
+        - PR-962 PR-964 Add new interface sched_get_stackinfo that simplifies
+          interfaces for things like TLS
+          There are some security imposed rules for using this interface
+              Any thread may query its own stack, A kernel thread may query the
+              stack of any other thread Application threads, however, may query
+              only the stacks of threads within the same task group, i.e., the
+              main thread and any of the child pthreads created with the main
+              thread as a parent or grandparent or great-grandparent.
+
+        - PR-1104 Internal function fs_fsopen() no longer affects errno -
+        - PR-1123 Move task_init() and task_activate() to be internal functions -
+        - PR-1140 Add nxtask_uninit() interface
+          This function will undo all operations on a TCB performed by
+          task_init() and release the TCB by calling kmm_free(). This is
+          intended primarily to support error recovery operations after a
+          successful call to task_init() such was when a subsequent call to
+          task_activate fails.
+        - PR-1134 Add typedef for max_align_t
+        - PR-1141 Handle custom stack allocations
+          sched_releasetcb() will normally free the stack allocated for a task.
+          However, a task with a custom, user-managed stack may be created using
+          nxtask_init() followed by nxtask_activate(). If such a custom stack is
+          used then it must not be freed in this manner or a crash will most
+          likely result.
+
+          This change adds a flag call TCB_FLAG_CUSTOM_STACK that may be passed
+          in the the pre-allocated TCB to nxtask_init(). This flag is not used
+          internally anywhere in the OS except that if set, it will prevent
+          sched_releasetcb() from attempting to free that custom stack.
+
+        * Bug Fixes:
+          - Many private architecture interfaces were using 'up_' instead of the
+            arch name 'arm_'
+            This fix is carried over many PRs such as PR-924.  Many files also
+            carried this same error in naming convention and were converted as
+            well.
+
+          - PR-1018 PR-1017 PR-1021 PR-1022 PR-1057 PR-1060 PR-1194 Clean up
+            internal APIs that were not using the properly naming conventions -
+          - PR-857 Wrong value for it_interval field in timespec returned by
+            timer_gettime - PR-902 SMP: On task creation do not clone
+            uninitialized descriptors
+            In SMP mode, there is a possibility that a pthread executing one CPU
+            may create a new task while a pthread on another CPU has allocated
+            the socket but not yet initialized it. This commit updates the
+            socket clone test to assure that the socket is both allocated and
+            initialized before it is cloned.
+          - PR-911 Use OS signal functions internally to not reset errno that
+            applications are using
+          - PR-925 sys/stat.h Change the xtime fields to align with POSIX
+            standard. Starting from Issue 7 of the POSIX standard the fields
+            st_atime, st_mtime and st_ctime have a type of strcut timespec instead
+            of time_t.
+          - PR-939 openamp: Update to 2020.04.0 - PR-953 lib_vsprintf: Fix issue
+            where stack would become corrupt on x86_64
+            This function requires traversing the VA_LIST twice.  For some
+            architectures like x86 and x86_64 this needs to be cloned first.
+
+  * Major Changes to the Build System:
+    Parts of the build system have been refactored to reduce duplication and
+    simplify Makefile and Make.defs files across many directories. These changes
+    are particularly beneficial for boards.
+
+    Please note that if you develop your own custom boards, you may need to make
+    some modifications to keep your board's build scripts up-to-date with the
+    rest of NuttX and avoid a broken or defective build. For details, see
+    Compatibility Concerns, Changes to Build System, in these release notes.
+
+      * New Features:
+        - PR-894 openamp and libmetal can now be downloaded and configured by
+          build system - PR-941 Remove 'u' prefix from userspace library in FLAT
+          Build so it is the same for all build types - PR-1044 ARM: Remove
+          support for old redundant gcc toolchains
+
+          This removes support for the Codesourcery, Atollic, DevKitArm,
+          Raisonance, and CodeRed toolchains. Not only are these tools old and
+          no longer used but they are all equivalent to the standard ARM EABI
+          toolchains. Retaining specific support was not meaningful (and they
+          are still supported, but now just as generic EABI toolchains).
+        - PR-1148 PR-1149 Improve build time especially on non-Linux platforms
+          by providing a C version of incdir.sh
+
+      * Bug Fixes:
+        Many small changes to resolve dependency resolution issues that would
+        sometimes appear during parallel builds.  Parallel builds should be much
+        more reliable now and bugs filed against any issues found.
+
+        - PR-1000 Fix broken support of ZDS-II Toolchain with MSYS
+
+  * Architectural Support:
+      * New Architecture Support:
+        - PR-879 ARMv8-M support - PR-1051 STM32G474 support
+
+        - Initial architectural support for the STM32G474 family of
+          microcontrollers. In terms of peripherals, currently there is basic
+          support for the RCC and UART, allowing NuttX to boot to a functional
+          NSH prompt on this family. Other peripherals on the SoC are not yet
+          supported and/or not tested yet. Contributions to enable other
+          peripherals are welcome. This adds support for these variants:
+
+            STM32G474C STM32G474M STM32G474R STM32G474Q STM32G474V
+
+      * Architectures With Significant Improvements:
+        - PR-745 The full line of STM32H7 chips are now defined
+          This adds support for these variants:
+
+              STM32H743AG STM32H743AI STM32H743BG STM32H743BI STM32H743IG
+              STM32H743II STM32H743VG STM32H743VI STM32H743XG STM32H743XI
+              STM32H743ZG STM32H753AI STM32H753BI STM32H753VI STM32H753XI
+              STM32H753ZI
+
+        - PR-811 i486: Fix corruption of esp register on full context restore
+          This resolves a long standing issue with running the x86 port under
+          QEMU where it would crash shortly after boot.
+
+        - PR-837 rx65n: Add crashdump support using standby RAM - PR-862
+          STM32L4: Expose LPTIM timers - PR-868 STM32L4: Extend clock options and
+          power regulation for based on clock settings
+            Interface to select the core regulator voltage according to clock
+            frequency range Usage of this interface during clock configuration
+            according to chosen clock frequency Option to choose a different
+            system clock than the main PLL (there is HSI, MSI, HSE and LSE
+            available to use) Option to not enable the main PLL which allows for
+            reduced power usage when setting one of the above options as system
+            clock, to do this you should define STM32L4_BOARD_NOPLL on your
+            board header.
+        - PR-960 STM32: Add support for ADC features EXTSEL and JEXTSEL
+        - PR-1041 STM32H7: Improve IDMA transfer and cache handling
+          This resolves an issue where the sdmmc driver crashes at boot when
+          using writeback cache.
+
+          This also simplifies the sdmmc driver when the IDMA is in use. There
+          is no need to mix IDMA and interrupt based transfers; instead, when
+          making unaligned data tranfers, just make IDMA into an internal
+          aligned buffer and then copy the data. This method also enables
+          multiblock transfers, and transfers from/to data buffers which are not
+          aligned on cache boundary.
+        - PR-1042 STM32H7: Resolve multiple limitations and bugs with progmem
+          especailly for partial memory writes
+        - PR-1045 STM32H7: This gives possibility to send arbitrary number of
+          bytes from memory to peripheral using DMA also when using write-back
+          cache
+            It was not possible to DMA to/from AXI sram if
+            CONFIG_STM32H7_DMACAPABLE=y When doing TX DMA (e.g. in SPI driver in
+            simplex-tx mode), it should not be necessary to align the data
+            buffers to the cache line.
+        - PR-1103 STM32H7: Resolve clocking and pin configurations bugs that
+          could cause SDMMC and ETH to fail in some configurations
+        - PR-1104 STM32H7: Use UUID for Ethernet MAC.  This is inline with the
+          behaviour of STM32F7
+        - PR-1110 STM32H7: Use FDCANSEL to determin FDCAN clock source if
+          possible - PR-1165 STM32H7: SPI transaction appears to be completed
+          before the data has actually been flushed
+          TX DMA completes before the data has been actually sent out from the
+          SPI fifo. This is expected, but the exchange should actually wait for
+          spi tx to finish instead of dma to the fifo to finish. This replaces
+          the dma completion event with the SPI TXC event for detecting end of
+          transmission.
+
+        - PR-1203 PR-1204 STM32H7: Enable support for BDMA and enable it for
+          SPI6
+        - PR-905 x86_64: Resolve linking issue when building with gcc 7 and 9.
+        - PR-904 x86_64: Resolve compiler aliasing warnings and RNG
+          pointer cast bug - PR-944 x86_64: Change entrypoint to standard
+          location 1M
+        - PR-971 x86_64: Fix bug in rng implementation using intrinsics
+        - PR-973 x86_64: Fix crash on boot when XSAVE and SSE/AVX is enabled
+        - PR-974 x86_64: Add support booting NuttX as a Jailhouse Cell
+        - PR-919 sim: Add host mmap and perror to allow use of LIBC_MODLIB
+          and BINFMT_LOADABLE
+        - PR-1198 sim: Use correct errno sign with hostfs interface
+        - PR-932 z16: Updated toolchain to ZDS-II 5.2.2
+        - PR-970 K210: Add PLL support
+        - PR-988 K210: Resolve occasional lock in early boot caused by waiting
+          forserial driver to initialize
+        - PR-1205 K210: Add basic GPIOHS support - PR-1112 tiva: Add up_idle
+          support - PR-1116 NRF52832: Work around chip eratta for SPI Master 1
+          Byte transfer anomaly - PR-1130 imxrt: Resolve WFI issue by setting
+          the low power mode to remain in run mode
+        - PR-1197 cxd56: Fix locking issue in Spresense audio driver causes by
+          using semaphore in DMA buffer handling code
+        - PR-1221 Add INTx_C macro defintion
+
+  * Driver Support:
+      * Bug Fixes:
+        - PR-1206 PR-1207 PR-1210 ioctl function should retun ENOTTY when the
+          command is not recognized.
+
+      * New Driver Support:
+        - PR-795 PR-1001 Initial NuttX audio driver supporting the Spresense
+          CXD56
+        - PR-975 Support for HDC1008 temperature and humidity sensor
+        - PR-1201 Support for the CS4344 stereo audio DAC
+        - PR-1145 Support for the FTDI FT232R USB to Serial converter
+        - PR-1052 gs2200m: Add max payload size to prevent crashing when
+          sending large packets
+        - PR-1090 gs2200m: Fix possible packet queue count overflow seen during
+          streaming - PR-1127 gs2200m: Resolve possible buffer overrun in packet
+          parsing - PR-1167 pty: Return correct number of bytes when
+          CONFIG_SERIAL_TERMIOS and OPOST|ONLCR are enabled
+
+      * Drivers With Significant Improvements:
+        - PR-887 PR-888 rptun: Add control for independent control of rx and tx
+          buffer size
+        - PR-917 gs2200m: Receive performance improvement for TCP/UDP
+        - PR-1032 gs2200m: Add SPI-DMA support to spresense
+        - PR-1046 gs2200m: Add getsockname() support
+        - PR-1094 PR-1163 gs2200m: Add flow control support to prevent memory
+          starvation in changing network environments
+        - PR-1101 gs2200m: Add WPA2-PSK AP mode support, this is now the default
+          instead of WEP
+        - PR-1115 SPI slave: Improve interface
+          Enable enqueue and receive full buffers of data with single call, to
+          avoid call overhead when sending / receiving large amounts of data.
+          Enable the slave device to leave received data in the controller
+          receive buffers and retrieve it from there by polling
+        - PR-1196 Audio: Add support for using ap_buffer_info without
+          CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS and return ENOTTY if provided ioctl
+          is not supported
+        - PR-1222 audio/cxd56: Add audio buffering feature.
+
+  * Board Support:
+      * Significant Improvements:
+
+        - PR-1200 The boards_button_initialize and boards_userled_initialize
+          functions now return the number of buttons and leds, thus their
+          prototypes have changed from:
+            void board_button_initialize(void)
+            void board_userled_initialize(void)
+
+            to
+
+            uint32_t board_button_initialize(void)
+            uint32_t board_userled_initialize(void).
+
+      * New Board Support:
+        - PR-1051 ST Micro B-G474E-DPOW1 Discovery Kit
+          Initial support for the ST Micro B-G474E-DPOW1 Discovery Kit with
+          STM32G474RE MCU. Currently there is basic support for booting NuttX to
+          a functional NSH prompt. Other peripherals on the board are not yet
+          supported or not tested yet. Contributions to enable other peripherals
+          are welcome. The NSH prompt can be accessed from a host computer via a
+          Virtual COM Port over the same Micro-USB Type B connection used for
+          programming/debugging.
+        - PR-1211  STM32F411-Minimum board (a.k.a. BlackPill)
+          Initial support for the BlackPill board which is a low cost STM32F411
+          board.  The current support boots NuttX to a functional NSH prompt.
+
+      * Boards With Significant Improvements:
+        - PR-949 qemu-intel64: Add nsh configuration for testing QEMU
+          virtualization
+        - PR-966 qemu-i486: Fix issue where console would not accept input
+          because of wrong IRQ number
+        - PR-993 stm32h747i-disco: Add support for FMC SDRAM - PR-1029 maix-bit:
+          Add knsh configuration for testing Kernel mode under QEMU virtualization
+        - PR-1056 stm32h747i-disco: Add support for FAT and SD Card via SDMMC
+        - PR-1070 PR-1086 spresense: Add ftpd/ftpc and nxplayer to wifi and rndis
+          configurations
+        - PR-1084 imxrt1060-evk: Add dns client and renew command to netnsh
+          configuration
+        - PR-1113 lm3s6965ek: Use proper sysclock for QEMU
+          configuration
+        - PR-1229 Add support for the inboard joystick
+        - PR-1232 Architectural re-organization to the initialization of the
+          video stream driver to comply with other NuttX drivers
+
+  * File System:
+      * Bug Fixes:
+        - PR-918 tmpfs: Calling statfs could cause files to be removed
+          recursively - PR-1142 NFS: Use of uint64_t causes issues with gaps in
+          data since it must be on a 8 byte boundary
+        - PR-1143 Report correct stats for proxied block and MTD drivers
+
+      * Significant Improvements:
+        - PR-793 Allow use of genromfs to geneate ROMFS
+        - PR-851 Upgrade littlefs to v2.2.1
+        - PR-1154 FATFS: Do not rewrite the root directory if it has not been
+          changed.
+        - PR-1120 PR-1118 Fill in file size for mtd and block inode
+
+  * Networking:
+    - PR-807 Netlink: Broadcast link status changes to userspace via
+      RTNLGRP_LINK
+    - PR-892 Netdb: Multiple DNS Servers
+      Adds capability to add multiple nameservers on run-time even when not
+      using resolv.conf and reset the list of nameservers back to default
+      setting (no nameserver at all or single predefined nameserver in Kconfig).
+      This is useful for applications that change their cellular network
+      frequently.
+    - PR-1015 tcp/conn: Request ARP before 3-way handshake
+
+  * Applications:
+      * Improvements:
+        - PR-185 PR-828 nshlib
+          Add the source command. Avoid use of sh where it is not needed since
+          it pollutes the parent environment including the working directory and
+          variables.
+
+        - PR-236 littlevgl: Add additional config mappings to the library
+        - PR-264 nxplayer: Add max host and filename for http url
+        - PR-260 nshlib: Add wget buffer size control with
+          CONFIG_NSH_WGET_BUFF_SIZE
+        - PR-243 dhcpd: Add ability for daemon to be cancelled
+        - PR-238 Remove use the set_errno this is now properly handled by the
+          libc and OS
+        - PR-233 hdc1008: Add example application for this driver
+
+      * Bug Fixes:
+        - PR-282 netlib: Fix pathlen computation for netlib_parseurl and
+          netlib_parsehttpurl
+        - PR-281 webclient: Check return value of netlib_parseurl correctly
+        - PR-278 webclient: Handle http/https redirection correctly
+        - PR-277 webclient: Limit the number of http redirects
+        - PR-198 webclient: Use getaddrinfo() to get IPv4 address on
+          dual stack systems
+        - PR-268 ftpd: Fix EPSV mode for IPv4
+        - PR-258 nsh: Always try FILE_APPS even if the command is builtin,
+          this is a regression introduced in 9.0.0
+        - PR-257 gs2200m: Handle packets over 1500 Bytes, previously would
+          overflow buffer
+        - PR-221 gs2200m: Server sockets were not properly being released by
+          the daemon when close was called
+        - PR-248 dhcpd: Correct option header check length
+        - PR-176 cu: Handle NULL character correctly
+        - PR-287 PR-290 examples: Update nxflat and thttpd Makefile's to fix
+          a build breakage.
+
+NuttX-10.0.0 Release Notes
+------------------------
+
+## Major Changes to Core OS
+
+### New Features
+
+Major changes to the internal, OS timer (wdog) interfaces. The change includes:
+
+ * The wdog timer call backs used to support a variable number of arguments.
+Now they support only a single argument ([PR
+#1565](https://github.com/apache/incubator-nuttx/pull/1565)). This eliminates
+(1) the configuration option `CONFIG_MAX_WDOGPARMS` and the OS interfaces
+`wd_create()` and `wd_delete()` * Â  wdog timer data structures are no longer
+pre-allocated. Now they are allocated by the caller of `wd_start()`. This (1)
+eliminates the configuration options `CONFIG_PREALLOC_WDOGS` and
+`CONFIG_WDOG_INTRESERVE`, (2) eliminates the type `WDOG_ID` which was a pointer
+type to `struct wdog_s`, and (3) change the type of the first argument of all
+remaining wdog interfaces functions from `WDOG_ID` to `FAR struct wdog_s *`.
+
+Because of these changes, all proprietary drivers maintained by all NuttX users
+will require modification. The following summaries the required modifications:
+
+ * Most drivers have a field in structure like `WDOG_ID wdog`; That must be
+changed to `struct wdog_s wdog`; That changes the field from a pointer to a
+`struct wdog_s` to the `struct wdog_s` storage itself. * Â  Eliminate all calls
+to `wd_create()`. The `WDOG_ID` is not longer managed by the timing subsystem
+and the `wd_create()` interface has been removed. * Â  The `wd_delete()`
+interface has also been removed, but more care will need to be exercised:
+`wd_delete()` also cancels any running timer so, in many case, calls to
+`wd_delete()` should be replaced with calls to `wd_cancel()`. If you are certain
+that the timer has never been started, then you must remove the call to
+`wd_delete()` altogether. Calling `wd_cancel()` with an un-initialized s`truct
+wdog_s` instance may well cause a fatal crash. * Â  Replace the first parameter
+of all remaining wdog function calls from. For example, replace a call like `ret
+= wd_cancel(priv->wdog)` where `priv->wdog` was type `WDOG_ID` with the call
+`ret = wd_cancel(&priv->wdog)`where `priv->wdog` is now type `struct wdog_s`.
+
+ * [PR-1877](https://github.com/apache/incubator-nuttx/pull/1877) libc:
+ Implement "j" modifier for scanf
+
+ * [PR-1864](https://github.com/apache/incubator-nuttx/pull/1864) libc: fs: Add
+ relative path support
+
+ * [PR-1863](https://github.com/apache/incubator-nuttx/pull/1863) libc:
+ Implement `access()`
+
+ * [PR-1866](https://github.com/apache/incubator-nuttx/pull/1866) libc: uio:
+ enable `writev()` for sockets
+
+ * [PR-1853](https://github.com/apache/incubator-nuttx/pull/1853) libc:
+ Implement `popcount/popcountl/popcountll`
+
+ * [PR-1850](https://github.com/apache/incubator-nuttx/pull/1850) Add tool for
+ parsing the callstack for Trace32
+
+ * [PR-1840](https://github.com/apache/incubator-nuttx/pull/1840) Add POLLPRI
+ for exception condition on the file descriptor
+
+ * [PR-1828](https://github.com/apache/incubator-nuttx/pull/1828) Implement
+ mkdtemp syscall
+
+ * [PR-1826](https://github.com/apache/incubator-nuttx/pull/1826) libc: Add
+ "tm\_zone" member to tm
+
+ * [PR-1824](https://github.com/apache/incubator-nuttx/pull/1824) Implement
+ etpriority syscall
+
+ * [PR-1821](https://github.com/apache/incubator-nuttx/pull/1821) Implement
+ gettid syscall
+
+ * [PR-1818](https://github.com/apache/incubator-nuttx/pull/1818) Implement
+ pipe2 syscall
+
+ * [PR-1779](https://github.com/apache/incubator-nuttx/pull/1779) libc: Minimal
+ umask implementation
+
+ * [PR-1758](https://github.com/apache/incubator-nuttx/pull/1758) mm: Add lock
+ to protect call to mm\_addregion
+
+ * [PR-1756](https://github.com/apache/incubator-nuttx/pull/1756) libc:
+ Implement gethrtime, getrlimit, setrlimit
+
+ * [PR-1658](https://github.com/apache/incubator-nuttx/pull/1658) libc: Add
+ stubs for utimes
+
+ * [PR-1615](https://github.com/apache/incubator-nuttx/pull/1615) libc:
+ Implement tm::tm\_gmtoff field
+
+ * [PR-1611](https://github.com/apache/incubator-nuttx/pull/1611) libc: Allocate
+ file\_struct dynamically
+
+ * [PR-1684](https://github.com/apache/incubator-nuttx/pull/1684) Add gdb script
+ for NuttX thread debugging
+
+ * [PR-1607](https://github.com/apache/incubator-nuttx/pull/1607) mm: Implement
+ malloc\_usable\_size
+
+ * [PR-1606](https://github.com/apache/incubator-nuttx/pull/1606) sched/pthread:
+ Implement pthread\_attr\_detachstate
+
+ * [PR-1600](https://github.com/apache/incubator-nuttx/pull/1600) Implement
+ epol\_pwait and EPOLLONESHOT flag
+
+ * [PR-1597](https://github.com/apache/incubator-nuttx/pull/1597) sched: Support
+ passing non empty argument to init task
+
+ * [PR-1596](https://github.com/apache/incubator-nuttx/pull/1596) libc: Replace
+ all sem\_xxx with \_SEM\_XXX. This insures the correct semaphore interface is
+ used by userspace and the kernel.
+
+ * [PR-1517](https://github.com/apache/incubator-nuttx/pull/1517) sched/wdog:
+ Change the default value of MAX\_WDOGPARMS from 4 to 2 as wd\_start is two every
+ where in the code base. Also bump CONFIG\_MAX\_WDOGPARAMS from 1 to 2 in
+ defconfigs to support pthread\_condclockwait()
+
+ * [PR-1486](https://github.com/apache/incubator-nuttx/pull/1486) libc:
+ Implement ftw and nftw functions
+
+ * [PR-1567](https://github.com/apache/incubator-nuttx/pull/1567) libc:
+ Implement proposed POSIX \_clockwait variants of \_timedwait functions
+
+ * [PR-1411](https://github.com/apache/incubator-nuttx/pull/1411) libxx:
+ Integrate latest uclibcxx 0.2.5
+
+ * [PR-1586](https://github.com/apache/incubator-nuttx/pull/1586) libc: Add open
+ for text (translated) access support
+
+ * [PR-1584](https://github.com/apache/incubator-nuttx/pull/1584) libc:
+ Implement strlcpy function
+
+ * [PR-1580](https://github.com/apache/incubator-nuttx/pull/1580) libc:
+ Implement pthread\_conattr\_etclock
+
+ * [PR-1545](https://github.com/apache/incubator-nuttx/pull/1545) sched/wdog: Do
+ not dynamically allocate wdog\_s. Reduces overhead and brings it inline with
+ work\_s
+
+ * [PR-1534](https://github.com/apache/incubator-nuttx/pull/1534) sched/wdog:
+ Replace all callback arguments from uint32\_t to wdparm\_t
+
+ * [PR-1420](https://github.com/apache/incubator-nuttx/pull/1420) libc: Do not
+ define localtime\[\_r\] to macro with CONFIG\_LIBC\_LOCALTIME is not defined.
+
+ * [PR-1375](https://github.com/apache/incubator-nuttx/pull/1375) libc: Always
+ declare getenv, link/symlink and atexist/on\_exit. Many C++ libraries reference
+ these but dont use them
+
+ * [PR-1371](https://github.com/apache/incubator-nuttx/pull/1371) libc: Improve
+ stat/readdir to be more POSIX compliant with S\_xxx macro definition as with
+ Linux
+
+ * [PR-1369](https://github.com/apache/incubator-nuttx/pull/1369) Initialize the
+ idle stack at the arch layer to better support stack coloring and also make it
+ compatible with new TLS implementation
+
+ * [PR-1292](https://github.com/apache/incubator-nuttx/pull/1292) pthread/mutex:
+ Add PTHREAD\_RECURSIVE\_MUTEX\_INITIALIZER\_NP support
+
+ * [PR-1280](https://github.com/apache/incubator-nuttx/pull/1280) libc:
+ Implement fseeko and ftello
+
+ * [PR-1279](https://github.com/apache/incubator-nuttx/pull/1279) libc:
+ Implement lstat and realpath
+
+ * [PR-1278](https://github.com/apache/incubator-nuttx/pull/1278) libc:
+ Implement pathconf and fpathconf
+
+ * [PR-1269](https://github.com/apache/incubator-nuttx/pull/1269) cstdlib: Add
+ missing atox to std namespace
+
+ * [PR-1264](https://github.com/apache/incubator-nuttx/pull/1264) sched/pthread:
+ Prohibit the use of pthread\_cleanup API's by kernel threads
+
+ * [PR-1440](https://github.com/apache/incubator-nuttx/pull/1440) libc: Add the
+ UUID libc functions
+
+ * [PR-1308](https://github.com/apache/incubator-nuttx/pull/1308) libc: Add
+ support for \_SC\_NPROCESSORS\_CONF/\_SC\_NPROCESSORS\_ONLN to sysconf
+
+ * [PR-1305](https://github.com/apache/incubator-nuttx/pull/1305) libc:
+ Implement WNOHANG for waitpid and waitid
+
+ * [PR-1237](https://github.com/apache/incubator-nuttx/pull/1237) libc: Add
+ minimal support for locale\_t operation: suplocale, freelocale, newlocale,
+ userlocale
+
+ * [PR-1317](https://github.com/apache/incubator-nuttx/pull/1317) sched/task:
+ Unify task initialization
+
+ * [PR-1187](https://github.com/apache/incubator-nuttx/pull/1187) sched: Unify
+ main thread and pthread behavior
+
+ * [PR-2263](https://github.com/apache/incubator-nuttx/pull/2263) libc/stdio:
+ Preallocate stdin, stdout, stderr
+
+ * [PR-2053](https://github.com/apache/incubator-nuttx/pull/2053)  *
+ [PR-2040](https://github.com/apache/incubator-nuttx/pull/2040) serial/termios:
+ Support custom baudrate setting
+
+### Bug Fixes
+
+ * [PR-1911](https://github.com/apache/incubator-nuttx/pull/1911) init\_section
+ was not being emitted resulting in C++ static constructors not being called.
+
+ * [PR-1889](https://github.com/apache/incubator-nuttx/pull/1889) Fix build
+ error for ::setbuf if CONFIG\_STDIO\_DISABLE\_BUFFERING is set
+
+ * [PR-1619](https://github.com/apache/incubator-nuttx/pull/1619) Fix inverted
+ errno in mq\_open
+
+ * [PR-1595](https://github.com/apache/incubator-nuttx/pull/1595) epoll\_wait()
+ must loop until "maxevents" to fille output evs array
+
+ * [PR-1519](https://github.com/apache/incubator-nuttx/pull/1519) libc: Replace
+ index/rindex from macro to function to protect against side effects with
+ conflicting local variables
+
+ * [PR-1514](https://github.com/apache/incubator-nuttx/pull/1514) Remove usage
+ for user-space memalign() from kernel/driver code. Instead use the proper
+ kernel memory interface.
+
+ * [PR-1512](https://github.com/apache/incubator-nuttx/pull/1512) /  *
+ [PR-1510](https://github.com/apache/incubator-nuttx/pull/1510) /  *
+ [PR-1507](https://github.com/apache/incubator-nuttx/pull/1507) Remove usage for
+ user-space malloc()/zalloc()/free() from kernel/driver code. Instead use the
+ proper kernel memory interface.
+
+ * [PR-1496](https://github.com/apache/incubator-nuttx/pull/1496) libc: Change
+ ctype macro to normal function to resolve macro evaluation side effects
+
+ * [PR-1463](https://github.com/apache/incubator-nuttx/pull/146) libc: Replace
+ all malloc/free with lib\_malloc/lib\_free inside libc
+
+ * [PR-1365](https://github.com/apache/incubator-nuttx/pull/1365) up\_assert
+ should not call exit() directly because it is only callable from userspace
+
+ * [PR-1336](https://github.com/apache/incubator-nuttx/pull/1336) syscall: Fix
+ prctl PR\_SET\_NAME failure if called without pid argument
+
+ * [PR-1289](https://github.com/apache/incubator-nuttx/pull/1289) Clear the
+ error indicator with rewind()
+
+ * [PR-1254](https://github.com/apache/incubator-nuttx/pull/1254) libc: mkstemp
+ only look at the trailing X's instead of the first X
+
+ * [PR-1311](https://github.com/apache/incubator-nuttx/pull/1311) libc: Move
+ double\_t typedef from sys/types.h to math.h
+
+ * [PR-1328](https://github.com/apache/incubator-nuttx/pull/1328) Make sure that
+ pthread\_cleanup functions are only called from userspace
+
+ * [PR-1318](https://github.com/apache/incubator-nuttx/pull/1318)
+ nxsched\_release\_tcb should release stack in kernel build, fixes memory leak
+
+ * [PR-2951](https://github.com/apache/incubator-nuttx/pull/2951) sched: Fix
+ deadlock in nxtask\_exit() for SMP
+
+ * [PR-2229](https://github.com/apache/incubator-nuttx/pulls/2229)  *
+ [PR-2298](https://github.com/apache/incubator-nuttx/pulls/2298)  *
+ [PR-2279](https://github.com/apache/incubator-nuttx/pulls/2279)  *
+ [PR-2272](https://github.com/apache/incubator-nuttx/pulls/2272)  *
+ [PR-2264](https://github.com/apache/incubator-nuttx/pulls/2264)  *
+ [PR-1992](https://github.com/apache/incubator-nuttx/pulls/1992)  *
+ [PR-2022](https://github.com/apache/incubator-nuttx/pulls/2022) sched: SMP
+ fixups that caused locking and removal of some no longer required workarounds
+
+ * [PR-1993](https://github.com/apache/incubator-nuttx/pull/1993) libc: Skip
+ close stdin/stdout/stderr in fclose
+
+ * [PR-1997](https://github.com/apache/incubator-nuttx/pull/1997) libc: Remove
+ all calls to fclose with stdin/stdout/stderr with fclose
+
+
+
+## Major Changes to Documentation
+
+ * [PR-1763](https://github.com/apache/incubator-nuttx/pulls/1763) Add
+ quickstart documentation
+
+ * [PR-1677](https://github.com/apache/incubator-nuttx/pull/1677) Add simulator,
+ drivers, and contributing instructions for new users
+
+ * [PR-1675](https://github.com/apache/incubator-nuttx/pull/1675) Add quickstart
+ documentation from NuttX Companion
+
+ * [PR-1673](https://github.com/apache/incubator-nuttx/pull/1673) Update all the
+ links in the documentation to point to nuttx.apache.org or the Apache NuttX
+ wiki instead of old nuttx.org resources
+
+ * [PR-1501](https://github.com/apache/incubator-nuttx/pull/1501) Port all the
+ existing documentation from HTML files to Sphinx based documentation along with
+ a bunch of updates and improvments
+
+ * [PR-1433](https://github.com/apache/incubator-nuttx/pull/1433) Convert README
+ documentation to Markdown
+
+## Major Changes to the Build System
+
+### New Features
+
+ * [PR-1786](https://github.com/apache/incubator-nuttx/pull/1786) Support
+ building external code into the OS
+
+ * [PR-1396](https://github.com/apache/incubator-nuttx/pull/1396) Make C/C++
+ search path common so all boards support uClibc++/libc++ automatically
+
+ * [PR-1682](https://github.com/apache/incubator-nuttx/pull/1682) configure.sh
+ can now list configurations with "-L" option
+
+ * [PR-2023](https://github.com/apache/incubator-nuttx/pull/2023) tools: Remove
+ WSL configuration. This is just Linux now.
+
+### Bug Fixes
+
+ * [PR-1713](https://github.com/apache/incubator-nuttx/pull/1713) Fix export
+ target: libboard was missing KERNEL flag.
+
+ * [PR-1470](https://github.com/apache/incubator-nuttx/pull/1470) Fix Make.dep
+ not updated by .config changes
+
+ * [PR-1345](https://github.com/apache/incubator-nuttx/pull/1786) Enhance export
+ target: make BIN directory configurable, export post build script, use LDNAME
+ instead of LDSCRIPT
+
+ * [PR-1332](https://github.com/apache/incubator-nuttx/pull/1332) Include
+ incdir.c in the export target
+
+ * [PR-1995](https://github.com/apache/incubator-nuttx/pull/1995) Fix issue
+ where wrong extension was generated for mkconfig in WSL builds
+
+ * [PR-1949](https://github.com/apache/incubator-nuttx/pull/1949) Fix issue in
+ make export where nuttx-names.dat was not being generated
+
+ * [PR-1682](https://github.com/apache/incubator-nuttx/pull/1682): Fix issue
+ where windows style paths might not be handled correctly breaking Cygwin builds
+
+## Architectural Support
+
+### New Architecture Support
+
+ * [PR-1847](https://github.com/apache/incubator-nuttx/pull/1847) ARM: Initial
+ support for ARMV6M to support CortexM0+
+
+ * [PR-1397](https://github.com/apache/incubator-nuttx/pull/1379): EOSS3:
+ Initial support for the QuickLogic EOS S3 SoC
+
+### Architectures With Significant Improvements
+
+#### cxd56xx
+
+ * [PR-1753](https://github.com/apache/incubator-nuttx/pull/1753) cxd56xx: Use
+ spinlock in gpioint to improve SMP performance
+
+ * [PR-1650](https://github.com/apache/incubator-nuttx/pull/1650) cxd56xx: Use
+ spinlock in rtc to improve SMP performance
+
+ * [PR-1621](https://github.com/apache/incubator-nuttx/pull/1621) cxd56xx: Use
+ spinlock in serial to improve SMP performance
+
+ * [PR-1569](https://github.com/apache/incubator-nuttx/pull/1569) cxd56xx: Add
+ SMP support to cxd56\_farapi.c
+
+ * [PR-1689](https://github.com/apache/incubator-nuttx/pull/1689) cxd56xx: Use
+ spinlock in uart to improve SMP performance
+
+#### ESP32
+
+ * [PR-1422](https://github.com/apache/incubator-nuttx/pull/1422) ESP32: Add SPI
+ driver (Master & Slave)
+
+ * [PR-1435](https://github.com/apache/incubator-nuttx/pull/1435) ESP32: Add I2C
+ driver
+
+ * [PR-1491](https://github.com/apache/incubator-nuttx/pull/1491) ESP32: Add SPI
+ Flash driver
+
+ * [PR-1525](https://github.com/apache/incubator-nuttx/pull/1525) ESP32: Add
+ Ethernet driver
+
+ * [PR-1610](https://github.com/apache/incubator-nuttx/pull/1610) ESP32: Improve
+ SPI transmision (DMA, IOMUX, software CS)
+
+ * [PR-1630](https://github.com/apache/incubator-nuttx/pull/1630) ESP32: Add
+ support for HW RNG
+
+ * [PR-1830](https://github.com/apache/incubator-nuttx/pull/1830) ESP32: Add
+ Power Management of Force-Sleep
+
+ * [PR-1754](https://github.com/apache/incubator-nuttx/pull/1754) ESP32: Add
+ support for external SPIFLASH
+
+ * [PR-1613](https://github.com/apache/incubator-nuttx/pull/1613) ESP32: Add
+ function for switching CPU from 80MHz to 240MHz
+
+PR-1712 ESP32: Add support for external MMCSD card over SPI
+
+#### IMXRT
+
+ * [PR-1868](https://github.com/apache/incubator-nuttx/pull/1868) IMXRT: Add ADC
+ driver
+
+#### Kinetis
+
+ * [PR-1624](https://github.com/apache/incubator-nuttx/pull/1624) Kinetis:
+ USBHOST improvements to avoid race condition durring freeing for queue head
+ structure by using Async Advance Doorbell.
+
+PR-1516 Kinetis K28: Add support for USB High Speed Host
+
+PR-1531 Kinetis K28: Add USB state change notifiers in notifier work queue
+
+PR-1456 Kinetis K28: Reworked USB driver for setup out data phase
+
+
+
+#### NRF52
+
+ * [PR-1418](https://github.com/apache/incubator-nuttx/pull/1418) NRF52: Add
+ Timer and RTC drivers
+
+ * [PR-1432](https://github.com/apache/incubator-nuttx/pull/1422) NRF52: Add
+ timer lowerhalf
+
+ * [PR-1635](https://github.com/apache/incubator-nuttx/pull/1635) NRF52: Add
+ support for RTC event handling
+
+ * [PR-1636](https://github.com/apache/incubator-nuttx/pull/1636) NRF52: Add
+ support for PPI peripheral
+
+ * [PR-1681](https://github.com/apache/incubator-nuttx/pull/1681) NRF52: Add
+ support for GPIOTE task mode
+
+ * [PR-1726](https://github.com/apache/incubator-nuttx/pull/1726) NRF52: Extend
+ systimer support
+
+ * [PR-1773](https://github.com/apache/incubator-nuttx/pull/1773) NRF52: Add ADC
+ and PWM support
+
+ * [PR-1915](https://github.com/apache/incubator-nuttx/pull/1915) NRF52: Add
+ serial termios support (no flow control)
+
+ * [PR-1907](https://github.com/apache/incubator-nuttx/pull/1907) NRF52: Add
+ basic error handing for i2c in polling mode to support i2ctool. Still not
+ handled in DMA mode.
+
+ * [PR-1839](https://github.com/apache/incubator-nuttx/pull/1839) NRF52: Add
+ missing SPI callback register hooks to support drivers like mmcsd
+
+ * [PR-1646](https://github.com/apache/incubator-nuttx/pull/1646) NRF52: Better
+ differentiation between NRF52840 and NRF52832
+
+PR-1685 NRF52: Add ARM system reset support. Add UID support.
+
+PR-1674 NRF52: Add LFCLK/HFCLK support for selecting oscillator sources.
+
+#### RISCV
+
+ * [PR-1858](https://github.com/apache/incubator-nuttx/pull/1858) RISCV: Add
+ missing CSR macros listed in RISC-V spec V1.10.
+
+PR-1314 rv32im: Add schedulesigaction.c, SYS\_save\_context handling, skip ECALL
+instruction when calling up\_swint()
+
+#### RX65N
+
+ * [PR-1622](https://github.com/apache/incubator-nuttx/pull/1622) RX65N: Add
+ I2C(RIIC) support
+
+ * [PR-1894](https://github.com/apache/incubator-nuttx/pull/1894) RX65N: Add USB
+ device support
+
+ * [PR-1899](https://github.com/apache/incubator-nuttx/pull/1899) RX65N: Add DTC
+ driver
+
+PR-1910 RX65N: Add SPI driver support
+
+#### SAMD5E5
+
+ * [PR-1515](https://github.com/apache/incubator-nuttx/pull/1515) SAMD5E5: Add
+ Watchdog timer support
+
+ * [PR-1574](https://github.com/apache/incubator-nuttx/pull/1574) SAMD5E5: Add
+ USB host support
+
+ * [PR-1594](https://github.com/apache/incubator-nuttx/pull/1594) SAMD5E5:
+ Freerun timer, oneshot timer and tickless support
+
+ * [PR-1816](https://github.com/apache/incubator-nuttx/pull/1816) SAMD5E5: Add
+ MTD progmem support and NVM USER PAGE IOTCLs
+
+#### SAMA5D2
+
+PR-1412 SAMA5D27: Implement system reset to support nsh reboot command
+
+PR-1393 SAMA5D2x: Implement SDMMC peripheral support
+
+#### S32K
+
+PR-1339 S32K: Extend FlexTimer support and add support for PWM
+
+PR-1337 S32K: Allow FlexCAN to use to NETDEV\_LATEINIT to handle the case where
+both FlexCAN and ENET are used
+
+#### SIM
+ * [PR-1914](https://github.com/apache/incubator-nuttx/pull/1914) SIM: SIGUSR1
+ handling now uses NuttX interrupt logic
+
+ * [PR-1859](https://github.com/apache/incubator-nuttx/pull/1859) ESIM: Add
+ host timer and improve the oneshot timer logic
+
+ * [PR-1767](https://github.com/apache/incubator-nuttx/pull/1767) SIM: Allow
+ access to tty interfaces for better termios support
+
+ * [PR-1655](https://github.com/apache/incubator-nuttx/pull/1655) SIM: Add
+ support for Linux HCI Socket as a NuttX BLE adapter. Full NuttX BLE stack can
+ be run against any Linux Bluetooth adapter in sim.
+
+ * [PR-1558](https://github.com/apache/incubator-nuttx/pull/1558) SIM: Add
+ support for Stack Smashing Protector.
+
+ * [PR-1392](https://github.com/apache/incubator-nuttx/pull/1392) SIM: Make
+ uClibc++ and libcxx work on sim platform
+
+ * [PR-1460](https://github.com/apache/incubator-nuttx/pull/1460) SIM: Call
+ sched\_note\_cpu\_\* when scheduler instrumentation is enabled
+
+#### STM32
+
+ * [PR-1865](https://github.com/apache/incubator-nuttx/pull/1865) STM32F4: Add
+ support for STM32F412CE fixing I2C2/I2C3 and USART1 alt
+
+ * [PR-1506](https://github.com/apache/incubator-nuttx/pull/1506) STM32: Add
+ support for single wire UART push/pull mode
+
+ * [PR-1572](https://github.com/apache/incubator-nuttx/pull/1572) STM32F2/F4:
+ Add options for I-Cache and D-Cache to be enabled/disable. Previously they were
+ always enabled.
+
+ * [PR-1287](https://github.com/apache/incubator-nuttx/pull/1286) STM32F7:
+ Refactor the FMC driver to support STM32F7 family and add support to the
+ STM32F46G-DISCO board
+
+ * [PR-1275](https://github.com/apache/incubator-nuttx/pull/1275) STM32: Allow
+ SysTick to be a tickless clock source option
+
+ * [PR-1268](https://github.com/apache/incubator-nuttx/pull/1268) STM32: Add
+ support for STM32F412 with UART / SPI / CAN / I2C / DMA
+
+ * [PR-1250](https://github.com/apache/incubator-nuttx/pull/1250) STM32L4: Add
+ support for booting into DFU mode
+
+### Bug Fixes
+
+#### ARM
+
+ * [PR-1562](https://github.com/apache/incubator-nuttx/pull/1562) ARM: Save
+ tcb-adj\_stack\_size should be saved without tls overhead
+
+ * [PR-1900](https://github.com/apache/incubator-nuttx/pull/1900) ARM: Fix false
+ reporting for stack usage for unaligned stacks
+
+#### AVR
+
+ * [PR-1410](https://github.com/apache/incubator-nuttx/pull/1410) avr: Implement
+ missing double\_t type, CONFIG\_STACK\_ALIGNMENT, linker emulation flags
+
+#### CXD56xx
+
+ * [PR-1930](https://github.com/apache/incubator-nuttx/pull/1930) cxd56xx: Fix
+ handle\_irqreq() in cxd56\_cpupause.c
+
+ * [PR-1789](https://github.com/apache/incubator-nuttx/pull/1789) cxd56xx: Fix
+ deadlock issue in up\_txinit() in SMP mode.
+
+ * [PR-1620](https://github.com/apache/incubator-nuttx/pull/1620) cxd56xx: Fix
+ IRQ control in cxd56\_dmac.c
+
+ * [PR-1253](https://github.com/apache/incubator-nuttx/pull/1253) cxd56xx: Fix
+ audio cxd56\_stop where a deadlock could be hit if the worker thread took too
+ long to turn on AMP
+
+ * [PR-1950](https://github.com/apache/incubator-nuttx/pull/1950) cxd56xx: Fix
+ deadlock and tcb corruption in SMP mode
+
+#### ESP32
+
+ * [PR-1908](https://github.com/apache/incubator-nuttx/pull/1908) ESP32: Fix
+ task signal process preemption
+
+ * [PR-1941](https://github.com/apache/incubator-nuttx/pull/1941) ESP32: Fix
+ interrupt clearing of edge interrupt due to issuing in masking interrupt state
+
+#### IMXRT
+
+ * [PR-1527](https://github.com/apache/incubator-nuttx/pull/1527) IMXRT: Fix
+ kconfig so that IMXRT\_ENET\_NRXBUFFERS can be set
+
+ * [PR-1455](https://github.com/apache/incubator-nuttx/pull/1455) IMXRT: Fix
+ auto-negotiation for KSZ8081 PHY
+
+#### Kinetis
+
+ * [PR-1273](https://github.com/apache/incubator-nuttx/pull/1273) Kinetis: Fix
+ issue in ethernet driver where buffers were blindly initialized and could cause
+ the TX of the MAC to be in a bad state. Also resolves an issue with interrupts
+ being throttled in the NVIC.
+
+#### NRF52
+
+ * [PR-1928](https://github.com/apache/incubator-nuttx/pull/1928) NRF52: Fix PPI
+ group disable and add group clear
+
+ * [PR-1885](https://github.com/apache/incubator-nuttx/pull/1885) NRF52: Fix SPI
+ driver structures when SPI\_EXCHANGE is not set
+
+ * [PR-1799](https://github.com/apache/incubator-nuttx/pull/1799) NRF52: Fix
+ SPI\_MASTER entry in kconfig
+
+ * [PR-1787](https://github.com/apache/incubator-nuttx/pull/1787) NRF52: Fix
+ base address for SPIM{1,2,3}
+
+ * [PR-1777](https://github.com/apache/incubator-nuttx/pull/1777) NRF52: Handle
+ case where rx or tx buffer could be 0 but data would still be transferred. Also
+ error if more than max data is requested.
+
+ * [PR-1770](https://github.com/apache/incubator-nuttx/pull/1770) NRF52: Fix bug
+ where SPI cmddata was not properly mapped for SPIM 0,2,3
+
+#### RISC-V
+
+ * [PR-1909](https://github.com/apache/incubator-nuttx/pull/1909) RISC-V: MIE
+ instead of MPIE register was being used in up\_schedule\_sigaction for storing
+ interrupt state
+
+#### SIM
+
+ * [PR-1903](https://github.com/apache/incubator-nuttx/pull/1903) SIM: Fix
+ complication issue for WPCAP in Cygwin build
+
+ * [PR-1888](https://github.com/apache/incubator-nuttx/pull/1888) SIM: Fix
+ EOVERFLOW returned when CONFIG\_SIM\_M32 is set
+
+ * [PR-1709](https://github.com/apache/incubator-nuttx/pull/1709) SIM: Fix
+ up\_cpu\_start initialization for macOS with SMP enabled
+
+#### STM32
+
+ * [PR-1898](https://github.com/apache/incubator-nuttx/pull/1898) STM32F7: Fixes
+ data loss bug in UART5 with TX DMA
+
+ * [PR-1841](https://github.com/apache/incubator-nuttx/pull/1841) STM32: Remove
+ broken overdriver support
+
+ * [PR-1719](https://github.com/apache/incubator-nuttx/pull/1719) STM32:
+ Lowputc: Ensure USART is disabled before attempting to configuring it
+
+ * [PR-1714](https://github.com/apache/incubator-nuttx/pull/1714) STM32H7: Fix
+ I2C driver interrupt storm
+
+ * [PR-1556](https://github.com/apache/incubator-nuttx/pull/1556) STM32: Fix IO
+ compentation support in STM32F7 and remove incorrect reference in STM32F0/L0/G0
+
+ * [PR-1529](https://github.com/apache/incubator-nuttx/pull/1529) STM32: Fix
+ initialization bug in ADC that prevented adc\_reset() from working correctly
+
+ * [PR-1561](https://github.com/apache/incubator-nuttx/pull/1561) STM32: Make
+ sure that core over-drive is enabled for all chips that support it and operating
+ at 180MHz. Some were enabled at 180MHz but may have not been stable without
+ over-drive not configured.
+
+ * [PR-1553](https://github.com/apache/incubator-nuttx/pull/1553) STM32F7: Fix
+ possible interrupt blocking in serial TXDMA ISR
+
+ * [PR-1544](https://github.com/apache/incubator-nuttx/pull/1544) STM32: Make
+ sure IO compensation cell is configured prior to call to
+ rcc\_enableperipherals() causing syscfg is accessed before it is enabled
+
+ * [PR-1380](https://github.com/apache/incubator-nuttx/pull/1380) STM32F7: Fix
+ tickless driver where th compare register could be set to a value that has
+ just passed preventing expiration
+
+ * [PR-1252](https://github.com/apache/incubator-nuttx/pull/1252) STM32L4: Fix
+ 48MHz MSI clock selection that could cause boot to hang
+
+ * [PR-1310](https://github.com/apache/incubator-nuttx/pull/1310) STM32L4:
+ Configure flash wait states earlier to prevent corruption of execution state
+
+ * [PR-1248](https://github.com/apache/incubator-nuttx/pull/1248) STM32L4: Fix
+ oneshot timer so that a minimum period is set otherwise it will never be
+ triggered.
+
+ * [PR-1247](https://github.com/apache/incubator-nuttx/pull/1247) STM32L47x/8x:
+ Set additional registers required to place a pin in analog mode
+
+ * [PR-1246](https://github.com/apache/incubator-nuttx/pull/1246) STM32L4: Fix
+ issue where clock divider for serial baud rate was not set correctly
+
+#### Miscellaneous
+
+ * [PR-1912](https://github.com/apache/incubator-nuttx/pull/1912) Fix
+ up\_interrupt\_contex() in case of SMP - Make sure the operation is atomic in
+ case of SMP
+
+## Driver Support
+
+### Bug Fixes
+
+ * [PR-1896](https://github.com/apache/incubator-nuttx/pull/1896) spi\_xx25xx
+ EEPROM: return the number of bytes written instead of 0 or error
+
+ * [PR-1891](https://github.com/apache/incubator-nuttx/pull/1891) serial: Don't
+ mangle PID when ISIG is changed
+
+ * [PR-1856](https://github.com/apache/incubator-nuttx/pull/1856) pipe: In case
+ of empty pipe with no writers, return EOF instead of EAGAIN
+
+ * [PR-1836](https://github.com/apache/incubator-nuttx/pull/1836) stmpe811: Fix
+ incorrect GPIO interrupt register logic
+
+ * [PR-1741](https://github.com/apache/incubator-nuttx/pull/1741) mmcsd\_sdio:
+ Properly arm the write completion detection
+
+ * [PR-1370](https://github.com/apache/incubator-nuttx/pull/1370) can: Fix
+ incorrect usage of nxsem\_getvalue which caused fifo->rx\_sem to increase with
+ teach received msg
+
+ * [PR-1452](https://github.com/apache/incubator-nuttx/pull/1452) lcd: Fix
+ memory leak when board\_graphics\_setup fail
+
+
+
+### New Driver Support
+
+ * [PR-1797](https://github.com/apache/incubator-nuttx/pull/1797) leds: WS2812
+ LED controller (aka Adafruit NeoPixel)
+
+ * [PR-1851](https://github.com/apache/incubator-nuttx/pull/1851) kbd: Add
+ support for SolderParty BlackBerry Q10 Keyboard
+
+ * [PR-1618](https://github.com/apache/incubator-nuttx/pull/1618) BQ27426 fuel
+ gauge
+
+ * [PR-1276](https://github.com/apache/incubator-nuttx/pull/1276) Add support
+ for the ST7735 TFT Controller
+
+ * [PR-1233](https://github.com/apache/incubator-nuttx/pull/1233) usbhost: Add
+ support for CDC-MBIM USB host driver
+
+### Drivers With Significant Improvements
+
+ * [PR-1816](https://github.com/apache/incubator-nuttx/pull/1816) stmpe811: Add
+ SPI support for touch screen controller
+
+ * [PR-1800](https://github.com/apache/incubator-nuttx/pull/1800) vfs: Add
+ `FIOCLEX/FIONCLEX` ioctl support
+
+ * [PR-1798](https://github.com/apache/incubator-nuttx/pull/1798) mmcsd: Allow
+ setting `IDMODE_CLOCK` via kconfig
+
+ * [PR-1587](https://github.com/apache/incubator-nuttx/pull/1587) BCH: Delay the
+ sector flush to avoid multiple erase/write operations in sequence write
+
+ * [PR-1577](https://github.com/apache/incubator-nuttx/pull/1577) rwbuffer:
+ Avoid allocating memory for the temporary erase buffer by the FTL driver
+
+ * [PR-1466](https://github.com/apache/incubator-nuttx/pull/1466) Altair Modem:
+ Add board specific logic, Fix issue that SPI4 RX frequency violated AC Spec,
+ Fix priority of SPI transfer task is too low, Modify timeout value for RX ready
+
+ * [PR-1471](https://github.com/apache/incubator-nuttx/pull/1471) ramlog: Add
+ option to overwrite buffer
+
+ * [PR-1547](https://github.com/apache/incubator-nuttx/pull/1547) usbhub: Make
+ sure to enumerate hubs that report protocol = 1 (High Speed Hub)
+
+ * [PR-1374](https://github.com/apache/incubator-nuttx/pull/1374) gpio: Extend
+ gpio\_pintype\_e for pulldown/up and opendrain
+
+ * [PR-1249](https://github.com/apache/incubator-nuttx/pull/1249) bmp280: Add
+ support for reading temperature
+
+ * [PR-1299](https://github.com/apache/incubator-nuttx/pull/1299) mpu60x0: Add
+ I2C support for the MPU60x0 sensor driver
+
+ * [PR-1325](https://github.com/apache/incubator-nuttx/pull/1325) can: expose
+ NART/ABOM and RTR settings via ioctls
+
+ * [PR-1520](https://github.com/apache/incubator-nuttx/pull/1520) note: Move
+ note driver from syslog to drivers/note
+
+ * [PR-1288](https://github.com/apache/incubator-nuttx/pull/1288) / PR-1449
+ note: Add sched\_note\_syscall\_enter/leave hooks for syscall instrumentation
+
+ * [PR-1259](https://github.com/apache/incubator-nuttx/pull/1259) note: Add
+ buffering support for syscall instrumentation
+
+ * [PR-1256](https://github.com/apache/incubator-nuttx/pull/1256) note: Add
+ hooks for note driver for interrupt instrumentation
+
+Board Support -------------
+
+### **Significant Improvements**
+
+ * [PR-1618](https://github.com/apache/incubator-nuttx/pull/1618) metro-m4: Add
+ support for: SmartFS initialization, AT24 EEPROM, GPIO dev, BQ27426 gauge
+ initialization
+
+ * [PR-1727](https://github.com/apache/incubator-nuttx/pull/1729) b-g474e-dpow1:
+ Add support for FLASH bootloader
+
+ * [PR-1683](https://github.com/apache/incubator-nuttx/pull/1683) cxd56xx: Add
+ wifi\_smp configuration
+
+ * [PR-1668](https://github.com/apache/incubator-nuttx/pull/1668) sim: Add new
+ configuration for SMP
+
+ * [PR-1644](https://github.com/apache/incubator-nuttx/pull/1644)
+ stm32f746g-disco: Move serial console from USART6 to USART1 which is attached
+ to the USB virtual COM port.
+
+ * [PR-1464](https://github.com/apache/incubator-nuttx/pull/1464) cxd56xx: Add
+ new GNSS functions, support for lower PWM frequency,
+ CONFIG\_CPUFREQ\_RELEASE\_LOCK, high speed ADC, HPADC input gain configuration,
+ eMMC device, frame buffer support
+
+ * [PR-1405](https://github.com/apache/incubator-nuttx/pull/1405)
+ stm32f4discovery: Add ELF support to wifi configuration
+
+ * [PR-1402](https://github.com/apache/incubator-nuttx/pull/1402) imxrt1060: Add
+ buttons support to iMXRT1060
+
+ * [PR-1590](https://github.com/apache/incubator-nuttx/pull/1590) sim: Add
+ duktape configuration
+
+ * [PR-1532](https://github.com/apache/incubator-nuttx/pull/1532) sim: Add
+ cromfs configuration
+
+ * [PR-1335](https://github.com/apache/incubator-nuttx/pull/1335) cxd56xx:
+ Enable basic snapshop camera example
+
+### New Board Support
+
+ * [PR-1664](https://github.com/apache/incubator-nuttx/pull/1664) NRF52: Add
+ support for NRF52832 MakerDiary MDK board
+
+ * [PR-1633](https://github.com/apache/incubator-nuttx/pull/1633) NRF52: Add
+ support for Sparkfun NRF52832 Breakout Board
+
+ * [PR-1728](https://github.com/apache/incubator-nuttx/pull/1728) SAMA5D27: Add
+ support for Giant Board
+
+ * [PR-1397](https://github.com/apache/incubator-nuttx/pull/1397) EOSS3: Initial
+ support for the QuickLogic EOS S3 SoC QuickFeather board
+
+ * [PR-1268](https://github.com/apache/incubator-nuttx/pull/1268) STM32: Add
+ support for nucleo-f412zg board
+
+File System -----------
+
+### **Bug Fixes**
+
+ * [PR-1796](https://github.com/apache/incubator-nuttx/pull/1796) vfs: Fix
+ memory leak calling `pseudorename`
+
+ * [PR-1794](https://github.com/apache/incubator-nuttx/pull/1794) vfs: Fix issue
+ where opendir would remove the trailing whitespace or /
+
+ * [PR-1793](https://github.com/apache/incubator-nuttx/pull/1793) vfs: Make sure
+ that rename of mount point uses pseudorename. Previously mv on a mountpoint
+ would return err 88.
+
+ * [PR-1737](https://github.com/apache/incubator-nuttx/pull/1737) vfs: reuse
+ file\_dup2 direction in file\_dup to prevent segfault issue
+
+ * [PR-1490](https://github.com/apache/incubator-nuttx/pull/1490) Ensure that
+ filesystems can all support paths that end with '/'
+
+ * [PR-1546](https://github.com/apache/incubator-nuttx/pull/1546) ROMFS: Fix
+ issue with how hard links are followed for ROMFS
+
+ * [PR-1442](https://github.com/apache/incubator-nuttx/pull/1442) SmartFS: Fix
+ file size corruption when opening with overwriting mode
+
+ * [PR-1431](https://github.com/apache/incubator-nuttx/pull/1431) nxffs: Fix
+ scan good block slowly and scan an invalid block
+
+PR-1295 fs: for setfd correct the return value
+
+### **Significant Improvements**
+
+ * [PR-1554](https://github.com/apache/incubator-nuttx/pull/1554) CROMFS: Add
+ support for hard links
+
+ * [PR-1499](https://github.com/apache/incubator-nuttx/pull/1499) FAT: Add
+ support for UTF8 long filename
+
+ * [PR-1479](https://github.com/apache/incubator-nuttx/pull/1479) vfs: Add file
+ descriptor based events support eventfd()
+
+ * [PR-1582](https://github.com/apache/incubator-nuttx/pull/1482) vfs: Add
+ epoll\_create1() support
+
+ * [PR-1579](https://github.com/apache/incubator-nuttx/pull/1579) vfs: Do not
+ check CONFIG\_NFILE\_STREAMS for mkdir/rename/rmdir/fs\_unlink
+
+ * [PR-1355](https://github.com/apache/incubator-nuttx/pull/1355) vfs: Implement
+ statvfs and fstatvfs
+
+ * [PR-1323](https://github.com/apache/incubator-nuttx/pull/1323) vfs: Add
+ chmod/fchmod/utimes function prototypes
+
+Networking ----------
+
+### **Bug Fixes**
+
+ * [PR-1267](https://github.com/apache/incubator-nuttx/pull/1267) SocketCAN:
+ When timestamped frame was received while in CAN2.0B mode the frame got dropped.
+
+ * [PR-1446](https://github.com/apache/incubator-nuttx/pull/1446) usrsock: Fix
+ recv() cannot peek data
+
+### **Significant Improvements**
+
+ * [PR-1666](https://github.com/apache/incubator-nuttx/pull/1666) Bluetooth:
+ Bluetooth sockets now use Linux sockaddr types of sockaddr\_l2 sockaddr\_hci
+ sockaddr\_rc. There are slight breaking changes here that may require
+ applications to be updated, but this brings the interface inline with Linux.
+
+ * [PR-1581](https://github.com/apache/incubator-nuttx/pull/1581) Socket: Add
+ SOCK\_CLOEXEC/SOCK\_NONBLOCK support
+
+ * [PR-1443](https://github.com/apache/incubator-nuttx/pull/1443) usrsock: Add
+ flag argument to sendto/recvfrom interface in usrsock
+
+ * [PR-1238](https://github.com/apache/incubator-nuttx/pull/1238) SocketCAN: Add
+ support for SocketCAN interface API
+
+Applications ------------
+
+### **Significant Improvements**
+
+ * [PR-409](https://github.com/apache/incubator-nuttx-apps/pull/409) wamr:
+ Update version to 09-29-2020 that supports NuttX directly and remove patches
+
+ * [PR-407](https://github.com/apache/incubator-nuttx-apps/pull/407) ipcfg: Add
+ IPv4 configuration file access helper
+
+ * [PR-406](https://github.com/apache/incubator-nuttx-apps/pull/406) wamr: Add
+ configs for heap pool and custom name sections
+
+ * [PR-404](https://github.com/apache/incubator-nuttx-apps/pull/404) timer: Add
+ supplying timer dev path to example
+
+ * [PR-403](https://github.com/apache/incubator-nuttx-apps/pull/402)
+ nxplayer/nxrecorder: Add channel map support
+
+ * [PR-396](https://github.com/apache/incubator-nuttx-apps/pull/396) wamr: Add
+ missing options to kconfig
+
+ * [PR-395](https://github.com/apache/incubator-nuttx-apps/pull/395) dhcpc: Try
+ to get hostname via syscall first
+
+ * [PR-391](https://github.com/apache/incubator-nuttx-apps/pull/391) wapi: Add
+ option to assocated directly via bssid
+
+ * [PR-390](https://github.com/apache/incubator-nuttx-apps/pull/390) wapi: App
+ option to scan partial channel
+
+ * [PR-387](https://github.com/apache/incubator-nuttx-apps/pull/387) wamr: Add
+ support for WAMR web assembly interpreter
+
+ * [PR-337](https://github.com/apache/incubator-nuttx-apps/pull/337) docs:
+ Convert all README files to markdown
+
+ * [PR-333](https://github.com/apache/incubator-nuttx-apps/pull/333) webclient:
+ Add hooks for TLS, extra request headers, PUT method, report status code,
+ improved error handling
+
+ * [PR-329](https://github.com/apache/incubator-nuttx-apps/pull/329) gpio: Add
+ support for new GPIO pin types
+
+ * [PR-317](https://github.com/apache/incubator-nuttx-apps/pull/317) nshlib:
+ Call symlink if user pass -s for ln command
+
+ * [PR-315](https://github.com/apache/incubator-nuttx-apps/pull/315) c++:
+ Support uClibc++ and libcxx in examples/testing
+
+ * [PR-314](https://github.com/apache/incubator-nuttx-apps/pull/314) camera: Add
+ a simple camera snapshot example
+
+ * [PR-378](https://github.com/apache/incubator-nuttx-apps/pull/378) wasm3:
+ Initial WebAssembly runtime support
+
+ * [PR-374](https://github.com/apache/incubator-nuttx-apps/pull/374) bluetooth:
+ Use the new l2cap socket address type
+
+ * [PR-373](https://github.com/apache/incubator-nuttx-apps/pull/373) duktape:
+ Add duktape to global search path so it can be used as a library
+
+ * [PR-372](https://github.com/apache/incubator-nuttx-apps/pull/372) quickjs:
+ Add support for QuickJS interpreter
+
+ * [PR-367](https://github.com/apache/incubator-nuttx-apps/pull/367) nsh: Accept
+ the command line arguments like sh
+
+ * [PR-365](https://github.com/apache/incubator-nuttx-apps/pull/365) duktape:
+ Add console, print, alert support
+
+ * [PR-364](https://github.com/apache/incubator-nuttx-apps/pull/364) cu:
+ Refactor cu and add support for "-c" to disable \\n to \\r\\n conversion
+
+ * [PR-362](https://github.com/apache/incubator-nuttx-apps/pull/362) libuv: Add
+ support for libuv library
+
+ * [PR-352](https://github.com/apache/incubator-nuttx-apps/pull/352) duktape:
+ Add initial support for duktape
+
+ * [PR-346](https://github.com/apache/incubator-nuttx-apps/pull/364) wget:
+ Enable URL from command line, can be used with ifup, hooks for HTTPS
+
+ * [PR-302](https://github.com/apache/incubator-nuttx-apps/pull/302) lvgl: Use
+ the latest version 7.0.2
+
+ * [PR-300](https://github.com/apache/incubator-nuttx-apps/pull/300) note: Add
+ support for decoding interrupt and syscall instrumentation
+
+ * [PR-299](https://github.com/apache/incubator-nuttx-apps/pull/299) nxrecorder:
+ Add O\_TRUNC when creating a file
+
+ * [PR-296](https://github.com/apache/incubator-nuttx-apps/pull/296) bmp280: Add
+ support for BMP180 to BMP280 application
+
+ * [PR-294](https://github.com/apache/incubator-nuttx-apps/pull/294) can: Add
+ cansend and candump utilities for interacting with SocketCAN
+
+### Bug Fixes
+
+ * [PR-411](https://github.com/apache/incubator-nuttx-apps/pull/411) wgetjson:
+ Fix build breakage
+
+ * [PR-405](https://github.com/apache/incubator-nuttx-apps/pull/405) nxplayer:
+ Fix missing "%d" in a sscanf call
+
+ * [PR-400](https://github.com/apache/incubator-nuttx-apps/pull/400) dhcpc:
+ Handle case where gethostname() might be empty
+
+ * [PR-399](https://github.com/apache/incubator-nuttx-apps/pull/399) build: Fix
+ build system issue where compiler would only compile first assembly file
+
+ * [PR-393](https://github.com/apache/incubator-nuttx-apps/pull/393) build: Fix
+ build system issue where ARCHCPUFLAGS in cxx command was lost
+
+ * [PR-392](https://github.com/apache/incubator-nuttx-apps/pull/392) wapi: Make
+ wapi more robust in failure cases
+
+ * [PR-383](https://github.com/apache/incubator-nuttx-apps/pull/383) ntpclient:
+ Fix NTP daemon state in case of DNS failure
+
+ * [PR-344](https://github.com/apache/incubator-nuttx-apps/pull/344) gs2200m:
+ Fix freeing of uninitialized memory
+
+ * [PR-335](https://github.com/apache/incubator-nuttx-apps/pull/335) ntp: Fix
+ malformated authentication headers in NTP packet
+
+ * [PR-331](https://github.com/apache/incubator-nuttx-apps/pull/331) telnetd:
+ Fix buffer overflow issue clearing socket address
+
+ * [PR-312](https://github.com/apache/incubator-nuttx-apps/pull/312) build: Make
+ sure to include incdir when running make export
+
+ * [PR-377](https://github.com/apache/incubator-nuttx-apps/pull/377) readline:
+ Fix stack overflow when application name is too long
+
+ * [PR-359](https://github.com/apache/incubator-nuttx-apps/pull/259) nshlib: Fix
+ memory corrupt in nsh\_parse if pthread\_create() failed
+
+ * [PR-354](https://github.com/apache/incubator-nuttx-apps/pull/354) dhcpd: Fix
+ member name for "ds\_pid"
+
+## Security Issues Fixed In This Release
+
+## Compatibility Concerns
+
+## Changes to Build System
+
+### In Apps, Change `$(TOPDIR)` to `$(APPDIR)`
+
+In the 'apps' repo, Makefiles are now using `$(APPDIR)` instead of `$(TOPDIR)`.
+
+In your custom app's Makefile, it is recommended to change `$(TOPDIR)` to
+`$(APPDIR)`.
+
+Replace this line:
+
+include $(TOPDIR)/Make.defs
+
+With this:
+
+include $(APPDIR)/Make.defs
+
+See  * [PR-326](https://github.com/apache/incubator-nuttx-apps/pull/326), git
+commit #
+`[deaa6c5b7bf8445b4a300691525f60aa506be0d7](https://github.com/apache/incubator-nuttx-apps/commit/deaa6c5b7bf8445b4a300691525f60aa506be0d7)`
+in the NuttX 'apps' repository.
+
+### Custom Boards Don't Need `ARCHINCLUDES` and `ARCHXXINCLUDES` Definitions
+
+As part of an effort to unify support for uClibc++ and libc++, the C/C++ include
+search path definitions `ARCHINCLUDES` and `ARCHXXINCLUDES` are now defined in
+one central place in `tools/Config.mk`. It is no longer necessary to define
+these in every board's `scripts/Make.defs`. Boards included in the NuttX
+repository have been updated, but if you are building NuttX for a custom board
+and are using C++, you may want to make the following changes:
+
+In your board's configuration, ensure that you have enabled either
+`CONFIG_UCLIBCXX` or `CONFIG_LIBCXX` as appropriate.
+
+In your custom board's `scripts/Make.defs` file, remove lines like these:
+
+CINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include} CXXINCPATH :=
+${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx} ARCHINCLUDES
++= $(CINCPATH) ARCHXXINCLUDES += $(CINCPATH) $(CXXINCPATH)
+
+In case your `scripts/Make.defs` uses different names, such as `ARCHINCLUDESXX`
+instead of `ARCHXXINCLUDES`, you'll need to find all uses of that variable and
+update them to use `ARCHXXINCLUDES`.
+
+See  * [PR-1396](https://github.com/apache/incubator-nuttx/pull/1396), git
+commit
+#[d32e9c38dfb0659a7f3c0cf586ba1584cd7eb3d6](https://github.com/apache/incubator-nuttx/commit/d32e9c38dfb0659a7f3c0cf586ba1584cd7eb3d6)
+in the main NuttX repository.
+
+See also  * [PR-1399](https://github.com/apache/incubator-nuttx/pull/1399), git
+commit
+#[6abd03d53ff9164fb17ea4aca701a49fbbf751c0](https://github.com/apache/incubator-nuttx/commit/6abd03d53ff9164fb17ea4aca701a49fbbf751c0).
+
+### Custom Boards Don't Need `HOSTCC` and `HOSTCFLAGS` Definitions
+
+The NuttX build system uses several binary utilities that it compiles and runs
+on the host computer. To build these binaries, it needs to know the host C
+compiler and C flags. Previously, every board's `scripts/Make.defs` file had to
+provide this information via `HOSTCC` and `HOSTCFLAGS` Definitions. As part of
+an effort to simplify the build system, these definitions are now automatically
+provided by logic in `tools/Config.mk`. Boards included in the NuttX repository
+have been updated, but if you are building NuttX for a custom board, you may
+want to make the following changes:
+
+In your custom board's `scripts/Make.defs` file, remove lines like these:
+
+HOSTCC = gcc HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
+
+Sometimes they may look like this:
+
+ifeq ($(CONFIG\_WINDOWS\_NATIVE),y)
+Â  HOSTCC = mingw32-gcc.exe
+else
+Â  HOSTCC = gcc
+endif
+
+Note: These changes are OPTIONAL.
+
+You may still set these definitions in your board's scripts/Make.defs, and your
+definitions will override the ones in tools/Config.mk.
+
+Also, you may override these definitions for a single run by providing them on
+the make command line. This is useful if, for example, you wish to build debug
+versions of these host binaries: define HOSTCFLAGS with -g on the command line.
+
+See  * [PR-1398](https://github.com/apache/incubator-nuttx/pull/1398), git
+commit
+#[ee875b2a260cb4cc532b8ca303c2515e24c39b4e](https://github.com/apache/incubator-nuttx/commit/ee875b2a260cb4cc532b8ca303c2515e24c39b4e)
+in the main NuttX repository.
+
+### Removal of Unused `ARCHCCVERSION` and `ARCHCCMAJOR`
+
+The ARCHCCVERSION and ARCHCCMAJOR variables are unused. Historically they were
+defined in many boards' scripts/Make.defs. These were removed from all boards in
+the NuttX repository, but if you are building NuttX for a custom board, you may
+want to remove this unnecessary boilerplate.
+
+In your custom board's `scripts/Make.defs` file, remove lines like these:
+
+
+
+ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e
+'s/^gcc version \\(\[0-9\\.\]\\)/\\1/g' -e 's/\[-\\ \].\*//g' -e '1q'}
+ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
+
+See  * [PR-1344](https://github.com/apache/incubator-nuttx/pull/1344), git
+commit
+#[f5311de6b42466ab5c6ef299dab0ecc417131bbe](https://github.com/apache/incubator-nuttx/commit/f5311de6b42466ab5c6ef299dab0ecc417131bbe)
+in the main NuttX repository.
+
+### Custom Boards May Not Need `EXTRA_LIBS` and `EXTRA_LIBPATHS` Definitions
+
+The `EXTRA_LIBS` and `EXTRA_LIBPATHS` make variables were previously defined in
+many boards' `scripts/Make.defs` files. These are now defined in a more central
+location: `arch/*/src/*/Toolchain.defs`. Your board's `scripts/Make.defs`
+usually includes this file. Boards included in NuttX have been updated, but if
+you are building NuttX for a custom board, you may need to update your board's
+`scripts/Make.defs` file to ensure you build with the correct definitions.
+
+If you have lines like these:
+
+EXTRA\_LIBPATHS = -L "${shell dirname "$(LIBSUPXX)"}" EXTRA\_LIBS = -lsupc++
+
+You may want to do one of the following:
+
+* Â  If they are redundant to the definitions provided in the included
+`arch/*/src/*/Toolchain.defs`, remove these lines, or * Â  If they contain
+additional needed libraries and paths not present in
+`arch/*/src/*/Toolchain.defs`, remove any redundant definitions and change the
+assignment '`=`' to '`+=`'.
+
+See  * [PR-1404](https://github.com/apache/incubator-nuttx/pull/1404), git
+commit
+#[4910d43ab0fc360dbddb1f8a31db2a3ee383b46d](https://github.com/apache/incubator-nuttx/commit/4910d43ab0fc360dbddb1f8a31db2a3ee383b46d)
+in the main NuttX repository.
+
+### Custom Boards May Not Need CC, CXX, CPP, LD, STRIP, AR, NM, OBJCOPY, and
+OBJDUMP Definitions
+
+These `make` variables were previously defined in many boards' scripts/Make.defs
+files with copy-paste duplication spanning many hundreds of files. These are now
+defined in a more central location: `arch/*/src/*/Toolchain.defs`. Your board's
+`scripts/Make.defs` usually includes this file. Boards included in NuttX have
+been updated, but if you are building NuttX for a custom board, you may need to
+update your board's `scripts/Make.defs` file to ensure you build with the
+correct definitions.
+
+If you have lines that define `CC`, `CXX`, `CPP`, `LD`, `STRIP`, `AR`, `NM`,
+`OBJCOPY`, and `OBJDUMP`, such as these:
+
+CC = $(CROSSDEV)gcc CXX = $(CROSSDEV)g++ CPP = $(CROSSDEV)gcc -E -P -x c LD =
+$(CROSSDEV)ld STRIP = $(CROSSDEV)strip --strip-unneeded AR = $(ARCROSSDEV)ar rcs
+NM = $(ARCROSSDEV)nm OBJCOPY = $(CROSSDEV)objcopy OBJDUMP = $(CROSSDEV)objdump
+
+
+
+You may want to do one of the following:
+
+* Â  If they are redundant to the definitions provided in the included
+`arch/*/src/*/Toolchain.defs`, remove these lines, or * Â  If they are different
+from the definitions in `arch/*/src/*/Toolchain.defs`, leave them as-is and they
+will take precedence.
+
+See  * [PR-1426](https://github.com/apache/incubator-nuttx/pull/1426), git
+commit
+#[b329e2377dd8816f37ad0408279926829efdf85d](https://github.com/apache/incubator-nuttx/commit/b329e2377dd8816f37ad0408279926829efdf85d)
+in the main NuttX repository.
+
+### Consolidated ARCROSSDEV and CROSSDEV
+
+The `ARCROSSDEV` and `CROSSDEV` variables always had identical values. Therefore
+`ARCROSSDEV` has been removed and `CROSSDEV` is used instead. Boards included in
+NuttX have been updated, but if you are building NuttX for a custom board, you
+may need to update your board's build scripts to use the `CROSSDEV` variable.
+
+See  * [PR-1439](https://github.com/apache/incubator-nuttx/pull/1439), git
+commit
+#[5efa93ec26fd8a3fd85b24a2008bb743f96027fb](https://github.com/apache/incubator-nuttx/commit/5efa93ec26fd8a3fd85b24a2008bb743f96027fb)
+in the main NuttX repository.

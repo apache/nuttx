@@ -54,7 +54,9 @@
 #  include <arch/armv7-r/spinlock.h>
 #elif defined(CONFIG_ARCH_ARMV7M)
 #  include <arch/armv7-m/spinlock.h>
-#elif defined(CONFIG_ARCH_CORTEXM0)
+#elif defined(CONFIG_ARCH_ARMV8M)
+#  include <arch/armv8-m/spinlock.h>
+#elif defined(CONFIG_ARCH_ARMV6M)
 #  include <arch/armv6-m/spinlock.h>
 #else
 #  include <arch/arm/spinlock.h>
@@ -93,6 +95,11 @@
 #define SP_DSB(n) __asm__ __volatile__ ("dsb sy" : : : "memory")
 #define SP_DMB(n) __asm__ __volatile__ ("dmb st" : : : "memory")
 
+#ifdef CONFIG_ARM_HAVE_WFE_SEV
+#define SP_WFE() __asm__ __volatile__ ("wfe" : : : "memory")
+#define SP_SEV() __asm__ __volatile__ ("sev" : : : "memory")
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -117,7 +124,7 @@
 typedef uint8_t spinlock_t;
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************

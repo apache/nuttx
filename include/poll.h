@@ -80,15 +80,16 @@
 #define POLLIN       (0x01)  /* NuttX does not make priority distinctions */
 #define POLLRDNORM   (0x01)
 #define POLLRDBAND   (0x01)
-#define POLLPRI      (0x01)
 
-#define POLLOUT      (0x02)  /* NuttX does not make priority distinctions */
-#define POLLWRNORM   (0x02)
-#define POLLWRBAND   (0x02)
+#define POLLPRI      (0x02)
 
-#define POLLERR      (0x04)
-#define POLLHUP      (0x08)
-#define POLLNVAL     (0x10)
+#define POLLOUT      (0x04)  /* NuttX does not make priority distinctions */
+#define POLLWRNORM   (0x04)
+#define POLLWRBAND   (0x04)
+
+#define POLLERR      (0x08)
+#define POLLHUP      (0x10)
+#define POLLNVAL     (0x20)
 
 #define POLLFD       (0x00)
 #define POLLFILE     (0x40)
@@ -110,7 +111,7 @@ typedef unsigned int nfds_t;
 
 typedef uint8_t pollevent_t;
 
-/* This is the Nuttx variant of the standard pollfd structure.  The poll()
+/* This is the NuttX variant of the standard pollfd structure.  The poll()
  * interfaces receive a variable length array of such structures.
  *
  * REVISIT: In a multi-threaded environment, one use case might be to share

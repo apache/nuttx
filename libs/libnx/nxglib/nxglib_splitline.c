@@ -41,6 +41,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <debug.h>
 
@@ -128,7 +129,8 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
   b16_t b16y;
 
   ginfo("vector: (%d,%d)->(%d,%d) linewidth: %d\n",
-        vector->pt1.x, vector->pt1.y, vector->pt2.x, vector->pt2.y, linewidth);
+        vector->pt1.x, vector->pt1.y, vector->pt2.x, vector->pt2.y,
+        linewidth);
 
   /* First, check the linewidth */
 
@@ -219,7 +221,8 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
       traps[1].bot.x2 = traps[1].bot.x1;
       traps[1].bot.y  = line.pt2.y;
 
-      ginfo("Vertical traps[1]: (%08x,%08x,%d),(%08x,%08x, %d)\n",
+      ginfo("Vertical traps[1]: (%08" PRIx32 ",%08" PRIx32 ",%d),"
+            "(%08" PRIx32 ",%08" PRIx32 ", %d)\n",
             traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
             traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
 
@@ -255,7 +258,8 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           traps[1].bot.x1 = tmp;
         }
 
-      ginfo("Horizontal traps[1]: (%08x,%08x,%d),(%08x,%08x, %d)\n",
+      ginfo("Horizontal traps[1]: (%08" PRIx32 ",%08" PRIx32 ",%d),"
+            "(%08" PRIx32 ",%08" PRIx32 ", %d)\n",
             traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
             traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
 
@@ -279,29 +283,32 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
     }
 
   /* Applying the line width to the line results in a rotated, rectangle.
-   * Get the Y offset from an end of the original thin line to a corner of the fat line.
+   * Get the Y offset from an end of the original thin line to a corner of
+   * the fat line.
    *
    *   Angle of line:      angle      = atan2(iheight, iwidth)
    *   Y offset from line: b16yoffset = linewidth * cos(angle)
    *
-   * For near verical lines, b16yoffset is be nearly zero.  For near horizontal
-   * lines, b16yOffset is be about the same as linewidth.
+   * For near verical lines, b16yoffset is be nearly zero.  For near
+   * horizontal lines, b16yOffset is be about the same as linewidth.
    */
 
   angle      = b16atan2(itob16(iheight), itob16(iwidth));
   cosangle   = b16cos(angle);
   b16yoffset = (linewidth * cosangle + 1) >> 1;
 
-  /* Get the X offset from an end of the original thin line to a corner of the fat line.
+  /* Get the X offset from an end of the original thin line to a corner of
+   * the fat line.
    *
-   * For near vertical lines, b16xoffset is about the same as linewidth.  For near
-   * horizontal lines, b16xoffset is nearly zero.
+   * For near vertical lines, b16xoffset is about the same as linewidth.
+   * For near horizontal lines, b16xoffset is nearly zero.
    */
 
   sinangle   =  b16sin(angle);
   b16xoffset = (linewidth * sinangle + 1) >> 1;
 
-  ginfo("height: %d width: %d angle: %08x b16yoffset: %08x b16xoffset: %08x\n",
+  ginfo("height: %d width: %d angle: %08" PRIx32 " "
+        "b16yoffset: %08" PRIx32 " b16xoffset: %08" PRIx32 "\n",
         iheight, iwidth, angle, b16yoffset, b16xoffset);
 
   /* Now we know all four points of the rotated rectangle */
@@ -331,7 +338,10 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           quad[2].x = b16x + b16xoffset;
           quad[3].x = b16x - b16xoffset;
 
-          ginfo("Southeast: quad (%08x,%08x),(%08x,%08x),(%08x,%08x),(%08x,%08x)\n",
+          ginfo("Southeast: quad (%08" PRIx32 ",%08" PRIx32 "),"
+                "(%08" PRIx32 ",%08" PRIx32 "),"
+                "(%08" PRIx32 ",%08" PRIx32 "),"
+                "(%08" PRIx32 ",%08" PRIx32 ")\n",
                 quad[0].x, quad[0].y, quad[1].x, quad[1].y,
                 quad[2].x, quad[2].y, quad[3].x, quad[3].y);
 
@@ -352,29 +362,35 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
               /* quad[1] is at the bottom left of the triangle. Interpolate
                * to get the corresponding point on the right side.
                *
-               * Interpolation is from quad[0] along the line quad[0]->quad[2]
-               * which as the same slope as the line (positive)
+               * Interpolation is from quad[0] along the line
+               * quad[0]->quad[2] which as the same slope as the line
+               * (positive)
                */
 
               b16dxdy = itob16(iwidth) / iheight;
 
               traps[0].bot.x1 = quad[1].x;
-              traps[0].bot.x2 = nxgl_interpolate(quad[0].x, quad[1].y -  quad[0].y, b16dxdy);
+              traps[0].bot.x2 = nxgl_interpolate(quad[0].x,
+                                                 quad[1].y - quad[0].y,
+                                                 b16dxdy);
               traps[0].bot.y  = b16toi(quad[1].y + b16HALF);
 
-              /* quad[1] is at the top left of the second trapezoid.  quad[2} is
-               * at the bottom right of the second trapezoid. Interpolate to get
-               * corresponding point on the left side.
+              /* quad[1] is at the top left of the second trapezoid.
+               * quad[2} is at the bottom right of the second trapezoid.
+               * Interpolate to get corresponding point on the left side.
                *
-               * Interpolation is from quad[1] along the line quad[1]->quad[3]
-               * which as the same slope as the line (positive)
+               * Interpolation is from quad[1] along the line
+               * quad[1]->quad[3] which as the same slope as the line
+               * (positive)
                */
 
               traps[1].top.x1 = traps[0].bot.x1;
               traps[1].top.x2 = traps[0].bot.x2;
               traps[1].top.y  = traps[0].bot.y;
 
-              traps[1].bot.x1 = nxgl_interpolate(traps[1].top.x1, quad[2].y - quad[1].y, b16dxdy);
+              traps[1].bot.x1 = nxgl_interpolate(traps[1].top.x1,
+                                                 quad[2].y - quad[1].y,
+                                                 b16dxdy);
               traps[1].bot.x2 = quad[2].x;
               traps[1].bot.y  = b16toi(quad[2].y + b16HALF);
             }
@@ -383,22 +399,26 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
               /* quad[2] is at the bottom right of the triangle. Interpolate
                * to get the corresponding point on the left side.
                *
-               * Interpolation is from quad[0] along the line quad[0]->quad[1]
-               * which orthogonal to the slope of the line (and negative)
+               * Interpolation is from quad[0] along the line
+               * quad[0]->quad[1] which orthogonal to the slope of the line
+               * (and negative)
                */
 
               b16dxdy = -itob16(iheight) / iwidth;
 
-              traps[0].bot.x1 = nxgl_interpolate(quad[0].x, quad[2].y -  quad[0].y, b16dxdy);
+              traps[0].bot.x1 = nxgl_interpolate(quad[0].x,
+                                                 quad[2].y - quad[0].y,
+                                                 b16dxdy);
               traps[0].bot.x2 = quad[2].x;
               traps[0].bot.y  = b16toi(quad[2].y + b16HALF);
 
-              /* quad[2] is at the top right of the second trapezoid.  quad[1} is
-               * at the bottom left of the second trapezoid. Interpolate to get
-               * corresponding point on the right side.
+              /* quad[2] is at the top right of the second trapezoid.
+               * quad[1} is at the bottom left of the second trapezoid.
+               * Interpolate to get corresponding point on the right side.
                *
-               * Interpolation is from quad[2] along the line quad[2]->quad[3]
-               * which as the same slope as the previous interpolation.
+               * Interpolation is from quad[2] along the line
+               * quad[2]->quad[3] which as the same slope as the previous
+               * interpolation.
                */
 
               traps[1].top.x1 = traps[0].bot.x1;
@@ -406,11 +426,15 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
               traps[1].top.y  = traps[0].bot.y;
 
               traps[1].bot.x1 = quad[1].x;
-              traps[1].bot.x2 = nxgl_interpolate(traps[1].top.x2, quad[1].y - quad[2].y, b16dxdy);
+              traps[1].bot.x2 = nxgl_interpolate(traps[1].top.x2,
+                                                 quad[1].y - quad[2].y,
+                                                 b16dxdy);
               traps[1].bot.y  = b16toi(quad[1].y + b16HALF);
             }
 
-          /* The final trapezond (triangle) at the bottom is new well defined */
+          /* The final trapezond (triangle) at the bottom is new well
+           * defined
+           */
 
           traps[2].top.x1 = traps[1].bot.x1;
           traps[2].top.x2 = traps[1].bot.x2;
@@ -432,7 +456,10 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           quad[2].x = b16x - b16xoffset;
           quad[3].x = b16x + b16xoffset;
 
-          ginfo("Southwest: quad (%08x,%08x),(%08x,%08x),(%08x,%08x),(%08x,%08x)\n",
+          ginfo("Southwest: quad (%08" PRIx32 ",%08" PRIx32 "),"
+                "(%08" PRIx32 ",%08" PRIx32 "),"
+                "(%08" PRIx32 ",%08" PRIx32 "),"
+                "(%08" PRIx32 ",%08" PRIx32 ")\n",
                 quad[0].x, quad[0].y, quad[1].x, quad[1].y,
                 quad[2].x, quad[2].y, quad[3].x, quad[3].y);
 
@@ -453,22 +480,26 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
               /* quad[1] is at the bottom right of the triangle. Interpolate
                * to get the corresponding point on the left side.
                *
-               * Interpolation is from quad[0] along the line quad[0]->quad[2]
-               * which as the same slope as the line (negative)
+               * Interpolation is from quad[0] along the line
+               * quad[0]->quad[2] which as the same slope as the line
+               * (negative)
                */
 
               b16dxdy = -itob16(iwidth) / iheight;
 
-              traps[0].bot.x1 = nxgl_interpolate(traps[0].top.x1, quad[1].y - quad[0].y, b16dxdy);
+              traps[0].bot.x1 = nxgl_interpolate(traps[0].top.x1,
+                                                 quad[1].y - quad[0].y,
+                                                 b16dxdy);
               traps[0].bot.x2 = quad[1].x;
               traps[0].bot.y  = b16toi(quad[1].y + b16HALF);
 
-              /* quad[1] is at the top right of the second trapezoid.  quad[2} is
-               * at the bottom left of the second trapezoid. Interpolate to get
-               * corresponding point on the right side.
+              /* quad[1] is at the top right of the second trapezoid.
+               * quad[2} is at the bottom left of the second trapezoid.
+               * Interpolate to get corresponding point on the right side.
                *
-               * Interpolation is from quad[1] along the line quad[1]->quad[3]
-               * which as the same slope as the line (negative)
+               * Interpolation is from quad[1] along the line
+               * quad[1]->quad[3] which as the same slope as the line
+               * (negative)
                */
 
               traps[1].top.x1 = traps[0].bot.x1;
@@ -476,7 +507,9 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
               traps[1].top.y  = traps[0].bot.y;
 
               traps[1].bot.x1 = quad[2].x;
-              traps[1].bot.x2 = nxgl_interpolate(traps[1].top.x2, quad[2].y - quad[1].y, b16dxdy);
+              traps[1].bot.x2 = nxgl_interpolate(traps[1].top.x2,
+                                                 quad[2].y - quad[1].y,
+                                                 b16dxdy);
               traps[1].bot.y  = b16toi(quad[2].y + b16HALF);
             }
           else
@@ -484,34 +517,42 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
               /* quad[2] is at the bottom left of the triangle. Interpolate
                * to get the corresponding point on the right side.
                *
-               * Interpolation is from quad[0] along the line quad[0]->quad[1]
-               * which orthogonal to the slope of the line (and positive)
+               * Interpolation is from quad[0] along the line
+               * quad[0]->quad[1] which orthogonal to the slope of the line
+               * (and positive)
                */
 
               b16dxdy = itob16(iheight) / iwidth;
 
               traps[0].bot.x1 = quad[2].x;
-              traps[0].bot.x2 = nxgl_interpolate(traps[0].top.x2, quad[2].y - quad[0].y, b16dxdy);
+              traps[0].bot.x2 = nxgl_interpolate(traps[0].top.x2,
+                                                 quad[2].y - quad[0].y,
+                                                 b16dxdy);
               traps[0].bot.y  = b16toi(quad[2].y + b16HALF);
 
-              /* quad[2] is at the top left of the second trapezoid.  quad[1} is
-               * at the bottom right of the second trapezoid. Interpolate to get
-               * corresponding point on the left side.
+              /* quad[2] is at the top left of the second trapezoid.
+               * quad[1} is at the bottom right of the second trapezoid.
+               * Interpolate to get corresponding point on the left side.
                *
-               * Interpolation is from quad[2] along the line quad[2]->quad[3]
-               * which as the same slope as the previous interpolation.
+               * Interpolation is from quad[2] along the line
+               * quad[2]->quad[3] which as the same slope as the previous
+               * interpolation.
                */
 
               traps[1].top.x1 = traps[0].bot.x1;
               traps[1].top.x2 = traps[0].bot.x2;
               traps[1].top.y  = traps[0].bot.y;
 
-              traps[1].bot.x1 = nxgl_interpolate(traps[1].top.x1, quad[1].y - quad[2].y, b16dxdy);
+              traps[1].bot.x1 = nxgl_interpolate(traps[1].top.x1,
+                                                 quad[1].y - quad[2].y,
+                                                 b16dxdy);
               traps[1].bot.x2 = quad[1].x;
               traps[1].bot.y  = b16toi(quad[1].y + b16HALF);
             }
 
-          /* The final trapezond (triangle) at the bottom is new well defined */
+          /* The final trapezond (triangle) at the bottom is new well
+           * defined
+           */
 
           traps[2].top.x1 = traps[1].bot.x1;
           traps[2].top.x2 = traps[1].bot.x2;
@@ -522,13 +563,16 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           traps[2].bot.y  = b16toi(quad[3].y + b16HALF);
         }
 
-      ginfo("traps[0]: (%08x,%08x,%d),(%08x,%08x,%d)\n",
+      ginfo("traps[0]: (%08" PRIx32 ",%08" PRIx32 ",%d),"
+            "(%08" PRIx32 ",%08" PRIx32 ",%d)\n",
             traps[0].top.x1, traps[0].top.x2, traps[0].top.y,
             traps[0].bot.x1, traps[0].bot.x2, traps[0].bot.y);
-      ginfo("traps[1]: (%08x,%08x,%d),(%08x,%08x,%d)\n",
+      ginfo("traps[1]: (%08" PRIx32 ",%08" PRIx32 ",%d),"
+            "(%08" PRIx32 ",%08" PRIx32 ",%d)\n",
             traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
             traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
-      ginfo("traps[2]: (%08x,%08x,%d),(%08x,%08x,%d)\n",
+      ginfo("traps[2]: (%08" PRIx32 ",%08" PRIx32 ",%d),"
+            "(%08" PRIx32 ",%08" PRIx32 ",%d)\n",
             traps[2].top.x1, traps[2].top.x2, traps[2].top.y,
             traps[2].bot.x1, traps[2].bot.x2, traps[2].bot.y);
 
@@ -547,7 +591,8 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
   traps[1].bot.x2 = traps[1].bot.x1 + itob16(linewidth - 1);
   traps[1].bot.y  = line.pt2.y;
 
-  ginfo("Horizontal traps[1]: (%08x,%08x,%d),(%08x,%08x, %d)\n",
+  ginfo("Horizontal traps[1]: (%08" PRIx32 ",%08" PRIx32 ",%d),"
+        "(%08" PRIx32 ",%08" PRIx32 ", %d)\n",
         traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
         traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
 

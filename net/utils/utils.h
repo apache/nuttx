@@ -172,7 +172,7 @@ unsigned int net_timeval2dsec(FAR struct timeval *tv,
  * Name: net_ipv6_mask2pref
  *
  * Description:
- *   Convert a 128-bit netmask to a prefix length.  The Nuttx IPv6
+ *   Convert a 128-bit netmask to a prefix length.  The NuttX IPv6
  *   networking uses 128-bit network masks internally.  This function
  *   converts the IPv6 netmask to a prefix length.
  *
@@ -224,7 +224,7 @@ void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask);
  *   data and len.
  *
  * Input Parameters:
- *   sum  - Partial calculations carried over from a previous call to chksum().
+ *   sum  - Partial calculations carried over from a previous call to chksum.
  *          This should be zero on the first time that check sum is called.
  *   data - Beginning of the data to include in the checksum.
  *   len  - Length of the data to include in the checksum.
@@ -254,7 +254,7 @@ uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len);
  *
  *   buf - A pointer to the buffer over which the checksum is to be computed.
  *
- *   len - The length of the buffer over which the checksum is to be computed.
+ *   len - Length of the buffer over which the checksum is to be computed.
  *
  * Returned Value:
  *   The Internet checksum of the buffer.

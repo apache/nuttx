@@ -108,7 +108,7 @@ struct sim_dev_s
   ioe_pinset_t level[2];             /* Bit encoded: 01=high/rising,
                                       * 10 low/falling, 11 both */
 
-  WDOG_ID wdog;                      /* Timer used to poll for interrupt
+  struct wdog_s wdog;                /* Timer used to poll for interrupt
                                       * simulation */
   struct work_s work;                /* Supports the interrupt handling
                                       * "bottom half" */
@@ -144,7 +144,7 @@ static int sim_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle);
 
 static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv);
 static void sim_interrupt_work(void *arg);
-static void sim_interrupt(int argc, wdparm_t arg1, ...);
+static void sim_interrupt(wdparm_t arg);
 
 /****************************************************************************
  * Private Data
@@ -199,9 +199,13 @@ static int sim_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 {
   FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
 
-  DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS &&
-              (direction == IOEXPANDER_DIRECTION_IN ||
-               direction == IOEXPANDER_DIRECTION_OUT));
+  if (direction != IOEXPANDER_DIRECTION_IN &&
+      direction != IOEXPANDER_DIRECTION_OUT)
+    {
+      return -EINVAL;
+    }
+
+  DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS);
 
   gpioinfo("pin=%u direction=%s\n",
            pin, (direction == IOEXPANDER_DIRECTION_IN) ? "IN" : "OUT");
@@ -770,8 +774,8 @@ static void sim_interrupt_work(void *arg)
 
   /* Re-start the poll timer */
 
-  ret = wd_start(priv->wdog, SIM_POLLDELAY, sim_interrupt,
-                 1, (wdparm_t)priv);
+  ret = wd_start(&priv->wdog, SIM_POLLDELAY,
+                 sim_interrupt, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");
@@ -789,12 +793,11 @@ static void sim_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static void sim_interrupt(int argc, wdparm_t arg1, ...)
+static void sim_interrupt(wdparm_t arg)
 {
   FAR struct sim_dev_s *priv;
 
-  DEBUGASSERT(argc == 1);
-  priv = (FAR struct sim_dev_s *)arg1;
+  priv = (FAR struct sim_dev_s *)arg;
   DEBUGASSERT(priv != NULL);
 
   /* Defer interrupt processing to the worker thread.  This is not only
@@ -854,13 +857,8 @@ FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void)
   priv->level[0] = PINSET_ALL;  /* All rising edge */
   priv->level[1] = PINSET_ALL;  /* All falling edge */
 
-  /* Set up a timer to poll for simulated interrupts */
-
-  priv->wdog = wd_create();
-  DEBUGASSERT(priv->wdog != NULL);
-
-  ret = wd_start(priv->wdog, SIM_POLLDELAY, sim_interrupt,
-                 1, (wdparm_t)priv);
+  ret = wd_start(&priv->wdog, SIM_POLLDELAY,
+                 sim_interrupt, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");

@@ -39,6 +39,7 @@
  ****************************************************************************/
 
 #include <debug.h>
+#include <inttypes.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/config.h>
@@ -121,18 +122,10 @@ static void gs2200m_irq_enable(void)
   irqstate_t flags = spin_lock_irqsave();
   uint32_t dready = 0;
 
-  wlinfo("== ec:%d called=%d \n", _enable_count, _n_called++);
+  wlinfo("== ec:%" PRId32 " called=%" PRId32 " \n",
+         _enable_count, _n_called++);
 
-  if (1 == _enable_count)
-    {
-      /* NOTE: This would happen if we received an event */
-
-      return;
-    }
-
-  _enable_count++;
-
-  if (1 == _enable_count)
+  if (0 == _enable_count)
     {
       /* Check if irq has been asserted */
 
@@ -143,6 +136,8 @@ static void gs2200m_irq_enable(void)
       stm32_gpiosetevent(GPIO_GS2200M_INT, true, false,
                          true, g_irq_handler, g_irq_arg);
     }
+
+  _enable_count++;
 
   spin_unlock_irqrestore(flags);
 
@@ -163,7 +158,8 @@ static void gs2200m_irq_disable(void)
 {
   irqstate_t flags = spin_lock_irqsave();
 
-  wlinfo("== ec:%d called=%d \n", _enable_count, _n_called++);
+  wlinfo("== ec:%" PRId32 " called=%" PRId32 " \n",
+         _enable_count, _n_called++);
 
   _enable_count--;
 

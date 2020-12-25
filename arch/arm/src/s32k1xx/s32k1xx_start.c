@@ -65,6 +65,14 @@
 #include "hardware/s32k1xx_mpu.h"
 #endif
 
+#ifdef CONFIG_S32K1XX_PROGMEM
+#include "s32k1xx_progmem.h"
+#endif
+
+#ifdef CONFIG_S32K1XX_EEEPROM
+#include "s32k1xx_eeeprom.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -352,6 +360,14 @@ void __start(void)
   s32k1xx_earlyserialinit();
 #endif
   showprogress('E');
+
+#ifdef CONFIG_S32K1XX_PROGMEM
+  s32k1xx_progmem_init();
+#endif
+
+#ifdef CONFIG_S32K1XX_EEEPROM
+  s32k1xx_eeeprom_init();
+#endif
 
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.

@@ -187,7 +187,6 @@ static int audio_open(FAR struct file *filep)
   /* Save the new open count on success */
 
   upper->crefs = tmp;
-  upper->usermq = NULL;
   ret = OK;
 
 errout_with_sem:
@@ -241,9 +240,10 @@ static int audio_close(FAR struct file *filep)
       /* Disable the Audio device */
 
       DEBUGASSERT(lower->ops->shutdown != NULL);
-      audinfo("calling shutdown: %d\n");
+      audinfo("calling shutdown\n");
 
       lower->ops->shutdown(lower);
+      upper->usermq = NULL;
     }
 
   ret = OK;
@@ -808,7 +808,7 @@ static inline void audio_message(FAR struct audio_upperhalf_s *upper,
   if (upper->usermq != NULL)
     {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-      msg.session = session;
+      msg->session = session;
 #endif
       nxmq_send(upper->usermq, (FAR const char *)msg, sizeof(*msg),
                 CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);

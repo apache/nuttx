@@ -229,6 +229,57 @@ int net_lock(void)
 }
 
 /****************************************************************************
+ * Name: net_trylock
+ *
+ * Description:
+ *   Try to take the network lock only when it is currently not locked.
+ *   Otherwise, it locks the semaphore.  In either
+ *   case, the call returns without blocking.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   failured (probably -EAGAIN).
+ *
+ ****************************************************************************/
+
+int net_trylock(void)
+{
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
+  pid_t me = getpid();
+  int ret = OK;
+
+  /* Does this thread already hold the semaphore? */
+
+  if (g_holder == me)
+    {
+      /* Yes.. just increment the reference count */
+
+      g_count++;
+    }
+  else
+    {
+      ret = nxsem_trywait(&g_netlock);
+      if (ret >= 0)
+        {
+          /* Now this thread holds the semaphore */
+
+          g_holder = me;
+          g_count  = 1;
+        }
+    }
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
+  return ret;
+}
+
+/****************************************************************************
  * Name: net_unlock
  *
  * Description:

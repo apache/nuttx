@@ -1,7 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/hymini-stm32v/src/stm32_buttons.c
  *
- *   Copyright (C) 2009, 2011, 2014-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2014-2015, 2017 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,16 +62,17 @@
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   stm32_configgpio(GPIO_BTN_KEYA);
   stm32_configgpio(GPIO_BTN_KEYB);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
@@ -80,14 +82,14 @@ void board_button_initialize(void)
 uint32_t board_buttons(void)
 {
   uint32_t ret = 0;
-  bool pinValue;
+  bool value;
 
   /* Check that state of each key */
 
   /* Pin is pulled up */
 
-  pinValue = stm32_gpioread(GPIO_BTN_KEYA);
-  if (!pinValue)
+  value = stm32_gpioread(GPIO_BTN_KEYA);
+  if (!value)
     {
       /* Button pressed */
 
@@ -96,8 +98,8 @@ uint32_t board_buttons(void)
 
   /* Pin is pulled down */
 
-  pinValue = stm32_gpioread(GPIO_BTN_KEYB);
-  if (pinValue)
+  value = stm32_gpioread(GPIO_BTN_KEYB);
+  if (value)
     {
       /* Button pressed */
 
@@ -112,9 +114,9 @@ uint32_t board_buttons(void)
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  *   After board_button_initialize() has been called, board_buttons() may be
  *   called to collect the state of all buttons.  board_buttons() returns an
@@ -122,8 +124,8 @@ uint32_t board_buttons(void)
  *   BUTTON_*_BIT and JOYSTICK_*_BIT definitions in board.h for the meaning
  *  of each bit.
  *
- *   board_button_irq() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
+ *   board_button_irq() may be called to register an interrupt handler that
+ *   will be called when a button is depressed or released. The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See
  *   the BUTTON_* definitions in board.h for the meaning of enumeration
  *   value.

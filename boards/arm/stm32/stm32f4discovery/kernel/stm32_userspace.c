@@ -51,6 +51,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_NUTTX_USERSPACE
@@ -65,14 +66,14 @@
  * Public Data
  ****************************************************************************/
 
-/* These 'addresses' of these values are setup by the linker script.  They are
- * not actual uint32_t storage locations! They are only used meaningfully in the
- * following way:
+/* These 'addresses' of these values are setup by the linker script. They are
+ * not actual uint32_t storage locations! They are only used meaningfully in
+ * the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
  *  - The declaration extern uint32_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32_t variable _data (it is
- *    not!).
+ *    that the value _sdata is the address of a uint32_t variable _data (it
+ *    is not!).
  *  - We can recover the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
@@ -108,7 +109,7 @@ const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
 
   /* Task/thread startup routines */
 
-  .task_startup     = task_startup,
+  .task_startup     = nxtask_startup,
 #ifndef CONFIG_DISABLE_PTHREAD
   .pthread_startup  = pthread_startup,
 #endif

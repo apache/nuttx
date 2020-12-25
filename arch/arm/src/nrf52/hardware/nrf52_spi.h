@@ -1,53 +1,38 @@
 /****************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_spi.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ***************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_SPI_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_SPI_H
 
 /****************************************************************************
  * Included Files
- ***************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
- ***************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets for SPI master (SPIM) **********************************/
+/* Register offsets for SPI master (SPIM) ***********************************/
 
 #define NRF52_SPIM_TASK_START_OFFSET      (0x0010) /* Start SPI transaction */
 #define NRF52_SPIM_TASK_STOP_OFFSET       (0x0014) /* Stop SPI transaction */
@@ -83,8 +68,9 @@
 #define NRF52_SPIM_PSELDCX_OFFSET         (0x056c) /* Pin select for DCX signal */
 #define NRF52_SPIM_DCXCNT_OFFSET          (0x0570) /* DCX configuration */
 #define NRF52_SPIM_ORC_OFFSET             (0x05c0) /* ORC */
+#define NRF52_SPIM_POWER_OFFSET           (0x0ffc) /* Hidden POWER register, for applying errata workaround */
 
-/* Register offsets for SPI slave (SPIS) ***********************************/
+/* Register offsets for SPI slave (SPIS) ************************************/
 
 #define NRF52_SPIS_SHORTS_OFFSET          (0x0200) /* Shortcuts between local events and tasks */
 #define NRF52_SPIS_INTENSET_OFFSET        (0x0304) /* Enable interrupt */
@@ -108,7 +94,7 @@
 #define NRF52_SPIS_DEF_OFFSET             (0x055c) /* Default character */
 #define NRF52_SPIS_ORC_OFFSET             (0x05c0) /* Over-read character */
 
-/* Register Bitfield Definitions for SPIM **********************************/
+/* Register Bitfield Definitions for SPIM ***********************************/
 
 /* TASKS_START Register */
 
@@ -168,41 +154,14 @@
 #define SPIM_ENABLE_DIS             (0)        /* Disable SPIM */
 #define SPIM_ENABLE_EN              (0x7 << 0) /* Enable SPIM */
 
-/* PSELSCK Register */
+/* PSEL* Registers */
 
-#define SPIM_PSELSCK_PIN_SHIFT      (0)       /* Bits 0-4: SCK pin number */
-#define SPIM_PSELSCK_PIN_MASK       (0x1f << SPIM_PSELSCK_PIN_SHIFT)
-#define SPIM_PSELSCK_PORT_SHIFT     (5)       /* Bit 5: SCK port number */
-#define SPIM_PSELSCK_PORT_MASK      (0x1 << SPIM_PSELSCK_PORT_SHIFT)
-#define SPIM_PSELSCK_CONNECTED      (1 << 31) /* Bit 31: Connection */
-#define SPIM_PSELSCK_RESET          (0xffffffff)
-
-/* PSELMOSI Register */
-
-#define SPIM_PSELMOSI_PIN_SHIFT     (0)       /* Bits 0-4: MOSI pin number */
-#define SPIM_PSELMOSI_PIN_MASK      (0x1f << SPIM_PSELMOSI_PIN_SHIFT)
-#define SPIM_PSELMOSI_PORT_SHIFT    (5)       /* Bit 5: MOSI port number */
-#define SPIM_PSELMOSI_PORT_MASK     (0x1 << SPIM_PSELMOSI_PORT_SHIFT)
-#define SPIM_PSELMOSI_CONNECTED     (1 << 31) /* Bit 31: Connection */
-#define SPIM_PSELMOSI_RESET         (0xffffffff)
-
-/* PSELMISO Register */
-
-#define SPIM_PSELMISO_PIN_SHIFT     (0)       /* Bits 0-4: MISO pin number */
-#define SPIM_PSELMISO_PIN_MASK      (0x1f << SPIM_PSELMISO_PIN_SHIFT)
-#define SPIM_PSELMISO_PORT_SHIFT    (5)       /* Bit 5: MISO port number */
-#define SPIM_PSELMISO_PORT_MASK     (0x1 << SPIM_PSELMISO_PORT_SHIFT)
-#define SPIM_PSELMISO_CONNECTED     (1 << 31) /* Bit 31: Connection */
-#define SPIM_PSELMISO_RESET         (0xffffffff)
-
-/* PSELCSN Register */
-
-#define SPIM_PSELCSN_PIN_SHIFT      (0)       /* Bits 0-4: CSN pin number */
-#define SPIM_PSELCSN_PIN_MASK       (0x1f << SPIM_PSELCSN_PIN_SHIFT)
-#define SPIM_PSELCSN_PORT_SHIFT     (5)       /* Bit 5: CSN port number */
-#define SPIM_PSELCSN_PORT_MASK      (0x1 << SPIM_PSELCSN_PORT_SHIFT)
-#define SPIM_PSELCSN_CONNECTED      (1 << 31) /* Bit 31: Connection */
-#define SPIM_PSELCSN_RESET          (0xffffffff)
+#define SPIM_PSEL_PIN_SHIFT         (0)       /* Bits 0-4: SCK pin number */
+#define SPIM_PSEL_PIN_MASK          (0x1f << SPIM_PSELSCK_PIN_SHIFT)
+#define SPIM_PSEL_PORT_SHIFT        (5)       /* Bit 5: SCK port number */
+#define SPIM_PSEL_PORT_MASK         (0x1 << SPIM_PSELSCK_PORT_SHIFT)
+#define SPIM_PSEL_CONNECTED         (1 << 31) /* Bit 31: Connection */
+#define SPIM_PSEL_RESET             (0xffffffff)
 
 /* FREQUENCY Register */
 
@@ -250,7 +209,7 @@
 #define SPIM_PSELDCX_PORT_MASK      (0x1 << SPIM_PSELDCX_PORT_SHIFT)
 #define SPIM_PSELDCX_CONNECTED      (1 << 31) /* Bit 31: Connection */
 
-/* Register Bitfield Definitions for SPIS *******************************************************/
+/* Register Bitfield Definitions for SPIS ***********************************/
 
 /* TODO */
 

@@ -43,8 +43,6 @@ MEMORY
   sram (rwx) : ORIGIN = 0x08000000, LENGTH = 32K
 }
 
-OUTPUT_ARCH(arm)
-OUTPUT_FORMAT(elf32-bigarm)
 EXTERN(_vectors)
 ENTRY(_stext)
 

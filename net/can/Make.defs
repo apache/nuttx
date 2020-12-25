@@ -1,0 +1,48 @@
+############################################################################
+# net/can/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Logic specific to SocketCAN socket support
+
+ifeq ($(CONFIG_NET_CAN),y)
+
+# Socket layer
+
+SOCK_CSRCS += can_sockif.c
+SOCK_CSRCS += can_send.c
+SOCK_CSRCS += can_recvfrom.c
+
+ifeq ($(CONFIG_NET_CAN_NOTIFIER),y)
+SOCK_CSRCS += can_notifier.c
+endif
+
+ifeq ($(CONFIG_NET_CANPROTO_OPTIONS),y)
+SOCK_CSRCS += can_setsockopt.c can_getsockopt.c
+endif
+
+NET_CSRCS += can_conn.c
+NET_CSRCS += can_input.c
+NET_CSRCS += can_callback.c
+NET_CSRCS += can_poll.c
+
+# Include can build support
+
+DEPPATH += --dep-path can
+VPATH += :can
+endif # CONFIG_NET_CAN

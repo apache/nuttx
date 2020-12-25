@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/statfs.h>
 #include <sys/stat.h>
 
 #include <stdint.h>
@@ -163,7 +162,7 @@ static int critmon_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate a container to hold the file attributes */
 
-  attr = (FAR struct critmon_file_s *)kmm_zalloc(sizeof(struct critmon_file_s));
+  attr = kmm_zalloc(sizeof(struct critmon_file_s));
   if (!attr)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -349,7 +348,7 @@ static int critmon_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newattr = (FAR struct critmon_file_s *)kmm_malloc(sizeof(struct critmon_file_s));
+  newattr = kmm_malloc(sizeof(struct critmon_file_s));
   if (!newattr)
     {
       ferr("ERROR: Failed to allocate file attributes\n");

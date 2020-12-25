@@ -2,35 +2,20 @@
  * include/nuttx/wireless/wireless.h
  * Wireless network IOCTL commands
  *
- *   Copyright (C) 2011-2013, 2017-2018 Gregory Nutt. All rights reserved.
- *   Author:  Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ************************************************************************************/
 
@@ -58,6 +43,7 @@
  ************************************************************************************/
 
 /* Network Driver IOCTL Commands ****************************************************/
+
 /* Use of these IOCTL commands requires a socket descriptor created by the socket()
  * interface.
  */
@@ -154,10 +140,14 @@
 
 #define SIOCSIWPMKSA        _WLIOC(0x0036)  /* PMKSA cache operation */
 
-/* Device-specific network IOCTL commands ******************************************/
+/* Country code extension */
+
+#define SIOCSIWCOUNTRY      _WLIOC(0x0037)  /* Country code extension */
+
+/* Device-specific network IOCTL commands *******************************************/
 
 #define WL_NETFIRST         0x0000          /* First network command */
-#define WL_NNETCMDS         0x0037          /* Number of network commands */
+#define WL_NNETCMDS         0x0038          /* Number of network commands */
 
 /* Reserved for Bluetooth network devices (see bt_ioctls.h) */
 
@@ -186,48 +176,50 @@
                                _IOC_NR(cmd) >= WL_PKTRADIOFIRST && \
                                _IOC_NR(cmd) < (WL_PKTRADIOFIRST + WL_NPKTRADIOCMDS))
 
-/* ------------------------------ WIRELESS EVENTS -------------------------------- */
+/* ------------------------------ WIRELESS EVENTS --------------------------------- */
+
 /* Those are *NOT* ioctls, do not issue request on them !!! */
+
 /* Most events use the same identifier as ioctl requests */
 
-#define IWEVTXDROP      0x8c00    /* Packet dropped to excessive retry */
-#define IWEVQUAL        0x8c01    /* Quality part of statistics (scan) */
-#define IWEVCUSTOM      0x8c02    /* Driver specific ascii string */
-#define IWEVREGISTERED  0x8c03    /* Discovered a new node (AP mode) */
-#define IWEVEXPIRED     0x8c04    /* Expired a node (AP mode) */
-#define IWEVGENIE       0x8c05    /* Generic IE (WPA, RSN, WMM, ..)
-                                   * (scan results); This includes id and
-                                   * length fields. One IWEVGENIE may
-                                   * contain more than one IE. Scan
-                                   * results may contain one or more
-                                   * IWEVGENIE events. */
+#define IWEVTXDROP      0x8c00        /* Packet dropped to excessive retry */
+#define IWEVQUAL        0x8c01        /* Quality part of statistics (scan) */
+#define IWEVCUSTOM      0x8c02        /* Driver specific ascii string */
+#define IWEVREGISTERED  0x8c03        /* Discovered a new node (AP mode) */
+#define IWEVEXPIRED     0x8c04        /* Expired a node (AP mode) */
+#define IWEVGENIE       0x8c05        /* Generic IE (WPA, RSN, WMM, ..)
+                                       * (scan results); This includes id and
+                                       * length fields. One IWEVGENIE may
+                                       * contain more than one IE. Scan
+                                       * results may contain one or more
+                                       * IWEVGENIE events. */
 #define IWEVMICHAELMICFAILURE 0x8c06  /* Michael MIC failure
                                        * (struct iw_michaelmicfailure)
                                        */
-#define IWEVASSOCREQIE  0x8c07    /* IEs used in (Re)Association Request.
-                                   * The data includes id and length
-                                   * fields and may contain more than one
-                                   * IE. This event is required in
-                                   * Managed mode if the driver
-                                   * generates its own WPA/RSN IE. This
-                                   * should be sent just before
-                                   * IWEVREGISTERED event for the
-                                   * association. */
-#define IWEVASSOCRESPIE 0x8c08    /* IEs used in (Re)Association
-                                   * Response. The data includes id and
-                                   * length fields and may contain more
-                                   * than one IE. This may be sent
-                                   * between IWEVASSOCREQIE and
-                                   * IWEVREGISTERED events for the
-                                   * association. */
-#define IWEVPMKIDCAND   0x8c09    /* PMKID candidate for RSN
-                                   * pre-authentication
-                                   * (struct iw_pmkid_cand) */
+#define IWEVASSOCREQIE  0x8c07        /* IEs used in (Re)Association Request.
+                                       * The data includes id and length
+                                       * fields and may contain more than one
+                                       * IE. This event is required in
+                                       * Managed mode if the driver
+                                       * generates its own WPA/RSN IE. This
+                                       * should be sent just before
+                                       * IWEVREGISTERED event for the
+                                       * association. */
+#define IWEVASSOCRESPIE 0x8c08        /* IEs used in (Re)Association
+                                       * Response. The data includes id and
+                                       * length fields and may contain more
+                                       * than one IE. This may be sent
+                                       * between IWEVASSOCREQIE and
+                                       * IWEVREGISTERED events for the
+                                       * association. */
+#define IWEVPMKIDCAND   0x8c09        /* PMKID candidate for RSN
+                                       * pre-authentication
+                                       * (struct iw_pmkid_cand) */
 
 #define IWEVFIRST       0x8c00
 #define IW_EVENT_IDX(cmd) ((cmd) - IWEVFIRST)
 
-/* Other Common Wireless Definitions ***********************************************/
+/* Other Common Wireless Definitions ************************************************/
 
 /* Maximum size of the ESSID and NICKN strings */
 
@@ -506,7 +498,7 @@ struct iw_range
 struct iw_event
 {
   uint16_t           len;   /* Real length of ata */
-  uint16_t           cmd;   /* Wireless IOCTL command*/
+  uint16_t           cmd;   /* Wireless IOCTL command */
   union iwreq_data   u;     /* Fixed IOCTL payload */
 };
 
@@ -514,15 +506,16 @@ struct iw_event
 
 struct  iw_encode_ext
 {
-  uint32_t   ext_flags;     /* IW_ENCODE_EXT_* */
-  uint8_t    tx_seq[IW_ENCODE_SEQ_MAX_SIZE]; /* LSB first */
-  uint8_t    rx_seq[IW_ENCODE_SEQ_MAX_SIZE]; /* LSB first */
-  struct sockaddr addr;     /* ff:ff:ff:ff:ff:ff for broadcast/multicast
-                             * (group) keys or unicast address for
-                             * individual keys */
-  uint16_t   alg;           /* IW_ENCODE_ALG_* */
-  uint16_t   key_len;
-  uint8_t    key[0];
+  uint32_t ext_flags;                      /* IW_ENCODE_EXT_* */
+  uint8_t  tx_seq[IW_ENCODE_SEQ_MAX_SIZE]; /* LSB first */
+  uint8_t  rx_seq[IW_ENCODE_SEQ_MAX_SIZE]; /* LSB first */
+  struct sockaddr addr;                    /* ff:ff:ff:ff:ff:ff for
+                                            * broadcast/multicast
+                                            * (group) keys or unicast address
+                                            * for individual keys */
+  uint16_t alg;                            /* IW_ENCODE_ALG_* */
+  uint16_t key_len;
+  uint8_t  key[0];
 };
 
 /* Optional data for scan request
@@ -538,15 +531,15 @@ struct  iw_encode_ext
 
 struct  iw_scan_req
 {
-  uint8_t scan_type; /* IW_SCAN_TYPE_{ACTIVE,PASSIVE} */
+  uint8_t scan_type;     /* IW_SCAN_TYPE_{ACTIVE,PASSIVE} */
   uint8_t essid_len;
-  uint8_t num_channels; /* num entries in channel_list;
-               * 0 = scan all allowed channels */
-  uint8_t flags; /* reserved as padding; use zero, this may
-        * be used in the future for adding flags
-        * to request different scan behavior */
+  uint8_t num_channels;  /* num entries in channel_list;
+                          * 0 = scan all allowed channels */
+  uint8_t flags;         /* reserved as padding; use zero, this may
+                          * be used in the future for adding flags
+                          * to request different scan behavior */
   struct sockaddr bssid; /* ff:ff:ff:ff:ff:ff for broadcast BSSID or
-        * individual address of a specific BSS */
+                          * individual address of a specific BSS */
 
   /* Use this ESSID if IW_SCAN_THIS_ESSID flag is used instead of using
    * the current ESSID. This allows scan requests for specific ESSID
@@ -571,5 +564,11 @@ struct  iw_scan_req
 
   struct iw_freq  channel_list[IW_MAX_FREQUENCIES];
 };
+
+/* A Wireless Event. Contains basically the same data as the ioctl...
+ */
+
+#define IW_EV_LEN(field) \
+  (offsetof(struct iw_event, u) + sizeof(((union iwreq_data *)0)->field))
 
 #endif /* __INCLUDE_NUTTX_WIRELESS_WIRELESS_H */

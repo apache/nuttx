@@ -87,7 +87,7 @@ static const uint32_t g_buttons[NUM_BUTTONS] =
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -99,6 +99,8 @@ void board_button_initialize(void)
     {
       stm32_configgpio(g_buttons[i]);
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
@@ -114,17 +116,16 @@ uint32_t board_buttons(void)
 
   for (i = 0; i < NUM_BUTTONS; i++)
     {
-       /* A LOW value means that the key is pressed.
-        */
+      /* A LOW value means that the key is pressed. */
 
-       bool released = stm32_gpioread(g_buttons[i]);
+      bool released = stm32_gpioread(g_buttons[i]);
 
-       /* Accumulate the set of depressed (not released) keys */
+      /* Accumulate the set of depressed (not released) keys */
 
-       if (!released)
-         {
-            ret |= (1 << i);
-         }
+      if (!released)
+        {
+           ret |= (1 << i);
+        }
     }
 
   return ret;

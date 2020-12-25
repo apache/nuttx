@@ -1,35 +1,20 @@
 /****************************************************************************
  * include/nuttx/sched_note.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -45,8 +30,21 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 #include <nuttx/sched.h>
+
+/* For system call numbers definition */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+#ifdef CONFIG_LIB_SYSCALL
+#include <syscall.h>
+#else
+#define CONFIG_LIB_SYSCALL
+#include <syscall.h>
+#undef CONFIG_LIB_SYSCALL
+#endif
+#endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
@@ -62,15 +60,48 @@
 #  define CONFIG_SCHED_INSTRUMENTATION_CPUSET 0xffff
 #endif
 
-#ifndef CONFIG_SCHED_NOTE_BUFSIZE
-#  define CONFIG_SCHED_NOTE_BUFSIZE 2048
+/* Note filter mode flag definitions */
+
+#define NOTE_FILTER_MODE_FLAG_ENABLE       (1 << 0) /* Enable instrumentation */
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+#define NOTE_FILTER_MODE_FLAG_SYSCALL      (1 << 1) /* Enable syscall instrumentation */
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+#define NOTE_FILTER_MODE_FLAG_IRQ          (1 << 2) /* Enable IRQ instrumentaiton */
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+#define NOTE_FILTER_MODE_FLAG_SYSCALL_ARGS (1 << 3) /* Enable collecting syscall arguments */
+#endif
+
+/* Helper macros for syscall instrumentation filter */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+#define NOTE_FILTER_SYSCALLMASK_SET(nr, s) \
+  ((s)->syscall_mask[(nr) / 8] |= (1 << ((nr) % 8)))
+#define NOTE_FILTER_SYSCALLMASK_CLR(nr, s) \
+  ((s)->syscall_mask[(nr) / 8] &= ~(1 << ((nr) % 8)))
+#define NOTE_FILTER_SYSCALLMASK_ISSET(nr, s) \
+  ((s)->syscall_mask[(nr) / 8] & (1 << ((nr) % 8)))
+#define NOTE_FILTER_SYSCALLMASK_ZERO(s) \
+  memset((s), 0, sizeof(struct note_filter_syscall_s))
+#endif
+
+/* Helper macros for IRQ instrumentation filter */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+#define NOTE_FILTER_IRQMASK_SET(nr, s) \
+  ((s)->irq_mask[(nr) / 8] |= (1 << ((nr) % 8)))
+#define NOTE_FILTER_IRQMASK_CLR(nr, s) \
+  ((s)->irq_mask[(nr) / 8] &= ~(1 << ((nr) % 8)))
+#define NOTE_FILTER_IRQMASK_ISSET(nr, s) \
+  ((s)->irq_mask[(nr) / 8] & (1 << ((nr) % 8)))
+#define NOTE_FILTER_IRQMASK_ZERO(s) \
+  memset((s), 0, sizeof(struct note_filter_irq_s))
 #endif
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_BUFFER
 
 /* This type identifies a note structure */
 
@@ -106,6 +137,16 @@ enum note_type_e
   NOTE_SPINLOCK_UNLOCK = 16,
   NOTE_SPINLOCK_ABORT  = 17
 #endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+  ,
+  NOTE_SYSCALL_ENTER   = 18,
+  NOTE_SYSCALL_LEAVE   = 19
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+  ,
+  NOTE_IRQ_ENTER       = 20,
+  NOTE_IRQ_LEAVE       = 21
+#endif
 };
 
 /* This structure provides the common header of each note */
@@ -119,7 +160,13 @@ struct note_common_s
   uint8_t nc_cpu;              /* CPU thread/task running on */
 #endif
   uint8_t nc_pid[2];           /* ID of the thread/task */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
+  uint8_t nc_systime_sec[4];   /* Time when note was buffered (sec) */
+  uint8_t nc_systime_nsec[4];  /* Time when note was buffered (nsec) */
+#else
   uint8_t nc_systime[4];       /* Time when note was buffered */
+#endif
 };
 
 /* This is the specific form of the NOTE_START note */
@@ -225,32 +272,101 @@ struct note_csection_s
 #endif /* CONFIG_SCHED_INSTRUMENTATION_CSECTION */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-/* This is the specific form of the NOTE_SPINLOCK_LOCK/LOCKED/UNLOCK/ABORT note */
+/* This is the specific form of the NOTE_SPINLOCK_LOCK/LOCKED/UNLOCK/ABORT
+ * note.
+ */
 
 struct note_spinlock_s
 {
-  struct note_common_s nsp_cmn; /* Common note parameters */
-  FAR void *nsp_spinlock;       /* Address of spinlock */
-  uint8_t nsp_value;            /* Value of spinlock */
+  struct note_common_s nsp_cmn;             /* Common note parameters */
+  uint8_t nsp_spinlock[sizeof(uintptr_t)];  /* Address of spinlock */
+  uint8_t nsp_value;                        /* Value of spinlock */
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS */
-#endif /* CONFIG_SCHED_INSTRUMENTATION_BUFFER */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+/* This is the specific form of the NOTE_SYSCALL_ENTER/LEAVE notes */
+
+#define MAX_SYSCALL_ARGS  6
+#define SIZEOF_NOTE_SYSCALL_ENTER(n) (sizeof(struct note_common_s) + \
+                                      sizeof(uint8_t) + sizeof(uint8_t) + \
+                                      (sizeof(uintptr_t) * (n)))
+
+struct note_syscall_enter_s
+{
+  struct note_common_s nsc_cmn;                           /* Common note parameters */
+  uint8_t nsc_nr;                                         /* System call number */
+  uint8_t nsc_argc;                                       /* Number of system call arguments */
+  uint8_t nsc_args[sizeof(uintptr_t) * MAX_SYSCALL_ARGS]; /* System call arguments */
+};
+
+struct note_syscall_leave_s
+{
+  struct note_common_s nsc_cmn;          /* Common note parameters */
+  uint8_t nsc_nr;                        /* System call number */
+  uint8_t nsc_result[sizeof(uintptr_t)]; /* Result of the system call */
+};
+#endif /* CONFIG_SCHED_INSTRUMENTATION_SYSCALL */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+/* This is the specific form of the NOTE_IRQ_ENTER/LEAVE notes */
+
+struct note_irqhandler_s
+{
+  struct note_common_s nih_cmn; /* Common note parameters */
+  uint8_t nih_irq;              /* IRQ number */
+};
+#endif /* CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+
+/* This is the type of the argument passed to the NOTECTL_GETMODE and
+ * NOTECTL_SETMODE ioctls
+ */
+
+struct note_filter_mode_s
+{
+  unsigned int flag;          /* Filter mode flag */
+#ifdef CONFIG_SMP
+  unsigned int cpuset;        /* The set of monitored CPUs */
+#endif
+};
+
+/* This is the type of the argument passed to the NOTECTL_GETSYSCALLFILTER
+ * and NOTECTL_SETSYSCALLFILTER ioctls
+ */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+struct note_filter_syscall_s
+{
+  uint8_t syscall_mask[(SYS_nsyscalls + 7) / 8];
+};
+#endif
+
+/* This is the type of the argument passed to the NOTECTL_GETIRQFILTER and
+ * NOTECTL_SETIRQFILTER ioctls
+ */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+struct note_filter_irq_s
+{
+  uint8_t irq_mask[(NR_IRQS + 7) / 8];
+};
+#endif
+
+#endif /* CONFIG_SCHED_INSTRUMENTATION_FILTER */
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: sched_note_*
  *
  * Description:
- *   If instrumentation of the scheduler is enabled, then some outboard logic
- *   must provide the following interfaces.  These interfaces are not available
- *   to application code.
- *
- *   NOTE: if CONFIG_SCHED_INSTRUMENTATION_BUFFER, then these interfaces are
- *   *not* available to the platform-specific logic.  Rather, they provided by
- *   the note buffering logic.  See sched_note_get() below.
+ *   If instrumentation of the scheduler is enabled, then some outboard
+ *   logic must provide the following interfaces.  These interfaces are not
+ *   available to application code.
  *
  * Input Parameters:
  *   tcb - The TCB of the thread.
@@ -258,7 +374,7 @@ struct note_spinlock_s
  * Returned Value:
  *   None
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 void sched_note_start(FAR struct tcb_s *tcb);
 void sched_note_stop(FAR struct tcb_s *tcb);
@@ -294,10 +410,14 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter);
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void sched_note_spinlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
-void sched_note_spinlocked(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
-void sched_note_spinunlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
-void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
+void sched_note_spinlock(FAR struct tcb_s *tcb,
+                         FAR volatile void *spinlock);
+void sched_note_spinlocked(FAR struct tcb_s *tcb,
+                           FAR volatile void *spinlock);
+void sched_note_spinunlock(FAR struct tcb_s *tcb,
+                           FAR volatile void *spinlock);
+void sched_note_spinabort(FAR struct tcb_s *tcb,
+                          FAR volatile void *spinlock);
 #else
 #  define sched_note_spinlock(t,s)
 #  define sched_note_spinlocked(t,s)
@@ -305,69 +425,120 @@ void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
 #  define sched_note_spinabort(t,s)
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+void sched_note_syscall_enter(int nr, int argc, ...);
+void sched_note_syscall_leave(int nr, uintptr_t result);
+#else
+#  define sched_note_syscall_enter(n,a...)
+#  define sched_note_syscall_leave(n,r)
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
+#else
+#  define sched_note_irqhandler(i,h,e)
+#endif
+
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
+
 /****************************************************************************
- * Name: sched_note_get
+ * Name: sched_note_add
  *
  * Description:
- *   Remove the next note from the tail of the circular buffer.  The note
- *   is also removed from the circular buffer to make room for further notes.
+ *   Add the variable length note to the transport layer
  *
  * Input Parameters:
- *   buffer - Location to return the next note
- *   buflen - The length of the user provided buffer.
+ *   note    - The note buffer
+ *   notelen - The buffer length
  *
  * Returned Value:
- *   On success, the positive, non-zero length of the return note is
- *   provided.  Zero is returned only if the circular buffer is empty.  A
- *   negated errno value is returned in the event of any failure.
+ *   None
+ *
+ * Assumptions:
+ *   We are within a critical section.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_SCHED_NOTE_GET)
-ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
-#endif
+void sched_note_add(FAR const void *note, size_t notelen);
 
 /****************************************************************************
- * Name: sched_note_size
+ * Name: sched_note_filter_mode
  *
  * Description:
- *   Return the size of the next note at the tail of the circular buffer.
+ *   Set and get note filter mode.
+ *   (Same as NOTECTL_GETMODE / NOTECTL_SETMODE ioctls)
  *
  * Input Parameters:
- *   None.
+ *   oldm - A writable pointer to struct note_filter_mode_s to get current
+ *          filter mode
+ *          If 0, no data is written.
+ *   newm - A read-only pointer to struct note_filter_mode_s which holds the
+ *          new filter mode
+ *          If 0, the filter mode is not updated.
  *
  * Returned Value:
- *   Zero is returned if the circular buffer is empty.  Otherwise, the size
- *   of the next note is returned.
+ *   None
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_SCHED_NOTE_GET)
-ssize_t sched_note_size(void);
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+void sched_note_filter_mode(struct note_filter_mode_s *oldm,
+                            struct note_filter_mode_s *newm);
 #endif
 
 /****************************************************************************
- * Name: note_register
+ * Name: sched_note_filter_syscall
  *
  * Description:
- *   Register a serial driver at /dev/note that can be used by an
- *   application to read data from the circular not buffer.
+ *   Set and get syscall filter setting
+ *   (Same as NOTECTL_GETSYSCALLFILTER / NOTECTL_SETSYSCALLFILTER ioctls)
  *
  * Input Parameters:
- *   None.
+ *   oldf - A writable pointer to struct note_filter_syscall_s to get
+ *          current syscall filter setting
+ *          If 0, no data is written.
+ *   newf - A read-only pointer to struct note_filter_syscall_s of the
+ *          new syscall filter setting
+ *          If 0, the setting is not updated.
  *
  * Returned Value:
- *   Zero is returned if the circular buffer is empty.  Otherwise, a negated
- *   errno value is returned.
+ *   None
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_DRIVER_NOTE)
-int note_register(void);
+#if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) && \
+    defined(CONFIG_SCHED_INSTRUMENTATION_SYSCALL)
+void sched_note_filter_syscall(struct note_filter_syscall_s *oldf,
+                               struct note_filter_syscall_s *newf);
 #endif
+
+/****************************************************************************
+ * Name: sched_note_filter_irq
+ *
+ * Description:
+ *   Set and get IRQ filter setting
+ *   (Same as NOTECTL_GETIRQFILTER / NOTECTL_SETIRQFILTER ioctls)
+ *
+ * Input Parameters:
+ *   oldf - A writable pointer to struct note_filter_irq_s to get
+ *          current IRQ filter setting
+ *          If 0, no data is written.
+ *   newf - A read-only pointer to struct note_filter_irq_s of the new
+ *          IRQ filter setting
+ *          If 0, the setting is not updated.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) && \
+    defined(CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER)
+void sched_note_filter_irq(struct note_filter_irq_s *oldf,
+                           struct note_filter_irq_s *newf);
+#endif
+
+#endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
 
 #else /* CONFIG_SCHED_INSTRUMENTATION */
 
@@ -387,6 +558,9 @@ int note_register(void);
 #  define sched_note_spinlocked(t,s)
 #  define sched_note_spinunlock(t,s)
 #  define sched_note_spinabort(t,s)
+#  define sched_note_syscall_enter(n,a...)
+#  define sched_note_syscall_leave(n,r)
+#  define sched_note_irqhandler(i,h,e)
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION */
 #endif /* __INCLUDE_NUTTX_SCHED_NOTE_H */

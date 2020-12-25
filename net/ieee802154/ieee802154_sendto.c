@@ -282,7 +282,7 @@ static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
   int hdrlen;
   int ret;
 
-  DEBUGASSERT(pvpriv != NULL && dev != NULL && pvconn != NULL);
+  DEBUGASSERT(pvpriv != NULL && dev != NULL);
 
   /* Ignore polls from non IEEE 802.15.4 network drivers */
 
@@ -298,7 +298,7 @@ static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
   pstate = (FAR struct ieee802154_sendto_s *)pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
 
-  ninfo("flags: %04x sent: %d\n", flags, pstate->is_sent);
+  ninfo("flags: %04x sent: %zd\n", flags, pstate->is_sent);
 
   if (pstate != NULL && (flags & IEEE802154_POLL) != 0)
     {

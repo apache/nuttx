@@ -1,35 +1,20 @@
 /****************************************************************************
  * net/usrsock/usrsock_accept.c
  *
- *   Copyright (C) 2018 Pinecone Inc. All rights reserved.
- *   Author: Xiang Xiao <xiaoxiang@pinecone.net>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -187,16 +172,16 @@ static int do_accept_request(FAR struct usrsock_conn_s *conn,
  * Name: usrsock_accept
  *
  * Description:
- *   The usrsock_sockif_accept function is used with connection-based socket
+ *   The usrsock_accept function is used with connection-based socket
  *   types (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
  *   connection request on the queue of pending connections, creates a new
- *   connected socket with mostly the same properties as 'sockfd', and
+ *   connected socket with mostly the same properties as 'psock', and
  *   allocates a new socket descriptor for the socket, which is returned. The
  *   newly created socket is no longer in the listening state. The original
- *   socket 'sockfd' is unaffected by this call.  Per file descriptor flags
- *   are not inherited across an inet_accept.
+ *   socket 'psock' is unaffected by this call.  Per file descriptor flags
+ *   are not inherited across an usrsock_accept.
  *
- *   The 'sockfd' argument is a socket descriptor that has been created with
+ *   The 'psock' argument is a socket descriptor that has been created with
  *   socket(), bound to a local address with bind(), and is listening for
  *   connections after a call to listen().
  *
@@ -206,15 +191,16 @@ static int do_accept_request(FAR struct usrsock_conn_s *conn,
  *   actual length of the address returned.
  *
  *   If no pending connections are present on the queue, and the socket is
- *   not marked as non-blocking, inet_accept blocks the caller until a
+ *   not marked as non-blocking, usrsock_accept blocks the caller until a
  *   connection is present. If the socket is marked non-blocking and no
- *   pending connections are present on the queue, inet_accept returns
+ *   pending connections are present on the queue, usrsock_accept returns
  *   EAGAIN.
  *
  * Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr',
+ *            Return: returned size of 'addr'
  *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:

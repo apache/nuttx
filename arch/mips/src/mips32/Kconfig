@@ -58,7 +58,7 @@ config MIPS32_TOOLCHAIN_MICROCHIPOPENL
 
 config MIPS32_TOOLCHAIN_PINGUINOW
 	bool "Pinguino mips-elf toolchain under Windows"
-	depends on TOOLCHAIN_WINDOWS || WINDOWS_UBUNTU
+	depends on TOOLCHAIN_WINDOWS
 	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 	select ARCH_TOOLCHAIN_GNU
 

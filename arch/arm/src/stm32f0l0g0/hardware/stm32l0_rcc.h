@@ -1,35 +1,20 @@
 /************************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32l0_rcc.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ************************************************************************************/
 
@@ -117,11 +102,11 @@
 
 /* Internal clock sources calibration register */
 
-#define RCC_ICSCR_HSICAL_SHIFT      (0)       /* Bits 0-7:  Internal high speed clock calibration */
+#define RCC_ICSCR_HSICAL_SHIFT      (0)                             /* Bits 0-7:  Internal high speed clock calibration */
 #define RCC_ICSCR_HSICAL_MASK       (0xff << RCC_ICSCR_HSICAL_SHIFT)
-#define RCC_ICSCR_HSITRIM_SHIFT     (8)       /* Bits 8-12:  High speed internal clock trimming */
+#define RCC_ICSCR_HSITRIM_SHIFT     (8)                             /* Bits 8-12:  High speed internal clock trimming */
 #define RCC_ICSCR_HSITRIM_MASK      (0x1f << RCC_ICSCR_HSITRIM_SHIFT)
-#define RCC_ICSCR_MSIRANGE_SHIFT    (13)      /* Bits 13-15:  MSI clock ranges */
+#define RCC_ICSCR_MSIRANGE_SHIFT    (13)                            /* Bits 13-15:  MSI clock ranges */
 #define RCC_ICSCR_MSIRANGE_MASK     (7 << RCC_ICSCR_MSIRANGE_SHIFT)
 #  define RCC_ICSCR_MSIRANGE_0      (0 << RCC_ICSCR_MSIRANGE_SHIFT) /* 000: Range 0 around 65.536 kHz */
 #  define RCC_ICSCR_MSIRANGE_1      (1 << RCC_ICSCR_MSIRANGE_SHIFT) /* 001: Range 1 around 131.072 kHz */
@@ -130,9 +115,9 @@
 #  define RCC_ICSCR_MSIRANGE_4      (4 << RCC_ICSCR_MSIRANGE_SHIFT) /* 100: Range 4 around 1.048 MHz */
 #  define RCC_ICSCR_MSIRANGE_5      (5 << RCC_ICSCR_MSIRANGE_SHIFT) /* 101: Range 5 around 2.097 MHz (reset value) */
 #  define RCC_ICSCR_MSIRANGE_6      (6 << RCC_ICSCR_MSIRANGE_SHIFT) /* 110: Range 6 around 4.194 MHz */
-#define RCC_ICSCR_MSICAL_SHIFT      (16)      /* Bits 16-23:  MSI clock calibration */
+#define RCC_ICSCR_MSICAL_SHIFT      (16)                            /* Bits 16-23:  MSI clock calibration */
 #define RCC_ICSCR_MSICAL_MASK       (0xff << RCC_ICSCR_MSICAL_SHIFT)
-#define RCC_ICSCR_MSITRIM_SHIFT     (24)      /* Bits 24-31:  MSI clock trimming */
+#define RCC_ICSCR_MSITRIM_SHIFT     (24)                            /* Bits 24-31:  MSI clock trimming */
 #define RCC_ICSCR_MSITRIM_MASK      (0xff << RCC_ICSCR_MSITRIM_SHIFT)
 
 #define RCC_ICSR_RSTVAL             0x0000b000
@@ -149,48 +134,48 @@
 
 /* Clock configuration register */
 
-#define RCC_CFGR_SW_SHIFT           (0)       /* Bits 0-1: System clock Switch */
+#define RCC_CFGR_SW_SHIFT           (0)                         /* Bits 0-1: System clock Switch */
 #define RCC_CFGR_SW_MASK            (3 << RCC_CFGR_SW_SHIFT)
-#  define RCC_CFGR_SW_MSI           (0 << RCC_CFGR_SW_SHIFT) /* 00: MSI selected as system clock */
-#  define RCC_CFGR_SW_HSI           (1 << RCC_CFGR_SW_SHIFT) /* 01: HSI selected as system clock */
-#  define RCC_CFGR_SW_HSE           (2 << RCC_CFGR_SW_SHIFT) /* 10: HSE selected as system clock */
-#  define RCC_CFGR_SW_PLL           (3 << RCC_CFGR_SW_SHIFT) /* 11: PLL selected as system clock */
-#define RCC_CFGR_SWS_SHIFT          (2)       /* Bits 2-3: System Clock Switch Status */
+#  define RCC_CFGR_SW_MSI           (0 << RCC_CFGR_SW_SHIFT)    /* 00: MSI selected as system clock */
+#  define RCC_CFGR_SW_HSI           (1 << RCC_CFGR_SW_SHIFT)    /* 01: HSI selected as system clock */
+#  define RCC_CFGR_SW_HSE           (2 << RCC_CFGR_SW_SHIFT)    /* 10: HSE selected as system clock */
+#  define RCC_CFGR_SW_PLL           (3 << RCC_CFGR_SW_SHIFT)    /* 11: PLL selected as system clock */
+#define RCC_CFGR_SWS_SHIFT          (2)                         /* Bits 2-3: System Clock Switch Status */
 #define RCC_CFGR_SWS_MASK           (3 << RCC_CFGR_SWS_SHIFT)
-#  define RCC_CFGR_SWS_MSI          (0 << RCC_CFGR_SWS_SHIFT) /* 00: MSI oscillator used as system clock */
-#  define RCC_CFGR_SWS_HSI          (1 << RCC_CFGR_SWS_SHIFT) /* 01: HSI oscillator used as system clock */
-#  define RCC_CFGR_SWS_HSE          (2 << RCC_CFGR_SWS_SHIFT) /* 10: HSE oscillator used as system clock */
-#  define RCC_CFGR_SWS_PLL          (3 << RCC_CFGR_SWS_SHIFT) /* 11: PLL used as system clock */
-#define RCC_CFGR_HPRE_SHIFT         (4)       /* Bits 4-7: AHB prescaler */
+#  define RCC_CFGR_SWS_MSI          (0 << RCC_CFGR_SWS_SHIFT)   /* 00: MSI oscillator used as system clock */
+#  define RCC_CFGR_SWS_HSI          (1 << RCC_CFGR_SWS_SHIFT)   /* 01: HSI oscillator used as system clock */
+#  define RCC_CFGR_SWS_HSE          (2 << RCC_CFGR_SWS_SHIFT)   /* 10: HSE oscillator used as system clock */
+#  define RCC_CFGR_SWS_PLL          (3 << RCC_CFGR_SWS_SHIFT)   /* 11: PLL used as system clock */
+#define RCC_CFGR_HPRE_SHIFT         (4)                         /* Bits 4-7: AHB prescaler */
 #define RCC_CFGR_HPRE_MASK          (0x0f << RCC_CFGR_HPRE_SHIFT)
-#  define RCC_CFGR_HPRE_SYSCLK      (0 << RCC_CFGR_HPRE_SHIFT) /* 0xxx: SYSCLK not divided */
-#  define RCC_CFGR_HPRE_SYSCLKd2    (8 << RCC_CFGR_HPRE_SHIFT) /* 1000: SYSCLK divided by 2 */
-#  define RCC_CFGR_HPRE_SYSCLKd4    (9 << RCC_CFGR_HPRE_SHIFT) /* 1001: SYSCLK divided by 4 */
+#  define RCC_CFGR_HPRE_SYSCLK      (0 << RCC_CFGR_HPRE_SHIFT)  /* 0xxx: SYSCLK not divided */
+#  define RCC_CFGR_HPRE_SYSCLKd2    (8 << RCC_CFGR_HPRE_SHIFT)  /* 1000: SYSCLK divided by 2 */
+#  define RCC_CFGR_HPRE_SYSCLKd4    (9 << RCC_CFGR_HPRE_SHIFT)  /* 1001: SYSCLK divided by 4 */
 #  define RCC_CFGR_HPRE_SYSCLKd8    (10 << RCC_CFGR_HPRE_SHIFT) /* 1010: SYSCLK divided by 8 */
 #  define RCC_CFGR_HPRE_SYSCLKd16   (11 << RCC_CFGR_HPRE_SHIFT) /* 1011: SYSCLK divided by 16 */
 #  define RCC_CFGR_HPRE_SYSCLKd64   (12 << RCC_CFGR_HPRE_SHIFT) /* 1100: SYSCLK divided by 64 */
 #  define RCC_CFGR_HPRE_SYSCLKd128  (13 << RCC_CFGR_HPRE_SHIFT) /* 1101: SYSCLK divided by 128 */
 #  define RCC_CFGR_HPRE_SYSCLKd256  (14 << RCC_CFGR_HPRE_SHIFT) /* 1110: SYSCLK divided by 256 */
 #  define RCC_CFGR_HPRE_SYSCLKd512  (15 << RCC_CFGR_HPRE_SHIFT) /* 1111: SYSCLK divided by 512 */
-#define RCC_CFGR_PPRE1_SHIFT        (8)       /* Bits 8-10: APB Low speed prescaler (APB1) */
+#define RCC_CFGR_PPRE1_SHIFT        (8)                         /* Bits 8-10: APB Low speed prescaler (APB1) */
 #define RCC_CFGR_PPRE1_MASK         (7 << RCC_CFGR_PPRE1_SHIFT)
 #  define RCC_CFGR_PPRE1_HCLK       (0 << RCC_CFGR_PPRE1_SHIFT) /* 0xx: HCLK not divided */
 #  define RCC_CFGR_PPRE1_HCLKd2     (4 << RCC_CFGR_PPRE1_SHIFT) /* 100: HCLK divided by 2 */
 #  define RCC_CFGR_PPRE1_HCLKd4     (5 << RCC_CFGR_PPRE1_SHIFT) /* 101: HCLK divided by 4 */
 #  define RCC_CFGR_PPRE1_HCLKd8     (6 << RCC_CFGR_PPRE1_SHIFT) /* 110: HCLK divided by 8 */
 #  define RCC_CFGR_PPRE1_HCLKd16    (7 << RCC_CFGR_PPRE1_SHIFT) /* 111: HCLK divided by 16 */
-#define RCC_CFGR_PPRE2_SHIFT        (11)      /* Bits 11-13: APB High speed prescaler (APB2) */
+#define RCC_CFGR_PPRE2_SHIFT        (11)                        /* Bits 11-13: APB High speed prescaler (APB2) */
 #define RCC_CFGR_PPRE2_MASK         (7 << RCC_CFGR_PPRE2_SHIFT)
 #  define RCC_CFGR_PPRE2_HCLK       (0 << RCC_CFGR_PPRE2_SHIFT) /* 0xx: HCLK not divided */
 #  define RCC_CFGR_PPRE2_HCLKd2     (4 << RCC_CFGR_PPRE2_SHIFT) /* 100: HCLK divided by 2 */
 #  define RCC_CFGR_PPRE2_HCLKd4     (5 << RCC_CFGR_PPRE2_SHIFT) /* 101: HCLK divided by 4 */
 #  define RCC_CFGR_PPRE2_HCLKd8     (6 << RCC_CFGR_PPRE2_SHIFT) /* 110: HCLK divided by 8 */
 #  define RCC_CFGR_PPRE2_HCLKd16    (7 << RCC_CFGR_PPRE2_SHIFT) /* 111: HCLK divided by 16 */
-                                              /* Bits 14: Reserved */
-#define RCC_CFGR_STOPWUCK           (15)       /* Bits 15:  */
-#define RCC_CFGR_PLLSRC             (1 << 16) /* Bit 16: PLL entry clock source */
-                                              /* Bit 17: Reserved */
-#define RCC_CFGR_PLLMUL_SHIFT       (18)      /* Bits 18-21: PLL Multiplication Factor */
+                                                                /* Bits 14: Reserved */
+#define RCC_CFGR_STOPWUCK           (15)                        /* Bits 15:  */
+#define RCC_CFGR_PLLSRC             (1 << 16)                   /* Bit 16: PLL entry clock source */
+                                                                /* Bit 17: Reserved */
+#define RCC_CFGR_PLLMUL_SHIFT       (18)                        /* Bits 18-21: PLL Multiplication Factor */
 #define RCC_CFGR_PLLMUL_MASK        (15 << RCC_CFGR_PLLMUL_SHIFT)
 #  define RCC_CFGR_PLLMUL_CLKx3     (0 << RCC_CFGR_PLLMUL_SHIFT)  /* 0000: PLL clock entry x 3 */
 #  define RCC_CFGR_PLLMUL_CLKx4     (1 << RCC_CFGR_PLLMUL_SHIFT)  /* 0001: PLL clock entry x 4 */
@@ -201,12 +186,12 @@
 #  define RCC_CFGR_PLLMUL_CLKx24    (6 << RCC_CFGR_PLLMUL_SHIFT)  /* 0110: PLL clock entry x 24 */
 #  define RCC_CFGR_PLLMUL_CLKx32    (7 << RCC_CFGR_PLLMUL_SHIFT)  /* 0111: PLL clock entry x 32 */
 #  define RCC_CFGR_PLLMUL_CLKx48    (8 << RCC_CFGR_PLLMUL_SHIFT)  /* 1000: PLL clock entry x 48 */
-#define RCC_CFGR_PLLDIV_SHIFT       (22)      /* Bits 22-23: PLL output division */
+#define RCC_CFGR_PLLDIV_SHIFT       (22)                          /* Bits 22-23: PLL output division */
 #define RCC_CFGR_PLLDIV_MASK        (3 << RCC_CFGR_PLLDIV_SHIFT)
 #  define RCC_CFGR_PLLDIV_2         (1 << RCC_CFGR_PLLDIV_SHIFT) /* 01: PLL clock output = PLLVCO / 2 */
 #  define RCC_CFGR_PLLDIV_3         (2 << RCC_CFGR_PLLDIV_SHIFT) /* 10: PLL clock output = PLLVCO / 3 */
 #  define RCC_CFGR_PLLDIV_4         (3 << RCC_CFGR_PLLDIV_SHIFT) /* 11: PLL clock output = PLLVCO / 4 */
-#define RCC_CFGR_MCOSEL_SHIFT       (24)      /* Bits 24-27: Microcontroller clock output selection */
+#define RCC_CFGR_MCOSEL_SHIFT       (24)                         /* Bits 24-27: Microcontroller clock output selection */
 #define RCC_CFGR_MCOSEL_MASK        (7 << RCC_CFGR_MCOSEL_SHIFT)
 #  define RCC_CFGR_MCOSEL_DISABLED  (0 << RCC_CFGR_MCOSEL_SHIFT)  /* 0000: MCO output disabled, no clock on MCO */
 #  define RCC_CFGR_MCOSEL_SYSCLK    (1 << RCC_CFGR_MCOSEL_SHIFT)  /* 0001: SYSCLK clock selected */
@@ -217,14 +202,14 @@
 #  define RCC_CFGR_MCOSEL_LSICLK    (6 << RCC_CFGR_MCOSEL_SHIFT)  /* 0110: LSI oscillator clock selected */
 #  define RCC_CFGR_MCOSEL_LSECLK    (7 << RCC_CFGR_MCOSEL_SHIFT)  /* 0111: LSE oscillator clock selected */
 #  define RCC_CFGR_MCOSEL_HSI48CLK  (8 << RCC_CFGR_MCOSEL_SHIFT)  /* 1000: HSI48 oscillator clock selected */
-#define RCC_CFGR_MCOPRE_SHIFT       (28)      /* Bits 28-30: Microcontroller clock output selection */
+#define RCC_CFGR_MCOPRE_SHIFT       (28)                          /* Bits 28-30: Microcontroller clock output selection */
 #define RCC_CFGR_MCOPRE_MASK        (7 << RCC_CFGR_MCOPRE_SHIFT)
 #  define RCC_CFGR_MCOPRE_DIV1      (0 << RCC_CFGR_MCOPRE_SHIFT) /* 000: MCO is divided by 1 */
 #  define RCC_CFGR_MCOPRE_DIV2      (1 << RCC_CFGR_MCOPRE_SHIFT) /* 001: MCO is divided by 2 */
 #  define RCC_CFGR_MCOPRE_DIV4      (2 << RCC_CFGR_MCOPRE_SHIFT) /* 010: MCO is divided by 4 */
 #  define RCC_CFGR_MCOPRE_DIV8      (3 << RCC_CFGR_MCOPRE_SHIFT) /* 011: MCO is divided by 8 */
 #  define RCC_CFGR_MCOPRE_DIV16     (4 << RCC_CFGR_MCOPRE_SHIFT) /* 100: MCO is divided by 16 */
-                                              /* Bit 31: Reserved */
+                                                                 /* Bit 31: Reserved */
 #define RCC_CFGR_RESET              0x00000000
 
 /* Clock Source Interrupt enable register */
@@ -353,7 +338,7 @@
 #define RCC_AHBENR_RNGEN            (1 << 20) /* Bit 20: Random number generator module clock enable */
                                               /* Bits 21-23: Reserved */
 #define RCC_AHBENR_AESEN            (1 << 24) /* Bit 24: Crypto module (AES) clock enable */
-                                               /* Bits 25-31: Reserved */
+                                              /* Bits 25-31: Reserved */
 
 /* APB2 Peripheral Clock enable register */
 
@@ -531,8 +516,8 @@
 #  define RCC_CSR_LSEDRV_HIGH           (3 << RCC_CSR_LSEDRV_SHIFT)
 #define RCC_CSR_CSSLSEON                (1 << 13) /* Bit 13: CSS on LSE enable */
 #define RCC_CSR_CSSLSED                 (1 << 14) /* Bit 14: CSS on LSE failure detection flag */
-                                                 /* Bit 15: Reserved */
-#define RCC_CSR_RTCSEL_SHIFT            (16)     /* Bits 16-17: RTC clock source selection */
+                                                  /* Bit 15: Reserved */
+#define RCC_CSR_RTCSEL_SHIFT            (16)      /* Bits 16-17: RTC clock source selection */
 #define RCC_CSR_RTCSEL_MASK             (3 << RCC_CSR_RTCSEL_SHIFT)
 #  define RCC_CSR_RTCSEL_NOCLK          (0 << RCC_CSR_RTCSEL_SHIFT)
 #  define RCC_CSR_RTCSEL_LSE            (1 << RCC_CSR_RTCSEL_SHIFT)

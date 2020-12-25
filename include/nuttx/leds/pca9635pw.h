@@ -107,14 +107,14 @@
 
 /* PCA9635PW_LED_OUT_x register value definitions */
 
-#define PCA9635PW_LED_OUT_x_MODE_0 (0x00)                     /* all led drivers are turned off */
-#define PCA9635PW_LED_OUT_x_MODE_1 (0x55)                     /* all led drivers are fully turned on */
-#define PCA9635PW_LED_OUT_x_MODE_2 (0xAA)                     /* all led drivers individual brightness can be controlled by their individual pwm registers */
-#define PCA9635PW_LED_OUT_x_MODE_3 (0xFF)                     /* all led drivers individual brightness and group dimming/blinking can be controlled by their individual pwm registers and the GRPPWM register */
+#define PCA9635PW_LED_OUT_X_MODE_0 (0x00)                     /* all led drivers are turned off */
+#define PCA9635PW_LED_OUT_X_MODE_1 (0x55)                     /* all led drivers are fully turned on */
+#define PCA9635PW_LED_OUT_X_MODE_2 (0xAA)                     /* all led drivers individual brightness can be controlled by their individual pwm registers */
+#define PCA9635PW_LED_OUT_X_MODE_3 (0xFF)                     /* all led drivers individual brightness and group dimming/blinking can be controlled by their individual pwm registers and the GRPPWM register */
 
 /* IOCTL commands */
 
-#define PWMIOC_SETLED_BRIGHTNESS   _PWMIOC(1)                 /* Arg: pca9635pw_setled_brightness_arg_s * pointer */
+#define PWMIOC_SETLED_BRIGHTNESS   _PWMIOC(1)                 /* Arg: pca9635pw_brightness_s * pointer */
 
 /****************************************************************************
  * Public Types
@@ -140,14 +140,15 @@ enum led_select_e
   LED_15 = PCA9635PW_LED_15
 };
 
-/* This structure is used in an IOCTL command for setting the PWM of an individual
- * LED. The desired LED is selected by setting the 'led' parameter accordingly
- * whereas the 'led_pwm' field governs the brightness of the selected LED. A value
- * of 0 (0x00) leads to a duty cycle of 0 % = LED off while a value of 255 (0xFF)
- * leads to a duty cycle of 99.6 % = Maximum brightness.
+/* This structure is used in an IOCTL command for setting the PWM of an
+ * individual LED. The desired LED is selected by setting the 'led'
+ * parameter accordingly whereas the 'led_pwm' field governs the brightness
+ * of the selected LED.
+ * A value of 0 (0x00) leads to a duty cycle of 0 % = LED off while a value
+ * of 255 (0xFF) leads to a duty cycle of 99.6 % = Maximum brightness.
  */
 
-struct pca9635pw_setled_brightness_arg_s
+struct pca9635pw_brightness_s
 {
   enum led_select_e led;
   uint8_t brightness;

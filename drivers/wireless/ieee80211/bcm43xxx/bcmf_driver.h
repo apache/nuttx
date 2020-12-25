@@ -36,6 +36,10 @@
 #ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H
 #define __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -54,11 +58,19 @@ struct bcmf_frame_s;
 
 struct bcmf_bus_dev_s;
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 /* Chip interfaces */
 
 #define CHIP_STA_INTERFACE   0
 #define CHIP_AP_INTERFACE    1
 #define CHIP_P2P_INTERFACE   2
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
 /* This structure contains the unique state of the Broadcom FullMAC driver */
 
@@ -67,7 +79,7 @@ struct bcmf_dev_s
   FAR struct bcmf_bus_dev_s *bus; /* Bus interface structure */
 
   bool bc_bifup;             /* true:ifup false:ifdown */
-  WDOG_ID bc_txpoll;         /* TX poll timer */
+  struct wdog_s bc_txpoll;   /* TX poll timer */
   struct work_s bc_irqwork;  /* For deferring interrupt work to the work queue */
   struct work_s bc_pollwork; /* For deferring poll work to the work queue */
 
@@ -80,7 +92,6 @@ struct bcmf_dev_s
 
   event_handler_t event_handlers[BCMF_EVENT_COUNT];
 
-  // FIXME use mutex instead of semaphore
   sem_t control_mutex;         /* Cannot handle multiple control requests */
   sem_t control_timeout;       /* Semaphore to wait for control frame rsp */
   uint16_t control_reqid;      /* Current control request id */
@@ -89,10 +100,11 @@ struct bcmf_dev_s
   uint32_t control_status;     /* Last received frame status */
 
   /* AP Scan state machine.
-   * During scan, control_mutex is locked to prevent control requests */
+   * During scan, control_mutex is locked to prevent control requests
+   */
 
   int scan_status;                     /* Current scan status */
-  WDOG_ID scan_timeout;                /* Scan timeout timer */
+  struct wdog_s scan_timeout;          /* Scan timeout timer */
   FAR uint8_t *scan_result;            /* Temp buffer that holds results */
   unsigned int scan_result_size;       /* Current size of temp buffer */
 
@@ -114,11 +126,13 @@ struct bcmf_bus_dev_s
    * control - true if control frame else false
    * block   - true to block until free frame is available
    */
+
   struct bcmf_frame_s *(*allocate_frame)(FAR struct bcmf_dev_s *priv,
                                          unsigned int len, bool block,
                                          bool control);
 
-  void (*free_frame)(FAR struct bcmf_dev_s *priv, struct bcmf_frame_s *frame);
+  void (*free_frame)(FAR struct bcmf_dev_s *priv,
+                     FAR struct bcmf_frame_s *frame);
 };
 
 /* bcmf frame definition */
@@ -129,6 +143,10 @@ struct bcmf_frame_s
   uint8_t *data; /* Payload data (Control, data and event messages) */
   uint16_t len;  /* Frame buffer size */
 };
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /* IOCTLs network interface implementation */
 

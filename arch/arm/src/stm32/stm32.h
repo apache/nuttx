@@ -49,10 +49,6 @@
 
 #include "arm_internal.h"
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
 /* Peripherals **********************************************************************/
 
 #include "chip.h"
@@ -75,6 +71,7 @@
 #include "stm32_rtc.h"
 #include "stm32_sdio.h"
 #include "stm32_spi.h"
+#include "stm32_i2s.h"
 #include "stm32_tim.h"
 #include "stm32_uart.h"
 #include "stm32_usbdev.h"

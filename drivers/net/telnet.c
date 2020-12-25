@@ -1,41 +1,20 @@
 /****************************************************************************
  * drivers/net/telnet.c
  *
- *   Copyright (C) 2007, 2009, 2011-2013, 2017, 2019, 2020 Gregory Nutt. All
- *     rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * This derives remotely from some Telnet logic from uIP which has a
- * compatible BSD license:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Author: Adam Dunkels <adam@sics.se>
- *   Copyright (c) 2003, Adam Dunkels.
- *   All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Institute, NuttX nor the names of its
- *    contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -89,7 +68,7 @@
 #endif
 
 #undef HAVE_SIGNALS
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
 #  define HAVE_SIGNALS
 #endif
 
@@ -144,9 +123,9 @@ struct telnet_dev_s
   sem_t             td_exclsem;   /* Enforces mutually exclusive access */
   sem_t             td_iosem;     /* I/O thread will notify that data is available */
   uint8_t           td_state;     /* (See telnet_state_e) */
-  uint8_t           td_offset;    /* Offset to the valid, pending bytes in the rxbuffer */
   uint8_t           td_crefs;     /* The number of open references to the session */
   uint8_t           td_minor;     /* Minor device number */
+  uint16_t          td_offset;    /* Offset to the valid, pending bytes in the rxbuffer */
   uint16_t          td_pending;   /* Number of valid, pending bytes in the rxbuffer */
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
   uint16_t          td_rows;      /* Number of NAWS rows */
@@ -310,18 +289,18 @@ static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
         }
 #endif
 
-#ifdef CONFIG_TTY_SIGSTP
-      /* Is this the special character that will generate the SIGSTP
+#ifdef CONFIG_TTY_SIGTSTP
+      /* Is this the special character that will generate the SIGTSTP
        * signal?
        */
 
-      if (*buffer == CONFIG_TTY_SIGSTP_CHAR)
+      if (*buffer == CONFIG_TTY_SIGTSTP_CHAR)
         {
           /* Note that the kill is needed and do not put the character
            * into the Rx buffer.  It should not be read as normal data.
            */
 
-          signo = SIGSTP;
+          signo = SIGTSTP;
 #ifndef CONFIG_TTY_SIGINT
           break;
 #endif
@@ -380,7 +359,7 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
   int nread;
   uint8_t ch;
 
-  ninfo("srclen: %d destlen: %d\n", srclen, destlen);
+  ninfo("srclen: %zd destlen: %zd\n", srclen, destlen);
 
   for (nread = 0; srclen > 0 && nread < destlen; srclen--)
     {
@@ -830,7 +809,7 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
   ssize_t nread = 0;
   int ret;
 
-  ninfo("len: %d\n", len);
+  ninfo("len: %zd\n", len);
 
   /* First, handle the case where there are still valid bytes left in the
    * I/O buffer from the last time that read was called.  NOTE:  Much of
@@ -913,7 +892,7 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
   char ch;
   bool eol;
 
-  ninfo("len: %d\n", len);
+  ninfo("len: %zd\n", len);
 
   /* Process each character from the user buffer */
 
@@ -938,7 +917,7 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
           ret = psock_send(&priv->td_psock, priv->td_txbuffer, ncopied, 0);
           if (ret < 0)
             {
-              nerr("ERROR: psock_send failed '%s': %d\n",
+              nerr("ERROR: psock_send failed '%s': %zd\n",
                    priv->td_txbuffer, ret);
               return ret;
             }
@@ -956,7 +935,7 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
       ret = psock_send(&priv->td_psock, priv->td_txbuffer, ncopied, 0);
       if (ret < 0)
         {
-          nerr("ERROR: psock_send failed '%s': %d\n",
+          nerr("ERROR: psock_send failed '%s': %zd\n",
                priv->td_txbuffer, ret);
           return ret;
         }
@@ -1137,7 +1116,7 @@ errout_with_clone:
   psock_close(&priv->td_psock);
 
 errout_with_dev:
-  free(priv);
+  kmm_free(priv);
   return ret;
 }
 

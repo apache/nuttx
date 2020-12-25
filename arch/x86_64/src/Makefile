@@ -19,7 +19,7 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
-include chip/Make.defs
+-include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_INTEL64),y)
 ARCH_SUBDIR = intel64
@@ -32,10 +32,10 @@ INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)common}
 INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)$(ARCH_SUBDIR)}
 INCLUDES += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
 
-CPPFLAGS += $(INCLUDES) $(EXTRAFLAGS)
-CFLAGS += $(INCLUDES) $(EXTRAFLAGS)
-CXXFLAGS += $(INCLUDES) $(EXTRAFLAGS)
-AFLAGS += $(INCLUDES) $(EXTRAFLAGS)
+CPPFLAGS += $(INCLUDES)
+CFLAGS += $(INCLUDES)
+CXXFLAGS += $(INCLUDES)
+AFLAGS += $(INCLUDES)
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   NUTTX = "${shell cygpath -w $(TOPDIR)$(DELIM)nuttx$(EXEEXT)}"
@@ -84,10 +84,19 @@ ifeq ($(BOARDMAKE),y)
   LDLIBS += -lboard
 endif
 
-LIBGCC = "${shell "$(CC)" $(ARCHCPUFLAGS) -print-libgcc-file-name}"
+# Add the builtin library
 
-ifeq ($(HOSTOS),FreeBSD)
-  HOST_ARCH = ${shell uname -m 2>/dev/null || echo "Other"}
+EXTRA_LIBS += -lgcc
+EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name}}"
+
+ifneq ($(CONFIG_LIBM),y)
+  EXTRA_LIBS += -lm
+  EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}"
+endif
+
+ifeq ($(CONFIG_CXX_LIBSUPCXX),y)
+  EXTRA_LIBS += -lsupc++
+  EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}}"
 endif
 
 VPATH = chip:common:$(ARCH_SUBDIR)
@@ -114,12 +123,13 @@ $(KBIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
 board/libboard$(LIBEXT):
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 nuttx$(EXEEXT): board/libboard$(LIBEXT)
 	@echo "LD: nuttx$(EXEEXT)"
-	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) -o $(NUTTX) $(EXTRA_OBJS) \
-		$(LDSTARTGROUP) $(LIBGCC) --whole-archive --no-relax  $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
+	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
+		-o $(NUTTX) $(EXTRA_OBJS) \
+		$(LDSTARTGROUP) $(EXTRA_LIBS) --whole-archive --no-relax $(LDLIBS) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
@@ -138,26 +148,33 @@ export_startup: board/libboard$(LIBEXT) $(STARTUP_OBJS)
 
 # Dependencies
 
-.depend: Makefile chip/Make.defs $(SRCS)
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+	$(call CATFILE, Make.dep, $^)
+	$(call DELFILE, $^)
+
+.depend: Makefile chip/Make.defs $(SRCS) $(TOPDIR)$(DELIM).config
 ifeq ($(BOARDMAKE),y)
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" depend
+	$(Q) $(MAKE) -C board depend
 endif
-	$(Q) $(MKDEP) --dep-path chip --dep-path common --dep-path $(ARCH_SUBDIR) \
-	 "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MAKE) makedepfile DEPPATH="--dep-path chip --dep-path common --dep-path $(ARCH_SUBDIR)"
 	$(Q) touch $@
 
 depend: .depend
 
+context::
+
+clean_context::
+
 clean:
 ifeq ($(BOARDMAKE),y)
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" clean
+	$(Q) $(MAKE) -C board clean
 endif
 	$(call DELFILE, libarch$(LIBEXT))
 	$(call CLEAN)
 
 distclean: clean
 ifeq ($(BOARDMAKE),y)
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" distclean
+	$(Q) $(MAKE) -C board distclean
 endif
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)

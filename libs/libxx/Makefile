@@ -35,19 +35,10 @@
 
 include $(TOPDIR)/Make.defs
 
-CXXSRCS  = libxx_cxapurevirtual.cxx libxx_eabi_atexit.cxx libxx_cxa_atexit.cxx
-CXXSRCS += libxx_cxa_guard.cxx
-ifeq ($(CONFIG_CXX_EXCEPTION),y)
-CXXSRCS += libxx__gnu_unwind_find_exidx.cxx
-endif
+CXXSRCS = libxx_cxa_atexit.cxx libxx_eabi_atexit.cxx
 
-# Some of the libs/libxx/ files are not need if uClibc++ or libcxx is installed
-# because uClibx++ or libcxx will replace them
-
-ifeq (,$(findstring y,$(CONFIG_UCLIBCXX) $(CONFIG_LIBCXX)))
-CXXSRCS += libxx_delete.cxx libxx_delete_sized.cxx libxx_deletea.cxx
-CXXSRCS += libxx_deletea_sized.cxx libxx_new.cxx libxx_newa.cxx
-CXXSRCS += libxx_stdthrow.cxx
+ifeq ($(CONFIG_CXX_LIBSUPCXX),y)
+CXXSRCS += libxx_impure.cxx
 endif
 
 # Include the uClibc++ Make.defs file if selected.  If it is included,
@@ -61,11 +52,11 @@ endif
 # in the NuttX uClibc++ GIT repository for more information
 
 ifeq ($(CONFIG_UCLIBCXX),y)
-include uClibc++/Make.defs
-endif
-
-ifeq ($(CONFIG_LIBCXX),y)
-include libcxx/Make.defs
+include uClibc++.defs
+else ifeq ($(CONFIG_LIBCXX),y)
+include libcxx.defs
+else
+include cxx.defs
 endif
 
 # Object Files
@@ -81,7 +72,7 @@ OBJS = $(AOBJS) $(COBJS) $(CXXOBJS) $(CPPOBJS)
 BIN = libxx$(LIBEXT)
 
 all: $(BIN)
-.PHONY: depend clean distclean
+.PHONY: depend clean distclean dirlinks
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -98,8 +89,14 @@ $(CPPOBJS): %$(OBJEXT): %.cpp
 $(BIN):	$(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CXX)" -- $(CXXFLAGS) -- $(SRCS) >Make.dep
+dirlinks::
+
+makedepfile: $(CXXSRCS:.cxx=.ddx) $(CPPSRCS:.cpp=.ddp)
+	$(call CATFILE, Make.dep, $^)
+	$(call DELFILE, $^)
+
+.depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
+	$(Q) $(MAKE) makedepfile
 	$(Q) touch $@
 
 depend: .depend
@@ -108,7 +105,7 @@ clean:
 	$(call DELFILE, $(BIN))
 	$(call CLEAN)
 
-distclean: clean
+distclean:: clean
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 

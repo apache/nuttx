@@ -11,35 +11,13 @@ Contents
   - Serial Console
   - LEDs
   - Networking
-  - IPv6 Integration
-  - HTTP Server Integration on IPv4
-  - DHCP Client Integration on IPv4
-  - DHCP Server Integration on IPv4
-  - FTP Server Integration on IPv4
-  - FTP Client Integration on IPv4
-  - TFTP Client Integration on IPv4
-  - Telnet Server Integration on IPv4
-  - Telnet Client Integration on IPv4
-  - Ustream Socket Integration on IPv4
-  - Udgram Socket Integration on IPv4
-  - SMTP Client Integration on IPv4
-  - Raw Socket Integration
-  - Custom User Socket Integration
-  - IGMPv2 Integration
-  - Inherit telnet server Integration
-  - VNC Server Integration
-  - PPPD Integration
-  - HTTP Client Integration
-  - NTP Client Integration
-  - NFS Client Integration
-  - MLD Integration
-  - ICMPv6 AutoConfig Integration
-  - IP Forwarding Integration for IPv4
-  - DNS Name Resolution Integration for IPv4
-  - LINK MONITOR Integration
   - RTC
-  - Standby RAM
-  - File Systems
+  - USB Device
+  - RSPI
+  - RIIC
+  - DTC
+  - USB Host
+  - USB Host Hub
   - Debugging
 
 Board Features
@@ -58,14 +36,6 @@ Board Features
 See the RX65N RSK2MB website for further information about this board:
 
   - https://www.renesas.com/br/en/products/software-tools/boards-and-kits/starter-kits/renesas-starter-kitplus-for-rx65n-2mb.html
-
-Status/Open Issues
-==================
-Ethernet
----------
-1.Observed instability in Link Management, due to difference in hardware design.(No Separate Interrupt line for PHY)
-2.Currently tested only ping and udpblaster application.
-3. Executed long run ping and udpblaster stress test for 12 hrs. Code is able to execute for 12hrs without any breakage.
 
 Serial Console
 ==============
@@ -146,6 +116,15 @@ Ethernet Connections
   P71           ET0_MDIO
   P54           ET0_LINKSTA
   ------         ---------
+
+USB Device
+-----------
+
+For the RX65N RSK2MB board, to be used as USB Device, the following Jumper settings need to be done
+
+J7     Short Pin 2 & Pin 3
+J16    Short Pin 1 & Pin 2
+
 NuttX Configurations
 --------------------
 The following configurations, need to be enabled for network.
@@ -206,6 +185,30 @@ Configure UDP blaster application as mentioned below :
 CONFIG_EXAMPLES_UDPBLASTER_HOSTIP=0x0a4b1801  (10.75.24.1) ------> Gateway IP
 CONFIG_EXAMPLES_UDPBLASTER_NETMASK=0xfffffe00 (255.255.254.0) --------> Netmask
 CONFIG_EXAMPLES_UDPBLASTER_TARGETIP=0x0a4b189b (10.75.24.155) ---------> Target IP
+
+RSPI
+-----------
+
+For RX65N RSK2MB board, Following pin is configured for all channels in JA3.
+Channel0: Pin number 7 and 8 in JA3 is used for MOSIA and MISOA respectively
+Channel1: Pin number 35 and 36 in JA3 is used for MOSIB and MISOB respectively
+Channel2: Pin number 18 and 19 in JA3 is used for MOSIC and MISOC respectively
+and for enabling these pin need to select DSW-SEL0 by making off SW4-4
+
+USB Host
+=============
+For the RX65N RSK2MB board, to be used as USB Device, the following Jumper settings need to be done
+
+J7     Short Pin 1 & Pin 2
+J16    Short Pin 2 & Pin 3
+
+USB Device
+=============
+For the RX65N RSK2MB board, to be used as USB Device, the following Jumper settings need to be done
+
+J7     Short Pin 2 & Pin 3
+J16    Short Pin 1 & Pin 2
+
 RTC
 ==========
 
@@ -222,6 +225,138 @@ The following configurations are to be enabled as part of testing RTC examples.
 CONFIG_EXAMPLES_ALARM
 CONFIG_EXAMPLES_PERIODIC
 CONFIG_EXAMPLES_CARRY
+
+USB Device Configurations
+--------------------------
+The following configurations need to be enabled for USB Device
+
+CONFIG_USBDEV
+CONFIG_CDCACM
+CONFIG_STDIO_BUFFER_SIZE=64
+CONFIG_STDIO_LINEBUFFER
+
+USB Device Testing
+------------------------
+The following testing is executed as part of USB Device testing on RX65N target for GRROSE board
+
+echo "This is a test for USB Device" > /dev/ttyACM0
+
+xd 0 0x20000 > /dev/ttyACM0
+
+The output of the commands mentioned above should be seen on the USB Device COM port on teraterm
+
+RSPI Configurations
+--------------------------
+The following configurations need to be enabled for RSPI
+
+CONFIG_SYSTEM_SPITOOL=y
+
+RSPI Testing
+------------------------
+The following testing is executed as part of RSPI testing on RX65N target for RSK2MB board
+
+On RSK2MB board, all three channels 0, 1 and 2 has been brought out and tested.
+
+Following command can be used for testing RSPI communication to slave device.
+spi exch -b 0 -x 4 aabbccdd
+where b is bus number and x is Number of word to exchange.
+
+RIIC Configurations
+--------------------------
+The following configurations need to be enabled for RIIC.
+
+CONFIG_SYSTEM_I2CTOOL=y
+
+RIIC Testing
+------------------------
+The following testing is executed as part of RIIC testing on RX65N target for RSK2MB board
+
+On RSK2MB board only channel 0 can be tested.
+
+Following command can be used for testing RIIC communication with slave device.
+i2c set -b 0 -a 53 -r 0 10
+where b is bus number, a is the slave address, r is the register address and 10 is the value to be written.
+
+DTC Configurations
+--------------------------
+The following configurations need to be enabled for DTC.
+
+CONFIG_SYSTEM_SPITOOL=y
+
+DTC Testing
+------------------------
+
+DTC has been tested using RSPI driver.
+
+USB Host Configurations
+--------------------------
+The following configurations need to be enabled for USB Host Mode driver to 
+support USB HID Keyboard class and MSC Class.
+
+CONFIG_USBHOST=y
+CONFIG_USBHOST_HIDKBD=y
+CONFIG_FS_FAT=y
+CONFIG_EXAMPLES_HIDKBD=y
+
+USB Host Driver Testing
+------------------------
+The Following Class Drivers were tested as mentioned below : 
+
+- USB HID Keyboard Class
+On the NuttX Console "hidkbd" application was executed 
+
+nsh> hidkbd
+The characters typed from the keyboard were executed correctly.
+
+- USB MSC Class
+
+The MSC device is enumerated as sda in /dev directory.
+
+The block device is mounted using the command as mentioned below : 
+
+mount -t vfat /dev/sda /mnt
+
+The MSC device is mounted in /dev directory 
+
+The copy command is executed to test the Read/Write functionality
+
+cp /mnt/<file.txt> /mnt/file_copy.txt
+
+USB Host Hub Configurations
+--------------------------
+The following configurations need to be enabled for USB Host Mode driver to 
+support USB HID Keyboard class and MSC Class.
+
+CONFIG_RX65N_USBHOST=y
+CONFIG_USBHOST_HUB=y
+CONFIG_USBHOST_ASYNCH=y
+CONFIG_USBHOST=y
+CONFIG_USBHOST_HIDKBD=y
+CONFIG_FS_FAT=y
+CONFIG_EXAMPLES_HIDKBD=y
+
+USB Host Hub Driver Testing
+------------------------
+The Following Class Drivers were tested as mentioned below : 
+
+- USB HID Keyboard Class
+On the NuttX Console "hidkbd" application was executed 
+
+nsh> hidkbd
+The characters typed from the keyboard were executed correctly.
+
+- USB MSC Class
+The MSC device is enumerated as sda in /dev directory.
+
+The block device is mounted using the command as mentioned below : 
+
+mount -t vfat /dev/sda /mnt
+
+The MSC device is mounted in /dev directory 
+
+The copy command is executed to test the Read/Write functionality
+
+cp /mnt/<file.txt> /mnt/file_copy.txt
 
 Debugging
 ==========

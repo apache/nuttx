@@ -434,13 +434,7 @@ pid_t nxtask_start_vfork(FAR struct task_tcb_s *child)
 
   /* Activate the task */
 
-  ret = nxtask_activate((FAR struct tcb_s *)child);
-  if (ret < OK)
-    {
-      nxtask_abort_vfork(child, -ret);
-      sched_unlock();
-      return ERROR;
-    }
+  nxtask_activate((FAR struct tcb_s *)child);
 
   /* The child task has not yet ran because pre-emption is disabled.
    * The child task has the same priority as the parent task, so that

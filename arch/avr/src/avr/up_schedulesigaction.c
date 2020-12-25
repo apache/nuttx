@@ -62,7 +62,7 @@
  *   This function is called by the OS when one or more
  *   signal handling actions have been queued for execution.
  *   The architecture specific code must configure things so
- *   that the 'igdeliver' callback is executed on the thread
+ *   that the 'sigdeliver' callback is executed on the thread
  *   specified by 'tcb' as soon as possible.
  *
  *   This function may be called from interrupt handling logic.
@@ -91,6 +91,7 @@
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   irqstate_t flags;
+  uintptr_t reg_ptr = (uintptr_t)up_sigdeliver;
 
   sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
 
@@ -136,9 +137,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           else
             {
-              /* Save registers that must be protected while the signal handler
-               * runs. These will be restored by the signal trampoline after
-               * the signal(s) have been delivered.
+              /* Save registers that must be protected while the signal
+               * handler runs. These will be restored by the signal
+               * trampoline after the signal(s) have been delivered.
                */
 
               tcb->xcp.sigdeliver   = sigdeliver;
@@ -152,13 +153,14 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
+
 #if !defined(REG_PC2)
-              g_current_regs[REG_PC0]   = (uint16_t)up_sigdeliver >> 8;
-              g_current_regs[REG_PC1]   = (uint16_t)up_sigdeliver & 0xff;
+              g_current_regs[REG_PC0] = (uint16_t)reg_ptr >> 8;
+              g_current_regs[REG_PC1] = (uint16_t)reg_ptr & 0xff;
 #else
-              g_current_regs[REG_PC0]   = (uint32_t)up_sigdeliver >> 16;
-              g_current_regs[REG_PC1]   = (uint32_t)up_sigdeliver >> 8;
-              g_current_regs[REG_PC2]   = (uint32_t)up_sigdeliver & 0xff;
+              g_current_regs[REG_PC0] = (uint32_t)reg_ptr >> 16;
+              g_current_regs[REG_PC1] = (uint32_t)reg_ptr >> 8;
+              g_current_regs[REG_PC2] = (uint32_t)reg_ptr & 0xff;
 #endif
               g_current_regs[REG_SREG] &= ~(1 << SREG_I);
 
@@ -196,12 +198,12 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            */
 
 #if !defined(REG_PC2)
-          tcb->xcp.regs[REG_PC0]    = (uint16_t)up_sigdeliver >> 8;
-          tcb->xcp.regs[REG_PC1]    = (uint16_t)up_sigdeliver & 0xff;
+          tcb->xcp.regs[REG_PC0]    = (uint16_t)reg_ptr >> 8;
+          tcb->xcp.regs[REG_PC1]    = (uint16_t)reg_ptr & 0xff;
 #else
-          tcb->xcp.regs[REG_PC0]    = (uint32_t)up_sigdeliver >> 16;
-          tcb->xcp.regs[REG_PC1]    = (uint32_t)up_sigdeliver >> 8;
-          tcb->xcp.regs[REG_PC2]    = (uint32_t)up_sigdeliver & 0xff;
+          tcb->xcp.regs[REG_PC0]    = (uint32_t)reg_ptr >> 16;
+          tcb->xcp.regs[REG_PC1]    = (uint32_t)reg_ptr >> 8;
+          tcb->xcp.regs[REG_PC2]    = (uint32_t)reg_ptr & 0xff;
 
 #endif
           tcb->xcp.regs[REG_SREG]  &= ~(1 << SREG_I);

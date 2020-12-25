@@ -58,6 +58,10 @@ ifeq ($(CONFIG_USBHOST_CDCACM),y)
 CSRCS += usbhost_cdcacm.c
 endif
 
+ifeq ($(CONFIG_USBHOST_CDCMBIM),y)
+CSRCS += usbhost_cdcmbim.c
+endif
+
 ifeq ($(CONFIG_USBHOST_HIDKBD),y)
 CSRCS += usbhost_hidkbd.c
 endif

@@ -57,8 +57,12 @@ behavior that is closer to normal timing, then you can define
 CONFIG_SIM_WALLTIME=y in your configuration file.  This configuration setting
 will cause the sim target's IDLE loop to delay on each call so that the system
 "timer interrupt" is called at a rate approximately correct for the system
-timer tick rate.  With this definition in the configuration, sleep() behavior
-is more or less normal.
+timer tick rate.  This option can be enabled with CONFIG_SIM_WALLTIME_SIGNAL
+which will drive the entire simulation by using a host timer that ticks at
+CONFIG_USEC_PER_TICK.  This option will no longer deliver 'tick' events
+from Idle task and it will generate them from the host signal handler.
+Another option is to use CONFIG_SIM_WALLTIME_SLEEP which will enable the
+tick events to be delayed from the Idle task by using a host sleep call.
 
 Debugging
 ^^^^^^^^^
@@ -544,6 +548,17 @@ bluetooth
   apps/wireless/bluetooth/btsak and the NULL Bluetooth device at
   drivers/wireless/bluetooth/bt_null.c
 
+  There is also support on a Linux Host for attaching the bluetooth hardware
+  from the host to the NuttX bluetoooth stack via the HCI Socket interface
+  over the User Channel.  This is enabled in the bthcisock configuration.
+  In order to use this you must give the nuttx elf additional capabilities:
+
+  sudo setcap 'cap_net_raw,cap_net_admin=eip' ./nuttx
+
+  You can then monitor the HCI traffic on the host with wireshark or btmon
+
+  sudo btmon
+
 configdata
 
   A unit test for the MTD configuration data driver.
@@ -561,7 +576,7 @@ cxxtest
      on how to install uClibc++
 
   2. At present (2012/11/02), exceptions are disabled in this example
-     (CONFIG_UCLIBCXX_EXCEPTION=n).  It is probably not necessary to disable
+     (CONFIG_CXX_EXCEPTION=n).  It is probably not necessary to disable
      exceptions.
 
   3. Unfortunately, this example will not run now.
@@ -612,6 +627,13 @@ loadable
   with any Windows configuration, however, because Windows does not use the
   ELF format.
 
+  This is the key part of the configuration:
+
+  +CONFIG_PATH_INITIAL="/system/bin"
+  +CONFIG_USER_INITPATH="/system/bin/nsh"
+
+  The shell is loaded from the elf, but you can also run any of the ELFs that are in /system/bin as they are on the "PATH"
+
 minibasic
 
   This configuration was used to test the Mini Basic port at
@@ -620,14 +642,14 @@ minibasic
 module
 
   This is a configuration to test CONFIG_LIBC_MODLIB with 64-bit modules.
-  This has apps/examples/module and apps/examples/sotest enabled.
+  This has apps/examples/module enabled.
   This configuration is intended for 64-bit host OS.
 
 module32
 
   This is a configuration to test CONFIG_LIBC_MODLIB with CONFIG_SIM_M32
   and 32-bit modules.
-  This has apps/examples/module and apps/examples/sotest enabled.
+  This has apps/examples/module enabled.
   This configuration is intended for 64-bit host OS.
 
 mount
@@ -669,6 +691,39 @@ nettest
      will either need to edit your configuration files to use 10.0.0.1 on the
      "target" (CONFIG_EXAMPLES_NETTEST_*) or edit up_wpcap.c to select the IP
      address that you want to use.
+
+nimble
+
+  This is similar to bthcisock configuration, which uses the exposes the real
+  BLE stack to NuttX, but disables NuttX's own BLE stack and uses nimBLE stack
+  instead (built in userspace).
+
+  This configuration can be tested by running nimBLE example application "nimble"
+  as follows:
+
+    $ sudo setcap 'cap_net_raw,cap_net_admin=eip' nuttx
+    $ ./nuttx
+    NuttShell (NSH) NuttX-9.1.0
+    nsh> ifup bnep0
+    ifup bnep0...OK
+    nsh> nimble
+    hci init
+    port init
+    gap init
+    gatt init
+    ans init
+    ias init
+    lls init
+    tps init
+    hci_sock task init
+    ble_host task init
+    hci sock task
+    host task
+    advertise
+
+  At this point you should be able to detect a "nimble" BLE device when scanning
+  for BLE devices. You can use nRFConnect Android application from Nordic to connect
+  and inspect exposed GATT services.
 
 nsh
 
@@ -1131,6 +1186,19 @@ spiffs
 
   This is a test of the SPIFFS file system using the apps/testing/fstest test
   with an MTD RAM driver to simulate the FLASH part.
+
+sotest
+
+  This is a configuration to test CONFIG_LIBC_MODLIB with 64-bit modules.
+  This has apps/examples/sotest enabled.
+  This configuration is intended for 64-bit host OS.
+
+sotest32
+
+  This is a configuration to test CONFIG_LIBC_MODLIB with CONFIG_SIM_M32
+  and 32-bit modules.
+  This has apps/examples/sotest enabled.
+  This configuration is intended for 64-bit host OS.
 
 tcploop
 

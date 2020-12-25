@@ -53,6 +53,10 @@ else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += k64_bringup.c
 endif
 
+ifeq ($(CONFIG_I2C),y)
+CSRCS += k64_i2c.c
+endif
+
 ifeq ($(CONFIG_KINETIS_SDHC),y)
 CSRCS += k64_sdhc.c
 ifeq ($(CONFIG_FS_AUTOMOUNTER),y)

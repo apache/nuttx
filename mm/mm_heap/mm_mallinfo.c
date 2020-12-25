@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
+#include <malloc.h>
 #include <assert.h>
 #include <debug.h>
 

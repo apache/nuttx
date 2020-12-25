@@ -55,9 +55,10 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   kinetis_pinconfig(GPIO_LED);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -76,7 +77,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   kinetis_gpiowrite(GPIO_LED, (ledset & BOARD_LED_BIT) != 0);
 }

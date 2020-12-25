@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/net/lan91c111.h
  *
- *   Copyright (C) 2018 Pinecone Inc. All rights reserved.
- *   Author: Xiang Xiao <xiaoxiang@pinecone.net>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -55,8 +40,9 @@
 
 #define BANK_SELECT             14
 
-/* Transmit Control Register */
-/* BANK 0 */
+/* Transmit Control Register
+ * BANK 0
+ */
 
 #define TCR_REG                 0x0000
 #define TCR_ENABLE              0x0001 /* When 1 we can transmit */
@@ -76,8 +62,9 @@
 
 #define TCR_DEFAULT             (TCR_ENABLE | TCR_PAD_EN)
 
-/* EPH Status Register */
-/* BANK 0 */
+/* EPH Status Register
+ * BANK 0
+ */
 
 #define EPH_STATUS_REG          0x0002
 #define ES_TX_SUC               0x0001 /* Last TX was successful */
@@ -96,8 +83,9 @@
 #define ES_TXUNRN               0x8000 /* Tx Underrun */
 #define ES_ERRORS               (ES_TXUNRN | ES_LOSTCARR | ES_LATCOL | ES_SQET | ES_16COL)
 
-/* Receive Control Register */
-/* BANK 0 */
+/* Receive Control Register
+ * BANK 0
+ */
 
 #define RCR_REG                 0x0004
 #define RCR_RX_ABORT            0x0001 /* Set if a rx frame was aborted */
@@ -118,19 +106,22 @@
 #endif
 #define RCR_CLEAR               0x0    /* set it to a base state */
 
-/* Counter Register */
-/* BANK 0 */
+/* Counter Register
+ * BANK 0
+ */
 
 #define COUNTER_REG             0x0006
 
-/* Memory Information Register */
-/* BANK 0 */
+/* Memory Information Register
+ * BANK 0
+ */
 
 #define MIR_REG                 0x0008
 #define MIR_FREE_MASK           0xff00
 
-/* Receive/Phy Control Register */
-/* BANK 0 */
+/* Receive/Phy Control Register
+ * BANK 0
+ */
 
 #define RPC_REG                 0x000a
 #define RPC_SPEED               0x2000 /* When 1 PHY is in 100Mbps mode. */
@@ -152,13 +143,15 @@
 
 /* Bank 0 0x000c is reserved */
 
-/* Bank Select Register */
-/* All Banks */
+/* Bank Select Register
+ * All Banks
+ */
 
 #define BSR_REG                 0x000e
 
-/* Configuration Reg */
-/* BANK 1 */
+/* Configuration Reg
+ * BANK 1
+ */
 
 #define CONFIG_REG              0x0100
 #define CONFIG_EXT_PHY          0x0200 /* 1=external MII, 0=internal Phy */
@@ -171,25 +164,29 @@
 #define CONFIG_DEFAULT          (CONFIG_EPH_POWER_EN)
 #define CONFIG_CLEAR             0
 
-/* Base Address Register */
-/* BANK 1 */
+/* Base Address Register
+ * BANK 1
+ */
 
 #define BASE_REG                0x0102
 
-/* Individual Address Registers */
-/* BANK 1 */
+/* Individual Address Registers
+ * BANK 1
+ */
 
 #define ADDR0_REG               0x0104
 #define ADDR1_REG               0x0106
 #define ADDR2_REG               0x0108
 
-/* General Purpose Register */
-/* BANK 1 */
+/* General Purpose Register
+ * BANK 1
+ */
 
 #define  GP_REG                 0x010a
 
-/* Control Register */
-/* BANK 1 */
+/* Control Register
+ * BANK 1
+ */
 
 #define CTL_REG                 0x010c
 #define CTL_RCV_BAD             0x4000 /* When 1 bad CRC packets are received */
@@ -204,8 +201,9 @@
 #define CTL_DEFAULT             (CTL_AUTO_RELEASE)
 #define CTL_CLEAR               0
 
-/* MMU Command Register */
-/* BANK 2 */
+/* MMU Command Register
+ * BANK 2
+ */
 
 #define MMU_CMD_REG             0x0200
 #define MC_BUSY                 1      /* When 1 the last release has not completed */
@@ -218,33 +216,38 @@
 #define MC_ENQUEUE              (6<<5) /* Enqueue the packet for transmit */
 #define MC_RSTTXFIFO            (7<<5) /* Reset the TX FIFOs */
 
-/* Packet Number Register */
-/* BANK 2 */
+/* Packet Number Register
+ * BANK 2
+ */
 
 #define  PN_REG                 0x0202
 
-/* Allocation Result Register */
-/* BANK 2 */
+/* Allocation Result Register
+ * BANK 2
+ */
 
 #define AR_REG                  0x0203
 #define AR_FAILED               0x80   /* Allocation Failed */
 
-/* TX FIFO Ports Register */
-/* BANK 2 */
+/* TX FIFO Ports Register
+ * BANK 2
+ */
 
 #define TXFIFO_REG              0x0204
 #define TXFIFO_TEMPTY           0x80   /* TX FIFO Empty */
 
-/* RX FIFO Ports Register */
-/* BANK 2 */
+/* RX FIFO Ports Register
+ * BANK 2
+ */
 
 #define RXFIFO_REG              0x0205
 #define RXFIFO_REMPTY           0x80   /* RX FIFO Empty */
 
 #define FIFO_REG                0x0204
 
-/* Pointer Register */
-/* BANK 2 */
+/* Pointer Register
+ * BANK 2
+ */
 
 #define PTR_REG                 0x0206
 #define PTR_RCV                 0x8000 /* 1=Receive area, 0=Transmit area */
@@ -252,18 +255,21 @@
 #define PTR_READ                0x2000 /* When 1 the operation is a read */
 #define PTR_NOTEMPTY            0x0800 /* When 1 _do not_ write fifo DATA REG */
 
-/* Data Register */
-/* BANK 2 */
+/* Data Register
+ * BANK 2
+ */
 
 #define DATA_REG                0x0208
 
-/* Interrupt Status/Acknowledge Register */
-/* BANK 2 */
+/* Interrupt Status/Acknowledge Register
+ * BANK 2
+ */
 
 #define INT_REG                 0x020c
 
-/* Interrupt Mask Register */
-/* BANK 2 */
+/* Interrupt Mask Register
+ * BANK 2
+ */
 
 #define IM_REG                  0x020d
 #define IM_MDINT                0x80   /* PHY MI Register 18 Interrupt */
@@ -275,16 +281,18 @@
 #define IM_TX_INT               0x02   /* Transmit Interrupt */
 #define IM_RCV_INT              0x01   /* Receive Interrupt */
 
-/* Multicast Table Registers */
-/* BANK 3 */
+/* Multicast Table Registers
+ * BANK 3
+ */
 
 #define MCAST_REG1              0x0300
 #define MCAST_REG2              0x0302
 #define MCAST_REG3              0x0304
 #define MCAST_REG4              0x0306
 
-/* Management Interface Register (MII) */
-/* BANK 3 */
+/* Management Interface Register (MII)
+ * BANK 3
+ */
 
 #define MII_REG                 0x0308
 #define MII_MSK_CRS100          0x4000 /* Disables CRS100 detection during tx half dup */
@@ -293,22 +301,25 @@
 #define MII_MDI                 0x0002 /* MII Input, pin MDI */
 #define MII_MDO                 0x0001 /* MII Output, pin MDO */
 
-/* Revision Register */
-/* BANK 3 */
-/* ( hi: chip id   low: rev # ) */
+/* Revision Register
+ * BANK 3
+ * ( hi: chip id   low: rev # )
+ */
 
 #define REV_REG                 0x030a
 
-/* Early RCV Register */
-/* BANK 3 */
-/* this is NOT on SMC9192 */
+/* Early RCV Register
+ * BANK 3
+ * this is NOT on SMC9192
+ */
 
 #define ERCV_REG                0x030c
 #define ERCV_RCV_DISCRD         0x0080 /* When 1 discards a packet being received */
 #define ERCV_THRESHOLD          0x001f /* ERCV Threshold Mask */
 
-/* External Register */
-/* BANK 7 */
+/* External Register
+ * BANK 7
+ */
 
 #define EXT_REG                 0x0700
 
@@ -320,8 +331,9 @@
 #define CHIP_91100FD            8
 #define CHIP_91111FD            9
 
-/* Transmit status bits */
-/* Same as ES_xxx */
+/* Transmit status bits
+ * Same as ES_xxx
+ */
 
 /* Transmit control bits */
 

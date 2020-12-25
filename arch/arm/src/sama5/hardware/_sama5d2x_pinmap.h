@@ -1,4 +1,4 @@
-/************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/_sama5d2x_pinmap.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -31,40 +31,42 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D2X_PINMAP_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D2X_PINMAP_H
 
-/************************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "sam_pio.h"
 
-/************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************************/
+ ****************************************************************************/
 
-/* PIO pin definitions **************************************************************************************/
-/* Alternate Pin Functions.
+/* PIO pin definitions ******************************************************
+ * Alternate Pin Functions.
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.  Drivers, however, will
- * use the pin selection without the numeric suffix.  Additional definitions are required in the board.h
- * file.  For example, if we wanted the PCK0 on PB26, then the following definition should appear in the
- * board.h header file for that board:
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc.  Drivers, however, will use the pin selection without the numeric
+ * suffix.  Additional definitions are required in the board.h file.  For
+ * example, if we wanted the PCK0 on PB26, then the following definition
+ * should appear in the board.h header file for that board:
  *
  *   #define PIO_PMC_PCK0 PIO_PMC_PCK0_1
  *
  * The PCK logic will then automatically configure PB26 as the PCK0 pin.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific PIO options such as frequency, open-drain/push-pull,
- * and pull-up/down!  Just the basics are defined for most pins in this file at the present time.
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific PIO options such as
+ * frequency, open-drain/push-pull, and pull-up/down!  Just the basics are
+ * defined for most pins in this file at the present time.
  */
 
 /* Analog-to-Digital Converter - ADC */
@@ -537,7 +539,6 @@
 #define PIO_PDMIC_DAT_1      (PIO_PERIPHD | PIO_CFG_DEFAULT | PIO_PORT_PIOB | PIO_PIN11)
 #define PIO_PDMIC_DAT_2      (PIO_PERIPHD | PIO_CFG_DEFAULT | PIO_PORT_PIOB | PIO_PIN26)
 
-
 /* Pulse Width Modulation Controller - PWM */
 
 #define PIO_PWM0_EXTRG0      (PIO_PERIPHD | PIO_CFG_DEFAULT | PIO_PORT_PIOB | PIO_PIN3)
@@ -601,28 +602,28 @@
 
 /* Secure Data Memory Card - SDMMC */
 
-#define PIO_SDMMC0_CD        (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN13)
+#define PIO_SDMMC0_CD        (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN13 | PIO_CFG_DEGLITCH | PIO_INT_BOTHEDGES | PIO_INPUT )
 #define PIO_SDMMC0_CK        (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN0)
-#define PIO_SDMMC0_CMD       (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN1)
-#define PIO_SDMMC0_DAT0      (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN2)
-#define PIO_SDMMC0_DAT1      (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN3)
-#define PIO_SDMMC0_DAT2      (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN4)
-#define PIO_SDMMC0_DAT3      (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN5)
-#define PIO_SDMMC0_DAT4      (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN6)
-#define PIO_SDMMC0_DAT5      (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN7)
-#define PIO_SDMMC0_DAT6      (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN8)
-#define PIO_SDMMC0_DAT7      (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN9)
+#define PIO_SDMMC0_CMD       (PIO_PERIPHA | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN1)
+#define PIO_SDMMC0_DAT0      (PIO_PERIPHA | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN2)
+#define PIO_SDMMC0_DAT1      (PIO_PERIPHA | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN3)
+#define PIO_SDMMC0_DAT2      (PIO_PERIPHA | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN4)
+#define PIO_SDMMC0_DAT3      (PIO_PERIPHA | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN5)
+#define PIO_SDMMC0_DAT4      (PIO_PERIPHA | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN6)
+#define PIO_SDMMC0_DAT5      (PIO_PERIPHA | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN7)
+#define PIO_SDMMC0_DAT6      (PIO_PERIPHA | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN8)
+#define PIO_SDMMC0_DAT7      (PIO_PERIPHA | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN9)
 #define PIO_SDMMC0_RSTN      (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN10)
 #define PIO_SDMMC0_VDDSEL    (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN11)
 #define PIO_SDMMC0_WP        (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN12)
 
 #define PIO_SDMMC1_CD        (PIO_PERIPHE | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN30)
 #define PIO_SDMMC1_CK        (PIO_PERIPHE | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN22)
-#define PIO_SDMMC1_CMD       (PIO_PERIPHE | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN28)
-#define PIO_SDMMC1_DAT0      (PIO_PERIPHE | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN18)
-#define PIO_SDMMC1_DAT1      (PIO_PERIPHE | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN19)
-#define PIO_SDMMC1_DAT2      (PIO_PERIPHE | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN20)
-#define PIO_SDMMC1_DAT3      (PIO_PERIPHE | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN21)
+#define PIO_SDMMC1_CMD       (PIO_PERIPHE | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN28)
+#define PIO_SDMMC1_DAT0      (PIO_PERIPHE | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN18)
+#define PIO_SDMMC1_DAT1      (PIO_PERIPHE | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN19)
+#define PIO_SDMMC1_DAT2      (PIO_PERIPHE | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN20)
+#define PIO_SDMMC1_DAT3      (PIO_PERIPHE | PIO_CFG_PULLUP  | PIO_PORT_PIOA | PIO_PIN21)
 #define PIO_SDMMC1_RSTN      (PIO_PERIPHE | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN27)
 #define PIO_SDMMC1_WP        (PIO_PERIPHE | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN29)
 

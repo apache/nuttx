@@ -42,12 +42,7 @@
 #include <nuttx/arch.h>
 
 #include "cxd56_audio_irq.h"
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-extern void cxd56_audio_dma_int_handler(void);
+#include "cxd56_audio_dma.h"
 
 /****************************************************************************
  * Public Functions

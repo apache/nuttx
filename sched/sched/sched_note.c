@@ -1,35 +1,20 @@
 /****************************************************************************
  * sched/sched/sched_note.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -40,10 +25,13 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdarg.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <time.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/sched.h>
 #include <nuttx/clock.h>
 #include <nuttx/spinlock.h>
@@ -51,22 +39,22 @@
 
 #include "sched/sched.h"
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_BUFFER
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct note_info_s
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+struct note_filter_s
 {
-  volatile unsigned int ni_head;
-  volatile unsigned int ni_tail;
-  uint8_t ni_buffer[CONFIG_SCHED_NOTE_BUFSIZE];
+  struct note_filter_mode_s mode;
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+  struct note_filter_irq_s irq_mask;
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+  struct note_filter_syscall_s syscall_mask;
+#endif
 };
+#endif
 
 struct note_startalloc_s
 {
@@ -83,50 +71,31 @@ struct note_startalloc_s
 #endif
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static void note_add(FAR const uint8_t *note, uint8_t notelen);
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct note_info_s g_note_info;
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+static struct note_filter_s g_note_filter =
+{
+  .mode =
+    {
+      .flag = CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+#ifdef CONFIG_SMP
+      .cpuset = CONFIG_SCHED_INSTRUMENTATION_CPUSET,
+#endif
+    }
+};
 
 #ifdef CONFIG_SMP
-static volatile spinlock_t g_note_lock;
+static unsigned int g_note_disabled_irq_nest[CONFIG_SMP_NCPUS];
+#else
+static unsigned int g_note_disabled_irq_nest[1];
+#endif
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: note_next
- *
- * Description:
- *   Return the circular buffer index at offset from the specified index
- *   value, handling wraparound
- *
- * Input Parameters:
- *   ndx - Old circular buffer index
- *
- * Returned Value:
- *   New circular buffer index
- *
- ****************************************************************************/
-
-static inline unsigned int note_next(unsigned int ndx, unsigned int offset)
-{
-  ndx += offset;
-  if (ndx >= CONFIG_SCHED_NOTE_BUFSIZE)
-    {
-      ndx -= CONFIG_SCHED_NOTE_BUFSIZE;
-    }
-
-  return ndx;
-}
 
 /****************************************************************************
  * Name: note_common
@@ -149,7 +118,13 @@ static void note_common(FAR struct tcb_s *tcb,
                         FAR struct note_common_s *note,
                         uint8_t length, uint8_t type)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
+  struct timespec ts;
+
+  clock_systime_timespec(&ts);
+#else
   uint32_t systime    = (uint32_t)clock_systime_ticks();
+#endif
 
   /* Save all of the common fields */
 
@@ -162,13 +137,176 @@ static void note_common(FAR struct tcb_s *tcb,
   note->nc_pid[0]     = (uint8_t)(tcb->pid & 0xff);
   note->nc_pid[1]     = (uint8_t)((tcb->pid >> 8) & 0xff);
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
+  note->nc_systime_nsec[0] = (uint8_t)(ts.tv_nsec         & 0xff);
+  note->nc_systime_nsec[1] = (uint8_t)((ts.tv_nsec >> 8)  & 0xff);
+  note->nc_systime_nsec[2] = (uint8_t)((ts.tv_nsec >> 16) & 0xff);
+  note->nc_systime_nsec[3] = (uint8_t)((ts.tv_nsec >> 24) & 0xff);
+  note->nc_systime_sec[0] = (uint8_t)(ts.tv_sec         & 0xff);
+  note->nc_systime_sec[1] = (uint8_t)((ts.tv_sec >> 8)  & 0xff);
+  note->nc_systime_sec[2] = (uint8_t)((ts.tv_sec >> 16) & 0xff);
+  note->nc_systime_sec[3] = (uint8_t)((ts.tv_sec >> 24) & 0xff);
+#else
   /* Save the LS 32-bits of the system timer in little endian order */
 
   note->nc_systime[0] = (uint8_t)(systime         & 0xff);
   note->nc_systime[1] = (uint8_t)((systime >> 8)  & 0xff);
   note->nc_systime[2] = (uint8_t)((systime >> 16) & 0xff);
   note->nc_systime[3] = (uint8_t)((systime >> 24) & 0xff);
+#endif
 }
+
+/****************************************************************************
+ * Name: note_isenabled
+ *
+ * Description:
+ *   Check whether the instrumentation is enabled.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   True is returned if the instrumentation is enabled.
+ *
+ ****************************************************************************/
+
+static inline int note_isenabled(void)
+{
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_ENABLE))
+    {
+      return false;
+    }
+
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((g_note_filter.mode.cpuset & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return false;
+    }
+#endif
+#endif
+
+  return true;
+}
+
+/****************************************************************************
+ * Name: note_isenabled_syscall
+ *
+ * Description:
+ *   Check whether the syscall instrumentation is enabled.
+ *
+ * Input Parameters:
+ *   nr - syscall number
+ *
+ * Returned Value:
+ *   True is returned if the instrumentation is enabled.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+static inline int note_isenabled_syscall(int nr)
+{
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  if (!note_isenabled())
+    {
+      return false;
+    }
+
+  /* Exclude the case of syscall called by the interrupt handler which is
+   * not traced.
+   */
+
+  if (up_interrupt_context())
+    {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+#ifdef CONFIG_SMP
+      int cpu = this_cpu();
+#else
+      int cpu = 0;
+#endif
+
+      if (g_note_disabled_irq_nest[cpu] > 0)
+        {
+          return false;
+        }
+#else
+      return false;
+#endif
+    }
+
+  /* If the syscall trace is disabled or the syscall number is masked,
+   * do nothing.
+   */
+
+  if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_SYSCALL) ||
+      NOTE_FILTER_SYSCALLMASK_ISSET(nr - CONFIG_SYS_RESERVED,
+                                    &g_note_filter.syscall_mask))
+    {
+      return false;
+    }
+#endif
+
+  return true;
+}
+#endif
+
+/****************************************************************************
+ * Name: note_isenabled_irqhandler
+ *
+ * Description:
+ *   Check whether the interrupt handler instrumentation is enabled.
+ *
+ * Input Parameters:
+ *   irq   - IRQ number
+ *   enter - interrupt enter/leave flag
+ *
+ * Returned Value:
+ *   True is returned if the instrumentation is enabled.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+static inline int note_isenabled_irq(int irq, bool enter)
+{
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  if (!note_isenabled())
+    {
+      return false;
+    }
+
+  /* If the IRQ trace is disabled or the IRQ number is masked, disable
+   * subsequent syscall traces until leaving the interrupt handler
+   */
+
+  if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_IRQ) ||
+      NOTE_FILTER_IRQMASK_ISSET(irq, &g_note_filter.irq_mask))
+    {
+#ifdef CONFIG_SMP
+      int cpu = this_cpu();
+#else
+      int cpu = 0;
+#endif
+
+      if (enter)
+        {
+          g_note_disabled_irq_nest[cpu]++;
+        }
+      else
+        {
+          g_note_disabled_irq_nest[cpu]--;
+        }
+
+      return false;
+    }
+#endif
+
+  return true;
+}
+#endif
 
 /****************************************************************************
  * Name: note_spincommon
@@ -186,168 +324,41 @@ static void note_common(FAR struct tcb_s *tcb,
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void note_spincommon(FAR struct tcb_s *tcb,
-                     FAR volatile spinlock_t *spinlock,
-                     int type)
+static void note_spincommon(FAR struct tcb_s *tcb,
+                            FAR volatile spinlock_t *spinlock,
+                            int type)
 {
   struct note_spinlock_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
 
   /* Format the note */
 
   note_common(tcb, &note.nsp_cmn, sizeof(struct note_spinlock_s), type);
-  note.nsp_spinlock = (FAR void *)spinlock;
+
+  note.nsp_spinlock[0] = (uint8_t)((uintptr_t)spinlock & 0xff);
+  note.nsp_spinlock[1] = (uint8_t)(((uintptr_t)spinlock >> 8)  & 0xff);
+#if UINTPTR_MAX > UINT16_MAX
+  note.nsp_spinlock[2] = (uint8_t)(((uintptr_t)spinlock >> 16) & 0xff);
+  note.nsp_spinlock[3] = (uint8_t)(((uintptr_t)spinlock >> 24) & 0xff);
+#if UINTPTR_MAX > UINT32_MAX
+  note.nsp_spinlock[4] = (uint8_t)(((uintptr_t)spinlock >> 32) & 0xff);
+  note.nsp_spinlock[5] = (uint8_t)(((uintptr_t)spinlock >> 40) & 0xff);
+  note.nsp_spinlock[6] = (uint8_t)(((uintptr_t)spinlock >> 48) & 0xff);
+  note.nsp_spinlock[7] = (uint8_t)(((uintptr_t)spinlock >> 56) & 0xff);
+#endif
+#endif
+
   note.nsp_value    = (uint8_t)*spinlock;
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_spinlock_s));
+  sched_note_add(&note, sizeof(struct note_spinlock_s));
 }
 #endif
-
-/****************************************************************************
- * Name: note_length
- *
- * Description:
- *   Length of data currently in circular buffer.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Length of data currently in circular buffer.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_NOTE_GET) || defined(CONFIG_DEBUG_ASSERTIONS)
-static unsigned int note_length(void)
-{
-  unsigned int head = g_note_info.ni_head;
-  unsigned int tail = g_note_info.ni_tail;
-
-  if (tail > head)
-    {
-      head += CONFIG_SCHED_NOTE_BUFSIZE;
-    }
-
-  return head - tail;
-}
-#endif
-
-/****************************************************************************
- * Name: note_remove
- *
- * Description:
- *   Remove the variable length note from the tail of the circular buffer
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   We are within a critical section.
- *
- ****************************************************************************/
-
-static void note_remove(void)
-{
-  FAR struct note_common_s *note;
-  unsigned int tail;
-  unsigned int length;
-
-  /* Get the tail index of the circular buffer */
-
-  tail = g_note_info.ni_tail;
-  DEBUGASSERT(tail < CONFIG_SCHED_NOTE_BUFSIZE);
-
-  /* Get the length of the note at the tail index */
-
-  note   = (FAR struct note_common_s *)&g_note_info.ni_buffer[tail];
-  length = note->nc_length;
-  DEBUGASSERT(length <= note_length());
-
-  /* Increment the tail index to remove the entire note from the circular
-   * buffer.
-   */
-
-  g_note_info.ni_tail = note_next(tail, length);
-}
-
-/****************************************************************************
- * Name: note_add
- *
- * Description:
- *   Add the variable length note to the head of the circular buffer
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   We are within a critical section.
- *
- ****************************************************************************/
-
-static void note_add(FAR const uint8_t *note, uint8_t notelen)
-{
-  unsigned int head;
-  unsigned int next;
-
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
-    {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
-      return;
-    }
-#endif
-
-#ifdef CONFIG_SMP
-  irqstate_t flags = up_irq_save();
-  spin_lock_wo_note(&g_note_lock);
-#endif
-
-  /* Get the index to the head of the circular buffer */
-
-  DEBUGASSERT(note != NULL && notelen < CONFIG_SCHED_NOTE_BUFSIZE);
-  head = g_note_info.ni_head;
-
-  /* Loop until all bytes have been transferred to the circular buffer */
-
-  while (notelen > 0)
-    {
-      /* Get the next head index.  Would it collide with the current tail
-       * index?
-       */
-
-      next = note_next(head, 1);
-      if (next == g_note_info.ni_tail)
-        {
-          /* Yes, then remove the note at the tail index */
-
-          note_remove();
-        }
-
-      /* Save the next byte at the head index */
-
-      g_note_info.ni_buffer[head] = *note++;
-
-      head = next;
-      notelen--;
-    }
-
-  g_note_info.ni_head = head;
-
-#ifdef CONFIG_SMP
-  spin_unlock_wo_note(&g_note_lock);
-  up_irq_restore(flags);
-#endif
-}
 
 /****************************************************************************
  * Public Functions
@@ -380,6 +391,11 @@ void sched_note_start(FAR struct tcb_s *tcb)
   int namelen;
 #endif
 
+  if (!note_isenabled())
+    {
+      return;
+    }
+
   /* Copy the task name (if possible) and get the length of the note */
 
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -390,7 +406,7 @@ void sched_note_start(FAR struct tcb_s *tcb)
 
   length = SIZEOF_NOTE_START(namelen + 1);
 #else
-  length = SIZEOF_NOTE_START(0)
+  length = SIZEOF_NOTE_START(0);
 #endif
 
   /* Finish formatting the note */
@@ -399,12 +415,17 @@ void sched_note_start(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, length);
+  sched_note_add(&note, length);
 }
 
 void sched_note_stop(FAR struct tcb_s *tcb)
 {
   struct note_stop_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
 
   /* Format the note */
 
@@ -412,12 +433,17 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_stop_s));
+  sched_note_add(&note, sizeof(struct note_stop_s));
 }
 
 void sched_note_suspend(FAR struct tcb_s *tcb)
 {
   struct note_suspend_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
 
   /* Format the note */
 
@@ -427,12 +453,17 @@ void sched_note_suspend(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_suspend_s));
+  sched_note_add(&note, sizeof(struct note_suspend_s));
 }
 
 void sched_note_resume(FAR struct tcb_s *tcb)
 {
   struct note_resume_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
 
   /* Format the note */
 
@@ -440,13 +471,18 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_resume_s));
+  sched_note_add(&note, sizeof(struct note_resume_s));
 }
 
 #ifdef CONFIG_SMP
 void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_start_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
 
   /* Format the note */
 
@@ -456,12 +492,17 @@ void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_start_s));
+  sched_note_add(&note, sizeof(struct note_cpu_start_s));
 }
 
 void sched_note_cpu_started(FAR struct tcb_s *tcb)
 {
   struct note_cpu_started_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
 
   /* Format the note */
 
@@ -470,12 +511,17 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_started_s));
+  sched_note_add(&note, sizeof(struct note_cpu_started_s));
 }
 
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_pause_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
 
   /* Format the note */
 
@@ -485,12 +531,17 @@ void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_pause_s));
+  sched_note_add(&note, sizeof(struct note_cpu_pause_s));
 }
 
 void sched_note_cpu_paused(FAR struct tcb_s *tcb)
 {
   struct note_cpu_paused_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
 
   /* Format the note */
 
@@ -499,12 +550,17 @@ void sched_note_cpu_paused(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_paused_s));
+  sched_note_add(&note, sizeof(struct note_cpu_paused_s));
 }
 
 void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_resume_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
 
   /* Format the note */
 
@@ -514,12 +570,17 @@ void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_resume_s));
+  sched_note_add(&note, sizeof(struct note_cpu_resume_s));
 }
 
 void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 {
   struct note_cpu_resumed_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
 
   /* Format the note */
 
@@ -528,7 +589,7 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_resumed_s));
+  sched_note_add(&note, sizeof(struct note_cpu_resumed_s));
 }
 #endif
 
@@ -536,6 +597,11 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 {
   struct note_preempt_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
 
   /* Format the note */
 
@@ -546,7 +612,7 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_preempt_s));
+  sched_note_add(&note, sizeof(struct note_preempt_s));
 }
 #endif
 
@@ -554,6 +620,11 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 {
   struct note_csection_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
 
   /* Format the note */
 
@@ -566,7 +637,7 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_csection_s));
+  sched_note_add(&note, sizeof(struct note_csection_s));
 }
 #endif
 
@@ -594,144 +665,260 @@ void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
 }
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+void sched_note_syscall_enter(int nr, int argc, ...)
+{
+  struct note_syscall_enter_s note;
+  FAR struct tcb_s *tcb = this_task();
+  unsigned int length;
+  va_list ap;
+  uintptr_t arg;
+  int i;
+  uint8_t *args;
+
+  if (!note_isenabled_syscall(nr))
+    {
+      return;
+    }
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_SYSCALL_ARGS))
+    {
+      argc = 0;
+    }
+#endif
+
+  /* Format the note */
+
+  length = SIZEOF_NOTE_SYSCALL_ENTER(argc);
+  note_common(tcb, &note.nsc_cmn, length, NOTE_SYSCALL_ENTER);
+  DEBUGASSERT(nr <= UCHAR_MAX);
+  note.nsc_nr = nr;
+  DEBUGASSERT(argc <= MAX_SYSCALL_ARGS);
+  note.nsc_argc = argc;
+
+  /* If needed, retrieve the given syscall arguments */
+
+  va_start(ap, argc);
+
+  args = note.nsc_args;
+  for (i = 0; i < argc; i++)
+    {
+      arg = (uintptr_t)va_arg(ap, uintptr_t);
+      *args++ = (uint8_t)(arg & 0xff);
+      *args++ = (uint8_t)((arg >> 8)  & 0xff);
+#if UINTPTR_MAX > UINT16_MAX
+      *args++ = (uint8_t)((arg >> 16) & 0xff);
+      *args++ = (uint8_t)((arg >> 24) & 0xff);
+#if UINTPTR_MAX > UINT32_MAX
+      *args++ = (uint8_t)((arg >> 32) & 0xff);
+      *args++ = (uint8_t)((arg >> 40) & 0xff);
+      *args++ = (uint8_t)((arg >> 48) & 0xff);
+      *args++ = (uint8_t)((arg >> 56) & 0xff);
+#endif
+#endif
+    }
+
+  va_end(ap);
+
+  /* Add the note to circular buffer */
+
+  sched_note_add((FAR const uint8_t *)&note, length);
+}
+
+void sched_note_syscall_leave(int nr, uintptr_t result)
+{
+  struct note_syscall_leave_s note;
+  FAR struct tcb_s *tcb = this_task();
+
+  if (!note_isenabled_syscall(nr))
+    {
+      return;
+    }
+
+  /* Format the note */
+
+  note_common(tcb, &note.nsc_cmn, sizeof(struct note_syscall_leave_s),
+              NOTE_SYSCALL_LEAVE);
+  DEBUGASSERT(nr <= UCHAR_MAX);
+  note.nsc_nr     = nr;
+
+  note.nsc_result[0] = (uint8_t)(result & 0xff);
+  note.nsc_result[1] = (uint8_t)((result >> 8)  & 0xff);
+#if UINTPTR_MAX > UINT16_MAX
+  note.nsc_result[2] = (uint8_t)((result >> 16) & 0xff);
+  note.nsc_result[3] = (uint8_t)((result >> 24) & 0xff);
+#if UINTPTR_MAX > UINT32_MAX
+  note.nsc_result[4] = (uint8_t)((result >> 32) & 0xff);
+  note.nsc_result[5] = (uint8_t)((result >> 40) & 0xff);
+  note.nsc_result[6] = (uint8_t)((result >> 48) & 0xff);
+  note.nsc_result[7] = (uint8_t)((result >> 56) & 0xff);
+#endif
+#endif
+
+  /* Add the note to circular buffer */
+
+  sched_note_add(&note, sizeof(struct note_syscall_leave_s));
+}
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
+{
+  struct note_irqhandler_s note;
+  FAR struct tcb_s *tcb = this_task();
+
+  if (!note_isenabled_irq(irq, enter))
+    {
+      return;
+    }
+
+  /* Format the note */
+
+  note_common(tcb, &note.nih_cmn, sizeof(struct note_irqhandler_s),
+              enter ? NOTE_IRQ_ENTER : NOTE_IRQ_LEAVE);
+  DEBUGASSERT(irq <= UCHAR_MAX);
+  note.nih_irq = irq;
+
+  /* Add the note to circular buffer */
+
+  sched_note_add((FAR const uint8_t *)&note,
+                 sizeof(struct note_irqhandler_s));
+}
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+
 /****************************************************************************
- * Name: sched_note_get
+ * Name: sched_note_filter_mode
  *
  * Description:
- *   Remove the next note from the tail of the circular buffer.  The note
- *   is also removed from the circular buffer to make room for further notes.
+ *   Set and get note filter mode.
+ *   (Same as NOTECTL_GETMODE / NOTECTL_SETMODE ioctls)
  *
  * Input Parameters:
- *   buffer - Location to return the next note
- *   buflen - The length of the user provided buffer.
+ *   oldm - A writable pointer to struct note_filter_mode_s to get current
+ *          filter mode
+ *          If 0, no data is written.
+ *   newm - A read-only pointer to struct note_filter_mode_s which holds the
+ *          new filter mode
+ *          If 0, the filter mode is not updated.
  *
  * Returned Value:
- *   On success, the positive, non-zero length of the return note is
- *   provided.  Zero is returned only if the circular buffer is empty.  A
- *   negated errno value is returned in the event of any failure.
+ *   None
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_NOTE_GET
-ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen)
+void sched_note_filter_mode(struct note_filter_mode_s *oldm,
+                            struct note_filter_mode_s *newm)
 {
-  FAR struct note_common_s *note;
-  irqstate_t flags;
-  unsigned int remaining;
-  unsigned int tail;
-  ssize_t notelen;
-  size_t circlen;
+  irqstate_t irq_mask;
 
-  DEBUGASSERT(buffer != NULL);
-  flags = enter_critical_section();
+  irq_mask = enter_critical_section();
 
-  /* Verify that the circular buffer is not empty */
-
-  circlen = note_length();
-  if (circlen <= 0)
+  if (oldm != NULL)
     {
-      notelen = 0;
-      goto errout_with_csection;
+      *oldm = g_note_filter.mode;
     }
 
-  /* Get the index to the tail of the circular buffer */
-
-  tail    = g_note_info.ni_tail;
-  DEBUGASSERT(tail < CONFIG_SCHED_NOTE_BUFSIZE);
-
-  /* Get the length of the note at the tail index */
-
-  note    = (FAR struct note_common_s *)&g_note_info.ni_buffer[tail];
-  notelen = note->nc_length;
-  DEBUGASSERT(notelen <= circlen);
-
-  /* Is the user buffer large enough to hold the note? */
-
-  if (buflen < notelen)
+  if (newm != NULL)
     {
-      /* Remove the large note so that we do not get constipated. */
-
-      note_remove();
-
-      /* and return an error */
-
-      notelen = -EFBIG;
-      goto errout_with_csection;
+      g_note_filter.mode = *newm;
     }
 
-  /* Loop until the note has been transferred to the user buffer */
+  leave_critical_section(irq_mask);
+}
 
-  remaining = (unsigned int)notelen;
-  while (remaining > 0)
+/****************************************************************************
+ * Name: sched_note_filter_syscall
+ *
+ * Description:
+ *   Set and get syscall filter setting
+ *   (Same as NOTECTL_GETSYSCALLFILTER / NOTECTL_SETSYSCALLFILTER ioctls)
+ *
+ * Input Parameters:
+ *   oldf - A writable pointer to struct note_filter_syscall_s to get
+ *          current syscall filter setting
+ *          If 0, no data is written.
+ *   newf - A read-only pointer to struct note_filter_syscall_s of the
+ *          new syscall filter setting
+ *          If 0, the setting is not updated.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+void sched_note_filter_syscall(struct note_filter_syscall_s *oldf,
+                               struct note_filter_syscall_s *newf)
+{
+  irqstate_t irq_mask;
+
+  irq_mask = enter_critical_section();
+
+  if (oldf != NULL)
     {
-      /* Copy the next byte at the tail index */
+      /* Return the current filter setting */
 
-      *buffer++ = g_note_info.ni_buffer[tail];
-
-      /* Adjust indices and counts */
-
-      tail = note_next(tail, 1);
-      remaining--;
+      *oldf = g_note_filter.syscall_mask;
     }
 
-  g_note_info.ni_tail = tail;
+  if (newf != NULL)
+    {
+      /* Replace the syscall filter mask by the provided setting */
 
-errout_with_csection:
-  leave_critical_section(flags);
-  return notelen;
+      g_note_filter.syscall_mask = *newf;
+    }
+
+  leave_critical_section(irq_mask);
 }
 #endif
 
 /****************************************************************************
- * Name: sched_note_size
+ * Name: sched_note_filter_irq
  *
  * Description:
- *   Return the size of the next note at the tail of the circular buffer.
+ *   Set and get IRQ filter setting
+ *   (Same as NOTECTL_GETIRQFILTER / NOTECTL_SETIRQFILTER ioctls)
  *
  * Input Parameters:
- *   None.
+ *   oldf - A writable pointer to struct note_filter_irq_s to get
+ *          current IRQ filter setting
+ *          If 0, no data is written.
+ *   newf - A read-only pointer to struct note_filter_irq_s of the new
+ *          IRQ filter setting
+ *          If 0, the setting is not updated.
  *
  * Returned Value:
- *   Zero is returned if the circular buffer is empty.  Otherwise, the size
- *   of the next note is returned.
+ *   None
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_NOTE_GET
-ssize_t sched_note_size(void)
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+void sched_note_filter_irq(struct note_filter_irq_s *oldf,
+                           struct note_filter_irq_s *newf)
 {
-  FAR struct note_common_s *note;
-  irqstate_t flags;
-  unsigned int tail;
-  ssize_t notelen;
-  size_t circlen;
+  irqstate_t irq_mask;
 
-  flags = enter_critical_section();
+  irq_mask = enter_critical_section();
 
-  /* Verify that the circular buffer is not empty */
-
-  circlen = note_length();
-  if (circlen <= 0)
+  if (oldf != NULL)
     {
-      notelen = 0;
-      goto errout_with_csection;
+      /* Return the current filter setting */
+
+      *oldf = g_note_filter.irq_mask;
     }
 
-  /* Get the index to the tail of the circular buffer */
+  if (newf != NULL)
+    {
+      /* Replace the syscall filter mask by the provided setting */
 
-  tail = g_note_info.ni_tail;
-  DEBUGASSERT(tail < CONFIG_SCHED_NOTE_BUFSIZE);
+      g_note_filter.irq_mask = *newf;
+    }
 
-  /* Get the length of the note at the tail index */
-
-  note    = (FAR struct note_common_s *)&g_note_info.ni_buffer[tail];
-  notelen = note->nc_length;
-  DEBUGASSERT(notelen <= circlen);
-
-errout_with_csection:
-  leave_critical_section(flags);
-  return notelen;
+  leave_critical_section(irq_mask);
 }
 #endif
 
-#endif /* CONFIG_SCHED_INSTRUMENTATION_BUFFER */
+#endif /* CONFIG_SCHED_INSTRUMENTATION_FILTER */

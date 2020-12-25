@@ -1,35 +1,20 @@
 /****************************************************************************
  * net/bluetooth/bluetooth.h
  *
- *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -106,11 +91,13 @@ struct bluetooth_conn_s
                                                * Necessary only to support multiple
                                                * Bluetooth devices */
   bt_addr_t bc_raddr;                         /* Connected remote address */
+  uint8_t bc_ldev;                            /* Locally bound device */
   uint8_t bc_channel;                         /* Connection channel */
   uint8_t bc_crefs;                           /* Reference counts on this instance */
 #if CONFIG_NET_BLUETOOTH_BACKLOG > 0
   uint8_t bc_backlog;                         /* Number of frames in RX queue */
 #endif
+  uint8_t bc_proto;                           /* Protocol */
 
   /* Queue of incoming packets */
 
@@ -139,10 +126,10 @@ EXTERN const struct sock_intf_s g_bluetooth_sockif;
  ****************************************************************************/
 
 struct bluetooth_frame_meta_s;  /* Forward reference */
-struct radio_driver_s;        /* Forward reference */
-struct net_driver_s;          /* Forward reference */
-struct socket;                /* Forward reference */
-struct sockaddr;              /* Forward reference */
+struct radio_driver_s;          /* Forward reference */
+struct net_driver_s;            /* Forward reference */
+struct socket;                  /* Forward reference */
+struct sockaddr;                /* Forward reference */
 
 /****************************************************************************
  * Name: bluetooth_initialize()
@@ -272,7 +259,8 @@ FAR struct bluetooth_conn_s *
  * Name: bluetooth_callback
  *
  * Description:
- *   Inform the application holding the Bluetooth socket of a change in state.
+ *   Inform the application holding the Bluetooth socket of a change in
+ *   state.
  *
  * Returned Value:
  *   OK if Bluetooth has been processed, otherwise ERROR.
@@ -291,9 +279,9 @@ uint16_t bluetooth_callback(FAR struct radio_driver_s *radio,
  *
  * Description:
  *   Implements the socket recvfrom interface for the case of the AF_INET
- *   and AF_INET6 address families.  bluetooth_recvfrom() receives messages from
- *   a socket, and may be used to receive data on a socket whether or not it
- *   is connection-oriented.
+ *   and AF_INET6 address families.  bluetooth_recvfrom() receives messages
+ *   from a socket, and may be used to receive data on a socket whether or
+ *   not it is connection-oriented.
  *
  *   If 'from' is not NULL, and the underlying protocol provides the source
  *   address, this source address is filled in.  The argument 'fromlen' is
@@ -390,7 +378,8 @@ void bluetooth_poll(FAR struct net_driver_s *dev,
 ssize_t psock_bluetooth_sendto(FAR struct socket *psock,
                                 FAR const void *buf,
                                 size_t len, int flags,
-                                FAR const struct sockaddr *to, socklen_t tolen);
+                                FAR const struct sockaddr *to,
+                                socklen_t tolen);
 
 /****************************************************************************
  * Name: bluetooth_container_initialize
@@ -428,8 +417,8 @@ void bluetooth_container_initialize(void);
  *   None
  *
  * Returned Value:
- *   A reference to the allocated container structure.  All user fields in this
- *   structure have been zeroed.  On a failure to allocate, NULL is
+ *   A reference to the allocated container structure.  All user fields in
+ *   this structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
  *
  * Assumptions:

@@ -55,7 +55,7 @@
 #define S32K1XX_PCC_FLEXCAN1_OFFSET  0x0094  /* PCC FlexCAN1 Register */
 #define S32K1XX_PCC_FTM3_OFFSET      0x0098  /* PCC FTM3 Register */
 #define S32K1XX_PCC_ADC1_OFFSET      0x009c  /* PCC ADC1 Register */
-#define S32K1XX_PCC_FLEXCAN_OFFSET   0x00ac  /* PCC FlexCAN2 Register */
+#define S32K1XX_PCC_FLEXCAN2_OFFSET  0x00ac  /* PCC FlexCAN2 Register */
 #define S32K1XX_PCC_LPSPI0_OFFSET    0x00b0  /* PCC LPSPI0 Register */
 #define S32K1XX_PCC_LPSPI1_OFFSET    0x00b4  /* PCC LPSPI1 Register */
 #define S32K1XX_PCC_LPSPI2_OFFSET    0x00b8  /* PCC LPSPI2 Register */
@@ -101,7 +101,7 @@
 #define S32K1XX_PCC_FLEXCAN1         (S32K1XX_PCC_BASE + S32K1XX_PCC_FLEXCAN1_OFFSET)
 #define S32K1XX_PCC_FTM3             (S32K1XX_PCC_BASE + S32K1XX_PCC_FTM3_OFFSET)
 #define S32K1XX_PCC_ADC1             (S32K1XX_PCC_BASE + S32K1XX_PCC_ADC1_OFFSET)
-#define S32K1XX_PCC_FLEXCAN          (S32K1XX_PCC_BASE + S32K1XX_PCC_FLEXCAN_OFFSET)
+#define S32K1XX_PCC_FLEXCAN2         (S32K1XX_PCC_BASE + S32K1XX_PCC_FLEXCAN2_OFFSET)
 #define S32K1XX_PCC_LPSPI0           (S32K1XX_PCC_BASE + S32K1XX_PCC_LPSPI0_OFFSET)
 #define S32K1XX_PCC_LPSPI1           (S32K1XX_PCC_BASE + S32K1XX_PCC_LPSPI1_OFFSET)
 #define S32K1XX_PCC_LPSPI2           (S32K1XX_PCC_BASE + S32K1XX_PCC_LPSPI2_OFFSET)
@@ -155,6 +155,7 @@
 #define PCC_PCD_SHIFT      (0)       /* Bits 0-2:  Peripheral Clock Divider Select */
 #define PCC_PCD_MASK       (7 << PCC_PCD_SHIFT)
 #  define PCC_PCD(n)       ((uint32_t)((n) - 1) << PCC_PCD_SHIFT) /* n=1..8 */
+
 #define PCC_FRAC           (1 << 3)  /* Bits 3:  Peripheral Clock Divider Fraction */
 #define PCC_PCS_SHIFT      (24)      /* Bits 24-26:  Peripheral Clock Source Select */
 #define PCC_PCS_MASK       (7 << PCC_PCS_SHIFT)
@@ -167,6 +168,7 @@
 #  define PCC_PCS_OPTION5  (5 << PCC_PCS_SHIFT)  /* Clock option 5 */
 #  define PCC_PCS_OPTION6  (6 << PCC_PCS_SHIFT)  /* Clock option 6 */
 #  define PCC_PCS_OPTION7  (7 << PCC_PCS_SHIFT)  /* Clock option 7 */
+
 #define PCC_CGC            (1 << 30) /* Clock Gate Control */
 #define PCC_PR             (1 << 31) /* Present */
 

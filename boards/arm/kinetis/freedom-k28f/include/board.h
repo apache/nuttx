@@ -57,7 +57,7 @@
 
 /* The Freedom K28F uses a 12MHz external Oscillator.
  * The Kinetis MCU startup from an internal digitally-controlled oscillator
- * (DCO). Nuttx will enable the main external oscillator (EXTAL0/XTAL0).
+ * (DCO). NuttX will enable the main external oscillator (EXTAL0/XTAL0).
  * The external oscillator/resonator can range from 32.768 KHz up to 50 MHz.
  * The default external source for the MCG oscillator inputs is 12 MHz
  * oscillator

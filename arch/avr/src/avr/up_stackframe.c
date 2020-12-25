@@ -53,6 +53,16 @@
  * Pre-processor Macros
  ****************************************************************************/
 
+/* Stack can be aligned to 1 byte */
+
+#define CONFIG_STACK_ALIGNMENT 1
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (CONFIG_STACK_ALIGNMENT-1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -99,7 +109,9 @@
 
 FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 {
-  uintptr_t topaddr;
+  /* Align the frame_size */
+
+  frame_size = STACK_ALIGN_UP(frame_size);
 
   /* Is there already a stack allocated? Is it big enough? */
 
@@ -110,8 +122,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  topaddr                = (uintptr_t)tcb->adj_stack_ptr - frame_size;
-  tcb->adj_stack_ptr     = (FAR void *)topaddr;
+  tcb->adj_stack_ptr     = (uint8_t *)tcb->adj_stack_ptr - frame_size;
   tcb->adj_stack_size   -= frame_size;
 
   /* Set the initial stack pointer to the "base" of the allocated stack */
@@ -121,5 +132,5 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   /* And return the pointer to the allocated region */
 
-  return (FAR void *)(topaddr + sizeof(uint8_t));
+  return tcb->adj_stack_ptr;
 }

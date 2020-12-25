@@ -595,7 +595,7 @@ void pic32mx_dmadump(DMA_HANDLE handle, const struct pic32mx_dmaregs_s *regs,
  *
  * Description:
  *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide pic32mx_pullup.
+ *   connect and disconnect), then the board software must provide pic32mx_usbpullup.
  *   See include/nuttx/usb/usbdev.h for additional description of this method.
  *   Alternatively, if no pull-up GPIO the following can be redefined to be
  *   NULL.

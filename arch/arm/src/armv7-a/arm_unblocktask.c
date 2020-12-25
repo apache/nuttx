@@ -56,20 +56,7 @@
 
 void up_unblock_task(struct tcb_s *tcb)
 {
-  struct tcb_s *rtcb;
-#ifdef CONFIG_SMP
-  int cpu;
-
-  /* Get the TCB of the currently executing task on this CPU (avoid using
-   * this_task() because the TCBs may be in an inappropriate state right
-   * now).
-   */
-
-  cpu  = this_cpu();
-  rtcb = current_task(cpu);
-#else
-  rtcb = this_task();
-#endif
+  struct tcb_s *rtcb = this_task();
 
   /* Verify that the context switch can be performed */
 
@@ -108,11 +95,7 @@ void up_unblock_task(struct tcb_s *tcb)
            * of the ready-to-run task list.
            */
 
-#ifdef CONFIG_SMP
-          rtcb = current_task(cpu);
-#else
           rtcb = this_task();
-#endif
 
           /* Update scheduler parameters */
 
@@ -138,11 +121,7 @@ void up_unblock_task(struct tcb_s *tcb)
            * ready-to-run task list.
            */
 
-#ifdef CONFIG_SMP
-          rtcb = current_task(cpu);
-#else
           rtcb = this_task();
-#endif
 
 #ifdef CONFIG_ARCH_ADDRENV
           /* Make sure that the address environment for the previously

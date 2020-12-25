@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
+#include <malloc.h>
 
 #include <nuttx/mm/mm.h>
 

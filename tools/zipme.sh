@@ -121,7 +121,7 @@ done
 VERSION=$1
 if [ -n ${VERSION} ] ; then
   VERSIONOPT="-v ${VERSION}"
-if
+fi
 
 # Full tar options
 
@@ -129,7 +129,7 @@ for pat in ${EXCLPAT} ; do
   TAR+=" --exclude=${pat}"
 done
 
-TAR+=" --exclude-vcs-ignores --exclude-vcs"
+TAR+=" --exclude-vcs"
 
 if [ $verbose != 0 ] ; then
   TAR+=" -czvf"
@@ -184,9 +184,6 @@ fi
 
 # Perform a full clean for the distribution
 
-cd ${TRUNKDIR} || \
-   { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
-
 echo "Cleaning the repositories"
 
 if [ $verbose != 0 ] ; then
@@ -196,11 +193,6 @@ else
 fi
 
 # Prepare the nuttx directory
-
-# Make sure that versioned copies of certain files are in place
-
-cd ${NUTTXDIR}/Documentation || \
-   { echo "Failed to cd to ${NUTTXDIR}/Documentation" ; exit 1 ; }
 
 # Write a version file into the NuttX directory.  The syntax of file is such that it
 # may be sourced by a bash script or included by a Makefile.

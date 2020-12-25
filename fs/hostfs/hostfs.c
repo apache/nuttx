@@ -157,7 +157,7 @@ const struct mountpt_operations hostfs_operations =
   hostfs_unbind,        /* unbind */
   hostfs_statfs,        /* statfs */
 
-  hostfs_unlink,        /* unlinke */
+  hostfs_unlink,        /* unlink */
   hostfs_mkdir,         /* mkdir */
   hostfs_rmdir,         /* rmdir */
   hostfs_rename,        /* rename */
@@ -1077,8 +1077,6 @@ static int hostfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
     }
 
   /* Check if there are sill any files opened on the filesystem. */
-
-  ret = OK; /* Assume success */
 
   ret = hostfs_semtake(fs);
   if (ret < 0)

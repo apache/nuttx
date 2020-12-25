@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_i2c.c
  *
- *   Copyright (C) 2020 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -157,7 +142,7 @@ static struct nrf52_i2c_priv_s g_nrf52_i2c0_priv =
 static struct nrf52_i2c_priv_s g_nrf52_i2c1_priv =
 {
   .ops     = &g_nrf52_i2c_ops,
-  .base    = NRF52_TWIM0_BASE,
+  .base    = NRF52_TWIM1_BASE,
   .scl_pin = BOARD_I2C1_SCL_PIN,
   .sda_pin = BOARD_I2C1_SDA_PIN,
   .refs    = 0,
@@ -325,6 +310,25 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_POLLED
           while (nrf52_i2c_getreg(priv,
                                   NRF52_TWIM_EVENTS_LASTTX_OFFSET) != 1);
+          while (1)
+            {
+              regval = nrf52_i2c_getreg(priv,
+                                        NRF52_TWIM_ERRORSRC_OFFSET) & 0x7;
+              if (regval != 0)
+                {
+                  i2cerr("Error SRC: %x\n", regval);
+                  ret = -1;
+                  nrf52_i2c_putreg(priv,
+                                  NRF52_TWIM_ERRORSRC_OFFSET, 0x7);
+                  goto errout;
+                }
+
+              if (nrf52_i2c_getreg(priv,
+                                  NRF52_TWIM_EVENTS_LASTTX_OFFSET) == 1)
+                {
+                  break;
+                }
+            }
 
           /* Clear event */
 
@@ -357,8 +361,25 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
           /* Wait for last RX done */
 
 #ifdef CONFIG_I2C_POLLED
-          while (nrf52_i2c_getreg(priv,
-                                  NRF52_TWIM_EVENTS_LASTRX_OFFSET) != 1);
+        while (1)
+          {
+            regval = nrf52_i2c_getreg(priv,
+                                      NRF52_TWIM_ERRORSRC_OFFSET) & 0x7;
+            if (regval != 0)
+              {
+                i2cerr("Error SRC: %x\n", regval);
+                ret = -1;
+                nrf52_i2c_putreg(priv,
+                                 NRF52_TWIM_ERRORSRC_OFFSET, 0x7);
+                goto errout;
+              }
+
+            if (nrf52_i2c_getreg(priv,
+                                 NRF52_TWIM_EVENTS_LASTRX_OFFSET) == 1)
+              {
+                break;
+              }
+          }
 
           /* Clear event */
 
@@ -387,8 +408,25 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
   /* Wait for stop event */
 
 #ifdef CONFIG_I2C_POLLED
-  while (nrf52_i2c_getreg(priv,
-                          NRF52_TWIM_EVENTS_STOPPED_OFFSET) != 1);
+  while (1)
+    {
+      regval = nrf52_i2c_getreg(priv,
+                                NRF52_TWIM_ERRORSRC_OFFSET) & 0x7;
+      if (regval != 0)
+        {
+          i2cerr("Error SRC: %x\n", regval);
+          ret = -1;
+          nrf52_i2c_putreg(priv,
+                           NRF52_TWIM_ERRORSRC_OFFSET, 0x7);
+          goto errout;
+        }
+
+      if (nrf52_i2c_getreg(priv,
+                           NRF52_TWIM_EVENTS_STOPPED_OFFSET) == 1)
+        {
+          break;
+        }
+    }
 
   /* Clear event */
 

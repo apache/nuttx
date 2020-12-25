@@ -90,18 +90,25 @@
 #  define CLOCK_MONOTONIC  1
 #endif
 
+/* Monotonic system-wide clock that includes time spent in suspension. */
+
+#ifdef CONFIG_CLOCK_MONOTONIC
+#  define CLOCK_BOOTTIME   2
+#endif
+
 /* This is a flag that may be passed to the timer_settime() and
  * clock_nanosleep() functions.
  */
 
 #define TIMER_ABSTIME      1
 
-#ifndef CONFIG_LIBC_LOCALTIME
-/* Local time is the same as gmtime in this implementation */
+/* Time base values for timespec_get.  */
 
-#  define localtime(c)     gmtime(c)
-#  define localtime_r(c,r) gmtime_r(c,r)
-#endif
+#define TIME_UTC           1
+
+/* Redirect the timegm */
+
+#define timegm mktime
 
 /********************************************************************************
  * Public Types
@@ -134,15 +141,17 @@ struct timespec
 
 struct tm
 {
-  int tm_sec;     /* Seconds (0-61, allows for leap seconds) */
-  int tm_min;     /* Minutes (0-59) */
-  int tm_hour;    /* Hours (0-23) */
-  int tm_mday;    /* Day of the month (1-31) */
-  int tm_mon;     /* Month (0-11) */
-  int tm_year;    /* Years since 1900 */
-  int tm_wday;    /* Day of the week (0-6) */
-  int tm_yday;    /* Day of the year (0-365) */
-  int tm_isdst;   /* Non-0 if daylight savings time is in effect */
+  int  tm_sec;         /* Seconds (0-61, allows for leap seconds) */
+  int  tm_min;         /* Minutes (0-59) */
+  int  tm_hour;        /* Hours (0-23) */
+  int  tm_mday;        /* Day of the month (1-31) */
+  int  tm_mon;         /* Month (0-11) */
+  int  tm_year;        /* Years since 1900 */
+  int  tm_wday;        /* Day of the week (0-6) */
+  int  tm_yday;        /* Day of the year (0-365) */
+  int  tm_isdst;       /* Non-0 if daylight savings time is in effect */
+  long tm_gmtoff;      /* Offset from UTC in seconds */
+  const char *tm_zone; /* Timezone abbreviation. */
 };
 
 /* Struct itimerspec is used to define settings for an interval timer */
@@ -196,15 +205,14 @@ clock_t clock(void);
 int clock_settime(clockid_t clockid, FAR const struct timespec *tp);
 int clock_gettime(clockid_t clockid, FAR struct timespec *tp);
 int clock_getres(clockid_t clockid, FAR struct timespec *res);
+int timespec_get(FAR struct timespec *t, int b);
 
 time_t mktime(FAR struct tm *tp);
 FAR struct tm *gmtime(FAR const time_t *timep);
 FAR struct tm *gmtime_r(FAR const time_t *timep, FAR struct tm *result);
 
-#ifdef CONFIG_LIBC_LOCALTIME
 FAR struct tm *localtime(FAR const time_t *timep);
 FAR struct tm *localtime_r(FAR const time_t *timep, FAR struct tm *result);
-#endif
 
 size_t strftime(FAR char *s, size_t max, FAR const char *format,
                 FAR const struct tm *tm);

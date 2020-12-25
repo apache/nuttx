@@ -63,8 +63,8 @@ if "%1"=="-f" goto :SetFormat
 if "%1"=="-b" goto :SetFormat
 if "%1"=="-l" goto :SetHostOption
 if "%1"=="-c" goto :SetHostOption
-if "%1"=="-u" goto :SetHostOption
 if "%1"=="-n" goto :SetHostOption
+if "%1"=="-L" goto :SetList
 if "%1"=="-a" goto :SetAppDir
 
 set config=%1
@@ -81,6 +81,10 @@ goto :NextArg
 :SetHostOption
 set hostopt=%1
 goto :NextArg
+
+:SetList
+set list=%1
+goto :EndOfLoop
 
 :SetAppDir
 shift
@@ -108,7 +112,7 @@ if errorlevel 1 (
 
 :HaveConfigureExe
 cd ..
-tools\configure.exe %debug% %fmt% %hostopt% %appdir% %config%
+tools\configure.exe %debug% %fmt% %hostopt% %appdir% %config% %list%
 if errorlevel 1 echo configure.exe failed
 goto End
 
@@ -128,11 +132,13 @@ echo    style paths are used by default.
 echo  -f:
 echo    Informs the tool that it should use POSIX style paths like /usr/local/bin.
 echo    By default, Windows style paths like C:\\Program Files are used.
-echo  -l selects the Linux (l) host environment.  The [-c^|u^|n] options
+echo  -l selects the Linux (l) host environment.  The [-c^|n] options
 echo    select one of the Windows environments.  Default:  Use host setup
 echo    in the defconfig file
-echo  [-c^|u^|n] selects the Windows host and a Windows environment:  Cygwin (c),
-echo    Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin
+echo  [-c^|n] selects the Windows host and a Windows environment:
+echo    Cygwin (c), or Windows native (n). Default Cygwin
+echo  -L:
+echo    List all available configurations.
 echo  -a ^<app-dir^>:
 echo    Informs the configuration tool where the application build
 echo    directory.  This is a relative path from the top-level NuttX

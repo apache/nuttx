@@ -60,11 +60,12 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure D301 GPIO for output */
 
   sam_configgpio(GPIO_D301);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -83,9 +84,10 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
-  sam_gpiowrite(GPIO_D301, (ledset & BOARD_D301_BIT) ? LED_D301_ON : LED_D301_OFF);
+  sam_gpiowrite(GPIO_D301,
+    (ledset & BOARD_D301_BIT) ? LED_D301_ON : LED_D301_OFF);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

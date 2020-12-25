@@ -70,5 +70,5 @@ void __nr5_init(void)
 
   /* Shouldn't get here */
 
-  for (;;);
+  for (; ; );
 }

@@ -56,7 +56,7 @@
 
 /* The Freedom K66F uses a 12Mhz external Oscillator.
  * The Kinetis MCU startup from an internal digitally-controlled oscillator
- * (DCO). Nuttx will enable the main external oscillator (EXTAL0/XTAL0).
+ * (DCO). NuttX will enable the main external oscillator (EXTAL0/XTAL0).
  * The external oscillator/resonator can range from 32.768 KHz up to 50 MHz.
  * The default external source for the MCG oscillator inputs is 12 MHz
  * oscillator
@@ -129,7 +129,7 @@
                                          BOARD_SIM_CLKDIV2_USBFRAC)
 #endif
 
-/* Divider output clock = Divider input clock * ((PLLFLLFRAC+1)/(PLLFLLDIV+1))
+/* Divider output clock = Divider input clock*((PLLFLLFRAC+1)/(PLLFLLDIV+1))
  *  SIM_CLKDIV3_FREQ = BOARD_SOPT2_FREQ × [ (PLLFLLFRAC+1) / (PLLFLLDIV+1)]
  *            90 MHz = 180 MHz X [(0 + 1) / (1 + 1)]
  *            90 MHz = 180 MHz / (1 + 1) * (0 + 1)
@@ -275,10 +275,10 @@
  * Besides the general purpose input/output functions, SW2 and SW3 can be
  * low-power wake up signal. Also, only SW3 can be a non-maskable interrupt.
  *
- *   Switch    GPIO Function
- *   --------- ---------------------------------------------------------------
- *   SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
- *   SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
+ *   Switch GPIO Function
+ *   ------ ---------------------------------------------------------------
+ *   SW2    PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
+ *   SW3    PTA4/FTM0_CH1/NMI_b/LLWU_P3
  */
 
 #define BUTTON_SW2        0
@@ -382,38 +382,36 @@
 #define PIN_SPI1_SIN     PIN_SPI1_SIN_3
 
 /* Ethernet MAC/KSZ8081 PHY
- *  ------------------------
- *  ------------ ----------------- --------------------------------------------
- * KSZ8081      Board Signal(s)   K66F Pin
- * Pin Signal                     Function                       pinmux Name
- * --- -------- ----------------- --------------------------------------------
- *  1  VDD_1V2  VDDPLL_1.2V       ---                            ---
- *  2  VDDA_3V3 VDDA_ENET         ---                            ---
- *  3  RXM      ENET1_RX-         ---                            ---
- *  4  RXP      ENET1_RX+         ---                            ---
- *  5  TXM      ENET1_TX-         ---                            ---
- *  6  TXP      ENET1_TX+         ---                            ---
- *  7  X0       RMII_XTAL0        ---                            ---
- *  8  XI       RMII_XTAL1        ---                            ---
- *  9  REXT     ---               ---, Apparently not connected  ---
- * 10  MDIO     RMII0_MDIO        PTB0/RMII0_MDIO                PIN_RMII0_MDIO
- * 11  MDC      RMII0_MDC         PTB1/RMII0_MDC                 PIN_RMII0_MDC
- * 12  RXD1     RMII0_RXD_1       PTA12/RMII0_RXD1               PIN_RMII0_RXD1
- * 13  RXD0     RMII0_RXD_0       PTA13/RMII0_RXD0               PIN_RMII0_RXD0
- * 14  VDDIO    VDDIO_ENET        ---                            ---
- * 15  CRS_DIV                    PTA14/RMII0_CRS_DV             PIN_RMII0_CRS_DV
- * 16  REF_CLK  PTE26             PTE26(Ethernet clock)          PTE26/ENET_1588_CLKIN
- * 17  RXER     RMII0_RXER        PTA5/RMII0_RXER                PIN_RMII0_RXER
- * 18  INTRP    RMII0_INT_B,      J14 Pin 2, Apparently not      ---
- *              PHY_INT_1         available unless jumpered
- * 19  TXEN     RMII0_TXEN        PTA15/RMII0_TXEN               PIN_RMII0_TXEN
- * 20  TXD0     RMII0_TXD_0       PTA16/RMII0_TXD0               PIN_RMII0_TXD0
- * 21  TXD1     RMII0_TXD_1       PTA17/RMII0_TXD1               PIN_RMII0_TXD1
- * 22  GND1     ---               ---                            ---
- * 24  nRST     PHY_RST_B         ---                            ---
- * 25  GND2     ---               ---                            ---
- * --- -------- ----------------- --------------------------------------------
- *
+ *  ------------ ----------- ---------------------------------------
+ * KSZ8081      Board         K66F Pin
+ * Pin Signal   Signal(s)     Function                  pinmux Name
+ * --- -------- ------------ ---------------------------------------
+ *  1  VDD_1V2  VDDPLL_1.2V  ---                       ---
+ *  2  VDDA_3V3 VDDA_ENET    ---                       ---
+ *  3  RXM      ENET1_RX-    ---                       ---
+ *  4  RXP      ENET1_RX+    ---                       ---
+ *  5  TXM      ENET1_TX-    ---                       ---
+ *  6  TXP      ENET1_TX+    ---                       ---
+ *  7  X0       RMII_XTAL0   ---                       ---
+ *  8  XI       RMII_XTAL1   ---                       ---
+ *  9  REXT     ---          Apparently not connected  ---
+ * 10  MDIO     RMII0_MDIO   PTB0/RMII0_MDIO           PIN_RMII0_MDIO
+ * 11  MDC      RMII0_MDC    PTB1/RMII0_MDC            PIN_RMII0_MDC
+ * 12  RXD1     RMII0_RXD_1  PTA12/RMII0_RXD1          PIN_RMII0_RXD1
+ * 13  RXD0     RMII0_RXD_0  PTA13/RMII0_RXD0          PIN_RMII0_RXD0
+ * 14  VDDIO    VDDIO_ENET   ---                       ---
+ * 15  CRS_DIV               PTA14/RMII0_CRS_DV        PIN_RMII0_CRS_DV
+ * 16  REF_CLK  PTE26        PTE26(Ethernet clock)     PTE26/ENET_1588_CLKIN
+ * 17  RXER     RMII0_RXER   PTA5/RMII0_RXER           PIN_RMII0_RXER
+ * 18  INTRP    RMII0_INT_B, J14 Pin 2, Apparently not ---
+ *              PHY_INT_1    available unless jumpered ---
+ * 19  TXEN     RMII0_TXEN   PTA15/RMII0_TXEN          PIN_RMII0_TXEN
+ * 20  TXD0     RMII0_TXD_0  PTA16/RMII0_TXD0          PIN_RMII0_TXD0
+ * 21  TXD1     RMII0_TXD_1  PTA17/RMII0_TXD1          PIN_RMII0_TXD1
+ * 22  GND1     ---          ---                       ---
+ * 24  nRST     PHY_RST_B    ---                       ---
+ * 25  GND2     ---          ---                       ---
+ * --- -------- ------------ --------------------------------------------
  */
 
 #define PIN_RMII0_MDIO  PIN_RMII0_MDIO_1

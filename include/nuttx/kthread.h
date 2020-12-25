@@ -105,13 +105,13 @@ extern "C"
 int nxtask_create(FAR const char *name, int priority,
                   int stack_size, main_t entry, FAR char * const argv[]);
 
-/********************************************************************************
+/****************************************************************************
  * Name: kthread_create
  *
  * Description:
- *   This function creates and activates a kernel thread task with kernel-mode
- *   privileges.  It is identical to task_create() except that it configures the
- *   newly started thread to run in kernel model.
+ *   This function creates and activates a kernel thread task with
+ *   kernel-mode privileges. It is identical to task_create() except
+ *   that it configures the newly started thread to run in kernel model.
  *
  * Input Parameters:
  *   name       - Name of the new task
@@ -127,7 +127,7 @@ int nxtask_create(FAR const char *name, int priority,
  *   errno value to indicate the nature of any failure.  If memory is
  *   insufficient or the task cannot be created -ENOMEM will be returned.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 int kthread_create(FAR const char *name, int priority, int stack_size,
                    main_t entry, FAR char * const argv[]);

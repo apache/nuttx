@@ -52,7 +52,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking ****************************************************************/
+/* Clocking *****************************************************************/
 
 /* NOTE:  The following definitions require lpc17_40_syscon.h.
  * It is not included here because the including C file may not have that
@@ -66,23 +66,24 @@
 
 /* This is the clock setup we configure for:
  *
- *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
- *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
- *   CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
+ *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Main oscillator for source
+ *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> multipler=20, pre-divider=1
+ *   CCLCK = 480MHz / 6 = 80MHz               -> divider = 6
  */
 
 #define LPC17_40_CCLK                 80000000 /* 80Mhz*/
 
-/* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
- * of the main oscillator.
+/* Select the main oscillator as the frequency source.  SYSCLK is then the
+ * frequency of the main oscillator.
  */
 
 #undef CONFIG_LPC17_40_MAINOSC
 #define CONFIG_LPC17_40_MAINOSC       1
 #define BOARD_SCS_VALUE            SYSCON_SCS_OSCEN
 
-/* Select the main oscillator and CCLK divider. The output of the divider is CCLK.
- * The input to the divider (PLLCLK) will be determined by the PLL output.
+/* Select the main oscillator and CCLK divider. The output of the divider is
+ * CCLK. The input to the divider (PLLCLK) will be determined by the PLL
+ * output.
  */
 
 #define BOARD_CCLKCFG_DIVIDER      6
@@ -134,7 +135,7 @@
 
 #define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV20
 
-/* LED definitions *********************************************************/
+/* Clocking *****************************************************************/
 
 /* The Lincoln 60 has 2 LEDs along the bottom of the board. Green or off.
  * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows
@@ -142,6 +143,7 @@
  *
  * During the boot phases.  LED1 and LED2 will show boot status.
  */
+
                                       /* LED1   LED2    */
 #define LED_STARTED                0  /* OFF    OFF     */
 #define LED_HEAPALLOCATE           1  /* GREEN  OFF     */
@@ -152,6 +154,7 @@
  * They are available for use the application software using lpc17_40_led
  * (prototyped below)
  */
+
                                       /* LED1   LED2   LED3 LED4 */
 #define LED_INIRQ                  4  /*  NC     NC    NC   ON  (momentary) */
 #define LED_SIGNAL                 5  /*  NC     NC    NC   ON  (momentary) */

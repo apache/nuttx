@@ -92,6 +92,14 @@ config MMCSD_SPIMODE
 	---help---
 		Should be mode 0.  However, sometimes this is useful for experimenting.
 
+config MMCSD_IDMODE_CLOCK
+	int "MMC/SD ID Mode SPI clock"
+	default 400000
+	depends on MMCSD_SPI
+	---help---
+		SPI clock identify MMC/SD card.
+		Should be 400KHz or less.
+
 endif
 
 config SDIO_DMA

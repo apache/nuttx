@@ -126,12 +126,14 @@ _xtensa_context_save:
 	s32i	a10, a2, (4 * REG_A10)
 	s32i	a11, a2, (4 * REG_A11)
 
-	/* Call0 ABI callee-saved regs a12-15 */
+	/* Call0 ABI callee-saved regs a12-15 do not need to be saved here */
 
+#ifndef __XTENSA_CALL0_ABI__
 	s32i	a12, a2, (4 * REG_A12)
 	s32i	a13, a2, (4 * REG_A13)
 	s32i	a14, a2, (4 * REG_A14)
 	s32i	a15, a2, (4 * REG_A15)
+#endif
 
 	rsr		a3, SAR
 	s32i	a3, a2, (4 * REG_SAR)
@@ -216,7 +218,7 @@ _xtensa_context_save:
  *
  * Input State:
  *   a0 = The return value to the caller.
- *   a2 = The address of the register state state structure
+ *   a2 = The address of the register state structure
  *
  * Return state:
  *   a0 = The return value to the caller.
@@ -246,12 +248,12 @@ xtensa_context_save:
 	movi	a3, 1							/* Set saved A2 to 1 */
 	s32i	a3, a2, (4 * REG_A2)
 
-	/* Save the rest of the processor state.  For the CALL0 ABI, we can user
+	/* Save the rest of the processor state.  For the CALL0 ABI, we can use
 	 * _xtensa_context_save(),  Otherwise we duplicate the context save here
 	 * to avoid the window spill.
 	 */
 
-	l32i	r3, a2, (4 * REG_A3)			/* Recover original a3 */
+	l32i	a3, a2, (4 * REG_A3)			/* Recover original a3 */
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Recover the return address and return zero */
@@ -266,8 +268,8 @@ xtensa_context_save:
 /****************************************************************************
  * This implementation of xtensa_context_save for the case of the window ABI.
  * This case is more complex.  For the Window ABI, there is a "hook" that
- * performs the low level state state.  xtensa_context_save() is a simply
- * trampoline function that performs the window oeprations in that
+ * performs the low level state.  xtensa_context_save() is simply a
+ * trampoline function that performs the window operations in that
  * configuration.
  ****************************************************************************/
 
@@ -279,7 +281,7 @@ xtensa_context_save:
  * Input State:
  *   True return value has already been saved
  *   a0 = The return value into xtensa_context_save()
- *   a2 = The address of the register state state structure
+ *   a2 = The address of the register state structure
  *
  * Return state:
  *   a0, a3 modified.
@@ -370,7 +372,7 @@ _xtensa_save_hook:
  *
  * Input State:
  *   a0 = The true return value to the caller.
- *   a2 = The address of the register state state structure
+ *   a2 = The address of the register state structure
  *
  * Return state:
  *   a0, a2, and a3 modified.
@@ -482,10 +484,12 @@ _xtensa_context_restore:
 
 	/* Call0 ABI callee-saved regs a12-15 */
 
+#ifndef __XTENSA_CALL0_ABI__
 	l32i	a12, a2, (4 * REG_A12)
 	l32i	a13, a2, (4 * REG_A13)
 	l32i	a14, a2, (4 * REG_A14)
 	l32i	a15, a2, (4 * REG_A15)
+#endif
 
 	ret
 

@@ -178,7 +178,7 @@ static int stm32_rng_interrupt(int irq, void *context, FAR void *arg)
   rngsr = getreg32(STM32_RNG_SR);
 
   if ((rngsr & (RNG_SR_SEIS | RNG_SR_CEIS)) /* Check for error bits */
-      || !(rngsr & RNG_SR_DRDY)) /* Data ready must be set */
+      || !(rngsr & RNG_SR_DRDY))            /* Data ready must be set */
     {
       /* This random value is not valid, we will try again. */
 
@@ -190,9 +190,10 @@ static int stm32_rng_interrupt(int irq, void *context, FAR void *arg)
   /* As required by the FIPS PUB (Federal Information Processing Standard
    * Publication) 140-2, the first random number generated after setting the
    * RNGEN bit should not be used, but saved for comparison with the next
-   * generated random number. Each subsequent generated random number has to be
-   * compared with the previously generated number. The test fails if any two
-   * compared numbers are equal (continuous random number generator test).
+   * generated random number. Each subsequent generated random number has to
+   * be compared with the previously generated number. The test fails if any
+   * two compared numbers are equal (continuous random number generator
+   * test).
    */
 
   if (g_rngdev.rd_first)
@@ -242,7 +243,8 @@ static int stm32_rng_interrupt(int irq, void *context, FAR void *arg)
  * Name: stm32_rng_read
  ****************************************************************************/
 
-static ssize_t stm32_rng_read(struct file *filep, char *buffer, size_t buflen)
+static ssize_t stm32_rng_read(struct file *filep, char *buffer,
+                              size_t buflen)
 {
   int ret;
 

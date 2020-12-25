@@ -188,13 +188,16 @@
 #ifndef CONFIG_LPC43_BOOT_SRAM
 
 /* Configuration A */
+
 /* CONFIG_RAM_START should be set to the base of local SRAM, Bank 0. */
 
 #  if CONFIG_RAM_START != LPC43_LOCSRAM_BANK0_BASE
 #    error "CONFIG_RAM_START must be set to the base address of RAM bank 0"
 #  endif
 
-/* The configured RAM size should be equal to the size of local SRAM Bank 0. */
+/* The configured RAM size should be equal to the size of local SRAM Bank
+ * 0.
+ */
 
 #  if CONFIG_RAM_SIZE != LPC43_LOCSRAM_BANK0_SIZE
 #    error "CONFIG_RAM_SIZE must be set to size of local SRAM Bank 0"
@@ -213,13 +216,16 @@
 #else /* CONFIG_LPC43_BOOT_SRAM */
 
 /* Configuration B */
+
 /* CONFIG_RAM_START should be set to the base of local SRAM, Bank 1. */
 
 #  if CONFIG_RAM_START != LPC43_LOCSRAM_BANK1_BASE
 #    error "CONFIG_RAM_START must be set to the base address of RAM bank 1"
 #  endif
 
-/* The configured RAM size should be equal to the size of local SRAM Bank 1. */
+/* The configured RAM size should be equal to the size of local SRAM Bank
+ * 1.
+ */
 
 #  if CONFIG_RAM_SIZE != LPC43_LOCSRAM_BANK1_SIZE
 #    error "CONFIG_RAM_SIZE must be set to size of local SRAM Bank 1"
@@ -334,7 +340,8 @@
  * aligned).
  */
 
-const uint32_t g_idle_topstack = (uint32_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE;
+const uintptr_t g_idle_topstack = (uintptr_t)&_ebss +
+    CONFIG_IDLETHREAD_STACKSIZE;
 
 #ifdef MM_HAVE_REGION
 static uint8_t g_mem_region_next = 0;
@@ -408,7 +415,8 @@ static void mem_addregion(FAR void *region_start, size_t region_size)
  *
  *     Kernel .data region.  Size determined at link time.
  *     Kernel .bss  region  Size determined at link time.
- *     Kernel IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
+ *     Kernel IDLE thread stack.  Size determined by
+ *     CONFIG_IDLETHREAD_STACKSIZE.
  *     Padding for alignment
  *     User .data region.  Size determined at link time.
  *     User .bss region  Size determined at link time.
@@ -425,7 +433,8 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+                               CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = CONFIG_RAM_END - ubase;
   int       log2;
 
@@ -492,7 +501,8 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+                               CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = CONFIG_RAM_END - ubase;
   int       log2;
 
@@ -538,36 +548,42 @@ void arm_addregion(void)
 #ifdef MM_USE_LOCSRAM_BANK1
   /* Add the SRAM to the user heap */
 
-  mem_addregion((FAR void *)LPC43_LOCSRAM_BANK1_BASE, LPC43_LOCSRAM_BANK1_SIZE);
+  mem_addregion((FAR void *)LPC43_LOCSRAM_BANK1_BASE,
+                            LPC43_LOCSRAM_BANK1_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the SRAM heap */
 
-  lpc43_mpu_uheap((uintptr_t)LPC43_LOCSRAM_BANK1_BASE, LPC43_LOCSRAM_BANK1_SIZE);
+  lpc43_mpu_uheap((uintptr_t)LPC43_LOCSRAM_BANK1_BASE,
+                             LPC43_LOCSRAM_BANK1_SIZE);
 #endif
 #endif
 
 #ifdef MM_USE_AHBSRAM_BANK0
   /* Add the SRAM to the user heap */
 
-  mem_addregion((FAR void *)LPC43_AHBSRAM_BANK0_BASE, LPC43_AHBSRAM_BANK0_SIZE);
+  mem_addregion((FAR void *)LPC43_AHBSRAM_BANK0_BASE,
+                            LPC43_AHBSRAM_BANK0_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the SRAM heap */
 
-  lpc43_mpu_uheap((uintptr_t)LPC43_AHBSRAM_BANK0_BASE, LPC43_AHBSRAM_BANK0_SIZE);
+  lpc43_mpu_uheap((uintptr_t)LPC43_AHBSRAM_BANK0_BASE,
+                             LPC43_AHBSRAM_BANK0_SIZE);
 #endif
 #endif
 
 #ifdef MM_USE_AHBSRAM_BANK1
   /* Add the SRAM to the user heap */
 
-  mem_addregion((FAR void *)LPC43_AHBSRAM_BANK1_BASE, LPC43_AHBSRAM_BANK1_SIZE);
+  mem_addregion((FAR void *)LPC43_AHBSRAM_BANK1_BASE,
+                            LPC43_AHBSRAM_BANK1_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the SRAM heap */
 
-  lpc43_mpu_uheap((uintptr_t)LPC43_AHBSRAM_BANK1_BASE, LPC43_AHBSRAM_BANK1_SIZE);
+  lpc43_mpu_uheap((uintptr_t)LPC43_AHBSRAM_BANK1_BASE,
+                             LPC43_AHBSRAM_BANK1_SIZE);
 #endif
 #endif
 

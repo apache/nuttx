@@ -54,7 +54,7 @@
 #define STM32_I2C_CCR_OFFSET    0x001c  /* Clock control register (16-bit) */
 #define STM32_I2C_TRISE_OFFSET  0x0020  /* TRISE Register (16-bit) */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
-    defined(CONFIG_STM32_STM32F446)
+    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F412)
 #  define STM32_I2C_FLTR_OFFSET   0x0024  /* FLTR Register (16-bit) */
 #endif
 

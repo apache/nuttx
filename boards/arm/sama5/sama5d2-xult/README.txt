@@ -780,8 +780,10 @@ Configurations
 
   netnsh:
 
-    This is a network enabled configuration based on the NuttShell (NSH)
-    REVISIT:  More to be provided.
+    This is a network enabled configuration based on the NuttShell (NSH).
+    The CDC-ECM driver is enabled, so you can plug a USB cable into the
+    USB-Micro port (USB-A) and the board will appear as an CDC-ECM
+    ethernet adapter.
 
   nsh:
 
@@ -815,7 +817,7 @@ Configurations
 
     4. This configuration supports logging of debug output to a circular
        buffer in RAM.  This feature is discussed fully in this Wiki page:
-       http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
+       https://cwiki.apache.org/confluence/display/NUTTX/SYSLOG . Relevant
        configuration settings are summarized below:
 
        File System:
@@ -952,3 +954,10 @@ Configurations
        NOTE:  If you want the RTC to preserve time over power cycles, you
        will need to install a battery in the battery holder (J12) and close
        the jumper, JP13.
+
+  sdmmcnsh:
+
+    This is a configuration based on the NuttShell (NSH). The SDMMC
+    peripheral is enabled, and can read and write to a VFAT filesystem
+    on the SD Card.
+

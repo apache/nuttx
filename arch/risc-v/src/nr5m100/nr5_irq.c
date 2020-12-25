@@ -76,27 +76,27 @@ volatile uint32_t *g_current_regs;
 
 void epic_dump(void)
 {
-   uint32_t reg;
-   char     str[40];
+  uint32_t reg;
+  char     str[40];
 
-   __asm__ volatile("csrr %0, 0x7e0" : "=r"(reg));
-   sprintf(str, "IRQMASK  = 0x%08X\r", (int) reg);
-   up_puts(str);
-   __asm__ volatile("csrr %0, 0x7e4" : "=r"(reg));
-   sprintf(str, "IRQSTACK = 0x%08X\r", (int) reg);
-   up_puts(str);
-   __asm__ volatile("csrr %0, 0x7e1" : "=r"(reg));
-   sprintf(str, "PRI1     = 0x%08X\r", (int) reg);
-   up_puts(str);
-   __asm__ volatile("csrr %0, 0x7e2" : "=r"(reg));
-   sprintf(str, "PRI2     = 0x%08X\r", (int) reg);
-   up_puts(str);
-   __asm__ volatile("csrr %0, 0x7e3" : "=r"(reg));
-   sprintf(str, "PRI3     = 0x%08X\r", (int) reg);
-   up_puts(str);
-   __asm__ volatile("csrr %0, 0x7e5" : "=r"(reg));
-   sprintf(str, "SYSTICK  = 0x%08X\r", (int) reg);
-   up_puts(str);
+  __asm__ volatile("csrr %0, 0x7e0" : "=r"(reg));
+  sprintf(str, "IRQMASK  = 0x%08X\r", (int) reg);
+  up_puts(str);
+  __asm__ volatile("csrr %0, 0x7e4" : "=r"(reg));
+  sprintf(str, "IRQSTACK = 0x%08X\r", (int) reg);
+  up_puts(str);
+  __asm__ volatile("csrr %0, 0x7e1" : "=r"(reg));
+  sprintf(str, "PRI1     = 0x%08X\r", (int) reg);
+  up_puts(str);
+  __asm__ volatile("csrr %0, 0x7e2" : "=r"(reg));
+  sprintf(str, "PRI2     = 0x%08X\r", (int) reg);
+  up_puts(str);
+  __asm__ volatile("csrr %0, 0x7e3" : "=r"(reg));
+  sprintf(str, "PRI3     = 0x%08X\r", (int) reg);
+  up_puts(str);
+  __asm__ volatile("csrr %0, 0x7e5" : "=r"(reg));
+  sprintf(str, "SYSTICK  = 0x%08X\r", (int) reg);
+  up_puts(str);
 }
 
 /****************************************************************************
@@ -151,11 +151,11 @@ void up_irqinitialize(void)
   /* Colorize the interrupt stack for debug purposes */
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-  {
-    size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
-    up_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
-                   intstack_size);
-  }
+    {
+      size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+      up_stack_color((FAR void *)((uintptr_t)&g_intstackbase -
+                     intstack_size), intstack_size);
+    }
 #endif
 
   /* Set the location of the vector table */
@@ -168,7 +168,7 @@ void up_irqinitialize(void)
         csrw %1, 0(zero) \
         csrw %2, 0(zero) " ::
         "i"(NR5_EPIC_PRI1_REG), "i"(NR5_EPIC_PRI2_REG),
-        "i"(NR5_EPIC_PRI3_REG) );
+        "i"(NR5_EPIC_PRI3_REG));
 #endif
 
   /* Initialize the IRQ stack to Pri level 5 with interrupts disabled */

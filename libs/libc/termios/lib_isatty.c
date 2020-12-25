@@ -54,7 +54,7 @@
  *   Return a non-zero (true) value if the file descriptor, fd, corresponds
  *   to a TTYY.
  *
- *   NOTE: Nuttx, of course, does not have true TTYs in the sense that this
+ *   NOTE: NuttX, of course, does not have true TTYs in the sense that this
  *   function is intended.  In this implementation, the function simply
  *   returns true if the file descriptor is associated with a driver that
  *   responds wo tcgetattr() without an error -- that it, the driver supports

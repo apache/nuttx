@@ -40,45 +40,29 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#define SETUP_SEARCH(d,p,n) \
+  do \
+    { \
+      (d)->path     = (p); \
+      (d)->node     = NULL; \
+      (d)->peer     = NULL; \
+      (d)->parent   = NULL; \
+      (d)->relpath  = NULL; \
+      (d)->buffer   = NULL; \
+      (d)->nofollow = (n); \
+    } \
+  while (0)
 
-#  define SETUP_SEARCH(d,p,n) \
-    do \
-      { \
-        (d)->path     = (p); \
-        (d)->node     = NULL; \
-        (d)->peer     = NULL; \
-        (d)->parent   = NULL; \
-        (d)->relpath  = NULL; \
-        (d)->linktgt  = NULL; \
-        (d)->buffer   = NULL; \
-        (d)->nofollow = (n); \
-      } \
-    while (0)
-
-#  define RELEASE_SEARCH(d) \
-     if ((d)->buffer != NULL) \
-       { \
-         kmm_free((d)->buffer); \
-         (d)->buffer  = NULL; \
-       }
-
-#else
-
-#  define SETUP_SEARCH(d,p,n) \
-    do \
-      { \
-        (d)->path     = (p); \
-        (d)->node     = NULL; \
-        (d)->peer     = NULL; \
-        (d)->parent   = NULL; \
-        (d)->relpath  = NULL; \
-      } \
-    while (0)
-
-#  define RELEASE_SEARCH(d)
-
-#endif
+#define RELEASE_SEARCH(d) \
+  do \
+    { \
+      if ((d)->buffer != NULL) \
+        { \
+          kmm_free((d)->buffer); \
+          (d)->buffer  = NULL; \
+        } \
+    } \
+  while (0)
 
 /****************************************************************************
  * Public Types
@@ -97,7 +81,6 @@
  *  relpath  - INPUT:  (not used)
  *             OUTPUT: If the returned inode is a mountpoint, this is the
  *                     relative path from the mountpoint.
- *  linktgt  - INPUT:  (not used)
  *             OUTPUT: If a symobolic link into a mounted file system is
  *                     detected while traversing the path, then the link
  *                     will be converted to a mountpoint inode if the
@@ -121,11 +104,8 @@ struct inode_search_s
   FAR struct inode *peer;    /* Node to the "left" for the found inode */
   FAR struct inode *parent;  /* Node "above" the found inode */
   FAR const char *relpath;   /* Relative path into the mountpoint */
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  FAR const char *linktgt;   /* Target of symbolic link if linked to a directory */
   FAR char *buffer;          /* Path expansion buffer */
   bool nofollow;             /* true: Don't follow terminal soft link */
-#endif
 };
 
 /* Callback used by foreach_inode to traverse all inodes in the pseudo-
@@ -248,9 +228,10 @@ int inode_find(FAR struct inode_search_s *desc);
  *   <sys/stat.h>, into which information is placed concerning the file.
  *
  * Input Parameters:
- *   inode - The indoe of interest
- *   buf   - The caller provide location in which to return information about
- *           the inode.
+ *   inode   - The inode of interest
+ *   buf     - The caller provide location in which to return information
+ *             about the inode.
+ *   resolve - Whether to resolve the symbolic link
  *
  * Returned Value:
  *   Zero (OK) returned on success.  Otherwise, a negated errno value is
@@ -259,7 +240,7 @@ int inode_find(FAR struct inode_search_s *desc);
  ****************************************************************************/
 
 struct stat;  /* Forward reference */
-int inode_stat(FAR struct inode *inode, FAR struct stat *buf);
+int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve);
 
 /****************************************************************************
  * Name: inode_free
@@ -281,6 +262,16 @@ void inode_free(FAR struct inode *node);
  ****************************************************************************/
 
 const char *inode_nextname(FAR const char *name);
+
+/****************************************************************************
+ * Name: inode_root_reserve
+ *
+ * Description:
+ *   Reserve the root node for the pseudo file system.
+ *
+ ****************************************************************************/
+
+void inode_root_reserve(void);
 
 /****************************************************************************
  * Name: inode_reserve

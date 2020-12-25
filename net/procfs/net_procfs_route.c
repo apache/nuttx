@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/statfs.h>
 #include <sys/stat.h>
 
 #include <stdint.h>
@@ -108,10 +107,10 @@ enum route_node_e
 
 struct route_file_s
 {
-  struct procfs_file_s base;           /* Base open file structure */
+  struct procfs_file_s base;          /* Base open file structure */
   FAR const char *name;               /* Terminal node segment name */
   uint8_t node;                       /* Type of node (see enum route_node_e) */
-  char line[STATUS_LINELEN];           /* Pre-allocated buffer for formatted lines */
+  char line[STATUS_LINELEN];          /* Pre-allocated buffer for formatted lines */
 };
 
 /* This structure describes one open "directory" */
@@ -288,7 +287,8 @@ static void route_sprintf(FAR struct route_info_s *info,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-static int route_ipv4_entry(FAR struct net_route_ipv4_s *route, FAR void *arg)
+static int route_ipv4_entry(FAR struct net_route_ipv4_s *route,
+                            FAR void *arg)
 {
   FAR struct route_info_s *info = (FAR struct route_info_s *)arg;
   char target[INET_ADDRSTRLEN];
@@ -345,7 +345,8 @@ static int route_ipv4_entry(FAR struct net_route_ipv4_s *route, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-static int route_ipv6_entry(FAR struct net_route_ipv6_s *route, FAR void *arg)
+static int route_ipv6_entry(FAR struct net_route_ipv6_s *route,
+                            FAR void *arg)
 {
   FAR struct route_info_s *info = (FAR struct route_info_s *)arg;
   char addr[INET6_ADDRSTRLEN];
@@ -391,7 +392,8 @@ static int route_ipv6_entry(FAR struct net_route_ipv6_s *route, FAR void *arg)
 
 #ifdef CONFIG_NET_IPv4
 static ssize_t route_ipv4_table(FAR struct route_file_s *procfile,
-                                FAR char *buffer, size_t buflen, off_t offset)
+                                FAR char *buffer, size_t buflen,
+                                off_t offset)
 {
   struct route_info_s info;
 
@@ -416,7 +418,8 @@ static ssize_t route_ipv4_table(FAR struct route_file_s *procfile,
 
 #ifdef CONFIG_NET_IPv6
 static ssize_t route_ipv6_table(FAR struct route_file_s *procfile,
-                                FAR char *buffer, size_t buflen, off_t offset)
+                                FAR char *buffer, size_t buflen,
+                                off_t offset)
 {
   struct route_info_s info;
 

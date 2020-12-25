@@ -100,6 +100,7 @@
 #define I2S_DAO_WSHALFPER_MASK          (0x01ff << I2S_DAO_WSHALFPER_SHIFT)
 #define I2S_DAO_MUTE                    (1 << 15) /* Bit 15: Send only zeros on channel */
                                                   /* Bits 16-31: Reserved */
+
 /* Digital Audio Input Register */
 
 #define I2S_DAI_WDWID_SHIFT             (0)       /* Bits 0-1: Selects the number of bytes in data */
@@ -114,8 +115,10 @@
 #define I2S_DAI_WSHALFPER_SHIFT         (6)       /* Bits 6-14: Word select half period minus 1 */
 #define I2S_DAI_WSHALFPER_MASK          (0x01ff << I2S_DAI_WSHALFPER_SHIFT)
                                                   /* Bits 15-31: Reserved */
-/* Transmit FIFO: 8 � 32-bit transmit FIFO */
-/* Receive FIFO: 8 � 32-bit receive FIFO */
+
+/* Transmit FIFO: 8 - 32-bit transmit FIFO
+ * Receive FIFO: 8 - 32-bit receive FIFO
+ */
 
 /* Status Feedback Register */
 
@@ -129,6 +132,7 @@
 #define I2S_STATE_TXLEVEL_SHIFT         (16)      /* Bits 16-19: Current level of the Transmit FIFO */
 #define I2S_STATE_TXLEVEL_MASK          (15 << I2S_STATE_TXLEVEL_SHIFT)
                                                   /* Bits 20-31: Reserved */
+
 /* DMA Configuration Register 1 and 2 */
 
 #define I2S_DMA_RXDMAEN                 (1 << 0)  /* Bit 0:  Enable DMA1 for I2S receive */
@@ -140,6 +144,7 @@
 #define I2S_DMA_TXDEPTH_SHIFT           (16)      /* Bits 16-19: FIFO level that triggers a TX request on DMA1 */
 #define I2S_DMA_TXDEPTH_MASK            (15 << I2S_DMA_TXDEPTH_SHIFT)
                                                   /* Bits 20-31: Reserved */
+
 /* Interrupt Request Control Register */
 
 #define I2S_IRQ_RXEN                    (1 << 0)  /* Bit 0:  Enable I2S receive interrupt */
@@ -151,6 +156,7 @@
 #define I2S_IRQ_TXDEPTH_SHIFT           (16)      /* Bits 16-19: Set FIFO level for irq request */
 #define I2S_IRQ_TXDEPTH_MASK            (15 << I2S_IRQ_TXDEPTH_SHIFT)
                                                   /* Bits 20-31: Reserved */
+
 /* Transmit and Receive MCLK divider */
 
 #define I2S_RATE_YDIV_SHIFT             (0)       /* Bits 0-7: I2S transmit MCLK rate denominator */
@@ -164,6 +170,7 @@
 #define I2S_BITRATE_SHIFT               (0)       /* Bits 0-5: I2S transmit bit rate */
 #define I2S_BITRATE_MASK                (0x3f << I2S_BITRATE_SHIFT)
                                                   /* Bits 6-31: Reserved */
+
 /* Transmit and Receive mode control */
 
 #define I2S_MODE_CLKSEL_SHIFT           (0)       /* Bits 0-1: Clock source for bit clock divider */
@@ -171,20 +178,9 @@
 #  define I2S_MODE_CLKSEL_FRACDIV       (0 << I2S_MODE_CLKSEL_SHIFT) /* TX/RX fractional rate divider */
 #  define I2S_MODE_CLKSEL_RXMCLK        (2 << I2S_MODE_CLKSEL_SHIFT) /* RX_CLCK for TX_MCLK source */
 #  define I2S_MODE_CLKSEL_TXMCLK        (2 << I2S_MODE_CLKSEL_SHIFT) /* TX_CLCK for RX_MCLK source */
+
 #define I2S_MODE_4PIN                   (1 << 2)  /* Bit 2:  Transmit/Receive 4-pin mode selection */
 #define I2S_MODE_MCENA                  (1 << 3)  /* Bit 3:  Enable for the TX/RX_MCLK output */
                                                   /* Bits 4-31: Reserved */
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_I2S_H */

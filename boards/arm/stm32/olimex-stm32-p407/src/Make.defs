@@ -35,7 +35,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c stm32_bringup.c
+CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c stm32_st7735.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
   CSRCS += stm32_autoleds.c
@@ -65,6 +65,14 @@ endif
 
 ifeq ($(CONFIG_CAN),y)
   CSRCS += stm32_can.c
+endif
+
+ifeq ($(CONFIG_AUDIO_CS4344),y)
+  CSRCS += stm32_cs4344.c
+endif
+
+ifeq ($(CONFIG_DJOYSTICK),y)
+  CSRCS += stm32_djoystick.c
 endif
 
 DEPPATH += --dep-path board

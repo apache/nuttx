@@ -53,6 +53,7 @@
 #include <sys/statfs.h>
 #include <sys/stat.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -511,7 +512,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
       tmp = fxdr_unsigned(uint32_t, fattr.fa_mode);
       if ((tmp & (NFSMODE_IWOTH | NFSMODE_IWGRP | NFSMODE_IWUSR)) == 0)
         {
-          ferr("ERROR: File is read-only: %08x\n", tmp);
+          ferr("ERROR: File is read-only: %08" PRIx32 "\n", tmp);
           return -EACCES;
         }
     }
@@ -733,7 +734,7 @@ static int nfs_close(FAR struct file *filep)
 
   else
     {
-      /* Assume file structure will not be found.  This should never happen. */
+      /* Assume file structure won't be found. This should never happen. */
 
       ret = -EINVAL;
 
@@ -795,7 +796,8 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
   FAR uint32_t              *ptr;
   int                        ret = 0;
 
-  finfo("Read %d bytes from offset %d\n", buflen, filep->f_pos);
+  finfo("Read %zu bytes from offset %jd\n",
+        buflen, (intmax_t)filep->f_pos);
 
   /* Sanity checks */
 
@@ -829,7 +831,9 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
 
   for (bytesread = 0; bytesread < buflen; )
     {
-      /* Make sure that the attempted read size does not exceed the RPC maximum */
+      /* Make sure that the attempted read size does not exceed the RPC
+       * maximum
+       */
 
       readsize = buflen - bytesread;
       if (readsize > nmp->nm_rsize)
@@ -837,7 +841,9 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
           readsize = nmp->nm_rsize;
         }
 
-      /* Make sure that the attempted read size does not exceed the IO buffer size */
+      /* Make sure that the attempted read size does not exceed the IO buffer
+       * size
+       */
 
       tmp = SIZEOF_rpc_reply_read(readsize);
       if (tmp > nmp->nm_buflen)
@@ -965,7 +971,8 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
   int                    committed = NFSV3WRITE_FILESYNC;
   int                    ret;
 
-  finfo("Write %d bytes to offset %d\n", buflen, filep->f_pos);
+  finfo("Write %zu bytes to offset %jd\n",
+        buflen, (intmax_t)filep->f_pos);
 
   /* Sanity checks */
 
@@ -1318,7 +1325,7 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   objtype = fxdr_unsigned(uint32_t, obj_attributes.fa_type);
   if (objtype != NFDIR)
     {
-      ferr("ERROR:  Not a directory, type=%d\n", objtype);
+      ferr("ERROR:  Not a directory, type=%" PRId32 "\n", objtype);
       ret = -ENOTDIR;
       goto errout_with_semaphore;
     }
@@ -1405,7 +1412,9 @@ read_dir:
   ptr    += uint32_increment(DIRENT_NFS_VERFLEN);
   reqlen += DIRENT_NFS_VERFLEN;
 
-  /* Number of directory entries (We currently only process one entry at a time) */
+  /* Number of directory entries (We currently only process one entry at a
+   * time)
+   */
 
   readsize = nmp->nm_readdirsize;
   tmp      = SIZEOF_rpc_reply_readdir(readsize);
@@ -1692,7 +1701,9 @@ static void nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
       maxio = MAXBSIZE;
     }
 
-  /* Get the maximum amount of data that can be transferred in one write transfer */
+  /* Get the maximum amount of data that can be transferred in one write
+   * transfer
+   */
 
   if ((argp->flags & NFSMNT_WSIZE) != 0 && argp->wsize > 0)
     {
@@ -1712,7 +1723,9 @@ static void nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
       nprmt->wsize = maxio;
     }
 
-  /* Get the maximum amount of data that can be transferred in one read transfer */
+  /* Get the maximum amount of data that can be transferred in one read
+   * transfer
+   */
 
   if ((argp->flags & NFSMNT_RSIZE) != 0 && argp->rsize > 0)
     {
@@ -1732,7 +1745,9 @@ static void nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
       nprmt->rsize = maxio;
     }
 
-  /* Get the maximum amount of data that can be transferred in directory transfer */
+  /* Get the maximum amount of data that can be transferred in directory
+   * transfer
+   */
 
   if ((argp->flags & NFSMNT_READDIRSIZE) != 0 && argp->readdirsize > 0)
     {
@@ -2299,7 +2314,9 @@ static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
       return ret;
     }
 
-  /* Find the NFS node of the directory containing the directory to be created */
+  /* Find the NFS node of the directory containing the directory to be
+   * created
+   */
 
   ret = nfs_finddir(nmp, relpath, &fhandle, &fattr, dirname);
   if (ret != OK)
@@ -2422,7 +2439,9 @@ static int nfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
       return ret;
     }
 
-  /* Find the NFS node of the directory containing the directory to be removed */
+  /* Find the NFS node of the directory containing the directory to be
+   * removed
+   */
 
   ret = nfs_finddir(nmp, relpath, &fhandle, &fattr, dirname);
   if (ret != OK)

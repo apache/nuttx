@@ -42,7 +42,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -132,16 +131,16 @@ struct arg
 #ifdef CONFIG_LIBC_LONG_LONG
     unsigned long long ull;
 #endif
-    double_t d;
+    double d;
     FAR char *cp;
   } value;
 };
 
- /****************************************************************************
-  * Private Constant Data
-  ****************************************************************************/
+/****************************************************************************
+ * Private Constant Data
+ ****************************************************************************/
 
- static const char g_nullstring[] = "(null)";
+static const char g_nullstring[] = "(null)";
 
 /****************************************************************************
  * Public Functions
@@ -250,7 +249,6 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                 {
                   if ((flags & FL_ARGNUMBER) == 0)
                     {
-
                       /* No other flag except FL_WIDTH or FL_ZFILL (leading
                        * zeros) and argument number must be at least 1
                        */
@@ -281,11 +279,12 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                         {
                           index = prec;
                         }
+
                       if (index > 0 && index <= numargs)
                         {
                           if (stream == NULL)
                             {
-                              arglist[index-1].type = TYPE_INT;
+                              arglist[index - 1].type = TYPE_INT;
                               if (index > total_len)
                                 {
                                   total_len = index;
@@ -295,11 +294,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                             {
                               if ((flags & FL_PREC) == 0)
                                 {
-                                  width = (int)arglist[index-1].value.u;
+                                  width = (int)arglist[index - 1].value.u;
                                 }
                               else
                                 {
-                                  prec = (int)arglist[index-1].value.u;
+                                  prec = (int)arglist[index - 1].value.u;
                                 }
                             }
                         }
@@ -376,13 +375,16 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                 }
             }
 
-          if (c == 'z')
+          /* Note: On Nuttx, ptrdiff_t == intptr_t == ssize_t. */
+
+          if (c == 'z' || c == 't')
             {
               switch (sizeof(size_t))
                 {
                   /* The only known cases that the default will be hit are
                    * (1) the eZ80 which has sizeof(size_t) = 3 which is the
-                   * same as the sizeof(int).  And (2) if CONFIG_LIBC_LONG_LONG
+                   * same as the sizeof(int).  And (2) if
+                   * CONFIG_LIBC_LONG_LONG
                    * is not enabled and sizeof(size_t) is equal to
                    * sizeof(unsigned long long).  This latter case is an
                    * error.
@@ -407,6 +409,18 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                     break;
 #endif
                 }
+            }
+
+          if (c == 'j')
+            {
+              /* Same as long long if available. Otherwise, long. */
+
+#ifdef CONFIG_LIBC_LONG_LONG
+              flags |= FL_REPD_TYPE;
+#endif
+              flags |= FL_LONG;
+              flags &= ~FL_SHORT;
+              continue;
             }
 
           if (c == 'l')
@@ -473,36 +487,37 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                   if ((c >= 'E' && c <= 'G')
                       || (c >= 'e' && c <= 'g'))
                     {
-                      arglist[argnumber-1].type = TYPE_DOUBLE;
+                      arglist[argnumber - 1].type = TYPE_DOUBLE;
                     }
                   else if (c == 'i' || c == 'd' || c == 'u' || c == 'p')
                     {
                       if ((flags & FL_LONG) == 0)
                         {
-                          arglist[argnumber-1].type = TYPE_INT;
+                          arglist[argnumber - 1].type = TYPE_INT;
                         }
                       else if ((flags & FL_REPD_TYPE) == 0)
                         {
-                          arglist[argnumber-1].type = TYPE_LONG;
+                          arglist[argnumber - 1].type = TYPE_LONG;
                         }
                       else
                         {
-                          arglist[argnumber-1].type = TYPE_LONG_LONG;
+                          arglist[argnumber - 1].type = TYPE_LONG_LONG;
                         }
                     }
                   else if (c == 'c')
                     {
-                      arglist[argnumber-1].type = TYPE_INT;
+                      arglist[argnumber - 1].type = TYPE_INT;
                     }
                   else if (c == 's')
                     {
-                      arglist[argnumber-1].type = TYPE_CHAR_POINTER;
+                      arglist[argnumber - 1].type = TYPE_CHAR_POINTER;
                     }
 
                   if (argnumber > total_len)
                     {
                       total_len = argnumber;
                     }
+
                   continue; /* We do only parsing */
                 }
             }
@@ -527,7 +542,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
         }
       else if (c >= 'e' && c <= 'g')
         {
-          double_t value;
+          double value;
           int exp;              /* Exponent of master decimal digit */
           int n;
           uint8_t sign;         /* Sign character (or 0) */
@@ -572,14 +587,14 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
             {
-              value = arglist[argnumber-1].value.d;
+              value = arglist[argnumber - 1].value.d;
             }
           else
             {
-              value = va_arg(ap, double_t);
+              value = va_arg(ap, double);
             }
 #else
-          value = va_arg(ap, double_t);
+          value = va_arg(ap, double);
 #endif
 
           ndigs = __dtoa_engine(value, &_dtoa, ndigs,
@@ -751,7 +766,6 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
               n = exp > 0 ? exp : 0;    /* Exponent of left digit */
               do
                 {
-
                   /* Insert decimal point at correct place */
 
                   if (n == -1)
@@ -846,7 +860,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #else /* !CONFIG_LIBC_FLOATINGPOINT */
       if ((c >= 'E' && c <= 'G') || (c >= 'e' && c <= 'g'))
         {
-          va_arg(ap, double_t);
+          va_arg(ap, double);
           pnt  = "*float*";
           size = sizeof("*float*") - 1;
           goto str_lpad;
@@ -855,12 +869,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
       switch (c)
         {
-
         case 'c':
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
             {
-              buf[0] = (int)arglist[argnumber-1].value.u;
+              buf[0] = (int)arglist[argnumber - 1].value.u;
             }
           else
             {
@@ -878,7 +891,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
             {
-              pnt = (FAR char *)arglist[argnumber-1].value.cp;
+              pnt = (FAR char *)arglist[argnumber - 1].value.cp;
             }
           else
             {
@@ -930,7 +943,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
                 {
-                  x = (long long)arglist[argnumber-1].value.ull;
+                  x = (long long)arglist[argnumber - 1].value.ull;
                 }
               else
                 {
@@ -947,7 +960,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
                 {
-                  x = (long)arglist[argnumber-1].value.ul;
+                  x = (long)arglist[argnumber - 1].value.ul;
                 }
               else
                 {
@@ -962,7 +975,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
                 {
-                  x = (int)arglist[argnumber-1].value.u;
+                  x = (int)arglist[argnumber - 1].value.u;
                 }
               else
                 {
@@ -1013,7 +1026,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
                 {
-                  x = arglist[argnumber-1].value.ull;
+                  x = arglist[argnumber - 1].value.ull;
                 }
               else
                 {
@@ -1030,7 +1043,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
                 {
-                  x = arglist[argnumber-1].value.ul;
+                  x = arglist[argnumber - 1].value.ul;
                 }
               else
                 {
@@ -1045,7 +1058,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
                 {
-                  x = (unsigned int)arglist[argnumber-1].value.u;
+                  x = (unsigned int)arglist[argnumber - 1].value.u;
                 }
               else
                 {
@@ -1262,7 +1275,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
           break;
 
         case TYPE_DOUBLE:
-          arglist[i].value.d = va_arg(ap, double_t);
+          arglist[i].value.d = va_arg(ap, double);
           break;
 
         case TYPE_CHAR_POINTER:

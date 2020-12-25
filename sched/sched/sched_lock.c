@@ -104,13 +104,6 @@ volatile spinlock_t g_cpu_schedlock SP_SECTION = SP_UNLOCKED;
 volatile spinlock_t g_cpu_locksetlock SP_SECTION;
 volatile cpu_set_t g_cpu_lockset SP_SECTION;
 
-#if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
-/* This is part of the sched_lock() logic to handle atomic operations when
- * locking the scheduler.
- */
-
-volatile int16_t g_global_lockcount;
-#endif
 #endif /* CONFIG_SMP */
 
 /****************************************************************************
@@ -140,60 +133,28 @@ volatile int16_t g_global_lockcount;
 int sched_lock(void)
 {
   FAR struct tcb_s *rtcb;
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
-  irqstate_t flags;
-#endif
-  int cpu;
 
-  /* The following operation is non-atomic unless
-   * CONFIG_ARCH_GLOBAL_IRQDISABLE or CONFIG_ARCH_HAVE_FETCHADD is defined.
-   */
-
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
   /* If the CPU supports suppression of interprocessor interrupts, then
    * simple disabling interrupts will provide sufficient protection for
    * the following operation.
    */
 
-  flags = up_irq_save();
-
-#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
-  /* If the CPU supports an atomic fetch add operation, then we can use the
-   * global lockcount to assure that the following operation is atomic.
-   */
-
-  DEBUGASSERT((uint16_t)g_global_lockcount < INT16_MAX); /* Not atomic! */
-  up_fetchadd16(&g_global_lockcount, 1);
-#endif
-
-  /* This operation is safe if CONFIG_ARCH_HAVE_FETCHADD is defined.  NOTE
-   * we cannot use this_task() because it calls sched_lock().
-   */
-
-  cpu  = this_cpu();
-  rtcb = current_task(cpu);
+  rtcb = this_task();
 
   /* Check for some special cases:  (1) rtcb may be NULL only during early
    * boot-up phases, and (2) sched_lock() should have no effect if called
    * from the interrupt level.
    */
 
-  if (rtcb == NULL || up_interrupt_context())
-    {
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
-      up_irq_restore(flags);
-#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
-      DEBUGASSERT(g_global_lockcount > 0);
-      up_fetchsub16(&g_global_lockcount, 1);
-#endif
-    }
-  else
+  if (rtcb != NULL && !up_interrupt_context())
     {
       /* Catch attempts to increment the lockcount beyond the range of the
        * integer type.
        */
 
       DEBUGASSERT(rtcb->lockcount < MAX_LOCK_COUNT);
+
+      irqstate_t flags = enter_critical_section();
 
       /* We must hold the lock on this CPU before we increment the lockcount
        * for the first time. Holding the lock is sufficient to lockout
@@ -228,13 +189,6 @@ int sched_lock(void)
 
       rtcb->lockcount++;
 
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
-      up_irq_restore(flags);
-#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
-      DEBUGASSERT(g_global_lockcount > 0);
-      up_fetchsub16(&g_global_lockcount, 1);
-#endif
-
 #if defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION) || \
     defined(CONFIG_SCHED_CRITMONITOR)
       /* Check if we just acquired the lock */
@@ -260,6 +214,8 @@ int sched_lock(void)
       nxsched_merge_prioritized((FAR dq_queue_t *)&g_readytorun,
                                 (FAR dq_queue_t *)&g_pendingtasks,
                                 TSTATE_TASK_PENDING);
+
+      leave_critical_section(flags);
     }
 
   return OK;

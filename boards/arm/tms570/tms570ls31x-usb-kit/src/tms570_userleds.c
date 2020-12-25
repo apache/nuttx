@@ -73,11 +73,12 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
   tms570_configgio(GIO_LED_D11);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -96,7 +97,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   /* Low illuminates */
 

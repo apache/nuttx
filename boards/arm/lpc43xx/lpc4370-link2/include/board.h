@@ -51,7 +51,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking ****************************************************************/
+/* Clocking *****************************************************************/
 
 /* NOTE:  The following definitions require lpc43_cgu.h.  It is not included
  * here because the including C file may not have that file in its include
@@ -157,7 +157,7 @@
 #define BOARD_IDIVA_CLKSRC          IDIVA_CLKSEL_PLL1
 #define BOARD_IDIVA_FREQUENCY       (BOARD_FCLKOUT_FREQUENCY/BOARD_IDIVA_DIVIDER)
 
-/* USB0 ********************************************************************/
+/* USB0 *********************************************************************/
 
 /* Settings needed in lpc43_cpu.c */
 
@@ -165,7 +165,7 @@
 #define BOARD_USB0_MDIV             0x06167ffa /* Table 149 datsheet, valid for 12Mhz Fclkin */
 #define BOARD_USB0_NP_DIV           0x00302062 /* Table 149 datsheet, valid for 12Mhz Fclkin */
 
-/* SPIFI clocking **********************************************************/
+/* SPIFI clocking ***********************************************************/
 
 /* The SPIFI will receive clocking from a divider per the settings provided
  * in this file.  The NuttX code will configure PLL1 as the input clock
@@ -218,7 +218,7 @@
 #  define SPIFI_DEVICE_REQUENCY_DIVIDER   2        /* PLL1 clock divider */
 #endif
 
-/* UART clocking ***********************************************************/
+/* UART clocking ************************************************************/
 
 /* Configure all U[S]ARTs to use the XTAL input frequency */
 
@@ -250,7 +250,7 @@
 #define BOARD_SSP1_CLKSRC           BASE_SSP1_CLKSEL_IDIVA
 #define BOARD_SSP1_BASEFREQ         BOARD_IDIVA_FREQUENCY
 
-/* LED definitions *********************************************************/
+/* Clocking *****************************************************************/
 
 /* LED1   K2  GPIO0[8]
  *
@@ -270,10 +270,11 @@
  * control of the application.  The following interfaces are then available
  * for application control of the LEDs:
  *
- *  void board_userled_initialize(void);
+ *  uint32_t board_userled_initialize(void);
  *  void board_userled(int led, bool ledon);
- *  void board_userled_all(uint8_t ledset);
+ *  void board_userled_all(uint32_t ledset);
  */
+
                                        /* LED      */
 #define LED_STARTED                 0  /* OFF      */
 #define LED_HEAPALLOCATE            0  /* OFF      */

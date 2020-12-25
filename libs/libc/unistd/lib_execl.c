@@ -44,11 +44,14 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include "libc.h"
+
 #ifdef CONFIG_LIBC_EXECFUNCS
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* This is an artificial limit to detect error conditions where an argv[]
  * list is not properly terminated.
  */
@@ -96,11 +99,12 @@
  *   The non-standard binfmt function 'exec()' needs to have (1) a symbol
  *   table that provides the list of symbols exported by the base code, and
  *   (2) the number of symbols in that table.  This information is currently
- *   provided to 'exec()' from 'exec[l|v]()' via NuttX configuration settings:
+ *   provided to 'exec()' from 'exec[l|v]()' via NuttX configuration setting:
  *
  *     CONFIG_LIBC_EXECFUNCS         : Enable exec[l|v] support
  *     CONFIG_EXECFUNCS_SYMTAB_ARRAY : Symbol table name used by exec[l|v]
- *     CONFIG_EXECFUNCS_NSYMBOLS_VAR : Variable holding number of symbols in the table
+ *     CONFIG_EXECFUNCS_NSYMBOLS_VAR : Variable holding number of symbols in
+ *                                     the table
  *
  *   As a result of the above, the current implementations of 'execl()' and
  *   'execv()' suffer from some incompatibilities that may or may not be
@@ -166,7 +170,7 @@ int execl(FAR const char *path, ...)
 
   if (nargs > 0)
     {
-      argv = (FAR char **)malloc((nargs + 1) * sizeof(FAR char *));
+      argv = (FAR char **)lib_malloc((nargs + 1) * sizeof(FAR char *));
       if (argv == (FAR char **)NULL)
         {
           set_errno(ENOMEM);
@@ -193,7 +197,7 @@ int execl(FAR const char *path, ...)
 
   if (argv)
     {
-      free(argv);
+      lib_free(argv);
     }
 
   return ret;

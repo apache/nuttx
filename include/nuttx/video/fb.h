@@ -52,8 +52,8 @@
  * Pre-processor definitions
  ****************************************************************************/
 
-/* Color format definitions.  The pretty much define the color pixel processing
- * organization of the video controller.
+/* Color format definitions.  This pretty much defines the color pixel
+ * processing organization of the video controller.
  */
 
 /* Monochrome Formats *******************************************************/
@@ -66,7 +66,7 @@
 #define FB_FMT_GREY           FB_FMT_Y8 /* BPP=8 */
 #define FB_FMT_Y800           FB_FMT_Y8 /* BPP=8 */
 
-#define FB_ISMONO(f)          ((f) >= FB_FMT_Y4) && (f) <= FB_FMT_Y16)
+#define FB_ISMONO(f)          (((f) >= FB_FMT_Y4) && (f) <= FB_FMT_Y16)
 
 /* RGB video formats ********************************************************/
 
@@ -92,8 +92,8 @@
 
 #define FB_FMT_RGBRAW         16          /* BPP=? */
 
-/* Raw RGB with arbitrary sample packing within a pixel. Packing and precision
- * of R, G and B components is determined by bit masks for each.
+/* Raw RGB with arbitrary sample packing within a pixel. Packing and
+ * precision of R, G and B components is determined by bit masks for each.
  */
 
 #define FB_FMT_RGBBTFLD16     17          /* BPP=16 */
@@ -110,7 +110,7 @@
 #define FB_FMT_RGBT16         22          /* BPP=16 */
 #define FB_FMT_RGBT32         23          /* BPP=32 */
 
-#define FB_ISRGB(f)           ((f) >= FB_FMT_RGB1) && (f) <= FB_FMT_RGBT32)
+#define FB_ISRGB(f)           (((f) >= FB_FMT_RGB1) && (f) <= FB_FMT_RGBT32)
 
 /* Packed YUV Formats *******************************************************/
 
@@ -148,7 +148,7 @@
 #define FB_FMT_Y42T           44          /* BPP=16  UYVY LSB for transparency */
 #define FB_FMT_YUVP           45          /* BPP=24? YCbCr 4:2:2 Y0U0Y1V0 order */
 
-#define FB_ISYUVPACKED(f)     ((f) >= FB_FMT_AYUV) && (f) <= FB_FMT_YUVP)
+#define FB_ISYUVPACKED(f)     (((f) >= FB_FMT_AYUV) && (f) <= FB_FMT_YUVP)
 
 /* Packed Planar YUV Formats ************************************************/
 
@@ -196,7 +196,7 @@
 #  define FB_CUR_XOR          0x10        /* Use XOR vs COPY ROP on image */
 #endif
 
-/* Hardware overlay acceleration *******************************************/
+/* Hardware overlay acceleration ********************************************/
 
 #ifdef CONFIG_FB_OVERLAY
 #  define FB_ACCL_TRANSP      0x01        /* Hardware tranparency support */
@@ -245,11 +245,11 @@
                                                *           fb_setcursor_s */
 #endif
 
-#ifdef CONFIG_LCD_UPDATE
+#ifdef CONFIG_FB_UPDATE
 #  define FBIO_UPDATE         _FBIOC(0x0007)  /* Update a rectangular region in
                                                * the framebuffer
                                                * Argument: read-only struct
-                                               *           nxgl_rect_s */
+                                               *           fb_area_s */
 #endif
 
 #ifdef CONFIG_FB_SYNC
@@ -324,15 +324,6 @@ struct fb_planeinfo_s
   uint8_t    bpp;         /* Bits per pixel */
 };
 
-#ifdef CONFIG_FB_OVERLAY
-/* This structure describes the transparency. */
-
-struct fb_transp_s
-{
-  uint8_t    transp;      /* Transparency */
-  uint8_t    transp_mode; /* Transparency mode */
-};
-
 /* This structure describes an area. */
 
 struct fb_area_s
@@ -341,6 +332,15 @@ struct fb_area_s
   fb_coord_t y;           /* y-offset of the area */
   fb_coord_t w;           /* Width of the area */
   fb_coord_t h;           /* Height of the area */
+};
+
+#ifdef CONFIG_FB_OVERLAY
+/* This structure describes the transparency. */
+
+struct fb_transp_s
+{
+  uint8_t    transp;      /* Transparency */
+  uint8_t    transp_mode; /* Transparency mode */
 };
 
 /* This structure describes one overlay. */
@@ -445,7 +445,9 @@ struct fb_cursorsize_s
 };
 #endif
 
-/* The following are used to get/get the cursor attributes via IOCTL command. */
+/* The following are used to get/get the cursor attributes via IOCTL
+ * command.
+ */
 
 struct fb_cursorattrib_s
 {
@@ -507,6 +509,15 @@ struct fb_vtable_s
                    FAR struct fb_cursorattrib_s *attrib);
   int (*setcursor)(FAR struct fb_vtable_s *vtable,
                    FAR struct fb_setcursor_s *settings);
+#endif
+
+#ifdef CONFIG_FB_UPDATE
+  /* The following are provided only if the video hardware need extera
+   * notification to update display content.
+   */
+
+  int (*updatearea)(FAR struct fb_vtable_s *vtable,
+                    FAR const struct fb_area_s *area);
 #endif
 
 #ifdef CONFIG_FB_SYNC
@@ -624,7 +635,8 @@ int up_fbinitialize(int display);
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
- *   plane of the specified plane.  Many OSDs support multiple planes of video.
+ *   plane of the specified plane.  Many OSDs support multiple planes of
+ *   video.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this

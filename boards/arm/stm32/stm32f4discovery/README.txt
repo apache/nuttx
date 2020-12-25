@@ -1266,7 +1266,7 @@ Configuration Sub-directories
 
   2. Example usage CS43L22 Audio driver
 
-    a. Power On or reset the STM32F4 Discovery board.  We can see the Nuttx
+    a. Power On or reset the STM32F4 Discovery board.  We can see the NuttX
        command line prompt:
 
       NuttShell (NSH)
@@ -1357,7 +1357,7 @@ Configuration Sub-directories
 
        arm-none-eabi-ar.exe rcs libsupc++.a vterminate.o
 
-  3. Exceptions are enabled and workking (CONFIG_UCLIBCXX_EXCEPTION=y)
+  3. Exceptions are enabled and workking (CONFIG_CXX_EXCEPTION=y)
 
   elf:
   ---
@@ -1393,12 +1393,11 @@ Configuration Sub-directories
        CONFIG_HAVE_CXXINITIALIZE=y
 
        CONFIG_UCLIBCXX=y
-       CONFIG_UCLIBCXX_EXCEPTION=y
-       CONFIG_UCLIBCXX_HAVE_LIBSUPCXX=y
-       CONFIG_UCLIBCXX_IOSTREAM_BUFSIZE=32
+       CONFIG_CXX_EXCEPTION=y
+       CONFIG_CXX_LIBSUPCXX=y
+       CONFIG_UCLIBCXX_BUFSIZE=32
 
-       CONFIG_EXAMPLES_ELF_CXXINITIALIZE=y
-       CONFIG_EXAMPLES_ELF_UCLIBCXX=y
+       CONFIG_EXAMPLES_ELF_CXX=y
 
     6. By default, this configuration uses the ROMFS file system.  It can also
        be modified to use the compressed CROMFS:
@@ -1761,7 +1760,7 @@ Configuration Sub-directories
             not be possible.
          b) Develop a strategy to manage CCM memory and DMA memory.  Look
             at this discussion on the NuttX Wiki:
-            http://www.nuttx.org/doku.php?id=wiki:howtos:stm32-ccm-alloc
+            https://cwiki.apache.org/confluence/display/NUTTX/STM32+CCM+Allocator
 
        To put the CCM memory back into the heap you would need to change
        the following in the NuttX configuration:
@@ -2143,8 +2142,8 @@ Configuration Sub-directories
      There are some issues with the presentation... some tuning of the
      configuration could fix that.  Lower resolution displays are also more
      subject to the "fat, flat line bug" that I need to fix someday.  See
-     http://www.nuttx.org/doku.php?id=wiki:graphics:nxgraphics for a description
-     of the fat, flat line bug.
+     https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=139629474
+     for a description of the fat, flat line bug.
 
   pm:
   --

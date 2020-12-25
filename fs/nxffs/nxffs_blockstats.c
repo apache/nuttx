@@ -94,8 +94,8 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
       ret = MTD_BREAD(volume->mtd, ioblock, volume->blkper, volume->pack);
       if (ret < volume->blkper)
         {
-          ferr("ERROR: Failed to read erase block %d: %d\n",
-               ioblock / volume->blkper, ret);
+          ferr("ERROR: Failed to read erase block %jd: %d\n",
+               (intmax_t)(ioblock / volume->blkper), ret);
           return ret;
         }
 
@@ -109,7 +109,8 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
            * in the NXFFS data.
            */
 
-          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s *)bptr;
+          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s *)
+                                             bptr;
 
           /* Increment the total count of blocks examined */
 
@@ -149,11 +150,11 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
         }
     }
 
-  finfo("Number blocks:        %d\n", stats->nblocks);
-  finfo("  Good blocks:        %d\n", stats->ngood);
-  finfo("  Bad blocks:         %d\n", stats->nbad);
-  finfo("  Unformatted blocks: %d\n", stats->nunformat);
-  finfo("  Corrupt blocks:     %d\n", stats->ncorrupt);
+  finfo("Number blocks:        %jd\n", (intmax_t)stats->nblocks);
+  finfo("  Good blocks:        %jd\n", (intmax_t)stats->ngood);
+  finfo("  Bad blocks:         %jd\n", (intmax_t)stats->nbad);
+  finfo("  Unformatted blocks: %jd\n", (intmax_t)stats->nunformat);
+  finfo("  Corrupt blocks:     %jd\n", (intmax_t)stats->ncorrupt);
 
 #else
   for (ioblock = 0; ioblock < volume->nblocks; ioblock++)
@@ -189,7 +190,8 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
            * in the NXFFS data.
            */
 
-          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s *)volume->pack;
+          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s *)
+                                             volume->pack;
 
           /* Collect statistics.
            *

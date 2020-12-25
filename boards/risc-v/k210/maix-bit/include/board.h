@@ -48,6 +48,28 @@
 
 #include "k210.h"
 
+#include "k210_fpioa.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define BOARD_LED_PAD     14 /* Connected to red led */
+
+/* Map pad 14 to gpiohs io 0 */
+
+#define BOARD_LED_IO_FUNC K210_IO_FUNC_GPIOHS0
+#define BOARD_LED_IO      0
+
+#define LED_STARTED       0  /* N/C */
+#define LED_HEAPALLOCATE  1  /* N/C */
+#define LED_IRQSENABLED   2  /* N/C */
+#define LED_STACKCREATED  3  /* N/C */
+#define LED_INIRQ         4  /* N/C */
+#define LED_SIGNAL        5  /* N/C */
+#define LED_ASSERTION     6  /* N/C */
+#define LED_PANIC         7  /* blink */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

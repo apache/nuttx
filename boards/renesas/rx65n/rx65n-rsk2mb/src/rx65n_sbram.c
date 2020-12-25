@@ -330,7 +330,7 @@ int rx65n_sbram_int(void)
 
 #if defined(CONFIG_RX65N_SAVE_CRASHDUMP)
 void board_crashdump(uintptr_t currentsp, FAR void *tcb,
-                     FAR const uint8_t *filename, int lineno)
+                     FAR const char *filename, int lineno)
 {
   struct fullcontext *pdump ;
   pdump = (struct fullcontext *)&g_sdata;
@@ -401,16 +401,8 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
       pdump->info.stacks.user.sp = currentsp;
     }
 
-  if (pdump->info.pid == 0)
-    {
-      pdump->info.stacks.user.top = g_idle_topstack - 4;
-      pdump->info.stacks.user.size = CONFIG_IDLETHREAD_STACKSIZE;
-    }
-  else
-    {
-      pdump->info.stacks.user.top = (uint32_t) rtcb->adj_stack_ptr;
-      pdump->info.stacks.user.size = (uint32_t) rtcb->adj_stack_size;
-    }
+  pdump->info.stacks.user.top = (uint32_t) rtcb->adj_stack_ptr;
+  pdump->info.stacks.user.size = (uint32_t) rtcb->adj_stack_size;
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   /* Get the limits on the interrupt stack memory */

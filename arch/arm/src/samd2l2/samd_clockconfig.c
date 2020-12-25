@@ -107,10 +107,10 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
   {
     .gclk       = 1,
 #ifdef BOARD_GCLK1_RUN_IN_STANDBY
-    .runstandby = true;
+    .runstandby = true,
 #endif
 #ifdef BOARD_GCLK1_OUTPUT_ENABLE
-    .output     = true;
+    .output     = true,
 #endif
     .prescaler  = BOARD_GCLK1_PRESCALER,
     .clksrc     = (uint8_t)(BOARD_GCLK1_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
@@ -124,10 +124,10 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
   {
     .gclk       = 2,
 #ifdef BOARD_GCLK2_RUN_IN_STANDBY
-    .runstandby = true;
+    .runstandby = true,
 #endif
 #ifdef BOARD_GCLK2_OUTPUT_ENABLE
-    .output     = true;
+    .output     = true,
 #endif
     .prescaler  = BOARD_GCLK2_PRESCALER,
     .clksrc     = (uint8_t)(BOARD_GCLK2_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
@@ -141,10 +141,10 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
   {
     .gclk       = 3,
 #ifdef BOARD_GCLK3_RUN_IN_STANDBY
-    .runstandby = true;
+    .runstandby = true,
 #endif
 #ifdef BOARD_GCLK3_OUTPUT_ENABLE
-    .output     = true;
+    .output     = true,
 #endif
     .prescaler  = BOARD_GCLK3_PRESCALER,
     .clksrc     = (uint8_t)(BOARD_GCLK3_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
@@ -158,10 +158,10 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
   {
     .gclk       = 4,
 #ifdef BOARD_GCLK4_RUN_IN_STANDBY
-    .runstandby = true;
+    .runstandby = true,
 #endif
 #ifdef BOARD_GCLK4_OUTPUT_ENABLE
-    .output     = true;
+    .output     = true,
 #endif
     .prescaler  = BOARD_GCLK4_PRESCALER,
     .clksrc     = (uint8_t)(BOARD_GCLK4_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
@@ -175,10 +175,10 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
   {
     .gclk       = 5,
 #ifdef BOARD_GCLK5_RUN_IN_STANDBY
-    .runstandby = true;
+    .runstandby = true,
 #endif
 #ifdef BOARD_GCLK5_OUTPUT_ENABLE
-    .output     = true;
+    .output     = true,
 #endif
     .prescaler  = BOARD_GCLK5_PRESCALER,
     .clksrc     = (uint8_t)(BOARD_GCLK5_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
@@ -192,10 +192,10 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
   {
     .gclk       = 6,
 #ifdef BOARD_GCLK6_RUN_IN_STANDBY
-    .runstandby = true;
+    .runstandby = true,
 #endif
 #ifdef BOARD_GCLK6_OUTPUT_ENABLE
-    .output     = true;
+    .output     = true,
 #endif
     .prescaler  = BOARD_GCLK6_PRESCALER,
     .clksrc     = (uint8_t)(BOARD_GCLK6_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
@@ -209,10 +209,10 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
   {
     .gclk       = 7,
 #ifdef BOARD_GCLK7_RUN_IN_STANDBY
-    .runstandby = true;
+    .runstandby = true,
 #endif
 #ifdef BOARD_GCLK7_OUTPUT_ENABLE
-    .output     = true;
+    .output     = true,
 #endif
     .prescaler  = BOARD_GCLK7_PRESCALER,
     .clksrc     = (uint8_t)(BOARD_GCLK7_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
@@ -226,10 +226,10 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
   {
     .gclk       = 8,
 #ifdef BOARD_GCLK8_RUN_IN_STANDBY
-    .runstandby = true;
+    .runstandby = true,
 #endif
 #ifdef BOARD_GCLK8_OUTPUT_ENABLE
-    .output     = true;
+    .output     = true,
 #endif
     .prescaler  = BOARD_GCLK8_PRESCALER,
     .clksrc     = (uint8_t)(BOARD_GCLK8_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),

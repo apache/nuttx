@@ -61,6 +61,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* The pin configurations here require that SPI1 is selected */
 
 #ifndef CONFIG_STM32_SPI1
@@ -113,7 +114,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = ssd1351_initialize(spi, devno);
       if (dev == NULL)
         {
-          lcderr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+          lcderr("ERROR: Failed to bind SPI port 1 to OLED %d\n", devno);
         }
      else
         {

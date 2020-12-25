@@ -1,0 +1,74 @@
+############################################################################
+# libs/libxx/libcxx.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+###########################################################################
+
+VERSION=11.0.0
+
+libcxx-$(VERSION).src.tar.xz:
+	$(Q) curl -O -L https://github.com/llvm/llvm-project/releases/download/llvmorg-$(VERSION)/libcxx-$(VERSION).src.tar.xz
+
+libcxx: libcxx-$(VERSION).src.tar.xz
+	$(Q) tar -xf libcxx-$(VERSION).src.tar.xz
+	$(Q) mv libcxx-$(VERSION).src libcxx
+	$(Q) patch -p0 < 0001-libc-Fix-a-few-warnings.patch
+	$(Q) patch -p0 < 0001-libc-NFC-Fix-several-GCC-warnings-in-the-test-suite.patch
+	$(Q) patch -p0 < 0001-libc-Fix-tests-failing-with-Clang-after-removing-GCC.patch
+	$(Q) patch -p0 < 0001-libcxx-Check-_LIBCPP_PROVIDES_DEFAULT_RUNE_TABLE-fir.patch
+	$(Q) patch -p0 < 0001-libcxx-Port-to-NuttX-https-nuttx.apache.org-RTOS.patch
+	$(Q) touch $@
+
+$(TOPDIR)/include/libcxx: libcxx
+	$(Q) $(DIRLINK) $(CURDIR)/libcxx/include $(TOPDIR)/include/libcxx
+
+dirlinks:: $(TOPDIR)/include/libcxx
+
+distclean::
+	$(Q) $(DELFILE) libcxx-$(VERSION).src.tar.xz
+	$(Q) $(DIRUNLINK) $(TOPDIR)/include/libcxx
+	$(call DELDIR, libcxx)
+
+CXXFLAGS += ${shell $(DEFINE) "$(CC)" __GLIBCXX__}
+CXXFLAGS += ${shell $(DEFINE) "$(CC)" _LIBCPP_BUILDING_LIBRARY}
+
+# Workaround the following warning with "c++ (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
+#
+# libcxx/src/barrier.cpp: In constructor 'std::__1::__barrier_algorithm_base::__barrier_algorithm_base(ptrdiff_t&)':
+# libcxx/src/barrier.cpp:35:9: warning: declaration of '__expected' shadows a member of 'std::__1::__barrier_algorithm_base' [-Wshadow]
+#    35 |         : __expected(__expected)
+#       |         ^
+# libcxx/src/barrier.cpp:29:24: note: shadowed declaration is here
+#    29 |     ptrdiff_t&         __expected;
+#       |                        ^~~~~~~~~~
+libcxx/src/barrier.cpp_CXXFLAGS += -Wno-shadow
+libcxx/src/locale.cpp_CXXFLAGS += -Wno-shadow
+
+libcxx/src/filesystem/directory_iterator.cpp_CXXFLAGS += -Wno-shadow
+libcxx/src/filesystem/operations.cpp_CXXFLAGS += -Wno-shadow
+
+CPPSRCS += $(notdir $(wildcard libcxx/src/*.cpp))
+CPPSRCS += $(notdir $(wildcard libcxx/src/experimental/*.cpp))
+CPPSRCS += $(notdir $(wildcard libcxx/src/filesystem/*.cpp))
+
+DEPPATH += --dep-path libcxx/src
+DEPPATH += --dep-path libcxx/src/experimental
+DEPPATH += --dep-path libcxx/src/filesystem
+
+VPATH += libcxx/src
+VPATH += libcxx/src/experimental
+VPATH += libcxx/src/filesystem

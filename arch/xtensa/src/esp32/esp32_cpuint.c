@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_irq.c
+ * arch/xtensa/src/esp32/esp32_cpuint.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -233,7 +233,7 @@ static inline void xtensa_disable_all(void)
  *
  ****************************************************************************/
 
-int esp32_alloc_cpuint(uint32_t intmask)
+static int esp32_alloc_cpuint(uint32_t intmask)
 {
   irqstate_t flags;
   uint32_t *freeints;
@@ -242,7 +242,7 @@ int esp32_alloc_cpuint(uint32_t intmask)
   int cpuint;
   int ret = -ENOMEM;
 
-  /* Check if there are is CPU interrupts with the requested properties
+  /* Check if there are CPU interrupts with the requested properties
    * available.
    */
 
@@ -375,7 +375,7 @@ int esp32_cpuint_initialize(void)
    *   CPU interrupt bit           IRQ number
    *   --------------------------- ---------------------
    *   ESP32_CPUINT_TIMER0      6  XTENSA_IRQ_TIMER0  0
-   *   SP32_CPUINT_SOFTWARE0    7  Not yet defined
+   *   ESP32_CPUINT_SOFTWARE0   7  Not yet defined
    *   ESP32_CPUINT_PROFILING  11  Not yet defined
    *   ESP32_CPUINT_TIMER1     15  XTENSA_IRQ_TIMER1  1
    *   ESP32_CPUINT_TIMER2     16  XTENSA_IRQ_TIMER2  2
@@ -416,7 +416,7 @@ void up_disable_irq(int cpuint)
  * Name: up_enable_irq
  *
  * Description:
- *   Ensable the CPU interrupt specified by 'cpuint'
+ *   Enable the CPU interrupt specified by 'cpuint'
  *
  ****************************************************************************/
 
@@ -446,7 +446,7 @@ void up_enable_irq(int cpuint)
  *   priority - Priority of the CPU interrupt (1-5)
  *
  * Returned Value:
- *   On success, the allocated level-sensitive, CPU interrupt numbr is
+ *   On success, the allocated level-sensitive, CPU interrupt number is
  *   returned.  A negated errno is returned on failure.  The only possible
  *   failure is that all level-sensitive CPU interrupts have already been
  *   allocated.
@@ -504,7 +504,7 @@ int esp32_alloc_edgeint(int priority)
  * Name:  esp32_free_cpuint
  *
  * Description:
- *   Free a previoulsy allocated CPU interrupt
+ *   Free a previously allocated CPU interrupt
  *
  * Input Parameters:
  *   The CPU interrupt number to be freed
@@ -551,7 +551,7 @@ void esp32_free_cpuint(int cpuint)
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
- *   periphid - The peripheral number from ira.h to be assigned to
+ *   periphid - The peripheral number from irq.h to be assigned to
  *              a CPU interrupt.
  *   cpuint   - The CPU interrupt to receive the peripheral interrupt
  *              assignment.

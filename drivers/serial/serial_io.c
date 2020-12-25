@@ -139,7 +139,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 #endif
   unsigned int status;
   int nexthead = rxbuf->head + 1;
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   int signo = 0;
 #endif
   uint16_t nbytes = 0;
@@ -184,8 +184,8 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
       if (nbuffered >= watermark)
         {
-          /* Let the lower level driver know that the watermark level has been
-           * crossed.  It will probably activate RX flow control.
+          /* Let the lower level driver know that the watermark level has
+           * been crossed.  It will probably activate RX flow control.
            */
 
           if (uart_rxflowcontrol(dev, nbuffered, true))
@@ -196,8 +196,9 @@ void uart_recvchars(FAR uart_dev_t *dev)
             }
         }
 #else
-      /* Check if RX buffer is full and allow serial low-level driver to pause
-       * processing. This allows proper utilization of hardware flow control.
+      /* Check if RX buffer is full and allow serial low-level driver to
+       * pause processing. This allows proper utilization of hardware flow
+       * control.
        */
 
       if (is_full)
@@ -217,9 +218,12 @@ void uart_recvchars(FAR uart_dev_t *dev)
       ch = uart_receive(dev, &status);
 
 #ifdef CONFIG_TTY_SIGINT
-      /* Is this the special character that will generate the SIGINT signal? */
+      /* Is this the special character that will generate the SIGINT
+       * signal?
+       */
 
-      if (dev->pid >= 0 && ch == CONFIG_TTY_SIGINT_CHAR)
+      if (dev->pid >= 0 && (dev->tc_lflag & ISIG) &&
+          ch == CONFIG_TTY_SIGINT_CHAR)
         {
           /* Yes.. note that the kill is needed and do not put the character
            * into the Rx buffer.  It should not be read as normal data.
@@ -229,10 +233,13 @@ void uart_recvchars(FAR uart_dev_t *dev)
         }
       else
 #endif
-#ifdef CONFIG_TTY_SIGSTP
-      /* Is this the special character that will generate the SIGSTP signal? */
+#ifdef CONFIG_TTY_SIGTSTP
+      /* Is this the special character that will generate the SIGTSTP
+       * signal?
+       */
 
-      if (dev->pid >= 0 && ch == CONFIG_TTY_SIGSTP_CHAR)
+      if (dev->pid >= 0 && (dev->tc_lflag & ISIG) &&
+          ch == CONFIG_TTY_SIGTSTP_CHAR)
         {
 #ifdef CONFIG_TTY_SIGINT
           /* Give precedence to SIGINT */
@@ -244,7 +251,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
                * into the Rx buffer.  It should not be read as normal data.
                */
 
-              signo = SIGSTP;
+              signo = SIGTSTP;
             }
         }
       else
@@ -285,7 +292,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
       uart_datareceived(dev);
     }
 
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   /* Send the signal if necessary */
 
   if (signo != 0)

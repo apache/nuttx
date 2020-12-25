@@ -58,57 +58,57 @@ all: mklibgraphics
 	 gen32bppsources
 
 gen1bppsources:
-	$(Q) $(MAKE) -C nxglib -f Makefile.devblit TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=1 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.devblit NXGLIB_BITSPERPIXEL=1 EXTRAFLAGS="$(EXTRAFLAGS)"
 ifeq ($(CONFIG_NX_RAMBACKED),y)
-	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=1 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb NXGLIB_BITSPERPIXEL=1 EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 
 gen2bppsource:
-	$(Q) $(MAKE) -C nxglib -f Makefile.devblit TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=2 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.devblit NXGLIB_BITSPERPIXEL=2 EXTRAFLAGS="$(EXTRAFLAGS)"
 ifeq ($(CONFIG_NX_RAMBACKED),y)
-	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=2 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb NXGLIB_BITSPERPIXEL=2 EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 
 gen4bppsource:
-	$(Q) $(MAKE) -C nxglib -f Makefile.devblit TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=4 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.devblit NXGLIB_BITSPERPIXEL=4 EXTRAFLAGS="$(EXTRAFLAGS)"
 ifeq ($(CONFIG_NX_RAMBACKED),y)
-	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=4 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb NXGLIB_BITSPERPIXEL=4 EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 
 gen8bppsource:
-	$(Q) $(MAKE) -C nxglib -f Makefile.devblit TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=8 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.devblit NXGLIB_BITSPERPIXEL=8 EXTRAFLAGS="$(EXTRAFLAGS)"
 ifeq ($(CONFIG_NX_RAMBACKED),y)
-	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=8 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb NXGLIB_BITSPERPIXEL=8 EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 ifeq ($(CONFIG_NX_SWCURSOR),y)
-	$(Q) $(MAKE) -C nxglib -f Makefile.cursor TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=8 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.cursor NXGLIB_BITSPERPIXEL=8 EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 
 gen16bppsource:
-	$(Q) $(MAKE) -C nxglib -f Makefile.devblit TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=16 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.devblit NXGLIB_BITSPERPIXEL=16 EXTRAFLAGS="$(EXTRAFLAGS)"
 ifeq ($(CONFIG_NX_RAMBACKED),y)
-	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=16 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb NXGLIB_BITSPERPIXEL=16 EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 ifeq ($(CONFIG_NX_SWCURSOR),y)
-	$(Q) $(MAKE) -C nxglib -f Makefile.cursor TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=16 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.cursor NXGLIB_BITSPERPIXEL=16 EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 
 gen24bppsource:
-	$(Q) $(MAKE) -C nxglib -f Makefile.devblit TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=24 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.devblit NXGLIB_BITSPERPIXEL=24 EXTRAFLAGS="$(EXTRAFLAGS)"
 ifeq ($(CONFIG_NX_RAMBACKED),y)
-	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=24 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb NXGLIB_BITSPERPIXEL=24 EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 ifeq ($(CONFIG_NX_SWCURSOR),y)
-	$(Q) $(MAKE) -C nxglib -f Makefile.cursor TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=24 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.cursor NXGLIB_BITSPERPIXEL=24 EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 
 gen32bppsources:
-	$(Q) $(MAKE) -C nxglib -f Makefile.devblit TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=32 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.devblit NXGLIB_BITSPERPIXEL=32 EXTRAFLAGS="$(EXTRAFLAGS)"
 ifeq ($(CONFIG_NX_RAMBACKED),y)
-	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=32 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb NXGLIB_BITSPERPIXEL=32 EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 ifeq ($(CONFIG_NX_SWCURSOR),y)
-	$(Q) $(MAKE) -C nxglib -f Makefile.cursor TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=32 EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.cursor NXGLIB_BITSPERPIXEL=32 EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 
 gensources: gen1bppsources gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource gen32bppsources
@@ -124,16 +124,20 @@ $(BIN): $(OBJS)
 
 mklibgraphics: $(BIN)
 
-.depend: gensources Makefile $(SRCS)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+	$(call CATFILE, Make.dep, $^)
+	$(call DELFILE, $^)
+
+.depend: gensources Makefile $(SRCS) $(TOPDIR)$(DELIM).config
+	$(Q) $(MAKE) makedepfile
 	$(Q) touch $@
 
 depend: .depend
 
 clean_context:
-	$(Q) $(MAKE) -C nxglib -f Makefile.devblit distclean TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
-	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb distclean TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
-	$(Q) $(MAKE) -C nxglib -f Makefile.cursor distclean TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.devblit distclean EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb distclean EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C nxglib -f Makefile.cursor distclean EXTRAFLAGS="$(EXTRAFLAGS)"
 
 context: gensources
 

@@ -67,6 +67,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* If we are not using the serial driver for the console, then we still must
  * provide some minimal implementation of up_putc.
  */
@@ -328,7 +329,7 @@ static void sam_shutdown(struct uart_dev_s *dev);
 static int  sam_attach(struct uart_dev_s *dev);
 static void sam_detach(struct uart_dev_s *dev);
 static int  sam_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  sam_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  sam_receive(struct uart_dev_s *dev, unsigned int *status);
 static void sam_rxint(struct uart_dev_s *dev, bool enable);
 static bool sam_rxavailable(struct uart_dev_s *dev);
 static void sam_send(struct uart_dev_s *dev, int ch);
@@ -512,7 +513,7 @@ static uart_dev_t g_usart4port =
   {
     .size   = CONFIG_USART4_TXBUFSIZE,
     .buffer = g_usart4txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_usart4priv,
 };
@@ -537,7 +538,7 @@ static uart_dev_t g_usart5port =
   {
     .size   = CONFIG_USART5_TXBUFSIZE,
     .buffer = g_usart5txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_usart5priv,
 };
@@ -562,7 +563,7 @@ static uart_dev_t g_usart6port =
   {
     .size   = CONFIG_USART6_TXBUFSIZE,
     .buffer = g_usart6txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_usart6priv,
 };
@@ -587,7 +588,7 @@ static uart_dev_t g_usart7port =
   {
     .size   = CONFIG_USART7_TXBUFSIZE,
     .buffer = g_usart7txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_usart7priv,
 };
@@ -879,7 +880,7 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int sam_receive(struct uart_dev_s *dev, uint32_t *status)
+static int sam_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
 
@@ -907,7 +908,9 @@ static void sam_rxint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      /* Receive an interrupt when their is anything in the Rx data register */
+      /* Receive an interrupt when their is anything in the Rx data
+       * register
+       */
 
       sam_serialout8(priv, SAM_USART_INTENSET_OFFSET, USART_INT_RXC);
 #endif
@@ -929,7 +932,8 @@ static void sam_rxint(struct uart_dev_s *dev, bool enable)
 static bool sam_rxavailable(struct uart_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
-  return ((sam_serialin8(priv, SAM_USART_INTFLAG_OFFSET) & USART_INT_RXC) != 0);
+  return ((sam_serialin8(priv, SAM_USART_INTFLAG_OFFSET) & USART_INT_RXC)
+          != 0);
 }
 
 /****************************************************************************
@@ -997,7 +1001,8 @@ static void sam_txint(struct uart_dev_s *dev, bool enable)
 static bool sam_txempty(struct uart_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
-  return ((sam_serialin8(priv, SAM_USART_INTFLAG_OFFSET) & USART_INT_DRE) != 0);
+  return ((sam_serialin8(priv, SAM_USART_INTFLAG_OFFSET) & USART_INT_DRE)
+          != 0);
 }
 
 /****************************************************************************

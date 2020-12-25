@@ -100,10 +100,7 @@ FAR sigq_t *nxsig_alloc_pendingsigaction(void)
         {
           /* No...Try the resource pool */
 
-          if (!sigq)
-            {
-              sigq = (FAR sigq_t *)kmm_malloc((sizeof (sigq_t)));
-            }
+          sigq = (FAR sigq_t *)kmm_malloc((sizeof (sigq_t)));
 
           /* Check if we got an allocated message */
 

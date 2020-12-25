@@ -52,6 +52,7 @@
 #include "tcp/tcp.h"
 #include "usrsock/usrsock.h"
 #include "utils/utils.h"
+#include "can/can.h"
 
 /****************************************************************************
  * Private Functions
@@ -66,12 +67,12 @@
  *   the size of the option value is greater than 'value_len', the value
  *   stored in the object pointed to by the 'value' argument will be silently
  *   truncated. Otherwise, the length pointed to by the 'value_len' argument
- *   will be modified to indicate the actual length of the'value'.
+ *   will be modified to indicate the actual length of the 'value'.
  *
  *   The 'level' argument specifies the protocol level of the option. To
  *   retrieve options at the socket level, specify the level argument as
  *   SOL_SOCKET; to retrieve options at the TCP-protocol level, the level
- *   argument is SOL_CP.
+ *   argument is SOL_TCP.
  *
  *   See <sys/socket.h> a complete list of values for the socket-level
  *   'option' argument.  Protocol-specific options are are protocol specific
@@ -102,37 +103,47 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       return -EINVAL;
     }
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      FAR struct usrsock_conn_s *conn = psock->s_conn;
-
-      DEBUGASSERT(conn);
-
-      /* Some of the socket options are handled from this function. */
-
-      switch (option)
-        {
-          case SO_TYPE:     /* Type can be read from NuttX psock structure. */
-          case SO_RCVTIMEO: /* Rx timeouts can be handled at NuttX side, thus
-                             * simplify daemon implementation. */
-          case SO_SNDTIMEO: /* Rx timeouts can be handled at NuttX side, thus
-                             * simplify daemon implementation. */
-            break;
-
-          default:          /* Other options are passed to usrsock daemon. */
-            {
-              return usrsock_getsockopt(conn, SOL_SOCKET,
-                                        option, value, value_len);
-            }
-        }
-    }
-#endif
-
   /* Process the option */
 
   switch (option)
     {
+      /* The following are valid only if the OS CLOCK feature is enabled */
+
+      case SO_RCVTIMEO:
+      case SO_SNDTIMEO:
+        {
+          socktimeo_t timeo;
+
+          /* Verify that option is the size of an 'int'.  Should also check
+           * that 'value' is properly aligned for an 'int'
+           */
+
+          if (*value_len < sizeof(struct timeval))
+            {
+              return -EINVAL;
+            }
+
+          /* Get the timeout value.  This is a atomic operation and should
+         * require no special operation.
+         */
+
+          if (option == SO_RCVTIMEO)
+            {
+              timeo = psock->s_rcvtimeo;
+            }
+          else
+            {
+              timeo = psock->s_sndtimeo;
+            }
+
+          /* Then return the timeout value to the caller */
+
+          net_dsec2timeval(timeo, (struct timeval *)value);
+          *value_len   = sizeof(struct timeval);
+        }
+        break;
+
+#ifndef CONFIG_NET_USRSOCK
       case SO_ACCEPTCONN: /* Reports whether socket listening is enabled */
         if (*value_len < sizeof(int))
           {
@@ -230,42 +241,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
         }
         break;
 
-      /* The following are valid only if the OS CLOCK feature is enabled */
-
-      case SO_RCVTIMEO:
-      case SO_SNDTIMEO:
-        {
-          socktimeo_t timeo;
-
-          /* Verify that option is the size of an 'int'.  Should also check
-           * that 'value' is properly aligned for an 'int'
-           */
-
-          if (*value_len < sizeof(struct timeval))
-            {
-              return -EINVAL;
-            }
-
-          /* Get the timeout value.  This is a atomic operation and should
-         * require no special operation.
-         */
-
-          if (option == SO_RCVTIMEO)
-            {
-              timeo = psock->s_rcvtimeo;
-            }
-          else
-            {
-              timeo = psock->s_sndtimeo;
-            }
-
-          /* Then return the timeout value to the caller */
-
-          net_dsec2timeval(timeo, (struct timeval *)value);
-          *value_len   = sizeof(struct timeval);
-        }
-        break;
-
       case SO_ERROR:      /* Reports and clears error status. */
         {
           if (*value_len != sizeof(int))
@@ -278,6 +253,19 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
         }
         break;
 
+#ifdef CONFIG_NET_TIMESTAMP
+      case SO_TIMESTAMP:
+        {
+          if (*value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+          *(FAR int *)value = (int)psock->s_timestamp;
+        }
+        break;
+#endif
+
       /* The following are not yet implemented
        * (return values other than {0,1})
        */
@@ -287,6 +275,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */
       case SO_SNDBUF:     /* Sets send buffer size */
       case SO_SNDLOWAT:   /* Sets the minimum number of bytes to output */
+#endif
 
       default:
         return -ENOPROTOOPT;
@@ -313,7 +302,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
  *   The 'level' argument specifies the protocol level of the option. To
  *   retrieve options at the socket level, specify the level argument as
  *   SOL_SOCKET; to retrieve options at the TCP-protocol level, the level
- *   argument is SOL_CP.
+ *   argument is SOL_TCP.
  *
  *   See <sys/socket.h> a complete list of values for the socket-level
  *   'option' argument.  Protocol-specific options are are protocol specific
@@ -361,13 +350,19 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
   switch (level)
     {
-      case SOL_SOCKET: /* Socket-level options (see include/sys/socket.h) */
+      case SOL_SOCKET:   /* Socket-level options (see include/sys/socket.h) */
        ret = psock_socketlevel_option(psock, option, value, value_len);
        break;
 
-      case SOL_TCP:    /* TCP protocol socket options (see include/netinet/tcp.h) */
 #ifdef CONFIG_NET_TCPPROTO_OPTIONS
+      case IPPROTO_TCP:  /* TCP protocol socket options (see include/netinet/tcp.h) */
        ret = tcp_getsockopt(psock, option, value, value_len);
+       break;
+#endif
+
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+      case SOL_CAN_RAW:/* CAN protocol socket options (see include/netpacket/can.h) */
+       ret = can_getsockopt(psock, option, value, value_len);
        break;
 #endif
 
@@ -375,16 +370,23 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
        * implemented.
        */
 
-      case SOL_IP:     /* TCP protocol socket options (see include/netinet/ip.h) */
-      case SOL_IPV6:   /* TCP protocol socket options (see include/netinet/ip6.h) */
-      case SOL_UDP:    /* TCP protocol socket options (see include/netinit/udp.h) */
-        ret = -ENOSYS;
-       break;
-
-      default:         /* The provided level is invalid */
-        ret = -EINVAL;
+      case IPPROTO_IP:   /* TCP protocol socket options (see include/netinet/ip.h) */
+      case IPPROTO_IPV6: /* TCP protocol socket options (see include/netinet/ip6.h) */
+      case IPPROTO_UDP:  /* TCP protocol socket options (see include/netinit/udp.h) */
+      default:           /* The provided level is invalid */
+        ret = -ENOPROTOOPT;
        break;
     }
+
+#ifdef CONFIG_NET_USRSOCK
+  /* Try usrsock further if the protocol not available */
+
+  if (ret == -ENOPROTOOPT && psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      ret = usrsock_getsockopt(psock->s_conn, level,
+                               option, value, value_len);
+    }
+#endif
 
   return ret;
 }
@@ -403,7 +405,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
  *   The 'level' argument specifies the protocol level of the option. To
  *   retrieve options at the socket level, specify the level argument as
  *   SOL_SOCKET; to retrieve options at the TCP-protocol level, the level
- *   argument is SOL_CP.
+ *   argument is SOL_TCP.
  *
  *   See <sys/socket.h> a complete list of values for the socket-level
  *   'option' argument.  Protocol-specific options are are protocol specific

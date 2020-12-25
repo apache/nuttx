@@ -140,6 +140,8 @@ extern char expected_hello_old[5];
  * Public Function Prototypes
  ****************************************************************************/
 
+int negotiate(int fd, struct vif_info *vif);
+
 extern struct init_message *create_init_message(void);
 extern int read_init_message(int fd, struct init_message *ci);
 extern int write_init_message(int fd, struct init_message *ci);

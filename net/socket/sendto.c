@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/socket/sendto.c
  *
- *   Copyright (C) 2007-2009, 2011-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2015, 2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,12 +127,10 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Verify that non-NULL pointers were passed */
 
-#ifdef CONFIG_DEBUG_FEATURES
   if (buf == NULL)
     {
       return -EINVAL;
     }
-#endif
 
   /* If to is NULL or tolen is zero, then this function is same as send (for
    * connected socket types)

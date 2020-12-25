@@ -60,7 +60,7 @@ endif
 
 # Support for network access using streams
 
-ifneq ($(CONFIG_NFILE_STREAMS),0)
+ifeq ($(CONFIG_FILE_STREAM),y)
 SOCK_CSRCS += net_checksd.c
 endif
 
@@ -74,3 +74,9 @@ endif
 
 DEPPATH += --dep-path socket
 VPATH += :socket
+
+# Support for control messages (CMSG)
+ifeq ($(CONFIG_NET_CMSG),y)
+SOCK_CSRCS += recvmsg.c
+SOCK_CSRCS += sendmsg.c
+endif

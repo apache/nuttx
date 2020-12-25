@@ -48,6 +48,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -1348,7 +1349,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
        * will be faster.
        */
 
-      spiinfo("Frequency %d->%d\n", frequency, actual);
+      spiinfo("Frequency %" PRId32 "->%" PRId32 "\n", frequency, actual);
 
       priv->frequency = frequency;
       priv->actual    = actual;
@@ -1476,7 +1477,6 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
   uint16_t setbits;
   uint16_t clrbits;
-  int savbits = nbits;
 
   spiinfo("nbits=%d\n", nbits);
 
@@ -1513,9 +1513,11 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       spi_modifycr2(priv, setbits, clrbits);
       spi_modifycr1(priv, SPI_CR1_SPE, 0);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so that subsequent re-configurations will
+       * be faster.
+       */
 
-      priv->nbits = savbits; /* nbits has been clobbered... save the signed value. */
+      priv->nbits = nbits;
     }
 }
 
@@ -1544,11 +1546,8 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev,
 #endif
 
 #ifdef CONFIG_SPI_BITORDER
-  uint16_t setbitscr1;
-  uint16_t clrbitscr1;
-  uint16_t setbitscr2;
-  uint16_t clrbitscr2;
-  int savbits = nbits;
+  uint16_t setbits;
+  uint16_t clrbits;
 
   spiinfo("features=%08x\n", features);
 
@@ -1637,11 +1636,15 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 
   if (priv->nbits > 8)
     {
-      spiinfo("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
+      spiinfo("Sent: %04" PRIx32 " Return: %04" PRIx32
+              " Status: %02" PRIx32 "\n",
+              wd, ret, regval);
     }
   else
     {
-      spiinfo("Sent: %02x Return: %02x Status: %02x\n", wd, ret, regval);
+      spiinfo("Sent: %02" PRIx32 " Return: %02" PRIx32
+              " Status: %02" PRIx32 "\n",
+              wd, ret, regval);
     }
 
   UNUSED(regval);
@@ -1790,13 +1793,15 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
   DEBUGASSERT(priv != NULL);
 
-  /* Convert the number of word to a number of bytes */
+  /* Convert the number of word to a number of bytes. */
 
   size_t nbytes = (priv->nbits > 8) ? nwords << 1 : nwords;
 
 #ifdef CONFIG_STM32F7_SPI_DMATHRESHOLD
 
-  /* If this is a small SPI transfer, then let spi_exchange_nodma() do the work. */
+  /* If this is a small SPI transfer, then let spi_exchange_nodma()
+   * do the work.
+   */
 
   if (nbytes <= CONFIG_STM32F7_SPI_DMATHRESHOLD)
     {
@@ -1820,9 +1825,9 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   /* If this bus uses a in driver DMA aligned buffers we can skip the test */
 
   if ((txbuffer && priv->txbuf == 0 &&
-      !stm32_dmacapable((uint32_t)txbuffer, nwords, priv->txccr)) ||
+      !stm32_dmacapable((uintptr_t)txbuffer, nwords, priv->txccr)) ||
       (rxbuffer && priv->rxbuf == 0 &&
-       !stm32_dmacapable((uint32_t)rxbuffer, nwords, priv->rxccr)))
+       !stm32_dmacapable((uintptr_t)rxbuffer, nwords, priv->rxccr)))
     {
       /* Unsupported memory region or not in driver buffers
        * fall back to non-DMA method.
@@ -1846,10 +1851,10 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* If this bus uses a in driver buffers we will incur 2 copies,
        * The copy cost is << less the non DMA transfer time and having
-       * the buffer in the driver ensures DMA can be used. This is bacause
+       * the buffer in the driver ensures DMA can be used. This is because
        * the API does not support passing the buffer extent so the only
        * extent is buffer + the transfer size. These can sizes be less than
-       * the cache line size, and not aligned and tyicaly greater then 4
+       * the cache line size, and not aligned and typically greater then 4
        * bytes, which is about the break even point for the DMA IO overhead.
        */
 
@@ -2080,7 +2085,9 @@ static int spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
       if (sval <= 0)
         {
-          /* Exclusive lock is held, do not allow entry to deeper PM states. */
+          /* Exclusive lock is held, do not allow entry to deeper
+           * PM states.
+           */
 
           return -EBUSY;
         }

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/risc-v/src/gap8/gap8_interrupt.c
  * GAP8 event system
  *
@@ -32,18 +32,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- *  GAP8 features a FC controller and a 8-core cluster. IRQ from peripherals have
- *  unique ID, which are dispatched to the FC or cluster by the SOC event unit, and
- *  then by the FC event unit or cluster event unit, and finally to FC or cluster.
- *  Peripherals share the same IRQ entry.
- ************************************************************************************/
+/****************************************************************************
+ *  GAP8 features a FC controller and a 8-core cluster. IRQ from peripherals
+ *  have unique ID, which are dispatched to the FC or cluster by the SOC
+ *  event unit, and then by the FC event unit or cluster event unit, and
+ *  finally to FC or cluster. Peripherals share the same IRQ entry.
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -58,11 +58,11 @@
 
 volatile uint32_t *g_current_regs;
 
-/************************************************************************************
- * Public Function
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/* Function exported to the Nuttx kernel */
+/* Function exported to the NuttX kernel */
 
 void up_mdelay(unsigned int time)
 {
@@ -100,8 +100,8 @@ void up_irqinitialize(void)
 {
   /* Deactivate all the soc events */
 
-  SOC_EU->FC_MASK_MSB = 0xFFFFFFFF;
-  SOC_EU->FC_MASK_LSB = 0xFFFFFFFF;
+  SOC_EU->FC_MASK_MSB = 0xffffffff;
+  SOC_EU->FC_MASK_LSB = 0xffffffff;
 
   /* enable soc peripheral interrupt */
 

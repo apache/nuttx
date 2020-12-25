@@ -104,13 +104,6 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
       goto errout;
     }
 
-  /* Check for the fake root directory (which has no inode) */
-
-  if (strcmp(path, "/") == 0)
-    {
-      return statpseudofs(NULL, buf);
-    }
-
   /* Get an inode for this file */
 
   SETUP_SEARCH(&desc, path, false);

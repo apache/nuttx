@@ -172,6 +172,7 @@ static void board_sdcard_enable(FAR void *arg)
               else
                 {
                   _err("ERROR: Failed to mount the SDCARD. %d\n", errno);
+                  cxd56_sdio_resetstatus(g_sdhci.sdhci);
                   goto release_frequency_lock;
                 }
             }
@@ -284,7 +285,7 @@ static int board_sdcard_detect_int(int irq, FAR void *context, FAR void *arg)
 
       if (up_interrupt_context())
         {
-          DEBUGASSERT(work_available(&g_sdcard_work));
+          work_cancel(HPWORK, &g_sdcard_work);
           if (inserted)
             {
               work_queue(HPWORK, &g_sdcard_work, board_sdcard_enable,

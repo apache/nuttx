@@ -487,10 +487,10 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
           nameptr += 10 + 4;
 
           ninfo("IPv4 address: %d.%d.%d.%d\n",
-                (ans->u.ipv4.s_addr) & 0xff,
-                (ans->u.ipv4.s_addr >> 8) & 0xff,
-                (ans->u.ipv4.s_addr >> 16) & 0xff,
-                (ans->u.ipv4.s_addr >> 24) & 0xff);
+                (int)((ans->u.ipv4.s_addr) & 0xff),
+                (int)((ans->u.ipv4.s_addr >> 8) & 0xff),
+                (int)((ans->u.ipv4.s_addr >> 16) & 0xff),
+                (int)((ans->u.ipv4.s_addr >> 24) & 0xff));
 
           inaddr                  = &addr[naddr_read].ipv4;
           inaddr->sin_family      = AF_INET;

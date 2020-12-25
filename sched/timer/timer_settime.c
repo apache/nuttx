@@ -43,7 +43,7 @@
 static inline void timer_signotify(FAR struct posix_timer_s *timer);
 static inline void timer_restart(FAR struct posix_timer_s *timer,
                                  wdparm_t itimer);
-static void timer_timeout(int argc, wdparm_t itimer, ...);
+static void timer_timeout(wdparm_t itimer);
 
 /****************************************************************************
  * Private Functions
@@ -98,8 +98,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
   if (timer->pt_delay)
     {
       timer->pt_last = timer->pt_delay;
-      wd_start(timer->pt_wdog, timer->pt_delay,
-               timer_timeout, 1, itimer);
+      wd_start(&timer->pt_wdog, timer->pt_delay, timer_timeout, itimer);
     }
 }
 
@@ -111,9 +110,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
  *   signaled.
  *
  * Input Parameters:
- *   argc   - the number of arguments (should be 1)
  *   itimer - A reference to the POSIX timer that just timed out
- *   signo  - The signal to use to wake up the task
  *
  * Returned Value:
  *   None
@@ -123,7 +120,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
  *
  ****************************************************************************/
 
-static void timer_timeout(int argc, wdparm_t itimer, ...)
+static void timer_timeout(wdparm_t itimer)
 {
   FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)itimer;
 
@@ -236,7 +233,7 @@ int timer_settime(timer_t timerid, int flags,
     {
       /* Get the number of ticks before the underlying watchdog expires */
 
-      delay = wd_gettime(timer->pt_wdog);
+      delay = wd_gettime(&timer->pt_wdog);
 
       /* Convert that to a struct timespec and return it */
 
@@ -248,7 +245,7 @@ int timer_settime(timer_t timerid, int flags,
    * timer_settime() is called).
    */
 
-  wd_cancel(timer->pt_wdog);
+  wd_cancel(&timer->pt_wdog);
 
   /* Cancel any pending notification */
 
@@ -288,12 +285,9 @@ int timer_settime(timer_t timerid, int flags,
 
   if ((flags & TIMER_ABSTIME) != 0)
     {
-      /* Calculate a delay corresponding to the absolute time in 'value'.
-       * NOTE:  We have internal knowledge the clock_abstime2ticks only
-       * returns an error if clockid != CLOCK_REALTIME.
-       */
+      /* Calculate a delay corresponding to the absolute time in 'value' */
 
-      clock_abstime2ticks(CLOCK_REALTIME, &value->it_value, &delay);
+      clock_abstime2ticks(timer->pt_clock, &value->it_value, &delay);
     }
   else
     {
@@ -323,8 +317,8 @@ int timer_settime(timer_t timerid, int flags,
        */
 
       timer->pt_last = delay;
-      ret = wd_start(timer->pt_wdog, delay, timer_timeout,
-                     1, (wdparm_t)timer);
+      ret = wd_start(&timer->pt_wdog, delay,
+                     timer_timeout, (wdparm_t)timer);
       if (ret < 0)
         {
           set_errno(-ret);

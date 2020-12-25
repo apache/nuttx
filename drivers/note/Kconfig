@@ -1,0 +1,88 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig DRIVER_NOTE
+	bool "Note Driver Support"
+	depends on SCHED_INSTRUMENTATION
+	default n
+
+if DRIVER_NOTE
+
+choice
+	prompt "Note driver selection"
+	default DRIVER_NOTERAM
+
+config DRIVER_NOTERAM
+	bool "Note RAM driver"
+	depends on !SCHED_INSTRUMENTATION_CSECTION && (!SCHED_INSTRUMENTATION_SPINLOCK || !SMP)
+	---help---
+		If this option is selected, then in-memory buffering logic is
+		enabled to capture scheduler instrumentation data.  This has
+		the advantage that (1) the platform logic does not have to provide
+		the sched_note_* interfaces described for the previous settings.
+		Instead, the buffering logic catches all of these.  It encodes
+		timestamps the scheduler note and adds the note to an in-memory,
+		circular buffer.  And (2) buffering the scheduler instrumentation
+		data (versus performing some output operation) minimizes the impact
+		of the instrumentation on the behavior of the system. If the in-memory
+		buffer becomes full, then older notes are overwritten by newer notes.
+
+		A character driver is provided which can be used by an application
+		to read data from the in-memory, scheduler instrumentation "note"
+		buffer.
+
+		NOTE: This option is not available if critical sections are being
+		monitor (nor if spinlocks are being monitored in SMP configuration)
+		because there would be a logical error in the design in those cases.
+		That error is that these interfaces call enter_ and leave_critical_section
+		(and which us spinlocks in SMP mode).  That means that each call to
+		sched_note_get() causes several additional entries to be added from
+		the note buffer in order to remove one entry.
+
+config DRIVER_NOTEARCH
+	bool "Note Arch driver"
+	---help---
+		The note driver is provided by arch specific code.
+
+endchoice
+
+config DRIVER_NOTERAM_BUFSIZE
+	int "Note RAM buffer size"
+	depends on DRIVER_NOTERAM
+	default 2048
+	---help---
+		The size of the in-memory, circular instrumentation buffer (in bytes).
+
+config DRIVER_NOTERAM_TASKNAME_BUFSIZE
+	int "Note RAM task name buffer size"
+	depends on DRIVER_NOTERAM
+	default 256 if TASK_NAME_SIZE > 0
+	default 0 if TASK_NAME_SIZE = 0
+	---help---
+		The size of the in-memory task name buffer (in bytes).
+		The buffer is used to hold the name of the task during instrumentation.
+		Trace dump can find and show a task name corresponding to given pid in
+		the instrumentation data by using this buffer.
+		If 0 is specified, this feature is disabled and trace dump shows only
+		the name of the newly created task.
+
+config DRIVER_NOTERAM_DEFAULT_NOOVERWRITE
+	bool "Disable overwrite by default"
+	depends on DRIVER_NOTERAM
+	default n
+	---help---
+		Disables overwriting old notes in the circular buffer when the buffer
+		is full by default. This is useful to keep instrumentation data of the
+		beginning of a system boot.
+
+config DRIVER_NOTECTL
+	bool "Scheduler instrumentation filter control driver"
+	default n
+	depends on SCHED_INSTRUMENTATION_FILTER
+	---help---
+		If this option is selected, the instrumentation filter control device
+		/dev/notectl is provided.
+
+endif

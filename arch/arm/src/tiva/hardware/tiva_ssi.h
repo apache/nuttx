@@ -165,17 +165,17 @@
 
 /* SSI Control 0 (SSICR0), offset 0x000 */
 
-#define SSI_CR0_DSS_SHIFT           0         /* Bits 3-0: SSI Data Size Select */
+#define SSI_CR0_DSS_SHIFT           0                            /* Bits 3-0: SSI Data Size Select */
 #define SSI_CR0_DSS_MASK            (0x0f << SSI_CR0_DSS_SHIFT)
 #define   SSI_CR0_DSS(n)            ((n-1) << SSI_CR0_DSS_SHIFT) /* n={4,5,..16} */
-#define SSI_CR0_FRF_SHIFT           4         /* Bits 5-4: SSI Frame Format Select */
+#define SSI_CR0_FRF_SHIFT           4                            /* Bits 5-4: SSI Frame Format Select */
 #define SSI_CR0_FRF_MASK            (3 << SSI_CR0_FRF_SHIFT)
 #define   SSI_CR0_FRF_SPI           (0 << SSI_CR0_FRF_SHIFT)     /* Freescale SPI format */
 #define   SSI_CR0_FRF_SSFF          (1 << SSI_CR0_FRF_SHIFT)     /* TI synchronous serial fram format */
 #define   SSI_CR0_FRF_UWIRE         (2 << SSI_CR0_FRF_SHIFT)     /* MICROWIRE frame format */
-  #define SSI_CR0_SPO               (1 << 6)  /* Bit 6:  SSI Serial Clock Polarity */
-#define SSI_CR0_SPH                 (1 << 7)  /* Bit 7:  SSI Serial Clock Phase */
-#define SSI_CR0_SCR_SHIFT           8         /* Bits 15-8: SSI Serial Clock Rate */
+  #define SSI_CR0_SPO               (1 << 6)                     /* Bit 6:  SSI Serial Clock Polarity */
+#define SSI_CR0_SPH                 (1 << 7)                     /* Bit 7:  SSI Serial Clock Phase */
+#define SSI_CR0_SCR_SHIFT           8                            /* Bits 15-8: SSI Serial Clock Rate */
 #define SSI_CR0_SCR_MASK            (0xff << SSI_CR0_SCR_SHIFT)
 
 /* SSI Control 1 (SSICR1), offset 0x004 */

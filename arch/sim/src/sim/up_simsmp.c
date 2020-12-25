@@ -37,70 +37,50 @@
  * Included Files
  ****************************************************************************/
 
-#define _GNU_SOURCE 1
-
 #include <stdint.h>
 #include <pthread.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include <signal.h>
+#include <sched.h>
 #include <errno.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Must match definitions in arch/sim/include/spinlock.h */
-
-#define SP_UNLOCKED   0   /* The Un-locked state */
-#define SP_LOCKED     1   /* The Locked state */
+#include "up_internal.h"
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/* Must match definitions in arch/sim/include/spinlock.h.  Assuming that
- * bool and unsigned char are equivalent.
- */
-
-typedef unsigned char spinlock_t;
-
 struct sim_cpuinfo_s
 {
-  int cpu;                /* CPU number */
-  pthread_mutex_t mutex;  /* For synchronization */
+  int cpu;                       /* CPU number */
+  pthread_cond_t cpu_init_done;  /* For synchronization */
+  pthread_mutex_t cpu_init_lock;
+  bool is_cpu_initialized;
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static pthread_key_t          g_cpukey;
-static pthread_t              g_sim_cputhread[CONFIG_SMP_NCPUS];
+static pthread_key_t g_cpu_key;
+static pthread_t     g_cpu_thread[CONFIG_SMP_NCPUS];
 
-/* These spinlocks are used in the SMP configuration in order to implement
- * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
- *
- * 1. The up_cpu_pause() implementation on CPUn locks both g_cpu_wait[m]
- *    and g_cpu_paused[m].  CPUn then waits spinning on g_cpu_paused[m].
- * 2. CPUm receives the interrupt it (1) unlocks g_cpu_paused[m] and
- *    (2) locks g_cpu_wait[m].  The first unblocks CPUn and the second
- *    blocks CPUm in the interrupt handler.
- *
- * When CPUm resumes, CPUn unlocks g_cpu_wait[m] and the interrupt handler
- * on CPUm continues.  CPUm must, of course, also then unlock g_cpu_wait[m]
- * so that it will be ready for the next pause operation.
- */
-
-volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
-volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
+static pthread_t     g_timer_thread;
 
 /****************************************************************************
  * NuttX domain function prototypes
  ****************************************************************************/
 
-void nx_start(void);
-void up_cpu_started(void);
-int up_cpu_paused(int cpu);
-void host_sleepuntil(uint64_t nsec);
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+void sched_note_cpu_start(struct tcb_s *tcb, int cpu);
+void sched_note_cpu_pause(struct tcb_s *tcb, int cpu);
+void sched_note_cpu_resume(struct tcb_s *tcb, int cpu);
+#endif
+
+void up_irqinitialize(void);
+
+extern uint8_t g_nx_initstate;
 
 /****************************************************************************
  * Private Functions
@@ -129,32 +109,32 @@ void host_sleepuntil(uint64_t nsec);
 static void *sim_idle_trampoline(void *arg)
 {
   struct sim_cpuinfo_s *cpuinfo = (struct sim_cpuinfo_s *)arg;
-  sigset_t set;
+#ifdef CONFIG_SIM_WALLTIME
+  uint64_t now = 0;
+#endif
   int ret;
 
-  /* Set the CPU number zero for the CPU thread */
+  /* Set the CPU number for the CPU thread */
 
-  ret = pthread_setspecific(g_cpukey,
+  ret = pthread_setspecific(g_cpu_key,
                            (const void *)((uintptr_t)cpuinfo->cpu));
   if (ret != 0)
     {
       return NULL;
     }
 
-  /* Make sure the SIGUSR1 is not masked */
+  /* Initialize IRQ */
 
-  sigemptyset(&set);
-  sigaddset(&set, SIGUSR1);
-
-  ret = pthread_sigmask(SIG_UNBLOCK, &set, NULL);
-  if (ret < 0)
-    {
-      return NULL;
-    }
+  up_irqinitialize();
 
   /* Let up_cpu_start() continue */
 
-  pthread_mutex_unlock(&cpuinfo->mutex);
+  pthread_mutex_lock(&cpuinfo->cpu_init_lock);
+
+  cpuinfo->is_cpu_initialized = true;
+  pthread_cond_signal(&cpuinfo->cpu_init_done);
+
+  pthread_mutex_unlock(&cpuinfo->cpu_init_lock);
 
   /* up_cpu_started() is logically a part of this function but needs to be
    * inserted in the path because in needs to access NuttX domain definition.
@@ -167,8 +147,6 @@ static void *sim_idle_trampoline(void *arg)
   for (; ; )
     {
 #ifdef CONFIG_SIM_WALLTIME
-      uint64_t now = 0;
-
       /* Wait a bit so that the timing is close to the correct rate. */
 
       now += 1000 * CONFIG_USEC_PER_TICK;
@@ -176,7 +154,7 @@ static void *sim_idle_trampoline(void *arg)
 #else
       /* Give other pthreads/CPUs a shot */
 
-      pthread_yield();
+      sched_yield();
 #endif
     }
 
@@ -184,25 +162,27 @@ static void *sim_idle_trampoline(void *arg)
 }
 
 /****************************************************************************
- * Name: sim_handle_signal
- *
- * Description:
- *   This is the SIGUSR signal handler.  It implements the core logic of
- *   up_cpu_pause() on the thread of execution the simulated CPU.
- *
- * Input Parameters:
- *   arg - Standard sigaction arguments
- *
- * Returned Value:
- *   None
- *
+ * Name: sim_host_timer_handler
  ****************************************************************************/
 
-static void sim_handle_signal(int signo, siginfo_t *info, void *context)
+static void *sim_host_timer_handler(void *arg)
 {
-  int cpu = (int)((uintptr_t)pthread_getspecific(g_cpukey));
+  /* Wait until OSINIT_OSREADY(5) */
 
-  up_cpu_paused(cpu);
+  while (g_nx_initstate < 5)
+    {
+      host_sleep(10 * 1000); /* 10ms */
+    }
+
+  /* Send a periodic timer event to CPU0 */
+
+  while (1)
+    {
+      pthread_kill(g_cpu_thread[0], SIGUSR1);
+      host_sleep(10 * 1000); /* 10ms */
+    }
+
+  return NULL;
 }
 
 /****************************************************************************
@@ -226,15 +206,13 @@ static void sim_handle_signal(int signo, siginfo_t *info, void *context)
 
 void sim_cpu0_start(void)
 {
-  struct sigaction act;
-  sigset_t set;
   int ret;
 
-  g_sim_cputhread[0] = pthread_self();
+  g_cpu_thread[0] = pthread_self();
 
   /* Create the pthread key */
 
-  ret = pthread_key_create(&g_cpukey, NULL);
+  ret = pthread_key_create(&g_cpu_key, NULL);
   if (ret != 0)
     {
       return;
@@ -242,38 +220,18 @@ void sim_cpu0_start(void)
 
   /* Set the CPU number zero for the CPU thread */
 
-  ret = pthread_setspecific(g_cpukey, (const void *)0);
+  ret = pthread_setspecific(g_cpu_key, (const void *)0);
   if (ret != 0)
     {
       return;
     }
 
-  /* Register the common signal handler for all threads */
+  /* NOTE: IRQ initialization will be done in up_irqinitialize */
 
-  act.sa_sigaction = sim_handle_signal;
-  act.sa_flags     = SA_SIGINFO;
-  sigemptyset(&act.sa_mask);
+  /* Create timer thread to send a periodic timer event */
 
-  ret = sigaction(SIGUSR1, &act, NULL);
-  if (ret < 0)
-    {
-      return;
-    }
-
-  /* Make sure the SIGUSR1 is not masked */
-
-  sigemptyset(&set);
-  sigaddset(&set, SIGUSR1);
-
-  ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
-  if (ret < 0)
-    {
-      return;
-    }
-
-  /* Give control to nx_start() */
-
-  nx_start();
+  ret = pthread_create(&g_timer_thread,
+                       NULL, sim_host_timer_handler, NULL);
 }
 
 /****************************************************************************
@@ -294,7 +252,7 @@ void sim_cpu0_start(void)
 
 int up_cpu_index(void)
 {
-  void *value = pthread_getspecific(g_cpukey);
+  void *value = pthread_getspecific(g_cpu_key);
   return (int)((uintptr_t)value);
 }
 
@@ -330,118 +288,54 @@ int up_cpu_start(int cpu)
   struct sim_cpuinfo_s cpuinfo;
   int ret;
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the start event */
+
+  sched_note_cpu_start(up_this_task(), cpu);
+#endif
+
   /* Initialize the CPU info */
 
   cpuinfo.cpu = cpu;
-  ret = pthread_mutex_init(&cpuinfo.mutex, NULL);
-  if (ret != 0)
-    {
-      return -ret;  /* REVISIT:  That is a host errno value. */
-    }
+  cpuinfo.is_cpu_initialized = false;
 
-  /* Lock the mutex */
-
-  ret = pthread_mutex_lock(&cpuinfo.mutex);
-  if (ret != 0)
-    {
-      ret = -ret;  /* REVISIT: This is a host errno value. */
-      goto errout_with_mutex;
-    }
+  pthread_mutex_init(&cpuinfo.cpu_init_lock, NULL);
+  pthread_cond_init(&cpuinfo.cpu_init_done, NULL);
 
   /* Start the CPU emulation thread.  This is analogous to starting the CPU
    * in a multi-CPU hardware model.
    */
 
-  ret = pthread_create(&g_sim_cputhread[cpu],
+  ret = pthread_create(&g_cpu_thread[cpu],
                        NULL, sim_idle_trampoline, &cpuinfo);
   if (ret != 0)
     {
       ret = -ret;  /* REVISIT:  That is a host errno value. */
-      goto errout_with_lock;
+      goto errout_with_cond;
     }
 
-  /* Try to lock the mutex again.  This will block until the pthread unlocks
-   * the mutex.
-   */
+  /* This will block until the pthread post the semaphore */
 
-  ret = pthread_mutex_lock(&cpuinfo.mutex);
-  if (ret != 0)
+  pthread_mutex_lock(&cpuinfo.cpu_init_lock);
+
+  while (!cpuinfo.is_cpu_initialized)
     {
-      ret = -ret;  /* REVISIT:  That is a host errno value. */
+      pthread_cond_wait(&cpuinfo.cpu_init_done, &cpuinfo.cpu_init_lock);
     }
 
-errout_with_lock:
-  pthread_mutex_unlock(&cpuinfo.mutex);
+  pthread_mutex_unlock(&cpuinfo.cpu_init_lock);
 
-errout_with_mutex:
-  pthread_mutex_destroy(&cpuinfo.mutex);
+errout_with_cond:
+  pthread_mutex_destroy(&cpuinfo.cpu_init_lock);
+  pthread_cond_destroy(&cpuinfo.cpu_init_done);
   return ret;
 }
 
 /****************************************************************************
- * Name: up_cpu_pause
- *
- * Description:
- *   Save the state of the current task at the head of the
- *   g_assignedtasks[cpu] task list and then pause task execution on the
- *   CPU.
- *
- *   This function is called by the OS when the logic executing on one CPU
- *   needs to modify the state of the g_assignedtasks[cpu] list for another
- *   CPU.
- *
- * Input Parameters:
- *   cpu - The index of the CPU to be stopped/
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
+ * Name: sim_send_ipi(int cpu)
  ****************************************************************************/
 
-int up_cpu_pause(int cpu)
+void sim_send_ipi(int cpu)
 {
-  /* Take the spinlock that will prevent the CPU thread from running */
-
-  g_cpu_wait[cpu]   = SP_LOCKED;
-  g_cpu_paused[cpu] = SP_LOCKED;
-
-  /* Signal the CPU thread */
-
-  pthread_kill(g_sim_cputhread[cpu], SIGUSR1);
-
-  /* Spin, waiting for the thread to pause */
-
-  while (g_cpu_paused[cpu] != 0)
-    {
-      pthread_yield();
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: up_cpu_resume
- *
- * Description:
- *   Restart the cpu after it was paused via up_cpu_pause(), restoring the
- *   state of the task at the head of the g_assignedtasks[cpu] list, and
- *   resume normal tasking.
- *
- *   This function is called after up_cpu_pause in order resume operation of
- *   the CPU after modifying its g_assignedtasks[cpu] list.
- *
- * Input Parameters:
- *   cpu - The index of the CPU being re-started.
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int up_cpu_resume(int cpu)
-{
-  /* Release the spinlock that will alloc the CPU thread to continue */
-
-  g_cpu_wait[cpu] = SP_UNLOCKED;
-  return 0;
+  pthread_kill(g_cpu_thread[cpu], SIGUSR1);
 }

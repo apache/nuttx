@@ -253,19 +253,6 @@ static void max11802_notify(FAR struct max11802_dev_s *priv)
 {
   int i;
 
-  /* If there are threads waiting for read data, then signal one of them
-   * that the read data is available.
-   */
-
-  if (priv->nwaiters > 0)
-    {
-      /* After posting this semaphore, we need to exit because the sample
-       * is no longer available.
-       */
-
-      nxsem_post(&priv->waitsem);
-    }
-
   /* If there are threads waiting on poll() for MAX11802 data to become
    * available, then wake them up now.  NOTE: we wake up all waiting
    * threads because we do not know that they are going to do.  If they
@@ -281,6 +268,19 @@ static void max11802_notify(FAR struct max11802_dev_s *priv)
           iinfo("Report events: %02x\n", fds->revents);
           nxsem_post(fds->sem);
         }
+    }
+
+  /* If there are threads waiting for read data, then signal one of them
+   * that the read data is available.
+   */
+
+  if (priv->nwaiters > 0)
+    {
+      /* After posting this semaphore, we need to exit because the sample
+       * is no longer available.
+       */
+
+      nxsem_post(&priv->waitsem);
     }
 }
 
@@ -439,7 +439,7 @@ static int max11802_schedule(FAR struct max11802_dev_s *priv)
    * while the pen remains down.
    */
 
-  wd_cancel(priv->wdog);
+  wd_cancel(&priv->wdog);
 
   /* Transfer processing to the worker thread.  Since MAX11802 interrupts are
    * disabled while the work is pending, no special action should be required
@@ -460,10 +460,10 @@ static int max11802_schedule(FAR struct max11802_dev_s *priv)
  * Name: max11802_wdog
  ****************************************************************************/
 
-static void max11802_wdog(int argc, uint32_t arg1, ...)
+static void max11802_wdog(wdparm_t arg)
 {
   FAR struct max11802_dev_s *priv =
-    (FAR struct max11802_dev_s *)((uintptr_t)arg1);
+    (FAR struct max11802_dev_s *)arg;
 
   max11802_schedule(priv);
 }
@@ -497,7 +497,7 @@ static void max11802_worker(FAR void *arg)
    * by this function and this function is serialized on the worker thread.
    */
 
-  wd_cancel(priv->wdog);
+  wd_cancel(&priv->wdog);
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -580,8 +580,8 @@ static void max11802_worker(FAR void *arg)
 
       iinfo("Previous pen up event still in buffer\n");
       max11802_notify(priv);
-      wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
-               (uint32_t)priv);
+      wd_start(&priv->wdog, MAX11802_WDOG_DELAY,
+               max11802_wdog, (wdparm_t)priv);
       goto ignored;
     }
   else
@@ -620,8 +620,8 @@ static void max11802_worker(FAR void *arg)
 
       /* Continue to sample the position while the pen is down */
 
-      wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
-               (uint32_t)priv);
+      wd_start(&priv->wdog, MAX11802_WDOG_DELAY,
+               max11802_wdog, (wdparm_t)priv);
 
       /* Check if data is valid */
 
@@ -1165,7 +1165,6 @@ int max11802_register(FAR struct spi_dev_s *spi,
   memset(priv, 0, sizeof(struct max11802_dev_s));
   priv->spi     = spi;               /* Save the SPI device handle */
   priv->config  = config;            /* Save the board configuration */
-  priv->wdog    = wd_create();       /* Create a watchdog timer */
   priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
   priv->threshy = INVALID_THRESHOLD; /* Initialize thresholding logic */
 

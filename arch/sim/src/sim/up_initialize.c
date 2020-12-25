@@ -42,7 +42,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
+#include <nuttx/audio/audio.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/fs/ioctl.h>
@@ -50,6 +50,7 @@
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/note/note_driver.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
@@ -91,7 +92,9 @@ static void up_init_smartfs(void)
     {
       mtd = m25p_initialize(spi);
 
-      /* Now initialize a SMART Flash block device and bind it to the MTD device */
+      /* Now initialize a SMART Flash block device and bind it to the MTD
+       * device
+       */
 
       if (mtd != NULL)
         {
@@ -108,7 +111,9 @@ static void up_init_smartfs(void)
     {
       mtd = sst26_initialize_spi(spi);
 
-      /* Now initialize a SMART Flash block device and bind it to the MTD device */
+      /* Now initialize a SMART Flash block device and bind it to the MTD
+       * device
+       */
 
       if (mtd != NULL)
         {
@@ -125,7 +130,9 @@ static void up_init_smartfs(void)
     {
       mtd = w25_initialize(spi);
 
-      /* Now initialize a SMART Flash block device and bind it to the MTD device */
+      /* Now initialize a SMART Flash block device and bind it to the MTD
+       * device
+       */
 
       if (mtd != NULL)
         {
@@ -143,7 +150,9 @@ static void up_init_smartfs(void)
     {
       mtd = n25qxxx_initialize(qspi, 0);
 
-      /* Now initialize a SMART Flash block device and bind it to the MTD device */
+      /* Now initialize a SMART Flash block device and bind it to the MTD
+       * device
+       */
 
       if (mtd != NULL)
         {
@@ -212,8 +221,7 @@ void up_initialize(void)
   loop_register();          /* Standard /dev/loop */
 #endif
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_DRIVER_NOTE)
+#if defined(CONFIG_DRIVER_NOTE)
   note_register();          /* Non-standard /dev/note */
 #endif
 
@@ -221,15 +229,11 @@ void up_initialize(void)
   rpmsg_serialinit();
 #endif
 
-#if defined(USE_DEVCONSOLE)
-  /* Start the simulated UART device */
+  /* Register some tty-port to access tty-port on sim platform */
 
-  simuart_start();
+  up_uartinit();
 
-  /* Register a console (or not) */
-
-  up_devconsole();          /* Our private /dev/console */
-#elif defined(CONFIG_CONSOLE_SYSLOG)
+#if defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
 #endif
 
@@ -277,5 +281,10 @@ void up_initialize(void)
 
 #if defined(CONFIG_FS_SMARTFS) && (defined(CONFIG_SIM_SPIFLASH) || defined(CONFIG_SIM_QSPIFLASH))
   up_init_smartfs();
+#endif
+
+#ifdef CONFIG_SIM_SOUND
+  audio_register("pcm0p", sim_audio_initialize(true));
+  audio_register("pcm0c", sim_audio_initialize(false));
 #endif
 }

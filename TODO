@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 18, 2020)
+NuttX TODO List (Last updated November 26, 2020)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -10,15 +10,15 @@ issues related to each board port.
 nuttx/:
 
  (16)  Task/Scheduler (sched/)
-  (5)  SMP
+  (2)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (5)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread, libs/libc/pthread)
   (0)  Message Queues (sched/mqueue)
   (1)  Work Queues (sched/wqueue)
-  (8)  Kernel/Protected Build
-  (3)  C++ Support
+  (6)  Kernel/Protected Build
+  (2)  C++ Support
   (5)  Binary loaders (binfmt/)
  (17)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
@@ -34,7 +34,7 @@ apps/ and other Add-Ons:
 
   (1)  Network Utilities (apps/netutils/)
   (1)  NuttShell (NSH) (apps/nshlib)
-  (1)  System libraries apps/system (apps/system)
+  (2)  System libraries apps/system (apps/system)
   (1)  Modbus (apps/modbus)
   (5)  Other Applications & Tests (apps/examples/)
 
@@ -77,7 +77,7 @@ o Task/Scheduler (sched/)
   Title:       ON-DEMAND PAGING INCOMPLETE
   Description: On-demand paging has recently been incorporated into the RTOS.
                The design of this feature is described here:
-               http://www.nuttx.org/NuttXDemandPaging.html.
+               https://nuttx.apache.org/docs/latest/components/paging.html.
                As of this writing, the basic feature implementation is
                complete and much of the logic has been verified.  The test
                harness for the feature exists only for the NXP LPC3131 (see
@@ -295,49 +295,10 @@ o Task/Scheduler (sched/)
   Task:        IDLE THREAD TCB SETUP
   Description: There are issues with setting IDLE thread stacks:
 
-               1. One problem is stack-related data in the IDLE threads TCB.
-                  A solution might be to standardize the use of g_idle_topstack.
-                  That you could add initialization like this in nx_start:
-
-                  @@ -344,6 +347,11 @@ void nx_start(void)
-                     g_idleargv[1]  = NULL;
-                     g_idletcb.argv = g_idleargv;
-
-                  +  /* Set the IDLE task stack size */
-                  +
-                  +  g_idletcb.cmn.adj_stack_size = CONFIG_IDLETHREAD_STACKSIZE;
-                  +  g_idletcb.cmn.stack_alloc_ptr = (void *)(g_idle_topstack - CONFIG_IDLETHREAD_STACKSIZE);
-                  +
-                     /* Then add the idle task's TCB to the head of the ready to run list */
-
-                     dq_addfirst((FAR dq_entry_t *)&g_idletcb, (FAR dq_queue_t *)&g_readytorun);
-
-                  The g_idle_topstack variable is available for almost all architectures:
-
-                  $ find . -name *.h | xargs grep g_idle_top
-                  ./arm/src/common/up_internal.h:EXTERN const uint32_t g_idle_topstack;
-                  ./avr/src/avr/avr.h:extern uint16_t g_idle_topstack;
-                  ./avr/src/avr32/avr32.h:extern uint32_t g_idle_topstack;
-                  ./hc/src/common/up_internal.h:extern uint16_t g_idle_topstack;
-                  ./mips/src/common/up_internal.h:extern uint32_t g_idle_topstack;
-                  ./misoc/src/lm32/lm32.h:extern uint32_t g_idle_topstack;
-                  ./renesas/src/common/up_internal.h:extern uint32_t g_idle_topstack;
-                  ./renesas/src/m16c/chip.h:extern uint32_t g_idle_topstack; /* Start of the heap */
-                  ./risc-v/src/common/up_internal.h:EXTERN uint32_t g_idle_topstack;
-                  ./x86/src/common/up_internal.h:extern uint32_t g_idle_topstack;
-
-                  That omits these architectures: sh1, sim, xtensa, z16, z80,
-                  ez80, and z8.  All would have to support this common
-                  global variable.
-
-                  Also, the stack itself may be 8-, 16-, or 32-bits wide,
-                  depending upon the architecture and do have differing
-                  alignment requirements.
-
-               2. Another problem is colorizing that stack to use with
-                 stack usage monitoring logic.  There is logic in some
-                 start functions to do this in a function called go_nx_start.
-                 It is available in these architectures:
+               The problem is colorizing that stack to use with stack usage
+               monitoring logic.  There is logic in some start functions to
+               do this in a function called go_nx_start.
+               It is available in these architectures:
 
                  ./arm/src/efm32/efm32_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
                  ./arm/src/kinetis/kinetis_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
@@ -349,9 +310,9 @@ o Task/Scheduler (sched/)
                  ./arm/src/tms570/tms570_boot.c:static void go_nx_start(void *pv, unsigned int nbytes)
                  ./arm/src/xmc4/xmc4_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
 
-                 But no others.
-  Status:     Open
-  Priority:   Low, only needed for more complete debug.
+               But no others.
+  Status:      Open
+  Priority:    Low, only needed for more complete debug.
 
   Title:       PRIORITY INHERITANCE WITH SPORADIC SCHEDULER
   Description: The sporadic scheduler manages CPU utilization by a task by
@@ -487,34 +448,6 @@ o Task/Scheduler (sched/)
 o SMP
   ^^^
 
-  Title:       SMP AND DATA CACHES
-  Description: When spinlocks, semaphores, etc. are used in an SMP system with
-               a data cache, then there may be problems with cache coherency
-               in some CPU architectures:  When one CPU modifies the shared
-               object, the changes may not be visible to another CPU if it
-               does not share the data cache. That would cause failure in
-               the IPC logic.
-
-               Flushing the D-cache on writes and invalidating before a read is
-               not really an option.  That would essentially effect every memory
-               access and there may be side-effects due to cache line sizes
-               and alignment.
-
-               For the same reason a separate, non-cacheable memory region is
-               not an option.  Essentially all data would have to go in the
-               non-cached region and you would have no benefit from the data
-               cache.
-
-               On ARM Cortex-A, each CPU has a separate data cache.  However,
-               the MPCore's Snoop Controller Unit supports coherency among
-               the different caches.  The SCU is enabled by the SCU control
-               register and each CPU participates in the SMP coherency by
-               setting the ACTLR_SMP bit in the auxiliary control register
-               (ACTLR).
-
-  Status:      Closed
-  Priority:    High on platforms that may have the issue.
-
   Title:       MISUSE OF sched_lock() IN SMP MODE
   Description: The OS API sched_lock() disables pre-emption and locks a
                task in place.  In the single CPU case, it is also often
@@ -535,37 +468,6 @@ o SMP
   Priority:    Medium for SMP system.  Not critical to single CPU systems.
                NOTE:  There are no known bugs from this potential problem.
 
-  Title:       CORTEX-A GIC SGI INTERRUPT MASKING
-  Description: In the ARMv7-A GICv2 architecture, the inter-processor
-               interrupts (SGIs) are non maskable and will occur even if
-               interrupts are disabled.  This adds a lot of complexity
-               to the ARMV7-A critical section design.
-
-               Masayuki Ishikawa has suggested the use of the GICv2 ICCMPR
-               register to control SGI interrupts.  This register (much like
-               the ARMv7-M BASEPRI register) can be used to mask interrupts
-               by interrupt priority.  Since SGIs may be assigned priorities
-               the ICCMPR should be able to block execution of SGIs as well.
-
-               Such an implementation would be very similar to the BASEPRI
-               (vs PRIMASK) implementation for the ARMv7-M:  (1) The
-               up_irq_save() and up_irq_restore() registers would have to
-               set/restore the ICCMPR register, (2) register setup logic in
-               arch/arm/src/armv7-a for task start-up and signal dispatch
-               would have to set the ICCMPR correctly, and (3) the 'xcp'
-               structure would have to be extended to hold the ICCMPR
-               register;  logic would have to added be save/restore the
-               ICCMPR register in the 'xcp' structure on each interrupt and
-               context switch.
-
-               This would also be an essential part of a high priority,
-               nested interrupt implementation (unrelated).
-  Status:      Open
-  Priority:    Low.  There are no known issues with the current non-maskable
-               SGI implementation.  This change would, however, lead to
-               simplification in the design and permit commonality with
-               other, non-GIC implementations.
-
   Title:       ISSUES WITH ACCESSING CPU INDEX
   Description: The CPU number is accessed usually with the macro this_cpu().
                The returned CPU number is then used for various things,
@@ -582,70 +484,6 @@ o SMP
   Prioity:     Medium.  This is a logical problem but I have never seen
                an bugs caused by this.  But I believe that failures are
                possible.
-
-  Title:       POSSIBLE FOR TWO CPUs TO HOLD A CRITICAL SECTION?
-  Description: The SMP design includes logic that will support multiple
-               CPUs holding a critical section.  Is this necessary?  How
-               can that occur?  I think it can occur in the following
-               situation:
-
-               The log below was reported is Nuttx running on two cores
-               Cortex-A7 architecture in SMP mode.  You can notice see that
-               when nxsched_add_readytorun() was called, the g_cpu_irqset is 3.
-
-                 nxsched_add_readytorun: irqset cpu 1, me 0 btcbname init, irqset 1 irqcount 2.
-                 nxsched_add_readytorun: nxsched_add_readytorun line 338 g_cpu_irqset = 3.
-
-               This can happen, but only under a very certain condition.
-               g_cpu_irqset only exists to support this certain condition:
-
-                 a. A task running on CPU 0 takes the critical section.  So
-                    g_cpu_irqset == 0x1.
-
-                 b. A task exits on CPU 1 and a waiting, ready-to-run task
-                    is re-started on CPU 1.  This new task also holds the
-                    critical section.  So when the task is re-restarted on
-                    CPU 1, we than have g_cpu_irqset == 0x3
-
-               So we are in a very perverse state!  There are two tasks
-               running on two different CPUs and both hold the critical
-               section.  I believe that is a dangerous situation and there
-               could be undiscovered bugs that could happen in that case.
-               However, as of this moment, I have not heard of any specific
-               problems caused by this weird behavior.
-
-               A possible solution would be to add a new task state that
-               would exist only for SMP.
-
-               - Add a new SMP-only task list and state.  Say,
-                 g_csection_wait[].  It should be prioritized.
-               - When a task acquires the critical section, all tasks in
-                 g_readytorun[] that need the critical section would be
-                 moved to g_csection_wait[].
-               - When any task is unblocked for any reason and moved to the
-                 g_readytorun[] list, if that unblocked task needs the
-                 critical section, it would also be moved to the
-                 g_csection_wait[] list.  No task that needs the critical
-                 section can be in the ready-to-run list if the critical
-                 section is not available.
-               - When the task releases the critical section, all tasks in
-                 the g_csection_wait[] needs to be moved back to
-                 g_readytorun[].
-              - This may result in a context switch.  The tasks should be
-                 moved back to g_readytorun[] highest priority first.  If a
-                 context switch occurs and the critical section to re-taken
-                 by the re-started task, the lower priority tasks in
-                 g_csection_wait[] must stay in that list.
-
-               That is really not as much work as it sounds.  It is
-               something that could be done in 2-3 days of work if you know
-               what you are doing.  Getting the proper test setup and
-               verifying the change would be the more difficult task.
-
-Status:        Open
-Priority:      Unknown.  Might be high, but first we would need to confirm
-               that this situation can occur and that is actually causes
-               a failure.
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -757,7 +595,7 @@ o Signals (sched/signal, arch/)
                SIGALRM Abnormal Termination CONFIG_SIG_SIGALRM_ACTION
                SIGPOLL Abnormal Termination CONFIG_SIG_SIGPOLL_ACTION
                SIGSTOP Suspend task         CONFIG_SIG_SIGSTOP_ACTION
-               SIGSTP  Suspend task         CONFIG_SIG_SIGSTOP_ACTION
+               SIGTSTP Suspend task         CONFIG_SIG_SIGSTOP_ACTION
                SIGCONT Resume task          CONFIG_SIG_SIGSTOP_ACTION
                SIGINT  Abnormal Termination CONFIG_SIG_SIGKILL_ACTION
                SIGKILL Abnormal Termination CONFIG_SIG_SIGKILL_ACTION
@@ -767,7 +605,7 @@ o Signals (sched/signal, arch/)
                embedded system.
 
   Title:       SIGEV_THREAD
-  Description: Implementation of support for support for SIGEV_THREAD is available
+  Description: Implementation of support for SIGEV_THREAD is available
                only in the FLAT build mode because it uses the OS work queues to
                perform the callback.  The alternative for the PROTECTED and KERNEL
                builds would be to create pthreads in the user space to perform the
@@ -862,7 +700,7 @@ o pthreads (sched/pthreads libs/libc/pthread)
                Excerpted from my post in a Linked-In discussion:
 
                "I started to implement this HLS/"PCP" semaphore in an RTOS that I
-                work with (http://www.nuttx.org) and I discovered after doing the
+                work with (https://apache.nuttx.org) and I discovered after doing the
                 analysis and basic code framework that a complete solution for the
                 case of a counting semaphore is still quite complex -- essentially
                 as complex as is priority inheritance.
@@ -950,25 +788,6 @@ o Work Queues (sched/wqueue)
 
 o Kernel/Protected Build
   ^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       apps/system PARTITIONING
-  Description: Several of the USB device helper applications in apps/system
-               violate OS/application partitioning and will fail on a kernel
-               or protected build.  Many of these have been fixed by adding
-               the BOARDIOC_USBDEV_CONTROL boardctl() command.  But there are
-               still issues.
-
-               These functions still call directly into operating system
-               functions:
-
-                 - usbmsc_configure - Called from apps/system/usbmsc and
-                   apps/system/composite
-                 - usbmsc_bindlun - Called from apps/system/usbmsc
-                 - usbmsc_exportluns - Called from apps/system/usbmsc.
-
-  Status:      Open
-  Priority:    Medium/High -- the kernel build configuration is not fully fielded
-               yet.
 
   Title:       C++ CONSTRUCTORS HAVE TOO MANY PRIVILEGES (PROTECTED MODE)
   Description: When a C++ ELF module is loaded, its C++ constructors are called
@@ -1103,26 +922,6 @@ o Kernel/Protected Build
   Priority:    Low for most embedded systems but would be a critical need if
                NuttX were used in a secure system.
 
-  Title:       ERRNO VARIABLE in KERNEL MODE
-  Description: In the FLAT and PROTECTED mode, the errno variable is retained
-               within the TCB.  It requires a call into the OS to access the
-               errno variable.
-
-               In the KERNEL build, TLS should be used:  The errno should be
-               stored at the base of the callers stack along with other TLS
-               data.
-
-               To do this, NuttX system calls should be reorganized.  The
-               system calls should go to the internal OS functions (like
-               nxsem_wait() vs sem_wait()) which do not set the errno value.
-               The implementation available to applications (sem_wait() in
-               this example) should call the internal OS function then set the
-               errno variable in TLS.
-  Status:      Open
-  Priority:    Low, this primarily an aesthetic issue but may also have some
-               performance implications if the the errno variable is accessed
-               via a system call at high rates.
-
   Title:       SIGNAL ACTION VULNERABILITY
   Description: When a signal action is performed, the user stack is used.
                Unlike Linux, applications do not have separate user and
@@ -1154,23 +953,6 @@ o Kernel/Protected Build
 
 o C++ Support
   ^^^^^^^^^^^
-
-  Title:       USE OF SIZE_T IN NEW OPERATOR
-  Description: The argument of the 'new' operators should take a type of
-               size_t (see libxx/libxx_new.cxx and libxx/libxx_newa.cxx).  But
-               size_t has an unknown underlying.  In the nuttx sys/types.h
-               header file, size_t is typed as uint32_t (which is determined by
-               architecture-specific logic).  But the C++ compiler may believe
-               that size_t is of a different type resulting in compilation errors
-               in the operator.  Using the underlying integer type Instead of
-               size_t seems to resolve the compilation issues.
-  Status:      Kind of open. There is a workaround. Setting CONFIG_ARCH_SIZET_LONG
-               =y will define the operators with argument of type unsigned long;
-               Setting CONFIG_ARCH_SIZET_LONG=n will define the operators with
-               argument of type unsigned int. But this is pretty ugly!  A better
-               solution would be to get a hold of the compilers definition of
-               size_t.
-  Priority:    Low.
 
   Title:       STATIC CONSTRUCTORS AND MULTITASKING
   Description: The logic that calls static constructors operates on the main
@@ -1234,7 +1016,7 @@ o C++ Support
                   processes).]
 
                   NuttX does not have processes, but it does have "task groups".
-                  See http://www.nuttx.org/doku.php?id=wiki:nxinternal:tasksnthreads.
+                  See https://cwiki.apache.org/confluence/display/NUTTX/Tasks+vs.+Threads+FAQ.
                   A task group is the task plus all of the pthreads created by
                   the task via pthread_create().  Resources like FILE streams
                   are shared within a task group. Task groups are like a poor
@@ -2543,7 +2325,7 @@ o Linux/Cygwin simulation (arch/sim)
   Priority:    Low, unless there is a need for developing a higher fidelity simulation
                I have been thinking about how to implement simulated interrupts in
                the simulation.  I think a solution would work like this:
-               http://www.nuttx.org/doku.php?id=wiki:nxinternal:simulator
+               https://cwiki.apache.org/confluence/display/NUTTX/NuttX+Simulation
 
   Title:       ROUND-ROBIN SCHEDULING IN THE SIMULATOR
   Description: Since the simulation is not pre-emptible, you can't use round-robin
@@ -2693,6 +2475,25 @@ o System libraries apps/system (apps/system)
   Priority:    Low (unless you are using mixed C-buffered I/O with readline and
                fgetc, for example).
 
+  Title:       apps/system PARTITIONING
+  Description: Several of the USB device helper applications in apps/system
+               violate OS/application partitioning and will fail on a kernel
+               or protected build.  Many of these have been fixed by adding
+               the BOARDIOC_USBDEV_CONTROL boardctl() command.  But there are
+               still issues.
+
+               These functions still call directly into operating system
+               functions:
+
+                 - usbmsc_configure - Called from apps/system/usbmsc and
+                   apps/system/composite
+                 - usbmsc_bindlun - Called from apps/system/usbmsc
+                 - usbmsc_exportluns - Called from apps/system/usbmsc.
+
+  Status:      Open
+  Priority:    Medium/High -- the kernel build configuration is not fully fielded
+               yet.
+
 o Modbus (apps/modbus)
   ^^^^^^^^^^^^^^^^^^^^
 
@@ -2706,7 +2507,7 @@ o Modbus (apps/modbus)
                handling.
 
                A more USB-friendly solution would be to: (1) Re-connect and
-               (2) re-open the serial drviers.  That is what is done is NSH.
+               (2) re-open the serial drivers.  That is what is done is NSH.
                When the serial USB device is removed, this terminates the
                session and NSH will then try to re-open the USB device.  See
                the function nsh_waitusbready() in the file
@@ -2716,6 +2517,7 @@ o Modbus (apps/modbus)
   Status:      Open
   Priority:    Low.  This is really an enhancement request:  Modbus was never
                designed to work with removable serial devices.
+
 o Other Applications & Tests (apps/examples/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

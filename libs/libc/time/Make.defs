@@ -38,8 +38,9 @@
 
 CSRCS += lib_strftime.c lib_calendar2utc.c lib_daysbeforemonth.c
 CSRCS += lib_gettimeofday.c lib_isleapyear.c lib_settimeofday.c lib_time.c
-CSRCS += lib_nanosleep.c lib_difftime.c lib_dayofweek.c
+CSRCS += lib_timespec_get.c lib_nanosleep.c lib_difftime.c lib_dayofweek.c
 CSRCS += lib_asctime.c lib_asctimer.c lib_ctime.c lib_ctimer.c
+CSRCS += lib_gethrtime.c
 
 ifdef CONFIG_LIBC_LOCALTIME
 CSRCS += lib_localtime.c

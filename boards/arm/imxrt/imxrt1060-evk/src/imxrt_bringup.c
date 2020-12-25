@@ -49,6 +49,7 @@
 #include <nuttx/video/fb.h>
 #include <imxrt_lpi2c.h>
 #include <imxrt_lpspi.h>
+#include <nuttx/input/buttons.h>
 
 #ifdef CONFIG_IMXRT_USDHC
 #  include "imxrt_usdhc.h"
@@ -62,6 +63,7 @@
 #  include <nuttx/usb/pl2303.h>
 #endif
 
+#include "imxrt_enet.h"
 #include "imxrt1060-evk.h"
 
 #include <arch/board/board.h>  /* Must always be included last */
@@ -211,6 +213,19 @@ int imxrt_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_IMXRT_ENET) && defined(CONFIG_NETDEV_LATEINIT)
+  ret = imxrt_netinitialize(0);
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXCAN
+  ret = imxrt_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: imxrt_can_setup() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_DEV_GPIO
   /* Initialize the GPIO driver */
 
@@ -219,6 +234,16 @@ int imxrt_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_IMXRT_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = imxrt_adc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: imxrt_adc_initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -237,6 +262,23 @@ int imxrt_bringup(void)
 
   imxrt_lcd_initialize();
 #endif
+
+#ifdef CONFIG_BUTTONS
+#ifdef CONFIG_BUTTONS_LOWER
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#else
+  /* Enable BUTTON support for some other purpose */
+
+  board_button_initialize();
+#endif /* CONFIG_BUTTONS_LOWER */
+#endif /* CONFIG_BUTTONS */
 
 #ifdef CONFIG_VIDEO_FB
   /* Initialize and register the framebuffer driver */

@@ -143,7 +143,7 @@ void k210_cpu_boot(int cpu)
 
   /* Then transfer control to the IDLE task */
 
-  nx_idle_task(0, NULL);
+  nx_idle_trampoline();
 }
 
 /****************************************************************************

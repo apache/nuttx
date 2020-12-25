@@ -51,7 +51,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking ****************************************************************/
+/* Clocking *****************************************************************/
 
 /* NOTE:  The following definitions require lpc43_cgu.h.  It is not included
  * here because the including C file may not have that file in its include
@@ -144,9 +144,9 @@
 
 /* This is the clock setup we configure for:
  *
- * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
- * PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
- * CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
+ * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Main oscillator for source
+ * PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> multipler=20, pre-divider=1
+ * CCLCK = 480MHz / 6 = 80MHz               -> divider = 6
  */
 
 #define LPC43_CCLK                  BOARD_FCLKOUT_FREQUENCY
@@ -179,7 +179,7 @@
 #define BOARD_SSP1_CLKSRC           BASE_SSP1_CLKSEL_IDIVA
 #define BOARD_SSP1_BASEFREQ         BOARD_IDIVA_FREQUENCY
 
-/* USB0 ********************************************************************/
+/* USB0 *********************************************************************/
 
 /* Settings needed in lpc43_cpu.c */
 
@@ -187,7 +187,7 @@
 #define BOARD_USB0_MDIV             0x06167ffa /* Table 149 datsheet, valid for 12Mhz Fclkin */
 #define BOARD_USB0_NP_DIV           0x00302062 /* Table 149 datsheet, valid for 12Mhz Fclkin */
 
-/* SPIFI clocking **********************************************************/
+/* SPIFI clocking ***********************************************************/
 
 /* The SPIFI will receive clocking from a divider per the settings provided
  * in this file.  The NuttX code will configure PLL1 as the input clock
@@ -219,7 +219,7 @@
 #  define BOARD_SPIFI_FREQUENCY     (102000000) /* 204MHz / 14 = 14.57MHz */
 #endif
 
-/* SD/MMC or SDIO interface ************************************************/
+/* SD/MMC or SDIO interface *************************************************/
 
 #define BOARD_SDMMC_CEIL(a,b)    (((a) + (b) - 1) / (b))
 
@@ -248,7 +248,7 @@
 #define BOARD_CLKDIV_SDWIDEXFR  BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 25000000)
 #define BOARD_CLKDIV_SDXFR      BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 25000000)
 
-/* UART clocking ***********************************************************/
+/* UART clocking ************************************************************/
 
 /* Configure all U[S]ARTs to use the XTAL input frequency */
 
@@ -264,7 +264,7 @@
 #define BOARD_USART3_CLKSRC         BASE_USART3_CLKSEL_XTAL
 #define BOARD_USART3_BASEFREQ       BOARD_XTAL_FREQUENCY
 
-/* LED definitions *********************************************************/
+/* Clocking *****************************************************************/
 
 /* The LPC4330-Xplorer has 2 user-controllable LEDs labeled D2 an D3 in the
  * schematic and on but referred to has LED1 and LED2 here, respectively.
@@ -292,12 +292,12 @@
  * control of the application.  The following interfaces are then available
  * for application control of the LEDs:
  *
- *  void board_userled_initialize(void);
+ *  uint32_t board_userled_initialize(void);
  *  void board_userled(int led, bool ledon);
- *  void board_userled_all(uint8_t ledset);
+ *  void board_userled_all(uint32_t ledset);
  */
-                                      /*     ON            OFF     */
-                                      /* LED1   LED2   LED1   LED2 */
+
+                               /* LED1   LED2   LED1   LED2 */
 #define LED_STARTED         0  /* OFF    OFF     -      -   */
 #define LED_HEAPALLOCATE    1  /* ON     OFF     -      -   */
 #define LED_IRQSENABLED     1  /* ON     OFF     -      -   */

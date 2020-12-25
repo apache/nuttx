@@ -55,12 +55,13 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED gpio as output */
 
   stm32l4_configgpio(GPIO_LED1);
   stm32l4_configgpio(GPIO_LED2);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -73,7 +74,7 @@ void board_userled(int led, bool ledon)
     {
       stm32l4_gpiowrite(GPIO_LED1, ledon);
     }
-   else if (led == BOARD_LED2)
+  else if (led == BOARD_LED2)
     {
       stm32l4_gpiowrite(GPIO_LED2, ledon);
     }
@@ -83,7 +84,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   stm32l4_gpiowrite(GPIO_LED1, !!(ledset & BOARD_LED1_BIT));
   stm32l4_gpiowrite(GPIO_LED2, !!(ledset & BOARD_LED2_BIT));

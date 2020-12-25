@@ -40,6 +40,7 @@
 #include <nuttx/wireless/ieee80211/mmc_sdio.h>
 #include <debug.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <string.h>
 
 #include <nuttx/compiler.h>
@@ -118,8 +119,9 @@ int sdio_sendcmdpoll(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
       ret = SDIO_WAITRESPONSE(dev, cmd);
       if (ret != OK)
         {
-          wlerr("ERROR: Wait for response to cmd: %08x failed: %d\n",
-               cmd, ret);
+          wlerr("ERROR: Wait for response to cmd: %08" PRIx32
+                " failed: %d\n",
+                cmd, ret);
         }
     }
 
@@ -374,7 +376,7 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
       return ret;
     }
 
-  wlinfo("rca is %x\n", data >> 16);
+  wlinfo("rca is %" PRIx32 "\n", data >> 16);
 
   /* Send CMD7 with the argument == RCA in order to select the card
    * and put it in Transfer State.

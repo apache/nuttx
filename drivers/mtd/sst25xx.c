@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * drivers/mtd/sst25xx.c
  * Driver for SPI-based SST25VF parts 64MBit and larger.
  *
@@ -39,15 +39,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -61,14 +62,16 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
-/* Per the data sheet, SST25 parts can be driven with either SPI mode 0 (CPOL=0 and
- * CPHA=0) or mode 3 (CPOL=1 and CPHA=1).  So you may need to specify
- * CONFIG_SST25XX_SPIMODE to select the best mode for your device.  If
- * CONFIG_SST25XX_SPIMODE is not defined, mode 0 will be used.
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* Per the data sheet, SST25 parts can be driven with either SPI mode 0
+ * (CPOL=0 and CPHA=0) or mode 3 (CPOL=1 and CPHA=1).  So you may need to
+ * specify CONFIG_SST25XX_SPIMODE to select the best mode for your device.
+ * If CONFIG_SST25XX_SPIMODE is not defined, mode 0 will be used.
  */
 
 #ifndef CONFIG_SST25XX_SPIMODE
@@ -81,8 +84,8 @@
 #  define CONFIG_SST25XX_SPIFREQUENCY 20000000
 #endif
 
-/* Various manufacturers may have produced the parts.  0xBF is the manufacturer ID
- * for the SST serial FLASH.
+/* Various manufacturers may have produced the parts.  0xBF is the
+ * manufacturer ID for the SST serial FLASH.
  */
 
 #ifndef CONFIG_SST25XX_MANUFACTURER
@@ -93,7 +96,8 @@
 #  define CONFIG_SST25XX_MEMORY_TYPE  0x25
 #endif
 
-/* SST25 Registers *******************************************************************/
+/* SST25 Registers **********************************************************/
+
 /* Identification register values */
 
 #define SST25_MANUFACTURER         CONFIG_SST25XX_MANUFACTURER
@@ -112,7 +116,10 @@
 #define SST25_SST25064_NPAGES        32768
 
 /* Instructions */
-/*      Command        Value      N Description             Addr Dummy  Data   */
+
+/*      Command        Value      N Description             Addr Dummy  Data
+ */
+
 #define SST25_WREN      0x06    /* 1 Write Enable              0   0     0     */
 #define SST25_WRDI      0x04    /* 1 Write Disable             0   0     0     */
 #define SST25_RDID      0x9f    /* 1 Read Identification       0   0     1-3   */
@@ -149,14 +156,14 @@
 #  define SST25_SR_BP_UPPERQTR    (6 << SST25_SR_BP_SHIFT) /* Upper quarter */
 #  define SST25_SR_BP_UPPERHALF   (7 << SST25_SR_BP_SHIFT) /* Upper half */
 #  define SST25_SR_BP_ALL         (8 << SST25_SR_BP_SHIFT) /* All sectors */
-#define SST_SR_SEC                (1 << 6)                /* Security ID status */
-#define SST25_SR_SRWD             (1 << 7)                /* Bit 7: Status register write protect */
+#define SST_SR_SEC                (1 << 6)                 /* Security ID status */
+#define SST25_SR_SRWD             (1 << 7)                 /* Bit 7: Status register write protect */
 
 #define SST25_DUMMY     0xa5
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This type represents the state of the MTD device.  The struct mtd_dev_s
  * must appear at the beginning of the definition so that you can freely
@@ -174,9 +181,9 @@ struct sst25xx_dev_s
   uint8_t  lastwaswrite;     /* Indicates if last operation was write */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Helpers */
 
@@ -185,37 +192,43 @@ static inline void sst25xx_unlock(FAR struct spi_dev_s *dev);
 static inline int sst25xx_readid(struct sst25xx_dev_s *priv);
 static void sst25xx_waitwritecomplete(struct sst25xx_dev_s *priv);
 static void sst25xx_writeenable(struct sst25xx_dev_s *priv);
-static inline void sst25xx_sectorerase(struct sst25xx_dev_s *priv, off_t offset, uint8_t type);
+static inline void sst25xx_sectorerase(struct sst25xx_dev_s *priv,
+                                       off_t offset, uint8_t type);
 static inline int  sst25xx_bulkerase(struct sst25xx_dev_s *priv);
-static inline void sst25xx_pagewrite(struct sst25xx_dev_s *priv, FAR const uint8_t *buffer,
-                                  off_t offset);
+static inline void sst25xx_pagewrite(struct sst25xx_dev_s *priv,
+                                     FAR const uint8_t *buffer,
+                                     off_t offset);
 
 /* MTD driver methods */
 
-static int sst25xx_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
+static int sst25xx_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+                         size_t nblocks);
 static ssize_t sst25xx_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                           size_t nblocks, FAR uint8_t *buf);
 static ssize_t sst25xx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                            size_t nblocks, FAR const uint8_t *buf);
-static ssize_t sst25xx_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR uint8_t *buffer);
+static ssize_t sst25xx_read(FAR struct mtd_dev_s *dev, off_t offset,
+                            size_t nbytes,
+                            FAR uint8_t *buffer);
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t sst25xx_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR const uint8_t *buffer);
+static ssize_t sst25xx_write(FAR struct mtd_dev_s *dev, off_t offset,
+                             size_t nbytes,
+                             FAR const uint8_t *buffer);
 #endif
-static int sst25xx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+static int sst25xx_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+                         unsigned long arg);
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25xx_lock
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sst25xx_lock(FAR struct spi_dev_s *dev)
 {
@@ -223,16 +236,18 @@ static void sst25xx_lock(FAR struct spi_dev_s *dev)
    * lock SPI to have exclusive access to the buses for a sequence of
    * transfers.  The bus should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusive access to
-   * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
+   * This is a blocking call and will not return until we have exclusive
+   * access to the SPI bus.  We will retain that exclusive access until
+   * the bus is unlocked.
    */
 
   SPI_LOCK(dev, true);
 
-  /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
-   * setmode methods to make sure that the SPI is properly configured for the device.
-   * If the SPI bus is being shared, then it may have been left in an incompatible
-   * state.
+  /* After locking the SPI bus, the we also need call the setfrequency,
+   * setbits, and setmode methods to make sure that the SPI is properly
+   * configured for the device.
+   * If the SPI bus is being shared, then it may have been left in an
+   * incompatible state.
    */
 
   SPI_SETMODE(dev, CONFIG_SST25XX_SPIMODE);
@@ -241,18 +256,18 @@ static void sst25xx_lock(FAR struct spi_dev_s *dev)
   SPI_SETFREQUENCY(dev, CONFIG_SST25XX_SPIFREQUENCY);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25xx_unlock
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void sst25xx_unlock(FAR struct spi_dev_s *dev)
 {
   SPI_LOCK(dev, false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25xx_readid
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int sst25xx_readid(struct sst25xx_dev_s *priv)
 {
@@ -291,22 +306,22 @@ static inline int sst25xx_readid(struct sst25xx_dev_s *priv)
 
       if (capacity == SST25_SST25064_CAPACITY)
         {
-           /* Save the FLASH geometry */
+          /* Save the FLASH geometry */
 
-           priv->sectorshift = SST25_SST25064_SECTOR_SHIFT;
-           priv->nsectors    = SST25_SST25064_NSECTORS;
-           priv->pageshift   = SST25_SST25064_PAGE_SHIFT;
-           priv->npages      = SST25_SST25064_NPAGES;
-           return OK;
+          priv->sectorshift = SST25_SST25064_SECTOR_SHIFT;
+          priv->nsectors    = SST25_SST25064_NSECTORS;
+          priv->pageshift   = SST25_SST25064_PAGE_SHIFT;
+          priv->npages      = SST25_SST25064_NPAGES;
+          return OK;
         }
     }
 
   return -ENODEV;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25xx_waitwritecomplete
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sst25xx_waitwritecomplete(struct sst25xx_dev_s *priv)
 {
@@ -333,7 +348,9 @@ static void sst25xx_waitwritecomplete(struct sst25xx_dev_s *priv)
 
       SPI_SEND(priv->dev, SST25_RDSR);
 
-      /* Send a dummy byte to generate the clock needed to shift out the status */
+      /* Send a dummy byte to generate the clock needed to shift out the
+       * status
+       */
 
       status = SPI_SEND(priv->dev, SST25_DUMMY);
 
@@ -341,9 +358,9 @@ static void sst25xx_waitwritecomplete(struct sst25xx_dev_s *priv)
 
       SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 
-      /* Given that writing could take up to few tens of milliseconds, and erasing
-       * could take more.  The following short delay in the "busy" case will allow
-       * other peripherals to access the SPI bus.
+      /* Given that writing could take up to few tens of milliseconds, and
+       * erasing could take more.  The following short delay in the "busy"
+       * case will allow other peripherals to access the SPI bus.
        */
 
       if ((status & SST25_SR_WIP) != 0)
@@ -360,9 +377,9 @@ static void sst25xx_waitwritecomplete(struct sst25xx_dev_s *priv)
   finfo("Complete\n");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sst25xx_writeenable
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sst25xx_writeenable(struct sst25xx_dev_s *priv)
 {
@@ -380,9 +397,9 @@ static void sst25xx_writeenable(struct sst25xx_dev_s *priv)
   finfo("Enabled\n");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25xx_unprotect
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sst25xx_unprotect(struct sst25xx_dev_s *priv)
 {
@@ -407,11 +424,12 @@ static void sst25xx_unprotect(struct sst25xx_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sst25xx_sectorerase
- ************************************************************************************/
+ ****************************************************************************/
 
-static void sst25xx_sectorerase(struct sst25xx_dev_s *priv, off_t sector, uint8_t type)
+static void sst25xx_sectorerase(struct sst25xx_dev_s *priv, off_t sector,
+                                uint8_t type)
 {
   off_t offset;
 
@@ -457,9 +475,9 @@ static void sst25xx_sectorerase(struct sst25xx_dev_s *priv, off_t sector, uint8_
   finfo("Erased\n");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sst25xx_bulkerase
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int sst25xx_bulkerase(struct sst25xx_dev_s *priv)
 {
@@ -494,12 +512,13 @@ static inline int sst25xx_bulkerase(struct sst25xx_dev_s *priv)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sst25xx_pagewrite
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void sst25xx_pagewrite(struct sst25xx_dev_s *priv, FAR const uint8_t *buffer,
-                                  off_t page)
+static inline void sst25xx_pagewrite(struct sst25xx_dev_s *priv,
+                                     FAR const uint8_t *buffer,
+                                     off_t page)
 {
   off_t offset = page << priv->pageshift;
 
@@ -542,9 +561,9 @@ static inline void sst25xx_pagewrite(struct sst25xx_dev_s *priv, FAR const uint8
   finfo("Written\n");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sst25xx_bytewrite
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
 static inline void sst25xx_bytewrite(struct sst25xx_dev_s *priv,
@@ -591,11 +610,12 @@ static inline void sst25xx_bytewrite(struct sst25xx_dev_s *priv,
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25xx_erase
- ************************************************************************************/
+ ****************************************************************************/
 
-static int sst25xx_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
+static int sst25xx_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+                         size_t nblocks)
 {
   FAR struct sst25xx_dev_s *priv = (FAR struct sst25xx_dev_s *)dev;
   size_t blocksleft = nblocks;
@@ -667,11 +687,12 @@ static int sst25xx_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
   return (int)nblocks;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25xx_bread
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t sst25xx_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+static ssize_t sst25xx_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+                             size_t nblocks,
                              FAR uint8_t *buffer)
 {
   FAR struct sst25xx_dev_s *priv = (FAR struct sst25xx_dev_s *)dev;
@@ -679,23 +700,26 @@ static ssize_t sst25xx_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
-  /* On this device, we can handle the block read just like the byte-oriented read */
+  /* On this device, we can handle the block read just like the
+   * byte-oriented read
+   */
 
   nbytes = sst25xx_read(dev, startblock << priv->pageshift,
                         nblocks << priv->pageshift, buffer);
   if (nbytes > 0)
     {
-        return nbytes >> priv->pageshift;
+      return nbytes >> priv->pageshift;
     }
 
   return (int)nbytes;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25xx_bwrite
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t sst25xx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+static ssize_t sst25xx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                              size_t nblocks,
                               FAR const uint8_t *buffer)
 {
   FAR struct sst25xx_dev_s *priv = (FAR struct sst25xx_dev_s *)dev;
@@ -712,17 +736,18 @@ static ssize_t sst25xx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_
       sst25xx_pagewrite(priv, buffer, startblock);
       buffer += pagesize;
       startblock++;
-   }
+    }
 
   sst25xx_unlock(priv->dev);
   return nblocks;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25xx_read
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t sst25xx_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+static ssize_t sst25xx_read(FAR struct mtd_dev_s *dev, off_t offset,
+                            size_t nbytes,
                             FAR uint8_t *buffer)
 {
   FAR struct sst25xx_dev_s *priv = (FAR struct sst25xx_dev_s *)dev;
@@ -772,13 +797,14 @@ static ssize_t sst25xx_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
   return nbytes;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25xx_write
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t sst25xx_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR const uint8_t *buffer)
+static ssize_t sst25xx_write(FAR struct mtd_dev_s *dev, off_t offset,
+                             size_t nbytes,
+                             FAR const uint8_t *buffer)
 {
   FAR struct sst25xx_dev_s *priv = (FAR struct sst25xx_dev_s *)dev;
   int    startpage;
@@ -811,7 +837,7 @@ static ssize_t sst25xx_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nby
 
       count = nbytes;
       pagesize = (1 << priv->pageshift);
-      bytestowrite = pagesize - (offset & (pagesize-1));
+      bytestowrite = pagesize - (offset & (pagesize - 1));
       sst25xx_bytewrite(priv, buffer, offset, bytestowrite);
 
       /* Update offset and count */
@@ -848,11 +874,12 @@ static ssize_t sst25xx_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nby
 }
 #endif /* CONFIG_MTD_BYTE_WRITE */
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25xx_ioctl
- ************************************************************************************/
+ ****************************************************************************/
 
-static int sst25xx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
+static int sst25xx_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+                         unsigned long arg)
 {
   FAR struct sst25xx_dev_s *priv = (FAR struct sst25xx_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
@@ -863,16 +890,17 @@ static int sst25xx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)
+                                           ((uintptr_t)arg);
           if (geo)
             {
-              /* Populate the geometry structure with information need to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information need to
+               * know the capacity and how to access the device.
                *
-               * NOTE: that the device is treated as though it where just an array
-               * of fixed size blocks.  That is most likely not true, but the client
-               * will expect the device logic to do whatever is necessary to make it
-               * appear so.
+               * NOTE: that the device is treated as though it where just
+               * an array of fixed size blocks.  That is most likely not
+               * true, but the client will expect the device logic to do
+               * whatever is necessary to make it appear so.
                */
 
               geo->blocksize = (1 << priv->pageshift);
@@ -881,7 +909,8 @@ static int sst25xx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
               ret = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %" PRId32 " erasesize: %" PRId32
+                    " neraseblocks: %" PRId32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -907,19 +936,20 @@ static int sst25xx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25xx_initialize
  *
  * Description:
- *   Create an initialize MTD device instance.  MTD devices are not registered
- *   in the file system, but are created as instances that can be bound to
- *   other functions (such as a block or character driver front end).
+ *   Create an initialize MTD device instance.  MTD devices are not
+ *   registered in the file system, but are created as instances that can
+ *   be bound to other functions (such as a block or character driver front
+ *   end).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct mtd_dev_s *sst25xx_initialize(FAR struct spi_dev_s *dev)
 {
@@ -931,11 +961,12 @@ FAR struct mtd_dev_s *sst25xx_initialize(FAR struct spi_dev_s *dev)
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
    * The current implementation would handle only one FLASH part per SPI
-   * device (only because of the SPIDEV_FLASH(0) definition) and so would have
-   * to be extended to handle multiple FLASH parts on the same SPI bus.
+   * device (only because of the SPIDEV_FLASH(0) definition) and so would
+   * have to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
-  priv = (FAR struct sst25xx_dev_s *)kmm_zalloc(sizeof(struct sst25xx_dev_s));
+  priv = (FAR struct sst25xx_dev_s *)
+         kmm_zalloc(sizeof(struct sst25xx_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure. (unsupported methods were
@@ -963,7 +994,9 @@ FAR struct mtd_dev_s *sst25xx_initialize(FAR struct spi_dev_s *dev)
       ret = sst25xx_readid(priv);
       if (ret != OK)
         {
-          /* Unrecognized! Discard all of that work we just did and return NULL */
+          /* Unrecognized! Discard all of that work we just did and return
+           * NULL
+           */
 
           ferr("ERROR: Unrecognized\n");
           kmm_free(priv);
@@ -971,7 +1004,9 @@ FAR struct mtd_dev_s *sst25xx_initialize(FAR struct spi_dev_s *dev)
         }
       else
         {
-          /* Make sure that the FLASH is unprotected so that we can write into it */
+          /* Make sure that the FLASH is unprotected so that we can write
+           * into it
+           */
 
           sst25xx_unprotect(priv);
         }

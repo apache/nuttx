@@ -99,13 +99,12 @@ $(CXXOBJS): %$(OBJEXT): %.cxx
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-.depend: Makefile $(SRCS)
-ifneq ($(SRCS),)
-	$(Q) $(MKDEP) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-endif
-ifneq ($(CXXSRCS),)
-	$(Q) $(MKDEP) "$(CXX)" -- $(CXXFLAGS) -- $(CXXSRCS) >>Make.dep
-endif
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) $(CXXSRCS:.cxx=.ddx)
+	$(call CATFILE, Make.dep, $^)
+	$(call DELFILE, $^)
+
+.depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
+	$(Q) $(MAKE) makedepfile
 	$(Q) touch $@
 
 depend: .depend
@@ -118,7 +117,7 @@ dirlinks: $(DUMMY_KCONFIG)
 
 context: $(DUMMY_KCONFIG)
 ifeq ($(BOARD_INSTALLED),y)
-	$(Q) $(MAKE) -C $(BOARDDIR) TOPDIR="$(TOPDIR)" context
+	$(Q) $(MAKE) -C $(BOARDDIR) context
 endif
 
 clean_context:

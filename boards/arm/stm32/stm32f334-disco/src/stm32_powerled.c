@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f334-disco/src/stm32_powerled.c
  *
- *   Copyright (C) 2017, 2018 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -99,15 +84,15 @@
 
 /* Maximum onboard LED current is 350mA */
 
-#define LED_ABSOLUTE_CURRENT_LIMIT_mA 250
+#define LED_ABSOLUTE_CURRENT_LIMIT 250 /* in mA */
 
-#if (CONFIG_EXAMPLES_POWERLED_CURRENT_LIMIT > LED_ABSOLUTE_CURRENT_LIMIT_mA)
+#if (CONFIG_EXAMPLES_POWERLED_CURRENT_LIMIT > LED_ABSOLUTE_CURRENT_LIMIT)
 #  error "Board LED maximum current is 250 mA"
 #endif
 
-/* Voltage reference for DAC */
+/* Voltage reference for DAC (in mV) */
 
-#define DAC_REF_VOLTAGE_mV 3300
+#define DAC_REV_VOLTAGE 3300
 
 /* DAC resolution */
 
@@ -211,7 +196,8 @@ struct powerled_lower_dev_s g_powerled_lower;
 static int powerled_shutdown(FAR struct powerled_dev_s *dev)
 {
   FAR struct powerled_s      *powerled = (FAR struct powerled_s *)dev->priv;
-  FAR struct powerled_priv_s *priv = (struct powerled_priv_s *)powerled->priv;
+  FAR struct powerled_priv_s *priv =
+    (struct powerled_priv_s *)powerled->priv;
 
   /* Stop powerled if running */
 
@@ -280,20 +266,22 @@ static int powerled_setup(FAR struct powerled_dev_s *dev)
 static int powerled_start(FAR struct powerled_dev_s *dev)
 {
   FAR struct powerled_lower_dev_s *lower = dev->lower;
-  FAR struct powerled_s      *powerled   = (FAR struct powerled_s *)dev->priv;
+  FAR struct powerled_s      *powerled   =
+    (FAR struct powerled_s *)dev->priv;
   FAR struct hrtim_dev_s     *hrtim      = lower->hrtim;
   FAR struct dac_dev_s       *dac        = lower->dac;
-  FAR struct powerled_priv_s *priv = (struct powerled_priv_s *)powerled->priv;
+  FAR struct powerled_priv_s *priv =
+    (struct powerled_priv_s *)powerled->priv;
   uint16_t burst_cmp = 0;
   uint16_t burst_per = 0;
   uint16_t burst_pre = 0;
-  int current_av_mA  = 0;
-  int current_max_mA;
+  int current_av  = 0;
+  int current_max;
   int i;
 
   /* Set max current in mA */
 
-  current_max_mA = (int)(powerled->limits.current * 1000);
+  current_max = (int)(powerled->limits.current * 1000);
 
   /* Stop HRTIM PWM */
 
@@ -306,27 +294,28 @@ static int powerled_start(FAR struct powerled_dev_s *dev)
     {
       /* Average current set to max */
 
-      current_av_mA = (uint16_t)(current_max_mA);
+      current_av = (uint16_t)(current_max);
 
       /* Dimming through burst mode IDLE state */
 
       burst_pre = HRTIM_BURST_PRESCALER_1;
       burst_per = 1000;
-      burst_cmp = (uint16_t)(((float)burst_per)*
-                              (100.0-powerled->param.brightness)/100.0);
+      burst_cmp = (uint16_t)(((float)burst_per) *
+                              (100.0 - powerled->param.brightness) / 100.0);
     }
 
   else if (powerled->opmode == POWERLED_OPMODE_FLASH)
     {
       /* Average current - brightness */
+
       /* Flashing through burst mode IDLE state */
 
       /* Maximum brightness is achieved when average LED current is equalt to
-       * LED current limit, and there is no IDLE state */
+       * LED current limit, and there is no IDLE state
+       */
 
-      current_av_mA = (uint16_t)(powerled->param.brightness * current_max_mA
-                                 / POWERLED_BRIGHTNESS_MAX);
-
+      current_av = (uint16_t)(powerled->param.brightness * current_max
+                              / POWERLED_BRIGHTNESS_MAX);
 
       /* HRTIM clock           = 144000000 Hz
        * HRTIM burst prescaler = 32768,
@@ -334,9 +323,10 @@ static int powerled_start(FAR struct powerled_dev_s *dev)
        */
 
       burst_pre = HRTIM_BURST_PRESCALER_32768;
-      burst_per = (uint16_t)(((float)HRTIM_CLOCK/(1<<burst_pre))/
+      burst_per = (uint16_t)(((float)HRTIM_CLOCK / (1 << burst_pre)) /
                              powerled->param.frequency);
-      burst_cmp = (uint16_t)((float)burst_per*((100-powerled->param.duty)/100.0));
+      burst_cmp = (uint16_t)((float)burst_per *
+                             ((100 - powerled->param.duty) / 100.0));
     }
 
   /* Configure DAC buffer */
@@ -345,7 +335,7 @@ static int powerled_start(FAR struct powerled_dev_s *dev)
     {
       /* TODO: add slope compensation */
 
-      priv->current_tab[i] = current_av_mA ;
+      priv->current_tab[i] = current_av ;
     }
 
   /* Convert current sense value thresholds for DAC */
@@ -353,7 +343,7 @@ static int powerled_start(FAR struct powerled_dev_s *dev)
   for (i = 0; i < CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE; i += 1)
     {
       priv->dacbuffer[i] =
-        priv->current_tab[i] * DAC_RESOLUTION / DAC_REF_VOLTAGE_mV;
+        priv->current_tab[i] * DAC_RESOLUTION / DAC_REV_VOLTAGE;
     }
 
   /* Write DAC buffer */
@@ -414,8 +404,10 @@ static int powerled_stop(FAR struct powerled_dev_s *dev)
 {
   FAR struct powerled_lower_dev_s *lower = dev->lower;
   FAR struct hrtim_dev_s     *hrtim      = lower->hrtim;
-  FAR struct powerled_s      *powerled   = (FAR struct powerled_s *)dev->priv;
-  FAR struct powerled_priv_s *priv = (struct powerled_priv_s *)powerled->priv;
+  FAR struct powerled_s      *powerled   =
+    (FAR struct powerled_s *)dev->priv;
+  FAR struct powerled_priv_s *priv =
+    (struct powerled_priv_s *)powerled->priv;
 
   /* Disable output */
 
@@ -489,12 +481,12 @@ static int powerled_limits_set(FAR struct powerled_dev_s *dev,
       goto errout;
     }
 
-  if (limits->current * 1000 > LED_ABSOLUTE_CURRENT_LIMIT_mA)
+  if (limits->current * 1000 > LED_ABSOLUTE_CURRENT_LIMIT)
     {
-      limits->current = (float)LED_ABSOLUTE_CURRENT_LIMIT_mA/1000.0;
+      limits->current = (float)LED_ABSOLUTE_CURRENT_LIMIT / 1000.0;
       pwrwarn("WARNING: "
               "LED current limiit > LED absolute current limit."
-              " Set current limit to %d.\n",
+              " Set current limit to %lf.\n",
               limits->current);
     }
 
@@ -527,21 +519,24 @@ static int powerled_fault_set(FAR struct powerled_dev_s *dev, uint8_t fault)
   return -1;
 }
 
-static int powerled_fault_get(FAR struct powerled_dev_s *dev, FAR uint8_t *fault)
+static int powerled_fault_get(FAR struct powerled_dev_s *dev,
+                              FAR uint8_t *fault)
 {
   /* Do nothing */
 
   return -1;
 }
 
-static int powerled_fault_clean(FAR struct powerled_dev_s *dev, uint8_t fault)
+static int powerled_fault_clean(FAR struct powerled_dev_s *dev,
+                                uint8_t fault)
 {
   /* Do nothing */
 
   return -1;
 }
 
-static int powerled_ioctl(FAR struct powerled_dev_s *dev, int cmd, unsigned long arg)
+static int powerled_ioctl(FAR struct powerled_dev_s *dev, int cmd,
+                          unsigned long arg)
 {
   /* Do nothing */
 
@@ -593,7 +588,8 @@ int stm32_powerled_setup(void)
       dac = stm32_dacinitialize(DAC_CURRENT_LIMIT);
       if (dac == NULL)
         {
-          pwrerr("ERROR: Failed to get DAC %d interface\n", DAC_CURRENT_LIMIT);
+          pwrerr("ERROR: Failed to get DAC %d interface\n",
+                 DAC_CURRENT_LIMIT);
           return -ENODEV;
         }
 
@@ -615,7 +611,8 @@ int stm32_powerled_setup(void)
       lower->adc   = NULL;
       lower->opamp = NULL;
 
-      /* We do not need register character drivers for POWERLED lower peripherals.
+      /* We do not need register character drivers for POWERLED lower
+       * peripherals.
        * All control should be done via POWERLED character driver.
        */
 

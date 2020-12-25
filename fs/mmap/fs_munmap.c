@@ -52,8 +52,6 @@
 #include "inode/inode.h"
 #include "fs_rammap.h"
 
-#ifdef CONFIG_FS_RAMMAP
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -110,6 +108,7 @@
 
 int munmap(FAR void *start, size_t length)
 {
+#ifdef CONFIG_FS_RAMMAP
   FAR struct fs_rammap_s *prev;
   FAR struct fs_rammap_s *curr;
   FAR void *newaddr;
@@ -129,7 +128,8 @@ int munmap(FAR void *start, size_t length)
 
   /* Search the list of regions */
 
-  for (prev = NULL, curr = g_rammaps.head; curr; prev = curr, curr = curr->flink)
+  for (prev = NULL, curr = g_rammaps.head; curr;
+       prev = curr, curr = curr->flink)
     {
       /* Does this region include any part of the specified range? */
 
@@ -196,7 +196,8 @@ int munmap(FAR void *start, size_t length)
 
   else
     {
-      newaddr = kumm_realloc(curr->addr, sizeof(struct fs_rammap_s) + length);
+      newaddr = kumm_realloc(curr->addr,
+                             sizeof(struct fs_rammap_s) + length);
       DEBUGASSERT(newaddr == (FAR void *)(curr->addr));
       UNUSED(newaddr); /* May not be used */
       curr->length = length;
@@ -211,6 +212,7 @@ errout_with_semaphore:
 errout:
   set_errno(errcode);
   return ERROR;
-}
-
+#else
+  return OK;
 #endif /* CONFIG_FS_RAMMAP */
+}

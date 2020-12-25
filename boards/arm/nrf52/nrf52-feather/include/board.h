@@ -51,11 +51,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking ****************************************************************/
+/* Clocking *****************************************************************/
 
 #define BOARD_SYSTICK_CLOCK         (64000000)
 
-/* LED definitions *********************************************************/
+/* Clocking *****************************************************************/
 
 /* A low output illuminates the LED.
  *
@@ -88,9 +88,9 @@
  * control of the application.  The following interfaces are then available
  * for application control of the LEDs:
  *
- *  void board_userled_initialize(void);
+ *  uint32_t board_userled_initialize(void);
  *  void board_userled(int led, bool ledon);
- *  void board_userled_all(uint8_t ledset);
+ *  void board_userled_all(uint32_t ledset);
  */
 
 /* Button definitions *******************************************************/

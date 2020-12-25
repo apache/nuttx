@@ -58,7 +58,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_CXD56_DECI_BM1422GMV
+#ifdef CONFIG_SENSORS_BM1422GMV_SCU_DECI
 #  define BM1422GMV_SEQ_TYPE SEQ_TYPE_DECI
 #else
 #  define BM1422GMV_SEQ_TYPE SEQ_TYPE_NORMAL
@@ -138,9 +138,10 @@ static int bm1422gmv_open(FAR struct file *filep);
 static int bm1422gmv_close(FAR struct file *filep);
 static ssize_t bm1422gmv_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen);
-static ssize_t bm1422gmv_write(FAR struct file *filep, FAR const char *buffer,
-                               size_t buflen);
-static int bm1422gmv_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static ssize_t bm1422gmv_write(FAR struct file *filep,
+                               FAR const char *buffer, size_t buflen);
+static int bm1422gmv_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -301,8 +302,8 @@ static int bm1422gmv_seqinit(FAR struct bm1422gmv_dev_s *priv)
   /* Set instruction and sample data information to sequencer */
 
   seq_setinstruction(priv->seq, g_bm1422gmvinst, itemsof(g_bm1422gmvinst));
-  seq_setsample(priv->seq, BM1422GMV_BYTESPERSAMPLE, 0, BM1422GMV_ELEMENTSIZE,
-                false);
+  seq_setsample(priv->seq, BM1422GMV_BYTESPERSAMPLE, 0,
+                BM1422GMV_ELEMENTSIZE, false);
 
   return OK;
 }
@@ -413,8 +414,8 @@ static ssize_t bm1422gmv_read(FAR struct file *filep, FAR char *buffer,
  * Name: bm1422gmv_write
  ****************************************************************************/
 
-static ssize_t bm1422gmv_write(FAR struct file *filep, FAR const char *buffer,
-                               size_t buflen)
+static ssize_t bm1422gmv_write(FAR struct file *filep,
+                               FAR const char *buffer, size_t buflen)
 {
   return -ENOSYS;
 }
@@ -423,7 +424,8 @@ static ssize_t bm1422gmv_write(FAR struct file *filep, FAR const char *buffer,
  * Name: bm1422gmv_ioctl
  ****************************************************************************/
 
-static int bm1422gmv_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int bm1422gmv_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct bm1422gmv_dev_s *priv = inode->i_private;

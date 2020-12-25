@@ -45,26 +45,18 @@
 #ifdef CONFIG_LIBC_WCHAR
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MB_LEN_MAX
-#  define MB_LEN_MAX 8
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 int wctob(wint_t wc)
 {
-  unsigned char pmb[MB_LEN_MAX];
+  char pmb[MB_LEN_MAX];
 
   if (wc == WEOF)
     {
       return EOF;
     }
 
-  return wctomb((char *)pmb, wc) == 1 ? (int)pmb[0] : EOF;
+  return wctomb(pmb, wc) == 1 ? (int)pmb[0] : EOF;
 }
 #endif

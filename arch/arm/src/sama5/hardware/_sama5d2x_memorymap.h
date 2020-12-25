@@ -317,6 +317,8 @@
 #define SAM_AXIMX_MMUFLAGS       MMU_IOFLAGS
 #define SAM_DAP_MMUFLAGS         MMU_IOFLAGS
 #define SAM_L2CC_MMUFLAGS        MMU_IOFLAGS
+#define SAM_SDMMC0_MMUFLAGS      MMU_IOFLAGS
+#define SAM_SDMMC1_MMUFLAGS      MMU_IOFLAGS
 
 /* If the NFC is not being used, the NFC SRAM can be used as general purpose
  * SRAM (cached).  If the NFC is used, then the NFC SRAM should be treated
@@ -374,12 +376,12 @@
 #  define SAM_EBICS3_MMUFLAGS    MMU_ROMFLAGS
 #endif
 
-#define SAM_QSPI0AES             MMU_IOFLAGS
-#define SAM_QSPI1AES             MMU_IOFLAGS
-#define SAM_SDMMC0               MMU_IOFLAGS
-#define SAM_SDMMC1               MMU_IOFLAGS
-#define SAM_QSPI0                MMU_IOFLAGS
-#define SAM_QSPI1                MMU_IOFLAGS
+#define SAM_QSPI0AES_MMUFLAGS    MMU_IOFLAGS
+#define SAM_QSPI1AES_MMUFLAGS    MMU_IOFLAGS
+#define SAM_SDMMC0_MMUFLAGS      MMU_IOFLAGS
+#define SAM_SDMMC1_MMUFLAGS      MMU_IOFLAGS
+#define SAM_QSPI0_MMUFLAGS       MMU_IOFLAGS
+#define SAM_QSPI1_MMUFLAGS       MMU_IOFLAGS
 #define SAM_NFCCR_MMUFLAGS       MMU_IOFLAGS
 
 #define SAM_PERIPHA_MMUFLAGS     MMU_IOFLAGS
@@ -429,8 +431,8 @@
 #define SAM_EBICS1_VSECTION      0x60000000 /* 0x60000000-0x6fffffff: EBI Chip Select 1 */
 #define SAM_EBICS2_VSECTION      0x70000000 /* 0x70000000-0x7fffffff: EBI Chip Select 2 */
 #define SAM_EBICS3_VSECTION      0x80000000 /* 0x80000000-0x8fffffff: EBI Chip Select 3 */
-#define SAM_QSPI0AES_VSECTION    0x90000000 /* 0x90000000-0x9fffffff: QSPI0 AES Memory */
-#define SAM_QSPI1AES_VSECTION    0xa0000000 /* 0xa0000000-0xafffffff: QSPI1 AES Memory */
+#define SAM_QSPI0AES_VSECTION    0x90000000 /* 0x90000000-0x97ffffff: QSPI0 AES Memory */
+#define SAM_QSPI1AES_VSECTION    0x98000000 /* 0x98000000-0x9fffffff: QSPI1 AES Memory */
 #define SAM_SDMMC0_VSECTION      0xa0000000 /* 0xa0000000-0xafffffff: SDMMC0 */
 #define SAM_SDMMC1_VSECTION      0xb0000000 /* 0xb0000000-0xbfffffff: SDMMC1 */
 #define SAM_NFCCR_VSECTION       0xc0000000 /* 0xc0000000-0xcfffffff: NFC Command Registers */
@@ -461,6 +463,8 @@
 
 /* Peripheral virtual base addresses */
 
+#define SAM_SDMMC0_VBASE         (SAM_SDMMC0_VSECTION)
+#define SAM_SDMMC1_VBASE         (SAM_SDMMC1_VSECTION)
 #define SAM_LCDC_VBASE           (SAM_PERIPHA_VSECTION+SAM_LCDC_OFFSET)
 #define SAM_XDMAC1_VBASE         (SAM_PERIPHA_VSECTION+SAM_XDMAC1_OFFSET)
 #define SAM_ISC_VBASE            (SAM_PERIPHA_VSECTION+SAM_ISC_OFFSET)
@@ -640,7 +644,7 @@
  * 1) If CONFIG_ARCH_ROMPGTABLE, then the page table resides in ROM and we
  *    will not use any page table in RAM.
  * 2) We are executing out of SRAM.  In this case, vectors will reside at
- *    the bottom of SRAM, following by .text, .data, .bss, and heep.  The
+ *    the bottom of SRAM, following by .text, .data, .bss, and heap.  The
  *    page table will be squeezed into the end of internal SRAM in this
  *    case.
  *

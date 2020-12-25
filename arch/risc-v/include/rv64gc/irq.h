@@ -55,7 +55,9 @@
 
 /* Configuration ************************************************************/
 
-/* If this is a kernel build, how many nested system calls should we support? */
+/* If this is a kernel build, how many nested system calls should we
+ * support?
+ */
 
 #ifndef CONFIG_SYS_NNEST
 #  define CONFIG_SYS_NNEST 2

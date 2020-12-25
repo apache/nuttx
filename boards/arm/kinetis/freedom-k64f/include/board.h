@@ -54,7 +54,7 @@
 
 /* The Freedom K64F uses a 50MHz external clock from the Micrel Ethernet PHY.
  * The Kinetis MCU startup from an internal digitally-controlled oscillator
- * (DCO). Nuttx will enable the main external oscillator (EXTAL0/XTAL0).
+ * (DCO). NuttX will enable the main external oscillator (EXTAL0/XTAL0).
  * The external oscillator/resonator can range from 32.768 KHz up to 50 MHz.
  * The default external source for the MCG oscillator inputs (EXTAL) is
  * 50 MHz clock source from Micrel Ethernet PHY.
@@ -218,14 +218,15 @@
  * Besides the general purpose input/output functions, SW2 and SW3 can be
  * low-power wake up signal. Also, only SW3 can be a non-maskable interrupt.
  *
- *   Switch    GPIO Function
- *   --------- ---------------------------------------------------------------
- *   SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
- *   SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
+ *   Switch  GPIO Function
+ *   ------- ---------------------------------------------------------------
+ *   SW2     PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
+ *   SW3     PTA4/FTM0_CH1/NMI_b/LLWU_P3
  */
 
 #define BUTTON_SW2        0
 #define BUTTON_SW3        1
+#define NUM_BUTTONS       2
 
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 #define BUTTON_SW3_BIT    (1 << BUTTON_SW3)
@@ -267,5 +268,16 @@
 
 #define PIN_UART3_RX      PIN_UART3_RX_2
 #define PIN_UART3_TX      PIN_UART3_TX_2
+
+/* I2C Bus 0
+ *
+ *  Pin Name   K64   Name
+ *  ---- ----- ------ ---------
+ *   11  SCL    PTE24  2C0_SCL
+ *   12  SDA    PTE25  2C0_SDA
+ */
+
+#define PIN_I2C0_SCL      PIN_I2C0_SCL_4
+#define PIN_I2C0_SDA      PIN_I2C0_SDA_4
 
 #endif /* __BOARDS_ARM_FREEDOM_K64F_INCLUDE_BOARD_H */

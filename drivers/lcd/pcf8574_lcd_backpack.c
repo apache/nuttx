@@ -699,7 +699,7 @@ static void lcd_scroll_up(FAR struct pcf8574_lcd_dev_s *priv)
   int nrow;
   int ncol;
 
-  data = (FAR uint8_t *)malloc(priv->cfg.cols);
+  data = (FAR uint8_t *)kmm_malloc(priv->cfg.cols);
   if (NULL == data)
     {
       lcdinfo("Failed to allocate buffer in lcd_scroll_up()\n");
@@ -729,7 +729,7 @@ static void lcd_scroll_up(FAR struct pcf8574_lcd_dev_s *priv)
 
   lcd_set_curpos(priv, priv->cfg.rows - 1, 0);
 
-  free(data);
+  kmm_free(data);
   return;
 }
 

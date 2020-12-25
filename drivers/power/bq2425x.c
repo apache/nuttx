@@ -638,11 +638,11 @@ static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv,
   int idx;
   int ret;
 
-  /* Verify if voltage is in the acceptable range */
+  /* Verify if current is in the acceptable range */
 
   if (current < BQ2425X_CURR_MIN || current > BQ2425X_CURR_MAX)
     {
-      baterr("ERROR: Current %d mA is out of range.\n", volts);
+      baterr("ERROR: Current %d mA is out of range.\n", current);
       return -EINVAL;
     }
 

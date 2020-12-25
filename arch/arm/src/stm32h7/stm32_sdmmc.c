@@ -336,7 +336,7 @@ struct stm32_dev_s
   sdio_eventset_t    waitevents;      /* Set of events to be waited for */
   uint32_t           waitmask;        /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  WDOG_ID            waitwdog;        /* Watchdog that handles event timeouts */
+  struct wdog_s      waitwdog;        /* Watchdog that handles event timeouts */
 
   /* Callback support */
 
@@ -452,7 +452,7 @@ static void stm32_recvfifo(struct stm32_dev_s *priv);
       !defined(CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT)
 static void stm32_recvdma(struct stm32_dev_s *priv);
 #endif
-static void stm32_eventtimeout(int argc, uint32_t arg, ...);
+static void stm32_eventtimeout(wdparm_t arg);
 static void stm32_endwait(struct stm32_dev_s *priv,
                           sdio_eventset_t wkupevent);
 static void stm32_endtransfer(struct stm32_dev_s *priv,
@@ -493,7 +493,7 @@ static void stm32_blocksetup(FAR struct sdio_dev_s *dev,
 static int  stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                             size_t nbytes);
 static int  stm32_sendsetup(FAR struct sdio_dev_s *dev,
-                            FAR const uint8_t *buffer, uint32_t nbytes);
+                            FAR const uint8_t *buffer, size_t nbytes);
 #endif
 static int  stm32_cancel(FAR struct sdio_dev_s *dev);
 
@@ -614,8 +614,13 @@ struct stm32_dev_s g_sdmmcdev2 =
     .attach           = stm32_attach,
     .sendcmd          = stm32_sendcmd,
     .blocksetup       = stm32_blocksetup,
+#if defined(CONFIG_STM32H7_SDMMC_IDMA)
+    .recvsetup        = stm32_dmarecvsetup,
+    .sendsetup        = stm32_dmasendsetup,
+#else
     .recvsetup        = stm32_recvsetup,
     .sendsetup        = stm32_sendsetup,
+#endif
     .cancel           = stm32_cancel,
     .waitresponse     = stm32_waitresponse,
     .recv_r1          = stm32_recvshortcrc,
@@ -1412,9 +1417,7 @@ static void stm32_recvdma(struct stm32_dev_s *priv)
  *   any other waited-for event occurring.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (the SDMMC private state structure reference cast
- *            to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -1424,7 +1427,7 @@ static void stm32_recvdma(struct stm32_dev_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_eventtimeout(int argc, uint32_t arg, ...)
+static void stm32_eventtimeout(wdparm_t arg)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
 
@@ -1471,7 +1474,7 @@ static void stm32_endwait(struct stm32_dev_s *priv,
 {
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Disable event-related interrupts */
 
@@ -1947,7 +1950,7 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
   priv->waitmask   = 0;      /* Interrupt enables for event waiting */
   priv->wkupevent  = 0;      /* The event that caused the wakeup */
 
-  wd_cancel(priv->waitwdog); /* Cancel any timeouts */
+  wd_cancel(&priv->waitwdog); /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
 
@@ -2448,7 +2451,7 @@ static int stm32_cancel(FAR struct sdio_dev_s *dev)
 
   /* Cancel any watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Mark no transfer in progress */
 
@@ -2886,8 +2889,8 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay, stm32_eventtimeout,
-                       1, (uint32_t)priv);
+      ret   = wd_start(&priv->waitwdog, delay,
+                       stm32_eventtimeout, (wdparm_t)priv);
       if (ret < OK)
         {
           mcerr("ERROR: wd_start failed: %d\n", ret);
@@ -2929,7 +2932,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
            * return an SDIO error.
            */
 
-          wd_cancel(priv->waitwdog);
+          wd_cancel(&priv->waitwdog);
           wkupevent = SDIOWAIT_ERROR;
           goto errout_with_waitints;
         }
@@ -3529,11 +3532,6 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    */
 
   nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
-  /* Create a watchdog timer */
-
-  priv->waitwdog = wd_create();
-  DEBUGASSERT(priv->waitwdog);
 
   /* Reset the card and assure that it is in the initial, unconfigured
    * state.

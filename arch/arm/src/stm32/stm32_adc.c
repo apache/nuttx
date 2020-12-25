@@ -45,6 +45,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -71,7 +72,7 @@
 
 /* The STM32 ADC lower-half driver functionality overview:
  *   - one lower-half driver for all STM32 ADC IP cores,
- *   - general lower-half logic for the Nuttx upper-half ADC driver,
+ *   - general lower-half logic for the NuttX upper-half ADC driver,
  *   - lower-half ADC driver can be used not only with the upper-half ADC
  *     driver, but also in the lower-half logic for special-case custom
  *     drivers (eg. power-control, custom sensors),
@@ -103,7 +104,7 @@
  *   - TIM triggering with/without DMA tranfer
  *   - external triggering with/without DMA transfer
  *
- * (tested with ADC example app from Nuttx apps repo).
+ * (tested with ADC example app from NuttX apps repo).
  */
 
 /* At the moment there is no proper implementation for timers external
@@ -472,9 +473,7 @@ static void adc_modifyreg(FAR struct stm32_dev_s *priv, int offset,
 static uint32_t adccmn_base_get(FAR struct stm32_dev_s *priv);
 static void adccmn_modifyreg(FAR struct stm32_dev_s *priv, uint32_t offset,
                              uint32_t clrbits, uint32_t setbits);
-#  ifdef CONFIG_DEBUG_ANALOG_INFO
 static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset);
-#  endif
 #endif
 #ifdef ADC_HAVE_TIMER
 static uint16_t tim_getreg(FAR struct stm32_dev_s *priv, int offset);
@@ -1085,7 +1084,6 @@ static void adccmn_modifyreg(FAR struct stm32_dev_s *priv, uint32_t offset,
  * Name: adccmn_getreg
  ****************************************************************************/
 
-#  ifdef CONFIG_DEBUG_ANALOG_INFO
 static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset)
 {
   uint32_t base = 0;
@@ -1098,7 +1096,6 @@ static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset)
 
   return getreg32(base + offset);
 }
-#  endif
 #endif /* HAVE_ADC_CMN_REGS */
 
 /****************************************************************************
@@ -2792,7 +2789,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   if (priv->initialized > 0)
     {
-      return;
+      goto out;
     }
 
 #ifdef HAVE_HSI_CONTROL
@@ -2814,7 +2811,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 #ifdef HAVE_ADC_CMN_DATA
   if (adccmn_lock(priv, true) < 0)
     {
-      return;
+      goto out;
     }
 
   if (priv->cmn->initialized == 0)
@@ -2833,6 +2830,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   adccmn_lock(priv, false);
 #endif
 
+out:
   leave_critical_section(flags);
 }
 
@@ -2885,8 +2883,6 @@ static int adc_setup(FAR struct adc_dev_s *dev)
     {
       return OK;
     }
-
-  priv->initialized += 1;
 
   /* Attach the ADC interrupt */
 
@@ -2960,6 +2956,10 @@ static int adc_setup(FAR struct adc_dev_s *dev)
   adccmn_lock(priv, false);
 #endif
 
+  /* The ADC device is ready */
+
+  priv->initialized += 1;
+
   return ret;
 }
 
@@ -2980,9 +2980,14 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
 
-  /* Shutdown the ADC device only when not in use */
+  /* Decrement count only when ADC device is in use */
 
-  priv->initialized -= 1;
+  if (priv->initialized > 0)
+    {
+      priv->initialized -= 1;
+    }
+
+  /* Shutdown the ADC device only when not in use */
 
   if (priv->initialized > 0)
     {
@@ -3126,7 +3131,7 @@ static void adc_ioc_enable_tvref_register(FAR struct adc_dev_s *dev,
         }
     }
 
-  ainfo("STM32_ADC_CR2 value: 0x%08x\n",
+  ainfo("STM32_ADC_CR2 value: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_CR2_OFFSET));
 #  endif /* CONFIG_STM32_ADC1 */
 #else    /* !HAVE_BASIC_ADC */
@@ -3139,7 +3144,7 @@ static void adc_ioc_enable_tvref_register(FAR struct adc_dev_s *dev,
       adccmn_modifyreg(priv, STM32_ADC_CCR_OFFSET, ADC_CCR_TSVREFE, 0);
     }
 
-  ainfo("STM32_ADC_CCR value: 0x%08x\n",
+  ainfo("STM32_ADC_CCR value: 0x%08" PRIx32 "\n",
         adccmn_getreg(priv, STM32_ADC_CCR_OFFSET));
 #endif
 }
@@ -3208,7 +3213,7 @@ static int adc_extcfg_set(FAR struct stm32_dev_s *priv, uint32_t extcfg)
       setbits = (extsel | exten);
       clrbits = (ADC_EXTREG_EXTEN_MASK | ADC_EXTREG_EXTSEL_MASK);
 
-      ainfo("Initializing extsel = 0x%08x\n", extsel);
+      ainfo("Initializing extsel = 0x%08" PRIx32 "\n", extsel);
 
       /* Write register */
 
@@ -3249,7 +3254,7 @@ static int adc_jextcfg_set(FAR struct stm32_dev_s *priv, uint32_t jextcfg)
       setbits = (jexten | jextsel);
       clrbits = (ADC_JEXTREG_JEXTEN_MASK | ADC_JEXTREG_JEXTSEL_MASK);
 
-      ainfo("Initializing jextsel = 0x%08x\n", jextsel);
+      ainfo("Initializing jextsel = 0x%08" PRIx32 "\n", jextsel);
 
       /* Write register */
 
@@ -3269,43 +3274,47 @@ static void adc_dumpregs(FAR struct stm32_dev_s *priv)
   UNUSED(priv);
 
 #if defined(HAVE_IP_ADC_V2)
-  ainfo("ISR:  0x%08x IER:  0x%08x CR:   0x%08x CFGR1: 0x%08x\n",
+  ainfo("ISR:  0x%08" PRIx32 " IER:  0x%08" PRIx32
+        " CR:   0x%08" PRIx32 " CFGR1: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_ISR_OFFSET),
         adc_getreg(priv, STM32_ADC_IER_OFFSET),
         adc_getreg(priv, STM32_ADC_CR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR1_OFFSET));
 #else
-  ainfo("SR:   0x%08x CR1:  0x%08x CR2:  0x%08x\n",
+  ainfo("SR:   0x%08" PRIx32 " CR1:  0x%08" PRIx32
+        " CR2:  0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR1_OFFSET),
         adc_getreg(priv, STM32_ADC_CR2_OFFSET));
 #endif
 
-  ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x\n",
+  ainfo("SQR1: 0x%08" PRIx32 " SQR2: 0x%08" PRIx32
+        " SQR3: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR3_OFFSET));
 
-  ainfo("SMPR1: 0x%08x SMPR2: 0x%08x\n",
+  ainfo("SMPR1: 0x%08" PRIx32 " SMPR2: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SMPR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SMPR2_OFFSET));
 
 #if defined(STM32_ADC_SQR4_OFFSET)
-  ainfo("SQR4: 0x%08x\n",
+  ainfo("SQR4: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
 #endif
 
 #if defined(STM32_ADC_SQR5_OFFSET)
-  ainfo("SQR5: 0x%08x\n",
+  ainfo("SQR5: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SQR5_OFFSET));
 #endif
 
 #ifdef ADC_HAVE_INJECTED
-  ainfo("JSQR: 0x%08x\n", adc_getreg(priv, STM32_ADC_JSQR_OFFSET));
+  ainfo("JSQR: 0x%08" PRIx32 "\n", adc_getreg(priv, STM32_ADC_JSQR_OFFSET));
 #endif
 
 #if defined(HAVE_IP_ADC_V2) || (defined(HAVE_IP_ADC_V1) && !defined(HAVE_BASIC_ADC))
-  ainfo("CCR:  0x%08x\n", adccmn_getreg(priv, STM32_ADC_CCR_OFFSET));
+  ainfo("CCR:  0x%08" PRIx32 "\n",
+        adccmn_getreg(priv, STM32_ADC_CCR_OFFSET));
 #endif
 }
 
@@ -3339,7 +3348,7 @@ static void adc_enable_vbat_channel(FAR struct adc_dev_s *dev, bool enable)
       adccmn_modifyreg(priv, STM32_ADC_CCR_OFFSET, ADC_CCR_VBATEN, 0);
     }
 
-  ainfo("STM32_ADC_CCR value: 0x%08x\n",
+  ainfo("STM32_ADC_CCR value: 0x%08" PRIx32 "\n",
         adccmn_getreg(priv, STM32_ADC_CCR_OFFSET));
 }
 #endif

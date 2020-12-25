@@ -78,8 +78,8 @@ struct nxbe_filltrap_s
  * Name: nxbe_clipfilltrapezoid
  *
  * Description:
- *  Called from nxbe_clipper() to performed the fill operation on visible portions
- *  of the rectangle.
+ *  Called from nxbe_clipper() to performed the fill operation on visible
+ *  portions of the rectangle.
  *
  ****************************************************************************/
 
@@ -107,7 +107,7 @@ static void nxbe_clipfilltrapezoid(FAR struct nxbe_clipops_s *cops,
                      MIN(fillinfo->trap.bot.x2, rect->pt2.x));
   update.pt2.y = MIN(fillinfo->trap.bot.y, rect->pt2.y);
 
-  nx_notify_rectangle(&plane->pinfo, &update);
+  nxbe_notify_rectangle(plane->driver, &update);
 #endif
 }
 
@@ -129,10 +129,11 @@ static void nxbe_clipfilltrapezoid(FAR struct nxbe_clipops_s *cops,
  *
  ****************************************************************************/
 
-static inline void nxbe_filltrapezoid_dev(FAR struct nxbe_window_s *wnd,
-                                          FAR const struct nxgl_rect_s *bounds,
-                                          FAR const struct nxgl_trapezoid_s *trap,
-                                          nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+static inline void
+nxbe_filltrapezoid_dev(FAR struct nxbe_window_s *wnd,
+                       FAR const struct nxgl_rect_s *bounds,
+                       FAR const struct nxgl_trapezoid_s *trap,
+                       nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   struct nxbe_filltrap_s info;
   int i;
@@ -190,10 +191,11 @@ static inline void nxbe_filltrapezoid_dev(FAR struct nxbe_window_s *wnd,
  ****************************************************************************/
 
 #ifdef CONFIG_NX_RAMBACKED
-static inline void nxbe_filltrapezoid_pwfb(FAR struct nxbe_window_s *wnd,
-                                           FAR const struct nxgl_rect_s *bounds,
-                                           FAR const struct nxgl_trapezoid_s *trap,
-                                           nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+static inline void
+nxbe_filltrapezoid_pwfb(FAR struct nxbe_window_s *wnd,
+                        FAR const struct nxgl_rect_s *bounds,
+                        FAR const struct nxgl_trapezoid_s *trap,
+                        nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   FAR const void *src[CONFIG_NX_NPLANES];
   struct nxgl_trapezoid_s reltrap;
@@ -214,9 +216,9 @@ static inline void nxbe_filltrapezoid_pwfb(FAR struct nxbe_window_s *wnd,
    * REVISIT:  Assumes a single color plane.
    */
 
-   DEBUGASSERT(wnd->be->plane[0].pwfb.filltrapezoid != NULL);
-   wnd->be->plane[0].pwfb.filltrapezoid(wnd, &reltrap, &relbounds,
-                                        color[0]);
+  DEBUGASSERT(wnd->be->plane[0].pwfb.filltrapezoid != NULL);
+  wnd->be->plane[0].pwfb.filltrapezoid(wnd, &reltrap, &relbounds,
+                                       color[0]);
 
   /* Get the source of address of the trapezoid bounding box in the
    * framebuffer.

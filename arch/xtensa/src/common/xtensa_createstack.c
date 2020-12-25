@@ -54,22 +54,19 @@
 #include <arch/board/board.h>
 
 #include "xtensa.h"
+#include "xtensa_mm.h"
 
 /****************************************************************************
  * Pre-processor Macros
  ****************************************************************************/
 
-/* XTENSA requires at least a 4-byte stack alignment.  For floating point
- * use, however, the stack must be aligned to 8-byte addresses.
- *
- * REVIST: Is this true?  Comes from ARM EABI
- */
+/* XTENSA requires at least a 16-byte stack alignment. */
 
-#define STACK_ALIGNMENT     8
+#define STACK_ALIGNMENT     16
 
 /* Stack alignment macros */
 
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
@@ -183,7 +180,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
           /* Use the user-space allocator if this is a task or pthread */
 
           tcb->stack_alloc_ptr =
-            (uint32_t *)kumm_memalign(TLS_STACK_ALIGN, stack_size);
+            (uint32_t *)UMM_MEMALIGN(TLS_STACK_ALIGN, stack_size);
         }
 
 #else /* CONFIG_TLS_ALIGNED */
@@ -199,7 +196,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
         {
           /* Use the user-space allocator if this is a task or pthread */
 
-          tcb->stack_alloc_ptr = (uint32_t *)kumm_malloc(stack_size);
+          tcb->stack_alloc_ptr = (uint32_t *)UMM_MALLOC(stack_size);
         }
 #endif /* CONFIG_TLS_ALIGNED */
 
@@ -220,24 +217,13 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       uintptr_t top_of_stack;
       size_t size_of_stack;
 
-#ifdef CONFIG_STACK_COLORATION
-      /* If stack debug is enabled, then fill the stack with a
-       * recognizable value that we can use later to test for high
-       * water marks.
-       */
-
-      up_stack_color((FAR void *)tcb->stack_alloc_ptr +
-                     sizeof(struct tls_info_s),
-                     stack_size - sizeof(struct tls_info_s));
-#endif
-
       /* XTENSA uses a push-down stack:  the stack grows toward lower
        * addresses in memory.  The stack pointer register points to the
        * lowest, valid working address (the "top" of the stack).  Items on
        * the stack are referenced as positive word offsets from sp.
        */
 
-      top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size - 4;
+      top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size - 16;
 
 #if XCHAL_CP_NUM > 0
       /* Allocate the co-processor save area at the top of the (push down)
@@ -272,7 +258,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        */
 
       top_of_stack  = STACK_ALIGN_DOWN(top_of_stack);
-      size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
+      size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 16;
 
       /* Save the adjusted stack values in the struct tcb_s */
 
@@ -286,6 +272,17 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       board_autoled_on(LED_STACKCREATED);
       return OK;
     }
+
+#ifdef CONFIG_STACK_COLORATION
+      /* If stack debug is enabled, then fill the stack with a
+       * recognizable value that we can use later to test for high
+       * water marks.
+       */
+
+      up_stack_color((FAR void *)tcb->stack_alloc_ptr +
+                     sizeof(struct tls_info_s),
+                     tcb->adj_stack_size - sizeof(struct tls_info_s));
+#endif
 
   return ERROR;
 }
@@ -303,8 +300,8 @@ void up_stack_color(FAR void *stackbase, size_t nbytes)
 {
   /* Take extra care that we do not write outsize the stack boundaries */
 
-  uint32_t *stkptr = (uint32_t *)(((uintptr_t)stackbase + 3) & ~3);
-  uintptr_t stkend = (((uintptr_t)stackbase + nbytes) & ~3);
+  uint32_t *stkptr = (uint32_t *)(((uintptr_t)stackbase + 15) & ~15);
+  uintptr_t stkend = (((uintptr_t)stackbase + nbytes) & ~15);
   size_t    nwords = (stkend - (uintptr_t)stackbase) >> 2;
 
   /* Set the entire stack to the coloration value */

@@ -41,6 +41,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdint.h>
@@ -733,7 +734,9 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
             }
           else
             {
-              /* The IDs will be filtered only by the Filter register (Mask == Filter) */
+              /* The IDs will be filtered only by the Filter register
+               * (Mask == Filter)
+               */
 
               /* Setup the Filter */
 
@@ -1031,7 +1034,9 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
             }
           else
             {
-              /* The IDs will be filtered only by the Filter register (Mask == Filter) */
+              /* The IDs will be filtered only by the Filter register
+               * (Mask == Filter)
+               */
 
               /* Setup the Filter */
 
@@ -1756,8 +1761,8 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   config = priv->config;
 
   caninfo("CAN%d\n", config->devid);
-  caninfo("CAN%d ID: %d DLC: %d\n",
-          config->devid, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  caninfo("CAN%d ID: %" PRId32 " DLC: %d\n",
+          config->devid, (uint32_t)msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
   UNUSED(config);
 
   /* Get exclusive access to the MCP2515 peripheral */

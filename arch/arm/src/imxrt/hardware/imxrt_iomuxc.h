@@ -93,32 +93,37 @@
 
 #define PADCTL_SRE                            (1 << 0)  /* Bit 0: Slew Rate Field */
 #define PADCTL_DSE_SHIFT                      (3)       /* Bits 3-5: Drive Strength Field */
+
 #define PADCTL_DSE_MASK                       (7 << PADCTL_DSE_SHIFT)
 #  define PADCTL_DSE(n)                       ((uint32_t)(n) << PADCTL_DSE_SHIFT) /* n=DRIVE_* */
-#  define PADCTL_DSE_HIZ                      (0 << PADCTL_DSE_SHIFT) /* HI-Z */
-#  define PADCTL_DSE_260OHM                   (1 << PADCTL_DSE_SHIFT) /* 150 Ohm @3.3V, 260 Ohm @1.8V */
-#  define PADCTL_DSE_130OHM                   (2 << PADCTL_DSE_SHIFT) /* 75 Ohm @3.3V, 130 Ohm @1.8V */
-#  define PADCTL_DSE_90OHM                    (3 << PADCTL_DSE_SHIFT) /* 50 Ohm @3.3V, 90 Ohm @1.8V */
-#  define PADCTL_DSE_60OHM                    (4 << PADCTL_DSE_SHIFT) /* 37 Ohm @3.3V, 60 Ohm @1.8V */
-#  define PADCTL_DSE_50OHM                    (5 << PADCTL_DSE_SHIFT) /* 30 Ohm @3.3V, 50 Ohm @1.8V */
-#  define PADCTL_DSE_40OHM                    (6 << PADCTL_DSE_SHIFT) /* 25 Ohm @3.3V, 40 Ohm @1.8V */
-#  define PADCTL_DSE_33OHM                    (7 << PADCTL_DSE_SHIFT) /* 20 Ohm @3.3V, 33 Ohm @1.8V */
+#  define PADCTL_DSE_HIZ                      (0 << PADCTL_DSE_SHIFT)             /* HI-Z */
+#  define PADCTL_DSE_260OHM                   (1 << PADCTL_DSE_SHIFT)             /* 150 Ohm @3.3V, 260 Ohm @1.8V */
+#  define PADCTL_DSE_130OHM                   (2 << PADCTL_DSE_SHIFT)             /* 75 Ohm @3.3V, 130 Ohm @1.8V */
+#  define PADCTL_DSE_90OHM                    (3 << PADCTL_DSE_SHIFT)             /* 50 Ohm @3.3V, 90 Ohm @1.8V */
+#  define PADCTL_DSE_60OHM                    (4 << PADCTL_DSE_SHIFT)             /* 37 Ohm @3.3V, 60 Ohm @1.8V */
+#  define PADCTL_DSE_50OHM                    (5 << PADCTL_DSE_SHIFT)             /* 30 Ohm @3.3V, 50 Ohm @1.8V */
+#  define PADCTL_DSE_40OHM                    (6 << PADCTL_DSE_SHIFT)             /* 25 Ohm @3.3V, 40 Ohm @1.8V */
+#  define PADCTL_DSE_33OHM                    (7 << PADCTL_DSE_SHIFT)             /* 20 Ohm @3.3V, 33 Ohm @1.8V */
+
 #define PADCTL_SPEED_SHIFT                    (6)       /* Bits 6-7: Speed Field */
 #define PADCTL_SPEED_MASK                     (3 << PADCTL_SPEED_SHIFT)
 #  define PADCTL_SPEED(n)                     ((uint32_t)(n) << PADCTL_SPEED_SHIFT) /* n=SPEED_* */
-#  define PADCTL_SPEED_LOW                    (0 << PADCTL_SPEED_SHIFT) /* Low frequency (50 MHz) */
-#  define PADCTL_SPEED_MEDIUM                 (1 << PADCTL_SPEED_SHIFT) /* Medium frequency (100, 150 MHz) */
-#  define PADCTL_SPEED_MAX                    (3 << PADCTL_SPEED_SHIFT) /* Maximum frequency (100, 150, 200 MHz) */
+#  define PADCTL_SPEED_LOW                    (0 << PADCTL_SPEED_SHIFT)             /* Low frequency (50 MHz) */
+#  define PADCTL_SPEED_MEDIUM                 (1 << PADCTL_SPEED_SHIFT)             /* Medium frequency (100, 150 MHz) */
+#  define PADCTL_SPEED_MAX                    (3 << PADCTL_SPEED_SHIFT)             /* Maximum frequency (100, 150, 200 MHz) */
+
 #define PADCTL_ODE                            (1 << 11) /* Bit 11: Open Drain Enable Field */
 #define PADCTL_PKE                            (1 << 12) /* Bit 12: Pull / Keep Enable Field */
 #define PADCTL_PUE                            (1 << 13) /* Bit 13: Pull / Keep Select Field */
+
 #define PADCTL_PUS_SHIFT                      (14)      /* Bits 14-15: Pull Up / Down Config. Field */
 #define PADCTL_PUS_MASK                       (3 << PADCTL_PUS_SHIFT)
 #  define PADCTL_PUS(n)                       ((uint32_t)(n) << PADCTL_PUS_SHIFT) /* n=PULL_* */
-#  define PADCTL_PUS_DOWN_100K                (0 << PADCTL_PUS_SHIFT) /* 100K Ohm Pull Down */
-#  define PADCTL_PUS_UP_47K                   (1 << PADCTL_PUS_SHIFT) /* 47K Ohm Pull Up */
-#  define PADCTL_PUS_UP_100K                  (2 << PADCTL_PUS_SHIFT) /* 100K Ohm Pull Up */
-#  define PADCTL_PUS_UP_22K                   (3 << PADCTL_PUS_SHIFT) /*  22K Ohm Pull Up */
+#  define PADCTL_PUS_DOWN_100K                (0 << PADCTL_PUS_SHIFT)             /* 100K Ohm Pull Down */
+#  define PADCTL_PUS_UP_47K                   (1 << PADCTL_PUS_SHIFT)             /* 47K Ohm Pull Up */
+#  define PADCTL_PUS_UP_100K                  (2 << PADCTL_PUS_SHIFT)             /* 100K Ohm Pull Up */
+#  define PADCTL_PUS_UP_22K                   (3 << PADCTL_PUS_SHIFT)             /*  22K Ohm Pull Up */
+
 #define PADCTL_HYS                            (1 << 16) /* Bit 16: Hysteresis Enable Field */
 
 /* Defaults for drive conditions for each set of pins. These are a good
@@ -160,6 +165,9 @@
 #define IOMUX_ENET_TX_CLK_DEFAULT             (IOMUX_SLEW_FAST | IOMUX_DRIVE_40OHM | IOMUX_SPEED_LOW | \
                                                IOMUX_PULL_DOWN_100K | IOMUX_PULL_KEEP | GPIO_SION_ENABLE )
 
+#define IOMUX_CAN_DEFAULT                     (IOMUX_SLEW_SLOW | \
+                                               IOMUX_DRIVE_50OHM | IOMUX_SPEED_LOW )
+
 #define IOMUX_USDHC1_DATAX_DEFAULT            (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | \
                                                IOMUX_PULL_UP_47K | IOMUX_SCHMITT_TRIGGER)
 #define IOMUX_USDHC1_CMD_DEFAULT              (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | \
@@ -180,5 +188,7 @@
 #define IOMUX_USBOTG_PWR_DEFAULT              (IOMUX_SLEW_SLOW | IOMUX_DRIVE_50OHM | \
                                                IOMUX_SPEED_LOW )
 #define IOMUX_USBOTG_OC_DEFAULT               (IOMUX_PULL_UP_100K)
+
+#define IOMUX_ADC_DEFAULT                     (0)
 
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_IOMUXC_H */

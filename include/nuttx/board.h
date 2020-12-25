@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* This header file contains function prototypes for the interfaces between
  * (1) the nuttx core-code, (2) the microprocessor specific logic that
  * resides under the arch/ sub-directory, and (3) the board-specific logic
@@ -50,8 +51,8 @@
  *    nuttx/include/arch.h
  *
  *    NOTE: up_ is supposed to stand for microprocessor; the u is like the
- *    Greek letter micron: µ. So it would be µP which is a common shortening
- *    of the word microprocessor.
+ *    Greek letter micron: µ. So it would be µP which is a common
+ *    shortening of the word microprocessor.
  *
  * 2. Microprocessor-Specific Interfaces.
  *
@@ -118,6 +119,14 @@
  * directly from application code but may be freely used within the OS
  *
  ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Name: board_early_initialize
@@ -547,10 +556,12 @@ void board_autoled_off(int led);
  *   used by the NuttX LED logic exclusively and may not be available for
  *   use by user logic if CONFIG_ARCH_LEDS=y.
  *
+ *   NOTE: The LED number is returned.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_LEDS
-void board_userled_initialize(void);
+uint32_t board_userled_initialize(void);
 #endif
 
 /****************************************************************************
@@ -602,7 +613,7 @@ void board_userled(int led, bool ledon);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_LEDS
-void board_userled_all(uint8_t ledset);
+void board_userled_all(uint32_t ledset);
 #endif
 
 /****************************************************************************
@@ -610,18 +621,19 @@ void board_userled_all(uint8_t ledset);
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  *   NOTE: This interface may or may not be supported by board-specific
- *   logic.  If the board supports button interfaces, then CONFIG_ARCH_BUTTONS
+ *   logic. If the board supports button interfaces, then CONFIG_ARCH_BUTTONS
  *   will be defined.
+ *   NOTE: The button number is returned.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-void board_button_initialize(void);
+uint32_t board_button_initialize(void);
 #endif
 
 /****************************************************************************
@@ -669,14 +681,14 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg);
  *
  * Description:
  *   If CONFIG_BOARD_CRASHDUMP is selected then up_asseert will call out to
- *   board_crashdump prior to calling exit in the case of an assertion failure.
- *   Or in the case of a hardfault looping indefinitely. board_crashdump then
- *   has a chance to save the state of the machine. The provided
- *   board_crashdump should save as much information as it can about the cause
- *   of the fault and then most likely reset the system.
+ *   board_crashdump prior to calling exit in the case of an assertion
+ *   failure. Or in the case of a hardfault looping indefinitely.
+ *   board_crashdump then has a chance to save the state of the machine.
+ *   The provided board_crashdump should save as much information as it can
+ *   about the cause of the fault and then most likely reset the system.
  *
  *   N.B. There are limited system resources that can be used by the provided
- *   board_crashdump function. The tems from the fact that most critical/fatal
+ *   board_crashdump. The tems from the fact that most critical/fatal
  *   crashes are because of a hard fault or during interrupt processing.
  *   In these cases, up_assert is running from the context of an interrupt
  *   handlerand it is impossible to use any device driver in this context.
@@ -691,7 +703,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg);
 
 #ifdef CONFIG_BOARD_CRASHDUMP
 void board_crashdump(uintptr_t currentsp, FAR void *tcb,
-                     FAR const uint8_t *filename,
+                     FAR const char *filename,
                      int lineno);
 #endif
 
@@ -709,6 +721,11 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
 
 #ifdef CONFIG_BOARD_INITRNGSEED
 void board_init_rngseed(void);
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* __INCLUDE_NUTTX_BOARD_H */

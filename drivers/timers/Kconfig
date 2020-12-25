@@ -67,6 +67,7 @@ config TIMER_ARCH
 	bool "Timer Arch Implementation"
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_TIMEKEEPING
+	select SCHED_TICKLESS_LIMIT_MAX_SLEEP if SCHED_TICKLESS
 	---help---
 		Implement timer arch API on top of timer driver interface.
 
@@ -86,6 +87,8 @@ config ALARM_ARCH
 	bool "Alarm Arch Implementation"
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_TIMEKEEPING
+	select SCHED_TICKLESS_ALARM if SCHED_TICKLESS
+	select SCHED_TICKLESS_LIMIT_MAX_SLEEP if SCHED_TICKLESS
 	---help---
 		Implement alarm arch API on top of oneshot driver interface.
 
@@ -310,18 +313,21 @@ if WATCHDOG
 config WATCHDOG_DEVPATH
 	string "Watchdog Device Path"
 	default "/dev/watchdog0"
+	---help---
+		Please, check how your specific chip or board uses this symbol.
+		FYI: It's NOT used by the Auto-monitor feature.
 
-config WATCHDOG_AUTOMONITOR
+menuconfig WATCHDOG_AUTOMONITOR
 	bool "Auto-monitor"
 	---help---
 		The auto-monitor provides an OS-internal mechanism for automatically
-		start and repeatedly reset the counting after the watchdog is register.
+		start and repeatedly reset the WDTs that were previous selected.
+		Once the Auto-monitor is enabled, it will reset all
+		registered watchdog timers. If you start a specific WDT, the auto-monitor
+		will stop for that WDT and the application should take care of this from
+		now on.
 
 if WATCHDOG_AUTOMONITOR
-
-config WATCHDOG_AUTOMONITOR_TIMEOUT
-	int "Auto-monitor reset timeout(second)"
-	default 60
 
 choice
 	prompt "Auto-monitor keepalive by"
@@ -342,6 +348,24 @@ config WATCHDOG_AUTOMONITOR_BY_IDLE
 	depends on PM
 
 endchoice
+
+config WATCHDOG_AUTOMONITOR_TIMEOUT
+	int "Auto-monitor reset timeout(second)"
+	default 60
+
+if WATCHDOG_AUTOMONITOR_BY_TIMER || WATCHDOG_AUTOMONITOR_BY_WORKER
+
+config WATCHDOG_AUTOMONITOR_PING_INTERVAL
+	int "Auto-monitor keep a live interval"
+	default WATCHDOG_AUTOMONITOR_TIMEOUT
+	range 1 WATCHDOG_AUTOMONITOR_TIMEOUT
+	---help---
+		If the interval is same as WATCHDOG_AUTOMONITOR_TIMEOUT
+		the default value will change to (WATCHDOG_AUTOMONITOR_TIMEOUT / 2).
+		This interval will only be used by auto-monitor by Worker callback
+		or by Timer callback.
+
+endif # WATCHDOG_AUTOMONITOR_BY_TIMER || WATCHDOG_AUTOMONITOR_BY_WORKER
 
 endif # WATCHDOG_AUTOMONITOR
 

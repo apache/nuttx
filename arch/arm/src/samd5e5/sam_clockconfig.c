@@ -82,209 +82,209 @@ static const struct sam_clockconfig_s g_initial_clocking =
   .gclkset2          = BOARD_GCLK_SET2,
   .cpu_frequency     = BOARD_CPU_FREQUENCY,
 #if BOARD_HAVE_XOSC32K != 0
-   .xosc32k          =
-   {
-     .enable         = BOARD_XOSC32K_ENABLE,
-     .highspeed      = BOARD_XOSC32K_HIGHSPEED,
-     .extalen        = BOARD_XOSC32K_XTALEN,
-     .en32k          = BOARD_XOSC32K_EN32K,
-     .en1k           = BOARD_XOSC32K_EN1K,
-     .runstdby       = BOARD_XOSC32K_RUNSTDBY,
-     .ondemand       = BOARD_XOSC32K_ONDEMAND,
-     .cfden          = BOARD_XOSC32K_CFDEN,
-     .cfdeo          = BOARD_XOSC32K_CFDEO,
-     .caliben        = BOARD_XOSC32K_CALIBEN,
-     .startup        = BOARD_XOSC32K_STARTUP,
-     .calib          = BOARD_XOSC32K_CALIB,
-     .rtcsel         = BOARD_XOSC32K_RTCSEL,
-   },
+  .xosc32k          =
+    {
+      .enable         = BOARD_XOSC32K_ENABLE,
+      .highspeed      = BOARD_XOSC32K_HIGHSPEED,
+      .extalen        = BOARD_XOSC32K_XTALEN,
+      .en32k          = BOARD_XOSC32K_EN32K,
+      .en1k           = BOARD_XOSC32K_EN1K,
+      .runstdby       = BOARD_XOSC32K_RUNSTDBY,
+      .ondemand       = BOARD_XOSC32K_ONDEMAND,
+      .cfden          = BOARD_XOSC32K_CFDEN,
+      .cfdeo          = BOARD_XOSC32K_CFDEO,
+      .caliben        = BOARD_XOSC32K_CALIBEN,
+      .startup        = BOARD_XOSC32K_STARTUP,
+      .calib          = BOARD_XOSC32K_CALIB,
+      .rtcsel         = BOARD_XOSC32K_RTCSEL,
+    },
 #endif
 #if BOARD_HAVE_XOSC0 != 0
-   .xosc0            =
-   {
-     .enable         = BOARD_XOSC0_ENABLE,
-     .extalen        = BOARD_XOSC0_XTALEN,
-     .runstdby       = BOARD_XOSC0_RUNSTDBY,
-     .ondemand       = BOARD_XOSC0_ONDEMAND,
-     .lowgain        = BOARD_XOSC0_LOWGAIN,
-     .enalc          = BOARD_XOSC0_ENALC,
-     .cfden          = BOARD_XOSC0_CFDEN,
-     .startup        = BOARD_XOSC0_STARTUP,
-     .xosc_frequency = BOARD_XOSC0_FREQUENCY,
-   },
+  .xosc0            =
+    {
+      .enable         = BOARD_XOSC0_ENABLE,
+      .extalen        = BOARD_XOSC0_XTALEN,
+      .runstdby       = BOARD_XOSC0_RUNSTDBY,
+      .ondemand       = BOARD_XOSC0_ONDEMAND,
+      .lowgain        = BOARD_XOSC0_LOWGAIN,
+      .enalc          = BOARD_XOSC0_ENALC,
+      .cfden          = BOARD_XOSC0_CFDEN,
+      .startup        = BOARD_XOSC0_STARTUP,
+      .xosc_frequency = BOARD_XOSC0_FREQUENCY,
+    },
 #endif
 #if BOARD_HAVE_XOSC1 != 0
-   .xosc1            =
-   {
-     .enable         = BOARD_XOSC1_ENABLE,
-     .extalen        = BOARD_XOSC1_XTALEN,
-     .runstdby       = BOARD_XOSC1_RUNSTDBY,
-     .ondemand       = BOARD_XOSC1_ONDEMAND,
-     .lowgain        = BOARD_XOSC1_LOWGAIN,
-     .enalc          = BOARD_XOSC1_ENALC,
-     .cfden          = BOARD_XOSC1_CFDEN,
-     .startup        = BOARD_XOSC1_STARTUP,
-     .xosc_frequency = BOARD_XOSC1_FREQUENCY,
-   },
+  .xosc1            =
+    {
+      .enable         = BOARD_XOSC1_ENABLE,
+      .extalen        = BOARD_XOSC1_XTALEN,
+      .runstdby       = BOARD_XOSC1_RUNSTDBY,
+      .ondemand       = BOARD_XOSC1_ONDEMAND,
+      .lowgain        = BOARD_XOSC1_LOWGAIN,
+      .enalc          = BOARD_XOSC1_ENALC,
+      .cfden          = BOARD_XOSC1_CFDEN,
+      .startup        = BOARD_XOSC1_STARTUP,
+      .xosc_frequency = BOARD_XOSC1_FREQUENCY,
+    },
 #endif
-   .dfll             =
-   {
-     .enable         = BOARD_DFLL_ENABLE,
-     .runstdby       = BOARD_DFLL_RUNSTDBY,
-     .ondemand       = BOARD_DFLL_ONDEMAND,
-     .mode           = BOARD_DFLL_MODE,
-     .stable         = BOARD_DFLL_STABLE,
-     .llaw           = BOARD_DFLL_LLAW,
-     .usbcrm         = BOARD_DFLL_USBCRM,
-     .ccdis          = BOARD_DFLL_CCDIS,
-     .qldis          = BOARD_DFLL_QLDIS,
-     .bplckc         = BOARD_DFLL_BPLCKC,
-     .waitlock       = BOARD_DFLL_WAITLOCK,
-     .caliben        = BOARD_DFLL_CALIBEN,
-     .gclklock       = BOARD_DFLL_GCLKLOCK,
-     .fcalib         = BOARD_DFLL_FCALIB,
-     .ccalib         = BOARD_DFLL_CCALIB,
-     .fstep          = BOARD_DFLL_FSTEP,
-     .cstep          = BOARD_DFLL_CSTEP,
-     .gclk           = BOARD_DFLL_GCLK,
-     .mul            = BOARD_DFLL_MUL
-   },
-   .dpll             =
-   {
-     {
-       .enable       = BOARD_DPLL0_ENABLE,
-       .dcoen        = BOARD_DPLL0_DCOEN,
-       .lbypass      = BOARD_DPLL0_LBYPASS,
-       .wuf          = BOARD_DPLL0_WUF,
-       .runstdby     = BOARD_DPLL0_RUNSTDBY,
-       .ondemand     = BOARD_DPLL0_ONDEMAND,
-       .reflock      = BOARD_DPLL0_REFLOCK,
-       .refclk       = BOARD_DPLL0_REFCLK,
-       .ltime        = BOARD_DPLL0_LTIME,
-       .filter       = BOARD_DPLL0_FILTER,
-       .dcofilter    = BOARD_DPLL0_DCOFILTER,
-       .gclk         = BOARD_DPLL0_GCLK,
-       .ldrfrac      = BOARD_DPLL0_LDRFRAC,
-       .ldrint       = BOARD_DPLL0_LDRINT,
-       .div          = BOARD_DPLL0_DIV
-     },
-     {
-       .enable       = BOARD_DPLL1_ENABLE,
-       .dcoen        = BOARD_DPLL1_DCOEN,
-       .lbypass      = BOARD_DPLL1_LBYPASS,
-       .wuf          = BOARD_DPLL1_WUF,
-       .runstdby     = BOARD_DPLL1_RUNSTDBY,
-       .ondemand     = BOARD_DPLL1_ONDEMAND,
-       .reflock      = BOARD_DPLL1_REFLOCK,
-       .refclk       = BOARD_DPLL1_REFCLK,
-       .ltime        = BOARD_DPLL1_LTIME,
-       .filter       = BOARD_DPLL1_FILTER,
-       .dcofilter    = BOARD_DPLL1_DCOFILTER,
-       .gclk         = BOARD_DPLL1_GCLK,
-       .ldrfrac      = BOARD_DPLL1_LDRFRAC,
-       .ldrint       = BOARD_DPLL1_LDRINT,
-       .div          = BOARD_DPLL1_DIV
-     }
-   },
-   .gclk             =
-   {
-     {
-     .enable         = BOARD_GCLK0_ENABLE,
-     .oov            = BOARD_GCLK0_OOV,
-     .oe             = BOARD_GCLK0_OE,
-     .runstdby       = BOARD_GCLK0_RUNSTDBY,
-     .source         = BOARD_GCLK0_SOURCE,
-     .div            = BOARD_GCLK0_DIV
-     },
-     {
-     .enable         = BOARD_GCLK1_ENABLE,
-     .oov            = BOARD_GCLK1_OOV,
-     .oe             = BOARD_GCLK1_OE,
-     .runstdby       = BOARD_GCLK1_RUNSTDBY,
-     .source         = BOARD_GCLK1_SOURCE,
-     .div            = BOARD_GCLK1_DIV
-     },
-     {
-     .enable         = BOARD_GCLK2_ENABLE,
-     .oov            = BOARD_GCLK2_OOV,
-     .oe             = BOARD_GCLK2_OE,
-     .runstdby       = BOARD_GCLK2_RUNSTDBY,
-     .source         = BOARD_GCLK2_SOURCE,
-     .div            = BOARD_GCLK2_DIV
-     },
-     {
-     .enable         = BOARD_GCLK3_ENABLE,
-     .oov            = BOARD_GCLK3_OOV,
-     .oe             = BOARD_GCLK3_OE,
-     .runstdby       = BOARD_GCLK3_RUNSTDBY,
-     .source         = BOARD_GCLK3_SOURCE,
-     .div            = BOARD_GCLK3_DIV
-     },
-     {
-     .enable         = BOARD_GCLK4_ENABLE,
-     .oov            = BOARD_GCLK4_OOV,
-     .oe             = BOARD_GCLK4_OE,
-     .runstdby       = BOARD_GCLK4_RUNSTDBY,
-     .source         = BOARD_GCLK4_SOURCE,
-     .div            = BOARD_GCLK4_DIV
-     },
-     {
-     .enable         = BOARD_GCLK5_ENABLE,
-     .oov            = BOARD_GCLK5_OOV,
-     .oe             = BOARD_GCLK5_OE,
-     .runstdby       = BOARD_GCLK5_RUNSTDBY,
-     .source         = BOARD_GCLK5_SOURCE,
-     .div            = BOARD_GCLK5_DIV
-     },
-     {
-     .enable         = BOARD_GCLK6_ENABLE,
-     .oov            = BOARD_GCLK6_OOV,
-     .oe             = BOARD_GCLK6_OE,
-     .runstdby       = BOARD_GCLK6_RUNSTDBY,
-     .source         = BOARD_GCLK6_SOURCE,
-     .div            = BOARD_GCLK6_DIV
-     },
-     {
-     .enable         = BOARD_GCLK7_ENABLE,
-     .oov            = BOARD_GCLK7_OOV,
-     .oe             = BOARD_GCLK7_OE,
-     .runstdby       = BOARD_GCLK7_RUNSTDBY,
-     .source         = BOARD_GCLK7_SOURCE,
-     .div            = BOARD_GCLK7_DIV
-     },
-     {
-     .enable         = BOARD_GCLK8_ENABLE,
-     .oov            = BOARD_GCLK8_OOV,
-     .oe             = BOARD_GCLK8_OE,
-     .runstdby       = BOARD_GCLK8_RUNSTDBY,
-     .source         = BOARD_GCLK8_SOURCE,
-     .div            = BOARD_GCLK8_DIV
-     },
-     {
-     .enable         = BOARD_GCLK9_ENABLE,
-     .oov            = BOARD_GCLK9_OOV,
-     .oe             = BOARD_GCLK9_OE,
-     .runstdby       = BOARD_GCLK9_RUNSTDBY,
-     .source         = BOARD_GCLK9_SOURCE,
-     .div            = BOARD_GCLK9_DIV
-     },
-     {
-     .enable         = BOARD_GCLK10_ENABLE,
-     .oov            = BOARD_GCLK10_OOV,
-     .oe             = BOARD_GCLK10_OE,
-     .runstdby       = BOARD_GCLK10_RUNSTDBY,
-     .source         = BOARD_GCLK10_SOURCE,
-     .div            = BOARD_GCLK10_DIV
-     },
-     {
-     .enable         = BOARD_GCLK11_ENABLE,
-     .oov            = BOARD_GCLK11_OOV,
-     .oe             = BOARD_GCLK11_OE,
-     .runstdby       = BOARD_GCLK11_RUNSTDBY,
-     .source         = BOARD_GCLK11_SOURCE,
-     .div            = BOARD_GCLK11_DIV
-     }
-   }
+  .dfll             =
+    {
+      .enable         = BOARD_DFLL_ENABLE,
+      .runstdby       = BOARD_DFLL_RUNSTDBY,
+      .ondemand       = BOARD_DFLL_ONDEMAND,
+      .mode           = BOARD_DFLL_MODE,
+      .stable         = BOARD_DFLL_STABLE,
+      .llaw           = BOARD_DFLL_LLAW,
+      .usbcrm         = BOARD_DFLL_USBCRM,
+      .ccdis          = BOARD_DFLL_CCDIS,
+      .qldis          = BOARD_DFLL_QLDIS,
+      .bplckc         = BOARD_DFLL_BPLCKC,
+      .waitlock       = BOARD_DFLL_WAITLOCK,
+      .caliben        = BOARD_DFLL_CALIBEN,
+      .gclklock       = BOARD_DFLL_GCLKLOCK,
+      .fcalib         = BOARD_DFLL_FCALIB,
+      .ccalib         = BOARD_DFLL_CCALIB,
+      .fstep          = BOARD_DFLL_FSTEP,
+      .cstep          = BOARD_DFLL_CSTEP,
+      .gclk           = BOARD_DFLL_GCLK,
+      .mul            = BOARD_DFLL_MUL
+    },
+  .dpll             =
+    {
+      {
+        .enable       = BOARD_DPLL0_ENABLE,
+        .dcoen        = BOARD_DPLL0_DCOEN,
+        .lbypass      = BOARD_DPLL0_LBYPASS,
+        .wuf          = BOARD_DPLL0_WUF,
+        .runstdby     = BOARD_DPLL0_RUNSTDBY,
+        .ondemand     = BOARD_DPLL0_ONDEMAND,
+        .reflock      = BOARD_DPLL0_REFLOCK,
+        .refclk       = BOARD_DPLL0_REFCLK,
+        .ltime        = BOARD_DPLL0_LTIME,
+        .filter       = BOARD_DPLL0_FILTER,
+        .dcofilter    = BOARD_DPLL0_DCOFILTER,
+        .gclk         = BOARD_DPLL0_GCLK,
+        .ldrfrac      = BOARD_DPLL0_LDRFRAC,
+        .ldrint       = BOARD_DPLL0_LDRINT,
+        .div          = BOARD_DPLL0_DIV
+      },
+      {
+        .enable       = BOARD_DPLL1_ENABLE,
+        .dcoen        = BOARD_DPLL1_DCOEN,
+        .lbypass      = BOARD_DPLL1_LBYPASS,
+        .wuf          = BOARD_DPLL1_WUF,
+        .runstdby     = BOARD_DPLL1_RUNSTDBY,
+        .ondemand     = BOARD_DPLL1_ONDEMAND,
+        .reflock      = BOARD_DPLL1_REFLOCK,
+        .refclk       = BOARD_DPLL1_REFCLK,
+        .ltime        = BOARD_DPLL1_LTIME,
+        .filter       = BOARD_DPLL1_FILTER,
+        .dcofilter    = BOARD_DPLL1_DCOFILTER,
+        .gclk         = BOARD_DPLL1_GCLK,
+        .ldrfrac      = BOARD_DPLL1_LDRFRAC,
+        .ldrint       = BOARD_DPLL1_LDRINT,
+        .div          = BOARD_DPLL1_DIV
+      }
+    },
+  .gclk             =
+    {
+      {
+        .enable         = BOARD_GCLK0_ENABLE,
+        .oov            = BOARD_GCLK0_OOV,
+        .oe             = BOARD_GCLK0_OE,
+        .runstdby       = BOARD_GCLK0_RUNSTDBY,
+        .source         = BOARD_GCLK0_SOURCE,
+        .div            = BOARD_GCLK0_DIV
+      },
+      {
+        .enable         = BOARD_GCLK1_ENABLE,
+        .oov            = BOARD_GCLK1_OOV,
+        .oe             = BOARD_GCLK1_OE,
+        .runstdby       = BOARD_GCLK1_RUNSTDBY,
+        .source         = BOARD_GCLK1_SOURCE,
+        .div            = BOARD_GCLK1_DIV
+      },
+      {
+        .enable         = BOARD_GCLK2_ENABLE,
+        .oov            = BOARD_GCLK2_OOV,
+        .oe             = BOARD_GCLK2_OE,
+        .runstdby       = BOARD_GCLK2_RUNSTDBY,
+        .source         = BOARD_GCLK2_SOURCE,
+        .div            = BOARD_GCLK2_DIV
+      },
+      {
+        .enable         = BOARD_GCLK3_ENABLE,
+        .oov            = BOARD_GCLK3_OOV,
+        .oe             = BOARD_GCLK3_OE,
+        .runstdby       = BOARD_GCLK3_RUNSTDBY,
+        .source         = BOARD_GCLK3_SOURCE,
+        .div            = BOARD_GCLK3_DIV
+      },
+      {
+        .enable         = BOARD_GCLK4_ENABLE,
+        .oov            = BOARD_GCLK4_OOV,
+        .oe             = BOARD_GCLK4_OE,
+        .runstdby       = BOARD_GCLK4_RUNSTDBY,
+        .source         = BOARD_GCLK4_SOURCE,
+        .div            = BOARD_GCLK4_DIV
+      },
+      {
+        .enable         = BOARD_GCLK5_ENABLE,
+        .oov            = BOARD_GCLK5_OOV,
+        .oe             = BOARD_GCLK5_OE,
+        .runstdby       = BOARD_GCLK5_RUNSTDBY,
+        .source         = BOARD_GCLK5_SOURCE,
+        .div            = BOARD_GCLK5_DIV
+      },
+      {
+        .enable         = BOARD_GCLK6_ENABLE,
+        .oov            = BOARD_GCLK6_OOV,
+        .oe             = BOARD_GCLK6_OE,
+        .runstdby       = BOARD_GCLK6_RUNSTDBY,
+        .source         = BOARD_GCLK6_SOURCE,
+        .div            = BOARD_GCLK6_DIV
+      },
+      {
+        .enable         = BOARD_GCLK7_ENABLE,
+        .oov            = BOARD_GCLK7_OOV,
+        .oe             = BOARD_GCLK7_OE,
+        .runstdby       = BOARD_GCLK7_RUNSTDBY,
+        .source         = BOARD_GCLK7_SOURCE,
+        .div            = BOARD_GCLK7_DIV
+      },
+      {
+        .enable         = BOARD_GCLK8_ENABLE,
+        .oov            = BOARD_GCLK8_OOV,
+        .oe             = BOARD_GCLK8_OE,
+        .runstdby       = BOARD_GCLK8_RUNSTDBY,
+        .source         = BOARD_GCLK8_SOURCE,
+        .div            = BOARD_GCLK8_DIV
+      },
+      {
+        .enable         = BOARD_GCLK9_ENABLE,
+        .oov            = BOARD_GCLK9_OOV,
+        .oe             = BOARD_GCLK9_OE,
+        .runstdby       = BOARD_GCLK9_RUNSTDBY,
+        .source         = BOARD_GCLK9_SOURCE,
+        .div            = BOARD_GCLK9_DIV
+      },
+      {
+        .enable         = BOARD_GCLK10_ENABLE,
+        .oov            = BOARD_GCLK10_OOV,
+        .oe             = BOARD_GCLK10_OE,
+        .runstdby       = BOARD_GCLK10_RUNSTDBY,
+        .source         = BOARD_GCLK10_SOURCE,
+        .div            = BOARD_GCLK10_DIV
+      },
+      {
+        .enable         = BOARD_GCLK11_ENABLE,
+        .oov            = BOARD_GCLK11_OOV,
+        .oe             = BOARD_GCLK11_OE,
+        .runstdby       = BOARD_GCLK11_RUNSTDBY,
+        .source         = BOARD_GCLK11_SOURCE,
+        .div            = BOARD_GCLK11_DIV
+      }
+    }
 };
 
 /****************************************************************************
@@ -317,7 +317,7 @@ static void sam_set_waitstates(const struct sam_clockconfig_s *config)
 {
   DEBUGASSERT(config->waitstates < 16);
   modifyreg16(SAM_NVMCTRL_CTRLA, NVMCTRL_CTRLA_RWS_MASK,
-              NVMCTRL_CTRLA_RWS(config->waitstates) );
+              NVMCTRL_CTRLA_RWS(config->waitstates));
 }
 
 /****************************************************************************
@@ -422,9 +422,9 @@ static void sam_xosc32k_configure(const struct sam_xosc32_config_s *config)
 static uint32_t sam_xoscctrl(const struct sam_xosc_config_s *config)
 {
   uint32_t regval;
-  uint8_t cfdpresc;
-  uint8_t imult;
-  uint8_t iptat;
+  uint32_t cfdpresc;
+  uint32_t imult;
+  uint8_t iptat = 3;
 
   /* Some settings determined by the crystal frequency */
 
@@ -446,7 +446,7 @@ static uint32_t sam_xoscctrl(const struct sam_xosc_config_s *config)
       imult    = 5;
       iptat    = 3;
     }
-  else if (config->xosc_frequency > 8000000)
+  else
     {
       cfdpresc = 3;
       imult    = 4;
@@ -455,7 +455,7 @@ static uint32_t sam_xoscctrl(const struct sam_xosc_config_s *config)
 
   /* Get the XOSCTCTL register *configuration */
 
-  regval = OSCCTRL_XOSCCTRL_IPTAT(ipta) | OSCCTRL_XOSCCTRL_IMULT(imult) |
+  regval = OSCCTRL_XOSCCTRL_IPTAT(iptat) | OSCCTRL_XOSCCTRL_IMULT(imult) |
            OSCCTRL_XOSCCTRL_STARTUP(config->startup) |
            OSCCTRL_XOSCCTRL_CFDPRESC(cfdpresc);
 
@@ -504,15 +504,15 @@ static uint32_t sam_xoscctrl(const struct sam_xosc_config_s *config)
 #endif
 
 /****************************************************************************
- * Name: sam_xosc32k_configure
+ * Name: sam_xosc0_configure
  *
  * Description:
- *   Configure XOSC32K
+ *   Configure XOSC0K
  *
  ****************************************************************************/
 
 #if BOARD_HAVE_XOSC0 != 0
-static void sam_xosc0_configure(const struct sam_clockconfig_s *config)
+static void sam_xosc0_configure(const struct sam_xosc_config_s *config)
 {
   uint32_t regval;
 
@@ -521,11 +521,11 @@ static void sam_xosc0_configure(const struct sam_clockconfig_s *config)
   regval = sam_xoscctrl(config);
   putreg32(regval, SAM_OSCCTRL_XOSCCTRL0);
 
-  /* Wait for XOSC32 to become ready if it was enabled */
+  /* Wait for XOSC0 to become ready if it was enabled */
 
   if (config->enable)
     {
-      while (getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_XOSCRDY0) == 0)
+      while ((getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_XOSCRDY0) == 0)
         {
         }
     }
@@ -534,14 +534,14 @@ static void sam_xosc0_configure(const struct sam_clockconfig_s *config)
 
   if (config->ondemand)
     {
-      regval  = getre32(SAM_OSCCTRL_XOSCCTRL0)
+      regval  = getreg32(SAM_OSCCTRL_XOSCCTRL0);
       regval |= OSCCTRL_XOSCCTRL_ONDEMAND;
       putreg32(regval, SAM_OSCCTRL_XOSCCTRL0);
     }
 }
 #endif
 
-#if BOARD_HAVE_XOSC0 != 0
+#if BOARD_HAVE_XOSC1 != 0
 void sam_xosc1_configure(const struct sam_xosc_config_s *config)
 {
   uint32_t regval;
@@ -551,11 +551,11 @@ void sam_xosc1_configure(const struct sam_xosc_config_s *config)
   regval = sam_xoscctrl(config);
   putreg32(regval, SAM_OSCCTRL_XOSCCTRL1);
 
-  /* Wait for XOSC32 to become ready if it was enabled */
+  /* Wait for XOSC1 to become ready if it was enabled */
 
   if (config->enable)
     {
-      while (getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_XOSCRDY1) == 0)
+      while ((getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_XOSCRDY1) == 0)
         {
         }
     }
@@ -564,7 +564,7 @@ void sam_xosc1_configure(const struct sam_xosc_config_s *config)
 
   if (config->ondemand)
     {
-      regval  = getre32(SAM_OSCCTRL_XOSCCTRL1)
+      regval  = getreg32(SAM_OSCCTRL_XOSCCTRL1);
       regval |= OSCCTRL_XOSCCTRL_ONDEMAND;
       putreg32(regval, SAM_OSCCTRL_XOSCCTRL1);
     }
@@ -782,8 +782,9 @@ static void sam_dfll_ready(const struct sam_dfll_config_s *config)
   uint32_t regval32;
   uint8_t regval8;
 
-  /* Check if the mode bit was set, i.e., we are in closed-loop mode.  If so
-   * wait for the DFLL to be ready for and for the coarse lock to be obtained.
+  /* Check if the mode bit was set, i.e., we are in closed-loop mode. If so
+   * wait for the DFLL to be ready for and for the coarse lock to be
+   * obtained.
    */
 
   regval8 = getreg8(SAM_OSCCTRL_DPLL0CTRLB);
@@ -828,7 +829,7 @@ static void sam_dfll_gclkready(const struct sam_dfll_config_s *config)
     {
     }
 
-  /* Set the source of GCLK0 to the configured source. */
+  /* Set the source of GCLK0 to to the configured source. */
 
   regval32  = getreg32(SAM_GCLK_GENCTRL(0));
   regval32 &= ~GCLK_GENCTRL_SRC_MASK;
@@ -854,7 +855,9 @@ static void sam_dpll_gclkchannel(uint8_t chan,
 
   if (config->refclk == 0 && !sam_gclk_chan_locked(chan))
     {
-      /* Yes.. configure the GCLK channel that will be used as refclk source */
+      /* Yes.. configure the GCLK channel that will be used as
+       * refclk source.
+       */
 
       sam_gclk_chan_enable(chan, config->gclk, (bool)config->reflock);
     }

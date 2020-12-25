@@ -29,7 +29,7 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *****************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -133,7 +133,7 @@ static struct args *parse_args(int argc, char **argv)
   if (show_help == 1)
     {
       fprintf(stderr,
-              "mkspk [-c <number>] <filename> <save name> [<output file>]\n");
+        "mkspk [-c <number>] <filename> <save name> [<output file>]\n");
       exit(EXIT_FAILURE);
     }
 

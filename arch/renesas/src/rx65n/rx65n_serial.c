@@ -37,13 +37,13 @@
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 #include "rx65n_macrodriver.h"
-#include "rx65n/iodefine.h"
+#include "arch/rx65n/iodefine.h"
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
 #include "rx65n_definitions.h"
 #include "rx65n_sci.h"
-#include "rx65n/irq.h"
+#include "arch/rx65n/irq.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -284,7 +284,7 @@ static int  up_xmtinterrupt(int irq, void *context, FAR void *arg);
 static int  up_rcvinterrupt(int irq, void *context, FAR void *arg);
 static int  up_eriinterrupt(int irq, void *context, FAR void *arg);
 static int  up_teiinterrupt(int irq, void *context, FAR void *arg);
-static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
 static void up_send(struct uart_dev_s *dev, int ch);

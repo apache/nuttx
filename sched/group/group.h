@@ -101,7 +101,7 @@ FAR struct task_group_s *group_findby_grpid(grpid_t grpid);
 FAR struct task_group_s *group_findbypid(pid_t pid);
 int group_foreachchild(FAR struct task_group_s *group,
                        foreachchild_t handler, FAR void *arg);
-int group_kill_children(FAR struct task_tcb_s *tcb);
+int group_kill_children(FAR struct tcb_s *tcb);
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
 int group_suspend_children(FAR struct tcb_s *tcb);
 int group_continue(FAR struct tcb_s *tcb);
@@ -146,7 +146,7 @@ void group_remove_children(FAR struct task_group_s *group);
 
 int  group_setupidlefiles(FAR struct task_tcb_s *tcb);
 int  group_setuptaskfiles(FAR struct task_tcb_s *tcb);
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 int  group_setupstreams(FAR struct task_tcb_s *tcb);
 #endif
 

@@ -1,35 +1,20 @@
 /************************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_bdma.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ************************************************************************************/
 
@@ -49,17 +34,20 @@
 
 /* Register Offsets *****************************************************************/
 
-#define STM32_BDMA_OFFSET(x)        (0x08+0x14*(x))
 #define STM32_BDMA_ISR_OFFSET       0x0000 /* BDMA interrupt status register */
 #define STM32_BDMA_IFCR_OFFSET      0x0004 /* BDMA interrupt flag clear register */
 
-#define STM32_BDMACH_CCR_OFFSET     0x0008
-#define STM32_BDMACH_CNDTR_OFFSET   0x000C
-#define STM32_BDMACH_CPAR_OFFSET    0x0010
-#define STM32_BDMACH_CM0AR_OFFSET   0x0014
-#define STM32_BDMACH_CM1AR_OFFSET   0x0018
+#define STM32_BDMACH_CCR_OFFSET     0x0008 /* BDMA channel x configuration register */
+#define STM32_BDMACH_CNDTR_OFFSET   0x000C /* BDMA channel x number of data to transfer register */
+#define STM32_BDMACH_CPAR_OFFSET    0x0010 /* BDMA channel x peripheral address register */
+#define STM32_BDMACH_CM0AR_OFFSET   0x0014 /* BDMA channel x memory 0 address register */
+#define STM32_BDMACH_CM1AR_OFFSET   0x0018 /* BDMA channel x memory 1 address register */
 
-#define STM32_BDMA_CCRX_OFFSET(x)   (0x0008+(x*0x0014)) /* BDMA channel x configuration register */
+#define STM32_BDMA_SPACING          0x14
+#define STM32_BDMA_OFFSET(x)        (STM32_BDMA_SPACING * (x))
+
+#define STM32_BDMA_CCRX_OFFSET(x)   (STM32_BDMACH_CCR_OFFSET + \
+                                    STM32_BDMA_OFFSET(x))
 #define STM32_BDMA_CCR0_OFFSET      STM32_BDMA_CCRX_OFFSET(0)
 #define STM32_BDMA_CCR1_OFFSET      STM32_BDMA_CCRX_OFFSET(1)
 #define STM32_BDMA_CCR2_OFFSET      STM32_BDMA_CCRX_OFFSET(2)
@@ -69,7 +57,8 @@
 #define STM32_BDMA_CCR6_OFFSET      STM32_BDMA_CCRX_OFFSET(6)
 #define STM32_BDMA_CCR7_OFFSET      STM32_BDMA_CCRX_OFFSET(7)
 
-#define STM32_BDMA_CNDTRX_OFFSET(x) (0x000C+(x*0x0014)) /* BDMA channel x number of data to transfer register */
+#define STM32_BDMA_CNDTRX_OFFSET(x) (STM32_BDMACH_CNDTR_OFFSET + \
+                                    STM32_BDMA_OFFSET(x))
 #define STM32_BDMA_CNDTR0_OFFSET    STM32_BDMA_CNDTRX_OFFSET(0)
 #define STM32_BDMA_CNDTR1_OFFSET    STM32_BDMA_CNDTRX_OFFSET(1)
 #define STM32_BDMA_CNDTR2_OFFSET    STM32_BDMA_CNDTRX_OFFSET(2)
@@ -79,7 +68,8 @@
 #define STM32_BDMA_CNDTR6_OFFSET    STM32_BDMA_CNDTRX_OFFSET(6)
 #define STM32_BDMA_CNDTR7_OFFSET    STM32_BDMA_CNDTRX_OFFSET(7)
 
-#define STM32_BDMA_CPARX_OFFSET(x)  (0x0010+(x*0x0014)) /* BDMA channel x peripheral address register */
+#define STM32_BDMA_CPARX_OFFSET(x)  (STM32_BDMACH_CPAR_OFFSET + \
+                                    STM32_BDMA_OFFSET(x))
 #define STM32_BDMA_CPAR0_OFFSET     STM32_BDMA_CPARX_OFFSET(0)
 #define STM32_BDMA_CPAR1_OFFSET     STM32_BDMA_CPARX_OFFSET(1)
 #define STM32_BDMA_CPAR2_OFFSET     STM32_BDMA_CPARX_OFFSET(2)
@@ -89,7 +79,8 @@
 #define STM32_BDMA_CPAR6_OFFSET     STM32_BDMA_CPARX_OFFSET(6)
 #define STM32_BDMA_CPAR7_OFFSET     STM32_BDMA_CPARX_OFFSET(7)
 
-#define STM32_BDMA_CM0ARX_OFFSET(x) (0x0014+(x*0x0014)) /* BDMA channel x memory 0 address register */
+#define STM32_BDMA_CM0ARX_OFFSET(x) (STM32_BDMACH_CM0AR_OFFSET + \
+                                    STM32_BDMA_OFFSET(x))
 #define STM32_BDMA_CM0AR0_OFFSET    STM32_BDMA_CM0ARX_OFFSET(0)
 #define STM32_BDMA_CM0AR1_OFFSET    STM32_BDMA_CM0ARX_OFFSET(1)
 #define STM32_BDMA_CM0AR2_OFFSET    STM32_BDMA_CM0ARX_OFFSET(2)
@@ -99,7 +90,8 @@
 #define STM32_BDMA_CM0AR6_OFFSET    STM32_BDMA_CM0ARX_OFFSET(6)
 #define STM32_BDMA_CM0AR7_OFFSET    STM32_BDMA_CM0ARX_OFFSET(7)
 
-#define STM32_BDMA_CM1ARX_OFFSET(x) (0x0018+(x*0x0014)) /* BDMA channel x memory 1 address register */
+#define STM32_BDMA_CM1ARX_OFFSET(x) (STM32_BDMACH_CM1AR_OFFSET + \
+                                    STM32_BDMA_OFFSET(x))
 #define STM32_BDMA_CM1AR0_OFFSET    STM32_BDMA_CM1ARX_OFFSET(0)
 #define STM32_BDMA_CM1AR1_OFFSET    STM32_BDMA_CM1ARX_OFFSET(1)
 #define STM32_BDMA_CM1AR2_OFFSET    STM32_BDMA_CM1ARX_OFFSET(2)
@@ -172,6 +164,7 @@
 #define BDMA_CHAN_TCIF             (1 << 1) /* Bit 1: Transfer complete flag */
 #define BDMA_CHAN_HTIF             (1 << 2) /* Bit 2: half transfer complete flag */
 #define BDMA_CHAN_TEIF             (1 << 3) /* Bit 3: Transfer error flag */
+#define BDMA_CCR_ALLINTS           (BDMA_CHAN_TCIF | BDMA_CHAN_HTIF | BDMA_CHAN_TEIF)
 
 /* BDMA interrupt status register */
 
@@ -240,20 +233,20 @@
 #  define BDMA_CCR_PSIZE_8BITS     (0 << BDMA_CCR_PSIZE_SHIFT) /* 00: 8-bits */
 #  define BDMA_CCR_PSIZE_16BITS    (1 << BDMA_CCR_PSIZE_SHIFT) /* 01: 16-bits */
 #  define BDMA_CCR_PSIZE_32BITS    (2 << BDMA_CCR_PSIZE_SHIFT) /* 10: 32-bits */
-#define BDMA_CCR_MSIZE_SHIFT       (10)      /* Bits 10-11: Memory size*/
+#define BDMA_CCR_MSIZE_SHIFT       (10)                        /* Bits 10-11: Memory size*/
 #define BDMA_CCR_MSIZE_MASK        (3 << BDMA_CCR_MSIZE_SHIFT)
 #  define BDMA_CCR_MSIZE_8BITS     (0 << BDMA_CCR_MSIZE_SHIFT) /* 00: 8-bits */
 #  define BDMA_CCR_MSIZE_16BITS    (1 << BDMA_CCR_MSIZE_SHIFT) /* 01: 16-bits */
 #  define BDMA_CCR_MSIZE_32BITS    (2 << BDMA_CCR_MSIZE_SHIFT) /* 10: 32-bits */
-#define BDMA_CCR_PL_SHIFT          (12)      /* Bits 12-13: Priority level */
+#define BDMA_CCR_PL_SHIFT          (12)                        /* Bits 12-13: Priority level */
 #define BDMA_CCR_PL_MASK           (3 << BDMA_CCR_PL_SHIFT)
 #  define BDMA_CCR_PRILO           (0 << BDMA_CCR_PL_SHIFT) /* 00: Low */
 #  define BDMA_CCR_PRIMED          (1 << BDMA_CCR_PL_SHIFT) /* 01: Medium */
 #  define BDMA_CCR_PRIHI           (2 << BDMA_CCR_PL_SHIFT) /* 10: High */
 #  define BDMA_CCR_PRIVERYHI       (3 << BDMA_CCR_PL_SHIFT) /* 11: Very high */
-#define BDMA_CCR_M2M               (1 << 14) /* Bit 14: Memory-to-memory mode */
-#define BDMA_CCR_DBM               (1 << 15) /* Bit 15: dobule buffer mode*/
-#define BDMA_CCR_CT                (1 << 16) /* Bit 16: Current target */
+#define BDMA_CCR_M2M               (1 << 14)                /* Bit 14: Memory-to-memory mode */
+#define BDMA_CCR_DBM               (1 << 15)                /* Bit 15: dobule buffer mode*/
+#define BDMA_CCR_CT                (1 << 16)                /* Bit 16: Current target */
 
 /* BDMA channel x number of data to transfer register */
 

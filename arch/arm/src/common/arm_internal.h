@@ -82,7 +82,7 @@
  * some configurations.
  */
 
-#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M) || \
+#if defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
     defined(CONFIG_ARCH_ARMV8M)
 
   /* If the floating point unit is present and enabled, then save the
@@ -212,7 +212,7 @@ EXTERN volatile uint32_t *g_current_regs[1];
  * CONFIG_RAM_END
  */
 
-EXTERN const uint32_t g_idle_topstack;
+EXTERN const uintptr_t g_idle_topstack;
 
 /* Address of the saved user stack pointer */
 
@@ -319,7 +319,7 @@ void arm_pminitialize(void);
 
 /* Exception handling logic unique to the Cortex-M family */
 
-#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M) || \
+#if defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
     defined(CONFIG_ARCH_ARMV8M)
 
 /* Interrupt acknowledge and dispatch */
@@ -390,7 +390,7 @@ void arm_prefetchabort(uint32_t *regs);
 void arm_syscall(uint32_t *regs);
 void arm_undefinedinsn(uint32_t *regs);
 
-#endif /* CONFIG_ARCH_CORTEXM0,3,4,7 */
+#endif /* CONFIG_ARCH_ARMV[6-8]M */
 
 void arm_vectorundefinsn(void);
 void arm_vectorswi(void);

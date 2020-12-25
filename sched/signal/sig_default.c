@@ -134,12 +134,14 @@ static const struct nxsig_defaction_s g_defactions[] =
 #endif
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
   { SIGSTOP, SIG_FLAG_NOCATCH, nxsig_stop_task },
-  { SIGSTP,  0,                nxsig_stop_task },
+  { SIGTSTP, 0,                nxsig_stop_task },
   { SIGCONT, SIG_FLAG_NOCATCH, nxsig_null_action },
 #endif
 #ifdef CONFIG_SIG_SIGKILL_ACTION
   { SIGINT,  0,                nxsig_abnormal_termination },
   { SIGKILL, SIG_FLAG_NOCATCH, nxsig_abnormal_termination },
+  { SIGQUIT, 0,                nxsig_abnormal_termination },
+  { SIGTERM, 0,                nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGPIPE_ACTION
   { SIGPIPE, 0,                nxsig_abnormal_termination }
@@ -207,61 +209,12 @@ static void nxsig_abnormal_termination(int signo)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)this_task();
 
-  /* Check to see if this task has the non-cancelable bit set in its
-   * flags. Suppress context changes for a bit so that the flags are stable.
-   * (the flags should not change in interrupt handling).
-   */
+  /* Notify the target if the non-cancelable or deferred cancellation set */
 
-  sched_lock();
-  if ((rtcb->flags & TCB_FLAG_NONCANCELABLE) != 0)
+  if (nxnotify_cancellation(rtcb))
     {
-      /* Then we cannot cancel the thread now.  Here is how this is
-       * supposed to work:
-       *
-       * "When cancellability is disabled, all cancels are held pending
-       *  in the target thread until the thread changes the cancellability.
-       *  When cancellability is deferred, all cancels are held pending in
-       *  the target thread until the thread changes the cancellability,
-       *  calls a function which is a cancellation point or calls
-       *  pthread_testcancel(), thus creating a cancellation point.  When
-       *  cancellability is asynchronous, all cancels are acted upon
-       *  immediately, interrupting the thread with its processing."
-       *
-       * REVISIT:  Does this rule apply to equally to both SIGKILL and
-       * SIGINT?
-       */
-
-      rtcb->flags |= TCB_FLAG_CANCEL_PENDING;
-      sched_unlock();
       return;
     }
-
-#ifdef CONFIG_CANCELLATION_POINTS
-  /* Check if this task supports deferred cancellation */
-
-  if ((rtcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
-    {
-      /* Then we cannot cancel the task asynchronously.
-       * Mark the cancellation as pending.
-       */
-
-      rtcb->flags |= TCB_FLAG_CANCEL_PENDING;
-
-      /* If the task is waiting at a cancellation point, then notify of the
-       * cancellation thereby waking the task up with an ECANCELED error.
-       */
-
-      if (rtcb->cpcount > 0)
-        {
-          nxnotify_cancellation(rtcb);
-        }
-
-      sched_unlock();
-      return;
-    }
-#endif
-
-  sched_unlock();
 
   /* Careful:  In the multi-threaded task, the signal may be handled on a
    * child pthread.
@@ -273,7 +226,7 @@ static void nxsig_abnormal_termination(int signo)
    * task group if this_task is a pthread.
    */
 
-  group_kill_children((FAR struct task_tcb_s *)rtcb);
+  group_kill_children(rtcb);
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
@@ -302,7 +255,7 @@ static void nxsig_abnormal_termination(int signo)
  * Name: nxsig_stop_task
  *
  * Description:
- *   This is the handler for the abnormal termination default action.
+ *   This is the handler for the stop default action.
  *
  * Input Parameters:
  *   Standard signal handler parameters
@@ -364,7 +317,7 @@ static void nxsig_stop_task(int signo)
 
       group->tg_waitflags = 0;
 
-      /* YWakeup any tasks waiting for this task to exit or stop. */
+      /* Wakeup any tasks waiting for this task to exit or stop. */
 
       while (group->tg_exitsem.semcount < 0)
         {

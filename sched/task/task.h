@@ -71,8 +71,6 @@ void nxtask_recover(FAR struct tcb_s *tcb);
 
 /* Cancellation points */
 
-#ifdef CONFIG_CANCELLATION_POINTS
-void nxnotify_cancellation(FAR struct tcb_s *tcb);
-#endif
+bool nxnotify_cancellation(FAR struct tcb_s *tcb);
 
 #endif /* __SCHED_TASK_TASK_H */

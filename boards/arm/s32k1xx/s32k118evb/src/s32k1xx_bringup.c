@@ -51,6 +51,10 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#ifdef CONFIG_S32K1XX_EEEPROM
+#  include "s32k1xx_eeeprom.h"
+#endif
+
 #include "s32k118evb.h"
 
 /****************************************************************************
@@ -103,6 +107,23 @@ int s32k1xx_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_S32K1XX_PROGMEM
+  FAR struct mtd_dev_s *mtd;
+  int minor = 0;
+
+  mtd = progmem_initialize();
+  if (!mtd)
+    {
+      syslog(LOG_ERR, "ERROR: progmem_initialize failed\n");
+    }
+#endif
+
+#ifdef CONFIG_S32K1XX_EEEPROM
+  /* Register EEEPROM block device */
+
+  s32k1xx_eeeprom_register(0, 2048);
 #endif
 
   return ret;

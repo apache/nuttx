@@ -49,7 +49,7 @@
  *   state table allows for more PUSH/POP report items to be nested, but
  *   consumes more memory. By default this is set to 2 levels (allowing non-
  *   nested PUSH items) but this can be overridden by defining
- *   CONFIG_HID_STATEDEPTH in the Nuttx config file.
+ *   CONFIG_HID_STATEDEPTH in the NuttX config file.
  *
  * CONFIG_HID_USAGEDEPTH
  *   Constant indicating the maximum stack depth of the usage table. A larger
@@ -57,14 +57,15 @@
  *   REPORT COUNT entries of more than one, but requires more stack space. By
  *   default this is set to 8 levels (allowing for a report item with a count
  *   of 8) but this can be overridden by defining CONFIG_HID_USAGEDEPTH to
- *   in the Nuttx config file.
+ *   in the NuttX config file.
  *
  * CONFIG_HID_MAXCOLLECTIONS
  *   Constant indicating the maximum number of COLLECTION items (nested or
  *   unnested) that can be processed in the report item descriptor. A large
  *   value allows for more COLLECTION items to be processed, but consumes
  *   more memory. By default this is set to 10 collections, but this can be
- *   overridden by defining CONFIG_HID_MAXCOLLECTIONS in the Nuttx config file.
+ *   overridden by defining CONFIG_HID_MAXCOLLECTIONS in the NuttX config
+ *   file.
  *
  * CONFIG_HID_MAXITEMS
  *   Constant indicating the maximum number of report items (IN, OUT or
@@ -72,7 +73,7 @@
  *   in the user HID Report Info structure. A large value allows
  *   for more report items to be stored, but consumes more memory. By default
  *   this is set to 20 items, but this can be overridden by defining
- *   CONFIG_HID_MAXITEMS in the Nuttx config file.
+ *   CONFIG_HID_MAXITEMS in the NuttX config file.
  *
  * CONFIG_HID_MAXIDS
  *   Constant indicating the maximum number of unique report IDs that can be
@@ -80,8 +81,9 @@
  *   array in the user HID Report Info structure. A large value allows for
  *   more report ID report sizes to be stored, but consumes more memory. By
  *   default this is set to 10 items, but this can be overridden by defining
- *   CONFIG_HID_MAXIDS in the Nuttx config file. Note that IN, OUT and FEATURE
- *   items sharing the same report ID consume only one size item in the array.
+ *   CONFIG_HID_MAXIDS in the NuttX config file. Note that IN, OUT and
+ *   FEATURE items sharing the same report ID consume only one size item in
+ *   the array.
  */
 
 #ifndef CONFIG_HID_STATEDEPTH
@@ -175,14 +177,14 @@ struct hid_rptitem_attributes_s
 
 struct hid_rptitem_s
 {
-  uint16_t bitoffset;                 /* Bit offset in IN, OUT or FEATURE report of the item */
-  uint8_t type;                       /* Report item type */
-  uint16_t flags;                     /* Item data flags */
-  uint8_t id;                         /* Report ID this item belongs to (0 if only one report) */
-  struct hid_collectionpath_s *collectionpath;   /* Collection path of the item */
-  struct hid_rptitem_attributes_s attrib; /* Report item attributes */
-  uint32_t value;                     /* Current value of the report item */
-  uint32_t previous;                  /* Previous value of the report item */
+  uint16_t bitoffset;                          /* Bit offset in IN, OUT or FEATURE report of the item */
+  uint8_t type;                                /* Report item type */
+  uint16_t flags;                              /* Item data flags */
+  uint8_t id;                                  /* Report ID this item belongs to (0 if only one report) */
+  struct hid_collectionpath_s *collectionpath; /* Collection path of the item */
+  struct hid_rptitem_attributes_s attrib;      /* Report item attributes */
+  uint32_t value;                              /* Current value of the report item */
+  uint32_t previous;                           /* Previous value of the report item */
 };
 
 /* HID Parser Report Size Structure. Type define for a report item size
@@ -201,7 +203,9 @@ struct hid_rptsizeinfo_s
 
 struct hid_rptinfo_s
 {
-  /* nitems is the number of report items stored in the report items array (rptitems[]). */
+  /* nitems is the number of report items stored in the report items array
+   * (rptitems[]).
+   */
 
   uint8_t nitems;
   struct hid_rptitem_s items[CONFIG_HID_MAXITEMS];
@@ -210,10 +214,10 @@ struct hid_rptinfo_s
 
   struct hid_collectionpath_s collectionpaths[CONFIG_HID_MAXCOLLECTIONS];
 
-  uint8_t nreports;                   /* Number of reports within the HID interface */
+  uint8_t nreports;                                    /* Number of reports within the HID interface */
   struct hid_rptsizeinfo_s rptsize[CONFIG_HID_MAXIDS]; /* Report sizes for each report in the interface */
-  uint16_t maxrptsize;                /* Largest report that the attached device will generate, in bits */
-  bool haverptid;                     /* Device has at least one REPORT ID in its HID report */
+  uint16_t maxrptsize;                                 /* Largest report that the attached device will generate, in bits */
+  bool haverptid;                                      /* Device has at least one REPORT ID in its HID report */
 };
 
 /* Callback routine for the HID Report Parser. This callback must be
@@ -348,6 +352,5 @@ size_t hid_reportsize(FAR struct hid_rptinfo_s *rptinfo, uint8_t id,
 #if defined(__cplusplus)
 }
 #endif
-
 
 #endif /* __INCLUDE_NUTTX_USB_HID_PARSER_H */

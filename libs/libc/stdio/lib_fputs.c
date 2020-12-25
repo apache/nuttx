@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_fputs.c
  *
- *   Copyright (C) 2007, 2008, 2011-2012, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011-2012, 2017 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +61,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_ROMGETC)
-int fputs(FAR const char *s, FAR FILE *stream)
+int fputs(FAR const IPTR char *s, FAR FILE *stream)
 {
   int nput;
   int ret;
@@ -104,7 +105,7 @@ int fputs(FAR const char *s, FAR FILE *stream)
 }
 
 #else
-int fputs(FAR const char *s, FAR FILE *stream)
+int fputs(FAR const IPTR char *s, FAR FILE *stream)
 {
   int nput;
 
@@ -151,7 +152,7 @@ int fputs(FAR const char *s, FAR FILE *stream)
         }
     }
 
-  /* Without line buffering, we can write the whole string in one operation. */
+  /* We can write the whole string in one operation without line buffering */
 
   else
     {
@@ -172,7 +173,6 @@ int fputs(FAR const char *s, FAR FILE *stream)
         {
           return EOF;
         }
-
     }
 
   return nput;

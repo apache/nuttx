@@ -22,6 +22,7 @@ Contents
     - LEDs
     - RGB Power LED
   - Serial Consoles
+  - FLASH Bootloader Support
   - Configurations
 
 
@@ -112,6 +113,28 @@ Serial Consoles
 
   On Debian Linux, this shows up as /dev/ttyACM0. Other operating systems may
   differ.
+
+
+FLASH Bootloader Support
+========================
+
+  If implementing a FLASH bootloader, turn on Kconfig option CONFIG_STM32_DFU.
+  This option activates an alternate linker script, scripts/ld.script.dfu,
+  which causes NuttX to leave a gap at the start of FLASH, leaving that space
+  for the FLASH bootloader. See scripts/ld.script.dfu for details. It also
+  causes NuttX to relocate its vector table and possibly make other
+  adjustments.
+
+  One possible bootloader is STmicro's OpenBootloader "middleware" supplied
+  with STM32CubeG4 version 1.3.0. On the host (PC), it should be possible to
+  use STmicro's STM32CubeProgrammer or the stm32loader.py script from
+  https://github.com/jsnyder/stm32loader. That script can be invoked with
+  parameters such as:
+
+    stm32loader.py -p /dev/ttyACM0 -a 0x08006000 -e -w -v -g 0x08006000 nuttx.bin
+
+  where the given address (0x08006000 in this case) must match the starting
+  address in scripts/ld.script.dfu.
 
 
 Configurations

@@ -43,6 +43,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -59,6 +60,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration */
 
 #ifndef CONFIG_MTD_SECT512_ERASED_STATE
@@ -208,9 +210,9 @@ static void s512_cacheflush(struct s512_dev_s *priv)
   off_t sector;
   ssize_t result;
 
-  /* If the cached is dirty (meaning that it no longer matches the old FLASH contents)
-   * or was erased (with the cache containing the correct FLASH contents), then write
-   * the cached erase block to FLASH.
+  /* If the cached is dirty (meaning that it no longer matches the old FLASH
+   * contents) or was erased (with the cache containing the correct FLASH
+   * contents), then write the cached erase block to FLASH.
    */
 
   if (IS_DIRTY(priv) || IS_ERASED(priv))
@@ -218,7 +220,8 @@ static void s512_cacheflush(struct s512_dev_s *priv)
       /* Write entire erase block to FLASH */
 
       sector = priv->eblockno * priv->sectperblock;
-      result = priv->dev->bwrite(priv->dev, sector, priv->sectperblock, priv->eblock);
+      result = priv->dev->bwrite(priv->dev, sector, priv->sectperblock,
+                                 priv->eblock);
       if (result < 0)
         {
           ferr("ERROR: bwrite(%lu, %lu) returned %ld\n",
@@ -251,8 +254,7 @@ static int s512_erase(FAR struct mtd_dev_s *dev, off_t sector512, size_t nsector
   size_t eblockno;
   int ret;
 
-  finfo("sector512: %08lx nsectors: %lu\n",
-        (unsigned long)sector512, (unsigned int)nsectors);
+  finfo("sector512: %08jx nsectors: %zu\n", (intmax_t)sector512, nsectors);
 
   while (sectorsleft-- > 0)
     {
@@ -263,7 +265,7 @@ static int s512_erase(FAR struct mtd_dev_s *dev, off_t sector512, size_t nsector
       dest = s512_cacheread(priv, sector512);
       if (!dest)
         {
-          ferr("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector512);
+          ferr("ERROR: s512_cacheread(%lu) failed\n", (unsigned long)sector512);
           DEBUGPANIC();
           return -EIO;
         }
@@ -331,7 +333,7 @@ static ssize_t s512_bread(FAR struct mtd_dev_s *dev, off_t sector512,
       src = s512_cacheread(priv, sector512);
       if (!src)
         {
-          ferr("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector512);
+          ferr("ERROR: s512_cacheread(%lu) failed\n", (unsigned long)sector512);
           DEBUGPANIC();
 
           result = (ssize_t)nsectors - remaining;
@@ -358,8 +360,9 @@ static ssize_t s512_bread(FAR struct mtd_dev_s *dev, off_t sector512,
  * Name: s512_bwrite
  ************************************************************************************/
 
-static ssize_t s512_bwrite(FAR struct mtd_dev_s *dev, off_t sector512, size_t nsectors,
-                            FAR const uint8_t *buffer)
+static ssize_t s512_bwrite(FAR struct mtd_dev_s *dev, off_t sector512,
+                           size_t nsectors,
+                           FAR const uint8_t *buffer)
 {
 #ifdef CONFIG_MTD_SECT512_READONLY
   return -EACCESS;
@@ -464,7 +467,7 @@ static ssize_t s512_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
         {
           int result;
 
-          ferr("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector);
+          ferr("ERROR: s512_cacheread(%lu) failed\n", (unsigned long)sector);
           DEBUGPANIC();
 
           result = (ssize_t)nbytes - remaining;
@@ -507,7 +510,8 @@ static int s512_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)
+                                           ((uintptr_t)arg);
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -524,7 +528,8 @@ static int s512_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->neraseblocks = priv->neblocks * priv->stdperblock;
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %" PRId32 " erasesize: %" PRId32
+                    " neraseblocks: %" PRId32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -590,7 +595,7 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
   if (ret < 0 || geo.erasesize <= SECTOR_512 ||
      (geo.erasesize & ~MASK_512) != geo.erasesize)
     {
-      ferr("ERROR: MTDIOC_GEOMETRY ioctl returned %d, eraseize=%d\n",
+      ferr("ERROR: MTDIOC_GEOMETRY ioctl returned %d, eraseize=%" PRId32 "\n",
            ret, geo.erasesize);
       DEBUGPANIC();
       return NULL;
@@ -628,7 +633,9 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
       priv->eblock = (FAR uint8_t *)kmm_malloc(priv->eblocksize);
       if (!priv->eblock)
         {
-          /* Allocation failed! Discard all of that work we just did and return NULL */
+          /* Allocation failed! Discard all of that work we just did and
+           * return NULL
+           */
 
           ferr("ERROR: Allocation failed\n");
           kmm_free(priv);

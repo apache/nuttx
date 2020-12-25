@@ -70,18 +70,6 @@
  * Public Type Definitions
  ****************************************************************************/
 
-struct mallinfo
-{
-  int arena;    /* This is the total size of memory allocated
-                 * for use by malloc in bytes. */
-  int ordblks;  /* This is the number of free (not in use) chunks */
-  int mxordblk; /* Size of the largest free (not in use) chunk */
-  int uordblks; /* This is the total size of memory occupied by
-                 * chunks handed out by malloc. */
-  int fordblks; /* This is the total size of memory occupied
-                 * by free (not in use) chunks. */
-};
-
 /* Structure type returned by the div() function. */
 
 struct div_s
@@ -133,7 +121,10 @@ int       rand(void);
 #define   srandom(s) srand(s)
 long      random(void);
 
-#ifndef CONFIG_DISABLE_ENVIRON
+#ifdef CONFIG_CRYPTO_RANDOM_POOL
+void      arc4random_buf(FAR void *bytes, size_t nbytes);
+#endif
+
 /* Environment variable support */
 
 FAR char **get_environ_ptr(void);
@@ -142,23 +133,17 @@ int       putenv(FAR const char *string);
 int       clearenv(void);
 int       setenv(FAR const char *name, FAR const char *value, int overwrite);
 int       unsetenv(FAR const char *name);
-#endif
 
 /* Process exit functions */
 
 void      exit(int status) noreturn_function;
 void      abort(void) noreturn_function;
-#ifdef CONFIG_SCHED_ATEXIT
 int       atexit(CODE void (*func)(void));
-#endif
-#ifdef CONFIG_SCHED_ONEXIT
 int       on_exit(CODE void (*func)(int, FAR void *), FAR void *arg);
-#endif
 
 /* _Exit() is a stdlib.h equivalent to the unistd.h _exit() function */
 
-void      _exit(int status); /* See unistd.h */
-#define   _Exit(s) _exit(s)
+void      _Exit(int status) noreturn_function;
 
 /* System() command is not implemented in the NuttX libc because it is so
  * entangled with shell logic.  There is an experimental version at
@@ -169,6 +154,8 @@ void      _exit(int status); /* See unistd.h */
 #ifndef __KERNEL__
 int       system(FAR const char *cmd);
 #endif
+
+FAR char *realpath(FAR const char *path, FAR char *resolved);
 
 /* String to binary conversions */
 
@@ -187,13 +174,13 @@ double    strtod(FAR const char *str, FAR char **endptr);
 long double strtold(FAR const char *str, FAR char **endptr);
 #endif
 
-#define atoi(nptr)  ((int)strtol((nptr), NULL, 10))
-#define atol(nptr)  strtol((nptr), NULL, 10)
+int       atoi(FAR const char *nptr);
+long      atol(FAR const char *nptr);
 #ifdef CONFIG_HAVE_LONG_LONG
-#define atoll(nptr) strtoll((nptr), NULL, 10)
+long long atoll(FAR const char *nptr);
 #endif
 #ifdef CONFIG_HAVE_DOUBLE
-#define atof(nptr)  strtod((nptr), NULL)
+double    atof(FAR const char *nptr);
 #endif
 
 /* Binary to string conversions */
@@ -203,8 +190,11 @@ FAR char *itoa(int val, FAR char *str, int base);
 /* Wide character operations */
 
 #ifdef CONFIG_LIBC_WCHAR
+int       mblen(FAR const char *s, size_t n);
 int       mbtowc(FAR wchar_t *pwc, FAR const char *s, size_t n);
+size_t    mbstowcs(FAR wchar_t *dst, FAR const char *src, size_t len);
 int       wctomb(FAR char *s, wchar_t wchar);
+size_t    wcstombs(FAR char *dst, FAR const wchar_t *src, size_t len);
 #endif
 
 /* Memory Management */
@@ -215,18 +205,18 @@ FAR void *realloc(FAR void *, size_t);
 FAR void *memalign(size_t, size_t);
 FAR void *zalloc(size_t);
 FAR void *calloc(size_t, size_t);
-
-struct mallinfo mallinfo(void);
+FAR void *aligned_alloc(size_t, size_t);
+int       posix_memalign(FAR void **, size_t, size_t);
 
 /* Pseudo-Terminals */
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1
 FAR char *ptsname(int fd);
-int ptsname_r(int fd, FAR char *buf, size_t buflen);
+int       ptsname_r(int fd, FAR char *buf, size_t buflen);
 #endif
 
 #ifdef CONFIG_PSEUDOTERM
-int unlockpt(int fd);
+int       unlockpt(int fd);
 
 /* int grantpt(int fd); Not implemented */
 
@@ -235,33 +225,34 @@ int unlockpt(int fd);
 
 /* Arithmetic */
 
-int      abs(int j);
-long int labs(long int j);
+int       abs(int j);
+long int  labs(long int j);
 #ifdef CONFIG_HAVE_LONG_LONG
 long long int llabs(long long int j);
 #endif
 
-div_t    div(int number, int denom);
-ldiv_t   ldiv(long number, long denom);
+div_t     div(int number, int denom);
+ldiv_t    ldiv(long number, long denom);
 #ifdef CONFIG_HAVE_LONG_LONG
-lldiv_t  lldiv(long long number, long long denom);
+lldiv_t   lldiv(long long number, long long denom);
 #endif
 
 /* Temporary files */
 
-int      mktemp(FAR char *path_template);
-int      mkstemp(FAR char *path_template);
+FAR char *mktemp(FAR char *path_template);
+int       mkstemp(FAR char *path_template);
+FAR char *mkdtemp(FAR char *path_template);
 
 /* Sorting */
 
-void     qsort(FAR void *base, size_t nel, size_t width,
-               CODE int (*compar)(FAR const void *, FAR const void *));
+void      qsort(FAR void *base, size_t nel, size_t width,
+                CODE int (*compar)(FAR const void *, FAR const void *));
 
 /* Binary search */
 
-FAR void *bsearch(FAR const void *key, FAR const void *base, size_t nel,
-                  size_t width, CODE int (*compar)(FAR const void *,
-                  FAR const void *));
+FAR void  *bsearch(FAR const void *key, FAR const void *base, size_t nel,
+                   size_t width, CODE int (*compar)(FAR const void *,
+                   FAR const void *));
 
 #undef EXTERN
 #if defined(__cplusplus)

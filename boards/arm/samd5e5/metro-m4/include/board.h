@@ -253,27 +253,31 @@
 #define BOARD_GCLK11_DIV        1         /* Division factor */
 #define BOARD_GCLK11_FREQUENCY  BOARD_XOSC1_FREQUENCY
 
-/* FDLL */
+/* DFLL */
 
 #define BOARD_DFLL_ENABLE       TRUE      /* DFLL enable */
 #define BOARD_DFLL_RUNSTDBY     FALSE     /* Don't run in standby */
 #define BOARD_DFLL_ONDEMAND     FALSE     /* No n-demand control */
-#define BOARD_DFLL_MODE         FALSE     /* Open loop mode */
+#define BOARD_DFLL_MODE         FALSE     /* TRUE->48MHz! Closed mode! */
 #define BOARD_DFLL_STABLE       FALSE     /* No stable DFLL frequency */
 #define BOARD_DFLL_LLAW         FALSE     /* Don't ose lock after wake */
-#define BOARD_DFLL_USBCRM       TRUE      /* Use USB clock recovery mode */
-#define BOARD_DFLL_CCDIS        TRUE      /* Chill cycle disable */
+#define BOARD_DFLL_USBCRM       FALSE     /* Use USB clock recovery mode */
+#define BOARD_DFLL_CCDIS        FALSE     /* Chill cycle disable */
 #define BOARD_DFLL_QLDIS        FALSE     /* No Quick Lock Disable */
-#define BOARD_DFLL_BPLCKC       FALSE     /* No ypass coarse clock */
+#define BOARD_DFLL_BPLCKC       FALSE     /* No bypass coarse clock */
 #define BOARD_DFLL_WAITLOCK     TRUE      /* Wait lock */
-#define BOARD_DFLL_CALIBEN      FALSE     /* Don't verwrite factory calibration */
+#define BOARD_DFLL_CALIBEN      FALSE     /* Don't overwrite factory calibration */
 #define BOARD_DFLL_GCLKLOCK     FALSE     /* Don't lock the GCLK source */
 #define BOARD_DFLL_FCALIB       128       /* Coarse calibration value (if caliben) */
 #define BOARD_DFLL_CCALIB       (31 / 4)  /* Fine calibration value (if caliben) */
 #define BOARD_DFLL_FSTEP        1         /* Fine maximum step */
 #define BOARD_DFLL_CSTEP        1         /* Coarse maximum step */
-#define BOARD_DFLL_GCLK         3         /* GCLK source (if !usbcrm && !mode) */
-#define BOARD_DFLL_MUL          0         /* DFLL multiply factor */
+#define BOARD_DFLL_GCLK         3         /* Generic clock generator 3 output: OSCULP32K / GCLK source (if !usbcrm || !mode) */
+#if (BOARD_DFLL_MODE == TRUE) && (BOARD_DFLL_USBCRM == TRUE)
+#define BOARD_DFLL_MUL          0xBB80    /* 48MHz/1KHz DFLL multiply factor */
+#else
+#define BOARD_DFLL_MUL          1465      /* 1464(3)=48MHz/32768 4915(2) DFLL multiply factor */
+#endif
 
 /* DPLL0/1
  *
@@ -417,8 +421,8 @@
 /* SERCOM definitions *******************************************************/
 
 /* The SERCOM bus clock (CLK_SERCOMx_APB) can be enabled and disabled in the
- * Main Clock Controller.
- * The SERCOM uses two generic clocks: GCLK_SERCOMn_CORE and GCLK_SERCOM_SLOW.
+ * Main Clock Controller. The SERCOM uses two generic clocks:
+ * GCLK_SERCOMn_CORE and GCLK_SERCOM_SLOW.
  * The core clock (GCLK_SERCOMx_CORE) is required to clock the SERCOM while
  * working as a master.  The slow clock (GCLK_SERCOM_SLOW) is only  required
  * for certain functions and is common to all SERCOM modules.
@@ -460,6 +464,36 @@
 #define BOARD_SERCOM3_COREGEN        1                   /* 48MHz Core clock */
 #define BOARD_SERCOM3_CORELOCK       FALSE               /* Don't lock the CORECLOCK */
 #define BOARD_SERCOM3_FREQUENCY      BOARD_GCLK1_FREQUENCY
+
+/* I2C
+ *  PB02 - SERCOM5 PAD0 SDA
+ *  PB03 - SERCOM5 PAD1 SCL
+ */
+
+#define BOARD_SERCOM5_MUXCONFIG      (0)
+#define BOARD_SERCOM5_PINMAP_PAD0    PORT_SERCOM5_PAD0_3 /* PB02: PAD0: I2C SDA */
+#define BOARD_SERCOM5_PINMAP_PAD1    PORT_SERCOM5_PAD1_3 /* PB03: PAD1: I2C SCL */
+#define BOARD_SERCOM5_PINMAP_PAD2    0                   /* PAD2: (not used) */
+#define BOARD_SERCOM5_PINMAP_PAD3    0                   /* PAD3: (not used) */
+
+#define BOARD_SERCOM5_GCLKGEN 		 1                   /* 48MHz Core clock */
+#define BOARD_SERCOM5_SLOW_GCLKGEN	 3
+#define BOARD_SERCOM5_FREQUENCY      BOARD_GCLK1_FREQUENCY
+
+/* Tickless */
+
+#define BOARD_TC0_PINMAP_CC0         0                      /* CC0: (not used) */
+#define BOARD_TC0_PINMAP_CC1         0                      /* CC1: (not used) */
+#define BOARD_TC0_GCLKGEN            3
+#define BOARD_TC0_FREQUENCY          BOARD_GCLK3_FREQUENCY
+#define BOARD_TC2_PINMAP_CC0         0                      /* CC0: (not used) */
+#define BOARD_TC2_PINMAP_CC1         0                      /* CC1: (not used) */
+#define BOARD_TC2_GCLKGEN            3
+#define BOARD_TC2_FREQUENCY          BOARD_GCLK3_FREQUENCY
+#define BOARD_TC4_PINMAP_CC0         0                      /* CC0: (not used) */
+#define BOARD_TC4_PINMAP_CC1         0                      /* CC1: (not used) */
+#define BOARD_TC4_GCLKGEN            3
+#define BOARD_TC4_FREQUENCY          BOARD_GCLK3_FREQUENCY
 
 /* USB */
 

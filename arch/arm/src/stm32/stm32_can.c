@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdint.h>
@@ -69,6 +70,7 @@
  ****************************************************************************/
 
 /* Delays *******************************************************************/
+
 /* Time out for INAK bit */
 
 #define INAK_TIMEOUT 65535
@@ -294,7 +296,7 @@ static uint32_t stm32can_vgetreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          caninfo("[repeats %d more times]\n", count-3);
+          caninfo("[repeats %d more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -844,11 +846,15 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
 
           DEBUGASSERT(bt != NULL);
           regval       = stm32can_getreg(priv, STM32_CAN_BTR_OFFSET);
-          bt->bt_sjw   = ((regval & CAN_BTR_SJW_MASK) >> CAN_BTR_SJW_SHIFT) + 1;
-          bt->bt_tseg1 = ((regval & CAN_BTR_TS1_MASK) >> CAN_BTR_TS1_SHIFT) + 1;
-          bt->bt_tseg2 = ((regval & CAN_BTR_TS2_MASK) >> CAN_BTR_TS2_SHIFT) + 1;
+          bt->bt_sjw   = ((regval & CAN_BTR_SJW_MASK) >>
+                          CAN_BTR_SJW_SHIFT) + 1;
+          bt->bt_tseg1 = ((regval & CAN_BTR_TS1_MASK) >>
+                          CAN_BTR_TS1_SHIFT) + 1;
+          bt->bt_tseg2 = ((regval & CAN_BTR_TS2_MASK) >>
+                          CAN_BTR_TS2_SHIFT) + 1;
 
-          brp          = ((regval & CAN_BTR_BRP_MASK) >> CAN_BTR_BRP_SHIFT) + 1;
+          brp          = ((regval & CAN_BTR_BRP_MASK) >>
+                          CAN_BTR_BRP_SHIFT) + 1;
           bt->bt_baud  = STM32_PCLK1_FREQUENCY /
                          (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
           ret = OK;
@@ -865,11 +871,11 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
        *                    to indicate thenature of the error.
        *   Dependencies:   None
        *
-       * REVISIT: There is probably a limitation here:  If there are multiple
-       * threads trying to send CAN packets, when one of these threads
-       * reconfigures the bitrate, the MCAN hardware will be reset and the
-       * context of operation will be lost.  Hence, this IOCTL can only safely
-       * be executed in quiescent time periods.
+       * REVISIT: There is probably a limitation here:  If there are
+       * multiple threads trying to send CAN packets, when one of these
+       * threads reconfigures the bitrate, the MCAN hardware will be reset
+       * and the context of operation will be lost.  Hence, this IOCTL can
+       * only safely be executed in quiescent time periods.
        */
 
       case CANIOC_SET_BITTIMING:
@@ -889,8 +895,9 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
 
           regval = stm32can_getreg(priv, STM32_CAN_BTR_OFFSET);
 
-          /* Extract bit timing data */
-          /* tmp is in clocks per bit time */
+          /* Extract bit timing data
+           * tmp is in clocks per bit time
+           */
 
           tmp = STM32_PCLK1_FREQUENCY / bt->bt_baud;
 
@@ -913,11 +920,11 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
 
           else
             {
-              brp = (tmp + (can_bit_quanta/2)) / can_bit_quanta;
+              brp = (tmp + (can_bit_quanta / 2)) / can_bit_quanta;
               DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
             }
 
-          caninfo("TS1: %d TS2: %d BRP: %d\n",
+          caninfo("TS1: %d TS2: %d BRP: %" PRId32 "\n",
                   bt->bt_tseg1, bt->bt_tseg2, brp);
 
           /* Configure bit timing. */
@@ -1102,6 +1109,56 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
         }
         break;
 
+      case CANIOC_SET_NART:
+        {
+          uint32_t regval;
+
+          ret = stm32can_enterinitmode(priv);
+          if (ret != 0)
+            {
+              return ret;
+            }
+
+          regval = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+          if (arg == 1)
+            {
+              regval |= CAN_MCR_NART;
+            }
+          else
+            {
+              regval &= ~CAN_MCR_NART;
+            }
+
+          stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+          return stm32can_exitinitmode(priv);
+        }
+        break;
+
+      case CANIOC_SET_ABOM:
+        {
+          uint32_t regval;
+
+          ret = stm32can_enterinitmode(priv);
+          if (ret != 0)
+            {
+              return ret;
+            }
+
+          regval = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+          if (arg == 1)
+            {
+              regval |= CAN_MCR_ABOM;
+            }
+          else
+            {
+              regval &= ~CAN_MCR_ABOM;
+            }
+
+          stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+          return stm32can_exitinitmode(priv);
+        }
+        break;
+
       /* Unsupported/unrecognized command */
 
       default:
@@ -1165,8 +1222,8 @@ static int stm32can_send(FAR struct can_dev_s *dev,
   int dlc;
   int txmb;
 
-  caninfo("CAN%d ID: %d DLC: %d\n",
-          priv->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  caninfo("CAN%d ID: %" PRId32 " DLC: %d\n",
+          priv->port, (uint32_t)msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   /* Select one empty transmit mailbox */
 
@@ -1211,8 +1268,12 @@ static int stm32can_send(FAR struct can_dev_s *dev,
       regval |= msg->cm_hdr.ch_id << CAN_TIR_STID_SHIFT;
     }
 #else
-  regval &= ~CAN_TIR_STID_MASK;
-  regval |= (uint32_t)msg->cm_hdr.ch_id << CAN_TIR_STID_SHIFT;
+  regval |= (((uint32_t) msg->cm_hdr.ch_id << CAN_TIR_STID_SHIFT) &
+             CAN_TIR_STID_MASK);
+
+#ifdef CONFIG_CAN_USE_RTR
+  regval |= (msg->cm_hdr.ch_rtr ? CAN_TIR_RTR : 0);
+#endif
 #endif
   stm32can_putreg(priv, STM32_CAN_TIR_OFFSET(txmb), regval);
 
@@ -1320,7 +1381,7 @@ static bool stm32can_txready(FAR struct can_dev_s *dev)
   /* Return true if any mailbox is available */
 
   regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
-  caninfo("CAN%d TSR: %08x\n", priv->port, regval);
+  caninfo("CAN%d TSR: %08" PRIx32 "\n", priv->port, regval);
 
   return stm32can_txmb0empty(regval) || stm32can_txmb1empty(regval) ||
          stm32can_txmb2empty(regval);
@@ -1352,7 +1413,7 @@ static bool stm32can_txempty(FAR struct can_dev_s *dev)
   /* Return true if all mailboxes are available */
 
   regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
-  caninfo("CAN%d TSR: %08x\n", priv->port, regval);
+  caninfo("CAN%d TSR: %08" PRIx32 "\n", priv->port, regval);
 
   return stm32can_txmb0empty(regval) && stm32can_txmb1empty(regval) &&
          stm32can_txmb2empty(regval);
@@ -1658,7 +1719,7 @@ static int stm32can_bittiming(FAR struct stm32_can_s *priv)
   uint32_t ts1;
   uint32_t ts2;
 
-  caninfo("CAN%d PCLK1: %d baud: %d\n",
+  caninfo("CAN%d PCLK1: %ld baud: %" PRId32 "\n",
           priv->port, STM32_PCLK1_FREQUENCY, priv->baud);
 
   /* Try to get CAN_BIT_QUANTA quanta in one bit_time.
@@ -1698,20 +1759,21 @@ static int stm32can_bittiming(FAR struct stm32_can_s *priv)
         }
     }
 
-  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_STM32_CAN_TSEG1, ts2 is
-   * CONFIG_STM32_CAN_TSEG2 and we calculate brp to achieve CAN_BIT_QUANTA quanta
-   * in the bit time
+  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_STM32_CAN_TSEG1,
+   * ts2 is CONFIG_STM32_CAN_TSEG2 and we calculate brp to achieve
+   * CAN_BIT_QUANTA quanta in the bit time
    */
 
   else
     {
       ts1 = CONFIG_STM32_CAN_TSEG1;
       ts2 = CONFIG_STM32_CAN_TSEG2;
-      brp = (tmp + (CAN_BIT_QUANTA/2)) / CAN_BIT_QUANTA;
+      brp = (tmp + (CAN_BIT_QUANTA / 2)) / CAN_BIT_QUANTA;
       DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
     }
 
-  caninfo("TS1: %d TS2: %d BRP: %d\n", ts1, ts2, brp);
+  caninfo("TS1: %" PRId32 " TS2: %" PRId32 " BRP: %" PRId32 "\n",
+          ts1, ts2, brp);
 
   /* Configure bit timing.  This also does the following, less obvious
    * things.  Unless loopback mode is enabled, it:
@@ -1726,7 +1788,8 @@ static int stm32can_bittiming(FAR struct stm32_can_s *priv)
   tmp = ((brp - 1) << CAN_BTR_BRP_SHIFT) | ((ts1 - 1) << CAN_BTR_TS1_SHIFT) |
         ((ts2 - 1) << CAN_BTR_TS2_SHIFT) | ((1 - 1) << CAN_BTR_SJW_SHIFT);
 #ifdef CONFIG_CAN_LOOPBACK
-//tmp |= (CAN_BTR_LBKM | CAN_BTR_SILM);
+  /* tmp |= (CAN_BTR_LBKM | CAN_BTR_SILM); */
+
   tmp |= CAN_BTR_LBKM;
 #endif
 
@@ -1829,7 +1892,8 @@ static int stm32can_exitinitmode(FAR struct stm32_can_s *priv)
 
   if (timeout < 1)
     {
-      canerr("ERROR: Timed out waiting to exit initialization mode: %08x\n",
+      canerr("ERROR: Timed out waiting to "
+             "exit initialization mode: %08" PRIx32 "\n",
              regval);
       return -ETIMEDOUT;
     }

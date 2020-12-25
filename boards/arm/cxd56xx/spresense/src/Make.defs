@@ -89,6 +89,10 @@ ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
 CSRCS += cxd56_composite.c
 endif
 
+ifeq ($(CONFIG_MODEM_ALTMDM),y)
+CSRCS += cxd56_altmdm_power.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)

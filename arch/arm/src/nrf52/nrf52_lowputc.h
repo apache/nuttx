@@ -45,6 +45,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <nrf52_gpio.h>
+#include <nrf52_config.h>
 
 /****************************************************************************
  * Public Types
@@ -112,6 +113,19 @@ void nrf52_usart_configure(uintptr_t base,
 #ifdef HAVE_UART_DEVICE
 void nrf52_usart_disable(uintptr_t base,
                          FAR const struct uart_config_s *config);
+#endif
+
+/****************************************************************************
+ * Name: nrf52_usart_setformat
+ *
+ * Description:
+ *   Set the USART line format and speed.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_UART_DEVICE
+void nrf52_usart_setformat(uintptr_t base,
+                           FAR const struct uart_config_s *config);
 #endif
 
 #endif /* __ARCH_ARM_SRC_NRF52_NRF52_LOWPUTC_H */

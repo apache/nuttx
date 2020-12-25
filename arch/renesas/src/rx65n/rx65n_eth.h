@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/wdog.h>
 #include "chip.h"
 
 /****************************************************************************
@@ -79,7 +80,6 @@ int rx65n_ethinitialize(int intf);
  *   Poll Expiry timer
  *
  * Input Parameters:
- *   argc - Input argument
  *   arg  - Input argument
  *
  * Returned Value:
@@ -87,7 +87,7 @@ int rx65n_ethinitialize(int intf);
  *
  ****************************************************************************/
 
-void rx65n_poll_expiry(int argc, uint32_t arg, ...);
+void rx65n_poll_expiry(wdparm_t arg);
 
 /****************************************************************************
  * Function: rx65n_txtimeout_expiry
@@ -96,7 +96,6 @@ void rx65n_poll_expiry(int argc, uint32_t arg, ...);
  *   txtimeout timer
  *
  * Input Parameters:
- *   argc - Input argument
  *   arg  - Input argument
  *
  * Returned Value:
@@ -104,7 +103,7 @@ void rx65n_poll_expiry(int argc, uint32_t arg, ...);
  *
  ****************************************************************************/
 
-void rx65n_txtimeout_expiry(int argc, uint32_t arg, ...);
+void rx65n_txtimeout_expiry(wdparm_t arg);
 #endif
 
 #undef EXTERN

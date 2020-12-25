@@ -186,7 +186,7 @@ nsh
 ---
   nsh:
     This configuration directory will built the NuttShell (NSH).  See
-    the NSH user manual in the documents directory (or online at nuttx.org).
+    the NSH user manual in the documents directory (or online at apache.nuttx.org).
     See also the README.txt file in the nsh sub-directory for information
     about using ZDS-II.
 

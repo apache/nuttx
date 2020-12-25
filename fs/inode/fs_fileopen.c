@@ -102,7 +102,7 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
   ret = file_detach(fd, filep);
   if (ret < 0)
     {
-      close(fd);
+      nx_close(fd);
       return ret;
     }
 

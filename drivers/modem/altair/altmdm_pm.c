@@ -56,47 +56,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#  define EVENT_BIT(b)                     (1<<(b))
-#  define EVENT_NONE                       (0)
-#  define EVENT_D2H_DOWN                   EVENT_BIT(0)
-#  define EVENT_D2H_UP                     EVENT_BIT(1)
-#  define EVENT_MODEM_SLEPT_NOTIF          EVENT_BIT(2)
-#  define EVENT_MODEM_WAKEUP_NOTIF         EVENT_BIT(3)
-#  define EVENT_MODEM_GOING_TO_SLEEP_NOTIF EVENT_BIT(4)
-#  define EVENT_MODEM_WAKEUP_REQ           EVENT_BIT(5)
-#  define EVENT_MODEM_SLEEP_REQ            EVENT_BIT(6)
-#  define EVENT_EXIT                       EVENT_BIT(7)
-#  define EVENT_MODEM_RESET_NOTIF          EVENT_BIT(8)
-#  define EVENT_MODEM_POWERON_REQ          EVENT_BIT(9)
-#  define EVENT_MODEM_POWEROFF_REQ         EVENT_BIT(10)
-#  define EVENT_PM_TASK_WAIT               (EVENT_D2H_DOWN | EVENT_D2H_UP | \
-                                           EVENT_MODEM_WAKEUP_REQ | \
-                                           EVENT_MODEM_RESET_NOTIF | \
-                                           EVENT_MODEM_POWERON_REQ | \
-                                           EVENT_MODEM_POWEROFF_REQ | \
-                                           EVENT_MODEM_SLEEP_REQ | EVENT_EXIT)
-#  define EVENT_STATE_CHG_WAIT             (EVENT_MODEM_SLEPT_NOTIF | \
-                                           EVENT_MODEM_GOING_TO_SLEEP_NOTIF | \
-                                           EVENT_MODEM_WAKEUP_NOTIF)
-#  define EVENT_MODEM_SLEEP_REQ_DONE_OK    EVENT_BIT(0)
-#  define EVENT_MODEM_SLEEP_REQ_DONE_NG    EVENT_BIT(1)
-#  define EVENT_MODEM_SLEEP_REQ_DONE       (EVENT_MODEM_SLEEP_REQ_DONE_OK | \
-                                           EVENT_MODEM_SLEEP_REQ_DONE_NG)
-#  define EVENT_MODEM_WAKEUP_REQ_DONE_OK   EVENT_BIT(0)
-#  define EVENT_MODEM_WAKEUP_REQ_DONE_NG   EVENT_BIT(1)
-#  define EVENT_MODEM_WAKEUP_REQ_DONE      (EVENT_MODEM_WAKEUP_REQ_DONE_OK | \
-                                           EVENT_MODEM_WAKEUP_REQ_DONE_NG)
-#  define EVENT_MODEM_POWER_ON_DONE        EVENT_BIT(0)
-#  define EVENT_MODEM_POWER_OFF_DONE       EVENT_BIT(1)
-
 /* Timeout is counted in units of millisecond. */
 
 #  define D2H_UP_EVENT_TIMEOUT   (5*1000)
-#  define ST_TRANS_EVENT_TIMEOUT (ALTMDM_SYS_FLAG_TMOFEVR)
-
-#  define PM_TASK_PRI     (90)
-#  define PM_TASK_NAME    "altmdm_pm_task"
-#  define PM_TASK_STKSIZE (1024)
 
 #  define GPIO_LOW                       (false)
 #  define GPIO_HIGH                      (true)
@@ -106,73 +68,11 @@
  ****************************************************************************/
 
 static struct altmdm_dev_s *g_privdata = NULL;
-static struct altmdm_sys_flag_s g_statetrans_flag;
-static struct altmdm_sys_flag_s g_pmtask_flag;
-static struct altmdm_sys_flag_s g_wakeup_done_flag;
-static struct altmdm_sys_flag_s g_sleep_done_flag;
-static struct altmdm_sys_flag_s g_power_done_flag;
 static bool g_is_initdone = false;
-static bool g_is_waitnotif = false;
-static bool g_is_notrun;
-static int g_taskid;
 static altmdm_pm_cbfunc_t g_pm_callback = NULL;
 static altmdm_pm_cbfunc_t g_pm_errcallback = NULL;
 static sq_queue_t g_wakelock;
 static uint32_t g_boot_stat = MODEM_PM_ERR_RESET_BOOTSTAT_NONE;
-
-/****************************************************************************
- * Name: init_h2d_gpio
- *
- * Description:
- *   Initialize Host to Device GPIO line.
- *
- ****************************************************************************/
-
-static int init_h2d_gpio(FAR struct altmdm_dev_s *priv)
-{
-  return 0;
-}
-
-/****************************************************************************
- * Name: uninit_h2d_gpio
- *
- * Description:
- *   Uninitialize Host to Device GPIO line.
- *
- ****************************************************************************/
-
-static int uninit_h2d_gpio(FAR struct altmdm_dev_s *priv)
-{
-  return 0;
-}
-
-/****************************************************************************
- * Name: init_d2h_gpio
- *
- * Description:
- *   Initialize Device to Host GPIO line.
- *
- ****************************************************************************/
-
-static int init_d2h_gpio(FAR struct altmdm_dev_s *priv)
-{
-  return 0;
-}
-
-/****************************************************************************
- * Name: uninit_d2h_gpio
- *
- * Description:
- *   Uninitialize Device to Host GPIO line.
- *
- ****************************************************************************/
-
-static int uninit_d2h_gpio(FAR struct altmdm_dev_s *priv)
-{
-  return 0;
-}
-
-#  ifdef CONFIG_MODEM_ALTMDM_PROTCOL_V2_1
 
 /****************************************************************************
  * Name: set_mreq_gpio
@@ -184,9 +84,11 @@ static int uninit_d2h_gpio(FAR struct altmdm_dev_s *priv)
 
 static int set_mreq_gpio(FAR struct altmdm_dev_s *priv, bool value)
 {
+  DEBUGASSERT(priv && priv->lower);
+  priv->lower->master_request(value);
+
   return 0;
 }
-#  endif
 
 /****************************************************************************
  * Name: set_h2d_gpio
@@ -198,23 +100,11 @@ static int set_mreq_gpio(FAR struct altmdm_dev_s *priv, bool value)
 
 static int set_h2d_gpio(FAR struct altmdm_dev_s *priv, bool value)
 {
+  DEBUGASSERT(priv && priv->lower);
+  priv->lower->wakeup(value);
+
   return 0;
 }
-
-/****************************************************************************
- * Name: get_d2h_gpio
- *
- * Description:
- *   Get current value of Device to Host GPIO line.
- *
- ****************************************************************************/
-
-static int get_d2h_gpio(FAR struct altmdm_dev_s *priv, FAR bool * value)
-{
-  return 0;
-}
-
-#  ifdef CONFIG_MODEM_ALTMDM_PROTCOL_V2_1
 
 /****************************************************************************
  * Name: set_mreq_down
@@ -241,7 +131,6 @@ static int set_mreq_up(FAR struct altmdm_dev_s *priv)
 {
   return set_mreq_gpio(priv, GPIO_HIGH);
 }
-#  endif
 
 /****************************************************************************
  * Name: set_h2d_down
@@ -267,565 +156,6 @@ static int set_h2d_down(FAR struct altmdm_dev_s *priv)
 static int set_h2d_up(FAR struct altmdm_dev_s *priv)
 {
   return set_h2d_gpio(priv, GPIO_HIGH);
-}
-
-/****************************************************************************
- * Name: send_d2h_down_notif
- *
- * Description:
- *   Notify that Device to Host GPIO line has been deassertted.
- *
- ****************************************************************************/
-
-static int send_d2h_down_notif(FAR struct altmdm_dev_s *priv)
-{
-  int ret = 0;
-
-  ret = altmdm_sys_setflag(&g_pmtask_flag, EVENT_D2H_DOWN);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_d2h_up_notif
- *
- * Description:
- *   Notify that Device to Host GPIO line has been assertted.
- *
- ****************************************************************************/
-
-static int send_d2h_up_notif(FAR struct altmdm_dev_s *priv)
-{
-  int ret = 0;
-  uint32_t pm_state;
-
-  pm_state = altmdm_pm_getinternalstate();
-  if ((pm_state == MODEM_PM_INTERNAL_STATE_SLEEP) ||
-      (pm_state == MODEM_PM_INTERNAL_STATE_GOING_TO_WAKE))
-    {
-      ret = altmdm_sys_setflag(&g_pmtask_flag, EVENT_D2H_UP);
-      if (ret != 0)
-        {
-          m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-        }
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_modem_slept_notif
- *
- * Description:
- *   Notify that the modem slept.
- *
- ****************************************************************************/
-
-static int send_modem_slept_notif(FAR struct altmdm_dev_s *priv)
-{
-  int ret = 0;
-
-  if (g_is_waitnotif)
-    {
-      /* Send only when waiting for notification. */
-
-      ret = altmdm_sys_setflag(&g_statetrans_flag, EVENT_MODEM_SLEPT_NOTIF);
-      if (ret != 0)
-        {
-          m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-        }
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_modem_wakeup_notif
- *
- * Description:
- *   Notify that the modem has woken up.
- *
- ****************************************************************************/
-
-static int send_modem_wakeup_notif(FAR struct altmdm_dev_s *priv)
-{
-  int ret = 0;
-
-  if (g_is_waitnotif)
-    {
-      /* Send only when waiting for notification. */
-
-      ret = altmdm_sys_setflag(&g_statetrans_flag, EVENT_MODEM_WAKEUP_NOTIF);
-      if (ret != 0)
-        {
-          m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-        }
-    }
-#  ifdef CONFIG_MODEM_ALTMDM_PROTCOL_V2_1
-  else
-    {
-      altmdm_spi_setreceiverready(priv);
-    }
-#  endif
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_modem_reset_notif
- *
- * Description:
- *   Notify that the modem is reset.
- *
- ****************************************************************************/
-
-static int send_modem_reset_notif(FAR struct altmdm_dev_s *priv)
-{
-  int ret = 0;
-
-  ret = altmdm_sys_setflag(&g_pmtask_flag, EVENT_MODEM_RESET_NOTIF);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_modem_wakeup_request
- *
- * Description:
- *   Send request to wake up the modem.
- *
- ****************************************************************************/
-
-static int send_modem_wakeup_request(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-
-  ret = altmdm_sys_setflag(&g_pmtask_flag, EVENT_MODEM_WAKEUP_REQ);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_modem_sleep_request
- *
- * Description:
- *   Send request to sleep the modem.
- *
- ****************************************************************************/
-
-static int send_modem_sleep_request(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-
-  ret = altmdm_sys_setflag(&g_pmtask_flag, EVENT_MODEM_SLEEP_REQ);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_exit_request
- *
- * Description:
- *   Send request to terminate the power management task.
- *
- ****************************************************************************/
-
-static int send_exit_request(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-
-  ret = altmdm_sys_setflag(&g_pmtask_flag, EVENT_EXIT);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_modem_poweron_request
- *
- * Description:
- *   Send request to power on the modem.
- *
- ****************************************************************************/
-
-static int send_modem_poweron_request(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-
-  ret = altmdm_sys_setflag(&g_pmtask_flag, EVENT_MODEM_POWERON_REQ);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_modem_poweroff_request
- *
- * Description:
- *   Send request to power off the modem.
- *
- ****************************************************************************/
-
-static int send_modem_poweroff_request(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-
-  ret = altmdm_sys_setflag(&g_pmtask_flag, EVENT_MODEM_POWEROFF_REQ);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_modem_wakeup_done
- *
- * Description:
- *   Notify that the wake up of the modem is complete.
- *
- ****************************************************************************/
-
-static int send_modem_wakeup_done(FAR struct altmdm_dev_s *priv, int result)
-{
-  int ret;
-  uint32_t ptn;
-
-  if (result == 0)
-    {
-      ptn = EVENT_MODEM_WAKEUP_REQ_DONE_OK;
-    }
-  else
-    {
-      ptn = EVENT_MODEM_WAKEUP_REQ_DONE_NG;
-    }
-  ret = altmdm_sys_setflag(&g_wakeup_done_flag, ptn);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_modem_sleep_done
- *
- * Description:
- *   Notify that the modem slept.
- *
- ****************************************************************************/
-
-static int send_modem_sleep_done(FAR struct altmdm_dev_s *priv, int result)
-{
-  int ret;
-  uint32_t ptn;
-
-  if (result == 0)
-    {
-      ptn = EVENT_MODEM_SLEEP_REQ_DONE_OK;
-    }
-  else
-    {
-      ptn = EVENT_MODEM_SLEEP_REQ_DONE_NG;
-    }
-
-  ret = altmdm_sys_setflag(&g_sleep_done_flag, ptn);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_modem_poweron_done
- *
- * Description:
- *   Notify that the modem power on.
- *
- ****************************************************************************/
-
-static int send_modem_poweron_done(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-
-  ret = altmdm_sys_setflag(&g_power_done_flag, EVENT_MODEM_POWER_ON_DONE);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: send_modem_poweroff_done
- *
- * Description:
- *   Notify that the modem power off.
- *
- ****************************************************************************/
-
-static int send_modem_poweroff_done(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-
-  ret = altmdm_sys_setflag(&g_power_done_flag, EVENT_MODEM_POWER_OFF_DONE);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Set flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: wait_for_d2h_up_complete
- *
- * Description:
- *   Wait until the Device to Host GPIO line is assert.
- *
- ****************************************************************************/
-
-static int wait_for_d2h_up_complete(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-  uint32_t ptn;
-
-  ret = altmdm_sys_waitflag(&g_pmtask_flag, EVENT_D2H_UP,
-                            ALTMDM_SYS_FLAG_WMODEOR, &ptn,
-                            D2H_UP_EVENT_TIMEOUT);
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: wait_for_modem_state_change_notif
- *
- * Description:
- *   Wait until the state of the modem changes.
- *
- ****************************************************************************/
-
-static int wait_for_modem_state_change_notif(FAR struct altmdm_dev_s *priv,
-                                             FAR uint32_t * state)
-{
-  int ret;
-  uint32_t ptn;
-
-  g_is_waitnotif = true;
-
-  ret = altmdm_sys_waitflag(&g_statetrans_flag, EVENT_STATE_CHG_WAIT,
-                            ALTMDM_SYS_FLAG_WMODEOR, &ptn,
-                            ST_TRANS_EVENT_TIMEOUT);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Wait flag:%d.\n", __LINE__, ret);
-    }
-  else
-    {
-      if (ptn & EVENT_MODEM_SLEPT_NOTIF)
-        {
-          *state = MODEM_PM_INTERNAL_STATE_SLEEP;
-        }
-      else if (ptn & EVENT_MODEM_WAKEUP_NOTIF)
-        {
-          *state = MODEM_PM_INTERNAL_STATE_WAKE;
-        }
-      else if (ptn & EVENT_MODEM_GOING_TO_SLEEP_NOTIF)
-        {
-          *state = MODEM_PM_INTERNAL_STATE_GOING_TO_SLEEP;
-        }
-      else
-        {
-          *state = MODEM_PM_INTERNAL_STATE_MAX;
-        }
-    }
-
-  g_is_waitnotif = false;
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: wait_for_wakeup_requeset_done
- *
- * Description:
- *   Wait until the wakeup request is completed.
- *
- ****************************************************************************/
-
-static int wait_for_wakeup_requeset_done(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-  uint32_t ptn;
-
-  ret = altmdm_sys_waitflag(&g_wakeup_done_flag,
-                            EVENT_MODEM_WAKEUP_REQ_DONE,
-                            ALTMDM_SYS_FLAG_WMODEOR, &ptn,
-                            ALTMDM_SYS_FLAG_TMOFEVR);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Wait flag:%d.\n", __LINE__, ret);
-    }
-  else
-    {
-      if (ptn & EVENT_MODEM_WAKEUP_REQ_DONE_NG)
-        {
-          ret = -1;
-        }
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: wait_for_sleep_requeset_done
- *
- * Description:
- *   Wait until the sleep request is completed.
- *
- ****************************************************************************/
-
-static int wait_for_sleep_requeset_done(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-  uint32_t ptn;
-
-  ret = altmdm_sys_waitflag(&g_sleep_done_flag, EVENT_MODEM_SLEEP_REQ_DONE,
-                            ALTMDM_SYS_FLAG_WMODEOR, &ptn,
-                            ALTMDM_SYS_FLAG_TMOFEVR);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Wait flag:%d.\n", __LINE__, ret);
-    }
-  else
-    {
-      if (ptn & EVENT_MODEM_SLEEP_REQ_DONE_NG)
-        {
-          ret = -1;
-        }
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: wait_for_poweron_done
- *
- * Description:
- *   Wait until the power on is completed.
- *
- ****************************************************************************/
-
-static int wait_for_poweron_done(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-  uint32_t ptn;
-
-  ret = altmdm_sys_waitflag(&g_power_done_flag, EVENT_MODEM_POWER_ON_DONE,
-                            ALTMDM_SYS_FLAG_WMODEOR, &ptn,
-                            ALTMDM_SYS_FLAG_TMOFEVR);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Wait flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: wait_for_poweroff_done
- *
- * Description:
- *   Wait until the power off is completed.
- *
- ****************************************************************************/
-
-static int wait_for_poweroff_done(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-  uint32_t ptn;
-
-  ret = altmdm_sys_waitflag(&g_power_done_flag, EVENT_MODEM_POWER_OFF_DONE,
-                            ALTMDM_SYS_FLAG_WMODEOR, &ptn,
-                            ALTMDM_SYS_FLAG_TMOFEVR);
-  if (ret != 0)
-    {
-      m_err("ERR:%04d Wait flag:%d.\n", __LINE__, ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: d2h_gpio_isr
- *
- * Description:
- *   Interrupt handler for Device to Host GPIO line.
- *
- ****************************************************************************/
-
-static void d2h_gpio_isr(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-  bool val = GPIO_LOW;
-
-  ret = get_d2h_gpio(priv, &val);
-  if (ret == 0)
-    {
-      switch (val)
-        {
-        case GPIO_LOW:
-
-          ret = send_d2h_down_notif(priv);
-          if (ret != 0)
-            {
-              m_err("ERR:%04d send d2h down notification:%d.\n", __LINE__,
-                    ret);
-            }
-          break;
-
-        case GPIO_HIGH:
-
-          ret = send_d2h_up_notif(priv);
-          if (ret != 0)
-            {
-              m_err("ERR:%04d send device up notification:%d.\n",
-                    __LINE__, ret);
-            }
-          break;
-
-        default:
-          m_err("ERR:%04d Invalid D2H GPIO value:%d.\n", __LINE__, val);
-          break;
-        }
-    }
 }
 
 /****************************************************************************
@@ -860,44 +190,6 @@ static int exe_callback(uint32_t type, uint32_t cb_event)
 }
 
 /****************************************************************************
- * Name: wakeup_modem_itself
- *
- * Description:
- *   The modem wakes up by itself, it transitions to the wakeup state.
- *
- ****************************************************************************/
-
-static int wakeup_modem_itself(FAR struct altmdm_dev_s *priv, bool wakeupreq)
-{
-  int ret;
-
-  altmdm_pm_setinternalstate(MODEM_PM_INTERNAL_STATE_GOING_TO_WAKE);
-
-  ret = set_h2d_up(priv);
-  if (ret == 0)
-    {
-      /* Transitions to the wakeup state. */
-
-      altmdm_pm_setinternalstate(MODEM_PM_INTERNAL_STATE_WAKE);
-
-      /* When the EVENT_MODEM_WAKEUP_REQ is simultaneous,
-       *  there is no need to notify.
-       */
-
-      if (!wakeupreq)
-        {
-          /* Perform processing at the time of state transition. */
-
-          send_modem_wakeup_notif(priv);
-        }
-
-      exe_callback(MODEM_PM_CB_TYPE_NORMAL, MODEM_PM_CB_WAKE);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: sleep_modem_itself
  *
  * Description:
@@ -915,7 +207,6 @@ static int sleep_modem_itself(FAR struct altmdm_dev_s *priv)
 
   /* Perform processing at the time of state transition. */
 
-  send_modem_slept_notif(priv);
   exe_callback(MODEM_PM_CB_TYPE_NORMAL, MODEM_PM_CB_SLEEP);
 
   return 0;
@@ -942,7 +233,6 @@ static int modem_sleep_procedure(FAR struct altmdm_dev_s *priv)
 
       /* Perform processing at the time of state transition. */
 
-      send_modem_slept_notif(priv);
       exe_callback(MODEM_PM_CB_TYPE_NORMAL, MODEM_PM_CB_SLEEP);
     }
 
@@ -957,31 +247,52 @@ static int modem_sleep_procedure(FAR struct altmdm_dev_s *priv)
  *
  ****************************************************************************/
 
-static int modem_wakeup_procedure(FAR struct altmdm_dev_s *priv)
+static int modem_wakeup_procedure(FAR struct altmdm_dev_s *priv,
+  CODE int (*wait_fn)(FAR struct altmdm_dev_s *priv, uint32_t timeout_ms))
 {
   int ret = 0;
+
+  if (MODEM_PM_INTERNAL_STATE_WAKE == altmdm_pm_getinternalstate())
+    {
+      return MODEM_PM_WAKEUP_ALREADY;
+    }
 
   altmdm_pm_setinternalstate(MODEM_PM_INTERNAL_STATE_GOING_TO_WAKE);
 
   ret = set_h2d_up(priv);
   if (ret == 0)
     {
-#  ifdef CONFIG_MODEM_ALTMDM_PROTCOL_V2_1
-      set_mreq_up(priv);
-#  endif
-      ret = wait_for_d2h_up_complete(priv);
-      if (ret != 0)
+      if (wait_fn)
         {
-          m_err("ERR:%04d device is not up.\n", __LINE__);
+          set_mreq_up(priv);
 
-          /* Do rollback. */
+          ret = wait_fn(priv, D2H_UP_EVENT_TIMEOUT);
+          if (ret != 0)
+            {
+              m_err("ERR:%04d device is not up.\n", __LINE__);
 
-#  ifdef CONFIG_MODEM_ALTMDM_PROTCOL_V2_1
-          set_mreq_down(priv);
-#  endif
-          set_h2d_down(priv);
+              /* Do rollback. */
 
-          altmdm_pm_setinternalstate(MODEM_PM_INTERNAL_STATE_SLEEP);
+              set_mreq_down(priv);
+
+              set_h2d_down(priv);
+
+              altmdm_pm_setinternalstate(MODEM_PM_INTERNAL_STATE_SLEEP);
+
+              ret = MODEM_PM_WAKEUP_FAIL;
+            }
+          else
+            {
+              /* Transitions to the wake state. */
+
+              altmdm_pm_setinternalstate(MODEM_PM_INTERNAL_STATE_WAKE);
+
+              /* Perform processing at the time of state transition. */
+
+              exe_callback(MODEM_PM_CB_TYPE_NORMAL, MODEM_PM_CB_WAKE);
+
+              ret = MODEM_PM_WAKEUP_DONE;
+            }
         }
       else
         {
@@ -992,6 +303,8 @@ static int modem_wakeup_procedure(FAR struct altmdm_dev_s *priv)
           /* Perform processing at the time of state transition. */
 
           exe_callback(MODEM_PM_CB_TYPE_NORMAL, MODEM_PM_CB_WAKE);
+
+          ret = MODEM_PM_WAKEUP_DONE;
         }
     }
 
@@ -1036,167 +349,6 @@ static int sleep_is_possible(FAR struct altmdm_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: modem_sleep_req
- *
- * Description:
- *   Execute the sleep request.
- *
- ****************************************************************************/
-
-static int modem_sleep_req(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-
-  altmdm_pm_setinternalstate(MODEM_PM_INTERNAL_STATE_GOING_TO_SLEEP);
-
-  ret = send_modem_sleep_request(priv);
-  if (ret == 0)
-    {
-      ret = wait_for_sleep_requeset_done(priv);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: modem_wakeup_req
- *
- * Description:
- *   Execute the wakeup request.
- *
- ****************************************************************************/
-
-static int modem_wakeup_req(FAR struct altmdm_dev_s *priv)
-{
-  int ret;
-
-  ret = send_modem_wakeup_request(priv);
-  if (ret == 0)
-    {
-      ret = wait_for_wakeup_requeset_done(priv);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: pm_task
- *
- * Description:
- *   ALTMDM power manager driver task.
- *
- ****************************************************************************/
-
-static int pm_task(int argc, FAR char *argv[])
-{
-  int ret;
-  uint32_t ptn;
-  FAR struct altmdm_dev_s *priv = g_privdata;
-
-  while (!g_is_notrun)
-    {
-      ret = altmdm_sys_waitflag(&g_pmtask_flag, EVENT_PM_TASK_WAIT,
-                                ALTMDM_SYS_FLAG_WMODEOR, &ptn,
-                                ALTMDM_SYS_FLAG_TMOFEVR);
-      if (ret != 0)
-        {
-          m_err("ERR:%04d Wait Flag:%d.\n", __LINE__, ret);
-        }
-      else
-        {
-          m_info("pm_task ptn:%x.\n", ptn);
-
-          if (ptn & EVENT_MODEM_WAKEUP_REQ)
-            {
-              if (ptn & EVENT_D2H_UP)
-                {
-                  /* Modem already wakeup. */
-
-                  ret = wakeup_modem_itself(priv, true);
-
-#  ifdef CONFIG_MODEM_ALTMDM_PROTCOL_V2_1
-                  set_mreq_up(priv);
-#  endif
-                }
-              else
-                {
-                  /* Make modem wakeup. */
-
-                  ret = modem_wakeup_procedure(priv);
-                }
-              send_modem_wakeup_done(priv, ret);
-
-              if (ptn & EVENT_MODEM_SLEEP_REQ)
-                {
-                  /* This condition does not occur,
-                   * but it is due to fail safe.
-                   */
-
-                  send_modem_sleep_done(priv, -1);
-                }
-            }
-          else if (ptn & EVENT_MODEM_SLEEP_REQ)
-            {
-              /* Make modem sleep. */
-
-              ret = modem_sleep_procedure(priv);
-              send_modem_sleep_done(priv, ret);
-            }
-          else if (ptn & EVENT_D2H_UP)
-            {
-              /* Modem has wake itself. */
-
-              wakeup_modem_itself(priv, false);
-            }
-          else if (ptn & EVENT_D2H_DOWN)
-            {
-              /* Modem become sleep itself. */
-
-              sleep_modem_itself(priv);
-            }
-
-          if (ptn & EVENT_MODEM_POWERON_REQ)
-            {
-              /* Modem power on. */
-
-              send_modem_poweron_done(priv);
-            }
-
-          if (ptn & EVENT_MODEM_POWEROFF_REQ)
-            {
-              /* Modem power off. */
-
-              sleep_modem_itself(priv);
-
-              send_modem_poweroff_done(priv);
-            }
-
-          if (ptn & EVENT_MODEM_RESET_NOTIF)
-            {
-              if (MODEM_PM_ERR_RESET_BOOTSTAT_NONE != g_boot_stat)
-                {
-                  exe_callback(MODEM_PM_CB_TYPE_ERROR, g_boot_stat);
-                }
-              else
-                {
-                  m_err("ERR:%04d Unexpected boot stat:%d.\n",
-                        __LINE__, g_boot_stat);
-                }
-            }
-
-          if (ptn & EVENT_EXIT)
-            {
-              g_is_notrun = true;
-            }
-        }
-    }
-
-  task_delete(0);
-
-  return 0;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1221,31 +373,7 @@ int altmdm_pm_init(FAR struct altmdm_dev_s *priv)
 
   altmdm_pm_setinternalstate(MODEM_PM_INTERNAL_STATE_SLEEP);
 
-  /* Create event flags. */
-
-  altmdm_sys_initflag(&g_statetrans_flag);
-  altmdm_sys_initflag(&g_pmtask_flag);
-  altmdm_sys_initflag(&g_wakeup_done_flag);
-  altmdm_sys_initflag(&g_sleep_done_flag);
-  altmdm_sys_initflag(&g_power_done_flag);
-
   sq_init(&g_wakelock);
-
-  /* Initialize GPIO. */
-
-  init_h2d_gpio(priv);
-  init_d2h_gpio(priv);
-
-  /* Create Power management task. */
-
-  g_is_notrun = false;
-
-  g_taskid = task_create(PM_TASK_NAME, PM_TASK_PRI, PM_TASK_STKSIZE,
-                         (main_t) pm_task, NULL);
-  if (g_taskid == ERROR)
-    {
-      m_err("Failed to create pm task\n");
-    }
 
   return 0;
 }
@@ -1267,35 +395,6 @@ int altmdm_pm_uninit(FAR struct altmdm_dev_s *priv)
 
   g_is_initdone = false;
 
-  /* Delete Transfer task. */
-
-  send_exit_request(priv);
-
-  /* Check pm task is deleted or not. */
-
-  while (1)
-    {
-      if (g_is_notrun)
-        {
-          break;
-        }
-
-      nxsig_usleep(10);
-    }
-
-  /* Delete event flags. */
-
-  altmdm_sys_deleteflag(&g_statetrans_flag);
-  altmdm_sys_deleteflag(&g_pmtask_flag);
-  altmdm_sys_deleteflag(&g_wakeup_done_flag);
-  altmdm_sys_deleteflag(&g_sleep_done_flag);
-  altmdm_sys_deleteflag(&g_power_done_flag);
-
-  /* Uinitialize GPIO. */
-
-  uninit_h2d_gpio(priv);
-  uninit_d2h_gpio(priv);
-
   altmdm_pm_setinternalstate(MODEM_PM_INTERNAL_STATE_SLEEP);
 
   sq_init(&g_wakelock);
@@ -1311,83 +410,19 @@ int altmdm_pm_uninit(FAR struct altmdm_dev_s *priv)
  *
  ****************************************************************************/
 
-int altmdm_pm_wakeup(FAR struct altmdm_dev_s *priv)
+int altmdm_pm_wakeup(FAR struct altmdm_dev_s *priv,
+  CODE int (*wait_fn)(FAR struct altmdm_dev_s *priv, uint32_t timeout_ms))
 {
-  int ret;
-  int retval = MODEM_PM_WAKEUP_FAIL;
-  bool is_slept = false;
-  uint32_t modem_state;
+  int ret = MODEM_PM_WAKEUP_FAIL;
 
   if (!g_is_initdone)
     {
       return -EPERM;
     }
 
-  modem_state = altmdm_pm_getinternalstate();
-  switch (modem_state)
-    {
-    case MODEM_PM_INTERNAL_STATE_WAKE:
+  ret = modem_wakeup_procedure(priv, wait_fn);
 
-      retval = MODEM_PM_WAKEUP_ALREADY;
-
-#  ifdef CONFIG_MODEM_ALTMDM_PROTCOL_V2_1
-      /* Case where modem spontaneously enters the wake state and already
-         notified by altmdm_spi_setreceiverready().
-      */
-
-      if (altmdm_spi_isreceiverready(priv))
-        {
-          altmdm_spi_clearreceiverready(priv);
-          retval = MODEM_PM_WAKEUP_DONE;
-        }
-#  endif
-      break;
-
-    case MODEM_PM_INTERNAL_STATE_SLEEP:
-
-      is_slept = true;
-      break;
-
-    case MODEM_PM_INTERNAL_STATE_GOING_TO_SLEEP:
-    case MODEM_PM_INTERNAL_STATE_GOING_TO_WAKE:
-
-      /* Wait for change modem state. */
-
-      wait_for_modem_state_change_notif(priv, &modem_state);
-
-      if (modem_state == MODEM_PM_INTERNAL_STATE_SLEEP)
-        {
-          is_slept = true;
-        }
-      else if (modem_state == MODEM_PM_INTERNAL_STATE_WAKE)
-        {
-          retval = MODEM_PM_WAKEUP_DONE;
-        }
-      else
-        {
-          m_err("ERR:%04d unexpected event occur. state:%d.\n",
-                __LINE__, modem_state);
-        }
-
-      break;
-
-    default:
-      m_err("ERR:%04d unexpected event occur. state:%d.\n",
-            __LINE__, modem_state);
-    }
-
-  if (is_slept)
-    {
-      /* Wakeup request. */
-
-      ret = modem_wakeup_req(priv);
-      if (ret == 0)
-        {
-          retval = MODEM_PM_WAKEUP_DONE;
-        }
-    }
-
-  return retval;
+  return ret;
 }
 
 /****************************************************************************
@@ -1405,33 +440,18 @@ int altmdm_pm_notify_reset(FAR struct altmdm_dev_s *priv)
       return -EPERM;
     }
 
-  send_modem_reset_notif(priv);
-
-  return 0;
-}
-
-#  ifdef CONFIG_MODEM_ALTMDM_PROTCOL_V2_1
-
-/****************************************************************************
- * Name: altmdm_pm_callgpiohandler
- *
- * Description:
- *   Call Device to Host GPIO interrupt handler.
- *
- ****************************************************************************/
-
-int altmdm_pm_callgpiohandler(FAR struct altmdm_dev_s *priv)
-{
-  if (!g_is_initdone)
+  if (MODEM_PM_ERR_RESET_BOOTSTAT_NONE != g_boot_stat)
     {
-      return -EPERM;
+      exe_callback(MODEM_PM_CB_TYPE_ERROR, g_boot_stat);
+    }
+  else
+    {
+      m_err("ERR:%04d Unexpected boot stat:%d.\n",
+            __LINE__, g_boot_stat);
     }
 
-  d2h_gpio_isr(priv);
-
   return 0;
 }
-#  endif
 
 /****************************************************************************
  * Name: altmdm_pm_registercb
@@ -1491,6 +511,7 @@ int altmdm_pm_deregistercb(uint32_t type)
     {
       lcallback = &g_pm_callback;
     }
+
   if (*lcallback == NULL)
     {
       return -EPERM;
@@ -1518,7 +539,8 @@ int altmdm_pm_sleepmodem(FAR struct altmdm_dev_s *priv)
       return -EPERM;
     }
 
-  ret = modem_sleep_req(priv);
+  altmdm_pm_setinternalstate(MODEM_PM_INTERNAL_STATE_GOING_TO_SLEEP);
+  ret = modem_sleep_procedure(priv);
 
   return ret;
 }
@@ -1608,6 +630,7 @@ int altmdm_pm_acquirewakelock(FAR struct altmdm_pm_wakelock_s *lock)
     {
       sq_addlast((FAR sq_entry_t *) & lock->queue, &g_wakelock);
     }
+
   lock->count++;
 
   leave_critical_section(flags);
@@ -1712,18 +735,12 @@ int altmdm_pm_getwakelockstate(void)
 
 int altmdm_pm_poweron(FAR struct altmdm_dev_s *priv)
 {
-  int ret;
-
   if (!g_is_initdone)
     {
       return -EPERM;
     }
 
-  ret = send_modem_poweron_request(priv);
-  if (ret == 0)
-    {
-      ret = wait_for_poweron_done(priv);
-    }
+  priv->lower->poweron();
 
   return 0;
 }
@@ -1738,18 +755,13 @@ int altmdm_pm_poweron(FAR struct altmdm_dev_s *priv)
 
 int altmdm_pm_poweroff(FAR struct altmdm_dev_s *priv)
 {
-  int ret;
-
   if (!g_is_initdone)
     {
       return -EPERM;
     }
 
-  ret = send_modem_poweroff_request(priv);
-  if (ret == 0)
-    {
-      ret = wait_for_poweroff_done(priv);
-    }
+  priv->lower->poweroff();
+  sleep_modem_itself(priv);
 
   return 0;
 }

@@ -54,6 +54,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
@@ -184,7 +185,7 @@ struct xmc4_spics_s
 #ifdef CONFIG_XMC4_SPI_DMA
   bool candma;                  /* DMA is supported */
   sem_t dmawait;                /* Used to wait for DMA completion */
-  WDOG_ID dmadog;               /* Watchdog that handles DMA timeouts */
+  struct wdog_s dmadog;         /* Watchdog that handles DMA timeouts */
   int result;                   /* DMA result */
   DMA_HANDLE rxdma;             /* SPI RX DMA handle */
   DMA_HANDLE txdma;             /* SPI TX DMA handle */
@@ -899,8 +900,7 @@ static void spi_dma_sampledone(struct xmc4_spics_s *spics)
  *   DMA.
  *
  * Input Parameters:
- *   argc - The number of arguments (should be 1)
- *   arg  - The argument (state structure reference cast to uint32_t)
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -911,7 +911,7 @@ static void spi_dma_sampledone(struct xmc4_spics_s *spics)
  ****************************************************************************/
 
 #ifdef CONFIG_XMC4_SPI_DMA
-static void spi_dmatimeout(int argc, uint32_t arg, ...)
+static void spi_dmatimeout(wdparm_t arg)
 {
   struct xmc4_spics_s *spics = (struct xmc4_spics_s *)arg;
 
@@ -958,7 +958,7 @@ static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(spics->dmadog);
+  wd_cancel(&spics->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -1251,7 +1251,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests
+ *   nbits - The number of bits requested
  *
  * Returned Value:
  *   none
@@ -1265,7 +1265,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
   uint32_t regval;
 
   spiinfo("cs=%d nbits=%d\n", spics->cs, nbits);
-  DEBUGASSERT(spics && nbits > 7 && nbits < 17);
+  DEBUGASSERT(nbits > 7 && nbits < 17);
 
   /* Has the number of bits changed? */
 
@@ -1280,7 +1280,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
       spiinfo("SCTR = %08x\n", regval);
 
-      /* Save the selection so the subsequence re-configs will be faster */
+      /* Save the selection so that subsequent re-configs will be faster. */
 
       spics->nbits = nbits;
     }
@@ -1660,8 +1660,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       /* Start (or re-start) the watchdog timeout */
 
-      ret = wd_start(spics->dmadog, DMA_TIMEOUT_TICKS,
-                     spi_dmatimeout, 1, (uint32_t)spics);
+      ret = wd_start(&spics->dmadog, DMA_TIMEOUT_TICKS,
+                     spi_dmatimeout, (wdparm_t)spics);
       if (ret != OK)
         {
            spierr("ERROR: wd_start failed: %d\n", ret);
@@ -1673,7 +1673,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       /* Cancel the watchdog timeout */
 
-      wd_cancel(spics->dmadog);
+      wd_cancel(&spics->dmadog);
 
       /* Check if we were awakened by an error of some kind. */
 
@@ -1806,7 +1806,7 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
    * chip select structures.
    */
 
-  spics = (struct xmc4_spics_s *)zalloc(sizeof(struct xmc4_spics_s));
+  spics = (struct xmc4_spics_s *)kmm_zalloc(sizeof(struct xmc4_spics_s));
   if (!spics)
     {
       spierr("ERROR: Failed to allocate a chip select structure\n");
@@ -2091,11 +2091,6 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
 
       nxsem_init(&spics->dmawait, 0, 0);
       nxsem_set_protocol(&spics->dmawait, SEM_PRIO_NONE);
-
-      /* Create a watchdog time to catch DMA timeouts */
-
-      spics->dmadog = wd_create();
-      DEBUGASSERT(spics->dmadog);
 #endif
 
       spi_dumpregs(spi, "After initialization");
@@ -2104,7 +2099,7 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
   return &spics->spidev;
 
 errchannel:
-  free(spics);
+  kmm_free(spics);
   return NULL;
 }
 #endif /* CONFIG_XMC4_SPI0 || CONFIG_XMC4_SPI1 */

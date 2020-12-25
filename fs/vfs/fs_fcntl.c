@@ -143,6 +143,8 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
             {
               filep->f_oflags &= ~O_CLOEXEC;
             }
+
+          ret = OK;
         }
         break;
 

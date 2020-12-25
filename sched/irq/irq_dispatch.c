@@ -43,6 +43,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/random.h>
+#include <nuttx/sched_note.h>
 
 #include "irq/irq.h"
 #include "clock/clock.h"
@@ -171,10 +172,22 @@ void irq_dispatch(int irq, FAR void *context)
   add_irq_randomness(irq);
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+  /* Notify that we are entering into the interrupt handler */
+
+  sched_note_irqhandler(irq, vector, true);
+#endif
+
   /* Then dispatch to the interrupt handler */
 
   CALL_VECTOR(ndx, vector, irq, context, arg);
   UNUSED(ndx);
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+  /* Notify that we are leaving from the interrupt handler */
+
+  sched_note_irqhandler(irq, vector, false);
+#endif
 
   /* Record the new "running" task.  g_running_tasks[] is only used by
    * assertion logic for reporting crashes.

@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Indicates that there is no holder of the re-entrant semaphore */
 
 #define TMPFS_NO_HOLDER   -1
@@ -169,7 +170,9 @@ struct tmpfs_s
   struct tmpfs_sem_s tfs_exclsem;
 };
 
-/* This is the type used the tmpfs_statfs_callout to accumulate memory usage */
+/* This is the type used the tmpfs_statfs_callout to accumulate memory
+ * usage
+ */
 
 struct tmpfs_statfs_s
 {

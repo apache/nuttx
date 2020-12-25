@@ -42,6 +42,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -269,7 +270,7 @@ static int tiva_gpioporthandler(uint8_t port, void *context)
   irq  = gpioport2irq(port);
   mis  = getreg32(base + TIVA_GPIO_MIS_OFFSET);
 
-  gpioinfo("irq=%d mis=0b%08b\n", irq, mis & 0xff);
+  gpioinfo("irq=%d mis=0x%02" PRIx32 "\n", irq, mis & 0xff);
 
   /* Clear all pending interrupts */
 
@@ -284,7 +285,8 @@ static int tiva_gpioporthandler(uint8_t port, void *context)
           if (((mis >> pin) & 1) != 0)
             {
               int index = TIVA_GPIO_IRQ_IDX(port, pin);
-              FAR struct gpio_handler_s *handler = &g_gpioportirqvector[index];
+              FAR struct gpio_handler_s *handler =
+                &g_gpioportirqvector[index];
 
               gpioinfo("port=%d pin=%d isr=%p arg=%p index=%d\n",
                        port, pin, handler->isr, handler->arg, index);
@@ -752,9 +754,9 @@ void tiva_gpioirqclear(pinconfig_t pinconfig)
   uint8_t pin    = 1 << ((pinconfig & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
   uintptr_t base = tiva_gpiobaseaddress(port);
 
-  /* "The GPIOICR register is the interrupt clear register. Writing a 1 to a bit
-   * in this register clears the corresponding interrupt edge detection logic
-   * register. Writing a 0 has no effect."
+  /* "The GPIOICR register is the interrupt clear register. Writing a 1 to a
+   * bit in this register clears the corresponding interrupt edge detection
+   * logic register. Writing a 0 has no effect."
    */
 
   putreg32((1 << pin), base + TIVA_GPIO_ICR_OFFSET);

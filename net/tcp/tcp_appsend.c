@@ -44,6 +44,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <assert.h>
 #include <debug.h>
@@ -85,8 +86,8 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 {
   uint8_t hdrlen;
 
-  ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %d\n",
-        result, dev->d_sndlen, conn->tx_unacked);
+  ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %" PRId32 "\n",
+        result, dev->d_sndlen, (uint32_t)conn->tx_unacked);
 
 #ifdef CONFIG_NET_TCP_DELAYED_ACK
   /* Did the caller request that an ACK be sent? */
@@ -223,10 +224,10 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       if (dev->d_sndlen > 0)
         {
           /* Remember how much data we send out now so that we know
-           * when everything has been acknowledged.  Just increment the amount
-           * of data sent.  This will be needed in sequence number calculations
-           * and we know that this is not a re-transmission.  Retransmissions
-           * do not go through this path.
+           * when everything has been acknowledged.  Just increment the
+           * amount of data sent.  This will be needed in sequence number
+           * calculations and we know that this is not a re-transmission.
+           * Retransmissions do not go through this path.
            */
 
           conn->tx_unacked += dev->d_sndlen;
@@ -271,8 +272,8 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 {
   uint8_t hdrlen;
 
-  ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %d\n",
-        result, dev->d_sndlen, conn->tx_unacked);
+  ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %" PRId32 "\n",
+        result, dev->d_sndlen, (uint32_t)conn->tx_unacked);
 
   /* Get the IP header length associated with the IP domain configured for
    * this TCP connection.
@@ -315,7 +316,9 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + hdrlen);
     }
 
-  /* If there is no data to send, just send out a pure ACK if one is requested`. */
+  /* If there is no data to send, just send out a pure ACK if one is
+   * requested.
+   */
 
   else if ((result & TCP_SNDACK) != 0)
     {

@@ -141,7 +141,7 @@ GNU Toolchain Options
      but you might easily find some new path problems.  If so, check out 'cygpath -w'
 
   2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic links
-     are used in Nuttx (e.g., include/arch).  The make system works around these
+     are used in NuttX (e.g., include/arch).  The make system works around these
      problems for the Windows tools by copying directories instead of linking them.
      But this can also cause some confusion for you:  For example, you may edit
      a file in a "linked" directory and find that your changes had no effect.
@@ -171,7 +171,7 @@ NuttX buildroot Toolchain
   If you have no ARM toolchain, one can be downloaded from the NuttX
   Bitbucket download site (https://bitbucket.org/nuttx/buildroot/downloads/).
 
-  1. You must have already configured Nuttx in <some-dir>nuttx.
+  1. You must have already configured NuttX in <some-dir>nuttx.
 
      tools/configure.sh olimex-strp711:<sub-dir>
 

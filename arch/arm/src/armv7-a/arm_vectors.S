@@ -261,7 +261,7 @@ arm_vectorirq:
 	/* Call arm_decodeirq() on the interrupt stack */
 
 	setirqstack r1, r3				/* SP = IRQ stack top */
-	str		r0, [sp]				/* Save the user stack pointer */
+	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
 	mov		r4, sp					/* Save the SP in a preserved register */
 	bic		sp, sp, #7				/* Force 8-byte alignment */
 	bl		arm_decodeirq			/* Call the handler */
@@ -1004,7 +1004,7 @@ arm_vectorfiq:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 	setfiqstack r1, r4				/* SP = FIQ stack top */
-	str		r0, [sp]				/* Save the user stack pointer */
+	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
 	mov		r4, sp					/* Save the SP in a preserved register */
 	bic		sp, sp, #7				/* Force 8-byte alignment */
 	bl		arm_decodefiq			/* Call the handler */
@@ -1072,7 +1072,7 @@ arm_vectorfiq:
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 	.bss
-	.align	4
+	.balign	8
 
 	.globl	g_intstackalloc
 	.type	g_intstackalloc, object
@@ -1080,7 +1080,7 @@ arm_vectorfiq:
 	.type	g_intstackbase, object
 
 g_intstackalloc:
-	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~7) - 4)
+	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
 g_intstackbase:
 	.skip	4
 	.size	g_intstackbase, 4
@@ -1096,7 +1096,7 @@ g_intstackbase:
 	.type	g_fiqstackbase, object
 
 g_fiqstackalloc:
-	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~7) - 4)
+	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
 g_fiqstackbase:
 	.skip	4
 	.size	g_fiqstackbase, 4

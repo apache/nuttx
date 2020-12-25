@@ -67,13 +67,13 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-static int board_button_irqx(gpio_pinset_t pinset, int irq, xcpt_t irqhandler,
-                             void *arg)
+static int board_button_irqx(gpio_pinset_t pinset, int irq,
+                             xcpt_t irqhandler, void *arg)
 {
   irqstate_t flags;
 
-  /* Disable interrupts until we are done.  This guarantees that the following
-   * operations are atomic.
+  /* Disable interrupts until we are done.  This guarantees that the
+   * following operations are atomic.
    */
 
   flags = enter_critical_section();
@@ -116,12 +116,13 @@ static int board_button_irqx(gpio_pinset_t pinset, int irq, xcpt_t irqhandler,
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   sam_configgpio(GPIO_SCROLLUP);
   sam_configgpio(GPIO_SCROLLDWN);
   sam_configgpio(GPIO_WAKU);
   sam_configgpio(GPIO_TAMP);
+  return 4;
 }
 
 /****************************************************************************

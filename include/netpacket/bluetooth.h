@@ -1,35 +1,20 @@
 /****************************************************************************
  * include/netpacket/bluetooth.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -75,7 +60,7 @@
  *   should be used.
  * BTPROTO_L2CAP
  *   L2CAP sockets give sequential packet access over channels to other
- *   Bluetooth devices and make use of the bt_psm field in the sockaddr_bt_s
+ *   Bluetooth devices and make use of the bt_psm field in the sockaddr_l2
  *   structure to select the Protocol/Service Multiplexer to specify when
  *   making connections.  If the special value of L2CAP_PSM_ANY is bound
  *   when the listen() call is made, the next available PSM from the
@@ -83,16 +68,15 @@
  *   using the getsockname() call.
  * BTPROTO_RFCOMM
  *   RFCOMM sockets provide streamed data over Bluetooth connection and
- *   make use of the bt_psm, and bt_channel fields in the sockaddr_bt_s
- *   structure.  The channel number must be between 1 and 30 inclusive
- *   except that if the special value RFCOMM_CHANNEL_ANY is bound, when
- *   the listen() call is made, the first unused channel for the relevant
- *   bdaddr will be allocated and may be discovered using the
- *   getsockname(2) call.  If no PSM is specified, a default value of
- *   L2CAP_PSM_RFCOMM (0x0003) will be used.
+ *   make use of the l2_cid field in the sockaddr_rc structure.
+ *   The channel number must be between 1 and 30 inclusive except that if
+ *   the special value RFCOMM_CHANNEL_ANY is bound, when the listen() call
+ *   is made, the first unused channel for the relevant bdaddr will be
+ *   allocated and may be discovered using the getsockname(2) call.
  *
- * NOTE:  All protocol values currently ignored.  Only BTPROTO_L2CAP is
- * supported by default.
+ * BTPROTO_NONE
+ *   This is to be used internally to indicate unconfigured protocol. Not
+ * to be used on sockets by user.
  */
 
 #define BTPROTO_L2CAP   0
@@ -103,6 +87,7 @@
 #define BTPROTO_CMTP    5
 #define BTPROTO_HIDP    6
 #define BTPROTO_AVDTP   7
+#define BTPROTO_NONE    255
 
 /* HCI socket options (SOL_HCI, see include/sys/socket.h):
  *
@@ -217,13 +202,13 @@
                                          * use */
 #define BT_LE_CID_ATT           0x0004  /* Attribute Protocol */
 #define BT_LE_CID_L2CAP         0x0005  /* Low Energy L2CAP Signaling channel */
-#define BT_LE_CID_SMP           0x0006  /* Security Manager Protocol
-                                        /* 0x0007-0x001f Reserved for future
-                                        /* 0x0020-0x003e Assigned Numbers
+#define BT_LE_CID_SMP           0x0006  /* Security Manager Protocol */
+                                        /* 0x0007-0x001f Reserved for future */
+                                        /* 0x0020-0x003e Assigned Numbers */
                                         /* 0x003f Reserved for future use */
                                         /* 0x0040-0x007f Dynamically allocated
                                          * using the L2CAP LE credit based
-                                         * connection mechanism
+                                         * connection mechanism */
                                         /* Others reserved for future use */
 
 /* Protocol and Service Multiplexers (PSMs) */
@@ -261,6 +246,19 @@
 #define BT_PSM_OTS              0x0025  /* Object Transfer Service (OTS),
                                          * Bluetooth SIG  */
 
+/* Channels for a BTPROTO_HCI socket */
+
+#define HCI_CHANNEL_RAW         0x0
+#define HCI_CHANNEL_USER        0x1
+
+/* Packets types send over the network layer for BTPROTO_HCI */
+
+#define HCI_COMMAND_PKT         0x01
+#define HCI_ACLDATA_PKT         0x02
+#define HCI_SCODATA_PKT         0x03
+#define HCI_EVENT_PKT           0x04
+#define HCI_VENDOR_PKT          0xff
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -276,14 +274,29 @@
  *   sendto()  - Send to specified remote address
  *   recvfrom()- Receive from indicated remote address.
  *
- * REVISIT: Some protocols would require a bt_psm field as well.
  */
 
-struct sockaddr_bt_s
+struct sockaddr_l2
 {
-  sa_family_t  bt_family;  /* Must be AF_BLUETOOTH */
-  bt_addr_t    bt_bdaddr;  /* 6-byte Bluetooth address */
-  uint8_t      bt_channel; /* Channel identifier (CID) */
+  sa_family_t  l2_family;       /* Must be AF_BLUETOOTH */
+  uint16_t     l2_psm;          /* Protocol Service Multiplexer (PSM) */
+  bt_addr_t    l2_bdaddr;       /* 6-byte Bluetooth address */
+  uint16_t     l2_cid;          /* Channel identifier (CID) */
+  uint8_t      l2_bdaddr_type;  /* Bluetooth address type */
+};
+
+struct sockaddr_hci
+{
+  sa_family_t hci_family;   /* Must be AF_BLUETOOTH */
+  uint16_t    hci_dev;      /* Network Device ID */
+  uint16_t    hci_channel;  /* Channel: USER, MONITOR, CONTROL, etc... */
+};
+
+struct sockaddr_rc
+{
+  sa_family_t rc_family;    /* Must be AF_BLUETOOTH */
+  bt_addr_t   rc_bdaddr;    /* 6-byte Bluetooth address */
+  uint8_t     rc_channel;   /* Channel number */
 };
 
 /****************************************************************************

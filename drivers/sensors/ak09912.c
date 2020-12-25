@@ -84,8 +84,8 @@
 #define AK09912_ASAX        0x60
 
 /* REGISTER: CNTL1
- * Enable or disable temparator measure or enable or disable Noise suppression
- * filter.
+ * Enable or disable temparator measure or enable or disable Noise
+ * suppression filter.
  */
 
 #define AK09912_CTRL1       0x30
@@ -165,7 +165,7 @@ struct ak09912_dev_s
   struct sensi_data_s asa_data; /* sensitivity data */
   uint8_t mode;                 /* power mode */
   uint8_t nsf;                  /* noise suppression filter setting */
-  WDOG_ID wd;
+  struct wdog_s wd;
   sem_t wait;
 };
 
@@ -398,9 +398,9 @@ static int ak09912_set_noise_suppr_flt(FAR struct ak09912_dev_s *priv,
  *
  ****************************************************************************/
 
-static void ak09912_wd_timeout(int argc, uint32_t arg, ...)
+static void ak09912_wd_timeout(wdparm_t arg)
 {
-  struct ak09912_dev_s *priv = (struct ak09912_dev_s *) arg;
+  struct ak09912_dev_s *priv = (struct ak09912_dev_s *)arg;
   irqstate_t flags = enter_critical_section();
   nxsem_post(&priv->wait);
   leave_critical_section(flags);
@@ -421,15 +421,15 @@ static int ak09912_read_mag_uncomp_data(FAR struct ak09912_dev_s *priv,
   uint8_t state = 0;
   uint8_t buffer[8];  /* TMPS and ST2 is read, but the value is omitted. */
 
-  wd_start(priv->wd, AK09912_POLLING_TIMEOUT, ak09912_wd_timeout,
-           1, (uint32_t)priv);
+  wd_start(&priv->wd, AK09912_POLLING_TIMEOUT,
+           ak09912_wd_timeout, (wdparm_t)priv);
   state = ak09912_getreg8(priv, AK09912_ST1);
   while (! (state & 0x1))
     {
       nxsem_wait(&priv->wait);
     }
 
-  wd_cancel(priv->wd);
+  wd_cancel(&priv->wd);
   ret = ak09912_getreg(priv,  AK09912_HXL,  buffer, sizeof(buffer));
 
   mag_data->x = MERGE_BYTE(buffer[0], buffer[1]);
@@ -676,7 +676,7 @@ int ak09912_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 
   /* Initialize the AK09912 device structure */
 
-  priv = (FAR struct ak09912_dev_s *)kmm_malloc(sizeof(struct ak09912_dev_s));
+  priv = kmm_zalloc(sizeof(struct ak09912_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");
@@ -687,7 +687,6 @@ int ak09912_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   priv->addr = AK09912_ADDR;
   priv->freq = AK09912_FREQ;
   priv->compensated = ENABLE_COMPENSATED;
-  priv->wd = wd_create();
   nxsem_init(&priv->wait, 0, 0);
 
   /* set default noise suppression filter. */

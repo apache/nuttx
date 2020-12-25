@@ -42,6 +42,9 @@ void r_port_create(void)
 {
   led_port_create();
   sci_port_create();
+#ifdef CONFIG_USBDEV
+  r_usbdev_port_enable();
+#endif
 }
 
 #ifdef CONFIG_RX65N_EMAC0

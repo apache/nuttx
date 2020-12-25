@@ -78,5 +78,6 @@ CXD56_AUDIO_ECODE cxd56_audio_dma_start(cxd56_audio_dma_t handle,
                                         uint32_t addr,
                                         uint32_t sample);
 CXD56_AUDIO_ECODE cxd56_audio_dma_stop(cxd56_audio_dma_t handle);
+void cxd56_audio_dma_int_handler(void);
 
 #endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_DMA_H */

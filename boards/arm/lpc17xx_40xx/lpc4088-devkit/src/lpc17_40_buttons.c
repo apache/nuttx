@@ -73,8 +73,8 @@
  * JOY_D           -- Connected to P2[19]
  * JOY_CTR         -- Connected to P0[14]
  *
- * The switches are all connected to ground and should be pulled up and sensed
- * with a value of '0' when closed.
+ * The switches are all connected to ground and should be pulled up and
+ * sensed with a value of '0' when closed.
  */
 
 /* Pin configuration for each LPC4088 Developer's Kit button.  This array is
@@ -113,7 +113,7 @@ static const uint8_t g_buttonirq[NUM_BUTTONS] =
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -123,6 +123,8 @@ void board_button_initialize(void)
     {
       lpc17_40_configgpio(g_buttoncfg[i]);
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

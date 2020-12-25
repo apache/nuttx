@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-mainmenu "Nuttx/$ARCH Configuration"
+mainmenu "NuttX/$ARCH Configuration"
 
 config APPSDIR
 	string
@@ -29,7 +29,7 @@ config DEFAULT_SMALL
 
 config DEFAULT_TASK_STACKSIZE
 	int "The default stack size for tasks"
-	default 8192 if ARCH_SIM
+	default 65536 if ARCH_SIM
 	default 2048
 	---help---
 		The default stack size for tasks.
@@ -92,12 +92,6 @@ config WINDOWS_CYGWIN
 	---help---
 		Build natively in a Cygwin environment with POSIX style paths (like
 		/cygdrive/c/Program Files)
-
-config WINDOWS_UBUNTU
-	bool "Ubuntu under Windows 10"
-	---help---
-		Build natively in an Ubuntu shell under Windows 10 environment with
-		POSIX style paths (like /mnt/c/Program Files)
 
 config WINDOWS_MSYS
 	bool "MSYS or MSYS2"
@@ -501,11 +495,26 @@ config ARCH_SETJMP_H
 		ARCH_SETJMP_H=y and providing. If ARCH_SETJMP_H, is not defined, then
 		the setjmp.h header file will stay out-of-the-way in include/nuttx/.
 
+choice
+	prompt "debug.h selection"
+	default ARCH_NONE_DEBUG_H
+
+config ARCH_NONE_DEBUG_H
+	bool "None"
+	---help---
+		No debug.h under include/arch/ and include/arch/chip.
+
 config ARCH_DEBUG_H
 	bool "debug.h"
-	default n
 	---help---
-		The debug.h contains architecture dependent debugging primitives
+		The debug.h under include/arch contains architecture dependent debugging primitives
+
+config ARCH_CHIP_DEBUG_H
+	bool "chip debug.h"
+	---help---
+		The debug.h under include/arch/chip contains architecture dependent debugging primitives
+
+endchoice # debug.h selection
 
 endmenu # Customize Header Files
 
@@ -1423,6 +1432,44 @@ config DEBUG_PWM_INFO
 
 endif # DEBUG_PWM
 
+config DEBUG_RC
+	bool "RC Debug Features"
+	default n
+	depends on DRIVERS_RC
+	---help---
+		Enable RC debug features.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+if DEBUG_RC
+
+config DEBUG_RC_ERROR
+	bool "RC Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable RC driver error output to SYSLOG.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_RC_WARN
+	bool "RC Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable RC driver warning output to SYSLOG.
+
+config DEBUG_RC_INFO
+	bool "RC Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable RC driver informational output to SYSLOG.
+
+endif # DEBUG_RC
+
 config DEBUG_RTC
 	bool "RTC Debug Features"
 	default n
@@ -1686,6 +1733,20 @@ config STACK_COLORATION
 
 		Only supported by a few architectures.
 
+config STACK_CANARIES
+	bool "Compiler stack canaries"
+	depends on ARCH_HAVE_STACKCHECK
+	default n
+	---help---
+		This option enables compiler stack canaries.
+		If stack canaries are supported by the compiler, it will emit
+		extra code that inserts a canary value into the stack frame when
+		a function is entered and validates this value upon exit.
+		Stack corruption (such as that caused by buffer overflow) results
+		in a fatal error condition for the running entity.
+		Enabling this option can result in a significant increase
+		in footprint and an associated decrease in performance.
+
 config ARCH_HAVE_HEAPCHECK
 	bool
 	default n
@@ -1812,3 +1873,15 @@ endmenu
 menu "Application Configuration"
 source "$APPSDIR/Kconfig"
 endmenu
+
+# Support optionally including external code
+# into the OS build. EXTERNALDIR will be used
+# to either point to 'nuttx/external' or
+# 'nuttx/dummy', if 'nuttx/external'
+# does not contain a Kconfig file
+
+config EXTERNALDIR
+        string
+        option env="EXTERNALDIR"
+
+source "$EXTERNALDIR/Kconfig"

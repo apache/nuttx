@@ -1,35 +1,20 @@
 /****************************************************************************
  * libs/libc/stdio/lib_libfread.c
  *
- *   Copyright (C) 2007-2009, 2011-2014, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -60,7 +45,7 @@
 
 ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 {
-  FAR unsigned char *dest  = (FAR unsigned char*)ptr;
+  FAR unsigned char *dest = (FAR unsigned char *)ptr;
   ssize_t bytes_read;
   size_t remaining = count;
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
@@ -72,7 +57,6 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
   if (!stream || (stream->fs_oflags & O_RDOK) == 0)
     {
       set_errno(EBADF);
-      bytes_read = -1;
     }
   else
     {
@@ -105,8 +89,8 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
       if (stream->fs_bufstart != NULL)
         {
           /* If the buffer is currently being used for write access, then
-           * flush all of the buffered write data.  We do not support concurrent
-           * buffered read/write access.
+           * flush all of the buffered write data.  We do not support
+           * concurrent buffered read/write access.
            */
 
           ret = lib_wrflush(stream);
@@ -130,8 +114,8 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                   remaining--;
                 }
 
-              /* The buffer is empty OR we have already supplied the number of
-               * bytes requested in the read.  Check if we need to read
+              /* The buffer is empty OR we have already supplied the number
+               * of bytes requested in the read.  Check if we need to read
                * more from the file.
                */
 
@@ -139,11 +123,14 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                 {
                   size_t buffer_available;
 
-                  /* We need to read more data into the buffer from the file */
+                  /* We need to read more data into the buffer from the
+                   * file
+                   */
 
                   /* Mark the buffer empty */
 
-                  stream->fs_bufpos = stream->fs_bufread = stream->fs_bufstart;
+                  stream->fs_bufpos = stream->fs_bufread =
+                                      stream->fs_bufstart;
 
                   /* How much space is available in the buffer? */
 
@@ -167,17 +154,17 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                         }
                       else if (bytes_read == 0)
                         {
-                          /* We are at the end of the file.  But we may already
-                           * have buffered data.  In that case, we will report
-                           * the EOF indication later.
+                          /* We are at the end of the file.  But we may
+                           * already have buffered data.  In that case,
+                           * we will report the EOF indication later.
                            */
 
                           goto shortread;
                         }
                       else
                         {
-                          /* Some (perhaps all) bytes were read. Adjust the dest
-                           * pointer and remaining bytes to be read.
+                          /* Some (perhaps all) bytes were read. Adjust the
+                           * dest pointer and remaining bytes to be read.
                            */
 
                           DEBUGASSERT(bytes_read <= remaining);
@@ -198,8 +185,8 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                                             buffer_available);
                       if (bytes_read < 0)
                         {
-                          /* An error occurred on the read.  The error code is
-                           * in the 'errno' variable.
+                          /* An error occurred on the read.  The error code
+                           * is in the 'errno' variable.
                            */
 
                           _NX_SETERRNO(bytes_read);
@@ -207,9 +194,9 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                         }
                       else if (bytes_read == 0)
                         {
-                          /* We are at the end of the file.  But we may already
-                           * have buffered data.  In that case, we will report
-                           * the EOF indication later.
+                          /* We are at the end of the file.  But we may
+                           * already have buffered data.  In that case,
+                           * we will report the EOF indication later.
                            */
 
                           goto shortread;
@@ -286,7 +273,7 @@ shortread:
 
   return count - remaining;
 
-/* Error exits */
+  /* Error exits */
 
 errout_with_errno:
   stream->fs_flags |= __FS_FLAG_ERROR;

@@ -36,6 +36,10 @@
 #ifndef __INCLUDE_NUTTX_SENSORS_BMP280_H
 #define __INCLUDE_NUTTX_SENSORS_BMP280_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_BMP280) || defined(CONFIG_SENSORS_BMP280_SCU))
@@ -111,6 +115,13 @@ extern "C"
  */
 
 #define SNIOC_SETSTB               _SNIOC(0x0003)
+
+/* Get temperature value
+ *
+ * Arg: Pointer to uint32_t (raw value)
+ */
+
+#define SNIOC_GET_TEMP             _SNIOC(0x0004)
 
 struct bmp280_press_adj_s
 {

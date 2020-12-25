@@ -148,7 +148,7 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
           ret = MTD_BREAD(fs->mtd, blkstart, 1, wptr);
           if (ret < 0)
             {
-              ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
+              ferr("ERROR: MTD_BREAD() failed: %zd\n", ret);
               return (ssize_t)ret;
             }
 
@@ -160,8 +160,8 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
           nbytes  = MIN(remaining, maxcopy);
 
           spiffs_mtdinfo("Leading partial block: "
-                         "blkstart=%ld blkoffset=%d nbytes=%d\n",
-                         (long)blkstart, blkoffset, nbytes);
+                         "blkstart=%jd blkoffset=%d nbytes=%d\n",
+                         (intmax_t)blkstart, blkoffset, nbytes);
 
           memcpy(&wptr[blkoffset], src, nbytes);
 
@@ -172,7 +172,7 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
           ret = MTD_BWRITE(fs->mtd, blkstart, 1, wptr);
           if (ret < 0)
             {
-              ferr("ERROR: MTD_BWRITE() failed: %d\n", ret);
+              ferr("ERROR: MTD_BWRITE() failed: %zd\n", ret);
               return (ssize_t)ret;
             }
 
@@ -205,7 +205,7 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
           ret = MTD_BWRITE(fs->mtd, blkstart, nblocks, src);
           if (ret < 0)
             {
-              ferr("ERROR: MTD_BWRITE() failed: %d\n", ret);
+              ferr("ERROR: MTD_BWRITE() failed: %zd\n", ret);
               return (ssize_t)ret;
             }
 
@@ -227,7 +227,7 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
           ret = MTD_BREAD(fs->mtd, blkend, 1, fs->mtd_work);
           if (ret < 0)
             {
-              ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
+              ferr("ERROR: MTD_BREAD() failed: %zd\n", ret);
               return (ssize_t)ret;
             }
 
@@ -250,7 +250,7 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
           ret = MTD_BWRITE(fs->mtd, blkend, 1, fs->mtd_work);
           if (ret < 0)
             {
-              ferr("ERROR: MTD_BWRITE() failed: %d\n", ret);
+              ferr("ERROR: MTD_BWRITE() failed: %zd\n", ret);
               return (ssize_t)ret;
             }
         }
@@ -336,7 +336,7 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
           ret = MTD_BREAD(fs->mtd, blkstart, 1, wptr);
           if (ret < 0)
             {
-              ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
+              ferr("ERROR: MTD_BREAD() failed: %zd\n", ret);
               return (ssize_t)ret;
             }
 
@@ -348,8 +348,8 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
           nbytes  = MIN(remaining, maxcopy);
 
           spiffs_mtdinfo("Leading partial block: "
-                         "blkstart=%ld blkoffset=%d nbytes=%d\n",
-                         (long)blkstart, blkoffset, nbytes);
+                         "blkstart=%jd blkoffset=%d nbytes=%zd\n",
+                         (intmax_t)blkstart, blkoffset, nbytes);
 
           memcpy(dest, &wptr[blkoffset], nbytes);
 
@@ -380,7 +380,7 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
           ret = MTD_BREAD(fs->mtd, blkstart, nblocks, dest);
           if (ret < 0)
             {
-              ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
+              ferr("ERROR: MTD_BREAD() failed: %zd\n", ret);
               return (ssize_t)ret;
             }
 
@@ -404,7 +404,7 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
           ret = MTD_BREAD(fs->mtd, blkend, 1, fs->mtd_work);
           if (ret < 0)
             {
-              ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
+              ferr("ERROR: MTD_BREAD() failed: %zd\n", ret);
               return (ssize_t)ret;
             }
 
@@ -471,7 +471,7 @@ ssize_t spiffs_mtd_erase(FAR struct spiffs_s *fs, off_t offset, size_t len)
   nerased = MTD_ERASE(fs->mtd, eblkstart, eblkend - eblkstart);
   if (nerased < 0)
     {
-      ferr("ERROR: MTD_ERASE() failed: %d\n");
+      ferr("ERROR: MTD_ERASE() failed: %zd\n", nerased);
       return nerased;
     }
 

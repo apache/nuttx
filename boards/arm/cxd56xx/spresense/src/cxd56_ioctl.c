@@ -46,9 +46,9 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <arch/chip/chip.h>
 
-#include "chip.h"
-#include "cxd56_uart.h"
+#include "cxd56_usbdev.h"
 
 #ifdef CONFIG_BOARDCTL_IOCTL
 

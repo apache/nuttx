@@ -70,10 +70,11 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   tiva_configgpio(&g_gpio_sw1);
   tiva_configgpio(&g_gpio_sw2);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

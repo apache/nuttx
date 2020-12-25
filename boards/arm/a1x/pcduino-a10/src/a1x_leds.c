@@ -82,9 +82,9 @@
  *   LED_PANIC         The system has crashed   N/C  N/C  2Hz Flashing
  *   LED_IDLE          MCU is is sleep mode         Not used
  *
- * After booting, LED1 and 3 are not longer used by the system and can be used
- * for other purposes by the application (Of course, all LEDs are available to
- * the application if CONFIG_ARCH_LEDS is not defined.
+ * After booting, LED1 and 3 are not longer used by the system and can be
+ * used for other purposes by the application (Of course, all LEDs are
+ * available to the application if CONFIG_ARCH_LEDS is not defined.
  */
 
 /****************************************************************************
@@ -217,9 +217,11 @@ void board_autoled_off(int led)
  *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Initialization already performed in a1x_led_initialize */
+
+  return BOARD_NLEDS;
 }
 
 void board_userled(int led, bool ledon)
@@ -242,7 +244,7 @@ void board_userled(int led, bool ledon)
     }
 }
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   board_userled(BOARD_LED1, (ledset & BOARD_LED1) != 0);
   board_userled(BOARD_LED3, (ledset & BOARD_LED3) != 0);

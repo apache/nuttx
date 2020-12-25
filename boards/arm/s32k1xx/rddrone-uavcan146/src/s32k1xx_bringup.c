@@ -57,6 +57,10 @@
 #  include "s32k1xx_lpi2c.h"
 #endif
 
+#ifdef CONFIG_S32K1XX_EEEPROM
+#  include "s32k1xx_eeeprom.h"
+#endif
+
 #include "rddrone-uavcan146.h"
 
 /****************************************************************************
@@ -126,18 +130,35 @@ int s32k1xx_bringup(void)
 
   if (i2c == NULL)
     {
-      serr("ERROR: Failed to get I2C%d interface\n", bus);
+      serr("ERROR: Failed to get I2C interface\n");
     }
   else
     {
       ret = i2c_register(i2c, 0);
       if (ret < 0)
         {
-          serr("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          serr("ERROR: Failed to register I2C driver: %d\n", ret);
           s32k1xx_i2cbus_uninitialize(i2c);
         }
     }
 #endif
+#endif
+
+#ifdef CONFIG_S32K1XX_PROGMEM
+  FAR struct mtd_dev_s *mtd;
+  int minor = 0;
+
+  mtd = progmem_initialize();
+  if (!mtd)
+    {
+      syslog(LOG_ERR, "ERROR: progmem_initialize failed\n");
+    }
+#endif
+
+#ifdef CONFIG_S32K1XX_EEEPROM
+  /* Register EEEPROM block device */
+
+  s32k1xx_eeeprom_register(0, 4096);
 #endif
 
   return ret;

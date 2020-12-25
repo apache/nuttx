@@ -58,8 +58,6 @@ endif
 # Each toolchain definition should set:
 #
 #  CROSSDEV         The GNU toolchain triple (command prefix)
-#  ARCROSSDEV       If required, an alternative prefix used when
-#                   invoking ar and nm.
 #  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
 #                   options, etc.
 #  MAXOPTIMIZATION  The maximum optimization level that results in
@@ -74,7 +72,6 @@ endif
 
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
   CROSSDEV ?= riscv64-unknown-elf-
-  ARCROSSDEV ?= riscv64-unknown-elf-
 endif
 
 # Individual tools may limit the optimization level but, by default, the
@@ -82,4 +79,31 @@ endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),)
 MAXOPTIMIZATION ?= -Os
+endif
+
+# Default toolchain
+
+CC = $(CROSSDEV)gcc
+CXX = $(CROSSDEV)g++
+CPP = $(CROSSDEV)gcc -E -P -x c
+LD = $(CROSSDEV)ld
+STRIP = $(CROSSDEV)strip --strip-unneeded
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
+OBJCOPY = $(CROSSDEV)objcopy
+OBJDUMP = $(CROSSDEV)objdump
+
+# Add the builtin library
+
+EXTRA_LIBS += -lgcc
+EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name`"}"
+
+ifneq ($(CONFIG_LIBM),y)
+  EXTRA_LIBS += -lm
+  EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a`"}"
+endif
+
+ifeq ($(CONFIG_CXX_LIBSUPCXX),y)
+  EXTRA_LIBS += -lsupc++
+  EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a`"}"
 endif

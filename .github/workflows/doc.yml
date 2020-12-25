@@ -10,30 +10,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-name: Doc
-
+name: "Build Documentation"
 on:
   pull_request:
+  push:
 
 jobs:
-  docs:
-    runs-on: ubuntu-18.04
+  build-html:
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-      with:
-        path: nuttx
-        fetch-depth: 1
-    - name: Generate Inlined Docs
-      run: |
-        echo "Inline Docs"
-        npm install --no-audit inliner
-        inliner=`pwd`/node_modules/inliner/cli/index.js
-        build_output=`pwd`/build
-        mkdir $build_output
-        cd nuttx/Documentation
-        find ./ -type f -name "*.html" -exec  script -e -c "$inliner {} > $build_output/{}" \;
-        ls -l $build_output/
-    - uses: actions/upload-artifact@v1
-      with:
-        name: htmldocs
-        path: ./build/
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Generate requirements.txt file
+        run: |
+          cd Documentation/
+          pip3 install pipenv
+          pipenv lock -r > requirements.txt
+      - uses: ammaraskar/sphinx-problem-matcher@master
+      - uses: ammaraskar/sphinx-action@master
+        with:
+          docs-folder: "Documentation/"
+      - uses: actions/upload-artifact@v2
+        with:
+          name: sphinx-docs
+          path: Documentation/_build/html/
+  linkcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - uses: ammaraskar/sphinx-problem-matcher@master
+      - name: Run linkcheck
+        run: |
+          cd Documentation/
+          pip3 install pipenv
+          pipenv install
+          # This step flakes frequently so still annotate errors but dont fail the build
+          pipenv run make linkcheck || true

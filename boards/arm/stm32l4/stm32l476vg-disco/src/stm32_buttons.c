@@ -120,36 +120,39 @@ static void button_pm_notify(struct pm_callback_s *cb, int domain,
     {
       case(PM_NORMAL):
         {
-          /* Restore normal buttons operation */
-          //XXX turn on any GPIO
+          /* Restore normal buttons operation
+           * XXX turn on any GPIO
+           */
         }
         break;
 
       case(PM_IDLE):
         {
-          /* Entering IDLE mode - buttons */
-          //XXX turn on any GPIO
+          /* Entering IDLE mode - buttons
+           * XXX turn on any GPIO
+           */
         }
         break;
 
       case(PM_STANDBY):
         {
-          /* Entering STANDBY mode - Logic for PM_STANDBY goes here */
-          //XXX turn off any GPIO
+          /* Entering STANDBY mode - Logic for PM_STANDBY goes here
+           * XXX turn off any GPIO
+           */
         }
         break;
 
       case(PM_SLEEP):
         {
-          /* Entering SLEEP mode - Logic for PM_SLEEP goes here */
-          //XXX turn off any GPIO
+          /* Entering SLEEP mode - Logic for PM_SLEEP goes here
+           * XXX turn off any GPIO
+           */
         }
         break;
 
       default:
         {
           /* Should not get here */
-
         }
         break;
     }
@@ -163,6 +166,7 @@ static void button_pm_notify(struct pm_callback_s *cb, int domain,
  *   Handle a button wake-up interrupt
  *
  ****************************************************************************/
+
 /* XXX it's not completely clear to me if this is appropriate; on the one
  * hand, it seems to make sense that this would be the module to have the ISR
  * for the buttons.  On the other hand, it will conflict with things done in
@@ -230,7 +234,7 @@ static int button_pm_prepare(struct pm_callback_s *cb, int domain,
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -252,6 +256,8 @@ void board_button_initialize(void)
 #endif
 #endif
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
@@ -297,20 +303,20 @@ uint32_t board_buttons(void)
  * Button support.
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
- *   After board_button_initialize() has been called, board_buttons() may be called to
- *   collect the state of all buttons.  board_buttons() returns an 32-bit bit set
- *   with each bit associated with a button.  See the BUTTON_*_BIT
- *   definitions in board.h for the meaning of each bit.
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   32-bit bit set with each bit associated with a button.  See the
+ *   BUTTON_*_BIT definitions in board.h for the meaning of each bit.
  *
- *   board_button_irq() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* definitions in board.h for the meaning of enumeration
+ *   board_button_irq() may be called to register an interrupt handler that
+ *   will be called when a button is depressed or released.  The ID value is
+ *   a button enumeration value that uniquely identifies a button resource.
+ *   See the BUTTON_* definitions in board.h for the meaning of enumeration
  *   value.
  *
  ****************************************************************************/
@@ -324,7 +330,8 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
   if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
     {
-      ret = stm32l4_gpiosetevent(g_buttons[id], true, true, true, irqhandler, arg);
+      ret = stm32l4_gpiosetevent(g_buttons[id], true, true, true,
+                                 irqhandler, arg);
     }
 
   return ret;

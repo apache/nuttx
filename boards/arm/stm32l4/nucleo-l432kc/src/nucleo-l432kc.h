@@ -80,8 +80,8 @@
 #  undef HAVE_AT45DB
 #endif
 
-/* LED.  User LD3: the green LED is a user LED connected to Arduino signal D13
- * corresponding to MCU I/O PB3 (pin 26)
+/* LED.  User LD3: the green LED is a user LED connected to Arduino signal
+ * D13 corresponding to MCU I/O PB3 (pin 26)
  * target.
  *
  * - When the I/O is HIGH value, the LED is on.
@@ -131,7 +131,7 @@ extern struct spi_dev_s *g_spi2;
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public functions
  ****************************************************************************/
 
 /****************************************************************************

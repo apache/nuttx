@@ -105,7 +105,7 @@ void ez80_pb2interrupt(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   uint8_t regval;
 
@@ -149,6 +149,8 @@ void board_button_initialize(void)
   regval &= ~7;
   outp(EZ80_PB_ALT2, regval);
 #endif
+
+  return 3;
 }
 
 /****************************************************************************

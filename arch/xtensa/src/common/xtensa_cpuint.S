@@ -77,12 +77,12 @@ xtensa_enable_cpuint:
 	xsr		a4, INTENABLE		/* Disables all interrupts */
 	rsync
 
-	l32i	a4, a2, 0			/* a4 = value of INTENABLE shadow */
+	l32i	a4, a2, 0			  /* a4 = value of INTENABLE shadow */
 	or		a5, a4, a3			/* a5 = shadow | mask */
-	s32i	a5, a2, 0			/* shadow |= mask */
+	s32i	a5, a2, 0			  /* shadow |= mask */
 
 	wsr		a5, INTENABLE		/* Set CPU INTENABLE to shadow */
-	mov		a3, a4				/* Return previous shadow content */
+	mov		a3, a4			   	/* Return previous shadow content */
 	RET(16)
 
 	.size	xtensa_enable_cpuint, . - xtensa_enable_cpuint
@@ -99,7 +99,7 @@ xtensa_enable_cpuint:
  *   writes that value to the hardware INTENABLE register.  Can be called
  *   from interrupt handlers.
  *
- *   NOTE: It is possible only to enable interrupts on the current CPU
+ *   NOTE: It is possible only to disable interrupts on the current CPU
  *   because there is an INTENABLE register implemented in each CPU.
  *
  ****************************************************************************/
@@ -116,13 +116,13 @@ xtensa_disable_cpuint:
 	xsr		a4, INTENABLE		/* Disables all interrupts */
 	rsync
 
-	l32i	a4, a2, 0			/* a4 = value of INTENABLE shadow */
+	l32i	a4, a2, 0			  /* a4 = value of INTENABLE shadow */
 	or		a5, a4, a3			/* a5 = shadow | mask */
 	xor		a5, a5, a3			/* a5 = shadow & ~mask */
-	s32i	a5, a2, 0			/* shadow &= ~mask */
+	s32i	a5, a2, 0			  /* shadow &= ~mask */
 
 	wsr		a5, INTENABLE		/* Set CPU INTENABLE to shadow */
-	mov		a3, a4				/* Return previous shadow content */
+	mov		a3, a4				  /* Return previous shadow content */
 	RET(16)
 
 	.size	xtensa_disable_cpuint, . - xtensa_disable_cpuint

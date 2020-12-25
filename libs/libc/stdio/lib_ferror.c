@@ -44,7 +44,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 
 /****************************************************************************
  * Public Functions
@@ -72,4 +72,4 @@ int ferror(FILE *stream)
   return (stream->fs_flags & __FS_FLAG_ERROR) != 0;
 }
 
-#endif /* CONFIG_NFILE_STREAMS */
+#endif /* CONFIG_FILE_STREAM */

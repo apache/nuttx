@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <fixedmath.h>
 #include <errno.h>
@@ -219,7 +220,8 @@ static int lm75_readb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
    */
 
   *regvalue = b8tob16((b8_t)buffer[0] << 8 | (b8_t)buffer[1]);
-  sninfo("addr: %02x value: %08x ret: %d\n", regaddr, *regvalue, ret);
+  sninfo("addr: %02x value: %08" PRIx32 " ret: %d\n",
+         regaddr, *regvalue, ret);
   return OK;
 }
 
@@ -227,7 +229,8 @@ static int lm75_readb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
  * Name: lm75_writeb16
  *
  * Description:
- *   Write to a 16-bit register (LM75_TEMP_REG, LM75_THYS_REG, or LM75_TOS_REG)
+ *   Write to a 16-bit register (LM75_TEMP_REG, LM75_THYS_REG, or
+ *   LM75_TOS_REG)
  *
  ****************************************************************************/
 
@@ -237,7 +240,7 @@ static int lm75_writeb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
   uint8_t buffer[3];
   b8_t regb8;
 
-  sninfo("addr: %02x value: %08x\n", regaddr, regval);
+  sninfo("addr: %02x value: %08" PRIx32 "\n", regaddr, regval);
 
   /* Set up a 3 byte message to send */
 
@@ -276,7 +279,7 @@ static int lm75_readtemp(FAR struct lm75_dev_s *priv, FAR b16_t *temp)
 
   add_sensor_randomness(temp16);
 
-  sninfo("Centigrade: %08x\n", temp16);
+  sninfo("Centigrade: %08" PRIx32 "\n", temp16);
 
   /* Was fahrenheit requested? */
 
@@ -285,7 +288,7 @@ static int lm75_readtemp(FAR struct lm75_dev_s *priv, FAR b16_t *temp)
       /* Centigrade to Fahrenheit conversion:  F = 9*C/5 + 32 */
 
       temp16 =  b16mulb16(temp16, B16_9DIV5) + B16_32;
-      sninfo("Fahrenheit: %08x\n", temp16);
+      sninfo("Fahrenheit: %08" PRIx32 "\n", temp16);
     }
 
   *temp = temp16;
@@ -377,7 +380,8 @@ static int lm75_close(FAR struct file *filep)
  * Name: lm75_read
  ****************************************************************************/
 
-static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer,
+                         size_t buflen)
 {
   FAR struct inode      *inode = filep->f_inode;
   FAR struct lm75_dev_s *priv   = inode->i_private;
@@ -507,7 +511,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = lm75_readb16(priv, LM75_THYS_REG, ptr);
-          sninfo("THYS: %08x ret: %d\n", *ptr, ret);
+          sninfo("THYS: %08" PRIx32 " ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -515,25 +519,29 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_WRITETHYS:
         ret = lm75_writeb16(priv, LM75_THYS_REG, (b16_t)arg);
-        sninfo("THYS: %08x ret: %d\n", (b16_t)arg, ret);
+        sninfo("THYS: %08" PRIx32 " ret: %d\n", (b16_t)arg, ret);
         break;
 
-      /* Read TOS (Over-temp Shutdown Threshold) Register. Arg: b16_t* pointer */
+      /* Read TOS (Over-temp Shutdown Threshold) Register.
+       * Arg: b16_t* pointer
+       */
 
       case SNIOC_READTOS:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = lm75_readb16(priv, LM75_TOS_REG, ptr);
-          sninfo("TOS: %08x ret: %d\n", *ptr, ret);
+          sninfo("TOS: %08" PRIx32 " ret: %d\n", *ptr, ret);
         }
         break;
 
-      /* Write TOS (Over-temp Shutdown Threshold) Register. Arg: b16_t value */
+      /* Write TOS (Over-temp Shutdown Threshold) Register.
+       * Arg: b16_t value
+       */
 
       case SNIOC_WRITETOS:
         ret = lm75_writeb16(priv, LM75_TOS_REG, (b16_t)arg);
-        sninfo("TOS: %08x ret: %d\n", (b16_t)arg, ret);
+        sninfo("TOS: %08" PRIx32 " ret: %d\n", (b16_t)arg, ret);
         break;
 
       default:
@@ -567,7 +575,8 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int lm75_register(FAR const char *devpath, FAR struct i2c_master_s *i2c, uint8_t addr)
+int lm75_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
+                  uint8_t addr)
 {
   FAR struct lm75_dev_s *priv;
   int ret;

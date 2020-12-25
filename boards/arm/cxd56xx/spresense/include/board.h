@@ -52,6 +52,7 @@
 #include "cxd56_charger.h"
 #include "cxd56_gs2200m.h"
 #include "cxd56_i2cdev.h"
+#include "cxd56_spidev.h"
 #include "cxd56_sdcard.h"
 #include "cxd56_wdt.h"
 #include "cxd56_gpioif.h"
@@ -61,12 +62,15 @@
 #include "cxd56_ak09912.h"
 #include "cxd56_apds9930.h"
 #include "cxd56_apds9960.h"
+#include "cxd56_bcm20706.h"
 #include "cxd56_bh1721fvc.h"
 #include "cxd56_bh1745nuc.h"
 #include "cxd56_bm1383glv.h"
 #include "cxd56_bm1422gmv.h"
 #include "cxd56_bmi160.h"
 #include "cxd56_bmp280.h"
+#include "cxd56_emmcdev.h"
+#include "cxd56_spisd.h"
 #include "cxd56_kx022.h"
 #include "cxd56_lt1pa01.h"
 #include "cxd56_rpr0521rs.h"
@@ -184,13 +188,18 @@ enum board_power_device
 
   POWER_AUDIO_AVDD      = PMIC_GPO(1),
   POWER_AUDIO_MUTE      = PMIC_GPO(6),
-  POWER_IMAGE_SENSOR    = PMIC_GPO(4) | PMIC_GPO(5) | PMIC_GPO(7),
+  POWER_IMAGE_SENSOR    = PMIC_GPO(4),
 
   POWER_BTBLE           = PMIC_NONE,
   POWER_SENSOR          = PMIC_NONE,
   POWER_EMMC            = PMIC_NONE,
   POWER_LTE             = PMIC_GPO(2),
 };
+
+/* Power Off Level definitions **********************************************/
+
+#define BOARD_POWEROFF_DEEP (0)
+#define BOARD_POWEROFF_COLD (1)
 
 /* CXD5247 audio control definitions ****************************************/
 
@@ -254,6 +263,14 @@ enum board_power_device
  */
 
 #define BOARDIOC_USBDEV_SETNOTIFYSIG      (BOARDIOC_USER+0x0001)
+
+/* Altair modem device pin definitions **************************************/
+
+#define ALTMDM_SLAVE_REQ          PIN_SPI2_SCK
+#define ALTMDM_MASTER_REQ         PIN_RTC_IRQ_OUT
+#define ALTMDM_WAKEUP             PIN_SPI2_MOSI
+#define ALTMDM_SHUTDOWN           PIN_SPI2_MISO
+#define ALTMDM_LTE_POWER_BUTTON   PIN_AP_CLK
 
 /****************************************************************************
  * Public Types

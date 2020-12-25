@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/sam_usb.h
  *
  *   Copyright (C) 2015 Filament - www.filament.com
@@ -35,12 +35,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRCSAMD5E5_SAM_USB_H
 #define __ARCH_ARM_SRCSAMD5E5_SAM_USB_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -51,7 +51,7 @@
 #include "chip.h"
 #include "hardware/sam_usb.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -66,7 +66,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name:  sam_usb_suspend
  *
  * Description:
@@ -75,17 +75,18 @@ extern "C"
  *   suspend mode.
  *
  *   When 'resume' is false, this function call provides an opportunity to
- *   perform board-specific power-saving actions so that less power is consumed
- *   while the USB is suspended.
+ *   perform board-specific power-saving actions so that less power is
+ *   consumed while the USB is suspended.
  *
  * NOTE:
  *   Certain power-saving operations are performed by the UDP driver when it
- *   enters suspend mode:  The USB device peripheral clocks are be switched off.
- *   MCK and UDPCK are switched off and the USB transceiver is disabled.
+ *   enters suspend mode:  The USB device peripheral clocks are be switched
+ *   off. MCK and UDPCK are switched off and the USB transceiver is disabled.
  *
- *   When 'resume' is true, normal clocking and operations must all be restored.
+ *   When 'resume' is true, normal clocking and operations must all be
+ *   restored.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void sam_usb_suspend(FAR struct usbdev_s *dev, bool resume);
 

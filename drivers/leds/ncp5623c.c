@@ -68,7 +68,8 @@ static int ncp5623c_i2c_write_byte(FAR struct ncp5623c_dev_s *priv,
 
 static int ncp5623c_open(FAR struct file *filep);
 static int ncp5623c_close(FAR struct file *filep);
-static int ncp5623c_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int ncp5623c_ioctl(FAR struct file *filep, int cmd,
+                          unsigned long arg);
 static ssize_t ncp5623c_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
@@ -162,7 +163,7 @@ static int ncp5623c_open(FAR struct file *filep)
 
   /* Set up Max current */
 
-  ret = ncp5623c_i2c_write_byte(priv, NCP5623C_ILED, 0x1F);
+  ret = ncp5623c_i2c_write_byte(priv, NCP5623C_ILED, 0x1f);
   if (ret != OK)
     {
       lcderr("ERROR: Could not set up max current\n");
@@ -204,7 +205,8 @@ static int ncp5623c_close(FAR struct file *filep)
  * Name: ncp5623c_ioctl
  *
  * Description:
- *   This function is called whenever an ioctl call to a NCP5623C is performed.
+ *   This function is called whenever an ioctl call to a NCP5623C is
+ *   performed.
  *
  ****************************************************************************/
 
@@ -295,7 +297,7 @@ int ncp5623c_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Register the character driver */
 
-  int const ret = register_driver(devpath, &g_ncp5623c_fileops, 666, priv);
+  int const ret = register_driver(devpath, &g_ncp5623c_fileops, 0666, priv);
   if (ret != OK)
     {
       lcderr("ERROR: Failed to register driver: %d\n", ret);

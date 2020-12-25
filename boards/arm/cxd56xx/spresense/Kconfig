@@ -5,6 +5,19 @@
 
 if ARCH_BOARD_SPRESENSE
 
+config BOARD_CUSTOM_PINCONFIG
+	bool
+	default y
+
+config BOARD_USB_DISABLE_IN_DEEP_SLEEPING
+	bool
+	default y
+	---help---
+		Due to the system specification, it's impossible to enter the deep
+		sleeping mode for the power saving as long as USB is attached. As
+		the workaround for this restriction, this configuration forces to be
+		disable the USB function in deep sleeping.
+
 config CXD56_SPIFLASHSIZE
 	hex
 	default 0x400000
@@ -505,43 +518,43 @@ endif
 comment "LTE Options"
 
 menuconfig CXD56_LTE
-        bool "LTE"
-        default n
+	bool "LTE"
+	default n
 
 if CXD56_LTE
 
 choice
-        prompt "LTE SPI selection"
-        default CXD56_LTE_SPI4
+	prompt "LTE SPI selection"
+	default CXD56_LTE_SPI4
 
 config CXD56_LTE_SPI4
-        bool "Use SPI4"
-        select CXD56_SPI4
+	bool "Use SPI4"
+	select CXD56_SPI4
 
 config CXD56_LTE_SPI5
-        bool "Use SPI5"
-        select CXD56_SPI5
+	bool "Use SPI5"
+	select CXD56_SPI5
 endchoice
 
 if CXD56_LTE_SPI4
 
 config CXD56_LTE_SPI4_DMAC
-        bool "Use DMAC for SPI4"
-        default y
-        select CXD56_DMAC_SPI4_TX
-        select CXD56_DMAC_SPI4_RX
+	bool "Use DMAC for SPI4"
+	default y
+	select CXD56_DMAC_SPI4_TX
+	select CXD56_DMAC_SPI4_RX
 
 endif # CXD56_LTE_SPI4
 
 if CXD56_LTE_SPI5
 
 config CXD56_LTE_SPI5_DMAC
-        bool "Use DMAC for SPI5"
-        default y
-        select CXD56_DMAC_SPI5_TX
-        select CXD56_DMAC_SPI5_RX
+	bool "Use DMAC for SPI5"
+	default y
+	select CXD56_DMAC_SPI5_TX
+	select CXD56_DMAC_SPI5_RX
 
-endif # CXD56_LTE_SPI4
+endif # CXD56_LTE_SPI5
 
 endif # CXD56_LTE
 

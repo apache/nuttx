@@ -200,10 +200,10 @@
  * SW2 and SW3 can be low-power wake up signal.
  * Also, only SW3 can be a non-maskable interrupt.
  *
- *   Switch    GPIO Function
- *   --------- --------------------------------------------------------------
- *   SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
- *   SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
+ *   Switch GPIO Function
+ *   ------ --------------------------------------------------------------
+ *   SW2    PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
+ *   SW3    PTA4/FTM0_CH1/NMI_b/LLWU_P3
  */
 
 #define GPIO_SW2           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTC | PIN6)
@@ -229,14 +229,20 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Name: k64_i2cdev_initialize
+ *
+ * Description:
+ *   Called to configure I2C chip select GPIO pins for the FRDM-K64F board.
+ *
  ****************************************************************************/
+
+int k64_i2cdev_initialize(void);
 
 /****************************************************************************
  * Name: k64_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the FREEDOM-K64F board.
+ *   Called to configure SPI chip select GPIO pins for the FRDM-K64F board.
  *
  ****************************************************************************/
 
@@ -328,7 +334,8 @@ void k64_automount_initialize(void);
  * Name:  k64_automount_event
  *
  * Description:
- *   The SDHC card detection logic has detected an insertion or removal event.
+ *   The SDHC card detection logic has detected
+ *   an insertion or removal event.
  *   It has already scheduled the MMC/SD block driver operations.
  *   Now we need to schedule the auto-mount event which will occur with a
  *   substantial delay to make sure that everything has settle down.

@@ -49,6 +49,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -197,13 +198,13 @@ static struct at24c_dev_s g_at24c;
  * Private Functions
  ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Name: at24c_i2c_write
  *
  * Description:
  *   Write to the I2C device.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int at24c_i2c_write(FAR struct at24c_dev_s *priv, uint16_t at24addr,
                            FAR const uint8_t *buffer, int buflen)
@@ -223,13 +224,13 @@ static int at24c_i2c_write(FAR struct at24c_dev_s *priv, uint16_t at24addr,
   return I2C_TRANSFER(priv->dev, &msg, 1);
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: at24c_i2c_read
  *
  * Description:
  *   Read from the I2C device.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int at24c_i2c_read(FAR struct at24c_dev_s *priv, uint16_t at24addr,
                           FAR uint8_t *buffer, int buflen)
@@ -319,17 +320,20 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
   finfo("offset: %lu nbytes: %lu address: %02x\n",
         (unsigned long)offset, (unsigned long)nbytes, address);
 
-  /* "Random Read: A Random Read requires a dummy byte write sequence to load in the
-   *  data word address. Once the device address word and data word address are clocked
-   *  in and acknowledged by the EEPROM, the microcontroller must generate another
-   *  Start condition. The microcontroller now initiates a current address read
-   *  by sending a device address with the read/write select bit high. The EEPROM
-   *  acknowledges the device address and serially clocks out the data word. To end the
-   *  random read sequence, the microcontroller does not respond with a zero but does
-   *  generate a Stop condition in the subsequent clock cycle."
+  /* "Random Read: A Random Read requires a dummy byte write sequence to
+   *  load in the data word address. Once the device address word and data
+   *  word address are clocked in and acknowledged by the EEPROM, the
+   *  microcontroller must generate another Start condition. The
+   *  microcontroller now initiates a current address read by sending a
+   *  device address with the read/write select bit high. The EEPROM
+   *  acknowledges the device address and serially clocks out the data word.
+   *  To end the random read sequence, the microcontroller does not respond
+   *  with a zero but does generate a Stop condition in the subsequent clock
+   *  cycle."
    *
-   * A repeated START after the address is suggested, however, this simple driver
-   * just performs the write as a sepate transfer with an additional, unnecessary STOP.
+   * A repeated START after the address is suggested, however, this simple
+   * driver just performs the write as a sepate transfer with an additional,
+   * unnecessary STOP.
    */
 
 #if AT24XX_ADDRSIZE == 2
@@ -411,9 +415,9 @@ static ssize_t at24c_bread(FAR struct mtd_dev_s *dev, off_t startblock,
     }
 
 #if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
-   return nblocks / (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
+  return nblocks / (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
 #else
-   return nblocks;
+  return nblocks;
 #endif
 }
 
@@ -424,7 +428,8 @@ static ssize_t at24c_bread(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ************************************************************************************/
 
-static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                            size_t nblocks,
                             FAR const uint8_t *buffer)
 {
   FAR struct at24c_dev_s *priv = (FAR struct at24c_dev_s *)dev;
@@ -553,7 +558,8 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-         FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+         FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)
+                                          ((uintptr_t)arg);
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -580,7 +586,8 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
               geo->blocksize    = CONFIG_AT24XX_MTD_BLOCKSIZE;
               geo->erasesize    = CONFIG_AT24XX_MTD_BLOCKSIZE;
-              geo->neraseblocks = (CONFIG_AT24XX_SIZE * 1024 / 8) / CONFIG_AT24XX_MTD_BLOCKSIZE;
+              geo->neraseblocks = (CONFIG_AT24XX_SIZE * 1024 / 8) /
+                                  CONFIG_AT24XX_MTD_BLOCKSIZE;
 #else
               geo->blocksize    = priv->pagesize;
               geo->erasesize    = priv->pagesize;
@@ -588,7 +595,8 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #endif
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %" PRId32 " erasesize: %" PRId32
+                    " neraseblocks: %" PRId32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }

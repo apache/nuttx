@@ -1284,16 +1284,6 @@ static int usbhost_kbdpoll(int argc, char *argv[])
           newstate = (priv->headndx == priv->tailndx);
           if (!newstate)
             {
-              /* Yes.. Is there a thread waiting for keyboard data now? */
-
-              if (priv->waiting)
-                {
-                  /* Yes.. wake it up */
-
-                  usbhost_givesem(&priv->waitsem);
-                  priv->waiting = false;
-                }
-
               /* Did we just transition from no data available to data
                * available?  If so, wake up any threads waiting for the
                * POLLIN event.
@@ -1302,6 +1292,16 @@ static int usbhost_kbdpoll(int argc, char *argv[])
               if (empty)
                 {
                   usbhost_pollnotify(priv);
+                }
+
+              /* Yes.. Is there a thread waiting for keyboard data now? */
+
+              if (priv->waiting)
+                {
+                  /* Yes.. wake it up */
+
+                  usbhost_givesem(&priv->waitsem);
+                  priv->waiting = false;
                 }
             }
 

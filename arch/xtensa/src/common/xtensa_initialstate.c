@@ -73,6 +73,16 @@ void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
 
+  /* Initialize the idle thread stack */
+
+  if (tcb->pid == 0)
+    {
+      tcb->stack_alloc_ptr = g_idlestack;
+      tcb->adj_stack_ptr   = (char *)g_idlestack +
+                             CONFIG_IDLETHREAD_STACKSIZE;
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+    }
+
   /* Initialize the initial exception register context structure */
 
   memset(xcp, 0, sizeof(struct xcptcontext));

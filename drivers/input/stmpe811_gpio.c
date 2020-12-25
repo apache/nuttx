@@ -1,41 +1,27 @@
 /****************************************************************************
  * drivers/input/stmpe811_gpio.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
- *   "STMPE811 S-Touch® advanced resistive touchscreen controller with 8-bit
- *    GPIO expander," Doc ID 14489 Rev 6, CD00186725, STMicroelectronics"
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
+/* References:
+ *   "STMPE811 S-Touch advanced resistive touchscreen controller with 8-bit
+ *    GPIO expander," Doc ID 14489 Rev 6, CD00186725, STMicroelectronics"
+ */
 
 /****************************************************************************
  * Included Files
@@ -177,14 +163,17 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
       stmpe811_putreg8(priv, STMPE811_GPIO_DIR_REG, regval);
 
       /* Set its initial output value */
+
       if ((pinconfig & STMPE811_GPIO_VALUE) != STMPE811_GPIO_ZERO)
         {
           /* Set the output value(s)e by writing to the SET register */
+
           stmpe811_putreg8(priv, STMPE811_GPIO_SETPIN, (1 << pin));
         }
       else
         {
           /* Clear the output value(s) by writing to the CLR register */
+
           stmpe811_putreg8(priv, STMPE811_GPIO_CLRPIN, (1 << pin));
         }
     }
@@ -205,21 +194,23 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
         }
       else
         {
-          regval &= pinmask;
+          regval &= ~pinmask;
         }
+
       stmpe811_putreg8(priv, STMPE811_GPIO_FE, regval);
 
       /* Set up the rising edge detection */
 
      regval = stmpe811_getreg8(priv, STMPE811_GPIO_RE);
-      if ((pinconfig & STMPE811_GPIO_FALLING) != 0)
+      if ((pinconfig & STMPE811_GPIO_RISING) != 0)
         {
           regval |= pinmask;
         }
       else
         {
-          regval &= pinmask;
+          regval &= ~pinmask;
         }
+
       stmpe811_putreg8(priv, STMPE811_GPIO_RE, regval);
 
       /* Disable interrupts for now */
@@ -252,7 +243,8 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
  *
  ****************************************************************************/
 
-void stmpe811_gpiowrite(STMPE811_HANDLE handle, uint8_t pinconfig, bool value)
+void stmpe811_gpiowrite(STMPE811_HANDLE handle, uint8_t pinconfig,
+                        bool value)
 {
   FAR struct stmpe811_dev_s *priv = (FAR struct stmpe811_dev_s *)handle;
   int pin = (pinconfig & STMPE811_GPIO_PIN_MASK) >> STMPE811_GPIO_PIN_SHIFT;
@@ -323,21 +315,21 @@ int stmpe811_gpioread(STMPE811_HANDLE handle, uint8_t pinconfig, bool *value)
     }
 
   regval  = stmpe811_getreg8(priv, STMPE811_GPIO_MPSTA);
-  *value = ((regval & GPIO_PIN(pin)) != 0);
+  *value = ((regval & STMPE811_GPIO_PIN(pin)) != 0);
   nxsem_post(&priv->exclsem);
   return OK;
 }
 
-/***********************************************************************************
+/****************************************************************************
  * Name: stmpe811_gpioattach
  *
  * Description:
- *  Attach to a GPIO interrupt input pin and enable interrupts on the pin.  Using
- *  the value NULL for the handler address will disable interrupts from the pin and
- *  detach the handler.
+ *  Attach to a GPIO interrupt input pin and enable interrupts on the pin.
+ *  Using the value NULL for the handler address will disable interrupts
+ *  from the pin anddetach the handler.
  *
- *  NOTE:  Callbacks do not occur from an interrupt handler but rather from the
- *  context of the worker thread.
+ *  NOTE:  Callbacks do not occur from an interrupt handler but rather
+ *  from the context of the worker thread.
  *
  * Input Parameters:
  *   handle    - The handle previously returned by stmpe811_instantiate
@@ -345,10 +337,10 @@ int stmpe811_gpioread(STMPE811_HANDLE handle, uint8_t pinconfig, bool *value)
  *   handler   - The handler that will be called when the interrupt occurs.
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned
- *   to indicate the nature of the failure.
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_STMPE811_GPIOINT_DISABLE
 int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig,
@@ -385,13 +377,13 @@ int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig,
     {
       /* Enable interrupts for this GPIO */
 
-      regval |= GPIO_PIN(pin);
+      regval |= STMPE811_GPIO_PIN(pin);
     }
   else
     {
       /* Disable interrupts for this GPIO */
 
-      regval &= ~GPIO_PIN(pin);
+      regval &= ~STMPE811_GPIO_PIN(pin);
     }
 
   stmpe811_putreg8(priv, STMPE811_GPIO_EN, regval);
@@ -442,7 +434,8 @@ void stmpe811_gpioworker(FAR struct stmpe811_dev_s *priv)
             }
           else
             {
-              ierr("ERROR: No handler for PIN%d, GPIO_INTSTA: %02x\n", pin, regval);
+              ierr("ERROR: No handler for PIN%d, GPIO_INTSTA: %02x\n",
+                   pin, regval);
             }
 
           /* Clear the pending GPIO interrupt by writing a '1' to the
@@ -450,6 +443,15 @@ void stmpe811_gpioworker(FAR struct stmpe811_dev_s *priv)
            */
 
           stmpe811_putreg8(priv, STMPE811_GPIO_INTSTA, pinmask);
+
+          /* Must also clear the edge detection status bit
+           * this is _not documented_ as being required but is used in
+           * the SDK and without it a second interrupt will never trigger.
+           * Yep you have to "clear" _both_ the edge detection status and
+           * GPIO interrupt status register even in level mode.
+           */
+
+          stmpe811_putreg8(priv, STMPE811_GPIO_ED, pinmask);
         }
     }
 }

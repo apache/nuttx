@@ -1,0 +1,127 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_GIANT_BOARD
+
+choice
+	prompt "CPU Frequency"
+	default SAMA5D27_GIANT_BOARD_492MHZ
+
+config SAMA5D27_GIANT_BOARD_492MHZ
+	bool "492 MHz"
+
+endchoice # CPU Frequency
+
+config SAMA5D27_GIANT_BOARD_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1536 if USBHOST_HUB
+	default 1024 if !USBHOST_HUB
+	depends on USBHOST
+
+config SAMA5D27_GIANT_BOARD_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
+
+config SAMA5_SDMMC
+	bool "enable SDMMC controller"
+	default y if SAMA5_HAVE_SDMMC
+	select SDIO_DMA
+	select SCHED_WORKQUEUE
+	select SCHED_HPWORK
+	select MMCSD
+	select MMCSD_SDIO
+	select SDIO_BLOCKSETUP
+	select ARCH_HAVE_SDIO
+	select SAMA5_SDMMC_DMA
+	---help---
+		Enable SD Card interface SDMMC0. Selects SAMA5_SDMMC SAMA5_SDMMC0
+		SAMA5_SDMMC_DMA SDIO_DMA SCHED_WORKQUEUE SCHED_HPWORK SDIO_BLOCKSETUP
+
+config SAMA5_SDMMC0
+	bool "Enable SDMMC0 (built-in eMMC)"
+	default n if SAMA5_SDMMC
+	depends on SAMA5_SDMMC
+
+config SAMA5_SDMMC0_SIZE
+	int "SDMMC0 size in bytes"
+	default 4294967296
+	depends on SAMA5_SDMMC0
+	---help---
+		Size of eMMC flash in bytes. Default: 4GB
+
+config SAMA5D27_SDMMC0_MOUNT
+	bool "Mount SDMMC0 at startup"
+	default n
+	depends on SAMA5_SDMMC0
+
+config SAMA5D27_SDMMC0_MOUNT_BLKDEV
+	string "SDMMC0 block device name"
+	default mmc0
+	depends on SAMA5_SDMMC0
+
+config SAMA5D27_SDMMC0_MOUNT_MOUNTPOINT
+	string "SDMMC0 mountpoint"
+	default "/mnt/sdmmc0"
+	depends on SAMA5_SDMMC0
+
+config SAMA5D27_SDMMC0_MOUNT_FSTYPE
+	string "SDMMC0 file system type"
+	default "vfat"
+	depends on SAMA5_SDMMC0
+
+config CONFIG_SAMA5_SDMMC1_WIDTH_D1_D8
+	bool "SDMMC0 data bus width 8 bits"
+	default y
+	depends on SAMA5_SDMMC0
+
+config SAMA5_SDMMC1
+	bool "Enable SDMMC1"
+	default y if SAMA5_SDMMC
+	select SAMA5_SDMMC1_WIDTH_D1_D4
+	depends on SAMA5_SDMMC
+
+config SAMA5_SDMMC1_SIZE
+	int "SDMMC1 size in bytes"
+	default 1073741824
+	depends on SAMA5_SDMMC1
+	---help---
+		Size of SD Card in bytes. Default: 16GB
+
+config SAMA5D27_SDMMC1_MOUNT
+	bool "Mount SDMMC1 at startup"
+	default n
+	depends on SAMA5_SDMMC1
+
+config SAMA5D27_SDMMC1_MOUNT_BLKDEV
+	string "SDMMC1 block device name"
+	default mmc1
+	depends on SAMA5_SDMMC1
+
+config SAMA5D27_SDMMC1_MOUNT_MOUNTPOINT
+	string "SDMMC1 mountpoint"
+	default "/mnt/sdmmc1"
+	depends on SAMA5_SDMMC1
+
+config SAMA5D27_SDMMC1_MOUNT_FSTYPE
+	string "SDMMC1 file system type"
+	default "vfat"
+	depends on SAMA5_SDMMC1
+
+config MMCSD_HAVE_CARDDETECT
+	bool "SDMMC1 card detect"
+	default y
+	depends on SAMA5_SDMMC1
+
+config SAMA5_SDMMC1_WIDTH_D1_D4
+	bool "SDMMC1 data bus width 4 bits"
+	default y
+	depends on SAMA5_SDMMC1
+
+config SAMA5_SYSTEMRESET
+	bool "Enable system reset - this will enable the nsh reboot command"
+	select BOARDCTL_RESET
+
+endif # ARCH_BOARD_GIANT_BOARD

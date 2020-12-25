@@ -401,7 +401,7 @@ Configurations
     4. This configuration does NOT have USART3 output enabled.  This
        configuration supports logging of debug output to a circular
        buffer in RAM.  This feature is discussed fully in this Wiki page:
-       http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
+       https://cwiki.apache.org/confluence/display/NUTTX/SYSLOG . Relevant
        configuration settings are summarized below:
 
        Device Drivers:
@@ -719,7 +719,6 @@ Configurations
 
       CONFIG_HAVE_CXX=y
       CONFIG_HAVE_CXXINITIALIZE=y
-      CONFIG_SYSTEM_NSH_CXXINITIALIZE=y
 
   usbnsh:
 

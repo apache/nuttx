@@ -150,9 +150,9 @@ void files_releaselist(FAR struct filelist *list)
    * because there should not be any references in this context.
    */
 
-  for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
+  for (i = CONFIG_NFILE_DESCRIPTORS; i > 0; i--)
     {
-      _files_close(&list->fl_files[i]);
+      _files_close(&list->fl_files[i - 1]);
     }
 
   /* Destroy the semaphore */

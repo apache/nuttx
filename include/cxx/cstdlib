@@ -40,7 +40,6 @@ namespace std
   using ::rand;
   using ::random;
 
-#ifndef CONFIG_DISABLE_ENVIRON
   // Environment variable support
 
   using ::get_environ_ptr;
@@ -49,18 +48,13 @@ namespace std
   using ::clearenv;
   using ::setenv;
   using ::unsetenv;
-#endif
 
   // Process exit functions
 
   using ::exit;
   using ::abort;
-#ifdef CONFIG_SCHED_ATEXIT
   using ::atexit;
-#endif
-#ifdef CONFIG_SCHED_ONEXIT
   using ::on_exit;
-#endif
 
 #ifndef __KERNEL__
   // System command
@@ -70,6 +64,9 @@ namespace std
 
   // String to binary conversions
 
+  using ::atof;
+  using ::atoi;
+  using ::atol;
   using ::strtol;
   using ::strtoul;
 #ifdef CONFIG_HAVE_LONG_LONG
@@ -103,7 +100,6 @@ namespace std
   using ::memalign;
   using ::zalloc;
   using ::calloc;
-  using ::mallinfo;
 
 #ifdef CONFIG_PSEUDOTERM
   // Pseudo-Terminals

@@ -530,8 +530,8 @@
 
 #  define KINETIS_SIM_HAS_SCGC3                       1   /* SoC has SCGC3 Register */
 #  define KINETIS_SIM_HAS_SCGC3_RNGA                  1   /* SoC has SCGC3[TRNG/RNGA] */
-#  undef  KINETIS_SIM_HAS_SCGC3_USBHS                     /* SoC does not have SCGC3[USBHS] */
-#  undef  KINETIS_SIM_HAS_SCGC3_USBHSPHY                  /* SoC does not have SCGC3[USBHSPHY] */
+#  define KINETIS_SIM_HAS_SCGC3_USBHS                 1   /* SoC has SCGC3[USBHS] */
+#  define KINETIS_SIM_HAS_SCGC3_USBHSPHY              1   /* SoC has SCGC3[USBHSPHY] */
 #  undef  KINETIS_SIM_HAS_SCGC3_USBHSDCD                  /* SoC does not have SCGC3[USBHSDCD] */
 #  undef  KINETIS_SIM_HAS_SCGC3_FLEXCAN1                  /* SoC does not have SCGC3[FLEXCAN1] */
 #  undef  KINETIS_SIM_HAS_SCGC3_NFC                       /* SoC does not have SCGC3[NFC] */
@@ -845,7 +845,7 @@
 #  define KINETIS_SIM_HAS_SCGC1_UART4                 1   /* SoC has SCGC1[UART4] */
 #  undef  KINETIS_SIM_HAS_SCGC1_I2C3                      /* SoC has SCGC1[I2C3] */
 #  undef  KINETIS_SIM_HAS_SCGC1_I2C2                      /* SoC has SCGC1[I2C2] */
-#  define KINETIS_SIM_HAS_SCGC1_OSC1                  1    /* SoC has SCGC1[OSC1] */
+#  define KINETIS_SIM_HAS_SCGC1_OSC1                  1   /* SoC has SCGC1[OSC1] */
 #  define KINETIS_SIM_HAS_SCGC2                       1   /* SoC has SCGC2 Register */
 #  define KINETIS_SIM_HAS_SCGC2_ENET                  1   /* SoC has SCGC2[ENET] */
 #  undef  KINETIS_SIM_HAS_SCGC2_LPUART0                   /* SoC has SCGC2[LPUART0] */
@@ -1193,10 +1193,12 @@
  *  MK66FX1M0VLQ18  180 MHz 144 LQFP    1.25 MB  1 MB   4 KB  256 KB 100
  */
 
-#elif defined(CONFIG_ARCH_CHIP_MK66FN2M0VMD18) || defined(CONFIG_ARCH_CHIP_MK66FX1M0VMD18) || \
-      defined(CONFIG_ARCH_CHIP_MK66FN2M0VLQ18) || defined(CONFIG_ARCH_CHIP_MK66FX1M0VLQ18)
+#elif defined(CONFIG_ARCH_CHIP_MK66FN2M0VMD18) || \
+      defined(CONFIG_ARCH_CHIP_MK66FX1M0VMD18) || \
+      defined(CONFIG_ARCH_CHIP_MK66FN2M0VLQ18) || \
+      defined(CONFIG_ARCH_CHIP_MK66FX1M0VLQ18)
 
-/* Verified to Document Number: Document Number: K66P144M180SF5RMV2 Rev. 2, May 2015 */
+/* Verified to Document Number: K66P144M180SF5RMV2 Rev. 2, May 2015 */
 
 #  define KINETIS_SIM_VERSION KINETIS_SIM_VERSION_06
 
@@ -1461,7 +1463,9 @@
 #  error "Unsupported Kinetis chip"
 #endif
 
-/* Use the catch all configuration for the SIM based on the implementations in nuttx prior 2/16/2017 */
+/* Use the catch all configuration for the SIM based on the
+ * implementations in nuttx prior 2/16/2017
+ */
 
 #if KINETIS_SIM_VERSION == KINETIS_SIM_VERSION_UKN
 

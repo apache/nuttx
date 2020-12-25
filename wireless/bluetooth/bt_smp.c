@@ -138,9 +138,7 @@ struct bt_smphandlers_s
  * Private Function Prototypes
  ****************************************************************************/
 
- #ifdef CONFIG_DEBUG_WIRELESS_INFO
 static const char *h(FAR const void *buf, size_t len);
-#endif
 static void     xor_128(FAR const struct uint128_s *p,
                   FAR const struct uint128_s *q, FAR struct uint128_s *r);
 static int     le_encrypt(const uint8_t key[16], const uint8_t plaintext[16],
@@ -323,7 +321,6 @@ static const uint8_t g_mac4[] =
  * in a single syslog call.
  */
 
-#ifdef CONFIG_DEBUG_WIRELESS_INFO
 static const char *h(FAR const void *buf, size_t len)
 {
   static const char hex[] = "0123456789abcdef";
@@ -352,7 +349,6 @@ static const char *h(FAR const void *buf, size_t len)
   str[i * 2] = '\0';
   return str;
 }
-#endif
 
 static void xor_128(FAR const struct uint128_s *p,
                     FAR const struct uint128_s *q,
@@ -1443,7 +1439,7 @@ static int bt_smp_aes_cmac(FAR const uint8_t *key, FAR const uint8_t *in,
         }
     }
 
-  wlinfo("len %u n %u flag %u\n", len, n, flag);
+  wlinfo("len %zu n %u flag %u\n", len, n, flag);
 
   /* If flag is true then M_last = M_n XOR K1 */
 

@@ -51,7 +51,7 @@
 #include "up_arch.h"
 
 /****************************************************************************
- * Public Funictions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -61,7 +61,7 @@
  *   This function is called by the OS when one or more
  *   signal handling actions have been queued for execution.
  *   The architecture specific code must configure things so
- *   that the 'igdeliver' callback is executed on the thread
+ *   that the 'sigdeliver' callback is executed on the thread
  *   specified by 'tcb' as soon as possible.
  *
  *   This function may be called from interrupt handling logic.
@@ -135,7 +135,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               tcb->xcp.sigdeliver    = sigdeliver;
               tcb->xcp.saved_pc[0]   = g_current_regs[REG_PC];
-              tcb->xcp.saved_pc[1]   = g_current_regs[REG_PC+1];
+              tcb->xcp.saved_pc[1]   = g_current_regs[REG_PC + 1];
               tcb->xcp.saved_flg     = g_current_regs[REG_FLG];
 
               /* Then set up to vector to the trampoline with interrupts
@@ -143,7 +143,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               g_current_regs[REG_PC]   = (uint32_t)up_sigdeliver >> 8;
-              g_current_regs[REG_PC+1] = (uint32_t)up_sigdeliver;
+              g_current_regs[REG_PC + 1] = (uint32_t)up_sigdeliver;
               g_current_regs[REG_FLG] &= ~M16C_FLG_I;
 
               /* And make sure that the saved context in the TCB
@@ -169,7 +169,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.sigdeliver     = sigdeliver;
           tcb->xcp.saved_pc[0]    = tcb->xcp.regs[REG_PC];
-          tcb->xcp.saved_pc[1]    = tcb->xcp.regs[REG_PC+1];
+          tcb->xcp.saved_pc[1]    = tcb->xcp.regs[REG_PC + 1];
           tcb->xcp.saved_flg      = tcb->xcp.regs[REG_FLG];
 
           /* Then set up to vector to the trampoline with interrupts
@@ -177,7 +177,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            */
 
           tcb->xcp.regs[REG_PC]   = (uint32_t)up_sigdeliver >> 8;
-          tcb->xcp.regs[REG_PC+1] = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_PC + 1] = (uint32_t)up_sigdeliver;
           tcb->xcp.regs[REG_FLG] &= ~M16C_FLG_I;
         }
     }

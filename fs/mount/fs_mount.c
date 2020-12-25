@@ -67,7 +67,8 @@
 #if defined(CONFIG_FS_NXFFS) || defined(CONFIG_FS_BINFS) || \
     defined(CONFIG_FS_PROCFS) || defined(CONFIG_NFS) || \
     defined(CONFIG_FS_TMPFS) || defined(CONFIG_FS_USERFS) || \
-    defined(CONFIG_FS_CROMFS) || defined(CONFIG_FS_UNIONFS)
+    defined(CONFIG_FS_CROMFS) || defined(CONFIG_FS_UNIONFS) || \
+    defined(CONFIG_FS_HOSTFS)
 #  define NODFS_SUPPORT
 #endif
 
@@ -284,7 +285,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 
 #ifdef BDFS_SUPPORT
   if (source != NULL &&
-      (ret = find_blockdriver(source, mountflags, &drvr_inode)) >= 0)
+      find_blockdriver(source, mountflags, &drvr_inode) >= 0)
     {
       /* Find the block based file system */
 

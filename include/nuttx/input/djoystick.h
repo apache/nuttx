@@ -63,6 +63,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_DJOYSTICK_NPOLLWAITERS
@@ -70,6 +71,7 @@
 #endif
 
 /* Joystick Interface *******************************************************/
+
 /* These definitions provide the meaning of all of the bits that may be
  * reported in the djoy_buttonset_t bitset.
  */
@@ -114,8 +116,8 @@
  * seek() methods.  The remaining driver methods behave as follows:
  *
  * 1) The read() method will always return a single value of size
- *    djoy_buttonset_t represent the current state of the joystick buttons.
- *    read() never blocks.
+ *    djoy_buttonset_t that represents the current state of the joystick
+ *    buttons.  read() never blocks.
  * 2) The poll() method can be used to notify a client if there is a change
  *    in any of the joystick discrete inputs.  This feature, of course,
  *    depends upon interrupt GPIO support from the platform.  NOTE: that
@@ -140,7 +142,8 @@
  * Description: Specify the set of button events that can cause a poll()
  *              to awaken.  The default is all button depressions and all
  *              button releases (all supported buttons);
- * Argument:    A read-only pointer to an instance of struct djoy_pollevents_s
+ * Argument:    A read-only pointer to an instance of struct
+ *              djoy_pollevents_s
  * Return:      Zero (OK) on success.  Minus one will be returned on failure
  *              with the errno value set appropriately.
  */
@@ -162,15 +165,16 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This type is a bit set that contains the state of all discrete joystick
  * buttons.
  */
 
 typedef uint8_t djoy_buttonset_t;
 
-/* A reference to this structure is provided with the DJOYIOC_POLLEVENTS IOCTL
- * command and describes the conditions under which the client would like
- * to receive notification.
+/* A reference to this structure is provided with the DJOYIOC_POLLEVENTS
+ * IOCTL command and describes the conditions under which the client would
+ * like to receive notification.
  */
 
 struct djoy_pollevents_s
@@ -216,19 +220,27 @@ struct djoy_lowerhalf_s
 {
   /* Return the set of buttons supported on the discrete joystick device */
 
-  CODE djoy_buttonset_t (*dl_supported)(FAR const struct djoy_lowerhalf_s *lower);
+  CODE djoy_buttonset_t (*dl_supported)
+    (FAR const struct djoy_lowerhalf_s *lower);
 
   /* Return the current state of all discrete joystick buttons */
 
-  CODE djoy_buttonset_t (*dl_sample)(FAR const struct djoy_lowerhalf_s *lower);
+  CODE djoy_buttonset_t (*dl_sample)
+    (FAR const struct djoy_lowerhalf_s *lower);
 
-  /* Enable interrupts on the selected set of joystick buttons.  And empty
+  /* Enable interrupts on the selected set of joystick buttons.  An empty
    * set will disable all interrupts.
    */
 
   CODE void (*dl_enable)(FAR const struct djoy_lowerhalf_s *lower,
                          djoy_buttonset_t press, djoy_buttonset_t release,
                          djoy_interrupt_t handler, FAR void *arg);
+
+  /* Allow for storing implementation specific data to support cases where
+   * their may be more than one joystick
+   */
+
+  FAR void *config;
 };
 
 /****************************************************************************

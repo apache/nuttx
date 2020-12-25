@@ -225,7 +225,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
             g_portchar[port], getreg32(STM32_RCC_AHB1ENR));
     }
 
-#elif defined(CONFIG_STM32_STM32G47XX)
+#elif defined(CONFIG_STM32_STM32G4XXX)
   DEBUGASSERT(port < STM32_NGPIO_PORTS);
 
   _info("GPIO%c pinset: %08x base: %08x -- %s\n",

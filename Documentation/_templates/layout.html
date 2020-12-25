@@ -1,0 +1,49 @@
+<!--
+ Documentation/_templates/layout.html
+
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.  The
+ ASF licenses this file to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance with the
+ License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ License for the specific language governing permissions and limitations
+ under the License.
+-->
+
+{% extends "!layout.html" %}
+{% block sidebartitle %}
+  {% if logo and theme_logo_only %}
+    <a href="{{ pathto(master_doc) }}">
+  {% else %}
+    <a href="{{ pathto(master_doc) }}" class="icon icon-home"> {{ project }}
+  {% endif %}
+
+  {% if logo %}
+    {# Not strictly valid HTML, but it's the only way to display/scale
+       it properly, without weird scripting or heaps of work
+    #}
+    <img src="{{ pathto('_static/' + logo, 1) }}" class="logo" alt="{{ _('Logo') }}"/>
+  {% endif %}
+  </a>
+
+  <!-- this version selector is quite ugly, should be probably replaced by something
+       more modern -->
+
+  <div class="version-selector">
+    <select onchange="javascript:location.href = this.value;">
+    {% for nuttx_version in nuttx_versions.split(',') %}
+    <option value="{{ url_root }}../{{ nuttx_version }}" {% if nuttx_version == version %}selected="selected"{% endif %}>{{ nuttx_version }}</option>
+    {% endfor %}
+    </select>
+  </div>
+
+  {% include "searchbox.html" %}
+{% endblock %}
+

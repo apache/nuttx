@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/nrf52/nrf52840-dk/include/board.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -51,11 +36,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking ****************************************************************/
+/* Clocking *****************************************************************/
 
 #define BOARD_SYSTICK_CLOCK         (64000000)
 
-/* LED definitions *********************************************************/
+/* LED definitions **********************************************************/
 
 /* A low output illuminates the LED.
  *
@@ -92,9 +77,9 @@
  * control of the application.  The following interfaces are then available
  * for application control of the LEDs:
  *
- *  void board_userled_initialize(void);
+ *  uint32_t board_userled_initialize(void);
  *  void board_userled(int led, bool ledon);
- *  void board_userled_all(uint8_t ledset);
+ *  void board_userled_all(uint32_t ledset);
  */
 
 /* Button definitions *******************************************************/
@@ -151,5 +136,33 @@
 
 #define BOARD_I2C0_SCL_PIN (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(27))
 #define BOARD_I2C0_SDA_PIN (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(26))
+
+/* PWM Pins *****************************************************************/
+
+/* PWM 0:
+ *   PWM0 CH0 - P1.1
+ *   PWM0 CH1 - P1.2
+ *   PWM0 CH2 - P1.3
+ *   PWM0 CH3 - P1.4
+ */
+
+#define NRF52_PWM0_CH0_PIN (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(1))
+#define NRF52_PWM0_CH1_PIN (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(2))
+#define NRF52_PWM0_CH2_PIN (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(3))
+#define NRF52_PWM0_CH3_PIN (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(4))
+
+/* ADC Pins *****************************************************************/
+
+/* ADC
+ *   ADC CH0 - P0.03 - AIN1
+ *   ADC CH1 - P0.04 - AIN2
+ *   ADC CH2 - P0.28 - AIN4
+ *   ADC CH3 - P0.29 - AIN5
+ */
+
+#define NRF52_ADC_CH0_PIN (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(3))
+#define NRF52_ADC_CH1_PIN (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(4))
+#define NRF52_ADC_CH2_PIN (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(28))
+#define NRF52_ADC_CH3_PIN (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(29))
 
 #endif /* __BOARDS_ARM_NRF52_NRF52840_DK_INCLUDE_BOARD_H */

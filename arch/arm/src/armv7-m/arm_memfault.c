@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <inttypes.h>
 
 #include <arch/irq.h>
 
@@ -67,9 +68,10 @@ int arm_memfault(int irq, FAR void *context, FAR void *arg)
   up_irq_save();
   _alert("PANIC!!! Memory Management Fault:\n");
   mfinfo("  IRQ: %d context: %p\n", irq, context);
-  _alert("  CFAULTS: %08x MMFAR: %08x\n",
+  _alert("  CFAULTS: %08" PRIx32 " MMFAR: %08" PRIx32 "\n",
         getreg32(NVIC_CFAULTS), getreg32(NVIC_MEMMANAGE_ADDR));
-  mfinfo("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
+  mfinfo("  BASEPRI: %08" PRIx32 " PRIMASK: %08" PRIx32
+         " IPSR: %08" PRIx32 " CONTROL: %08" PRIx32 "\n",
          getbasepri(), getprimask(), getipsr(), getcontrol());
 
   PANIC();

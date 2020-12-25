@@ -99,7 +99,7 @@ static uint8_t g_buttonirq[NUM_BUTTONS] =
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -109,6 +109,8 @@ void board_button_initialize(void)
     {
       lpc43_configgpio(g_buttoncfg[i]);
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
@@ -156,8 +158,8 @@ uint32_t board_buttons(void)
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   After that, board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  *   board_button_irq() may be called to register an interrupt handler that
  *   will be called when a button is depressed or released.

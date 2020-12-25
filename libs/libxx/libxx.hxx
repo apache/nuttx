@@ -76,7 +76,7 @@ typedef CODE void (*__cxa_exitfunc_t)(void *arg);
 // Public Data
 //***************************************************************************
 
-extern "C" FAR void *__dso_handle;
+extern "C" FAR void *__dso_handle weak_data;
 
 //***************************************************************************
 // Public Function Prototypes

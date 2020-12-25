@@ -30,35 +30,16 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ssd1306.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/spi/spi.h>
 
-#include "stm32.h"
 #include "stm32_i2c.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+#include "stm32_spi.h"
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-FAR struct lcd_dev_s    *g_lcddev;
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+static FAR struct lcd_dev_s    *g_lcddev;
 
 /****************************************************************************
  * Public Functions
@@ -68,7 +49,7 @@ FAR struct lcd_dev_s    *g_lcddev;
  * Name: board_ssd1306_initialize
  *
  * Description:
- *   Initialize and register the device
+ *   Initialize and register the device. I2C version.
  *
  * Input Parameters:
  *   busno - The I2C bus number
@@ -77,31 +58,32 @@ FAR struct lcd_dev_s    *g_lcddev;
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
-
+#ifdef CONFIG_LCD_SSD1306_I2C
 int board_ssd1306_initialize(int busno)
 {
   FAR struct i2c_master_s *i2c;
+  const int devno = 0;
 
   /* Initialize I2C */
 
   i2c = stm32_i2cbus_initialize(busno);
   if (!i2c)
     {
-      lcderr("ERROR: Failed to initialize I2C port %d\n", OLED_I2C_PORT);
+      lcderr("ERROR: Failed to initialize I2C port %d\n", busno);
       return -ENODEV;
     }
 
   /* Bind the I2C port to the OLED */
 
-  g_lcddev = ssd1306_initialize(i2c, NULL, 0);
+  g_lcddev = ssd1306_initialize(i2c, NULL, devno);
   if (!g_lcddev)
     {
-      lcderr("ERROR: Failed to bind I2C port 1 to OLED %d: %d\n", devno);
+      lcderr("ERROR: Failed to bind I2C port %d to OLED %d\n", busno, devno);
       return -ENODEV;
     }
   else
     {
-      lcdinfo("Bound I2C port %d to OLED %d\n", OLED_I2C_PORT, devno);
+      lcdinfo("Bound I2C port %d to OLED %d\n", busno, devno);
 
       /* And turn the OLED on */
 
@@ -109,6 +91,55 @@ int board_ssd1306_initialize(int busno)
       return OK;
     }
 }
+#endif
+
+/****************************************************************************
+ * Name: board_ssd1306_initialize
+ *
+ * Description:
+ *   Initialize and register the device. SPI version.
+ *
+ * Input Parameters:
+ *   busno - The SPI bus number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_LCD_SSD1306_SPI
+int board_ssd1306_initialize(int busno)
+{
+  FAR struct spi_dev_s *spi;
+  const int devno = 0;
+
+  /* Initialize SPI */
+
+  spi = stm32_spibus_initialize(busno);
+  if (!spi)
+    {
+      lcderr("ERROR: Failed to initialize SPI port %d\n", busno);
+      return -ENODEV;
+    }
+
+  /* Bind the SPI port to the OLED */
+
+  g_lcddev = ssd1306_initialize(spi, NULL, devno);
+  if (!g_lcddev)
+    {
+      lcderr("ERROR: Failed to bind SPI port %d to OLED %d\n", busno, devno);
+      return -ENODEV;
+    }
+  else
+    {
+      lcdinfo("Bound SPI port %d to OLED %d\n", busno, devno);
+
+      /* And turn the OLED on */
+
+      g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);
+      return OK;
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: board_ssd1306_getdev

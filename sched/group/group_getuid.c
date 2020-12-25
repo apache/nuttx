@@ -52,7 +52,8 @@
  * Name: getuid
  *
  * Description:
- *   The getuid() function will return the real user ID of the calling process.
+ *   The getuid() function will return the real user ID of the calling
+ *   process.
  *
  * Input Parameters:
  *   None
@@ -69,6 +70,6 @@ uid_t getuid(void)
 
   /* Set the task group's group identity. */
 
-  DEBUGASSERT(group != NULL);
+  DEBUGASSERT(rgroup != NULL);
   return rgroup->tg_uid;
 }

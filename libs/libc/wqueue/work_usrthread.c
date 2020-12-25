@@ -191,7 +191,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
 
           if (worker != NULL)
             {
-              /* Extract the work argument (before unlocking the work queue) */
+              /* Extract the work argument before unlocking the work queue */
 
               arg = work->arg;
 
@@ -206,9 +206,9 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
               work_unlock();
               worker(arg);
 
-              /* Now, unfortunately, since we unlocked the work queue we don't
-               * know the state of the work list and we will have to start
-               * back at the head of the list.
+              /* Now, unfortunately, since we unlocked the work queue we
+               * don't know the state of the work list and we will have to
+               * start back at the head of the list.
                */
 
               ret = work_lock();
@@ -362,79 +362,73 @@ static pthread_addr_t work_usrthread(pthread_addr_t arg)
 
 int work_usrstart(void)
 {
-  /* Initialize work queue data structures */
-
 #ifdef CONFIG_BUILD_PROTECTED
-  {
-    /* Set up the work queue lock */
+  /* Set up the work queue lock */
 
-    nxsem_init(&g_usrsem, 0, 1);
+  _SEM_INIT(&g_usrsem, 0, 1);
 
-    /* Start a user-mode worker thread for use by applications. */
+  /* Start a user-mode worker thread for use by applications. */
 
-    g_usrwork.pid = task_create("uwork",
-                                CONFIG_LIB_USRWORKPRIORITY,
-                                CONFIG_LIB_USRWORKSTACKSIZE,
-                                (main_t)work_usrthread,
-                                (FAR char * const *)NULL);
+  g_usrwork.pid = task_create("uwork",
+                              CONFIG_LIB_USRWORKPRIORITY,
+                              CONFIG_LIB_USRWORKSTACKSIZE,
+                              (main_t)work_usrthread,
+                              (FAR char * const *)NULL);
 
-    DEBUGASSERT(g_usrwork.pid > 0);
-    if (g_usrwork.pid < 0)
-      {
-        int errcode = get_errno();
-        DEBUGASSERT(errcode > 0);
-        return -errcode;
-      }
+  DEBUGASSERT(g_usrwork.pid > 0);
+  if (g_usrwork.pid < 0)
+    {
+      int errcode = get_errno();
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
+    }
 
-    return g_usrwork.pid;
-  }
+  return g_usrwork.pid;
 #else
-  {
-    pthread_t usrwork;
-    pthread_attr_t attr;
-    struct sched_param param;
-    int ret;
+  pthread_t usrwork;
+  pthread_attr_t attr;
+  struct sched_param param;
+  int ret;
 
-    /* Set up the work queue lock */
+  /* Set up the work queue lock */
 
-    pthread_mutex_init(&g_usrmutex, NULL);
+  pthread_mutex_init(&g_usrmutex, NULL);
 
-    /* Start a user-mode worker thread for use by applications. */
+  /* Start a user-mode worker thread for use by applications. */
 
-    pthread_attr_init(&attr);
-    pthread_attr_setstacksize(&attr, CONFIG_LIB_USRWORKSTACKSIZE);
+  pthread_attr_init(&attr);
+  pthread_attr_setstacksize(&attr, CONFIG_LIB_USRWORKSTACKSIZE);
 
 #ifdef CONFIG_SCHED_SPORADIC
-    /* Get the current sporadic scheduling parameters.  Those will not be
-     * modified.
-     */
+  /* Get the current sporadic scheduling parameters.  Those will not be
+   * modified.
+   */
 
-    ret = set_getparam(pid, &param);
-    if (ret < 0)
-      {
-        int erroode = get_errno();
-        return -errcode;
-      }
+  ret = set_getparam(pid, &param);
+  if (ret < 0)
+    {
+      int errcode = get_errno();
+      return -errcode;
+    }
 #endif
 
-    param.sched_priority = CONFIG_LIB_USRWORKPRIORITY;
-    pthread_attr_setschedparam(&attr, &param);
+  param.sched_priority = CONFIG_LIB_USRWORKPRIORITY;
+  pthread_attr_setschedparam(&attr, &param);
 
-    ret = pthread_create(&usrwork, &attr, work_usrthread, NULL);
-    if (ret != 0)
-      {
-        return -ret;
-      }
+  ret = pthread_create(&usrwork, &attr, work_usrthread, NULL);
+  if (ret != 0)
+    {
+      return -ret;
+    }
 
-    /* Detach because the return value and completion status will not be
-     * requested.
-     */
+  /* Detach because the return value and completion status will not be
+   * requested.
+   */
 
-    pthread_detach(usrwork);
+  pthread_detach(usrwork);
 
-    g_usrwork.pid = (pid_t)usrwork;
-    return g_usrwork.pid;
-  }
+  g_usrwork.pid = (pid_t)usrwork;
+  return g_usrwork.pid;
 #endif
 }
 

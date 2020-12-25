@@ -130,7 +130,7 @@ struct kinetis_i2cdev_s
   bool restart;               /* Should next transfer restart or not */
   sem_t mutex;                /* Only one thread can access at a time */
   sem_t wait;                 /* Place to wait for state machine completion */
-  WDOG_ID timeout;            /* watchdog to timeout when bus hung */
+  struct wdog_s timeout;      /* watchdog to timeout when bus hung */
   struct i2c_msg_s *msgs;     /* Remaining transfers - first one is in
                                * progress */
 };
@@ -152,8 +152,12 @@ static inline void kinetis_i2c_sem_init(FAR struct kinetis_i2cdev_s *priv);
 static inline void
   kinetis_i2c_sem_destroy(FAR struct kinetis_i2cdev_s *priv);
 static inline int kinetis_i2c_sem_wait(FAR struct kinetis_i2cdev_s *priv);
+
+#ifdef CONFIG_I2C_RESET
 static int
   kinetis_i2c_sem_wait_noncancelable(FAR struct kinetis_i2cdev_s *priv);
+#endif
+
 static inline void kinetis_i2c_sem_post(struct kinetis_i2cdev_s *priv);
 
 /* Signal Helper */
@@ -171,7 +175,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
 static int  kinetis_i2c_start(struct kinetis_i2cdev_s *priv);
 static void kinetis_i2c_stop(struct kinetis_i2cdev_s *priv);
 static int kinetis_i2c_interrupt(int irq, void *context, void *arg);
-static void kinetis_i2c_timeout(int argc, uint32_t arg, ...);
+static void kinetis_i2c_timeout(wdparm_t arg);
 static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
                                      uint32_t frequency);
 
@@ -363,6 +367,7 @@ static inline int kinetis_i2c_sem_wait(FAR struct kinetis_i2cdev_s *priv)
   return nxsem_wait(&priv->mutex);
 }
 
+#ifdef CONFIG_I2C_RESET
 /****************************************************************************
  * Name: kinetis_i2c_sem_wait_noncancelable
  *
@@ -376,6 +381,7 @@ static int
 {
   return nxsem_wait_uninterruptible(&priv->mutex);
 }
+#endif
 
 /****************************************************************************
  * Name: kinetis_i2c_sem_post
@@ -901,7 +907,7 @@ static void kinetis_i2c_stop(struct kinetis_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static void kinetis_i2c_timeout(int argc, uint32_t arg, ...)
+static void kinetis_i2c_timeout(wdparm_t arg)
 {
   struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)arg;
 
@@ -1222,11 +1228,11 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
 
       /* Wait for transfer complete */
 
-      wd_start(priv->timeout, I2C_TIMEOUT, kinetis_i2c_timeout, 1,
-               (uint32_t)priv);
+      wd_start(&priv->timeout, I2C_TIMEOUT,
+               kinetis_i2c_timeout, (wdparm_t)priv);
       kinetis_i2c_wait(priv);
 
-      wd_cancel(priv->timeout);
+      wd_cancel(&priv->timeout);
 
       msg_n++;
     }
@@ -1437,14 +1443,6 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
   flags = enter_critical_section();
   if ((volatile int)priv->refs++ == 0)
     {
-      priv->timeout = wd_create();
-      DEBUGASSERT(priv->timeout != 0);
-      if (priv->timeout == NULL)
-      {
-          priv->refs--;
-          goto errout;
-      }
-
       kinetis_i2c_sem_init(priv);
       kinetis_i2c_init(priv);
     }
@@ -1452,10 +1450,6 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
   leave_critical_section(flags);
 
   return &priv->dev;
-
-errout:
-  leave_critical_section(flags);
-  return NULL;
 }
 
 /****************************************************************************
@@ -1494,7 +1488,7 @@ int kinetis_i2cbus_uninitialize(struct i2c_master_s *dev)
 
   kinetis_i2c_deinit(priv);
   kinetis_i2c_sem_destroy(priv);
-  wd_delete(priv->timeout);
+  wd_cancel(&priv->timeout);
   return OK;
 }
 

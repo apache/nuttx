@@ -34,7 +34,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * TODO: Theory of Operation
@@ -54,7 +54,11 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
+#ifdef CONFIG_MPU60X0_SPI
 #include <nuttx/spi/spi.h>
+#else
+#include <nuttx/i2c/i2c_master.h>
+#endif
 #include <nuttx/fs/fs.h>
 #include <nuttx/sensors/mpu60x0.h>
 
@@ -305,7 +309,7 @@ static const struct file_operations g_mpu_fops =
  * the chip and its associated data.
  */
 
-#ifdef CONFIG_SPI
+#ifdef CONFIG_MPU60X0_SPI
 /* __mpu_read_reg(), but for spi-connected devices. See that function
  * for documentation.
  */
@@ -403,9 +407,8 @@ static int __mpu_write_reg_spi(FAR struct mpu_dev_s *dev,
 
   return ret;
 }
-#endif
 
-#ifdef CONFIG_I2C
+#else
 
 /* __mpu_read_reg(), but for i2c-connected devices. */
 
@@ -413,20 +416,58 @@ static int __mpu_read_reg_i2c(FAR struct mpu_dev_s *dev,
                               enum mpu_regaddr_e reg_addr,
                               FAR uint8_t *buf, uint8_t len)
 {
-  /* We don't support i2c yet. */
+  int ret;
+  struct i2c_msg_s msg[2];
 
-  return -EINVAL;
+  msg[0].frequency = CONFIG_MPU60X0_I2C_FREQ;
+  msg[0].addr      = dev->config.addr;
+  msg[0].flags     = I2C_M_NOSTOP;
+  msg[0].buffer    = &reg_addr;
+  msg[0].length    = 1;
+
+  msg[1].frequency = CONFIG_MPU60X0_I2C_FREQ;
+  msg[1].addr      = dev->config.addr;
+  msg[1].flags     = I2C_M_READ;
+  msg[1].buffer    = buf;
+  msg[1].length    = len;
+
+  ret = I2C_TRANSFER(dev->config.i2c, msg, 2);
+  if (ret < 0)
+    {
+      snerr("ERROR: I2C_TRANSFER(read) failed: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
 }
 
 static int __mpu_write_reg_i2c(FAR struct mpu_dev_s *dev,
                                enum mpu_regaddr_e reg_addr,
                                FAR const uint8_t *buf, uint8_t len)
 {
-  /* We don't support i2c yet. */
+  int ret;
+  struct i2c_msg_s msg[2];
 
-  return -EINVAL;
+  msg[0].frequency = CONFIG_MPU60X0_I2C_FREQ;
+  msg[0].addr      = dev->config.addr;
+  msg[0].flags     = I2C_M_NOSTOP;
+  msg[0].buffer    = &reg_addr;
+  msg[0].length    = 1;
+  msg[1].frequency = CONFIG_MPU60X0_I2C_FREQ;
+  msg[1].addr      = dev->config.addr;
+  msg[1].flags     = I2C_M_NOSTART;
+  msg[1].buffer    = (FAR uint8_t *)buf;
+  msg[1].length    = len;
+  ret = I2C_TRANSFER(dev->config.i2c, msg, 2);
+  if (ret < 0)
+    {
+      snerr("ERROR: I2C_TRANSFER(write) failed: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
 }
-#endif
+#endif /* CONFIG_MPU60X0_SPI */
 
 /* __mpu_read_reg()
  *
@@ -443,16 +484,14 @@ static inline int __mpu_read_reg(FAR struct mpu_dev_s *dev,
                                  enum mpu_regaddr_e reg_addr,
                                  FAR uint8_t *buf, uint8_t len)
 {
-#ifdef CONFIG_SPI
+#ifdef CONFIG_MPU60X0_SPI
   /* If we're wired to SPI, use that function. */
 
   if (dev->config.spi != NULL)
     {
       return __mpu_read_reg_spi(dev, reg_addr, buf, len);
     }
-#endif
-
-#ifdef CONFIG_I2C
+#else
   /* If we're wired to I2C, use that function. */
 
   if (dev->config.i2c != NULL)
@@ -485,16 +524,14 @@ static inline int __mpu_write_reg(FAR struct mpu_dev_s *dev,
                                   enum mpu_regaddr_e reg_addr,
                                   FAR const uint8_t *buf, uint8_t len)
 {
-#ifdef CONFIG_SPI
+#ifdef CONFIG_MPU60X0_SPI
   /* If we're connected to SPI, use that function. */
 
   if (dev->config.spi != NULL)
     {
       return __mpu_write_reg_spi(dev, reg_addr, buf, len);
     }
-#endif
-
-#ifdef CONFIG_I2C
+#else
   if (dev->config.i2c != NULL)
     {
       return __mpu_write_reg_i2c(dev, reg_addr, buf, len);
@@ -655,12 +692,17 @@ static void inline mpu_unlock(FAR struct mpu_dev_s *dev)
 
 static int mpu_reset(FAR struct mpu_dev_s *dev)
 {
-  /* We support only SPI right now. */
-
+#ifdef CONFIG_MPU60X0_SPI
   if (dev->config.spi == NULL)
     {
       return -EINVAL;
     }
+#else
+  if (dev->config.i2c == NULL)
+    {
+      return -EINVAL;
+    }
+#endif
 
   mpu_lock(dev);
 
@@ -668,32 +710,34 @@ static int mpu_reset(FAR struct mpu_dev_s *dev)
 
   __mpu_write_pwr_mgmt_1(dev, PWR_MGMT_1__DEVICE_RESET);
 
-  /* Wait for reset cycle to finish (note: per the datasheet, we don't need to
-   * hold NSS for this)
+  /* Wait for reset cycle to finish (note: per the datasheet, we don't need
+   * to hold NSS for this)
    */
 
   do
     {
-      up_mdelay(50);            /* msecs (arbitrary) */
+      nxsig_usleep(50000);            /* usecs (arbitrary) */
     }
   while (__mpu_read_pwr_mgmt_1(dev) & PWR_MGMT_1__DEVICE_RESET);
 
   /* Reset signal paths */
 
   __mpu_write_signal_path_reset(dev, SIGNAL_PATH_RESET__ALL_RESET);
-  up_mdelay(2);
+  nxsig_usleep(2000);
 
   /* Disable SLEEP, use PLL with z-axis clock source */
 
   __mpu_write_pwr_mgmt_1(dev, 3);
-  up_mdelay(2);
+  nxsig_usleep(2000);
 
   /* Disable i2c if we're on spi. */
 
+#ifdef CONFIG_MPU60X0_SPI
   if (dev->config.spi)
     {
       __mpu_write_user_ctrl(dev, USER_CTRL__I2C_IF_DIS);
     }
+#endif
 
   /* Disable low-power mode, enable all gyros and accelerometers */
 
@@ -827,7 +871,7 @@ static ssize_t mpu_read(FAR struct file *filep, FAR char *buf, size_t len)
 
   if (send_len)
     {
-      memcpy(buf, ((uint8_t *) & dev->buf) + dev->bufpos, send_len);
+      memcpy(buf, ((uint8_t *)&dev->buf) + dev->bufpos, send_len);
     }
 
   /* Move the cursor, to mark them as sent. */
@@ -943,7 +987,9 @@ int mpu60x0_register(FAR const char *path, FAR struct mpu_config_s *config)
   memset(priv, 0, sizeof(*priv));
   nxmutex_init(&priv->lock);
 
-  /* Keep a copy of the config structure, in case the caller discards theirs. */
+  /* Keep a copy of the config structure, in case the caller discards
+   * theirs.
+   */
 
   priv->config = *config;
 

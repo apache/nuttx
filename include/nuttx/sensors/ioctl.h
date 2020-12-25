@@ -181,8 +181,11 @@
 /* IOCTL commands unique to the SCD30 */
 
 /* SNIOC_RESET */                                 /* Arg: None */
+
 /* SNIOC_START */                                 /* Arg: None */
+
 /* SNIOC_STOP */                                  /* Arg: None */
+
 /* SNIOC_READ_CONVERT_DATA */                     /* Arg: struct scd30_conv_data_s* */
 #define SNIOC_SET_INTERVAL         _SNIOC(0x0054) /* Arg: uint16_t value (seconds) */
 #define SNIOC_SET_TEMP_OFFSET      _SNIOC(0x0055) /* Arg: uint16_t value (0.01 Kelvin) */
@@ -194,9 +197,13 @@
 /* IOCTL commands unique to the SGP30 */
 
 /* SNIOC_RESET */                                 /* Arg: None */
+
 /* SNIOC_START_SELFTEST */                        /* Arg: None */
+
 /* SNIOC_READ_CONVERT_DATA */                     /* Arg: struct sgp30_conv_data_s* */
+
 /* SNIOC_READ_RAW_DATA */                         /* Arg: struct sgp30_raw_data_s* */
+
 #define SNIOC_GET_BASELINE         _SNIOC(0x005a) /* Arg: struct sgp30_baseline_s* */
 #define SNIOC_SET_BASELINE         _SNIOC(0x005b) /* Arg: const struct sgp30_baseline_s* */
 #define SNIOC_SET_HUMIDITY         _SNIOC(0x005c) /* Arg: uint32_t value (mg/m³) */
@@ -204,9 +211,13 @@
 /* IOCTL commands unique to the SPS30 */
 
 /* SNIOC_RESET */                                 /* Arg: None */
+
 /* SNIOC_START */                                 /* Arg: None */
+
 /* SNIOC_STOP */                                  /* Arg: None */
+
 /* SNIOC_READ_CONVERT_DATA */                     /* Arg: struct sps30_conv_data_s* */
+
 #define SNIOC_SET_CLEAN_INTERVAL   _SNIOC(0x005d) /* Arg: uint32_t value (seconds) */
 #define SNIOC_START_FAN_CLEANING   _SNIOC(0x005e) /* Arg: None */
 
@@ -226,5 +237,50 @@
 #define SNIOC_SET_OPERATIONAL_MODE _SNIOC(0x0064) /* Arg: uint8_t value */
 #define SNIOC_SET_RESOLUTION       _SNIOC(0x0065) /* Arg: uint8_t value */
 #define SNIOC_SET_RANGE            _SNIOC(0x0066) /* Arg: uint8_t value */
+
+/* Command:      SNIOC_ACTIVATE
+ * Description:  Enable or disable sensor
+ * Argument:     true or false.
+ */
+
+#define SNIOC_ACTIVATE             _SNIOC(0x0067)
+
+/* Command:      SNIOC_SET_INTERVAL
+ * Description:  Set interval between samples
+ * Argument:     This is the interval pointer, in microseconds
+ */
+
+#define SNIOC_SET_INTERVAL         _SNIOC(0x0068)
+
+/* Command:      SNIOC_BATCH
+ * Description:  Set batch latency between batch data.
+ * Argument:     This is the latency pointer, in microseconds
+ */
+
+#define SNIOC_BATCH                _SNIOC(0x0069)
+
+/* Command:      SNIOC_GET_NEVENTBUF
+ * Description:  the number of sensor events that sensor buffer of upper half holds.
+ * Argument:     This is the number of events pointer, is output parameter.
+ * Note:         Tell the application layer number of sensor events in sensor buffer.
+ *               This buffer is used to solve the problem that the application layer
+ *               can't read the sensor event in time. Recommend the number of sensor
+ *               events in application layer's buffer is same as result by call this
+ *               function.
+ *               This is number of sensor events rather than the length of buffer.
+ *               See sensor.h(struct sensor_lower_half_s buffer_bytes).
+ */
+
+#define SNIOC_GET_NEVENTBUF        _SNIOC(0x0070)
+
+/* Command:      SNIOC_SET_BUFFER_SIZE
+ * Description:  Set size of intermediate circualr buffer in upper half driver.
+ * Argument:     This is the size of buffer pointer.
+ * Note:         The application layer can set size of intermediate circualr buffer
+ *               by this ioctl command. The size is in bytes, it should be a multiple
+ *               of an event.
+ */
+
+#define SNIOC_SET_BUFFER_SIZE      _SNIOC(0x0071)
 
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

@@ -1,10 +1,8 @@
 Board-Specific Configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This directory contains the board support for logic for all boards supported
-by NuttX.  This directory is retained in a separate repository and is a Sub-
-Module of NuttX and will appear as nuttx/boards when the NuttX repository
-is cloned.
+This directory contains the board support logic for all boards supported
+by NuttX.
 
 The nuttx/boards directory is a part of the internal OS.  It should contain
 only OS bring-up logic and driver initialization logic.  THERE SHOULD BE NO
@@ -117,7 +115,7 @@ Make.defs -- This makefile fragment provides architecture and
   is the path to the root directory of the build.  This makefile
   fragment should include:
 
-    $(TOPDIR)/.config          : Nuttx configuration
+    $(TOPDIR)/.config          : NuttX configuration
     $(TOPDIR)/tools/Config.mk  : Common definitions
 
   Definitions in the Make.defs file probably depend on some of the
@@ -160,10 +158,6 @@ any time using that tool or, more appropriately, the wrapper script at
 nuttx/tools/mkconfigvars.sh.  That script will generate the file
 nuttx/Documentation/NuttXConfigVariables.html.
 
-The version of NuttXConfigVariables.html for the last released version of
-NuttX can also be found online at:
-http://nuttx.org/Documentation/NuttXConfigVariables.html.
-
 Supported Boards
 ^^^^^^^^^^^^^^^^
 
@@ -187,6 +181,13 @@ boards/avr/at32uc3/avr32dev1
 boards/arm/stm32/axoloti
   Support for the Axoloti synthesizer board based on the STMicro
   STM32F427IGH6 MCU.  See: http://www.axoloti.com/
+
+boards/arm/stm32/b-g474e-dpow1
+  Initial support for booting NuttX to a functional NSH prompt on the
+  STMicro B-G474E-DPOW1 Discovery kit with STM32G474RE MCU.
+
+boards/arm/stm32/nucleo-g431rb
+    STMicro Nucleo G431RB board based on the STMicro STM32G431RB MCU.
 
 boards/arm/stm32f0l0g0/b-l072z-lrwan1
   STMicro STM32L0 Discovery kit with LoRa/SigFox based on STM32L072CZ MCU.
@@ -224,8 +225,8 @@ boards/hc/m9s12/demo9s12ne64
   is code complete but has not yet been verified.
 
 boards/arm/tiva/dk-tm4c129x
-  This is the port of NuttX to the Tiva® DK-TM4C129x Connected Development Kit.  The
-  Tiva® DK-TM4C129x features the TM4C129XNCZAD MCU.
+  This is the port of NuttX to the Tiva DK-TM4C129x Connected Development Kit.  The
+  Tiva DK-TM4C129x features the TM4C129XNCZAD MCU.
 
 boards/arm/lpc31xx/ea3131
   Embedded Artists EA3131 Development board.  This board is based on the
@@ -334,8 +335,8 @@ boards/arm/tiva/lm3s8962-ek
 
 boards/arm/tiva/lm4f120-launchpad
   This is the port of NuttX to the Stellaris LM4F120 LaunchPad.  The
-  Stellaris® LM4F120 LaunchPad Evaluation Board is a low-cost evaluation
-  platform for ARM® Cortex™-M4F-based microcontrollers from Texas
+  Stellaris LM4F120 LaunchPad Evaluation Board is a low-cost evaluation
+  platform for ARM Cortex-M4F-based microcontrollers from Texas
   Instruments.
 
 boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768
@@ -435,16 +436,16 @@ boards/hc/mcs92s12ne6/ne64badge
   not yet been fully tested.
 
 boards/arm/nrf52/nrf52-feather
-  Nuttx port to the Adafruit nRF52832 Feather board
+  NuttX port to the Adafruit nRF52832 Feather board
 
 boards/arm/nrf52/nrf52832-dk
-  Nuttx port to the Nordic nRF52832 Development Kit (PCA10040)
+  NuttX port to the Nordic nRF52832 Development Kit (PCA10040)
 
 boards/arm/nrf52/nrf52840-dk
-	Nuttx port to the Nordic nRF52840 Development Kit (PCA10056)
+	NuttX port to the Nordic nRF52840 Development Kit (PCA10056)
 
 boards/arm/nrf52/nrf52840-dongle
-  Nuttx port to the Nordic nRF52840 Dongle (PCA10059)
+  NuttX port to the Nordic nRF52840 Dongle (PCA10059)
 
 boards/arm/dm320/ntosd-dm320
   This port uses the Neuros OSD v1.0 Dev Board with a GNU arm-nuttx-elf
@@ -644,8 +645,13 @@ boards/arm/imx6/sabre-6quad
   featuring the iMX 6Quad CPU.
 
 boards/arm/sama5/sama5d2-xult
-  This is the  port of NuttX to the Atmel SAMA5D2-Xplained Ultra development
-  board.  This board features the Atmel SAMA5D27.  See http://www.atmel.com.
+  This is the  port of NuttX to the Microchip SAMA5D2-Xplained Ultra development
+  board.  This board features the Microchip SAMA5D27. See
+  https://www.microchip.com/Developmenttools/ProductDetails/ATSAMA5D2C-XULT
+
+boards/arm/sama5/giant-board
+  This is the port of NuttX to the Groboards Giant Board board. This board
+  features the Atmel SAMA5D27C-D1G. See http://groboards.com/giant-board.
 
 boards/arm/sama5/sama5d3x-ek
   This is the  port of NuttX to the Atmel SAMA5D3x-EK development boards
@@ -816,21 +822,30 @@ boards/arm/kinetis/teensy-3.x
   Teensy-3.0).  the primary difference is that the Teensy 3.0 has a
   MK30DX128VLH5 with slightly less capability.
 
+boards/arm/imxrt/teensy-4.x
+		This is the port of NuttX to the PJRC Teensy++ 4.x board.  This board is
+		developed by http://pjrc.com/teensy/.  The Teensy++ 4.x is based
+		on an NXP MIMXRT1062DVL6A MCU. The port can support both Teensy 4.0 and
+		Teensy 4.1 boards.
+
+    https://www.pjrc.com/store/teensy40.html
+    https://www.pjrc.com/store/teensy41.html
+
 boards/arm/kl/teensy-lc
   This is the port of nuttx for the Teensy LC board.  The Teensy LC
   is a DIP style breakout board for the MKL25Z64 and comes with a USB
   based bootloader.
 
 boards/arm/tiva/tm4c123g-launchpad
-  This is the port of NuttX to the Tiva® TM4C123G LaunchPad.  The
-  Tiva® TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
-  platform for ARM® Cortex™-M4F-based microcontrollers from Texas
+  This is the port of NuttX to the Tiva TM4C123G LaunchPad.  The
+  Tiva TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
+  platform for ARM Cortex-M4F-based microcontrollers from Texas
   Instruments.
 
 boards/arm/tiva/tm4c1294-launchpad
-  This is the port of NuttX to the Tiva® TM4C1294 LaunchPad.  The
-  Tiva® TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
-  platform for ARM® Cortex™-M4F-based microcontrollers from Texas
+  This is the port of NuttX to the Tiva TM4C1294 LaunchPad.  The
+  Tiva TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
+  platform for ARM Cortex-M4F-based microcontrollers from Texas
   Instruments.
 
 boards/arm/tmx570/tms570ls31x-usb-kit
@@ -898,7 +913,7 @@ boards/arm/lpc214x/zp214xpa
 
 boards/arm/lpc17xx_40xx/zkit-arm-1769
   Zilogic System's ARM development Kit, ZKIT-ARM-1769.  This board is based
-  on the NXP LPC1769.  The Nuttx Buildroot toolchain is used by default.
+  on the NXP LPC1769.  The NuttX Buildroot toolchain is used by default.
 
 Configuring NuttX
 ^^^^^^^^^^^^^^^^^

@@ -41,6 +41,7 @@
 #include <math.h>
 #include <queue.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/config.h>
@@ -53,6 +54,10 @@
 #include <arch/chip/audio.h>
 
 #include "cxd56.h"
+
+#ifdef CONFIG_AUDIO_CXD56_SRC
+#include "cxd56_src.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -119,7 +124,7 @@
 #define CXD56_ACA_OSC_49_152MHZ       3  /* 49.152MHz */
 #define CXD56_ACA_OSC_49_152MHZ_HIRES 4  /* 49.152MHz, Hi-Res */
 
-/* Control IDs for external as_aca_control */
+/* Control IDs for external fw_as_acacontrol */
 #define CXD56_ACA_CTL_CHECK_ID          0
 #define CXD56_ACA_CTL_POWER_ON_COMMON   1
 #define CXD56_ACA_CTL_POWER_ON_INPUT    2
@@ -170,17 +175,6 @@
 #define CXD56_DMA_CMD_FIFO_NOT_FULL 1
 #define CXD56_DMA_START_ADDR_MASK   0x3fffffff
 
-/* Queue helpers */
-
-#define dq_put(q,n) (dq_addlast((dq_entry_t*)n,(q)))
-#define dq_get(q)    (dq_remfirst(q))
-#define dq_clear(q) \
-  do \
-    { \
-      dq_remlast(q); \
-    } \
-  while (!dq_empty(q))
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -193,7 +187,7 @@ extern bool cxd56_audio_clock_is_enabled(void);
 
 /* Located in arch/arm/src/cxd56xx/cxd56_farapistub.S */
 
-extern uint32_t as_aca_control(uint8_t type, uint32_t param);
+extern uint32_t fw_as_acacontrol(uint8_t type, uint32_t param);
 
 /****************************************************************************
  * Private Types
@@ -430,8 +424,6 @@ static void cxd56_set_mic_gains(uint8_t gain,
 static void cxd56_set_mic_out_channel(FAR struct cxd56_dev_s *dev);
 static int cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol);
 static void cxd56_swap_buffer_rl(uint32_t addr, uint16_t size);
-static int  cxd56_take_sem(sem_t *sem);
-#define cxd56_give_sem(s) (nxsem_post(s))
 static void *cxd56_workerthread(pthread_addr_t pvarg);
 
 /****************************************************************************
@@ -1097,20 +1089,6 @@ static void write_reg_addr(const cxd56_aureg_t *reg, uint32_t val)
 #define write_reg(reg, val)   (write_reg_addr(&(reg), (val)))
 #define write_reg32(reg, val) (*((volatile uint32_t *)(reg).addr) = (val))
 
-/****************************************************************************
- * Name: cxd56_take_sem
- *
- * Description:
- *  Take a semaphore count, handling the nasty EINTR return if we are
- *  interrupted by a signal.
- *
- ****************************************************************************/
-
-static int cxd56_take_sem(sem_t *sem)
-{
-  return nxsem_wait_uninterruptible(sem);
-}
-
 static void cxd56_int_clear(cxd56_dmahandle_t handle, uint8_t intbits)
 {
   if (handle == CXD56_AUDIO_DMA_MIC)
@@ -1298,6 +1276,157 @@ static void cxd56_reset_channel_sel(cxd56_dmahandle_t handle)
     }
 }
 
+#ifdef CONFIG_CXD56_AUCIO_SRC
+static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
+{
+  struct audio_msg_s msg;
+  struct cxd56_dev_s *dev;
+  irqstate_t flags;
+  bool request_buffer = true;
+  int ret;
+
+  dev = g_dev[hdl];
+
+  /* Trigger new DMA job */
+
+  flags = spin_lock_irqsave();
+
+  if (err_code == CXD56_AUDIO_ECODE_DMA_TRANS)
+    {
+      /* Notify end of data */
+
+      if (dev->state != CXD56_DEV_STATE_PAUSED
+          && dq_count(&dev->down_pendq) == 0)
+        {
+          msg.msg_id = AUDIO_MSG_STOP;
+          msg.u.data = 0;
+          spin_unlock_irqrestore(flags);
+          ret = nxmq_send(dev->mq, (FAR const char *)&msg,
+                          sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+          flags = spin_lock_irqsave();
+          if (ret != OK)
+            {
+              auderr("ERROR: nxmq_send to stop failed (%d)\n", ret);
+            }
+        }
+    }
+
+  if (dq_count(&dev->down_runq) > 0)
+    {
+      FAR struct ap_buffer_s *src_apb;
+
+      src_apb = (struct ap_buffer_s *) dq_get(&dev->down_runq);
+      src_apb->nbytes = 0;
+      dq_put(&dev->down_doneq, &src_apb->dq_entry);
+
+      if (src_apb->flags & AUDIO_APB_SRC_FINAL)
+        {
+          struct ap_buffer_s *apb;
+
+          apb = dq_get(&dev->up_runq);
+          spin_unlock_irqrestore(flags);
+          dev->dev.upper(dev->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
+          flags = spin_lock_irqsave();
+
+          /* End of data? */
+
+          if ((apb->flags & AUDIO_APB_FINAL) != 0)
+            {
+              msg.msg_id = AUDIO_MSG_STOP;
+              msg.u.data = 0;
+              spin_unlock_irqrestore(flags);
+              ret = nxmq_send(dev->mq, (FAR const char *)&msg,
+                              sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+              flags = spin_lock_irqsave();
+              if (ret != OK)
+                {
+                  auderr("ERROR: nxmq_send to stop failed (%d)\n", ret);
+                }
+
+              request_buffer = false;
+            }
+        }
+    }
+
+  if (request_buffer && dev->mq != NULL)
+    {
+      /* Request more data */
+
+      msg.msg_id = AUDIO_MSG_DATA_REQUEST;
+      msg.u.data = 0;
+      spin_unlock_irqrestore(flags);
+      ret = nxmq_send(dev->mq, (FAR const char *) &msg,
+                          sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+      flags = spin_lock_irqsave();
+      if (ret != OK)
+        {
+          auderr("ERROR: nxmq_send to request failed (%d)\n", ret);
+        }
+    }
+
+  spin_unlock_irqrestore(flags);
+}
+
+#else
+static void _process_audio(cxd56_dmahandle_t hdl, uint16_t err_code)
+{
+  struct audio_msg_s msg;
+  struct cxd56_dev_s *dev;
+  irqstate_t flags;
+  int ret;
+
+  dev = g_dev[hdl];
+
+  /* Trigger new DMA job */
+
+  flags = spin_lock_irqsave();
+
+  if (dq_count(&dev->up_runq) > 0)
+    {
+      FAR struct ap_buffer_s *apb;
+
+      apb = (struct ap_buffer_s *) dq_get(&dev->up_runq);
+      spin_unlock_irqrestore(flags);
+      dev->dev.upper(dev->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
+      flags = spin_lock_irqsave();
+    }
+
+  spin_unlock_irqrestore(flags);
+
+  if (err_code == CXD56_AUDIO_ECODE_DMA_TRANS)
+    {
+      /* Notify end of data */
+
+      if (dev->state != CXD56_DEV_STATE_PAUSED)
+        {
+          audinfo("DMA_TRANS up_pendq=%d \n",
+                 dq_count(&dev->up_pendq));
+          msg.msg_id = AUDIO_MSG_STOP;
+          msg.u.data = 0;
+          ret = nxmq_send(dev->mq, (FAR const char *)&msg,
+                          sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+          if (ret != OK)
+            {
+              auderr("ERROR: nxmq_send to stop failed (%d)\n", ret);
+            }
+        }
+    }
+  else if (dev->mq != NULL)
+    {
+      /* Request more data */
+
+      msg.msg_id = AUDIO_MSG_DATA_REQUEST;
+      msg.u.data = 0;
+      ret = nxmq_send(dev->mq, (FAR const char *) &msg,
+                      sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+      if (ret != OK)
+        {
+          auderr("ERROR: nxmq_send to request failed (%d)\n", ret);
+        }
+    }
+}
+#endif
+
 static void cxd56_dma_int_handler(void)
 {
   uint16_t err_code;
@@ -1361,6 +1490,8 @@ static void cxd56_dma_int_handler(void)
           write_reg(REG_I2S1_INT_CTRL_ERR, 1);
 
           err_code = CXD56_AUDIO_ECODE_DMA_TRANS;
+
+          auderr("ERROR: I2S0 transfer failed.\n");
         }
 
       if (int_i2s & (1 << REG_I2S1_INT_CTRL_CMB.pos))
@@ -1371,65 +1502,24 @@ static void cxd56_dma_int_handler(void)
           write_reg(REG_I2S1_INT_CTRL_CMB, 1);
 
           err_code = CXD56_AUDIO_ECODE_DMA_CMB;
+
+          auderr("ERROR: I2S0 bus error.\n");
         }
     }
   else
     {
       audinfo("Unhandled interrupt\n");
+
       return;
     }
 
   if (err_code != CXD56_AUDIO_ECODE_DMA_HANDLE_INV)
     {
-      struct audio_msg_s msg;
-      struct cxd56_dev_s *dev;
-      int ret;
-
-      dev = g_dev[hdl];
-
-      /* Trigger new DMA job */
-
-      cxd56_take_sem(&dev->pendsem);
-
-      if (dq_count(&dev->runningq) > 0)
-        {
-          FAR struct ap_buffer_s *apb;
-
-          apb = (struct ap_buffer_s *) dq_get(&dev->runningq);
-          dev->dev.upper(dev->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
-        }
-
-      cxd56_give_sem(&dev->pendsem);
-
-      if (err_code == CXD56_AUDIO_ECODE_DMA_TRANS)
-        {
-          /* Notify end of data */
-
-          if (dev->state != CXD56_DEV_STATE_PAUSED)
-            {
-              msg.msg_id = AUDIO_MSG_STOP;
-              msg.u.data = 0;
-              ret = nxmq_send(dev->mq, (FAR const char *)&msg,
-                              sizeof(msg), CONFIG_CXD56_MSG_PRIO);
-              if (ret != OK)
-                {
-                  auderr("ERROR: nxmq_send to stop failed (%d)\n", ret);
-                }
-            }
-        }
-      else if (dev->mq != NULL)
-        {
-          /* Request more data */
-
-          msg.msg_id = AUDIO_MSG_DATA_REQUEST;
-          msg.u.data = 0;
-          ret = nxmq_send(dev->mq, (FAR const char *) &msg,
-                          sizeof(msg), CONFIG_CXD56_MSG_PRIO);
-          if (ret != OK)
-            {
-              auderr("ERROR: nxmq_send to request failed (%d)\n", ret);
-            }
-        }
+#ifdef CONFIG_CXD56_AUCIO_SRC
+    _process_audio_with_src(hdl, err_code);
+#else
+    _process_audio(hdl, err_code);
+#endif
     }
 }
 
@@ -1526,7 +1616,7 @@ static int cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol)
     {
       /* Disable analog out */
 
-      ret = as_aca_control(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
+      ret = fw_as_acacontrol(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
                            (uint32_t)CXD56_OUT_DEV_OFF);
       if (ret != CXD56_AUDIO_ECODE_OK)
         {
@@ -1538,7 +1628,7 @@ static int cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol)
     {
       /* Enable analog out */
 
-      ret = as_aca_control(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
+      ret = fw_as_acacontrol(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
                            (uint32_t)CXD56_OUT_DEV_SP);
       if (ret != CXD56_AUDIO_ECODE_OK)
         {
@@ -1641,8 +1731,13 @@ static void cxd56_init_dma(FAR struct cxd56_dev_s *dev)
           dev->state,
           dev->dma_handle);
 
-  dq_clear(&dev->pendingq);
-  dq_clear(&dev->runningq);
+  dq_clear(&dev->up_pendq);
+  dq_clear(&dev->up_runq);
+#ifdef CONFIG_AUDIO_CXD56_SRC
+  dq_clear(&dev->down_pendq);
+  dq_clear(&dev->down_runq);
+  dq_clear(&dev->down_doneq);
+#endif
 
   ints = CXD56_DMA_INT_DONE | CXD56_DMA_INT_ERR | CXD56_DMA_INT_CMB;
 
@@ -1726,7 +1821,7 @@ static int cxd56_power_on_aca(uint32_t samplerate)
   uint8_t mic_sel;
   uint8_t i;
 
-  if (as_aca_control(CXD56_ACA_CTL_CHECK_ID, (uint32_t)NULL) != 0)
+  if (fw_as_acacontrol(CXD56_ACA_CTL_CHECK_ID, (uint32_t)NULL) != 0)
     {
       return -ENXIO;
     }
@@ -1750,7 +1845,7 @@ static int cxd56_power_on_aca(uint32_t samplerate)
   pwon_param.mclk_ds = CXD56_MCLKOUT_DS;
   pwon_param.gpo_ds = CXD56_GPO_A_DS;
 
-  if (as_aca_control(CXD56_ACA_CTL_POWER_ON_COMMON,
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_COMMON,
                     (uint32_t)&pwon_param) != 0)
     {
       return -EBUSY;
@@ -1778,7 +1873,7 @@ static int cxd56_power_on_aca(uint32_t samplerate)
       ser_param.sel_ch.in[i] = (enum cxd56_pulco_ser_sel_ch_id_e)mic_sel;
     }
 
-  if (as_aca_control(CXD56_ACA_CTL_SET_SERDES, (uint32_t)&ser_param) != 0)
+  if (fw_as_acacontrol(CXD56_ACA_CTL_SET_SERDES, (uint32_t)&ser_param) != 0)
     {
       return -EBUSY;
     }
@@ -1817,13 +1912,13 @@ static int cxd56_power_on_analog_output(FAR struct cxd56_dev_s *dev)
   pwon_param.sp_spliton  = CXD56_SP_SPLIT_ON;
   pwon_param.sp_drv      = CXD56_SP_DRIVER;
 
-  if (as_aca_control(CXD56_ACA_CTL_SET_SMASTER,
+  if (fw_as_acacontrol(CXD56_ACA_CTL_SET_SMASTER,
                     (uint32_t)&smaster_param) != 0)
     {
       return -EBUSY;
     }
 
-  if (as_aca_control(CXD56_ACA_CTL_POWER_ON_OUTPUT,
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_OUTPUT,
                     (uint32_t)&pwon_param) != 0)
     {
       return -EBUSY;
@@ -1954,7 +2049,7 @@ static int cxd56_power_on_micbias(FAR struct cxd56_dev_s *dev)
 {
   struct timespec start;
 
-  if (as_aca_control(CXD56_ACA_CTL_POWER_ON_MICBIAS, (uint32_t)NULL) != 0)
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_MICBIAS, (uint32_t)NULL) != 0)
     {
       return -EBUSY;
     }
@@ -2222,7 +2317,7 @@ static int cxd56_power_on_input(FAR struct cxd56_dev_s *dev)
 
   cxd56_set_mic_gains(120, &param);
 
-  if (as_aca_control(CXD56_ACA_CTL_POWER_ON_INPUT,
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_INPUT,
                      (uint32_t)&param) != 0)
     {
       return -EBUSY;
@@ -2272,6 +2367,8 @@ static int cxd56_power_on(FAR struct cxd56_dev_s *dev)
 
   if (g_codec_start_count == 0)
     {
+      uint32_t val;
+
       board_audio_i2s_enable();
       board_audio_initialize();
 
@@ -2293,17 +2390,19 @@ static int cxd56_power_on(FAR struct cxd56_dev_s *dev)
 
       /* Power_on_codec */
 
-      if (read_reg(REG_AC_REVID) != CXD56_EXP_REVID)
+      val = read_reg(REG_AC_REVID);
+      if (val != CXD56_EXP_REVID)
         {
-          auderr("ERROR: Power on REVID mismatch (%x vs. %x)\n",
-               REG_AC_REVID, CXD56_EXP_REVID);
+          auderr("ERROR: Power on REVID mismatch (%" PRIx32 " vs. %x)\n",
+                 val, CXD56_EXP_REVID);
           return -ENXIO;
         }
 
-      if (read_reg(REG_AC_DEVICEID) != CXD56_EXP_DEVICEID)
+      val = read_reg(REG_AC_DEVICEID);
+      if (val != CXD56_EXP_DEVICEID)
         {
-          auderr("ERROR: Power on DEVICEID mismatch (%x vs. %x)\n",
-               REG_AC_DEVICEID, CXD56_EXP_DEVICEID);
+          auderr("ERROR: Power on DEVICEID mismatch (%" PRIx32 " vs. %x)\n",
+                 val, CXD56_EXP_DEVICEID);
           return -ENXIO;
         }
 
@@ -2438,7 +2537,7 @@ static int cxd56_power_off(FAR struct cxd56_dev_s *dev)
 
   cxd56_audio_clock_disable();
 
-  if (as_aca_control(CXD56_ACA_CTL_POWER_OFF_COMMON, (uint32_t)NULL) != 0)
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_OFF_COMMON, (uint32_t)NULL) != 0)
     {
       return -EBUSY;
     }
@@ -2709,6 +2808,15 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
         priv->channels = caps->ac_channels;
         priv->bitwidth = caps->ac_controls.b[2];
 
+#ifdef CONFIG_AUDIO_CXD56_SRC
+        ret = cxd56_src_init(priv, &priv->down_doneq, &priv->down_pendq);
+        if (ret != OK)
+          {
+            auderr("ERROR: Could not initialize SRC (%d)\n", ret);
+            return -ENOMEM;
+          }
+
+#endif
         g_dev[priv->dma_handle] = priv;
         poweron = 1;
 
@@ -2872,7 +2980,7 @@ static int cxd56_stop_dma(FAR struct cxd56_dev_s *priv)
 
           /* Disable input */
 
-          if (as_aca_control(CXD56_ACA_CTL_POWER_OFF_INPUT,
+          if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_OFF_INPUT,
                              (uint32_t)NULL) != 0)
             {
               return -EBUSY;
@@ -2896,7 +3004,7 @@ static int cxd56_stop_dma(FAR struct cxd56_dev_s *priv)
           write_reg(REG_AC_NSPMUTE, 1);
           write_reg(REG_AC_PDN_SMSTR, 1);
 
-          if (as_aca_control(CXD56_ACA_CTL_POWER_OFF_OUTPUT,
+          if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_OFF_OUTPUT,
                                (uint32_t)NULL) != 0)
             {
               return -EBUSY;
@@ -2914,31 +3022,27 @@ static int cxd56_stop(FAR struct audio_lowerhalf_s *lower, FAR void *session)
 static int cxd56_stop(FAR struct audio_lowerhalf_s *lower)
 #endif
 {
+  int ret;
+  FAR void *value;
+  struct audio_msg_s msg;
   FAR struct cxd56_dev_s *priv = (FAR struct cxd56_dev_s *)lower;
 
   audinfo("cxd56_stop\n");
 
-  if (priv->state != CXD56_DEV_STATE_STOPPED)
+  msg.msg_id = AUDIO_MSG_STOP;
+  msg.u.data = 0;
+  ret = nxmq_send(priv->mq, (FAR const char *)&msg,
+                  sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+  if (ret != OK)
     {
-      int ret;
-      FAR void *value;
-      struct audio_msg_s msg;
-
-      msg.msg_id = AUDIO_MSG_STOP;
-      msg.u.data = 0;
-      ret = nxmq_send(priv->mq, (FAR const char *)&msg,
-                      sizeof(msg), CONFIG_CXD56_MSG_PRIO);
-      if (ret != OK)
-        {
-          auderr("ERROR: nxmq_send stop message failed (%d)\n", ret);
-          return ret;
-        }
-
-      /* Join the worker thread */
-
-      pthread_join(priv->threadid, &value);
-      priv->threadid = 0;
+      auderr("ERROR: nxmq_send stop message failed (%d)\n", ret);
+      return ret;
     }
+
+  /* Join the worker thread */
+
+  pthread_join(priv->threadid, &value);
+  priv->threadid = 0;
 
   return OK;
 }
@@ -2994,12 +3098,25 @@ static int cxd56_resume(FAR struct audio_lowerhalf_s *lower)
   int ret;
   FAR struct cxd56_dev_s *dev = (FAR struct cxd56_dev_s *)lower;
 
-  if (dev->state == CXD56_DEV_STATE_PAUSED)
+  if (dev->state == CXD56_DEV_STATE_PAUSED ||
+      dev->state == CXD56_DEV_STATE_BUFFERING)
     {
-      dev->state = CXD56_DEV_STATE_STARTED;
-      cxd56_power_on_analog_output(dev);
-      board_external_amp_mute_control(false);
+      if (dev->state == CXD56_DEV_STATE_PAUSED)
+        {
+          dev->state = CXD56_DEV_STATE_STARTED;
+          cxd56_power_on_analog_output(dev);
+          board_external_amp_mute_control(false);
+        }
+      else
+        {
+          /* NOTE: only power on the analog output
+           * when resumed from buffering
+           */
 
+          cxd56_power_on_analog_output(dev);
+        }
+
+      audinfo("START DMA up_pendq=%d \n", dq_count(&dev->up_pendq));
       ret = cxd56_start_dma(dev);
       if (ret != OK)
         {
@@ -3067,34 +3184,47 @@ static void cxd56_swap_buffer_rl(uint32_t addr, uint16_t size)
 static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
 {
   FAR struct ap_buffer_s *apb;
+  irqstate_t flags;
   int retry;
   int timeout;
   uint32_t addr;
   uint32_t size;
   int ret = OK;
 
-  cxd56_take_sem(&dev->pendsem);
-  if (dq_count(&dev->pendingq) == 0)
+  flags = spin_lock_irqsave();
+#ifdef CONFIG_AUDIO_CXD56_SRC
+  FAR struct ap_buffer_s *src_apb;
+
+  if (dq_count(&dev->down_pendq) == 0)
+#else
+  if (dq_count(&dev->up_pendq) == 0)
+#endif
     {
-      /* Pending queue empty, nothing to do */
+      /* Underrun occurred, stop DMA and change state for buffering */
 
-      struct audio_msg_s msg;
+      audwarn("Underrun \n");
 
-      msg.msg_id = AUDIO_MSG_STOP;
-      msg.u.data = 0;
-      ret = nxmq_send(dev->mq, (FAR const char *)&msg,
-                      sizeof(msg), CONFIG_CXD56_MSG_PRIO);
-      if (ret != OK)
+      spin_unlock_irqrestore(flags);
+      ret = cxd56_stop_dma(dev);
+      flags = spin_lock_irqsave();
+      audwarn("STOP DMA due to underrun \n");
+      if (ret != CXD56_AUDIO_ECODE_OK)
         {
-          auderr("ERROR: nxmq_send start DMA failed (%d)\n", ret);
-          goto exit;
+          auderr("ERROR: Could not stop DMA transfer (%d)\n", ret);
+          dev->running = false;
         }
+
+      dev->state = CXD56_DEV_STATE_BUFFERING;
     }
   else
     {
       /* Fill up with as many DMA requests as we can */
 
-      while (dq_count(&dev->pendingq) > 0)
+#ifdef CONFIG_AUDIO_CXD56_SRC
+      while (dq_count(&dev->down_pendq) > 0)
+#else
+      while (dq_count(&dev->up_pendq) > 0)
+#endif
         {
           if (cxd56_dma_is_busy(dev->dma_handle))
             {
@@ -3104,9 +3234,15 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
               goto exit;
             }
 
-          apb = (struct ap_buffer_s *) dq_peek(&dev->pendingq);
+#ifdef CONFIG_AUDIO_CXD56_SRC
+          src_apb = (struct ap_buffer_s *) dq_peek(&dev->down_pendq);
+          addr = ((uint32_t)src_apb->samp) & CXD56_DMA_START_ADDR_MASK;
+          size = (src_apb->nbytes / (dev->bitwidth / 8) / dev->channels) - 1;
+#else
+          apb = (struct ap_buffer_s *) dq_peek(&dev->up_pendq);
           addr = ((uint32_t)apb->samp) & CXD56_DMA_START_ADDR_MASK;
           size = (apb->nbytes / (dev->bitwidth / 8) / dev->channels) - 1;
+#endif
 
           if (dev->dma_handle == CXD56_AUDIO_DMA_MIC)
             {
@@ -3118,7 +3254,13 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
               if (dev->bitwidth == 16 &&
                   CXD56_DMA_FORMAT == CXD56_DMA_FORMAT_RL)
                 {
-                  cxd56_swap_buffer_rl((uint32_t)apb->samp, apb->nbytes);
+#ifdef CONFIG_AUDIO_CXD56_SRC
+                  cxd56_swap_buffer_rl((uint32_t)src_apb->samp,
+                                       src_apb->nbytes);
+#else
+                  cxd56_swap_buffer_rl((uint32_t)apb->samp,
+                                        apb->nbytes);
+#endif
                 }
 
               write_reg(REG_I2S1_OUT_START_ADR, addr);
@@ -3131,7 +3273,9 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
             {
               /* Turn on amplifier */
 
+              spin_unlock_irqrestore(flags);
               board_external_amp_mute_control(false);
+              flags = spin_lock_irqsave();
 
               /* Mask interrupts */
 
@@ -3146,11 +3290,6 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
 
                   cxd56_int_clear(dev->dma_handle, CXD56_DMA_INT_ERR);
                   cxd56_int_clear(dev->dma_handle, CXD56_DMA_INT_SMP);
-
-                  /* Lock interrupt */
-
-                  up_irq_disable();
-                  sched_lock();
 
                   for (timeout = 0; timeout < CXD56_DMA_TIMEOUT; timeout++)
                     {
@@ -3173,11 +3312,6 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
                   /* Start DMA */
 
                   cxd56_set_dma_running(dev->dma_handle, true);
-
-                  /* Unlock interrupt */
-
-                  sched_unlock();
-                  up_irq_enable();
 
                   /* Wait for 1sample tramsfer */
 
@@ -3235,14 +3369,45 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
               cxd56_set_dma_running(dev->dma_handle, true);
             }
 
-          dq_get(&dev->pendingq);
-          dq_put(&dev->runningq, &apb->dq_entry);
+#ifdef CONFIG_AUDIO_CXD56_SRC
+          dq_get(&dev->down_pendq);
+          dq_put(&dev->down_runq, &src_apb->dq_entry);
+
+          apb = (struct ap_buffer_s *) dq_get(&dev->up_pendq);
+#else
+          dq_get(&dev->up_pendq);
+#endif
+          dq_put(&dev->up_runq, &apb->dq_entry);
+
           dev->state = CXD56_DEV_STATE_STARTED;
+
+#ifndef CONFIG_AUDIO_CXD56_SRC
+          if ((apb->flags & AUDIO_APB_FINAL) != 0)
+            {
+              /* If the apb is final, send stop message */
+
+              audinfo("Final apb \n");
+              struct audio_msg_s msg;
+              msg.msg_id = AUDIO_MSG_STOP;
+              msg.u.data = 0;
+
+              spin_unlock_irqrestore(flags);
+              ret = nxmq_send(dev->mq, (FAR const char *)&msg,
+                              sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+              flags = spin_lock_irqsave();
+
+              if (ret != OK)
+                {
+                  auderr("ERROR: nxmq_send for stop failed (%d)\n", ret);
+                  goto exit;
+                }
+            }
+#endif
         }
     }
 
 exit:
-  cxd56_give_sem(&dev->pendsem);
+  spin_unlock_irqrestore(flags);
 
   return ret;
 }
@@ -3259,27 +3424,41 @@ static int cxd56_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
 {
   FAR struct cxd56_dev_s *priv = (FAR struct cxd56_dev_s *)lower;
   struct audio_msg_s msg;
+  irqstate_t flags;
+  int ret;
 
-  cxd56_take_sem(&priv->pendsem);
-  apb->dq_entry.flink = NULL;
-  dq_put(&priv->pendingq, &apb->dq_entry);
-  cxd56_give_sem(&priv->pendsem);
-
-  if (priv->mq != NULL)
+#ifdef CONFIG_AUDIO_CXD56_SRC
+  ret = cxd56_src_enqueue(apb);
+  if (ret != OK)
     {
-      int ret;
-
-      msg.msg_id = AUDIO_MSG_ENQUEUE;
-      msg.u.data = 0;
-
-      ret = nxmq_send(priv->mq, (FAR const char *) &msg,
-                      sizeof(msg), CONFIG_CXD56_MSG_PRIO);
-      if (ret != OK)
-        {
-          auderr("ERROR: nxmq_send to enqueue failed (%d)\n", ret);
-          return ret;
-        }
+      auderr("ERROR: SRC processing failed (%d)\n", ret);
     }
+  else
+    {
+#endif
+      flags = spin_lock_irqsave();
+
+      apb->dq_entry.flink = NULL;
+      dq_put(&priv->up_pendq, &apb->dq_entry);
+
+      spin_unlock_irqrestore(flags);
+
+      if (priv->mq != NULL)
+        {
+          msg.msg_id = AUDIO_MSG_ENQUEUE;
+          msg.u.data = 0;
+
+          ret = nxmq_send(priv->mq, (FAR const char *) &msg,
+                          sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+          if (ret != OK)
+            {
+              auderr("ERROR: nxmq_send to enqueue failed (%d)\n", ret);
+              return ret;
+            }
+        }
+#ifdef CONFIG_AUDIO_CXD56_SRC
+    }
+#endif
 
   return OK;
 }
@@ -3307,6 +3486,7 @@ static int cxd56_cancelbuffer(FAR struct audio_lowerhalf_s *lower,
 static int cxd56_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
                  unsigned long arg)
 {
+  int ret = OK;
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
   FAR struct ap_buffer_info_s *bufinfo;
 #endif
@@ -3329,11 +3509,12 @@ static int cxd56_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
 #endif
 
       default:
+        ret = -ENOTTY;
         audinfo("Unhandled ioctl: %d\n", cmd);
         break;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -3395,6 +3576,20 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
                 priv->running = false;
               }
 
+#ifdef CONFIG_AUDIO_CXD56_SRC
+            ret = cxd56_src_stop();
+            if (ret != OK)
+              {
+                auderr("ERROR: Could not stop SRC (%d)\n", ret);
+              }
+
+            ret = cxd56_src_deinit();
+            if (ret != OK)
+              {
+                auderr("ERROR: Could not deinit SRC (%d)\n", ret);
+              }
+
+#endif
             priv->state = CXD56_DEV_STATE_STOPPED;
             priv->running = false;
             audinfo("Workerthread stopped.\n");
@@ -3408,6 +3603,29 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
             break;
 
           case AUDIO_MSG_ENQUEUE:
+            if (priv->state == CXD56_DEV_STATE_BUFFERING)
+              {
+                audwarn("Buffering up_pendq=%d \n",
+                        dq_count(&priv->up_pendq));
+
+                FAR struct ap_buffer_s *apb;
+                apb = (struct ap_buffer_s *)(&priv->up_pendq)->tail;
+
+                bool final = (apb != NULL) &&
+                  ((apb->flags & AUDIO_APB_FINAL) != 0);
+
+                /* If up_pendq exceeds the threshold or up_pendq
+                 * contains the final buffer, then start dma.
+                 */
+
+                if (CONFIG_CXD56_AUDIO_NUM_BUFFERS <=
+                    dq_count(&priv->up_pendq) || final)
+                  {
+                    cxd56_resume((FAR struct audio_lowerhalf_s *)priv);
+                  }
+              }
+            break;
+
           default:
             break;
         }
@@ -3439,7 +3657,8 @@ static int cxd56_init_worker(FAR struct audio_lowerhalf_s *dev)
   void *value;
   int ret;
 
-  snprintf(priv->mqname, sizeof(priv->mqname), "/tmp/%X", priv);
+  snprintf(priv->mqname, sizeof(priv->mqname), "/tmp/%" PRIXPTR,
+           (uintptr_t)priv);
 
   m_attr.mq_maxmsg  = 16;
   m_attr.mq_msgsize = sizeof(struct audio_msg_s);
@@ -3507,8 +3726,13 @@ struct audio_lowerhalf_s *cxd56_initialize(
       priv->state   = CXD56_DEV_STATE_OFF;
 
       nxsem_init(&priv->pendsem, 0, 1);
-      dq_init(&priv->pendingq);
-      dq_init(&priv->runningq);
+      dq_init(&priv->up_pendq);
+      dq_init(&priv->up_runq);
+#ifdef CONFIG_AUDIO_CXD56_SRC
+      dq_init(&priv->down_pendq);
+      dq_init(&priv->down_runq);
+      dq_init(&priv->down_doneq);
+#endif
     }
 
   return &priv->dev;

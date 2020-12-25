@@ -26,6 +26,18 @@ config CXD56_WLCSP
 
 endchoice
 
+choice
+	prompt "CXD56xx core selection"
+	default CXD56_MAINCORE
+
+config CXD56_MAINCORE
+	bool "Main Core"
+
+config CXD56_SUBCORE
+	bool "Sub Core"
+
+endchoice
+
 config CXD56_CUSTOM_PINCONFIG
 	bool "Board-specific pin configuration"
 	default n
@@ -60,10 +72,12 @@ config CXD56_SPH
 
 config CXD56_PMIC
 	bool
-	default y
+	default y if CXD56_MAINCORE
+	default n if CXD56_SUBCORE
 
 config CXD56_CPUFIFO
 	bool
+	default y
 
 config CXD56_ICC
 	bool
@@ -81,8 +95,8 @@ config CXD56_CPUFIFO_NBUFFERS
 
 config CXD56_FARAPI
 	bool
-	default y
-	select CXD56_CPUFIFO
+	default y if CXD56_MAINCORE
+	default n if CXD56_SUBCORE
 
 menu "Far API Configuration"
 	depends on CXD56_FARAPI
@@ -192,11 +206,24 @@ menuconfig CXD56_PM
 
 if CXD56_PM
 
+config CPUFREQ_RELEASE_LOCK
+	bool "Dynamic clock control"
+	default n
+	---help---
+		CPU frequency lock allows the system clock to be changed dynamically.
+		Acquiring the higher frequency lock will improve the performance, but
+		will increase the power consumption. If this is enabled, the system
+		clock is the lower frequency unless the frequency lock is acquired.
+		If disabled, the system clock will not change and will remain at the
+		maximum system clock.
+
 config CXD56_PM_PROCFS
 	bool "Power Management PROCFS support"
 	default n
 	---help---
 		Enable the power domain status or the clock frequency monitor.
+
+endif # CXD56_PM
 
 config CXD56_GAUGE
 	bool "CXD5247 battery gauge"
@@ -241,7 +268,6 @@ config CXD56_CHARGER_DEBUG
 		Enable battery charger driver debug messages.
 
 endif
-endif # CXD56_PM
 
 comment "Peripheral Support"
 
@@ -320,6 +346,24 @@ config CXD56_SPI
 	bool "SPI"
 
 if CXD56_SPI
+
+config CXD56_SPI_DRIVER
+	bool "SPI character driver"
+	default y
+	select SPI_DRIVER
+	---help---
+		Build in support for a character driver at /dev/spi[N] that may be
+		used to perform SPI bus transfers from applications.  The intent of
+		this driver is to support SPI testing.
+
+config CXD56_SPI_DMATHRESHOLD
+       int "SPI DMA threshold"
+       default 64
+       depends on CXD56_DMAC
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
 
 config CXD56_SPI0
 	bool "SPI0"
@@ -482,6 +526,7 @@ endif
 
 config CXD56_I2C
 	bool "I2C"
+	select I2C
 
 if CXD56_I2C
 
@@ -598,6 +643,27 @@ config CXD56_HPADC0_FREQ
 			RCOSC  : 0 to 7 (0 ~ 6 : over-sampling mode)
 			XOSC   : 0 to 7 (0 ~ 6 : over-sampling mode)
 
+choice
+	prompt "Input Gain"
+	default CXD56_HPADC0_INPUT_GAIN_0DB
+
+config CXD56_HPADC0_INPUT_GAIN_M6DB
+	bool "-6 dB"
+
+config CXD56_HPADC0_INPUT_GAIN_0DB
+	bool "0 dB"
+
+config CXD56_HPADC0_INPUT_GAIN_6DB
+	bool "+6 dB"
+
+config CXD56_HPADC0_INPUT_GAIN_12DB
+	bool "+12 dB"
+
+config CXD56_HPADC0_INPUT_GAIN_14DB
+	bool "+14 dB"
+
+endchoice
+
 config CXD56_HPADC0_OFFSET
 	int "Offset"
 	default 0
@@ -614,6 +680,17 @@ config CXD56_HPADC0_FSIZE
 	range 2 40960
 	---help---
 		SCU FIFO size
+
+config CXD56_HPADC0_HIGHSPEED
+	bool "High speed support"
+	default n
+	depends on !CXD56_LPADC && !CXD56_HPADC1 && !CXD56_I2C0_SCUSEQ && !CXD56_I2C1_SCUSEQ && !CXD56_SPI3_SCUSEQ
+	---help---
+		Enable high-speed ADC. It supports a sampling rate of up to 512kHz
+		only for HPADC0. In other to use the 512kHz sampling rate, SCU clock
+		mode should be selected CXD56_SCU_XOSC, and Coefficient of sampling
+		frequency CXD56_HPADC0_FREQ should be set 2. When this is enabled,
+		other ADC channels and SCU sequencers cannot be used at the same time.
 
 endif # CXD56_HPADC0
 
@@ -642,6 +719,27 @@ config CXD56_HPADC1_FREQ
 			RCOSC  : 0 to 7 (0 ~ 6 : over-sampling mode)
 			XOSC   : 0 to 7 (0 ~ 6 : over-sampling mode)
 
+choice
+	prompt "Input Gain"
+	default CXD56_HPADC1_INPUT_GAIN_0DB
+
+config CXD56_HPADC1_INPUT_GAIN_M6DB
+	bool "-6 dB"
+
+config CXD56_HPADC1_INPUT_GAIN_0DB
+	bool "0 dB"
+
+config CXD56_HPADC1_INPUT_GAIN_6DB
+	bool "+6 dB"
+
+config CXD56_HPADC1_INPUT_GAIN_12DB
+	bool "+12 dB"
+
+config CXD56_HPADC1_INPUT_GAIN_14DB
+	bool "+14 dB"
+
+endchoice
+
 config CXD56_HPADC1_OFFSET
 	int "Offset"
 	default 0
@@ -669,7 +767,7 @@ if CXD56_LPADC
 
 choice
 	prompt "Select LPADC channel"
-	default CXD56_LPADC0
+	default CXD56_LPADC_ALL
 
 config CXD56_LPADC0
 	bool "LPADC channel 0"
@@ -713,7 +811,8 @@ menu "LPADC0"
 
 config CXD56_LPADC0_FREQ
 	int "Coefficient of sampling frequency"
-	default 12
+	default 12 if CXD56_SCU_32K
+	default 7 if CXD56_SCU_RCOSC || CXD56_SCU_XOSC
 	range 11 15 if CXD56_SCU_32K && CXD56_LPADC0
 	range 3 15 if CXD56_SCU_RCOSC && CXD56_LPADC0
 	range 2 15 if CXD56_SCU_XOSC && CXD56_LPADC0
@@ -767,7 +866,8 @@ menu "LPADC1"
 
 config CXD56_LPADC1_FREQ
 	int "Coefficient of sampling frequency"
-	default 12
+	default 12 if CXD56_SCU_32K
+	default 7 if CXD56_SCU_RCOSC || CXD56_SCU_XOSC
 	range 11 15 if CXD56_SCU_32K && CXD56_LPADC1
 	range 3 15 if CXD56_SCU_RCOSC && CXD56_LPADC1
 	range 2 15 if CXD56_SCU_XOSC && CXD56_LPADC1
@@ -821,7 +921,8 @@ menu "LPADC2"
 
 config CXD56_LPADC2_FREQ
 	int "Coefficient of sampling frequency"
-	default 12
+	default 12 if CXD56_SCU_32K
+	default 7 if CXD56_SCU_RCOSC || CXD56_SCU_XOSC
 	range 11 15 if CXD56_SCU_32K && CXD56_LPADC2
 	range 3 15 if CXD56_SCU_RCOSC && CXD56_LPADC2
 	range 2 15 if CXD56_SCU_XOSC && CXD56_LPADC2
@@ -867,7 +968,8 @@ menu "LPADC3"
 
 config CXD56_LPADC3_FREQ
 	int "Coefficient of sampling frequency"
-	default 12
+	default 12 if CXD56_SCU_32K
+	default 7 if CXD56_SCU_RCOSC || CXD56_SCU_XOSC
 	range 11 15 if CXD56_SCU_32K && CXD56_LPADC3
 	range 3 15 if CXD56_SCU_RCOSC && CXD56_LPADC3
 	range 2 15 if CXD56_SCU_XOSC && CXD56_LPADC3
@@ -1035,7 +1137,7 @@ menuconfig CXD56_SDIO
 	default n
 	select ARCH_HAVE_SDIO
 	select SDIO_BLOCKSETUP
-	select SCHED_HPWORK
+	depends on SCHED_HPWORK
 
 if CXD56_SDIO
 
@@ -1062,12 +1164,6 @@ config CXD56_SDIO_DISABLE_CD_WP
 		Disable the CD and WP pin for Embedded SDIO.If the CD pin is not disable,
 		the SDIO initialization will be failed.
 
-config CXD56_SDIO_ENABLE_MULTIFUNCTION
-	bool "Enable SDIO multi-function"
-	default n
-	---help---
-		Support multi-function with SDIO interfaced peripheral other than SD Card.
-
 endif # SDIO Configuration
 
 menuconfig CXD56_SPISD
@@ -1082,6 +1178,13 @@ config CXD56_SPISD_SLOT_NO
 	default 0
 	---help---
 		Select spi sd card slot number.
+
+config CXD56_SPISD_SPI_CH
+	int "SPI channel number"
+	default 5
+	range 4 5
+	---help---
+		Select spi channel number to use spi sd card.
 
 endif # SPISD Configuration
 
@@ -1141,6 +1244,22 @@ config CXD56_GNSS_FW_RTK
 	---help---
 		This is experimental function.
 
+choice
+	prompt "GNSS 1PPS output"
+	default CXD56_GNSS_1PPS_PIN_HIF_IRQ_OUT
+
+config CXD56_GNSS_1PPS_PIN_GNSS_1PPS_OUT
+	bool "Use PIN_GNSS_1PPS_OUT"
+	depends on CXD56_FCBGA
+	---help---
+		GNSS 1PPS output from PIN_GNSS_1PPS_OUT pin.
+
+config CXD56_GNSS_1PPS_PIN_HIF_IRQ_OUT
+	bool "Use PIN_HIF_IRQ_OUT"
+	---help---
+		GNSS 1PPS output from PIN_HIF_IRQ_OUT pin.
+endchoice
+
 config CXD56_GNSS_DEBUG_FEATURE
 	bool "GNSS debug feature"
 
@@ -1164,5 +1283,12 @@ config CXD56_GEOFENCE
 	depends on CXD56_GNSS
 
 endif
+
+config CXD56_TESTSET
+	bool "Use custom testset for spinlock"
+	default n
+	depends on SPINLOCK
+	---help---
+		Use custom testset based on hardware semaphore
 
 endmenu

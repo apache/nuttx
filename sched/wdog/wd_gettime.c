@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-int wd_gettime(WDOG_ID wdog)
+int wd_gettime(FAR struct wdog_s *wdog)
 {
   irqstate_t flags;
 

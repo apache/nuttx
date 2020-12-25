@@ -41,6 +41,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <crc32.h>
 #include <assert.h>
@@ -60,7 +61,8 @@
  * Name: nxffs_rdentry
  *
  * Description:
- *   Read the inode entry at this offset.  Called only from nxffs_nextentry().
+ *   Read the inode entry at this offset.  Called only from
+ *   nxffs_nextentry().
  *
  * Input Parameters:
  *   volume - Describes the current volume.
@@ -117,7 +119,8 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   ecrc           = nxffs_rdle32(inode.crc);
   inode.state    = CONFIG_NXFFS_ERASEDSTATE;
   memset(inode.crc, 0, 4);
-  crc            = crc32((FAR const uint8_t *)&inode, SIZEOF_NXFFS_INODE_HDR);
+  crc            = crc32((FAR const uint8_t *)&inode,
+                         SIZEOF_NXFFS_INODE_HDR);
 
   /* Allocate memory to hold the variable-length file name */
 
@@ -155,7 +158,8 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   crc = crc32part((FAR const uint8_t *)entry->name, namlen, crc);
   if (crc != ecrc)
     {
-      ferr("ERROR: CRC entry: %08x CRC calculated: %08x\n", ecrc, crc);
+      ferr("ERROR: CRC entry: %08" PRIx32
+           " CRC calculated: %08" PRIx32 "\n", ecrc, crc);
       ret = -EIO;
       goto errout_with_name;
     }
@@ -303,7 +307,8 @@ int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
           if (ch != g_inodemagic[nmagic])
             {
               /* Ooops... this is the not the right character for the magic
-               * Sequence.  Check if we need to restart or to cancel the sequence:
+               * Sequence.  Check if we need to restart or to cancel the
+               * sequence:
                */
 
               if (ch == g_inodemagic[0])
@@ -328,7 +333,9 @@ int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
 
           else
             {
-              /* The the FLASH offset where we found the matching magic number */
+              /* The the FLASH offset where we found the matching magic
+               * number
+               */
 
               offset = nxffs_iotell(volume) - NXFFS_MAGICSIZE;
 
@@ -337,7 +344,8 @@ int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
               ret = nxffs_rdentry(volume, offset, entry);
               if (ret == OK)
                 {
-                  finfo("Found a valid fileheader, offset: %d\n", offset);
+                  finfo("Found a valid fileheader, offset: %jd\n",
+                        (intmax_t)offset);
                   return OK;
                 }
 
@@ -384,9 +392,9 @@ int nxffs_findinode(FAR struct nxffs_volume_s *volume, FAR const char *name,
 
   offset = volume->inoffset;
 
-  /* Loop, checking each NXFFS inode until either: (1) we find the NXFFS inode
-   * with the matching name, or (2) we reach the end of data written on the
-   * media.
+  /* Loop, checking each NXFFS inode until either: (1) we find the NXFFS
+   * inode with the matching name, or (2) we reach the end of data written
+   * on the media.
    */
 
   for (; ; )
@@ -465,15 +473,16 @@ off_t nxffs_inodeend(FAR struct nxffs_volume_s *volume,
 
       /* This is the minimum number of blocks require to span all of the
        * inode data.  One additional block could possibly be required -- we
-       * could make this accurate by looking at the size of the first, perhaps
-       * partial, data block.
+       * could make this accurate by looking at the size of the first,
+       * perhaps partial, data block.
        */
 
       off_t minblocks = (entry->datlen + maxsize - 1) / maxsize;
 
       /* And this is our best, simple guess at the end of the inode data */
 
-      return entry->doffset + entry->datlen + minblocks * SIZEOF_NXFFS_DATA_HDR;
+      return entry->doffset + entry->datlen +
+             minblocks * SIZEOF_NXFFS_DATA_HDR;
     }
 
   /* Otherwise, return an offset that accounts only for the inode header and

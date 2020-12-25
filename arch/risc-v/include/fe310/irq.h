@@ -43,17 +43,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* In mstatus register */
-
-#define MSTATUS_MIE   (0x1 << 3)  /* Machine Interrupt Enable */
-#define MSTATUS_MPIE  (0x1 << 7)  /* Machine Previous Interrupt Enable */
-#define MSTATUS_MPPM  (0x3 << 11) /* Machine Previous Privilege (m-mode) */
-
-/* In mie (machine interrupt enable) register */
-
-#define MIE_MTIE      (0x1 << 7)  /* Machine Timer Interrupt Enable */
-#define MIE_MEIE      (0x1 << 11) /* Machine External Interrupt Enable */
-
 /* Map RISC-V exception code to NuttX IRQ */
 
 /* IRQ 0-15 : (exception:interrupt=0) */
@@ -121,36 +110,4 @@
 
 #define NR_IRQS            (FE310_IRQ_GPIO31 + 1)
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-EXTERN irqstate_t  up_irq_save(void);
-EXTERN void up_irq_restore(irqstate_t);
-EXTERN irqstate_t up_irq_enable(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_INCLUDE_FE310_IRQ_H */

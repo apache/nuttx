@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -250,7 +251,7 @@ struct lpc17_40_dev_s
   sdio_eventset_t    waitevents;      /* Set of events to be waited for */
   uint32_t           waitmask;        /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  WDOG_ID            waitwdog;        /* Watchdog that handles event timeouts */
+  struct wdog_s      waitwdog;        /* Watchdog that handles event timeouts */
 
   /* Callback support */
 
@@ -347,7 +348,7 @@ static void lpc17_40_dataconfig(uint32_t timeout, uint32_t dlen,
 static void lpc17_40_datadisable(void);
 static void lpc17_40_sendfifo(struct lpc17_40_dev_s *priv);
 static void lpc17_40_recvfifo(struct lpc17_40_dev_s *priv);
-static void lpc17_40_eventtimeout(int argc, uint32_t arg, ...);
+static void lpc17_40_eventtimeout(wdparm_t arg);
 static void lpc17_40_endwait(struct lpc17_40_dev_s *priv,
               sdio_eventset_t wkupevent);
 static void lpc17_40_endtransfer(struct lpc17_40_dev_s *priv,
@@ -382,7 +383,7 @@ static int  lpc17_40_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
 static int  lpc17_40_recvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t nbytes);
 static int  lpc17_40_sendsetup(FAR struct sdio_dev_s *dev,
-              FAR const uint8_t *buffer, uint32_t nbytes);
+              FAR const uint8_t *buffer, size_t nbytes);
 static int  lpc17_40_cancel(FAR struct sdio_dev_s *dev);
 
 static int  lpc17_40_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
@@ -537,7 +538,7 @@ static inline void lpc17_40_setclock(uint32_t clkcr)
   regval |=  clkcr;
   putreg32(regval, LPC17_40_SDCARD_CLOCK);
 
-  mcinfo("CLKCR: %08x PWR: %08x\n",
+  mcinfo("CLKCR: %08" PRIx32 " PWR: %08" PRIx32 "\n",
          getreg32(LPC17_40_SDCARD_CLOCK), getreg32(LPC17_40_SDCARD_PWR));
 }
 
@@ -1077,8 +1078,7 @@ static void lpc17_40_recvfifo(struct lpc17_40_dev_s *priv)
  *   any other waited-for event occurring.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -1088,7 +1088,7 @@ static void lpc17_40_recvfifo(struct lpc17_40_dev_s *priv)
  *
  ****************************************************************************/
 
-static void lpc17_40_eventtimeout(int argc, uint32_t arg, ...)
+static void lpc17_40_eventtimeout(wdparm_t arg)
 {
   struct lpc17_40_dev_s *priv = (struct lpc17_40_dev_s *)arg;
 
@@ -1131,7 +1131,7 @@ static void lpc17_40_endwait(struct lpc17_40_dev_s *priv,
 {
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Disable event-related interrupts */
 
@@ -1495,7 +1495,7 @@ static void lpc17_40_reset(FAR struct sdio_dev_s *dev)
   priv->xfrflags   = 0;      /* Used to synchronize SD card and DMA completion events */
 #endif
 
-  wd_cancel(priv->waitwdog); /* Cancel any timeouts */
+  wd_cancel(&priv->waitwdog); /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
 
@@ -1516,7 +1516,7 @@ static void lpc17_40_reset(FAR struct sdio_dev_s *dev)
   lpc17_40_setpwrctrl(SDCARD_PWR_CTRL_ON);
   leave_critical_section(flags);
 
-  mcinfo("CLCKR: %08x POWER: %08x\n",
+  mcinfo("CLCKR: %08" PRIx32 " POWER: %08" PRIx32 "\n",
          getreg32(LPC17_40_SDCARD_CLOCK), getreg32(LPC17_40_SDCARD_PWR));
 }
 
@@ -1754,7 +1754,8 @@ static int lpc17_40_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
   cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
   regval |= cmdidx | SDCARD_CMD_CPSMEN;
 
-  mcinfo("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
+  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32 " regval: %08" PRIx32 "\n",
+         cmd, arg, regval);
 
   /* Write the SD card CMD */
 
@@ -1914,7 +1915,7 @@ static int lpc17_40_cancel(FAR struct sdio_dev_s *dev)
 
   /* Cancel any watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
@@ -1991,8 +1992,9 @@ static int lpc17_40_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
     {
       if (--timeout <= 0)
         {
-          mcerr("ERROR: Timeout cmd: %08x events: %08x STA: %08x\n",
-               cmd, events, getreg32(LPC17_40_SDCARD_STATUS));
+          mcerr("ERROR: Timeout cmd: %08" PRIx32
+                " events: %08" PRIx32 " STA: %08" PRIx32 "\n",
+                cmd, events, getreg32(LPC17_40_SDCARD_STATUS));
 
           return -ETIMEDOUT;
         }
@@ -2068,7 +2070,7 @@ static int lpc17_40_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1B_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R6_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2079,12 +2081,12 @@ static int lpc17_40_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = getreg32(LPC17_40_SDCARD_STATUS);
       if ((regval & SDCARD_STATUS_CTIMEOUT) != 0)
         {
-          mcerr("ERROR: Command timeout: %08x\n", regval);
+          mcerr("ERROR: Command timeout: %08" PRIx32 "\n", regval);
           ret = -ETIMEDOUT;
         }
       else if ((regval & SDCARD_STATUS_CCRCFAIL) != 0)
         {
-          mcerr("ERROR: CRC failure: %08x\n", regval);
+          mcerr("ERROR: CRC failure: %08" PRIx32 "\n", regval);
           ret = -EIO;
         }
 #ifdef CONFIG_DEBUG_FEATURES
@@ -2096,7 +2098,8 @@ static int lpc17_40_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
           if ((uint8_t)(respcmd & SDCARD_RESPCMD_MASK) !=
               (cmd & MMCSD_CMDIDX_MASK))
             {
-              mcerr("ERROR: RESCMD=%02x CMD=%08x\n", respcmd, cmd);
+              mcerr("ERROR: RESCMD=%02" PRIx32 " CMD=%08" PRIx32 "\n",
+                    respcmd, cmd);
               ret = -EINVAL;
             }
         }
@@ -2132,7 +2135,7 @@ static int lpc17_40_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2143,12 +2146,12 @@ static int lpc17_40_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = getreg32(LPC17_40_SDCARD_STATUS);
       if (regval & SDCARD_STATUS_CTIMEOUT)
         {
-          mcerr("ERROR: Timeout STA: %08x\n", regval);
+          mcerr("ERROR: Timeout STA: %08" PRIx32 "\n", regval);
           ret = -ETIMEDOUT;
         }
       else if (regval & SDCARD_STATUS_CCRCFAIL)
         {
-          mcerr("ERROR: CRC fail STA: %08x\n", regval);
+          mcerr("ERROR: CRC fail STA: %08" PRIx32 "\n", regval);
           ret = -EIO;
         }
     }
@@ -2188,7 +2191,7 @@ static int lpc17_40_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2201,7 +2204,7 @@ static int lpc17_40_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = getreg32(LPC17_40_SDCARD_STATUS);
       if (regval & SDCARD_STATUS_CTIMEOUT)
         {
-          mcerr("ERROR: Timeout STA: %08x\n", regval);
+          mcerr("ERROR: Timeout STA: %08" PRIx32 "\n", regval);
           ret = -ETIMEDOUT;
         }
     }
@@ -2344,9 +2347,8 @@ static sdio_eventset_t lpc17_40_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay,
-                       lpc17_40_eventtimeout,
-                       1, (uint32_t)priv);
+      ret   = wd_start(&priv->waitwdog, delay,
+                       lpc17_40_eventtimeout, (wdparm_t)priv);
       if (ret < 0)
         {
           mcerr("ERROR: wd_start failed: %d\n", ret);
@@ -2374,7 +2376,7 @@ static sdio_eventset_t lpc17_40_eventwait(FAR struct sdio_dev_s *dev,
            * return an SDIO error.
            */
 
-          wd_cancel(priv->waitwdog);
+          wd_cancel(&priv->waitwdog);
           leave_critical_section(flags);
           return SDIOWAIT_ERROR;
         }
@@ -2793,11 +2795,6 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    */
 
   nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
-  /* Create a watchdog timer */
-
-  priv->waitwdog = wd_create();
-  DEBUGASSERT(priv->waitwdog);
 
 #ifdef CONFIG_LPC17_40_SDCARD_DMA
   /* Configure the SDCARD DMA request */

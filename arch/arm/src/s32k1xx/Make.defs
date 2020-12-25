@@ -58,6 +58,10 @@ ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
 CHIP_CSRCS += s32k1xx_flashcfg.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CHIP_CSRCS += s32k1xx_pwm.c
+endif
+
 ifeq ($(CONFIG_S32K1XX_LPUART),y)
 CHIP_CSRCS += s32k1xx_serial.c
 endif
@@ -87,8 +91,20 @@ ifeq ($(CONFIG_S32K1XX_ENET),y)
 CHIP_CSRCS += s32k1xx_enet.c
 endif
 
+ifeq ($(CONFIG_S32K1XX_FLEXCAN),y)
+CHIP_CSRCS += s32k1xx_flexcan.c
+endif
+
 ifeq ($(CONFIG_S32K1XX_RTC),y)
 CHIP_CSRCS += s32k1xx_rtc.c
+endif
+
+ifeq ($(CONFIG_S32K1XX_PROGMEM),y)
+CHIP_CSRCS += s32k1xx_progmem.c
+endif
+
+ifeq ($(CONFIG_S32K1XX_EEEPROM),y)
+CHIP_CSRCS += s32k1xx_eeeprom.c
 endif
 
 # Source files specific to the ARM CPU family and to the S32K1xx chip family

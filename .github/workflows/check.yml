@@ -14,23 +14,26 @@ name: Check
 
 on:
   pull_request:
+    paths-ignore:
+      - 'Documentation/**'
 
 jobs:
   check:
     runs-on: ubuntu-18.04
 
     steps:
-    - name: Checkout nuttx repo
-      uses: actions/checkout@v2
-      with:
-        repository: apache/incubator-nuttx
-        path: nuttx
-        fetch-depth: 0
+      - name: Checkout nuttx repo
+        uses: actions/checkout@v2
+        with:
+          repository: apache/incubator-nuttx
+          path: nuttx
+          fetch-depth: 0
 
-    - name: Check Pull Request
-      run: |
-        cd nuttx
-        commits=`git log -1 --merges --pretty=format:%P | awk -F" " '{ print $1 ".." $2 }'`
-        git log --oneline $commits
-        echo "../nuttx/tools/checkpatch.sh -g $commits"
-        ../nuttx/tools/checkpatch.sh -g $commits
+      - name: Check Pull Request
+        run: |
+          echo "::add-matcher::nuttx/.github/nxstyle.json"
+          cd nuttx
+          commits="${{ github.event.pull_request.base.sha }}..HEAD"
+          git log --oneline $commits
+          echo "../nuttx/tools/checkpatch.sh -g $commits"
+          ../nuttx/tools/checkpatch.sh -g $commits

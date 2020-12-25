@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/net/rpmsgdrv.c
  *
- *   Copyright (C) 2018 Pinecone Inc. All rights reserved.
- *   Author: Jianli Dong <dongjianli@pinecone.net>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -166,7 +151,7 @@ struct net_rpmsg_drv_s
   FAR const char        *cpuname;
   FAR const char        *devname;
   struct rpmsg_endpoint ept;
-  WDOG_ID               txpoll;   /* TX poll timer */
+  struct wdog_s         txpoll;   /* TX poll timer */
   struct work_s         pollwork; /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
@@ -210,7 +195,7 @@ static int  net_rpmsg_drv_send_recv(struct net_driver_s *dev,
 /* Watchdog timer expirations */
 
 static void net_rpmsg_drv_poll_work(FAR void *arg);
-static void net_rpmsg_drv_poll_expiry(int argc, wdparm_t arg, ...);
+static void net_rpmsg_drv_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -637,7 +622,7 @@ static int net_rpmsg_drv_transfer_handler(FAR struct rpmsg_endpoint *ept,
   dev->d_len = msg->length;
 
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(dev);
 #endif
@@ -843,8 +828,8 @@ static void net_rpmsg_drv_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, NET_RPMSG_DRV_WDDELAY, net_rpmsg_drv_poll_expiry, 1,
-           (wdparm_t)dev);
+  wd_start(&priv->txpoll, NET_RPMSG_DRV_WDDELAY,
+           net_rpmsg_drv_poll_expiry, (wdparm_t)dev);
   net_unlock();
 }
 
@@ -855,8 +840,7 @@ static void net_rpmsg_drv_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -867,7 +851,7 @@ static void net_rpmsg_drv_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void net_rpmsg_drv_poll_expiry(int argc, wdparm_t arg, ...)
+static void net_rpmsg_drv_poll_expiry(wdparm_t arg)
 {
   FAR struct net_driver_s *dev = (FAR struct net_driver_s *)arg;
   FAR struct net_rpmsg_drv_s *priv = dev->d_private;
@@ -968,8 +952,8 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, NET_RPMSG_DRV_WDDELAY, net_rpmsg_drv_poll_expiry, 1,
-           (wdparm_t)dev);
+  wd_start(&priv->txpoll, NET_RPMSG_DRV_WDDELAY,
+           net_rpmsg_drv_poll_expiry, (wdparm_t)dev);
 
   net_unlock();
 
@@ -1039,7 +1023,7 @@ static int net_rpmsg_drv_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and work */
 
-  wd_cancel(priv->txpoll);
+  wd_cancel(&priv->txpoll);
   work_cancel(LPWORK, &priv->pollwork);
 
   leave_critical_section(flags);
@@ -1107,7 +1091,7 @@ static void net_rpmsg_drv_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          devif_poll(dev, net_rpmsg_drv_txpoll);
+          devif_timer(dev, 0, net_rpmsg_drv_txpoll);
         }
     }
 
@@ -1394,11 +1378,6 @@ int net_rpmsg_drv_init(FAR const char *cpuname,
   dev->d_ioctl   = net_rpmsg_drv_ioctl;   /* Handle network IOCTL commands */
 #endif
   dev->d_private = priv;                  /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for transmissions */
-
-  priv->txpoll   = wd_create();           /* Create periodic poll timer */
-  DEBUGASSERT(priv->txpoll != NULL);
 
   /* Register the device with the openamp */
 

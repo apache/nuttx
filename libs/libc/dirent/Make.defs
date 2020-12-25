@@ -36,6 +36,7 @@
 # Add the dirent C files to the build
 
 CSRCS += lib_readdirr.c lib_telldir.c lib_alphasort.c lib_scandir.c
+CSRCS += lib_ftw.c lib_nftw.c
 
 # Add the dirent directory to the build
 

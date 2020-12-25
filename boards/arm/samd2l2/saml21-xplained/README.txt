@@ -286,7 +286,7 @@ GNU Toolchain Options
      out 'cygpath -w'
 
   2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic
-     links are used in Nuttx (e.g., include/arch).  The make system works
+     links are used in NuttX (e.g., include/arch).  The make system works
      around these problems for the Windows tools by copying directories
      instead of linking them. But this can also cause some confusion for
      you:  For example, you may edit a file in a "linked" directory and find
@@ -341,7 +341,7 @@ NuttX EABI "buildroot" Toolchain
   Bitbucket download site (https://bitbucket.org/nuttx/buildroot/downloads/).
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
-  1. You must have already configured Nuttx in <some-dir>/nuttx.
+  1. You must have already configured NuttX in <some-dir>/nuttx.
 
      tools/configure.sh saml21-xplained:<sub-dir>
 

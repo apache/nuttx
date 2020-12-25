@@ -11,17 +11,23 @@ if SCU_SENSORS
 config SENSORS_AK09912_SCU
 	bool "Asahi AK09911/AK09912 Compass Sensor"
 	default n
-	select CXD56_I2C
-	select CXD56_SCU
+	depends on !SENSORS_AK09912 && (CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ)
 	---help---
 		Enable driver for AK09911/AK09912 Compass sensor.
 		NOTE: This sensor is connected to the SCU unit
 
+if SENSORS_AK09912_SCU
+
+config SENSORS_AK09912_SCU_DECI
+	bool "AK09912 Magnetometer to decimator"
+	default n
+
+endif
+
 config SENSORS_APDS9930_SCU
 	bool "Avago APDS9930 Proximity and Ambient light Sensor"
 	default n
-	select CXD56_I2C
-	select CXD56_SCU
+	depends on CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ
 	---help---
 		Enable driver for APDS9930 proximity and ambient light sensor.
 
@@ -29,7 +35,7 @@ if SENSORS_APDS9930_SCU
 
 config SENSORS_APDS9930_PROXIMITY_INTERRUPT
 	bool "Use Proximity interrupt"
-	default y
+	default n
 	---help---
 		Use Interrupt when the threshold is exceeded.
 		In this case, SCU sequencer is not used.
@@ -39,32 +45,28 @@ endif
 config SENSORS_BH1721FVC_SCU
 	bool "Rohm BH1721FVC Ambient Light Sensor"
 	default n
-	select CXD56_I2C
-	select CXD56_SCU
+	depends on CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ
 	---help---
 		Enable driver for the Rohm BH1721FVC light sensor.
 
 config SENSORS_BH1745NUC_SCU
 	bool "Rohm BH1745NUC Color Sensor"
 	default n
-	select CXD56_I2C
-	select CXD56_SCU
+	depends on CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ
 	---help---
 		Enable driver for BH1745NUC color sensor.
 
 config SENSORS_BM1383GLV_SCU
 	bool "Rohm BM1383GLV/BM1383AGLV Pressure Sensor"
 	default n
-	select CXD56_I2C
-	select CXD56_SCU
+	depends on CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ
 	---help---
 		Enable driver for BM1383GLV/BM1383AGLV pressure sensor.
 
 config SENSORS_BM1422GMV_SCU
 	bool "Rohm BM1422GMV/BM1422AGMV Magnetic Sensor"
 	default n
-	select CXD56_I2C
-	select CXD56_SCU
+	depends on CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ
 	---help---
 		Enable driver for BM1422GMV/BM1422AGMV magnetic sensor.
 
@@ -81,12 +83,17 @@ config BM1422GMV_SLAVE_ADDRESS_0F
 	bool "0x0F"
 
 endchoice
+
+config SENSORS_BM1422GMV_SCU_DECI
+	bool "BM1422GMV Magnetometer to decimator"
+	default n
+
 endif # SENSORS_BM1422GMV_SCU
 
 config SENSORS_BMI160_SCU
 	bool "Bosch BMI160 Sensor support"
 	default n
-	select CXD56_SCU
+	depends on !SENSORS_BMI160 && (CXD56_SPI3_SCUSEQ || CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ)
 	---help---
 		Enable driver support for the Bosch BMI160 sensor.
 
@@ -98,32 +105,51 @@ choice
 
 config SENSORS_BMI160_SCU_SPI
 	bool "BMI160 SPI Interface"
-	select CXD56_SPI
+	depends on CXD56_SPI3_SCUSEQ
 	---help---
 		Enables support for the SPI interface.
 
 config SENSORS_BMI160_SCU_I2C
 	bool "BMI160 I2C Interface"
-	select CXD56_I2C
+	depends on CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ
 	---help---
 		Enables support for the I2C interface
 
 endchoice
-endif # CONFIG_SENSORS_BMI160_SCU
+
+config SENSORS_BMI160_SCU_DECI_GYRO
+	bool "BMI160 Gyroscope to decimator"
+	default n
+
+config SENSORS_BMI160_SCU_DECI_ACCEL
+	bool "BMI160 Accelerometer to decimator"
+	default n
+
+endif # SENSORS_BMI160_SCU
 
 config SENSORS_BMP280_SCU
 	bool "Bosch BMP280 Barometic Pressure Sensor"
 	default n
-	select CXD56_I2C
-	select CXD56_SCU
+	depends on !SENSORS_BMP280 && (CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ)
 	---help---
 		Enable driver for the Bosch BMP280 barometic pressure sensor.
+
+if SENSORS_BMP280_SCU
+
+config SENSORS_BMP280_SCU_DECI_PRESS
+	bool "BMP280 Pressure to decimator"
+	default n
+
+config SENSORS_BMP280_SCU_DECI_TEMP
+	bool "BMI280 Temperature to decimator"
+	default n
+
+endif
 
 config SENSORS_KX022_SCU
 	bool "Kionix KX022/KX122 Acceleration Sensor"
 	default n
-	select CXD56_I2C
-	select CXD56_SCU
+	depends on CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ
 	---help---
 		Enable driver for the Kionix KX022/KX122 acceleration sensor.
 
@@ -135,13 +161,16 @@ config SENSORS_KX122
 	---help---
 		Use KX122 which has the register upper compatibility with KX022.
 
+config SENSORS_KX022_SCU_DECI
+	bool "KX022 Accelerometer to decimator"
+	default n
+
 endif # SENSORS_KX022
 
 config SENSORS_LT1PA01_SCU
 	bool "Murata LT1PA01 Proximity and Ambient light Sensor"
 	default n
-	select CXD56_I2C
-	select CXD56_SCU
+	depends on CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ
 	---help---
 		Enable driver for LT1PA01 proximity and ambient light sensor.
 
@@ -149,7 +178,7 @@ if SENSORS_LT1PA01_SCU
 
 config LT1PA01_PROXIMITY_INTERRUPT
 	bool "Use Proximity interrupt"
-	default y
+	default n
 	---help---
 		Use Interrupt when the threshold is exceeded.
 		In this case, SCU sequencer is not used.
@@ -159,8 +188,7 @@ endif # SENSORS_LT1PA01_SCU
 config SENSORS_RPR0521RS_SCU
 	bool "Rohm RPR0521RS Proximity and Ambient light Sensor"
 	default n
-	select CXD56_I2C
-	select CXD56_SCU
+	depends on CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ
 	---help---
 		Enable driver for RPR0521RS proximity and ambient light sensor.
 
@@ -168,7 +196,7 @@ if SENSORS_RPR0521RS_SCU
 
 config RPR0521RS_PROXIMITY_INTERRUPT
 	bool "Use Proximity interrupt"
-	default y
+	default n
 	---help---
 		Use Interrupt when the threshold is exceeded.
 		In this case, SCU sequencer is not used.

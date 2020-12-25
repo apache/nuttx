@@ -59,16 +59,17 @@
  * Name: board_button_initialize
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   stm32_configgpio(GPIO_BTN_0);    /* Configure the GPIO pins as inputs. */
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
@@ -88,21 +89,22 @@ uint32_t board_buttons(void)
  * Button support.
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
- *   After board_button_initialize() has been called, board_buttons() may be called to
- *   collect the state of all buttons.  board_buttons() returns an 32-bit bit set
- *   with each bit associated with a button.  See the BUTTON_*_BIT and JOYSTICK_*_BIT
- *   definitions in board.h for the meaning of each bit.
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   32-bit bit set with each bit associated with a button.  See the
+ *   BUTTON_*_BIT and JOYSTICK_*_BIT definitions in board.h for the meaning
+ *   of each bit.
  *
- *   board_button_irq() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of enumeration
- *   value.
+ *   board_button_irq() may be called to register an interrupt handler that
+ *   will be called when a button is depressed or released. The ID value is a
+ *   button enumeration value that uniquely identifies a button resource. See
+ *   the BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of
+ *   enumeration value.
  *
  ****************************************************************************/
 
@@ -113,7 +115,8 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
   if (id == 0)
     {
-      ret = stm32_gpiosetevent(GPIO_BTN_0, true, true, true, irqhandler, arg);
+      ret = stm32_gpiosetevent(GPIO_BTN_0, true, true, true,
+                               irqhandler, arg);
     }
 
   return ret;

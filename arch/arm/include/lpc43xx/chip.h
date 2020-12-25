@@ -47,6 +47,7 @@
  ************************************************************************************/
 
 /* Per the data sheet: LPC4350/30/20/10 Rev. 3.2 — 4 June 2012 */
+
 /* Get customizations for each supported chip.
  *
  * SRAM Resources
@@ -75,6 +76,7 @@
  */
 
 /* Per the user manual: UM10503, Rev. 1.2 — 8 June 2012 */
+
 /* Get customizations for each supported chip.
  *
  * SRAM Resources
@@ -90,7 +92,7 @@
  * --------------------- -------- ------- ------- ------- ------- ------- -------
  * BANK 0 (0x2000 0000)     16Kb    48Kb   48Kb    48Kb     48Kb    48Kb    48Kb
  * BANK 1 (0x2000 8000)             NOTE 1 NOTE 1  NOTE 1  NOTE 1  NOTE 1  NOTE 1
- * BANK 2 (0x2000 c000)     16Kb    16Kb   16Kb    16Kb    16Kb    16Kb		 16Kb
+ * BANK 2 (0x2000 c000)     16Kb    16Kb   16Kb    16Kb    16Kb    16Kb     16Kb
  * --------------------- -------- ------- ------- ------- ------- ------- -------
  * SUBTOTAL                 32Kb    64Kb   64Kb    64Kb     64Kb    64Kb    64Kb
  * --------------------- -------- ------- ------- ------- ------- ------- -------
@@ -103,7 +105,7 @@
  * BANK A (0x1a00 0000)                                    256Kb   512Kb   512Kb
  * BANK B (0x1b00 8000)                                    256Kb   512Kb   512Kb
  * --------------------- -------- ------- ------- ------- ------- ------- -------
- * TOTAL                   None    None    None    None    512Kb  1024Kb	1024Kb
+ * TOTAL                   None    None    None    None    512Kb  1024Kb   1024Kb
  * --------------------- -------- ------- ------- ------- ------- ------- -------
  *
  * NOTE 1: The 64Kb of AHB of SRAM on the LPC4350/30/20 span all AHB SRAM
@@ -688,6 +690,7 @@
 #endif
 
 /* NVIC priority levels *************************************************************/
+
 /* Each priority field holds a priority value, 0-31. The lower the value, the greater
  * the priority of the corresponding interrupt.
  *
@@ -706,23 +709,11 @@
 #define LPC43M0_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
 #define LPC43M0_SYSH_PRIORITY_STEP    0x40 /* Steps between priorities */
 
-/* Only the Cortex-M4 is supported by Nuttx */
+/* Only the Cortex-M4 is supported by NuttX */
 
 #define NVIC_SYSH_PRIORITY_MIN        LPC43M4_SYSH_PRIORITY_MIN
 #define NVIC_SYSH_PRIORITY_DEFAULT    LPC43M4_SYSH_PRIORITY_DEFAULT
 #define NVIC_SYSH_PRIORITY_MAX        LPC43M4_SYSH_PRIORITY_MAX
 #define NVIC_SYSH_PRIORITY_STEP       LPC43M4_SYSH_PRIORITY_STEP
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
 
 #endif /* __ARCH_ARM_INCLUDE_LPC43XX_CHIP_H */

@@ -107,11 +107,6 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
            CONFIG_NX_NPLANES, be->vinfo.nplanes);
       return -E2BIG;
     }
-  else if (be->vinfo.nplanes < CONFIG_NX_NPLANES)
-    {
-      gwarn("WARNING: NX configured for %d planes, controller only needs %d\n",
-           CONFIG_NX_NPLANES, be->vinfo.nplanes);
-    }
 #endif
 
   /* Then get information about each color plane */
@@ -124,6 +119,8 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
           gerr("ERROR: Failed to get pinfo[%d]\n", i);
           return ret;
         }
+
+      be->plane[i].driver = dev;
 
       /* Select rasterizers to match the BPP reported for this plane.
        * NOTE that there are configuration options to eliminate support
@@ -309,5 +306,6 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
           return -ENOSYS;
         }
     }
+
   return OK;
 }

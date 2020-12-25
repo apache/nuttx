@@ -2,35 +2,20 @@
  * boards/arm/stm32/nucleo-l152re/include/board.h
  * include/arch/board/board.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -58,16 +43,19 @@
 
 /* Clocking *****************************************************************/
 
-/* Four different clock sources can be used to drive the system clock (SYSCLK):
+/* Four different clock sources can be used to drive the system clock
+ * (SYSCLK):
  *
  * - HSI high-speed internal oscillator clock
  *   Generated from an internal 16 MHz RC oscillator
- * - HSE high-speed external oscillator clock. 8 MHz from MCO output of ST-LINK.
+ * - HSE high-speed external oscillator clock. 8 MHz from MCO output of
+ *   ST-LINK.
  * - PLL clock
  * - MSI multispeed internal oscillator clock
- *   The MSI clock signal is generated from an internal RC oscillator. Seven frequency
- *   ranges are available: 65.536 kHz, 131.072 kHz, 262.144 kHz, 524.288 kHz, 1.048 MHz,
- *   2.097 MHz (default value) and 4.194 MHz.
+ *   The MSI clock signal is generated from an internal RC oscillator.
+ *   Seven frequency ranges are available: 65.536 kHz, 131.072 kHz,
+ *   262.144 kHz, 524.288 kHz, 1.048 MHz, 2.097 MHz (default value)
+ *   and 4.194 MHz.
  *
  * The devices have the following two secondary clock sources
  * - LSI low-speed internal RC clock
@@ -97,13 +85,15 @@
  *   MHz frequency. This is required to provide a 48 MHz clock to the USB or
  *   SDIO (SDIOCLK or USBCLK = PLLVCO/2).
  * SYSCLK
- *   The system clock is derived from the PLL VCO divided by the output division factor.
+ *   The system clock is derived from the PLL VCO divided by the output
+ *   division factor.
  * Limitations:
  *   96 MHz as PLLVCO when the product is in range 1 (1.8V),
  *   48 MHz as PLLVCO when the product is in range 2 (1.5V),
  *   24 MHz when the product is in range 3 (1.2V).
  *   Output division to avoid exceeding 32 MHz as SYSCLK.
- *   The minimum input clock frequency for PLL is 2 MHz (when using HSE as PLL source).
+ *   The minimum input clock frequency for PLL is 2 MHz (when using HSE as
+ *   PLL source).
  */
 
 #if 1
@@ -119,8 +109,8 @@
 #define STM32_PLL_FREQUENCY     (6*STM32_HSI_FREQUENCY) /* PLL VCO Frequency is 96MHz */
 #endif
 
-/* Use the PLL and set the SYSCLK source to be the divided down PLL VCO output
- * frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
+/* Use the PLL and set the SYSCLK source to be the divided down PLL VCO
+ * output frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
  */
 
 #define STM32_SYSCLK_SW         RCC_CFGR_SW_PLL
@@ -147,6 +137,7 @@
 /* TODO: Timers */
 
 /* LED definitions **********************************************************/
+
 /* The Nucleo L152RE board has three LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
@@ -200,6 +191,7 @@
 #define LED_PANIC        1
 
 /* Button definitions *******************************************************/
+
 /* The Nucleo L152RE supports two buttons; only one button is controllable
  * by software:
  *
@@ -224,5 +216,11 @@
 
 #define GPIO_USART2_RX GPIO_USART2_RX_1 /* PA3 */
 #define GPIO_USART2_TX GPIO_USART2_TX_1 /* PA2 */
+
+/* SPI1 */
+
+#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_2
+#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_2
+#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_L152RE_INCLUDE_BOARD_H */

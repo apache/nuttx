@@ -79,8 +79,8 @@
  * Returned Value:
  *   On success, 0 is returned, the 'addr' argument points to the address
  *   of the socket, and the 'addrlen' argument points to the length of the
- *   address. Otherwise, -1 is returned and errno is set to indicate the error.
- *   Possible errno values that may be returned include:
+ *   address. Otherwise, -1 is returned and errno is set to indicate the
+ *   error. Possible errno values that may be returned include:
  *
  *   EBADF      - The socket argument is not a valid file descriptor.
  *   ENOTSOCK   - The socket argument does not refer to a socket.
@@ -103,7 +103,7 @@ int psock_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Some sanity checking... */
 
-  if (addr == NULL || addrlen == NULL)
+  if (addr == NULL || addrlen == NULL || *addrlen <= 0)
     {
       return -EINVAL;
     }
@@ -139,8 +139,8 @@ int psock_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
  * Returned Value:
  *   On success, 0 is returned, the 'addr' argument points to the address
  *   of the socket, and the 'addrlen' argument points to the length of the
- *   address. Otherwise, -1 is returned and errno is set to indicate the error.
- *   Possible errno values that may be returned include:
+ *   address. Otherwise, -1 is returned and errno is set to indicate the
+ *   error. Possible errno values that may be returned include:
  *
  *   EBADF      - The socket argument is not a valid file descriptor.
  *   ENOTSOCK   - The socket argument does not refer to a socket.
@@ -151,7 +151,8 @@ int psock_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
+int getsockname(int sockfd, FAR struct sockaddr *addr,
+                FAR socklen_t *addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
   int ret;

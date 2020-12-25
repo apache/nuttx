@@ -193,8 +193,8 @@ int sam_emac0_setmac(void)
   nread = at24->read(at24, AT24XX_MACADDR_OFFSET, 6, mac);
   if (nread < 6)
     {
-      nerr("ERROR: AT24 read(AT24XX_MACADDR_OFFSET) failed: ld\n",
-          (long)nread);
+      nerr("ERROR: AT24 read(AT24XX_MACADDR_OFFSET) failed: %zd\n",
+           nread);
       sam_i2cbus_uninitialize(i2c);
       return (int)nread;
     }

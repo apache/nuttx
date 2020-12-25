@@ -199,8 +199,8 @@ LEDs
 
   These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
   defined.  In that case, the usage by the board port is defined in
-  include/board.h and src/up_leds.c. The LEDs are used to encode OS-related
-  events as follows:
+  include/board.h and src/stm32_autoleds.c. The LEDs are used to encode
+  OS-related events as follows:
 
     SYMBOL                Meaning                 LED state
                                                     LED3     LED4

@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig DRIVERS_RC
+	bool "Remote Control Device Support"
+	select MM_CIRCBUF
+	default n
+	---help---
+		Drivers for various remote control
+
+if DRIVERS_RC
+
+config RC_DUMMY
+	bool "Dummy RC Device Support"
+	select SCHED_LPWORK
+	default n
+	---help---
+		We test RC driver architecture by dummy rc device.
+		Test Item: 1. Test all the IOCTL commands; 2. Test all API interface,
+                ex: tx_ir, tx_scancode; 3. We use the way of workqueue to periodically
+		feed data to the downstream buffer(userspace->kernelspace) to simulate
+		reading data from IR device; 4. Write IR data to device by tx_ir/tx_scancode
+		to simulate as remote control.
+
+endif # DRIVERS_RC

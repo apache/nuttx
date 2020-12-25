@@ -14,7 +14,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
- *    distribution.
+
  * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
@@ -110,6 +110,7 @@ const uintptr_t g_spiobase[SAM_NPIO] =
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Maps a port number to the standard port character */
 
 #if defined(CONFIG_DEBUG_GPIO_INFO) && SAM_NPIO > 0
@@ -131,6 +132,7 @@ static const char g_portchar[SAM_NPIO] =
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_issecure
  *
@@ -411,7 +413,9 @@ int sam_configpio(pio_pinset_t cfgset)
   irqstate_t flags;
   int ret;
 
-  /* Get the base address and pin mask associated with this pin configuration */
+  /* Get the base address and pin mask associated with this pin
+   * configuration
+   */
 
   base = sam_piobase(cfgset);
   if (base == 0)
@@ -464,7 +468,10 @@ int sam_configpio(pio_pinset_t cfgset)
     {
       putreg32(pin, base + SAM_SPIO_SIONR_OFFSET);
     }
-  /* Set the mask register to modify only the specific pin being configured. */
+
+  /* Set the mask register to modify only the specific pin being
+   * configured.
+   */
 
   putreg32(pin, base + SAM_PIO_MSKR_OFFSET);
 
@@ -485,7 +492,9 @@ int sam_configpio(pio_pinset_t cfgset)
         break;
 
       case PIO_ANALOG:
+
         /* REVISIT */
+
         ret = OK;
         break;
 
@@ -581,26 +590,28 @@ bool sam_pioread(pio_pinset_t pinset)
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pio_forceclk
  *
  * Description:
- *   Enable PIO clocking.  Needed only for SAMA5D3/D4 compatibility.  For the SAMA5D2,
- *   there is a common clock for all PIO ports and that clock is always enabled.
+ *   Enable PIO clocking.  Needed only for SAMA5D3/D4 compatibility.  For the
+ *   SAMA5D2, there is a common clock for all PIO ports and that clock is
+ *   always enabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_pio_forceclk(pio_pinset_t pinset, bool enable)
 {
 }
 
-/************************************************************************************
+/****************************************************************************
  * Function:  sam_dumppio
  *
  * Description:
- *   Dump all PIO registers associated with the base address of the provided pinset.
+ *   Dump all PIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int sam_dumppio(uint32_t pinset, const char *msg)
@@ -632,17 +643,22 @@ int sam_dumppio(uint32_t pinset, const char *msg)
     }
 
   gpioinfo("   MSKR: %08x   CFGR: %08x   PDSR: %08x LOCKSR: %08x\n",
-          getreg32(base + SAM_PIO_MSKR_OFFSET), getreg32(base + SAM_PIO_CFGR_OFFSET),
-          getreg32(base + SAM_PIO_PDSR_OFFSET), getreg32(base + SAM_PIO_LOCKSR_OFFSET));
+          getreg32(base + SAM_PIO_MSKR_OFFSET),
+          getreg32(base + SAM_PIO_CFGR_OFFSET),
+          getreg32(base + SAM_PIO_PDSR_OFFSET),
+          getreg32(base + SAM_PIO_LOCKSR_OFFSET));
   gpioinfo("   ODSR: %08x    IMR: %08x    ISR: %08x\n",
-          getreg32(base + SAM_PIO_ODSR_OFFSET), getreg32(base + SAM_PIO_IMR_OFFSET),
+          getreg32(base + SAM_PIO_ODSR_OFFSET),
+          getreg32(base + SAM_PIO_IMR_OFFSET),
           getreg32(base + SAM_PIO_ISR_OFFSET));
 
   if (secure)
     {
       gpioinfo("   SCDR: %08x   WPMR: %08x   WPSR: %08x  IOSSR: %08x\n",
-              getreg32(SAM_SPIO_SCDR), getreg32(SAM_SPIO_WPMR),
-              getreg32(SAM_SPIO_WPSR), getreg32(base + SAM_SPIO_IOSSR_OFFSET));
+              getreg32(SAM_SPIO_SCDR),
+              getreg32(SAM_SPIO_WPMR),
+              getreg32(SAM_SPIO_WPSR),
+              getreg32(base + SAM_SPIO_IOSSR_OFFSET));
     }
   else
     {

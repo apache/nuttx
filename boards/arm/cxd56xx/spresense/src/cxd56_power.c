@@ -226,6 +226,42 @@ int board_power_control(int target, bool en)
 }
 
 /****************************************************************************
+ * Name: board_power_control_tristate
+ *
+ * Description:
+ *   Power on/off/HiZ the device on the board.
+ *   (HiZ is available only for PMIC_TYPE_GPO.)
+ *
+ * Input Parameter:
+ *   target : PMIC channel
+ *   value : 1 (ON), 0 (OFF), -1(HiZ)
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+int board_power_control_tristate(int target, int value)
+{
+  int ret = 0;
+  bool en;
+
+  if ((PMIC_GET_TYPE(target) == PMIC_TYPE_GPO) && (value < 0))
+    {
+      /* set HiZ to PMIC GPO channel */
+
+      ret = cxd56_pmic_set_gpo_hiz(PMIC_GET_CH(target));
+    }
+  else
+    {
+      en = value ? true : false;
+      ret = board_power_control(target, en);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: board_power_monitor
  *
  * Description:
@@ -258,6 +294,38 @@ bool board_power_monitor(int target)
   if (pfunc)
     {
       ret = pfunc(PMIC_GET_CH(target));
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: board_power_monitor_tristate
+ *
+ * Description:
+ *   Get status of Power on/off/HiZ the device on the board.
+ *
+ * Input Parameter:
+ *   target : PMIC channel
+ *
+ * Returned Value:
+ *   1 (ON), 0 (OFF), -1(HiZ)
+ *
+ ****************************************************************************/
+
+int board_power_monitor_tristate(int target)
+{
+  int ret = 0;
+  bool en;
+
+  if (PMIC_GET_TYPE(target) == PMIC_TYPE_GPO)
+    {
+      ret = cxd56_pmic_get_gpo_hiz(PMIC_GET_CH(target));
+    }
+  else
+    {
+      en = board_power_monitor(target);
+      ret = en ? 1 : 0;
     }
 
   return ret;
@@ -326,7 +394,7 @@ int board_xtal_power_control(bool en)
 
   /* Get exclusive access to the lna / tcxo power control */
 
-  nxsem_wait(&g_ltsem);
+  nxsem_wait_uninterruptible(&g_ltsem);
 
   if (en)
     {
@@ -384,7 +452,7 @@ int board_lna_power_control(bool en)
 
   /* Get exclusive access to the lna / tcxo power control */
 
-  nxsem_wait(&g_ltsem);
+  nxsem_wait_uninterruptible(&g_ltsem);
 
   if (en)
     {

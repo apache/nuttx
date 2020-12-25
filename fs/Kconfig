@@ -30,6 +30,12 @@ config FS_AUTOMOUNTER_DEBUG
 		system debug is not enable.  This is useful primarily for in vivo
 		unit testing of the auto-mount feature.
 
+config FS_NEPOLL_DESCRIPTORS
+	int "Maximum number of default epoll descriptors for epoll_create1(2)"
+	default 8
+	---help---
+		The maximum number of default epoll descriptors for epoll_create1(2)
+
 config DISABLE_PSEUDOFS_OPERATIONS
 	bool "Disable pseudo-filesystem operations"
 	default y if DEFAULT_SMALL
@@ -52,6 +58,34 @@ config PSEUDOFS_SOFTLINKS
 		may be add in the pseudo file system.  This might be useful, for
 		to link a directory in the pseudo-file system, such as /bin, to
 		to a directory in a mounted volume, say /mnt/sdcard/bin.
+
+config EVENT_FD
+	bool "EventFD"
+	default n
+	---help---
+		Create a file descriptor for event notification
+
+if EVENT_FD
+
+config EVENT_FD_VFS_PATH
+    string "Path to eventfd storage"
+    default "/var/event"
+    ---help---
+        The path to where eventfd will exist in the VFS namespace.
+
+config EVENT_FD_POLL
+	bool "EventFD poll support"
+	default y
+	---help---
+		Poll support for file descriptor based events
+
+config EVENT_FD_NPOLLWAITERS
+	int "Number of eventFD poll waiters"
+	default 2
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+endif # EVENT_FD
 
 source fs/aio/Kconfig
 source fs/semaphore/Kconfig

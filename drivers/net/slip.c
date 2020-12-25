@@ -502,7 +502,7 @@ static int slip_txtask(int argc, FAR char *argv[])
             {
               /* No, perform the normal TX poll */
 
-              devif_poll(&priv->dev, slip_txpoll);
+              devif_timer(&priv->dev, 0, slip_txpoll);
             }
 
           net_unlock();

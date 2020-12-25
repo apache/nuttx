@@ -103,7 +103,7 @@ static uint16_t send_eventhandler(FAR struct net_driver_s *dev,
 {
   FAR struct sixlowpan_send_s *sinfo = (FAR struct sixlowpan_send_s *)pvpriv;
 
-  ninfo("flags: %04x: %d\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   /* Verify that this is a compatible network driver. */
 

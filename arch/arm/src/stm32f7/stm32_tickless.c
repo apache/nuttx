@@ -34,6 +34,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Tickless OS Support.
  *
@@ -139,7 +140,7 @@ struct stm32_tickless_s
   volatile bool pending;           /* True: pending task */
   uint32_t period;                 /* Interval period */
   uint32_t base;
-#if CONFIG_SCHED_TICKLESS_ALARM
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
   uint64_t last_alrm;
 #endif
 };
@@ -223,7 +224,7 @@ static inline void stm32_tickless_ackint(int channel)
 
 /****************************************************************************
  * Name: stm32_tickless_getint
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t stm32_tickless_getint(void)
 {
@@ -391,6 +392,17 @@ static int stm32_tickless_handler(int irq, void *context, void *arg)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_get_counter
+ *
+ ****************************************************************************/
+
+static uint64_t stm32_get_counter(void)
+{
+  return ((uint64_t)g_tickless.overflow << 32) |
+         STM32_TIM_GETCOUNTER(g_tickless.tch);
 }
 
 /****************************************************************************
@@ -988,22 +1000,41 @@ int up_timer_start(FAR const struct timespec *ts)
 }
 #endif
 
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
 int up_alarm_start(FAR const struct timespec *ts)
 {
+  size_t offset = 1;
   uint64_t tm = ((uint64_t)ts->tv_sec * NSEC_PER_SEC + ts->tv_nsec) /
                 NSEC_PER_TICK;
-  uint64_t counter = ((uint64_t)g_tickless.overflow << 32) |
-                     STM32_TIM_GETCOUNTER(g_tickless.tch);
+  irqstate_t flags;
 
-  g_tickless.last_alrm = tm;
-
-  int32_t diff = tm / NSEC_PER_TICK + counter;
+  flags = enter_critical_section();
 
   STM32_TIM_SETCOMPARE(g_tickless.tch, CONFIG_STM32F7_TICKLESS_CHANNEL, tm);
 
   stm32_tickless_ackint(g_tickless.channel);
   stm32_tickless_enableint(CONFIG_STM32F7_TICKLESS_CHANNEL);
 
+  g_tickless.pending = true;
+
+  /* If we have already passed this time, there is a chance we didn't set the
+   * compare register in time and we've missed the interrupt. If we don't
+   * catch this case, we won't interrupt until a full loop of the clock.
+   *
+   * Since we can't make assumptions about the clock speed and tick rate,
+   * we simply keep adding an offset to the current time, until we can leave
+   * certain that the interrupt is going to fire as soon as we leave the
+   * critical section.
+   */
+
+  while (tm <= stm32_get_counter())
+    {
+      tm = stm32_get_counter() + offset++;
+      STM32_TIM_SETCOMPARE(g_tickless.tch, CONFIG_STM32F7_TICKLESS_CHANNEL,
+                           tm);
+    }
+
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -1019,5 +1050,6 @@ int up_alarm_cancel(FAR struct timespec *ts)
 
   return 0;
 }
+#endif
 
 #endif /* CONFIG_SCHED_TICKLESS */

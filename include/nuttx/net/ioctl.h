@@ -85,6 +85,9 @@
 #define SIOCGIFCONF      _SIOC(0x0018)  /* Return an interface list (IPv4) */
 #define SIOCGLIFCONF     _SIOC(0x0019)  /* Return an interface list (IPv6) */
 
+#define SIOCGIFNAME      _SIOC(0x002A)  /* Get interface name string */
+#define SIOCGIFINDEX     _SIOC(0x002B)  /* Get index based name string */
+
 /* Interface flags */
 
 #define SIOCSIFFLAGS     _SIOC(0x001a)  /* Sets the interface flags */
@@ -121,6 +124,11 @@
 
 #define SIOCTELNET       _SIOC(0x0029)  /* Create a Telnet sessions.
                                          * See include/nuttx/net/telnet.h */
+
+/* SocketCAN ****************************************************************/
+
+#define SIOCGCANBITRATE  _SIOC(0x002C)  /* Get bitrate from a CAN controller */
+#define SIOCSCANBITRATE  _SIOC(0x002D)  /* Set bitrate of a CAN controller */
 
 /****************************************************************************
  * Public Type Definitions

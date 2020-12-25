@@ -91,7 +91,7 @@ struct bbsramd_s
 {
   uint8_t flags;               /* The crc is valid and the file was closed */
   uint8_t fileno;              /* The minor number */
-  uint16_t len;                /* Total Bytes in this file*/
+  uint16_t len;                /* Total Bytes in this file */
   struct timespec lastwrite;   /* Last write time */
 };
 
@@ -111,6 +111,7 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Function: stm32_bbsraminitialize
  *
@@ -151,7 +152,7 @@ int stm32_bbsraminitialize(char *devpath, int *sizes);
 *
 * Assumptions:
 *
-****************************************************************************/
+*****************************************************************************/
 
 #if defined(CONFIG_STM32_SAVE_CRASHDUMP)
 int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length);

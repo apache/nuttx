@@ -53,7 +53,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
+
+/* Configuration */
+
 /* CONFIG_BATTERY_GAUGE - Upper half battery fuel gauge driver support
  *
  * Specific, lower-half drivers will have other configuration requirements
@@ -63,7 +65,8 @@
  *   CONFIG_I2C_MAX1704X - The MAX1704x driver must be explicitly selected.
  */
 
-/* IOCTL Commands ***********************************************************/
+/* IOCTL Commands */
+
 /* The upper-half battery fuel gauge driver provides a character driver
  * "wrapper"  * around the lower-half battery driver that does all of the
  * real work.
@@ -89,6 +92,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* Battery status */
 
 enum battery_gauge_status_e
@@ -100,7 +104,7 @@ enum battery_gauge_status_e
   BATTERY_DISCHARGING  /* Probably not full, discharging */
 };
 
- /* This structure defines the lower half battery interface */
+/* This structure defines the lower half battery interface */
 
 struct battery_gauge_dev_s;
 struct battery_gauge_operations_s
@@ -129,7 +133,7 @@ struct battery_gauge_dev_s
   /* Fields required by the upper-half driver */
 
   FAR const struct battery_gauge_operations_s *ops; /* Battery operations */
-  sem_t batsem;  /* Enforce mutually exclusive access */
+  sem_t batsem;                                     /* Enforce mutually exclusive access */
 
   /* Data fields specific to the lower-half driver may follow */
 };
@@ -151,6 +155,7 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Name: battery_gauge_register
  *
@@ -172,6 +177,40 @@ int battery_gauge_register(FAR const char *devpath,
                            FAR struct battery_gauge_dev_s *dev);
 
 /****************************************************************************
+ * Name: bq27426_initialize
+ *
+ * Description:
+ *   Initialize the bq2742 battery driver and return an instance of the
+ *   lower_half interface that may be used with battery_gauge_register();
+ *
+ *   This driver requires:
+ *
+ *   CONFIG_BATTERY_GAUGE - Upper half battery fuel gauge driver support
+ *   CONFIG_I2C - I2C support
+ *   CONFIG_BQ27426 - And the driver must be explictly selected.
+ *
+ * Input Parameters:
+ *   i2c - An instance of the I2C interface to use to communicate with the
+ *         bq27426
+ *   addr - The I2C address of the bq27426 (Better be 0x55).
+ *   frequency - The I2C frequency
+ *
+ * Returned Value:
+ *   A pointer to the initializeed battery driver instance.  A NULL pointer
+ *   is returned on a failure to initialize the bq27426 lower half.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_BQ27426)
+struct i2c_master_s; /* Forward reference */
+
+FAR struct battery_gauge_dev_s *bq27426_initialize(
+                                                FAR struct i2c_master_s *i2c,
+                                                uint8_t addr,
+                                                uint32_t frequency);
+#endif
+
+/****************************************************************************
  * Name: max1704x_initialize
  *
  * Description:
@@ -187,7 +226,8 @@ int battery_gauge_register(FAR const char *devpath,
  *     chip is on the board in order to scale the voltage correctly.
  *
  * Input Parameters:
- *   i2c - An instance of the I2C interface to use to communicate with the MAX1704x
+ *   i2c - An instance of the I2C interface to use to communicate with
+ *         the MAX1704x.
  *   addr - The I2C address of the MAX1704x (Better be 0x36).
  *   frequency - The I2C frequency
  *
@@ -200,9 +240,10 @@ int battery_gauge_register(FAR const char *devpath,
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_MAX1704X)
 struct i2c_master_s; /* Forward reference */
 
-FAR struct battery_gauge_dev_s *max1704x_initialize(FAR struct i2c_master_s *i2c,
-                                                    uint8_t addr,
-                                                    uint32_t frequency);
+FAR struct battery_gauge_dev_s *max1704x_initialize(
+                                                FAR struct i2c_master_s *i2c,
+                                                uint8_t addr,
+                                                uint32_t frequency);
 #endif
 
 #undef EXTERN

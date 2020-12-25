@@ -755,9 +755,11 @@ int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel)
   putreg32(AM335X_LCD_DMA_CTRL, regval);
 
   putreg32(AM335X_LCD_DMA_FB0_BASE, CONFIG_AM335X_LCDC_FB_PBASE);
-  putreg32(AM335X_LCD_DMA_FB0_BASE, CONFIG_AM335X_LCDC_FB_PBASE + priv->fbsize - 1);
+  putreg32(AM335X_LCD_DMA_FB0_BASE,
+           CONFIG_AM335X_LCDC_FB_PBASE + priv->fbsize - 1);
   putreg32(AM335X_LCD_DMA_FB1_BASE, CONFIG_AM335X_LCDC_FB_PBASE);
-  putreg32(AM335X_LCD_DMA_FB1_CEIL, CONFIG_AM335X_LCDC_FB_PBASE + priv->fbsize - 1);
+  putreg32(AM335X_LCD_DMA_FB1_CEIL,
+           CONFIG_AM335X_LCDC_FB_PBASE + priv->fbsize - 1);
 
   /* Enable LCD */
 
@@ -815,7 +817,8 @@ int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel)
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
- *   plane of the specified plane.  Many OSDs support multiple planes of video.
+ *   plane of the specified plane.  Many OSDs support multiple planes of
+ *   video.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
@@ -894,8 +897,8 @@ void am335x_lcdclear(nxgl_mxpixel_t color)
 #endif
   int i;
 
-  lcdinfo("Clearing display: color=%04x VRAM=%08lx size=%lu\n",
-          color, (unsigned long)CONFIG_AM335X_LCDC_FB_VBASE,
+  lcdinfo("Clearing display: color=%04jx VRAM=%08lx size=%lu\n",
+          (uintmax_t)color, (unsigned long)CONFIG_AM335X_LCDC_FB_VBASE,
           (unsigned long)priv->fbsize);
 
   for (i = 0; i < priv->fbsize; i += incr)

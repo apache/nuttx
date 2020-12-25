@@ -29,6 +29,12 @@ config ARCH_CHIP_AT32UC3
 	---help---
 		Atmel AT32UC3A/B/C family of 32-bit AVR32s.
 
+config ARCH_CHIP_AVR_CUSTOM
+	bool "Custom AVR chip"
+	select ARCH_CHIP_CUSTOM
+	---help---
+		Select this option if there is no directory for the chip under arch/avr/src/.
+
 endchoice
 
 config ARCH_FAMILY_AVR

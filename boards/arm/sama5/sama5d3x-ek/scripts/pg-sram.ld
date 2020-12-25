@@ -72,8 +72,6 @@ MEMORY
     data   (rw) : ORIGIN = 0x00316000, LENGTH = 24K
 }
 
-OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
-OUTPUT_ARCH(arm)
 ENTRY(entry)
 ENTRY(_stext)
 

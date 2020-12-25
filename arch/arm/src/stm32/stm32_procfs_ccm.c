@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/statfs.h>
 #include <sys/stat.h>
 
 #include <stdint.h>
@@ -89,6 +88,7 @@ struct ccm_file_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* File system methods */
 
 static int     ccm_open(FAR struct file *filep, FAR const char *relpath,
@@ -221,15 +221,14 @@ static ssize_t ccm_read(FAR struct file *filep, FAR char *buffer,
   priv = (FAR struct ccm_file_s *)filep->f_priv;
   DEBUGASSERT(priv);
 
-
   mm_mallinfo(&g_ccm_heap, &mem);
 
   remaining = buflen;
   totalsize = 0;
 
   linesize = snprintf(priv->line,
-                      CCM_LINELEN,
-                      "             total       used       free    largest\n");
+                    CCM_LINELEN,
+                    "             total       used       free    largest\n");
   copysize = procfs_memcpy(priv->line, linesize, buffer, remaining, &offset);
   totalsize += copysize;
   buffer    += copysize;

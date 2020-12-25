@@ -44,6 +44,7 @@
 
 #include <stdint.h>
 #include <limits.h>
+#include <time.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -88,6 +89,7 @@ struct sem_s
 {
   volatile int16_t semcount;     /* >0 -> Num counts available */
                                  /* <0 -> Num tasks waiting for semaphore */
+
   /* If priority inheritance is enabled, then we have to keep track of which
    * tasks hold references to the semaphore.
    */
@@ -134,9 +136,6 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-/* Forward references needed by some prototypes */
-
-struct timespec; /* Defined in time.h */
 
 /* Counting Semaphore Interfaces (based on POSIX APIs) */
 
@@ -144,6 +143,8 @@ int        sem_init(FAR sem_t *sem, int pshared, unsigned int value);
 int        sem_destroy(FAR sem_t *sem);
 int        sem_wait(FAR sem_t *sem);
 int        sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime);
+int        sem_clockwait(FAR sem_t *sem, clockid_t clockid,
+                         FAR const struct timespec *abstime);
 int        sem_trywait(FAR sem_t *sem);
 int        sem_post(FAR sem_t *sem);
 int        sem_getvalue(FAR sem_t *sem, FAR int *sval);

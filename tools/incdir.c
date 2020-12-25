@@ -179,7 +179,6 @@ static enum compiler_e get_compiler(char *ccname, enum os_e os)
 
   if (strstr(ccname, "gcc")     != NULL ||
       strstr(ccname, "g++")     != NULL ||
-      strcmp(ccname, "cc")      == 0    ||
       strncmp(ccname, "cc.", 3) == 0)
     {
       return COMPILER_GCC;
@@ -204,8 +203,9 @@ static enum compiler_e get_compiler(char *ccname, enum os_e os)
     }
   else
     {
-      fprintf(stderr, "ERROR:  Unknown compiler: %s\n", ccname);
-      return COMPILER_UNKNOWN;
+      /* Unknown compiler. Assume GCC-compatible */
+
+      return COMPILER_GCC;
     }
 }
 
@@ -399,8 +399,8 @@ int main(int argc, char **argv, char **envp)
 
       if (compiler == COMPILER_ZDSII)
         {
-          /* FORM:  -stdinc: 'dir1;dir2;...;dirN'
-           *        -usrinc: 'dir1;dir2;...;dirN'
+          /* FORM:  -stdinc:'dir1;dir2;...;dirN'
+           *        -usrinc:'dir1;dir2;...;dirN'
            */
 
           /* Treat the first directory differently */
@@ -409,11 +409,11 @@ int main(int argc, char **argv, char **envp)
             {
               if (i == ndirs - 1)
                 {
-                  ret = my_asprintf(&segment, "%s '%s'", cmdarg, incpath);
+                  ret = my_asprintf(&segment, "%s'%s'", cmdarg, incpath);
                 }
               else
                 {
-                  ret = my_asprintf(&segment, "%s '%s", cmdarg, incpath);
+                  ret = my_asprintf(&segment, "%s'%s", cmdarg, incpath);
                 }
             }
           else
@@ -476,6 +476,11 @@ int main(int argc, char **argv, char **envp)
 
       /* Clean up for the next pass */
 
+      if (saveresp != NULL)
+        {
+          free(saveresp);
+        }
+
       if (segment != NULL)
         {
           free(segment);
@@ -492,5 +497,7 @@ int main(int argc, char **argv, char **envp)
     }
 
   fputs(response, stdout);
+  free(response);
+
   return EXIT_SUCCESS;
 }

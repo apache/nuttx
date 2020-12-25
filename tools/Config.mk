@@ -74,6 +74,34 @@ MODULECC ?= $(CC)
 MODULELD ?= $(LD)
 MODULESTRIP ?= $(STRIP)
 
+# Define HOSTCC on the make command line if it differs from these defaults
+# Define HOSTCFLAGS with -g on the make command line to build debug versions
+
+HOSTOS = ${shell uname -o 2>/dev/null || uname -s 2>/dev/null || echo "Other"}
+
+ifeq ($(HOSTOS),MinGW)
+
+# In the Windows native environment, the MinGW GCC compiler is used
+
+HOSTCC ?= mingw32-gcc.exe
+HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -DCONFIG_WINDOWS_NATIVE=y
+
+else
+
+# GCC or clang is assumed in all other POSIX environments
+# (Linux, Cygwin, MSYS2, macOS).
+# strtok_r is used in some tools, but does not seem to be available in
+# the MinGW environment.
+
+HOSTCC ?= cc
+HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow
+HOSTCFLAGS += -DHAVE_STRTOK_C=1
+
+ifeq ($(HOSTOS),Cygwin)
+HOSTCFLAGS += -DHOST_CYGWIN=1
+endif
+endif
+
 # Some defaults just to prohibit some bad behavior if for some reason they
 # are not defined
 
@@ -107,13 +135,30 @@ else
   DELIM ?= $(strip /)
 endif
 
+# Process chip-specific directories
+
+ifeq ($(CONFIG_ARCH_CHIP_CUSTOM),y)
+  CUSTOM_CHIP_DIR = $(patsubst "%",%,$(CONFIG_ARCH_CHIP_CUSTOM_DIR))
+ifeq ($(CONFIG_ARCH_CHIP_CUSTOM_DIR_RELPATH),y)
+  CHIP_DIR ?= $(TOPDIR)$(DELIM)$(CUSTOM_CHIP_DIR)
+  CHIP_KCONFIG = $(TOPDIR)$(DELIM)$(CUSTOM_CHIP_DIR)$(DELIM)Kconfig
+else
+  CHIP_DIR ?= $(CUSTOM_CHIP_DIR)
+  CHIP_KCONFIG = $(CUSTOM_CHIP_DIR)$(DELIM)Kconfig
+endif
+else
+  CHIP_DIR ?= $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)$(CONFIG_ARCH_CHIP)
+  CHIP_KCONFIG = $(TOPDIR)$(DELIM)arch$(DELIM)dummy$(DELIM)dummy_kconfig
+endif
+
 # Process board-specific directories
 
 ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
+  CUSTOM_DIR = $(patsubst "%",%,$(CONFIG_ARCH_BOARD_CUSTOM_DIR))
 ifeq ($(CONFIG_ARCH_BOARD_CUSTOM_DIR_RELPATH),y)
-  BOARD_DIR ?= $(TOPDIR)$(DELIM)$(CONFIG_ARCH_BOARD_CUSTOM_DIR)$(DELIM)$(CONFIG_ARCH_BOARD)
+  BOARD_DIR ?= $(TOPDIR)$(DELIM)$(CUSTOM_DIR)
 else
-  BOARD_DIR ?= $(CONFIG_ARCH_BOARD_CUSTOM_DIR)$(DELIM)$(CONFIG_ARCH_BOARD)
+  BOARD_DIR ?= $(CUSTOM_DIR)
 endif
 else
   BOARD_DIR ?= $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)
@@ -154,6 +199,25 @@ else ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
 else
   MKDEP ?= $(TOPDIR)$(DELIM)tools$(DELIM)mkdeps$(HOSTEXEEXT)
 endif
+
+# Per-file dependency generation rules
+
+OBJPATH ?= .
+
+%.dds: %.S
+	$(Q) $(MKDEP) --obj-path $(OBJPATH) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $< > $@
+
+%.ddc: %.c
+	$(Q) $(MKDEP) --obj-path $(OBJPATH) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $< > $@
+
+%.ddp: %.cpp
+	$(Q) $(MKDEP) --obj-path $(OBJPATH) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CXX)" -- $(CXXFLAGS) -- $< > $@
+
+%.ddx: %.cxx
+	$(Q) $(MKDEP) --obj-path $(OBJPATH) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CXX)" -- $(CXXFLAGS) -- $< > $@
+
+%.ddh: %.c
+	$(Q) $(MKDEP) --obj-path $(OBJPATH) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(HOSTCFLAGS) -- $< > $@
 
 # INCDIR - Convert a list of directory paths to a list of compiler include
 #   directories
@@ -271,8 +335,8 @@ define INSTALL_LIB
 	$(Q) install -m 0644 $1 $2
 endef
 
-# ARCHIVE - Add a list of files to an archive
-# Example: $(call ARCHIVE, archive-file, "file1 file2 file3 ...")
+# ARCHIVE_ADD - Add a list of files to an archive
+# Example: $(call ARCHIVE_ADD, archive-file, "file1 file2 file3 ...")
 #
 # Note: The fileN strings may not contain spaces or  characters that may be
 # interpreted strangely by the shell
@@ -287,8 +351,18 @@ endef
 #
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
+define ARCHIVE_ADD
+	@echo "AR (add): ${shell basename $(1)} $(2)"
+	$(Q) $(AR) $1 $(2)
+endef
+
+# ARCHIVE - Same as above, but ensure the archive is
+# created from scratch
+
 define ARCHIVE
-	$(AR) $1 $(2)
+	@echo "AR (create): ${shell basename $(1)} $(2)"
+	$(Q) $(RM) $1
+	$(Q) $(AR) $1 $(2)
 endef
 
 # PRELINK - Prelink a list of files
@@ -391,7 +465,7 @@ define CATFILE
 endef
 else
 define CATFILE
-	$(Q) cat $(2) > $1
+	$(Q) if [ -z "$(strip $(2))" ]; then echo '' > $(1); else cat $(2) > $1; fi
 endef
 endif
 
@@ -416,10 +490,12 @@ define CLEAN
 	$(Q) if exist *$(LIBEXT) (del /f /q *$(LIBEXT))
 	$(Q) if exist *~ (del /f /q *~)
 	$(Q) if exist (del /f /q  .*.swp)
+	$(Q) if exist $(OBJS) (del /f /q $(OBJS))
+	$(Q) if exist $(BIN) (del /f /q  $(BIN))
 endef
 else
 define CLEAN
-	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp
+	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(OBJS) $(BIN)
 endef
 endif
 
@@ -452,12 +528,29 @@ endif
 # Invoke make
 
 define MAKE_template
-	+$(Q) $(MAKE) -C $(1) $(2) TOPDIR="$(TOPDIR)" APPDIR="$(APPDIR)"
+	+$(Q) $(MAKE) -C $(1) $(2) APPDIR="$(APPDIR)"
 
 endef
 
 define SDIR_template
 $(1)_$(2):
-	+$(Q) $(MAKE) -C $(1) $(2) TOPDIR="$(TOPDIR)" APPDIR="$(APPDIR)"
+	+$(Q) $(MAKE) -C $(1) $(2) APPDIR="$(APPDIR)"
 
 endef
+
+# ARCHxxx means the predefined setting(either toolchain, arch, or system specific)
+
+ARCHDEFINES += ${shell $(DEFINE) "$(CC)" __NuttX__}
+
+# The default C/C++ search path
+
+ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+
+ifeq ($(CONFIG_LIBCXX),y)
+  ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)libcxx}
+else ifeq ($(CONFIG_UCLIBCXX),y)
+  ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)uClibc++}
+else
+  ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
+endif
+ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}

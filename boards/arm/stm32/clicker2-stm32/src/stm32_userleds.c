@@ -49,15 +49,20 @@
 #ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED1-2 GPIOs for output */
 
   stm32_configgpio(GPIO_LED1);
   stm32_configgpio(GPIO_LED2);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -88,7 +93,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   stm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) != 0);
   stm32_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) != 0);

@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 #include <errno.h>
 #include <debug.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -58,9 +59,9 @@
 #include <nuttx/spi/qspi.h>
 #include <nuttx/mtd/mtd.h>
 
-/******************************************************************************
+/************************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ************************************************************************************/
 
 /* MX25RXX Commands */
 
@@ -193,9 +194,9 @@ struct mx25rxx_dev_s
 #endif
 };
 
-/******************************************************************************
+/************************************************************************************
  * Private Function Prototypes
- ******************************************************************************/
+ ************************************************************************************/
 
 /* MTD driver methods */
 
@@ -207,7 +208,8 @@ static ssize_t mx25rxx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                               size_t nblocks, FAR const uint8_t *buf);
 static ssize_t mx25rxx_read(FAR struct mtd_dev_s *dev, off_t offset,
                             size_t nbytes, FAR uint8_t *buffer);
-static int mx25rxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+static int mx25rxx_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+                         unsigned long arg);
 
 /* Internal driver methods */
 
@@ -223,7 +225,8 @@ static int mx25rxx_command_address(FAR struct qspi_dev_s *qspi, uint8_t cmd,
 
 static int mx25rxx_readid(struct mx25rxx_dev_s *dev);
 static int mx25rxx_read_byte(FAR struct mx25rxx_dev_s *dev,
-                             FAR uint8_t *buffer, off_t address, size_t buflen);
+                             FAR uint8_t *buffer, off_t address,
+                             size_t buflen);
 static int mx25rxx_read_status(FAR struct mx25rxx_dev_s *dev);
 static int mx25rxx_read_configuration(FAR struct mx25rxx_dev_s *dev);
 static void mx25rxx_write_status_config(FAR struct mx25rxx_dev_s *dev,
@@ -246,9 +249,9 @@ static int  mx25rxx_write_cache(FAR struct mx25rxx_dev_s *priv,
               FAR const uint8_t *buffer,  off_t sector, size_t nsectors);
 #endif
 
-/******************************************************************************
+/************************************************************************************
  * Private Functions
- ******************************************************************************/
+ ************************************************************************************/
 
 void mx25rxx_lock(FAR struct qspi_dev_s *qspi, bool read)
 {
@@ -302,7 +305,7 @@ int mx25rxx_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
 {
   struct qspi_cmdinfo_s cmdinfo;
 
-  finfo("CMD: %02x buflen: %lu 0x%x\n",
+  finfo("CMD: %02x buflen: %lu 0x%" PRIx32 "\n",
         cmd, (unsigned long)buflen, *(FAR uint32_t *)buffer);
 
   cmdinfo.flags   = QSPICMD_WRITEDATA;
@@ -410,8 +413,8 @@ int mx25rxx_write_page(struct mx25rxx_dev_s *priv, FAR const uint8_t *buffer,
 
       if (ret < 0)
         {
-          ferr("ERROR: QSPI_MEMORY failed writing address=%06x\n",
-               address);
+          ferr("ERROR: QSPI_MEMORY failed writing address=%06jx\n",
+               (intmax_t)address);
           return ret;
         }
 
@@ -589,8 +592,8 @@ int mx25rxx_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
 #endif
 
 #if 0
-  /* FIXME: use mx25rxx_erase_block in case CONFIG_MX25RXX_SECTOR512 is not configured
-   * to speed up block erase.
+  /* FIXME: use mx25rxx_erase_block in case CONFIG_MX25RXX_SECTOR512 is
+   * not configured to speed up block erase.
    */
 
   unsigned int sectorsperblock = (64 * 1024) >> priv->sectorshift;
@@ -748,7 +751,9 @@ int mx25rxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #endif
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %" PRId32
+                    " erasesize: %" PRId32
+                    " neraseblocks: %" PRId32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -877,8 +882,8 @@ static FAR uint8_t *mx25rxx_read_cache(struct mx25rxx_dev_s *priv, off_t sector)
 
   shift    = priv->sectorshift - MX25RXX_SECTOR512_SHIFT;
   esectno  = sector >> shift;
-  finfo("sector: %ld esectno: %d (%d) shift=%d\n",
-        sector, esectno, priv->esectno, shift);
+  finfo("sector: %jd esectno: %jd (%d) shift=%d\n",
+        (intmax_t)sector, (intmax_t)esectno, priv->esectno, shift);
 
   /* Check if the requested erase block is already in the cache */
 
@@ -946,7 +951,8 @@ static void mx25rxx_erase_cache(struct mx25rxx_dev_s *priv, off_t sector)
   if (!IS_ERASED(priv))
     {
       off_t esectno  = sector >> (priv->sectorshift - MX25RXX_SECTOR512_SHIFT);
-      finfo("sector: %ld esectno: %d\n", sector, esectno);
+      finfo("sector: %jd esectno: %jd\n",
+            (intmax_t)sector, (intmax_t)esectno);
 
       DEBUGVERIFY(mx25rxx_erase_sector(priv, esectno));
       SET_ERASED(priv);
@@ -990,7 +996,8 @@ static int mx25rxx_write_cache(FAR struct mx25rxx_dev_s *priv,
       if (!IS_ERASED(priv))
         {
           off_t esectno  = sector >> (priv->sectorshift - MX25RXX_SECTOR512_SHIFT);
-          finfo("sector: %ld esectno: %d\n", sector, esectno);
+          finfo("sector: %jd esectno: %jd\n",
+                (intmax_t)sector, (intmax_t)esectno);
 
           ret = mx25rxx_erase_sector(priv, esectno);
           if (ret < 0)
@@ -1009,8 +1016,9 @@ static int mx25rxx_write_cache(FAR struct mx25rxx_dev_s *priv,
 
       /* Set up for the next 512 byte sector */
 
-      finfo("address: %08x nbytes: %d 0x%04x\n",
-            sector << MX25RXX_SECTOR512_SHIFT, MX25RXX_SECTOR512_SIZE,
+      finfo("address: %08jx nbytes: %d 0x%04" PRIx32 "\n",
+            (intmax_t)(sector << MX25RXX_SECTOR512_SHIFT),
+            MX25RXX_SECTOR512_SIZE,
             *(FAR uint32_t *)buffer);
       buffer += MX25RXX_SECTOR512_SIZE;
       sector++;

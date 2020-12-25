@@ -149,16 +149,16 @@
 #define PIN_LPSPI1_SCK   PIN_LPSPI1_SCK_1   /* PTB14 */
 #define PIN_LPSPI1_MISO  PIN_LPSPI1_SIN_1   /* PTB15 */
 #define PIN_LPSPI1_MOSI  PIN_LPSPI1_SOUT_1  /* PTB16 */
-#define PIN_LPSPI1_PCS   PIN_LPSPI1_PCS3	/* PTB17 */
+#define PIN_LPSPI1_PCS   PIN_LPSPI1_PCS3    /* PTB17 */
 
 #define PIN_LPSPI2_SCK   PIN_LPSPI2_SCK_2   /* PTE15 */
 #define PIN_LPSPI2_MISO  PIN_LPSPI2_SIN_2   /* PTE16 */
 #define PIN_LPSPI2_MOSI  PIN_LPSPI2_SOUT_1  /* PTA8  */
-#define PIN_LPSPI2_PCS   PIN_LPSPI2_PCS0_2	/* PTA9  */
+#define PIN_LPSPI2_PCS   PIN_LPSPI2_PCS0_2  /* PTA9  */
 
 /* I2C selections ***********************************************************/
 
-#define PIN_LPI2C0_SCL   PIN_LPI2C0_SCL_2   /* PTA3 */				
-#define PIN_LPI2C0_SDA	 PIN_LPI2C0_SDA_2   /* PTA2 */
+#define PIN_LPI2C0_SCL   PIN_LPI2C0_SCL_2   /* PTA3 */
+#define PIN_LPI2C0_SDA   PIN_LPI2C0_SDA_2   /* PTA2 */
 
 #endif  /* __BOARDS_ARM_S32K146EVB_INCLUDE_BOARD_H */

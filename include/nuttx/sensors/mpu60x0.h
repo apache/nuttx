@@ -34,27 +34,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_SENSORS_MPU60X0_H
 #define __INCLUDE_NUTTX_SENSORS_MPU60X0_H
 
 /****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 /****************************************************************************
  * Public Types
- *****************************************************************************/
+ ****************************************************************************/
 
-/* These structures are defined elsewhere, and we don't need their definitions
- * here.
+/* These structures are defined elsewhere, and we don't need their
+ * definitions here.
  */
 
+#ifdef CONFIG_MPU60X0_SPI
 struct spi_dev_s;
+#else
 struct i2c_master_s;
+#endif
 
 /* Specifies the initial chip configuration and location.
  *
@@ -88,12 +91,11 @@ struct i2c_master_s;
  * them to disable or enable the unused interface type without
  * changing their code.
  *
- * Note, I2C support is unimplemented at present.
  */
 
 struct mpu_config_s
 {
-#ifdef CONFIG_SPI
+#ifdef CONFIG_MPU60X0_SPI
   /* For users on SPI.
    *
    *  spi_devid : the SPI master's slave-select number
@@ -101,14 +103,17 @@ struct mpu_config_s
    *  spi       : the SPI master device, as used in SPI_SELECT(spi, ..., ...)
    */
 
-   FAR struct spi_dev_s *spi;
-   int spi_devid;
-#endif
+  FAR struct spi_dev_s *spi;
+  int spi_devid;
+#else
+  /* For users on I2C.
+   *
+   *  i2c  : the I2C master device
+   *  addr : the I2C address.
+   */
 
-#ifdef CONFIG_I2C
-    /* For users on I2C. (Unimplemented.) */
-
-    FAR struct i2c_master_s *i2c;
+  FAR struct i2c_master_s *i2c;
+  int addr;
 #endif
   };
 

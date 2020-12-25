@@ -51,13 +51,7 @@
  * "gulp."
  */
 
-#define NUM_MSG_DESCRIPTORS 24
-
-/* This defines the number of messages to set aside for exclusive use by
- * interrupt handlers
- */
-
-#define NUM_INTERRUPT_MSGS   8
+#define NUM_MSG_DESCRIPTORS  4
 
 /********************************************************************************
  * Public Type Definitions

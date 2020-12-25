@@ -85,84 +85,28 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
       return -ENOMEM;
     }
 
-  /* Allocate a new task group with privileges appropriate for the parent
-   * thread type.
-   */
+  /* Setup the task type */
 
-  ret = group_allocate(tcb, ttype);
-  if (ret < 0)
-    {
-      goto errout_with_tcb;
-    }
+  tcb->cmn.flags = ttype;
 
-#if 0 /* No... there are side effects */
-  /* Associate file descriptors with the new task.  Exclude kernel threads;
-   * kernel threads do not have file or socket descriptors.  They must use
-   * SYSLOG for output and the low-level psock interfaces for network I/O.
-   */
+  /* Initialize the task */
 
-  if (ttype != TCB_FLAG_TTYPE_KERNEL)
-#endif
-    {
-      ret = group_setuptaskfiles(tcb);
-      if (ret < OK)
-        {
-          goto errout_with_tcb;
-        }
-    }
-
-  /* Allocate the stack for the TCB */
-
-  ret = up_create_stack((FAR struct tcb_s *)tcb, stack_size, ttype);
+  ret = nxtask_init(tcb, name, priority, NULL, stack_size, entry, argv);
   if (ret < OK)
     {
-      goto errout_with_tcb;
-    }
-
-  /* Initialize the task control block */
-
-  ret = nxtask_setup_scheduler(tcb, priority, nxtask_start, entry, ttype);
-  if (ret < OK)
-    {
-      goto errout_with_tcb;
-    }
-
-  /* Setup to pass parameters to the new task */
-
-  nxtask_setup_arguments(tcb, name, argv);
-
-  /* Now we have enough in place that we can join the group */
-
-  ret = group_initialize(tcb);
-  if (ret < 0)
-    {
-      goto errout_with_active;
+      kmm_free(tcb);
+      return ret;
     }
 
   /* Get the assigned pid before we start the task */
 
-  pid = (int)tcb->cmn.pid;
+  pid = tcb->cmn.pid;
 
   /* Activate the task */
 
-  ret = nxtask_activate((FAR struct tcb_s *)tcb);
-  if (ret < OK)
-    {
-      goto errout_with_active;
-    }
+  nxtask_activate(&tcb->cmn);
 
-  return pid;
-
-errout_with_active:
-  /* The TCB was added to the inactive task list by
-   * nxtask_setup_scheduler().
-   */
-
-  dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
-
-errout_with_tcb:
-  nxsched_release_tcb((FAR struct tcb_s *)tcb, ttype);
-  return ret;
+  return (int)pid;
 }
 
 /****************************************************************************

@@ -33,22 +33,25 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+set -e
+
 WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-e] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name> [make-opts]
+USAGE: ${0} [-E] [-e] [-l|m|c|g|n] [L] [-a <app-dir>] <board-name>:<config-name> [make-opts]
 
 Where:
-  -e enforce distclean if already configured
+  -E enforces distclean if already configured.
+  -e performs distclean if configuration changed.
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
   -c selects the Windows host and Cygwin (c) environment.
-  -u selects the Windows host and Ubuntu under Windows 10 (u) environment.
   -g selects the Windows host and MinGW/MSYS environment.
   -n selects the Windows host and Windows native (n) environment.
   Default: Use host setup in the defconfig file
   Default Windows: Cygwin
+  -L  Lists all available configurations.
   -a <app-dir> is the path to the apps/ directory, relative to the nuttx
      directory
   <board-name> is the name of the board in the boards directory
@@ -71,7 +74,19 @@ unset boardconfig
 unset winnative
 unset appdir
 unset host
-unset enforce
+unset enforce_distclean
+unset distclean
+
+function dumpcfgs
+{
+  configlist=`find ${TOPDIR}/boards -name defconfig`
+  for defconfig in ${configlist}; do
+    config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g"`
+    boardname=`echo ${config} | cut -d'/' -f3`
+    configname=`echo ${config} | cut -d'/' -f5`
+    echo "  ${boardname}:${configname}"
+  done
+}
 
 while [ ! -z "$1" ]; do
   case "$1" in
@@ -79,7 +94,7 @@ while [ ! -z "$1" ]; do
     shift
     appdir=$1
     ;;
-  -c | -g | -l | -m | -u )
+  -c | -g | -l | -m )
     winnative=n
     host+=" $1"
     ;;
@@ -87,11 +102,18 @@ while [ ! -z "$1" ]; do
     winnative=y
     host+=" $1"
     ;;
+  -E )
+    enforce_distclean=y
+    ;;
   -e )
-    enforce=y
+    distclean=y
     ;;
   -h )
     echo "$USAGE"
+    exit 0
+    ;;
+  -L )
+    dumpcfgs
     exit 0
     ;;
   *)
@@ -126,19 +148,14 @@ if [ ! -d ${configpath} ]; then
 
   configpath=${TOPDIR}/${boardconfig}
   if [ ! -d ${configpath} ]; then
-    echo "Directory for ${boardconfig} does not exist.  Options are:"
-    echo ""
-    echo "Select one of the following options for <board-name>:"
-    configlist=`find ${TOPDIR}/boards -name defconfig`
-    for defconfig in ${configlist}; do
-      config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g"`
-      boardname=`echo ${config} | cut -d'/' -f3`
-      configname=`echo ${config} | cut -d'/' -f5`
-      echo "  ${boardname}:${configname}"
-    done
-    echo ""
-    echo "$USAGE"
-    exit 3
+    configpath=${boardconfig}
+    if [ ! -d ${configpath} ]; then
+      echo "Directory for ${boardconfig} does not exist."
+      echo ""
+      echo "Run tools/configure.sh -L to list available configurations."
+      echo "$USAGE"
+      exit 3
+    fi
   fi
 fi
 
@@ -149,10 +166,14 @@ if [ ! -r ${src_makedefs} ]; then
   src_makedefs=${TOPDIR}/boards/*/*/${boarddir}/scripts/Make.defs
 
   if [ ! -r ${src_makedefs} ]; then
-    src_makedefs=${TOPDIR}/${boardconfig}/Make.defs
+    src_makedefs=${configpath}/Make.defs
     if [ ! -r ${src_makedefs} ]; then
-      echo "File Make.defs could not be found"
-      exit 4
+      src_makedefs=${configpath}/../../scripts/Make.defs
+
+      if [ ! -r ${src_makedefs} ]; then
+        echo "File Make.defs could not be found"
+        exit 4
+      fi
     fi
   fi
 fi
@@ -167,17 +188,21 @@ if [ ! -r ${src_config} ]; then
 fi
 
 if [ -r ${dest_config} ]; then
-  if cmp -s ${src_config} ${backup_config}; then
-    echo "No configuration change."
-    exit 0
-  fi
-
-  if [ "X${enforce}" = "Xy" ]; then
+  if [ "X${enforce_distclean}" = "Xy" ]; then
     make -C ${TOPDIR} distclean $*
   else
-    echo "Already configured!"
-    echo "Do 'make distclean' and try again."
-    exit 6
+    if cmp -s ${src_config} ${backup_config}; then
+      echo "No configuration change."
+      exit 0
+    fi
+
+    if [ "X${distclean}" = "Xy" ]; then
+      make -C ${TOPDIR} distclean $*
+    else
+      echo "Already configured!"
+      echo "Please 'make distclean' and try again."
+      exit 6
+    fi
   fi
 fi
 

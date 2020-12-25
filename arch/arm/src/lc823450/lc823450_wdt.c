@@ -1,37 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_wdt.c
  *
- *   Copyright 2014,2015,2017 Sony Video & Sound Products Inc.
- *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
- *   Author: Nobutaka Toyoshima <Nobutaka.Toyoshima@jp.sony.com>
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -42,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <syslog.h>
 #include <errno.h>
@@ -115,7 +99,8 @@ struct lc823450_wdt_lowerhalf_s
 /* Interrupt handling *******************************************************/
 
 #ifdef CONFIG_LC823450_WDT_INTERRUPT
-static int    lc823450_wdt_interrupt(int irq, FAR void *context, FAR void *arg);
+static int    lc823450_wdt_interrupt(int irq,
+                                     FAR void *context, FAR void *arg);
 #endif
 
 /* "Lower half" driver methods **********************************************/
@@ -156,7 +141,6 @@ static struct lc823450_wdt_lowerhalf_s g_wdtdev;
 #ifdef CONFIG_WATCHDOG_WORK
 static struct work_s    wdg_work;
 #endif
-
 
 /****************************************************************************
  * Private Functions
@@ -220,8 +204,8 @@ static int lc823450_wdt_interrupt(int irq, FAR void *context, FAR void *arg)
  *   Start the watchdog timer, resetting the time to the current timeout,
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of
+ *           the "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -243,8 +227,8 @@ static int lc823450_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
  *   Stop the watchdog timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of
+ *           the "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -268,8 +252,8 @@ static int lc823450_wdt_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   the atchdog timer or "petting the dog".
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of
+ *           the "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -295,8 +279,8 @@ static int lc823450_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *   Get the current watchdog timer status
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of
+ *             the "lower-half" driver state structure.
  *   stawtus - The location to return the watchdog status information.
  *
  * Returned Value:
@@ -345,9 +329,9 @@ static int lc823450_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
     (2 * (256 - WT0BCGST) * 1000) / wdt_freq;
 
   wdinfo("Status     :\n");
-  wdinfo("  flags    : %08x\n", status->flags);
-  wdinfo("  timeout  : %d\n", status->timeout);
-  wdinfo("  timeleft : %d\n", status->timeleft);
+  wdinfo("  flags    : %08" PRIx32 "\n", status->flags);
+  wdinfo("  timeout  : %" PRId32 "\n", status->timeout);
+  wdinfo("  timeleft : %" PRId32 "\n", status->timeleft);
   return OK;
 }
 
@@ -358,8 +342,8 @@ static int lc823450_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *   Set a new timeout value (and reset the watchdog timer)
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of
+ *             the "lower-half" driver state structure.
  *   timeout - The new timeout value in millisecnds.
  *
  * Returned Value:
@@ -381,11 +365,12 @@ static int lc823450_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   /* ProgrammersModel_PTM0v0.1.pdf:p24 */
 
-  wt0pstst = 65536 - (uint64_t)timeout * wdt_freq / (2 * (256 - WT0BCGST) * 1000);
+  wt0pstst = 65536 - (uint64_t)timeout * wdt_freq /
+    (2 * (256 - WT0BCGST) * 1000);
 
   if (wt0pstst < 1 || wt0pstst > 0xffff)
     {
-      wdinfo("Error: timeout= %d < %d > %d\n",
+      wdinfo("Error: timeout= %" PRId32 " < %" PRId32 " > %" PRId32 "\n",
             65536 - 1 * wdt_freq / (2 * (256 - WT0BCGST) * 1000),
             timeout,
             65536 - 0xffff * wdt_freq / (2 * (256 - WT0BCGST) * 1000)); /* 22s */
@@ -410,7 +395,7 @@ static int lc823450_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   lc823450_wdt_start(lower);
 
-  wdinfo("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%" PRId32 "\n", timeout);
 
   return OK;
 }
@@ -424,8 +409,8 @@ static int lc823450_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *   behavior.
  *
  * Input Parameters:
- *   lower      - A pointer the publicly visible representation of the "lower-half"
- *                driver state structure.
+ *   lower      - A pointer the publicly visible representation of
+ *                the "lower-half" driver state structure.
  *   newhandler - The new watchdog expiration function pointer.  If this
  *                function pointer is NULL, then the reset-on-expiration
  *                behavior is restored,
@@ -459,7 +444,7 @@ static xcpt_t lc823450_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Save the new handler */
 
-   priv->handler = handler;
+  priv->handler = handler;
 
   /* Are we attaching or detaching the handler? */
 
@@ -489,8 +474,8 @@ static xcpt_t lc823450_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
  *   are forwarded to the lower half driver through this method.
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of
+ *           the "lower-half" driver state structure.
  *   cmd   - The ioctol command value
  *   arg   - The optional argument that accompanies the 'cmd'.  The
  *           interpretation of this argument depends on the particular
@@ -501,8 +486,8 @@ static xcpt_t lc823450_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lc823450_wdt_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
-                    unsigned long arg)
+static int lc823450_wdt_ioctl(FAR struct watchdog_lowerhalf_s *lower,
+                              int cmd, unsigned long arg)
 {
   wdinfo("cmd=%d arg=%ld\n", cmd, arg);
 
@@ -587,7 +572,8 @@ void lc823450_wdt_work_enable(int en)
           putreg32(LOCKUPR_LOCKUPR0, LOCKUPR);
         }
 
-      lc823450_wdt_settimeout(&g_wdtdev.wdt_lh, CONFIG_WATCHDOG_WORK_TIMEOUT);
+      lc823450_wdt_settimeout(&g_wdtdev.wdt_lh,
+                              CONFIG_WATCHDOG_WORK_TIMEOUT);
 
       work_queue(HPWORK, &wdg_work, wdg_work_func, NULL,
                  MSEC2TICK(CONFIG_WATCHDOG_WORK_TIMEOUT / 2));

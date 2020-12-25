@@ -35,13 +35,13 @@
 
 /* There are 3 LEDs on the SAMA5D4-EK:
  *
- * ------------------------------ ------------------- -----------------------
- * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -----------------------
- * PE28/NWAIT/RTS4/A19            1Wire_PE28          1-WIRE ROM, LCD, D8 (green)
- * PE8/A8/TCLK3/PWML3             LED_USER_PE8        LED_USER (D10)
- * PE9/A9/TIOA2                   LED_POWER_PE9       LED_POWER (D9, Red)
- * ------------------------------ ------------------- -----------------------
+ * -------------------------- ------------------- -----------------------
+ * SAMA5D4 PIO                SIGNAL              USAGE
+ * -------------------------- ------------------- -----------------------
+ * PE28/NWAIT/RTS4/A19        1Wire_PE28          1-WIRE ROM, LCD, D8 (green)
+ * PE8/A8/TCLK3/PWML3         LED_USER_PE8        LED_USER (D10)
+ * PE9/A9/TIOA2               LED_POWER_PE9       LED_POWER (D9, Red)
+ * -------------------------- ------------------- -----------------------
  *
  * - D8: D8 is shared with other functions and cannot be used if the
  *   1-Wire ROM is used.
@@ -78,12 +78,13 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
   sam_configpio(PIO_LED_USER);
   sam_configpio(PIO_LED_POWER);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -119,7 +120,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   bool ledon;
 

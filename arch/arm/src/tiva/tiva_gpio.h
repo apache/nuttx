@@ -51,10 +51,6 @@
 
 #include <nuttx/irq.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
 /* Include chip specific definitions */
 
 #if defined(CONFIG_ARCH_CHIP_LM3S)

@@ -268,8 +268,8 @@ struct qspi_meminfo_s
   uint8_t   flags;       /* See QSPMEM_* definitions */
   uint8_t   addrlen;     /* Address length in bytes */
   uint8_t   dummies;     /* Number of dummy read cycles (READ only) */
-  uint16_t  buflen;      /* Data buffer length in bytes */
   uint16_t  cmd;         /* Memory access command */
+  uint32_t  buflen;      /* Data buffer length in bytes */
   uint32_t  addr;        /* Memory Address */
   uint32_t  key;         /* Scrambler key */
   FAR void *buffer;      /* Data buffer */

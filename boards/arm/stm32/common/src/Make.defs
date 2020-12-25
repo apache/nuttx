@@ -26,6 +26,10 @@ ifeq ($(CONFIG_LEDS_APA102),y)
   CSRCS += stm32_apa102.c
 endif
 
+ifeq ($(CONFIG_WS2812),y)
+  CSRCS += stm32_ws2812.c
+endif
+
 ifeq ($(CONFIG_SENSORS_MAX6675),y)
   CSRCS += stm32_max6675.c
 endif

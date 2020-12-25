@@ -91,17 +91,18 @@ struct lpc17_40_ubxmdm_pins
   lpc17_40_pinset_t usb_detect;
 };
 
-/* This structure type provides the private representation of the "lower-half"
- * driver state.  This type must be coercible to type 'ubxmdm_lower'.
+/* This structure type provides the private representation of the
+ * "lower-half" driver state.  This type must be coercible to type
+ * 'ubxmdm_lower'.
  */
 
 struct lpc17_40_ubxmdm_lower
 {
-  FAR const struct ubxmdm_ops* ops;  /* Lower half operations */
+  FAR const struct ubxmdm_ops * ops;  /* Lower half operations */
 
   /* Private, architecture-specific information. */
 
-  FAR const struct lpc17_40_ubxmdm_pins* pins;
+  FAR const struct lpc17_40_ubxmdm_pins * pins;
   bool usb_used;
 };
 
@@ -119,14 +120,14 @@ struct lpc17_40_name_pin
 
 /* "Lower half" driver methods **********************************************/
 
-static int lpc17_40_poweron  (FAR struct ubxmdm_lower* lower);
-static int lpc17_40_poweroff (FAR struct ubxmdm_lower* lower);
-static int lpc17_40_reset    (FAR struct ubxmdm_lower* lower);
-static int lpc17_40_getstatus(FAR struct ubxmdm_lower* lower,
-                           FAR struct ubxmdm_status* status);
-static int lpc17_40_ioctl    (FAR struct ubxmdm_lower* lower,
-                           int cmd,
-                           unsigned long arg);
+static int lpc17_40_poweron  (FAR struct ubxmdm_lower * lower);
+static int lpc17_40_poweroff (FAR struct ubxmdm_lower * lower);
+static int lpc17_40_reset    (FAR struct ubxmdm_lower * lower);
+static int lpc17_40_getstatus(FAR struct ubxmdm_lower * lower,
+                              FAR struct ubxmdm_status * status);
+static int lpc17_40_ioctl    (FAR struct ubxmdm_lower * lower,
+                              int cmd,
+                              unsigned long arg);
 
 /* "Lower half" driver state */
 
@@ -158,35 +159,113 @@ static const struct ubxmdm_ops lpc17_40_ubxmdm_ops =
 
 static const struct lpc17_40_name_pin lpc17_40_ubxmdm_name_pins[] =
 {
-  {{'T','X','D'}, GPIO_UART1_TXD},
-  {{'R','X','D'}, GPIO_UART1_RXD},
-  {{'C','T','S'}, GPIO_UART1_CTS},
-  {{'R','T','S'}, GPIO_UART1_RTS},
-  {{'D','C','D'}, GPIO_UART1_DCD},
-  {{'D','S','R'}, GPIO_UART1_DSR},
-  {{'D','T','R'}, GPIO_UART1_DTR},
-  {{'R','I',' '}, GPIO_UART1_RI },
-  {{'I','O','1'}, C027_MDMGPIO1 },
-  {{'R','S','T'}, C027_MDMRST   },
-  {{'P','W','R'}, C027_MDMPWR   },
-  {{'D','E','T'}, C027_MDMUSBDET},
-  {{'L','D','O'}, C027_MDMLDOEN },
-  {{'L','V','L'}, C027_MDMLVLOE },
+  {
+    {
+      'T','X','D'
+    },
+    GPIO_UART1_TXD
+  },
+  {
+    {
+      'R','X','D'
+    },
+    GPIO_UART1_RXD
+  },
+  {
+    {
+      'C','T','S'
+    },
+    GPIO_UART1_CTS
+  },
+  {
+    {
+      'R','T','S'
+    },
+    GPIO_UART1_RTS
+  },
+  {
+    {
+      'D','C','D'
+    },
+    GPIO_UART1_DCD
+  },
+  {
+    {
+      'D','S','R'
+    },
+    GPIO_UART1_DSR
+  },
+  {
+    {
+      'D','T','R'
+    },
+    GPIO_UART1_DTR
+  },
+  {
+    {
+      'R','I',' '
+    },
+    GPIO_UART1_RI
+  },
+  {
+    {
+      'I','O','1'
+    },
+    C027_MDMGPIO1
+  },
+  {
+    {
+      'R','S','T'
+    },
+    C027_MDMRST
+  },
+  {
+    {
+      'P','W','R'
+    },
+    C027_MDMPWR
+  },
+  {
+    {
+      'D','E','T'
+    },
+    C027_MDMUSBDET
+  },
+  {
+    {
+      'L','D','O'
+    },
+    C027_MDMLDOEN
+  },
+  {
+    {
+      'L','V','L'
+    },
+    C027_MDMLVLOE
+  },
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int lpc17_40_poweron(FAR struct ubxmdm_lower* lower)
+static int lpc17_40_poweron(FAR struct ubxmdm_lower * lower)
 {
-  FAR struct lpc17_40_ubxmdm_lower* priv =
-    (FAR struct lpc17_40_ubxmdm_lower*) lower;
+  FAR struct lpc17_40_ubxmdm_lower * priv =
+    (FAR struct lpc17_40_ubxmdm_lower *) lower;
   lpc17_40_pinset_t usb_detect_val;
 
-  lpc17_40_configgpio(priv->pins->reset_n      | GPIO_VALUE_ONE);  /* Modem not in reset */
-  lpc17_40_configgpio(priv->pins->power_on_n   | GPIO_VALUE_ZERO); /* Switch closed to GND */
-  nxsig_usleep(10 * 1000);  /* Min. time for power_on_n being low is 5 ms */
+  /* Modem not in reset */
+
+  lpc17_40_configgpio(priv->pins->reset_n      | GPIO_VALUE_ONE);
+
+  /* Switch closed to GND */
+
+  lpc17_40_configgpio(priv->pins->power_on_n   | GPIO_VALUE_ZERO);
+
+  /* Min. time for power_on_n being low is 5 ms */
+
+  nxsig_usleep(10 * 1000);
 
   if (priv->usb_used)
     {
@@ -199,46 +278,78 @@ static int lpc17_40_poweron(FAR struct ubxmdm_lower* lower)
 
   lpc17_40_configgpio(priv->pins->usb_detect   | usb_detect_val);
 
-  lpc17_40_configgpio(priv->pins->ldo_enable   | GPIO_VALUE_ONE);  /* LDO enabled */
-  nxsig_usleep(1 * 1000);  /* Delay to obtain correct voltage on shifters */
+  /* LDO enabled */
 
-  lpc17_40_configgpio(priv->pins->shifter_en_n | GPIO_VALUE_ZERO); /* UART shifter enabled */
-/* lpc17_40_configgpio(priv->pins->power_on_n  | GPIO_VALUE_ONE);    Stop current through switch */
+  lpc17_40_configgpio(priv->pins->ldo_enable   | GPIO_VALUE_ONE);
 
-  return OK;
-}
+  /* Delay to obtain correct voltage on shifters */
 
-static int lpc17_40_poweroff(FAR struct ubxmdm_lower* lower)
-{
-  FAR struct lpc17_40_ubxmdm_lower* priv =
-    (FAR struct lpc17_40_ubxmdm_lower*) lower;
+  nxsig_usleep(1 * 1000);
 
-  lpc17_40_configgpio(priv->pins->ldo_enable   | GPIO_VALUE_ZERO); /* LDO disabled */
-  lpc17_40_configgpio(priv->pins->reset_n      | GPIO_VALUE_ONE);  /* Modem not in reset */
-  lpc17_40_configgpio(priv->pins->power_on_n   | GPIO_VALUE_ONE);  /* Switch open */
-  lpc17_40_configgpio(priv->pins->shifter_en_n | GPIO_VALUE_ONE);  /* UART shifter disabled */
-  lpc17_40_configgpio(priv->pins->usb_detect   | GPIO_VALUE_ZERO); /* USB sense off */
+  /* UART shifter enabled */
+
+  lpc17_40_configgpio(priv->pins->shifter_en_n | GPIO_VALUE_ZERO);
+
+  /* Stop current through switch */
+
+  /* lpc17_40_configgpio(priv->pins->power_on_n  | GPIO_VALUE_ONE); */
 
   return OK;
 }
 
-static int lpc17_40_reset(FAR struct ubxmdm_lower* lower)
+static int lpc17_40_poweroff(FAR struct ubxmdm_lower * lower)
 {
-  FAR struct lpc17_40_ubxmdm_lower* priv =
-    (FAR struct lpc17_40_ubxmdm_lower*) lower;
+  FAR struct lpc17_40_ubxmdm_lower * priv =
+    (FAR struct lpc17_40_ubxmdm_lower *) lower;
 
-  lpc17_40_configgpio(priv->pins->reset_n | GPIO_VALUE_ZERO); /* Modem in reset */
-  nxsig_usleep(75 * 1000);  /* The minimum reset_n low time is 50 ms */
-  lpc17_40_configgpio(priv->pins->reset_n | GPIO_VALUE_ONE);  /* Modem not in reset */
+  /* LDO disabled */
+
+  lpc17_40_configgpio(priv->pins->ldo_enable   | GPIO_VALUE_ZERO);
+
+  /* Modem not in reset */
+
+  lpc17_40_configgpio(priv->pins->reset_n      | GPIO_VALUE_ONE);
+
+  /* Switch open */
+
+  lpc17_40_configgpio(priv->pins->power_on_n   | GPIO_VALUE_ONE);
+
+  /* UART shifter disabled */
+
+  lpc17_40_configgpio(priv->pins->shifter_en_n | GPIO_VALUE_ONE);
+
+  /* USB sense off */
+
+  lpc17_40_configgpio(priv->pins->usb_detect   | GPIO_VALUE_ZERO);
 
   return OK;
 }
 
-static int lpc17_40_getstatus(FAR struct ubxmdm_lower* lower,
-                           FAR struct ubxmdm_status* status)
+static int lpc17_40_reset(FAR struct ubxmdm_lower * lower)
 {
-  FAR struct lpc17_40_ubxmdm_lower* priv =
-    (FAR struct lpc17_40_ubxmdm_lower*) lower;
+  FAR struct lpc17_40_ubxmdm_lower * priv =
+    (FAR struct lpc17_40_ubxmdm_lower *) lower;
+
+  /* Modem in reset */
+
+  lpc17_40_configgpio(priv->pins->reset_n | GPIO_VALUE_ZERO);
+
+  /* The minimum reset_n low time is 50 ms */
+
+  nxsig_usleep(75 * 1000);
+
+  /* Modem not in reset */
+
+  lpc17_40_configgpio(priv->pins->reset_n | GPIO_VALUE_ONE);
+
+  return OK;
+}
+
+static int lpc17_40_getstatus(FAR struct ubxmdm_lower * lower,
+                              FAR struct ubxmdm_status * status)
+{
+  FAR struct lpc17_40_ubxmdm_lower * priv =
+    (FAR struct lpc17_40_ubxmdm_lower *) lower;
   int i;
 
   status->on =
@@ -261,13 +372,12 @@ static int lpc17_40_getstatus(FAR struct ubxmdm_lower* lower,
   return OK;
 }
 
-static int lpc17_40_ioctl(FAR struct ubxmdm_lower* lower,
-                       int cmd,
-                       unsigned long arg)
+static int lpc17_40_ioctl(FAR struct ubxmdm_lower * lower,
+                          int cmd, unsigned long arg)
 {
   /* No platform-specific IOCTL at the moment. */
 
-  return -ENOSYS;
+  return -ENOTTY;
 }
 
 /****************************************************************************
@@ -291,7 +401,7 @@ static int lpc17_40_ioctl(FAR struct ubxmdm_lower* lower,
 
 void lpc17_40_ubxmdm_init(bool usb_used)
 {
-  FAR struct lpc17_40_ubxmdm_lower* priv = &lpc17_40_ubxmdm_lower;
+  FAR struct lpc17_40_ubxmdm_lower * priv = &lpc17_40_ubxmdm_lower;
 
   DEBUGASSERT(priv->ops == NULL && priv->pins == NULL);
 
@@ -304,7 +414,7 @@ void lpc17_40_ubxmdm_init(bool usb_used)
   priv->pins     = &lpc17_40_ubxmdm_pins;
   priv->usb_used = usb_used;
 
-  lpc17_40_poweroff((FAR struct ubxmdm_lower*) priv);
+  lpc17_40_poweroff((FAR struct ubxmdm_lower *) priv);
 
-  ubxmdm_register("/dev/ubxmdm", (FAR struct ubxmdm_lower*) priv);
+  ubxmdm_register("/dev/ubxmdm", (FAR struct ubxmdm_lower *) priv);
 }

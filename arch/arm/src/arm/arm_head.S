@@ -541,7 +541,7 @@ __start:
 #ifdef CONFIG_IDENTITY_TEXTMAP
 	ldr		r4, .LCvpgtable			/* r4=virtual page table */
 #endif
-	ldr		r3, .LCnuttxpaddr		/* r3=Aligned Nuttx start address (physical) */
+	ldr		r3, .LCnuttxpaddr		/* r3=Aligned NuttX start address (physical) */
 
 	/* Now setup the page tables for our normal mapped execution region.
 	 * We round NUTTX_START_VADDR down to the nearest megabyte boundary.

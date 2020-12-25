@@ -477,7 +477,7 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
   FAR struct btreq_s *btreq = (FAR struct btreq_s *)((uintptr_t)arg);
   int ret;
 
-  wlinfo("cmd=%04x arg=%ul\n", cmd, arg);
+  wlinfo("cmd=%04x arg=%lu\n", cmd, arg);
   DEBUGASSERT(netdev != NULL && netdev->d_private != NULL);
 
   if (btreq == NULL)
@@ -600,7 +600,7 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
         {
           ret = bt_start_advertising(btreq->btr_advtype,
                                      btreq->btr_advad,
-                                     btreq->btr_advad);
+                                     btreq->btr_advsd);
           wlinfo("Start advertising: %d\n", ret);
         }
         break;

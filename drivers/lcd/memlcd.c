@@ -71,7 +71,7 @@
 #  warning This platform does not support SPI LSB-bit order
 #endif
 
-/* Cisplay resolution */
+/* Display resolution */
 
 #if defined CONFIG_MEMLCD_LS013B7DH01
 #  define MEMLCD_XRES        144
@@ -102,8 +102,8 @@
 /* display memory allocation */
 #define MEMLCD_FBSIZE        (MEMLCD_XSTRIDE*MEMLCD_YRES)
 
-/* contrast setting, related to VCOM toggle frequency
- * higher frequency gives better contrast, instead, saves power
+/* Contrast setting, related to VCOM toggle frequency.
+ * Higher frequency gives better contrast, lower instead saves power.
  */
 
 #define MEMLCD_CONTRAST      24
@@ -157,14 +157,15 @@ static void memlcd_deselect(FAR struct spi_dev_s *spi);
 
 static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
                          FAR const uint8_t * buffer, size_t npixels);
-static int memlcd_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
-                         size_t npixels);
+static int memlcd_getrun(fb_coord_t row, fb_coord_t col,
+                         FAR uint8_t * buffer, size_t npixels);
 
 /* lcd configuration */
 
 static int memlcd_getvideoinfo(FAR struct lcd_dev_s *dev,
                                FAR struct fb_videoinfo_s *vinfo);
-static int memlcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int memlcd_getplaneinfo(FAR struct lcd_dev_s *dev,
+                               unsigned int planeno,
                                FAR struct lcd_planeinfo_s *pinfo);
 
 /* lcd specific controls */
@@ -200,7 +201,9 @@ static const struct lcd_planeinfo_s g_planeinfo =
   .bpp = MEMLCD_BPP,                 /* Bits-per-pixel */
 };
 
-/* This is the oled driver instance (only a single device is supported for now) */
+/* This is the oled driver instance (only a single device is supported
+ * for now).
+ */
 
 static struct memlcd_dev_s g_memlcddev =
 {
@@ -230,16 +233,16 @@ static struct memlcd_dev_s g_memlcddev =
  * @nr: the bit to set
  * @addr: the address to start counting from
  *
- * Unlike set_bit(), this function is non-atomic and may be reordered.
- * If it's called on the same region of memory simultaneously, the effect
- * may be that only one operation succeeds.
+ * This function is not atomic and may be reordered.  If it's called on the
+ * same region of memory simultaneously, the effect may be that only one
+ * operation succeeds.
  *
  ****************************************************************************/
 
 #define BIT(nr)            (1 << (nr))
-#define BITS_PER_BYTE        8
-#define BIT_MASK(nr)        (1 << ((nr) % BITS_PER_BYTE))
-#define BIT_BYTE(nr)        ((nr) / BITS_PER_BYTE)
+#define BITS_PER_BYTE      8
+#define BIT_MASK(nr)       (1 << ((nr) % BITS_PER_BYTE))
+#define BIT_BYTE(nr)       ((nr) / BITS_PER_BYTE)
 
 static inline void __set_bit(int nr, uint8_t * addr)
 {
@@ -264,15 +267,13 @@ static inline int __test_bit(int nr, const volatile uint8_t * addr)
  * Name: memlcd_select
  *
  * Description:
- *   Select the SPI, locking and  re-configuring if necessary
+ *   Select the SPI, locking and re-configuring if necessary
  *
  * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:
  *   None
- *
- * Assumptions:
  *
  ****************************************************************************/
 
@@ -319,8 +320,6 @@ static void memlcd_select(FAR struct spi_dev_s *spi)
  * Returned Value:
  *   None
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 static void memlcd_deselect(FAR struct spi_dev_s *spi)
@@ -340,8 +339,6 @@ static void memlcd_deselect(FAR struct spi_dev_s *spi)
  * Input Parameters:
  *   mlcd   - Reference to private driver structure
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 static inline void memlcd_clear(FAR struct memlcd_dev_s *mlcd)
@@ -350,9 +347,13 @@ static inline void memlcd_clear(FAR struct memlcd_dev_s *mlcd)
 
   lcdinfo("Clear display\n");
   memlcd_select(mlcd->spi);
+
   /* XXX Ensure 2us here */
+
   SPI_SNDBLOCK(mlcd->spi, &cmd, 2);
+
   /* XXX Ensure 6us here */
+
   memlcd_deselect(mlcd->spi);
 }
 
@@ -363,10 +364,10 @@ static inline void memlcd_clear(FAR struct memlcd_dev_s *mlcd)
  *   This method enables/disables the polarity (VCOM) toggling behavior for
  *   the Memory LCD. Which is always used within setpower() call.
  *   Basically, the frequency shall be 1Hz~60Hz.
- *   If use hardware mode to toggle VCOM, we need to send specific command at a
- *   constant frequency to trigger the LCD internal hardware logic.
- *   While use software mode, we set up a timer to toggle EXTCOMIN connected IO,
- *   basically, it is a hardware timer to ensure a constant frequency.
+ *   If use hardware mode to toggle VCOM, we need to send specific command at
+ *   a constant frequency to trigger the LCD internal hardware logic.
+ *   While use software mode, we set up a timer to toggle EXTCOMIN connected
+ *   IO, basically, it is a hardware timer to ensure a constant frequency.
  *
  * Input Parameters:
  *   mlcd   - Reference to private driver structure
@@ -498,8 +499,8 @@ static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int memlcd_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
-                         size_t npixels)
+static int memlcd_getrun(fb_coord_t row, fb_coord_t col,
+                         FAR uint8_t * buffer, size_t npixels)
 {
   FAR struct memlcd_dev_s *mlcd = (FAR struct memlcd_dev_s *)&g_memlcddev;
   uint8_t *p;
@@ -582,7 +583,8 @@ static int memlcd_getvideoinfo(FAR struct lcd_dev_s *dev,
  *
  ****************************************************************************/
 
-static int memlcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int memlcd_getplaneinfo(FAR struct lcd_dev_s *dev,
+                               unsigned int planeno,
                                FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(pinfo && planeno == 0);
@@ -595,8 +597,9 @@ static int memlcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
  * Name:  memlcd_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on.
- *   On backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full
+ *   on.  On backlit LCDs, this setting may correspond to the backlight
+ *   setting.
  *
  ****************************************************************************/
 
@@ -613,8 +616,9 @@ static int memlcd_getpower(FAR struct lcd_dev_s *dev)
  * Name:  memlcd_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on).
- *   On backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full
+ *   on).  On backlit LCDs, this setting may correspond to the backlight
+ *   setting.
  *
  ****************************************************************************/
 
@@ -700,7 +704,8 @@ static int memlcd_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  * Input Parameters:
  *
  *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 through CONFIG_memlcd_NINTERFACES-1.
+ *   priv - Board specific structure
+ *   devno - A value in the range of 0 through CONFIG_MEMLCD_NINTERFACES-1.
  *     This allows support for multiple OLED devices.
  *
  * Returned Value:

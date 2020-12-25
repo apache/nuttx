@@ -59,8 +59,8 @@
 #  include "hardware/stm32f37xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "hardware/stm32f40xxx_rcc.h"
-#elif defined(CONFIG_STM32_STM32G47XX)
-#  include "hardware/stm32g47xxx_rcc.h"
+#elif defined(CONFIG_STM32_STM32G4XXX)
+#  include "hardware/stm32g4xxxx_rcc.h"
 #else
 #  error "Unsupported STM32 chip"
 #endif

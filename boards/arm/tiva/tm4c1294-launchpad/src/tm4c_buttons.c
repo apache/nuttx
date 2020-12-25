@@ -58,6 +58,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each STM3210E-EVAL button.  This array is indexed by
  * the BUTTON_* and JOYSTICK_* definitions in board.h
  */
@@ -86,7 +87,7 @@ static const uint32_t g_buttons[NUM_BUTTONS] =
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -102,6 +103,7 @@ void board_button_initialize(void)
 
   tiva_gpioirqinitialize();
 #endif
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

@@ -68,13 +68,14 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* Configure the single button as an input.  NOTE that EXTI interrupts are
    * also configured for the pin.
    */
 
   stm32_configgpio(GPIO_BTN_USER);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

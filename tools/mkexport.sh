@@ -34,14 +34,14 @@
 
 # Get the input parameter list
 
-USAGE="USAGE: $0 [-d] [-z] [-u] [-w|wy|wn] -t <top-dir> [-x <lib-ext>] [-a <apps-dir>] [-m <make-exe>] -l \"lib1 [lib2 [lib3 ...]]\""
+USAGE="USAGE: $0 [-d] [-z] [-u] [-t <top-dir> [-x <lib-ext>] [-a <apps-dir>] [-m <make-exe>] -l \"lib1 [lib2 [lib3 ...]]\""
 unset TOPDIR
 unset LIBLIST
 unset TGZ
 unset APPDIR
+unset BOARDDIR
 
 USRONLY=n
-WINTOOL=n
 LIBEXT=.a
 
 while [ ! -z "$1" ]; do
@@ -49,6 +49,10 @@ while [ ! -z "$1" ]; do
   -a )
     shift
     APPDIR="$1"
+    ;;
+  -b )
+    shift
+    BOARDDIR="$1"
     ;;
   -d )
     set -x
@@ -60,12 +64,6 @@ while [ ! -z "$1" ]; do
   -m )
     shift
     MAKE="$1"
-    ;;
-  -wy )
-    WINTOOL=y
-    ;;
-  -w | -wn )
-    WINTOOL=n
     ;;
   -t )
     shift
@@ -192,9 +190,20 @@ if [ ! -d "${ARCHDIR}" ]; then
   exit 1
 fi
 
+# Copy the depends script
+
+cp "${TOPDIR}/tools/mkdeps.c" "${EXPORTDIR}/tools/."
+cp "${TOPDIR}/tools/incdir.c" "${EXPORTDIR}/tools/."
+
 # Copy the default linker script
 
 cp -f "${TOPDIR}/binfmt/libelf/gnu-elf.ld" "${EXPORTDIR}/scripts/."
+
+# Copy the board config script
+
+if [ -f "${BOARDDIR}/scripts/Config.mk" ]; then
+  cp -f "${BOARDDIR}/scripts/Config.mk" "${EXPORTDIR}/scripts/."
+fi
 
 # Is there a linker script in this configuration?
 
@@ -229,6 +238,7 @@ fi
 # Save the compilation options
 
 echo "ARCHCFLAGS       = ${ARCHCFLAGS}" >"${EXPORTDIR}/scripts/Make.defs"
+echo "ARCHCPUFLAGS     = ${ARCHCPUFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "ARCHCXXFLAGS     = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "ARCHPICFLAGS     = ${ARCHPICFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "ARCHWARNINGS     = ${ARCHWARNINGS}" >>"${EXPORTDIR}/scripts/Make.defs"
@@ -254,19 +264,17 @@ echo "HOSTINCLUDES     = ${HOSTINCLUDES}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "HOSTCFLAGS       = ${HOSTCFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "HOSTLDFLAGS      = ${HOSTLDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "HOSTEXEEXT       = ${HOSTEXEEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "LDSCRIPT         = ${LDSCRIPT}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "LDNAME           = ${LDNAME}" >>"${EXPORTDIR}/scripts/Make.defs"
 
 # Additional compilation options when the kernel is built
 
 if [ "X${USRONLY}" != "Xy" ]; then
-  echo "LDFLAGS      = ${LDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "HEAD_OBJ     = ${HEAD_OBJ}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "EXTRA_OBJS   = ${EXTRA_OBJS}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LDSTARTGROUP = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LDLIBS       = ${LDLIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "EXTRA_LIBS   = ${EXTRA_LIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LIBGCC       = ${LIBGCC}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LDENDGROUP   = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "EXTRA_LIBS       = ${EXTRA_LIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "EXTRA_OBJS       = ${EXTRA_OBJS}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "HEAD_OBJ         = ${HEAD_OBJ}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LDENDGROUP       = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LDFLAGS          = ${LDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LDSTARTGROUP     = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
 fi
 
 # Copy the system map file(s)
@@ -358,58 +366,51 @@ if [ "X${USRONLY}" != "Xy" ]; then
   fi
 fi
 
+LDLIBS=`basename -a ${LIBLIST} | sed -e "s/lib/-l/g" -e "s/\.${LIBEXT:1}//g" | tr "\n" " "`
+
+if [ "X${USRONLY}" != "Xy" ]; then
+  echo "LDLIBS           = ${LDLIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
+fi
+
 # Then process each library
 
-AR=${CROSSDEV}ar
 for lib in ${LIBLIST}; do
   if [ ! -f "${TOPDIR}/${lib}" ]; then
     echo "MK: Library ${TOPDIR}/${lib} does not exist"
     exit 1
   fi
 
-  # Get some shorter names for the library
+  cp ${TOPDIR}/${lib} ${EXPORTDIR}/libs
+done
 
-  libname=`basename ${lib} ${LIBEXT}`
-  shortname=`echo ${libname} | sed -e "s/^lib//g"`
+# Process extra librarys
 
-  # Copy the application library unmodified
+for lib in ${EXTRA_LIBS}; do
 
-  if [ "X${libname}" = "Xlibapps" ]; then
-    cp -p "${TOPDIR}/${lib}" "${EXPORTDIR}/libs/." || \
-      { echo "MK: cp ${TOPDIR}/${lib} failed"; exit 1; }
-  else
+  # Convert library name
 
-    # Create a temporary directory and extract all of the objects there
-    # Hmmm.. this probably won't work if the archiver is not 'ar'
+  if [ ${lib:0:2} = "-l" ]; then
+    lib=`echo "${lib}" | sed -e "s/-l/lib/" -e "s/$/${LIBEXT}/"`
+  fi
 
-    mkdir "${EXPORTDIR}/tmp" || \
-      { echo "MK: 'mkdir ${EXPORTDIR}/tmp' failed"; exit 1; }
-    cd "${EXPORTDIR}/tmp" || \
-      { echo "MK: 'cd ${EXPORTDIR}/tmp' failed"; exit 1; }
-    if [ "X${WINTOOL}" = "Xy" ]; then
-      WLIB=`cygpath -w "${TOPDIR}/${lib}"`
-      ${AR} x "${WLIB}"
-    else
-      ${AR} x "${TOPDIR}/${lib}"
+  for path in ${EXTRA_LIBPATHS}; do
+
+    # Skip the library path options
+
+    if [ ${#path} == 2 ]; then continue; fi
+
+    if [ ${path:0:2} = "-l" ] || [ ${path:0:2} = "-L" ]; then
+      path=${path:2}
     fi
 
-    # Rename each object file (to avoid collision when they are combined)
-    # and add the file to libnuttx
+    # Export the extra librarys
 
-    for file in `ls`; do
-      mv "${file}" "${shortname}-${file}"
-      if [ "X${WINTOOL}" = "Xy" ]; then
-        WLIB=`cygpath -w "${EXPORTDIR}/libs/libnuttx${LIBEXT}"`
-        ${AR} rcs "${WLIB}" "${shortname}-${file}"
-      else
-        ${AR} rcs "${EXPORTDIR}/libs/libnuttx${LIBEXT}" "${shortname}-${file}"
-      fi
-    done
+    if [ -f "${path}/${lib}" ]; then
+      cp -a ${path}/${lib} ${EXPORTDIR}/libs
+      break
+    fi
 
-    cd "${TOPDIR}" || \
-      { echo "MK: 'cd ${TOPDIR}' failed"; exit 1; }
-    rm -rf "${EXPORTDIR}/tmp"
-  fi
+  done
 done
 
 # Copy the essential build script file(s)
@@ -432,15 +433,15 @@ cd "${TOPDIR}" || \
   { echo "MK: 'cd ${TOPDIR}' failed"; exit 1; }
 
 if [ -e "${APPDIR}/Makefile" ]; then
-  "${MAKE}" -C "${TOPDIR}/${APPDIR}" EXPORTDIR="$(cd "${EXPORTSUBDIR}" ; pwd )" TOPDIR="${TOPDIR}" export || \
+  "${MAKE}" -C "${APPDIR}" EXPORTDIR="$(cd "${EXPORTSUBDIR}" ; pwd )" TOPDIR="${TOPDIR}" export || \
       { echo "MK: call make export for APPDIR not supported"; }
 fi
 
 if [ "X${TGZ}" = "Xy" ]; then
-  tar cvf "${EXPORTSUBDIR}.tar" "${EXPORTSUBDIR}" 1>/dev/null 2>&1
+  tar cvf "${EXPORTSUBDIR}.tar" "${EXPORTSUBDIR}" 1>/dev/null
   gzip -f "${EXPORTSUBDIR}.tar"
 else
-  zip -r "${EXPORTSUBDIR}.zip" "${EXPORTSUBDIR}" 1>/dev/null 2>&1
+  zip -r "${EXPORTSUBDIR}.zip" "${EXPORTSUBDIR}" 1>/dev/null
 fi
 
 # Clean up after ourselves

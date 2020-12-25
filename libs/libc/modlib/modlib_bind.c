@@ -301,8 +301,10 @@ static int modlib_relocate(FAR struct module_s *modp,
           rel->r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
           berr("ERROR: Section %d reloc %d: "
-               "Relocation address out of range, offset %d size %d\n",
-               relidx, i, rel->r_offset, dstsec->sh_size);
+               "Relocation address out of range, "
+               "offset %" PRIuPTR " size %ju\n",
+               relidx, i, (uintptr_t)rel->r_offset,
+               (uintmax_t)dstsec->sh_size);
           ret = -EINVAL;
           break;
         }
@@ -487,8 +489,10 @@ static int modlib_relocateadd(FAR struct module_s *modp,
           rela->r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
           berr("ERROR: Section %d reloc %d: "
-               "Relocation address out of range, offset %d size %d\n",
-               relidx, i, rela->r_offset, dstsec->sh_size);
+               "Relocation address out of range, "
+               "offset %" PRIuPTR " size %ju\n",
+               relidx, i, (uintptr_t)rela->r_offset,
+               (uintmax_t)dstsec->sh_size);
           ret = -EINVAL;
           break;
         }

@@ -86,6 +86,7 @@
 #define TIVA_EEPROM_PP                (TIVA_EEPROM_BASE + TIVA_EEPROM_PP_OFFSET)
 
 /* Register Bit-Field Definitions ***************************************************/
+
 /* The following are defines for the bit fields in the EEPROM_EESIZE register. */
 
 #define EEPROM_EESIZE_WORDCNT_M       0x0000ffff  /* Number of 32-Bit Words */

@@ -216,6 +216,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -1030,7 +1031,7 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
    * still pending.
    */
 
-  i2cinfo("Timeout with CR: %04x SR: %04x\n", cr, sr);
+  i2cinfo("Timeout with CR: %04" PRIx32 " SR: %04" PRIx32 "\n", cr, sr);
 }
 
 /************************************************************************************
@@ -1064,7 +1065,8 @@ static inline void stm32_i2c_sem_init(FAR struct i2c_master_s *dev)
    */
 
   nxsem_init(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, 0, 0);
-  nxsem_set_protocol(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, SEM_PRIO_NONE);
+  nxsem_set_protocol(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr,
+                     SEM_PRIO_NONE);
 #endif
 }
 
@@ -1535,7 +1537,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
   status = stm32_i2c_getreg32(priv, STM32_I2C_ISR_OFFSET);
 
-  i2cinfo("ENTER: status = 0x%08x\n", status);
+  i2cinfo("ENTER: status = 0x%08" PRIx32 "\n", status);
 
   /* Update private version of the state assuming a good state */
 
@@ -1583,16 +1585,18 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
         {
           /* NACK received on first (address) byte: address is invalid */
 
-          i2cinfo("NACK: Address invalid: dcnt=%i msgc=%i status=0x%08x\n",
-          priv->dcnt, priv->msgc, status);
+          i2cinfo("NACK: Address invalid: dcnt=%i msgc=%i "
+                  "status=0x%08" PRIx32 "\n",
+                  priv->dcnt, priv->msgc, status);
           stm32_i2c_traceevent(priv, I2CEVENT_ADDRESS_NACKED, priv->msgv->addr);
         }
       else
         {
           /* NACK received on regular byte */
 
-          i2cinfo("NACK: NACK received: dcnt=%i msgc=%i status=0x%08x\n",
-          priv->dcnt, priv->msgc, status);
+          i2cinfo("NACK: NACK received: dcnt=%i msgc=%i "
+                  "status=0x%08" PRIx32 "\n",
+                  priv->dcnt, priv->msgc, status);
           stm32_i2c_traceevent(priv, I2CEVENT_ADDRESS_NACKED, priv->msgv->addr);
         }
 
@@ -1645,7 +1649,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
       /* TXIS interrupt occurred, address valid, ready to transmit */
 
       stm32_i2c_traceevent(priv, I2CEVENT_WRITE, 0);
-      i2cinfo("TXIS: ENTER dcnt = %i msgc = %i status 0x%08x\n",
+      i2cinfo("TXIS: ENTER dcnt = %i msgc = %i status 0x%08" PRIx32 "\n",
               priv->dcnt, priv->msgc, status);
 
       /* The first event after the address byte is sent will be either TXIS
@@ -1702,8 +1706,9 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
         {
           /* Unsupported state */
 
-          i2cerr("ERROR: TXIS Unsupported state detected, dcnt=%i, status 0x%08x\n",
-          priv->dcnt, status);
+          i2cerr("ERROR: TXIS Unsupported state detected, dcnt=%i, "
+                 "status 0x%08" PRIx32 "\n",
+                 priv->dcnt, status);
           stm32_i2c_traceevent(priv, I2CEVENT_WRITE_ERROR, 0);
 
           /* Indicate the bad state, so that on termination HW will be reset */
@@ -1711,7 +1716,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
           priv->status |= I2C_INT_BAD_STATE;
         }
 
-      i2cinfo("TXIS: EXIT  dcnt = %i msgc = %i status 0x%08x\n",
+      i2cinfo("TXIS: EXIT  dcnt = %i msgc = %i status 0x%08" PRIx32 "\n",
               priv->dcnt, priv->msgc, status);
     }
 
@@ -1752,7 +1757,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
        */
 
       stm32_i2c_traceevent(priv, I2CEVENT_READ, 0);
-      i2cinfo("RXNE: ENTER dcnt = %i msgc = %i status 0x%08x\n",
+      i2cinfo("RXNE: ENTER dcnt = %i msgc = %i status 0x%08" PRIx32 "\n",
               priv->dcnt, priv->msgc, status);
 
       /* If more bytes in the current message */
@@ -1792,7 +1797,8 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
           stm32_i2c_traceevent(priv, I2CEVENT_READ_ERROR, 0);
           status = stm32_i2c_getreg(priv, STM32_I2C_ISR_OFFSET);
-          i2cerr("ERROR: RXNE Unsupported state detected, dcnt=%i, status 0x%08x\n",
+          i2cerr("ERROR: RXNE Unsupported state detected, dcnt=%i, "
+                 "status 0x%08" PRIx32 "\n",
                  priv->dcnt, status);
 
           /* Set signals that will terminate ISR and wake waiting thread */
@@ -1802,7 +1808,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
           priv->msgc = 0;
         }
 
-      i2cinfo("RXNE: EXIT  dcnt = %i msgc = %i status 0x%08x\n",
+      i2cinfo("RXNE: EXIT  dcnt = %i msgc = %i status 0x%08" PRIx32 "\n",
               priv->dcnt, priv->msgc, status);
     }
 
@@ -1837,7 +1843,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
   else if ((status & I2C_ISR_TC) != 0)
     {
-      i2cinfo("TC: ENTER dcnt = %i msgc = %i status 0x%08x\n",
+      i2cinfo("TC: ENTER dcnt = %i msgc = %i status 0x%08" PRIx32 "\n",
               priv->dcnt, priv->msgc, status);
 
       /* Prior message has been sent successfully. Or there could have
@@ -1894,8 +1900,8 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
           priv->msgc = 0;
         }
 
-      i2cinfo("TC: EXIT dcnt = %i msgc = %i status 0x%08x\n",
-      priv->dcnt, priv->msgc, status);
+      i2cinfo("TC: EXIT dcnt = %i msgc = %i status 0x%08" PRIx32 "\n",
+              priv->dcnt, priv->msgc, status);
     }
 
   /* Transfer Complete (Reload) State Handler
@@ -1935,8 +1941,8 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
   else if ((status & I2C_ISR_TCR) != 0)
     {
-      i2cinfo("TCR: ENTER dcnt = %i msgc = %i status 0x%08x\n",
-      priv->dcnt, priv->msgc, status);
+      i2cinfo("TCR: ENTER dcnt = %i msgc = %i status 0x%08" PRIx32 "\n",
+              priv->dcnt, priv->msgc, status);
 
       /* If no more bytes in the current message to transfer */
 
@@ -2021,8 +2027,8 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
               stm32_i2c_set_bytes_to_transfer(priv, priv->dcnt);
             }
 
-          i2cinfo("TCR: EXIT dcnt = %i msgc = %i status 0x%08x\n",
-          priv->dcnt, priv->msgc, status);
+          i2cinfo("TCR: EXIT dcnt = %i msgc = %i status 0x%08" PRIx32 "\n",
+                  priv->dcnt, priv->msgc, status);
         }
     }
 
@@ -2035,7 +2041,8 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
   else if (priv->dcnt == -1 && priv->msgc == 0)
     {
       status = stm32_i2c_getreg(priv, STM32_I2C_ISR_OFFSET);
-      i2cwarn("WARNING: EMPTY CALL: Stopping ISR: status 0x%08x\n", status);
+      i2cwarn("WARNING: EMPTY CALL: Stopping ISR: status 0x%08" PRIx32 "\n",
+              status);
       stm32_i2c_traceevent(priv, I2CEVENT_ISR_EMPTY_CALL, 0);
     }
 
@@ -2058,7 +2065,8 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
       status = stm32_i2c_getreg(priv, STM32_I2C_ISR_OFFSET);
 
-      i2cerr("ERROR: Invalid state detected, status 0x%08x\n", status);
+      i2cerr("ERROR: Invalid state detected, status 0x%08" PRIx32 "\n",
+             status);
 
       /* set condition to terminate ISR and wake waiting thread */
 
@@ -2132,7 +2140,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
     }
 
   status = stm32_i2c_getreg32(priv, STM32_I2C_ISR_OFFSET);
-  i2cinfo("EXIT: status = 0x%08x\n", status);
+  i2cinfo("EXIT: status = 0x%08" PRIx32 "\n", status);
 
   return OK;
 }
@@ -2347,19 +2355,21 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev,
       /* Connection timed out */
 
       errval = ETIMEDOUT;
-      i2cerr("ERROR: Waitdone timed out CR1: 0x%08x CR2: 0x%08x status: 0x%08x\n",
+      i2cerr("ERROR: Waitdone timed out CR1: 0x%08" PRIx32
+             " CR2: 0x%08" PRIx32 " status: 0x%08" PRIx32 "\n",
              cr1, cr2, status);
     }
   else
     {
-      i2cinfo("Waitdone success: CR1: 0x%08x CR2: 0x%08x status: 0x%08x\n",
-             cr1, cr2, status);
+      i2cinfo("Waitdone success: CR1: 0x%08" PRIx32
+              " CR2: 0x%08" PRIx32 " status: 0x%08" PRIx32 "\n",
+              cr1, cr2, status);
     }
 
   UNUSED(cr1);
   UNUSED(cr2);
 
-  i2cinfo("priv->status: 0x%08x\n", priv->status);
+  i2cinfo("priv->status: 0x%08" PRIx32 "\n", priv->status);
 
   /* Check for error status conditions */
 

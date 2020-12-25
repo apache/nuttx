@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/renesas/src/common/up_initialize.c
  *
- *   Copyright (C) 2008-2010, 2012-2013, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012-2013, 2015-2017 Gregory Nutt. All rights
+ *   reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,12 +44,12 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/sched_note.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
+#include <nuttx/note/note_driver.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
@@ -116,8 +117,7 @@ void up_initialize(void)
   loop_register();      /* Standard /dev/loop */
 #endif
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_DRIVER_NOTE)
+#if defined(CONFIG_DRIVER_NOTE)
   note_register();      /* Non-standard /dev/note */
 #endif
 
@@ -132,9 +132,10 @@ void up_initialize(void)
 #endif
 
   /* Initialize the console device driver (if it is other than the standard
-   * serial driver). NOTE that the naming implies that the console is a serial
-   * driver.  That is usually the case, however, if no UARTs are enabled, the
-   * console could also be provided through some other device, such as an LCD.
+   * serial driver). NOTE that the naming implies that the console is a
+   * serial driver.  That is usually the case, however, if no UARTs are
+   * enabled, the console could also be provided through some other device,
+   * such as an LCD.
    * Architecture-specific logic will have to detect that case.
    */
 

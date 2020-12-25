@@ -47,7 +47,7 @@ General instructions.
   make oldconfig
   make
 
-6. Build Nuttx:
+6. Build NuttX:
 
   cd <directory>nuttx
   make

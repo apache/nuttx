@@ -247,7 +247,6 @@ config ARCH_CHIP_SAM4CM
 	default n
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_TICKLESS
-	select ARCH_GLOBAL_IRQDISABLE
 
 config ARCH_CHIP_SAM4L
 	bool
@@ -815,6 +814,17 @@ config SAM34_EXTNANDSIZE
 	default 0
 	---help---
 		Size of the external NAND in bytes.
+	config SAM34_HAVE_NAND
+	bool
+	default n
+
+config SAM34_NAND_DUMP
+	bool "NAND data dump"
+	default n
+	depends on DEBUG_FEATURES && DEBUG_FS
+	---help---
+		Dump the contents of all data read and written to FLASH.  Depends on
+		CONFIG_DEBUG_FEATURES and DEBUG_FS.
 
 endif # SAM34_EXTNAND
 

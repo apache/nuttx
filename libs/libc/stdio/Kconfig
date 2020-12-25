@@ -49,7 +49,7 @@ config NUNGET_CHARS
 	default 2
 	---help---
 		Number of characters that can be buffered by ungetc() (Only if
-		NFILE_STREAMS > 0)
+		FILE_STREAM equals y)
 
 config LIBC_PRINT_LEGACY
 	bool "Enable legacy printf logic"

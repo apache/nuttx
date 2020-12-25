@@ -105,7 +105,7 @@ int stm32_lcd_backpack_init(FAR const char *devpath)
   ret = i2c_register(i2c, LCDBP_I2C_PORTNO);
   if (ret < 0)
     {
-      rtcerr("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+      rtcerr("ERROR: Failed to register I2C driver: %d\n", ret);
       return -ENODEV;
     }
 #endif

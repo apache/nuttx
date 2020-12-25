@@ -1865,7 +1865,7 @@ FAR struct bt_buf_s *bt_att_create_pdu(FAR struct bt_conn_s *conn,
 
   if (len + sizeof(op) > att->mtu)
     {
-      wlwarn("ATT MTU exceeded, max %u, wanted %u\n", att->mtu, len);
+      wlwarn("ATT MTU exceeded, max %u, wanted %zu\n", att->mtu, len);
       return NULL;
     }
 

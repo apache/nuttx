@@ -49,6 +49,12 @@
 #include "nrf52840-dk.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NRF52_TIMER (0)
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -173,6 +179,42 @@ int nrf52_bringup(void)
              ret);
     }
 #endif /* CONFIG_LPWAN_SX127X */
+
+#if defined(CONFIG_TIMER) && defined(CONFIG_NRF52_TIMER)
+  /* Configure TIMER driver */
+
+  ret = nrf52_timer_driver_setup("/dev/timer0", NRF52_TIMER);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_PWM
+  /* Configure PWM driver */
+
+  ret = nrf52_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize PWM driver: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Configure ADC driver */
+
+  ret = nrf52_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize ADC driver: %d\n",
+             ret);
+    }
+#endif
 
   UNUSED(ret);
   return OK;

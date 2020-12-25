@@ -43,6 +43,7 @@
 #include "esp32_clockconfig.h"
 #include "esp32_region.h"
 #include "esp32_start.h"
+#include "esp32_spiram.h"
 
 /****************************************************************************
  * Public Data
@@ -109,9 +110,9 @@ void IRAM_ATTR __start(void)
     }
 #endif
 
-  /* Move the stack to a known location.  Although we were give a stack
+  /* Move the stack to a known location.  Although we were given a stack
    * pointer at start-up, we don't know where that stack pointer is
-   * positioned respect to our memory map.  The only safe option is to
+   * positioned with respect to our memory map.  The only safe option is to
    * switch to a well-known IDLE thread stack.
    */
 
@@ -144,6 +145,18 @@ void IRAM_ATTR __start(void)
   /* Perform early serial initialization */
 
   xtensa_early_serial_initialize();
+#endif
+
+#if defined(CONFIG_ESP32_SPIRAM_BOOT_INIT)
+  esp_spiram_init_cache();
+  if (esp_spiram_init() != OK)
+    {
+#  if defined(ESP32_SPIRAM_IGNORE_NOTFOUND)
+      mwarn("SPIRAM Initialization failed!\n");
+#  else
+      PANIC();
+#  endif
+    }
 #endif
 
   /* Initialize onboard resources */

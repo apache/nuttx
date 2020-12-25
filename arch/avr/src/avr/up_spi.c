@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -188,11 +189,15 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   FAR struct avr_spidev_s *priv = (FAR struct avr_spidev_s *)dev;
   uint32_t actual;
 
+  /* TODO: This is missing the actual logic to update the frequency.
+   * The divider bits are computed but not actually used.
+   */
+
   /* Has the request frequency changed? */
 
   if (frequency != priv->frequency)
     {
-      /* Read the SPI status and control registers, clearing all divider bits */
+      /* Read the SPI status and control registers, clearing all div bits */
 
       uint8_t spcr = SPCR & ~((1 << SPR0) | (1 << SPR1));
       uint8_t spsr = SPSR & ~(1 << SPI2X);
@@ -236,8 +241,6 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
           actual = BOARD_CPU_CLOCK / 128;
         }
 
-#warning REVISIT: spcr/spsr are never used
-
       /* Save the frequency setting */
 
       priv->frequency = frequency;
@@ -248,7 +251,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
       actual          = priv->actual;
     }
 
-  spiinfo("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %" PRId32 "->%" PRId32 "\n", frequency, actual);
   return actual;
 }
 
@@ -306,7 +309,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
       SPSR = regval;
 
-      /* Save the mode so that subsequent re-configuratins will be faster */
+      /* Save the mode so that subsequent re-configurations will be faster */
 
       priv->mode = mode;
     }
@@ -320,7 +323,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests (only nbits == 8 is supported)
+ *   nbits - The number of bits requested (only nbits == 8 is supported)
  *
  * Returned Value:
  *   none

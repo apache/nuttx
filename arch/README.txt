@@ -45,8 +45,8 @@ Directory Structure
 
 The arch/ directory contains architecture-specific logic.  The complete
 board port is defined by the architecture-specific code in this
-directory plus the board-specific configurations in the config/
-subdirectory.  Each architecture must provide a subdirectory <arch-name>
+directory plus the board-specific configurations in the boards/
+directory.  Each architecture must provide a subdirectory <arch-name>
 under arch/ with the following characteristics:
 
 
@@ -110,7 +110,7 @@ include/irq.h
 
   - irqstate_t up_irq_save(void) -- Used to disable all interrupts.
 
-  - void upirq_restore(irqstate_t flags) -- Used to restore interrupt
+  - void up_irq_restore(irqstate_t flags) -- Used to restore interrupt
     enables to the same state as before up_irq_save was called.
 
   NOTE: These interfaces are not available to application code but can

@@ -185,7 +185,9 @@
 #  endif
 #endif
 
-/* Pick ttyS1.  This could be any of UART0-4, USART0-4 excluding the console UART. */
+/* Pick ttyS1.  This could be any of UART0-4, USART0-4 excluding the
+ * console UART.
+ */
 
 #if defined(CONFIG_SAMA5_UART0) && !defined(UART0_ASSIGNED)
 #  define TTYS1_DEV           g_uart0port  /* UART0 is ttyS1 */
@@ -440,7 +442,7 @@ static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
 static void up_send(struct uart_dev_s *dev, int ch);
@@ -908,7 +910,9 @@ static inline void up_serialout(struct up_dev_s *priv, int offset,
 
 static inline void up_restoreusartint(struct up_dev_s *priv, uint32_t imr)
 {
-  /* Restore the previous interrupt state (assuming all interrupts disabled) */
+  /* Restore the previous interrupt state (assuming all interrupts
+   * disabled)
+   */
 
   up_serialout(priv, SAM_UART_IER_OFFSET, imr);
 }
@@ -969,7 +973,9 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
     {
       handled = false;
 
-      /* Get the UART/USART status (we are only interested in the unmasked interrupts). */
+      /* Get the UART/USART status (we are only interested in the unmasked
+       * interrupts).
+       */
 
       priv->sr = up_serialin(priv, SAM_UART_SR_OFFSET);  /* Save for error reporting */
       imr      = up_serialin(priv, SAM_UART_IMR_OFFSET); /* Interrupt mask */
@@ -1270,10 +1276,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        /* Return baud */
-
-        cfsetispeed(termiosp, priv->baud);
-
         /* Return parity */
 
         termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
@@ -1288,6 +1290,10 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
         termiosp->c_cflag |= (priv->flowc) ? (CCTS_OFLOW | CRTS_IFLOW): 0;
 #endif
+        /* Return baud */
+
+        cfsetispeed(termiosp, priv->baud);
+
         /* Return number of bits */
 
         switch (priv->bits)
@@ -1435,7 +1441,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int up_receive(struct uart_dev_s *dev, uint32_t *status)
+static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 

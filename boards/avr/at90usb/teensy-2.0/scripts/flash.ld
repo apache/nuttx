@@ -49,8 +49,6 @@ MEMORY
   eeprom (rw!x) : ORIGIN = 0x810000, LENGTH = 4K
 }
 
-OUTPUT_FORMAT("elf32-avr","elf32-avr","elf32-avr")
-OUTPUT_ARCH(avr:5)
 ENTRY(__start)
 
 SECTIONS

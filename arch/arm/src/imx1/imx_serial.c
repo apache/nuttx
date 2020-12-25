@@ -100,7 +100,8 @@ struct up_dev_s
  ****************************************************************************/
 
 static inline uint32_t up_serialin(struct up_dev_s *priv, uint32_t offset);
-static inline void up_serialout(struct up_dev_s *priv, uint32_t offset, uint32_t value);
+static inline void up_serialout(struct up_dev_s *priv, uint32_t offset,
+                                uint32_t value);
 static inline void up_disableuartint(struct up_dev_s *priv, uint32_t *ucr1);
 static inline void up_restoreuartint(struct up_dev_s *priv, uint32_t ucr1);
 static inline void up_waittxready(struct up_dev_s *priv);
@@ -111,7 +112,7 @@ static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
 static int  up_interrupt(int irq, void *context, FAR void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
 static void up_send(struct uart_dev_s *dev, int ch);
@@ -223,7 +224,7 @@ static struct uart_dev_s g_uart2port =
   {
     .size   = CONFIG_UART2_TXBUFSIZE,
     .buffer = g_uart2txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart2priv,
 };
@@ -385,7 +386,8 @@ static inline uint32_t up_serialin(struct up_dev_s *priv, uint32_t offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, uint32_t offset, uint32_t value)
+static inline void up_serialout(struct up_dev_s *priv, uint32_t offset,
+                                uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -554,7 +556,7 @@ static int up_setup(struct uart_dev_s *dev)
    */
 
   tmp   = ((uint64_t)refclk << (16 - 4)) / config->baud;
-  DEBUGASSERT(tmp < 0x0000000100000000LL);
+  DEBUGASSERT(tmp < 0x0000000100000000ll);
   ratio = (b16_t)tmp;
 
   /* Pick a scale factor that gives us about 14 bits of accuracy.
@@ -679,9 +681,11 @@ static int up_setup(struct uart_dev_s *dev)
     {
       div = 6 - div;
     }
+
   regval = div << UART_UFCR_RFDIV_SHIFT;
 
-  /* Set the TX trigger level to interrupt when the TxFIFO has 2 or fewer characters.
+  /* Set the TX trigger level to interrupt when the TxFIFO has 2 or fewer
+   * characters.
    * Set the RX trigger level to interrupt when the RxFIFO has 1 character.
    */
 
@@ -731,14 +735,15 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -779,6 +784,7 @@ static int up_attach(struct uart_dev_s *dev)
       up_enable_irq(priv->irq);
     }
 #endif
+
   return ret;
 }
 
@@ -787,8 +793,8 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -925,7 +931,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int up_receive(struct uart_dev_s *dev, uint32_t *status)
+static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t rxd0;
@@ -959,6 +965,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     {
       priv->ucr1 &= ~UART_UCR1_RRDYEN;
     }
+
   up_serialout(priv, UART_UCR1, priv->ucr1);
 }
 
@@ -1019,6 +1026,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       priv->ucr1 &= ~UART_UCR1_TXEMPTYEN;
     }
+
   up_serialout(priv, UART_UCR1, priv->ucr1);
 }
 

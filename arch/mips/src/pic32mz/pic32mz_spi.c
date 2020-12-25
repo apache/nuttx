@@ -154,7 +154,7 @@ struct pic32mz_dev_s
   DMA_HANDLE txdma;            /* SPI TX DMA handle */
   int result;                  /* DMA result */
   sem_t dmawait;               /* Used to wait for DMA completion */
-  WDOG_ID dmadog;              /* Watchdog that handles DMA timeouts */
+  struct wdog_s dmadog;        /* Watchdog that handles DMA timeouts */
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI_REGDEBUG
@@ -218,7 +218,7 @@ static void spi_dma_sampledone(FAR struct pic32mz_dev_s *priv);
 #  endif
 static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
 static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
-static void spi_dmatimeout(int argc, uint32_t arg, ...);
+static void spi_dmatimeout(wdparm_t arg);
 #endif
 
 /* SPI methods */
@@ -889,7 +889,7 @@ static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->dmadog);
+  wd_cancel(&priv->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -944,7 +944,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->dmadog);
+  wd_cancel(&priv->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -983,8 +983,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
  *   transfer.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -995,7 +994,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_SPI_DMA
-static void spi_dmatimeout(int argc, uint32_t arg, ...)
+static void spi_dmatimeout(wdparm_t arg)
 {
   struct pic32mz_dev_s *priv = (struct pic32mz_dev_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1369,7 +1368,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests
+ *   nbits - The number of bits requested
  *
  * Returned Value:
  *   none
@@ -1412,8 +1411,8 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       regval |= setting;
       spi_putreg(priv, PIC32MZ_SPI_CON_OFFSET, regval);
 
-      /* Save the selection so the subsequence re-configurations will be
-       * faster
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
        */
 
       priv->nbits = nbits;
@@ -1774,8 +1773,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     {
       /* Start (or re-start) the watchdog timeout */
 
-      ret = wd_start(priv->dmadog, DMA_TIMEOUT_TICKS,
-                     spi_dmatimeout, 1, (uint32_t)priv);
+      ret = wd_start(&priv->dmadog, DMA_TIMEOUT_TICKS,
+                     spi_dmatimeout, (wdparm_t)priv);
       if (ret < 0)
         {
           spierr("ERROR: wd_start failed: %d\n", ret);
@@ -1787,7 +1786,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* Cancel the watchdog timeout */
 
-      wd_cancel(priv->dmadog);
+      wd_cancel(&priv->dmadog);
 
       /* Check if we were awakened by an error of some kind. EINTR is not a
        * failure. It simply means that the wait was awakened by a signal.
@@ -2039,11 +2038,6 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
 
   nxsem_init(&priv->dmawait, 0, 0);
   nxsem_set_protocol(&priv->dmawait, SEM_PRIO_NONE);
-
-  /* Create a watchdog timer to catch DMA timeouts */
-
-  priv->dmadog = wd_create();
-  DEBUGASSERT(priv->dmadog);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
@@ -2098,7 +2092,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   regval |= (SPI_CON_ENHBUF | SPI_CON_SRXISEL_HALF | SPI_CON_STXISEL_HALF);
 #endif
   spi_putreg(priv, PIC32MZ_SPI_CON_OFFSET, regval);
-  spiinfo("CON: %08x\n", regval);
+  spiinfo("CON: %08" PRIx32 "\n", regval);
 
   /* Set the initial SPI configuration */
 

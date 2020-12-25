@@ -453,7 +453,7 @@ MCP2515 - SPI - CAN
 
   I like CANbus, and having an MCP2515 CAN Bus Module laying around
   gave me the idea to implement it on the TM4C123GXL (Launchpad).
-  Nuttx already had implemented it on the STM32. So a lot of work already
+  NuttX already had implemented it on the STM32. So a lot of work already
   has been done. It uses SPI and with this Launchpad we use SSI.
 
   Here is how I have the MCP2515 Module connected. But you can change

@@ -57,8 +57,15 @@
  *
  ****************************************************************************/
 
-struct tm *gmtime(const time_t *timer)
+FAR struct tm *gmtime(FAR const time_t *timep)
 {
   static struct tm tm;
-  return gmtime_r(timer, &tm);
+  return gmtime_r(timep, &tm);
 }
+
+#ifndef CONFIG_LIBC_LOCALTIME
+FAR struct tm *localtime(FAR const time_t *timep)
+{
+  return gmtime(timep);
+}
+#endif

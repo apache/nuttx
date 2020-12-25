@@ -482,7 +482,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
 
 static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 {
-  int devno = 'a' - priv->sdchar;
+  int devno = priv->sdchar - 'a';
 
   if (devno >= 0 && devno < 26)
     {
@@ -1400,6 +1400,14 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
 
       ret = -ENODEV;
     }
+#  ifdef CONFIG_USBHOST_MSC_NOTIFIER
+  else
+    {
+      /* Signal the connect */
+
+      usbhost_msc_notifier_signal(WORK_USB_MSC_CONNECT, priv->sdchar);
+    }
+#  endif
 
   /* Release the semaphore... there is a race condition here.
    * Decrementing the reference count and releasing the semaphore
@@ -1409,6 +1417,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
    */
 
   usbhost_givesem(&priv->exclsem);
+
   return ret;
 }
 
@@ -1848,6 +1857,12 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 
   DEBUGASSERT(priv != NULL);
 
+#  ifdef CONFIG_USBHOST_MSC_NOTIFIER
+  /* Signal the disconnect */
+
+  usbhost_msc_notifier_signal(WORK_USB_MSC_DISCONNECT, priv->sdchar);
+#  endif
+
   /* Set an indication to any users of the mass storage device that the
    * device is no longer available.
    */
@@ -2129,7 +2144,7 @@ static ssize_t usbhost_write(FAR struct inode *inode,
   ssize_t nbytes;
   int ret;
 
-  uinfo("sector: %d nsectors: %d sectorsize: %d\n");
+  uinfo("sector: %zu nsectors: %u\n", startsector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct usbhost_state_s *)inode->i_private;
@@ -2359,5 +2374,99 @@ int usbhost_msc_initialize(void)
 
   return usbhost_registerclass(&g_storage);
 }
+
+#  ifdef CONFIG_USBHOST_MSC_NOTIFIER
+
+/****************************************************************************
+ * Name: usbhost_msc_notifier_setup
+ *
+ * Description:
+ *   Set up to perform a callback to the worker function when a mass storage
+ *   device is attached.
+ *
+ * Input Parameters:
+ *   worker - The worker function to execute on the low priority work queue
+ *            when the event occurs.
+ *   event  - Currently only USBHOST_MSC_DISCONNECT and USBHOST_MSC_CONNECT
+ *   sdchar - sdchar of the connected or disconnected block device
+ *   arg    - A user-defined argument that will be available to the worker
+ *            function when it runs.
+ *
+ * Returned Value:
+ *   > 0   - The notification is in place. The returned value is a key that
+ *           may be used later in a call to
+ *           usbmsc_attach_notifier_teardown().
+ *   == 0  - Not used.
+ *   < 0   - An unexpected error occurred and no notification will occur. The
+ *           returned value is a negated errno value that indicates the
+ *           nature of the failure.
+ *
+ ****************************************************************************/
+
+int usbhost_msc_notifier_setup(worker_t worker, uint8_t event, char sdchar,
+    FAR void *arg)
+{
+  struct work_notifier_s info;
+
+  DEBUGASSERT(worker != NULL);
+
+  info.evtype    = event;
+  info.qid       = LPWORK;
+  info.qualifier = (FAR void *)(uintptr_t)sdchar;
+  info.arg       = arg;
+  info.worker    = worker;
+
+  return work_notifier_setup(&info);
+}
+
+/****************************************************************************
+ * Name: usbhost_msc_notifier_teardown
+ *
+ * Description:
+ *   Eliminate an USB MSC notification previously setup by
+ *   usbhost_msc_notifier_setup().
+ *   This function should only be called if the notification should be
+ *   aborted prior to the notification.  The notification will automatically
+ *   be torn down after the notification.
+ *
+ * Input Parameters:
+ *   key - The key value returned from a previous call to
+ *         usbhost_msc_notifier_setup().
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int usbhost_msc_notifier_teardown(int key)
+{
+  /* This is just a simple wrapper around work_notifier_teardown(). */
+
+  return work_notifier_teardown(key);
+}
+
+/****************************************************************************
+ * Name: usbhost_msc_notifier_signal
+ *
+ * Description:
+ *   An USB mass storage device has been connected or disconnected.
+ *   Signal all threads.
+ *
+ * Input Parameters:
+ *   event  - Currently only USBHOST_MSC_DISCONNECT and USBHOST_MSC_CONNECT
+ *   sdchar - sdchar of the connected or disconnected block device
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void usbhost_msc_notifier_signal(uint8_t event, char sdchar)
+{
+  work_notifier_signal(event, (FAR void *)(uintptr_t)sdchar);
+}
+
+#  endif /* CONFIG_USBHOST_MSC_NOTIFIER */
 
 #endif /* CONFIG_USBHOST && !CONFIG_USBHOST_BULK_DISABLE && !CONFIG_DISABLE_MOUNTPOINT */

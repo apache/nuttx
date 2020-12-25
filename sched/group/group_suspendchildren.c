@@ -86,7 +86,7 @@ static int group_suspend_children_handler(pid_t pid, FAR void *arg)
  *
  * Description:
  *   Suspend all children of a task except for the specified task.  This is
- *   SIGSTP/SIGSTOP default signal action logic.  When the main task is
+ *   SIGTSTP/SIGSTOP default signal action logic.  When the main task is
  *   suspended, all of its child pthreads must also be suspended.
  *
  * Input Parameters:

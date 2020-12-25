@@ -5,7 +5,7 @@
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
- *   "STMPE811 S-Touch® advanced resistive touchscreen controller with 8-bit
+ *   "STMPE811 S-Touch advanced resistive touchscreen controller with 8-bit
  *    GPIO expander," Doc ID 14489 Rev 6, CD00186725, STMicroelectronics"
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,19 +57,15 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
+
 /* Configuration ****************************************************************************/
-/* Reference counting is partially implemented, but not needed in the current design.
- */
+
+/* Reference counting is partially implemented, but not needed in the current design. */
 
 #undef CONFIG_STMPE811_REFCNT
 
-/* No support for the SPI interface yet */
-
-#ifdef CONFIG_STMPE811_SPI
-#  error "Only the STMPE811 I2C interface is supported by this driver"
-#endif
-
 /* Driver support ***************************************************************************/
+
 /* This format is used to construct the /dev/input[n] device driver path.  It defined here
  * so that it will be used consistently in all places.
  */
@@ -77,7 +73,7 @@
 #define DEV_FORMAT   "/dev/input%d"
 #define DEV_NAMELEN  16
 
-/* STMPE811 Resources ************************************************************************/
+/* STMPE811 Resources ***********************************************************************/
 #ifndef CONFIG_STMPE811_TSC_DISABLE
 #  define STMPE811_ADC_NPINS  4 /* Only pins 0-3 can be used for ADC */
 #  define STMPE811_GPIO_NPINS 4 /* Only pins 0-3 can be used as GPIOs */
@@ -100,6 +96,7 @@
 /********************************************************************************************
  * Public Types
  ********************************************************************************************/
+
 /* This describes the state of one contact */
 
 enum stmpe811_contact_3
@@ -127,41 +124,41 @@ struct stmpe811_sample_s
 struct stmpe811_dev_s
 {
 #ifdef CONFIG_STMPE811_MULTIPLE
-  FAR struct stmpe811_dev_s *flink;      /* Supports a singly linked list of drivers */
+  FAR struct stmpe811_dev_s *flink;     /* Supports a singly linked list of drivers */
 #endif
 
   /* Common fields */
 
   FAR struct stmpe811_config_s *config; /* Board configuration data */
-  sem_t exclsem;                       /* Manages exclusive access to this structure */
+  sem_t exclsem;                        /* Manages exclusive access to this structure */
 #ifdef CONFIG_STMPE811_SPI
-  FAR struct spi_dev_s *spi;           /* Saved SPI driver instance */
+  FAR struct spi_dev_s *spi;            /* Saved SPI driver instance */
 #else
-  FAR struct i2c_master_s *i2c;        /* Saved I2C driver instance */
+  FAR struct i2c_master_s *i2c;         /* Saved I2C driver instance */
 #endif
 
-  uint8_t inuse;                       /* STMPE811 pins in use */
-  uint8_t flags;                       /* See STMPE811_FLAGS_* definitions */
-  struct work_s work;                  /* Supports the interrupt handling "bottom half" */
+  uint8_t inuse;                        /* STMPE811 pins in use */
+  uint8_t flags;                        /* See STMPE811_FLAGS_* definitions */
+  struct work_s work;                   /* Supports the interrupt handling "bottom half" */
 
   /* Fields that may be disabled to save size if touchscreen support is not used. */
 
 #ifndef CONFIG_STMPE811_TSC_DISABLE
 #ifdef CONFIG_STMPE811_REFCNT
-  uint8_t crefs;                       /* Number of times the device has been opened */
+  uint8_t crefs;                        /* Number of times the device has been opened */
 #endif
-  uint8_t nwaiters;                    /* Number of threads waiting for STMPE811 data */
-  uint8_t id;                          /* Current touch point ID */
-  uint8_t minor;                       /* Touchscreen minor device number */
-  volatile bool penchange;             /* An unreported event is buffered */
+  uint8_t nwaiters;                     /* Number of threads waiting for STMPE811 data */
+  uint8_t id;                           /* Current touch point ID */
+  uint8_t minor;                        /* Touchscreen minor device number */
+  volatile bool penchange;              /* An unreported event is buffered */
 
-  uint16_t threshx;                    /* Thresholded X value */
-  uint16_t threshy;                    /* Thresholded Y value */
-  sem_t waitsem;                       /* Used to wait for the availability of data */
+  uint16_t threshx;                     /* Thresholded X value */
+  uint16_t threshy;                     /* Thresholded Y value */
+  sem_t waitsem;                        /* Used to wait for the availability of data */
 
-  struct work_s timeout;               /* Supports tiemeout work */
-  WDOG_ID wdog;                        /* Timeout to detect missing pen down events */
-  struct stmpe811_sample_s sample;     /* Last sampled touch point data */
+  struct work_s timeout;                /* Supports tiemeout work */
+  struct wdog_s wdog;                   /* Timeout to detect missing pen down events */
+  struct stmpe811_sample_s sample;      /* Last sampled touch point data */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also

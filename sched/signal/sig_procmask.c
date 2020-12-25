@@ -81,7 +81,7 @@
  *   sigprocmask() except that it does not modify the errno value.
  *
  * Input Parameters:
- *   how - How the signal mast will be changed:
+ *   how - How the signal mask will be changed:
  *         SIG_BLOCK   - The resulting set is the union of the current set
  *                       and the signal set pointed to by 'set'.
  *         SIG_UNBLOCK - The resulting set is the intersection of the current
@@ -104,7 +104,6 @@
 int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 {
   FAR struct tcb_s *rtcb = this_task();
-  sigset_t   oldsigprocmask;
   irqstate_t flags;
   int        ret = OK;
 
@@ -112,10 +111,9 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 
   /* Return the old signal mask if requested */
 
-  oldsigprocmask = rtcb->sigprocmask;
   if (oset != NULL)
     {
-      *oset = oldsigprocmask;
+      *oset = rtcb->sigprocmask;
     }
 
   /* Modify the current signal mask if so requested */
@@ -141,7 +139,7 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
             break;
 
           /* The resulting set is the intersection of the current set and
-           * the complement of the signal set pointed to by _set.
+           * the complement of the signal set pointed to by set.
            */
 
           case SIG_UNBLOCK:
@@ -186,7 +184,7 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
  *   by this function call.
  *
  * Input Parameters:
- *   how - How the signal mast will be changed:
+ *   how - How the signal mask will be changed:
  *         SIG_BLOCK   - The resulting set is the union of the current set
  *                       and the signal set pointed to by 'set'.
  *         SIG_UNBLOCK - The resulting set is the intersection of the current

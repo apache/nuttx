@@ -422,7 +422,7 @@ struct pic32mx_usbdev_s
   uint8_t                  rxbusy:1;      /* EP0 OUT data transfer in progress */
   uint16_t                 epavail;       /* Bitset of available endpoints */
   uint16_t                 epstalled;     /* Bitset of stalled endpoints */
-  WDOG_ID                  wdog;          /* Supports the restart delay */
+  struct wdog_s            wdog;          /* Supports the restart delay */
 
   /* The endpoint list */
 
@@ -465,7 +465,7 @@ static void pic32mx_epwrite(struct pic32mx_ep_s *privep,
                 const uint8_t *src, uint32_t nbytes);
 static void pic32mx_wrcomplete(struct pic32mx_usbdev_s *priv,
                 struct pic32mx_ep_s *privep);
-static void pic32mx_rqrestart(int argc, uint32_t arg1, ...);
+static void pic32mx_rqrestart(wdparm_t arg);
 static void pic32mx_delayedrestart(struct pic32mx_usbdev_s *priv,
                 uint8_t epno);
 static void pic32mx_rqstop(struct pic32mx_ep_s *privep);
@@ -971,7 +971,7 @@ static void pic32mx_wrcomplete(struct pic32mx_usbdev_s *priv,
  * Name: pic32mx_rqrestart
  ****************************************************************************/
 
-static void pic32mx_rqrestart(int argc, uint32_t arg1, ...)
+static void pic32mx_rqrestart(wdparm_t arg)
 {
   struct pic32mx_usbdev_s *priv;
   struct pic32mx_ep_s *privep;
@@ -982,7 +982,7 @@ static void pic32mx_rqrestart(int argc, uint32_t arg1, ...)
 
   /* Recover the pointer to the driver structure */
 
-  priv = (struct pic32mx_usbdev_s *)((uintptr_t)arg1);
+  priv = (struct pic32mx_usbdev_s *)arg;
   DEBUGASSERT(priv != NULL);
 
   /* Sample and clear the set of endpoints that have recovered from a stall */
@@ -1042,8 +1042,8 @@ static void pic32mx_delayedrestart(struct pic32mx_usbdev_s *priv,
 
   /* And start (or re-start) the watchdog timer */
 
-  wd_start(priv->wdog, RESTART_DELAY, pic32mx_rqrestart, 1,
-           (uint32_t)priv);
+  wd_start(&priv->wdog, RESTART_DELAY,
+           pic32mx_rqrestart, (wdparm_t)priv);
 }
 
 /****************************************************************************
@@ -4366,7 +4366,6 @@ void up_usbinitialize(void)
    */
 
   priv->epstalled = 0;
-  priv->wdog      = wd_create();
 
   /* Attach USB controller interrupt handler.  The hardware will not be
    * initialized and interrupts will not be enabled until the class device

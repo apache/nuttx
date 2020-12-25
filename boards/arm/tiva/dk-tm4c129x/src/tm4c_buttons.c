@@ -88,7 +88,7 @@ static const uint32_t g_buttons[NUM_BUTTONS] =
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -98,6 +98,8 @@ void board_button_initialize(void)
     {
       tiva_configgpio(g_buttons[i]);
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
@@ -158,7 +160,9 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
   irqstate_t flags;
   int ret = -EINVAL;
 
-  /* Interrupts are supported only on ports P and Q and, hence, only on button SW4 */
+  /* Interrupts are supported only on ports P and Q and,
+   * hence, only on button SW4
+   */
 
   if (id == BUTTON_SW4)
     {

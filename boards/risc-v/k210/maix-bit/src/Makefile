@@ -41,4 +41,8 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += k210_appinit.c
 endif
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += k210_leds.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

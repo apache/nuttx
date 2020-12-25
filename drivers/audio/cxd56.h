@@ -227,6 +227,18 @@
 #  define CONFIG_CXD56_AUDIO_NUM_BUFFERS  4
 #endif
 
+/* Queue helpers */
+
+#define dq_get(q)    (dq_remfirst(q))
+#define dq_put(q,n) (dq_addlast((dq_entry_t*)n,(q)))
+#define dq_put_back(q,n) (dq_addfirst((dq_entry_t*)n,(q)))
+#define dq_clear(q) \
+  do \
+    { \
+      dq_remlast(q); \
+    } \
+  while (!dq_empty(q))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -243,6 +255,7 @@ enum cxd56_devstate_e
 {
   CXD56_DEV_STATE_OFF,
   CXD56_DEV_STATE_PAUSED,
+  CXD56_DEV_STATE_BUFFERING,
   CXD56_DEV_STATE_STARTED,
   CXD56_DEV_STATE_STOPPED
 };
@@ -271,8 +284,14 @@ struct cxd56_dev_s
   pthread_t               threadid;         /* ID of our thread */
   sem_t                   pendsem;          /* Protect pendq */
 
-  struct dq_queue_s       pendingq;         /* Queue of pending buffers to be sent */
-  struct dq_queue_s       runningq;         /* Queue of buffers being played */
+  struct dq_queue_s       up_pendq;         /* Pending buffers from app to process */
+  struct dq_queue_s       up_runq;          /* Buffers from app being played */
+
+#ifdef CONFIG_AUDIO_CXD56_SRC
+  struct dq_queue_s       down_pendq;       /* Pending SRC buffers to be DMA'd */
+  struct dq_queue_s       down_runq;        /* SRC buffers being processed */
+  struct dq_queue_s       down_doneq;       /* Done SRC buffers to be re-used */
+#endif
 
   uint16_t                samplerate;       /* Sample rate */
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME

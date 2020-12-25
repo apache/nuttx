@@ -151,7 +151,7 @@ static void igmp_timeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void igmp_timeout(int argc, uint32_t arg, ...)
+static void igmp_timeout(wdparm_t arg)
 {
   FAR struct igmp_group_s *group;
   int ret;
@@ -161,7 +161,7 @@ static void igmp_timeout(int argc, uint32_t arg, ...)
   /* Recover the reference to the group */
 
   group = (FAR struct igmp_group_s *)arg;
-  DEBUGASSERT(argc == 1 && group != NULL);
+  DEBUGASSERT(group != NULL);
 
   /* Perform the timeout-related operations on (preferably) the low priority
    * work queue.
@@ -197,7 +197,7 @@ void igmp_startticks(FAR struct igmp_group_s *group, unsigned int ticks)
 
   gtmrinfo("ticks: %d\n", ticks);
 
-  ret = wd_start(group->wdog, ticks, igmp_timeout, 1, (uint32_t)group);
+  ret = wd_start(&group->wdog, ticks, igmp_timeout, (wdparm_t)group);
 
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
@@ -242,7 +242,7 @@ bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks)
    * the watchdog was never started.
    */
 
-  remaining = wd_gettime(group->wdog);
+  remaining = wd_gettime(&group->wdog);
 
   /* A remaining time of zero means that the watchdog was never started
    * or has already expired.  That case should be covered in the following
@@ -254,7 +254,7 @@ bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks)
     {
       /* Cancel the watchdog timer and return true */
 
-      wd_cancel(group->wdog);
+      wd_cancel(&group->wdog);
       leave_critical_section(flags);
       return true;
     }

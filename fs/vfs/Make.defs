@@ -51,12 +51,12 @@ endif
 CSRCS += fs_pread.c fs_pwrite.c
 
 ifneq ($(CONFIG_PSEUDOFS_SOFTLINKS),0)
-CSRCS += fs_link.c fs_readlink.c
+CSRCS += fs_symlink.c fs_readlink.c
 endif
 
 # Stream support
 
-ifneq ($(CONFIG_NFILE_STREAMS),0)
+ifeq ($(CONFIG_FILE_STREAM),y)
 CSRCS += fs_fdopen.c
 endif
 
@@ -64,6 +64,12 @@ endif
 
 ifeq ($(CONFIG_NET_SENDFILE),y)
 CSRCS += fs_sendfile.c
+endif
+
+# Support for eventfd
+
+ifeq ($(CONFIG_EVENT_FD),y)
+CSRCS += fs_eventfd.c
 endif
 
 # Include vfs build support

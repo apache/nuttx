@@ -41,6 +41,7 @@ CMN_CSRCS  = up_initialize.c \
              up_interruptcontext.c \
              up_allocateheap.c \
              up_createstack.c \
+             up_usestack.c \
              up_releasestack.c \
              up_stackframe.c \
              up_initialstate.c \

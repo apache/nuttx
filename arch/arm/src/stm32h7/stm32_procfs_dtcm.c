@@ -46,7 +46,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/statfs.h>
 #include <sys/stat.h>
 
 #include <stdint.h>
@@ -82,6 +81,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This enumeration identifies all of the thread attributes that can be
  * accessed via the procfs file system.
  */
@@ -241,8 +241,8 @@ static ssize_t dtcm_read(FAR struct file *filep, FAR char *buffer,
   totalsize = 0;
 
   linesize = snprintf(priv->line,
-                      DTCM_LINELEN,
-                      "             total       used       free    largest\n");
+                    DTCM_LINELEN,
+                    "             total       used       free    largest\n");
   copysize = procfs_memcpy(priv->line, linesize, buffer, remaining, &offset);
   totalsize += copysize;
   buffer    += copysize;

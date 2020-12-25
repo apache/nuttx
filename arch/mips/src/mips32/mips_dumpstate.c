@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -59,23 +60,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_getsp
- ****************************************************************************/
-
-/* I don't know if the builtin to get SP is enabled */
-
-static inline uint32_t up_getsp(void)
-{
-  register uint32_t sp;
-  __asm__
-  (
-    "\tadd  %0, $0, $29\n"
-    : "=r"(sp)
-  );
-  return sp;
-}
-
-/****************************************************************************
  * Name: up_stackdump
  ****************************************************************************/
 
@@ -86,7 +70,9 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
-      _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      _alert("%08" PRIx32 ": %08" PRIx32 " %08" PRIx32
+             " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+             " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
@@ -102,36 +88,43 @@ static inline void up_registerdump(void)
 
   if (CURRENT_REGS)
     {
-      _alert("MFLO:%08x MFHI:%08x EPC:%08x STATUS:%08x\n",
-            CURRENT_REGS[REG_MFLO], CURRENT_REGS[REG_MFHI],
-            CURRENT_REGS[REG_EPC], CURRENT_REGS[REG_STATUS]);
-      _alert("AT:%08x V0:%08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
-            CURRENT_REGS[REG_AT], CURRENT_REGS[REG_V0],
-            CURRENT_REGS[REG_V1], CURRENT_REGS[REG_A0],
-            CURRENT_REGS[REG_A1], CURRENT_REGS[REG_A2],
-            CURRENT_REGS[REG_A3]);
-      _alert("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x "
-             "T6:%08x T7:%08x\n",
-            CURRENT_REGS[REG_T0], CURRENT_REGS[REG_T1],
-            CURRENT_REGS[REG_T2], CURRENT_REGS[REG_T3],
-            CURRENT_REGS[REG_T4], CURRENT_REGS[REG_T5],
-            CURRENT_REGS[REG_T6], CURRENT_REGS[REG_T7]);
-      _alert("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x "
-             "S6:%08x S7:%08x\n",
-            CURRENT_REGS[REG_S0], CURRENT_REGS[REG_S1],
-            CURRENT_REGS[REG_S2], CURRENT_REGS[REG_S3],
-            CURRENT_REGS[REG_S4], CURRENT_REGS[REG_S5],
-            CURRENT_REGS[REG_S6], CURRENT_REGS[REG_S7]);
+      _alert("MFLO:%08" PRIx32 " MFHI:%08" PRIx32
+             " EPC:%08" PRIx32 " STATUS:%08" PRIx32 "\n",
+             CURRENT_REGS[REG_MFLO], CURRENT_REGS[REG_MFHI],
+             CURRENT_REGS[REG_EPC], CURRENT_REGS[REG_STATUS]);
+      _alert("AT:%08" PRIx32 " V0:%08" PRIx32 " V1:%08" PRIx32
+             " A0:%08" PRIx32 " A1:%08" PRIx32 " A2:%08" PRIx32
+             " A3:%08" PRIx32 "\n",
+             CURRENT_REGS[REG_AT], CURRENT_REGS[REG_V0],
+             CURRENT_REGS[REG_V1], CURRENT_REGS[REG_A0],
+             CURRENT_REGS[REG_A1], CURRENT_REGS[REG_A2],
+             CURRENT_REGS[REG_A3]);
+      _alert("T0:%08" PRIx32 " T1:%08" PRIx32 " T2:%08" PRIx32
+             " T3:%08" PRIx32 " T4:%08" PRIx32 " T5:%08" PRIx32
+             " T6:%08" PRIx32 " T7:%08" PRIx32 "\n",
+             CURRENT_REGS[REG_T0], CURRENT_REGS[REG_T1],
+             CURRENT_REGS[REG_T2], CURRENT_REGS[REG_T3],
+             CURRENT_REGS[REG_T4], CURRENT_REGS[REG_T5],
+             CURRENT_REGS[REG_T6], CURRENT_REGS[REG_T7]);
+      _alert("S0:%08" PRIx32 " S1:%08" PRIx32 " S2:%08" PRIx32
+             " S3:%08" PRIx32 " S4:%08" PRIx32 " S5:%08" PRIx32
+             " S6:%08" PRIx32 " S7:%08" PRIx32 "\n",
+             CURRENT_REGS[REG_S0], CURRENT_REGS[REG_S1],
+             CURRENT_REGS[REG_S2], CURRENT_REGS[REG_S3],
+             CURRENT_REGS[REG_S4], CURRENT_REGS[REG_S5],
+             CURRENT_REGS[REG_S6], CURRENT_REGS[REG_S7]);
 #ifdef MIPS32_SAVE_GP
-      _alert("T8:%08x T9:%08x GP:%08x SP:%08x FP:%08x RA:%08x\n",
-            CURRENT_REGS[REG_T8], CURRENT_REGS[REG_T9],
-            CURRENT_REGS[REG_GP], CURRENT_REGS[REG_SP],
-            CURRENT_REGS[REG_FP], CURRENT_REGS[REG_RA]);
+      _alert("T8:%08" PRIx32 " T9:%08" PRIx32 " GP:%08" PRIx32
+             " SP:%08" PRIx32 " FP:%08" PRIx32 " RA:%08" PRIx32 "\n",
+             CURRENT_REGS[REG_T8], CURRENT_REGS[REG_T9],
+             CURRENT_REGS[REG_GP], CURRENT_REGS[REG_SP],
+             CURRENT_REGS[REG_FP], CURRENT_REGS[REG_RA]);
 #else
-      _alert("T8:%08x T9:%08x SP:%08x FP:%08x RA:%08x\n",
-            CURRENT_REGS[REG_T8], CURRENT_REGS[REG_T9],
-            CURRENT_REGS[REG_SP], CURRENT_REGS[REG_FP],
-            CURRENT_REGS[REG_RA]);
+      _alert("T8:%08" PRIx32 " T9:%08" PRIx32 " SP:%08" PRIx32
+             " FP:%08" PRIx32 " RA:%08" PRIx32 "\n",
+             CURRENT_REGS[REG_T8], CURRENT_REGS[REG_T9],
+             CURRENT_REGS[REG_SP], CURRENT_REGS[REG_FP],
+             CURRENT_REGS[REG_RA]);
 #endif
     }
 }
@@ -147,7 +140,7 @@ static inline void up_registerdump(void)
 void up_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint32_t sp = up_getsp();
+  uint32_t sp = mips_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
@@ -161,16 +154,8 @@ void up_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  if (rtcb->pid == 0) /* Check for CPU0 IDLE thread */
-    {
-      ustackbase = g_idle_topstack - 4;
-      ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
-    }
-  else
-    {
-      ustackbase = (uint32_t)rtcb->adj_stack_ptr;
-      ustacksize = (uint32_t)rtcb->adj_stack_size;
-    }
+  ustackbase = (uint32_t)rtcb->adj_stack_ptr;
+  ustacksize = (uint32_t)rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */
 
@@ -180,10 +165,10 @@ void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  _alert("sp:     %08x\n", sp);
+  _alert("sp:     %08" PRIx32 "\n", sp);
   _alert("IRQ stack:\n");
-  _alert("  base: %08x\n", istackbase);
-  _alert("  size: %08x\n", istacksize);
+  _alert("  base: %08" PRIx32 "\n", istackbase);
+  _alert("  size: %08" PRIx32 "\n", istacksize);
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -200,7 +185,7 @@ void up_dumpstate(void)
        */
 
       sp = g_intstackbase;
-      _alert("sp:     %08x\n", sp);
+      _alert("sp:     %08" PRIx32 "\n", sp);
     }
   else if (CURRENT_REGS)
     {
@@ -211,12 +196,12 @@ void up_dumpstate(void)
   /* Show user stack info */
 
   _alert("User stack:\n");
-  _alert("  base: %08x\n", ustackbase);
-  _alert("  size: %08x\n", ustacksize);
+  _alert("  base: %08" PRIx32 "\n", ustackbase);
+  _alert("  size: %08" PRIx32 "\n", ustacksize);
 #else
-  _alert("sp:         %08x\n", sp);
-  _alert("stack base: %08x\n", ustackbase);
-  _alert("stack size: %08x\n", ustacksize);
+  _alert("sp:         %08" PRIx32 "\n", sp);
+  _alert("stack base: %08" PRIx32 "\n", ustackbase);
+  _alert("stack size: %08" PRIx32 "\n", ustacksize);
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user

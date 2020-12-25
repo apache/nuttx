@@ -154,7 +154,7 @@
 
 #  elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
         defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G47XX)
+        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
 
 #    if defined(CONFIG_USART1_RXDMA) || defined(CONFIG_USART2_RXDMA) || \
       defined(CONFIG_USART3_RXDMA)
@@ -198,7 +198,7 @@
 #  ifndef CONFIG_USART_RXDMAPRIO
 #    if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
         defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G47XX)
+        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
 #      define CONFIG_USART_RXDMAPRIO  DMA_CCR_PRIMED
 #    elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #      define CONFIG_USART_RXDMAPRIO  DMA_SCR_PRIMED
@@ -208,7 +208,7 @@
 #  endif
 #    if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
         defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G47XX)
+        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
 #    if (CONFIG_USART_RXDMAPRIO & ~DMA_CCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_USART_RXDMAPRIO"
 #    endif
@@ -1177,7 +1177,7 @@ static void up_set_format(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G47XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
   uint32_t usartdiv8;
 #else
   uint32_t usartdiv32;
@@ -1192,7 +1192,7 @@ static void up_set_format(struct uart_dev_s *dev)
   regval = up_serialin(priv, STM32_USART_CR1_OFFSET);
 
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)|| \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G47XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
   /* This first implementation is for U[S]ARTs that support oversampling
    * by 8 in additional to the standard oversampling by 16.
    * With baud rate of fCK / Divider for oversampling by 16.
@@ -1882,7 +1882,7 @@ static int up_interrupt(int irq, void *context, void *arg)
       else if ((priv->sr & (USART_SR_ORE | USART_SR_NE | USART_SR_FE)) != 0)
         {
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G47XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
           /* These errors are cleared by writing the corresponding bit to the
            * interrupt clear register (ICR).
            */
@@ -1980,7 +1980,9 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #else
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
-            uint32_t gpio_val = GPIO_OPENDRAIN;
+            uint32_t gpio_val = (arg & SER_SINGLEWIRE_PUSHPULL) ==
+                                 SER_SINGLEWIRE_PUSHPULL ?
+                                 GPIO_PUSHPULL : GPIO_OPENDRAIN;
             gpio_val |= ((arg & SER_SINGLEWIRE_PULL_MASK) ==
                          SER_SINGLEWIRE_PULLUP) ? GPIO_PULLUP
                                                 : GPIO_FLOAT;
@@ -2017,8 +2019,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        cfsetispeed(termiosp, priv->baud);
-
         /* Note that since we only support 8/9 bit modes and
          * there is no way to report 9-bit mode, we always claim 8.
          */
@@ -2034,6 +2034,8 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
           ((priv->iflow) ? CRTS_IFLOW : 0) |
 #endif
           CS8;
+
+        cfsetispeed(termiosp, priv->baud);
 
         /* TODO: CCTS_IFLOW, CCTS_OFLOW */
       }
@@ -2313,11 +2315,9 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
                              unsigned int nbuffered, bool upper)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-#if !(defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && defined(CONFIG_STM32_FLOWCONTROL_BROKEN))
-  uint16_t ie;
-#endif
 
-#if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && \
+    defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
     {
       /* Assert/de-assert nRTS set it high resume/stop sending */
@@ -2361,9 +2361,7 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
            * enable Rx interrupts.
            */
 
-          ie = priv->ie;
-          ie &= ~USART_CR1_RXNEIE;
-          up_restoreusartint(priv, ie);
+          uart_disablerxint(dev);
           return true;
         }
 
@@ -2376,7 +2374,7 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
            * received.
            */
 
-          up_rxint(dev, true);
+          uart_enablerxint(dev);
         }
     }
 #endif
@@ -2475,8 +2473,11 @@ static void up_send(struct uart_dev_s *dev, int ch)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 #ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
-    stm32_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
+    {
+      stm32_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
+    }
 #endif
+
   up_serialout(priv, STM32_USART_TDR_OFFSET, (uint32_t)ch);
 }
 

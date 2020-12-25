@@ -1,0 +1,93 @@
+/****************************************************************************
+ * Documentation/_static/custom.css
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* Make content wider */
+
+.wy-nav-content {
+    max-width: 1200px !important;
+}
+
+/* Make links inside C definitions more visible */
+
+.c a:link {
+  color: black;
+}
+
+/* override table width restrictions */
+
+@media screen and (min-width: 767px) {
+
+   .wy-table-responsive table td {
+      /* !important prevents the common CSS stylesheets from overriding
+         this as on RTD they are loaded after this stylesheet */
+      white-space: normal !important;
+   }
+
+   .wy-table-responsive {
+      overflow: visible !important;
+   }
+}
+
+/* remove useless padding on the sidebar */
+
+.wy-nav-side
+{
+  padding-bottom: 0em !important;
+}
+
+/* define some classes to be used */
+
+table.valign-top td {
+  vertical-align: top !important;
+}
+
+/* Make <kbd> elements look nice */
+
+kbd {
+  margin: 0px 0.1em;
+  padding: 0.1em 0.6em;
+  border-radius: 3px;
+  border: 1px solid rgb(204, 204, 204);
+  color: rgb(51, 51, 51);
+  line-height: 1.4;
+  font-family: Arial,Helvetica,sans-serif;
+  font-size: 10px;
+  display: inline-block;
+  box-shadow: 0px 1px 0px rgba(0,0,0,0.2), inset 0px 0px 0px 2px #ffffff;
+  background-color: rgb(247, 247, 247);
+  -moz-box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2), 0 0 0 2px #ffffff inset;
+  -webkit-box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2), 0 0 0 2px #ffffff inset;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  text-shadow: 0 1px 0 #fff;
+}
+
+span.menuselection
+{
+  margin: 0px 0.1em;
+  padding: 0.1em 0.1em;
+  border-radius: 3px;
+  border: 1px solid rgb(204, 204, 204);
+}
+
+div.version-selector
+{
+  margin-bottom: 1em;
+}

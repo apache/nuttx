@@ -190,14 +190,14 @@ Configurations
   Each  B-L475E-IOT01A configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh [-l|c|u|n] /b-l475e-iot01a:<subdir>
+    tools/configure.sh [-l|c|n] /b-l475e-iot01a:<subdir>
 
   Where:
    -l selects the Linux (l) host environment.  The [-c|u|n] options
        select one of the Windows environments.  Default:  Use host setup
        in the defconfig file
-   [-c|u|n] selects the Windows host and a Windows environment:  Cygwin (c),
-       Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin
+   [-c|n] selects the Windows host and a Windows environment:
+      Cygwin (c), or Windows native (n). Default Cygwin
 
   Before building, make sure that:
 

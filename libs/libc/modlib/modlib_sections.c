@@ -90,7 +90,6 @@ static inline int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
 
   /* Loop until we get the entire section name into memory */
 
-  buffer    = loadinfo->iobuffer;
   bytesread = 0;
 
   for (; ; )

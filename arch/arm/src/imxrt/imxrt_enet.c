@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -186,6 +187,7 @@
  *
  * The imxrt1050-evk board uses a KSZ8081 PHY
  * The Versiboard2 uses a LAN8720 PHY
+ * The Teensy-4.1 board uses a DP83825I PHY
  *
  * ...and further PHY descriptions here.
  */
@@ -208,6 +210,15 @@
 #  define BOARD_PHY_10BASET(s)  (((s)&MII_LAN8720_SPSCR_10MBPS) != 0)
 #  define BOARD_PHY_100BASET(s) (((s)&MII_LAN8720_SPSCR_100MBPS) != 0)
 #  define BOARD_PHY_ISDUPLEX(s) (((s)&MII_LAN8720_SPSCR_DUPLEX) != 0)
+#elif defined(CONFIG_ETH0_PHY_DP83825I)
+#  define BOARD_PHY_NAME        "DP83825I"
+#  define BOARD_PHYID1          MII_PHYID1_DP83825I
+#  define BOARD_PHYID2          MII_PHYID2_DP83825I
+#  define BOARD_PHY_STATUS      MII_DP83825I_PHYSTS
+#  define BOARD_PHY_ADDR        (0)
+#  define BOARD_PHY_10BASET(s)  (((s) & MII_DP83825I_PHYSTS_SPEED) != 0)
+#  define BOARD_PHY_100BASET(s) (((s) & MII_DP83825I_PHYSTS_SPEED) == 0)
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_DP83825I_PHYSTS_DUPLEX) != 0)
 #else
 #  error "Unrecognized or missing PHY selection"
 #endif
@@ -242,7 +253,9 @@
 
 #define CRITICAL_ERROR    (ENET_INT_UN | ENET_INT_RL | ENET_INT_EBERR)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing
+ * the contents of the Ethernet header
+ */
 
 #define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
@@ -252,8 +265,8 @@
  * Private Types
  ****************************************************************************/
 
-/* The imxrt_driver_s encapsulates all state information for a single hardware
- * interface
+/* The imxrt_driver_s encapsulates all state information for
+ * a single hardware interface
  */
 
 struct imxrt_driver_s
@@ -263,8 +276,8 @@ struct imxrt_driver_s
   uint8_t txhead;              /* The next TX descriptor to use */
   uint8_t rxtail;              /* The next RX descriptor to use */
   uint8_t phyaddr;             /* Selected PHY address */
-  WDOG_ID txpoll;              /* TX poll timer */
-  WDOG_ID txtimeout;           /* TX timeout timer */
+  struct wdog_s txpoll;        /* TX poll timer */
+  struct wdog_s txtimeout;     /* TX timeout timer */
   struct work_s irqwork;       /* For deferring interrupt work to the work queue */
   struct work_s pollwork;      /* For deferring poll work to the work queue */
   struct enet_desc_s *txdesc;  /* A pointer to the list of TX descriptor */
@@ -334,10 +347,10 @@ static int  imxrt_enet_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void imxrt_txtimeout_work(FAR void *arg);
-static void imxrt_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void imxrt_txtimeout_expiry(wdparm_t arg);
 
 static void imxrt_poll_work(FAR void *arg);
-static void imxrt_polltimer_expiry(int argc, uint32_t arg, ...);
+static void imxrt_polltimer_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -563,8 +576,8 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, IMXRT_TXTIMEOUT, imxrt_txtimeout_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(&priv->txtimeout, IMXRT_TXTIMEOUT,
+           imxrt_txtimeout_expiry, (wdparm_t)priv);
 
   /* Start the TX transfer (if it was not already waiting for buffers) */
 
@@ -651,8 +664,8 @@ static int imxrt_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until
+   * all connections have been examined.
    */
 
   return 0;
@@ -683,7 +696,7 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
   NETDEV_RXPACKETS(&priv->dev);
 
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(&priv->dev);
 #endif
@@ -704,7 +717,7 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
       ipv4_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -744,7 +757,7 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
       ipv6_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -911,7 +924,7 @@ static void imxrt_txdone(FAR struct imxrt_driver_s *priv)
    * canceled.
    */
 
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txtimeout);
 
   /* Verify that the oldest descriptor descriptor completed */
 
@@ -953,7 +966,7 @@ static void imxrt_txdone(FAR struct imxrt_driver_s *priv)
     {
       /* No.. Cancel the TX timeout and disable further Tx interrupts. */
 
-      wd_cancel(priv->txtimeout);
+      wd_cancel(&priv->txtimeout);
 
       regval  = getreg32(IMXRT_ENET_EIMR);
       regval &= ~TX_INTERRUPTS;
@@ -1013,7 +1026,7 @@ static void imxrt_enet_interrupt_work(FAR void *arg)
 
       NETDEV_ERRORS(&priv->dev);
 
-      nerr("ERROR: Network interface error occurred (0x%08X)\n",
+      nerr("ERROR: Network interface error occurred (0x%08" PRIX32 ")\n",
            (pending & ERROR_INTERRUPTS));
     }
 
@@ -1088,7 +1101,7 @@ static void imxrt_enet_interrupt_work(FAR void *arg)
  * Function: imxrt_enet_interrupt
  *
  * Description:
- *   Three interrupt sources will vector this this function:
+ *   Three interrupt sources will vector to this function:
  *   1. Ethernet MAC transmit interrupt handler
  *   2. Ethernet MAC receive interrupt handler
  *   3.
@@ -1169,8 +1182,7 @@ static void imxrt_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1180,7 +1192,7 @@ static void imxrt_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void imxrt_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void imxrt_txtimeout_expiry(wdparm_t arg)
 {
   FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
 
@@ -1219,8 +1231,9 @@ static void imxrt_poll_work(FAR void *arg)
 {
   FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
 
-  /* Check if there is there is a transmission in progress.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
+  /* Check if there is there is a transmission in progress.
+   * We cannot perform the TX poll if he are unable to accept
+   * another packet for transmission.
    */
 
   net_lock();
@@ -1236,8 +1249,8 @@ static void imxrt_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again in any case */
 
-  wd_start(priv->txpoll, IMXRT_WDDELAY, imxrt_polltimer_expiry,
-           1, (wdparm_t)priv);
+  wd_start(&priv->txpoll, IMXRT_WDDELAY,
+           imxrt_polltimer_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1248,8 +1261,7 @@ static void imxrt_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1259,7 +1271,7 @@ static void imxrt_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void imxrt_polltimer_expiry(int argc, uint32_t arg, ...)
+static void imxrt_polltimer_expiry(wdparm_t arg)
 {
   FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
 
@@ -1298,8 +1310,10 @@ static int imxrt_ifup_action(struct net_driver_s *dev, bool resetphy)
   int ret;
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Initialize ENET buffers */
 
@@ -1368,8 +1382,8 @@ static int imxrt_ifup_action(struct net_driver_s *dev, bool resetphy)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, IMXRT_WDDELAY, imxrt_polltimer_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(&priv->txpoll, IMXRT_WDDELAY,
+           imxrt_polltimer_expiry, (wdparm_t)priv);
 
   /* Clear all pending ENET interrupt */
 
@@ -1441,8 +1455,10 @@ static int imxrt_ifdown(struct net_driver_s *dev)
   irqstate_t flags;
 
   ninfo("Taking down: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Flush and disable the Ethernet interrupts at the NVIC */
 
@@ -1453,8 +1469,8 @@ static int imxrt_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txpoll);
+  wd_cancel(&priv->txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the imxrt_ifup() always
@@ -1506,7 +1522,7 @@ static void imxrt_txavail_work(FAR void *arg)
            * new XMIT data.
            */
 
-          devif_poll(&priv->dev, imxrt_txpoll);
+          devif_timer(&priv->dev, 0, imxrt_txpoll);
         }
     }
 
@@ -1788,7 +1804,8 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret = imxrt_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
+          ret = imxrt_readmii(priv, req->phy_id,
+                              req->reg_num, &req->val_out);
         }
         break;
 
@@ -2037,9 +2054,10 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
 
   if (renogphy)
     {
-      /* Loop (potentially infinitely?) until we successfully communicate with
-       * the PHY. This is 'standard stuff' that should work for any PHY - we
-       * are not communicating with it's 'special' registers at this point.
+      /* Loop (potentially infinitely?) until we successfully communicate
+       * with the PHY. This is 'standard stuff' that should work for any PHY
+       * - we are not communicating with it's 'special' registers
+       * at this point.
        */
 
       ninfo("%s: Try phyaddr: %u\n", BOARD_PHY_NAME, phyaddr);
@@ -2144,6 +2162,13 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
       imxrt_writemii(priv, phyaddr, MII_KSZ8081_PHYCTRL2,
                      (phydata | (1 << 4)));
 
+      imxrt_writemii(priv, phyaddr, MII_ADVERTISE,
+                     MII_ADVERTISE_100BASETXFULL |
+                     MII_ADVERTISE_100BASETXHALF |
+                     MII_ADVERTISE_10BASETXFULL |
+                     MII_ADVERTISE_10BASETXHALF |
+                     MII_ADVERTISE_CSMA);
+
 #elif defined (CONFIG_ETH0_PHY_LAN8720)
       /* Make sure that PHY comes up in correct mode when it's reset */
 
@@ -2154,6 +2179,25 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
       /* ...and reset PHY */
 
       imxrt_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
+
+#elif defined (CONFIG_ETH0_PHY_DP83825I)
+
+      /* Reset PHY */
+
+      imxrt_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
+
+      /* Set RMII mode and Indicate 50MHz clock */
+
+      imxrt_writemii(priv, phyaddr, MII_DP83825I_RCSR,
+                    MII_DP83825I_RCSC_ELAST_2 | MII_DP83825I_RCSC_RMIICS);
+
+      imxrt_writemii(priv, phyaddr, MII_ADVERTISE,
+                     MII_ADVERTISE_100BASETXFULL |
+                     MII_ADVERTISE_100BASETXHALF |
+                     MII_ADVERTISE_10BASETXFULL |
+                     MII_ADVERTISE_10BASETXHALF |
+                     MII_ADVERTISE_CSMA);
+
 #endif
 
       /* Start auto negotiation */
@@ -2467,7 +2511,9 @@ int imxrt_netinitialize(int intf)
   regval |= GPR_GPR1_ENET1_TX_CLK_OUT_EN;
   putreg32(regval, IMXRT_IOMUXC_GPR_GPR1);
 
-  /* Enable the ENET clock.  Clock is on during all modes, except STOP mode. */
+  /* Enable the ENET clock.  Clock is on during all modes,
+   * except STOP mode.
+   */
 
   imxrt_clockall_enet();
 
@@ -2521,18 +2567,13 @@ int imxrt_netinitialize(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = imxrt_ioctl;    /* Support PHY ioctl() calls */
 #endif
-  priv->dev.d_private = (void *)g_enet;   /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll        = wd_create();      /* Create periodic poll timer */
-  priv->txtimeout     = wd_create();      /* Create TX timeout timer */
+  priv->dev.d_private = g_enet;         /* Used to recover private state from dev */
 
 #ifdef CONFIG_NET_ETHERNET
   /* Determine a semi-unique MAC address from MCU UID
    * We use UID Low and Mid Low registers to get 64 bits, from which we keep
-   * 48 bits.  We then force unicast and locally administered bits (b0 and b1,
-   * 1st octet)
+   * 48 bits.  We then force unicast and locally administered bits
+   * (b0 and b1, 1st octet)
    */
 
   /* hardcoded offset: todo: need proper header file */

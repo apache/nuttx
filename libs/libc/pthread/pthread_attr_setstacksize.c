@@ -68,7 +68,7 @@ int pthread_attr_setstacksize(FAR pthread_attr_t *attr, size_t stacksize)
 {
   int ret;
 
-  linfo("attr=0x%p stacksize=%ld\n", attr, stacksize);
+  linfo("attr=0x%p stacksize=%zu\n", attr, stacksize);
 
   if (!attr || stacksize < PTHREAD_STACK_MIN)
     {

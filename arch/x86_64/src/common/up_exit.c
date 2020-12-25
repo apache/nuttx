@@ -65,8 +65,8 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct filelist *filelist;
-#if CONFIG_NFILE_STREAMS > 0
-  FAR struct streamlist *streamlist;
+#ifdef CONFIG_FILE_STREAM
+  FAR struct file_struct *filep;
 #endif
   int i;
 #endif
@@ -87,11 +87,10 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
     }
 #endif
 
-#if CONFIG_NFILE_STREAMS > 0
-  streamlist = tcb->group->tg_streamlist;
-  for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
+#ifdef CONFIG_FILE_STREAM
+  filep = tcb->group->tg_streamlist->sl_head;
+  for (; filep != NULL; filep = filep->fs_next)
     {
-      struct file_struct *filep = &streamlist->sl_streams[i];
       if (filep->fs_fd >= 0)
         {
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
@@ -117,7 +116,7 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _exit
+ * Name: up_exit
  *
  * Description:
  *   This function causes the currently executing task to cease to exist.
@@ -127,7 +126,7 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
  *
  ****************************************************************************/
 
-void _exit(int status)
+void up_exit(int status)
 {
   struct tcb_s *tcb;
 
@@ -135,7 +134,7 @@ void _exit(int status)
    * The IRQ state will be restored when the next task is started.
    */
 
-  (void)enter_critical_section();
+  enter_critical_section();
 
   sinfo("TCB=%p exiting\n", this_task());
 
@@ -146,13 +145,19 @@ void _exit(int status)
 
   /* Destroy the task at the head of the ready to run list. */
 
-  (void)nxtask_exit();
+  nxtask_exit();
 
   /* Now, perform the context switch to the new ready-to-run task at the
    * head of the list.
    */
 
   tcb = this_task();
+
+  /* Adjusts time slice for SCHED_RR & SCHED_SPORADIC cases
+   * NOTE: the API also adjusts the global IRQ control for SMP
+   */
+
+  nxsched_resume_scheduler(tcb);
 
   /* Context switch, rearrange MMU */
 
@@ -165,11 +170,10 @@ void _exit(int status)
    * the ready-to-run list.
    */
 
-  (void)group_addrenv(tcb);
+  group_addrenv(tcb);
 #endif
 
   /* Then switch contexts */
 
   up_fullcontextrestore(tcb->xcp.regs);
 }
-

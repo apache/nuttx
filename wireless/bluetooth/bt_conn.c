@@ -92,7 +92,6 @@ static struct bt_conn_handoff_s g_conn_handoff =
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_WIRELESS_INFO
 static const char *state2str(enum bt_conn_state_e state)
 {
   switch (state)
@@ -116,7 +115,6 @@ static const char *state2str(enum bt_conn_state_e state)
       return "(unknown)";
     }
 }
-#endif
 
 static void bt_conn_reset_rx_state(FAR struct bt_conn_s *conn)
 {
@@ -180,7 +178,7 @@ static int conn_tx_kthread(int argc, FAR char *argv[])
         }
 
       wlinfo("passing buf %p len %u to driver\n", buf, buf->len);
-      g_btdev.btdev->send(g_btdev.btdev, buf);
+      bt_send(g_btdev.btdev, buf);
       bt_buf_release(buf);
     }
 
@@ -298,7 +296,7 @@ void bt_conn_receive(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
 
   switch (flags)
     {
-      case 0x02:
+      case BT_HCI_ACL_NEW:
 
         /* First packet */
 
@@ -323,7 +321,7 @@ void bt_conn_receive(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
 
         break;
 
-      case 0x01:
+      case BT_HCI_ACL_CONTINUATION:
 
         /* Continuation */
 

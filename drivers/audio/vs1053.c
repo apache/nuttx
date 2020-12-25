@@ -44,6 +44,8 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+#include <math.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -60,7 +62,6 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/vs1053.h>
-#include <nuttx/lib/math.h>
 
 #include "vs1053.h"
 
@@ -1486,7 +1487,8 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
 
   /* Create a message queue for the worker thread */
 
-  snprintf(dev->mqname, sizeof(dev->mqname), "/tmp/%X", dev);
+  snprintf(dev->mqname, sizeof(dev->mqname), "/tmp/%" PRIXPTR,
+           (uintptr_t)dev);
   attr.mq_maxmsg = 16;
   attr.mq_msgsize = sizeof(struct audio_msg_s);
   attr.mq_curmsgs = 0;
@@ -1716,6 +1718,7 @@ static int vs1053_cancelbuffer(FAR struct audio_lowerhalf_s *lower,
 static int vs1053_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
                   unsigned long arg)
 {
+  int ret = OK;
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
   FAR struct ap_buffer_info_s *bufinfo;
 #endif
@@ -1744,10 +1747,11 @@ static int vs1053_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
 #endif
 
       default:
+        ret = -ENOTTY;
         break;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

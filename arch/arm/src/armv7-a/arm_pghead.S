@@ -632,7 +632,7 @@ __start:
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 	/* Get R3 = Value of RAM L1 page table entry */
 
-	ldr		r3, .LCprambase			/* r3=Aligned Nuttx RAM address (physical) */
+	ldr		r3, .LCprambase			/* r3=Aligned NuttX RAM address (physical) */
 	ldr		r1, .LCramflags			/* R1=.bss/.data section MMU flags */
 	add		r3, r3, r1				/* r3=flags + base */
 

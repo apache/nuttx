@@ -114,7 +114,7 @@ NuttX buildroot Toolchain
   If you have no ARM toolchain, one can be downloaded from the NuttX
   Bitbucket download site (https://bitbucket.org/nuttx/buildroot/downloads/).
 
-  1. You must have already configured Nuttx in <some-dir>nuttx.
+  1. You must have already configured NuttX in <some-dir>nuttx.
 
      tools/configure.sh ntosd-dm320:<sub-dir>
 

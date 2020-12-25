@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -425,7 +426,7 @@ struct sam_buffer_s
 struct sam_transport_s
 {
   DMA_HANDLE dma;             /* SSC DMA handle */
-  WDOG_ID dog;                /* Watchdog that handles DMA timeouts */
+  struct wdog_s dog;          /* Watchdog that handles DMA timeouts */
   sq_queue_t pend;            /* A queue of pending transfers */
   sq_queue_t act;             /* A queue of active transfers */
   sq_queue_t done;            /* A queue of completed transfers */
@@ -580,14 +581,14 @@ static void     ssc_txdma_sampledone(struct sam_ssc_s *priv, int result);
 #endif
 
 #ifdef SSC_HAVE_RX
-static void     ssc_rxdma_timeout(int argc, uint32_t arg, ...);
+static void     ssc_rxdma_timeout(wdparm_t arg);
 static int      ssc_rxdma_setup(struct sam_ssc_s *priv);
 static void     ssc_rx_worker(void *arg);
 static void     ssc_rx_schedule(struct sam_ssc_s *priv, int result);
 static void     ssc_rxdma_callback(DMA_HANDLE handle, void *arg, int result);
 #endif
 #ifdef SSC_HAVE_TX
-static void     ssc_txdma_timeout(int argc, uint32_t arg, ...);
+static void     ssc_txdma_timeout(wdparm_t arg);
 static int      ssc_txdma_setup(struct sam_ssc_s *priv);
 static void     ssc_tx_worker(void *arg);
 static void     ssc_tx_schedule(struct sam_ssc_s *priv, int result);
@@ -1183,8 +1184,7 @@ static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
  *   The RX watchdog timeout without completion of the RX DMA.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -1195,7 +1195,7 @@ static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
  ****************************************************************************/
 
 #ifdef SSC_HAVE_RX
-static void ssc_rxdma_timeout(int argc, uint32_t arg, ...)
+static void ssc_rxdma_timeout(wdparm_t arg)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1344,8 +1344,8 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
   if (!notimeout)
     {
-      ret = wd_start(priv->rx.dog, timeout, ssc_rxdma_timeout,
-                     1, (uint32_t)priv);
+      ret = wd_start(&priv->rx.dog, timeout,
+                     ssc_rxdma_timeout, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We
@@ -1575,7 +1575,7 @@ static void ssc_rxdma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->rx.dog);
+  wd_cancel(&priv->rx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -1599,8 +1599,7 @@ static void ssc_rxdma_callback(DMA_HANDLE handle, void *arg, int result)
  *   The RX watchdog timeout without completion of the RX DMA.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -1611,7 +1610,7 @@ static void ssc_rxdma_callback(DMA_HANDLE handle, void *arg, int result)
  ****************************************************************************/
 
 #ifdef SSC_HAVE_TX
-static void ssc_txdma_timeout(int argc, uint32_t arg, ...)
+static void ssc_txdma_timeout(wdparm_t arg)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1761,8 +1760,8 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
   if (!notimeout)
     {
-      ret = wd_start(priv->tx.dog, timeout, ssc_txdma_timeout,
-                     1, (uint32_t)priv);
+      ret = wd_start(&priv->tx.dog, timeout,
+                     ssc_txdma_timeout, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We
@@ -1979,7 +1978,7 @@ static void ssc_txdma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->tx.dog);
+  wd_cancel(&priv->tx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -2197,7 +2196,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 #endif
 
   DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & priv->align) == 0);
-  i2sinfo("apb=%p nmaxbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nmaxbytes=%d arg=%p timeout=%" PRId32 "\n",
           apb, apb->nmaxbytes, arg, timeout);
 
   ssc_init_buffer(apb->samp, apb->nmaxbytes);
@@ -2418,7 +2417,7 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
    */
 
   DEBUGASSERT(priv && apb);
-  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%" PRId32 "\n",
           apb, apb->nbytes - apb->curbyte, arg, timeout);
 
   ssc_dump_buffer("Sending", &apb->samp[apb->curbyte],
@@ -2915,7 +2914,7 @@ static void ssc_clocking(struct sam_ssc_s *priv)
 
   sam_enableperiph1(priv->pid);
 
-  i2sinfo("PCSR1=%08x PCR=%08x CMR=%08x\n",
+  i2sinfo("PCSR1=%08" PRIx32 " PCR=%08" PRIx32 " CMR=%08" PRIx32 "\n",
           getreg32(SAM_PMC_PCSR1), regval,
           ssc_getreg(priv, SAM_SSC_CMR_OFFSET));
 }
@@ -3007,15 +3006,6 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
           i2serr("ERROR: Failed to allocate the RX DMA channel\n");
           goto errout;
         }
-
-      /* Create a watchdog time to catch RX DMA timeouts */
-
-      priv->rx.dog = wd_create();
-      if (!priv->rx.dog)
-        {
-          i2serr("ERROR: Failed to create the RX DMA watchdog\n");
-          goto errout;
-        }
     }
 #endif
 
@@ -3028,15 +3018,6 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
       if (!priv->tx.dma)
         {
           i2serr("ERROR: Failed to allocate the TX DMA channel\n");
-          goto errout;
-        }
-
-      /* Create a watchdog time to catch TX DMA timeouts */
-
-      priv->tx.dog = wd_create();
-      if (!priv->tx.dog)
-        {
-          i2serr("ERROR: Failed to create the TX DMA watchdog\n");
           goto errout;
         }
     }
@@ -3070,11 +3051,7 @@ errout:
 static void ssc_dma_free(struct sam_ssc_s *priv)
 {
 #ifdef SSC_HAVE_TX
-  if (priv->tx.dog)
-    {
-       wd_delete(priv->tx.dog);
-    }
-
+  wd_cancel(&priv->tx.dog);
   if (priv->tx.dma)
     {
       sam_dmafree(priv->tx.dma);
@@ -3082,11 +3059,7 @@ static void ssc_dma_free(struct sam_ssc_s *priv)
 #endif
 
 #ifdef SSC_HAVE_RX
-  if (priv->rx.dog)
-    {
-       wd_delete(priv->rx.dog);
-    }
-
+  wd_cancel(&priv->rx.dog);
   if (priv->rx.dma)
     {
       sam_dmafree(priv->rx.dma);
@@ -3424,7 +3397,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
    * chip select structures.
    */
 
-  priv = (struct sam_ssc_s *)zalloc(sizeof(struct sam_ssc_s));
+  priv = (struct sam_ssc_s *)kmm_zalloc(sizeof(struct sam_ssc_s));
   if (!priv)
     {
       i2serr("ERROR: Failed to allocate a chip select structure\n");
@@ -3432,7 +3405,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
     }
 
   /* Set up the initial state for this chip select structure.  Other fields
-   * were zeroed by zalloc().
+   * were zeroed by kmm_zalloc().
    */
 
   /* Initialize the common parts for the SSC device structure  */

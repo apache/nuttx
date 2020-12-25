@@ -108,6 +108,10 @@ const struct sock_intf_s g_pkt_sockif =
   NULL,            /* si_sendfile */
 #endif
   pkt_recvfrom,    /* si_recvfrom */
+#ifdef CONFIG_NET_CMSG
+  NULL,            /* si_recvmsg */
+  NULL,            /* si_sendmsg */
+#endif
   pkt_close        /* si_close */
 };
 
@@ -310,7 +314,7 @@ static int pkt_connect(FAR struct socket *psock,
  *
  * Returned Value:
  *   Returns 0 (OK) on success.  On failure, it returns a negated errno
- *   value.  See accept() for a desrciption of the appropriate error value.
+ *   value.  See accept() for a description of the appropriate error value.
  *
  * Assumptions:
  *   The network is locked.
@@ -486,7 +490,7 @@ static int pkt_getpeername(FAR struct socket *psock,
  *
  * Returned Value:
  *   On success, zero is returned. On error, a negated errno value is
- *   returned.  See list() for the set of appropriate error values.
+ *   returned.  See listen() for the set of appropriate error values.
  *
  ****************************************************************************/
 

@@ -46,26 +46,24 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#ifdef CONFIG_STM32_STM32F4XXX
-
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
 
 /* Register Offsets *********************************************************************************/
 
-#define STM32_SYSCFG_MEMRMP_OFFSET    0x0000 /* SYSCFG memory remap register */
-#define STM32_SYSCFG_PMC_OFFSET       0x0004 /* SYSCFG peripheral mode configuration register */
+#define STM32_SYSCFG_MEMRMP_OFFSET    0x0000                    /* SYSCFG memory remap register */
+#define STM32_SYSCFG_PMC_OFFSET       0x0004                    /* SYSCFG peripheral mode configuration register */
 
 #define STM32_SYSCFG_EXTICR_OFFSET(p) (0x0008 + ((p) & 0x000c)) /* Registers are displaced by 4! */
-#define STM32_SYSCFG_EXTICR1_OFFSET   0x0008 /* SYSCFG external interrupt configuration register 1 */
-#define STM32_SYSCFG_EXTICR2_OFFSET   0x000c /* SYSCFG external interrupt configuration register 2 */
-#define STM32_SYSCFG_EXTICR3_OFFSET   0x0010 /* SYSCFG external interrupt configuration register 3 */
-#define STM32_SYSCFG_EXTICR4_OFFSET   0x0014 /* SYSCFG external interrupt configuration register 4 */
+#define STM32_SYSCFG_EXTICR1_OFFSET   0x0008                    /* SYSCFG external interrupt configuration register 1 */
+#define STM32_SYSCFG_EXTICR2_OFFSET   0x000c                    /* SYSCFG external interrupt configuration register 2 */
+#define STM32_SYSCFG_EXTICR3_OFFSET   0x0010                    /* SYSCFG external interrupt configuration register 3 */
+#define STM32_SYSCFG_EXTICR4_OFFSET   0x0014                    /* SYSCFG external interrupt configuration register 4 */
 
-#define STM32_SYSCFG_CMPCR_OFFSET     0x0020 /* Compensation cell control register */
+#define STM32_SYSCFG_CMPCR_OFFSET     0x0020                    /* Compensation cell control register */
 #if defined(CONFIG_STM32_STM32F446)
-#  define STM32_SYSCFG_CFGR_OFFSET    0x002c /* SYSCFG configuration register */
+#  define STM32_SYSCFG_CFGR_OFFSET    0x002c                    /* SYSCFG configuration register */
 #endif
 
 /* Register Addresses *******************************************************************************/
@@ -198,5 +196,4 @@
 #  define SYSCFG_CFGR_FMPI2C1_SDA    (1 << 1)  /* Bit 8: Forces FM+ drive capability on SDA */
 #endif
 
-#endif /* CONFIG_STM32_STM32F4XXX */
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F40XXX_SYSCFG_H */

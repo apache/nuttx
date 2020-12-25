@@ -34,6 +34,8 @@ config WL_GS2200M
 	default n
 	select SPI
 	select LIBC_SCANSET
+	select SCHED_LPWORK
+	select DRIVERS_IEEE80211
 
 if WL_GS2200M
 

@@ -141,6 +141,15 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
           nsectors = bch->nsectors - sector;
         }
 
+      /* Flush the dirty sector to keep the sector sequence */
+
+      ret = bchlib_flushsector(bch);
+      if (ret < 0)
+        {
+          ferr("ERROR: Flush failed: %d\n", ret);
+          return ret;
+        }
+
       /* Write the contiguous sectors */
 
       ret = bch->inode->u.i_bops->write(bch->inode, (FAR uint8_t *)buffer,
@@ -182,15 +191,6 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
       /* Adjust counts */
 
       byteswritten += len;
-    }
-
-  /* Finally, flush any cached writes to the device as well */
-
-  ret = bchlib_flushsector(bch);
-  if (ret < 0)
-    {
-      ferr("ERROR: Flush failed: %d\n", ret);
-      return ret;
     }
 
   return byteswritten;

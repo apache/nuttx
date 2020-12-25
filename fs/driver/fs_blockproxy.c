@@ -201,6 +201,7 @@ int block_proxy(FAR const char *blkdev, int oflags)
     {
       ret = -errno;
       ferr("ERROR: Failed to unlink %s: %d\n", chardev, ret);
+      goto errout_with_chardev;
     }
 
   /* Free the allocate character driver name and return the open file

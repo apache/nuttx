@@ -41,6 +41,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <fcntl.h>
 #include <crc32.h>
@@ -227,7 +228,9 @@ static inline int nxffs_wralloc(FAR struct nxffs_volume_s *volume,
           ret = nxffs_hdrerased(volume, wrfile, mindata);
           if (ret == OK)
             {
-              /* Valid memory for the data block was found.  Return success. */
+              /* Valid memory for the data block was found.  Return
+               * success.
+               */
 
               return OK;
             }
@@ -519,7 +522,8 @@ static inline ssize_t nxffs_zappend(FAR struct nxffs_volume_s *volume,
  *
  ****************************************************************************/
 
-ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
+ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer,
+                    size_t buflen)
 {
   FAR struct nxffs_volume_s *volume;
   FAR struct nxffs_wrfile_s *wrfile;
@@ -528,7 +532,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
   ssize_t total;
   int ret;
 
-  finfo("Write %d bytes to offset %d\n", buflen, filep->f_pos);
+  finfo("Write %zd bytes to offset %jd\n", buflen, (intmax_t)filep->f_pos);
 
   /* Sanity checks */
 
@@ -590,7 +594,9 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
 
       nxffs_ioseek(volume, wrfile->doffset);
 
-      /* Verify that the FLASH data that was previously written is still intact */
+      /* Verify that the FLASH data that was previously written is still
+       * intact
+       */
 
       ret = nxffs_reverify(volume, wrfile);
       if (ret < 0)
@@ -606,7 +612,8 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
       nwritten = nxffs_wrappend(volume, wrfile, &buffer[total], remaining);
       if (nwritten < 0)
         {
-          ferr("ERROR: Failed to append to FLASH to a data block: %d\n", -ret);
+          ferr("ERROR: Failed to append to FLASH to a data block: %d\n",
+               -ret);
           goto errout_with_semaphore;
         }
 
@@ -684,7 +691,9 @@ int nxffs_wrextend(FAR struct nxffs_volume_s *volume,
 
       nxffs_ioseek(volume, wrfile->doffset);
 
-      /* Verify that the FLASH data that was previously written is still intact */
+      /* Verify that the FLASH data that was previously written is still
+       * intact
+       */
 
       ret = nxffs_reverify(volume, wrfile);
       if (ret < 0)
@@ -873,8 +882,8 @@ int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size)
            * the block has uncorrectable bit errors.
            */
 
-          ferr("ERROR: Failed to read block %d: %d\n",
-               volume->ioblock, -ret);
+          ferr("ERROR: Failed to read block %jd: %d\n",
+               (intmax_t)volume->ioblock, -ret);
         }
 
       /* Search to the very end of this block if we have to */
@@ -898,7 +907,7 @@ int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size)
 
                   if (nerased >= size)
                     {
-                      /* Yes.. this this is where we will put the object */
+                      /* Yes.. this is where we will put the object */
 
                       off_t offset =
                         volume->ioblock * volume->geo.blocksize + iooffset;
@@ -1005,7 +1014,8 @@ int nxffs_wrblkhdr(FAR struct nxffs_volume_s *volume,
    *     begin the search for the next inode header or data block.
    */
 
-  volume->froffset = (wrfile->doffset + wrfile->datlen + SIZEOF_NXFFS_DATA_HDR);
+  volume->froffset = (wrfile->doffset + wrfile->datlen +
+                      SIZEOF_NXFFS_DATA_HDR);
 
   /* wrfile->file.entry:
    *   datlen:  Total file length accumulated so far.  When the file is

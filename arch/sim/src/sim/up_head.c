@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
+#include <syslog.h>
 #include <assert.h>
 
 #include <nuttx/init.h>
@@ -89,11 +90,10 @@ int main(int argc, char **argv, char **envp)
       /* Start the CPU0 emulation.  This should not return. */
 
       sim_cpu0_start();
-#else
-      /* Start the Nuttx emulation.  This should not return. */
+#endif
+      /* Start the NuttX emulation.  This should not return. */
 
       nx_start();
-#endif
     }
 
   return g_exitcode;
@@ -108,22 +108,22 @@ int main(int argc, char **argv, char **envp)
  *
  ****************************************************************************/
 
-void up_assert(const uint8_t *filename, int line)
+void up_assert(const char *filename, int line)
 {
   /* Show the location of the failed assertion */
 
 #ifdef CONFIG_SMP
-  fprintf(stderr, "CPU%d: Assertion failed at file:%s line: %d\r\n",
+  syslog(LOG_ERR, "CPU%d: Assertion failed at file:%s line: %d\n",
           up_cpu_index(), filename, line);
 #else
-  fprintf(stderr, "Assertion failed at file:%s line: %d\r\n",
+  syslog(LOG_ERR, "Assertion failed at file:%s line: %d\n",
           filename, line);
 #endif
 
   /* Allow for any board/configuration specific crash information */
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), this_task(), filename, line);
+  board_crashdump(sim_getsp(), this_task(), filename, line);
 #endif
 
   /* Exit the simulation */

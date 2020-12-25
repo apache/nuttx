@@ -86,18 +86,30 @@
 #define NRF52_IRQ_I2S           (NRF52_IRQ_EXTINT+37)  /* Inter-IC Sound interface */
 #define NRF52_IRQ_FPU           (NRF52_IRQ_EXTINT+38)  /* FPU interrupt */
 
-#if defined(CONFIG_ARCH_FAMILY_NRF52840)
+#ifdef CONFIG_NRF52_HAVE_USBDEV
 #  define NRF52_IRQ_USBD        (NRF52_IRQ_EXTINT+39)  /* USB device */
+#endif
+#ifdef CONFIG_NRF52_HAVE_UART1
 #  define NRF52_IRQ_UART1       (NRF52_IRQ_EXTINT+40)  /* UART/UARTE 1 */
+#endif
+#ifdef CONFIG_NRF52_HAVE_QSPI
 #  define NRF52_IRQ_QSPI        (NRF52_IRQ_EXTINT+41)  /* Quad SPI */
+#endif
+#ifdef CONFIG_NRF52_HAVE_PWM3
 #  define NRF52_IRQ_PWM3        (NRF52_IRQ_EXTINT+45)  /* Pulse Width Modulation Unit 3 */
+#endif
+#ifdef CONFIG_NRF52_HAVE_SPI3_MASTER
 #  define NRF52_IRQ_SPIM3       (NRF52_IRQ_EXTINT+47)  /* SPI Master 3 */
 #endif
 
-#if defined(CONFIG_ARCH_FAMILY_NRF52840)
+#if defined(CONFIG_ARCH_CHIP_NRF52832)
+#  define NRF52_IRQ_NEXTINT     (39)
+#elif defined(CONFIG_ARCH_CHIP_NRF52833)
+#  define NRF52_IRQ_NEXTINT     (48)
+#elif defined(CONFIG_ARCH_CHIP_NRF52840)
 #  define NRF52_IRQ_NEXTINT     (48)
 #else
-#  define NRF52_IRQ_NEXTINT     (39)
+#  error Unknown NRF52 chip !
 #endif
 
 #define NRF52_IRQ_NIRQS         (NRF52_IRQ_EXTINT+NRF52_IRQ_NEXTINT)

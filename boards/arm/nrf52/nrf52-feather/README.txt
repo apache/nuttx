@@ -91,6 +91,6 @@ Where <subdir> is one of the following:
   control of the application.  The following interfaces are then available
   for application control of the LEDs:
 
-    void board_userled_initialize(void);
+    uint32_t board_userled_initialize(void);
     void board_userled(int led, bool ledon);
-    void board_userled_all(uint8_t ledset);
+    void board_userled_all(uint32_t ledset);

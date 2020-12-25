@@ -1,63 +1,53 @@
-/********************************************************************************************
+/*****************************************************************************
  * include/nuttx/usb/cdc.h
  *
- *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References: "Universal Serial Bus Class Definitions for Communication
- *   Devices," Version 1.1, January 19, 1999
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ *****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_USB_CDC_H
 #define __INCLUDE_NUTTX_USB_CDC_H
 
-/********************************************************************************************
+/*****************************************************************************
  * Included Files
- ********************************************************************************************/
+ *****************************************************************************/
 
 #include <nuttx/config.h>
 
-/********************************************************************************************
+/*****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Device Class Codes ***********************************************************************/
-/* Table 14: Communication Device Class Code (see definition USB_CLASS_CDC in usb.h) */
-/* Table 18: Data Interface Class Code  (see definition USB_CLASS_CDC_DATA in usb.h) */
+ *****************************************************************************/
 
-/* Communication Interface Class Codes ******************************************************/
+/* Device Class Codes ********************************************************/
+
+/* Table 14: Communication Device Class Code (see definition USB_CLASS_CDC in
+ *           usb.h)
+ */
+
+/* Table 18: Data Interface Class Code  (see definition USB_CLASS_CDC_DATA in
+ *           usb.h)
+ */
+
+/* Communication Interface Class Codes ***************************************/
+
 /* Table 15: Communication Interface Class Code */
 
 #define CDC_CLASS_COMM          0x02 /* Communication Interface Class */
 
-/* Communication Interface Sub-Class Codes **************************************************/
+/* Communication Interface Sub-Class Codes ***********************************/
 
 #define CDC_SUBCLASS_NONE       0x00 /* Reserved */
 #define CDC_SUBCLASS_DLC        0x01 /* Direct Line Control Model */
@@ -67,26 +57,35 @@
 #define CDC_SUBCLASS_CAPI       0x05 /* CAPI Control Model */
 #define CDC_SUBCLASS_ECM        0x06 /* Ethernet Networking Control Model */
 #define CDC_SUBCLASS_ATM        0x07 /* ATM Networking Control Model */
-                                     /* 0x08-0x7f Reserved (future use) */
+                                     /* 0x08-0x0d Reserved (future use) */
+#define CDC_SUBCLASS_MBIM       0x0e /* MBIM Control Model */
+                                     /* 0x0f-0x7f Reserved (future use) */
                                      /* 0x80-0xfe Reserved (vendor specific) */
-/* Communication Interface Class Protocol Codes ********************************************/
+
+/* Communication Interface Class Protocol Codes ******************************/
+
 /* Table 17: Communication Interface Class Control Protocol Codes */
 
 #define CDC_PROTO_NONE          0x00 /* No class specific protocol required */
-#define CDC_PROTO_ATM           0x01 /* Common AT commands (also known as Hayes compatible) */
+#define CDC_PROTO_ATM           0x01 /* Common AT commands (also known as Hayes
+                                      * compatible)
+                                      */
                                      /* 0x02-0xfe Reserved (future use) */
 #define CDC_PROTO_VENDOR        0xff /* Vendor-specific */
 
-/* Data Interface Sub-Class Codes ***********************************************************/
+/* Data Interface Sub-Class Codes ********************************************/
+
 /* None defined, should be zero */
 
 #define CDC_DATA_SUBCLASS_NONE  0x00
 
-/* Date Interface Class Protocol Codes ******************************************************/
+/* Date Interface Class Protocol Codes ***************************************/
+
 /* Table 19: Data Interface Class Protocol Codes */
 
 #define CDC_DATA_PROTO_NONE     0x00 /* No class specific protocol required */
                                      /* 0x01-0x2f Reserved (future use) */
+#define CDC_DATA_PROTO_NTB      0x02 /* Network Transfer Block protocol */
 #define CDC_DATA_PROTO_ISDN     0x30 /* Physical interface protocol for ISDN BRI */
 #define CDC_DATA_PROTO_HDLC     0x31 /* HDLC */
 #define CDC_DATA_PROTO_TRANSP   0x32 /* Transparent */
@@ -107,7 +106,8 @@
                                       */
 #define CDC_DATA_PROTO_VENDOR   0xff /* Vendor-specific */
 
-/* Requests and Notifications ***************************************************************/
+/* Requests and Notifications ************************************************/
+
 /* Table 2: Requests, Direct Line Control Model */
 
 #define DLC_SET_AUX_LINE_STATE  0x10 /* Request to connect or disconnect secondary jack from
@@ -128,6 +128,7 @@
 #define DLC_RING_AUX_JACK       0x15 /* Request for a ring signal to be generated on secondary
                                       * phone jack. (Optional)
                                       */
+
 /* Table 3: Notifications, Direct Line Control Model */
 
 #define DLC_AUX_JACK_HOOK_STATE 0x08 /* Indicates hook state of secondary device plugged
@@ -136,6 +137,7 @@
 #define DLC_RING_DETECT         0x09 /* Message to notify host that ring voltage was
                                       * detected on POTS interface. (Required)
                                       */
+
 /* Table 4: Requests, Abstract Control Model */
 
 #define ACM_SEND_COMMAND        0x00 /* Issues a command in the format of the supported
@@ -164,6 +166,7 @@
                                       */
 #define ACM_SEND_BREAK          0x23 /* Sends special carrier
                                       */
+
 /* Table 5: Notifications, Abstract Control Model */
 
 #define ACM_NETWORK_CONNECTION  0x00 /* Notification to host of network connection status.
@@ -175,6 +178,7 @@
 #define ACM_SERIAL_STATE        0x20 /* Returns the current state of the carrier detect, DSR,
                                       * break, and ring signal. (Optional)
                                       */
+
 /* Table 6: Requests, Telephone Control Model */
 
 #define TCM_SET_COMM_FEATURE    0x02 /* Used to set a unique communication feature, which is
@@ -208,12 +212,14 @@
                                       */
 #define TCM_DIAL_DIGITS         0x36 /* Dials digits on the network connection. (Required)
                                       */
+
 /* Table 7: Notifications, Telephone Control Model */
 
 #define TCM_CALL_STATE_CHANGE   0x28 /* DReports a state change on a call. (Required)
                                       */
 #define TCM_LINE_STATE_CHANGE   0x29 /* DReports a state change on a line. (Optional)
                                       */
+
 /* Table 8: Requests, Multi-Channel Model */
 
 #define MCM_SET_UNIT_PARAM      0x37 /* Used to set a Unit specific parameter (Optional)
@@ -223,11 +229,13 @@
 #define MCM_CLEAR_UNIT_PARAM    0x39 /* Used to set a Unit specific parameter to its default
                                       * state. (Optional)
                                       */
+
 /* Table 9: Request, CAPI Control Model */
 
 #define CAPI_GET_PROFILE        0x3a /* Returns the implemented capabilities of the device
                                       * (Required)
                                       */
+
 /* Table 10: Requests, Ethernet Networking Control Model */
 
 #define ECM_SEND_COMMAND        0x00 /* Issues a command in the format of the supported
@@ -267,6 +275,7 @@
                                       * transmitted, frames received, and bad frames received.
                                       * (Optional)
                                       */
+
 /* Table 11: Notifications, Ethernet Networking Control Model */
 
 #define ECM_NETWORK_CONNECTION  0x00 /* Reports whether or not the physical layer (modem,
@@ -277,6 +286,7 @@
                                       */
 #define ECM_SPEED_CHANGE        0x2a /* Reports a change in upstream or downstream (Required)
                                       */
+
 /* Table 12: Requests, ATM Networking Control Model */
 
 #define ATM_SEND_COMMAND        0x00 /* Issues a command in the format of the supported control
@@ -302,6 +312,7 @@
 #define ATM_GET_VC_STATISTICS   0x53 /* Retrieves statistics from the ATM Networking device for
                                       * a particular VPI/VCI. (Optional)
                                       */
+
 /* Table 13: Requests, Ethernet and ATM Networking Control Model */
 
 #define ATM_NETWORK_CONNECTION  0x00 /* Reports whether or not the physical layer (modem,
@@ -317,7 +328,8 @@
                                       */
 #define ECM_SPEED_CHANGE        ATM_SPEED_CHANGE
 
-/* Descriptors ******************************************************************************/
+/* Descriptors ***************************************************************/
+
 /* Table 25: bDescriptor SubType in Functional Descriptors */
 
 #define CDC_DSUBTYPE_HDR        0x00 /* Header Functional Descriptor, which marks the
@@ -340,6 +352,7 @@
 #define CDC_DSUBTYPE_CAPI       0x0e /* CAPI Control Management Functional Descriptor */
 #define CDC_DSUBTYPE_ECM        0x0f /* Ethernet Networking Functional Descriptor */
 #define CDC_DSUBTYPE_ATM        0x10 /* ATM Networking Functional Descriptor */
+#define CDC_DSUBTYPE_MBIM       0x1b /* MBIM Functional Descriptor */
                                      /* 0x11-0xff Reserved (future use) */
 
 /* Table 42: Ethernet Statistics Capabilities */
@@ -390,6 +403,7 @@
 #define FEATURE_COUNTRY_SETTING 0x02 /* Country code in hexadecimal format as defined in
                                       * ISO 3166
                                       */
+
 /* Table 49: POTS Relay Configuration Values */
 
 #define POTS_ON_HOOK            0x0000
@@ -515,18 +529,22 @@
                                             * been detected with HEC errors in the cell
                                             * header and successfully corrected.
                                             */
+
 /* Table 66: ATM VC Selector Codes */
 
-#define VC_US_CELLS_SENT        0x01 /* The number of cells that have been sent upstream to
-                                      * the WAN link for the specified VPI/VCI since the
+#define VC_US_CELLS_SENT        0x01 /* The number of cells that have been
+                                      * sent upstream to the WAN link for the
+                                      * specified VPI/VCI since the device
+                                      * has been powered on or reset
+                                      */
+#define VC_DS_CELLS_RECEIVED    0x02 /* The number of cells that have been
+                                      * received downstream from the WAN link
+                                      * for the specified VPI/VCI since the
                                       * device has been powered on or reset
                                       */
-#define VC_DS_CELLS_RECEIVED    0x02 /* The number of cells that have been received
-                                      * downstream from the WAN link for the specified
-                                      * VPI/VCI since the device has been
-                                      * powered on or reset
-                                      */
-/* Notifications ****************************************************************************/
+
+/* Notifications *************************************************************/
+
 /* Table 69: UART State Bitmap Values */
 
 #define CDC_UART_RXCARRIER      (1 << 0) /* bRxCarrier State of receiver carrier detection
@@ -554,12 +572,14 @@
 #define CDCACM_UART_DCD          CDC_UART_RXCARRIER
 #define CDCACM_UART_DSR          CDC_UART_TXCARRIER
 
-/* "SerialState is used like a real interrupt status register. Once a notification has been
- *  sent, the device will reset and reevaluate the different signals.  For the consistent
- *  signals like carrier detect or transmission carrier, this will mean another notification
- *  will not be generated until there is a state change.  For the irregular signals like
- *  break, the incoming ring signal, or the overrun error state, this will reset their values
- *  to zero and again will not send another notification until their state changes."
+/* "SerialState is used like a real interrupt status register. Once a
+ *  notification has been sent, the device will reset and reevaluate the
+ *  different signals.  For the consistent signals like carrier detect or
+ *  transmission carrier, this will mean another notification will not be
+ *  generated until there is a state change.  For the irregular signals like
+ *  break, the incoming ring signal, or the overrun error state, this will
+ *  reset their values to zero and again will not send another notification
+ *  until their state changes."
  */
 
 #define CDC_UART_CONSISTENT     (CDC_UART_RXCARRIER | CDC_UART_TXCARRIER)
@@ -583,9 +603,9 @@
 #define CDC_LINEST_OFFHOOK      0x0002 /* Hook-switch has gone off hook */
 #define CDC_LINEST_ONHOOK       0x0003 /* Hook-switch has gone on hook */
 
-/********************************************************************************************
+/*****************************************************************************
  * Public Types
- ********************************************************************************************/
+ *****************************************************************************/
 
 /* Table 1: Data Class Protocol Wrapper */
 
@@ -594,10 +614,13 @@ struct cdc_protowrapper_s
   uint8_t size[2];   /* Size of wrapper in bytes */
   uint8_t dstproto;  /* bDstProtocol, Destination protocol ID */
   uint8_t srcproto;  /* bSrcProtocol, Source protocol ID */
-  uint8_t data[1];   /* Data payload, actual size depends of size of the wrapper */
+  uint8_t data[1];   /* Data payload, actual size depends of size of the
+                      * wrapper
+                      */
 };
 
-/* Functional Descriptors *******************************************************************/
+/* Functional Descriptors ****************************************************/
+
 /* Table 23: Functional Descriptor General Format */
 
 struct cdc_funcdesc_s
@@ -758,14 +781,18 @@ struct cdc_usbterm_funcdesc_s
 struct cdc_netchan_funcdesc_s
 {
   uint8_t size;     /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
-  uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_NETCHAN as defined in Table 25 */
-  uint8_t id;        /* bEntityId, Constant uniquely identifying the Terminal */
-  uint8_t name;      /* iName, Index of string descriptor, describing the name of the Network
-                      * Channel Terminal
-                      */
-  uint8_t index;     /* bChannelIndex, The channel index of the associated network channel */
-  uint8_t phyif;     /* bPhysicalInterface, Type of physical interface */
+  uint8_t type;     /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
+  uint8_t subtype;  /* bDescriptorSubType, CDC_DSUBTYPE_NETCHAN as defined in
+                     * Table 25 */
+  uint8_t id;       /* bEntityId, Constant uniquely identifying the
+                     * Terminal */
+  uint8_t name;     /* iName, Index of string descriptor, describing the name
+                     * of the Network Channel Terminal
+                     */
+  uint8_t index;    /* bChannelIndex, The channel index of the associated
+                     * network channel
+                     */
+  uint8_t phyif;    /* bPhysicalInterface, Type of physical interface */
 };
 
 #define SIZEOF_NETCHAN_FUNCDESC 7
@@ -827,22 +854,28 @@ struct cdc_capi_funcdesc_s
 
 struct cdc_ecm_funcdesc_s
 {
-  uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
-  uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_ECM as defined in Table 25 */
-  uint8_t mac;       /* iMACAddress, Index of the 48bit Ethernet MAC address string descriptor */
-  uint8_t stats[4];  /* bmEthernetStatistics, Indicates which Ethernet statistics functions
-                      * the device collects.  See Table 42.
-                      */
-  uint8_t maxseg[2];   /* wMaxSegmentSize, The maximum segment size that the Ethernet device is
-                      * capable of supporting.
-                      */
-  uint8_t nmcflts[2];  /* wNumberMCFilters, Contains the number of multicast filters that can be
-                      * configured by the host.
-                      */
-  uint8_t  npwrflts; /* bNumberPowerFilters, Contains the number of pattern filters that are
-                      * available for causing wake-up of the host.
-                      */
+  uint8_t size;       /* bFunctionLength, Size of this descriptor */
+  uint8_t type;       /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
+  uint8_t subtype;    /* bDescriptorSubType, CDC_DSUBTYPE_ECM as defined in
+                       * Table 25.
+                       */
+  uint8_t mac;        /* iMACAddress, Index of the 48bit Ethernet MAC address
+                       * string descriptor.
+                       */
+  uint8_t stats[4];   /* bmEthernetStatistics, Indicates which Ethernet
+                       * statistics functions the device collects.
+                       * See Table 42.
+                       */
+  uint8_t maxseg[2];  /* wMaxSegmentSize, The maximum segment size that the
+                       * Ethernet device is capable of supporting.
+                       */
+  uint8_t nmcflts[2]; /* wNumberMCFilters, Contains the number of multicast
+                       * filters that can be configured by the host.
+                       */
+  uint8_t  npwrflts;  /* bNumberPowerFilters, Contains the number of pattern
+                       * filters that are available for causing wake-up of
+                       * the host.
+                       */
 };
 
 #define SIZEOF_ECM_FUNCDESC 13
@@ -853,26 +886,33 @@ struct cdc_atm_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
   uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
-  uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_ATM as defined in Table 25 */
-  uint8_t endid;     /* iEndSystemIdentifier, Index of End System Identifier string descriptor */
-  uint8_t datacaps;  /* bmDataCapabilities, The ATM data types the device supports */
-  uint8_t devstats;  /* bmATMDeviceStatistics, Indicates which optional statistics functions the
-                      * device collects.
+  uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_ATM as defined in
+                      * Table 25.
                       */
-  uint8_t mxseg2[2]; /* wType2MaxSegmentSize, The maximum segment size that the Type 2 device is
-                      * capable of supporting.
+  uint8_t endid;     /* iEndSystemIdentifier, Index of End System Identifier
+                      * string descriptor.
                       */
-  uint8_t mxseg3[2];  /* wType3MaxSegmentSize, The maximum segment size that the Type 3 device is
-                      * capable of supporting
+  uint8_t datacaps;  /* bmDataCapabilities, The ATM data types the device
+                      * supports.
                       */
-  uint8_t mxvc[2];    /* wMaxVC, The maximum number of simultaneous virtual circuits the device is
-                      * capable of supporting
+  uint8_t devstats;  /* bmATMDeviceStatistics, Indicates which optional
+                      * statistics functions the device collects.
+                      */
+  uint8_t mxseg2[2]; /* wType2MaxSegmentSize, The maximum segment size that
+                      * the Type 2 device is capable of supporting.
+                      */
+  uint8_t mxseg3[2]; /* wType3MaxSegmentSize, The maximum segment size that
+                      * the Type 3 device is capable of supporting
+                      */
+  uint8_t mxvc[2];   /* wMaxVC, The maximum number of simultaneous virtual
+                      * circuits the device is capable of supporting
                       */
 };
 
 #define SIZEOF_ATM_FUNCDESC 12
 
-/* Descriptor Data Structures ***************************************************************/
+/* Descriptor Data Structures ************************************************/
+
 /* Table 50: Line Coding Structure */
 
 struct cdc_linecoding_s
@@ -890,15 +930,17 @@ struct cdc_linecoding_s
 struct cdc_linestatus_s
 {
   uint8_t size[2];   /* wLength, Size of this structure, in bytes */
-  uint8_t ringer[4]; /* dwRingerBitmap, Ringer Configuration bitmap for this line */
+  uint8_t ringer[4]; /* dwRingerBitmap, Ringer Configuration bitmap for this
+                      * line
+                      */
   uint8_t line[4];   /* dwLineState, Defines current state of the line */
-  uint32_t call[1];  /* dwCallStateN, Defines current state of call N on the line */
+  uint32_t call[1];  /* dwCallStateN, Current state of call N on the line */
 };
 
-/* Messages are formatted as a standardized 8-byte header, followed by a variable-length
- * data field. The header identifies the kind of notification, and the interface associated
- * with the notification; it also indicates the length of the variable length portion of
- * the message
+/* Messages are formatted as a standardized 8-byte header, followed by a
+ * variable-length data field. The header identifies the kind of notification,
+ * and the interface associated with the notification; it also indicates the
+ * length of the variable length portion of the message
  */
 
 struct cdc_notification_s
@@ -918,12 +960,15 @@ struct cdc_notification_s
 struct cdc_unitparm_s
 {
   uint8_t id;        /* bEntityId, Unit ID */
-  uint8_t index;     /* bParameterIndex, A zero based value indicating Unit parameter index */
+  uint8_t index;     /* bParameterIndex, A zero based value indicating Unit
+                      * parameter index
+                      */
 };
 
 /* Table 61: Power Management Pattern Filter Structure */
 
-/* Notification Data Structures *************************************************************/
+/* Notification Data Structures **********************************************/
+
 /* Table 72: ConnectionSpeedChange Data Structure */
 
 struct cdc_speedchange_s

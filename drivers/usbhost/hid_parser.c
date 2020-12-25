@@ -71,14 +71,16 @@ struct hid_state_s
  *    report   Buffer containing the device's HID report table.
  *    rptlen   Size in bytes of the HID report table.
  *    filter   Callback function to decide if an item should be retained
- *    rptinfo  Pointer to a struct hid_rptinfo_s instance for the parser output.
+ *    rptinfo  Pointer to a struct hid_rptinfo_s instance for the parser
+ *             output.
  *
  * Returned Value:
  *  Zero on success, otherwise a negated errno value.
  ****************************************************************************/
 
 int hid_parsereport(FAR const uint8_t *report, int rptlen,
-                    hid_rptfilter_t filter, FAR struct hid_rptinfo_s *rptinfo)
+                    hid_rptfilter_t filter,
+                    FAR struct hid_rptinfo_s *rptinfo)
 {
   struct hid_state_s           state[CONFIG_HID_STATEDEPTH];
   struct hid_state_s          *currstate = &state[0];
@@ -86,7 +88,12 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
   struct hid_rptsizeinfo_s    *rptidinfo = &rptinfo->rptsize[0];
   uint16_t                     usage[CONFIG_HID_USAGEDEPTH];
   uint8_t                      nusage = 0;
-  struct hid_range_s           usage_range = { 0, 0 };
+  struct hid_range_s           usage_range =
+    {
+      0,
+      0
+    };
+
   int                          i;
 
   DEBUGASSERT(report && filter && rptinfo);
@@ -250,13 +257,15 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
             }
           else
             {
-              struct hid_collectionpath_s *ParentCollectionPath = collectionpath;
+              struct hid_collectionpath_s *parent_collection_path =
+                  collectionpath;
 
               collectionpath = &rptinfo->collectionpaths[1];
 
               while (collectionpath->parent != NULL)
                 {
-                  if (collectionpath == &rptinfo->collectionpaths[CONFIG_HID_MAXCOLLECTIONS - 1])
+                  if (collectionpath == &rptinfo->collectionpaths[
+                                        CONFIG_HID_MAXCOLLECTIONS - 1])
                     {
                       return -EINVAL;
                     }
@@ -264,7 +273,7 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
                   collectionpath++;
                 }
 
-              collectionpath->parent = ParentCollectionPath;
+              collectionpath->parent = parent_collection_path;
             }
 
           collectionpath->type       = data;
@@ -274,8 +283,8 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
             {
               collectionpath->usage.usage = usage[0];
 
-              for (i = 0; i < nusage; i++)
-                usage[i] = usage[i + 1];
+              for (i = 1; i < nusage; i++)
+                usage[i - 1] = usage[i];
 
               nusage--;
             }
@@ -316,10 +325,11 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
                   {
                     newitem.attrib.usage.usage = usage[0];
 
-                    for (i = 0; i < nusage; i++)
+                    for (i = 1; i < nusage; i++)
                       {
-                        usage[i] = usage[i + 1];
+                        usage[i - 1] = usage[i];
                       }
+
                     nusage--;
                   }
                 else if (usage_range.min <= usage_range.max)
@@ -341,7 +351,7 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
                     newitem.type = HID_REPORT_ITEM_FEATURE;
                   }
 
-                newitem.bitoffset              = rptidinfo->size[newitem.type];
+                newitem.bitoffset = rptidinfo->size[newitem.type];
                 rptidinfo->size[newitem.type] += currstate->attrib.bitsize;
 
                 /* Accumulate the maximum report size */
@@ -389,8 +399,8 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
  *
  * Description:
  *   Extracts the given report item's value out of the given HID report and
- *   places it into the value member of the report item's struct hid_rptitem_s
- *   structure.
+ *   places it into the value member of the report item's struct
+ *   hid_rptitem_s structure.
  *
  *   When called on a report with an item that exists in that report, this
  *   copies the report item's Value to it's previous element for easy
@@ -401,8 +411,8 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
  * Input Parameters:
  *   report  Buffer containing an IN or FEATURE report from an attached
  *               device.
- *   item        Pointer to the report item of interest in a struct hid_rptinfo_s
- *               item array.
+ *   item        Pointer to the report item of interest in a struct
+ *               hid_rptinfo_s item array.
  *
  * Returned Value:
  *   Zero on success, otherwise a negated errno value.
@@ -447,10 +457,11 @@ int hid_getitem(FAR const uint8_t *report, FAR struct hid_rptitem_s *item)
  *
  * Description:
  *   Retrieves the given report item's value out of the Value member of the
- *   report item's struct hid_rptitem_s structure and places it into the correct
- *   position in the HID report buffer. The report buffer is assumed to have
- *   the appropriate bits cleared before calling this function (i.e., the
- *   buffer should be explicitly cleared before report values are added).
+ *   report item's struct hid_rptitem_s structure and places it into the
+ *   correct position in the HID report buffer. The report buffer is assumed
+ *   to have the appropriate bits cleared before calling this function
+ *   (i.e., the buffer should be explicitly cleared before report values are
+ *   added).
  *
  *   When called, this copies the report item's Value element to it's
  *   previous element for easy checking to see if an item's value has
@@ -501,16 +512,18 @@ void hid_putitem(FAR uint8_t *report, struct hid_rptitem_s *item)
  *   Retrieves the size of a given HID report in bytes from it's Report ID.
  *
  * Input Parameters:
- *  rptinfo Pointer to a struct hid_rptinfo_s instance containing the parser output.
+ *  rptinfo Pointer to a struct hid_rptinfo_s instance containing the parser
+ *          output.
  *  id      Report ID of the report whose size is to be retrieved.
- *  rpttype Type of the report whose size is to be determined, a valued from the
- *          HID_ReportItemTypes_t enum.
+ *  rpttype Type of the report whose size is to be determined, a valued from
+ *          the HID_ReportItemTypes_t enum.
  *
  *  Size of the report in bytes, or 0 if the report does not exist.
  *
  ****************************************************************************/
 
-size_t hid_reportsize(FAR struct hid_rptinfo_s *rptinfo, uint8_t id, uint8_t rpttype)
+size_t hid_reportsize(FAR struct hid_rptinfo_s *rptinfo, uint8_t id,
+                      uint8_t rpttype)
 {
   int i;
   for (i = 0; i < CONFIG_HID_MAXIDS; i++)

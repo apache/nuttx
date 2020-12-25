@@ -32,6 +32,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/net/net.h>
 
 #include "inode/inode.h"
@@ -114,8 +115,7 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
 {
   FAR struct streamlist *slist;
   FAR FILE              *stream;
-  int                    ret;
-  int                    i;
+  int                    ret = OK;
 
   /* Check input parameters */
 
@@ -164,7 +164,7 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
    * more checks.
    */
 
-  else
+  else if (fd >= 3)
     {
       ret = fs_checkfd(tcb, fd, oflags);
     }
@@ -186,82 +186,80 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
   slist = &tcb->group->tg_streamlist;
 #endif
 
-  /* Find an unallocated FILE structure in the stream list */
+  /* Allocate FILE structure */
 
-  ret = nxsem_wait(&slist->sl_sem);
-  if (ret < 0)
+  if (fd >= 3)
     {
-      goto errout;
+      stream = group_zalloc(tcb->group, sizeof(FILE));
+      if (stream == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout;
+        }
+
+      /* Add FILE structure to the stream list */
+
+      ret = nxsem_wait(&slist->sl_sem);
+      if (ret < 0)
+        {
+          group_free(tcb->group, stream);
+          goto errout;
+        }
+
+      if (slist->sl_tail)
+        {
+          slist->sl_tail->fs_next = stream;
+          slist->sl_tail = stream;
+        }
+      else
+        {
+          slist->sl_head = stream;
+          slist->sl_tail = stream;
+        }
+
+      nxsem_post(&slist->sl_sem);
+
+      /* Initialize the semaphore the manages access to the buffer */
+
+      lib_sem_initialize(stream);
+    }
+  else
+    {
+      stream = &slist->sl_std[fd];
     }
 
-  for (i = 0 ; i < CONFIG_NFILE_STREAMS; i++)
-    {
-      stream = &slist->sl_streams[i];
-      if (stream->fs_fd < 0)
-        {
-          /* Zero the structure */
-
-          memset(stream, 0, sizeof(FILE));
-
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
-          /* Initialize the semaphore the manages access to the buffer */
-
-          nxsem_init(&stream->fs_sem, 0, 1);
-
 #if CONFIG_STDIO_BUFFER_SIZE > 0
-          /* Allocate the IO buffer at the appropriate privilege level for
-           * the group.
-           */
+  /* Set up pointers */
 
-          stream->fs_bufstart =
-            group_malloc(tcb->group, CONFIG_STDIO_BUFFER_SIZE);
-
-          if (!stream->fs_bufstart)
-            {
-              ret = -ENOMEM;
-              goto errout_with_sem;
-            }
-
-          /* Set up pointers */
-
-          stream->fs_bufend = &stream->fs_bufstart[CONFIG_STDIO_BUFFER_SIZE];
-          stream->fs_bufpos = stream->fs_bufstart;
-          stream->fs_bufread = stream->fs_bufstart;
+  stream->fs_bufstart = stream->fs_buffer;
+  stream->fs_bufend   = &stream->fs_bufstart[CONFIG_STDIO_BUFFER_SIZE];
+  stream->fs_bufpos   = stream->fs_bufstart;
+  stream->fs_bufread  = stream->fs_bufstart;
+  stream->fs_flags    = __FS_FLAG_UBF; /* Fake setvbuf and fclose */
 
 #ifdef CONFIG_STDIO_LINEBUFFER
-          /* Setup buffer flags */
+  /* Setup buffer flags */
 
-          stream->fs_flags  |= __FS_FLAG_LBF; /* Line buffering */
+  stream->fs_flags   |= __FS_FLAG_LBF; /* Line buffering */
 
 #endif /* CONFIG_STDIO_LINEBUFFER */
 #endif /* CONFIG_STDIO_BUFFER_SIZE > 0 */
-#endif /* !CONFIG_STDIO_DISABLE_BUFFERING */
+#endif /* CONFIG_STDIO_DISABLE_BUFFERING */
 
-          /* Save the file description and open flags.  Setting the
-           * file descriptor locks this stream.
-           */
+  /* Save the file description and open flags.  Setting the
+   * file descriptor locks this stream.
+   */
 
-          stream->fs_fd      = fd;
-          stream->fs_oflags  = (uint16_t)oflags;
+  stream->fs_fd       = fd;
+  stream->fs_oflags   = oflags;
 
-          nxsem_post(&slist->sl_sem);
-          if (filep != NULL)
-            {
-              *filep = stream;
-            }
-
-          return OK;
-        }
+  if (filep != NULL)
+    {
+      *filep = stream;
     }
 
-  /* No free stream available.. report ENFILE */
-
-  ret = -ENFILE;
-
-#if !defined(CONFIG_STDIO_DISABLE_BUFFERING) && CONFIG_STDIO_BUFFER_SIZE > 0
-errout_with_sem:
-#endif
-  nxsem_post(&slist->sl_sem);
+  return OK;
 
 errout:
   if (filep != NULL)

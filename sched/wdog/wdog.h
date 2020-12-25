@@ -67,25 +67,12 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* The g_wdfreelist data structure is a singly linked list of watchdogs
- * available to the system for delayed function use.
- */
-
-extern sq_queue_t g_wdfreelist;
-
 /* The g_wdactivelist data structure is a singly linked list ordered by
  * watchdog expiration time. When watchdog timers expire,the functions on
  * this linked list are removed and the function is called.
  */
 
 extern sq_queue_t g_wdactivelist;
-
-/* This is the number of free, pre-allocated watchdog structures in the
- * g_wdfreelist.  This value is used to enforce a reserve for interrupt
- * handlers.
- */
-
-extern uint16_t g_wdnfree;
 
 /* This is wdog tickbase, for wd_gettime() may called many times
  * between 2 times of wd_timer(), we use it to update wd_gettime().

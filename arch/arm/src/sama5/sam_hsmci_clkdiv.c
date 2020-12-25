@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_pmc.c
+ * arch/arm/src/sama5/sam_hsmci_clkdiv.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

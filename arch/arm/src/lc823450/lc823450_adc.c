@@ -1,37 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_adc.c
  *
- *   Copyright 2014,2015,2017 Sony Video & Sound Products Inc.
- *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
- *   Author: Nobutaka Toyoshima <Nobutaka.Toyoshima@jp.sony.com>
- *   Author: Satoshi Mihara <Satoshi.Mihara@jp.sony.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -43,6 +26,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -74,8 +58,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define LC823450_ADCHST(c)    (((c) & 0xf) << rADCCTL_fADCHST_SHIFT)
-#define LC823450_ADC0DT(d)    (rADC0DT + ((d) << 2))
+#define LC823450_ADCHST(c)    (((c) & 0xf) << ADCCTL_ADCHST_SHIFT)
+#define LC823450_ADC0DT(d)    (ADC0DT + ((d) << 2))
 
 #define LC823450_MAX_ADCCLK   (5 * 1000 * 1000)   /* Hz */
 
@@ -169,7 +153,7 @@ static const struct adc_ops_s lc823450_adc_ops =
 
 static inline void lc823450_adc_clearirq(void)
 {
-  putreg32(rADCSTS_fADCMPL, rADCSTS);
+  putreg32(ADCSTS_ADCMPL, ADCSTS);
 }
 
 /****************************************************************************
@@ -190,7 +174,7 @@ static void lc823450_adc_standby(int on)
 
       /* Enter standby mode */
 
-      modifyreg32(rADCSTBY, 0, rADCSTBY_STBY);
+      modifyreg32(ADCSTBY, 0, ADCSTBY_STBY);
 
       /* disable clock */
 
@@ -204,7 +188,7 @@ static void lc823450_adc_standby(int on)
 
       /* Exit standby mode */
 
-      modifyreg32(rADCSTBY, rADCSTBY_STBY, 0);
+      modifyreg32(ADCSTBY, ADCSTBY_STBY, 0);
 
       up_udelay(10);
 
@@ -241,7 +225,7 @@ static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
     {
       if (pclk / div <= LC823450_MAX_ADCCLK)
         {
-          ainfo("ADCCLK: %d[Hz]\n", pclk / div);
+          ainfo("ADCCLK: %" PRId32 "[Hz]\n", pclk / div);
           break;
         }
     }
@@ -250,18 +234,18 @@ static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
 
   /* Setup ADC channels */
 
-  putreg32((i << rADCCTL_fADCNVCK_SHIFT) |
+  putreg32((i << ADCCTL_ADCNVCK_SHIFT) |
            LC823450_ADCHST(CONFIG_LC823450_ADC_NCHANNELS - 1) |
-           rADCCTL_fADCHSCN, rADCCTL);
+           ADCCTL_ADCHSCN, ADCCTL);
 
   /* Start A/D conversion */
 
-  modifyreg32(rADCCTL, rADCCTL_fADACT, rADCCTL_fADACT);
+  modifyreg32(ADCCTL, ADCCTL_ADACT, ADCCTL_ADACT);
 
   /* Wait for completion */
 
 #ifdef CONFIG_ADC_POLLED
-  while ((getreg32(rADCSTS) & rADCSTS_fADCMPL) == 0)
+  while ((getreg32(ADCSTS) & ADCSTS_ADCMPL) == 0)
     ;
 #else
   ret = nxsem_wait_uninterruptible(&inst->sem_isr);
@@ -572,7 +556,7 @@ FAR struct adc_dev_s *lc823450_adcinitialize(void)
        * all ADCCLK between 2MHz and 5MHz. [PDFW15IS-1847]
        */
 
-      putreg32(53, rADCSMPL);
+      putreg32(53, ADCSMPL);
 
       /* Setup ADC interrupt */
 

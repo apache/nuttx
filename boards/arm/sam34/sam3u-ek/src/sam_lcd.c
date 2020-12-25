@@ -113,6 +113,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -384,10 +385,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = sam_putrun,            /* Put a run into LCD memory */
-  .getrun = sam_getrun,            /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer, /* Run scratch buffer */
-  .bpp    = SAM3UEK_BPP,           /* Bits-per-pixel */
+  .putrun = sam_putrun,             /* Put a run into LCD memory */
+  .getrun = sam_getrun,             /* Get a run from LCD memory */
+  .buffer = (uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp    = SAM3UEK_BPP,            /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
@@ -602,7 +603,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
                       FAR const uint8_t *buffer,
                       size_t npixels)
 {
-  uint16_t *run = (uint16_t*)buffer;
+  uint16_t *run = (uint16_t *)buffer;
   unsigned int i;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -651,6 +652,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
       sam_wrram(*run++);
     }
 #endif
+
   return OK;
 }
 
@@ -671,7 +673,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
 static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                       size_t npixels)
 {
-  uint16_t *run = (uint16_t*)buffer;
+  uint16_t *run = (uint16_t *)buffer;
   unsigned int i;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -715,6 +717,7 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       *run++ = sam_rdram();
     }
 #endif
+
   return OK;
 }
 
@@ -919,7 +922,7 @@ int board_lcd_initialize(void)
   /* Enable SMC peripheral clock */
 
   putreg32((1 << SAM_PID_SMC), SAM_PMC_PCER);
-  lcdinfo("PMC PCSR: %08x SMC: %08x\n",
+  lcdinfo("PMC PCSR: %08" PRIx32 " SMC: %08x\n",
           getreg32(SAM_PMC_PCSR), (1 << SAM_PID_SMC));
 
   /* Configure SMC CS2 */
@@ -947,10 +950,10 @@ int board_lcd_initialize(void)
             (SMCCS_MODE_DBW_16BITS);
   putreg32(regval, SAM_SMCCS_MODE(2));
 
-  lcdinfo("SMC SETUP[%08x]: %08x PULSE[%08x]: %08x\n",
+  lcdinfo("SMC SETUP[%08x]: %08" PRIx32 " PULSE[%08x]: %08" PRIx32 "\n",
           SAM_SMCCS_SETUP(2), getreg32(SAM_SMCCS_SETUP(2)),
           SAM_SMCCS_PULSE(2), getreg32(SAM_SMCCS_PULSE(2)));
-  lcdinfo("    CYCLE[%08x]: %08x MODE[%08x]:  %08x\n",
+  lcdinfo("    CYCLE[%08x]: %08" PRIx32 " MODE[%08x]:  %08" PRIx32 "\n",
           SAM_SMCCS_CYCLE(2), getreg32(SAM_SMCCS_CYCLE(2)),
           SAM_SMCCS_MODE(2),  getreg32(SAM_SMCCS_MODE(2)));
 

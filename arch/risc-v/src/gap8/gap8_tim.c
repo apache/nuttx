@@ -34,15 +34,15 @@
  *
  ****************************************************************************/
 
-/************************************************************************************
- *  FC core has a 64-bit basic timer, able to split into 2 32-bit timers, with
- *  identicle memory map and 2 IRQ channels, for both FC core and cluster. We would
- *  use it as system timer.
- ************************************************************************************/
+/****************************************************************************
+ *  FC core has a 64-bit basic timer, able to split into 2 32-bit timers,
+ *  with identicle memory map and 2 IRQ channels, for both FC core and
+ *  cluster. We would use it as system timer.
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -56,7 +56,7 @@
 
 struct gap8_tim_instance
 {
-  BASIC_TIM_reg_t *reg;
+  basic_tim_reg_t *reg;
   uint32_t core_clock;
 };
 

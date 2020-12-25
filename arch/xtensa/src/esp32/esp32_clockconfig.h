@@ -33,10 +33,6 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
 #ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_CLOCKCONFIG_H
 #define __ARCH_XTENSA_SRC_ESP32_ESP32_CLOCKCONFIG_H
 
@@ -44,9 +40,45 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name:  esp32_update_cpu_freq
+ *
+ * Description:
+ *   Set the real CPU ticks per us to the ets, so that ets_delay_us
+ *   will be accurate. Call this function when CPU frequency is changed.
+ *
+ * Input Parameters:
+ *   ticks_per_us - CPU ticks per us
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32_update_cpu_freq(uint32_t ticks_per_us);
+
+/****************************************************************************
+ * Name: esp32_set_cpu_freq
+ *
+ * Description:
+ *   Switch to one of PLL-based frequencies.
+ *   Current frequency can be XTAL or PLL.
+ *
+ * Input Parameters:
+ *   cpu_freq_mhz      - new CPU frequency
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32_set_cpu_freq(int cpu_freq_mhz);
 
 /****************************************************************************
  * Name: esp32_clockconfig
@@ -59,5 +91,37 @@
  ****************************************************************************/
 
 void esp32_clockconfig(void);
+
+/****************************************************************************
+ * Name:  esp_clk_cpu_freq
+ *
+ * Description:
+ *   Get CPU frequency
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   CPU frequency
+ *
+ ****************************************************************************/
+
+int esp_clk_cpu_freq(void);
+
+/****************************************************************************
+ * Name:  esp_clk_apb_freq
+ *
+ * Description:
+ *   Return current APB clock frequency.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   APB clock frequency, in Hz
+ *
+ ****************************************************************************/
+
+int esp_clk_apb_freq(void);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_CLOCKCONFIG_H */

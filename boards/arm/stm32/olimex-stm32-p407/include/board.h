@@ -209,23 +209,31 @@
 
 /* The Olimex STM32-P407 supports seven buttons: */
 
-#define BUTTON_TAMPER     0
-#define BUTTON_WKUP       1
-#define BUTTON_RIGHT      2
-#define BUTTON_UP         3
-#define BUTTON_LEFT       4
-#define BUTTON_DOWN       5
-#define BUTTON_CENTER     6
+#define BUTTON_TAMPER         0
+#define BUTTON_WKUP           1
 
-#define NUM_BUTTONS       7
+#ifdef CONFIG_DJOYSTICK
+#  define NUM_BUTTONS         2
+#else
+#  define JOYSTICK_RIGHT      2
+#  define JOYSTICK_UP         3
+#  define JOYSTICK_LEFT       4
+#  define JOYSTICK_DOWN       5
+#  define JOYSTICK_CENTER     6
 
-#define BUTTON_TAMPER_BIT (1 << BUTTON_TAMPER)
-#define BUTTON_WKUP_BIT   (1 << BUTTON_WKUP)
-#define BUTTON_RIGHT_BIT  (1 << BUTTON_RIGHT)
-#define BUTTON_UP_BIT     (1 << BUTTON_UP)
-#define BUTTON_LEFT_BIT   (1 << BUTTON_LEFT)
-#define BUTTON_DOWN_BIT   (1 << BUTTON_DOWN)
-#define BUTTON_CENTER_BIT (1 << BUTTON_CENTER)
+#  define NUM_BUTTONS         7
+#endif
+
+#define BUTTON_TAMPER_BIT     (1 << BUTTON_TAMPER)
+#define BUTTON_WKUP_BIT       (1 << BUTTON_WKUP)
+
+#ifndef CONFIG_DJOYSTICK
+#  define JOYSTICK_RIGHT_BIT  (1 << JOYSTICK_RIGHT)
+#  define JOYSTICK_UP_BIT     (1 << JOYSTICK_UP)
+#  define JOYSTICK_LEFT_BIT   (1 << JOYSTICK_LEFT)
+#  define JOYSTICK_DOWN_BIT   (1 << JOYSTICK_DOWN)
+#  define JOYSTICK_CENTER_BIT (1 << JOYSTICK_CENTER)
+#endif
 
 /* Alternate function pin selections ****************************************/
 
@@ -235,6 +243,18 @@
 #define GPIO_USART3_TX    GPIO_USART3_TX_3  /* PD8  */
 #define GPIO_USART3_CTS   GPIO_USART3_CTS_2 /* PD11 */
 #define GPIO_USART3_RTS   GPIO_USART3_RTS_2 /* PD12 */
+
+/* UEXT USART3: This will redefine the above macros if enabled. */
+
+#ifdef CONFIG_STM32_OLIMEXP407_UEXT_USART3
+#  undef  GPIO_USART3_RX    GPIO_USART3_RX_3
+#  undef  GPIO_USART3_TX    GPIO_USART3_TX_3
+#  undef  GPIO_USART3_CTS   GPIO_USART3_CTS_2
+#  undef  GPIO_USART3_RTS   GPIO_USART3_RTS_2
+
+#  define GPIO_USART3_RX    GPIO_USART3_RX_2 /* PC11 */
+#  define GPIO_USART3_TX    GPIO_USART3_TX_2 /* PC10 */
+#endif
 
 /* USART6: */
 
@@ -340,5 +360,23 @@
 #define BOARD_DHTXX_GPIO_INPUT   GPIO_DHTXX_PIN_INPUT
 #define BOARD_DHTXX_GPIO_OUTPUT  GPIO_DHTXX_PIN_OUTPUT
 #define BOARD_DHTXX_FRTIMER      1  /* Free-run timer 1 */
+
+/* SPI3 - As present in the UEXT header */
+
+#define GPIO_SPI3_MISO    GPIO_SPI3_MISO_2
+#define GPIO_SPI3_MOSI    GPIO_SPI3_MOSI_2
+#define GPIO_SPI3_SCK     GPIO_SPI3_SCK_2
+
+#define DMACHAN_SPI3_RX   DMAMAP_SPI3_RX_1
+#define DMACHAN_SPI3_TX   DMAMAP_SPI3_TX_1
+
+/* I2S3 - CS4344 configuration uses I2S3 */
+
+#define GPIO_I2S3_SD      GPIO_I2S3_SD_1
+#define GPIO_I2S3_CK      GPIO_I2S3_CK_1
+#define GPIO_I2S3_WS      GPIO_I2S3_WS_2
+
+#define DMACHAN_I2S3_RX   DMAMAP_SPI3_RX_2
+#define DMACHAN_I2S3_TX   DMAMAP_SPI3_TX_2
 
 #endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_P407_INCLUDE_BOARD_H */

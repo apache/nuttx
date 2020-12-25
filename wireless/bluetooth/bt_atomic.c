@@ -47,13 +47,6 @@
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_HAVE_INLINE
-void bt_atomic_set(FAR bt_atomic_t *ptr, bt_atomic_t value)
-{
-  *ptr = value;
-}
-#endif
-
 bt_atomic_t bt_atomic_incr(FAR bt_atomic_t *ptr)
 {
   irqstate_t flags;
@@ -105,20 +98,6 @@ bt_atomic_t bt_atomic_clrbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno)
 
   return value;
 }
-
-#ifndef CONFIG_HAVE_INLINE
-bt_atomic_t bt_atomic_get(FAR bt_atomic_t *ptr)
-{
-  return *ptr;
-}
-#endif
-
-#ifndef CONFIG_HAVE_INLINE
-bool bt_atomic_testbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno)
-{
-  return (*ptr & (1 << bitno)) != 0;
-}
-#endif
 
 bool bt_atomic_testsetbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno)
 {

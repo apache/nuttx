@@ -24,6 +24,12 @@ config ARCH_INTEL64
 	---help---
 		Intel x86_64 architecture
 
+config ARCH_CHIP_X86_64_CUSTOM
+	bool "Custom x86_64 chip"
+	select ARCH_CHIP_CUSTOM
+	---help---
+		Select this option if there is no directory for the chip under arch/x86_64/src/.
+
 endchoice
 
 choice

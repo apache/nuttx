@@ -148,7 +148,7 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
       ret = nxffs_findinode(volume, relpath, &entry);
       if (ret < 0)
         {
-          ferr("ERROR: Inode '%s' not found: %d\n", -ret);
+          ferr("ERROR: Inode '%s' not found: %d\n", relpath, -ret);
           goto errout_with_semaphore;
         }
 
@@ -198,7 +198,7 @@ int nxffs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   FAR struct nxffs_ofile_s *ofile;
   int ret;
 
-  finfo("Buf %s\n", buf);
+  finfo("Buf %p\n", buf);
   DEBUGASSERT(filep != NULL && buf != NULL);
 
   /* Recover the open file state from the struct file instance */

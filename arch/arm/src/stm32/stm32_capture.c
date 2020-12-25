@@ -321,7 +321,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
         break;
 #endif
 
-/* TIM6 and TIM7 cannot be used in capture */
+  /* TIM6 and TIM7 cannot be used in capture */
 
 #ifdef CONFIG_STM32_TIM8_CAP
       case STM32_TIM8_BASE:
@@ -519,6 +519,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
         break;
 #endif
     }
+
   return 0;
 }
 
@@ -623,6 +624,7 @@ static inline int stm32_cap_set_rcc(FAR const struct stm32_cap_priv_s *priv,
 
   return OK;
 }
+
 /************************************************************************************
  * Basic Functions
  ************************************************************************************/
@@ -731,6 +733,7 @@ static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler,
           irq_detach(irq_of);
         }
 #endif
+
       return OK;
     }
 
@@ -902,7 +905,6 @@ static stm32_cap_flags_t stm32_cap_getflags(FAR struct stm32_cap_dev_s *dev)
     }
 
   return flags;
-
 }
 
 /************************************************************************************
@@ -1015,7 +1017,8 @@ static int stm32_cap_setchannel(FAR struct stm32_cap_dev_s *dev, uint8_t channel
   return OK;
 }
 
-static uint32_t stm32_cap_getcapture(FAR struct stm32_cap_dev_s *dev, uint8_t channel)
+static uint32_t stm32_cap_getcapture(FAR struct stm32_cap_dev_s *dev,
+                                     uint8_t channel)
 {
   const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
   uint32_t offset;

@@ -179,14 +179,15 @@ static int pipe_close(FAR struct file *filep)
  *   fd[2] - The user provided array in which to catch the pipe file
  *   descriptors
  *   bufsize - The size of the in-memory, circular buffer in bytes.
+ *   flags - The file status flags.
  *
  * Returned Value:
- *   0 is returned on success; otherwise, -1 is returned with errno set
- *   appropriately.
+ *   0 is returned on success; a negated errno value is returned on a
+ *   failure.
  *
  ****************************************************************************/
 
-int nx_pipe(int fd[2], size_t bufsize)
+int nx_pipe(int fd[2], size_t bufsize, int flags)
 {
   FAR struct pipe_dev_s *dev = NULL;
   char devname[16];
@@ -249,7 +250,7 @@ int nx_pipe(int fd[2], size_t bufsize)
 
   /* Get a write file descriptor */
 
-  fd[1] = nx_open(devname, O_WRONLY);
+  fd[1] = nx_open(devname, O_WRONLY | flags);
   if (fd[1] < 0)
     {
       ret = fd[1];
@@ -258,7 +259,7 @@ int nx_pipe(int fd[2], size_t bufsize)
 
   /* Get a read file descriptor */
 
-  fd[0] = nx_open(devname, O_RDONLY);
+  fd[0] = nx_open(devname, O_RDONLY | flags);
   if (fd[0] < 0)
     {
       ret = fd[0];
@@ -268,7 +269,7 @@ int nx_pipe(int fd[2], size_t bufsize)
   return OK;
 
 errout_with_wrfd:
-  close(fd[1]);
+  nx_close(fd[1]);
 
 errout_with_driver:
   unregister_driver(devname);

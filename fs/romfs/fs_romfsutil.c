@@ -1,39 +1,24 @@
 /****************************************************************************
  * rm/romfs/fs_romfsutil.c
  *
- *   Copyright (C) 2008-2009, 2013, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References: Linux/Documentation/filesystems/romfs.txt
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
+/* References: Linux/Documentation/filesystems/romfs.txt */
 
 /****************************************************************************
  * Included Files
@@ -42,6 +27,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -57,6 +43,13 @@
 #include <nuttx/mtd/mtd.h>
 
 #include "fs_romfs.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define LINK_NOT_FOLLOWED 0
+#define LINK_FOLLOWED     1
 
 /****************************************************************************
  * Private Functions
@@ -75,6 +68,10 @@
 
 static uint32_t romfs_devread32(struct romfs_mountpt_s *rm, int ndx)
 {
+  /* This should not read past the end of the sector since the directory
+   * entries are aligned at 16-byte boundaries.
+   */
+
   return ((((uint32_t)rm->rm_buffer[ndx]     & 0xff) << 24) |
           (((uint32_t)rm->rm_buffer[ndx + 1] & 0xff) << 16) |
           (((uint32_t)rm->rm_buffer[ndx + 2] & 0xff) << 8) |
@@ -218,6 +215,11 @@ int16_t romfs_devcacheread(struct romfs_mountpt_s *rm, uint32_t offset)
  *   If so, traverse the hard links until the terminal, non-linked header
  *   so found and return that offset.
  *
+ * Return value:
+ *   < 0  :  An error occurred
+ *     0  :  No link followed
+ *     1  :  Link followed, poffset is the new volume offset
+ *
  ****************************************************************************/
 
 static int romfs_followhardlinks(struct romfs_mountpt_s *rm, uint32_t offset,
@@ -226,6 +228,7 @@ static int romfs_followhardlinks(struct romfs_mountpt_s *rm, uint32_t offset,
   uint32_t next;
   int16_t  ndx;
   int      i;
+  int      ret = LINK_NOT_FOLLOWED;
 
   /* Loop while we are redirected by hardlinks */
 
@@ -245,12 +248,15 @@ static int romfs_followhardlinks(struct romfs_mountpt_s *rm, uint32_t offset,
       if (!IS_HARDLINK(next))
         {
           *poffset = offset;
-          return OK;
+          return ret;
         }
 
-      /* Follow the hard-link */
+      /* Follow the hard-link.  Set return to indicate that we followed a
+       * link and that poffset was set to the link offset is valid.
+       */
 
       offset = romfs_devread32(rm, ndx + ROMFS_FHDR_INFO);
+      ret    = LINK_FOLLOWED;
     }
 
   return -ELOOP;
@@ -411,7 +417,8 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf,
 {
   int ret;
 
-  finfo("sector: %d cached: %d sectorsize: %d XIP base: %p buffer: %p\n",
+  finfo("sector: %" PRId32 " cached: %" PRId32
+        " sectorsize: %d XIP base: %p buffer: %p\n",
         sector, rf->rf_cachesector, rm->rm_hwsectorsize,
         rm->rm_xipbase, rf->rf_buffer);
 
@@ -751,6 +758,11 @@ int romfs_finddirentry(struct romfs_mountpt_s *rm,
           entrylen = terminator - entryname;
         }
 
+      if (entrylen == 0)
+        {
+          return OK;
+        }
+
       /* Long path segment names will be truncated to NAME_MAX */
 
       if (entrylen > NAME_MAX)
@@ -836,10 +848,24 @@ int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32_t offset,
     {
       return ret;
     }
+  else if (ret > 0)
+    {
+      /* The link was followed */
+
+      ndx = romfs_devcacheread(rm, *poffset);
+      if (ndx < 0)
+        {
+          return ndx;
+        }
+    }
 
   /* Because everything is chunked and aligned to 16-bit boundaries,
    * we know that most the basic node info fits into the sector.  The
    * associated name may not, however.
+   *
+   * NOTE:  Since ROMFS directory entries are aligned to 16-byte boundaries,
+   * we are assured that ndx + ROMFS_FHDR_INFO/SIZE will lie wholly within
+   * the sector buffer.
    */
 
   next   = romfs_devread32(rm, ndx + ROMFS_FHDR_NEXT);

@@ -60,12 +60,13 @@
  *  modifier, suitable for use within the format argument of a formatted
  *  input/output function when converting the corresponding integer type.
  *  These macros have the general form of PRI (character string literals for
- *  the fprintf() and fwprintf() family of functions) or SCN (character string
- *  literals for the fscanf() and fwscanf() family of functions), followed by
- *  the conversion specifier, followed by a name corresponding to a similar
- *  type name in <stdint.h>. In these names, N represents the width of the
- *  type as described in <stdint.h>. For example, PRIdFAST32 can be used in a
- *  format string to print the value of an integer of type int_fast32_t.
+ *  the fprintf() and fwprintf() family of functions) or SCN (character
+ *  string literals for the fscanf() and fwscanf() family of functions),
+ *  followed by the conversion specifier, followed by a name corresponding
+ *  to a similar type name in <stdint.h>. In these names, N represents the
+ *  width of the type as described in <stdint.h>. For example, PRIdFAST32
+ *  can be used in a format string to print the value of an integer of type
+ *  int_fast32_t.
  *
  * "The fprintf() macros for signed integers are:
  *
@@ -146,6 +147,179 @@
  * corresponding fscanf() and fwscanf() macros shall be defined unless the
  * implementation does not have a suitable modifier for the type.
  */
+
+/* On NuttX, least and fast types are aliases of the exact type.
+ * (See stdint.h)
+ */
+
+#define PRIdLEAST8  PRId8
+#define PRIdLEAST16 PRId16
+#define PRIdLEAST32 PRId32
+#if defined(PRId64)
+#define PRIdLEAST64 PRId64
+#endif
+
+#define PRIdFAST8   PRId8
+#define PRIdFAST16  PRId16
+#define PRIdFAST32  PRId32
+#if defined(PRId64)
+#define PRIdFAST64  PRId64
+#endif
+
+#define PRIiLEAST8  PRIi8
+#define PRIiLEAST16 PRIi16
+#define PRIiLEAST32 PRIi32
+#if defined(PRIi64)
+#define PRIiLEAST64 PRIi64
+#endif
+
+#define PRIiFAST8   PRIi8
+#define PRIiFAST16  PRIi16
+#define PRIiFAST32  PRIi32
+#if defined(PRIi64)
+#define PRIiFAST64  PRIi64
+#endif
+
+#define PRIoLEAST8  PRIo8
+#define PRIoLEAST16 PRIo16
+#define PRIoLEAST32 PRIo32
+#if defined(PRIo64)
+#define PRIoLEAST64 PRIo64
+#endif
+
+#define PRIoFAST8   PRIo8
+#define PRIoFAST16  PRIo16
+#define PRIoFAST32  PRIo32
+#if defined(PRIo64)
+#define PRIoFAST64  PRIo64
+#endif
+
+#define PRIuLEAST8  PRIu8
+#define PRIuLEAST16 PRIu16
+#define PRIuLEAST32 PRIu32
+#if defined(PRIu64)
+#define PRIuLEAST64 PRIu64
+#endif
+
+#define PRIuFAST8   PRIu8
+#define PRIuFAST16  PRIu16
+#define PRIuFAST32  PRIu32
+#if defined(PRIu64)
+#define PRIuFAST64  PRIu64
+#endif
+
+#define PRIxLEAST8  PRIx8
+#define PRIxLEAST16 PRIx16
+#define PRIxLEAST32 PRIx32
+#if defined(PRIx64)
+#define PRIxLEAST64 PRIx64
+#endif
+
+#define PRIxFAST8   PRIx8
+#define PRIxFAST16  PRIx16
+#define PRIxFAST32  PRIx32
+#if defined(PRIx64)
+#define PRIxFAST64  PRIx64
+#endif
+
+#define PRIXLEAST8  PRIX8
+#define PRIXLEAST16 PRIX16
+#define PRIXLEAST32 PRIX32
+#if defined(PRIX64)
+#define PRIXLEAST64 PRIX64
+#endif
+
+#define PRIXFAST8   PRIX8
+#define PRIXFAST16  PRIX16
+#define PRIXFAST32  PRIX32
+#if defined(PRIX64)
+#define PRIXFAST64  PRIX64
+#endif
+
+#define SCNdLEAST8  SCNd8
+#define SCNdLEAST16 SCNd16
+#define SCNdLEAST32 SCNd32
+#if defined(SCNd64)
+#define SCNdLEAST64 SCNd64
+#endif
+
+#define SCNdFAST8   SCNd8
+#define SCNdFAST16  SCNd16
+#define SCNdFAST32  SCNd32
+#if defined(SCNd64)
+#define SCNdFAST64  SCNd64
+#endif
+
+#define SCNiLEAST8  SCNi8
+#define SCNiLEAST16 SCNi16
+#define SCNiLEAST32 SCNi32
+#if defined(SCNi64)
+#define SCNiLEAST64 SCNi64
+#endif
+
+#define SCNiFAST8   SCNi8
+#define SCNiFAST16  SCNi16
+#define SCNiFAST32  SCNi32
+#if defined(SCNi64)
+#define SCNiFAST64  SCNi64
+#endif
+
+#define SCNoLEAST8  SCNo8
+#define SCNoLEAST16 SCNo16
+#define SCNoLEAST32 SCNo32
+#if defined(SCNo64)
+#define SCNoLEAST64 SCNo64
+#endif
+
+#define SCNoFAST8   SCNo8
+#define SCNoFAST16  SCNo16
+#define SCNoFAST32  SCNo32
+#if defined(SCNo64)
+#define SCNoFAST64  SCNo64
+#endif
+
+#define SCNuLEAST8  SCNu8
+#define SCNuLEAST16 SCNu16
+#define SCNuLEAST32 SCNu32
+#if defined(SCNu64)
+#define SCNuLEAST64 SCNu64
+#endif
+
+#define SCNuFAST8   SCNu8
+#define SCNuFAST16  SCNu16
+#define SCNuFAST32  SCNu32
+#if defined(SCNu64)
+#define SCNuFAST64  SCNu64
+#endif
+
+#define SCNxLEAST8  SCNx8
+#define SCNxLEAST16 SCNx16
+#define SCNxLEAST32 SCNx32
+#if defined(SCNx64)
+#define SCNxLEAST64 SCNx64
+#endif
+
+#define SCNxFAST8   SCNx8
+#define SCNxFAST16  SCNx16
+#define SCNxFAST32  SCNx32
+#if defined(SCNx64)
+#define SCNxFAST64  SCNx64
+#endif
+
+/* intmax_t/uintmax_t */
+
+#define PRIdMAX     "jd"
+#define PRIiMAX     "ji"
+#define PRIoMAX     "jo"
+#define PRIuMAX     "ju"
+#define PRIxMAX     "jx"
+#define PRIXMAX     "jX"
+
+#define SCNdMAX     "jd"
+#define SCNiMAX     "ji"
+#define SCNoMAX     "jo"
+#define SCNuMAX     "ju"
+#define SCNxMAX     "jx"
 
 /****************************************************************************
  * Type Definitions

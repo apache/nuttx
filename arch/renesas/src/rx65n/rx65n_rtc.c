@@ -69,7 +69,9 @@ void up_enable_irq(int irq);
 void up_disable_irq(int irq);
 void  rtc_prd_interrupt(void);
 static uint32_t rtc_dec2bcd(uint8_t value);
+#if defined (CONFIG_RTC_HIRES) || defined (CONFIG_RTC_ALARM) || defined (CONFIG_RTC_DATETIME)
 static int rtc_bcd2dec(uint32_t value);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -236,10 +238,12 @@ static uint32_t rtc_dec2bcd(uint8_t value)
  *
  ****************************************************************************/
 
+#if defined (CONFIG_RTC_HIRES) || defined (CONFIG_RTC_ALARM) || defined (CONFIG_RTC_DATETIME)
 static int rtc_bcd2dec(uint32_t value)
 {
   return (int) ((((value & 0xf0) >> 4) * 10) + (value & 0x0f));
 }
+#endif
 
 /****************************************************************************
  * Name: rtc_interrupt
@@ -774,7 +778,6 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Day of the week (0-6, 0=Sunday) */
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   RTC.RWKCNT.BYTE = rtc_dec2bcd((uint8_t) newtime.tm_wday);
 
   /* WAIT_LOOP */
@@ -783,7 +786,6 @@ int up_rtc_settime(FAR const struct timespec *tp)
     {
       dummy_byte = RTC.RWKCNT.BYTE;
     }
-#endif
 
   /* Day of the month (1-31) */
 
@@ -1355,9 +1357,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
       /* Days since Sunday (0-6) */
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
-    tp->tm_wday = (int) (RTC.RWKCNT.BYTE & 0x07u);
-#endif
+      tp->tm_wday = (int) (RTC.RWKCNT.BYTE & 0x07u);
       rtc_dumptime(tp, "Returning");
     }
 

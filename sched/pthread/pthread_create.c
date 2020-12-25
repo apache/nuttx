@@ -284,6 +284,11 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       goto errout_with_tcb;
     }
 
+  if (attr->detachstate == PTHREAD_CREATE_DETACHED)
+    {
+      pjoin->detached = true;
+    }
+
   if (attr->stackaddr)
     {
       /* Use pre-allocated stack */
@@ -553,11 +558,8 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   sched_lock();
   if (ret == OK)
     {
-      ret = nxtask_activate((FAR struct tcb_s *)ptcb);
-    }
+      nxtask_activate((FAR struct tcb_s *)ptcb);
 
-  if (ret == OK)
-    {
       /* Wait for the task to actually get running and to register
        * its join structure.
        */

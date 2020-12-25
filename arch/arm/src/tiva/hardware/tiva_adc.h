@@ -102,30 +102,30 @@
 #define TIVA_ADC_SS(n)           (TIVA_ADC_SS_BASE + ((n)*TIVA_ADC_SSMUX_OFFSET))
 
 #define TIVA_ADC_ACTSS(n)        (TIVA_ADC_BASE(n)+TIVA_ADC_ACTSS_OFFSET) /* ADC Active Sample Sequencer */
-#define TIVA_ADC_RIS(n)          (TIVA_ADC_BASE(n)+TIVA_ADC_RIS_OFFSET) /* ADC Raw Interrupt Status */
-#define TIVA_ADC_IM(n)           (TIVA_ADC_BASE(n)+TIVA_ADC_IM_OFFSET) /* ADC Interrupt Mask */
-#define TIVA_ADC_ISC(n)          (TIVA_ADC_BASE(n)+TIVA_ADC_ISC_OFFSET) /* ADC Interrupt Status and Clear */
+#define TIVA_ADC_RIS(n)          (TIVA_ADC_BASE(n)+TIVA_ADC_RIS_OFFSET)   /* ADC Raw Interrupt Status */
+#define TIVA_ADC_IM(n)           (TIVA_ADC_BASE(n)+TIVA_ADC_IM_OFFSET)    /* ADC Interrupt Mask */
+#define TIVA_ADC_ISC(n)          (TIVA_ADC_BASE(n)+TIVA_ADC_ISC_OFFSET)   /* ADC Interrupt Status and Clear */
 #define TIVA_ADC_OSTAT(n)        (TIVA_ADC_BASE(n)+TIVA_ADC_OSTAT_OFFSET) /* ADC Overflow Status */
-#define TIVA_ADC_EMUX(n)         (TIVA_ADC_BASE(n)+TIVA_ADC_EMUX_OFFSET) /* ADC Event Multiplexer Select */
+#define TIVA_ADC_EMUX(n)         (TIVA_ADC_BASE(n)+TIVA_ADC_EMUX_OFFSET)  /* ADC Event Multiplexer Select */
 #define TIVA_ADC_USTAT(n)        (TIVA_ADC_BASE(n)+TIVA_ADC_USTAT_OFFSET) /* ADC Underflow Status */
 #define TIVA_ADC_TSSEL(n)        (TIVA_ADC_BASE(n)+TIVA_ADC_TSSEL_OFFSET) /* ADC Trigger Source Select */
 #define TIVA_ADC_SSPRI(n)        (TIVA_ADC_BASE(n)+TIVA_ADC_SSPRI_OFFSET) /* ADC Sample Sequencer Priority */
-#define TIVA_ADC_SPC(n)          (TIVA_ADC_BASE(n)+TIVA_ADC_SPC_OFFSET) /* ADC Sample Phase Control */
-#define TIVA_ADC_PSSI(n)         (TIVA_ADC_BASE(n)+TIVA_ADC_PSSI_OFFSET) /* ADC Processor Sample Sequence Initiate */
-#define TIVA_ADC_SAC(n)          (TIVA_ADC_BASE(n)+TIVA_ADC_SAC_OFFSET) /* ADC Sample Averaging Control */
+#define TIVA_ADC_SPC(n)          (TIVA_ADC_BASE(n)+TIVA_ADC_SPC_OFFSET)   /* ADC Sample Phase Control */
+#define TIVA_ADC_PSSI(n)         (TIVA_ADC_BASE(n)+TIVA_ADC_PSSI_OFFSET)  /* ADC Processor Sample Sequence Initiate */
+#define TIVA_ADC_SAC(n)          (TIVA_ADC_BASE(n)+TIVA_ADC_SAC_OFFSET)   /* ADC Sample Averaging Control */
 #define TIVA_ADC_DCISC(n)        (TIVA_ADC_BASE(n)+TIVA_ADC_DCISC_OFFSET) /* ADC Digital Comparator Interrupt Status and Clear */
-#define TIVA_ADC_CTL(n)          (TIVA_ADC_BASE(n)+TIVA_ADC_CTL_OFFSET) /* ADC Control */
+#define TIVA_ADC_CTL(n)          (TIVA_ADC_BASE(n)+TIVA_ADC_CTL_OFFSET)   /* ADC Control */
 
-#define TIVA_ADC_SSMUX(n)        TIVA_ADC_SS(n) /* ADC Sample Sequence Input Multiplexer Select */
-#define TIVA_ADC_SSCTL(n)        (TIVA_ADC_SS(n)+TIVA_ADC_SSCTL_OFFSET) /* ADC Sample Sequence Control */
-#define TIVA_ADC_SSFIFO(n)       (TIVA_ADC_SS(n)+TIVA_ADC_SSFIFO_OFFSET) /* ADC Sample Sequence Result FIFO */
+#define TIVA_ADC_SSMUX(n)        TIVA_ADC_SS(n)                           /* ADC Sample Sequence Input Multiplexer Select */
+#define TIVA_ADC_SSCTL(n)        (TIVA_ADC_SS(n)+TIVA_ADC_SSCTL_OFFSET)   /* ADC Sample Sequence Control */
+#define TIVA_ADC_SSFIFO(n)       (TIVA_ADC_SS(n)+TIVA_ADC_SSFIFO_OFFSET)  /* ADC Sample Sequence Result FIFO */
 #define TIVA_ADC_SSFSTAT(n)      (TIVA_ADC_SS(n)+TIVA_ADC_SSFSTAT_OFFSET) /* ADC Sample Sequence FIFO Status */
-#define TIVA_ADC_SSOP(n)         (TIVA_ADC_SS(n)+TIVA_ADC_SSOP_OFFSET) /* ADC Sample Sequence Operation */
-#define TIVA_ADC_SSDC(n)         (TIVA_ADC_SS(n)+TIVA_ADC_SSDC_OFFSET) /* ADC Sample Sequence Digital Comparator Select */
-#define TIVA_ADC_SSEMUX(n)       (TIVA_ADC_SS(n)+TIVA_ADC_SSEMUX_OFFSET) /* ADC Sample Sequence Extended Input Multiplexer Select */
-#define TIVA_ADC_SSTSH(n)        (TIVA_ADC_SS(n)+TIVA_ADC_SSTSH_OFFSET) /* ADC Sample Sequence Sample and Hold Time */
+#define TIVA_ADC_SSOP(n)         (TIVA_ADC_SS(n)+TIVA_ADC_SSOP_OFFSET)    /* ADC Sample Sequence Operation */
+#define TIVA_ADC_SSDC(n)         (TIVA_ADC_SS(n)+TIVA_ADC_SSDC_OFFSET)    /* ADC Sample Sequence Digital Comparator Select */
+#define TIVA_ADC_SSEMUX(n)       (TIVA_ADC_SS(n)+TIVA_ADC_SSEMUX_OFFSET)  /* ADC Sample Sequence Extended Input Multiplexer Select */
+#define TIVA_ADC_SSTSH(n)        (TIVA_ADC_SS(n)+TIVA_ADC_SSTSH_OFFSET)   /* ADC Sample Sequence Sample and Hold Time */
 
-#define TIVA_ADC_DCRIC(n)        (TIVA_ADC_BASE(n)+TIVA_ADC_DCRIC_OFFSET) /* ADC Digital Comparator Reset Initial Conditions */
+#define TIVA_ADC_DCRIC(n)        (TIVA_ADC_BASE(n)+TIVA_ADC_DCRIC_OFFSET)  /* ADC Digital Comparator Reset Initial Conditions */
 #define TIVA_ADC_DCCTL0(n)       (TIVA_ADC_BASE(n)+TIVA_ADC_DCCTL0_OFFSET) /* ADC Digital Comparator Control 0 */
 #define TIVA_ADC_DCCTL1(n)       (TIVA_ADC_BASE(n)+TIVA_ADC_DCCTL1_OFFSET) /* ADC Digital Comparator Control 1 */
 #define TIVA_ADC_DCCTL2(n)       (TIVA_ADC_BASE(n)+TIVA_ADC_DCCTL2_OFFSET) /* ADC Digital Comparator Control 2 */
@@ -147,57 +147,57 @@
 /* ADC register address expansion ***************************************************/
 
 #define TIVA_ADC0_ACTSS          (TIVA_ADC_BASE(0) + TIVA_ADC_ACTSS_OFFSET) /* ADC Active Sample Sequencer */
-#define TIVA_ADC0_RIS            (TIVA_ADC_BASE(0) + TIVA_ADC_RIS_OFFSET) /* ADC Raw Interrupt Status */
-#define TIVA_ADC0_IM             (TIVA_ADC_BASE(0) + TIVA_ADC_IM_OFFSET) /* ADC Interrupt Mask */
-#define TIVA_ADC0_ISC            (TIVA_ADC_BASE(0) + TIVA_ADC_ISC_OFFSET) /* ADC Interrupt Status and Clear */
+#define TIVA_ADC0_RIS            (TIVA_ADC_BASE(0) + TIVA_ADC_RIS_OFFSET)   /* ADC Raw Interrupt Status */
+#define TIVA_ADC0_IM             (TIVA_ADC_BASE(0) + TIVA_ADC_IM_OFFSET)    /* ADC Interrupt Mask */
+#define TIVA_ADC0_ISC            (TIVA_ADC_BASE(0) + TIVA_ADC_ISC_OFFSET)   /* ADC Interrupt Status and Clear */
 #define TIVA_ADC0_OSTAT          (TIVA_ADC_BASE(0) + TIVA_ADC_OSTAT_OFFSET) /* ADC Overflow Status */
-#define TIVA_ADC0_EMUX           (TIVA_ADC_BASE(0) + TIVA_ADC_EMUX_OFFSET) /* ADC Event Multiplexer Select */
+#define TIVA_ADC0_EMUX           (TIVA_ADC_BASE(0) + TIVA_ADC_EMUX_OFFSET)  /* ADC Event Multiplexer Select */
 #define TIVA_ADC0_USTAT          (TIVA_ADC_BASE(0) + TIVA_ADC_USTAT_OFFSET) /* ADC Underflow Status */
 #define TIVA_ADC0_TSSEL          (TIVA_ADC_BASE(0) + TIVA_ADC_TSSEL_OFFSET) /* ADC Trigger Source Select */
 #define TIVA_ADC0_SSPRI          (TIVA_ADC_BASE(0) + TIVA_ADC_SSPRI_OFFSET) /* ADC Sample Sequencer Priority */
-#define TIVA_ADC0_SPC            (TIVA_ADC_BASE(0) + TIVA_ADC_SPC_OFFSET) /* ADC Sample Phase Control */
-#define TIVA_ADC0_PSSI           (TIVA_ADC_BASE(0) + TIVA_ADC_PSSI_OFFSET) /* ADC Processor Sample Sequence Initiate */
-#define TIVA_ADC0_SAC            (TIVA_ADC_BASE(0) + TIVA_ADC_SAC_OFFSET) /* ADC Sample Averaging Control */
+#define TIVA_ADC0_SPC            (TIVA_ADC_BASE(0) + TIVA_ADC_SPC_OFFSET)   /* ADC Sample Phase Control */
+#define TIVA_ADC0_PSSI           (TIVA_ADC_BASE(0) + TIVA_ADC_PSSI_OFFSET)  /* ADC Processor Sample Sequence Initiate */
+#define TIVA_ADC0_SAC            (TIVA_ADC_BASE(0) + TIVA_ADC_SAC_OFFSET)   /* ADC Sample Averaging Control */
 #define TIVA_ADC0_DCISC          (TIVA_ADC_BASE(0) + TIVA_ADC_DCISC_OFFSET) /* ADC Digital Comparator Interrupt Status and Clear */
-#define TIVA_ADC0_CTL            (TIVA_ADC_BASE(0) + TIVA_ADC_CTL_OFFSET) /* ADC Control */
+#define TIVA_ADC0_CTL            (TIVA_ADC_BASE(0) + TIVA_ADC_CTL_OFFSET)   /* ADC Control */
 
-#define TIVA_ADC0_SSMUX0         (TIVA_ADC_BASE(0) + TIVA_ADC_SSMUX(0)) /* ADC Sample Sequence Input Multiplexer Select 0 */
-#define TIVA_ADC0_SSCTL0         (TIVA_ADC_BASE(0) + TIVA_ADC_SSCTL(0)) /* ADC Sample Sequence Control 0 */
-#define TIVA_ADC0_SSFIFO0        (TIVA_ADC_BASE(0) + TIVA_ADC_SSFIFO(0)) /* ADC Sample Sequence Result FIFO 0 */
+#define TIVA_ADC0_SSMUX0         (TIVA_ADC_BASE(0) + TIVA_ADC_SSMUX(0))   /* ADC Sample Sequence Input Multiplexer Select 0 */
+#define TIVA_ADC0_SSCTL0         (TIVA_ADC_BASE(0) + TIVA_ADC_SSCTL(0))   /* ADC Sample Sequence Control 0 */
+#define TIVA_ADC0_SSFIFO0        (TIVA_ADC_BASE(0) + TIVA_ADC_SSFIFO(0))  /* ADC Sample Sequence Result FIFO 0 */
 #define TIVA_ADC0_SSFSTAT0       (TIVA_ADC_BASE(0) + TIVA_ADC_SSFSTAT(0)) /* ADC Sample Sequence FIFO 0 Status */
-#define TIVA_ADC0_SSOP0          (TIVA_ADC_BASE(0) + TIVA_ADC_SSOP(0)) /* ADC Sample Sequence 0 Operation */
-#define TIVA_ADC0_SSDC0          (TIVA_ADC_BASE(0) + TIVA_ADC_SSDC(0)) /* ADC Sample Sequence 0 Digital Comparator Select */
-#define TIVA_ADC0_SSEMUX0        (TIVA_ADC_BASE(0) + TIVA_ADC_SSEMUX(0)) /* ADC Sample Sequence Extended Input Multiplexer Select 0 */
-#define TIVA_ADC0_SSTSH0         (TIVA_ADC_BASE(0) + TIVA_ADC_SSTSH(0)) /* ADC Sample Sequence 0 Sample and Hold Time */
+#define TIVA_ADC0_SSOP0          (TIVA_ADC_BASE(0) + TIVA_ADC_SSOP(0))    /* ADC Sample Sequence 0 Operation */
+#define TIVA_ADC0_SSDC0          (TIVA_ADC_BASE(0) + TIVA_ADC_SSDC(0))    /* ADC Sample Sequence 0 Digital Comparator Select */
+#define TIVA_ADC0_SSEMUX0        (TIVA_ADC_BASE(0) + TIVA_ADC_SSEMUX(0))  /* ADC Sample Sequence Extended Input Multiplexer Select 0 */
+#define TIVA_ADC0_SSTSH0         (TIVA_ADC_BASE(0) + TIVA_ADC_SSTSH(0))   /* ADC Sample Sequence 0 Sample and Hold Time */
 
-#define TIVA_ADC0_SSMUX1         (TIVA_ADC_BASE(0) + TIVA_ADC_SSMUX(1)) /* ADC Sample Sequence Input Multiplexer Select 1 */
-#define TIVA_ADC0_SSCTL1         (TIVA_ADC_BASE(0) + TIVA_ADC_SSCTL(1)) /* ADC Sample Sequence Control 1 */
-#define TIVA_ADC0_SSFIFO1        (TIVA_ADC_BASE(0) + TIVA_ADC_SSFIFO(1)) /* ADC Sample Sequence Result FIFO 1 */
+#define TIVA_ADC0_SSMUX1         (TIVA_ADC_BASE(0) + TIVA_ADC_SSMUX(1))   /* ADC Sample Sequence Input Multiplexer Select 1 */
+#define TIVA_ADC0_SSCTL1         (TIVA_ADC_BASE(0) + TIVA_ADC_SSCTL(1))   /* ADC Sample Sequence Control 1 */
+#define TIVA_ADC0_SSFIFO1        (TIVA_ADC_BASE(0) + TIVA_ADC_SSFIFO(1))  /* ADC Sample Sequence Result FIFO 1 */
 #define TIVA_ADC0_SSFSTAT1       (TIVA_ADC_BASE(0) + TIVA_ADC_SSFSTAT(1)) /* ADC Sample Sequence FIFO 1 Status */
-#define TIVA_ADC0_SSOP1          (TIVA_ADC_BASE(0) + TIVA_ADC_SSOP(1)) /* ADC Sample Sequence 1 Operation */
-#define TIVA_ADC0_SSDC1          (TIVA_ADC_BASE(0) + TIVA_ADC_SSDC(1)) /* ADC Sample Sequence 1 Digital Comparator Select */
-#define TIVA_ADC0_SSEMUX1        (TIVA_ADC_BASE(0) + TIVA_ADC_SSEMUX(1)) /* ADC Sample Sequence Extended Input Multiplexer Select 1 */
-#define TIVA_ADC0_SSTSH1         (TIVA_ADC_BASE(0) + TIVA_ADC_SSTSH(1)) /* ADC Sample Sequence 1 Sample and Hold Time */
+#define TIVA_ADC0_SSOP1          (TIVA_ADC_BASE(0) + TIVA_ADC_SSOP(1))    /* ADC Sample Sequence 1 Operation */
+#define TIVA_ADC0_SSDC1          (TIVA_ADC_BASE(0) + TIVA_ADC_SSDC(1))    /* ADC Sample Sequence 1 Digital Comparator Select */
+#define TIVA_ADC0_SSEMUX1        (TIVA_ADC_BASE(0) + TIVA_ADC_SSEMUX(1))  /* ADC Sample Sequence Extended Input Multiplexer Select 1 */
+#define TIVA_ADC0_SSTSH1         (TIVA_ADC_BASE(0) + TIVA_ADC_SSTSH(1))   /* ADC Sample Sequence 1 Sample and Hold Time */
 
-#define TIVA_ADC0_SSMUX2         (TIVA_ADC_BASE(0) + TIVA_ADC_SSMUX(2)) /* ADC Sample Sequence Input Multiplexer Select 2 */
-#define TIVA_ADC0_SSCTL2         (TIVA_ADC_BASE(0) + TIVA_ADC_SSCTL(2)) /* ADC Sample Sequence Control 2 */
-#define TIVA_ADC0_SSFIFO2        (TIVA_ADC_BASE(0) + TIVA_ADC_SSFIFO(2)) /* ADC Sample Sequence Result FIFO 2 */
+#define TIVA_ADC0_SSMUX2         (TIVA_ADC_BASE(0) + TIVA_ADC_SSMUX(2))   /* ADC Sample Sequence Input Multiplexer Select 2 */
+#define TIVA_ADC0_SSCTL2         (TIVA_ADC_BASE(0) + TIVA_ADC_SSCTL(2))   /* ADC Sample Sequence Control 2 */
+#define TIVA_ADC0_SSFIFO2        (TIVA_ADC_BASE(0) + TIVA_ADC_SSFIFO(2))  /* ADC Sample Sequence Result FIFO 2 */
 #define TIVA_ADC0_SSFSTAT2       (TIVA_ADC_BASE(0) + TIVA_ADC_SSFSTAT(2)) /* ADC Sample Sequence FIFO 2 Status */
-#define TIVA_ADC0_SSOP2          (TIVA_ADC_BASE(0) + TIVA_ADC_SSOP(2)) /* ADC Sample Sequence 2 Operation */
-#define TIVA_ADC0_SSDC2          (TIVA_ADC_BASE(0) + TIVA_ADC_SSDC(2)) /* ADC Sample Sequence 2 Digital Comparator Select */
-#define TIVA_ADC0_SSEMUX2        (TIVA_ADC_BASE(0) + TIVA_ADC_SSEMUX(2)) /* ADC Sample Sequence Extended Input Multiplexer Select 2 */
-#define TIVA_ADC0_SSTSH2         (TIVA_ADC_BASE(0) + TIVA_ADC_SSTSH(2)) /* ADC Sample Sequence 2 Sample and Hold Time */
+#define TIVA_ADC0_SSOP2          (TIVA_ADC_BASE(0) + TIVA_ADC_SSOP(2))    /* ADC Sample Sequence 2 Operation */
+#define TIVA_ADC0_SSDC2          (TIVA_ADC_BASE(0) + TIVA_ADC_SSDC(2))    /* ADC Sample Sequence 2 Digital Comparator Select */
+#define TIVA_ADC0_SSEMUX2        (TIVA_ADC_BASE(0) + TIVA_ADC_SSEMUX(2))  /* ADC Sample Sequence Extended Input Multiplexer Select 2 */
+#define TIVA_ADC0_SSTSH2         (TIVA_ADC_BASE(0) + TIVA_ADC_SSTSH(2))   /* ADC Sample Sequence 2 Sample and Hold Time */
 
-#define TIVA_ADC0_SSMUX3         (TIVA_ADC_BASE(0) + TIVA_ADC_SSMUX(3)) /* ADC Sample Sequence Input Multiplexer Select 3 */
-#define TIVA_ADC0_SSCTL3         (TIVA_ADC_BASE(0) + TIVA_ADC_SSCTL(3)) /* ADC Sample Sequence Control 3 */
-#define TIVA_ADC0_SSFIFO3        (TIVA_ADC_BASE(0) + TIVA_ADC_SSFIFO(3)) /* ADC Sample Sequence Result FIFO 3 */
+#define TIVA_ADC0_SSMUX3         (TIVA_ADC_BASE(0) + TIVA_ADC_SSMUX(3))   /* ADC Sample Sequence Input Multiplexer Select 3 */
+#define TIVA_ADC0_SSCTL3         (TIVA_ADC_BASE(0) + TIVA_ADC_SSCTL(3))   /* ADC Sample Sequence Control 3 */
+#define TIVA_ADC0_SSFIFO3        (TIVA_ADC_BASE(0) + TIVA_ADC_SSFIFO(3))  /* ADC Sample Sequence Result FIFO 3 */
 #define TIVA_ADC0_SSFSTAT3       (TIVA_ADC_BASE(0) + TIVA_ADC_SSFSTAT(3)) /* ADC Sample Sequence FIFO 3 Status */
-#define TIVA_ADC0_SSOP3          (TIVA_ADC_BASE(0) + TIVA_ADC_SSOP(3)) /* ADC Sample Sequence 3 Operation */
-#define TIVA_ADC0_SSDC3          (TIVA_ADC_BASE(0) + TIVA_ADC_SSDC(3)) /* ADC Sample Sequence 3 Digital Comparator Select */
-#define TIVA_ADC0_SSEMUX3        (TIVA_ADC_BASE(0) + TIVA_ADC_SSEMUX(3)) /* ADC Sample Sequence Extended Input Multiplexer Select 3 */
-#define TIVA_ADC0_SSTSH3         (TIVA_ADC_BASE(0) + TIVA_ADC_SSTSH(3)) /* ADC Sample Sequence 3 Sample and Hold Time */
+#define TIVA_ADC0_SSOP3          (TIVA_ADC_BASE(0) + TIVA_ADC_SSOP(3))    /* ADC Sample Sequence 3 Operation */
+#define TIVA_ADC0_SSDC3          (TIVA_ADC_BASE(0) + TIVA_ADC_SSDC(3))    /* ADC Sample Sequence 3 Digital Comparator Select */
+#define TIVA_ADC0_SSEMUX3        (TIVA_ADC_BASE(0) + TIVA_ADC_SSEMUX(3))  /* ADC Sample Sequence Extended Input Multiplexer Select 3 */
+#define TIVA_ADC0_SSTSH3         (TIVA_ADC_BASE(0) + TIVA_ADC_SSTSH(3))   /* ADC Sample Sequence 3 Sample and Hold Time */
 
-#define TIVA_ADC0_DCRIC          (TIVA_ADC_BASE(0) + TIVA_ADC_DCRIC_OFFSET) /* ADC Digital Comparator Reset Initial Conditions */
+#define TIVA_ADC0_DCRIC          (TIVA_ADC_BASE(0) + TIVA_ADC_DCRIC_OFFSET)  /* ADC Digital Comparator Reset Initial Conditions */
 #define TIVA_ADC0_DCCTL0         (TIVA_ADC_BASE(0) + TIVA_ADC_DCCTL0_OFFSET) /* ADC Digital Comparator Control 0 */
 #define TIVA_ADC0_DCCTL1         (TIVA_ADC_BASE(0) + TIVA_ADC_DCCTL1_OFFSET) /* ADC Digital Comparator Control 1 */
 #define TIVA_ADC0_DCCTL2         (TIVA_ADC_BASE(0) + TIVA_ADC_DCCTL2_OFFSET) /* ADC Digital Comparator Control 2 */
@@ -217,57 +217,57 @@
 #define TIVA_ADC0_DCCMP7         (TIVA_ADC_BASE(0) + TIVA_ADC_DCCMP7_OFFSET) /* ADC Digital Comparator Range 7 */
 
 #define TIVA_ADC1_ACTSS          (TIVA_ADC_BASE(1) + TIVA_ADC_ACTSS_OFFSET) /* ADC Active Sample Sequencer */
-#define TIVA_ADC1_RIS            (TIVA_ADC_BASE(1) + TIVA_ADC_RIS_OFFSET) /* ADC Raw Interrupt Status */
-#define TIVA_ADC1_IM             (TIVA_ADC_BASE(1) + TIVA_ADC_IM_OFFSET) /* ADC Interrupt Mask */
-#define TIVA_ADC1_ISC            (TIVA_ADC_BASE(1) + TIVA_ADC_ISC_OFFSET) /* ADC Interrupt Status and Clear */
+#define TIVA_ADC1_RIS            (TIVA_ADC_BASE(1) + TIVA_ADC_RIS_OFFSET)   /* ADC Raw Interrupt Status */
+#define TIVA_ADC1_IM             (TIVA_ADC_BASE(1) + TIVA_ADC_IM_OFFSET)    /* ADC Interrupt Mask */
+#define TIVA_ADC1_ISC            (TIVA_ADC_BASE(1) + TIVA_ADC_ISC_OFFSET)   /* ADC Interrupt Status and Clear */
 #define TIVA_ADC1_OSTAT          (TIVA_ADC_BASE(1) + TIVA_ADC_OSTAT_OFFSET) /* ADC Overflow Status */
-#define TIVA_ADC1_EMUX           (TIVA_ADC_BASE(1) + TIVA_ADC_EMUX_OFFSET) /* ADC Event Multiplexer Select */
+#define TIVA_ADC1_EMUX           (TIVA_ADC_BASE(1) + TIVA_ADC_EMUX_OFFSET)  /* ADC Event Multiplexer Select */
 #define TIVA_ADC1_USTAT          (TIVA_ADC_BASE(1) + TIVA_ADC_USTAT_OFFSET) /* ADC Underflow Status */
 #define TIVA_ADC1_TSSEL          (TIVA_ADC_BASE(1) + TIVA_ADC_TSSEL_OFFSET) /* ADC Trigger Source Select */
 #define TIVA_ADC1_SSPRI          (TIVA_ADC_BASE(1) + TIVA_ADC_SSPRI_OFFSET) /* ADC Sample Sequencer Priority */
-#define TIVA_ADC1_SPC            (TIVA_ADC_BASE(1) + TIVA_ADC_SPC_OFFSET) /* ADC Sample Phase Control */
-#define TIVA_ADC1_PSSI           (TIVA_ADC_BASE(1) + TIVA_ADC_PSSI_OFFSET) /* ADC Processor Sample Sequence Initiate */
-#define TIVA_ADC1_SAC            (TIVA_ADC_BASE(1) + TIVA_ADC_SAC_OFFSET) /* ADC Sample Averaging Control */
+#define TIVA_ADC1_SPC            (TIVA_ADC_BASE(1) + TIVA_ADC_SPC_OFFSET)   /* ADC Sample Phase Control */
+#define TIVA_ADC1_PSSI           (TIVA_ADC_BASE(1) + TIVA_ADC_PSSI_OFFSET)  /* ADC Processor Sample Sequence Initiate */
+#define TIVA_ADC1_SAC            (TIVA_ADC_BASE(1) + TIVA_ADC_SAC_OFFSET)   /* ADC Sample Averaging Control */
 #define TIVA_ADC1_DCISC          (TIVA_ADC_BASE(1) + TIVA_ADC_DCISC_OFFSET) /* ADC Digital Comparator Interrupt Status and Clear */
-#define TIVA_ADC1_CTL            (TIVA_ADC_BASE(1) + TIVA_ADC_CTL_OFFSET) /* ADC Control */
+#define TIVA_ADC1_CTL            (TIVA_ADC_BASE(1) + TIVA_ADC_CTL_OFFSET)   /* ADC Control */
 
-#define TIVA_ADC1_SSMUX0         (TIVA_ADC_BASE(1) + TIVA_ADC_SSMUX(0)) /* ADC Sample Sequence Input Multiplexer Select 0 */
-#define TIVA_ADC1_SSCTL0         (TIVA_ADC_BASE(1) + TIVA_ADC_SSCTL(0)) /* ADC Sample Sequence Control 0 */
-#define TIVA_ADC1_SSFIFO0        (TIVA_ADC_BASE(1) + TIVA_ADC_SSFIFO(0)) /* ADC Sample Sequence Result FIFO 0 */
+#define TIVA_ADC1_SSMUX0         (TIVA_ADC_BASE(1) + TIVA_ADC_SSMUX(0))   /* ADC Sample Sequence Input Multiplexer Select 0 */
+#define TIVA_ADC1_SSCTL0         (TIVA_ADC_BASE(1) + TIVA_ADC_SSCTL(0))   /* ADC Sample Sequence Control 0 */
+#define TIVA_ADC1_SSFIFO0        (TIVA_ADC_BASE(1) + TIVA_ADC_SSFIFO(0))  /* ADC Sample Sequence Result FIFO 0 */
 #define TIVA_ADC1_SSFSTAT0       (TIVA_ADC_BASE(1) + TIVA_ADC_SSFSTAT(0)) /* ADC Sample Sequence FIFO 0 Status */
-#define TIVA_ADC1_SSOP0          (TIVA_ADC_BASE(1) + TIVA_ADC_SSOP(0)) /* ADC Sample Sequence 0 Operation */
-#define TIVA_ADC1_SSDC0          (TIVA_ADC_BASE(1) + TIVA_ADC_SSDC(0)) /* ADC Sample Sequence 0 Digital Comparator Select */
-#define TIVA_ADC1_SSEMUX0        (TIVA_ADC_BASE(1) + TIVA_ADC_SSEMUX(0)) /* ADC Sample Sequence Extended Input Multiplexer Select 0 */
-#define TIVA_ADC1_SSTSH0         (TIVA_ADC_BASE(1) + TIVA_ADC_SSTSH(0)) /* ADC Sample Sequence 0 Sample and Hold Time */
+#define TIVA_ADC1_SSOP0          (TIVA_ADC_BASE(1) + TIVA_ADC_SSOP(0))    /* ADC Sample Sequence 0 Operation */
+#define TIVA_ADC1_SSDC0          (TIVA_ADC_BASE(1) + TIVA_ADC_SSDC(0))    /* ADC Sample Sequence 0 Digital Comparator Select */
+#define TIVA_ADC1_SSEMUX0        (TIVA_ADC_BASE(1) + TIVA_ADC_SSEMUX(0))  /* ADC Sample Sequence Extended Input Multiplexer Select 0 */
+#define TIVA_ADC1_SSTSH0         (TIVA_ADC_BASE(1) + TIVA_ADC_SSTSH(0))   /* ADC Sample Sequence 0 Sample and Hold Time */
 
-#define TIVA_ADC1_SSMUX1         (TIVA_ADC_BASE(1) + TIVA_ADC_SSMUX(1)) /* ADC Sample Sequence Input Multiplexer Select 1 */
-#define TIVA_ADC1_SSCTL1         (TIVA_ADC_BASE(1) + TIVA_ADC_SSCTL(1)) /* ADC Sample Sequence Control 1 */
-#define TIVA_ADC1_SSFIFO1        (TIVA_ADC_BASE(1) + TIVA_ADC_SSFIFO(1)) /* ADC Sample Sequence Result FIFO 1 */
+#define TIVA_ADC1_SSMUX1         (TIVA_ADC_BASE(1) + TIVA_ADC_SSMUX(1))   /* ADC Sample Sequence Input Multiplexer Select 1 */
+#define TIVA_ADC1_SSCTL1         (TIVA_ADC_BASE(1) + TIVA_ADC_SSCTL(1))   /* ADC Sample Sequence Control 1 */
+#define TIVA_ADC1_SSFIFO1        (TIVA_ADC_BASE(1) + TIVA_ADC_SSFIFO(1))  /* ADC Sample Sequence Result FIFO 1 */
 #define TIVA_ADC1_SSFSTAT1       (TIVA_ADC_BASE(1) + TIVA_ADC_SSFSTAT(1)) /* ADC Sample Sequence FIFO 1 Status */
-#define TIVA_ADC1_SSOP1          (TIVA_ADC_BASE(1) + TIVA_ADC_SSOP(1)) /* ADC Sample Sequence 1 Operation */
-#define TIVA_ADC1_SSDC1          (TIVA_ADC_BASE(1) + TIVA_ADC_SSDC(1)) /* ADC Sample Sequence 1 Digital Comparator Select */
-#define TIVA_ADC1_SSEMUX1        (TIVA_ADC_BASE(1) + TIVA_ADC_SSEMUX(1)) /* ADC Sample Sequence Extended Input Multiplexer Select 1 */
-#define TIVA_ADC1_SSTSH1         (TIVA_ADC_BASE(1) + TIVA_ADC_SSTSH(1)) /* ADC Sample Sequence 1 Sample and Hold Time */
+#define TIVA_ADC1_SSOP1          (TIVA_ADC_BASE(1) + TIVA_ADC_SSOP(1))    /* ADC Sample Sequence 1 Operation */
+#define TIVA_ADC1_SSDC1          (TIVA_ADC_BASE(1) + TIVA_ADC_SSDC(1))    /* ADC Sample Sequence 1 Digital Comparator Select */
+#define TIVA_ADC1_SSEMUX1        (TIVA_ADC_BASE(1) + TIVA_ADC_SSEMUX(1))  /* ADC Sample Sequence Extended Input Multiplexer Select 1 */
+#define TIVA_ADC1_SSTSH1         (TIVA_ADC_BASE(1) + TIVA_ADC_SSTSH(1))   /* ADC Sample Sequence 1 Sample and Hold Time */
 
-#define TIVA_ADC1_SSMUX2         (TIVA_ADC_BASE(1) + TIVA_ADC_SSMUX(2)) /* ADC Sample Sequence Input Multiplexer Select 2 */
-#define TIVA_ADC1_SSCTL2         (TIVA_ADC_BASE(1) + TIVA_ADC_SSCTL(2)) /* ADC Sample Sequence Control 2 */
-#define TIVA_ADC1_SSFIFO2        (TIVA_ADC_BASE(1) + TIVA_ADC_SSFIFO(2)) /* ADC Sample Sequence Result FIFO 2 */
+#define TIVA_ADC1_SSMUX2         (TIVA_ADC_BASE(1) + TIVA_ADC_SSMUX(2))   /* ADC Sample Sequence Input Multiplexer Select 2 */
+#define TIVA_ADC1_SSCTL2         (TIVA_ADC_BASE(1) + TIVA_ADC_SSCTL(2))   /* ADC Sample Sequence Control 2 */
+#define TIVA_ADC1_SSFIFO2        (TIVA_ADC_BASE(1) + TIVA_ADC_SSFIFO(2))  /* ADC Sample Sequence Result FIFO 2 */
 #define TIVA_ADC1_SSFSTAT2       (TIVA_ADC_BASE(1) + TIVA_ADC_SSFSTAT(2)) /* ADC Sample Sequence FIFO 2 Status */
-#define TIVA_ADC1_SSOP2          (TIVA_ADC_BASE(1) + TIVA_ADC_SSOP(2)) /* ADC Sample Sequence 2 Operation */
-#define TIVA_ADC1_SSDC2          (TIVA_ADC_BASE(1) + TIVA_ADC_SSDC(2)) /* ADC Sample Sequence 2 Digital Comparator Select */
-#define TIVA_ADC1_SSEMUX2        (TIVA_ADC_BASE(1) + TIVA_ADC_SSEMUX(2)) /* ADC Sample Sequence Extended Input Multiplexer Select 2 */
-#define TIVA_ADC1_SSTSH2         (TIVA_ADC_BASE(1) + TIVA_ADC_SSTSH(2)) /* ADC Sample Sequence 2 Sample and Hold Time */
+#define TIVA_ADC1_SSOP2          (TIVA_ADC_BASE(1) + TIVA_ADC_SSOP(2))    /* ADC Sample Sequence 2 Operation */
+#define TIVA_ADC1_SSDC2          (TIVA_ADC_BASE(1) + TIVA_ADC_SSDC(2))    /* ADC Sample Sequence 2 Digital Comparator Select */
+#define TIVA_ADC1_SSEMUX2        (TIVA_ADC_BASE(1) + TIVA_ADC_SSEMUX(2))  /* ADC Sample Sequence Extended Input Multiplexer Select 2 */
+#define TIVA_ADC1_SSTSH2         (TIVA_ADC_BASE(1) + TIVA_ADC_SSTSH(2))   /* ADC Sample Sequence 2 Sample and Hold Time */
 
-#define TIVA_ADC1_SSMUX3         (TIVA_ADC_BASE(1) + TIVA_ADC_SSMUX(3)) /* ADC Sample Sequence Input Multiplexer Select 3 */
-#define TIVA_ADC1_SSCTL3         (TIVA_ADC_BASE(1) + TIVA_ADC_SSCTL(3)) /* ADC Sample Sequence Control 3 */
-#define TIVA_ADC1_SSFIFO3        (TIVA_ADC_BASE(1) + TIVA_ADC_SSFIFO(3)) /* ADC Sample Sequence Result FIFO 3 */
+#define TIVA_ADC1_SSMUX3         (TIVA_ADC_BASE(1) + TIVA_ADC_SSMUX(3))   /* ADC Sample Sequence Input Multiplexer Select 3 */
+#define TIVA_ADC1_SSCTL3         (TIVA_ADC_BASE(1) + TIVA_ADC_SSCTL(3))   /* ADC Sample Sequence Control 3 */
+#define TIVA_ADC1_SSFIFO3        (TIVA_ADC_BASE(1) + TIVA_ADC_SSFIFO(3))  /* ADC Sample Sequence Result FIFO 3 */
 #define TIVA_ADC1_SSFSTAT3       (TIVA_ADC_BASE(1) + TIVA_ADC_SSFSTAT(3)) /* ADC Sample Sequence FIFO 3 Status */
-#define TIVA_ADC1_SSOP3          (TIVA_ADC_BASE(1) + TIVA_ADC_SSOP(3)) /* ADC Sample Sequence 3 Operation */
-#define TIVA_ADC1_SSDC3          (TIVA_ADC_BASE(1) + TIVA_ADC_SSDC(3)) /* ADC Sample Sequence 3 Digital Comparator Select */
-#define TIVA_ADC1_SSEMUX3        (TIVA_ADC_BASE(1) + TIVA_ADC_SSEMUX(3)) /* ADC Sample Sequence Extended Input Multiplexer Select 3 */
-#define TIVA_ADC1_SSTSH3         (TIVA_ADC_BASE(1) + TIVA_ADC_SSTSH(3)) /* ADC Sample Sequence 3 Sample and Hold Time */
+#define TIVA_ADC1_SSOP3          (TIVA_ADC_BASE(1) + TIVA_ADC_SSOP(3))    /* ADC Sample Sequence 3 Operation */
+#define TIVA_ADC1_SSDC3          (TIVA_ADC_BASE(1) + TIVA_ADC_SSDC(3))    /* ADC Sample Sequence 3 Digital Comparator Select */
+#define TIVA_ADC1_SSEMUX3        (TIVA_ADC_BASE(1) + TIVA_ADC_SSEMUX(3))  /* ADC Sample Sequence Extended Input Multiplexer Select 3 */
+#define TIVA_ADC1_SSTSH3         (TIVA_ADC_BASE(1) + TIVA_ADC_SSTSH(3))   /* ADC Sample Sequence 3 Sample and Hold Time */
 
-#define TIVA_ADC1_DCRIC          (TIVA_ADC_BASE(1) + TIVA_ADC_DCRIC_OFFSET) /* ADC Digital Comparator Reset Initial Conditions */
+#define TIVA_ADC1_DCRIC          (TIVA_ADC_BASE(1) + TIVA_ADC_DCRIC_OFFSET)  /* ADC Digital Comparator Reset Initial Conditions */
 #define TIVA_ADC1_DCCTL0         (TIVA_ADC_BASE(1) + TIVA_ADC_DCCTL0_OFFSET) /* ADC Digital Comparator Control 0 */
 #define TIVA_ADC1_DCCTL1         (TIVA_ADC_BASE(1) + TIVA_ADC_DCCTL1_OFFSET) /* ADC Digital Comparator Control 1 */
 #define TIVA_ADC1_DCCTL2         (TIVA_ADC_BASE(1) + TIVA_ADC_DCCTL2_OFFSET) /* ADC Digital Comparator Control 2 */
@@ -357,18 +357,18 @@
 
 #define ADC_EMUX_SHIFT(n)        (4 * (n))                  /* SS EMUX Shift */
 #define ADC_EMUX_MASK(n)         (0xF << ADC_EMUX_SHIFT(n)) /* SS EMUX Mask */
-#  define ADC_EMUX_PROC          (0x0)                    /* Processor (default) */
-#  define ADC_EMUX_COMP0         (0x1)                    /* Analog Comparator 0 */
-#  define ADC_EMUX_COMP1         (0x2)                    /* Analog Comparator 1 */
-#  define ADC_EMUX_COMP2         (0x3)                    /* Analog Comparator 2 */
-#  define ADC_EMUX_EXTERNAL      (0x4)                    /* External (GPIO Pins) */
-#  define ADC_EMUX_TIMER         (0x5)                    /* Timer */
-#  define ADC_EMUX_PWM0          (0x6)                    /* PWM generator 0 */
-#  define ADC_EMUX_PWM1          (0x7)                    /* PWM generator 1 */
-#  define ADC_EMUX_PWM2          (0x8)                    /* PWM generator 2 */
-#  define ADC_EMUX_PWM3          (0x9)                    /* PWM generator 3 */
-#  define ADC_EMUX_NEVER         (0xe)                    /* Never Trigger */
-#  define ADC_EMUX_ALWAYS        (0xf)                    /* Always (continuously sample) */
+#  define ADC_EMUX_PROC          (0x0)                      /* Processor (default) */
+#  define ADC_EMUX_COMP0         (0x1)                      /* Analog Comparator 0 */
+#  define ADC_EMUX_COMP1         (0x2)                      /* Analog Comparator 1 */
+#  define ADC_EMUX_COMP2         (0x3)                      /* Analog Comparator 2 */
+#  define ADC_EMUX_EXTERNAL      (0x4)                      /* External (GPIO Pins) */
+#  define ADC_EMUX_TIMER         (0x5)                      /* Timer */
+#  define ADC_EMUX_PWM0          (0x6)                      /* PWM generator 0 */
+#  define ADC_EMUX_PWM1          (0x7)                      /* PWM generator 1 */
+#  define ADC_EMUX_PWM2          (0x8)                      /* PWM generator 2 */
+#  define ADC_EMUX_PWM3          (0x9)                      /* PWM generator 3 */
+#  define ADC_EMUX_NEVER         (0xe)                      /* Never Trigger */
+#  define ADC_EMUX_ALWAYS        (0xf)                      /* Always (continuously sample) */
 
 /* Bit fields in the TIVA_ADC_USTAT register. */
 
@@ -389,10 +389,10 @@
 
 #define ADC_SSPRI_SHIFT(n)       ((n) * 4)                   /* SSE priority mask */
 #define ADC_SSPRI_MASK(n)        (0x3 << ADC_SSPRI_SHIFT(n)) /* SSE priority mask */
-#  define ADC_SSPRI_0            (0x0)                    /* SSE priority value 0 (highest) */
-#  define ADC_SSPRI_1            (0x1)                    /* SSE priority value 1 (high) */
-#  define ADC_SSPRI_2            (0x2)                    /* SSE priority value 2 (low) */
-#  define ADC_SSPRI_3            (0x3)                    /* SSE priority value 3 (lowest) */
+#  define ADC_SSPRI_0            (0x0)                       /* SSE priority value 0 (highest) */
+#  define ADC_SSPRI_1            (0x1)                       /* SSE priority value 1 (high) */
+#  define ADC_SSPRI_2            (0x2)                       /* SSE priority value 2 (low) */
+#  define ADC_SSPRI_3            (0x3)                       /* SSE priority value 3 (lowest) */
 
 /* Bit fields in the TIVA_ADC_SPC register. */
 
@@ -522,14 +522,14 @@
 
 #define ADC_SSTSH_SHIFT(n)       ((n) * 4)
 #define ADC_SSTSH_MASK(n)        (0xf << (ADC_SSTSH_SHIFT(n))) /* nth Sample and Hold Period Select */
-#  define ADC_SSTH_SHOLD_4       (0x0)                    /* Sample and hold 4 ADC clocks */
-#  define ADC_SSTH_SHOLD_8       (0x2)                    /* Sample and hold 8 ADC clocks */
-#  define ADC_SSTH_SHOLD_16      (0x4)                    /* Sample and hold 16 ADC clocks */
-#  define ADC_SSTH_SHOLD_32      (0x6)                    /* Sample and hold 32 ADC clocks */
-#  define ADC_SSTH_SHOLD_64      (0x8)                    /* Sample and hold 64 ADC clocks */
-#  define ADC_SSTH_SHOLD_128     (0xa)                    /* Sample and hold 128 ADC clocks */
-#  define ADC_SSTH_SHOLD_256     (0xc)                    /* Sample and hold 256 ADC clocks */
-#  define SSTSH_TSH_TS           ADC_SSTH_SHOLD_4         /* Same and hold time for the temp sensor should be at least 16 ADC ticks */
+#  define ADC_SSTH_SHOLD_4       (0x0)                         /* Sample and hold 4 ADC clocks */
+#  define ADC_SSTH_SHOLD_8       (0x2)                         /* Sample and hold 8 ADC clocks */
+#  define ADC_SSTH_SHOLD_16      (0x4)                         /* Sample and hold 16 ADC clocks */
+#  define ADC_SSTH_SHOLD_32      (0x6)                         /* Sample and hold 32 ADC clocks */
+#  define ADC_SSTH_SHOLD_64      (0x8)                         /* Sample and hold 64 ADC clocks */
+#  define ADC_SSTH_SHOLD_128     (0xa)                         /* Sample and hold 128 ADC clocks */
+#  define ADC_SSTH_SHOLD_256     (0xc)                         /* Sample and hold 256 ADC clocks */
+#  define SSTSH_TSH_TS           ADC_SSTH_SHOLD_4              /* Same and hold time for the temp sensor should be at least 16 ADC ticks */
 
 /* Bit fields in the TIVA_ADC_SSFIFO1 register. */
 

@@ -71,7 +71,8 @@ static int pca9635pw_set_led_mode(FAR struct pca9635pw_dev_s *priv,
 
 static int pca9635pw_open(FAR struct file *filep);
 static int pca9635pw_close(FAR struct file *filep);
-static int pca9635pw_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int pca9635pw_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -123,8 +124,8 @@ static int pca9635pw_i2c_write_byte(FAR struct pca9635pw_dev_s *priv,
 
   /* Write the register address followed by the data (no RESTART) */
 
-  lcdinfo("i2c addr: 0x%02X reg addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
-          buffer[0], buffer[1]);
+  lcdinfo("i2c addr: 0x%02X reg addr: 0x%02X value: 0x%02X\n",
+          priv->i2c_addr, buffer[0], buffer[1]);
 
   ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
   if (ret < 0)
@@ -140,7 +141,8 @@ static int pca9635pw_i2c_write_byte(FAR struct pca9635pw_dev_s *priv,
  * Name: pca9635pw_set_led_mode
  *
  * Description:
- *   Set the led output mode (see PCA9635PW_LED_OUT_x register value definitions)
+ *   Set the led output mode (see PCA9635PW_LED_OUT_x register value
+ *   definitions)
  *
  ****************************************************************************/
 
@@ -210,8 +212,8 @@ static int pca9635pw_open(FAR struct file *filep)
     }
 
   /* A delay of 500 us is necessary since this is the maximum time which the
-   * oscillator of the PCA9635PW needs to be up and running once sleep mode was
-   * left.
+   * oscillator of the PCA9635PW needs to be up and running once sleep mode
+   * was left.
    */
 
   nxsig_usleep(500);
@@ -220,11 +222,11 @@ static int pca9635pw_open(FAR struct file *filep)
    * by the individual pwm registers.
    */
 
-  ret = pca9635pw_set_led_mode(priv, PCA9635PW_LED_OUT_x_MODE_2);
+  ret = pca9635pw_set_led_mode(priv, PCA9635PW_LED_OUT_X_MODE_2);
   if (ret < 0)
     {
-      lcderr("ERROR: Could not set led driver outputs to MODE2 (LED's brightness are "
-             "controlled by pwm registers)\n");
+      lcderr("ERROR: Could not set led driver outputs to MODE2"
+             " (LED's brightness are controlled by pwm registers)\n");
       return ret;
     }
 
@@ -247,10 +249,11 @@ static int pca9635pw_close(FAR struct file *filep)
 
   /* Turn all led drivers off */
 
-  ret = pca9635pw_set_led_mode(priv, PCA9635PW_LED_OUT_x_MODE_0);
+  ret = pca9635pw_set_led_mode(priv, PCA9635PW_LED_OUT_X_MODE_0);
   if (ret < 0)
     {
-      lcderr("ERROR: Could not set led driver outputs to MODE0 (LED's are off)\n");
+      lcderr("ERROR: Could not set led driver outputs to MODE0"
+             " (LED's are off)\n");
       return ret;
     }
 
@@ -258,7 +261,7 @@ static int pca9635pw_close(FAR struct file *filep)
 
   uint8_t const PCA9635PW_MODE_1_FINAL_VALUE = PCA9635PW_MODE_1_SLEEP;
 
-  ret =pca9635pw_i2c_write_byte(priv, PCA9635PW_MODE_1,
+  ret = pca9635pw_i2c_write_byte(priv, PCA9635PW_MODE_1,
                                 PCA9635PW_MODE_1_FINAL_VALUE);
   if (ret < 0)
     {
@@ -272,11 +275,13 @@ static int pca9635pw_close(FAR struct file *filep)
  * Name: pca9635pw_close
  *
  * Description:
- *   This function is called whenever an ioctl call to a PCA9635PW is performed.
+ *   This function is called whenever an ioctl call to a PCA9635PW is
+ *   performed.
  *
  ****************************************************************************/
 
-static int pca9635pw_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int pca9635pw_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct pca9635pw_dev_s *priv = inode->i_private;
@@ -286,16 +291,16 @@ static int pca9635pw_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      /* Set the brightness of an individual LED. Arg: pca9635pw_led_brightness_s
-       * pointer.
+      /* Set the brightness of an individual LED.
+       * Arg: pca9635pw_brightness_s pointer.
        */
 
     case PWMIOC_SETLED_BRIGHTNESS:
       {
         /* Retrieve the information handed over as argument for this ioctl */
 
-        FAR const struct pca9635pw_setled_brightness_arg_s *ptr =
-          (FAR const struct pca9635pw_setled_brightness_arg_s *)((uintptr_t)arg);
+        FAR const struct pca9635pw_brightness_s *ptr =
+          (FAR const struct pca9635pw_brightness_s *)((uintptr_t)arg);
 
         DEBUGASSERT(ptr != NULL);
 
@@ -363,7 +368,7 @@ int pca9635pw_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Register the character driver */
 
-  int const ret = register_driver(devpath, &g_pca9635pw_fileops, 666, priv);
+  int const ret = register_driver(devpath, &g_pca9635pw_fileops, 0666, priv);
   if (ret != OK)
     {
       lcderr("ERROR: Failed to register driver: %d\n", ret);

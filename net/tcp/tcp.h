@@ -79,6 +79,7 @@
 #  define TCP_WBPKTLEN(wrb)          ((wrb)->wb_iob->io_pktlen)
 #  define TCP_WBSENT(wrb)            ((wrb)->wb_sent)
 #  define TCP_WBNRTX(wrb)            ((wrb)->wb_nrtx)
+#  define TCP_WBNACK(wrb)            ((wrb)->wb_nack)
 #  define TCP_WBIOB(wrb)             ((wrb)->wb_iob)
 #  define TCP_WBCOPYOUT(wrb,dest,n)  (iob_copyout(dest,(wrb)->wb_iob,(n),0))
 #  define TCP_WBCOPYIN(wrb,src,n) \
@@ -191,7 +192,9 @@ struct tcp_conn_s
   uint16_t rport;         /* The remoteTCP port, in network byte order */
   uint16_t mss;           /* Current maximum segment size for the
                            * connection */
-  uint16_t winsize;       /* Current window size of the connection */
+  uint16_t snd_wnd;       /* Sequence and acknowledgement numbers of last
+                           * window update */
+  uint16_t rcv_wnd;       /* Receiver window available */
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   uint32_t tx_unacked;    /* Number bytes sent but not yet ACKed */
 #else
@@ -255,8 +258,8 @@ struct tcp_conn_s
   clock_t    keeptime;    /* Last time that the TCP socket was known to be
                            * alive (ACK or data received) OR time that the
                            * last probe was sent. */
-  uint16_t   keepidle;    /* Elapsed idle time before first probe sent (dsec) */
-  uint16_t   keepintvl;   /* Interval between probes (dsec) */
+  uint32_t   keepidle;    /* Elapsed idle time before first probe sent (dsec) */
+  uint32_t   keepintvl;   /* Interval between probes (dsec) */
   bool       keepalive;   /* True: KeepAlive enabled; false: disabled */
   uint8_t    keepcnt;     /* Number of retries before the socket is closed */
   uint8_t    keepretries; /* Number of retries attempted */
@@ -269,6 +272,12 @@ struct tcp_conn_s
    */
 
   FAR struct devif_callback_s *connevents;
+
+  /* Receiver callback to indicate that the data has been consumed and that
+   * an ACK should be send.
+   */
+
+  FAR struct devif_callback_s *rcv_ackcb;
 
   /* accept() is called when the TCP logic has created a connection
    *
@@ -299,6 +308,7 @@ struct tcp_wrbuffer_s
   uint16_t   wb_sent;      /* Number of bytes sent from the I/O buffer chain */
   uint8_t    wb_nrtx;      /* The number of retransmissions for the last
                             * segment sent */
+  uint8_t    wb_nack;      /* The number of ack count */
   struct iob_s *wb_iob;    /* Head of the I/O buffer chain */
 };
 #endif
@@ -1398,7 +1408,7 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
  *   The 'level' argument specifies the protocol level of the option. To
  *   retrieve options at the socket level, specify the level argument as
  *   SOL_SOCKET; to retrieve options at the TCP-protocol level, the level
- *   argument is SOL_CP.
+ *   argument is SOL_TCP.
  *
  *   See <sys/socket.h> a complete list of values for the socket-level
  *   'option' argument.  Protocol-specific options are are protocol specific
@@ -1430,14 +1440,16 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
  *   Calculate the TCP receive window for the specified device.
  *
  * Input Parameters:
- *   dev - The device whose TCP receive window will be updated.
+ *   dev  - The device whose TCP receive window will be updated.
+ *   conn - The TCP connection structure holding connection information.
  *
  * Returned Value:
  *   The value of the TCP receive window to use.
  *
  ****************************************************************************/
 
-uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev);
+uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
+                            FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
  * Name: psock_tcp_cansend

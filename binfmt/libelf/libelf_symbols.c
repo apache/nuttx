@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -323,9 +324,11 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
          * entry
          */
 
-        binfo("SHN_UNDEF: name=%s %08x+%08x=%08x\n",
-              loadinfo->iobuffer, sym->st_value, symbol->sym_value,
-              sym->st_value + symbol->sym_value);
+        binfo("SHN_UNDEF: name=%s "
+              "%08" PRIxPTR "+%08" PRIxPTR "=%08" PRIxPTR "\n",
+              loadinfo->iobuffer, (uintptr_t)sym->st_value,
+              (uintptr_t)symbol->sym_value,
+              (uintptr_t)(sym->st_value + symbol->sym_value));
 
         sym->st_value += ((uintptr_t)symbol->sym_value);
       }
@@ -335,8 +338,9 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
       {
         secbase = loadinfo->shdr[sym->st_shndx].sh_addr;
 
-        binfo("Other: %08x+%08x=%08x\n",
-              sym->st_value, secbase, sym->st_value + secbase);
+        binfo("Other: %08" PRIxPTR "+%08" PRIxPTR "=%08" PRIxPTR "\n",
+              (uintptr_t)sym->st_value, secbase,
+              (uintptr_t)(sym->st_value + secbase));
 
         sym->st_value += secbase;
       }

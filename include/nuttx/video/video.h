@@ -40,8 +40,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdint.h>
+#include <nuttx/compiler.h>
 #include <sys/ioctl.h>
+#include <stdint.h>
+
 #include "video_controls.h"
 
 #ifdef __cplusplus
@@ -220,6 +222,7 @@ extern "C"
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* Buffer type.
  *  Currently, support only V4L2_BUF_TYPE_VIDEO_CAPTURE and
  *  V4L2_BUF_TYPE_STILL_CAPTURE.
@@ -388,7 +391,7 @@ struct v4l2_frmsizeenum
   uint32_t  pixel_format;       /* Pixel format */
   uint32_t  type;               /* Frame size type the device supports. */
   union
-  {                             /* Frame size */
+  {                                        /* Frame size */
     struct v4l2_frmsize_discrete discrete; /* Use in type =
                                             *    V4L2_FRMSIZE_TYPE_DISCRETE
                                             *    case
@@ -403,7 +406,7 @@ struct v4l2_frmsizeenum
   uint32_t  subimg_type;         /* Frame size type of subimage. */
 
   union
-    {                            /* Frame size of subimage */
+    {                                      /* Frame size of subimage */
     struct v4l2_frmsize_discrete discrete; /* Use in subimg_type =
                                             *    V4L2_FRMSIZE_TYPE_DISCRETE
                                             *    case
@@ -568,7 +571,7 @@ struct v4l2_query_ext_ctrl
   uint32_t   dims[V4L2_CTRL_MAX_DIMS]; /* Dimensions */
 };
 
-struct v4l2_querymenu
+begin_packed_struct struct v4l2_querymenu
 {
   uint16_t   ctrl_class;    /* camera control class */
   uint16_t   id;            /* camera control id    */
@@ -578,7 +581,7 @@ struct v4l2_querymenu
     char    name[32];       /* name of menu  */
     int64_t value;          /* value of menu */
   };
-} __attribute__ ((packed));
+} end_packed_struct;
 
 struct v4l2_control
 {
@@ -590,7 +593,7 @@ struct v4l2_control
  *  ioctl(VIDIOC_G_EXT_CTRLS / VIDIOC_S_EXT_CTRLS)
  */
 
-struct v4l2_ext_control
+begin_packed_struct struct v4l2_ext_control
 {
   uint16_t   id;       /* camera control id */
   uint16_t   size;     /* size of value(not use) */
@@ -604,7 +607,7 @@ struct v4l2_ext_control
     uint32_t *p_u32;   /* QUERY_EXT_CTRL type = U32 */
     void     *ptr;
   };
-} __attribute__ ((packed));
+} end_packed_struct;
 
 struct v4l2_ext_controls
 {
@@ -618,7 +621,9 @@ struct v4l2_ext_controls
   struct v4l2_ext_control *controls;   /* each control information     */
 };
 
-FAR const struct video_devops_s *g_video_devops;
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Function Prototypes
@@ -632,7 +637,8 @@ FAR const struct video_devops_s *g_video_devops;
  *  negative value is returned.
  */
 
-int video_initialize(FAR const char *devpath);
+int video_initialize(FAR const char *devpath,
+                     FAR const struct video_devops_s *devops);
 
 /* Uninitialize video driver.
  *

@@ -60,18 +60,19 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The Sure DB_DP11215 PIC32 Storage Demo Board has three buttons.
  *
- * SW1  (SW_UP, left arrow)          RB3 Pulled high, Grounded/low when depressed
- * SW2  (SW_DOWN, down/right arrow)  RB2 Pulled high, Grounded/low when depressed
- * SW3  (SW_OK, right arrow)         RB4 Pulled high, Grounded/low when depressed
+ * SW1  (SW_UP, left arrow)      RB3 Pulled high, Grounded/low when depressed
+ * SW2  (SW_DOWN, down arrow)    RB2 Pulled high, Grounded/low when depressed
+ * SW3  (SW_OK, right arrow)     RB4 Pulled high, Grounded/low when depressed
  *
- * The Sure DB-DP11212 PIC32 General Purpose Demo Board also has three buttons,
- * but these are connected differently:
+ * The Sure DB-DP11212 PIC32 General Purpose Demo Board also has three
+ * buttons, but these are connected differently:
  *
- * SW2-1                             RF0  Pulled high, Grounded/low when depressed
- * SW3-1                             RF1  Pulled high, Grounded/low when depressed
- * SW5-1                             RD6  Pulled high, Grounded/low when depressed
+ * SW2-1                         RF0 Pulled high, Grounded/low when depressed
+ * SW3-1                         RF1 Pulled high, Grounded/low when depressed
+ * SW5-1                         RD6 Pulled high, Grounded/low when depressed
  *
  * Internal pull-ups are not required since the LEDs are pull-up externally.
  * Change notification interrupts are not *automatically* enabled.  Change
@@ -131,13 +132,13 @@ static const uint8_t g_buttoncn[NUM_BUTTONS] =
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
  *   interrupt handlers.
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -151,6 +152,7 @@ void board_button_initialize(void)
   /* Change AN2/AN3/AN4 to digital */
 
   putreg32(0xffff, PIC32MX_ADC_CFG);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

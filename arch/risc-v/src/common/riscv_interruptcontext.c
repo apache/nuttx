@@ -67,7 +67,17 @@
 bool up_interrupt_context(void)
 {
 #ifdef CONFIG_ARCH_RV64GC
-  return CURRENT_REGS != NULL;
+#ifdef CONFIG_SMP
+  irqstate_t flags = up_irq_save();
+#endif
+
+  bool ret = CURRENT_REGS != NULL;
+
+#ifdef CONFIG_SMP
+  up_irq_restore(flags);
+#endif
+
+  return ret;
 #else
   return g_current_regs != NULL;
 #endif

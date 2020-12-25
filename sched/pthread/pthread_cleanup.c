@@ -1,35 +1,20 @@
 /****************************************************************************
  * sched/pthread/pthread_cleanup.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -57,8 +42,8 @@
  * Name: pthread_cleanup_pop_tcb
  *
  * Description:
- *   The pthread_cleanup_pop_tcb() function will remove the routine at the top
- *   of the calling thread's cancellation cleanup stack and optionally
+ *   The pthread_cleanup_pop_tcb() function will remove the routine at the
+ *   top of the calling thread's cancellation cleanup stack and optionally
  *   invoke it (if 'execute' is non-zero).
  *
  * Input Parameters:
@@ -72,7 +57,7 @@
  *
  ****************************************************************************/
 
-static void pthread_cleanup_pop_tcb(FAR struct pthread_tcb_s *tcb, int execute)
+static void pthread_cleanup_pop_tcb(FAR struct tcb_s *tcb, int execute)
 {
   if (tcb->tos > 0)
     {
@@ -124,7 +109,7 @@ static void pthread_cleanup_pop_tcb(FAR struct pthread_tcb_s *tcb, int execute)
  *
  *   - The thread exits (that is, calls pthread_exit()).
  *   - The thread acts upon a cancellation request.
- *   - The thread calls pthread_cleanup_pop() with a non-zero execute argument.
+ *   - The thread calls pthread_cleanup_pop() with non-zero execute argument.
  *
  * Input Parameters:
  *   routine - The cleanup routine to be pushed on the cleanup stack.
@@ -138,9 +123,7 @@ static void pthread_cleanup_pop_tcb(FAR struct pthread_tcb_s *tcb, int execute)
 
 void pthread_cleanup_pop(int execute)
 {
-  FAR struct pthread_tcb_s *tcb = (FAR struct pthread_tcb_s *)this_task();
-
-  /* We don't assert if called from a non-pthread; we just don't do anything */
+  FAR struct tcb_s *tcb = this_task();
 
   DEBUGASSERT(tcb != NULL);
 
@@ -150,7 +133,7 @@ void pthread_cleanup_pop(int execute)
    */
 
   sched_lock();
-  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       pthread_cleanup_pop_tcb(tcb, execute);
     }
@@ -160,9 +143,7 @@ void pthread_cleanup_pop(int execute)
 
 void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
 {
-  FAR struct pthread_tcb_s *tcb = (FAR struct pthread_tcb_s *)this_task();
-
-  /* We don't assert if called from a non-pthread; we just don't do anything */
+  FAR struct tcb_s *tcb = this_task();
 
   DEBUGASSERT(tcb != NULL);
   DEBUGASSERT(tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
@@ -173,7 +154,7 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
    */
 
   sched_lock();
-  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD &&
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL &&
       tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE)
     {
       unsigned int ndx = tcb->tos;
@@ -191,8 +172,8 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
  *
  * Description:
  *   The pthread_cleanup_popall() is an internal function that will pop and
- *   execute all clean-up functions.  This function is only called from within
- *   the pthread_exit() and pthread_cancellation() logic
+ *   execute all clean-up functions.  This function is only called from
+ *   within the pthread_exit() and pthread_cancellation() logic
  *
  * Input Parameters:
  *   tcb - The TCB of the pthread that is exiting or being canceled.
@@ -202,25 +183,29 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
  *
  ****************************************************************************/
 
-void pthread_cleanup_popall(FAR struct pthread_tcb_s *tcb)
+void pthread_cleanup_popall(FAR struct tcb_s *tcb)
 {
   DEBUGASSERT(tcb != NULL);
-  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD);
 
-  /* Pop and execute each cleanup routine/
-   *
-   * sched_lock() should provide sufficient protection.  We only need to
-   * have this TCB stationary; the pthread cleanup stack should never be
-   * modified by interrupt level logic.
-   */
+  /* Kernel threads do not support pthread APIs */
 
-  sched_lock();
-  while (tcb->tos > 0)
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
-      pthread_cleanup_pop_tcb(tcb, 1);
-    }
+      /* Pop and execute each cleanup routine/
+       *
+       * sched_lock() should provide sufficient protection.  We only need to
+       * have this TCB stationary; the pthread cleanup stack should never be
+       * modified by interrupt level logic.
+       */
 
-  sched_unlock();
+      sched_lock();
+      while (tcb->tos > 0)
+        {
+          pthread_cleanup_pop_tcb(tcb, 1);
+        }
+
+      sched_unlock();
+    }
 }
 
 #endif /* CONFIG_PTHREAD_CLEANUP */

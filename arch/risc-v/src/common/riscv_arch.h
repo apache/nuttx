@@ -61,6 +61,7 @@
 # define putreg16(v,a)        (*(volatile uint16_t *)(a) = (v))
 # define getreg32(a)          (*(volatile uint32_t *)(a))
 # define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
+# define putreg64(v,a)        (*(volatile uint64_t *)(a) = (v))
 
 /****************************************************************************
  * Public Function Prototypes

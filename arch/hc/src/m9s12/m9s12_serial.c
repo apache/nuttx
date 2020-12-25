@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/hc/src/m9s12/m9s12_serial.c
  *
- *   Copyright (C) 2009, 2011-2012, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2016-2017 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -125,7 +126,7 @@ static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
 static int  up_interrupt(int irq, void *context, void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
 static void up_send(struct uart_dev_s *dev, int ch);
@@ -242,7 +243,8 @@ static inline uint8_t up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint8_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset,
+                                uint8_t value)
 {
   putreg8(value, priv->uartbase + offset);
 }
@@ -332,7 +334,7 @@ static inline void up_waittxnotfull(struct up_dev_s *priv)
 
 static int up_setup(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 #ifndef CONFIG_SUPPRESS_SCI_CONFIG
   uint8_t cr1;
 #endif
@@ -367,7 +369,7 @@ static int up_setup(struct uart_dev_s *dev)
       default:
         break;
       case 1:
-        cr1 |= SCI_CR1_PE|SCI_CR1_PT;
+        cr1 |= SCI_CR1_PE | SCI_CR1_PT;
         break;
       case 2:
         cr1 |= SCI_CR1_PE;
@@ -382,7 +384,7 @@ static int up_setup(struct uart_dev_s *dev)
    */
 
   priv->im = 0;
-  up_serialout(priv, HCS12_SCI_CR2_OFFSET, (SCI_CR2_TE|SCI_CR2_RE));
+  up_serialout(priv, HCS12_SCI_CR2_OFFSET, (SCI_CR2_TE | SCI_CR2_RE));
   return OK;
 }
 
@@ -396,7 +398,7 @@ static int up_setup(struct uart_dev_s *dev)
 
 static void up_shutdown(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_disablesciint(priv, NULL);
 }
 
@@ -409,15 +411,16 @@ static void up_shutdown(struct uart_dev_s *dev)
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
 static int up_attach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int ret;
 
   /* Attach and enable the IRQ */
@@ -425,13 +428,14 @@ static int up_attach(struct uart_dev_s *dev)
   ret = irq_attach(priv->irq, up_interrupt, dev);
   if (ret == OK)
     {
-       /* Enable the Rx interrupt (the TX interrupt is still disabled
-        * until we have something to send).
-        */
+      /* Enable the Rx interrupt (the TX interrupt is still disabled
+       * until we have something to send).
+       */
 
-       priv->im = SCI_CR2_RIE;
-       up_setsciint(priv);
+      priv->im = SCI_CR2_RIE;
+      up_setsciint(priv);
     }
+
   return ret;
 }
 
@@ -447,7 +451,7 @@ static int up_attach(struct uart_dev_s *dev)
 
 static void up_detach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_disablesciint(priv, NULL);
   irq_detach(priv->irq);
 }
@@ -473,7 +477,7 @@ static int up_interrupt(int irq, void *context, void *arg)
   bool               handled;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
-  priv = (struct up_dev_s*)dev->priv;
+  priv = (struct up_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
@@ -492,23 +496,24 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       if ((mis & SCI_SR1_RDRF) != 0)
         {
-           /* Rx buffer not empty ... process incoming bytes */
+          /* Rx buffer not empty ... process incoming bytes */
 
-           uart_recvchars(dev);
-           handled = true;
+          uart_recvchars(dev);
+          handled = true;
         }
 
       /* Handle outgoing, transmit bytes */
 
       if ((mis & SCI_SR1_TDRE) != 0)
         {
-           /* Tx FIFO not full ... process outgoing bytes */
+          /* Tx FIFO not full ... process outgoing bytes */
 
-           uart_xmitchars(dev);
-           handled = true;
+          uart_xmitchars(dev);
+          handled = true;
         }
     }
-    return OK;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -547,9 +552,9 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int up_receive(struct uart_dev_s *dev, uint32_t *status)
+static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int rxd;
 
   /* Return the error indications */
@@ -580,7 +585,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   if (enable)
     {
@@ -610,7 +615,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return ((up_serialin(priv, HCS12_SCI_SR1_OFFSET) & SCI_SR1_RDRF) != 0);
 }
 
@@ -624,7 +629,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 
 static void up_send(struct uart_dev_s *dev, int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint8_t regval;
 
   if (priv->bits == 9)
@@ -638,6 +643,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
         {
           regval |= SCI_DRH_T8;
         }
+
       up_serialout(priv, HCS12_SCI_DRH_OFFSET, regval);
     }
 
@@ -654,7 +660,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
 
 static void up_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
   flags = enter_critical_section();
@@ -692,7 +698,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
 static bool up_txready(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return ((up_serialin(priv, HCS12_SCI_SR1_OFFSET) & SCI_SR1_TDRE) != 0);
 }
 
@@ -706,7 +712,7 @@ static bool up_txready(struct uart_dev_s *dev)
 
 static bool up_txempty(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return ((up_serialin(priv, HCS12_SCI_SR1_OFFSET) & SCI_SR1_TC) != 0);
 }
 
@@ -779,7 +785,7 @@ void up_serialinit(void)
 int up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
-  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
+  struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint32_t im;
 
   up_disablesciint(priv, &im);

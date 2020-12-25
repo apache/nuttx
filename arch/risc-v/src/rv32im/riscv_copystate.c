@@ -81,5 +81,9 @@ void up_copystate(uint32_t *dest, uint32_t *src)
         {
           *dest++ = *src++;
         }
+
+#ifdef CONFIG_ARCH_FPU
+      up_savefpu(dest);
+#endif
     }
 }

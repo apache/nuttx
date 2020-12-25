@@ -45,6 +45,8 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <inttypes.h>
+#include <stdint.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
@@ -99,16 +101,16 @@ static inline void igmp_sched_send(FAR struct net_driver_s *dev,
   if (group->msgid == IGMPv2_MEMBERSHIP_REPORT)
     {
       dest = &group->grpaddr;
-      ninfo("Send IGMPv2_MEMBERSHIP_REPORT, dest=%08x flags=%02x\n",
-             *dest, group->flags);
+      ninfo("Send IGMPv2_MEMBERSHIP_REPORT, dest=%08" PRIx32 " flags=%02x\n",
+             (uint32_t)*dest, group->flags);
       SET_LASTREPORT(group->flags); /* Remember we were the last to report */
     }
   else
     {
       DEBUGASSERT(group->msgid == IGMP_LEAVE_GROUP);
       dest = &g_ipv4_allrouters;
-      ninfo("Send IGMP_LEAVE_GROUP, dest=%08x flags=%02x\n",
-             *dest, group->flags);
+      ninfo("Send IGMP_LEAVE_GROUP, dest=%08" PRIx32 " flags=%02x\n",
+             (uint32_t)*dest, group->flags);
     }
 
   /* Send the message */

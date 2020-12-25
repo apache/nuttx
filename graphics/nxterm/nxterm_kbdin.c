@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <fcntl.h>
 #include <sched.h>
 #include <assert.h>
@@ -136,8 +137,8 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
               break;
             }
 
-          /* If the driver was opened with O_NONBLOCK option, then don't wait.
-           * Just return EGAIN.
+          /* If the driver was opened with O_NONBLOCK option, then
+           * don't wait. Just return EGAIN.
            */
 
           if (filep->f_oflags & O_NONBLOCK)
@@ -147,8 +148,9 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
             }
 
           /* Otherwise, wait for something to be written to the circular
-           * buffer. Increment the number of waiters so that the nxterm_write()
-           * will not that it needs to post the semaphore to wake us up.
+           * buffer. Increment the number of waiters so that the
+           * nxterm_write() will not that it needs to post the semaphore
+           * to wake us up.
            */
 
           sched_lock();
@@ -162,8 +164,8 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
           ret = nxsem_wait(&priv->waitsem);
 
-          /* Pre-emption will be disabled when we return.  So the decrementing
-           * nwaiters here is safe.
+          /* Pre-emption will be disabled when we return.  So the
+           * decrementing nwaiters here is safe.
            */
 
           priv->nwaiters--;
@@ -313,15 +315,14 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
       /* Check if the receive buffer is empty */
 
       if (priv->head != priv->tail)
-       {
-         eventset |= POLLIN;
-       }
+        {
+          eventset |= POLLIN;
+        }
 
       if (eventset)
         {
           nxterm_pollnotify(priv, eventset);
         }
-
     }
   else if (fds->priv)
     {
@@ -384,7 +385,7 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
   char ch;
   int ret;
 
-  ginfo("buflen=%d\n");
+  ginfo("buflen=%" PRId8 "\n", buflen);
   DEBUGASSERT(handle);
 
   /* Get the reference to the driver structure from the handle */
@@ -429,7 +430,9 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
 
       if (nexthead == priv->tail)
         {
-          /* Yes... Return an indication that nothing was saved in the buffer. */
+          /* Yes... Return an indication that nothing was saved in
+           * the buffer.
+           */
 
           gerr("ERROR: Keyboard data overrun\n");
           break;
@@ -450,16 +453,20 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
       /* Are there threads waiting for read data? */
 
       sched_lock();
-      for (i = 0; i < priv->nwaiters; i++)
-        {
-          /* Yes.. Notify all of the waiting readers that more data is available */
-
-          nxsem_post(&priv->waitsem);
-        }
 
       /* Notify all poll/select waiters that they can read from the FIFO */
 
       nxterm_pollnotify(priv, POLLIN);
+
+      for (i = 0; i < priv->nwaiters; i++)
+        {
+          /* Yes.. Notify all of the waiting readers that more data is
+           * available
+           */
+
+          nxsem_post(&priv->waitsem);
+        }
+
       sched_unlock();
     }
 

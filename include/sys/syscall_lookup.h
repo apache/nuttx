@@ -28,6 +28,10 @@ SYSCALL_LOOKUP1(_exit,                     1)
 SYSCALL_LOOKUP(exit,                       1)
 SYSCALL_LOOKUP(getpid,                     0)
 
+#ifdef CONFIG_SCHED_HAVE_PARENT
+  SYSCALL_LOOKUP(getppid,                  0)
+#endif
+
 SYSCALL_LOOKUP(sched_getparam,             2)
 SYSCALL_LOOKUP(sched_getscheduler,         1)
 SYSCALL_LOOKUP(sched_lock,                 0)
@@ -45,7 +49,7 @@ SYSCALL_LOOKUP(nxsched_get_stackinfo,      2)
   SYSCALL_LOOKUP(sched_setaffinity,        3)
 #endif
 
-SYSCALL_LOOKUP(uname,                      1)
+SYSCALL_LOOKUP(gethostname,                2)
 SYSCALL_LOOKUP(sethostname,                2)
 
 /* User identity */
@@ -61,6 +65,7 @@ SYSCALL_LOOKUP(sethostname,                2)
 
 SYSCALL_LOOKUP(sem_destroy,                1)
 SYSCALL_LOOKUP(sem_post,                   1)
+SYSCALL_LOOKUP(sem_clockwait,              3)
 SYSCALL_LOOKUP(sem_timedwait,              2)
 SYSCALL_LOOKUP(sem_trywait,                1)
 SYSCALL_LOOKUP(sem_wait,                   1)
@@ -207,6 +212,9 @@ SYSCALL_LOOKUP(pwrite,                     4)
   SYSCALL_LOOKUP(select,                   5)
   SYSCALL_LOOKUP(ppoll,                    4)
   SYSCALL_LOOKUP(pselect,                  6)
+#ifdef CONFIG_EVENT_FD
+  SYSCALL_LOOKUP(eventfd,                  2)
+#endif
 #ifdef CONFIG_NETDEV_IFINDEX
   SYSCALL_LOOKUP(if_indextoname,           2)
   SYSCALL_LOOKUP(if_nametoindex,           1)
@@ -235,6 +243,7 @@ SYSCALL_LOOKUP(readdir,                    1)
 SYSCALL_LOOKUP(rewinddir,                  1)
 SYSCALL_LOOKUP(seekdir,                    2)
 SYSCALL_LOOKUP(stat,                       2)
+SYSCALL_LOOKUP(lstat,                      2)
 SYSCALL_LOOKUP(fstat,                      2)
 SYSCALL_LOOKUP(statfs,                     2)
 SYSCALL_LOOKUP(fstatfs,                    2)
@@ -245,16 +254,16 @@ SYSCALL_LOOKUP(telldir,                    1)
 #endif
 
 #if defined(CONFIG_PSEUDOFS_SOFTLINKS)
-  SYSCALL_LOOKUP(link,                     2)
+  SYSCALL_LOOKUP(symlink,                  2)
   SYSCALL_LOOKUP(readlink,                 3)
 #endif
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
-  SYSCALL_LOOKUP(nx_pipe,                  2)
+  SYSCALL_LOOKUP(nx_pipe,                  3)
   SYSCALL_LOOKUP(nx_mkfifo,                3)
 #endif
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
   SYSCALL_LOOKUP(fs_fdopen,                4)
   SYSCALL_LOOKUP(nxsched_get_streams,      0)
 #endif
@@ -314,7 +323,7 @@ SYSCALL_LOOKUP(telldir,                    1)
   SYSCALL_LOOKUP(pthread_setaffinity_np,   3)
   SYSCALL_LOOKUP(pthread_getaffinity_np,   3)
 #endif
-  SYSCALL_LOOKUP(pthread_cond_timedwait,   3)
+  SYSCALL_LOOKUP(pthread_cond_clockwait,   4)
   SYSCALL_LOOKUP(pthread_kill,             2)
   SYSCALL_LOOKUP(pthread_sigmask,          3)
 #ifdef CONFIG_PTHREAD_CLEANUP
@@ -377,5 +386,5 @@ SYSCALL_LOOKUP(telldir,                    1)
  */
 
 #ifdef CONFIG_CRYPTO_RANDOM_POOL
-  SYSCALL_LOOKUP(getrandom,                2)
+  SYSCALL_LOOKUP(arc4random_buf,           2)
 #endif

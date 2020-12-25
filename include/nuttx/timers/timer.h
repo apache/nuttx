@@ -56,6 +56,7 @@
  ****************************************************************************/
 
 /* IOCTL Commands ***********************************************************/
+
 /* The timer driver uses a standard character driver framework.  However,
  * since the timer driver is a device control interface and not a data
  * transfer interface, the majority of the functionality is implemented in
@@ -68,7 +69,8 @@
  * TCIOC_STOP         - Stop the timer
  *                      Argument: Ignored
  * TCIOC_GETSTATUS    - Get the status of the timer.
- *                      Argument:  A writeable pointer to struct timer_status_s.
+ *                      Argument:  A writeable pointer to struct
+ *                      timer_status_s.
  * TCIOC_SETTIMEOUT   - Reset the timer timeout to this value
  *                      Argument: A 32-bit timeout value in microseconds.
  * TCIOC_NOTIFICATION - Set up to notify an application via a signal when
@@ -95,6 +97,7 @@
 #define TCIOC_MAXTIMEOUT   _TCIOC(0x0006)
 
 /* Bit Settings *************************************************************/
+
 /* Bit settings for the struct timer_status_s flags field */
 
 #define TCFLAGS_ACTIVE     (1 << 0) /* 1=The timer is running */
@@ -138,7 +141,8 @@ struct timer_notify_s
 struct timer_lowerhalf_s;
 struct timer_ops_s
 {
-  /* Required methods ********************************************************/
+  /* Required methods *******************************************************/
+
   /* Start the timer, resetting the time to the current timeout */
 
   CODE int (*start)(FAR struct timer_lowerhalf_s *lower);
@@ -214,6 +218,7 @@ extern "C"
 /****************************************************************************
  * "Upper-Half" Timer Driver Interfaces
  ****************************************************************************/
+
 /****************************************************************************
  * Name: timer_register
  *
@@ -230,7 +235,7 @@ extern "C"
  *   initialization.
  *
  * Input Parameters:
- *   dev path - The full path to the driver to be registers in the NuttX
+ *   dev path - The full path to the driver to be registered in the NuttX
  *     pseudo-filesystem.  The recommended convention is to name all timer
  *     drivers as "/dev/timer0", "/dev/timer1", etc.  where the driver
  *     path differs only in the "minor" number at the end of the device name.
@@ -287,9 +292,7 @@ void timer_unregister(FAR void *handle);
  *
  ****************************************************************************/
 
-#ifdef __KERNEL__
 int timer_setcallback(FAR void *handle, tccb_t callback, FAR void *arg);
-#endif
 
 /****************************************************************************
  * Platform-Independent "Lower-Half" Timer Driver Interfaces

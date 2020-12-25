@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_qencoder.c
  *
  *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -62,11 +62,11 @@
 
 #ifdef CONFIG_SENSORS_QENCODER
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Timers ***************************************************************************/
+/* Timers *******************************************************************/
 
 #undef HAVE_32BIT_TIMERS
 #undef HAVE_16BIT_TIMERS
@@ -77,7 +77,7 @@
 
 #  define HAVE_16BIT_TIMERS     1
 
-   /* The width in bits of each timer */
+  /* The width in bits of each timer */
 
 #  define TIM1_BITWIDTH         16
 #  define TIM2_BITWIDTH         16
@@ -90,13 +90,13 @@
 
 #elif defined(CONFIG_STM32_STM32F30XX)
 
-   /* If TIM5 is enabled, then we have 32-bit timers */
+  /* If TIM5 is enabled, then we have 32-bit timers */
 
 #  if defined(CONFIG_STM32_TIM5_QE)
 #    define HAVE_32BIT_TIMERS   1
 #  endif
 
-   /* If TIM1,2,3,4, or 8 are enabled, then we have 16-bit timers */
+  /* If TIM1,2,3,4, or 8 are enabled, then we have 16-bit timers */
 
 #  if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM2_QE) || \
       defined(CONFIG_STM32_TIM3_QE) || defined(CONFIG_STM32_TIM4_QE) || \
@@ -104,7 +104,7 @@
 #    define HAVE_16BIT_TIMERS   1
 #  endif
 
-   /* The width in bits of each timer */
+  /* The width in bits of each timer */
 
 #  define TIM1_BITWIDTH         16
 #  define TIM2_BITWIDTH         16
@@ -117,20 +117,20 @@
 
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 
-   /* If TIM2 or TIM5 are enabled, then we have 32-bit timers */
+  /* If TIM2 or TIM5 are enabled, then we have 32-bit timers */
 
 #  if defined(CONFIG_STM32_TIM2_QE) || defined(CONFIG_STM32_TIM5_QE)
 #    define HAVE_32BIT_TIMERS   1
 #  endif
 
-   /* If TIM1,3,4, or 8 are enabled, then we have 16-bit timers */
+  /* If TIM1,3,4, or 8 are enabled, then we have 16-bit timers */
 
 #  if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM3_QE) || \
       defined(CONFIG_STM32_TIM4_QE) || defined(CONFIG_STM32_TIM8_QE)
 #    define HAVE_16BIT_TIMERS   1
 #  endif
 
-   /* The width in bits of each timer */
+  /* The width in bits of each timer */
 
 #  define TIM1_BITWIDTH         16
 #  define TIM2_BITWIDTH         32
@@ -147,7 +147,7 @@
 #  define HAVE_MIXEDWIDTH_TIMERS 1
 #endif
 
-/* Input filter *********************************************************************/
+/* Input filter *************************************************************/
 
 #ifdef CONFIG_STM32_QENCODER_FILTER
 #  if defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS)
@@ -218,8 +218,11 @@
 #  error "Unrecognized STM32 chip"
 #endif
 
-/* Debug ****************************************************************************/
-/* Non-standard debug that may be enabled just for testing the quadrature encoder */
+/* Debug ********************************************************************/
+
+/* Non-standard debug that may be enabled just for testing the quadrature
+ * encoder
+ */
 
 #ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_SENSORS
@@ -235,9 +238,9 @@
 #  define qe_dumpgpio(p,m)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Constant configuration structure that is retained in FLASH */
 
@@ -273,7 +276,7 @@ struct stm32_lowerhalf_s
 
   /* STM32 driver-specific fields: */
 
-  FAR const struct stm32_qeconfig_s *config; /* static onfiguration */
+  FAR const struct stm32_qeconfig_s *config; /* static configuration */
 
   bool             inuse;    /* True: The lower-half driver is in-use */
 
@@ -282,18 +285,24 @@ struct stm32_lowerhalf_s
 #endif
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Helper functions */
 
-static uint16_t stm32_getreg16(FAR struct stm32_lowerhalf_s *priv, int offset);
-static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset, uint16_t value);
-static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv, int offset);
-static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset, uint32_t value);
+static uint16_t stm32_getreg16(FAR struct stm32_lowerhalf_s *priv,
+                               int offset);
+static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset,
+                           uint16_t value);
+static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv,
+                               int offset);
+static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset,
+                           uint32_t value);
 
 #if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_INFO)
-static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv, FAR const char *msg);
+static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv,
+                           FAR const char *msg);
 #else
 #  define stm32_dumpregs(priv,msg)
 #endif
@@ -310,13 +319,16 @@ static int stm32_interrupt(int irq, FAR void *context, FAR void *arg);
 
 static int stm32_setup(FAR struct qe_lowerhalf_s *lower);
 static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower);
-static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos);
+static int stm32_position(FAR struct qe_lowerhalf_s *lower,
+                          FAR int32_t *pos);
 static int stm32_reset(FAR struct qe_lowerhalf_s *lower);
-static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd, unsigned long arg);
+static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
+                       unsigned long arg);
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
+
 /* The lower half callback structure */
 
 static const struct qe_ops_s g_qecallbacks =
@@ -480,11 +492,11 @@ static struct stm32_lowerhalf_s g_tim8lower =
 
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_getreg16
  *
  * Description:
@@ -497,14 +509,14 @@ static struct stm32_lowerhalf_s g_tim8lower =
  * Returned Value:
  *   The current contents of the specified register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint16_t stm32_getreg16(struct stm32_lowerhalf_s *priv, int offset)
 {
   return getreg16(priv->config->base + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_putreg16
  *
  * Description:
@@ -517,20 +529,21 @@ static uint16_t stm32_getreg16(struct stm32_lowerhalf_s *priv, int offset)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset, uint16_t value)
+static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset,
+                           uint16_t value)
 {
   putreg16(value, priv->config->base + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_getreg32
  *
  * Description:
- *   Read the value of a 32-bit timer register.  This applies only for the STM32 F4
- *   32-bit registers (CNT, ARR, CRR1-4) in the 32-bit timers TIM2-5 (but works OK
- *   with the 16-bit TIM1,8 and F1 registers as well).
+ *   Read the value of a 32-bit timer register.  This applies only for the
+ *   STM32 F4 32-bit registers (CNT, ARR, CRR1-4) in the 32-bit timers TIM2-5
+ *   (but works OK with the 16-bit TIM1,8 and F1 registers as well).
  *
  * Input Parameters:
  *   priv - A reference to the lower half status
@@ -539,20 +552,21 @@ static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset, uint1
  * Returned Value:
  *   The current contents of the specified register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv, int offset)
+static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv,
+                               int offset)
 {
   return getreg32(priv->config->base + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_putreg32
  *
  * Description:
- *   Write a value to a 32-bit timer register.  This applies only for the STM32 F4
- *   32-bit registers (CNT, ARR, CRR1-4) in the 32-bit timers TIM2-5 (but works OK
- *   with the 16-bit TIM1,8 and F1 registers).
+ *   Write a value to a 32-bit timer register.  This applies only for the
+ *   STM32 F4 32-bit registers (CNT, ARR, CRR1-4) in the 32-bit timers TIM2-5
+ *   (but works OK with the 16-bit TIM1,8 and F1 registers).
  *
  * Input Parameters:
  *   priv - A reference to the lower half status
@@ -561,9 +575,10 @@ static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv, int offset)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset, uint32_t value)
+static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset,
+                           uint32_t value)
 {
   putreg32(value, priv->config->base + offset);
 }
@@ -583,7 +598,8 @@ static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset, uint3
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_INFO)
-static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv, FAR const char *msg)
+static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv,
+                           FAR const char *msg)
 {
   sninfo("%s:\n", msg);
   sninfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
@@ -625,13 +641,13 @@ static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv, FAR const char *m
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_tim2lower
  *
  * Description:
  *   Map a timer number to a device structure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static FAR struct stm32_lowerhalf_s *stm32_tim2lower(int tim)
 {
@@ -666,14 +682,14 @@ static FAR struct stm32_lowerhalf_s *stm32_tim2lower(int tim)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_interrupt
  *
  * Description:
  *   Common timer interrupt handling.  NOTE: Only 16-bit timers require timer
  *   interrupts.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_16BIT_TIMERS
 static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
@@ -701,7 +717,7 @@ static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
     {
       priv->position -= (int32_t)0x00010000;
     }
-   else
+  else
     {
       priv->position += (int32_t)0x00010000;
     }
@@ -710,7 +726,7 @@ static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_setup
  *
  * Description:
@@ -718,7 +734,7 @@ static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
  *   should configure and initialize the device so that it is ready for use.
  *   The initial position value should be zero. *
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 {
@@ -741,8 +757,8 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   cr1 = stm32_getreg16(priv, STM32_GTIM_CR1_OFFSET);
 
-  /* Clear the direction bit (0=count up) and select the Counter Mode (0=Edge aligned)
-   * (Timers 2-5 and 1-8 only)
+  /* Clear the direction bit (0=count up) and select the Counter Mode
+   * (0=Edge aligned) (Timers 2-5 and 1-8 only)
    */
 
   cr1 &= ~(GTIM_CR1_DIR | GTIM_CR1_CMS_MASK);
@@ -805,6 +821,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   stm32_putreg32(priv, STM32_GTIM_SMCR_OFFSET, smcr);
 
   /* TI1 Channel Configuration */
+
   /* Disable the Channel 1: Reset the CC1E Bit */
 
   ccer  = stm32_getreg16(priv, STM32_GTIM_CCER_OFFSET);
@@ -840,6 +857,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   stm32_putreg32(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
 
   /* TI2 Channel Configuration */
+
   /* Disable the Channel 2: Reset the CC2E Bit */
 
   ccer  = stm32_getreg16(priv, STM32_GTIM_CCER_OFFSET);
@@ -944,15 +962,15 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_shutdown
  *
  * Description:
  *   This method is called when the driver is closed.  The lower half driver
- *   should stop data collection, free any resources, disable timer hardware, and
- *   put the system into the lowest possible power usage state *
+ *   should stop data collection, free any resources, disable timer hardware,
+ *   and put the system into the lowest possible power usage state
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 {
@@ -1060,13 +1078,13 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_position
  *
  * Description:
  *   Return the current position measurement.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
 {
@@ -1082,8 +1100,8 @@ static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
 
   do
     {
-      /* Don't let another task preempt us until we get the measurement.  The timer
-       * interrupt may still be processed
+      /* Don't let another task preempt us until we get the measurement.
+       * The timer interrupt may still be processed
        */
 
       sched_lock();
@@ -1105,13 +1123,13 @@ static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_reset
  *
  * Description:
  *   Reset the position measurement to zero.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_reset(FAR struct qe_lowerhalf_s *lower)
 {
@@ -1122,8 +1140,8 @@ static int stm32_reset(FAR struct qe_lowerhalf_s *lower)
   sninfo("Resetting position to zero\n");
   DEBUGASSERT(lower && priv->inuse);
 
-  /* Reset the timer and the counter.  Interrupts are disabled to make this atomic
-   * (if possible)
+  /* Reset the timer and the counter.  Interrupts are disabled to make this
+   * atomic (if possible)
    */
 
   flags = enter_critical_section();
@@ -1141,15 +1159,16 @@ static int stm32_reset(FAR struct qe_lowerhalf_s *lower)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_ioctl
  *
  * Description:
  *   Lower-half logic may support platform-specific ioctl commands
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd, unsigned long arg)
+static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
+                       unsigned long arg)
 {
   /* No ioctl commands supported */
 
@@ -1158,32 +1177,35 @@ static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd, unsigned long 
   return -ENOTTY;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_qeinitialize
  *
  * Description:
- *   Initialize a quadrature encoder interface.  This function must be called from
- *   board-specific logic.
+ *   Initialize a quadrature encoder interface.  This function must be
+ *   called from board-specific logic.
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/qe0"
- *   tim     - The timer number to used.  'tim' must be an element of {1,2,3,4,5,8}
+ *   tim     - The timer number to used.  'tim' must be an element of
+ *             {1,2,3,4,5,8}
  *
  * Returned Value:
  *   Zero on success; A negated errno value is returned on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_qeinitialize(FAR const char *devpath, int tim)
 {
   FAR struct stm32_lowerhalf_s *priv;
   int ret;
 
-  /* Find the pre-allocated timer state structure corresponding to this timer */
+  /* Find the pre-allocated timer state structure corresponding to this
+   * timer
+   */
 
   priv = stm32_tim2lower(tim);
   if (!priv)

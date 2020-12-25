@@ -44,7 +44,6 @@
 #include <nuttx/audio/i2s.h>
 
 #include "chip.h"
-#include "hardware/stm32_i2s.h"
 
 #ifndef __ASSEMBLY__
 
@@ -66,7 +65,7 @@ extern "C"
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_i2sdev_initialize
+ * Name: stm32_i2sbus_initialize
  *
  * Description:
  *   Initialize the selected I2S port
@@ -79,7 +78,7 @@ extern "C"
  *
  ************************************************************************************/
 
-FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port);
+FAR struct i2s_dev_s *stm32_i2sbus_initialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)

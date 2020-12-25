@@ -86,7 +86,9 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
       return -EBADF;
     }
 
-  /* Interrupts must be disabled in order to perform operations on socket structures */
+  /* Interrupts must be disabled in order to perform operations on socket
+   * structures
+   */
 
   net_lock();
   switch (cmd)
@@ -97,9 +99,9 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
          * or equal to the third argument, arg, taken as an integer of type
          * int. The new file descriptor shall refer to the same open file
          * description as the original file descriptor, and shall share any
-         * locks.  The FD_CLOEXEC flag associated  with the new file descriptor
-         * shall be cleared to keep the file open across calls to one of the
-         * exec functions.
+         * locks.  The FD_CLOEXEC flag associated  with the new file
+         * descriptor shall be cleared to keep the file open across calls
+         * to one of the exec functions.
          */
 
         {
@@ -146,6 +148,8 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
             {
               psock->s_flags &= ~_SF_CLOEXEC;
             }
+
+          ret = OK;
          }
          break;
 
@@ -183,12 +187,13 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
         break;
 
       case F_SETFL:
-        /* Set the file status flags, defined in <fcntl.h>, for the file description
-         * associated with fd from the corresponding  bits in the third argument,
-         * arg, taken as type int. Bits corresponding to the file access mode and
-         * the file creation flags, as defined in <fcntl.h>, that are set in arg
-         * will be ignored. If any bits in arg other than those mentioned here are
-         * changed by the application, the result is unspecified.
+        /* Set the file status flags, defined in <fcntl.h>, for the file
+         * description associated with fd from the corresponding bits in
+         * the third argument, arg, taken as type int. Bits corresponding
+         * to the file access mode and the file creation flags, as defined
+         * in <fcntl.h>, that are set in arg will be ignored. If any bits
+         * in arg other than those mentioned here are changed by the
+         * application, the result is unspecified.
          */
 
         {

@@ -49,8 +49,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxglib.h>
 #include <nuttx/video/fb.h>
 
 /****************************************************************************
@@ -173,7 +171,7 @@ static ssize_t fb_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* And transfer the data from the frame buffer */
 
-  memcpy(buffer, fb->fbmem, size);
+  memcpy(buffer, fb->fbmem + start, size);
   filep->f_pos += size;
   return size;
 }
@@ -217,7 +215,7 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
 
   /* And transfer the data into the frame buffer */
 
-  memcpy(fb->fbmem, buffer, size);
+  memcpy(fb->fbmem + start, buffer, size);
   filep->f_pos += size;
   return size;
 }
@@ -264,6 +262,7 @@ static off_t fb_seek(FAR struct file *filep, off_t offset, int whence)
       break;
 
     default:
+
       /* Return EINVAL if the whence argument is invalid */
 
       return -EINVAL;
@@ -271,15 +270,14 @@ static off_t fb_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Opengroup.org:
    *
-   *  "The lseek() function shall allow the file offset to be set beyond the end
-   *   of the existing data in the file. If data is later written at this point,
-   *   subsequent reads of data in the gap shall return bytes with the value 0
-   *   until data is actually written into the gap."
+   *  "The lseek() function shall allow the file offset to be set beyond the
+   *   end of the existing data in the file. If data is later written at this
+   *   point, subsequent reads of data in the gap shall return bytes with the
+   *   value 0 until data is actually written into the gap."
    *
-   * We can conform to the first part, but not the second.  But return EINVAL if
-   *
-   *  "...the resulting file offset would be negative for a regular file, block
-   *   special file, or directory."
+   * We can conform to the first part, but not the second.  Return EINVAL if
+   *  "...the resulting file offset would be negative for a regular file,
+   *   block special file, or directory."
    */
 
   if (newpos >= 0)
@@ -402,19 +400,13 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 #endif
 
-#ifdef CONFIG_LCD_UPDATE
-      case FBIO_UPDATE:  /* Update the LCD with the modified framebuffer data  */
+#ifdef CONFIG_FB_UPDATE
+      case FBIO_UPDATE:  /* Update the modified framebuffer data  */
         {
-          FAR struct nxgl_rect_s *rect =
-            (FAR struct nxgl_rect_s *)((uintptr_t)arg);
-          struct fb_planeinfo_s pinfo;
+          struct fb_area_s *area = (FAR struct fb_area_s *)((uintptr_t)arg);
 
-          DEBUGASSERT(fb->vtable != NULL && fb->vtable->getplaneinfo != NULL);
-          ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, &pinfo);
-          if (ret >= 0)
-            {
-               nx_notify_rectangle((FAR NX_PLANEINFOTYPE *)&pinfo, rect);
-            }
+          DEBUGASSERT(fb->vtable != NULL && fb->vtable->updatearea != NULL);
+          ret = fb->vtable->updatearea(fb->vtable, area);
         }
         break;
 #endif
@@ -432,7 +424,8 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           struct fb_overlayinfo_s oinfo;
 
-          DEBUGASSERT(fb->vtable != NULL && fb->vtable->getoverlayinfo != NULL);
+          DEBUGASSERT(fb->vtable != NULL &&
+                      fb->vtable->getoverlayinfo != NULL);
           ret = fb->vtable->getoverlayinfo(fb->vtable, arg, &oinfo);
           if (ret == OK)
             {
@@ -450,7 +443,8 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           DEBUGASSERT(oinfo != 0 && fb->vtable != NULL &&
                       fb->vtable->getoverlayinfo != NULL);
-          ret = fb->vtable->getoverlayinfo(fb->vtable, oinfo->overlay, oinfo);
+          ret = fb->vtable->getoverlayinfo(fb->vtable,
+                                           oinfo->overlay, oinfo);
         }
         break;
 
@@ -595,7 +589,8 @@ int fb_register(int display, int plane)
   ret = up_fbinitialize(display);
   if (ret < 0)
     {
-      gerr("ERROR: up_fbinitialize() failed for display %d: %d\n", display, ret);
+      gerr("ERROR: up_fbinitialize() failed for display %d: %d\n",
+           display, ret);
       goto errout_with_fb;
     }
 

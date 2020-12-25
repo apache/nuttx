@@ -49,7 +49,7 @@
  *      is configured.
  *   3. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
- *   4. The handle returned by stm32_i2sdev_initialize() may then be used to
+ *   4. The handle returned by stm32_i2sbus_initialize() may then be used to
  *     bind the I2S driver to higher level logic
  *
  ****************************************************************************/
@@ -61,6 +61,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -72,16 +73,14 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/spi/spi.h>
-
-#include <arch/board/board.h>
-
-#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
+
+#include <arch/board/board.h>
 
 #include "arm_internal.h"
 #include "arm_arch.h"
@@ -277,7 +276,7 @@ struct stm32_buffer_s
 struct stm32_transport_s
 {
   DMA_HANDLE dma;               /* I2S DMA handle */
-  WDOG_ID dog;                  /* Watchdog that handles DMA timeouts */
+  struct wdog_s dog;            /* Watchdog that handles DMA timeouts */
   sq_queue_t pend;              /* A queue of pending transfers */
   sq_queue_t act;               /* A queue of active transfers */
   sq_queue_t done;              /* A queue of completed transfers */
@@ -411,7 +410,7 @@ static void     i2s_txdma_sampledone(struct stm32_i2s_s *priv, int result);
 #endif
 
 #ifdef I2S_HAVE_RX
-static void     i2s_rxdma_timeout(int argc, uint32_t arg, ...);
+static void     i2s_rxdma_timeout(wdparm_t arg);
 static int      i2s_rxdma_setup(struct stm32_i2s_s *priv);
 static void     i2s_rx_worker(void *arg);
 static void     i2s_rx_schedule(struct stm32_i2s_s *priv, int result);
@@ -419,7 +418,7 @@ static void     i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result,
                                    void *arg);
 #endif
 #ifdef I2S_HAVE_TX
-static void     i2s_txdma_timeout(int argc, uint32_t arg, ...);
+static void     i2s_txdma_timeout(wdparm_t arg);
 static int      i2s_txdma_setup(struct stm32_i2s_s *priv);
 static void     i2s_tx_worker(void *arg);
 static void     i2s_tx_schedule(struct stm32_i2s_s *priv, int result);
@@ -947,8 +946,7 @@ static void i2s_txdma_sampledone(struct stm32_i2s_s *priv, int result)
  *   The RX watchdog timeout without completion of the RX DMA.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -959,7 +957,7 @@ static void i2s_txdma_sampledone(struct stm32_i2s_s *priv, int result)
  ****************************************************************************/
 
 #ifdef I2S_HAVE_RX
-static void i2s_rxdma_timeout(int argc, uint32_t arg, ...)
+static void i2s_rxdma_timeout(wdparm_t arg)
 {
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1097,8 +1095,8 @@ static int i2s_rxdma_setup(struct stm32_i2s_s *priv)
 
   if (!notimeout)
     {
-      ret = wd_start(priv->rx.dog, timeout, i2s_rxdma_timeout,
-                     1, (uint32_t)priv);
+      ret = wd_start(&priv->rx.dog, timeout,
+                     i2s_rxdma_timeout, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We
@@ -1322,7 +1320,7 @@ static void i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->rx.dog);
+  wd_cancel(&priv->rx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -1347,8 +1345,7 @@ static void i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
  *   The RX watchdog timeout without completion of the RX DMA.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -1359,7 +1356,7 @@ static void i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
  ****************************************************************************/
 
 #ifdef I2S_HAVE_TX
-static void i2s_txdma_timeout(int argc, uint32_t arg, ...)
+static void i2s_txdma_timeout(wdparm_t arg)
 {
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1497,8 +1494,8 @@ static int i2s_txdma_setup(struct stm32_i2s_s *priv)
 
   if (!notimeout)
     {
-      ret = wd_start(priv->tx.dog, timeout, i2s_txdma_timeout,
-                     1, (uint32_t)priv);
+      ret = wd_start(&priv->tx.dog, timeout,
+                     i2s_txdma_timeout, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We
@@ -1709,7 +1706,7 @@ static void i2s_txdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->tx.dog);
+  wd_cancel(&priv->tx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -1901,7 +1898,7 @@ static int stm32_i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 #endif
 
   DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & priv->align) == 0);
-  i2sinfo("apb=%p nmaxbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nmaxbytes=%d arg=%p timeout=%" PRId32 "\n",
           apb, apb->nmaxbytes, arg, timeout);
 
   i2s_init_buffer(apb->samp, apb->nmaxbytes);
@@ -2111,7 +2108,7 @@ static int stm32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
    */
 
   DEBUGASSERT(priv && apb);
-  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%" PRId32 "\n",
           apb, apb->nbytes - apb->curbyte, arg, timeout);
 
   i2s_dump_buffer("Sending", &apb->samp[apb->curbyte],
@@ -2382,15 +2379,6 @@ static int i2s_dma_allocate(struct stm32_i2s_s *priv)
           i2serr("ERROR: Failed to allocate the RX DMA channel\n");
           goto errout;
         }
-
-      /* Create a watchdog time to catch RX DMA timeouts */
-
-      priv->rx.dog = wd_create();
-      if (!priv->rx.dog)
-        {
-          i2serr("ERROR: Failed to create the RX DMA watchdog\n");
-          goto errout;
-        }
     }
 #endif
 
@@ -2403,15 +2391,6 @@ static int i2s_dma_allocate(struct stm32_i2s_s *priv)
       if (!priv->tx.dma)
         {
           i2serr("ERROR: Failed to allocate the TX DMA channel\n");
-          goto errout;
-        }
-
-      /* Create a watchdog time to catch TX DMA timeouts */
-
-      priv->tx.dog = wd_create();
-      if (!priv->tx.dog)
-        {
-          i2serr("ERROR: Failed to create the TX DMA watchdog\n");
           goto errout;
         }
     }
@@ -2445,11 +2424,7 @@ errout:
 static void i2s_dma_free(struct stm32_i2s_s *priv)
 {
 #ifdef I2S_HAVE_TX
-  if (priv->tx.dog)
-    {
-       wd_delete(priv->tx.dog);
-    }
-
+  wd_cancel(&priv->tx.dog);
   if (priv->tx.dma)
     {
       stm32_dmafree(priv->tx.dma);
@@ -2457,11 +2432,7 @@ static void i2s_dma_free(struct stm32_i2s_s *priv)
 #endif
 
 #ifdef I2S_HAVE_RX
-  if (priv->rx.dog)
-    {
-       wd_delete(priv->rx.dog);
-    }
-
+  wd_cancel(&priv->rx.dog);
   if (priv->rx.dma)
     {
       stm32_dmafree(priv->rx.dma);
@@ -2604,7 +2575,7 @@ static void i2s3_configure(struct stm32_i2s_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_i2sdev_initialize
+ * Name: stm32_i2sbus_initialize
  *
  * Description:
  *   Initialize the selected i2S port
@@ -2617,7 +2588,7 @@ static void i2s3_configure(struct stm32_i2s_s *priv)
  *
  ****************************************************************************/
 
-FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port)
+FAR struct i2s_dev_s *stm32_i2sbus_initialize(int port)
 {
   FAR struct stm32_i2s_s *priv = NULL;
   irqstate_t flags;
@@ -2632,7 +2603,7 @@ FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port)
    * chip select structures.
    */
 
-  priv = (struct stm32_i2s_s *)zalloc(sizeof(struct stm32_i2s_s));
+  priv = (struct stm32_i2s_s *)kmm_zalloc(sizeof(struct stm32_i2s_s));
   if (!priv)
     {
       i2serr("ERROR: Failed to allocate a chip select structure\n");
@@ -2640,7 +2611,7 @@ FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port)
     }
 
   /* Set up the initial state for this chip select structure.  Other fields
-   * were zeroed by zalloc().
+   * were zeroed by kmm_zalloc().
    */
 
   /* Initialize the common parts for the I2S device structure */

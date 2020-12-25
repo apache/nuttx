@@ -86,11 +86,24 @@ int psock_socket(int domain, int type, int protocol,
 
   psock->s_crefs  = 1;
   psock->s_domain = domain;
-  psock->s_type   = type;
+  psock->s_proto  = protocol;
   psock->s_conn   = NULL;
 #if defined(CONFIG_NET_TCP_WRITE_BUFFERS) || defined(CONFIG_NET_UDP_WRITE_BUFFERS)
   psock->s_sndcb  = NULL;
 #endif
+
+  if (type & SOCK_CLOEXEC)
+    {
+      psock->s_flags |= _SF_CLOEXEC;
+    }
+
+  if (type & SOCK_NONBLOCK)
+    {
+      psock->s_flags |= _SF_NONBLOCK;
+    }
+
+  type            &= SOCK_TYPE_MASK;
+  psock->s_type   = type;
 
 #ifdef CONFIG_NET_USRSOCK
   if (domain != PF_LOCAL && domain != PF_UNSPEC)

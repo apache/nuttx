@@ -69,6 +69,7 @@
  **************************************************************************************/
 
 /* Configuration **********************************************************************/
+
 /* ST7567 Configuration Settings:
  *
  * CONFIG_ST7567_SPIMODE - Controls the SPI mode
@@ -165,8 +166,10 @@
 #endif
 
 /* Color Properties *******************************************************************/
+
 /* The ST7567 display controller can handle a resolution of 128x64.
  */
+
 /* Display Resolution */
 
 #ifdef CONFIG_ST7567_XRES
@@ -287,7 +290,7 @@ static inline void up_clear(FAR struct st7567_dev_s  *priv);
  * if there are multiple LCD devices, they must each have unique run buffers.
  */
 
-static uint8_t g_runbuffer[ST7567_XSTRIDE+1];
+static uint8_t g_runbuffer[ST7567_XSTRIDE + 1];
 
 /* This structure describes the overall LCD video controller */
 
@@ -321,6 +324,7 @@ static struct st7567_dev_s g_st7567dev =
     .getplaneinfo = st7567_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
+
     /* Cursor Controls -- Not supported */
 
     /* LCD Specific Controls */
@@ -414,7 +418,9 @@ static void st7567_deselect(FAR struct spi_dev_s *spi)
 static int st7567_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
                        size_t npixels)
 {
-  /* Because of this line of code, we will only be able to support a single ST7567 device */
+  /* Because of this line of code, we will only be able to support a single
+   * ST7567 device
+   */
 
   FAR struct st7567_dev_s *priv = &g_st7567dev;
   FAR uint8_t *fbptr;
@@ -528,7 +534,7 @@ static int st7567_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
 
   /* Set the starting position for the run */
 
-  SPI_SEND(priv->spi, ST7567_SETPAGESTART+page);         /* Set the page start */
+  SPI_SEND(priv->spi, ST7567_SETPAGESTART + page);       /* Set the page start */
   SPI_SEND(priv->spi, ST7567_SETCOLL + (col & 0x0f));    /* Set the low column */
   SPI_SEND(priv->spi, ST7567_SETCOLH + (col >> 4));      /* Set the high column */
 
@@ -563,7 +569,9 @@ static int st7567_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
 static int st7567_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                      size_t npixels)
 {
-  /* Because of this line of code, we will only be able to support a single ST7567 device */
+  /* Because of this line of code, we will only be able to support a single
+   * ST7567 device
+   */
 
   FAR struct st7567_dev_s *priv = &g_st7567dev;
   FAR uint8_t *fbptr;
@@ -592,6 +600,7 @@ static int st7567_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
     }
 
   /* Then transfer the display data from the shadow frame buffer memory */
+
   /* Get the page number.  The range of 64 lines is divided up into eight
    * pages of 8 lines each.
    */
@@ -720,7 +729,7 @@ static int st7567_getpower(struct lcd_dev_s *dev)
 {
   struct st7567_dev_s *priv = (struct st7567_dev_s *)dev;
   DEBUGASSERT(priv);
-  ginfo("powered: %s\n", st7567_powerstring(priv->powered));
+
   return priv->powered;
 }
 
@@ -738,8 +747,6 @@ static int st7567_setpower(struct lcd_dev_s *dev, int power)
   struct st7567_dev_s *priv = (struct st7567_dev_s *)dev;
 
   DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
-  ginfo("power: %s powered: %s\n",
-        st7567_powerstring(power), st7567_powerstring(priv->powered));
 
   /* Select and lock the device */
 
@@ -852,7 +859,7 @@ static inline void up_clear(FAR struct st7567_dev_s  *priv)
 
       /* Set the starting position for the run */
 
-      SPI_SEND(priv->spi, ST7567_SETPAGESTART+i);
+      SPI_SEND(priv->spi, ST7567_SETPAGESTART + i);
       SPI_SEND(priv->spi, ST7567_SETCOLL);
       SPI_SEND(priv->spi, ST7567_SETCOLH);
 
@@ -860,9 +867,9 @@ static inline void up_clear(FAR struct st7567_dev_s  *priv)
 
       SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), false);
 
-       /* Then transfer all 96 columns of data */
+      /* Then transfer all 96 columns of data */
 
-       SPI_SNDBLOCK(priv->spi, &priv->fb[page * ST7567_XRES], ST7567_XRES);
+      SPI_SNDBLOCK(priv->spi, &priv->fb[page * ST7567_XRES], ST7567_XRES);
     }
 
   /* Unlock and de-select the device */

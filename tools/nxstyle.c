@@ -183,7 +183,16 @@ static const struct file_section_s g_section_info[] =
 static const char *g_white_prefix[] =
 {
   "Elf",     /* Ref:  include/elf.h, include/elf32.h, include/elf64.h */
-  "PRIx",    /* Ref:  intttypes.h */
+  "PRId",    /* Ref:  inttypes.h */
+  "PRIi",    /* Ref:  inttypes.h */
+  "PRIo",    /* Ref:  inttypes.h */
+  "PRIu",    /* Ref:  inttypes.h */
+  "PRIx",    /* Ref:  inttypes.h */
+  "SCNd",    /* Ref:  inttypes.h */
+  "SCNi",    /* Ref:  inttypes.h */
+  "SCNo",    /* Ref:  inttypes.h */
+  "SCNu",    /* Ref:  inttypes.h */
+  "SCNx",    /* Ref:  inttypes.h */
   "SYS_",    /* Ref:  include/sys/syscall.h */
   "STUB_",   /* Ref:  syscall/syscall_lookup.h, syscall/sycall_stublookup.c */
   "b8",      /* Ref:  include/fixedmath.h */
@@ -192,6 +201,15 @@ static const char *g_white_prefix[] =
   "ub8",     /* Ref:  include/fixedmath.h */
   "ub16",    /* Ref:  include/fixedmath.h */
   "ub32",    /* Ref:  include/fixedmath.h */
+  NULL
+};
+
+static const char *g_white_list[] =
+{
+  "__EIT_entry",             /* Ref:  gnu_unwind_find_exidx.c */
+  "__gnu_Unwind_Find_exidx", /* Ref:  gnu_unwind_find_exidx.c */
+  "_Exit",                   /* Ref:  stdlib.h */
+  "_Unwind_Ptr",             /* Ref:  unwind-arm-common.h */
   NULL
 };
 
@@ -352,7 +370,7 @@ static int block_comment_width(char *line)
 
   /* Skip over any trailing whitespace at the end of the line */
 
-  for (e = strlen(line) - 1; isspace(line[e]); e--)
+  for (e = strlen(line) - 1; e >= 0 && isspace(line[e]); e--)
     {
     }
 
@@ -502,7 +520,7 @@ static bool check_section_header(const char *line, int lineno)
  *
  ********************************************************************************/
 
-static bool white_prefix(const char *ident, int lineno)
+static bool white_list(const char *ident, int lineno)
 {
   const char **pptr;
   const char *str;
@@ -512,6 +530,19 @@ static bool white_prefix(const char *ident, int lineno)
        pptr++)
     {
       if (strncmp(ident, str, strlen(str)) == 0)
+        {
+          return true;
+        }
+    }
+
+  for (pptr = g_white_list;
+       (str = *pptr) != NULL;
+       pptr++)
+    {
+      size_t len = strlen(str);
+
+      if (strncmp(ident, str, len) == 0 &&
+          isalnum(ident[len]) == 0)
         {
           return true;
         }
@@ -1485,7 +1516,7 @@ int main(int argc, char **argv, char **envp)
                 {
                   /* Ignore symbols that begin with white-listed prefixes */
 
-                  if (white_prefix(&line[ident_index], lineno))
+                  if (white_list(&line[ident_index], lineno))
                     {
                       /* No error */
                     }

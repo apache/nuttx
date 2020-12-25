@@ -5,14 +5,18 @@
 
 if ARCH_BOARD_OLIMEX_STM32P407
 
-config STM32F4DISCO_OLIMEXP407_STACKSIZE
+config STM32_OLIMEXP407_STACKSIZE
 	int "USB host waiter stack size"
 	default 1024
 	depends on USBHOST
 
-config STM32F4DISCO_OLIMEXP407_PRIO
+config STM32_OLIMEXP407_PRIO
 	int "USB host waiter task priority"
 	default 100
 	depends on USBHOST
+
+config STM32_OLIMEXP407_UEXT_USART3
+  bool "Enable UEXT USART3"
+  default n
 
 endif

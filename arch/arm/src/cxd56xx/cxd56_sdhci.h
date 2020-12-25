@@ -496,6 +496,19 @@ void cxd56_sdhci_mediachange(FAR struct sdio_dev_s *dev);
 
 void cxd56_sdhci_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
 
+/****************************************************************************
+ * Name: cxd56_sdio_resetstatus
+ *
+ * Description:
+ *   Reset SDIO status.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ ****************************************************************************/
+
+void cxd56_sdio_resetstatus(FAR struct sdio_dev_s *dev);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

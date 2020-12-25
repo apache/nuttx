@@ -14,7 +14,7 @@
 #    notice, this list of conditions and the following disclaimer in
 #    the documentation and/or other materials provided with the
 #    distribution.
-# 3. Neither the name Nuttx nor the names of its contributors may be
+# 3. Neither the name NuttX nor the names of its contributors may be
 #    used to endorse or promote products derived from this software
 #    without specific prior written permission.
 #
@@ -48,10 +48,5 @@ endif
 
 DEPPATH += --dep-path procfs
 VPATH += :procfs
-
-# To ensure version information is newest,
-# add fs_procfsversion to phony target for force rebuild
-
-.PHONY: fs_procfsversion$(OBJEXT)
 
 endif

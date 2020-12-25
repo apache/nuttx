@@ -201,6 +201,9 @@
 #define DPORT_CPUPERIOD_SEL_M  ((DPORT_CPUPERIOD_SEL_V)<<(DPORT_CPUPERIOD_SEL_S))
 #define DPORT_CPUPERIOD_SEL_V  0x3
 #define DPORT_CPUPERIOD_SEL_S  0
+#define DPORT_CPUPERIOD_SEL_80  0
+#define DPORT_CPUPERIOD_SEL_160 1
+#define DPORT_CPUPERIOD_SEL_240	2
 
 #define DPORT_PRO_CACHE_CTRL_REG          (DR_REG_DPORT_BASE + 0x040)
 
@@ -1181,6 +1184,8 @@
 
 #define DPORT_WIFI_CLK_EN_REG          (DR_REG_DPORT_BASE + 0x0CC)
 
+#define DPORT_EMAC_CLK_EN              (BIT(14))
+
 /* DPORT_WIFI_CLK_EN : R/W ;bitpos:[31:0] ;default: 32'hfffce030 ; */
 
 #define DPORT_WIFI_CLK_EN  0xFFFFFFFF
@@ -1188,9 +1193,37 @@
 #define DPORT_WIFI_CLK_EN_V  0xFFFFFFFF
 #define DPORT_WIFI_CLK_EN_S  0
 
+/* Mask for all Wifi clock bits - 1, 2, 10 */
+
+#define DPORT_WIFI_CLK_WIFI_EN  0x00000406
+#define DPORT_WIFI_CLK_WIFI_EN_M  ((DPORT_WIFI_CLK_WIFI_EN_V)<<(DPORT_WIFI_CLK_WIFI_EN_S))
+#define DPORT_WIFI_CLK_WIFI_EN_V  0x406
+#define DPORT_WIFI_CLK_WIFI_EN_S  0
+
+/* Mask for all Bluetooth clock bits - 11, 16, 17 */
+
+#define DPORT_WIFI_CLK_BT_EN  0x61
+#define DPORT_WIFI_CLK_BT_EN_M  ((DPORT_WIFI_CLK_BT_EN_V)<<(DPORT_WIFI_CLK_BT_EN_S))
+#define DPORT_WIFI_CLK_BT_EN_V  0x61
+#define DPORT_WIFI_CLK_BT_EN_S  11
+
+/* Mask for clock bits used by both WIFI and Bluetooth */
+
+#define DPORT_WIFI_CLK_WIFI_BT_COMMON_M 0x000003c9
+
+/* bluetooth baseband bit11 */
+
+#define DPORT_BT_BASEBAND_EN  BIT(11)
+
+/* bluetooth LC bit16 and bit17 */
+#define DPORT_BT_LC_EN  (BIT(16)|BIT(17))
+
 #define DPORT_WIFI_RST_EN_REG          (DR_REG_DPORT_BASE + 0x0D0)
 
 /* DPORT_WIFI_RST : R/W ;bitpos:[31:0] ;default: 32'h0 ; */
+
+#define DPORT_EMAC_RST_EN              (BIT(7))
+#define DPORT_MAC_RST_EN               (BIT(2))
 
 #define DPORT_WIFI_RST  0xFFFFFFFF
 #define DPORT_WIFI_RST_M  ((DPORT_WIFI_RST_V)<<(DPORT_WIFI_RST_S))
@@ -4354,5 +4387,13 @@
 #define DPORT_DATE_V  0xFFFFFFF
 #define DPORT_DATE_S  0
 #define DPORT_DPORT_DATE_VERSION 0x1605190
+
+/* SPI Flash MMU table regitser base address for PRO CPU */
+
+#define DPORT_PRO_FLASH_MMU_TABLE_REG       (DR_REG_DPORT_BASE + 0x10000)
+
+/* SPI Flash MMU table regitser base address for APP CPU */
+
+#define DPORT_APP_FLASH_MMU_TABLE_REG       (DR_REG_DPORT_BASE + 0x12000)
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_DPORT_H */

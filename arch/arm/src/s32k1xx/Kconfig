@@ -27,6 +27,7 @@ config ARCH_CHIP_S32K118
 config ARCH_CHIP_S32K142
 	bool "S32K142"
 	select ARCH_CHIP_S32K14X
+	select S32K1XX_HAVE_FLEXCAN1
 	---help---
 		Cortex-M4F, 256Kb FLASH, 32Kb RAM incl. 4Kb FlexRAM
 
@@ -34,13 +35,19 @@ config ARCH_CHIP_S32K144
 	bool "S32K144"
 	select ARCH_CHIP_S32K14X
 	select S32K1XX_HAVE_LPSPI2
+	select S32K1XX_HAVE_FLEXCAN1
+	select S32K1XX_HAVE_FLEXCAN2
 	---help---
 		Cortex-M4F, 512Kb FLASH, 64Kb RAM incl. 4Kb FlexRAM
 
 config ARCH_CHIP_S32K146
 	bool "S32K146"
 	select ARCH_CHIP_S32K14X
+	select S32K1XX_HAVE_FTM4
+	select S32K1XX_HAVE_FTM5
 	select S32K1XX_HAVE_LPSPI2
+	select S32K1XX_HAVE_FLEXCAN1
+	select S32K1XX_HAVE_FLEXCAN2
 	---help---
 		Cortex-M4F, 1Mb FLASH, 128Kb RAM incl. 4Kb FlexRAM
 
@@ -48,9 +55,15 @@ config ARCH_CHIP_S32K148
 	bool "S32K148"
 	select ARCH_CHIP_S32K14X
 	select S32K1XX_HAVE_ENET
+	select S32K1XX_HAVE_FTM4
+	select S32K1XX_HAVE_FTM5
+	select S32K1XX_HAVE_FTM6
+	select S32K1XX_HAVE_FTM7
 	select S32K1XX_HAVE_LPI2C1
 	select S32K1XX_HAVE_LPSPI2
 	select S32K1XX_HAVE_SAI
+	select S32K1XX_HAVE_FLEXCAN1
+	select S32K1XX_HAVE_FLEXCAN2
 	---help---
 		Cortex-M4F, 2Mb FLASH, 256Kb RAM incl. 4Kb FlexRAM
 
@@ -69,6 +82,8 @@ config ARCH_CHIP_S32K14X
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_FETCHADD
 	select S32K1XX_HAVE_EWM
+	select S32K1XX_HAVE_FTM2
+	select S32K1XX_HAVE_FTM3
 	select S32K1XX_HAVE_SPLL
 	select S32K1XX_HAVE_HSRUN
 	select S32K1XX_HAVE_LMEM
@@ -88,6 +103,30 @@ config S32K1XX_HAVE_EWM
 	default n
 
 config S32K1XX_HAVE_FIRC_CMU
+	bool
+	default n
+
+config S32K1XX_HAVE_FTM2
+	bool
+	default n
+
+config S32K1XX_HAVE_FTM3
+	bool
+	default n
+
+config S32K1XX_HAVE_FTM4
+	bool
+	default n
+
+config S32K1XX_HAVE_FTM5
+	bool
+	default n
+
+config S32K1XX_HAVE_FTM6
+	bool
+	default n
+
+config S32K1XX_HAVE_FTM7
 	bool
 	default n
 
@@ -111,6 +150,14 @@ config S32K1XX_HAVE_LPSPI2
 	bool
 	default n
 
+config S32K1XX_HAVE_FLEXCAN1
+	bool
+	default n
+
+config S32K1XX_HAVE_FLEXCAN2
+	bool
+	default n
+
 config S32K1XX_HAVE_QSPI
 	bool
 	default n
@@ -125,6 +172,10 @@ config S32K1XX_HAVE_SPLL
 
 # Peripheral Group Selections
 
+config S32K1XX_FTM
+	bool
+	default n
+
 config S32K1XX_LPUART
 	bool
 	default n
@@ -135,6 +186,11 @@ config S32K1XX_LPI2C
 
 config S32K1XX_LPSPI
 	bool
+	default n
+
+config S32K1XX_FLEXCAN
+	bool
+	select NET_CAN_HAVE_CANFD
 	default n
 
 # Peripheral Selection
@@ -149,6 +205,72 @@ config S32K1XX_ENET
 	bool "Ethernet"
 	default n
 	depends on S32K1XX_HAVE_ENET
+
+config S32K1XX_FLEXCAN0
+	bool "FLEXCAN0"
+	select S32K1XX_FLEXCAN
+	select NET_CAN_HAVE_TX_DEADLINE
+	default n
+
+config S32K1XX_FLEXCAN1
+	bool "FLEXCAN1"
+	select S32K1XX_FLEXCAN
+	select NET_CAN_HAVE_TX_DEADLINE
+	default n
+	depends on S32K1XX_HAVE_FLEXCAN1
+
+config S32K1XX_FLEXCAN2
+	bool "FLEXCAN2"
+	select S32K1XX_FLEXCAN
+	select NET_CAN_HAVE_TX_DEADLINE
+	default n
+	depends on S32K1XX_HAVE_FLEXCAN2
+
+config S32K1XX_FTM0
+	bool "FTM0"
+	default n
+	select S32K1XX_FTM
+
+config S32K1XX_FTM1
+	bool "FTM1"
+	default n
+	select S32K1XX_FTM
+
+config S32K1XX_FTM2
+	bool "FTM2"
+	default n
+	select S32K1XX_FTM
+	depends on S32K1XX_HAVE_FTM2
+
+config S32K1XX_FTM3
+	bool "FTM3"
+	default n
+	select S32K1XX_FTM
+	depends on S32K1XX_HAVE_FTM3
+
+config S32K1XX_FTM4
+	bool "FTM4"
+	default n
+	select S32K1XX_FTM
+	depends on S32K1XX_HAVE_FTM4
+
+config S32K1XX_FTM5
+	bool "FTM5"
+	default n
+	select S32K1XX_FTM
+	depends on S32K1XX_HAVE_FTM5
+
+config S32K1XX_FTM6
+	bool "FTM6"
+	default n
+	select S32K1XX_FTM
+	depends on S32K1XX_HAVE_FTM6
+
+config S32K1XX_FTM7
+	bool "FTM7"
+	default n
+	select S32K1XX_FTM
+	depends on S32K1XX_HAVE_FTM7
 
 menuconfig S32K1XX_LPI2C0
 	bool "LPI2C0"
@@ -206,8 +328,117 @@ config S32K1XX_RTC
 	bool "RTC"
 	default n
 
+config S32K1XX_PROGMEM
+    bool PROGMEM
+    default n
+    select ARCH_HAVE_PROGMEM
+    depends on (ARCH_CHIP_S32K11X || (ARCH_CHIP_S32K14X && !ARCH_CHIP_S32K148) )
+    ---help---
+        Use the FlexNVM 32/64 KB of d-flash memory as a
+		Memory-Technology-Device (MTD).
+
+config S32K1XX_EEEPROM
+	bool "Emulated EEPROM"
+	default n
+    ---help---
+       Enables Emulated EEPROM function which uses the FlexRAM and FlexNVM
+       memory to emulate non-volatile memory. The EEEPROM wil be registered
+       as a ramdisk block device
 
 endmenu # S32K1XX Peripheral Selection
+
+menu "S32K1XX FTM PWM Configuration"
+	depends on S32K1XX_FTM
+
+config S32K1XX_FTM0_PWM
+	bool "FTM0 PWM"
+	default n
+	depends on S32K1XX_FTM0
+
+config S32K1XX_FTM0_CHANNEL
+	int "FTM0 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM0_PWM
+
+config S32K1XX_FTM1_PWM
+	bool "FTM1 PWM"
+	default n
+	depends on S32K1XX_FTM1
+
+config S32K1XX_FTM1_CHANNEL
+	int "FTM1 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM1_PWM
+
+config S32K1XX_FTM2_PWM
+	bool "FTM2 PWM"
+	default n
+	depends on S32K1XX_FTM2
+
+config S32K1XX_FTM2_CHANNEL
+	int "FTM2 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM2_PWM
+
+config S32K1XX_FTM3_PWM
+	bool "FTM3 PWM"
+	default n
+	depends on S32K1XX_FTM3
+
+config S32K1XX_FTM3_CHANNEL
+	int "FTM3 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM3_PWM
+
+config S32K1XX_FTM4_PWM
+	bool "FTM4 PWM"
+	default n
+	depends on S32K1XX_FTM4
+
+config S32K1XX_FTM4_CHANNEL
+	int "FTM4 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM4_PWM
+
+config S32K1XX_FTM5_PWM
+	bool "FTM5 PWM"
+	default n
+	depends on S32K1XX_FTM5
+
+config S32K1XX_FTM5_CHANNEL
+	int "FTM5 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM5_PWM
+
+config S32K1XX_FTM6_PWM
+	bool "FTM6 PWM"
+	default n
+	depends on S32K1XX_FTM6
+
+config S32K1XX_FTM6_CHANNEL
+	int "FTM6 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM6_PWM
+
+config S32K1XX_FTM7_PWM
+	bool "FTM7 PWM"
+	default n
+	depends on S32K1XX_FTM7
+
+config S32K1XX_FTM7_CHANNEL
+	int "FTM7 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM7_PWM
+
+endmenu # S32K1XX FTM PWM Configuration
 
 config S32K1XX_WDT_DISABLE
 	bool "Disable watchdog on reset"
@@ -452,5 +683,120 @@ config S32K1XX_ENET_PHYINIT
 		function one time before it first uses the PHY.
 
 endmenu # S32K1XX_ENET
+
+menu "FLEXCAN0 Configuration"
+	depends on S32K1XX_FLEXCAN0
+
+config FLEXCAN0_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN0_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+config FLEXCAN0_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN0_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN0_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN0_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # S32K1XX_FLEXCAN0
+
+menu "FLEXCAN1 Configuration"
+	depends on S32K1XX_FLEXCAN1
+
+config FLEXCAN1_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN1_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+config FLEXCAN1_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN1_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN1_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN1_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # S32K1XX_FLEXCAN1
+
+menu "FLEXCAN2 Configuration"
+	depends on S32K1XX_FLEXCAN2
+
+config FLEXCAN2_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN2_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+config FLEXCAN2_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN2_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN2_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN2_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # S32K1XX_FLEXCAN0
+
+menu "PROGMEM Configuration"
+	depends on S32K1XX_PROGMEM
+
+config PROGMEM_SIZE
+	int "Progmem size (KB)"
+	default 64 if ARCH_CHIP_S32K14X
+	default 32 if ARCH_CHIP_S32K11X
+
+endmenu
 
 endif # ARCH_CHIP_S32K1XX

@@ -52,7 +52,7 @@
  *
  ****************************************************************************/
 
-int puts(FAR const char *s)
+int puts(FAR const IPTR char *s)
 {
   FILE *stream = stdout;
   int nwritten;

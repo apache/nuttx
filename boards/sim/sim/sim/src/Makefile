@@ -59,7 +59,7 @@ ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
 endif
 endif
 
-ifeq ($(CONFIG_NX),y)
+ifeq ($(CONFIG_SIM_X11FB),y)
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   CSRCS += sim_touchscreen.c
 endif
@@ -78,6 +78,10 @@ ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
   RCSRCS = etc/init.d/rcS
   RCRAWS = etc/group etc/passwd
 endif
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+  CSRCS += sim_buttons.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

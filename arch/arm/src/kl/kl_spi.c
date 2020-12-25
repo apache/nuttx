@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <errno.h>
 #include <assert.h>
@@ -284,7 +285,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   unsigned int spr;
   unsigned int sppr;
 
-  /* Check if the requested frequence is the same as the frequency selection */
+  /* Check if the requested frequence is the same as the frequency
+   * selection.
+   */
 
   if (priv->frequency == frequency)
     {
@@ -351,7 +354,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spiinfo("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %" PRId32 "->%" PRId32 "\n", frequency, actual);
   return actual;
 }
 
@@ -410,7 +413,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
       spi_putreg(priv, KL_SPI_C1_OFFSET, regval);
 
-      /* Save the mode so that subsequent re-configuratins will be faster */
+      /* Save the mode so that subsequent re-configurations will be faster */
 
       priv->mode = mode;
     }

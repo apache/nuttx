@@ -80,6 +80,7 @@ struct mtd_partition_s
 
   struct mtd_dev_s child;       /* The "child" MTD vtable that manages the
                                  * sub-region */
+
   /* Other implementation specific data may follow here */
 
   FAR struct mtd_dev_s *parent; /* The "parent" MTD driver that manages the
@@ -323,8 +324,8 @@ static ssize_t part_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-static ssize_t part_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR uint8_t *buffer)
+static ssize_t part_read(FAR struct mtd_dev_s *dev, off_t offset,
+                         size_t nbytes, FAR uint8_t *buffer)
 {
   FAR struct mtd_partition_s *priv = (FAR struct mtd_partition_s *)dev;
   off_t newoffset;
@@ -361,8 +362,8 @@ static ssize_t part_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
  ****************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t part_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                          FAR const uint8_t *buffer)
+static ssize_t part_write(FAR struct mtd_dev_s *dev, off_t offset,
+                          size_t nbytes, FAR const uint8_t *buffer)
 {
   FAR struct mtd_partition_s *priv = (FAR struct mtd_partition_s *)dev;
   off_t newoffset;
@@ -373,7 +374,9 @@ static ssize_t part_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
 
   if (priv->parent->write)
     {
-      /* Make sure that write would not extend past the end of the partition */
+      /* Make sure that write would not extend past the end of the
+       * partition
+       */
 
       if (!part_bytecheck(priv, offset + nbytes - 1))
         {
@@ -413,8 +416,8 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
           FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
           if (geo)
             {
-              /* Populate the geometry structure with information needed to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information needed to
+               * know the capacity and how to access the device.
                */
 
               geo->blocksize    = priv->blocksize;
@@ -442,7 +445,8 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                    * return the sum to the caller.
                    */
 
-                  *ppv = (FAR void *)(base + priv->firstblock * priv->blocksize);
+                  *ppv = (FAR void *)(base +
+                                      priv->firstblock * priv->blocksize);
                 }
             }
         }
@@ -497,7 +501,8 @@ static int part_procfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate a container to hold the task and attribute selection */
 
-  attr = (FAR struct part_procfs_file_s *)kmm_zalloc(sizeof(struct part_procfs_file_s));
+  attr = (FAR struct part_procfs_file_s *)
+         kmm_zalloc(sizeof(struct part_procfs_file_s));
   if (!attr)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -571,7 +576,8 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
       if (attr->nextpart == g_pfirstpartition)
         {
 #ifdef CONFIG_MTD_PARTITION_NAMES
-          total = snprintf(buffer, buflen, "%-*s  Start    Size   MTD\n", PART_NAME_MAX, "Name");
+          total = snprintf(buffer, buflen, "%-*s  Start    Size   MTD\n",
+                           PART_NAME_MAX, "Name");
 #else
           total = snprintf(buffer, buflen, "  Start    Size   MTD\n");
 #endif
@@ -591,8 +597,8 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
               return 0;
             }
 
-          /* Get the number of blocks per erase.  There must be an even number
-           * of blocks in one erase blocks.
+          /* Get the number of blocks per erase.  There must be an even
+           * number of blocks in one erase blocks.
            */
 
           blkpererase = geo.erasesize / geo.blocksize;
@@ -623,13 +629,16 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
 
           /* Terminate the partition name and add to output buffer */
 
-          ret = snprintf(&buffer[total], buflen - total, "%s%7d %7d   %s\n",
-                  partname, attr->nextpart->firstblock / blkpererase,
-                  attr->nextpart->neraseblocks, attr->nextpart->parent->name);
+          ret = snprintf(&buffer[total], buflen - total, "%s%7ju %ju   %s\n",
+                  partname,
+                  (uintmax_t)attr->nextpart->firstblock / blkpererase,
+                  (uintmax_t)attr->nextpart->neraseblocks,
+                  attr->nextpart->parent->name);
 #else
-          ret = snprintf(&buffer[total], buflen - total, "%7d %7d   %s\n",
-                  attr->nextpart->firstblock / blkpererase,
-                  attr->nextpart->neraseblocks, attr->nextpart->parent->name);
+          ret = snprintf(&buffer[total], buflen - total, "%7ju %7ju   %s\n",
+                  (uintmax_t)attr->nextpart->firstblock / blkpererase,
+                  (uintmax_t)attr->nextpart->neraseblocks,
+                  attr->nextpart->parent->name);
 #endif
 
           if (ret + total < buflen)
@@ -672,7 +681,8 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
  *
  ****************************************************************************/
 
-static int part_procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
+static int part_procfs_dup(FAR const struct file *oldp,
+                           FAR struct file *newp)
 {
   FAR struct part_procfs_file_s *oldattr;
   FAR struct part_procfs_file_s *newattr;
@@ -686,7 +696,8 @@ static int part_procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newattr = (FAR struct part_procfs_file_s *)kmm_zalloc(sizeof(struct part_procfs_file_s));
+  newattr = (FAR struct part_procfs_file_s *)
+            kmm_zalloc(sizeof(struct part_procfs_file_s));
   if (!newattr)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -753,7 +764,8 @@ static int part_procfs_stat(const char *relpath, struct stat *buf)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
+FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
+                                    off_t firstblock,
                                     off_t nblocks)
 {
   FAR struct mtd_partition_s *part;
@@ -808,7 +820,8 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
 
   /* Allocate a partition device structure */
 
-  part = (FAR struct mtd_partition_s *)kmm_zalloc(sizeof(struct mtd_partition_s));
+  part = (FAR struct mtd_partition_s *)
+         kmm_zalloc(sizeof(struct mtd_partition_s));
   if (!part)
     {
       ferr("ERROR: Failed to allocate memory for the partition device\n");
@@ -851,12 +864,14 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
       struct mtd_partition_s *plast;
 
       /* Add the partition to the end of the list */
+
       part->pnext = NULL;
 
       plast = g_pfirstpartition;
       while (plast->pnext != NULL)
         {
           /* Get pointer to next partition */
+
           plast = plast->pnext;
         }
 

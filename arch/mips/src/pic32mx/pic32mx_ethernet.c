@@ -42,6 +42,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_PIC32MX_ETHERNET)
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
@@ -114,8 +115,8 @@
 #endif
 
 /* The logic here has a few hooks for support for multiple interfaces, but
- * that capability is not yet in place (and I won't worry about it until I get
- * the first multi-interface PIC32MX).
+ * that capability is not yet in place (and I won't worry about it until I
+ * get the first multi-interface PIC32MX).
  */
 
 #if CONFIG_PIC32MX_NINTERFACES > 1
@@ -159,7 +160,7 @@
 #define PIC32MX_NBUFFERS (CONFIG_PIC32MX_ETH_NRXDESC + \
                           CONFIG_PIC32MX_ETH_NTXDESC + 1)
 
-/* Debug Configuration *****************************************************/
+/* Debug Configuration ******************************************************/
 
 /* CONFIG_NET_DUMPPACKET will dump the contents of each packet to the
  * console.
@@ -225,7 +226,7 @@
 #define ETH_RXINTS             (ETH_INT_RXOVFLW | ETH_INT_RXBUFNA | ETH_INT_RXDONE | ETH_INT_RXBUSE)
 #define ETH_TXINTS             (ETH_INT_TXABORT | ETH_INT_TXDONE | ETH_INT_TXBUSE)
 
-/* Misc. Helpers ***********************************************************/
+/* Misc. Helpers ************************************************************/
 
 /* This is a helper pointer for accessing the contents of the Ethernet
  * header
@@ -330,8 +331,8 @@ struct pic32mx_driver_s
 #endif
   uint8_t    pd_txnext;         /* Index to the next Tx descriptor */
   uint32_t   pd_inten;          /* Shadow copy of INTEN register */
-  WDOG_ID    pd_txpoll;         /* TX poll timer */
-  WDOG_ID    pd_txtimeout;      /* TX timeout timer */
+  struct wdog_s pd_txpoll;      /* TX poll timer */
+  struct wdog_s pd_txtimeout;   /* TX timeout timer */
   struct work_s pd_irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s pd_pollwork;    /* For deferring poll work to the work queue */
 
@@ -395,7 +396,8 @@ static inline struct pic32mx_txdesc_s *
   pic32mx_txdesc(struct pic32mx_driver_s *priv);
 static inline void pic32mx_txnext(struct pic32mx_driver_s *priv);
 static inline void pic32mx_rxreturn(struct pic32mx_rxdesc_s *rxdesc);
-static struct pic32mx_rxdesc_s *pic32mx_rxdesc(struct pic32mx_driver_s *priv);
+static struct pic32mx_rxdesc_s *
+pic32mx_rxdesc(struct pic32mx_driver_s *priv);
 
 /* Common TX logic */
 
@@ -411,15 +413,15 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv);
 static void pic32mx_txdone(struct pic32mx_driver_s *priv);
 
 static void pic32mx_interrupt_work(void *arg);
-static int  pic32mx_interrupt(int irq, void *context, FAR void *arg);
+static int  pic32mx_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
 static void pic32mx_txtimeout_work(void *arg);
-static void pic32mx_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void pic32mx_txtimeout_expiry(wdparm_t arg);
 
 static void pic32mx_poll_work(void *arg);
-static void pic32mx_poll_expiry(int argc, uint32_t arg, ...);
+static void pic32mx_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -714,7 +716,8 @@ static uint8_t *pic32mx_allocbuffer(struct pic32mx_driver_s *priv)
  *
  ****************************************************************************/
 
-static void pic32mx_freebuffer(struct pic32mx_driver_s *priv, uint8_t *buffer)
+static void pic32mx_freebuffer(struct pic32mx_driver_s *priv,
+                               uint8_t *buffer)
 {
   /* Add the buffer to the end of the free buffer list */
 
@@ -989,8 +992,8 @@ static struct pic32mx_rxdesc_s *pic32mx_rxdesc(struct pic32mx_driver_s *priv)
   int i;
 
   /* Inspect the list of RX descriptors to see if the EOWN bit is cleared.
-   * If it is, this descriptor is now under software control and a message was
-   * received. Use SOP and EOP to extract the message, use BYTE_COUNT,
+   * If it is, this descriptor is now under software control and a message
+   * was received. Use SOP and EOP to extract the message, use BYTE_COUNT,
    * RXF_RSV, RSV and PKT_CHECKSUM to get the message characteristics.
    */
 
@@ -1055,9 +1058,9 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
    *
    * The SOP, EOP, DATA_BUFFER_ADDRESS and BYTE_COUNT will be updated when a
    * particular message has to be transmitted. The DATA_BUFFER_ADDRESS will
-   * contain the physical address of the message, the BYTE_COUNT message size.
-   * SOP and EOP are set depending on how many packets are needed to transmit
-   * the message.
+   * contain the physical address of the message, the BYTE_COUNT message
+   * size. SOP and EOP are set depending on how many packets are needed to
+   * transmit the message.
    */
 
   /* Find the next available TX descriptor.  We are guaranteed that is will
@@ -1083,9 +1086,9 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
   status = ((uint32_t)priv->pd_dev.d_len << TXDESC_STATUS_BYTECOUNT_SHIFT);
   priv->pd_dev.d_len = 0;
 
-  /* Set EOWN = 1 to indicate that the packet belongs to Ethernet and set both
-   * SOP and EOP to indicate that the packet both begins and ends with this
-   * frame.
+  /* Set EOWN = 1 to indicate that the packet belongs to Ethernet and set
+   * both SOP and EOP to indicate that the packet both begins and ends with
+   * this frame.
    */
 
   status        |= (TXDESC_STATUS_EOWN | TXDESC_STATUS_NPV |
@@ -1110,8 +1113,8 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->pd_txtimeout, PIC32MX_TXTIMEOUT,
-           pic32mx_txtimeout_expiry, 1, (uint32_t)priv);
+  wd_start(&priv->pd_txtimeout, PIC32MX_TXTIMEOUT,
+           pic32mx_txtimeout_expiry, (wdparm_t)priv);
 
   return OK;
 }
@@ -1188,7 +1191,9 @@ static int pic32mx_txpoll(struct net_driver_s *dev)
 
           if (pic32mx_txdesc(priv) == NULL)
             {
-              /* There are no more TX descriptors/buffers available.. stop the poll */
+              /* There are no more TX descriptors/buffers available..
+               * stop the poll
+               */
 
               return -EAGAIN;
             }
@@ -1207,8 +1212,8 @@ static int pic32mx_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return ret;
@@ -1247,7 +1252,7 @@ static void pic32mx_poll(struct pic32mx_driver_s *priv)
           /* And perform the poll */
 
           priv->pd_polling = true;
-          devif_poll(&priv->pd_dev, pic32mx_txpoll);
+          devif_timer(&priv->pd_dev, 0, pic32mx_txpoll);
 
           /* Free any buffer left attached after the poll */
 
@@ -1313,7 +1318,7 @@ static void pic32mx_timerpoll(struct pic32mx_driver_s *priv)
  *
  * Description:
  *   While processing an RxDone event, higher logic decides to send a packet,
- *   possibly a response to the incoming packet (but probably not, in reality)
+ *   possibly a response to the incoming packet(but probably not, in reality)
  *   However, since the Rx and Tx operations are decoupled, there is no
  *   guarantee that there will be a Tx descriptor available at that time.
  *   This function will perform that check and, if no Tx descriptor is
@@ -1414,7 +1419,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
       if ((rxdesc->rsv2 & RXDESC_RSV2_OK) == 0)
         {
-          nerr("ERROR. rsv1: %08x rsv2: %08x\n",
+          nerr("ERROR. rsv1: %08" PRIx32 " rsv2: %08" PRIx32 "\n",
                rxdesc->rsv1, rxdesc->rsv2);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
@@ -1428,7 +1433,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
       else if (priv->pd_dev.d_len > CONFIG_NET_ETH_PKTSIZE)
         {
-          nerr("ERROR: Too big. packet length: %d rxdesc: %08x\n",
+          nerr("ERROR: Too big. packet length: %d rxdesc: %08" PRIx32 "\n",
                priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
@@ -1441,7 +1446,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
       else if ((rxdesc->status & (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP)) !=
                (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP))
         {
-          nerr("ERROR: Fragment. packet length: %d rxdesc: %08x\n",
+          nerr("ERROR: Fragment. packet length: %d rxdesc: %08" PRIx32 "\n",
                priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXFRAGMENTS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
@@ -1499,7 +1504,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
               if (priv->pd_dev.d_len > 0)
                 {
-                  /* Update the Ethernet header with the correct MAC address */
+                  /* Update Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv6
                   if (IFF_IS_IPv4(priv->pd_dev.d_flags))
@@ -1538,7 +1543,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
               if (priv->pd_dev.d_len > 0)
                 {
-                  /* Update the Ethernet header with the correct MAC address */
+                  /* Update Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
                   if (IFF_IS_IPv4(priv->pd_dev.d_flags))
@@ -1624,7 +1629,7 @@ static void pic32mx_txdone(struct pic32mx_driver_s *priv)
 
   /* Cancel the pending Tx timeout */
 
-  wd_cancel(priv->pd_txtimeout);
+  wd_cancel(&priv->pd_txtimeout);
 
   /* Disable further Tx interrupts.  Tx interrupts may be re-enabled again
    * depending upon the result of the poll.
@@ -1660,7 +1665,8 @@ static void pic32mx_txdone(struct pic32mx_driver_s *priv)
 
               /* Free the TX buffer */
 
-              pic32mx_freebuffer(priv, (uint8_t *)VIRT_ADDR(txdesc->address));
+              pic32mx_freebuffer(priv,
+                                 (uint8_t *)VIRT_ADDR(txdesc->address));
               txdesc->address = 0;
 
               /* Reset status */
@@ -1743,23 +1749,25 @@ static void pic32mx_interrupt_work(void *arg)
 
       /* RXOVFLW: Receive FIFO Over Flow Error.  RXOVFLW is set by the RXBM
        * Logic for an RX FIFO Overflow condition. It is cleared by either a
-       * Reset or CPU write of a ‘1’ to the CLR register.
+       * Reset or CPU write of a 1 to the CLR register.
        */
 
       if ((status & ETH_INT_RXOVFLW) != 0)
         {
-          nerr("ERROR: RX Overrun. status: %08x\n", status);
+          nerr("ERROR: RX Overrun. status: %08" PRIx32 "\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
       /* RXBUFNA: Receive Buffer Not Available Interrupt.  This bit is set by
        * a RX Buffer Descriptor Overrun condition. It is cleared by either a
-       * Reset or a CPU write of a ‘1’ to the CLR register.
+       * Reset or a CPU write of a 1 to the CLR register.
        */
 
       if ((status & ETH_INT_RXBUFNA) != 0)
         {
-          nerr("ERROR: RX buffer descriptor overrun. status: %08x\n", status);
+          nerr("ERROR: RX buffer descriptor overrun. "
+               "status: %08" PRIx32 "\n",
+               status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1770,7 +1778,7 @@ static void pic32mx_interrupt_work(void *arg)
 
       if ((status & ETH_INT_RXBUSE) != 0)
         {
-          nerr("ERROR: RX BVCI bus error. status: %08x\n", status);
+          nerr("ERROR: RX BVCI bus error. status: %08" PRIx32 "\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1809,31 +1817,31 @@ static void pic32mx_interrupt_work(void *arg)
        * - Excessive defer abort
        * - Late collision abort
        * - Excessive collisions abort
-       * This bit is cleared by either a Reset or CPU write of a ‘1’ to the
+       * This bit is cleared by either a Reset or CPU write of a 1 to the
        * CLR register.
        */
 
       if ((status & ETH_INT_TXABORT) != 0)
         {
-          nerr("ERROR: TX abort. status: %08x\n", status);
+          nerr("ERROR: TX abort. status: %08" PRIx32 "\n", status);
           NETDEV_TXERRORS(&priv->pd_dev);
         }
 
       /* TXBUSE: Transmit BVCI Bus Error Interrupt. This bit is set when the
        * TX DMA encounters a BVCI Bus error during a memory access. It is
-       * cleared by either a Reset or CPU write of a ‘1’ to the CLR register.
+       * cleared by either a Reset or CPU write of a 1 to the CLR register.
        */
 
       if ((status & ETH_INT_TXBUSE) != 0)
         {
-          nerr("ERROR: TX BVCI bus error. status: %08x\n", status);
+          nerr("ERROR: TX BVCI bus error. status: %08" PRIx32 "\n", status);
           NETDEV_TXERRORS(&priv->pd_dev);
         }
 
       /* TXDONE: Transmit Done Interrupt.  This bit is set when the currently
        * transmitted TX packet completes transmission, and the Transmit
        * Status Vector is loaded into the first descriptor used for the
-       * packet. It is cleared by either a Reset or CPU write of a ‘1’ to
+       * packet. It is cleared by either a Reset or CPU write of a 1 to
        * the CLR register.
        */
 
@@ -1851,15 +1859,15 @@ static void pic32mx_interrupt_work(void *arg)
       /* EWMARK: Empty Watermark Interrupt.  This bit is set when the RX
        * Descriptor Buffer Count is less than or equal to the value in the
        * RXEWM bit (ETHRXWM:0-7) value. It is cleared by BUFCNT bit
-       * (ETHSTAT:16-23) being incremented by hardware. Writing a ‘0’ or a ‘1’
-       * has no effect.
+       * (ETHSTAT:16-23) being incremented by hardware. Writing a 0 or
+       * a 1 has no effect.
        */
 
       /* FWMARK: Full Watermark Interrupt.  This bit is set when the RX
        * escriptor Buffer Count is greater than or equal to the value in the
-       * RXFWM bit (ETHRXWM:16-23) field. It is cleared by writing the BUFCDEC
-       * (ETHCON1:0) bit to decrement the BUFCNT counter. Writing a ‘0’ or a
-       * ‘1’ has no effect.
+       * RXFWM bit (ETHRXWM:16-23) field. It is cleared by writing the
+       * BUFCDEC (ETHCON1:0) bit to decrement the BUFCNT counter. Writing a
+       * 0 or a 1 has no effect.
        */
     }
 
@@ -1933,7 +1941,7 @@ static int pic32mx_interrupt(int irq, void *context, FAR void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(priv->pd_txtimeout);
+       wd_cancel(&priv->pd_txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -1993,8 +2001,7 @@ static void pic32mx_txtimeout_work(void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2004,7 +2011,7 @@ static void pic32mx_txtimeout_work(void *arg)
  *
  ****************************************************************************/
 
-static void pic32mx_txtimeout_expiry(int argc, wdparm_t arg, ...)
+static void pic32mx_txtimeout_expiry(wdparm_t arg)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)arg;
 
@@ -2063,8 +2070,8 @@ static void pic32mx_poll_work(void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->pd_txpoll, PIC32MX_WDDELAY, pic32mx_poll_expiry,
-           1, priv);
+  wd_start(&priv->pd_txpoll, PIC32MX_WDDELAY,
+           pic32mx_poll_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -2075,8 +2082,7 @@ static void pic32mx_poll_work(void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2086,7 +2092,7 @@ static void pic32mx_poll_work(void *arg)
  *
  ****************************************************************************/
 
-static void pic32mx_poll_expiry(int argc, wdparm_t arg, ...)
+static void pic32mx_poll_expiry(wdparm_t arg)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)arg;
 
@@ -2119,8 +2125,10 @@ static int pic32mx_ifup(struct net_driver_s *dev)
   int ret;
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Reset the Ethernet controller (again) */
 
@@ -2138,8 +2146,9 @@ static int pic32mx_ifup(struct net_driver_s *dev)
   /* Pin Configuration:
    *
    * No GPIO pin configuration is required.  Enabling the Ethernet Controller
-   * will configure the IO pin direction as defined by the Ethernet Controller
-   * control bits. The port TRIS and LATCH registers will be overridden.
+   * will configure the IO pin direction as defined by the Ethernet
+   * Controller control bits. The port TRIS and LATCH registers will be
+   * overridden.
    *
    * I/O Pin    MII     RMII   Pin  Description
    *   Name   Required Required Type
@@ -2155,7 +2164,8 @@ static int pic32mx_ifup(struct net_driver_s *dev)
    * ERXCLK   Yes      No       I    Ethernet MII RX Clock
    * EREF_CLK No       Yes      I    Ethernet RMII Ref Clock
    * ERXDV    Yes      No       I    Ethernet MII Receive Data Valid
-   * ECRS_DV  No       Yes      I    Ethernet RMII Carrier Sense/Receive Data Valid
+   * ECRS_DV  No       Yes      I    Ethernet RMII Carrier Sense/
+   *                                          Receive Data Valid
    * ERXD0    Yes      Yes      I    Ethernet Data Receive 0
    * ERXD1    Yes      Yes      I    Ethernet Data Receive 1
    * ERXD2    Yes      No       I    Ethernet Data Receive 2
@@ -2200,7 +2210,8 @@ static int pic32mx_ifup(struct net_driver_s *dev)
    * preamble, no scan increment.
    */
 
-  regval &= ~(EMAC1_MCFG_CLKSEL_MASK | EMAC1_MCFG_NOPRE | EMAC1_MCFG_SCANINC);
+  regval &= ~(EMAC1_MCFG_CLKSEL_MASK |
+              EMAC1_MCFG_NOPRE | EMAC1_MCFG_SCANINC);
   regval |= EMAC1_MCFG_CLKSEL_DIV;
   pic32mx_putreg(regval, PIC32MX_EMAC1_MCFG);
 
@@ -2281,16 +2292,16 @@ static int pic32mx_ifup(struct net_driver_s *dev)
   pic32mx_putreg(regval, PIC32MX_EMAC1_SA2);
 #else
   regval = pic32mx_getreg(PIC32MX_EMAC1_SA0);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[4] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[5] = (uint32_t)((regval >> 8) & 0xff);
+  priv->pd_dev.d_mac.ether.ether_addr_octet[4] = regval & 0xff;
+  priv->pd_dev.d_mac.ether.ether_addr_octet[5] = (regval >> 8) & 0xff;
 
   regval = pic32mx_getreg(PIC32MX_EMAC1_SA1);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[2] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[3] = (uint32_t)((regval >> 8) & 0xff);
+  priv->pd_dev.d_mac.ether.ether_addr_octet[2] = regval & 0xff;
+  priv->pd_dev.d_mac.ether.ether_addr_octet[3] = (regval >> 8) & 0xff;
 
   regval = pic32mx_getreg(PIC32MX_EMAC1_SA2);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[0] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[1] = (uint32_t)((regval >> 8) & 0xff);
+  priv->pd_dev.d_mac.ether.ether_addr_octet[0] = regval & 0xff;
+  priv->pd_dev.d_mac.ether.ether_addr_octet[1] = (regval >> 8) & 0xff;
 #endif
 
   /* Continue Ethernet Controller Initialization ****************************/
@@ -2392,8 +2403,8 @@ static int pic32mx_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->pd_txpoll, PIC32MX_WDDELAY, pic32mx_poll_expiry, 1,
-           (uint32_t)priv);
+  wd_start(&priv->pd_txpoll, PIC32MX_WDDELAY,
+           pic32mx_poll_expiry, (wdparm_t)priv);
 
   /* Finally, enable the Ethernet interrupt at the interrupt controller */
 
@@ -2439,8 +2450,8 @@ static int pic32mx_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->pd_txpoll);
-  wd_cancel(priv->pd_txtimeout);
+  wd_cancel(&priv->pd_txpoll);
+  wd_cancel(&priv->pd_txtimeout);
 
   /* Reset the device and mark it as down. */
 
@@ -2950,8 +2961,8 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
 #endif
 
 #else
-  /* Set the MII/ operation mode. This usually requires access to a vendor-
-   * specific control register.
+  /* Set the MII/ operation mode. This usually requires access to a vendor
+   * -specific control register.
    */
 
 #ifdef CONFIG_ETH0_PHY_DP83848C
@@ -3080,8 +3091,8 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
   /* Set up the fixed PHY configuration
    *
    * If auto-negotiation is not supported/selected, update the PHY Duplex and
-   * Speed settings directly (use Control Register 0 and possibly some vendor-
-   * pecific registers).
+   * Speed settings directly (use Control Register 0 and possibly some vendor
+   * -pecific registers).
    */
 
   ret = pic32mx_phymode(phyaddr, PIC32MX_MODE_DEFLT);
@@ -3405,19 +3416,14 @@ static inline int pic32mx_ethinitialize(int intf)
   priv->pd_dev.d_addmac  = pic32mx_addmac;  /* Add multicast MAC address */
   priv->pd_dev.d_rmmac   = pic32mx_rmmac;   /* Remove multicast MAC address */
 #endif
-  priv->pd_dev.d_private = (void *)priv;    /* Used to recover private state from dev */
+  priv->pd_dev.d_private = priv;            /* Used to recover private state from dev */
 
 #if CONFIG_PIC32MX_NINTERFACES > 1
 # error "A mechanism to associate base address an IRQ with an interface is needed"
-  priv->pd_base          = ??;            /* Ethernet controller base address */
-  priv->pd_irq           = ??;            /* Ethernet controller IRQ vector number */
-  priv->pd_irqsrc        = ??;            /* Ethernet controller IRQ source number */
+  priv->pd_base          = ??;             /* Ethernet controller base address */
+  priv->pd_irq           = ??;             /* Ethernet controller IRQ vector number */
+  priv->pd_irqsrc        = ??;             /* Ethernet controller IRQ source number */
 #endif
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->pd_txpoll        = wd_create();   /* Create periodic poll timer */
-  priv->pd_txtimeout     = wd_create();   /* Create TX timeout timer */
 
   /* Reset the Ethernet controller and leave in the ifdown state.  The
    * Ethernet controller will be properly re-initialized each time

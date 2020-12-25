@@ -212,17 +212,6 @@
 
 #define IP_TTL 64
 
-#ifdef CONFIG_NET_TCP_REASSEMBLY
-#  ifndef CONFIG_NET_TCP_REASS_MAXAGE
-  /* The maximum time an IP fragment should wait in the reassembly
-   * buffer before it is dropped.  Units are deci-seconds, the range
-   * of the timer is 8-bits.
-   */
-
-#    define CONFIG_NET_TCP_REASS_MAXAGE (20 * 10) /* 20 seconds */
-#  endif
-#endif
-
 /* Network drivers often receive packets with garbage at the end
  * and are longer than the size of packet in the TCP header.  The
  * following "fudge" factor increases the size of the I/O buffering
@@ -253,8 +242,8 @@
 #  endif
 #endif
 
-/* The UDP maximum packet size. This is should not be to set to more
- * than NETDEV_PKTSIZE(d) - NET_LL_HDRLEN(dev) - __UDP_HDRLEN - IPv*_HDRLEN.
+/* The UDP maximum packet size. This should not be set to more than
+ * NETDEV_PKTSIZE(d) - NET_LL_HDRLEN(dev) - __UDP_HDRLEN - IPv*_HDRLEN.
  */
 
 #define UDP_MSS(d,h)               (NETDEV_PKTSIZE(d) - NET_LL_HDRLEN(d) - __UDP_HDRLEN - (h))
@@ -351,7 +340,7 @@
 #  define MAX_UDP_MSS           __MAX_UDP_MSS(__IPv4_HDRLEN)
 #endif
 
-/* If IPv6 is support, it will have the smaller MSS */
+/* If IPv6 is supported, it will have the smaller MSS. */
 
 #ifdef CONFIG_NET_IPv6
 #  undef  MIN_UDP_MSS
@@ -399,10 +388,7 @@
 
 /* The initial retransmission timeout counted in timer pulses.
  * REVISIT:  TCP RTO really should be calculated dynamically for each TCP
- * connection:
- *
- * https://unix.stackexchange.com/questions/210367/changing-the-tcp-rto-value-in-linux
- * http://sgros.blogspot.com/2012/02/calculating-tcp-rto.html
+ * connection.
  */
 
 #ifdef CONFIG_NET_TCP_RTO
@@ -428,12 +414,12 @@
 
 #define TCP_MAXSYNRTX 5
 
-/* The TCP maximum segment size. This is should not be set to more
- * than NETDEV_PKTSIZE(dev) - NET_LL_HDRLEN(dev) - IPvN_HDRLEN - __TCP_HDRLEN.
+/* The TCP maximum segment size. This should not be set to more than
+ * NETDEV_PKTSIZE(dev) - NET_LL_HDRLEN(dev) - IPvN_HDRLEN - __TCP_HDRLEN.
  *
  * In the case where there are multiple network devices with different
- * link layer protocols, each network device may support a different UDP
- * MSS value.  Here we arbitrarily select the minimum MSS for that case.
+ * link layer protocols, each network device may support a different MSS
+ * value.  Here we arbitrarily select the minimum MSS for that case.
  *
  * REVISIT: __TCP_HDRLEN is not really a constant!
  */
@@ -521,7 +507,7 @@
 #endif
 
 /* If IPv4 is supported, it will have the larger MSS.
- * NOTE: MSS calcuation excludes the __TCP_HDRLEN.
+ * NOTE: MSS calculation excludes the __TCP_HDRLEN.
  */
 
 #ifdef CONFIG_NET_IPv6
@@ -542,7 +528,7 @@
 #  define MAX_TCP_MSS           __MAX_TCP_MSS(__IPv4_HDRLEN)
 #endif
 
-/* If IPv6 is supported, it will have the smaller MSS */
+/* If IPv6 is supported, it will have the smaller MSS. */
 
 #ifdef CONFIG_NET_IPv6
 #  undef MIN_TCP_MSS
@@ -609,7 +595,7 @@
 
 /* Statistics datatype
  *
- * This typedef defines the dataype used for keeping statistics in
+ * This typedef defines the datatype used for keeping statistics in
  * the network.
  */
 

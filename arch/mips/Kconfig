@@ -30,6 +30,12 @@ config ARCH_CHIP_PIC32MZ
 	---help---
 		Microchip PIC32MZ (MIPS32)
 
+config ARCH_CHIP_MIPS_CUSTOM
+	bool "Custom MIPS chip"
+	select ARCH_CHIP_CUSTOM
+	---help---
+		Select this option if there is no directory for the chip under arch/mips/src/.
+
 endchoice
 
 config ARCH_MIPS32

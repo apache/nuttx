@@ -171,8 +171,8 @@
 
 /* AT24 Serial EEPROM
  *
- * A AT24C512 Serial EEPPROM was used for tested I2C.  There are other I2C/TWI
- * devices on-board, but the serial EEPROM is the simplest test.
+ * A AT24C512 Serial EEPPROM was used for tested I2C.  There are other
+ * I2C/TWI devices on-board, but the serial EEPROM is the simplest test.
  *
  * There is, however, no AT24 EEPROM on board the SAMA5D3x-EK:  The Serial
  * EEPROM was mounted on an external adaptor board and connected to the
@@ -243,9 +243,9 @@
 #  define AT24_MINOR  _AT24_MINOR
 #endif
 
-/* MMC/SD minor numbers:  The NSH device minor extended is extended to support
- * two devices.  If CONFIG_NSH_MMCSDMINOR is zero, these will be:  /dev/mmcsd0
- * and /dev/mmcsd1.
+/* MMC/SD minor numbers:  The NSH device minor extended is extended to
+ * support two devices.  If CONFIG_NSH_MMCSDMINOR is zero, these will be:
+ * /dev/mmcsd0 and /dev/mmcsd1.
  */
 
 #ifndef CONFIG_NSH_MMCSDMINOR
@@ -450,7 +450,7 @@
  * (2) a microSD memory card slot (J6 labeled MCI1).
  *
  * The full size SD card slot connects via HSMCI0.  The card detect discrete
- * is available on PB17 (pulled high).  The write protect descrete is tied to
+ * is available on PB17 (pulled high).  The write protect discrete is tied to
  * ground (via PP6) and not available to software.  The slot supports 8-bit
  * wide transfer mode, but the NuttX driver currently uses only the 4-bit
  * wide transfer mode
@@ -602,7 +602,7 @@
    * (MICREL KSZ9021/31) operating at 10/100/1000 Mbps.
    * The board supports RGMII interface mode. The Ethernet interface
    * consists of 4 pairs of low voltage differential pair signals
-   * designated from GRX± and GTx± plus control signals for link
+   * designated from GRX and GTx plus control signals for link
    * activity indicators. These signals can be used to connect to a
    * 10/100/1000 BaseT RJ45 connector integrated on the main board.
    *
@@ -688,7 +688,7 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************

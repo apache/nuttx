@@ -60,8 +60,9 @@
  */
 
 #if __GNUC__ >= 4
-#  define CONFIG_HAVE_BUILTIN_CTZ 1
-#  define CONFIG_HAVE_BUILTIN_CLZ 1
+#  define CONFIG_HAVE_BUILTIN_CTZ      1
+#  define CONFIG_HAVE_BUILTIN_CLZ      1
+#  define CONFIG_HAVE_BUILTIN_POPCOUNT 1
 #endif
 
 /* C++ support */
@@ -82,11 +83,13 @@
 #  define CONFIG_HAVE_WEAKFUNCTIONS 1
 #  define weak_alias(name, aliasname) \
    extern __typeof (name) aliasname __attribute__ ((weak, alias (#name)));
+#  define weak_data __attribute__ ((weak))
 #  define weak_function __attribute__ ((weak))
 #  define weak_const_function __attribute__ ((weak, __const__))
 # else
 #  undef  CONFIG_HAVE_WEAKFUNCTIONS
 #  define weak_alias(name, aliasname)
+#  define weak_data
 #  define weak_function
 #  define weak_const_function
 # endif
@@ -103,9 +106,17 @@
 
 #  define farcall_function __attribute__ ((long_call))
 
+/* Code locate */
+
+#  define locate_code(n) __attribute__ ((section(n)))
+
 /* Data alignment */
 
 #  define aligned_data(n) __attribute__ ((aligned(n)))
+
+/* Data location */
+
+#  define locate_data(n) __attribute__ ((section(n)))
 
 /* The packed attribute informs GCC that the structure elements are packed,
  * ignoring other alignment rules.
@@ -131,6 +142,19 @@
 
 #  define inline_function __attribute__ ((always_inline,no_instrument_function))
 #  define noinline_function __attribute__ ((noinline))
+
+/* Some versions of GCC have a separate __syslog__ format.
+ * http://mail-index.netbsd.org/source-changes/2015/10/14/msg069435.html
+ * Use it if available. Otherwise, assume __printf__ accepts %m.
+ */
+
+#  if !defined(__syslog_attribute__)
+#    define __syslog__ __printf__
+#  endif
+
+#  define printflike(a, b) __attribute__((__format__ (__printf__, a, b)))
+#  define sysloglike(a, b) __attribute__((__format__ (__syslog__, a, b)))
+#  define scanflike(a, b) __attribute__((__format__ (__scanf__, a, b)))
 
 /* GCC does not use storage classes to qualify addressing */
 
@@ -247,15 +271,6 @@
 #  undef  CONFIG_PTR_IS_NOT_INT
 #endif
 
-/* GCC supports inlined functions for C++ and for C version C99 and above */
-
-#  if defined(__cplusplus) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
-#    define CONFIG_HAVE_INLINE 1
-#  else
-#    undef CONFIG_HAVE_INLINE
-#    define inline
-#  endif
-
 /* ISO C11 supports anonymous (unnamed) structures and unions, added in
  * GCC 4.6 (but might be suppressed with -std= option).  ISO C++11 also
  * adds un-named unions, but NOT unnamed structures (although compilers
@@ -325,6 +340,7 @@
 
 #  undef  CONFIG_HAVE_WEAKFUNCTIONS
 #  define weak_alias(name, aliasname)
+#  define weak_data
 #  define weak_function
 #  define weak_const_function
 #  define restrict /* REVISIT */
@@ -336,7 +352,9 @@
  */
 
 #  define noreturn_function
+#  define locate_code(n)
 #  define aligned_data(n)
+#  define locate_data(n)
 #  define begin_packed_struct
 #  define end_packed_struct
 
@@ -352,6 +370,10 @@
 
 #  define inline_function
 #  define noinline_function
+
+#  define printflike(a, b)
+#  define sysloglike(a, b)
+#  define scanflike(a, b)
 
 /* The reentrant attribute informs SDCC that the function
  * must be reentrant.  In this case, SDCC will store input
@@ -412,10 +434,6 @@
 #  define CONFIG_PTR_IS_NOT_INT 1
 #endif
 
-/* New versions of SDCC supports inline function */
-
-#  define CONFIG_HAVE_INLINE 1
-
 /* SDCC does types long long and float, but not types double and long
  * double.
  */
@@ -465,6 +483,7 @@
 
 #  undef  CONFIG_HAVE_WEAKFUNCTIONS
 #  define weak_alias(name, aliasname)
+#  define weak_data
 #  define weak_function
 #  define weak_const_function
 #  define restrict
@@ -475,11 +494,16 @@
 
 #  define noreturn_function
 #  define aligned_data(n)
+#  define locate_code(n)
+#  define locate_data(n)
 #  define begin_packed_struct
 #  define end_packed_struct
 #  define naked_function
 #  define inline_function
 #  define noinline_function
+#  define printflike(a, b)
+#  define sysloglike(a, b)
+#  define scanflike(a, b)
 
 /* REVISIT: */
 
@@ -531,11 +555,6 @@
 #    endif
 #  endif
 
-/* The Zilog compiler does not support inline functions */
-
-#  undef  CONFIG_HAVE_INLINE
-#  define inline
-
 /* ISO C11 supports anonymous (unnamed) structures and unions.  Zilog does
  * not support C11
  */
@@ -571,17 +590,23 @@
 #  define UNUSED(a) ((void)(a))
 
 #  define weak_alias(name, aliasname)
+#  define weak_data            __weak
 #  define weak_function        __weak
 #  define weak_const_function
 #  define noreturn_function
 #  define farcall_function
+#  define locate_code(n)
 #  define aligned_data(n)
+#  define locate_data(n)
 #  define begin_packed_struct  __packed
 #  define end_packed_struct
 #  define reentrant_function
 #  define naked_function
 #  define inline_function
 #  define noinline_function
+#  define printflike(a, b)
+#  define sysloglike(a, b)
+#  define scanflike(a, b)
 
 #  define FAR
 #  define NEAR
@@ -622,18 +647,24 @@
 #  undef  CONFIG_HAVE_WEAKFUNCTIONS
 #  undef CONFIG_HAVE_CXX14
 #  define weak_alias(name, aliasname)
+#  define weak_data
 #  define weak_function
 #  define weak_const_function
 #  define restrict
 #  define noreturn_function
 #  define farcall_function
 #  define aligned_data(n)
+#  define locate_code(n)
+#  define locate_data(n)
 #  define begin_packed_struct
 #  define end_packed_struct
 #  define reentrant_function
 #  define naked_function
 #  define inline_function
 #  define noinline_function
+#  define printflike(a, b)
+#  define sysloglike(a, b)
+#  define scanflike(a, b)
 
 #  define FAR
 #  define NEAR
@@ -643,8 +674,6 @@
 #  undef  CONFIG_SMALL_MEMORY
 #  undef  CONFIG_LONG_IS_NOT_INT
 #  undef  CONFIG_PTR_IS_NOT_INT
-#  undef  CONFIG_HAVE_INLINE
-#  define inline
 #  undef  CONFIG_HAVE_LONG_LONG
 #  define CONFIG_HAVE_FLOAT 1
 #  undef  CONFIG_HAVE_DOUBLE

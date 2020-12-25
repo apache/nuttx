@@ -136,7 +136,7 @@ endif
 
 CROSSDEV =
 CC = ez8cc.exe
-CPP = gcc -E
+CPP = gcc -E -P -x c
 LD = ez8link.exe
 AS = ez8asm.exe
 AR = ez8lib.exe

@@ -72,7 +72,7 @@ struct automounter_state_s
 {
   FAR const struct automount_lower_s *lower; /* Board level interfaces */
   struct work_s work;                        /* Work queue support */
-  WDOG_ID wdog;                              /* Delay to retry un-mounts */
+  struct wdog_s wdog;                        /* Delay to retry un-mounts */
   bool mounted;                              /* True: Volume has been mounted */
   bool inserted;                             /* True: Media has been inserted */
 };
@@ -84,7 +84,7 @@ struct automounter_state_s
 static int  automount_findinode(FAR const char *path);
 static void automount_mount(FAR struct automounter_state_s *priv);
 static int  automount_unmount(FAR struct automounter_state_s *priv);
-static void automount_timeout(int argc, uint32_t arg1, ...);
+static void automount_timeout(wdparm_t arg);
 static void automount_worker(FAR void *arg);
 static int  automount_interrupt(FAR const struct automount_lower_s *lower,
               FAR void *arg, bool inserted);
@@ -104,7 +104,7 @@ static int  automount_interrupt(FAR const struct automount_lower_s *lower,
  *
  * Returned Value:
  *   OK_EXIST if the inode exists
- *   OK_NOENT if the indoe does not exist
+ *   OK_NOENT if the inode does not exist
  *   Negated errno if some failure occurs
  *
  ****************************************************************************/
@@ -114,9 +114,9 @@ static int automount_findinode(FAR const char *path)
   struct inode_search_s desc;
   int ret;
 
-  /* Make sure that we were given an absolute path */
+  /* Make sure that we were given a path */
 
-  DEBUGASSERT(path != NULL && path[0] == '/');
+  DEBUGASSERT(path != NULL);
 
   /* Get exclusive access to the in-memory inode tree. */
 
@@ -293,8 +293,8 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
 
               /* Start a timer to retry the umount2 after a delay */
 
-              ret = wd_start(priv->wdog, lower->udelay, automount_timeout, 1,
-                             (uint32_t)((uintptr_t)priv));
+              ret = wd_start(&priv->wdog, lower->udelay,
+                             automount_timeout, (wdparm_t)priv);
               if (ret < 0)
                 {
                   ferr("ERROR: wd_start failed: %d\n", ret);
@@ -349,14 +349,14 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
  *
  ****************************************************************************/
 
-static void automount_timeout(int argc, uint32_t arg1, ...)
+static void automount_timeout(wdparm_t arg)
 {
   FAR struct automounter_state_s *priv =
-    (FAR struct automounter_state_s *)((uintptr_t)arg1);
+    (FAR struct automounter_state_s *)arg;
   int ret;
 
   finfo("Timeout!\n");
-  DEBUGASSERT(argc == 1 && priv);
+  DEBUGASSERT(priv);
 
   /* Check the state of things.  This timeout at the interrupt level and
    * will cancel the timeout if there is any change in the insertion
@@ -493,7 +493,7 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
     {
       /* Cancel any retry delays */
 
-      wd_cancel(priv->wdog);
+      wd_cancel(&priv->wdog);
     }
 
   return OK;
@@ -540,16 +540,6 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   /* Initialize the automounter state structure */
 
   priv->lower = lower;
-
-  /* Get a timer to handle unmount retries */
-
-  priv->wdog  = wd_create();
-  if (!priv->wdog)
-    {
-      ferr("ERROR: Failed to create a timer\n");
-      automount_uninitialize(priv);
-      return NULL;
-    }
 
   /* Handle the initial state of the mount on the caller's thread */
 
@@ -611,9 +601,9 @@ void automount_uninitialize(FAR void *handle)
   AUTOMOUNT_DISABLE(lower);
   AUTOMOUNT_DETACH(lower);
 
-  /* Release resources */
+  /* Cancel the watchdog timer */
 
-  wd_delete(priv->wdog);
+  wd_cancel(&priv->wdog);
 
   /* And free the state structure */
 

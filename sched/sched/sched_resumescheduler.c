@@ -136,8 +136,11 @@ void nxsched_resume_scheduler(FAR struct tcb_s *tcb)
     {
       /* Release our hold on the IRQ lock. */
 
-      spin_clrbit(&g_cpu_irqset, me, &g_cpu_irqsetlock,
-                  &g_cpu_irqlock);
+      if ((g_cpu_irqset & (1 << me)) != 0)
+        {
+          spin_clrbit(&g_cpu_irqset, me, &g_cpu_irqsetlock,
+                      &g_cpu_irqlock);
+        }
     }
 #endif /* CONFIG_SMP */
 }

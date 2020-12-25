@@ -39,7 +39,9 @@
 
 void r_cgc_create(void)
 {
+#ifdef CONFIG_RX65N_RTC
   volatile uint8_t i;
+#endif
 #if ((24 * RX_CLK_1MHz) == RX_RESONATOR)
   /* Set main clock control registers */
 
@@ -287,10 +289,10 @@ void r_cgc_create(void)
       while (0 != SYSTEM.OSCOVFSR.BIT.SOOVF);
     }
 
-  SYSTEM.PLLCR.BIT.PLIDIV = 0;
-  SYSTEM.PLLCR.BIT.PLLSRCSEL = 0;
-  SYSTEM.PLLCR.BIT.STC = (20 * 2) - 1;
-  SYSTEM.PLLCR2.BYTE = 0x00;
+  SYSTEM.PLLCR.WORD   = _0000_CGC_PLL_FREQ_DIV_1 |
+                        _0000_CGC_PLL_SOURCE_MAIN |
+                        _2700_CGC_PLL_FREQ_MUL_20_0;
+  SYSTEM.PLLCR2.BYTE =  0x00;
   while (0 == SYSTEM.OSCOVFSR.BIT.PLOVF);
   SYSTEM.ROMWT.BYTE = 0x02;
   if (0x02 == SYSTEM.ROMWT.BYTE)
@@ -298,9 +300,20 @@ void r_cgc_create(void)
       __asm("nop");
     }
 
-  SYSTEM.SCKCR.LONG = 0x21c11222;
-  SYSTEM.SCKCR2.WORD = 0x0011;
-  SYSTEM.SCKCR3.WORD = 4u << 8;   /* BSP_CFG_CLOCK_SOURCE */
+  SYSTEM.SCKCR.LONG = _00000002_CGC_PCLKD_DIV_4 | _00000020_CGC_PCLKC_DIV_4 |
+                       _00000200_CGC_PCLKB_DIV_4 |
+                       _00001000_CGC_PCLKA_DIV_2 |
+                       _00010000_CGC_BCLK_DIV_2  |
+                       _00C00000_CGC_PSTOP0_PSTOP1 |
+                       _01000000_CGC_ICLK_DIV_2 |
+                       _20000000_CGC_FCLK_DIV_4;
+
+#if defined(CONFIG_USBHOST) || defined(CONFIG_USBDEV)
+  SYSTEM.SCKCR2.WORD = _0040_CGC_UCLK_DIV_5 | _0001_SCKCR2_BIT0;
+#else
+  SYSTEM.SCKCR2.WORD = _0010_CGC_UCLK_DIV_1 | _0001_SCKCR2_BIT0;
+#endif
+  SYSTEM.SCKCR3.WORD = _0400_CGC_CLOCKSOURCE_PLL;   /* BSP_CFG_CLOCK_SOURCE */
 
   SYSTEM.LOCOCR.BYTE = 0x01;
 #else

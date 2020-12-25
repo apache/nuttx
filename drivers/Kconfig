@@ -72,6 +72,10 @@ endif # DRVR_WRITEBUFFER || DRVR_READAHEAD
 
 endmenu # Buffering
 
+config SPECIFIC_DRIVERS
+	bool "Board Specific drivers"
+	default n
+
 source drivers/crypto/Kconfig
 source drivers/loop/Kconfig
 source drivers/can/Kconfig
@@ -92,6 +96,7 @@ source drivers/modem/Kconfig
 source drivers/mtd/Kconfig
 source drivers/eeprom/Kconfig
 source drivers/net/Kconfig
+source drivers/note/Kconfig
 source drivers/pipes/Kconfig
 source drivers/power/Kconfig
 source drivers/rptun/Kconfig
@@ -107,3 +112,4 @@ source drivers/1wire/Kconfig
 source drivers/syslog/Kconfig
 source drivers/platform/Kconfig
 source drivers/rf/Kconfig
+source drivers/rc/Kconfig

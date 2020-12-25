@@ -65,6 +65,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -1122,7 +1123,6 @@ static void imxrt_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
   FAR struct imxrt_lpspidev_s *priv = (FAR struct imxrt_lpspidev_s *)dev;
   uint32_t men;
-  int savbits = nbits;
 
   spiinfo("nbits=%d\n", nbits);
 
@@ -1148,12 +1148,11 @@ static void imxrt_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits)
                               LPSPI_TCR_FRAMESZ_MASK,
                               LPSPI_TCR_FRAMESZ(nbits - 1));
 
-      /* Save the selection so the subsequence re-configurations
-       * will be faster
+      /* Save the selection so the subsequent re-configurations
+       * will be faster.
        */
 
-      priv->nbits = savbits;    /* nbits has been clobbered... save the signed
-                                 * value. */
+      priv->nbits = nbits;
 
       /* Re-enable LPSPI if it was enabled previously */
 
@@ -1189,7 +1188,6 @@ static int imxrt_lpspi_hwfeatures(FAR struct spi_dev_s *dev,
   FAR struct imxrt_lpspidev_s *priv = (FAR struct imxrt_lpspidev_s *)dev;
   uint32_t setbits;
   uint32_t clrbits;
-  int savbits = nbits;
 
   spiinfo("features=%08x\n", features);
 
@@ -1206,7 +1204,7 @@ static int imxrt_lpspi_hwfeatures(FAR struct spi_dev_s *dev,
       clrbits = LPSPI_TCR_LSBF;
     }
 
-  imxrt_lpspi_modigyreg32(priv, IMXRT_LPSPI_TCR_OFFSET, clrbits, setbits);
+  imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_TCR_OFFSET, clrbits, setbits);
 
   /* Other H/W features are not supported */
 
@@ -1254,7 +1252,8 @@ static uint32_t imxrt_lpspi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 
   regval = imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_SR_OFFSET);
 
-  spiinfo("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
+  spiinfo("Sent: %04" PRIx32 " Return: %04" PRIx32 " Status: %02" PRIx32 "\n",
+          wd, ret, regval);
 
   UNUSED(regval);
   return ret;

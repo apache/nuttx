@@ -128,7 +128,7 @@ static int alloc_slot(int pin, bool isalloc)
                                      : CXD56_TOPREG_IOCAPP_INTSEL0;
   int offset = (pin < PIN_IS_CLK) ? 1 : 56;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave();
 
   for (slot = 0; slot < MAX_SYS_SLOT; slot++)
     {
@@ -158,12 +158,12 @@ static int alloc_slot(int pin, bool isalloc)
         }
       else
         {
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(flags);
           return -ENXIO; /* no space */
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 
   if (PIN_IS_CLK <= pin)
     {
@@ -323,13 +323,13 @@ static void invert_irq(int irq)
   irqstate_t flags;
   uint32_t val;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave();
 
   val = getreg32(CXD56_INTC_INVERT);
   val ^= (1 << (irq - CXD56_IRQ_EXTINT));
   putreg32(val, CXD56_INTC_INVERT);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 }
 
 static bool inverted_irq(int irq)
@@ -445,9 +445,9 @@ int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr,
       irq_attach(irq, NULL, NULL);
       g_isr[slot] = NULL;
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave();
       g_bothedge &= ~(1 << slot);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(flags);
       return irq;
     }
 
@@ -461,9 +461,9 @@ int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr,
     {
       /* set GPIO pseudo both edge interrupt */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave();
       g_bothedge |= (1 << slot);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(flags);
 
       /* detect the change from the current signal */
 

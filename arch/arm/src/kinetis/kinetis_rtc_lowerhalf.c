@@ -107,7 +107,7 @@ static int kinetis_settime(FAR struct rtc_lowerhalf_s *lower,
 static int kinetis_setalarm(FAR struct rtc_lowerhalf_s *lower,
                             FAR const struct lower_setalarm_s *alarminfo);
 static int kinetis_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                               FAR const struct lower_setrelative_s *alarminfo);
+                            FAR const struct lower_setrelative_s *alarminfo);
 static int kinetis_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
                                int alarmid);
 static int kinetis_rdalarm(FAR struct rtc_lowerhalf_s *lower,
@@ -168,7 +168,7 @@ static struct kinetis_lowerhalf_s g_rtc_lowerhalf =
 #ifdef CONFIG_RTC_ALARM
 static void kinetis_alarm_callback(void)
 {
-  FAR struct kinetis_cbinfo_s *cbinfo = &g_rtc_lowerhalf.cbinfo;/*[0];*/
+  FAR struct kinetis_cbinfo_s *cbinfo = &g_rtc_lowerhalf.cbinfo;
 
   /* Sample and clear the callback information to minimize the window in
    * time in which race conditions can occur.
@@ -330,7 +330,7 @@ static int kinetis_setalarm(FAR struct rtc_lowerhalf_s *lower,
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
   priv = (FAR struct kinetis_lowerhalf_s *)lower;
 
-  if (alarminfo->id == RTC_ALARMA )
+  if (alarminfo->id == RTC_ALARMA)
     {
       /* Remember the callback information */
 
@@ -374,8 +374,9 @@ static int kinetis_setalarm(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int kinetis_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                               FAR const struct lower_setrelative_s *alarminfo)
+static int
+kinetis_setrelative(FAR struct rtc_lowerhalf_s *lower,
+                    FAR const struct lower_setrelative_s *alarminfo)
 {
   struct lower_setalarm_s setalarm;
 #if defined(CONFIG_RTC_DATETIME)
@@ -388,7 +389,7 @@ static int kinetis_setrelative(FAR struct rtc_lowerhalf_s *lower,
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
   DEBUGASSERT(alarminfo->id == RTC_ALARMA);
 
-  if ((alarminfo->id == RTC_ALARMA ) &&
+  if (alarminfo->id == RTC_ALARMA &&
       alarminfo->reltime > 0)
     {
       /* Disable pre-emption while we do this so that we don't have to worry
@@ -419,6 +420,7 @@ static int kinetis_setrelative(FAR struct rtc_lowerhalf_s *lower,
           return ret;
         }
 #endif
+
       /* Convert to seconds since the epoch */
 
       seconds = ts.tv_sec;
@@ -466,7 +468,8 @@ static int kinetis_setrelative(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int kinetis_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
+static int
+kinetis_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
 {
   FAR struct kinetis_lowerhalf_s *priv;
   FAR struct kinetis_cbinfo_s *cbinfo;
@@ -489,7 +492,6 @@ static int kinetis_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
       /* Then cancel the alarm */
 
       ret = kinetis_rtc_cancelalarm();
-
     }
 
   return ret;
@@ -531,13 +533,8 @@ static int kinetis_rdalarm(FAR struct rtc_lowerhalf_s *lower,
       sched_lock();
       ret = kinetis_rtc_rdalarm(&ts);
 
-#ifdef CONFIG_LIBC_LOCALTIME
       localtime_r((FAR const time_t *)&ts.tv_sec,
                   (FAR struct tm *)alarminfo->time);
-#else
-      gmtime_r((FAR const time_t *)&ts.tv_sec,
-               (FAR struct tm *)alarminfo->time);
-#endif
       sched_unlock();
     }
 

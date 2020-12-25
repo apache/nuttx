@@ -46,6 +46,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -1416,7 +1417,7 @@ static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency)
   tiva_i2c_enablepwr(config->devno);
   tiva_i2c_enableclk(config->devno);
 
-  i2cinfo("I2C%d: RCGI2C[%08x]=%08x\n",
+  i2cinfo("I2C%d: RCGI2C[%08x]=%08" PRIx32 "\n",
           config->devno, TIVA_SYSCON_RCGCI2C, getreg32(TIVA_SYSCON_RCGCI2C));
 #else
   modifyreg32(TIVA_SYSCON_RCGC1, 0, priv->rcgbit);
@@ -1437,13 +1438,14 @@ static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency)
 
   /* Configure pins */
 
-  i2cinfo("I2C%d: SCL=%08x SDA=%08x\n",
+  i2cinfo("I2C%d: SCL=%08" PRIx32 " SDA=%08" PRIx32 "\n",
           config->devno, config->scl_pin, config->sda_pin);
 
   ret = tiva_configgpio(config->scl_pin);
   if (ret < 0)
     {
-      i2cinfo("I2C%d: tiva_configgpio(%08x) failed: %d\n",
+      i2cinfo("I2C%d: tiva_configgpio(%08" PRIx32 ") failed: %d\n",
+              config->devno,
               config->scl_pin, ret);
       return ret;
     }
@@ -1451,7 +1453,8 @@ static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency)
   ret = tiva_configgpio(config->sda_pin);
   if (ret < 0)
     {
-      i2cinfo("I2C%d: tiva_configgpio(%08x) failed: %d\n",
+      i2cinfo("I2C%d: tiva_configgpio(%08" PRIx32 ") failed: %d\n",
+              config->devno,
               config->sda_pin, ret);
       tiva_configgpio(MKI2C_INPUT(config->scl_pin));
       return ret;
@@ -1547,7 +1550,8 @@ static void tiva_i2c_setclock(struct tiva_i2c_priv_s *priv, uint32_t frequency)
   uint32_t regval;
   uint32_t tmp;
 
-  i2cinfo("I2C%d: frequency: %u\n", priv->config->devno, frequency);
+  i2cinfo("I2C%d: frequency: %" PRIu32 "\n",
+          priv->config->devno, frequency);
 
   /* Has the I2C bus frequency changed? */
 
@@ -1653,7 +1657,7 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
   else if ((priv->mstatus & (I2CM_CS_ERROR | I2CM_CS_ARBLST)) != 0)
 #endif
     {
-      i2cerr("ERROR: I2C%d I2C error status: %08x\n",
+      i2cerr("ERROR: I2C%d I2C error status: %08" PRIx32 "\n",
              priv->config->devno, priv->mstatus);
 
       if ((priv->mstatus & I2CM_CS_ARBLST) != 0)
@@ -1700,7 +1704,7 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
        * other bits are valid.
        */
 
-      i2cerr("ERROR: I2C%d I2C still busy: %08x\n",
+      i2cerr("ERROR: I2C%d I2C still busy: %08" PRIx32 "\n",
              priv->config->devno, regval);
 
       /* Reset and reinitialize the I2C hardware */

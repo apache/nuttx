@@ -219,8 +219,8 @@ static void mount_sprintf(FAR struct mount_info_s *info,
  ****************************************************************************/
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MOUNT
-static int mount_entry(FAR const char *mountpoint, FAR struct statfs *statbuf,
-                       FAR void *arg)
+static int mount_entry(FAR const char *mountpoint,
+                       FAR struct statfs *statbuf, FAR void *arg)
 {
   FAR struct mount_info_s *info = (FAR struct mount_info_s *)arg;
   FAR const char *fstype;
@@ -250,8 +250,8 @@ static int mount_entry(FAR const char *mountpoint, FAR struct statfs *statbuf,
  ****************************************************************************/
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_BLOCKS
-static int blocks_entry(FAR const char *mountpoint, FAR struct statfs *statbuf,
-                        FAR void *arg)
+static int blocks_entry(FAR const char *mountpoint,
+                        FAR struct statfs *statbuf, FAR void *arg)
 {
   FAR struct mount_info_s *info = (FAR struct mount_info_s *)arg;
 
@@ -289,8 +289,8 @@ static int blocks_entry(FAR const char *mountpoint, FAR struct statfs *statbuf,
  ****************************************************************************/
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_USAGE
-static int usage_entry(FAR const char *mountpoint, FAR struct statfs *statbuf,
-                       FAR void *arg)
+static int usage_entry(FAR const char *mountpoint,
+                       FAR struct statfs *statbuf, FAR void *arg)
 {
   FAR struct mount_info_s *info = (FAR struct mount_info_s *)arg;
   FAR const char *fstype;
@@ -318,7 +318,8 @@ static int usage_entry(FAR const char *mountpoint, FAR struct statfs *statbuf,
 
   if (!info->header)
     {
-      mount_sprintf(info, "  Filesystem    Size      Used  Available Mounted on\n");
+      mount_sprintf(info,
+        "  Filesystem    Size      Used  Available Mounted on\n");
       info->header = true;
     }
 

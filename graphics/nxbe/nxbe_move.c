@@ -69,8 +69,8 @@ struct nxbe_move_s
  * Name: nxbe_clipmovesrc
  *
  * Description:
- *  Called from nxbe_clipper() to performed the move operation on visible regions
- *  of the rectangle.
+ *  Called from nxbe_clipper() to performed the move operation on visible
+ *  regions of the rectangle.
  *
  ****************************************************************************/
 
@@ -92,7 +92,9 @@ static void nxbe_clipmovesrc(FAR struct nxbe_clipops_s *cops,
       offset.x = rect->pt1.x + info->offset.x;
       offset.y = rect->pt1.y + info->offset.y;
 
-      /* Move the source rectangle to the destination position in the device */
+      /* Move the source rectangle to the destination position in the
+       * device
+       */
 
       plane->dev.moverectangle(&plane->pinfo, rect, &offset);
 
@@ -109,7 +111,7 @@ static void nxbe_clipmovesrc(FAR struct nxbe_clipops_s *cops,
        * rectangle has changed.
        */
 
-      nx_notify_rectangle(&plane->pinfo, &update);
+      nxbe_notify_rectangle(plane->driver, &update);
 #endif
     }
 }
@@ -118,8 +120,8 @@ static void nxbe_clipmovesrc(FAR struct nxbe_clipops_s *cops,
  * Name: nxbe_clipmoveobscured
  *
  * Description:
- *  Called from nxbe_clipper() to performed the move operation on obsrured regions
- *  of the rectangle.
+ *  Called from nxbe_clipper() to performed the move operation on obsrured
+ *  regions of the rectangle.
  *
  ****************************************************************************/
 
@@ -189,7 +191,7 @@ static void nxbe_clipmovedest(FAR struct nxbe_clipops_s *cops,
 
       nxbe_clipper(dstdata->wnd->above, &src, dstdata->order,
                    &srcinfo.cops, plane);
-   }
+    }
 }
 
 /****************************************************************************
@@ -336,8 +338,8 @@ static inline void nxbe_move_pwfb(FAR struct nxbe_window_s *wnd,
   struct nxgl_rect_s destrect;
   unsigned int bpp;
 
-  /* The rectangle that we receive here is in absolute device coordinates.  We
-   * need to restore this to windows relative coordinates.
+  /* The rectangle that we receive here is in absolute device coordinates.
+   * We need to restore this to windows relative coordinates.
    */
 
   nxgl_rectoffset(&srcrect, rect, -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
@@ -457,7 +459,9 @@ void nxbe_move(FAR struct nxbe_window_s *wnd,
       if (!nxgl_nullrect(&srcrect))
         {
 #ifdef CONFIG_NX_RAMBACKED
-          /* Update the pre-window framebuffer first, then the device memory. */
+          /* Update the pre-window framebuffer first, then the device
+           * memory.
+           */
 
           if (NXBE_ISRAMBACKED(wnd))
             {

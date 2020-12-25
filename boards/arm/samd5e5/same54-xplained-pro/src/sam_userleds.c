@@ -33,7 +33,8 @@
  *
  ****************************************************************************/
 
-/* The SAME54 Xplained Pro has three LEDs, but only one is controllable by software:
+/* The SAME54 Xplained Pro has three LEDs, but only one is controllable by
+ * software:
  *
  *   1. LED0 near the edge of the board
  *
@@ -179,9 +180,10 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
-  (void)sam_portconfig(PORT_STATUS_LED);
+  sam_portconfig(PORT_STATUS_LED);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -200,7 +202,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   board_userled(BOARD_STATUS_LED, (ledset & BOARD_STATUS_LED_BIT) != 0);
 }

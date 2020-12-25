@@ -64,7 +64,8 @@
  *
  ****************************************************************************/
 
-int pthread_cond_init(FAR pthread_cond_t *cond, FAR const pthread_condattr_t *attr)
+int pthread_cond_init(FAR pthread_cond_t *cond,
+                      FAR const pthread_condattr_t *attr)
 {
   int ret = OK;
 
@@ -90,6 +91,8 @@ int pthread_cond_init(FAR pthread_cond_t *cond, FAR const pthread_condattr_t *at
        */
 
       sem_setprotocol(&cond->sem, SEM_PRIO_NONE);
+
+      cond->clockid = attr ? attr->clockid : CLOCK_REALTIME;
     }
 
   sinfo("Returning %d\n", ret);

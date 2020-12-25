@@ -49,8 +49,6 @@ MEMORY
     isram    (WRX)  : ORIGIN = 0x00304000, LENGTH = 128K - 16K
 }
 
-OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
-OUTPUT_ARCH(arm)
 ENTRY(entry)
 ENTRY(_stext)
 

@@ -46,6 +46,7 @@
 #include <sys/socket.h>
 
 #include <fcntl.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -151,7 +152,7 @@ static uint16_t ack_eventhandler(FAR struct net_driver_s *dev,
        */
 
       pstate->snd_acked = tcp_getsequence(tcp->ackno) - pstate->snd_isn;
-      ninfo("ACK: acked=%d sent=%d flen=%d\n",
+      ninfo("ACK: acked=%" PRId32 " sent=%zd flen=%zu\n",
             pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
 
       dev->d_sndlen = 0;
@@ -236,19 +237,6 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
   FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
   int ret;
 
-  /* The TCP socket is connected and, hence, should be bound to a device.
-   * Make sure that the polling device is the own that we are bound to.
-   */
-
-  DEBUGASSERT(conn->dev != NULL);
-  if (dev != conn->dev)
-    {
-      return flags;
-    }
-
-  ninfo("flags: %04x acked: %d sent: %d\n",
-        flags, pstate->snd_acked, pstate->snd_sent);
-
   /* Check for a loss of connection */
 
   if ((flags & TCP_DISCONN_EVENTS) != 0)
@@ -276,6 +264,20 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
       goto end_wait;
     }
 
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the own that we are bound to.
+   */
+
+  DEBUGASSERT(conn);
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      return flags;
+    }
+
+  ninfo("flags: %04x acked: %" PRId32 " sent: %zd\n",
+        flags, pstate->snd_acked, pstate->snd_sent);
+
   /* We get here if (1) not all of the data has been ACKed, (2) we have been
    * asked to retransmit data, (3) the connection is still healthy, and (4)
    * the outgoing packet is available for our use.  In this case, we are
@@ -297,7 +299,7 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 
       /* Check if we have "space" in the window */
 
-      if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->winsize)
+      if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->snd_wnd)
         {
           uint32_t seqno;
 
@@ -333,15 +335,16 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
            */
 
           seqno = pstate->snd_sent + pstate->snd_isn;
-          ninfo("SEND: sndseq %08x->%08x len: %d\n",
-                conn->sndseq, seqno, ret);
+          ninfo("SEND: sndseq %08" PRIx32 "->%08" PRIx32 " len: %d\n",
+                tcp_getsequence(conn->sndseq), seqno, ret);
 
           tcp_setsequence(conn->sndseq, seqno);
 
           /* Update the amount of data sent (but not necessarily ACKed) */
 
           pstate->snd_sent += sndlen;
-          ninfo("pid: %d SEND: acked=%d sent=%d flen=%d\n", getpid(),
+          ninfo("pid: %d SEND: acked=%" PRId32 " sent=%zd flen=%zu\n",
+                getpid(),
                 pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
         }
       else

@@ -178,31 +178,31 @@
 #define I2C_CTRLA_MODE_SHIFT       (2)       /* Bits 2-4: Operating Mode */
 #define I2C_CTRLA_MODE_MASK        (7 << I2C_CTRLA_MODE_SHIFT)
 #  define I2C_CTRLA_MODE_MASTER    (5 << I2C_CTRLA_MODE_SHIFT) /* I2C master mode */
-#define I2C_CTRLA_RUNSTDBY         (1 << 7)  /* Bit 7:  Run in standby */
-#define I2C_CTRLA_PINOUT           (1 << 16) /* Bit 16: Transmit data pinout */
-#  define I2C_CTRLA_1WIRE          (0)              /* 4-wire operation disable */
-#  define I2C_CTRLA_4WIRE          I2C_CTRLA_PINOUT /* 4-wire operation enable */
-#define I2C_CTRLA_SDAHOLD_SHIFT    (20)      /* Bits 20-21: SDA Hold Time */
+#define I2C_CTRLA_RUNSTDBY         (1 << 7)                    /* Bit 7:  Run in standby */
+#define I2C_CTRLA_PINOUT           (1 << 16)                   /* Bit 16: Transmit data pinout */
+#  define I2C_CTRLA_1WIRE          (0)                         /* 4-wire operation disable */
+#  define I2C_CTRLA_4WIRE          I2C_CTRLA_PINOUT            /* 4-wire operation enable */
+#define I2C_CTRLA_SDAHOLD_SHIFT    (20)                        /* Bits 20-21: SDA Hold Time */
 #define I2C_CTRLA_SDAHOLD_MASK     (3 << I2C_CTRLA_SDAHOLD_SHIFT)
 #  define I2C_CTRLA_SDAHOLD_DIS    (0 << I2C_CTRLA_SDAHOLD_SHIFT) /* Disabled */
 #  define I2C_CTRLA_SDAHOLD_75NS   (1 << I2C_CTRLA_SDAHOLD_SHIFT) /* 50-100ns hold time */
 #  define I2C_CTRLA_SDAHOLD_450NS  (2 << I2C_CTRLA_SDAHOLD_SHIFT) /* 300-600ns hold time */
 #  define I2C_CTRLA_SDAHOLD_600NS  (3 << I2C_CTRLA_SDAHOLD_SHIFT) /* 400-800ns hold time */
-#define I2C_CTRLA_MEXTTOEN         (1 << 22) /* Bit 22: Master SCL low extend time-out */
-#define I2C_CTRLA_SEXTTOEN         (1 << 23) /* Bit 23: Slave SCL low extend time-out */
-#define I2C_CTRLA_SPEED_SHIFT      (24)      /* Bits 24-25: Transfer speed */
+#define I2C_CTRLA_MEXTTOEN         (1 << 22)                      /* Bit 22: Master SCL low extend time-out */
+#define I2C_CTRLA_SEXTTOEN         (1 << 23)                      /* Bit 23: Slave SCL low extend time-out */
+#define I2C_CTRLA_SPEED_SHIFT      (24)                           /* Bits 24-25: Transfer speed */
 #define I2C_CTRLA_SPEED_MASK       (3 << I2C_CTRLA_SPEED_SHIFT)
 #  define I2C_CTRLA_SPEED_STD      (0 << I2C_CTRLA_SPEED_SHIFT) /* Standard (<=100KHz) and fast (<=400KHz) */
 #  define I2C_CTRLA_SPEED_FAST     (1 << I2C_CTRLA_SPEED_SHIFT) /* Fast-mode plus (<=1MHz) */
 #  define I2C_CTRLA_SPEED_HIGH     (2 << I2C_CTRLA_SPEED_SHIFT) /* High speed mode (<=3.4Mhz */
-#define I2C_CTRLA_SCLAM            (1 << 27) /* Bit 27: CSL clock stretch mode */
-#define I2C_CTRLA_INACTOUT_SHIFT   (28)      /* Bits 28-29: Inactive Time-Out */
+#define I2C_CTRLA_SCLAM            (1 << 27)                    /* Bit 27: CSL clock stretch mode */
+#define I2C_CTRLA_INACTOUT_SHIFT   (28)                         /* Bits 28-29: Inactive Time-Out */
 #define I2C_CTRLA_INACTOUT_MASK    (7 << I2C_CTRLA_INACTOUT_SHIFT)
 #  define I2C_CTRLA_INACTOUT_DIS   (0 << I2C_CTRLA_INACTOUT_SHIFT) /* Disabled */
 #  define I2C_CTRLA_INACTOUT_55US  (1 << I2C_CTRLA_INACTOUT_SHIFT) /* 5-6 SCL cycle time-out (50-60µs) */
 #  define I2C_CTRLA_INACTOUT_105US (2 << I2C_CTRLA_INACTOUT_SHIFT) /* 10-11 SCL cycle time-out (100-110µs) */
 #  define I2C_CTRLA_INACTOUT_205US (3 << I2C_CTRLA_INACTOUT_SHIFT) /* 20-21 SCL cycle time-out (200-210µs) */
-#define I2C_CTRLA_LOWTOUT          (1 << 30)  /* Bit 30: SCL Low Time-Out */
+#define I2C_CTRLA_LOWTOUT          (1 << 30)                       /* Bit 30: SCL Low Time-Out */
 
 /* Control B register */
 
@@ -214,13 +214,13 @@
 #  define I2C_CTRLB_CMD_ACKREP     (1 << I2C_CTRLB_CMD_SHIFT) /* ACK followed by repeated START */
 #  define I2C_CTRLB_CMD_ACKREAD    (2 << I2C_CTRLB_CMD_SHIFT) /* ACK followed by read operation */
 #  define I2C_CTRLB_CMD_ACKSTOP    (3 << I2C_CTRLB_CMD_SHIFT) /* ACK followed by STOP */
-#define I2C_CTRLB_ACKACT           (1 << 18) /* Bit 18: Acknowledge Action */
-#  define I2C_CTRLB_ACK            (0)              /* Send ACK */
-#  define I2C_CTRLB_NACK           I2C_CTRLB_ACKACT /* Send NACK */
+#define I2C_CTRLB_ACKACT           (1 << 18)                  /* Bit 18: Acknowledge Action */
+#  define I2C_CTRLB_ACK            (0)                        /* Send ACK */
+#  define I2C_CTRLB_NACK           I2C_CTRLB_ACKACT           /* Send NACK */
 
 /* Control C register */
 
-#define I2C_CTRLC_DATA32B          (1 << 24) /* Bit 24: Data 32 Bit */
+#define I2C_CTRLC_DATA32B          (1 << 24)         /* Bit 24: Data 32 Bit */
 #  define I2C_CTRLC_DATA32B_8BIT   (0)               /* DATA register is 8-bit */
 #  define I2C_CTRLC_DATA32B_32BIT  I2C_CTRLC_DATA32B /* DATA register is 32-bit */
 
@@ -231,13 +231,13 @@
 #  define I2C_BAUD(n)              ((uint16)(n) << I2C_BAUD_SHIFT)
 #define I2C_BAUDLOW_SHIFT          (8)       /* Bits 8-15: Master Baud Rate Low */
 #define I2C_BAUDLOW_MASK           (0xff << I2C_BAUDLOW_SHIFT)
-#  define I2C_BAUDLOW(n)           (uint16)(n) << I2C_BAUDLOW_SHIFT)
+#  define I2C_BAUDLOW(n)           ((uint16)(n) << I2C_BAUDLOW_SHIFT)
 #define I2C_HSBAUD_SHIFT           (16)      /* Bits 16-23: High speed master Baud Rate */
 #define I2C_HSBAUD_MASK            (0xff << I2C_HSBAUD_SHIFT)
 #  define I2C_HSBAUD(n)            ((uint16)(n) << I2C_HSBAUD_SHIFT)
 #define I2C_HSBAUDLOW_SHIFT        (24)      /* Bits 24-31: High speed master Baud Rate Low */
 #define I2C_HSBAUDLOW_MASK         (0xff << I2C_HSBAUDLOW_SHIFT)
-#  define I2C_HSBAUDLOW(n)         (uint16)(n) << I2C_HSBAUDLOW_SHIFT)
+#  define I2C_HSBAUDLOW(n)         ((uint16)(n) << I2C_HSBAUDLOW_SHIFT)
 
 /* Interrupt enable clear, interrupt enable set, interrupt enable set, interrupt flag and
  * status clear registers.
@@ -260,11 +260,11 @@
 #  define I2C_STATUS_BUSSTATE_IDLE    (1 << I2C_STATUS_BUSSTATE_SHIFT) /* Waiting for transaction */
 #  define I2C_STATUS_BUSSTATE_OWNER   (2 << I2C_STATUS_BUSSTATE_SHIFT) /* Master of bus owner */
 #  define I2C_STATUS_BUSSTATE_BUSY    (3 << I2C_STATUS_BUSSTATE_SHIFT) /* Other master owns */
-#define I2C_STATUS_LOWTOUT         (1 << 6)  /* Bit 6:  SCL Low Time-Out */
-#define I2C_STATUS_CLKHOLD         (1 << 7)  /* Bit 7:  Clock Hold */
-#define I2C_STATUS_MEXTTOUT        (1 << 8)  /* Bit 8:  Master SCL low extend time-out */
-#define I2C_STATUS_SEXTTOUT        (1 << 9)  /* Bit 9:  Slave SCL low extend time-out */
-#define I2C_STATUS_LENERR          (1 << 10) /* Bit 10: Transaction length error */
+#define I2C_STATUS_LOWTOUT         (1 << 6)                            /* Bit 6:  SCL Low Time-Out */
+#define I2C_STATUS_CLKHOLD         (1 << 7)                            /* Bit 7:  Clock Hold */
+#define I2C_STATUS_MEXTTOUT        (1 << 8)                            /* Bit 8:  Master SCL low extend time-out */
+#define I2C_STATUS_SEXTTOUT        (1 << 9)                            /* Bit 9:  Slave SCL low extend time-out */
+#define I2C_STATUS_LENERR          (1 << 10)                           /* Bit 10: Transaction length error */
 
 /* Synchronization busy register */
 
@@ -301,7 +301,7 @@
  ********************************************************************************************/
 
 /********************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ********************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_I2C_MASTER_H */

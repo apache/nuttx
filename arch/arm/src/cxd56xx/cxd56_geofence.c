@@ -169,7 +169,7 @@ FAR static int (*g_cmdlist[CXD56_GEOFENCE_IOCTL_MAX])(unsigned long) =
 
 static int cxd56_geofence_start(unsigned long arg)
 {
-  return GD_RegisterGeofence();
+  return fw_gd_registergeofence();
 }
 
 /****************************************************************************
@@ -189,7 +189,7 @@ static int cxd56_geofence_start(unsigned long arg)
 
 static int cxd56_geofence_stop(unsigned long arg)
 {
-  return GD_ReleaseGeofence();
+  return fw_gd_releasegeofence();
 }
 
 /****************************************************************************
@@ -219,7 +219,7 @@ static int cxd56_geofence_add_region(unsigned long arg)
 
   reg_data = (FAR struct cxd56_geofence_region_s *)arg;
 
-  ret = GD_GeoAddRegion(reg_data->id,
+  ret = fw_gd_geoaddregion(reg_data->id,
                         reg_data->latitude,
                         reg_data->longitude,
                         reg_data->radius);
@@ -254,7 +254,7 @@ static int cxd56_geofence_modify_region(unsigned long arg)
 
   reg_data = (FAR struct cxd56_geofence_region_s *)arg;
 
-  ret = GD_GeoModifyRegion(reg_data->id, reg_data->latitude,
+  ret = fw_gd_geomodifyregion(reg_data->id, reg_data->latitude,
                            reg_data->longitude, reg_data->radius);
 
   return ret;
@@ -286,7 +286,7 @@ static int cxd56_geofence_delete_region(unsigned long arg)
     }
 
   id = (uint8_t)arg;
-  ret = GD_GeoDeleteRegione(id);
+  ret = fw_gd_geodeleteregione(id);
 
   return ret;
 }
@@ -310,7 +310,7 @@ static int cxd56_geofence_delete_all_region(unsigned long arg)
 {
   int ret;
 
-  ret = GD_GeoDeleteAllRegion();
+  ret = fw_gd_geodeleteallregion();
 
   return ret;
 }
@@ -342,7 +342,7 @@ static int cxd56_geofence_get_region_data(unsigned long arg)
 
   reg_data = (FAR struct cxd56_geofence_region_s *)arg;
 
-  ret = GD_GeoGetRegionData(reg_data->id, &reg_data->latitude,
+  ret = fw_gd_geogetregiondata(reg_data->id, &reg_data->latitude,
                             &reg_data->longitude, &reg_data->radius);
 
   return ret;
@@ -370,7 +370,7 @@ static int cxd56_geofence_get_used_id(unsigned long arg)
       return -EINVAL;
     }
 
-  *(uint32_t *)arg = GD_GeoGetUsedRegionId();
+  *(uint32_t *)arg = fw_gd_geogetusedregionid();
 
   return 0;
 }
@@ -394,7 +394,7 @@ static int cxd56_geofence_get_all_status(unsigned long arg)
 {
   int ret;
 
-  ret = GD_GeoSetAllRgionNotifyRequest();
+  ret = fw_gd_geosetallrgionnotifyrequest();
 
   return ret;
 }
@@ -426,7 +426,7 @@ static int cxd56_geofence_set_mode(unsigned long arg)
 
   mode = (FAR struct cxd56_geofence_mode_s *)arg;
 
-  ret = GD_GeoSetOpMode(mode->deadzone, mode->dwell_detecttime);
+  ret = fw_gd_geosetopmode(mode->deadzone, mode->dwell_detecttime);
 
   return ret;
 }
@@ -571,9 +571,9 @@ static ssize_t cxd56_geofence_read(FAR struct file *filep, FAR char *buffer,
       goto _err;
     }
 
-  /* GD_ReadBuffer returns copied data size or negative error code */
+  /* fw_gd_readbuffer returns copied data size or negative error code */
 
-  ret = GD_ReadBuffer(CXD56_CPU1_DEV_GEOFENCE, 0, buffer, len);
+  ret = fw_gd_readbuffer(CXD56_CPU1_DEV_GEOFENCE, 0, buffer, len);
 
   _err:
   return ret;
@@ -659,7 +659,7 @@ static int cxd56_geofence_poll(FAR struct file *filep,
 
               priv->fds[i] = fds;
               fds->priv    = &priv->fds[i];
-              GD_SetNotifyMask(CXD56_CPU1_DEV_GEOFENCE, FALSE);
+              fw_gd_setnotifymask(CXD56_CPU1_DEV_GEOFENCE, FALSE);
               break;
             }
         }

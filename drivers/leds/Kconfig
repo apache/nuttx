@@ -8,7 +8,6 @@ menu "LED Support"
 config USERLED
 	bool "LED driver"
 	default n
-	depends on ARCH_HAVE_LEDS
 	---help---
 		Enable standard user LED upper half driver.
 
@@ -17,6 +16,7 @@ if USERLED
 config USERLED_LOWER
 	bool "Generic Lower Half LED Driver"
 	default n
+	depends on ARCH_HAVE_LEDS
 	---help---
 		If the board supports the standard LED interfaces as
 		defined in include/nuttx/board.h header file, then this
@@ -26,13 +26,6 @@ config USERLED_LOWER
 
 		1. The board implementation must provide the LED
 		   interfaces as defined in include/nuttx/board.h
-		2. The board.h header file must provide the definition
-		   BOARD_NLEDS, and
-		3. The board.h header file must not include any other
-		   header files that are not accessible in this context
-		   (such as those in arch/<arch>/src/<chip>) UNLESS those
-		   inclusions are conditioned on __KERNEL__.  button_lower.c
-		   will undefine __KERNEL__ before included board.h.
 
 		If your board does not meet these requirements, then the
 		userled_lower.c file can still be copied to your your
@@ -95,5 +88,20 @@ config NCP5623C
 	---help---
 		Enable support for the onsemi NCP5623C LED driver which can be
 		utilized to drive up to 3 LED's.
+
+config WS2812
+	bool "WS2812 LED Driver"
+	default n
+	select SPI
+	---help---
+		Enable support for the Worldsemi WS2812 LED driver which commonly
+		found in LED strips.
+		NOTE: This device is a one wire device and has no CS or RESET
+		line it must have exclusive use of the bus!
+
+config WS2812_FREQUENCY
+	int "WS2812 LED Driver SPI Frequency"
+	default 8000000
+	depends on WS2812
 
 endmenu # LED Support

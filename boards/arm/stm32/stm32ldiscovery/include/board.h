@@ -52,19 +52,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* Four different clock sources can be used to drive the system clock (SYSCLK):
+/* Clocking *****************************************************************/
+
+/* Four different clock sources can be used to drive the system clock
+ * (SYSCLK):
  *
  * - HSI high-speed internal oscillator clock
  *   Generated from an internal 16 MHz RC oscillator
  * - HSE high-speed external oscillator clock
- *   Normally driven by an external crystal (X3).  However, this crystal is not fitted
- *   on the STM32L-Discovery board.
+ *   Normally driven by an external crystal (X3).  However, this crystal is
+ *   not fitted on the STM32L-Discovery board.
  * - PLL clock
  * - MSI multispeed internal oscillator clock
- *   The MSI clock signal is generated from an internal RC oscillator. Seven frequency
- *   ranges are available: 65.536 kHz, 131.072 kHz, 262.144 kHz, 524.288 kHz, 1.048 MHz,
- *   2.097 MHz (default value) and 4.194 MHz.
+ *   The MSI clock signal is generated from an internal RC oscillator.
+ *   Seven frequency ranges are available: 65.536 kHz, 131.072 kHz,
+ *   262.144 kHz, 524.288 kHz, 1.048 MHz, 2.097 MHz (default value) and
+ *   4.194 MHz.
  *
  * The devices have the following two secondary clock sources
  * - LSI low-speed internal RC clock
@@ -95,13 +98,15 @@
  *   MHz frequency. This is required to provide a 48 MHz clock to the USB or
  *   SDIO (SDIOCLK or USBCLK = PLLVCO/2).
  * SYSCLK
- *   The system clock is derived from the PLL VCO divided by the output division factor.
+ *   The system clock is derived from the PLL VCO divided by the output
+ *   division factor.
  * Limitations:
  *   96 MHz as PLLVCO when the product is in range 1 (1.8V),
  *   48 MHz as PLLVCO when the product is in range 2 (1.5V),
  *   24 MHz when the product is in range 3 (1.2V).
  *   Output division to avoid exceeding 32 MHz as SYSCLK.
- *   The minimum input clock frequency for PLL is 2 MHz (when using HSE as PLL source).
+ *   The minimum input clock frequency for PLL is 2 MHz (when using HSE as
+ *   PLL source).
  */
 
 #define STM32_CFGR_PLLSRC        0                       /* Source is 16MHz HSI */
@@ -115,8 +120,8 @@
 #  define STM32_PLL_FREQUENCY    (4*STM32_HSI_FREQUENCY) /* PLL VCO Frequency is 64MHz */
 #endif
 
-/* Use the PLL and set the SYSCLK source to be the divided down PLL VCO output
- * frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
+/* Use the PLL and set the SYSCLK source to be the divided down PLL VCO
+ * output frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
  */
 
 #define STM32_SYSCLK_SW          RCC_CFGR_SW_PLL         /* Use the PLL as the SYSCLK */
@@ -159,23 +164,25 @@
 #define STM32_APB1_TIM6_CLKIN    (STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM7_CLKIN    (STM32_PCLK1_FREQUENCY)
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The STM32L-Discovery board has four LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
- * LD1 COM:   LD2 default status is red. LD2 turns to green to indicate that
- *            communications are in progress between the PC and the ST-LINK/V2.
+ * LD1 COM:   LD2 default status is red. LD2 turns to green to indicate
+ *            that communications are in progress between the PC and the
+ *            ST-LINK/V2.
  * LD2 PWR:   Red LED indicates that the board is powered.
  *
  * And two LEDs can be controlled by software:
  *
- * User LD3:  Green LED is a user LED connected to the I/O PB7 of the STM32L152
- *            MCU.
- * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the STM32L152
- *            MCU.
+ * User LD3:  Green LED is a user LED connected to the I/O PB7 of the
+ *            STM32L152 MCU.
+ * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the
+ *            STM32L152 MCU.
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -189,8 +196,9 @@
 #define BOARD_LED1_BIT           (1 << BOARD_LED1)
 #define BOARD_LED2_BIT           (1 << BOARD_LED2)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 8 LEDs on board the
- * STM32L-Discovery.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDS is defined, then NuttX will control the 2 LEDs on
+ * board the STM32L-Discovery.  The following definitions describe how NuttX
+ * controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
  *                                                   LED1     LED2
@@ -215,12 +223,14 @@
 #define LED_ASSERTION            2
 #define LED_PANIC                3
 
-/* Button definitions ***************************************************************/
-/* The STM32L-Discovery supports two buttons; only one button is controllable by
- * software:
+/* Button definitions *******************************************************/
+
+/* The STM32L-Discovery supports two buttons; only one button is controllable
+ * by software:
  *
- *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32L152RBT6.
- *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32L152RBT6.
+ *   B1 USER:  user and wake-up button connected to the I/O PA0 of the
+ *             STM32L152.
+ *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32L152.
  */
 
 #define BUTTON_USER              0
@@ -228,11 +238,12 @@
 
 #define BUTTON_USER_BIT          (1 << BUTTON_USER)
 
-/* Alternate Pin Functions **********************************************************/
-/* The STM32L-Discovery has no on-board RS-232 driver.  Further, there are no USART
- * pins that do not conflict with the on board resources, in particular, the LCD:
- * Most USART pins are available if the LCD is enabled; USART2 may be used if either
- * the LCD or the on-board LEDs are disabled.
+/* Alternate Pin Functions **************************************************/
+
+/* The STM32L-Discovery has no on-board RS-232 driver.  Further, there
+ * are no USART pins that do not conflict with the on board resources, in
+ * particular, the LCD.  Most USART pins are available if the LCD is enabled;
+ * USART2 may be used if either the LCD or the on-board LEDs are disabled.
  *
  *   PA9   USART1_TX  LCD glass COM1  P2, pin 22
  *   PA10  USART1_RX  LCD glass COM2  P2, pin 21

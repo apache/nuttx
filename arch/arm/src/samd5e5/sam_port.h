@@ -57,9 +57,9 @@
 
 /* Bit-encoded input to sam_portconfig() */
 
-/* 24-bit Encoding.  This could be compacted into 16-bits by making the bit usage
- * mode specific.  However, by giving each bit field a unique position, we handle
- * bad combinations of properties safely.
+/* 24-bit Encoding. This could be compacted into 16-bits by making the bit
+ * usage mode specific. However, by giving each bit field a unique position,
+ * we handle bad combinations of properties safely.
  *
  *   MODE         BITFIELDS
  *   ------------ -----------------------------
@@ -85,12 +85,13 @@
  *   Peripheral:  MM.. .... .... .... .... ....
  */
 
-#define PORT_MODE_SHIFT            (22)        /* Bits 22-23: PORT mode */
+#define PORT_MODE_SHIFT            (22)        						/* Bits 22-23: PORT mode */
 #define PORT_MODE_MASK             (3 << PORT_MODE_SHIFT)
 #  define PORT_INPUT               (0 << PORT_MODE_SHIFT) /* PORT Input */
 #  define PORT_OUTPUT              (1 << PORT_MODE_SHIFT) /* PORT Output */
 #  define PORT_PERIPHERAL          (2 << PORT_MODE_SHIFT) /* Controlled by peripheral */
 #  define PORT_INTERRUPT           (3 << PORT_MODE_SHIFT) /* Interrupting input */
+#define PORT_MODE(n)			   ((uint8_t)(n) << PORT_MODE_SHIFT)
 
 /* Pull-up/down resistor control for inputs
  *
@@ -217,8 +218,8 @@
 #  define PORT_OUTREADBACK_DISABLE (0 << PORT_OUTREADBACK_SHIFT)
 #  define PORT_OUTREADBACK_ENABLE  (1 << PORT_OUTREADBACK_SHIFT)
 
-/* If the pin is a PORT output, then this identifies the initial output value:
- *
+/* If the pin is a PORT output, then this
+ * identifies the initial output value:
  *   MODE         BITFIELDS
  *   ------------ -----------------------------
  *                2222 1111 1111 1100 0000 0000
@@ -251,6 +252,8 @@
 #  define PORT_INT_CHANGE          (0 << PORT_INT_SHIFT) /* Pin change */
 #  define PORT_INT_RISING          (1 << PORT_INT_SHIFT) /* Rising edge */
 #  define PORT_INT_FALLING         (2 << PORT_INT_SHIFT) /* Falling edge */
+#  define PORT_INT_BOTH            (3 << PORT_INT_SHIFT) /* Both edge */
+#  define PORT_INT_HIGH            (4 << PORT_INT_SHIFT) /* High edge */
 
 /* This identifies the PORT port:
  *

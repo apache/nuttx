@@ -168,7 +168,7 @@ struct esp32_dev_s
   const struct esp32_config_s *config; /* Constant configuration */
   uint32_t baud;                       /* Configured baud */
   uint32_t status;                     /* Saved status bits */
-  uint8_t  cpuint;                     /* CPU interrupt assigned to this UART */
+  int      cpuint;                     /* CPU interrupt assigned to this UART */
   uint8_t  parity;                     /* 0=none, 1=odd, 2=even */
   uint8_t  bits;                       /* Number of bits (5-9) */
   bool     stopbits2;                  /* true: Configure with 2 stop bits instead of 1 */
@@ -528,17 +528,17 @@ static int esp32_setup(struct uart_dev_s *dev)
    * But only one GPIO pad can connect with input signal
    */
 
-  esp32_configgpio(priv->config->txpin, OUTPUT_FUNCTION_2);
+  esp32_configgpio(priv->config->txpin, OUTPUT_FUNCTION_3);
   gpio_matrix_out(priv->config->txpin, priv->config->txsig, 0, 0);
 
-  esp32_configgpio(priv->config->rxpin, INPUT_FUNCTION_2);
+  esp32_configgpio(priv->config->rxpin, INPUT_FUNCTION_3);
   gpio_matrix_in(priv->config->rxpin, priv->config->rxsig, 0);
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  esp32_configgpio(priv->config->rtspin, OUTPUT_FUNCTION_2);
+  esp32_configgpio(priv->config->rtspin, OUTPUT_FUNCTION_3);
   gpio_matrix_out(priv->config->rtspin, priv->config->rtssig, 0, 0);
 
-  esp32_configgpio(priv->config->ctspin, INPUT_FUNCTION_2);
+  esp32_configgpio(priv->config->ctspin, INPUT_FUNCTION_3);
   gpio_matrix_in(priv->config->ctspin, priv->config->ctssig, 0);
 #endif
 
@@ -711,7 +711,7 @@ static void esp32_detach(struct uart_dev_s *dev)
   /* And release the CPU interrupt */
 
   esp32_free_cpuint(priv->cpuint);
-  priv->cpuint = 0xff;
+  priv->cpuint = -1;
 }
 
 /****************************************************************************
@@ -845,10 +845,6 @@ static int esp32_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        /* Return baud */
-
-        cfsetispeed(termiosp, priv->baud);
-
         /* Return parity */
 
         termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
@@ -863,6 +859,10 @@ static int esp32_ioctl(struct file *filep, int cmd, unsigned long arg)
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
         termiosp->c_cflag |= (priv->flowc) ? (CCTS_OFLOW | CRTS_IFLOW): 0;
 #endif
+        /* Return baud */
+
+        cfsetispeed(termiosp, priv->baud);
+
         /* Return number of bits */
 
         switch (priv->bits)

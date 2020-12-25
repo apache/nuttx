@@ -75,7 +75,7 @@ int pthread_condattr_init(FAR pthread_condattr_t *attr)
     }
   else
     {
-      *attr = 0;
+      attr->clockid = CLOCK_REALTIME;
     }
 
   linfo("Returning %d\n", ret);

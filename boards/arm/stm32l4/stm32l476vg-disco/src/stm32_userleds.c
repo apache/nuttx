@@ -102,8 +102,13 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
         {
           /* Restore normal LEDs operation */
 
-          //stm32l4_gpiowrite(GPIO_LED_RED, (ledset & BOARD_LED_RED_BIT) != 0);
-          //stm32l4_gpiowrite(GPIO_LED_GRN, (ledset & BOARD_LED_GRN_BIT) != 0);
+          /* stm32l4_gpiowrite(GPIO_LED_RED,
+           *   (ledset & BOARD_LED_RED_BIT) != 0);
+           */
+
+          /* stm32l4_gpiowrite(GPIO_LED_GRN,
+           *   (ledset & BOARD_LED_GRN_BIT) != 0);
+           */
         }
         break;
 
@@ -175,12 +180,13 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LD4,5 GPIO for output */
 
   stm32l4_configgpio(GPIO_LED_RED);
   stm32l4_configgpio(GPIO_LED_GRN);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -205,7 +211,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   stm32l4_gpiowrite(GPIO_LED_RED, (ledset & BOARD_LED_RED_BIT) != 0);
   stm32l4_gpiowrite(GPIO_LED_GRN, (ledset & BOARD_LED_GRN_BIT) != 0);

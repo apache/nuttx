@@ -1,0 +1,16 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "EOS S3 Configuration Options"
+
+menu "EOS S3 Peripheral Support"
+
+config EOSS3_UART
+	bool "UART"
+	default n
+	select UART_SERIALDRIVER
+	select SCHED_HPWORK
+
+endmenu

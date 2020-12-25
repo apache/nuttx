@@ -94,6 +94,13 @@ SECTIONS
         _ebss = ABSOLUTE(.);
     } > ksram
 
+    /* Emit the the D3 power domain section for locating BDMA data */
+
+    .sram4 :
+    {
+    } > sram4
+
+
     /* Stabs debugging sections */
 
     .stab 0 : { *(.stab) }

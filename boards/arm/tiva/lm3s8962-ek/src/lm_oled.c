@@ -122,7 +122,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = rit_initialize(spi, devno);
       if (!dev)
         {
-          gerr("ERROR: Failed to bind SSI port 0 to OLED %d: %d\n", devno);
+          gerr("ERROR: Failed to bind SSI port 0 to OLED %d\n", devno);
         }
      else
         {
@@ -134,6 +134,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
           return dev;
         }
     }
+
   return NULL;
 }
 

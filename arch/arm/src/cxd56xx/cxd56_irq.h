@@ -48,6 +48,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The size of one interrupt stack.  This is the configured value aligned
+ * the 8-bytes as required by the ARM EABI.
+ */
+
+#define INTSTACK_SIZE  (CONFIG_ARCH_INTERRUPTSTACK & ~7)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -68,12 +74,13 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+EXTERN uintptr_t arm_intstack_base(void);
+EXTERN uintptr_t arm_intstack_alloc(void);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

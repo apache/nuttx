@@ -178,7 +178,8 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
       ifdesc = (struct usb_ifdesc_s *)configdesc;
       if (ifdesc->type == USB_DESC_TYPE_INTERFACE)
         {
-          /* Yes, extract the class information from the interface descriptor.
+          /* Yes, extract the class information from the interface
+           * descriptor.
            * Typically these values are zero meaning that the "real" ID
            * information resides in the device descriptor.
            */
@@ -192,7 +193,7 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
           return OK;
         }
 
-     /* Increment the address of the next descriptor */
+      /* Increment the address of the next descriptor */
 
       configdesc += ifdesc->len;
       remaining  -= ifdesc->len;
@@ -281,8 +282,8 @@ static inline int usbhost_classbind(FAR struct usbhost_hubport_s *hport,
  *      into this caller-provided memory location.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   - Only a single class bound to a single device is supported.
@@ -430,11 +431,11 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   ret = DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
   if (ret < 0)
     {
-      uerr("ERROR: Failed to set address: %d\n");
+      uerr("ERROR: Failed to set address: %d\n", ret);
       goto errout;
     }
 
-  nxsig_usleep(2*1000);
+  nxsig_usleep(2 * 1000);
 
   /* Assign the function address to the port */
 
@@ -459,7 +460,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
 
   ret = DRVR_CTRLIN(hport->drvr, hport->ep0, ctrlreq, buffer);
   if (ret < 0)
-   {
+    {
       uerr("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
            USB_SIZEOF_CFGDESC, ret);
       goto errout;
@@ -467,12 +468,14 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
 
   /* Extract the full size of the configuration data */
 
-  cfglen = (unsigned int)usbhost_getle16(((struct usb_cfgdesc_s *)buffer)->totallen);
+  cfglen = (unsigned int)
+           usbhost_getle16(((struct usb_cfgdesc_s *)buffer)->totallen);
   uinfo("sizeof config data: %d\n", cfglen);
 
   if (cfglen > maxlen)
     {
-      uerr("ERROR: Configuration doesn't fit in buffer, length=%d, maxlen=%d\n",
+      uerr("ERROR: Configuration doesn't fit in buffer, "
+           "length=%d, maxlen=%d\n",
            cfglen, maxlen);
       ret = -E2BIG;
       goto errout;
@@ -532,7 +535,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
 
   /* Some devices may require some delay before initialization */
 
-  nxsig_usleep(100*1000);
+  nxsig_usleep(100 * 1000);
 
 #ifdef CONFIG_USBHOST_COMPOSITE
   /* Check if the device attached to the downstream port if a USB composite

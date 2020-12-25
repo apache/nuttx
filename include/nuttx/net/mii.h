@@ -71,9 +71,13 @@
 #define MII_MMDCONTROL               0x0d      /* MMD access control register */
 #define MII_ESTATUS                  0x0f      /* Extended status register */
 
-/* Extended Registers: Registers 16-31 may be used for vendor specific abilities */
+/* Extended Registers: Registers 16-31 may be used for vendor specific
+ * abilities
+ */
 
-/* National Semiconductor DP83840: 0x07-0x11, 0x14, 0x1a, 0x1d-0x1f reserved */
+/* National Semiconductor DP83840: 0x07-0x11, 0x14, 0x1a, 0x1d-0x1f
+ * reserved
+ */
 
 #define MII_DP83840_COUNTER          0x12      /* Disconnect counter */
 #define MII_DP83840_FCSCOUNTER       0x13      /* False carrier sense counter */
@@ -143,7 +147,9 @@
 #define MII_KSZ8081_PHYCTRL1         0x1e      /* PHY Control 1 */
 #define MII_KSZ8081_PHYCTRL2         0x1f      /* PHY Control 2 */
 
-/* National Semiconductor DP83848C PHY Extended Registers. 0x8-0x15, 0x13, 0x1c reserved */
+/* National Semiconductor DP83848C PHY Extended Registers.
+ * 0x8-0x15, 0x13, 0x1c reserved
+ */
 
 #define MII_DP83848C_STS             0x10      /* RO PHY Status Register */
 #define MII_DP83848C_MICR            0x11      /* RW MII Interrupt Control Register */
@@ -157,6 +163,24 @@
 #define MII_DP83848C_10BTSCR         0x1a      /* RW 10Base-T Status/Control Register */
 #define MII_DP83848C_CDCTRL1         0x1b      /* RW CD Test Control Register and BIST Extensions Register */
 #define MII_DP83848C_EDCR            0x1e      /* RW Energy Detect Control Register */
+
+/* Texas Instruments DP83825I PHY Extended Registers. */
+
+#define MII_DP83825I_PHYSTS          0x10      /* RO PHY Status Register */
+#define MII_DP83825I_PHYSCR          0x11      /* RW PHY Specific Control Register */
+#define MII_DP83825I_MISR1           0x12      /* RO MII Interrupt Status Register 1 */
+#define MII_DP83825I_MISR2           0x13      /* RO MII Interrupt Status Register 2 */
+#define MII_DP83825I_FCSCR           0x14      /* RO False Carrier Sense Counter Register */
+#define MII_DP83825I_RECR            0x15      /* RO Receive Error Counter Register */
+#define MII_DP83825I_BICSR           0x16      /* RW BIST Control Register */
+#define MII_DP83825I_RCSR            0x17      /* RW RMII and Control and Status Register */
+#define MII_DP83825I_LEDCR           0x18      /* RW LED Direct Control Register */
+#define MII_DP83825I_PHYCR           0x19      /* RW PHY Control Register */
+#define MII_DP83825I_10BTSCR         0x1a      /* RW 10Base-T Status/Control Register */
+#define MII_DP83825I_BICSR1          0x1b      /* RW BIST Control Register 1 */
+#define MII_DP83825I_BICSR2          0x1c      /* RW BIST Control Register 2 */
+#define MII_DP83825I_LEDCR           0x1e      /* RW Energy Detect Control Register */
+#define MII_DP83825I_PHYRCR          0x1f      /* RW PHY Reset Control Register */
 
 /* SMSC LAN8720 PHY Extended Registers */
 
@@ -219,7 +243,9 @@
 #define MII_MSR_100BASETXFULL        (1 << 14) /* Bit 14: 100BASE-TX full duplex able */
 #define MII_MSR_100BASET4            (1 << 15) /* Bit 15: 100BASE-T4 able */
 
-/* MII ID1 register bits: Bits 3-18 of the Organizationally Unique identifier (OUI) */
+/* MII ID1 register bits: Bits 3-18 of the Organizationally Unique
+ * identifier (OUI)
+ */
 
 /* MII ID2 register bits */
 
@@ -318,6 +344,7 @@
 #  define MII_MMDCONTROL_FUNC_WINCR  (3 << MII_MMDCONTROL_FUNC_SHIFT) /* Data, post incr on writes */
 
 /* Extended status register */
+
                                                /* Bits 0-11: Reserved */
 #define MII_ESTATUS_1000BASETHALF    (1 << 12) /* Bit 12: 1000BASE-T Half Duplex able */
 #define MII_ESTATUS_1000BASETFULL    (1 << 13) /* Bit 13: 1000BASE-T Full Duplex able */
@@ -347,6 +374,30 @@
 #define MII_RBR_RXOVFSTS             (1 << 3)  /* Bit 3: RX FIFO overflow */
 #define MII_RBR_RMIIREV10            (1 << 4)  /* Bit 4: 0=RMIIv1.2 1-RMIIv1.0 */
 #define MII_RBR_RMIIMODE             (1 << 5)  /* Bit 5: 0=MII mode 1=RMII mode */
+
+/* Texas Instruments DP83825I ***********************************************/
+
+/* DP838825I MII ID1/2 register bits */
+
+#define MII_PHYID1_DP83825I          0x2000    /* ID1 value for DP838825 */
+#define MII_PHYID2_DP83825I          0xa140    /* ID2 value for DP838825 */
+
+/* PHYSTS Register (0x10) */
+
+#define MII_DP83825I_PHYSTS_SPEED   (1 << 1)   /* Bit 2: Speed Status Register */
+#define MII_DP83825I_PHYSTS_DUPLEX  (1 << 2)   /* Bit 3: Duplex Status Register */
+
+/* RCSC Register (0x17) */
+
+#define MII_DP83825I_RCSC_ELAST_MASK 0x0003    /* Bits 0-1: Receive elasticity buffer */
+#  define MII_DP83825I_RCSC_ELAST_14 0x0000    /*   14 bit tolerance */
+#  define MII_DP83825I_RCSC_ELAST_2  0x0001    /*   2 bit tolerance */
+#  define MII_DP83825I_RCSC_ELAST_6  0x0002    /*   6 bit tolerance */
+#  define MII_DP83825I_RCSC_ELAST_10 0x0003    /*   10 bit tolerance */
+#define MII_DP83825I_RCSC_RXUNFSTS   (1 << 2)  /* Bit 2: RX FIFO underflow */
+#define MII_DP83825I_RCSC_RXOVFSTS   (1 << 3)  /* Bit 3: RX FIFO overflow */
+#define MII_DP83825I_RCSC_RMIIREV10  (1 << 4)  /* Bit 4: 0=RMIIv1.2 1-RMIIv1.0 */
+#define MII_DP83825I_RCSC_RMIICS     (1 << 7)  /* Bit 7: 0=25MHz 1=50MHz */
 
 /* SMSC LAN8720 *************************************************************/
 
@@ -480,7 +531,7 @@
 #define LM_LEDCONFIG_LED0_10BASET    (6 << LM_LEDCONFIG_LED0_SHIFT)  /* 10BASE-T mode */
 #define LM_LEDCONFIG_LED0_FDUPLEX    (7 << LM_LEDCONFIG_LED0_SHIFT)  /* Full duplex */
 #define LM_LEDCONFIG_LED0_OKRXTX     (8 << LM_LEDCONFIG_LED0_SHIFT)  /* Full duplex */
-#define LM_LEDCONFIG_LED1_SHIFT      (4)        /* Bits 7-4: LED1 Source */
+#define LM_LEDCONFIG_LED1_SHIFT      (4)                             /* Bits 7-4: LED1 Source */
 #define LM_LEDCONFIG_LED1_MASK       (0x0f << LM_LEDCONFIG_LED1_SHIFT)
 #define LM_LEDCONFIG_LED1_LINKOK     (0 << LM_LEDCONFIG_LED1_SHIFT)  /* Link OK */
 #define LM_LEDCONFIG_LED1_RXTX       (1 << LM_LEDCONFIG_LED1_SHIFT)  /* RX or TX activity */
@@ -543,6 +594,7 @@
 #  define KS8721_10BTCR_MODE_10BTFD  (5 << KS8721_10BTCR_MODE_SHIFT) /* 10BASE-T full duplex */
 #  define KS8721_10BTCR_MODE_100BTFD (6 << KS8721_10BTCR_MODE_SHIFT) /* 100BASE-T full duplex */
 #  define KS8721_10BTCR_MODE_ISOLATE (7 << KS8721_10BTCR_MODE_SHIFT) /* PHY/MII isolate */
+
 #define KS8721_10BTCR_ISOLATE        (1 << 5)  /* Bit 5:  PHY isolate */
 #define KS8721_10BTCR_PAUSE          (1 << 6)  /* Bit 6:  Enable pause */
 #define KS8721_10BTCR_ANEGCOMP       (1 << 7)  /* Bit 7:  Auto-negotiation complete */
@@ -567,9 +619,11 @@
 #define MII_PHYID2_KSZ8081           0x1560    /* ID2 value for Micrel KSZ8081 */
 
 /* KSZ8081 Digital Reserve Control */
+
                                                /* Bits 5-15: Reserved */
 #define KSZ8081_DRCTRL_PLLOFF        (1 << 4)  /* Bit 4: Turn PLL off in EDPD mode */
                                                /* Bits 0-3: Reserved */
+
 /* KSZ8041/51/81 Register 0x1b: Interrupt control/status */
 
 #define MII_KSZ80X1_INT_JEN          (1 << 15) /* Jabber interrupt enable */
@@ -613,10 +667,12 @@
 #  define MII_PHYCTRL2_MODE_DUPLEX   (4 << MII_PHYCTRL2_MODE_SHIFT) /* Full duplex */
 #  define MII_PHYCTRL2_MODE_10FDX    (5 << MII_PHYCTRL2_MODE_SHIFT) /* 10Base-T full-duplex */
 #  define MII_PHYCTRL2_MODE_100FDX   (6 << MII_PHYCTRL2_MODE_SHIFT) /* 100Base-T full-duplex */
+
 #define MII_PHYCTRL2_SEQTEST         (1 << 1)  /* Bit 1:  Enable SQE test */
 #define MII_PHYCTRL2_DISDS           (1 << 0)  /* Bit 1:  Disable data scrambling */
 
 /* KSZ8051/81 Register 0x1e: PHY Control 1 */
+
                                                /* Bits 10-15: Reserved */
 #define MII_PHYCTRL1_ENPAUSE         (1 << 9)  /* Bit 9:  Enable pause */
 #define MII_PHYCTRL1_LINKSTATUS      (1 << 8)  /* Bit 8:  Link status */
@@ -721,6 +777,7 @@
 #  define MII_CONFIG2_SNR_AV64            (1 <<  MII_CONFIG2_SNR_SHIFT)  /* signal to noise ratio averaging over  64 symbols */
 #  define MII_CONFIG2_SNR_AV128           (2 <<  MII_CONFIG2_SNR_SHIFT)  /* signal to noise ratio averaging over 128 symbols */
 #  define MII_CONFIG2_SNR_AV256           (3 <<  MII_CONFIG2_SNR_SHIFT)  /* signal to noise ratio averaging over 256 symbols */
+
 #define MII_CONFIG2_WLIM_SHIFT            (6)  /* SQI warning limit */
 #define MII_CONFIG2_WLIM_MASK             (7 << MII_CONFIG2_WLIM_SHIFT)
 #  define MII_CONFIG2_WLIM_NO             (0 << MII_CONFIG2_WLIM_SHIFT)  /* no warning */
@@ -731,6 +788,7 @@
 #  define MII_CONFIG2_WLIM_E              (5 << MII_CONFIG2_WLIM_SHIFT)  /* Class E SNR warning limit */
 #  define MII_CONFIG2_WLIM_F              (6 << MII_CONFIG2_WLIM_SHIFT)  /* Class F SNR warning limit */
 #  define MII_CONFIG2_WLIM_G              (7 << MII_CONFIG2_WLIM_SHIFT)  /* Class G SNR warning limit */
+
 #define MII_CONFIG2_SNR_F_SHIFT           (3)  /* signal to noise ratio fail limit */
 #define MII_CONFIG2_SNR_F_MASK            (7 << MII_CONFIG2_SNR_F_SHIFT)
 #  define MII_CONFIG2_SNR_F_NL            (0 << MII_CONFIG2_SNR_F_SHIFT)  /* no limit */
@@ -741,8 +799,9 @@
 #  define MII_CONFIG2_SNR_F_CLE           (5 << MII_CONFIG2_SNR_F_SHIFT)  /* Class E */
 #  define MII_CONFIG2_SNR_F_CLF           (6 << MII_CONFIG2_SNR_F_SHIFT)  /* Class F */
 #  define MII_CONFIG2_SNR_F_CLG           (7 << MII_CONFIG2_SNR_F_SHIFT)  /* Class G */
+
 #define MII_CONFIG2_JUMBO_EN              (1 << 2)  /* enable packets up to 16 kB instead of 4 kB */
-#define MII_CONFIG2_SLP_T_SHIFT           (0)  /* sleep request timeout */
+#define MII_CONFIG2_SLP_T_SHIFT           (0)       /* sleep request timeout */
 #define MII_CONFIG2_SLP_T_MASK            (3 << MII_CONFIG2_SLP_T_SHIFT)
 #  define MII_CONFIG2_SLP_T_04            (0 << MII_CONFIG2_SLP_T_SHIFT)  /* sleep request timeout 0.4 ms */
 #  define MII_CONFIG2_SLP_T_1             (1 << MII_CONFIG2_SLP_T_SHIFT)  /* sleep request timeout 1 ms */

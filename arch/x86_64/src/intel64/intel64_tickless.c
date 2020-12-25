@@ -436,7 +436,7 @@ int up_alarm_start(FAR const struct timespec *ts)
 
   up_tmr_sync_down();
 
-  tmrinfo("%d.%09d\n", ts->tv_sec, ts->tv_nsec);
+  tmrinfo("%d.%09ld\n", ts->tv_sec, ts->tv_nsec);
   tmrinfo("start\n");
 
   return OK;

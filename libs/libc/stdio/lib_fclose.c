@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_fclose.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013, 2017 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,6 +70,9 @@
 
 int fclose(FAR FILE *stream)
 {
+  FAR struct streamlist *slist;
+  FAR FILE *prev = NULL;
+  FAR FILE *next;
   int errcode = EINVAL;
   int ret = ERROR;
   int status;
@@ -77,22 +81,59 @@ int fclose(FAR FILE *stream)
 
   if (stream)
     {
+      ret = OK;
+
+      /* If the stream was opened for writing, then flush the stream */
+
+      if ((stream->fs_oflags & O_WROK) != 0)
+        {
+          ret = lib_fflush(stream, true);
+          errcode = get_errno();
+        }
+
+      /* Skip close the builtin streams(stdin, stdout and stderr) */
+
+      if (stream == stdin || stream == stdout || stream == stderr)
+        {
+          goto done;
+        }
+
+      /* Remove FILE structure from the stream list */
+
+      slist = nxsched_get_streams();
+      stream_semtake(slist);
+
+      for (next = slist->sl_head; next; prev = next, next = next->fs_next)
+        {
+          if (next == stream)
+            {
+              if (next == slist->sl_head)
+                {
+                  slist->sl_head = next->fs_next;
+                }
+              else
+                {
+                  prev->fs_next = next->fs_next;
+                }
+
+              if (next == slist->sl_tail)
+                {
+                  slist->sl_tail = prev;
+                }
+
+              break;
+            }
+        }
+
+      stream_semgive(slist);
+
       /* Check that the underlying file descriptor corresponds to an an open
        * file.
        */
 
-      ret = OK;
       if (stream->fs_fd >= 0)
         {
-          /* If the stream was opened for writing, then flush the stream */
-
-          if ((stream->fs_oflags & O_WROK) != 0)
-            {
-              ret = lib_fflush(stream, true);
-              errcode = get_errno();
-            }
-
-          /* Close the underlying file descriptor and save the return status */
+          /* Close the file descriptor and save the return status */
 
           status = close(stream->fs_fd);
 
@@ -110,7 +151,7 @@ int fclose(FAR FILE *stream)
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
       /* Destroy the semaphore */
 
-      sem_destroy(&stream->fs_sem);
+      _SEM_DESTROY(&stream->fs_sem);
 
       /* Release the buffer */
 
@@ -119,27 +160,12 @@ int fclose(FAR FILE *stream)
         {
           lib_free(stream->fs_bufstart);
         }
-
-      /* Clear the whole structure */
-
-      memset(stream, 0, sizeof(FILE));
-
-#else
-#if CONFIG_NUNGET_CHARS > 0
-      /* Reset the number of ungetc characters */
-
-      stream->fs_nungotten = 0;
-#endif
-      /* Reset the flags */
-
-      stream->fs_oflags = 0;
 #endif
 
-      /* Setting the file descriptor to -1 makes the stream available for reuse */
-
-      stream->fs_fd = -1;
+      lib_free(stream);
     }
 
+done:
   /* On an error, reset the errno to the first error encountered and return
    * EOF.
    */

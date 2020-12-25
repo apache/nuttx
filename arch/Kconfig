@@ -14,6 +14,7 @@ config ARCH_ARM
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
+	select ARCH_HAVE_SYSCALL_HOOKS
 	---help---
 		The ARM architectures
 
@@ -60,6 +61,7 @@ config ARCH_RISCV
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
+	select ARCH_HAVE_SYSCALL_HOOKS
 	---help---
 		RISC-V 32 and 64-bit RV32 / RV64 architectures.
 
@@ -67,10 +69,10 @@ config ARCH_SIM
 	bool "Simulation"
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_RTC_SUBSECONDS
+	select ARCH_HAVE_SERIAL_TERMIOS
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_TESTSET
-	select ARCH_NOINTC
 	select ALARM_ARCH
 	select ONESHOT
 	select SERIAL_CONSOLE
@@ -84,11 +86,13 @@ config ARCH_X86
 
 config ARCH_X86_64
 	bool "x86_64"
+	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		x86-64 architectures.
 
 config ARCH_XTENSA
 	bool "Xtensa"
+	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_TESTSET
@@ -144,6 +148,44 @@ source arch/xtensa/Kconfig
 source arch/z16/Kconfig
 source arch/z80/Kconfig
 source arch/or1k/Kconfig
+
+config ARCH_CHIP_CUSTOM
+	bool
+	default n
+
+if ARCH_CHIP_CUSTOM
+menu "Custom Chip Configuration"
+
+config ARCH_CHIP_CUSTOM_NAME
+	string "Custom chip name"
+	default ""
+	---help---
+		This is a name for the chip.  It is not used except to return the
+		information via the NSH uname command.
+
+config ARCH_CHIP_CUSTOM_DIR
+	string "Custom chip directory"
+	default ""
+	---help---
+		If the custom chip configuration is selected, then it is necessary
+		to also tell the build system where it can find the chip directory
+		for the custom chip.
+
+		In this case, the chip directory is assumed to lie outside the
+		NuttX directory.  The provided path must then be a full, absolute
+		path to some location outside of the NuttX source tree (like
+		"~/projects/mychip").
+
+config ARCH_CHIP_CUSTOM_DIR_RELPATH
+	bool "Relative custom chip directory"
+	default y
+	---help---
+		Specifies that the chip directory is relative to the NuttX directory.
+
+endmenu # Custom Chip Configuration
+endif #ARCH_CHIP_CUSTOM
+
+source arch/dummy/Kconfig
 
 config ARCH_TOOLCHAIN_IAR
 	bool
@@ -274,14 +316,13 @@ config ARCH_HAVE_RTC_SUBSECONDS
 	bool
 	default n
 
-config ARCH_GLOBAL_IRQDISABLE
+config ARCH_HAVE_SYSCALL_HOOKS
 	bool
 	default n
 	---help---
-		Indicates that disabling interrupts on one CPU will either (1) disable
-		all interrupts globally on all CPUs, or (2) will disable interprocessor
-		interrupts as well so that no context switches can occur on the CPU
-		that disabled "local" interrupts.
+		Indicates that the architecture supports the system call hooks as
+		required if CONFIG_SCHED_INSTRUMENTATION_SYSCALL is enabled.  Refer
+		to sched/Kconfig for additional information.
 
 config ARCH_FPU
 	bool "FPU support"
@@ -526,7 +567,8 @@ menuconfig PAGING
 	depends on ARCH_USE_MMU && !ARCH_ROMPGTABLE
 	---help---
 		If set =y in your configation file, this setting will enable the on-demand
-		paging feature as described in http://www.nuttx.org/NuttXDemandPaging.html.
+		paging feature as described in
+		https://nuttx.apache.org/docs/latest/components/paging.html.
 
 if PAGING
 

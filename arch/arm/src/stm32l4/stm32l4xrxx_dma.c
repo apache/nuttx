@@ -47,6 +47,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
@@ -713,7 +714,8 @@ static void stm32l4_dma12_setup(DMA_HANDLE handle, uint32_t paddr,
 
   DEBUGASSERT(dmachan->ctrl == DMA1 || dmachan->ctrl == DMA2);
 
-  dmainfo("paddr: %08x maddr: %08x ntransfers: %d ccr: %08x\n",
+  dmainfo("paddr: %08" PRIx32 " maddr: %08" PRIx32
+          " ntransfers: %zd ccr: %08" PRIx32 "\n",
           paddr, maddr, ntransfers, ccr);
 
 #ifdef CONFIG_STM32L4_DMACAPABLE

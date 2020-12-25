@@ -187,6 +187,12 @@
 
 typedef uint32_t nrf52_pinset_t;
 
+enum nrf52_gpio_detectmode_e
+{
+  NRF52_GPIO_DETECTMODE_DETECT,
+  NRF52_GPIO_DETECTMODE_LDETECT,
+};
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/

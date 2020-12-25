@@ -248,7 +248,7 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 {
   size_t heapsize;
-#ifdef CONFIG_CXX_EXCEPTION
+#ifdef CONFIG_ELF_EXIDX_SECTNAME
   int exidx;
 #endif
   int ret;
@@ -342,7 +342,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
     }
 #endif
 
-#ifdef CONFIG_CXX_EXCEPTION
+#ifdef CONFIG_ELF_EXIDX_SECTNAME
   exidx = elf_findsection(loadinfo, CONFIG_ELF_EXIDX_SECTNAME);
   if (exidx < 0)
     {

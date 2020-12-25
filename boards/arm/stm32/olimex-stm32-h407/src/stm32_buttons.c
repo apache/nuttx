@@ -54,8 +54,8 @@
  * Private Data
  ****************************************************************************/
 
-/* Pin configuration for each Olimex-STM32-H405 button.  This array is indexed by
- * the BUTTON_* definitions in board.h
+/* Pin configuration for each Olimex-STM32-H405 button. This array is indexed
+ * by the BUTTON_* definitions in board.h
  */
 
 static const uint32_t g_buttons[NUM_BUTTONS] =
@@ -78,7 +78,7 @@ static const uint32_t g_buttons[NUM_BUTTONS] =
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -90,6 +90,8 @@ void board_button_initialize(void)
     {
       stm32_configgpio(g_buttons[i]);
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
@@ -121,8 +123,8 @@ uint32_t board_buttons(void)
  *
  *   After board_button_initialize() has been called, board_buttons() may be
  *   called to collect the state of all buttons.  board_buttons() returns an
- *   32-bit bit set with each bit associated with a button.  See the BUTTON_*_BIT
- *   definitions in board.h for the meaning of each bit.
+ *   32-bit bit set with each bit associated with a button.  See the
+ *   BUTTON_*_BIT definitions in board.h for the meaning of each bit.
  *
  *   board_button_irq() may be called to register an interrupt handler that
  *   will be called when a button is depressed or released.  The ID value is

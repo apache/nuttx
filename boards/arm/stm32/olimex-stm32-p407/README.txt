@@ -192,9 +192,9 @@ OTGFS Host
 
    Olimex STM32 P407 Configuration:
 
-     CONFIG_STM32F4DISCO_OLIMEXP407_PRIO - Priority of the USB host watier
+     CONFIG_STM32F_OLIMEXP407_PRIO - Priority of the USB host watier
        thread (default 100).
-     CONFIG_STM32F4DISCO_OLIMEXP407_STACKSIZE - Stacksize of the USB host
+     CONFIG_STM32_OLIMEXP407_STACKSIZE - Stacksize of the USB host
        waiter thread (default 1024)
 
   Class Driver Configuration

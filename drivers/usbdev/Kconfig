@@ -568,6 +568,135 @@ config CDCACM_PRODUCTSTR
 endif # !CDCACM_COMPOSITE
 endif # CDCACM
 
+menuconfig USBADB
+	bool "USB Android Debug Bridge (ADB) support"
+	default n
+	---help---
+		Enables USB Android Debug Bridge (ADB) support
+
+if USBADB
+
+menuconfig USBADB_COMPOSITE
+	bool "USBADB composite support"
+	default n
+	depends on USBDEV_COMPOSITE
+	---help---
+		Configure the ADB driver as part of a composite driver
+		(only if USBDEV_COMPOSITE is also defined)
+
+if !USBADB_COMPOSITE
+
+# In a composite device the EP0 config comes from the composite device
+# and the EP-Number is configured dynamically via composite_initialize
+
+config USBADB_EP0MAXPACKET
+	int "Endpoint 0 max packet size"
+	default 64
+	---help---
+		Endpoint 0 max packet size. Default 64.
+
+# In a composite device the EP-Numbers are configured dynamically via
+# composite_initialize
+
+config USBADB_EPBULKOUT
+	int "Bulk OUT endpoint number"
+	default 1
+	---help---
+		The logical 7-bit address of a hardware endpoint that supports
+		bulk OUT operation.  Default: 3
+
+config USBADB_EPBULKIN
+	int "Bulk IN endpoint number"
+	default 2
+	---help---
+		The logical 7-bit address of a hardware endpoint that supports
+		bulk IN operation.  Default: 2
+endif
+
+config USBADB_EPBULKOUT_FSSIZE
+	int "Bulk OUT full speed  MAXPACKET size"
+	default 64
+	---help---
+		Max package size for the bulk OUT endpoint if full speed mode.
+		Default 64.
+
+config USBADB_EPBULKOUT_HSSIZE
+	int "Bulk OUT out high speed  MAXPACKET size"
+	default 512
+	---help---
+		Max package size for the bulk OUT endpoint if high speed mode.
+		Default 512.
+
+config USBADB_EPBULKIN_FSSIZE
+	int "Bulk IN full speed  MAXPACKET size"
+	default 64
+	---help---
+		Max package size for the bulk IN endpoint if full speed mode.
+		Default 64.
+
+config USBADB_EPBULKIN_HSSIZE
+	int "Bulk IN high speed  MAXPACKET size"
+	default 512
+	---help---
+		Max package size for the bulk IN endpoint if high speed mode.
+		Default 512.
+
+config USBADB_NRDREQS
+	int "Number of read requests that can be in flight"
+	default 4
+	---help---
+		The number of read requests that can be in flight
+
+config USBADB_NWRREQS
+	int "Number of write requests that can be in flight"
+	default 4
+	---help---
+		The number of write/read requests that can be in flight
+
+if !USBADB_COMPOSITE
+
+config USBADB_VENDORID
+	hex "Vendor ID"
+	default 0x18d1
+	---help---
+		The vendor ID code/string. Default is Google Inc.
+
+config USBADB_PRODUCTID
+	hex "Product ID"
+	default 0x4e11
+	---help---
+		The product ID code/string. Default is Nexus One.
+
+config USBADB_VENDORSTR
+	string "Vendor string"
+	default "NuttX"
+
+config USBADB_PRODUCTSTR
+	string "Product string"
+	default "Debug Bridge"
+
+config USBADB_SERIALSTR
+	string "Serial string"
+	default "1234"
+
+endif # !USBADB_COMPOSITE
+
+config USBADB_CONFIGSTR
+	string "Configuration descriptor string"
+	default "ADB Config"
+
+config USBADB_INTERFACESTR
+	string "Interface descriptor string"
+	default "ADB Interface"
+
+config USBADB_NPOLLWAITERS
+	int "Number of ADB poll waiters"
+	default 1
+	---help---
+		Maximum number of threads that can be waiting on poll().
+
+endif # USBADB
+
 menuconfig USBMSC
 	bool "USB Mass storage class device"
 	default n
@@ -744,7 +873,8 @@ if RNDIS
 
 config RNDIS_NWRREQS
 	int "The number of write requests that can be in flight"
-	default 2
+	default 4 if NET_TCP_WRITE_BUFFERS
+	default 2 if !NET_TCP_WRITE_BUFFERS
 	---help---
 		The number of write/read requests that can be in flight
 

@@ -57,7 +57,7 @@
  * Macros
  ****************************************************************************/
 
-/* Exception entry logic.  On entry, thee context save area looks like:     */
+/* Exception entry logic.  On entry, the context save area looks like:      */
 /*     xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx SR PC                   */
 /*                                                  ^     ^+2*4             */
 /* Upon joining common logic, the context save are will look like:          */
@@ -69,7 +69,7 @@
 \label:
 	st.w	--sp, r10
 	mov		r10, \irqno
-	rjmp	avr32_xcptcommon	/* FIXME!!! Need IRQ in a register          */
+	rjmp	avr32_xcptcommon	/* FIXME!!! Need IRQ in a register */
 	.endm
 
 /****************************************************************************
@@ -129,7 +129,7 @@ vectortab:
  * Interrupts
  ****************************************************************************/
 
-/* The interrupt controller must provide an address that is relative to the */
+/* The interrupt controller must provide an address that is relative to     */
 /* the EVBA so it is natural to define these interrupt vectors just after   */
 /* the exception table. On entry to each interrupt handler, R8-R12, LR, PC  */
 /* and SR have already been pushed onto the system stack by the MCU.        */

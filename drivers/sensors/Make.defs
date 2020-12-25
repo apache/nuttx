@@ -37,6 +37,12 @@
 
 ifeq ($(CONFIG_SENSORS),y)
 
+CSRCS += sensor.c
+
+ifeq ($(CONFIG_SENSORS_WTGAHRS2),y)
+  CSRCS += wtgahrs2.c
+endif
+
 ifeq ($(CONFIG_SENSORS_HCSR04),y)
   CSRCS += hc_sr04.c
 endif
@@ -67,6 +73,10 @@ endif
 
 ifeq ($(CONFIG_SENSORS_AS726X),y)
   CSRCS += as726x.c
+endif
+
+ifeq ($(CONFIG_SENSORS_FXOS8700CQ),y)
+  CSRCS += fxos8700cq.c
 endif
 
 ifeq ($(CONFIG_SENSORS_KXTJ9),y)
@@ -227,10 +237,6 @@ ifeq ($(CONFIG_LIS3DH),y)
   CSRCS += lis3dh.c
 endif
 
-ifeq ($(CONFIG_SENSORS_MPU60X0),y)
-  CSRCS += mpu60x0.c
-endif
-
 ifeq ($(CONFIG_SENSORS_MAX31855),y)
   CSRCS += max31855.c
 endif
@@ -260,6 +266,10 @@ ifeq ($(CONFIG_SENSORS_ADT7320),y)
 endif
 
 endif # CONFIG_SPI
+
+ifeq ($(CONFIG_SENSORS_MPU60X0),y)
+  CSRCS += mpu60x0.c
+endif
 
 # Quadrature encoder upper half
 

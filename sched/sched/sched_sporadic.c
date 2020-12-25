@@ -84,10 +84,10 @@ static int sporadic_replenish_delay(FAR struct replenishment_s *repl,
 
 /* Timer expiration handlers */
 
-static void sporadic_budget_expire(int argc, wdparm_t arg1, ...);
-static void sporadic_interval_expire(int argc, wdparm_t arg1, ...);
-static void sporadic_replenish_expire(int argc, wdparm_t arg1, ...);
-static void sporadic_delay_expire(int argc, wdparm_t arg1, ...);
+static void sporadic_budget_expire(wdparm_t arg);
+static void sporadic_interval_expire(wdparm_t arg);
+static void sporadic_replenish_expire(wdparm_t arg);
+static void sporadic_delay_expire(wdparm_t arg);
 
 /* Misc. helpers */
 
@@ -290,7 +290,7 @@ static int sporadic_budget_start(FAR struct replenishment_s *mrepl)
   /* And start the timer for the budget interval */
 
   DEBUGVERIFY(wd_start(&mrepl->timer, sporadic->budget,
-                       sporadic_budget_expire, 1, (wdentry_t)mrepl));
+                       sporadic_budget_expire, (wdparm_t)mrepl));
 
   /* Then reprioritize to the higher priority */
 
@@ -348,8 +348,8 @@ static int sporadic_interval_start(FAR struct replenishment_s *mrepl)
    * be canceled if the thread exits.
    */
 
-  DEBUGVERIFY(wd_start(&mrepl->timer, remainder, sporadic_interval_expire,
-              1, (wdentry_t)mrepl));
+  DEBUGVERIFY(wd_start(&mrepl->timer, remainder,
+              sporadic_interval_expire, (wdparm_t)mrepl));
 
   /* Drop the priority of thread, possible causing a context switch. */
 
@@ -390,8 +390,8 @@ static int sporadic_replenish_start(FAR struct replenishment_s *repl)
 
   /* And start the timer for the budget interval */
 
-  DEBUGVERIFY(wd_start(&repl->timer, repl->budget, sporadic_replenish_expire,
-                       1, (wdentry_t)repl));
+  DEBUGVERIFY(wd_start(&repl->timer, repl->budget,
+                       sporadic_replenish_expire, (wdparm_t)repl));
 
   /* Then reprioritize to the higher priority */
 
@@ -426,8 +426,8 @@ static int sporadic_replenish_delay(FAR struct replenishment_s *repl,
 
   /* And start the timer for the delay prior to replenishing. */
 
-  DEBUGVERIFY(wd_start(&repl->timer, period, sporadic_delay_expire,
-                       1, (wdentry_t)repl));
+  DEBUGVERIFY(wd_start(&repl->timer, period,
+                       sporadic_delay_expire, (wdparm_t)repl));
   return OK;
 }
 
@@ -455,14 +455,14 @@ static int sporadic_replenish_delay(FAR struct replenishment_s *repl,
  *
  ****************************************************************************/
 
-static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
+static void sporadic_budget_expire(wdparm_t arg)
 {
-  FAR struct replenishment_s *mrepl = (FAR struct replenishment_s *)arg1;
+  FAR struct replenishment_s *mrepl = (FAR struct replenishment_s *)arg;
   FAR struct replenishment_s *repl;
   FAR struct sporadic_s *sporadic;
   FAR struct tcb_s *tcb;
 
-  DEBUGASSERT(argc == 1 && mrepl != NULL && mrepl->tcb != NULL);
+  DEBUGASSERT(mrepl != NULL && mrepl->tcb != NULL);
   tcb = mrepl->tcb;
 
   /* As a special case, we can do nothing here if scheduler has been locked.
@@ -562,11 +562,11 @@ static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
  *
  ****************************************************************************/
 
-static void sporadic_interval_expire(int argc, wdparm_t arg1, ...)
+static void sporadic_interval_expire(wdparm_t arg)
 {
-  FAR struct replenishment_s *mrepl = (FAR struct replenishment_s *)arg1;
+  FAR struct replenishment_s *mrepl = (FAR struct replenishment_s *)arg;
 
-  DEBUGASSERT(argc == 1 && mrepl != NULL);
+  DEBUGASSERT(mrepl != NULL);
 
   /* If we get here, then (1) this should be the main thread, and (2) there
    * should be no active replenishment thread.
@@ -597,13 +597,13 @@ static void sporadic_interval_expire(int argc, wdparm_t arg1, ...)
  *
  ****************************************************************************/
 
-static void sporadic_replenish_expire(int argc, wdparm_t arg1, ...)
+static void sporadic_replenish_expire(wdparm_t arg)
 {
-  FAR struct replenishment_s *repl = (FAR struct replenishment_s *)arg1;
+  FAR struct replenishment_s *repl = (FAR struct replenishment_s *)arg;
   FAR struct sporadic_s *sporadic;
   FAR struct tcb_s *tcb;
 
-  DEBUGASSERT(argc == 1 && repl != NULL && repl->tcb != NULL);
+  DEBUGASSERT(repl != NULL && repl->tcb != NULL);
   tcb      = repl->tcb;
 
   sporadic = tcb->sporadic;
@@ -664,11 +664,11 @@ static void sporadic_replenish_expire(int argc, wdparm_t arg1, ...)
  *
  ****************************************************************************/
 
-static void sporadic_delay_expire(int argc, wdparm_t arg1, ...)
+static void sporadic_delay_expire(wdparm_t arg)
 {
-  FAR struct replenishment_s *repl = (FAR struct replenishment_s *)arg1;
+  FAR struct replenishment_s *repl = (FAR struct replenishment_s *)arg;
 
-  DEBUGASSERT(argc == 1 && repl != NULL);
+  DEBUGASSERT(repl != NULL);
 
   /* Start the replenishment */
 

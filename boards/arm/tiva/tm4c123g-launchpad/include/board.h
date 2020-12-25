@@ -195,13 +195,4 @@
 #define GPIO_UART1_RX     GPIO_UART1_RX_1
 #define GPIO_UART1_TX     GPIO_UART1_TX_1
 
-/* Pin SPI definitions ******************************************************/
-
-/* Needed by: chip/common/tiva_ssi.c ****************************************/
-
-#define GPIO_SSI2_RX      GPIO_SSI2_RX_1
-#define GPIO_SSI2_TX      GPIO_SSI2_TX_1
-#define GPIO_SSI2_CLK     GPIO_SSI2_CLK_1
-#define GPIO_SSI2_FSS     GPIO_SSI2_FSS_1
-
 #endif /* __BOARDS_ARM_TMC4C123G_LAUNCHPAD_INCLUDE_BOARD_H */

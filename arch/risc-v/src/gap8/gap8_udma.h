@@ -102,7 +102,7 @@ struct gap8_udma_peripheral
 {
   /* Public */
 
-  UDMA_reg_t *regs;             /* Hardware config regs */
+  udma_reg_t *regs;             /* Hardware config regs */
   uint32_t id;                  /* GAP8_UDMA_ID_x */
   void (*on_tx)(void *arg);     /* tx callback */
   void (*on_rx)(void *arg);     /* rx callback */

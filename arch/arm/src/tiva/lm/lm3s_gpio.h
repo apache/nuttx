@@ -213,7 +213,8 @@
 #    define GPIO_ALT_15               (15 << GPIO_ALT_SHIFT)
 #endif
 
-/* If the pin is an GPIO digital output, then this identifies the initial output value:
+/* If the pin is an GPIO digital output, then this identifies the initial
+ * output value:
  *    .... .... .... .... .... ...V .... ....
  */
 

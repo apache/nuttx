@@ -18,7 +18,7 @@ Buildroot Toolchain
   Bitbucket GIT repository (https://bitbucket.org/nuttx/buildroot).
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
-  1. You must have already configured Nuttx in <some-dir>/nuttx.
+  1. You must have already configured NuttX in <some-dir>/nuttx.
 
      tools/configure.sh misoc:<sub-dir>
      make oldconfig context

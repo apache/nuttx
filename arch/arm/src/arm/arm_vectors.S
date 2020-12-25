@@ -132,7 +132,7 @@ arm_vectorirq:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	ldr	sp, .Lirqstackbase	/* SP = interrupt stack base */
-	str	r0, [sp]		/* Save the user stack pointer */
+	str	r0, [sp, #-4]!		/* Save the xcp address at SP-4 then update SP */
 	bl	arm_decodeirq		/* Call the handler */
 	ldr	sp, [sp]		/* Restore the user stack pointer */
 #else
@@ -432,13 +432,13 @@ arm_vectorfiq:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.bss
-	.align	4
+	.balign	4
 	.globl	g_intstackalloc
 	.type	g_intstackalloc, object
 	.globl	g_intstackbase
 	.type	g_intstackbase, object
 g_intstackalloc:
-	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
+	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
 g_intstackbase:
 	.skip	4
 	.size	g_intstackbase, 4

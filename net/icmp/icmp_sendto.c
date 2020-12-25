@@ -317,6 +317,14 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf,
       goto errout;
     }
 
+  /* Sanity check if the request len is greater than the net payload len */
+
+  if (len > NETDEV_PKTSIZE(dev) - (NET_LL_HDRLEN(dev) + IPv4_HDRLEN))
+    {
+      nerr("ERROR: Invalid packet length\n");
+      return -EINVAL;
+    }
+
   /* If we are no longer processing the same ping ID, then flush any pending
    * packets from the read-ahead buffer.
    *

@@ -85,9 +85,10 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   sam_configpio(PIO_USER);
+  return 1;
 }
 
 /****************************************************************************

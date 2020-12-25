@@ -114,6 +114,10 @@ static void appdsp_boot(void)
   cpu = up_cpu_index();
   DPRINTF("cpu = %d\n", cpu);
 
+  /* Setup NVIC */
+
+  up_irqinitialize();
+
   /* Setup FPU */
 
   fpuconfig();
@@ -137,7 +141,7 @@ static void appdsp_boot(void)
 
   /* Then transfer control to the IDLE task */
 
-  nx_idle_task(0, NULL);
+  nx_idle_trampoline();
 }
 
 /****************************************************************************

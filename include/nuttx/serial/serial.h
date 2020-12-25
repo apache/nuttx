@@ -300,7 +300,7 @@ struct uart_dev_s
   tcflag_t             tc_iflag;     /* Input modes */
   tcflag_t             tc_oflag;     /* Output modes */
   tcflag_t             tc_lflag;     /* Local modes */
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   pid_t                pid;          /* Thread PID to receive signals (-1 if none) */
 #endif
 #endif
@@ -355,7 +355,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 /************************************************************************************
@@ -387,8 +387,8 @@ void uart_xmitchars(FAR uart_dev_t *dev);
  * Description:
  *   This function is called from the UART interrupt handler when an interrupt
  *   is received indicating that are bytes available to be received.  This
- *   function will add chars to head of receive buffer.  Driver read() logic will take
- *   characters from the tail of the buffer.
+ *   function will add chars to head of receive buffer.  Driver read() logic
+ *   will take characters from the tail of the buffer.
  *
  ************************************************************************************/
 
@@ -499,8 +499,8 @@ void uart_recvchars_done(FAR uart_dev_t *dev);
  * Name: uart_reset_sem
  *
  * Description:
- *   This function is called when need reset uart semaphore, this may used in kill one
- *   process, but this process was reading/writing with the semaphore.
+ *   This function is called when need reset uart semaphore, this may used in
+ *   kill one process, but this process was reading/writing with the semaphore.
  *
  ************************************************************************************/
 

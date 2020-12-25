@@ -76,13 +76,15 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   uint8_t regval;
 
   regval  = getreg8(M16C_PD8);
   regval |= (SW1_BIT | SW2_BIT | SW3_BIT);
   putreg8(regval, M16C_PD8);
+
+  return 3;
 }
 
 /****************************************************************************

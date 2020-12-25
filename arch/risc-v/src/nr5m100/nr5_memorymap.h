@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/risc-v/src/nr5m100/nr5_memorymap.h
  *
  *   Copyright (C) 2016 Ken Pettit. All rights reserved.
@@ -28,12 +28,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef _ARCH_RISCV_SRC_NR5M100_NR5_MEMORYMAP_H
 #define _ARCH_RISCV_SRC_NR5M100_NR5_MEMORYMAP_H
 
-//#include <stdint.h>
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+/* #include <stdint.h> */
 
 #ifdef CONFIG_NR5_NR5MXXX
 #include "hardware/nr5m1xx_memorymap.h"

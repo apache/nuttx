@@ -439,7 +439,7 @@ static void nxsched_timer_start(unsigned int ticks)
 
       if (ret < 0)
         {
-          serr("ERROR: up_timer_start/up_alarm_start failed: %d\n");
+          serr("ERROR: up_timer_start/up_alarm_start failed: %d\n", ret);
           UNUSED(ret);
         }
     }

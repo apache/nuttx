@@ -67,25 +67,14 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-/* In the SMP configuration, we will need two custom interrupt stacks.
- * These definitions provide the aligned stack allocations.
- */
-
-EXTERN uint64_t g_instack_alloc[];
-
-/* These definitions provide the "top" of the push-down stacks. */
-
-EXTERN const uint32_t g_cpu0_instack_base;
-#if CONFIG_SMP_NCPUS > 1
-EXTERN const uint32_t g_cpu1_instack_base;
-#endif
-
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+EXTERN uintptr_t arm_intstack_base(void);
+EXTERN uintptr_t arm_intstack_alloc(void);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

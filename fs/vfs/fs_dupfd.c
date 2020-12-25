@@ -50,13 +50,14 @@
  *   accepts a struct file instance instead of a file descriptor.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   The new file descriptor is returned on success; a negated errno value
+ *   is returned on any failure.
  *
  ****************************************************************************/
 
 int file_dup(FAR struct file *filep, int minfd)
 {
+  FAR struct file *filep2;
   int fd2;
   int ret;
 
@@ -67,21 +68,26 @@ int file_dup(FAR struct file *filep, int minfd)
       return -EBADF;
     }
 
-  /* Increment the reference count on the contained inode */
+  /* Then allocate a new file descriptor for the inode */
 
-  ret = inode_addref(filep->f_inode);
+  fd2 = files_allocate(NULL, 0, 0, minfd);
+  if (fd2 < 0)
+    {
+      return -EMFILE;
+    }
+
+  ret = fs_getfilep(fd2, &filep2);
   if (ret < 0)
     {
+      files_release(fd2);
       return ret;
     }
 
-  /* Then allocate a new file descriptor for the inode */
-
-  fd2 = files_allocate(filep->f_inode, filep->f_oflags, filep->f_pos, minfd);
-  if (fd2 < 0)
+  ret = file_dup2(filep, filep2);
+  if (ret < 0)
     {
-      inode_release(filep->f_inode);
-      return -EMFILE;
+      files_release(fd2);
+      return ret;
     }
 
   return fd2;
@@ -95,8 +101,8 @@ int file_dup(FAR struct file *filep, int minfd)
  *   value greater than or equal to 'minfd').
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   The new file descriptor is returned on success; a negated errno value
+ *   is returned on any failure.
  *
  ****************************************************************************/
 

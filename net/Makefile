@@ -52,6 +52,7 @@ include igmp/Make.defs
 include pkt/Make.defs
 include local/Make.defs
 include mld/Make.defs
+include can/Make.defs
 include netlink/Make.defs
 include tcp/Make.defs
 include udp/Make.defs
@@ -91,9 +92,13 @@ $(COBJS): %$(OBJEXT): %.c
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-.depend: Makefile $(SRCS)
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+	$(call CATFILE, Make.dep, $^)
+	$(call DELFILE, $^)
+
+.depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
 ifeq ($(CONFIG_NET),y)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MAKE) makedepfile
 endif
 	$(Q) touch $@
 

@@ -239,7 +239,7 @@ static int i2cdrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct i2c_transfer_s *transfer;
   int ret;
 
-  i2cinfo("cmd=%x arg=%08x\n", cmd, arg);
+  i2cinfo("cmd=%x arg=%08lx\n", cmd, arg);
 
   /* Get our private data structure */
 

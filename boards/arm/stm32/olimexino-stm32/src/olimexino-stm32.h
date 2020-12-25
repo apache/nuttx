@@ -56,14 +56,14 @@
 #  undef CONFIG_STM32_SPI2
 #endif
 
-/* LEDs *****************************************************************************
+/* LEDs *********************************************************************
  *
- *   GPIO      Function                                     MPU        Board
- *                                                          Pin #      Name
- * -- ----- --------------------------------             ----------------------------
+ *   GPIO      Function                               MPU        Board
+ *                                                    Pin #      Name
+ * -- ----- --------------------------------     ----------------------------
  *
- *  PA[05] PA5/SPI1_SCK/ADC5                                21       D13(SCK1/LED1)
- *  PA[01] PA1/USART2_RTS/ADC1/TIM2_CH2                     15       D3(LED2)
+ *  PA[05] PA5/SPI1_SCK/ADC5                          21       D13(SCK1/LED1)
+ *  PA[01] PA1/USART2_RTS/ADC1/TIM2_CH2               15       D3(LED2)
  */
 
 #define GPIO_LED1       (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
@@ -73,28 +73,28 @@
                          GPIO_PORTA | GPIO_PIN1 | GPIO_OUTPUT_CLEAR)
 #define GPIO_LED_YELLOW GPIO_LED2
 
-/* BUTTON ***************************************************************************
+/* BUTTON *******************************************************************
  *
- *   GPIO      Function                                     MPU        Board
- *                                                          Pin #      Name
- * -- ----- --------------------------------             ----------------------------
+ *   GPIO      Function                               MPU        Board
+ *                                                    Pin #      Name
+ * -- ----- --------------------------------     ----------------------------
  *
- *  PC[09] PC9/TIM3_CH4                                     40       BOOT0
+ *  PC[09] PC9/TIM3_CH4                               40       BOOT0
  *
  */
 
-#define BUTTON_BOOT0n   (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_PORTC | GPIO_PIN9 | \
+#define BUTTON_BOOT0N   (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_PORTC | GPIO_PIN9 | \
                          GPIO_EXTI)
 #define IRQBUTTON       BUTTON_BOOT0_BIT
 
-/* USBs *****************************************************************************
+/* USBs *********************************************************************
  *
- *   GPIO      Function                                     MPU        Board
- *                                                          Pin #      Name
- * -- ----- --------------------------------             ----------------------------
+ *   GPIO      Function                               MPU        Board
+ *                                                    Pin #      Name
+ * -- ----- --------------------------------     ----------------------------
  *
- *  PC[11] PC11/USART3_RX                                   52       USB_P
- *  PC[12] PC12/USART3_CK                                   53       DISC
+ *  PC[11] PC11/USART3_RX                             52       USB_P
+ *  PC[12] PC12/USART3_CK                             53       DISC
  *
  */
 
@@ -102,14 +102,14 @@
 #define GPIO_USB_PULLUPn (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
                           GPIO_PORTC | GPIO_PIN12 | GPIO_OUTPUT_SET)
 
-/* SPI ***************************************************************************
+/* SPI **********************************************************************
  *
- *   GPIO      Function                                     MPU        Board
- *                                                          Pin #      Name
- * -- ----- --------------------------------             ----------------------------
+ *   GPIO      Function                               MPU        Board
+ *                                                    Pin #      Name
+ * -- ----- --------------------------------     ----------------------------
  *
- *  PC[09] PA4/SPI1_NSS/USART2_CK/ADC4                      20       D10(#SS1)
- *  PD[02] PD2/TIM3_ETR                                     54       D25(MMC_CS)
+ *  PC[09] PA4/SPI1_NSS/USART2_CK/ADC4                20       D10(#SS1)
+ *  PD[02] PD2/TIM3_ETR                               54       D25(MMC_CS)
  */
 
 #define GPIO_SPI1_SSn (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
@@ -131,7 +131,7 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototype
  ****************************************************************************/
 
 /****************************************************************************
@@ -164,8 +164,8 @@ void stm32_usbinitialize(void);
  *   Called to setup set a call back for USB power state changes.
  *
  * Input Parameters:
- *   pwr_changed_handler: An interrupt handler that will be called on VBUS power
- *   state changes.
+ *   pwr_changed_handler: An interrupt handler that will be called on VBUS
+ *   power state changes.
  *
  ****************************************************************************/
 
@@ -197,7 +197,7 @@ void stm32_usb_set_pwr_callback(xcpt_t pwr_changed_handler);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void stm32_led_initialize(void);
+uint32_t stm32_led_initialize(void);
 #endif
 
 /****************************************************************************

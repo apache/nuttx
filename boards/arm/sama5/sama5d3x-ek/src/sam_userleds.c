@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* There are two LEDs on the SAMA5D3 series-CM board that can be controlled
  * by software.  A  blue LED is controlled via PIO pins.  A red LED normally
  * provides an indication that power is supplied to the board but can also
@@ -71,7 +72,7 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
@@ -79,6 +80,7 @@ void board_userled_initialize(void)
 #ifndef CONFIG_SAMA5D3xEK_NOREDLED
   sam_configpio(PIO_RED);
 #endif
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -116,7 +118,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   bool ledon;
 

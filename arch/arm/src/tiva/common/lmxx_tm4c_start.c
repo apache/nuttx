@@ -122,7 +122,8 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
  *       done, the processor reserves space on the stack for the FP state,
  *       but does not save that state information to the stack.
  *
- *  Software must not change the value of the ASPEN bit or LSPEN bit while either:
+ *  Software must not change the value of the ASPEN bit or LSPEN bit while
+ *  either:
  *   - the CPACR permits access to CP10 and CP11, that give access to the FP
  *     extension, or
  *   - the CONTROL.FPCA bit is set to 1
@@ -156,7 +157,7 @@ static inline void tiva_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -186,7 +187,7 @@ static inline void tiva_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -272,7 +273,7 @@ void __start(void)
   showprogress('F');
 
 #ifdef CONFIG_TIVA_EEPROM
-  /*Initialize the EEPROM */
+  /* Initialize the EEPROM */
 
   tiva_eeprom_initialize();
 #endif

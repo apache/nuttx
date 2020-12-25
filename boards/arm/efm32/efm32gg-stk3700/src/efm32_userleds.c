@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* The EFM32 Giant Gecko Start Kit has two yellow LEDs marked LED0 and LED1.
  * These LEDs are controlled by GPIO pins on the EFM32.  The LEDs are
  * connected to pins PE2 and PE3 in an active high configuration:
@@ -74,12 +75,13 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
   efm32_configgpio(GPIO_LED0);
   efm32_configgpio(GPIO_LED1);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -110,7 +112,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   /* High illuminates */
 

@@ -82,7 +82,7 @@ struct st7032_dev_s
   FAR struct i2c_master_s *i2c; /* I2C interface */
   uint8_t    row;               /* Current row position to write on display  */
   uint8_t    col;               /* Current col position to write on display  */
-  uint8_t    buffer[ST7032_MAX_ROW * ST7032_MAX_COL];  /* SLCD ASCII content */
+  uint8_t    buffer[ST7032_MAX_ROW * ST7032_MAX_COL];
   bool       pendscroll;
   sem_t sem_excl;
 };
@@ -326,7 +326,7 @@ static inline void lcd_putdata(FAR struct st7032_dev_s *priv, uint8_t data)
 
   /* Update col/row positions */
 
- priv->col++;
+  priv->col++;
 
   if (priv->col >= ST7032_MAX_COL)
     {
@@ -355,11 +355,11 @@ static inline void lcd_putdata(FAR struct st7032_dev_s *priv, uint8_t data)
 
 static void lcd_scroll_up(FAR struct st7032_dev_s *priv)
 {
-  uint8_t *data;
+  FAR uint8_t *data;
   int currow;
   int curcol;
 
-  data = (uint8_t *)malloc(ST7032_MAX_COL);
+  data = (FAR uint8_t *)kmm_malloc(ST7032_MAX_COL);
   if (NULL == data)
     {
       lcdinfo("Failed to allocate buffer in lcd_scroll_up()\n");
@@ -400,7 +400,7 @@ static void lcd_scroll_up(FAR struct st7032_dev_s *priv)
   priv->row = ST7032_MAX_ROW - 1;
   lcd_set_curpos(priv);
 
-  free(data);
+  kmm_free(data);
   return;
 }
 
@@ -800,7 +800,9 @@ static ssize_t st7032_write(FAR struct file *filep, FAR const char *buffer,
 
           if (ch == ASCII_TAB)
             {
-              /* Blink Cursor? Shouldn't it be just 4 spaces to indicate TAB? */
+              /* Blink Cursor? Shouldn't it be just 4 spaces to indicate
+               * TAB?
+               */
 
               st7032_write_inst(priv, ST7032_DISPLAY_ON_OFF |
                                       DISPLAY_ON_OFF_D | DISPLAY_ON_OFF_C |
@@ -900,7 +902,8 @@ static ssize_t st7032_write(FAR struct file *filep, FAR const char *buffer,
 static off_t st7032_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct st7032_dev_s *priv = (FAR struct st7032_dev_s *)inode->i_private;
+  FAR struct st7032_dev_s *priv =
+    (FAR struct st7032_dev_s *)inode->i_private;
   off_t maxpos;
   off_t pos;
 
@@ -954,6 +957,7 @@ static off_t st7032_seek(FAR struct file *filep, off_t offset, int whence)
         break;
 
       default:
+
         /* Return EINVAL if the whence argument is invalid */
 
         pos = (off_t)-EINVAL;

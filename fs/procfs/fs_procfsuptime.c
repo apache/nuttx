@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/statfs.h>
 #include <sys/stat.h>
 
 #include <stdint.h>
@@ -269,7 +268,7 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
       /* Convert the seconds + hundredths of seconds to a string */
 
 #ifdef CONFIG_SYSTEM_TIME64
-      linesize = snprintf(attr->line, UPTIME_LINELEN, "%7llu.%02u\n",
+      linesize = snprintf(attr->line, UPTIME_LINELEN, "%7" PRIu64 ".%02u\n",
                           sec, csec);
 #else
       linesize = snprintf(attr->line, UPTIME_LINELEN, "%7lu.%02u\n",

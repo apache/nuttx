@@ -67,8 +67,8 @@ struct nx_bitmap_s
  * Name: bitmap_clipcopy
  *
  * Description:
- *  Called from nxbe_clipper() to performed the fill operation on visible portions
- *  of the rectangle.
+ *  Called from nxbe_clipper() to performed the fill operation on visible
+ *  portions of the rectangle.
  *
  ****************************************************************************/
 
@@ -86,7 +86,7 @@ static void bitmap_clipcopy(FAR struct nxbe_clipops_s *cops,
 #ifdef CONFIG_NX_UPDATE
   /* Notify external logic that the display has been updated */
 
-  nx_notify_rectangle(&plane->pinfo, rect);
+  nxbe_notify_rectangle(plane->driver, rect);
 #endif
 }
 
@@ -340,8 +340,8 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
       nxbe_bitmap_dev(wnd, dest, src, origin, stride);
 
 #ifdef CONFIG_NX_SWCURSOR
-      /* Update cursor backup memory and redraw the cursor in the modified window
-       * region.
+      /* Update cursor backup memory and redraw the cursor in the modified
+       * window region.
        */
 
       nxbe_cursor_backupdraw_all(wnd, dest);

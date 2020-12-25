@@ -69,7 +69,11 @@
 
 /* SCU firmware (iSoP) binary */
 
+#ifdef CONFIG_CXD56_HPADC0_HIGHSPEED
+#include "hardware/cxd5602_isop_hadc0_highspeed.h"
+#else
 #include "hardware/cxd5602_isop.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -2006,6 +2010,8 @@ static int seq_fifoinit(FAR struct seq_s *seq, int fifoid, uint16_t fsize)
   /* Initialize DMA done wait semaphore */
 
   nxsem_init(&fifo->dmawait, 0, 0);
+  nxsem_set_protocol(&fifo->dmawait, SEM_PRIO_NONE);
+
   fifo->dmaresult = -1;
 #endif
 
@@ -2748,13 +2754,35 @@ FAR struct seq_s *seq_open(int type, int bustype)
 {
   FAR struct seq_s *seq;
 
+  /* Check bustype is valid */
+
+  switch (bustype)
+    {
+      case SCU_BUS_SPI:
+      case SCU_BUS_I2C0:
+      case SCU_BUS_I2C1:
+      case SCU_BUS_LPADC0:
+      case SCU_BUS_LPADC1:
+      case SCU_BUS_LPADC2:
+      case SCU_BUS_LPADC3:
+      case SCU_BUS_HPADC0:
+      case SCU_BUS_HPADC1:
+        break;
+      default:
+        return NULL;
+    }
+
   if (type == SEQ_TYPE_DECI)
     {
       seq = deci_new();
     }
-  else
+  else if (type == SEQ_TYPE_NORMAL)
     {
       seq = seq_new();
+    }
+  else
+    {
+      return NULL;
     }
 
   if (!seq)
@@ -3446,12 +3474,14 @@ void scu_initialize(void)
 
   memset(priv, 0, sizeof(struct cxd56_scudev_s));
 
-  nxsem_init(&priv->syncwait, 0, 0);
   nxsem_init(&priv->syncexc, 0, 1);
+  nxsem_init(&priv->syncwait, 0, 0);
+  nxsem_set_protocol(&priv->syncwait, SEM_PRIO_NONE);
 
   for (i = 0; i < 3; i++)
     {
       nxsem_init(&priv->oneshotwait[i], 0, 0);
+      nxsem_set_protocol(&priv->oneshotwait[i], SEM_PRIO_NONE);
     }
 
   scufifo_initialize();

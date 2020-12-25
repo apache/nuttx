@@ -478,7 +478,7 @@ Toolchains
      but you might easily find some new path problems.  If so, check out 'cygpath -w'
 
   2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic links
-     are used in Nuttx (e.g., include/arch).  The make system works around these
+     are used in NuttX (e.g., include/arch).  The make system works around these
      problems for the Windows tools by copying directories instead of linking them.
      But this can also cause some confusion for you:  For example, you may edit
      a file in a "linked" directory and find that your changes had no effect.
@@ -579,7 +579,7 @@ Serial Console: MEB
    gotten any serial UART output to work from the MEB.]]
 
   A serial console is not required to use NuttX.  However, all of the
-  Nuttx example code in the apps/examples assumes that you have a
+  NuttX example code in the apps/examples assumes that you have a
   serial console.  The Ethernet Starter Kit(even with the MEB) does not
   have any RS-232 connector needed to drive the serial console.
 
@@ -1075,13 +1075,13 @@ Where <subdir> is one of the following:
           available.
 
        b. This example can support an FTP client.  In order to build in FTP client
-          support simply add the following to the Nuttx configuration file:
+          support simply add the following to the NuttX configuration file:
 
          CONFIG_NETUTILS_FTPC=y
          CONFIG_EXAMPLES_FTPC=y
 
        c. This example can support an FTP server.  In order to build in FTP server
-          support simply add the following to the Nuttx configuration file:
+          support simply add the following to the NuttX configuration file:
 
          CONFIG_NETUTILS_FTPD=y
          CONFIG_EXAMPLES_FTPD=y

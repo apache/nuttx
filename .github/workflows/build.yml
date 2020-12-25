@@ -14,7 +14,11 @@ name: Build
 
 on:
   pull_request:
+    paths-ignore:
+      - 'Documentation/**'
   push:
+    paths-ignore:
+      - 'Documentation/**'
     branches:
       - master
       - 'releases/*'
@@ -85,6 +89,8 @@ jobs:
           ref: ${{ steps.gittargets.outputs.os_ref }}
           path: sources/nuttx
           fetch-depth: 1
+      - name: Checkout nuttx repo tags
+        run: git -C sources/nuttx fetch --tags
 
       - name: Checkout apps repo
         uses: actions/checkout@v2
@@ -102,20 +108,13 @@ jobs:
           path: sources/testing
           fetch-depth: 1
 
-      - name: Create Source Bundle
-        run: tar -czf sources.tar.gz sources
+      - name: Tar sources
+        run: tar zcf sources.tar.gz sources
       - name: Archive Source Bundle
         uses: actions/upload-artifact@v1
         with:
           name: source-bundle
           path: sources.tar.gz
-
-      - name: Cache Source
-        id: cache-source
-        uses: actions/cache@v1
-        with:
-          path: sources
-          key: build-sources-${{ github.run_id }}
 
   Linux:
     needs: Fetch-Source
@@ -125,28 +124,16 @@ jobs:
 
     strategy:
       matrix:
-        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, mips-riscv-x86-xtensa, sim]
+        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, sim]
 
     steps:
-      - name: Fetch Cached Source
-        id: cache-source
-        uses: actions/cache@v1
-        with:
-          path: sources-cache
-          key: build-sources-${{ github.run_id }}
-      - name: Prevent Updating Source Cache
-        if: steps.cache-source.outputs.cache-hit == 'true'
-        run: mv sources-cache sources
       - name: Download Source Artifact
-        if: steps.cache-source.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v1
         with:
           name: source-bundle
-          path: ./
-      - name: Extract Source Artifact
-        if: steps.cache-source.outputs.cache-hit != 'true'
-        run: tar -xf sources.tar.gz
-
+          path: .
+      - name: Extract sources
+        run: tar zxf sources.tar.gz
       - name: Docker Login
         uses: azure/docker-login@v1
         with:
@@ -163,54 +150,43 @@ jobs:
           command: docker pull docker.pkg.github.com/apache/incubator-nuttx-testing/nuttx-ci-linux
 
       - name: Export NuttX Repo SHA
-        run:  echo "::set-env name=nuttx_sha::`git -C sources/nuttx rev-parse HEAD`"
-      - name: Refresh Git Credentials
-        uses: actions/checkout@v2
-        with:
-          repository: apache/incubator-nuttx
-          ref: ${{ env.nuttx_sha }}
-          path: sources/nuttx
-          fetch-depth: 1
-      - name: Get Tags for NuttX Repo
-        run: git -C sources/nuttx fetch --tags
+        run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
       - name: Run builds
         uses: ./sources/testing/.github/actions/ci-container
         env:
           BLOBDIR: /tools/blobs
         with:
           run: |
+            echo "::add-matcher::sources/nuttx/.github/gcc.json"
+            export CCACHE_DIR=`pwd`/ccache
+            mkdir $CCACHE_DIR
             cd sources/testing
-            ./cibuild.sh -x testlist/${{matrix.boards}}.dat
+            export ARTIFACTDIR=`pwd`/../../buildartifacts
+            ./cibuild.sh -A -c testlist/${{matrix.boards}}.dat
+            ccache -s
+      - uses: actions/upload-artifact@v2
+        with:
+          name: linux-builds
+          path: buildartifacts/
+        continue-on-error: true
 
   macOS:
     runs-on: macos-10.15
     needs: Fetch-Source
     strategy:
       matrix:
-        boards: [arm-12, mips-riscv-x86-xtensa, sim]
+        boards: [arm-12, other, sim]
     steps:
-      - name: Fetch Cached Source
-        id: cache-source
-        uses: actions/cache@v1
-        with:
-          path: sources-cache
-          key: build-sources-${{ github.run_id }}
-      - name: Prevent Updating Source Cache
-        if: steps.cache-source.outputs.cache-hit == 'true'
-        run: mv sources-cache sources
       - name: Download Source Artifact
-        if: steps.cache-source.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v1
         with:
           name: source-bundle
-          path: ./
-      - name: Extract Source Artifact
-        if: steps.cache-source.outputs.cache-hit != 'true'
-        run: tar -xf sources.tar.gz
-
+          path: .
+      - name: Extract sources
+        run: tar zxf sources.tar.gz
       - name: Restore Tools Cache
         id: cache-tools
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         env:
           cache-name: ${{ runner.os }}-cache-tools
         with:
@@ -218,17 +194,18 @@ jobs:
           key: ${{ runner.os }}-tools-${{ hashFiles('./sources/testing/cibuild.sh') }}
 
       - name: Export NuttX Repo SHA
-        run:  echo "::set-env name=nuttx_sha::`git -C sources/nuttx rev-parse HEAD`"
-      - name: Refresh Git Credentials
-        uses: actions/checkout@v2
-        with:
-          repository: apache/incubator-nuttx
-          ref: ${{ env.nuttx_sha }}
-          path: sources/nuttx
-          fetch-depth: 1
-      - name: Get Tags for NuttX Repo
-        run: git -C sources/nuttx fetch --tags
+        run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
       - name: Run Builds
         run: |
+          echo "::add-matcher::sources/nuttx/.github/gcc.json"
+          export CCACHE_DIR=`pwd`/ccache
+          mkdir $CCACHE_DIR
           cd sources/testing
-          ./cibuild.sh -i -x testlist/${{matrix.boards}}.dat
+          export ARTIFACTDIR=`pwd`/../../buildartifacts
+          ./cibuild.sh -i -A -c testlist/${{matrix.boards}}.dat
+          ccache -s
+      - uses: actions/upload-artifact@v2
+        with:
+          name: macos-builds
+          path: buildartifacts/
+        continue-on-error: true

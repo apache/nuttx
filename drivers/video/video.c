@@ -219,6 +219,12 @@ static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
                              FAR struct v4l2_ext_controls *ctrls);
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+static const struct video_devops_s *g_video_devops;
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -1029,8 +1035,14 @@ static int video_queryctrl(FAR struct v4l2_queryctrl *ctrl)
 
   /* Replace to VIDIOC_QUERY_EXT_CTRL format */
 
-  ext_ctrl.ctrl_class = ctrl->ctrl_class;
-  ext_ctrl.id         = ctrl->id;
+  ext_ctrl.ctrl_class     = ctrl->ctrl_class;
+  ext_ctrl.id             = ctrl->id;
+  ext_ctrl.type           = ctrl->type;
+  ext_ctrl.minimum        = ctrl->minimum;
+  ext_ctrl.maximum        = ctrl->maximum;
+  ext_ctrl.step           = ctrl->step;
+  ext_ctrl.default_value  = ctrl->default_value;
+  ext_ctrl.flags          = ctrl->flags;
 
   ret = video_query_ext_ctrl(&ext_ctrl);
 
@@ -1187,7 +1199,7 @@ static int video_g_ext_ctrls(FAR struct video_mng_s *priv,
 static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
                              FAR struct v4l2_ext_controls *ctrls)
 {
-  int ret;
+  int ret = OK;
   int cnt;
   FAR struct v4l2_ext_control *control;
 
@@ -1209,12 +1221,6 @@ static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
           ctrls->error_idx = cnt;
           return ret;
         }
-    }
-
-  ret = g_video_devops->refresh();
-  if (ret < 0)
-    {
-      ctrls->error_idx = cnt;
     }
 
   return ret;
@@ -1483,7 +1489,8 @@ static int video_unregister(FAR video_mng_t *v_mgr)
  * Public Functions
  ****************************************************************************/
 
-int video_initialize(FAR const char *devpath)
+int video_initialize(FAR const char *devpath,
+                     FAR const struct video_devops_s *devops)
 {
   if (is_initialized)
     {
@@ -1491,6 +1498,8 @@ int video_initialize(FAR const char *devpath)
     }
 
   video_handler = video_register(devpath);
+
+  g_video_devops = devops;
 
   is_initialized = true;
 
@@ -1505,6 +1514,8 @@ int video_uninitialize(void)
     }
 
   video_unregister(video_handler);
+
+  g_video_devops = NULL;
 
   is_initialized = false;
 

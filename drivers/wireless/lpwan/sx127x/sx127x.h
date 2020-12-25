@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/wireless/lpwan/sx127x.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Authors: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -174,7 +159,7 @@
 
 /* Operating mode & LORA/FSK selection */
 
-#define SX127X_CMN_OPMODE_MODE_SHIFT      (0)      /* Bits 0-2: Transceiver mode */
+#define SX127X_CMN_OPMODE_MODE_SHIFT      (0)                                 /* Bits 0-2: Transceiver mode */
 #define SX127X_CMN_OPMODE_MODE_MASK       (7 << SX127X_CMN_OPMODE_MODE_SHIFT)
 #  define SX127X_CMN_OPMODE_MODE_SLEEP    (0 << SX127X_CMN_OPMODE_MODE_SHIFT) /* SLEEP */
 #  define SX127X_CMN_OPMODE_MODE_STBY     (1 << SX127X_CMN_OPMODE_MODE_SHIFT) /* STDBY */
@@ -184,12 +169,12 @@
 #  define SX127X_CMN_OPMODE_MODE_RX       (5 << SX127X_CMN_OPMODE_MODE_SHIFT) /* RX in FSK/OOK, RXCONTINOUS in LORA */
 #  define SX127X_CMN_OPMODE_MODE_RXSINGLE (6 << SX127X_CMN_OPMODE_MODE_SHIFT) /* RXSINGLE (only LORA) */
 #  define SX127X_CMN_OPMODE_MODE_CAD      (7 << SX127X_CMN_OPMODE_MODE_SHIFT) /* CAD (only LORA) */
-#define SX127X_CMN_OPMODE_LFMODEON        (1 << 3) /* Bit 3: Low Frequency Mode ON */
-#define SX127X_CMN_OPMODE_MODTYPE_SHIFT   (5)      /* Bits 5-6: Modulation type (only FSK/OOK) */
+#define SX127X_CMN_OPMODE_LFMODEON        (1 << 3)                            /* Bit 3: Low Frequency Mode ON */
+#define SX127X_CMN_OPMODE_MODTYPE_SHIFT   (5)                                 /* Bits 5-6: Modulation type (only FSK/OOK) */
 #  define SX127X_CMN_OPMODE_MODTYPE_MASK  (3 << SX127X_CMN_OPMODE_MODTYPE_SHIFT)
 #  define SX127X_CMN_OPMODE_MODTYPE_FSK   (0 << SX127X_CMN_OPMODE_MODTYPE_SHIFT)
 #  define SX127X_CMN_OPMODE_MODTYPE_OOK   (1 << SX127X_CMN_OPMODE_MODTYPE_SHIFT)
-#define SX127X_CMN_OPMODE_LRMODE          (1 << 7) /* Bit 7: Long Range Mode 0-FSK/OOK, 1-LORA */
+#define SX127X_CMN_OPMODE_LRMODE          (1 << 7)                            /* Bit 7: Long Range Mode 0-FSK/OOK, 1-LORA */
 
 /* FSK/OOK/LORA: RF carrier frequency */
 
@@ -356,17 +341,17 @@
 
 /* FSK/OOK: AFC, AGC, ctrl */
 
-#define SX127X_FOM_RXCFG_TRG_SHIFT        (0)      /* Bits 0-2: RX trigger */
+#define SX127X_FOM_RXCFG_TRG_SHIFT        (0)                               /* Bits 0-2: RX trigger */
 #define SX127X_FOM_RXCFG_TRG_MASK         (7 << SX127X_FOM_RXCFG_TRG_SHIFT)
 #  define SX127X_FOM_RXCFG_TRG_NONE       (0 << SX127X_FOM_RXCFG_TRG_SHIFT) /* 000: */
 #  define SX127X_FOM_RXCFG_TRG_RSSI       (1 << SX127X_FOM_RXCFG_TRG_SHIFT) /* 001: */
 #  define SX127X_FOM_RXCFG_TRG_PREDET     (6 << SX127X_FOM_RXCFG_TRG_SHIFT) /* 110: */
 #  define SX127X_FOM_RXCFG_TRG_RSSIPREDET (7 << SX127X_FOM_RXCFG_TRG_SHIFT) /* 111: */
-#define SX127X_FOM_RXCFG_AGCAUTOON        (1 << 3) /* Bit 3: AGC auto ON */
-#define SX127X_FOM_RXCFG_AFCAUTOON        (1 << 4) /* Bit 4: AFC auto ON */
-#define SX127X_FOM_RXCFG_RESRXWITHPLL     (1 << 5) /* Bit 5: Restar RX with PLL lock */
-#define SX127X_FOM_RXCFG_RESRXWITHOUTPLL  (1 << 6) /* Bit 6: Restart RX without PLL lock */
-#define SX127X_FOM_RXCFG_RESRXONCOLLSION  (1 << 7) /* Bit 7: Restart RX on collision */
+#define SX127X_FOM_RXCFG_AGCAUTOON        (1 << 3)                          /* Bit 3: AGC auto ON */
+#define SX127X_FOM_RXCFG_AFCAUTOON        (1 << 4)                          /* Bit 4: AFC auto ON */
+#define SX127X_FOM_RXCFG_RESRXWITHPLL     (1 << 5)                          /* Bit 5: Restar RX with PLL lock */
+#define SX127X_FOM_RXCFG_RESRXWITHOUTPLL  (1 << 6)                          /* Bit 6: Restart RX without PLL lock */
+#define SX127X_FOM_RXCFG_RESRXONCOLLSION  (1 << 7)                          /* Bit 7: Restart RX on collision */
 
 /* FSK/OOK: RSSI */
 
@@ -399,7 +384,6 @@
 
 #define FSKOOK_BANDWIDTH_GET(mant, exp)   (((exp << SX127X_FOM_RXBW_EXP_SHIFT) & SX127X_FOM_RXBW_EXP_MASK) | \
                                            ((mant << SX127X_FOM_RXBW_MANT_SHIFT) & SX127X_FOM_RXBW_MANT_MASK))
-
 
 /* FSK/OOK: AFC Channel Filter BW */
 
@@ -524,20 +508,20 @@
 
 /* FSK/OOK: Packet mode settings 1 */
 
-#define SX127X_FOM_PKTCFG1_CRCTYPE        (1 << 0) /* Bit 0: CRC type: 0 -> CCITT CRC, 1 -> IBM CRC with alternate whitening */
-#define SX127X_FOM_PKTCFG1_ADDRFLT_SHIFT  (1)      /* Bits 1-2: Address basef filtering in RX */
+#define SX127X_FOM_PKTCFG1_CRCTYPE        (1 << 0)                               /* Bit 0: CRC type: 0 -> CCITT CRC, 1 -> IBM CRC with alternate whitening */
+#define SX127X_FOM_PKTCFG1_ADDRFLT_SHIFT  (1)                                    /* Bits 1-2: Address basef filtering in RX */
 #define SX127X_FOM_PKTCFG1_ADDRFLT_MASK   (3 << SX127X_FOM_PKTCFG1_ADDRFLT_SHIFT)
 #  define SX127X_FOM_PKTCFG1_ADDRFLT_OFF  (0 << SX127X_FOM_PKTCFG1_ADDRFLT_SHIFT)
 #  define SX127X_FOM_PKTCFG1_ADDRFLT_NA   (1 << SX127X_FOM_PKTCFG1_ADDRFLT_SHIFT)
 #  define SX127X_FOM_PKTCFG1_ADDRFLT_NABA (2 << SX127X_FOM_PKTCFG1_ADDRFLT_SHIFT)
-#define SX127X_FOM_PKTCFG1_CRCAUTOCLROFF  (1 << 3) /* Bit 3: CRC auto clear OFF */
-#define SX127X_FOM_PKTCFG1_CRCON          (1 << 4) /* Bit 4: TX/RX CRC enable */
-#define SX127X_FOM_PKTCFG1_DCFREE_SHIFT   (5)      /* Bits 5-6: DC-free encodeing/decoding */
+#define SX127X_FOM_PKTCFG1_CRCAUTOCLROFF  (1 << 3)                               /* Bit 3: CRC auto clear OFF */
+#define SX127X_FOM_PKTCFG1_CRCON          (1 << 4)                               /* Bit 4: TX/RX CRC enable */
+#define SX127X_FOM_PKTCFG1_DCFREE_SHIFT   (5)                                    /* Bits 5-6: DC-free encodeing/decoding */
 #define SX127X_FOM_PKTCFG1_DCFREE_MASK    (3 << SX127X_FOM_PKTCFG1_DCFREE_SHIFT)
 #  define SX127X_FOM_PKTCFG1_DCFREE_OFF   (0 << SX127X_FOM_PKTCFG1_DCFREE_SHIFT) /* 00: None */
 #  define SX127X_FOM_PKTCFG1_DCFREE_M     (1 << SX127X_FOM_PKTCFG1_DCFREE_SHIFT) /* 01: Manchaster */
 #  define SX127X_FOM_PKTCFG1_DCFREE_W     (2 << SX127X_FOM_PKTCFG1_DCFREE_SHIFT) /* 10: Whitening */
-#define SX127X_FOM_PKTCFG1_PCKFORMAT      (1 << 7) /* Bit 7: 0 -> fixed length, 1 -> variable length*/
+#define SX127X_FOM_PKTCFG1_PCKFORMAT      (1 << 7)                               /* Bit 7: 0 -> fixed length, 1 -> variable length*/
 
 /* FSK/OOK: Packet mode settings 2 */
 
@@ -562,18 +546,18 @@
 
 /* FSK/OOK: Top level Sequencer settings 1 */
 
-#define SX127X_FOM_SEQCFG1_TX             (1 << 0) /* Bit 0: From Transmit  0 -> LowPowerSelection, 1 -> Receive */
-#define SX127X_FOM_SEQCFG1_IDLE           (1 << 1) /* Bit 1: From IDLE on T1: 0 -> TX, 1 -> RX*/
-#define SX127X_FOM_SEQCFG1_LOWPOWERSEL    (1 << 2) /* Bit 2: Low Power Selection */
-#define SX127X_FOM_SEQCFG1_START_SHIFT    (3)      /* Bits 3-4: From Start */
+#define SX127X_FOM_SEQCFG1_TX             (1 << 0)                              /* Bit 0: From Transmit  0 -> LowPowerSelection, 1 -> Receive */
+#define SX127X_FOM_SEQCFG1_IDLE           (1 << 1)                              /* Bit 1: From IDLE on T1: 0 -> TX, 1 -> RX*/
+#define SX127X_FOM_SEQCFG1_LOWPOWERSEL    (1 << 2)                              /* Bit 2: Low Power Selection */
+#define SX127X_FOM_SEQCFG1_START_SHIFT    (3)                                   /* Bits 3-4: From Start */
 #define SX127X_FOM_SEQCFG1_START_MASK     (3 << SX127X_FOM_SEQCFG1_START_SHIFT)
 #  define SX127X_FOM_SEQCFG1_START_LPS    (0 << SX127X_FOM_SEQCFG1_START_SHIFT) /* LowPowerSelection */
 #  define SX127X_FOM_SEQCFG1_START_RS     (1 << SX127X_FOM_SEQCFG1_START_SHIFT) /* RX */
 #  define SX127X_FOM_SEQCFG1_START_TS     (2 << SX127X_FOM_SEQCFG1_START_SHIFT) /* TX */
 #  define SX127X_FOM_SEQCFG1_START_TSFL   (3 << SX127X_FOM_SEQCFG1_START_SHIFT) /* TX on FifoLevel */
-#define SX127X_FOM_SEQCFG1_IDLEMODE       (1 << 5) /* Bit 5: IDLE Mode 0 -> standby, 1 -> sleep */
-#define SX127X_FOM_SEQCFG1_SEQSTOP        (1 << 6) /* Bit 6: Sequencer Stop */
-#define SX127X_FOM_SEQCFG1_SEQSTART       (1 << 7) /* Bit 7: Sequencer Start */
+#define SX127X_FOM_SEQCFG1_IDLEMODE       (1 << 5)                              /* Bit 5: IDLE Mode 0 -> standby, 1 -> sleep */
+#define SX127X_FOM_SEQCFG1_SEQSTOP        (1 << 6)                              /* Bit 6: Sequencer Stop */
+#define SX127X_FOM_SEQCFG1_SEQSTART       (1 << 7)                              /* Bit 7: Sequencer Start */
 
 /* FSK/OOK: Top level Sequencer settings 2 */
 
@@ -818,7 +802,7 @@
 
 #define LORA_DATARATE_GET(sf, bw, cr)     (sf * bw * cr / (2<<sf))
 
-/* Constants ***************************************************************/
+/* Constants ****************************************************************/
 
 /* FXOSC is 32 MHz */
 
@@ -842,7 +826,7 @@
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #undef EXTERN

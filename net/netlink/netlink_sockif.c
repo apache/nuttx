@@ -111,6 +111,10 @@ const struct sock_intf_s g_netlink_sockif =
   NULL,                 /* si_sendfile */
 #endif
   netlink_recvfrom,     /* si_recvfrom */
+#ifdef CONFIG_NET_CMSG
+  NULL,                 /* si_recvmsg */
+  NULL,                 /* si_sendmsg */
+#endif
   netlink_close         /* si_close */
 };
 
@@ -413,7 +417,7 @@ static int netlink_getpeername(FAR struct socket *psock,
  *
  * Returned Value:
  *   On success, zero is returned. On error, a negated errno value is
- *   returned.  See list() for the set of appropriate error values.
+ *   returned.  See listen() for the set of appropriate error values.
  *
  ****************************************************************************/
 

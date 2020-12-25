@@ -15,6 +15,10 @@ config ARCH_PHY_INTERRUPT
 	bool
 	default n
 
+config ARCH_PHY_POLLED
+	bool
+	default n
+
 config ARCH_HAVE_NETDEV_STATISTICS
 	bool
 	default n
@@ -150,6 +154,11 @@ config NET_LOOPBACK_PKTSIZE
 		CONFIG_NET_LOOPBACK_PKTSIZE is zero, meaning that this maximum
 		packet size will be used by loopback driver.
 
+menuconfig NET_MBIM
+	bool "MBIM modem support"
+	depends on USBHOST_CDCMBIM
+	default n
+
 menuconfig NET_SLIP
 	bool "SLIP support"
 	select ARCH_HAVE_NETDEV_STATISTICS
@@ -226,23 +235,6 @@ config NET_TUN_PKTSIZE
 
 endif # NET_TUN
 
-config NET_USRSOCK
-	bool "User-space networking stack API"
-	default n
-	---help---
-		Enable or disable user-space networking stack support.
-
-		User-space networking stack API allows user-space daemon to
-		provide TCP/IP stack implementation for NuttX network.
-
-		Main use for this is to allow use and integration of
-		HW-provided TCP/IP stacks for NuttX.
-
-		For example, user-space daemon can translate /dev/usrsock API
-		requests to HW TCP/IP API requests while rest of the user-space
-		can access standard socket API, with socket descriptors that
-		can be used with NuttX system calls.
-
 config NETDEV_LATEINIT
 	bool "Late driver initialization"
 	default n
@@ -284,39 +276,6 @@ config NET_IPv4
 	---help---
 		Build in support for IPv4.
 
-config NET_IPv4_REASSEMBLY
-	bool "IPv4 reassembly"
-	default n
-	depends on NET_IPv4 && EXPERIMENTAL && NET_ETHERNET
-	---help---
-		Enable support for IP packet reassembly of fragmented IP packets.
-
-		This features requires an additional amount of RAM to hold a single
-		reassembly buffer.  The reassembly buffer is of the same size as the
-		MTU of the selected device.
-
-		REVISIT:  There are multiple issues with the current implementation:
-		1. IPv4 reassembly in its current form is untested (and, hence,
-		   depends on CONFIG_EXPERIMENTAL).
-		2. Currently this feature can only work with Ethernet due to internal
-		   definitions that depend on Ethernet configuration settings (and,
-		   hence, depends on CONFIG_NET_ETHERNET).
-		3. Since there is only a single reassembly buffer, IPv4 reassembly
-		   cannot be used in a context where multiple network devices may be
-		   concurrently re-assemblying packets.
-
-if NET_IPv4_REASSEMBLY
-
-config NET_IPv4_REASS_MAXAGE
-	int "IP fragment timeout"
-	default 200
-	---help---
-		The maximum time an IP fragment should wait in the reassembly buffer
-		before it is dropped.  Units are deci-seconds, the range of the timer
-		is 8-bits.  Default: 20 seconds.
-
-endif # NET_IPv4_REASSEMBLY
-
 config NET_IPv6
 	bool "IPv6"
 	default n
@@ -344,6 +303,7 @@ source "net/socket/Kconfig"
 source "net/inet/Kconfig"
 source "net/pkt/Kconfig"
 source "net/local/Kconfig"
+source "net/can/Kconfig"
 source "net/netlink/Kconfig"
 source "net/tcp/Kconfig"
 source "net/udp/Kconfig"

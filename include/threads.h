@@ -71,8 +71,9 @@
 
 /* thread_local: thread local type macro */
 
-//#define thread_local _Thread_local
-#define thread_local NOTIMPLEMENTED
+#ifndef __cplusplus
+#define thread_local _Thread_local
+#endif
 
 /* tss_t: thread-specific storage pointer */
 
@@ -94,11 +95,11 @@ typedef CODE int (*thrd_start_t)(FAR void *arg)
 
 /* mtx_t : mutex identifier */
 
-#define pthread_mutex_t
+#define mtx_t pthread_mutex_t
 
 /* once_flag: the type of the flag used by call_once */
 
-#define pthread_once_t once_flag
+#define once_flag pthread_once_t
 
 /* cnd_t: condition variable identifier */
 
@@ -192,8 +193,17 @@ static inline int thrd_join(thrd_t thr, int *res)
 
 static inline int mtx_init(FAR mtx_t *mutex, int type)
 {
-  DEBUGASSERT(mutex && type == mtx_plain);
-  return pthread_mutex_init(mutex, NULL);
+  FAR pthread_mutexattr_t *pattr = NULL;
+  pthread_mutexattr_t attr;
+
+  if (type & mtx_recursive)
+    {
+      pthread_attr_init(&attr);
+      pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+      pattr = &attr;
+    }
+
+  return pthread_mutex_init(mutex, pattr);
 }
 
 /* mtx_lock: blocks until locks a mutex
@@ -207,6 +217,8 @@ static inline int mtx_init(FAR mtx_t *mutex, int type)
  *
  * int mtx_timedlock(FAR mtx_t *mutex, FAR const struct timespec *tp);
  */
+
+#define mtx_timedlock(mutex,tp) pthread_mutex_timedwait(mutex,tp)
 
 /* mtx_trylock: locks a mutex or returns without blocking if already locked
  *
@@ -285,7 +297,7 @@ static inline int mtx_init(FAR mtx_t *mutex, int type)
 
 /* Thread-local storage *****************************************************/
 
-/* tss_create: creates thread-specific storage pointer with a given destructor
+/* tss_create: creates thread-specific storage pointer with a destructor
  *
  * int tss_create(FAR tss_t *tss_id, tss_dtor_t destructor);
  */

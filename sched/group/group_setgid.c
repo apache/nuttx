@@ -93,7 +93,7 @@ int setgid(gid_t gid)
 
   /* Set the task group's group identity. */
 
-  DEBUGASSERT(group != NULL);
+  DEBUGASSERT(rgroup != NULL);
   rgroup->tg_gid = gid;
   return OK;
 }

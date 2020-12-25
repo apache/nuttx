@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_usbdev.c
  *
- *   Copyright 2014, 2015, 2016, 2017 Sony Video & Sound Products Inc.
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
- *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -91,11 +75,7 @@
 
 #ifndef MIN
 #  define MIN(a, b) ((a) > (b) ? (b) : (a))
-#endif /* MIN */
-
-#ifndef MAX
-#  define MAX(a, b) ((a) > (b) ? (a) : (b))
-#endif /* MIN */
+#endif
 
 #if 0
 #  define DPRINTF(fmt, args...) uinfo(fmt, ##args)
@@ -401,9 +381,9 @@ static void epcmd_write(int epnum, uint32_t val)
  * Input Parameters:
  *   ep   - the struct usbdev_ep_s instance obtained from allocep()
  *   desc - A struct usb_epdesc_s instance describing the endpoint
- *   last - true if this this last endpoint to be configured.  Some hardware
- *          needs to take special action when all of the endpoints have been
- *          configured.
+ *   last - true if this is the last endpoint to be configured.  Some
+ *          hardware needs to take special action when all of the endpoints
+ *          have been configured.
  *
  ****************************************************************************/
 
@@ -634,7 +614,7 @@ static void *lc823450_epallocbuffer(struct usbdev_ep_s *ep, uint16_t bytes)
 #  ifdef CONFIG_USBDEV_DMAMEMORY
   return usbdev_dma_alloc(bytes);
 #  else
-  return kmm_alloc(bytes);
+  return kmm_malloc(bytes);
 #  endif
 }
 #endif
@@ -668,7 +648,8 @@ static void lc823450_epfreebuffer(struct usbdev_ep_s *ep, void *buf)
  *
  ****************************************************************************/
 
-static int lc823450_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static int lc823450_epsubmit(struct usbdev_ep_s *ep,
+                             struct usbdev_req_s *req)
 {
   struct lc823450_req_s *privreq = (struct lc823450_req_s *)req;
   struct lc823450_ep_s *privep = (struct lc823450_ep_s *)ep;
@@ -728,7 +709,8 @@ static int lc823450_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
  *
  ****************************************************************************/
 
-static int lc823450_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static int lc823450_epcancel(struct usbdev_ep_s *ep,
+                             struct usbdev_req_s *req)
 {
   struct lc823450_req_s *privreq = (struct lc823450_req_s *)req;
   struct lc823450_ep_s *privep = (struct lc823450_ep_s *)ep;
@@ -797,12 +779,12 @@ void up_epignore_clear_stall(struct usbdev_ep_s *ep, bool ignore)
  * Input Parameters:
  *   eplog  - 7-bit logical endpoint number (direction bit ignored).  Zero
  *            means that any endpoint matching the other requirements will
- *            suffice.  The assigned endpoint can be found in the eplog field.
+ *            suffice. The assigned endpoint can be found in the eplog field.
  *   in     - true: IN (device-to-host) endpoint requested
  *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC,
  *            USB_EP_ATTR_XFER_BULK, USB_EP_ATTR_XFER_INT}
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static struct usbdev_ep_s *lc823450_allocep(struct usbdev_s *dev,
                                             uint8_t eplog, bool in,
@@ -820,7 +802,7 @@ static struct usbdev_ep_s *lc823450_allocep(struct usbdev_s *dev,
 
   if (priv->used & 1 << epphy)
     {
-      uinfo("ep%d is still used\n");
+      uinfo("ep is still used\n");
       return NULL;
     }
 
@@ -1955,7 +1937,8 @@ int usbdev_is_usbcharger(void)
 #endif
 
 #ifdef CONFIG_PM
-static void usbdev_pmnotify(struct pm_callback_s *cb, enum pm_state_e pmstate)
+static void usbdev_pmnotify(struct pm_callback_s *cb,
+                            enum pm_state_e pmstate)
 {
   irqstate_t flags;
 

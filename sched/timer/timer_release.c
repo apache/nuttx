@@ -119,11 +119,9 @@ int timer_release(FAR struct posix_timer_s *timer)
       return 1;
     }
 
-  /* Free the underlying watchdog instance (the timer will be canceled by the
-   * watchdog logic before it is actually deleted)
-   */
+  /* Cancel the underlying watchdog instance */
 
-  wd_delete(timer->pt_wdog);
+  wd_cancel(&timer->pt_wdog);
 
   /* Cancel any pending notification */
 

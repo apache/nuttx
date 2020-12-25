@@ -55,6 +55,7 @@
 #ifndef CONFIG_ARCH_LEDS
 
 /* LED Configuration ********************************************************/
+
 /* The PIC32MZ Ethernet Starter kit has 3 user LEDs labelled LED1-3 on the
  * board:
  *
@@ -89,13 +90,14 @@ static const pinset_t g_ledpincfg[PIC32MZ_STARTERKIT_NLEDS] =
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure output pins */
 
   pic32mz_configgpio(GPIO_LED_1);
   pic32mz_configgpio(GPIO_LED_2);
   pic32mz_configgpio(GPIO_LED_3);
+  return 3;
 }
 
 /****************************************************************************
@@ -114,7 +116,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   board_userled(PIC32MZ_STARTERKIT_LED1,
                 (ledset & PIC32MZ_STARTERKIT_LED1_BIT) != 0);

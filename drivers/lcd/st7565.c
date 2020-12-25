@@ -190,7 +190,8 @@ struct st7565_dev_s
 
   /* The ST7565 does not support reading from the display memory in SPI mode.
    * Since there is 1 BPP and access is byte-by-byte, it is necessary to keep
-   * a shadow copy of the framebuffer memory. */
+   * a shadow copy of the framebuffer memory.
+   */
 
   uint8_t fb[ST7565_FBSIZE];
 };
@@ -299,6 +300,7 @@ static struct st7565_dev_s g_st7565dev =
     .getplaneinfo = st7565_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
+
     /* Cursor Controls -- Not supported */
 
     /* LCD Specific Controls */
@@ -630,6 +632,7 @@ static int st7565_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
     }
 
   /* Then transfer the display data from the shadow frame buffer memory */
+
   /* Get the page number.  The range of 64 lines is divided up into eight pages
    * of 8 lines each.
    */
@@ -757,7 +760,7 @@ static int st7565_getpower(struct lcd_dev_s *dev)
 {
   struct st7565_dev_s *priv = (struct st7565_dev_s *)dev;
   DEBUGASSERT(priv);
-  ginfo("powered: %s\n", priv->power_level);
+  ginfo("powered: %d\n", priv->power_level);
   return priv->power_level;
 }
 
@@ -775,7 +778,7 @@ static int st7565_setpower(struct lcd_dev_s *dev, int power)
   struct st7565_dev_s *priv = (struct st7565_dev_s *)dev;
 
   DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
-  ginfo("power: %s powered: %s\n", power, priv->power_level);
+  ginfo("power: %d powered: %d\n", power, priv->power_level);
 
   /* Select and lock the device */
 

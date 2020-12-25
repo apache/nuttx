@@ -203,6 +203,258 @@ config RX65N_RTC
 config RX65N_CARRY
 	bool "RTC"
 	default y
+
+config RX65N_RSPI
+	bool "RSPI"
+	select SPI
+	select SPI_DRIVER
+	default n
+
+if RX65N_RSPI
+
+config RX65N_DATA_TRANSFER_MODE
+	bool "Data transfer mode"
+	default y
+
+if RX65N_DATA_TRANSFER_MODE
+
+config RX65N_RSPI_SW_DT_MODE
+	bool "Software DT mode"
+	default n
+
+config RX65N_RSPI_DTC_DT_MODE
+	bool "DTC DT mode"
+	depends on !RX65N_RSPI_SW_DT_MODE
+	select RX65N_DTC
+	default y
+
+endif
+
+config RX65N_RSPI_HIGHSPEED
+	bool "Speed: 0:Normal,1:High"
+	default y
+
+config RX65N_RSPI_BITORDER
+	bool "Bit order: 0:MSBF,1:LSBF"
+	default y
+
+config RX65N_RSPI_BUF_SIZE
+	int "RSPI buffer size(1-4)"
+	default 1
+	range 1 4
+
+config RX65N_RSPI_SPCKD_DELAY
+	int "RSPI clock delay"
+	default 2
+	range 0 7
+
+config RX65N_RSPI_SSLND_DELAY
+	int "RSPI SSL negation delay"
+	default 2
+	range 0 7
+
+config RX65N_RSPI_SPND_DELAY
+	int "RSPI next access delay"
+	default 2
+	range 0 7
+
+config RX65N_RSPI0
+	bool "RSPI0"
+	default y
+
+config RX65N_RSPI1
+	bool "RSPI1"
+	default n
+
+config RX65N_RSPI2
+	bool "RSPI2"
+	default n
+
+endif
+
+config RX65N_RIIC0
+	bool "RIIC0"
+	default n
+	depends on I2C && I2C_DRIVER
+
+if RX65N_RIIC0
+
+config RX65N_RIIC0_BITRATE
+	int "RIIC0 Bus Bit Rate"
+	default 400000
+
+config RX65N_RIIC0_NF
+	bool "Enable Noise Filter for RIIC0"
+	default y
+
+if RX65N_RIIC0_NF
+
+config RX65N_RIIC0_NF_STAGE
+	int "RIIC0 Noise Filter Stages"
+	default 2
+
+endif #RX65N_RIIC0_NF
+
+config RX65N_RIIC0_SDA_DELAY
+	bool "Enable SDA Output Delay"
+	default n
+
+if RX65N_RIIC0_SDA_DELAY
+
+config RX65N_RIIC0_DELAY_CNT
+	int "Number of Cycles Delay"
+	default 1
+
+endif #RX65N_RIIC0_SDA_DELAY
+
+config RX65N_RIIC0_RCV_CONTINUOUS
+	bool "RIIC0 receive continuously"
+	default n
+
+config RX65N_RIIC0_RCV_IN_BYTE_UNITS
+	bool "RIIC0 receive in byte units"
+	default y
+	depends on !RX65N_RIIC0_RCV_CONTINUOUS
+
+endif #RX65N_RIIC0
+
+config RX65N_RIIC1
+	bool "RIIC1"
+	default n
+	depends on I2C && I2C_DRIVER
+
+if RX65N_RIIC1
+
+config RX65N_RIIC1_BITRATE
+	int "RIIC1 Bus Bit Rate"
+	default 400000
+
+config RX65N_RIIC1_NF
+	bool "Enable Noise Filter"
+	default y
+
+if RX65N_RIIC1_NF
+
+config RX65N_RIIC1_NF_STAGE
+	int "RIIC1 Noise Filter Stages"
+	default 2
+
+endif #RX65N_RIIC1_NF
+
+config RX65N_RIIC1_SDA_DELAY
+	bool "Enable SDA Output Delay"
+	default n
+
+if RX65N_RIIC1_SDA_DELAY
+
+config RX65N_RIIC1_DELAY_CNT
+	int "Number of Cycles Delay"
+	default 1
+
+endif #RX65N_RIIC1_SDA_DELAY
+
+config RX65N_RIIC1_RCV_CONTINUOUS
+	bool "RIIC1 receive continuously"
+	default n
+
+config RX65N_RIIC1_RCV_IN_BYTE_UNITS
+	bool "RIIC1 receive in byte units"
+	default y
+	depends on !RX65N_RIIC1_RCV_CONTINUOUS
+
+endif #RX65N_RIIC1
+
+config RX65N_RIIC2
+	bool "RIIC2"
+	default n
+	depends on I2C && I2C_DRIVER
+
+if RX65N_RIIC2
+
+config RX65N_RIIC2_BITRATE
+	int "RIIC2 Bus Bit Rate"
+	default 400000
+
+config RX65N_RIIC2_NF
+	bool "Enable Noise Filter"
+	default y
+
+if RX65N_RIIC2_NF
+
+config RX65N_RIIC2_NF_STAGE
+	int "RIIC2 Noise Filter Stages"
+	default 2
+
+endif #RX65N_RIIC2_NF
+
+config RX65N_RIIC2_SDA_DELAY
+	bool "Enable SDA Output Delay for RIIC2"
+	default n
+
+if RX65N_RIIC2_SDA_DELAY
+
+config RX65N_RIIC2_DELAY_CNT
+	int "Number of Cycles Delay"
+	default 1
+
+endif #RX65N_RIIC2_SDA_DELAY
+
+config RX65N_RIIC2_RCV_CONTINUOUS
+	bool "RIIC2 receive continuously"
+	default n
+
+config RX65N_RIIC2_RCV_IN_BYTE_UNITS
+	bool "RIIC2 receive in byte units"
+	default y
+	depends on !RX65N_RIIC2_RCV_CONTINUOUS
+
+endif #RX65N_RIIC2
+
+config RX65N_USBDEV
+	bool "USB0 Device"
+	default n
+	depends on USBDEV
+
+if RX65N_USBDEV
+
+config RX65N_TEST_INTEP
+	bool "Testing RX65N Interrupt endpoint"
+	default n
+	depends on SERIAL_IFLOWCONTROL && CDCACM_IFLOWCONTROL
+
+endif #RX65N_USBDEV
+
+config RX65N_USBHOST
+	bool "USB host"
+	select USBHOST
+	select USBHOST_HAVE_ASYNCH
+
+config RX65N_DTC
+	bool "DTC"
+	default n
+
+if RX65N_DTC
+
+config RX65N_DTC_SEQUENCE_TRANSFER_MODE
+	bool "Sequence transfer mode"
+	depends on !RX65N_DTC_SHORT_ADDRESS_MODE
+	default n
+
+config RX65N_DTC_DISPLACEMENT
+	int "Displacement value"
+	depends on !RX65N_DTC_SHORT_ADDRESS_MODE
+	default 0
+
+config RX65N_DTC_SHORT_ADDRESS_MODE
+	bool "Short address mode"
+	default n
+
+config RX65N_DTC_TRANSFER_DATA_READ_SKIP
+	bool "Transfer data read skip"
+	default y
+
+endif #RX65N_DTC
+
 endmenu # RX65N Peripheral Selections
 endif
 
@@ -335,6 +587,257 @@ config RX65N_EMAC0
 	select RX65N_EMAC
 	select NETDEVICES
 	select ARCH_HAVE_PHY
+
+config RX65N_RSPI
+	bool "RSPI"
+	select SPI
+	select SPI_DRIVER
+	default n
+
+if RX65N_RSPI
+
+config RX65N_DATA_TRANSFER_MODE
+	bool "Data transfer mode"
+	default y
+
+if RX65N_DATA_TRANSFER_MODE
+
+config RX65N_RSPI_SW_DT_MODE
+	bool "Software DT mode"
+	default n
+
+config RX65N_RSPI_DTC_DT_MODE
+	bool "DTC DT mode"
+	depends on !RX65N_RSPI_SW_DT_MODE
+	select RX65N_DTC
+	default y
+
+endif
+
+config RX65N_RSPI_HIGHSPEED
+	bool "Speed: 0:Normal,1:High"
+	default y
+
+config RX65N_RSPI_BITORDER
+	bool "Bit order: 0:MSBF,1:LSBF"
+	default y
+
+config RX65N_RSPI_BUF_SIZE
+	int "RSPI buffer size(1-4)"
+	default 1
+	range 1 4
+
+config RX65N_RSPI_SPCKD_DELAY
+	int "RSPI clock delay"
+	default 2
+	range 0 7
+
+config RX65N_RSPI_SSLND_DELAY
+	int "RSPI SSL negation delay"
+	default 2
+	range 0 7
+
+config RX65N_RSPI_SPND_DELAY
+	int "RSPI next access delay"
+	default 2
+	range 0 7
+
+config RX65N_RSPI0
+	bool "RSPI0"
+	default y
+
+config RX65N_RSPI1
+	bool "RSPI1"
+	default n
+
+config RX65N_RSPI2
+	bool "RSPI2"
+	default n
+
+endif
+
+config RX65N_RIIC0
+	bool "RIIC0"
+	default n
+	depends on I2C && I2C_DRIVER
+
+if RX65N_RIIC0
+
+config RX65N_RIIC0_BITRATE
+	int "RIIC0 Bus Bit Rate"
+	default 400000
+
+config RX65N_RIIC0_NF
+	bool "Enable Noise Filter for RIIC0"
+	default y
+
+if RX65N_RIIC0_NF
+
+config RX65N_RIIC0_NF_STAGE
+	int "RIIC0 Noise Filter Stages"
+	default 2
+
+endif #RX65N_RIIC0_NF
+
+config RX65N_RIIC0_SDA_DELAY
+	bool "Enable SDA Output Delay"
+	default n
+
+if RX65N_RIIC0_SDA_DELAY
+
+config RX65N_RIIC0_DELAY_CNT
+	int "Number of Cycles Delay"
+	default 1
+
+endif #RX65N_RIIC0_SDA_DELAY
+
+config RX65N_RIIC0_RCV_CONTINUOUS
+	bool "RIIC0 receive continuously"
+	default n
+
+config RX65N_RIIC0_RCV_IN_BYTE_UNITS
+	bool "RIIC0 receive in byte units"
+	default y
+	depends on !RX65N_RIIC0_RCV_CONTINUOUS
+
+endif #RX65N_RIIC0
+
+config RX65N_RIIC1
+	bool "RIIC1"
+	default n
+	depends on I2C && I2C_DRIVER
+
+if RX65N_RIIC1
+
+config RX65N_RIIC1_BITRATE
+	int "RIIC1 Bus Bit Rate"
+	default 400000
+
+config RX65N_RIIC1_NF
+	bool "Enable Noise Filter for RIIC1"
+	default y
+
+if RX65N_RIIC1_NF
+
+config RX65N_RIIC1_NF_STAGE
+	int "RIIC1 Noise Filter Stages"
+	default 2
+
+endif #RX65N_RIIC1_NF
+
+config RX65N_RIIC1_SDA_DELAY
+	bool "Enable SDA Output Delay"
+	default n
+
+if RX65N_RIIC1_SDA_DELAY
+
+config RX65N_RIIC1_DELAY_CNT
+	int "Number of Cycles Delay"
+	default 1
+
+endif #RX65N_RIIC1_SDA_DELAY
+
+config RX65N_RIIC1_RCV_CONTINUOUS
+	bool "RIIC1 receive continuously"
+	default n
+
+config RX65N_RIIC1_RCV_IN_BYTE_UNITS
+	bool "RIIC1 receive in byte units"
+	default y
+	depends on !RX65N_RIIC1_RCV_CONTINUOUS
+
+endif #RX65N_RIIC1
+
+config RX65N_RIIC2
+	bool "RIIC2"
+	default n
+	depends on I2C && I2C_DRIVER
+
+if RX65N_RIIC2
+
+config RX65N_RIIC2_BITRATE
+	int "RIIC2 Bus Bit Rate"
+	default 400000
+
+config RX65N_RIIC2_NF
+	bool "Enable Noise Filter for RIIC2"
+	default y
+
+if RX65N_RIIC2_NF
+
+config RX65N_RIIC2_NF_STAGE
+	int "RIIC2 Noise Filter Stages"
+	default 2
+
+endif #RX65N_RIIC2_NF
+
+config RX65N_RIIC2_SDA_DELAY
+	bool "Enable SDA Output Delay"
+	default n
+
+if RX65N_RIIC2_SDA_DELAY
+
+config RX65N_RIIC2_DELAY_CNT
+	int "Number of Cycles Delay"
+	default 1
+
+endif #RX65N_RIIC2_SDA_DELAY
+
+config RX65N_RIIC2_RCV_CONTINUOUS
+	bool "RIIC2 receive continuously"
+	default n
+
+config RX65N_RIIC2_RCV_IN_BYTE_UNITS
+	bool "RIIC2 receive in byte units"
+	default y
+	depends on !RX65N_RIIC2_RCV_CONTINUOUS
+
+endif #RX65N_RIIC2
+
+config RX65N_USBDEV
+	bool "USB0 Device"
+	default n
+	depends on USBDEV
+
+if RX65N_USBDEV
+
+config RX65N_TEST_INTEP
+	bool "Testing RX65N Interrupt endpoint"
+	default n
+	depends on SERIAL_IFLOWCONTROL && CDCACM_IFLOWCONTROL
+
+endif #RX65N_USBDEV
+
+config RX65N_USBHOST
+	bool "USB host"
+	select USBHOST
+	select USBHOST_HAVE_ASYNCH
+
+config RX65N_DTC
+	bool "DTC"
+	default n
+
+if RX65N_DTC
+
+config RX65N_DTC_SEQUENCE_TRANSFER_MODE
+	bool "Sequence transfer mode"
+	depends on !RX65N_DTC_SHORT_ADDRESS_MODE
+	default n
+
+config RX65N_DTC_DISPLACEMENT
+	int "Displacement value"
+	depends on !RX65N_DTC_SHORT_ADDRESS_MODE
+	default 0
+
+config RX65N_DTC_SHORT_ADDRESS_MODE
+	bool "Short address mode"
+	default n
+
+config RX65N_DTC_TRANSFER_DATA_READ_SKIP
+	bool "Transfer data read skip"
+	default y
+
+endif #RX65N_DTC
 
 endmenu # RX65N Peripheral Selections
 endif

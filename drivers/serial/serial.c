@@ -686,6 +686,10 @@ static int uart_close(FAR struct file *filep)
 
   leave_critical_section(flags);
 
+  /* Wake up read and poll functions */
+
+  uart_datareceived(dev);
+
   /* We need to re-initialize the semaphores if this is the last close
    * of the device, as the close might be caused by pthread_cancel() of
    * a thread currently blocking on any of them.
@@ -854,6 +858,16 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
           break;
         }
 
+      else if (filep->f_inode == 0)
+        {
+          /* File has been closed.
+           * Descriptor is not valid.
+           */
+
+          recvd = -EBADFD;
+          break;
+        }
+
       /* No... then we would have to wait to get receive some data.
        * If the user has specified the O_NONBLOCK option, then do not
        * wait.
@@ -910,6 +924,20 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
               /* Re-enable UART Rx interrupts */
 
               uart_enablerxint(dev);
+
+              /* Check again if the RX buffer is empty.  The UART driver
+               * might have buffered data received between disabling the
+               * RX interrupt and entering the critical section.  Some
+               * drivers (looking at you, cdcacm...) will push the buffer
+               * to the receive queue during uart_enablerxint().
+               * Just continue processing the RX queue if this happens.
+               */
+
+              if (rxbuf->head != rxbuf->tail)
+                {
+                  leave_critical_section(flags);
+                  continue;
+                }
 #endif
 
 #ifdef CONFIG_SERIAL_REMOVABLE
@@ -1358,23 +1386,15 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             break;
 #endif
 
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
           /* Make the controlling terminal of the calling process */
 
           case TIOCSCTTY:
             {
-              /* Check if the ISIG flag is set in the termios c_lflag to enable
-               * this feature.  This flag is set automatically for a serial console
-               * device.
-               */
+              /* Save the PID of the recipient of the SIGINT signal. */
 
-             if ((dev->tc_lflag & ISIG) != 0)
-               {
-                  /* Save the PID of the recipient of the SIGINT signal. */
-
-                  dev->pid = (pid_t)arg;
-                  DEBUGASSERT((unsigned long)(dev->pid) == arg);
-               }
+              dev->pid = (pid_t)arg;
+              DEBUGASSERT((unsigned long)(dev->pid) == arg);
             }
             break;
 #endif
@@ -1421,17 +1441,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               dev->tc_iflag = termiosp->c_iflag;
               dev->tc_oflag = termiosp->c_oflag;
               dev->tc_lflag = termiosp->c_lflag;
-
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
-              /* If the ISIG flag has been cleared in c_lflag, then un-
-               * register the controlling terminal.
-               */
-
-              if ((dev->tc_lflag & ISIG) == 0)
-                {
-                  dev->pid = (pid_t)-1;
-                }
-#endif
             }
             break;
         }
@@ -1595,7 +1604,7 @@ errout:
 int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 {
 #ifdef CONFIG_SERIAL_TERMIOS
-#  if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#  if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   /* Initialize  of the task that will receive SIGINT signals. */
 
   dev->pid = (pid_t)-1;
@@ -1649,6 +1658,10 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 
 void uart_datareceived(FAR uart_dev_t *dev)
 {
+  /* Notify all poll/select waiters that they can read from the recv buffer */
+
+  uart_pollnotify(dev, POLLIN);
+
   /* Is there a thread waiting for read data?  */
 
   if (dev->recvwaiting)
@@ -1658,10 +1671,6 @@ void uart_datareceived(FAR uart_dev_t *dev)
       dev->recvwaiting = false;
       nxsem_post(&dev->recvsem);
     }
-
-  /* Notify all poll/select waiters that they can read from the recv buffer */
-
-  uart_pollnotify(dev, POLLIN);
 
 #if defined(CONFIG_PM) && defined(CONFIG_SERIAL_CONSOLE)
   /* Call pm_activity when characters are received on the console device */
@@ -1687,6 +1696,10 @@ void uart_datareceived(FAR uart_dev_t *dev)
 
 void uart_datasent(FAR uart_dev_t *dev)
 {
+  /* Notify all poll/select waiters that they can write to xmit buffer */
+
+  uart_pollnotify(dev, POLLOUT);
+
   /* Is there a thread waiting for space in xmit.buffer?  */
 
   if (dev->xmitwaiting)
@@ -1696,10 +1709,6 @@ void uart_datasent(FAR uart_dev_t *dev)
       dev->xmitwaiting = false;
       nxsem_post(&dev->xmitsem);
     }
-
-  /* Notify all poll/select waiters that they can write to xmit buffer */
-
-  uart_pollnotify(dev, POLLOUT);
 }
 
 /************************************************************************************
@@ -1735,6 +1744,10 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
   dev->disconnected = !connected;
   if (!connected)
     {
+      /* Notify all poll/select waiters that a hangup occurred */
+
+      uart_pollnotify(dev, (POLLERR | POLLHUP));
+
       /* Yes.. wake up all waiting threads.  Each thread should detect the
        * disconnection and return the ENOTCONN error.
        */
@@ -1758,10 +1771,6 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
           dev->recvwaiting = false;
           nxsem_post(&dev->recvsem);
         }
-
-      /* Notify all poll/select waiters that a hangup occurred */
-
-      uart_pollnotify(dev, (POLLERR | POLLHUP));
     }
 
   leave_critical_section(flags);

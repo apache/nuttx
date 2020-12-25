@@ -20,7 +20,7 @@ config NX_LCDDRIVER
 	---help---
 		By default, the NX graphics system uses the frame buffer driver interface
 		defined in include/nuttx/video/fb.h.  However, if LCD is support is enabled,
-		this this option is provide to select, instead, the LCD driver interface
+		this option is provided to select, instead, the LCD driver interface
 		defined in include/nuttx/lcd/lcd.h.
 
 config NX_NDISPLAYS
@@ -103,7 +103,7 @@ config NX_SWCURSOR
 
 config NX_HWCURSOR
 	bool "Hardware cursor support"
-	depends on (FB_HWCURSOR || LCD_HWCURSOR) && EXPERIMENTAL
+	depends on FB_HWCURSOR && EXPERIMENTAL
 	---help---
 		Hardware cursor support has not been implemented, hence the
 		EXPERIMENTAL dependency.
@@ -143,7 +143,7 @@ config NX_WRITEONLY
 
 config NX_UPDATE
 	bool "Display update hooks"
-	default n
+	default FB_UPDATE && !NX_LCDDRIVER
 	---help---
 		Enable a callout to inform some external module that the display has
 		been updated.  This would be useful in a couple for cases.
@@ -158,8 +158,11 @@ config NX_UPDATE
 		When this feature is enabled, some external logic must provide this
 		interface:
 
-		  void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
-		                           FAR const struct nxgl_rect_s *rect);
+		  fb_vtable_s
+		  {
+		    int (*updatearea)(FAR struct fb_vtable_s *vtable,
+		                      FAR const struct fb_area_s *area);
+		  };
 
 		That is the function that will handle the notification.  It
 		receives the rectangular region that was updated in the provided
@@ -492,11 +495,11 @@ config NXSTART_EXTERNINIT
 	select LCD_EXTERNINIT if LCD && LCD_FRAMEBUFFER && NX_LCDDRIVER
 	---help---
 		Define to support external display initialization by platform-
-		specific code.  This this option is defined, then nxmu_start()
-		will call board_graphics_setup(CONFIG_NXSTART_DEVNO) to initialize
-		the graphics device.  This option is necessary if display is used
-		that cannot be initialized using the standard LCD or framebuffer
-		interfaces.
+		specific code.  If this option is defined, then nxmu_start()
+		will call board_graphics_setup(CONFIG_NXSTART_DEVNO) to
+		initialize the graphics device.  This option is necessary if
+		display is used that cannot be initialized using the standard
+		LCD or framebuffer interfaces.
 
 config NXSTART_SERVERPRIO
 	int "NX Server priority"

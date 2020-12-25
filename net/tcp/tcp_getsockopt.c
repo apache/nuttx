@@ -74,7 +74,7 @@
  *   The 'level' argument specifies the protocol level of the option. To
  *   retrieve options at the socket level, specify the level argument as
  *   SOL_SOCKET; to retrieve options at the TCP-protocol level, the level
- *   argument is SOL_CP.
+ *   argument is SOL_TCP.
  *
  *   See <sys/socket.h> a complete list of values for the socket-level
  *   'option' argument.  Protocol-specific options are are protocol specific

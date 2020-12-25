@@ -39,6 +39,7 @@
  ****************************************************************************/
 
 #include <debug.h>
+#include <inttypes.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/config.h>
@@ -112,25 +113,19 @@ static int gs2200m_irq_attach(xcpt_t handler, FAR void *arg)
 
 static void gs2200m_irq_enable(void)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = enter_critical_section();
 
-  wlinfo("== ec:%d called=%d \n", _enable_count, _n_called++);
+  wlinfo("== ec:%" PRId32 " called=%" PRId32 " \n",
+         _enable_count, _n_called++);
 
-  if (1 == _enable_count)
-    {
-      /* NOTE: This would happen if we received an event */
-
-      return;
-    }
-
-  _enable_count++;
-
-  if (1 == _enable_count)
+  if (0 == _enable_count)
     {
       cxd56_gpioint_enable(PIN_UART2_CTS);
     }
 
-  spin_unlock_irqrestore(flags);
+  _enable_count++;
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -139,9 +134,10 @@ static void gs2200m_irq_enable(void)
 
 static void gs2200m_irq_disable(void)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = enter_critical_section();
 
-  wlinfo("== ec:%d called=%d \n", _enable_count, _n_called++);
+  wlinfo("== ec:%" PRId32 " called=%" PRId32 " \n",
+         _enable_count, _n_called++);
 
   _enable_count--;
 
@@ -150,7 +146,7 @@ static void gs2200m_irq_disable(void)
       cxd56_gpioint_disable(PIN_UART2_CTS);
     }
 
-  spin_unlock_irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -159,7 +155,7 @@ static void gs2200m_irq_disable(void)
 
 static uint32_t gs2200m_dready(int *ec)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = enter_critical_section();
 
   uint32_t r = cxd56_gpio_read(PIN_UART2_CTS);
 
@@ -170,7 +166,7 @@ static uint32_t gs2200m_dready(int *ec)
       *ec = _enable_count;
     }
 
-  spin_unlock_irqrestore(flags);
+  leave_critical_section(flags);
   return r;
 }
 

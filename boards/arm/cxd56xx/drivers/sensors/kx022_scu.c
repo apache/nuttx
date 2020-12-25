@@ -58,7 +58,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_CXD56_DECI_KX022
+#ifdef CONFIG_SENSORS_KX022_SCU_DECI
 #  define KX022_SEQ_TYPE SEQ_TYPE_DECI
 #else
 #  define KX022_SEQ_TYPE SEQ_TYPE_NORMAL

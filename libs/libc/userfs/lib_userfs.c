@@ -56,13 +56,15 @@
 #include <nuttx/fs/userfs.h>
 #include <nuttx/semaphore.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 struct userfs_info_s
 {
-  FAR const struct userfs_operations_s *userops; /* File system callbacks */
+  FAR const struct userfs_operations_s *userops;
   FAR void *volinfo;          /* Data that accompanies the user callbacks */
   struct sockaddr_in client;  /* Client to send response back to */
   int16_t sockfd;             /* Server socket */
@@ -388,7 +390,8 @@ static inline int userfs_dup_dispatch(FAR struct userfs_info_s *info,
   /* Dispatch the request */
 
   DEBUGASSERT(info->userops != NULL && info->userops->dup != NULL);
-  resp.ret  = info->userops->dup(info->volinfo, req->openinfo, &resp.openinfo);
+  resp.ret  = info->userops->dup(info->volinfo,
+                                 req->openinfo, &resp.openinfo);
 
   /* Send the response */
 
@@ -444,7 +447,8 @@ static inline int userfs_truncate_dispatch(FAR struct userfs_info_s *info,
   /* Dispatch the request */
 
   DEBUGASSERT(info->userops != NULL && info->userops->truncate != NULL);
-  resp.ret  = info->userops->truncate(info->volinfo, req->openinfo, req->length);
+  resp.ret  = info->userops->truncate(info->volinfo,
+                                      req->openinfo, req->length);
 
   /* Send the response */
 
@@ -749,7 +753,7 @@ static inline int userfs_rename_dispatch(FAR struct userfs_info_s *info,
 
   /* Verify the request size */
 
-  if (reqlen < SIZEOF_USERFS_RENAME_REQUEST_S(0,0))
+  if (reqlen < SIZEOF_USERFS_RENAME_REQUEST_S(0, 0))
     {
       return -EINVAL;
     }
@@ -886,7 +890,7 @@ static inline int userfs_destroy_dispatch(FAR struct userfs_info_s *info,
  *   the UserFS file system and will not return until that file system has
  *   been unmounted.
  *
- *   userfs_run() implements the UserFS server.  It performs there operations:
+ *   userfs_run() implements the UserFS server. It performs there operations:
  *
  *   1. It configures and creates the UserFS file system and
  *   2. Mounts the user file system at the provide mount point path.
@@ -932,10 +936,12 @@ int userfs_run(FAR const char *mountpt,
   DEBUGASSERT(mountpt != NULL && userops != NULL && mxwrite <= UINT16_MAX);
   DEBUGASSERT(mxwrite > 0 && mxwrite <= (UINT16_MAX - USERFS_REQ_MAXSIZE));
 
-  /* Allocate a state structure with an I/O buffer to receive UserFS requests */
+  /* Allocate a state structure with an I/O buffer to receive UserFS
+   * requests
+   */
 
   iolen = USERFS_REQ_MAXSIZE + mxwrite;
-  info  = (FAR struct userfs_info_s *)zalloc(SIZEOF_USERFS_INFO_S(iolen));
+  info  = lib_zalloc(SIZEOF_USERFS_INFO_S(iolen));
   if (info == NULL)
     {
       ferr("ERROR: Failed to allocate state structure\n");
@@ -1020,111 +1026,133 @@ int userfs_run(FAR const char *mountpt,
         {
           case USERFS_REQ_OPEN:
             ret = userfs_open_dispatch(info,
-                   (FAR struct userfs_open_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_open_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_CLOSE:
             ret = userfs_close_dispatch(info,
-                   (FAR struct userfs_close_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_close_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_READ:
             ret = userfs_read_dispatch(info,
-                   (FAR struct userfs_read_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_read_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_WRITE:
             ret = userfs_write_dispatch(info,
-                   (FAR struct userfs_write_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_write_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_SEEK:
             ret = userfs_seek_dispatch(info,
-                   (FAR struct userfs_seek_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_seek_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_IOCTL:
             ret = userfs_ioctl_dispatch(info,
-                   (FAR struct userfs_ioctl_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_ioctl_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_SYNC:
             ret = userfs_sync_dispatch(info,
-                   (FAR struct userfs_sync_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_sync_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_DUP:
             ret = userfs_dup_dispatch(info,
-                   (FAR struct userfs_dup_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_dup_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_FSTAT:
             ret = userfs_fstat_dispatch(info,
-                   (FAR struct userfs_fstat_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_fstat_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_TRUNCATE:
             ret = userfs_truncate_dispatch(info,
-                   (FAR struct userfs_truncate_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_truncate_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_OPENDIR:
             ret = userfs_opendir_dispatch(info,
-                   (FAR struct userfs_opendir_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_opendir_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_CLOSEDIR:
             ret = userfs_closedir_dispatch(info,
-                   (FAR struct userfs_closedir_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_closedir_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_READDIR:
             ret = userfs_readdir_dispatch(info,
-                   (FAR struct userfs_readdir_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_readdir_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_REWINDDIR:
             ret = userfs_rewinddir_dispatch(info,
-                   (FAR struct userfs_rewinddir_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_rewinddir_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_STATFS:
             ret = userfs_statfs_dispatch(info,
-                   (FAR struct userfs_statfs_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_statfs_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_UNLINK:
             ret = userfs_unlink_dispatch(info,
-                   (FAR struct userfs_unlink_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_unlink_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_MKDIR:
             ret = userfs_mkdir_dispatch(info,
-                   (FAR struct userfs_mkdir_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_mkdir_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_RMDIR:
             ret = userfs_rmdir_dispatch(info,
-                   (FAR struct userfs_rmdir_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_rmdir_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_RENAME:
             ret = userfs_rename_dispatch(info,
-                   (FAR struct userfs_rename_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_rename_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_STAT:
             ret = userfs_stat_dispatch(info,
-                   (FAR struct userfs_stat_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_stat_request_s *)info->iobuffer,
+                   nread);
             break;
 
           case USERFS_REQ_DESTROY:
             ret = userfs_destroy_dispatch(info,
-                   (FAR struct userfs_destroy_request_s *)info->iobuffer, nread);
+                   (FAR struct userfs_destroy_request_s *)info->iobuffer,
+                   nread);
             break;
 
           default:
-            ferr("ERROR: Unrecognized request received: %u\n", *info->iobuffer);
+            ferr("ERROR: Unrecognized request received: %u\n",
+                 *info->iobuffer);
             ret = -EINVAL;
             break;
         }
@@ -1139,6 +1167,6 @@ errout_with_sockfd:
   /* Free the IO Buffer */
 
 errout_with_info:
-  free(info);
+  lib_free(info);
   return ret;
 }

@@ -28,6 +28,10 @@
 
 #include  "sched/sched.h"
 
+#ifdef CONFIG_SMP
+#  include "irq/irq.h"
+#endif
+
 #include "signal/signal.h"
 #include "task/task.h"
 
@@ -84,6 +88,10 @@ int nxtask_exit(void)
   dtcb = this_task();
 #endif
 
+  /* Update scheduler parameters */
+
+  nxsched_suspend_scheduler(dtcb);
+
   /* Remove the TCB of the current task from the ready-to-run list.  A
    * context switch will definitely be necessary -- that must be done
    * by the architecture-specific logic.
@@ -94,6 +102,15 @@ int nxtask_exit(void)
 
   nxsched_remove_readytorun(dtcb);
 
+  /* If there are any pending tasks, then add them to the ready-to-run
+   * task list now
+   */
+
+  if (g_pendingtasks.head != NULL)
+    {
+      nxsched_merge_pending();
+    }
+
   /* Get the new task at the head of the ready to run list */
 
 #ifdef CONFIG_SMP
@@ -102,13 +119,11 @@ int nxtask_exit(void)
   rtcb = this_task();
 #endif
 
-#ifdef CONFIG_SMP
-  /* Because clearing the global IRQ control in nxsched_remove_readytorun()
-   * was moved to nxsched_resume_scheduler(). So call the API here.
+  /* NOTE: nxsched_resume_scheduler() was moved to up_exit()
+   * because the global IRQ control for SMP should be deferred until
+   * context switching, otherwise, the context switching would be done
+   * without a critical section
    */
-
-  nxsched_resume_scheduler(rtcb);
-#endif
 
   /* We are now in a bad state -- the head of the ready to run task list
    * does not correspond to the thread that is running.  Disabling pre-
@@ -138,7 +153,24 @@ int nxtask_exit(void)
    */
 
   nxsched_add_blocked(dtcb, TSTATE_TASK_INACTIVE);
+
+#ifdef CONFIG_SMP
+  /* NOTE:
+   * During nxtask_terminate(), enter_critical_section() will be called
+   * to deallocate tcb. However, this would aquire g_cpu_irqlock if
+   * rtcb->irqcount = 0, event though we are in critical section.
+   * To prevent from aquiring, increment rtcb->irqcount here.
+   */
+
+  rtcb->irqcount++;
+#endif
+
   ret = nxtask_terminate(dtcb->pid, true);
+
+#ifdef CONFIG_SMP
+  rtcb->irqcount--;
+#endif
+
   rtcb->task_state = TSTATE_TASK_RUNNING;
 
   /* Decrement the lockcount on rctb. */
@@ -154,15 +186,6 @@ int nxtask_exit(void)
                   &g_cpu_schedlock);
     }
 #endif
-
-  /* If there are any pending tasks, then add them to the ready-to-run
-   * task list now
-   */
-
-  if (g_pendingtasks.head != NULL)
-    {
-      nxsched_merge_pending();
-    }
 
   return ret;
 }

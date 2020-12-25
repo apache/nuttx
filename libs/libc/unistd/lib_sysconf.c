@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
+#include <sched.h>
 #include <errno.h>
 
 /****************************************************************************
@@ -224,6 +225,28 @@ long sysconf(int name)
     {
       case _SC_OPEN_MAX:
         return CONFIG_NFILE_DESCRIPTORS;
+
+      case _SC_ATEXIT_MAX:
+#ifdef CONFIG_SCHED_EXIT_MAX
+        return CONFIG_SCHED_EXIT_MAX;
+#else
+        return 0;
+#endif
+
+      case _SC_NPROCESSORS_CONF:
+      case _SC_NPROCESSORS_ONLN:
+#ifdef CONFIG_SMP_NCPUS
+        return CONFIG_SMP_NCPUS;
+#else
+        return 1;
+#endif
+
+      case _SC_PAGESIZE:
+#ifdef CONFIG_MM_PGSIZE
+        return CONFIG_MM_PGSIZE;
+#else
+        return 1;
+#endif
 
       default:
 #if 0 /* Assume valid but not implemented for the time being */

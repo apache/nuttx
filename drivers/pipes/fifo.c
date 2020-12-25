@@ -102,8 +102,8 @@ static const struct file_operations fifo_fops =
  *   bufsize - The size of the in-memory, circular buffer in bytes.
  *
  * Returned Value:
- *   0 is returned on success; otherwise, the negative error code return
- *   appropriately.
+ *   0 is returned on success; a negated errno value is returned on a
+ *   failure.
  *
  ****************************************************************************/
 

@@ -70,9 +70,10 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   max326_gpio_config(GPIO_BUTTON);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

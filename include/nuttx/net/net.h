@@ -155,7 +155,9 @@ enum net_lltype_e
   NET_LL_BLUETOOTH,    /* Bluetooth */
   NET_LL_IEEE80211,    /* IEEE 802.11 */
   NET_LL_IEEE802154,   /* IEEE 802.15.4 MAC */
-  NET_LL_PKTRADIO      /* Non-standard packet radio */
+  NET_LL_PKTRADIO,     /* Non-standard packet radio */
+  NET_LL_MBIM,         /* CDC-MBIM USB host driver */
+  NET_LL_CAN           /* CAN bus */
 };
 
 /* This defines a bitmap big enough for one bit for each socket option */
@@ -214,6 +216,12 @@ struct sock_intf_s
   CODE ssize_t    (*si_recvfrom)(FAR struct socket *psock, FAR void *buf,
                     size_t len, int flags, FAR struct sockaddr *from,
                     FAR socklen_t *fromlen);
+#ifdef CONFIG_NET_CMSG
+  CODE ssize_t    (*si_recvmsg)(FAR struct socket *psock,
+    FAR struct msghdr *msg, int flags);
+  CODE ssize_t    (*si_sendmsg)(FAR struct socket *psock,
+    FAR struct msghdr *msg, int flags);
+#endif
   CODE int        (*si_close)(FAR struct socket *psock);
 #ifdef CONFIG_NET_USRSOCK
   CODE int        (*si_ioctl)(FAR struct socket *psock, int cmd,
@@ -255,9 +263,9 @@ struct devif_callback_s;  /* Forward reference */
 struct socket
 {
   int16_t       s_crefs;     /* Reference count on the socket */
-  uint8_t       s_domain;    /* IP domain: PF_INET, PF_INET6, or PF_PACKET */
-  uint8_t       s_type;      /* Protocol type: Only SOCK_STREAM or
-                              * SOCK_DGRAM */
+  uint8_t       s_domain;    /* IP domain */
+  uint8_t       s_type;      /* Protocol type */
+  uint8_t       s_proto;     /* Socket Protocol */
   uint8_t       s_flags;     /* See _SF_* definitions */
 
   /* Socket options */
@@ -269,6 +277,9 @@ struct socket
   socktimeo_t   s_sndtimeo;  /* Send timeout value (in deciseconds) */
 #ifdef CONFIG_NET_SOLINGER
   socktimeo_t   s_linger;    /* Linger timeout value (in deciseconds) */
+#endif
+#ifdef CONFIG_NET_TIMESTAMP
+  int32_t       s_timestamp; /* Socket timestamp enabled/disabled */
 #endif
 #endif
 
@@ -368,6 +379,25 @@ void net_initialize(void);
  ****************************************************************************/
 
 int net_lock(void);
+
+/****************************************************************************
+ * Name: net_trylock
+ *
+ * Description:
+ *   Try to take the network lock only when it is currently not locked.
+ *   Otherwise, it locks the semaphore.  In either
+ *   case, the call returns without blocking.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   failured (probably -EAGAIN).
+ *
+ ****************************************************************************/
+
+int net_trylock(void);
 
 /****************************************************************************
  * Name: net_unlock
@@ -593,8 +623,6 @@ FAR struct socket *sockfd_socket(int sockfd);
  *     The protocol type or the specified protocol is not supported within
  *     this domain.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 int psock_socket(int domain, int type, int protocol,
@@ -612,8 +640,6 @@ int psock_socket(int domain, int type, int protocol,
  * Returned Value:
  *  Returns zero (OK) on success.  On failure, it returns a negated errno
  *  value to indicate the nature of the error.
- *
- * Assumptions:
  *
  ****************************************************************************/
 
@@ -662,8 +688,6 @@ int psock_close(FAR struct socket *psock);
  *     The socket is already bound to an address.
  *   ENOTSOCK
  *     psock is a descriptor for a file, not a socket.
- *
- * Assumptions:
  *
  ****************************************************************************/
 
@@ -839,8 +863,6 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *       Timeout while attempting connection. The server may be too busy
  *       to accept new connections.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
@@ -999,11 +1021,11 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
  *   fromlen - The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  If no data is
+ *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on any failure, a negated errno value
- *   is returned (see comments with send() for a list of appropriate errno
- *   values).
+ *   psock_recvfrom() will return 0.  Otherwise, on any failure, a negated
+ *   errno value is returned (see comments with recvfrom() for a list of
+ *   appropriate errno values).
  *
  ****************************************************************************/
 
@@ -1037,11 +1059,11 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *   fromlen - The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  If no data is
+ *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on any failure, a negated errno value
- *   is returned (see comments with send() for a list of appropriate errno
- *   values).
+ *   nx_recvfrom() will return 0.  Otherwise, on any failure, a negated errno
+ *   value is returned (see comments with recvfrom() for a list of
+ *   appropriate errno values).
  *
  ****************************************************************************/
 
@@ -1056,12 +1078,12 @@ ssize_t nx_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
  * Name: psock_getsockopt
  *
  * Description:
- *   getsockopt() retrieve thse value for the option specified by the
+ *   getsockopt() retrieve the value for the option specified by the
  *   'option' argument for the socket specified by the 'psock' argument. If
  *   the size of the option value is greater than 'value_len', the value
  *   stored in the object pointed to by the 'value' argument will be silently
  *   truncated. Otherwise, the length pointed to by the 'value_len' argument
- *   will be modified to indicate the actual length of the'value'.
+ *   will be modified to indicate the actual length of the 'value'.
  *
  *   The 'level' argument specifies the protocol level of the option. To
  *   retrieve options at the socket level, specify the level argument as
@@ -1139,8 +1161,6 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
  *  ENOBUFS
  *    Insufficient resources are available in the system to complete the
  *    call.
- *
- * Assumptions:
  *
  ****************************************************************************/
 

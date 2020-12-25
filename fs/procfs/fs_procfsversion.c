@@ -40,8 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/statfs.h>
 #include <sys/stat.h>
+#include <sys/utsname.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -207,6 +207,7 @@ static ssize_t version_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen)
 {
   FAR struct version_file_s *attr;
+  struct utsname name;
   size_t linesize;
   off_t offset;
   ssize_t ret;
@@ -220,16 +221,9 @@ static ssize_t version_read(FAR struct file *filep, FAR char *buffer,
 
   if (filep->f_pos == 0)
     {
-#if defined(__DATE__) && defined(__TIME__)
-      linesize = snprintf(attr->line, VERSION_LINELEN,
-                          "NuttX version %s %s %s %s\n",
-                          CONFIG_VERSION_STRING, CONFIG_VERSION_BUILD,
-                          __DATE__, __TIME__);
-#else
-      linesize = snprintf(attr->line, VERSION_LINELEN,
-                          "NuttX version %s %s\n",
-                          CONFIG_VERSION_STRING, CONFIG_VERSION_BUILD);
-#endif
+      uname(&name);
+      linesize = snprintf(attr->line, VERSION_LINELEN, "%s version %s %s\n",
+                          name.sysname, name.release, name.version);
 
       /* Save the linesize in case we are re-entered with f_pos > 0 */
 
@@ -237,7 +231,7 @@ static ssize_t version_read(FAR struct file *filep, FAR char *buffer,
     }
 
   offset = filep->f_pos;
-  ret    = procfs_memcpy(attr->line, attr->linesize, buffer, buflen, &offset);
+  ret = procfs_memcpy(attr->line, attr->linesize, buffer, buflen, &offset);
 
   /* Update the file offset */
 

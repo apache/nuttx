@@ -70,11 +70,23 @@ void up_initial_state(FAR struct tcb_s *tcb)
   FAR struct xcptcontext *xcp  = &tcb->xcp;
   FAR uint8_t            *regs = xcp->regs;
 
+  /* Initialize the idle thread stack */
+
+  if (tcb->pid == 0)
+    {
+      tcb->stack_alloc_ptr = (void *)(g_idle_topstack -
+                                      CONFIG_IDLETHREAD_STACKSIZE);
+      tcb->adj_stack_ptr   = (void *)g_idle_topstack;
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+    }
+
   /* Initialize the initial exception register context structure */
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 
-  /* Offset 0: FLG (bits 12-14) PC (bits 16-19) as would be present by an interrupt */
+  /* Offset 0: FLG (bits 12-14) PC (bits 16-19) as would be present by an
+   * interrupt
+   */
 
   *regs++ = ((M16C_DEFAULT_IPL << 4) | ((uint32_t)tcb->start >> 16));
 
@@ -93,7 +105,7 @@ void up_initial_state(FAR struct tcb_s *tcb)
 
   /* Offset 18-20: User stack pointer */
 
-   regs   = &xcp->regs[REG_SP];
+  regs    = &xcp->regs[REG_SP];
   *regs++ = (uint32_t)tcb->adj_stack_ptr >> 8;  /* Bits 8-15 of SP */
   *regs   = (uint32_t)tcb->adj_stack_ptr;       /* Bits 0-7 of SP */
 }

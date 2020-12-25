@@ -71,23 +71,6 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_getsp
- ****************************************************************************/
-
-/* I don't know if the builtin to get SP is enabled */
-
-static inline uint32_t up_getsp(void)
-{
-  uint32_t sp;
-  __asm__
-  (
-    "\tmov %0, sp\n\t"
-    : "=r"(sp)
-  );
-  return sp;
-}
-
-/****************************************************************************
  * Name: up_stackdump
  ****************************************************************************/
 
@@ -212,7 +195,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 static void up_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint32_t sp   = up_getsp();
+  uint32_t sp   = arm_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
@@ -229,16 +212,8 @@ static void up_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  if (rtcb->pid == 0) /* Check for CPU0 IDLE thread */
-    {
-      ustackbase = g_idle_topstack - 4;
-      ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
-    }
-  else
-    {
-      ustackbase = (uint32_t)rtcb->adj_stack_ptr;
-      ustacksize = (uint32_t)rtcb->adj_stack_size;
-    }
+  ustackbase = (uint32_t)rtcb->adj_stack_ptr;
+  ustacksize = (uint32_t)rtcb->adj_stack_size;
 
   _alert("Current sp: %08x\n", sp);
 
@@ -272,12 +247,12 @@ static void up_dumpstate(void)
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  /* This this thread have a kernel stack allocated? */
+  /* Does this thread have a kernel stack allocated? */
 
   if (rtcb->xcp.kstack)
     {
       kstackbase = (uint32_t)rtcb->xcp.kstack +
-                   CONFIG_ARCH_KERNEL_STACKSIZE - 4;
+                   CONFIG_ARCH_KERNEL_STACKSIZE;
 
       _alert("Kernel stack:\n");
       _alert("  base: %08x\n", kstackbase);
@@ -290,24 +265,10 @@ static void up_dumpstate(void)
 
   if (sp > istackbase - istacksize && sp < istackbase)
     {
-      uint32_t *stackbase;
-
       /* Yes.. dump the interrupt stack */
 
       _alert("Interrupt Stack\n", sp);
       up_stackdump(sp, istackbase);
-
-      /* Extract the user stack pointer which should lie
-       * at the base of the interrupt stack.
-       */
-
-#ifdef CONFIG_SMP
-      stackbase = (uint32_t *)arm_intstack_base();
-#else
-      stackbase = (uint32_t *)&g_intstackbase;
-#endif
-      sp        = *stackbase;
-      _alert("User sp: %08x\n", sp);
     }
   else if (CURRENT_REGS)
     {
@@ -315,6 +276,17 @@ static void up_dumpstate(void)
       up_stackdump(istackbase - istacksize, istackbase);
     }
 #endif
+
+  /* Extract the user stack pointer if we are in an interrupt handler.
+   * If we are not in an interrupt handler.  Then sp is the user stack
+   * pointer (and the above range check should have failed).
+   */
+
+  if (CURRENT_REGS)
+    {
+      sp = CURRENT_REGS[REG_R13];
+      _alert("User sp: %08x\n", sp);
+    }
 
   /* Dump the user stack if the stack pointer lies within the allocated user
    * stack memory.
@@ -370,8 +342,7 @@ static void up_dumpstate(void)
  * Name: _up_assert
  ****************************************************************************/
 
-static void _up_assert(int errorcode) noreturn_function;
-static void _up_assert(int errorcode)
+static void _up_assert(void)
 {
   /* Flush any buffered SYSLOG data */
 
@@ -411,7 +382,6 @@ static void _up_assert(int errorcode)
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 2
       board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
-      exit(errorcode);
     }
 }
 
@@ -423,7 +393,7 @@ static void _up_assert(int errorcode)
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const uint8_t *filename, int lineno)
+void up_assert(const char *filename, int lineno)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = running_task();
@@ -460,8 +430,8 @@ void up_assert(const uint8_t *filename, int lineno)
   syslog_flush();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), running_task(), filename, lineno);
+  board_crashdump(arm_getsp(), running_task(), filename, lineno);
 #endif
 
-  _up_assert(EXIT_FAILURE);
+  _up_assert();
 }

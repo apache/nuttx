@@ -54,7 +54,7 @@ configure.c, cfgparser.c, and cfgparser.h
 
   configure.sh is a bash script that is used to configure NuttX for a given
   target board in a environment that supports POSIX paths (Linux, Cygwin,
-  macOS, or similar).  See boards/README.txt or Documentation/NuttxPortingGuide.html
+  macOS, or similar).  See boards/README.txt or Documentation/NuttXPortingGuide.html
   for a description of how to configure NuttX with this script.
 
   configure.c, cfgparser.c, and cfgparser.h can be used to build a work-alike
@@ -189,7 +189,7 @@ mkconfig.c, cfgdefine.c, and cfgdefine.h
 
   When you configure NuttX, you will copy a configuration file called .config
   in the top level NuttX directory (See boards/README.txt or
-  Documentation/NuttxPortingGuide.html).  The first time you make NuttX,
+  Documentation/NuttXPortingGuide.html).  The first time you make NuttX,
   the top-level makefile will build the mkconfig executable from mkconfig.c
   (using Makefile.host).  The top-level Makefile will then execute the
   mkconfig program to convert the .config file in the top level directory
@@ -227,7 +227,7 @@ mkexport.sh and Makefile.export
   Makefile.export is used only by the mkexport.sh script to parse out
   options from the top-level Make.defs file.
 
-  USAGE: tools/mkexport.sh [-d] [-z] [-u] [-w|wy|wn] -t <top-dir> [-x <lib-ext>] -l "lib1 [lib2 [lib3 ...]]"
+  USAGE: tools/mkexport.sh [-d] [-z] [-u] -t <top-dir> [-x <lib-ext>] -l "lib1 [lib2 [lib3 ...]]"
 
   This script also depends on the environment variable MAKE which is set
   in the top-level Makefile before starting mkexport.sh.  If MAKE is not
@@ -251,7 +251,7 @@ mkversion.c, cfgdefine.c, and cfgdefine.h
   program is used during the initial NuttX build.
 
   When you build NuttX there should be a version file called .version in
-  the top level NuttX directory (See Documentation/NuttxPortingGuide.html).
+  the top level NuttX directory (See Documentation/NuttXPortingGuide.html).
   The first time you make NuttX, the top-level makefile will build the
   mkversion executable from mkversion.c (using Makefile.host).  The top-
   level Makefile will then execute the mkversion program to convert the
@@ -414,10 +414,10 @@ bdf-convert.c
 
        genfontsources:
          ifeq ($(CONFIG_NXFONT_SANS23X27),y)
-          @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=1 EXTRAFLAGS=$(EXTRAFLAGS)
+          @$(MAKE) -C nxfonts -f Makefile.sources NXFONTS_FONTID=1 EXTRAFLAGS=$(EXTRAFLAGS)
         endif
          ifeq ($(CONFIG_NXFONT_MYFONT),y)
-          @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=2 EXTRAFLAGS=$(EXTRAFLAGS)
+          @$(MAKE) -C nxfonts -f Makefile.sources NXFONTS_FONTID=2 EXTRAFLAGS=$(EXTRAFLAGS)
         endif
 
     6. nuttx/libnx/nxfonts/Make.defs.  Set the make variable NXFSET_CSRCS.
@@ -935,13 +935,12 @@ sethost.sh
 
     $ ./sethost.sh -h
 
-    USAGE: ./sethost.sh [-l|m|c|u|g|n] [make-opts]
+    USAGE: ./sethost.sh [-l|m|c|g|n] [make-opts]
            ./sethost.sh -h
 
     Where:
-      -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),
-         Ubuntu under Windows 10 (u), MSYS/MSYS2 (g)
-         or Windows native (n).  Default Linux
+      -l|m|c|g|n selects Linux (l), macOS (m), Cygwin (c),
+         MSYS/MSYS2 (g) or Windows native (n). Default Linux
       make-opts directly pass to make
       -h will show this help test and terminate
 
@@ -989,12 +988,12 @@ testbuild.sh
 
     $ ./testbuild.sh -h
 
-    USAGE: ./testbuild.sh [-l|m|c|u|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>
+    USAGE: ./testbuild.sh [-l|m|c|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>
            ./testbuild.sh -h
 
     Where:
-      -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),
-         Ubuntu under Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Linux
+      -l|m|c|g|n selects Linux (l), macOS (m), Cygwin (c),
+         MSYS/MSYS2 (g) or Windows native (n).  Default Linux
       -d enables script debug output
       -x exit on build failures
       -j <ncpus> passed on to make.  Default:  No -j make option.
@@ -1003,6 +1002,7 @@ testbuild.sh
          Default $WD/../nuttx, where $WD is the parent directory of
          the directory where this script is.
       -p only print the list of configs without running any builds
+      -C Skip tree cleanness check.
       -G Use "git clean -xfdq" instead of "make distclean" to clean the tree.
          This option may speed up the builds. However, note that:
            * This assumes that your trees are git based.
@@ -1018,7 +1018,7 @@ testbuild.sh
   These script needs two pieces of information.
 
     a. A description of the platform that you are testing on.  This description
-       is provided by the optional -l, -m, -c, -u, -g and -n options.
+       is provided by the optional -l, -m, -c, -g and -n options.
     b. A list of configurations to build.  That list is provided by a test
        list file.  The final, non-optional parameter, <testlist-file>,
        provides the path to that file.
@@ -1027,9 +1027,9 @@ testbuild.sh
   build descriptions consists of two comma separated values.  For example:
 
     stm32f429i-disco:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
-    arduino-due:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL,-CONFIG_ARCH_SIZET_LONG
+    arduino-due:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
     /arm,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
-    /risc-v,CONFIG_RV32IM_TOOLCHAIN_GNU_RVGL,CONFIG_ARCH_SIZET_LONG
+    /risc-v,CONFIG_RV32IM_TOOLCHAIN_GNU_RVGL
 
   The first value is the usual configuration description of the form
   <board-name>:<configuration-name> or /<folder-name> and must correspond to a
@@ -1041,20 +1041,23 @@ testbuild.sh
   configured board.
 
   The prefix '-' can be used to skip a configuration:
-  -stm32f429i-disco/nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
+  -stm32f429i-disco/nsh
+
+  or skip a configuration on a specific host(e.g. Darwin):
+  -Darwin,sim:rpserver
 
 uncrustify.cfg
 --------------
 
   This is a configuration script for the uncrustify code beautifier.
   Uncrustify does well with forcing braces into "if" statements and
-  indenting per the Nuttx C coding standard. It correctly does things
+  indenting per the NuttX C coding standard. It correctly does things
   like placing all braces on separate lines at the proper indentation
   level.  It cannot handle certain requirements of the coding standard
   such as
 
     - FAR attributes in pointer declarations.
-    - The Nuttx standard function header block comments.
+    - The NuttX standard function header block comments.
     - Naming violations such as use of CamelCase variable names,
       lower case pre-processor definitions, etc.
 

@@ -1,37 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_ipl2.c
  *
- *   Copyright 2015,2016,2017 Sony Video & Sound Products Inc.
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
- *   Author: Nobutaka Toyoshima <Nobutaka.Toyoshima@jp.sony.com>
- *   Author: Yasuhiro Osaki <Yasuhiro.Osaki@jp.sony.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -119,7 +102,8 @@ static struct
     uint32_t size;
     uint32_t enc;
     uint32_t offset;
-  } chunk[10];
+  }
+  chunk[10];
 } upg_image;
 
 /****************************************************************************
@@ -192,7 +176,10 @@ static int blk_write(const void *buf, int len, const char *path, int offset)
 
 static int install_recovery(const char *srcpath)
 {
-  int rfd, i, len, rem;
+  int rfd;
+  int i;
+  int len;
+  int rem;
   int ret = 0;
   void *handle = NULL;
 
@@ -223,7 +210,6 @@ static int install_recovery(const char *srcpath)
       sysreset();
 
       /* NOT REACHED */
-
     }
 #endif
 
@@ -308,7 +294,6 @@ static void load_kernel(const char *name, const char *devname)
      "ldr sp, [r1, #0]\n" /* set sp */
      "ldr pc, [r1, #4]"   /* set pc, start nuttx */
      );
-
 }
 
 /****************************************************************************
@@ -377,18 +362,18 @@ static int check_forceusbboot(void)
 
   /* start ADC0,1 */
 
-  putreg32(rADCCTL_fADCNVCK_DIV32 | rADCCTL_fADACT | rADCCTL_fADCHSCN |
-           1 /* 0,1 ch */, rADCCTL);
+  putreg32(ADCCTL_ADCNVCK_DIV32 | ADCCTL_ADACT | ADCCTL_ADCHSCN |
+           1 /* 0,1 ch */, ADCCTL);
 
-  putreg32(53, rADCSMPL);
+  putreg32(53, ADCSMPL);
 
   /* wait for adc done */
 
-  while ((getreg32(rADCSTS) & rADCSTS_fADCMPL) == 0)
+  while ((getreg32(ADCSTS) & ADCSTS_ADCMPL) == 0)
     ;
 
-  val = getreg32(rADC0DT);
-  val1 = getreg32(rADC1DT);
+  val = getreg32(ADC0DT);
+  val1 = getreg32(ADC1DT);
 
   _info("val = %d, val1 = %d\n", val, val1);
 
@@ -399,21 +384,21 @@ static int check_forceusbboot(void)
 
   /* check KEY0_AD_D key pressed */
 
-  if (val >= (0x3A << 2) && val < (0x57 << 2))
+  if (val >= (0x3a << 2) && val < (0x57 << 2))
     {
       return 1;
     }
 
   /* check KEY0_AD_B key pressed */
 
-  if (val >= (0x0B << 2) && val < (0x20 << 2))
+  if (val >= (0x0b << 2) && val < (0x20 << 2))
     {
       return 1;
     }
 
   /* check KEY1_AD_B key pressed */
 
-  if (val1 >= (0x0B << 2) && val1 < (0x20 << 2))
+  if (val1 >= (0x0b << 2) && val1 < (0x20 << 2))
     {
       return 1;
     }
@@ -495,11 +480,11 @@ static void chg_disable(void)
 
   /* I2C pinmux */
 
-  modifyreg32(PMDCNT0, 0x0003C000, 0x00014000);
+  modifyreg32(PMDCNT0, 0x0003c000, 0x00014000);
 
   /* I2C drv : 4mA */
 
-  modifyreg32(PTDRVCNT0, 0x0003C000, 0x0003C000);
+  modifyreg32(PTDRVCNT0, 0x0003c000, 0x0003c000);
 
   /* Enable I2C controller */
 
@@ -612,6 +597,7 @@ static int msc_enable(int forced)
       _info("Install recovery\n");
 
       /* clear old MBR */
+
       memset(copybuf, 0, sizeof(copybuf));
       set_config(0, copybuf);
     }
@@ -625,6 +611,7 @@ static int msc_enable(int forced)
   sysreset();
 
   /* not reached */
+
   return 0;
 }
 #endif
@@ -688,9 +675,6 @@ int ipl2_main(int argc, char *argv[])
 
   UNUSED(ret); /* Not used in all configurations */
 
-  _info("start: %s\n", CONFIG_CURRENT_REVISION);
-  _info("imgsig: %u\n", IMG_SIGNATURE);
-
 #ifdef CONFIG_CHARGER
   /* NOTE:
    * chg_disable() must be done before CMIC_FWAKE L->H.
@@ -749,7 +733,6 @@ int ipl2_main(int argc, char *argv[])
 
       install_recovery("/mnt/sd0/UPG.IMG");
       load_kernel("recovery", CONFIG_MTD_RECOVERY_DEVPATH);
-
     }
   else
     {

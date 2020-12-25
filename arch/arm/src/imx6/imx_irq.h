@@ -67,24 +67,14 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-/* In the SMP configuration, we will need custom IRQ and FIQ stacks.
- * These definitions provide the aligned stack allocations.
- */
-
-EXTERN uint64_t g_irqstack_alloc[];
-EXTERN uint64_t g_fiqstack_alloc[];
-
-/* These are arrays that point to the top of each interrupt stack */
-
-EXTERN uintptr_t g_irqstack_top[CONFIG_SMP_NCPUS];
-EXTERN uintptr_t g_irqstack_top[CONFIG_SMP_NCPUS];
-
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+EXTERN uintptr_t arm_intstack_base(void);
+EXTERN uintptr_t arm_intstack_alloc(void);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

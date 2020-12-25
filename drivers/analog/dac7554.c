@@ -199,7 +199,7 @@ static int dac7554_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 
   /* Sanity check */
 
-  DEBUGASSERT(priv->SPI != NULL);
+  DEBUGASSERT(priv->spi != NULL);
 
   /* Set up message to send */
 
@@ -261,7 +261,7 @@ FAR struct dac_dev_s *dac7554_initialize(FAR struct spi_dev_s *spi,
 
   /* Sanity check */
 
-  DEBUGASSERT(i2c != NULL);
+  DEBUGASSERT(spi != NULL);
 
   /* Initialize the DAC7554 device structure */
 

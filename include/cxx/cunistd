@@ -71,7 +71,9 @@ namespace std
 
   // Terminal I/O
 
+#ifdef CONFIG_SERIAL_TERMIOS
   using ::isatty;
+#endif
 
   // Memory management
 
@@ -94,10 +96,8 @@ namespace std
   using ::access;
   using ::rmdir;
   using ::unlink;
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  using ::link;
+  using ::symlink;
   using ::readlink;
-#endif
 
   // Execution of program files
 
@@ -122,10 +122,8 @@ namespace std
 
   // Networking
 
-#ifdef CONFIG_NET
   using ::gethostname;
   using ::sethostname;
-#endif
 }
 
 #endif // __INCLUDE_CXX_CUNISTD

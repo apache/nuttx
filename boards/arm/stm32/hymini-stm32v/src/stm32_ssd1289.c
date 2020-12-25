@@ -34,9 +34,14 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -60,7 +65,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration **********************************************************************/
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_STM32_FSMC
 #  error "CONFIG_STM32_FSMC is required to use the LCD"
@@ -83,7 +88,10 @@
 
 #define LCD_BL_TIMER_PERIOD 8999
 
-/* LCD is connected to the FSMC_Bank1_NOR/SRAM1 and NE1 is used as ship select signal */
+/* LCD is connected to the FSMC_Bank1_NOR/SRAM1 and NE1 is used as ship
+ * select signal
+ */
+
 /* RS <==> A16 */
 
 #define LCD_INDEX        0x60000000  /* RS = 0 */
@@ -228,7 +236,8 @@ static void stm32_write(FAR struct ssd1289_lcd_s *dev, uint16_t data)
  * Name: stm32_backlight
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER:
+ *   full on).
  *   Used here to set pwm duty on timer used for backlight.
  *
  ****************************************************************************/
@@ -248,7 +257,8 @@ static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power)
        * maximum power setting.
        */
 
-      duty = ((uint32_t)LCD_BL_TIMER_PERIOD * (uint32_t)power) / CONFIG_LCD_MAXPOWER;
+      duty = ((uint32_t)LCD_BL_TIMER_PERIOD * (uint32_t)power) /
+             CONFIG_LCD_MAXPOWER;
       if (duty >= LCD_BL_TIMER_PERIOD)
         {
           duty = LCD_BL_TIMER_PERIOD - 1;
@@ -314,7 +324,7 @@ static void init_lcd_backlight(void)
 
   ccer &= !ATIM_CCER_CC2P;
 
-  /* Enable channel 2*/
+  /* Enable channel 2 */
 
   ccer |= ATIM_CCER_CC2E;
 
@@ -327,32 +337,32 @@ static void init_lcd_backlight(void)
 
   modifyreg16(STM32_TIM3_CR1, 0, ATIM_CR1_ARPE);
 
-  /* Enable Backlight Timer !!!!*/
+  /* Enable Backlight Timer !!!! */
 
   modifyreg16(STM32_TIM3_CR1, 0, ATIM_CR1_CEN);
 
   /* Dump timer3 registers */
 
-  lcdinfo("APB1ENR: %08x\n", getreg32(STM32_RCC_APB1ENR));
-  lcdinfo("CR1:     %04x\n", getreg32(STM32_TIM3_CR1));
-  lcdinfo("CR2:     %04x\n", getreg32(STM32_TIM3_CR2));
-  lcdinfo("SMCR:    %04x\n", getreg32(STM32_TIM3_SMCR));
-  lcdinfo("DIER:    %04x\n", getreg32(STM32_TIM3_DIER));
-  lcdinfo("SR:      %04x\n", getreg32(STM32_TIM3_SR));
-  lcdinfo("EGR:     %04x\n", getreg32(STM32_TIM3_EGR));
-  lcdinfo("CCMR1:   %04x\n", getreg32(STM32_TIM3_CCMR1));
-  lcdinfo("CCMR2:   %04x\n", getreg32(STM32_TIM3_CCMR2));
-  lcdinfo("CCER:    %04x\n", getreg32(STM32_TIM3_CCER));
-  lcdinfo("CNT:     %04x\n", getreg32(STM32_TIM3_CNT));
-  lcdinfo("PSC:     %04x\n", getreg32(STM32_TIM3_PSC));
-  lcdinfo("ARR:     %04x\n", getreg32(STM32_TIM3_ARR));
-  lcdinfo("CCR1:    %04x\n", getreg32(STM32_TIM3_CCR1));
-  lcdinfo("CCR2:    %04x\n", getreg32(STM32_TIM3_CCR2));
-  lcdinfo("CCR3:    %04x\n", getreg32(STM32_TIM3_CCR3));
-  lcdinfo("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
-  lcdinfo("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
-  lcdinfo("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
-  lcdinfo("DMAR:    %04x\n", getreg32(STM32_TIM3_DMAR));
+  lcdinfo("APB1ENR: %08" PRIx32 "\n", getreg32(STM32_RCC_APB1ENR));
+  lcdinfo("CR1:     %04" PRIx32 "\n", getreg32(STM32_TIM3_CR1));
+  lcdinfo("CR2:     %04" PRIx32 "\n", getreg32(STM32_TIM3_CR2));
+  lcdinfo("SMCR:    %04" PRIx32 "\n", getreg32(STM32_TIM3_SMCR));
+  lcdinfo("DIER:    %04" PRIx32 "\n", getreg32(STM32_TIM3_DIER));
+  lcdinfo("SR:      %04" PRIx32 "\n", getreg32(STM32_TIM3_SR));
+  lcdinfo("EGR:     %04" PRIx32 "\n", getreg32(STM32_TIM3_EGR));
+  lcdinfo("CCMR1:   %04" PRIx32 "\n", getreg32(STM32_TIM3_CCMR1));
+  lcdinfo("CCMR2:   %04" PRIx32 "\n", getreg32(STM32_TIM3_CCMR2));
+  lcdinfo("CCER:    %04" PRIx32 "\n", getreg32(STM32_TIM3_CCER));
+  lcdinfo("CNT:     %04" PRIx32 "\n", getreg32(STM32_TIM3_CNT));
+  lcdinfo("PSC:     %04" PRIx32 "\n", getreg32(STM32_TIM3_PSC));
+  lcdinfo("ARR:     %04" PRIx32 "\n", getreg32(STM32_TIM3_ARR));
+  lcdinfo("CCR1:    %04" PRIx32 "\n", getreg32(STM32_TIM3_CCR1));
+  lcdinfo("CCR2:    %04" PRIx32 "\n", getreg32(STM32_TIM3_CCR2));
+  lcdinfo("CCR3:    %04" PRIx32 "\n", getreg32(STM32_TIM3_CCR3));
+  lcdinfo("CCR4:    %04" PRIx32 "\n", getreg32(STM32_TIM3_CCR4));
+  lcdinfo("CCR4:    %04" PRIx32 "\n", getreg32(STM32_TIM3_CCR4));
+  lcdinfo("CCR4:    %04" PRIx32 "\n", getreg32(STM32_TIM3_CCR4));
+  lcdinfo("DMAR:    %04" PRIx32 "\n", getreg32(STM32_TIM3_DMAR));
 }
 
 /****************************************************************************
@@ -409,9 +419,9 @@ static void stm32_extmemgpios(const uint16_t *gpios, int ngpios)
   /* Configure GPIOs */
 
   for (i = 0; i < ngpios; i++)
-  {
-    stm32_configgpio(gpios[i]);
-  }
+    {
+      stm32_configgpio(gpios[i]);
+    }
 }
 
 /****************************************************************************
@@ -422,9 +432,9 @@ static void stm32_extmemgpios(const uint16_t *gpios, int ngpios)
  * Name:  board_lcd_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the LCD video hardware.  The initial state of the LCD is
+ *   fully initialized, display memory cleared, and the LCD ready to use,
+ *   but with the power setting at 0 (full off).
  *
  ****************************************************************************/
 
@@ -463,8 +473,8 @@ int board_lcd_initialize(void)
  * Name:  board_lcd_getdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows support
- *   for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.  This
+ *   allows support for multiple LCD devices.
  *
  ****************************************************************************/
 

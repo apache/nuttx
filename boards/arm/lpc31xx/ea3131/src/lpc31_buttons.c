@@ -57,8 +57,9 @@
  * Name: board_button_initialize
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
+  return 0;
 }
 
 /****************************************************************************

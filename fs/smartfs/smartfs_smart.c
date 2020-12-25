@@ -156,7 +156,7 @@ const struct mountpt_operations smartfs_operations =
   smartfs_unbind,        /* unbind */
   smartfs_statfs,        /* statfs */
 
-  smartfs_unlink,        /* unlinke */
+  smartfs_unlink,        /* unlink */
   smartfs_mkdir,         /* mkdir */
   smartfs_rmdir,         /* rmdir */
   smartfs_rename,        /* rename */
@@ -331,10 +331,11 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
 
   /* When using sector buffering, current sector with its header should
    * always be present in sf->buffer. Otherwise data corruption may arise
-   * when writing.
+   * when writing. However, this does not apply when overwriting without
+   * append mode.
    */
 
-  if (sf->currsector != SMARTFS_ERASEDSTATE_16BIT)
+  if ((sf->currsector != SMARTFS_ERASEDSTATE_16BIT) && (oflags & O_APPEND))
     {
       readwrite.logsector = sf->currsector;
       readwrite.offset    = 0;
@@ -591,7 +592,7 @@ static ssize_t smartfs_read(FAR struct file *filep, char *buffer,
           sizeof(struct smartfs_chain_header_s));
       if (bytestoread + bytesread > buflen)
         {
-          /* Truncate bytesto read based on buffer len */
+          /* Truncate bytes to read based on buffer len */
 
           bytestoread = buflen - bytesread;
         }
@@ -993,7 +994,6 @@ static off_t smartfs_seek(FAR struct file *filep, off_t offset, int whence)
   /* Call our internal routine to perform the seek */
 
   ret = smartfs_seek_internal(fs, sf, offset, whence);
-
   if (ret >= 0)
     {
       filep->f_pos = ret;
@@ -1670,7 +1670,9 @@ static int smartfs_unlink(struct inode *mountpt, const char *relpath)
 
       /* TODO:  Need to check permissions?  */
 
-      /* Okay, we are clear to delete the file.  Use the deleteentry routine. */
+      /* Okay, we are clear to delete the file.  Use the deleteentry
+       * routine.
+       */
 
       smartfs_deleteentry(fs, &entry);
     }
@@ -1846,7 +1848,9 @@ int smartfs_rmdir(struct inode *mountpt, const char *relpath)
           goto errout_with_semaphore;
         }
 
-      /* Okay, we are clear to delete the directory.  Use the deleteentry routine. */
+      /* Okay, we are clear to delete the directory.  Use the deleteentry
+       * routine.
+       */
 
       ret = smartfs_deleteentry(fs, &entry);
       if (ret < 0)

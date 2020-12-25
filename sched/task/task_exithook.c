@@ -86,7 +86,6 @@ static inline void nxtask_atexit(FAR struct tcb_s *tcb)
 
   if (group && group->tg_nmembers == 1)
     {
-#if defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
       int index;
 
       /* Call each atexit function in reverse order of registration atexit()
@@ -95,37 +94,22 @@ static inline void nxtask_atexit(FAR struct tcb_s *tcb)
        * group exits, i.e., from higher to lower indices.
        */
 
-      for (index = CONFIG_SCHED_ATEXIT_MAX - 1; index >= 0; index--)
+      for (index = CONFIG_SCHED_EXIT_MAX - 1; index >= 0; index--)
         {
-          if (group->tg_atexitfunc[index])
+          if (group->tg_exit[index].func.at)
             {
               atexitfunc_t func;
 
               /* Nullify the atexit function to prevent its reuse. */
 
-              func = group->tg_atexitfunc[index];
-              group->tg_atexitfunc[index] = NULL;
+              func = group->tg_exit[index].func.at;
+              group->tg_exit[index].func.at = NULL;
 
               /* Call the atexit function */
 
               (*func)();
             }
         }
-#else
-      if (group->tg_atexitfunc)
-        {
-          atexitfunc_t func;
-
-          /* Nullify the atexit function to prevent its reuse. */
-
-          func = group->tg_atexitfunc;
-          group->tg_atexitfunc = NULL;
-
-          /* Call the atexit function */
-
-          (*func)();
-        }
-#endif
     }
 }
 #else
@@ -160,7 +144,6 @@ static inline void nxtask_onexit(FAR struct tcb_s *tcb, int status)
 
   if (group && group->tg_nmembers == 1)
     {
-#if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
       int index;
 
       /* Call each on_exit function in reverse order of registration.
@@ -169,37 +152,26 @@ static inline void nxtask_onexit(FAR struct tcb_s *tcb, int status)
        * when the task group exits, i.e., from higher to lower indices.
        */
 
-      for (index = CONFIG_SCHED_ONEXIT_MAX - 1; index >= 0; index--)
+      for (index = CONFIG_SCHED_EXIT_MAX - 1; index >= 0; index--)
         {
-          if (group->tg_onexitfunc[index])
+          if (group->tg_exit[index].func.on)
             {
               onexitfunc_t func;
+              FAR void    *arg;
 
               /* Nullify the on_exit function to prevent its reuse. */
 
-              func = group->tg_onexitfunc[index];
-              group->tg_onexitfunc[index] = NULL;
+              func = group->tg_exit[index].func.on;
+              arg  = group->tg_exit[index].arg;
+
+              group->tg_exit[index].func.on = NULL;
+              group->tg_exit[index].arg     = NULL;
 
               /* Call the on_exit function */
 
-              (*func)(status, group->tg_onexitarg[index]);
+              (*func)(status, arg);
             }
         }
-#else
-      if (group->tg_onexitfunc)
-        {
-          onexitfunc_t func;
-
-          /* Nullify the on_exit function to prevent its reuse. */
-
-          func = group->tg_onexitfunc;
-          group->tg_onexitfunc = NULL;
-
-          /* Call the on_exit function */
-
-          (*func)(status, group->tg_onexitarg);
-        }
-#endif
     }
 }
 #else
@@ -231,11 +203,6 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
       child = group_find_child(group, getpid());
       if (child)
         {
-#ifndef HAVE_GROUP_MEMBERS
-          /* No group members? Save the exit status */
-
-          child->ch_status = status;
-#endif
           /* Save the exit status..  For the case of HAVE_GROUP_MEMBERS,
            * the child status will be as exited until the last member
            * of the task group exits.
@@ -292,7 +259,7 @@ static inline void nxtask_groupexit(FAR struct task_group_s *group)
  * Name: nxtask_sigchild
  *
  * Description:
- *   Send the SIGCHILD signal to the parent thread
+ *   Send the SIGCHLD signal to the parent thread
  *
  ****************************************************************************/
 
@@ -433,7 +400,7 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
  * Name: nxtask_signalparent
  *
  * Description:
- *   Send the SIGCHILD signal to the parent task group
+ *   Send the SIGCHLD signal to the parent task group
  *
  ****************************************************************************/
 
@@ -561,7 +528,7 @@ static inline void nxtask_exitwakeup(FAR struct tcb_s *tcb, int status)
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 static inline void nxtask_flushstreams(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group = tcb->group;
@@ -667,7 +634,13 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
 
   nxtask_recover(tcb);
 
-  /* Send the SIGCHILD signal to the parent task group */
+  /* NOTE: signal handling needs to be done in a criticl section */
+
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
+
+  /* Send the SIGCHLD signal to the parent task group */
 
   nxtask_signalparent(tcb, status);
 
@@ -700,6 +673,10 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
   /* Deallocate anything left in the TCB's queues */
 
   nxsig_cleanup(tcb); /* Deallocate Signal lists */
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
 
   /* This function can be re-entered in certain cases.  Set a flag
    * bit in the TCB to not that we have already completed this exit

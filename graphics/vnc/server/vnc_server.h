@@ -60,10 +60,6 @@
 
 /* Configuration */
 
-#ifndef CONFIG_NX_UPDATE
-#  error CONFIG_NX_UPDATE must be set to use VNC
-#endif
-
 #if !defined(CONFIG_VNCSERVER_PROTO3p3) && !defined(CONFIG_VNCSERVER_PROTO3p8)
 #  error No VNC protocol selected
 #endif

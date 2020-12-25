@@ -158,23 +158,43 @@ void r_ether_pheriperal_enable(void)
 
   MPC.PA6PFS.BYTE = 0x12u;
   PORTA.PMR.BIT.B6 = 1u;
+}
+#endif
 
+/****************************************************************************
+ * Name: r_usbdev_port_enable
+ *
+ * Description:
+ * USB Device enabling
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV
+void r_usbdev_port_enable(void)
+{
+  /* Set USB0_VBUS pin */
+
+  MPC.P16PFS.BYTE = 0x11;
+  PORT1.PMR.BIT.B6 = 1;
+}
+#endif
+
+/****************************************************************************
+ * Name: r_usb_port_enable
+ *
+ * Description:
+ * USB Enabling for RX65N RSK2MB
+ ****************************************************************************/
+
+#if defined(CONFIG_USBHOST)
+void r_usb_port_enable(void)
+{
   /* Set VBUS pin for USB */
 
-  /* Referred from r_usb_basic_pinset.c */
-
-  MPC.P16PFS.BYTE = 0x12u;
+  MPC.P16PFS.BYTE = 0x11u;
 
   /* PORT1.PMR.BYTE |= 0x40; */
 
   PORT1.PMR.BIT.B6 = 1u;
-
-  /* Set USB0_OVRCURA pin */
-
-  /* GR Rose does not contain any of OVRCURA/B inputs
-   * MPC.P14PFS.BYTE = 0x12u;
-   * PORT1.PMR.BIT.B4 = 1u;
-   */
 }
 #endif
 
@@ -353,6 +373,172 @@ inline void sci8_init_port(void)
   MPC.PC7PFS.BYTE   = 0x0au;
   PORTC.PDR.BIT.B7  = 1u;
   PORTC.PMR.BIT.B7  = 1u;
+}
+#endif
+
+/****************************************************************************
+ * Name: rspi_pinconfig
+ *
+ * Description: RSPI pinconfiguration for channel
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple SPI interfaces)
+ *
+ * Description:
+ *RSPI pin(SCK,MOSI and MISO) configuration
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RSPI
+void rspi_pinconfig(int bus)
+{
+  /* Set RSPI signal ports to peripheral mode */
+
+  switch (bus)
+    {
+      case RX65N_RSPI_CHANNEL0:
+#ifdef CONFIG_RX65N_RSPI0
+
+        /* Configure RSPCKA */
+
+        MPC.PC5PFS.BYTE = 0x0d;
+        PORTC.PMR.BIT.B5 = 1;
+
+        /* Configure MOSIA */
+
+        MPC.PC6PFS.BYTE = 0x0d; /* This config will block SCI8 function */
+        PORTC.PMR.BIT.B6 = 1;
+
+        /* Configure MISOA */
+
+        MPC.PC7PFS.BYTE = 0x0d; /* This config will block SCI8 function */
+        PORTC.PMR.BIT.B7 = 1;
+
+        /* Configure SSLA0 */
+
+        MPC.PC4PFS.BYTE = 0x0d;
+        PORTC.PMR.BIT.B4 = 1;
+#endif
+        break;
+
+      case RX65N_RSPI_CHANNEL1:
+#ifdef CONFIG_RX65N_RSPI1
+
+        /* Configure RSPCKB */
+
+        MPC.PE5PFS.BYTE = 0x0d;
+        PORTE.PMR.BIT.B5 = 1;
+
+        /* Configure MOSIB */
+
+        MPC.PE6PFS.BYTE = 0x0d;
+        PORTE.PMR.BIT.B6 = 1;
+
+        /* Configure MISOB */
+
+        MPC.PE7PFS.BYTE = 0x0d;
+        PORTE.PMR.BIT.B7 = 1;
+
+        /* Configure SSLB0 */
+
+        MPC.PE4PFS.BYTE = 0x0d;
+        PORTE.PMR.BIT.B4 = 1;
+#endif
+        break;
+
+    case RX65N_RSPI_CHANNEL2:
+#ifdef CONFIG_RX65N_RSPI2
+
+        /* Configure RSPCKC */
+
+        MPC.PD3PFS.BYTE = 0x0d;
+        PORTD.PMR.BIT.B3 = 1;
+
+        /* Configure MOSIC */
+
+        MPC.PD1PFS.BYTE = 0x0d;
+        PORTD.PMR.BIT.B1 = 1;
+
+        /* Configure MISOC */
+
+        MPC.PD2PFS.BYTE = 0x0d;
+        PORTD.PMR.BIT.B2 = 1;
+
+        /* Configure SSLC0 */
+
+        MPC.PD4PFS.BYTE = 0x0d;
+        PORTD.PMR.BIT.B4 = 1;
+#endif
+        break;
+
+      default:
+        break;
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: riic0_init_port
+ *
+ * Description:
+ * RIIC0 Initialization RX65N GRROSE
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC0
+inline void riic0_init_port(void)
+{
+  /* Set SCL0 pin (P12) */
+
+  MPC.P12PFS.BYTE  = 0x0fu;
+  PORT1.PMR.BIT.B2 = 1u;
+
+  /* Set SDA0 pin (P13) */
+
+  MPC.P13PFS.BYTE   = 0x0fu;
+  PORT1.PMR.BIT.B3  = 1u;
+}
+#endif
+
+/****************************************************************************
+ * Name: riic1_init_port
+ *
+ * Description:
+ * RIIC1 Initialization RX65N RSK2MB
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC1
+inline void riic1_init_port(void)
+{
+  /* Set SCL0 pin (P21) */
+
+  MPC.P21PFS.BYTE  = 0x0fu;
+  PORT2.PMR.BIT.B1 = 1u;
+
+  /* Set SDA0 pin (P20) */
+
+  MPC.P20PFS.BYTE   = 0x0fu;
+  PORT2.PMR.BIT.BT0  = 1u;
+}
+#endif
+
+/****************************************************************************
+ * Name: riic2_init_port
+ *
+ * Description:
+ * RIIC2 Initialization RX65N RSK2MB
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC2
+inline void riic2_init_port(void)
+{
+  /* Set SCL0 pin (P16) */
+
+  MPC.P16PFS.BYTE  = 0x0fu;
+  PORT1.PMR.BIT.B6 = 1u;
+
+  /* Set SDA0 pin (P17) */
+
+  MPC.P17PFS.BYTE   = 0x0fu;
+  PORT1.PMR.BIT.B7  = 1u;
 }
 #endif
 #endif /* CONFIG_ARCH_BOARD_RX65N_GRROSE */

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/leds/userled.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_LEDS_USERLED_H
 #define __INCLUDE_NUTTX_LEDS_USERLED_H
@@ -43,11 +43,10 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
-#ifdef CONFIG_ARCH_HAVE_LEDS
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* ioctl commands */
 
 /* Command:     ULEDIOC_SUPPORTED
@@ -91,12 +90,13 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This type is a bit set that contains the state of all LEDs as defined
  * in arch/board/board.h.  This is the value that is returned when reading
  * from or writing to the LED driver.
  */
 
-typedef uint8_t userled_set_t;
+typedef uint32_t userled_set_t;
 
 /* A reference to this structure is provided with the ULEDIOC_SETLED IOCTL
  * command and describes the LED to be set and the new value of the LED.
@@ -127,7 +127,8 @@ struct userled_lowerhalf_s
 {
   /* Return the set of LEDs supported by the board */
 
-  CODE userled_set_t (*ll_supported)(FAR const struct userled_lowerhalf_s *lower);
+  CODE userled_set_t
+  (*ll_supported)(FAR const struct userled_lowerhalf_s *lower);
 
   /* Set the current state of one LED */
 
@@ -197,5 +198,4 @@ int userled_lower_initialize(FAR const char *devname);
 }
 #endif
 
-#endif /* CONFIG_ARCH_HAVE_LEDS */
 #endif /* __INCLUDE_NUTTX_LEDS_USERLED_H */

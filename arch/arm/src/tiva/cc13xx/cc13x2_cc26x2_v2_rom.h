@@ -974,8 +974,8 @@
 
 /* ROM Hard-API function interface types */
 
-typedef uint32_t (*fptr_crc32_t)              (uint8_t *     /* data        */,\
-                                               uint32_t      /* bytecount   */,\
+typedef uint32_t (*fptr_crc32_t)              (uint8_t *     /* data        */,
+                                               uint32_t      /* bytecount   */,
                                                uint32_t      /* repeatcount */);
 
 typedef uint32_t (*fptr_getflsize_t)          (void);
@@ -986,26 +986,26 @@ typedef uint32_t (*fptr_reserved1_t)          (uint32_t);
 
 typedef uint32_t (*fptr_reserved2_t)          (void);
 
-typedef uint32_t (*fptr_reserved3_t)          (uint8_t *,\
-                                               uint32_t,\
+typedef uint32_t (*fptr_reserved3_t)          (uint8_t *,
+                                               uint32_t,
                                                uint32_t);
 
 typedef void     (*fptr_resetdev_t)           (void);
 
-typedef uint32_t (*fptr_fletcher32_t)         (uint16_t *    /* data        */,\
-                                               uint16_t      /* wordcount   */,\
+typedef uint32_t (*fptr_fletcher32_t)         (uint16_t *    /* data        */,
+                                               uint16_t      /* wordcount   */,
                                                uint16_t      /* repeatcount */);
 
-typedef uint32_t (*fptr_minval_t)             (uint32_t *    /* data   */,\
+typedef uint32_t (*fptr_minval_t)             (uint32_t *    /* data   */,
                                                uint32_t      /* count  */);
 
-typedef uint32_t (*fptr_maxval_t)             (uint32_t *    /* buffer */,\
+typedef uint32_t (*fptr_maxval_t)             (uint32_t *    /* buffer */,
                                                uint32_t      /* count  */);
 
-typedef uint32_t (*fptr_meanval_t)            (uint32_t *    /* buffer */,\
+typedef uint32_t (*fptr_meanval_t)            (uint32_t *    /* buffer */,
                                                uint32_t      /* count  */);
 
-typedef uint32_t (*fptr_stddval_t)            (uint32_t *    /* buffer */,\
+typedef uint32_t (*fptr_stddval_t)            (uint32_t *    /* buffer */,
                                                uint32_t      /* count  */);
 
 typedef void     (*fptr_hfsourcesafeswitch_t) (void);

@@ -56,7 +56,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* The pin configurations here require that SPI1 is selected */
 
 #ifndef CONFIG_STM32_SPI1
@@ -68,6 +70,7 @@
 #endif
 
 /* Pin Configuration ********************************************************/
+
 /* UG-2864AMBAG01 OLED Display (SPI 4-wire):
  *
  * --------------------------+----------------------------------------------
@@ -81,8 +84,8 @@
  * 7  A0         | 9 A0      | P2 PB8 (Arbitrary selection)(2)
  * 9  LED+ (N/C) | -----     | -----
  * 2  5V Vcc     | 1,2 Vcc   | P2 5V
- * 4  DI         | 18 D1/SI  | P1 PA7 (GPIO_SPI1_MOSI == GPIO_SPI1_MOSI_1 (1))
- * 6  SCLK       | 19 D0/SCL | P1 PA5 (GPIO_SPI1_SCK == GPIO_SPI1_SCK_1 (2))
+ * 4  DI         | 18 D1/SI  | P1 PA7 (GPIO_SPI1_MOSI==GPIO_SPI1_MOSI_1 (1))
+ * 6  SCLK       | 19 D0/SCL | P1 PA5 (GPIO_SPI1_SCK==GPIO_SPI1_SCK_1 (2))
  * 8  LED- (N/C) | -----     | ------
  * 10 GND        | 20 GND    | P2 GND
  * --------------+-----------+----------------------------------------------
@@ -135,7 +138,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = ug2864ambag01_initialize(spi, devno);
       if (!dev)
         {
-          lcderr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+          lcderr("ERROR: Failed to bind SPI port 1 to OLED %d\n", devno);
         }
      else
         {

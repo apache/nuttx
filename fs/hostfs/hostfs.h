@@ -52,16 +52,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Quasi-standard definitions */
-
-#ifndef MIN
-#  define MIN(a,b)          (a < b ? a : b)
-#endif
-
-#ifndef MAX
-#  define MAX(a,b)          (a > b ? a : b)
-#endif
-
 #define HOSTFS_MAX_PATH     256
 
 /****************************************************************************

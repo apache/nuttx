@@ -133,4 +133,12 @@
 #define PIN_LPUART1_RX    PIN_LPUART1_RX_1  /* PTC6 */
 #define PIN_LPUART1_TX    PIN_LPUART1_TX_1  /* PTC7 */
 
+/* CAN selections ***********************************************************/
+#define PIN_CAN0_TX      PIN_CAN0_TX_1
+#define PIN_CAN0_RX      PIN_CAN0_RX_1
+#define PIN_CAN1_TX      PIN_CAN1_TX_1
+#define PIN_CAN1_RX      PIN_CAN1_RX_1
+#define PIN_CAN2_TX      PIN_CAN2_TX_1
+#define PIN_CAN2_RX      PIN_CAN2_RX_1
+
 #endif  /* __BOARDS_ARM_S32K148EVB_INCLUDE_BOARD_H */

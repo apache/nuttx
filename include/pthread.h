@@ -129,6 +129,11 @@
 #define PTHREAD_INHERIT_SCHED         0
 #define PTHREAD_EXPLICIT_SCHED        1
 
+/* Detach state  */
+
+#define PTHREAD_CREATE_JOINABLE       0
+#define PTHREAD_CREATE_DETACHED       1
+
 /* Default priority */
 
 #define PTHREAD_DEFAULT_PRIORITY      100
@@ -207,10 +212,10 @@
  */
 
 #define pthread_setname_np(thread, name) \
-  prctl((int)PR_SET_NAME, (char*)name, (int)thread)
+  prctl((int)PR_SET_NAME_EXT, (char*)name, (int)thread)
 
 #define pthread_getname_np(thread, name) \
-  prctl((int)PR_GET_NAME, (char*)name, (int)thread)
+  prctl((int)PR_GET_NAME_EXT, (char*)name, (int)thread)
 
 /********************************************************************************
  * Public Type Definitions
@@ -241,7 +246,7 @@ struct pthread_attr_s
   uint8_t priority;            /* Priority of the pthread */
   uint8_t policy;              /* Pthread scheduler policy */
   uint8_t inheritsched;        /* Inherit parent priority/policy? */
-
+  uint8_t detachstate;         /* Initialize to the detach state */
 #ifdef CONFIG_SCHED_SPORADIC
   uint8_t low_priority;        /* Low scheduling priority */
   uint8_t max_repl;            /* Maximum pending replenishments */
@@ -270,14 +275,20 @@ typedef pid_t pthread_t;
 #define __PTHREAD_T_DEFINED 1
 #endif
 
+struct pthread_condattr_s
+{
+  clockid_t clockid;
+};
+
 #ifndef __PTHREAD_CONDATTR_T_DEFINED
-typedef int pthread_condattr_t;
+typedef struct pthread_condattr_s pthread_condattr_t;
 #define __PTHREAD_CONDATTR_T_DEFINED 1
 #endif
 
 struct pthread_cond_s
 {
   sem_t sem;
+  clockid_t clockid;
 };
 
 #ifndef __PTHREAD_COND_T_DEFINED
@@ -285,7 +296,7 @@ typedef struct pthread_cond_s pthread_cond_t;
 #define __PTHREAD_COND_T_DEFINED 1
 #endif
 
-#define PTHREAD_COND_INITIALIZER {SEM_INITIALIZER(0)}
+#define PTHREAD_COND_INITIALIZER {SEM_INITIALIZER(0), CLOCK_REALTIME }
 
 struct pthread_mutexattr_s
 {
@@ -344,9 +355,16 @@ typedef struct pthread_mutex_s pthread_mutex_t;
 #  define PTHREAD_MUTEX_INITIALIZER {NULL, SEM_INITIALIZER(1), -1, \
                                      __PTHREAD_MUTEX_DEFAULT_FLAGS, \
                                      PTHREAD_MUTEX_DEFAULT, 0}
+#  define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
+                                     {NULL, SEM_INITIALIZER(1), -1, \
+                                     __PTHREAD_MUTEX_DEFAULT_FLAGS, \
+                                     PTHREAD_MUTEX_RECURSIVE, 0}
 #elif defined(CONFIG_PTHREAD_MUTEX_TYPES)
 #  define PTHREAD_MUTEX_INITIALIZER {SEM_INITIALIZER(1), -1, \
                                      PTHREAD_MUTEX_DEFAULT, 0}
+#  define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
+                                     {SEM_INITIALIZER(1), -1, \
+                                     PTHREAD_MUTEX_RECURSIVE, 0}
 #elif !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
 #  define PTHREAD_MUTEX_INITIALIZER {NULL, SEM_INITIALIZER(1), -1,\
                                      __PTHREAD_MUTEX_DEFAULT_FLAGS}
@@ -398,7 +416,6 @@ typedef int pthread_rwlockattr_t;
                                      0, 0, false}
 
 #ifdef CONFIG_PTHREAD_SPINLOCKS
-#ifndef __PTHREAD_SPINLOCK_T_DEFINED
 /* This (non-standard) structure represents a pthread spinlock */
 
 struct pthread_spinlock_s
@@ -408,7 +425,7 @@ struct pthread_spinlock_s
                                  * SP_UNLOCKED. */
   pthread_t sp_holder;          /* ID of the thread that holds the spinlock */
 };
-
+#ifndef __PTHREAD_SPINLOCK_T_DEFINED
 /* It is referenced via this standard type */
 
 typedef FAR struct pthread_spinlock_s pthread_spinlock_t;
@@ -452,6 +469,10 @@ int pthread_attr_setinheritsched(FAR pthread_attr_t *attr,
                                  int inheritsched);
 int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
                                  FAR int *inheritsched);
+int pthread_attr_getdetachstate(FAR const pthread_attr_t *attr,
+                                FAR int *detachstate);
+int pthread_attr_setdetachstate(FAR pthread_attr_t *attr,
+                                int detachstate);
 
 #ifdef CONFIG_SMP
 /* Set or obtain thread affinity attributes */
@@ -600,6 +621,10 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex);
 
 int pthread_condattr_init(FAR pthread_condattr_t *attr);
 int pthread_condattr_destroy(FAR pthread_condattr_t *attr);
+int pthread_condattr_getclock(FAR const pthread_condattr_t *attr,
+                              clockid_t *clock_id);
+int pthread_condattr_setclock(FAR pthread_condattr_t *attr,
+                              clockid_t clock_id);
 
 /* A thread can create and delete condition variables. */
 
@@ -620,6 +645,11 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex);
 
 int pthread_cond_timedwait(FAR pthread_cond_t *cond,
                            FAR pthread_mutex_t *mutex,
+                           FAR const struct timespec *abstime);
+
+int pthread_cond_clockwait(FAR pthread_cond_t *cond,
+                           FAR pthread_mutex_t *mutex,
+                           clockid_t clockid,
                            FAR const struct timespec *abstime);
 
 /* Barrier attributes */
@@ -652,9 +682,15 @@ int pthread_rwlock_init(FAR pthread_rwlock_t *rw_lock,
 int pthread_rwlock_rdlock(pthread_rwlock_t *lock);
 int pthread_rwlock_timedrdlock(FAR pthread_rwlock_t *lock,
                                FAR const struct timespec *abstime);
+int pthread_rwlock_clockrdlock(FAR pthread_rwlock_t *lock,
+                               clockid_t clockid,
+                               FAR const struct timespec *abstime);
 int pthread_rwlock_tryrdlock(FAR pthread_rwlock_t *lock);
 int pthread_rwlock_wrlock(FAR pthread_rwlock_t *lock);
 int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *lock,
+                               FAR const struct timespec *abstime);
+int pthread_rwlock_clockwrlock(FAR pthread_rwlock_t *lock,
+                               clockid_t clockid,
                                FAR const struct timespec *abstime);
 int pthread_rwlock_trywrlock(FAR pthread_rwlock_t *lock);
 int pthread_rwlock_unlock(FAR pthread_rwlock_t *lock);
@@ -721,7 +757,7 @@ typedef pid_t pthread_t;
 #endif
 
 #ifndef __PTHREAD_CONDATTR_T_DEFINED
-typedef int pthread_condattr_t;
+typedef struct pthread_condattr_s pthread_condattr_t;
 #  define __PTHREAD_CONDATTR_T_DEFINED 1
 #endif
 

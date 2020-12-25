@@ -49,8 +49,8 @@
  * Name: strcspn
  *
  * Description:
- *  strspn() calculates the length of the initial segment of s which
- *  consists entirely of characters not in reject
+ *  strcspn() calculates the length of the initial segment of s which
+ *  consists entirely of characters not in reject.
  *
  ****************************************************************************/
 

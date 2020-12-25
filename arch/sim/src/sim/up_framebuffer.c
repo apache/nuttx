@@ -46,8 +46,6 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxglib.h>
 #include <nuttx/video/fb.h>
 
 #include "up_internal.h"
@@ -55,18 +53,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef CONFIG_SIM_FBWIDTH
-#  define CONFIG_SIM_FBWIDTH  480 /* Framebuffer width in pixels */
-#endif
-
-#ifndef CONFIG_SIM_FBHEIGHT
-#  define CONFIG_SIM_FBHEIGHT 240 /* Framebuffer height in pixels */
-#endif
-
-#ifndef CONFIG_SIM_FBBPP
-#  define CONFIG_SIM_FBBPP    16  /* Framebuffer bytes per pixel (RGB) */
-#endif
 
 #undef FB_FMT
 #if CONFIG_SIM_FBBPP == 1
@@ -461,25 +447,3 @@ FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 void up_fbuninitialize(int display)
 {
 }
-
-/****************************************************************************
- * Name: nx_notify_rectangle
- *
- * Description:
- *   Must be provided if CONFIG_NX_UPDATE is enabled
- *
- * Input Parameters:
- *   display - In the case of hardware with multiple displays, this
- *     specifies the display.  Normally this is zero.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NX_UPDATE
-void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
-                         FAR const struct nxgl_rect_s *rect)
-{
-}
-#endif

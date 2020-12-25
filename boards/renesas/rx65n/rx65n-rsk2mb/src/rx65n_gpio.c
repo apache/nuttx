@@ -38,7 +38,7 @@
  * LED Port Initialization for RX65N RSK2MB Board
  ****************************************************************************/
 
-#if   defined (CONFIG_ARCH_BOARD_RX65N_RSK2MB) 
+#if   defined (CONFIG_ARCH_BOARD_RX65N_RSK2MB)
 void led_port_create(void)
 {
   /* LED Port initialization of RX65N RSK2MB */
@@ -196,10 +196,38 @@ void r_ether_pheriperal_enable(void)
 
   MPC.P34PFS.BYTE = 0x11u;
   PORT3.PMR.BIT.B4 = 1u;
+}
 
+#endif
+/****************************************************************************
+ * Name: r_usbdev_port_enable
+ *
+ * Description:
+ * USB Device enabling
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV
+void r_usbdev_port_enable(void)
+{
+  /* Set USB0_VBUS pin */
+
+  MPC.P16PFS.BYTE = 0x11;
+  PORT1.PMR.BIT.B6 = 1;
+}
+#endif
+
+/****************************************************************************
+ * Name: r_usb_port_enable
+ *
+ * Description:
+ * USB Enabling for RX65N RSK2MB
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_BOARD_RX65N_RSK2MB)
+#if defined(CONFIG_USBHOST)
+void r_usb_port_enable(void)
+{
   /* Set VBUS pin for USB */
-
-  /* Referred from r_usb_basic_pinset.c */
 
   MPC.P16PFS.BYTE = 0x12u;
 
@@ -207,11 +235,12 @@ void r_ether_pheriperal_enable(void)
 
   PORT1.PMR.BIT.B6 = 1u;
 
-  /* Set USB0_OVRCURA pin */
+  /* set USB0_OVRCURA pin */
 
-  MPC.P14PFS.BYTE = 0x12u;
+  MPC.P14PFS.BYTE  = 0x12u;
   PORT1.PMR.BIT.B4 = 1u;
 }
+#endif
 #endif
 
 /****************************************************************************
@@ -316,6 +345,213 @@ inline void sci12_init_port(void)
    * PORTX.PDR.BIT.BX = 1u;
    * PORTX.PMR.BIT.BX = 1u;
    */
+}
+#endif
+
+/****************************************************************************
+ * Name: rspi_pinconfig
+ *
+ * Description: RSPI pinconfiguration for channel
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple SPI interfaces)
+ *
+ * Description:
+ *RSPI pin(SCK,MOSI and MISO) configuration
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RSPI
+void rspi_pinconfig(int bus)
+{
+  /* Set RSPI signal ports to peripheral mode */
+
+  switch (bus)
+    {
+      case RX65N_RSPI_CHANNEL0:
+#ifdef CONFIG_RX65N_RSPI0
+
+        /* Configure RSPCKA */
+
+        MPC.PA5PFS.BYTE = 0x0d;
+        PORTA.PMR.BIT.B5 = 1;
+
+        /* Configure MOSIA */
+
+        MPC.PA6PFS.BYTE = 0x0d;
+        PORTA.PMR.BIT.B6 = 1;
+
+        /* Configure MISOA */
+
+        MPC.PA7PFS.BYTE = 0x0d;
+        PORTA.PMR.BIT.B7 = 1;
+
+        /* Configure SSLA0 */
+
+        MPC.PA4PFS.BYTE = 0x0d;
+        PORTC.PMR.BIT.B4 = 1;
+#endif
+        break;
+
+      case RX65N_RSPI_CHANNEL1:
+#ifdef CONFIG_RX65N_RSPI1
+
+        /* Configure RSPCKB */
+
+#if DSW_SEL0_ON
+        MPC.P27PFS.BYTE = 0x0d;
+        PORT2.PMR.BIT.B7 = 1;
+#else
+        MPC.PE5PFS.BYTE = 0x0d;
+        PORTE.PMR.BIT.B5 = 1;
+#endif
+
+        /* Configure MOSIB */
+
+#if DSW_SEL0_ON
+        MPC.P26PFS.BYTE = 0x0d;
+        PORT2.PMR.BIT.B6 = 1;
+#else
+        MPC.PE6PFS.BYTE = 0x0d;
+        PORTE.PMR.BIT.B6 = 1;
+#endif
+
+        /* Configure MISOB */
+
+#if DSW_SEL0_ON
+        MPC.P30PFS.BYTE = 0x0d;
+        PORT3.PMR.BIT.BT0 = 1;
+#else
+        MPC.PE7PFS.BYTE = 0x0d;
+        PORTE.PMR.BIT.B7 = 1;
+#endif
+
+        /* Configure SSLB0 */
+
+#if DSW_SEL0_ON
+        MPC.P57PFS.BYTE = 0x0d;
+        PORT5.PMR.BIT.B7 = 1;
+#else
+        MPC.PE4PFS.BYTE = 0x0d;
+        PORTE.PMR.BIT.B4 = 1;
+#endif
+
+#endif
+        break;
+
+      case RX65N_RSPI_CHANNEL2:
+#ifdef CONFIG_RX65N_RSPI2
+
+        /* Configure RSPCKC */
+
+#if DSW_SEL0_ON
+        MPC.P56PFS.BYTE = 0x0d;
+        PORT5.PMR.BIT.B6 = 1;
+#else
+        MPC.PD3PFS.BYTE = 0x0d;
+        PORTD.PMR.BIT.B3 = 1;
+#endif
+        /* Configure MOSIC */
+
+#if DSW_SEL0_ON
+        MPC.P54PFS.BYTE = 0x0d;
+        PORT5.PMR.BIT.B4 = 1;
+#else
+        MPC.PD1PFS.BYTE = 0x0d;
+        PORTD.PMR.BIT.B1 = 1;
+#endif
+
+        /* Configure MISOC */
+
+#if DSW_SEL0_ON
+        MPC.P55PFS.BYTE = 0x0d;
+        PORT5.PMR.BIT.B5 = 1;
+#else
+        MPC.PD2PFS.BYTE = 0x0d;
+        PORTD.PMR.BIT.B2 = 1;
+#endif
+
+        /* Configure SSLC0 */
+
+#if DSW_SEL0_ON
+        MPC.P57PFS.BYTE = 0x0d;
+        PORT5.PMR.BIT.B7 = 1;
+#else
+        MPC.PD4PFS.BYTE = 0x0d;
+        PORTD.PMR.BIT.B4 = 1;
+#endif
+
+#endif
+        break;
+
+      default:
+        break;
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: riic0_init_port
+ *
+ * Description:
+ * RIIC0 Initialization RX65N RSK2MB
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC0
+inline void riic0_init_port(void)
+{
+  /* Set SCL0 pin (P12) */
+
+  MPC.P12PFS.BYTE  = 0x0fu;
+  PORT1.PMR.BIT.B2 = 1u;
+
+  /* Set SDA0 pin (P13) */
+
+  MPC.P13PFS.BYTE   = 0x0fu;
+  PORT1.PMR.BIT.B3  = 1u;
+}
+#endif
+
+/****************************************************************************
+ * Name: riic1_init_port
+ *
+ * Description:
+ * RIIC1 Initialization RX65N RSK2MB
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC1
+inline void riic1_init_port(void)
+{
+  /* Set SCL0 pin (P21) */
+
+  MPC.P21PFS.BYTE  = 0x0fu;
+  PORT2.PMR.BIT.B1 = 1u;
+
+  /* Set SDA0 pin (P20) */
+
+  MPC.P20PFS.BYTE   = 0x0fu;
+  PORT2.PMR.BIT.BT0  = 1u;
+}
+#endif
+
+/****************************************************************************
+ * Name: riic2_init_port
+ *
+ * Description:
+ * RIIC2 Initialization RX65N RSK2MB
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC2
+inline void riic2_init_port(void)
+{
+  /* Set SCL0 pin (P16) */
+
+  MPC.P16PFS.BYTE  = 0x0fu;
+  PORT1.PMR.BIT.B6 = 1u;
+
+  /* Set SDA0 pin (P17) */
+
+  MPC.P17PFS.BYTE   = 0x0fu;
+  PORT1.PMR.BIT.B7  = 1u;
 }
 #endif
 #endif /* CONFIG_ARCH_BOARD_RX65N_RSK2MB */

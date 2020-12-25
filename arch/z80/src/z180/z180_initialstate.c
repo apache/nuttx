@@ -32,18 +32,6 @@
 #include "z80_arch.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -64,6 +52,16 @@
 void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
+
+  /* Initialize the idle thread stack */
+
+  if (tcb->pid == 0)
+    {
+      tcb->stack_alloc_ptr = (void *)CONFIG_STACK_BASE;
+      tcb->adj_stack_ptr   = (void *)(CONFIG_STACK_BASE +
+                                      CONFIG_IDLETHREAD_STACKSIZE);
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+    }
 
   /* Initialize the initial exception register context structure */
 

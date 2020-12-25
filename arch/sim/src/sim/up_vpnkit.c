@@ -33,8 +33,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <syslog.h>
 #include <unistd.h>
 
+#include "up_internal.h"
 #include "vpnkit/protocol.h"
 
 /****************************************************************************
@@ -42,14 +44,10 @@
  ****************************************************************************/
 
 #define ERROR(fmt, ...) \
-        fprintf(stderr, "up_vpnkit: " fmt "\r\n", ##__VA_ARGS__)
+        syslog(LOG_ERR, "up_vpnkit: " fmt "\n", ##__VA_ARGS__)
 #define INFO(fmt, ...) \
-        fprintf(stderr, "up_vpnkit: " fmt "\r\n", ##__VA_ARGS__)
+        syslog(LOG_ERR, "up_vpnkit: " fmt "\n", ##__VA_ARGS__)
 #define DEBUG(fmt, ...)
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -63,9 +61,6 @@ static bool g_connect_warned;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-int negotiate(int fd, struct vif_info *vif);
-void netdriver_setmacaddr(unsigned char *macaddr);
 
 static int vpnkit_connect(void)
 {
@@ -111,6 +106,7 @@ static int vpnkit_connect(void)
   INFO("Successfully negotiated with vpnkit");
   g_vpnkit_fd = fd;
   g_connect_warned = false;
+  netdriver_setmacaddr(g_vifinfo.mac);
   return 0;
 }
 
@@ -138,7 +134,6 @@ static void vpnkit_disconnect(void)
 void vpnkit_init(void)
 {
   vpnkit_connect();
-  netdriver_setmacaddr(g_vifinfo.mac);
 }
 
 /****************************************************************************

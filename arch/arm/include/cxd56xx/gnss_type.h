@@ -98,9 +98,13 @@ extern "C"
 
 /* GNSS oribital information data type, almanac & ephemeris */
 
-#define CXD56_GNSS_DATA_GPS      0 /* GPS data type */
-#define CXD56_GNSS_DATA_GLONASS  1 /* Glonass data type */
-#define CXD56_GNSS_DATA_QZSSL1CA 2 /* QZSS/L1CA data type */
+#define CXD56_GNSS_DATA_GPS        0 /* GPS data type */
+#define CXD56_GNSS_DATA_GLONASS    1 /* Glonass data type */
+#define CXD56_GNSS_DATA_QZSSL1CA   2 /* QZSS/L1CA data type */
+#define CXD56_GNSS_DATA_GALILEO    3 /* GALILEO data type */
+#define CXD56_GNSS_DATA_BEIDOU_D1  4 /* BEIDOU D1 data type */
+#define CXD56_GNSS_DATA_BEIDOU_D2  5 /* BEIDOU D2 data type */
+#define CXD56_GNSS_DATA_BEIDOU_ALM 6 /* BEIDOU Almanac data type */
 
 /* GNSS satellite status */
 
@@ -110,6 +114,37 @@ extern "C"
 #define CXD56_GNSS_SV_STAT_CALC_VELOCITY (1 << 2) /* Calc Velocity */
 #define CXD56_GNSS_SV_STAT_VISIBLE       (1 << 3) /* Visible */
 #define CXD56_GNSS_SV_STAT_SUB_CH        (1 << 4) /* Sub Ch */
+
+/* GNSS carrier phase status */
+
+#define CXD56_GNSS_SV_PHASESTAT_NONE       (0)      /* None */
+#define CXD56_GNSS_SV_PHASESTAT_UNKNOWN    (1 << 0) /* Unknown */
+#define CXD56_GNSS_SV_PHASESTAT_VALID      (1 << 1) /* Valid  */
+#define CXD56_GNSS_SV_PHASESTAT_RESET      (1 << 2) /* Reset detected */
+#define CXD56_GNSS_SV_PHASESTAT_CYCLE_SLIP (1 << 3) /* Cycle Slip detected */
+#define CXD56_GNSS_SV_PHASESTAT_HALF_CYCLE_RESOLVED (1 << 4)
+                                          /* Half cycle ambiguity resolved */
+
+/* GNSS Validity of raw measurement */
+
+#define CXD56_GNSS_SV_RAWSTAT_NONE         (0)      /* None */
+#define CXD56_GNSS_SV_RAWSTAT_DOPPLER      (1 << 0) /* doppler */
+#define CXD56_GNSS_SV_RAWSTAT_PSEUDORANGE  (1 << 1) /* pseudorange  */
+#define CXD56_GNSS_SV_RAWSTAT_CARRIERPHASE (1 << 2) /* carrier phase */
+#define CXD56_GNSS_SV_RAWSTAT_SVTIME       (1 << 3) /* received sv time */
+#define CXD56_GNSS_SV_RAWSTAT_SVCLOCKPARAM (1 << 4) /* correction parameter of sv clock*/
+#define CXD56_GNSS_SV_RAWSTAT_SVPOSVEL     (1 << 5) /* sv position and velocity */
+
+/* GNSS Cause of measurement invalidity */
+
+#define CXD56_GNSS_SV_INVCAUS_NOT_TRACKED       (1 << 0) /* not tracked */
+#define CXD56_GNSS_SV_INVCAUS_NO_SIGNAL         (1 << 1) /* no signal */
+#define CXD56_GNSS_SV_INVCAUS_NO_EPHEMERIS      (1 << 2) /* no ephemeris */
+#define CXD56_GNSS_SV_INVCAUS_CLK_NOT_ADJUSTED  (1 << 3) /* clock not adjusted */
+#define CXD56_GNSS_SV_INVCAUS_BEFORE_TOW_LOCKED (1 << 4) /* before TOW locked */
+#define CXD56_GNSS_SV_INVCAUS_SPEED_LIMIT       (1 << 5) /* speed limit */
+#define CXD56_GNSS_SV_INVCAUS_NOT_SUPPORTED     (1 << 6) /* not supported */
+#define CXD56_GNSS_SV_INVCAUS_OTHER             (1 << 7) /* other */
 
 /* GNSS 1PPS synchronization status (internal use) */
 
@@ -153,11 +188,17 @@ extern "C"
 
 /* AGPS Measurement tracking data */
 
-#define CXD56_GNSS_SUPL_TRK_DATA_SIZE (16)
+#define CXD56_GNSS_SUPL_TRK_DATA_SIZE (24)
 
 /* PVTLOG Max stored log number */
 
 #define CXD56_GNSS_PVTLOG_MAXNUM        170
+
+/* PVTLOG notify threshold of the stored data */
+
+#define CXD56_GNSS_PVTLOG_THRESHOLD_FULL     0 /* Limit of the storage size */
+#define CXD56_GNSS_PVTLOG_THRESHOLD_HALF     1 /* 1/2 of the Storage size */
+#define CXD56_GNSS_PVTLOG_THRESHOLD_ONE_DATA 2 /* Each log stored */
 
 /* assist bit fields */
 
@@ -225,7 +266,7 @@ struct cxd56_gnss_var_s
 
 /* Extra data for debugging */
 
-#define CXD56_GNSS_PVT_RECEIVER_EXTRA_DATA_SIZE (520)
+#define CXD56_GNSS_PVT_RECEIVER_EXTRA_DATA_SIZE (568)
 #define CXD56_GNSS_PVT_RECEIVER_EXTRA_DATA \
   uint8_t extra[CXD56_GNSS_PVT_RECEIVER_EXTRA_DATA_SIZE]
 #define CXD56_GNSS_PVT_SV_EXTRA_DATA_SIZE       40
@@ -246,88 +287,304 @@ struct cxd56_gnss_var_s
 
 struct cxd56_gnss_receiver_s
 {
-  uint8_t type;           /* [out] Position type; 0:Invalid, 1:GNSS,
-                           *       2:IMES, 3:user set, 4:previous
-                           */
-  uint8_t dgps;           /* [out] FALSE:SGPS, TRUE:DGPS */
-  uint8_t pos_fixmode;    /* [out] 1:Invalid, 2:2D, 3:3D */
-  uint8_t vel_fixmode;    /* [out] 1:Invalid, 2:2D VZ, 3:2D Offset,
-                           *       4:3D, 5:1D, 6:PRED
-                           */
-  uint8_t numsv;          /* [out] Nr of visible satellites */
-  uint8_t numsv_tracking; /* [out] Nr of tracking satellites */
-  uint8_t numsv_calcpos;  /* [out] Nr of satellites to calculate position */
-  uint8_t numsv_calcvel;  /* [out] Nr of satellites to calculate velocity */
-  uint8_t assist;         /* [out] bit field
-                           *     [7..5]Reserved
-                           *      [4]AEP Velocity
-                           *      [3]AEP Position
-                           *      [2]CEP Velocity
-                           *      [1]CEP Position,
-                           *      [0]user set
-                           */
-  uint8_t  pos_dataexist; /* [out] 0:none, 1:exist */
-  uint16_t svtype;        /* [out] Using sv system, bit field;
-                           *   bit0:GPS, bit1:GLONASS, bit2:SBAS,
-                           *   bit3:QZSS_L1CA, bit4:IMES,
-                           *   bit5:QZSS_L1SAIF, bit6:Beidu,
-                           *   bit7:Galileo
-                           */
-  uint16_t pos_svtype;    /* [out] using sv system, bit field;
-                           *   bit0:GPS, bit1:GLONASS, bit2:SBAS,
-                           *   bit3:QZSS_L1CA, bit4:IMES,
-                           *   bit5:QZSS_L1SAIF, bit6:Beidu,
-                           *   bit7:Galileo
-                           * */
-  uint16_t vel_svtype;    /* [out] using sv system, bit field; bit0:GPS,
-                           *   bit0:GPS, bit1:GLONASS, bit2:SBAS,
-                           *   bit3:QZSS_L1CA, bit4:IMES,
-                           *   bit5:QZSS_L1SAIF, bit6:Beidu,
-                           *   bit7:Galileo
-                           */
-  uint32_t possource;     /* [out] position source; 0:Invalid, 1:GNSS,
-                           *   2:IMES, 3:user set, 4:previous
-                           */
+  /* [out] Position type; 0:Invalid, 1:GNSS,
+   *       2:IMES, 3:user set, 4:previous
+   */
 
-  int32_t                    tcxo_offset; /* [out] TCXO offset[Hz] */
-  struct cxd56_gnss_dop_s pos_dop;        /* [out] DOPs of Position */
-  struct cxd56_gnss_dop_s vel_idx;        /* [out] Weighted DOPs of Velocity */
-  struct cxd56_gnss_var_s pos_accuracy;   /* [out] Accuracy of Position */
-  double                     latitude;    /* [out] Latitude [degree] */
-  double                     longitude;   /* [out] Longitude [degree] */
-  double                     altitude;    /* [out] Altitude [m] */
-  double                     geoid;       /* [out] Geoid height [m] */
-  float                      velocity;    /* [out] Velocity [m/s] */
-  float                      direction;   /* [out] Direction [degree] */
-  struct cxd56_gnss_date_s   date;        /* [out] Current day (UTC) */
-  struct cxd56_gnss_time_s   time;        /* [out] Current time (UTC) */
-  struct cxd56_gnss_date_s   gpsdate;     /* [out] Current day (GPS) */
-  struct cxd56_gnss_time_s   gpstime;     /* [out] Current time (GPS) */
-  struct cxd56_gnss_time_s   receivetime; /* [out] Receive time (UTC) */
-  uint32_t                   priv;        /* [out] For internal use */
-  CXD56_GNSS_PVT_RECEIVER_EXTRA_DATA;     /* [out] Receiver extra data */
+  uint8_t type;
+
+  /* [out] FALSE:SGPS, TRUE:DGPS */
+
+  uint8_t dgps;
+
+  /* [out] 1:Invalid, 2:2D, 3:3D */
+
+  uint8_t pos_fixmode;
+
+  /* [out] 1:Invalid, 2:2D VZ, 3:2D Offset,
+   *       4:3D, 5:1D, 6:PRED
+   */
+
+  uint8_t vel_fixmode;
+
+  /* [out] Nr of visible satellites */
+
+  uint8_t numsv;
+
+  /* [out] Nr of tracking satellites */
+
+  uint8_t numsv_tracking;
+
+  /* [out] Nr of satellites to calculate position */
+
+  uint8_t numsv_calcpos;
+
+  /* [out] Nr of satellites to calculate velocity */
+
+  uint8_t numsv_calcvel;
+
+  /* [out] bit field
+   *     [7..5]Reserved
+   *      [4]AEP Velocity
+   *      [3]AEP Position
+   *      [2]CEP Velocity
+   *      [1]CEP Position,
+   *      [0]user set
+   */
+
+  uint8_t assist;
+
+  /* [out] 0:none, 1:exist */
+
+  uint8_t  pos_dataexist;
+
+  /* [out] Using sv system, bit field;
+   *   bit0:GPS, bit1:GLONASS, bit2:SBAS,
+   *   bit3:QZSS_L1CA, bit4:IMES,
+   *   bit5:QZSS_L1SAIF, bit6:BeiDou,
+   *   bit7:Galileo
+   */
+
+  uint16_t svtype;
+
+  /* [out] using sv system, bit field;
+   *   bit0:GPS, bit1:GLONASS, bit2:SBAS,
+   *   bit3:QZSS_L1CA, bit4:IMES,
+   *   bit5:QZSS_L1SAIF, bit6:BeiDou,
+   *   bit7:Galileo
+   */
+
+  uint16_t pos_svtype;
+
+  /* [out] using sv system, bit field; bit0:GPS,
+   *   bit0:GPS, bit1:GLONASS, bit2:SBAS,
+   *   bit3:QZSS_L1CA, bit4:IMES,
+   *   bit5:QZSS_L1SAIF, bit6:BeiDou,
+   *   bit7:Galileo
+   */
+
+  uint16_t vel_svtype;
+
+  /* [out] position source; 0:Invalid, 1:GNSS,
+   *   2:IMES, 3:user set, 4:previous
+   */
+
+  uint32_t possource;
+
+  /* [out] TCXO offset[Hz] */
+
+  float                      tcxo_offset;
+
+  /* [out] DOPs of Position */
+
+  struct cxd56_gnss_dop_s    pos_dop;
+
+  /* [out] Weighted DOPs of Velocity */
+
+  struct cxd56_gnss_dop_s    vel_idx;
+
+  /* [out] Accuracy of Position */
+
+  struct cxd56_gnss_var_s    pos_accuracy;
+
+  /* [out] Latitude [degree] */
+
+  double                     latitude;
+
+  /* [out] Longitude [degree] */
+
+  double                     longitude;
+
+  /* [out] Altitude [m] */
+
+  double                     altitude;
+
+  /* [out] Geoid height [m] */
+
+  double                     geoid;
+
+  /* [out] Velocity [m/s] */
+
+  float                      velocity;
+
+  /* [out] Direction [degree] */
+
+  float                      direction;
+
+  /* [out] Current day (UTC) */
+
+  struct cxd56_gnss_date_s   date;
+
+  /* [out] Current time (UTC) */
+
+  struct cxd56_gnss_time_s   time;
+
+  /* [out] Current day (GPS) */
+
+  struct cxd56_gnss_date_s   gpsdate;
+
+  /* [out] Current time (GPS) */
+
+  struct cxd56_gnss_time_s   gpstime;
+
+  /* [out] Receive time (UTC) */
+
+  struct cxd56_gnss_time_s   receivetime;
+
+  /* [out] For internal use */
+
+  uint32_t                   priv;
+
+  /* [out] Leap Second[sec] */
+
+  int8_t                     leap_sec;
+
+  /* [out] elapsed time
+   *       from reset in ns
+   */
+
+  uint64_t                   time_ns;
+
+  /* [out] elapsed time
+   *       from GPS epoch in ns
+   */
+
+  int64_t                    full_bias_ns;
+
+  /* [out] Receiver extra data */
+
+  CXD56_GNSS_PVT_RECEIVER_EXTRA_DATA;
+};
+
+/* satellite position (ECEF) */
+
+struct cxd56_gnss_pvt_sv_pos_s
+{
+  double dx; /* X [m] */
+  double dy; /* Y [m] */
+  double dz; /* Z [m] */
+};
+
+/* satellite velocity (ECEF) */
+
+struct cxd56_gnss_pvt_sv_vel_s
+{
+  float fvx; /* Vx [m/s] */
+  float fvy; /* Vy [m/s] */
+  float fvz; /* Vz [m/s] */
 };
 
 /* GNSS satellite data */
 
 struct cxd56_gnss_sv_s
 {
-  uint16_t type;        /* [out] Using sv system, bit field; bit0:GPS,
-                         *     bit1:GLONASS, bit2:SBAS, bit3:QZSS_L1CA,
-                         *     bit4:IMES, bit5:QZSS_L1SAIF, bit6:Beidu,
-                         *     bit7:Galileo
-                         *     same as struct cxd56_gnss_receiver_s::svtype
-                         */
-  uint8_t svid;         /* [out] Satellite id */
-  uint8_t stat;         /* Using sv info, bit field; bit0:tracking,
-                         *     bit1:positioning, bit2:calculating velocity,
-                         *     bit3:visible satellite
-                         */
-  uint8_t elevation;    /* [out] Elevation [degree] */
-  int16_t azimuth;      /* [out] Azimuth [degree] */
-  float   siglevel;     /* [out] CN */
+  /* [out] Using sv system, bit field; bit0:GPS,
+   *     bit1:GLONASS, bit2:SBAS, bit3:QZSS_L1CA,
+   *     bit4:IMES, bit5:QZSS_L1SAIF, bit6:BeiDou,
+   *     bit7:Galileo
+   *     same as struct cxd56_gnss_receiver_s::svtype
+   */
 
-  CXD56_GNSS_PVT_SV_EXTRA_DATA; /* [out] Sv extra data */
+  uint16_t type;
+
+  /* [out] Satellite id */
+
+  uint8_t svid;
+
+  /* Using sv info, bit field; bit0:tracking,
+   *     bit1:positioning, bit2:calculating velocity,
+   *     bit3:visible satellite
+   */
+
+  uint8_t stat;
+
+  /* [out] Azimuth [degree] */
+
+  int16_t azimuth;
+
+  /* [out] carrier phase status, bit field;
+   *     bit0: unknown, bit1: valid, bit2: reset,
+   *     bit3: cycle slip (Loss of Lock Indicator)
+   */
+
+  uint8_t phase_stat;
+
+  /* [out] navigation message of the satellite vehicle
+   *     bit0: 1 = almanac OK, 0 = almanac NG
+   */
+
+  uint8_t nav_message_info;
+
+  /* [out] Validity of raw measurement, bit field;
+   *     bit0: doppler, bit1: pseudorange,
+   *     bit2: carrierphase, bit3: svtime,
+   *     bit4: svClockOffset & svClockDrift
+   *     bit5: svpos & svvel
+   */
+
+  uint8_t raw_stat;
+
+  /* [out] Cause of measurement invalidity, bit field;
+   *     bit0: not tracked, bit1: no signal,
+   *     bit2: no ephemeris
+   *     bit3: clock not adjusted,
+   *     bit4: before TOW locked
+   *     bit5: not supported, bit6: speed limit
+   */
+
+  uint8_t invalid_cause;
+
+  /* [out] Elevation [degree] */
+
+  uint8_t elevation;
+
+  /* [out] Frequency Channel (Glonass) */
+
+  int8_t  freqchannel;
+
+  /* [out] CN */
+
+  float   siglevel;
+
+  /* [out] Doppler frequency [Hz] */
+
+  float   doppler;
+
+  /* [out] Pseudo range [m] */
+
+  double  pseudo_range;
+
+  /* [out] Carrier phase [cycle] */
+
+  double  carrier_phase;
+
+  /* [out] received sv time in [sec] */
+
+  double  sv_time;
+
+  /* [out] Time tracked[sec] */
+
+  float   timetracked;
+
+  /* [out] Satellite clock offset [m] (Af0 * C) */
+
+  float   svclockoffset;
+
+  /* [out] Satellite clock drift [m/s] (Af1 * C) */
+
+  float   svclockdrift;
+
+  /* [out] satellite position (ECEF) */
+
+  struct cxd56_gnss_pvt_sv_pos_s svpos;
+
+  /* [out] satellite velocity (ECEF) */
+
+  struct cxd56_gnss_pvt_sv_vel_s svvel;
+
+  /* [out] Sv extra data */
+
+  CXD56_GNSS_PVT_SV_EXTRA_DATA;
 };
 
 /* Positioning data with SV data */
@@ -351,6 +608,26 @@ struct cxd56_gnss_dcreport_data_s
   uint8_t sf[CXD56_GNSS_QSM_MSG_BIT_NUM /
               CXD56_GNSS_QSM_NUM_BITS_IN_BYTE + 1]; /* [out] Message body */
   uint8_t svid;                                     /* [out] Satellite id */
+};
+
+/* Galileo SAR/RLM data */
+
+struct cxd56_gnss_sarrlm_data_s
+{
+  uint8_t  svid;        /* SVID */
+  uint8_t  rlmtype;     /* 0x0:Short, 0x1:Long */
+  uint8_t  datacmplt;   /* 0xf:Short, 0xff:Long */
+  uint8_t  msgcode;     /* Massage code(4bit) */
+  uint32_t beacon_id1;  /* Beacon ID (bit[31:0]) */
+  uint32_t beacon_id2;  /* Beacon ID (bit[59:32]) */
+  uint32_t param1;      /* Short:16bit, Long:96bit(bit[31:0]) */
+  uint32_t param2;      /* Long:96bit(bit[63:31]) */
+  uint32_t param3;      /* Long:96bit(bit[95:63]) */
+};
+
+struct cxd56_gnss_gal_sarrlm_s
+{
+  struct cxd56_gnss_sarrlm_data_s data;
 };
 
 /* SF_EVENT_GNSS_MEASUREMENT_VALUE */
@@ -461,16 +738,22 @@ struct cxd56_rtk_sv_s
   uint32_t gnss;         /* [out] GNSS type (CXD56_GNSS_GNSS_XXX) */
   int8_t   svid;         /* [out] Satellite id */
   int8_t   fdmch;        /* [out] Frequency slot for GLONASS (-7 ... 6) */
-  int16_t  cn;           /* [out] [0.01dBHz] CN */
   int8_t   polarity;     /* [out] Carrier polarity
                           * (0: not inverted, 1: inverted)
                           */
+  int16_t  cn;           /* [out] [0.01dBHz] CN */
   int8_t   lastpreamble; /* [out] Parity of last premable (0: ok, 1: ng) */
   int8_t   lli;          /* [out] Lock loss indicator
                           * (0: no lock loss, 1: lock loss)
                           */
   int8_t   ch;           /* [out] TRK channel number */
   float    c2p;          /* [out] C2P (0 ... 1.0) */
+  uint8_t  phase_stat;   /* [out] carrier phase status, bit field;
+                          *    bit0: unknown, bit1: valid, bit2: reset,
+                          *    bit3: cycle slip (Loss of Lock Indicator)
+                          */
+  float    timetracked;  /* [out] Tracked time[sec] */
+  double   sv_time;      /* [out] received transmit time of the SV[sec] */
   float    doppler;      /* [out] [Hz] Doppler shift */
 };
 
@@ -602,6 +885,16 @@ struct cxd56_gnss_sbasdata_s
   uint8_t  msgid;    /* sbas message ID */
 
   uint8_t  sbasmsg[CXD56_GNSS_SBAS_MESSAGE_DATA_LEN]; /* sbas message data */
+};
+
+/* RTK Setting Parameter */
+
+struct cxd56_gnss_rtk_setting_s
+{
+  int      interval; /* Interval */
+  uint32_t gnss;     /* Satellite system */
+  int      eph_out;  /* Ephemeris out enable */
+  uint64_t sbas_out; /* sbas out enable */
 };
 
 /* PVTLog Parameter */

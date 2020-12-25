@@ -45,5 +45,64 @@ config METRO_M4_32KHZXTAL
 		slow clock source.  This option will select instead XOSC32 as the
 		slow clock source.
 
+config METRO_M4_AT24_BLOCKMOUNT
+	bool "AT24 Serial EEPROM auto-mount"
+	default n
+	depends on MTD_AT24XX
+	---help---
+		Automatically initialize the AT24 I2C EEPROM driver when NSH starts.
+
+choice
+	prompt "AT24 serial EPPROM configuration"
+	default METRO_M4_AT24_FTL
+	depends on METRO_M4_AT24_BLOCKMOUNT
+
+config METRO_M4_AT24_FTL
+	bool "Create AT24 block driver"
+	---help---
+		Create the MTD driver for the AT24 and "wrap" the AT24 as a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+config METRO_M4_AT24_NXFFS
+	bool "Create AT24 NXFFS file system"
+	depends on FS_NXFFS
+	---help---
+		Create the MTD driver for the AT24 and mount the AT24 device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+endchoice # AT24 serial EPPROM configuration
+
+if FS_AUTOMOUNTER
+config METRO_M4_USB_AUTOMOUNT
+	bool "USB automounter"
+	default n
+
+if METRO_M4_USB_AUTOMOUNT
+
+config METRO_M4_USB_AUTOMOUNT_FSTYPE
+	string "USB file system type"
+	default "vfat"
+
+config METRO_M4_USB_AUTOMOUNT_BLKDEV
+	string "USB block device"
+	default "/dev/sda"
+
+config METRO_M4_USB_AUTOMOUNT_MOUNTPOINT
+	string "USB mount point"
+	default "/mnt/usb"
+
+config METRO_M4_USB_AUTOMOUNT_DDELAY
+	int "USB debounce delay (milliseconds)"
+	default 1000
+
+config METRO_M4_USB_AUTOMOUNT_UDELAY
+	int "USB unmount retry delay (milliseconds)"
+	default 2000
+
+endif # METRO_M4_USB_AUTOMOUNT
+endif # FS_AUTOMOUNTER
 
 endif # ARCH_BOARD_METRO_M4

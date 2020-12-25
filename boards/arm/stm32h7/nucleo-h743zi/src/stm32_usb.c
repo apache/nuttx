@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32h7/nucleo-h743zi/src/stm32_usb.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -136,16 +121,20 @@ static int usbhost_waiter(int argc, char *argv[])
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the nucleo-144 board.
+ *   Called from stm32_usbinitialize very early in inialization to setup
+ *   USB-related GPIO pins for the nucleo-144 board.
  *
  ****************************************************************************/
 
 void stm32_usbinitialize(void)
 {
-  /* The OTG FS has an internal soft pull-up.  No GPIO configuration is required */
+  /* The OTG FS has an internal soft pull-up.
+   * No GPIO configuration is required
+   */
 
-  /* Configure the OTG FS VBUS sensing GPIO, Power On, and Overcurrent GPIOs */
+  /* Configure the OTG FS VBUS sensing GPIO,
+   * Power On, and Overcurrent GPIOs
+   */
 
 #ifdef CONFIG_STM32H7_OTGFS
   stm32_configgpio(GPIO_OTGFS_VBUS);
@@ -154,15 +143,16 @@ void stm32_usbinitialize(void)
 #endif
 }
 
-/***********************************************************************************
+/****************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality.
+ *   Called at application startup time to initialize the USB host
+ *   functionality.
  *   This function will start a thread that will monitor for device
  *   connection/disconnection events.
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 int stm32_usbhost_initialize(void)
@@ -249,40 +239,49 @@ int stm32_usbhost_initialize(void)
 }
 #endif
 
-/***********************************************************************************
+/****************************************************************************
  * Name: stm32_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided be
- *   each platform that implements the STM32 OTG FS host interface
+ *   Enable/disable driving of VBUS 5V output. This function must be
+ *   provided be each platform that implements the STM32 OTG FS host
+ *   interface
  *
- *   "On-chip 5 V VBUS generation is not supported. For this reason, a charge pump
- *    or, if 5 V are available on the application board, a basic power switch, must
- *    be added externally to drive the 5 V VBUS line. The external charge pump can
- *    be driven by any GPIO output. When the application decides to power on VBUS
- *    using the chosen GPIO, it must also set the port power bit in the host port
- *    control and status register (PPWR bit in OTG_FS_HPRT).
+ *   "On-chip 5 V VBUS generation is not supported. For this reason, a
+ *    charge pump or, if 5 V are available on the application board, a
+ *    basic power switch, must be added externally to drive the 5 V VBUS
+ *    line. The external charge pump can be driven by any GPIO output.
+ *    When the application decides to power on VBUS using the chosen GPIO,
+ *    it must also set the port power bit in the host port control and status
+ *    register (PPWR bit in OTG_FS_HPRT).
  *
- *   "The application uses this field to control power to this port, and the core
- *    clears this bit on an overcurrent condition."
+ *   "The application uses this field to control power to this port, and
+ *    the core clears this bit on an overcurrent condition."
  *
  * Input Parameters:
- *   iface - For future growth to handle multiple USB host interface.  Should be zero.
+ *   iface - For future growth to handle multiple USB host interface.
+ *           Should be zero.
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:
  *   None
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 void stm32_usbhost_vbusdrive(int iface, bool enable)
 {
   DEBUGASSERT(iface == 0);
 
-  /* Set the Power Switch by driving the active low enable pin */
+  /* Set the Power Switch by driving the active high enable pin */
 
+#if defined(CONFIG_STM_NUCLEO144_MB1137)
+  stm32_gpiowrite(GPIO_OTGFS_PWRON, enable);
+#elif defined(CONFIG_STM_NUCLEO144_MB1364)
   stm32_gpiowrite(GPIO_OTGFS_PWRON, !enable);
+#else
+# error "Non-supported board"
+#endif
 }
 #endif
 
@@ -290,16 +289,16 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
  * Name: stm32_setup_overcurrent
  *
  * Description:
- *   Setup to receive an interrupt-level callback if an overcurrent condition is
- *   detected.
+ *   Setup to receive an interrupt-level callback if an overcurrent
+ *   condition is detected.
  *
  * Input Parameters:
  *   handler - New overcurrent interrupt handler
  *   arg     - The argument provided for the interrupt handler
  *
  * Returned Value:
- *   Zero (OK) is returned on success.  Otherwise, a negated errno value is returned
- *   to indicate the nature of the failure.
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value
+ *   is returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 
@@ -314,10 +313,10 @@ int stm32_setup_overcurrent(xcpt_t handler, void *arg)
  * Name:  stm32_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV
+ *   driver is used. This function is called whenever the USB enters or
+ *   leaves suspend mode. This is an opportunity for the board logic to
+ *   shutdown clocks, power, etc. while the USB is suspended.
  *
  ****************************************************************************/
 

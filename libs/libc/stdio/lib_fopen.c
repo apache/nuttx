@@ -49,6 +49,7 @@
                             * and writing) */
 #define MODE_B    (1 << 4) /* Bit 4: "{r|w|a|x|+}b" Binary mode */
 #define MODE_X    (1 << 5) /* Bit 5: "{r|w|a|b|+}x" Open exclusive mode */
+#define MODE_T    (1 << 6) /* Bit 6: "{r|w|a|+}t" Text mode */
 
 #define MODE_NONE 0        /* No access mode determined */
 #define MODE_MASK (MODE_R | MODE_W | MODE_A)
@@ -278,6 +279,22 @@ int lib_mode2oflags(FAR const char *mode)
 
                 oflags |= O_EXCL;
                 state  |= MODE_X;
+              }
+            else
+              {
+                goto errout;
+              }
+            break;
+
+          /* Open for text (translated) access ("{r|w|a|x|+}t") */
+
+          case 't' :
+            if ((state & MODE_MASK) != MODE_NONE)
+              {
+                /* The file is opened in text mode */
+
+                oflags |= O_TEXT;
+                state  |= MODE_T;
               }
             else
               {

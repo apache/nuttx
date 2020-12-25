@@ -50,8 +50,10 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
@@ -71,7 +73,6 @@
 #include <nuttx/audio/i2s.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/wm8904.h>
-#include <nuttx/lib/math.h>
 
 #include "wm8904.h"
 
@@ -1603,7 +1604,8 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
 
   /* Create a message queue for the worker thread */
 
-  snprintf(priv->mqname, sizeof(priv->mqname), "/tmp/%X", priv);
+  snprintf(priv->mqname, sizeof(priv->mqname), "/tmp/%" PRIXPTR,
+           (uintptr_t)priv);
 
   attr.mq_maxmsg  = 16;
   attr.mq_msgsize = sizeof(struct audio_msg_s);
@@ -1832,6 +1834,7 @@ static int wm8904_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
 static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
                         unsigned long arg)
 {
+  int ret = OK;
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
   FAR struct ap_buffer_info_s *bufinfo;
 #endif
@@ -1869,11 +1872,12 @@ static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 #endif
 
       default:
+        ret = -ENOTTY;
         audinfo("Ignored\n");
         break;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

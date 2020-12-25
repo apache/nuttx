@@ -216,7 +216,7 @@ class TelnetDev:
 	def __init__(self):
 		srv_ipaddr = ConfigArgs.SERVER_IP
 		srv_port = ConfigArgs.SERVER_PORT
-		self.recvbuf = b'';
+		self.recvbuf = b''
 		try:
 			self.telnet = telnetlib.Telnet(host=srv_ipaddr, port=srv_port, timeout=10)
 			# There is a ack to be sent after connecting to the telnet server.

@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* The EK-TM4C1294XL has a four green LEDs.
  *
  *   --- ------------
@@ -71,7 +72,7 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
@@ -79,6 +80,7 @@ void board_userled_initialize(void)
   tiva_configgpio(GPIO_LED_D2);
   tiva_configgpio(GPIO_LED_D3);
   tiva_configgpio(GPIO_LED_D4);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -117,7 +119,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   bool ledon;
 

@@ -264,11 +264,14 @@ static void stm32l4_tim_reset(FAR struct stm32l4_tim_dev_s *dev);
     defined(HAVE_TIM17_GPIOCONFIG)
 static void stm32l4_tim_gpioconfig(uint32_t cfg, enum stm32l4_tim_channel_e mode);
 #endif
+static void stm32l4_tim_dumpregs(FAR struct stm32l4_tim_dev_s *dev);
 
 /* Timer methods */
 
 static int stm32l4_tim_setmode(FAR struct stm32l4_tim_dev_s *dev,
                                enum stm32l4_tim_mode_e mode);
+static int stm32l4_tim_setfreq(FAR struct stm32l4_tim_dev_s *dev,
+                              uint32_t freq);
 static int stm32l4_tim_setclock(FAR struct stm32l4_tim_dev_s *dev,
                                 uint32_t freq);
 static uint32_t  stm32l4_tim_getclock(FAR struct stm32l4_tim_dev_s *dev);
@@ -297,7 +300,10 @@ static int stm32l4_tim_checkint(FAR struct stm32l4_tim_dev_s *dev, int source);
 
 static const struct stm32l4_tim_ops_s stm32l4_tim_ops =
 {
+  .enable     = stm32l4_tim_enable,
+  .disable    = stm32l4_tim_disable,
   .setmode    = stm32l4_tim_setmode,
+  .setfreq    = stm32l4_tim_setfreq,
   .setclock   = stm32l4_tim_setclock,
   .getclock   = stm32l4_tim_getclock,
   .setperiod  = stm32l4_tim_setperiod,
@@ -311,6 +317,7 @@ static const struct stm32l4_tim_ops_s stm32l4_tim_ops =
   .disableint = stm32l4_tim_disableint,
   .ackint     = stm32l4_tim_ackint,
   .checkint   = stm32l4_tim_checkint,
+  .dump_regs  = stm32l4_tim_dumpregs,
 };
 
 #ifdef CONFIG_STM32L4_TIM1
@@ -507,6 +514,7 @@ static void stm32l4_tim_reload_counter(FAR struct stm32l4_tim_dev_s *dev)
 static void stm32l4_tim_enable(FAR struct stm32l4_tim_dev_s *dev)
 {
   uint16_t val = stm32l4_getreg16(dev, STM32L4_BTIM_CR1_OFFSET);
+
   val |= ATIM_CR1_CEN;
   stm32l4_tim_reload_counter(dev);
   stm32l4_putreg16(dev, STM32L4_BTIM_CR1_OFFSET, val);
@@ -562,6 +570,54 @@ static void stm32l4_tim_gpioconfig(uint32_t cfg, enum stm32l4_tim_channel_e mode
 #endif
 
 /************************************************************************************
+ * Name: stm32l4_tim_dumpregs
+ ************************************************************************************/
+
+static void stm32l4_tim_dumpregs(FAR struct stm32l4_tim_dev_s *dev)
+{
+  struct stm32l4_tim_priv_s *priv = (struct stm32l4_tim_priv_s *)dev;
+
+  ainfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
+          stm32l4_getreg16(dev, STM32L4_GTIM_CR1_OFFSET),
+          stm32l4_getreg16(dev, STM32L4_GTIM_CR2_OFFSET),
+          stm32l4_getreg16(dev, STM32L4_GTIM_SMCR_OFFSET),
+          stm32l4_getreg16(dev, STM32L4_GTIM_DIER_OFFSET)
+        );
+  ainfo("   SR: %04x EGR:  0000 CCMR1: %04x CCMR2: %04x\n",
+          stm32l4_getreg16(dev, STM32L4_GTIM_SR_OFFSET),
+          stm32l4_getreg16(dev, STM32L4_GTIM_CCMR1_OFFSET),
+          stm32l4_getreg16(dev, STM32L4_GTIM_CCMR2_OFFSET)
+        );
+  ainfo(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
+          stm32l4_getreg16(dev, STM32L4_GTIM_CCER_OFFSET),
+          stm32l4_getreg16(dev, STM32L4_GTIM_CNT_OFFSET),
+          stm32l4_getreg16(dev, STM32L4_GTIM_PSC_OFFSET),
+          stm32l4_getreg16(dev, STM32L4_GTIM_ARR_OFFSET)
+        );
+  ainfo(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
+          stm32l4_getreg16(dev, STM32L4_GTIM_CCR1_OFFSET),
+          stm32l4_getreg16(dev, STM32L4_GTIM_CCR2_OFFSET),
+          stm32l4_getreg16(dev, STM32L4_GTIM_CCR3_OFFSET),
+          stm32l4_getreg16(dev, STM32L4_GTIM_CCR4_OFFSET)
+        );
+
+  if (priv->base == STM32L4_TIM1_BASE || priv->base == STM32L4_TIM8_BASE)
+    {
+      ainfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
+            stm32l4_getreg16(dev, STM32L4_ATIM_RCR_OFFSET),
+            stm32l4_getreg16(dev, STM32L4_ATIM_BDTR_OFFSET),
+            stm32l4_getreg16(dev, STM32L4_ATIM_DCR_OFFSET),
+            stm32l4_getreg16(dev, STM32L4_ATIM_DMAR_OFFSET));
+    }
+  else
+    {
+      ainfo("  DCR: %04x DMAR: %04x\n",
+            stm32l4_getreg16(dev, STM32L4_GTIM_DCR_OFFSET),
+            stm32l4_getreg16(dev, STM32L4_GTIM_DMAR_OFFSET));
+    }
+}
+
+/************************************************************************************
  * Name: stm32l4_tim_setmode
  ************************************************************************************/
 
@@ -599,8 +655,10 @@ static int stm32l4_tim_setmode(FAR struct stm32l4_tim_dev_s *dev,
 
       case STM32L4_TIM_MODE_DOWN:
         val |= ATIM_CR1_DIR;
+        break;
 
       case STM32L4_TIM_MODE_UP:
+        val &= ~ATIM_CR1_DIR;
         break;
 
       case STM32L4_TIM_MODE_UPDOWN:
@@ -632,6 +690,166 @@ static int stm32l4_tim_setmode(FAR struct stm32l4_tim_dev_s *dev,
 #endif
 
   return OK;
+}
+
+/************************************************************************************
+ * Name: stm32l4_tim_setfreq
+ ************************************************************************************/
+
+static int stm32l4_tim_setfreq(FAR struct stm32l4_tim_dev_s *dev,
+                              uint32_t freq)
+{
+  uint32_t freqin;
+  int prescaler;
+  uint32_t reload;
+  uint32_t timclk;
+
+  DEBUGASSERT(dev != NULL);
+
+  /* Disable Timer? */
+
+  if (freq == 0)
+    {
+      stm32l4_tim_disable(dev);
+      return 0;
+    }
+
+  /* Get the input clock frequency for this timer.  These vary with
+   * different timer clock sources, MCU-specific timer configuration, and
+   * board-specific clock configuration.  The correct input clock frequency
+   * must be defined in the board.h header file.
+   */
+
+  switch (((struct stm32l4_tim_priv_s *)dev)->base)
+    {
+#ifdef CONFIG_STM32L4_TIM1
+      case STM32L4_TIM1_BASE:
+        freqin = BOARD_TIM1_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM2
+      case STM32L4_TIM2_BASE:
+        freqin = BOARD_TIM2_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM3
+      case STM32L4_TIM3_BASE:
+        freqin = BOARD_TIM3_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM4
+      case STM32L4_TIM4_BASE:
+        freqin = BOARD_TIM4_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM5
+      case STM32L4_TIM5_BASE:
+        freqin = BOARD_TIM5_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM6
+      case STM32L4_TIM6_BASE:
+        freqin = BOARD_TIM6_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM7
+      case STM32L4_TIM7_BASE:
+        freqin = BOARD_TIM7_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM8
+      case STM32L4_TIM8_BASE:
+        freqin = BOARD_TIM8_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM15
+      case STM32L4_TIM15_BASE:
+        freqin = BOARD_TIM15_FREQUENCY;
+        break;
+#endif
+#ifdef CONFIG_STM32L4_TIM16
+      case STM32L4_TIM16_BASE:
+        freqin = BOARD_TIM16_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM17
+      case STM32L4_TIM17_BASE:
+        freqin = BOARD_TIM17_FREQUENCY;
+        break;
+#endif
+
+      default:
+        return -EINVAL;
+    }
+
+  /* Select a pre-scaler value for this timer using the input clock frequency.
+   *
+   * Calculate optimal values for the timer prescaler and for the timer
+   * reload register.  If freq is the desired frequency, then
+   *
+   *   reload = timclk / freq
+   *   reload = (pclck / prescaler) / freq
+   *
+   * There are many solutions to do this, but the best solution will be the
+   * one that has the largest reload value and the smallest prescaler value.
+   * That is the solution that should give us the most accuracy in the timer
+   * control.  Subject to:
+   *
+   *   0 <= prescaler  <= 65536
+   *   1 <= reload <= 65535
+   *
+   * So ( prescaler = pclck / 65535 / freq ) would be optimal.
+   */
+
+  prescaler = (freqin / freq + 65534) / 65535;
+
+  /* We need to decrement value for '1', but only if that will not to
+   * cause underflow.
+   */
+
+  if (prescaler < 1)
+    {
+      awarn("WARNING: Prescaler underflowed.\n");
+      prescaler = 1;
+    }
+
+  /* Check for overflow as well. */
+
+  if (prescaler > 65536)
+    {
+      awarn("WARNING: Prescaler overflowed.\n");
+      prescaler = 65536;
+    }
+
+  timclk = freqin / prescaler;
+
+  reload = timclk / freq;
+  if (reload < 1)
+    {
+      awarn("WARNING: Reload value underflowed.\n");
+      reload = 1;
+    }
+  else if (reload > 65535)
+    {
+      awarn("WARNING: Reload value overflowed.\n");
+      reload = 65535;
+    }
+
+  /* Set the reload and prescaler values */
+
+  stm32l4_putreg16(dev, STM32L4_GTIM_PSC_OFFSET, prescaler - 1);
+  stm32l4_putreg16(dev, STM32L4_GTIM_ARR_OFFSET, reload);
+
+  return (timclk / reload);
 }
 
 /************************************************************************************
@@ -754,7 +972,6 @@ static int stm32l4_tim_setclock(FAR struct stm32l4_tim_dev_s *dev,
     }
 
   stm32l4_putreg16(dev, STM32L4_BTIM_PSC_OFFSET, prescaler);
-  stm32l4_tim_enable(dev);
 
   return prescaler;
 }

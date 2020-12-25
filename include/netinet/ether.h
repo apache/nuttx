@@ -70,6 +70,8 @@ int ether_ntohost(FAR char *hostname, FAR const struct ether_addr *addr);
 int ether_hostton(FAR const char *hostname, FAR struct ether_addr *addr);
 int ether_line(FAR const char *line, FAR struct ether_addr *addr,
                FAR char *hostname);
+FAR struct ether_addr *ether_aton_r(FAR const char *asc,
+                                    FAR struct ether_addr *addr);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -60,7 +60,9 @@ typedef struct
   uint32_t chip_revision;               /* 0x04400004 ~ 0x04400007 */
   uint32_t sbl_version;                 /* 0x04400008 ~ 0x0440000b */
   uint32_t sysfw_version;               /* 0x0440000c ~ 0x0440000f */
-  uint32_t reserved_version[4];         /* 0x04400010 ~ 0x0440001f */
+  uint32_t gnssfw_version;              /* 0x04400010 ~ 0x04400013 */
+  uint32_t reserved_version[2];         /* 0x04400014 ~ 0x0440001b */
+  uint32_t fw_free_space;               /* 0x0440001c ~ 0x0440001f */
   uint32_t bootcause;                   /* 0x04400020 ~ 0x04400023 */
   uint32_t bootmask;                    /* 0x04400024 ~ 0x04400027 */
   uint32_t bootreserve;                 /* 0x04400028 ~ 0x0440002b */

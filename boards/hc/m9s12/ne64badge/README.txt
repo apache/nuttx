@@ -226,7 +226,7 @@ NuttX Buildroot Toolchain
   This GNU toolchain builds and executes in the Linux or Cygwin
   environments.
 
-  1. You must have already configured Nuttx in <some-dir>/nuttx.
+  1. You must have already configured NuttX in <some-dir>/nuttx.
 
      tools/configure.sh ne64badge:<sub-dir>
 

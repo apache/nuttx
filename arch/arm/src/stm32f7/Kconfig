@@ -1144,6 +1144,10 @@ config STM32F7_HAVE_ETHRNET
 	bool
 	default n
 
+config STM32F7_HAVE_PHY_POLLED
+	bool
+	default n
+
 config STM32F7_HAVE_RNG
 	bool
 	default n
@@ -1402,6 +1406,7 @@ config STM32F7_ETHMAC
 	depends on STM32F7_HAVE_ETHRNET
 	select NETDEVICES
 	select ARCH_HAVE_PHY
+	select STM32F7_HAVE_PHY_POLLED
 
 config STM32F7_FMC
 	bool "FMC"
@@ -2609,7 +2614,7 @@ config STM32F7_CUSTOM_CLOCKCONFIG
 
 config STM32F7_DTCMEXCLUDE
 	bool "Exclude DTCM SRAM from the heap"
-	default y if ELF
+	default y if LIBC_ARCH_ELF
 	depends on ARMV7M_HAVE_DTCM
 	---help---
 		Exclude DTCM SRAM from the HEAP because it appears to be impossible
@@ -2633,6 +2638,17 @@ config STM32F7_DMACAPABLE
 		used to check if it is possible to do DMA from the selected address.
 		Drivers then may use this information to determine if they should
 		attempt the DMA or fall back to a different transfer method.
+
+config STM32F7_DMACAPABLE_ASSUME_CACHE_ALIGNED
+	bool "Do not disqualify DMA capability based on cache alignment"
+	depends on STM32F7_DMACAPABLE && ARMV7M_DCACHE && !ARMV7M_DCACHE_WRITETHROUGH
+	default n
+	---help---
+		This option configures the stm32_dmacapable to not disqualify
+		DMA operations on memory that is not dcache aligned based solely
+		on the starting addresss and byte count.
+		Use this when ALL buffer extents are known to be aligned, but the
+		the count does not use the complete buffer.
 
 menu "Timer Configuration"
 
@@ -5256,6 +5272,16 @@ config STM32F7_PHYINIT
 		STM32F7_PHYINIT is defined in the configuration then the board specific logic must
 		provide stm32_phyinitialize();  The STM32 Ethernet driver will call this function
 		one time before it first uses the PHY.
+
+config STM32F7_PHY_POLLING
+	bool "Support network monitoring by poling the PHY"
+	default n
+	depends on STM32F7_HAVE_PHY_POLLED
+	select ARCH_PHY_POLLED
+	---help---
+		Some boards may not have an interrupt connected to the PHY.
+		This option allows the network monitor to be used by polling the
+		the PHY for status.
 
 config STM32F7_MII
 	bool "Use MII interface"

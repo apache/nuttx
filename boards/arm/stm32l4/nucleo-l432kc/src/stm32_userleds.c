@@ -101,35 +101,30 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
       case(PM_NORMAL):
         {
           /* Restore normal LEDs operation */
-
         }
         break;
 
       case(PM_IDLE):
         {
           /* Entering IDLE mode - Turn leds off */
-
         }
         break;
 
       case(PM_STANDBY):
         {
           /* Entering STANDBY mode - Logic for PM_STANDBY goes here */
-
         }
         break;
 
       case(PM_SLEEP):
         {
           /* Entering SLEEP mode - Logic for PM_SLEEP goes here */
-
         }
         break;
 
       default:
         {
           /* Should not get here */
-
         }
         break;
     }
@@ -168,11 +163,12 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LD3 GPIO for output */
 
   stm32l4_configgpio(GPIO_LD3);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -191,7 +187,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   stm32l4_gpiowrite(GPIO_LD3, (ledset & BOARD_LD3_BIT) != 0);
 }

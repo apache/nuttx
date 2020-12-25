@@ -45,6 +45,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/serial/pty.h>
+#include <nuttx/note/note_driver.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/drivers/drivers.h>
 
@@ -107,8 +108,6 @@ static inline void up_color_intstack(void)
 
 void up_initialize(void)
 {
-  FAR struct tcb_s *idle;
-
   /* Colorize the interrupt stack */
 
   up_color_intstack();
@@ -116,13 +115,6 @@ void up_initialize(void)
   /* Add any extra memory fragments to the memory manager */
 
   up_addregion();
-
-  /* Initialize the idle task stack info */
-
-  idle = this_task(); /* It should be idle task */
-  idle->stack_alloc_ptr = _END_BSS;
-  idle->adj_stack_ptr   = (FAR void *)g_idle_topstack;
-  idle->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
 
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
@@ -142,6 +134,10 @@ void up_initialize(void)
 
 #if defined(CONFIG_DEV_ZERO)
   devzero_register();   /* Standard /dev/zero */
+#endif
+
+#if defined(CONFIG_DRIVER_NOTE)
+  note_register();      /* Non-standard /dev/note */
 #endif
 
   /* Initialize the serial device driver */

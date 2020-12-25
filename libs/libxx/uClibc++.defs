@@ -1,0 +1,49 @@
+############################################################################
+# libs/libxx/libcxx.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+###########################################################################
+
+VERSION=0.2.5
+
+$(TOPDIR)/include/uClibc++:
+	$(Q) curl -O -L https://git.busybox.net/uClibc++/snapshot/uClibc++-$(VERSION).tar.gz
+	$(Q) tar -xzf uClibc++-$(VERSION).tar.gz
+	$(Q) $(DELFILE) uClibc++-$(VERSION).tar.gz
+	$(Q) mv uClibc++-$(VERSION) uClibc++
+	$(Q) $(DIRLINK) $(CURDIR)/uClibc++/include $(TOPDIR)/include/uClibc++
+	$(Q) $(COPYFILE) $(CURDIR)/system_configuration.h $(TOPDIR)/include/uClibc++
+
+dirlinks:: $(TOPDIR)/include/uClibc++
+
+distclean::
+	$(Q) $(DELFILE) $(TOPDIR)/include/uClibc++/system_configuration.h
+	$(Q) $(DIRUNLINK) $(TOPDIR)/include/uClibc++
+	$(call DELDIR, uClibc++)
+
+CPPSRCS += algorithm.cpp associative_base.cpp bitset.cpp char_traits.cpp
+CPPSRCS += complex.cpp del_op.cpp del_opnt.cpp del_ops.cpp del_opv.cpp
+CPPSRCS += del_opvnt.cpp del_opvs.cpp deque.cpp exception.cpp fstream.cpp
+CPPSRCS += func_exception.cpp iomanip.cpp ios.cpp iostream.cpp istream.cpp
+CPPSRCS += iterator.cpp limits.cpp list.cpp locale.cpp map.cpp new_handler.cpp
+CPPSRCS += new_op.cpp new_opnt.cpp new_opv.cpp new_opvnt.cpp numeric.cpp
+CPPSRCS += ostream.cpp queue.cpp set.cpp sstream.cpp stack.cpp stdexcept.cpp
+CPPSRCS += streambuf.cpp string.cpp typeinfo.cpp utility.cpp valarray.cpp
+CPPSRCS += vector.cpp
+
+DEPPATH += --dep-path uClibc++/src
+VPATH += uClibc++/src

@@ -1,35 +1,20 @@
 /****************************************************************************
  * include/nuttx/sensors/l3gd20.h
  *
- *   Copyright (C) Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -244,16 +229,6 @@ struct l3gd20_config_s
   int (*attach)(FAR struct l3gd20_config_s *, xcpt_t);
 };
 
-/* Data returned by reading from the L3GD20 is returned in this format. */
-
-struct l3gd20_sensor_data_s
-{
-  int16_t x_gyr;              /* Measurement result for x axis */
-  int16_t y_gyr;              /* Measurement result for y axis */
-  int16_t z_gyr;              /* Measurement result for z axis */
-  int8_t temperature;         /* Measurement result for temperature sensor */
-};
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -273,8 +248,9 @@ extern "C"
  *   Register the L3DF20 character device as 'devpath'.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register, e.g., "/dev/gyr0".
- *   i2c     - An SPI driver instance.
+ *   devno   - The device number, used to build the device path
+ *             as /dev/sensor/gyro_uncalN
+ *   spi     - An SPI driver instance.
  *   config  - configuration for the L3GD20 driver. For details see
  *             description above.
  *
@@ -283,7 +259,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int l3gd20_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
+int l3gd20_register(int devno, FAR struct spi_dev_s *spi,
                     FAR struct l3gd20_config_s *config);
 
 #undef EXTERN

@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/sys/types.h
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014-2015 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,16 +76,6 @@
 #  endif
 #endif
 
-/* POSIX-like OS return values: */
-
-#if !defined(__cplusplus)
-#  undef  ERROR
-#  define ERROR -1
-#endif
-
-#undef  OK
-#define OK 0
-
 /* Scheduling Priorities.
  *
  * NOTES:
@@ -103,17 +94,6 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-/* Floating point types */
-
-typedef float        float32;
-#ifndef CONFIG_HAVE_DOUBLE
-typedef float        double_t;
-typedef float        float64;
-#else
-typedef double       double_t;
-typedef double       float64;
-#endif
 
 /* Misc. scalar types */
 
@@ -165,8 +145,8 @@ typedef uint16_t     ino_t;
 
 typedef uint16_t     nlink_t;
 
-/* pid_t is used for process IDs and process group IDs. It must be signed because
- * negative PID values are used to represent invalid PIDs.
+/* pid_t is used for process IDs and process group IDs. It must be signed
+ * because negative PID values are used to represent invalid PIDs.
  */
 
 typedef int16_t      pid_t;
@@ -177,9 +157,9 @@ typedef int16_t      pid_t;
 
 typedef int16_t      id_t;
 
-/* Unix requires a key of type key_t defined in file sys/types.h for requesting
- * resources such as shared memory segments, message queues and semaphores. A key
- * is simply an integer of type key_t
+/* Unix requires a key of type key_t defined in file sys/types.h for
+ * requesting resources such as shared memory segments, message queues and
+ * semaphores. A key is simply an integer of type key_t
  */
 
 typedef int16_t      key_t;
@@ -188,10 +168,9 @@ typedef int16_t      key_t;
 
 typedef intptr_t     ptrdiff_t;
 
-#ifndef CONFIG_WCHAR_BUILTIN
+#if !defined(__cplusplus)
 /* Wide, 16-bit character types.  wchar_t is a built-in type in C++ and
- * its declaration here may cause compilation errors on some compilers
- * if -DCONFIG_WCHAR_BUILTIN is not included in the CXXFLAGS.
+ * its declaration here may cause compilation errors on some compilers.
  *
  * REVISIT: wchar_t belongs in stddef.h
  */
@@ -211,6 +190,11 @@ typedef int wint_t;
  */
 
 typedef int wctype_t;
+
+/* fsblkcnt_t and fsfilcnt_t shall be defined as unsigned integer types. */
+
+typedef uint32_t     fsblkcnt_t;
+typedef uint32_t     fsfilcnt_t;
 
 /* blkcnt_t and off_t are signed integer types.
  *
@@ -295,9 +279,29 @@ typedef unsigned long  ulong;
 typedef signed char    s_char;
 typedef FAR char      *caddr_t;
 
+/* These were defined by ISO C without the first `_'.  */
+
+typedef uint8_t  u_int8_t;
+typedef uint16_t u_int16_t;
+typedef uint32_t u_int32_t;
+#ifdef __INT24_DEFINED
+typedef uint24_t u_int24_t;
+#endif
+#ifdef __INT64_DEFINED
+typedef uint64_t u_int64_t;
+#endif
+
 /* Task entry point */
 
 typedef CODE int (*main_t)(int argc, FAR char *argv[]);
+
+/* POSIX-like OS return values: */
+
+enum
+{
+  ERROR = -1,
+  OK = 0,
+};
 
 #endif /* __ASSEMBLY__ */
 

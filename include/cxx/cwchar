@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <wchar.h>
+#include <wctype.h>
 #include <stdlib.h>
 
 //***************************************************************************

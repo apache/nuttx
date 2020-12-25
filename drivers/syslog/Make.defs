@@ -48,13 +48,6 @@ ifneq ($(CONFIG_ARCH_SYSLOG),y)
   CSRCS += syslog_initialize.c
 endif
 
-# The note driver is hosted in this directory, but is not associated with
-# SYSLOGging
-
-ifeq ($(CONFIG_DRIVER_NOTE),y)
-  CSRCS += note_driver.c
-endif
-
 # The RAMLOG device is usable as a system logging device or standalone
 
 ifeq ($(CONFIG_RAMLOG),y)

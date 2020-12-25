@@ -45,7 +45,7 @@ ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_cpucount.c
 endif
 
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
+ifneq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += task_startup.c
 endif
 

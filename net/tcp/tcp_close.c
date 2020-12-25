@@ -81,9 +81,9 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
   FAR struct tcp_close_s *pstate = (FAR struct tcp_close_s *)pvpriv;
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
 
-  DEBUGASSERT(pstate != NULL && conn != NULL);
+  DEBUGASSERT(pstate != NULL);
 
-  ninfo("conn: %p flags: %04x\n", conn, flags);
+  ninfo("flags: %04x\n", flags);
 
   /* TCP_DISCONN_EVENTS:
    *   TCP_CLOSE:    The remote host has closed the connection

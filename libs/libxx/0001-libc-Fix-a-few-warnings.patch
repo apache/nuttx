@@ -1,0 +1,43 @@
+From acd7be74ca12f8f08e52d6d80850a9b230109134 Mon Sep 17 00:00:00 2001
+From: YAMAMOTO Takashi <yamamoto@midokura.com>
+Date: Wed, 28 Oct 2020 15:40:16 -0400
+Subject: [PATCH] [libc++] Fix a few warnings
+
+Found during a NuttX porting effort.
+But these changes are not directly relevant to NuttX.
+
+Differential Revision: https://reviews.llvm.org/D90139
+---
+ src/filesystem/operations.cpp | 2 +-
+ src/locale.cpp                | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/filesystem/operations.cpp libcxx/src/filesystem/operations.cpp
+index 95d7d0d9642..788e31b673a 100644
+--- a/src/filesystem/operations.cpp
++++ libcxx/src/filesystem/operations.cpp
+@@ -534,7 +534,7 @@ path __canonical(path const& orig_p, error_code* ec) {
+   ErrorHandler<path> err("canonical", ec, &orig_p, &cwd);
+ 
+   path p = __do_absolute(orig_p, &cwd, ec);
+-#if _POSIX_VERSION >= 200112
++#if defined(_POSIX_VERSION) && _POSIX_VERSION >= 200112
+   std::unique_ptr<char, decltype(&::free)>
+     hold(::realpath(p.c_str(), nullptr), &::free);
+   if (hold.get() == nullptr)
+diff --git a/src/locale.cpp libcxx/src/locale.cpp
+index b9180880e49..02dbb334ff8 100644
+--- a/src/locale.cpp
++++ libcxx/src/locale.cpp
+@@ -1149,7 +1149,7 @@ ctype<char>::__classic_upper_table() _NOEXCEPT
+ {
+     return _LIBCPP_GET_C_LOCALE->__ctype_toupper;
+ }
+-#elif __NetBSD__
++#elif defined(__NetBSD__)
+ const short*
+ ctype<char>::__classic_lower_table() _NOEXCEPT
+ {
+-- 
+2.17.1
+

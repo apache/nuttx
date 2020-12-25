@@ -26,7 +26,7 @@
 #include <sched.h>
 #include "sched/sched.h"
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 
 /****************************************************************************
  * Public Functions
@@ -62,4 +62,4 @@ FAR struct streamlist *nxsched_get_streams(void)
 #endif
 }
 
-#endif /* CONFIG_NFILE_STREAMS */
+#endif /* CONFIG_FILE_STREAM */

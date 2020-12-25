@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -217,7 +218,7 @@ struct stm32f7_sai_s
   uint32_t samplerate;         /* Data sample rate */
   uint8_t rxenab:1;            /* True: RX transfers enabled */
   uint8_t txenab:1;            /* True: TX transfers enabled */
-  WDOG_ID dog;                 /* Watchdog that handles timeouts */
+  struct wdog_s dog;           /* Watchdog that handles timeouts */
   sq_queue_t pend;             /* A queue of pending transfers */
   sq_queue_t act;              /* A queue of active transfers */
   sq_queue_t done;             /* A queue of completed transfers */
@@ -236,10 +237,8 @@ struct stm32f7_sai_s
 
 #ifdef CONFIG_DEBUG_I2S_INFO
 static void     sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg);
-static void     rcc_dump_regs(const char *msg);
 #else
 #  define       sai_dump_regs(s,m)
-#  define       rcc_dump_regs(m)
 #endif
 
 /* Semaphore helpers */
@@ -705,51 +704,6 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
 #endif
 
 /****************************************************************************
- * Name: rcc_dump_regs
- *
- * Description:
- *   Dump the contents of all rcc block registers
- *
- * Input Parameters:
- *   msg - Message to print before the register data
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_I2S_INFO
-static void rcc_dump_regs(const char *msg)
-{
-  if (msg)
-    {
-      i2sinfo("%s\n", msg);
-    }
-
-#if 0
-  /* RCC_PLLSAICFGR */
-
-  uint32_t pll_sai_cfgr = getreg32(STM32_RCC_PLLSAICFGR);
-  i2sinfo("PLLSAICFGR = %08x\n", pll_sai_cfgr);
-
-  uint32_t pllsain = (pll_sai_cfgr & RCC_PLLSAICFGR_PLLSAIN_MASK) >>
-                      RCC_PLLSAICFGR_PLLSAIN_SHIFT;
-  i2sinfo("\t\tPLLSAICFGR PLLSAIN[14:6] = %d\n", pllsain);
-  uint32_t pllsaip = (pll_sai_cfgr & RCC_PLLSAICFGR_PLLSAIP_MASK) >>
-                      RCC_PLLSAICFGR_PLLSAIP_SHIFT;
-  i2sinfo("\t\tPLLSAICFGR PLLSAIP[17:16] = %d\n", pllsaip);
-  uint32_t pllsaiq = (pll_sai_cfgr & RCC_PLLSAICFGR_PLLSAIQ_MASK) >>
-                      RCC_PLLSAICFGQ_PLLSAIP_SHIFT;
-  i2sinfo("\t\tPLLSAICFGR PLLSAIQ[27:24] = %d\n", pllsaiq);
-
-  uint32_t pllsair = (pll_sai_cfgr & RCC_PLLSAICFGR_PLLSAIR_MASK) >>
-                      RCC_PLLSAICFGR_PLLSAIP_SHIFT;
-  i2sinfo("\t\tPLLSAICFGR PLLSAIR[30:28] = %d\n", pllsair);
-#endif
-}
-#endif
-
-/****************************************************************************
  * Name: sai_exclsem_take
  *
  * Description:
@@ -832,8 +786,7 @@ static void sai_mckdivider(struct stm32f7_sai_s *priv)
  *   The watchdog timeout without completion of the transfer.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -843,7 +796,7 @@ static void sai_mckdivider(struct stm32f7_sai_s *priv)
  *
  ****************************************************************************/
 
-static void sai_timeout(int argc, uint32_t arg, ...)
+static void sai_timeout(wdparm_t arg)
 {
   struct stm32f7_sai_s *priv = (struct stm32f7_sai_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -988,8 +941,8 @@ static int sai_dma_setup(struct stm32f7_sai_s *priv)
 
   if (bfcontainer->timeout > 0)
     {
-      ret = wd_start(priv->dog, bfcontainer->timeout, sai_timeout,
-                     1, (uint32_t)priv);
+      ret = wd_start(&priv->dog, bfcontainer->timeout,
+                     sai_timeout, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We
@@ -1170,7 +1123,7 @@ static void sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->dog);
+  wd_cancel(&priv->dog);
 
   /* Then schedule completion of the transfer to occur on the worker thread */
 
@@ -1302,7 +1255,7 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   int ret;
 
   DEBUGASSERT(priv && apb);
-  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%" PRId32 "\n",
           apb, apb->nbytes - apb->curbyte, arg, timeout);
 
   /* Allocate a buffer container in advance */
@@ -1402,7 +1355,7 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   int ret;
 
   DEBUGASSERT(priv && apb);
-  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%" PRId32 "\n",
           apb, apb->nbytes - apb->curbyte, arg, timeout);
 
   /* Allocate a buffer container in advance */
@@ -1623,11 +1576,6 @@ static void sai_portinitialize(struct stm32f7_sai_s *priv)
   sai_dump_regs(priv, "Before initialization");
 
   nxsem_init(&priv->exclsem, 0, 1);
-
-  /* Create a watchdog timer to catch transfer timeouts */
-
-  priv->dog = wd_create();
-  DEBUGASSERT(priv->dog);
 
   /* Initialize buffering */
 

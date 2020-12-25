@@ -55,7 +55,7 @@
  *
  ****************************************************************************/
 
-int wd_cancel(WDOG_ID wdog)
+int wd_cancel(FAR struct wdog_s *wdog)
 {
   FAR struct wdog_s *curr;
   FAR struct wdog_s *prev;

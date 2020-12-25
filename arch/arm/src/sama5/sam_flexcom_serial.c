@@ -486,7 +486,9 @@ static inline void flexus_serialout(struct flexus_dev_s *priv, int offset,
 static inline void flexus_restoreusartint(struct flexus_dev_s *priv,
                                           uint32_t imr)
 {
-  /* Restore the previous interrupt state (assuming all interrupts disabled) */
+  /* Restore the previous interrupt state (assuming all interrupts
+   * disabled)
+   */
 
   flexus_serialout(priv, SAM_FLEXUS_IER_OFFSET, imr);
 }
@@ -547,7 +549,9 @@ static int flexus_interrupt(int irq, void *context, FAR void *arg)
     {
       handled = false;
 
-      /* Get the UART/USART status (we are only interested in the unmasked interrupts). */
+      /* Get the UART/USART status (we are only interested in the unmasked
+       * interrupts).
+       */
 
       priv->sr = flexus_serialin(priv, SAM_FLEXUS_CSR_OFFSET); /* Save for error reporting */
       imr      = flexus_serialin(priv, SAM_FLEXUS_IMR_OFFSET); /* Interrupt mask */
@@ -820,10 +824,6 @@ static int flexus_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        /* Return baud */
-
-        cfsetispeed(termiosp, priv->baud);
-
         /* Return parity */
 
         termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
@@ -838,6 +838,10 @@ static int flexus_ioctl(struct file *filep, int cmd, unsigned long arg)
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
         termiosp->c_cflag |= (priv->flowc) ? (CCTS_OFLOW | CRTS_IFLOW): 0;
 #endif
+        /* Return baud */
+
+        cfsetispeed(termiosp, priv->baud);
+
         /* Return number of bits */
 
         switch (priv->bits)

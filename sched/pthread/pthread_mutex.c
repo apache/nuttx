@@ -57,30 +57,16 @@
 static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
 {
   FAR struct tcb_s *rtcb = this_task();
+  irqstate_t flags;
 
   DEBUGASSERT(mutex->flink == NULL);
 
-  /* Check if this is a pthread.  The main thread may also lock and unlock
-   * mutexes.  The main thread, however, does not participate in the mutex
-   * consistency logic.  Presumably, when the main thread exits, all of the
-   * child pthreads will also terminate.
-   *
-   * REVISIT:  NuttX does not support that behavior at present; child
-   * pthreads will persist after the main thread exits.
-   */
+  /* Add the mutex to the list of mutexes held by this pthread */
 
-  if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
-    {
-      FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)rtcb;
-      irqstate_t flags;
-
-      /* Add the mutex to the list of mutexes held by this pthread */
-
-      flags        = enter_critical_section();
-      mutex->flink = ptcb->mhead;
-      ptcb->mhead  = mutex;
-      leave_critical_section(flags);
-    }
+  flags        = enter_critical_section();
+  mutex->flink = rtcb->mhead;
+  rtcb->mhead  = mutex;
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -100,47 +86,37 @@ static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
 static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
 {
   FAR struct tcb_s *rtcb = this_task();
+  FAR struct pthread_mutex_s *curr;
+  FAR struct pthread_mutex_s *prev;
+  irqstate_t flags;
 
-  /* Check if this is a pthread.  The main thread may also lock and unlock
-   * mutexes.  The main thread, however, does not participate in the mutex
-   * consistency logic.
+  flags = enter_critical_section();
+
+  /* Remove the mutex from the list of mutexes held by this task */
+
+  for (prev = NULL, curr = rtcb->mhead;
+       curr != NULL && curr != mutex;
+       prev = curr, curr = curr->flink)
+    {
+    }
+
+  DEBUGASSERT(curr == mutex);
+
+  /* Remove the mutex from the list.  prev == NULL means that the mutex
+   * to be removed is at the head of the list.
    */
 
-  if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+  if (prev == NULL)
     {
-      FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)rtcb;
-      FAR struct pthread_mutex_s *curr;
-      FAR struct pthread_mutex_s *prev;
-      irqstate_t flags;
-
-      flags = enter_critical_section();
-
-      /* Remove the mutex from the list of mutexes held by this task */
-
-      for (prev = NULL, curr = ptcb->mhead;
-           curr != NULL && curr != mutex;
-           prev = curr, curr = curr->flink)
-        {
-        }
-
-      DEBUGASSERT(curr == mutex);
-
-      /* Remove the mutex from the list.  prev == NULL means that the mutex
-       * to be removed is at the head of the list.
-       */
-
-      if (prev == NULL)
-        {
-          ptcb->mhead = mutex->flink;
-        }
-      else
-        {
-          prev->flink = mutex->flink;
-        }
-
-      mutex->flink = NULL;
-      leave_critical_section(flags);
+      rtcb->mhead = mutex->flink;
     }
+  else
+    {
+      prev->flink = mutex->flink;
+    }
+
+  mutex->flink = NULL;
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

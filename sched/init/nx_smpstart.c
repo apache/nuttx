@@ -87,32 +87,6 @@ void nx_idle_trampoline(void)
   sched_note_start(tcb);
 #endif
 
-  /* Then transfer control to the IDLE task */
-
-  nx_idle_task(0, NULL);
-
-  /* The IDLE task should never return */
-
-  DEBUGPANIC();
-}
-
-/****************************************************************************
- * Name: nx_idle_task
- *
- * Description:
- *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
- *   It is equivalent to the CPU 0 IDLE logic in nx_start.c
- *
- * Input Parameters:
- *   Standard task arguments.
- *
- * Returned Value:
- *   This function does not return.
- *
- ****************************************************************************/
-
-int nx_idle_task(int argc, FAR char *argv[])
-{
   /* Enter the IDLE loop */
 
   sinfo("CPU%d: Beginning Idle Loop\n", this_cpu());
@@ -168,11 +142,7 @@ int nx_smp_start(void)
           return ret;
         }
 
-      /* Reinitialize the processor-specific portion of the TCB.  This is
-       * the second time this has been called for this CPU, but the stack
-       * was not yet initialized on the first call so we need to do it
-       * again.
-       */
+      /* Initialize the processor-specific portion of the TCB */
 
       up_initial_state(tcb);
     }

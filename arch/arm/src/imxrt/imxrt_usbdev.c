@@ -257,7 +257,9 @@ struct imxrt_dtd_s
 #define DTD_CONFIG_BUFFER_ERROR      (1 << 5)    /* Bit 6      : Status Buffer Error */
 #define DTD_CONFIG_TRANSACTION_ERROR (1 << 3)    /* Bit 3      : Status Transaction Error */
 
-/* This represents a queue head  - not these must be aligned to a 2048 byte boundary */
+/* This represents a queue head  - not these must be aligned to a 2048 byte
+ * boundary
+ */
 
 struct imxrt_dqh_s
 {
@@ -313,7 +315,9 @@ struct imxrt_dqh_s
 #define IMXRT_INTRMAXPACKET          (1024)       /* Interrupt endpoint max packet (1 to 1024) */
 #define IMXRT_ISOCMAXPACKET          (512)        /* Acutally 1..1023 */
 
-/* Endpoint bit position in SETUPSTAT, PRIME, FLUSH, STAT, COMPLETE registers */
+/* Endpoint bit position in SETUPSTAT, PRIME, FLUSH, STAT, COMPLETE
+ * registers
+ */
 
 #define IMXRT_ENDPTSHIFT(epphy)      (IMXRT_EPPHYIN(epphy) ? (16 + ((epphy) >> 1)) : ((epphy) >> 1))
 #define IMXRT_ENDPTMASK(epphy)       (1 << IMXRT_ENDPTSHIFT(epphy))
@@ -1180,7 +1184,9 @@ static void imxrt_usbreset(struct imxrt_usbdev_s *priv)
   imxrt_putreg (imxrt_getreg(IMXRT_USBDEV_ENDPTCOMPLETE),
                 IMXRT_USBDEV_ENDPTCOMPLETE);
 
-  /* Wait for all prime operations to have completed and then flush all DTDs */
+  /* Wait for all prime operations to have completed and then flush all
+   * DTDs
+   */
 
   while (imxrt_getreg (IMXRT_USBDEV_ENDPTPRIME) != 0)
     ;
@@ -1857,13 +1863,17 @@ bool imxrt_epcomplete(struct imxrt_usbdev_s *priv, uint8_t epphy)
   bool complete = true;
   if (IMXRT_EPPHYOUT(privep->epphy))
     {
-      /* read(OUT) completes when request filled, or a short transfer is received */
+      /* read(OUT) completes when request filled, or a short transfer is
+       * received
+       */
 
       usbtrace(TRACE_INTDECODE(IMXRT_TRACEINTID_EPIN), complete);
     }
   else
     {
-      /* write(IN) completes when request finished, unless we need to terminate with a ZLP */
+      /* write(IN) completes when request finished, unless we need to
+       * terminate with a ZLP
+       */
 
       bool need_zlp = (xfrd == privep->ep.maxpacket) &&
           ((privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0);
@@ -1873,7 +1883,9 @@ bool imxrt_epcomplete(struct imxrt_usbdev_s *priv, uint8_t epphy)
       usbtrace(TRACE_INTDECODE(IMXRT_TRACEINTID_EPOUT), complete);
     }
 
-  /* If the transfer is complete, then dequeue and progress any further queued requests */
+  /* If the transfer is complete, then dequeue and progress any further
+   * queued requests
+   */
 
   if (complete)
     {
@@ -1885,7 +1897,9 @@ bool imxrt_epcomplete(struct imxrt_usbdev_s *priv, uint8_t epphy)
       imxrt_progressep(privep);
     }
 
-  /* Now it's safe to call the completion callback as it may well submit a new request */
+  /* Now it's safe to call the completion callback as it may well submit a
+   * new request
+   */
 
   if (complete)
     {
@@ -2049,7 +2063,9 @@ static int imxrt_usbinterrupt(int irq, FAR void *context, FAR void *arg)
       uint32_t setupstat = imxrt_getreg(IMXRT_USBDEV_ENDPTSETUPSTAT);
       if (setupstat)
         {
-          /* Clear the endpoint complete CTRL OUT and IN when a Setup is received */
+          /* Clear the endpoint complete CTRL OUT and IN when a Setup is
+           * received
+           */
 
           imxrt_putreg(IMXRT_ENDPTMASK(IMXRT_EP0_IN) |
                        IMXRT_ENDPTMASK(IMXRT_EP0_OUT),
@@ -2105,9 +2121,9 @@ static int imxrt_usbinterrupt(int irq, FAR void *context, FAR void *arg)
  * Input Parameters:
  *   ep   - the struct usbdev_ep_s instance obtained from allocep()
  *   desc - A struct usb_epdesc_s instance describing the endpoint
- *   last - true if this this last endpoint to be configured.  Some hardware
- *          needs to take special action when all of the endpoints have been
- *          configured.
+ *   last - true if this is the last endpoint to be configured.  Some
+ *          hardware needs to take special action when all of the endpoints
+ *          have been configured.
  *
  ****************************************************************************/
 
@@ -2623,7 +2639,9 @@ static FAR struct usbdev_ep_s *imxrt_allocep(FAR struct usbdev_s *dev,
       epset &= priv->epavail;
       if (epset)
         {
-          /* Select the lowest bit in the set of matching, available endpoints */
+          /* Select the lowest bit in the set of matching, available
+           * endpoints
+           */
 
           for (epndx = 2; epndx < IMXRT_NPHYSENDPOINTS; epndx++)
             {
@@ -2635,7 +2653,9 @@ static FAR struct usbdev_ep_s *imxrt_allocep(FAR struct usbdev_s *dev,
                   priv->epavail &= ~bit;
                   leave_critical_section(flags);
 
-                  /* And return the pointer to the standard endpoint structure */
+                  /* And return the pointer to the standard endpoint
+                   * structure
+                   */
 
                   return &priv->eplist[epndx].ep;
                 }

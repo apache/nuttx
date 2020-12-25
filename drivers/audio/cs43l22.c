@@ -43,6 +43,8 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+#include <math.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -62,7 +64,6 @@
 #include <nuttx/audio/i2s.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/cs43l22.h>
-#include <nuttx/lib/math.h>
 
 #include "cs43l22.h"
 
@@ -1214,7 +1215,8 @@ static int cs43l22_start(FAR struct audio_lowerhalf_s *dev)
 
   /* Create a message queue for the worker thread */
 
-  snprintf(priv->mqname, sizeof(priv->mqname), "/tmp/%X", priv);
+  snprintf(priv->mqname, sizeof(priv->mqname), "/tmp/%" PRIXPTR,
+           (uintptr_t)priv);
 
   attr.mq_maxmsg  = 16;
   attr.mq_msgsize = sizeof(struct audio_msg_s);
@@ -1449,6 +1451,7 @@ static int cs43l22_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
 static int cs43l22_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
                          unsigned long arg)
 {
+  int ret = OK;
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
   FAR struct ap_buffer_info_s *bufinfo;
 #endif
@@ -1486,11 +1489,12 @@ static int cs43l22_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 #endif
 
       default:
+        ret = -ENOTTY;
         audinfo("Ignored\n");
         break;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -2006,7 +2010,7 @@ FAR struct audio_lowerhalf_s *
 
       /* Initialize I2C */
 
-      audinfo("address=%02x frequency=%d\n",
+      audinfo("address=%02x frequency=%" PRId32 "\n",
               lower->address, lower->frequency);
 
       /* Software reset.  This puts all CS43L22 registers back in their

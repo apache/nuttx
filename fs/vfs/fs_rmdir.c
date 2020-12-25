@@ -37,18 +37,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef FS_HAVE_WRITABLE_MOUNTPOINT
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_STREAMS > 0
-#  define FS_HAVE_WRITABLE_MOUNTPOINT 1
-#endif
-
-#undef FS_HAVE_PSEUDOFS_OPERATIONS
-#if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && CONFIG_NFILE_STREAMS > 0
-#  define FS_HAVE_PSEUDOFS_OPERATIONS 1
-#endif
-
 #undef FS_HAVE_RMDIR
-#if defined(FS_HAVE_WRITABLE_MOUNTPOINT) || defined(FS_HAVE_PSEUDOFS_OPERATIONS)
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
 #  define FS_HAVE_RMDIR 1
 #endif
 

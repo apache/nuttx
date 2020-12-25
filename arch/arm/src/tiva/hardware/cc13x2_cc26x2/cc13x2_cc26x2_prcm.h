@@ -1,10 +1,11 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_prcm.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a compatible BSD
+ * license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,23 +37,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_PRCM_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_PRCM_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* PRCM Register Offsets ****************************************************************************/
+/* PRCM Register Offsets ****************************************************/
 
 #define TIVA_PRCM_INFRCLKDIVR_OFFSET     0x0000  /* Infrastructure Clock Division Factor For Run Mode */
 #define TIVA_PRCM_INFRCLKDIVS_OFFSET     0x0004  /* Infrastructure Clock Division Factor For Sleep Mode */
@@ -126,7 +127,7 @@
 #define TIVA_PRCM_OSCRIS_OFFSET          0x0294  /* Oscillator Raw Interrupt Status */
 #define TIVA_PRCM_OSCICR_OFFSET          0x0298  /* Oscillator Raw Interrupt Clear */
 
-/* PRCM Register Addresses *************************************************************************/
+/* PRCM Register Addresses **************************************************/
 
 #define TIVA_PRCM_INFRCLKDIVR            (TIVA_PRCM_BASE + TIVA_PRCM_INFRCLKDIVR_OFFSET)
 #define TIVA_PRCM_INFRCLKDIVS            (TIVA_PRCM_BASE + TIVA_PRCM_INFRCLKDIVS_OFFSET)
@@ -200,7 +201,7 @@
 #define TIVA_PRCM_OSCRIS                 (TIVA_PRCM_BASE + TIVA_PRCM_OSCRIS_OFFSET)
 #define TIVA_PRCM_OSCICR                 (TIVA_PRCM_BASE + TIVA_PRCM_OSCICR_OFFSET)
 
-/* PRCM Register Bitfield Definitions **************************************************************/
+/* PRCM Register Bitfield Definitions ***************************************/
 
 /* Infrastructure Clock Division Factor For Run Mode */
 
@@ -265,7 +266,9 @@
 #define PRCM_SECDMACLKG_DMA_CLKEN_SHIFT    (8)       /* Bit 8:  Enable DMA clock */
 #define PRCM_SECDMACLKG_DMA_CLKEN          (1 << PRCM_SECDMACLKG_DMA_CLKEN_SHIFT)
 
-/* SEC (PKA And TRNG And CRYPTO) And UDMA Clock Gate For Run And All Modes (only) */
+/* SEC (PKA And TRNG And CRYPTO) And UDMA Clock Gate For Run And All Modes
+ * (only)
+ */
 
 #define PRCM_SECDMACLKGR_CRYPTO_AMCLKEN  (1 << 16) /* Bit 16: Force Crypto clock on all modes */
 #define PRCM_SECDMACLKGR_TRNG_AMCLKEN    (1 << 17) /* Bit 17: Force TRNG clock on all modes */
@@ -416,14 +419,14 @@
 
 /* I2S Clock Control */
 
-#define PRCM_I2SCLKCTL_EN                 (1 << 0)  /* Enable MCLK, BCLK, and WCLK */
-#define PRCM_I2SCLKCTL_WCLKPHASE_SHIFT    1         /* Bits 1-2: Wclock division ration mode */
+#define PRCM_I2SCLKCTL_EN                 (1 << 0)                              /* Enable MCLK, BCLK, and WCLK */
+#define PRCM_I2SCLKCTL_WCLKPHASE_SHIFT    1                                     /* Bits 1-2: Wclock division ration mode */
 #define PRCM_I2SCLKCTL_WCLKPHASE_MASK     (3 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT)
 #  define PRCM_I2SCLKCTL_WCLKPHASE_SINGLE (0 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT) /* Single phase */
 #  define PRCM_I2SCLKCTL_WCLKPHASE_DUAL   (1 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT) /* Dual phase */
 #  define PRCM_I2SCLKCTL_WCLKPHASE_USER   (2 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT) /* User Defined */
-#define PRCM_I2SCLKCTL_POSEDGE            (1 << 3)  /* Bit 3: Sample/clock on positive edge */
-#  define PRCM_I2SCLKCTL_NEGEDGE          (0)       /*        Sample/clock on negative edge */
+#define PRCM_I2SCLKCTL_POSEDGE            (1 << 3)                              /* Bit 3: Sample/clock on positive edge */
+#  define PRCM_I2SCLKCTL_NEGEDGE          (0)                                   /*        Sample/clock on negative edge */
 
 /* MCLK Division Ratio */
 
@@ -621,16 +624,16 @@
 #define PRCM_OSCINT_LFSRCDONE            (1 << 6)  /* Bit 6:  LFSRCDONE interrupt */
 #define PRCM_OSCINT_HFSRCPEND            (1 << 7)  /* Bit 7:  HFSRCPEND interrupt  */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_PRCM_H */

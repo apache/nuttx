@@ -47,8 +47,6 @@ MEMORY
     ddr   (W!RX) : ORIGIN = 0x8a000000, LENGTH = 512M - 160M
 }
 
-OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
-OUTPUT_ARCH(arm)
 ENTRY(entry)
 ENTRY(_stext)
 

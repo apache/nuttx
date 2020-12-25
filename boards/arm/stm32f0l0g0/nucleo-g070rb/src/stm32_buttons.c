@@ -71,13 +71,14 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* Configure the single button as an input.  NOTE that EXTI interrupts are
    * also configured for the pin.
    */
 
   stm32_configgpio(GPIO_BTN_USER);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
@@ -99,8 +100,8 @@ uint32_t board_buttons(void)
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
  *   interrupt handlers.
  *
  *   After board_button_initialize() has been called, board_buttons() may be
@@ -109,9 +110,10 @@ uint32_t board_buttons(void)
  *   BUTTON_*_BIT definitions in board.h for the meaning of each bit.
  *
  *   board_button_irq() may be called to register an interrupt handler that
- *   will be called when a button is depressed or released.  The ID value is a
+ *   will be called when a button is depressed or released. The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See
- *   the BUTTON_* definitions in board.h for the meaning of enumeration value.
+ *   the BUTTON_* definitions in board.h for the meaning of enumeration
+ *   value.
  *
  ****************************************************************************/
 

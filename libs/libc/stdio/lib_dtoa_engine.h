@@ -40,11 +40,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <math.h>
 #include <stdint.h>
 #include <float.h>
-
-#include <nuttx/lib/float.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -178,15 +176,15 @@ struct dtoa_s
  * Public Data
  ****************************************************************************/
 
-extern const double_t g_dtoa_scale_up[];
-extern const double_t g_dtoa_scale_down[];
-extern const double_t g_dtoa_round[];
+extern const double g_dtoa_scale_up[];
+extern const double g_dtoa_scale_down[];
+extern const double g_dtoa_round[];
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-int __dtoa_engine(double_t x, FAR struct dtoa_s *dtoa, int max_digits,
+int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
                   int max_decimals);
 
 #endif /* __LIBS_LIBC_STDIO_LIB_DTOA_ENGINE_H */

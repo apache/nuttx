@@ -99,7 +99,7 @@ int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
                             start_t start, pthread_startroutine_t entry);
 
 #ifdef CONFIG_PTHREAD_CLEANUP
-void pthread_cleanup_popall(FAR struct pthread_tcb_s *tcb);
+void pthread_cleanup_popall(FAR struct tcb_s *tcb);
 #endif
 
 int pthread_completejoin(pid_t pid, FAR void *exit_value);
@@ -121,7 +121,7 @@ int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
                        FAR const struct timespec *abs_timeout, bool intr);
 int pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex);
 int pthread_mutex_give(FAR struct pthread_mutex_s *mutex);
-void pthread_mutex_inconsistent(FAR struct pthread_tcb_s *tcb);
+void pthread_mutex_inconsistent(FAR struct tcb_s *tcb);
 #else
 #  define pthread_mutex_take(m,abs_timeout,i)  pthread_sem_take(&(m)->sem,(abs_timeout),(i))
 #  define pthread_mutex_trytake(m)             pthread_sem_trytake(&(m)->sem)

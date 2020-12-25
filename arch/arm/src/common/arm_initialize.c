@@ -28,12 +28,12 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/sched_note.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
+#include <nuttx/note/note_driver.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
@@ -62,13 +62,17 @@
 static inline void up_color_intstack(void)
 {
 #ifdef CONFIG_SMP
-  uint32_t *ptr = (uint32_t *)arm_intstack_base();
+  uint32_t *ptr = (uint32_t *)arm_intstack_alloc();
 #else
   uint32_t *ptr = (uint32_t *)&g_intstackalloc;
 #endif
   ssize_t size;
 
+#ifdef CONFIG_SMP
+  for (size = ((CONFIG_ARCH_INTERRUPTSTACK & ~3) * CONFIG_SMP_NCPUS);
+#else
   for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+#endif
        size > 0;
        size -= sizeof(uint32_t))
     {
@@ -159,8 +163,7 @@ void up_initialize(void)
   loop_register();      /* Standard /dev/loop */
 #endif
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_DRIVER_NOTE)
+#if defined(CONFIG_DRIVER_NOTE)
   note_register();      /* Non-standard /dev/note */
 #endif
 

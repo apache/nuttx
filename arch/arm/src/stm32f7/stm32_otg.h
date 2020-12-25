@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/stm32_otg.h
  *
  *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_STM32_OTG_H
 #define __ARCH_ARM_SRC_STM32F7_STM32_OTG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,11 +49,11 @@
 
 #if defined(CONFIG_STM32F7_OTGFS) || defined(CONFIG_STM32F7_OTGFSHS)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_OTG_PRI
 #  define CONFIG_OTG_PRI NVIC_SYSH_PRIORITY_DEFAULT
@@ -83,9 +83,9 @@
 #  define STM32_OTG_FIFO_SIZE   4096
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -105,9 +105,9 @@ extern "C"
  *   Initialize USB host device controller hardware.
  *
  * Input Parameters:
- *   controller -- If the device supports more than USB host controller, then
- *     this identifies which controller is being initializeed.  Normally, this
- *     is just zero.
+ *   controller -- If the device supports more than USB host controller,
+ *     then this identifies which controller is being initialized.
+ *     Normally, this is just zero.
  *
  * Returned Value:
  *   And instance of the USB host interface.  The controlling task should
@@ -128,17 +128,18 @@ struct usbhost_connection_s;
 FAR struct usbhost_connection_s *stm32_otghost_initialize(int controller);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32_usbsuspend logic if the OTG FS device driver
- *   is used.  This function is called whenever the USB enters or leaves suspend
- *   mode. This is an opportunity for the board logic to shutdown clocks, power,
- *   etc. while the USB is suspended.
+ *   Board logic must provide the stm32_usbsuspend logic if the OTG FS
+ *   device driver is used.  This function is called whenever the USB enters
+ *   or leaves suspend mode. This is an opportunity for the board logic to
+ *   shutdown clocks, power, etc. while the USB is suspended.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
+struct usbdev_s;
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 
 #undef EXTERN

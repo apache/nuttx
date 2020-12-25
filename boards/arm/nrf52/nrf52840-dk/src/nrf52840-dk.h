@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/nrf52/nrf52840-dk/src/nrf52840-dk.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -88,7 +73,7 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -120,7 +105,7 @@ int nrf52_bringup(void);
 void nrf52_spidev_initialize(void);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: nrf52_lsm6dsl_initialize
  *
  * Description:
@@ -132,7 +117,7 @@ void nrf52_spidev_initialize(void);
 int nrf52_lsm6dsl_initialize(char *devpath);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: nrf52_lsm303agr_initialize
  *
  * Description:
@@ -144,7 +129,7 @@ int nrf52_lsm6dsl_initialize(char *devpath);
 int nrf52_lsm303agr_initialize(char *devpath);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: nrf52_hts221_initialize
  *
  * Description:
@@ -156,15 +141,52 @@ int nrf52_lsm303agr_initialize(char *devpath);
 int nrf52_hts221_initialize(char *devpath);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: nrf52_lpwaninitialize
  *
  * Description:
  *   Initialize SX127X LPWAN interaface.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_LPWAN_SX127X
 int nrf52_lpwaninitialize(void);
+#endif
+
+/****************************************************************************
+ * Name: nrf52_timer_driver_setup
+ *
+ * Description:
+ *   Initialize TIMER driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIMER
+int nrf52_timer_driver_setup(FAR const char *devpath, int timer);
+#endif
+
+/****************************************************************************
+ * Name: nrf52_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int nrf52_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: nrf52_adc_setup
+ *
+ * Description:
+ *   Initialize ADC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int nrf52_adc_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

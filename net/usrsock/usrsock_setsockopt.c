@@ -107,8 +107,8 @@ static uint16_t setsockopt_event(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
-                                 int level, int option, FAR const void *value,
-                                 socklen_t value_len)
+                                 int level, int option,
+                                 FAR const void *value, socklen_t value_len)
 {
   struct usrsock_request_setsockopt_s req =
   {
@@ -157,8 +157,7 @@ static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
  * Description:
  *   psock_setsockopt() sets the option specified by the 'option' argument,
  *   at the protocol level specified by the 'level' argument, to the value
- *   pointed to by the 'value' argument for the socket on the 'psock'
- *   argument.
+ *   pointed to by the 'value' argument for the usrsock connection.
  *
  *   The 'level' argument specifies the protocol level of the option. To set
  *   options at the socket level, specify the level argument as SOL_SOCKET.
@@ -174,7 +173,8 @@ static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
  *
  ****************************************************************************/
 
-int usrsock_setsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
+int usrsock_setsockopt(FAR struct usrsock_conn_s *conn,
+                       int level, int option,
                        FAR const void *value, FAR socklen_t value_len)
 {
   struct usrsock_reqstate_s state =
@@ -192,7 +192,7 @@ int usrsock_setsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
     {
       /* Invalid state or closed by daemon. */
 
-      ninfo("usockid=%d; connect() with uninitialized usrsock.\n",
+      ninfo("usockid=%d; setsockopt() with uninitialized usrsock.\n",
             conn->usockid);
 
       ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
@@ -211,7 +211,7 @@ int usrsock_setsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
       goto errout_unlock;
     }
 
-  /* Request user-space daemon to close socket. */
+  /* Request user-space daemon to handle request. */
 
   ret = do_setsockopt_request(conn, level, option, value, value_len);
   if (ret >= 0)

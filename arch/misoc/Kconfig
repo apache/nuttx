@@ -21,6 +21,12 @@ config ARCH_CHIP_MINERVA
 	---help---
 		LambdaConcept MINERVAL Chip Selected
 
+config ARCH_CHIP_MISOC_CUSTOM
+	bool "Custom MISOC chip"
+	select ARCH_CHIP_CUSTOM
+	---help---
+		Select this option if there is no directory for the chip under arch/misoc/src/.
+
 endchoice # Misoc Chip Selection
 
 config ARCH_CHIP

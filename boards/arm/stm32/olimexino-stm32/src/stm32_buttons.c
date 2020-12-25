@@ -79,15 +79,16 @@
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
  *   interrupt handlers.
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
-  stm32_configgpio(BUTTON_BOOT0n);
+  stm32_configgpio(BUTTON_BOOT0N);
+  return 1;
 }
 
 /****************************************************************************
@@ -104,7 +105,7 @@ void board_button_initialize(void)
 
 uint32_t board_buttons(void)
 {
-  return stm32_gpioread(BUTTON_BOOT0n) ? 0 : BUTTON_BOOT0_MASK;
+  return stm32_gpioread(BUTTON_BOOT0N) ? 0 : BUTTON_BOOT0_MASK;
 }
 
 /****************************************************************************
@@ -129,8 +130,8 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
   if (id == IRQBUTTON)
     {
-      ret = stm32_gpiosetevent(BUTTON_BOOT0n, true, true, true, irqhandler,
-                               arg);
+      ret = stm32_gpiosetevent(BUTTON_BOOT0N, true, true, true,
+                               irqhandler, arg);
     }
 
   return ret;

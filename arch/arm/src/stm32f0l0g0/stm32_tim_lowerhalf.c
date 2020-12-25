@@ -47,6 +47,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
@@ -206,7 +207,6 @@ static struct stm32_lowerhalf_s g_tim8_lowerhalf =
 };
 #endif
 
-
 #ifdef CONFIG_STM32F0L0G0_TIM12
 static struct stm32_lowerhalf_s g_tim12_lowerhalf =
 {
@@ -300,8 +300,8 @@ static int stm32_timer_handler(int irq, void * context, void * arg)
  *   Start the timer, resetting the time to the current timeout,
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -340,8 +340,8 @@ static int stm32_start(FAR struct timer_lowerhalf_s *lower)
  *   Stop the timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -407,6 +407,7 @@ static int stm32_getstatus(FAR struct timer_lowerhalf_s *lower,
     }
 
   /* Get timeout */
+
   clock      = STM32_TIM_GETCLOCK(priv->tim);
   period     = STM32_TIM_GETPERIOD(priv->tim);
 
@@ -422,10 +423,11 @@ static int stm32_getstatus(FAR struct timer_lowerhalf_s *lower,
   status->timeout = timeout;
 
   /* Get the time remaining until the timer expires (in microseconds) */
+
   counter    = STM32_TIM_GETCOUNTER(priv->tim);
   status->timeleft = ((uint64_t) (timeout - counter) * clock) / 1000000;
-  tmrinfo("timeout=%u counter=%u\n", timeout, counter);
-  tmrinfo("timeleft=%u\n", status->timeleft);
+  tmrinfo("timeout=%" PRIu32 " counter=%" PRIu32 "\n", timeout, counter);
+  tmrinfo("timeleft=%" PRIu32 "\n", status->timeleft);
   return OK;
 }
 
@@ -458,7 +460,7 @@ static int stm32_settimeout(FAR struct timer_lowerhalf_s *lower,
       return -EPERM;
     }
 
-  tmrinfo("Set timeout=%d\n", timeout);
+  tmrinfo("Set timeout=%" PRId32 "\n", timeout);
 
   maxtimeout = ((uint64_t)1 << priv->resolution) - 1;
   if (timeout > maxtimeout)
@@ -473,7 +475,8 @@ static int stm32_settimeout(FAR struct timer_lowerhalf_s *lower,
       period = (uint32_t) timeout;
     }
 
-  tmrinfo("  clock=%lu period=%lu maxtimeout=%lu\n", clock, period, (uint32_t) maxtimeout);
+  tmrinfo("  clock=%lu period=%lu maxtimeout=%lu\n", clock, period,
+          (uint32_t)maxtimeout);
   STM32_TIM_SETCLOCK(priv->tim, clock);
   STM32_TIM_SETPERIOD(priv->tim, period);
 
@@ -487,8 +490,8 @@ static int stm32_settimeout(FAR struct timer_lowerhalf_s *lower,
  *   Call this user provided timeout callback.
  *
  * Input Parameters:
- *   lower      - A pointer the publicly visible representation of the "lower-
- *                half" driver state structure.
+ *   lower      - A pointer the publicly visible representation of the
+ *                "lower-half" driver state structure.
  *   callback - The new timer expiration function pointer.  If this
  *                function pointer is NULL, then the reset-on-expiration
  *                behavior is restored,
@@ -627,7 +630,7 @@ int stm32_timer_initialize(FAR const char *devpath, int timer)
         break;
 #endif
       default:
-        return -ENODEV;;
+        return -ENODEV;
     }
 
   /* Initialize the elements of lower half state structure */

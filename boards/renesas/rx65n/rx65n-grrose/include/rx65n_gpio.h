@@ -32,7 +32,7 @@
   #define PHY_STS_REG_LINK             (1 << 0)
   #define PHY_STS_READ_REG             PHY_STS_REG
   #define PHY_STS_BIT_MASK             (0x1)
-  #define PHY_STS_SHIFT_COUNT          (0x0)	
+  #define PHY_STS_SHIFT_COUNT          (0x0)
 #endif
 
 #if defined(CONFIG_ARCH_RX65N_GRROSE)
@@ -48,6 +48,12 @@
   #define RX65N_MAC_ADDRL 0x00000000
   #define RX65N_MAC_ADDRH 0x00000000
 #endif
+
+/* RSPI channel number */
+
+#define RX65N_RSPI_CHANNEL0 0
+#define RX65N_RSPI_CHANNEL1 1
+#define RX65N_RSPI_CHANNEL2 2
 
 /****************************************************************************
  * Public Function Prototypes
@@ -101,6 +107,24 @@ void led_port_create(void);
 
 #ifdef CONFIG_RX65N_EMAC0
 void r_ether_pheriperal_enable(void);
+#endif
+
+/****************************************************************************
+ * Name: r_usbdev_port_enable
+ *
+ * Description:
+ *   USB device port settings
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV
+void r_usbdev_port_enable(void);
 #endif
 
 /****************************************************************************
@@ -227,6 +251,76 @@ void sci6_init_port(void);
 
 #ifdef CONFIG_RX65N_SCI8
 void sci8_init_port(void);
+#endif
+
+/****************************************************************************
+ * Name: rspi_pinconfig
+ *
+ * Description: RSPI pinconfiguration for channel
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple SPI interfaces)
+ *
+ * Description:
+ *RSPI pin(SCK,MOSI and MISO) configuration
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RSPI
+  void rspi_pinconfig(int bus);
+#endif
+
+/****************************************************************************
+ * Name: riic0_init_port
+ *
+ * Description:
+ *   RIIC0 Initialization RX65N GRROSE
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC0
+void riic0_init_port(void);
+#endif
+
+/****************************************************************************
+ * Name: riic1_init_port
+ *
+ * Description:
+ *   RIIC1 Initialization RX65N GRROSE
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC1
+void riic1_init_port(void);
+#endif
+
+/****************************************************************************
+ * Name: riic2_init_port
+ *
+ * Description:
+ *   RIIC2 Initialization RX65N GRROSE
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC2
+void riic2_init_port(void);
 #endif
 #endif /* __BOARDS_RENESAS_RX65N_RX65N_GRROSE_INCLUDE_RX65N_GPIO_H */
 

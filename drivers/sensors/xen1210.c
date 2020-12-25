@@ -44,6 +44,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <debug.h>
+#include <inttypes.h>
 #include <stdio.h>
 
 #include <nuttx/kmalloc.h>
@@ -180,9 +181,9 @@ static ssize_t xen1210_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
-  sninfo("X = 0x%06X\n", priv->sample.data_x);
-  sninfo("Y = 0x%06X\n", priv->sample.data_y);
-  sninfo("Z = 0x%06X\n", priv->sample.data_z);
+  sninfo("X = 0x%06" PRIX32 "\n", priv->sample.data_x);
+  sninfo("Y = 0x%06" PRIX32 "\n", priv->sample.data_y);
+  sninfo("Z = 0x%06" PRIX32 "\n", priv->sample.data_z);
 
   /* Return read sample */
 
@@ -289,7 +290,8 @@ XEN1210_HANDLE xen1210_instantiate(FAR struct spi_dev_s *dev,
 
   /* Allocate the XEN1210 driver instance */
 
-  priv = (FAR struct xen1210_dev_s *)kmm_zalloc(sizeof(struct xen1210_dev_s));
+  priv = (FAR struct xen1210_dev_s *)
+         kmm_zalloc(sizeof(struct xen1210_dev_s));
   if (!priv)
     {
       snerr("ERROR: Failed to allocate the device structure!\n");

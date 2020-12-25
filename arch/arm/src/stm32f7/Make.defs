@@ -133,6 +133,10 @@ ifeq ($(CONFIG_STM32F7_DMA),y)
 CHIP_CSRCS += stm32_dma.c
 endif
 
+ifeq ($(CONFIG_STM32F7_FMC),y)
+CHIP_CSRCS += stm32_fmc.c
+endif
+
 ifeq ($(CONFIG_PM),y)
 CHIP_CSRCS += stm32_pmstandby.c stm32_pmstop.c stm32_pmsleep.c
 ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)

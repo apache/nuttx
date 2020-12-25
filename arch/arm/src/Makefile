@@ -35,7 +35,7 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
-include chip/Make.defs
+-include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_ARMV7A),y)          # ARMv7-A
 ARCH_SUBDIR = armv7-a
@@ -45,7 +45,7 @@ else ifeq ($(CONFIG_ARCH_ARMV7M),y)     # ARMv7-M
 ARCH_SUBDIR = armv7-m
 else ifeq ($(CONFIG_ARCH_ARMV8M),y)     # ARMv8-M
 ARCH_SUBDIR = armv8-m
-else ifeq ($(CONFIG_ARCH_CORTEXM0),y)   # Cortex-M0 is ARMv6-M
+else ifeq ($(CONFIG_ARCH_ARMV6M),y)     # ARMv6-M
 ARCH_SUBDIR = armv6-m
 else                                    # ARM9, ARM7TDMI, etc.
 ARCH_SUBDIR = arm
@@ -58,15 +58,21 @@ INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)common}
 INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)$(ARCH_SUBDIR)}
 INCLUDES += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
 
-CPPFLAGS += $(INCLUDES) $(EXTRAFLAGS)
-CFLAGS += $(INCLUDES) $(EXTRAFLAGS)
-CXXFLAGS += $(INCLUDES) $(EXTRAFLAGS)
-AFLAGS += $(INCLUDES) $(EXTRAFLAGS)
+CPPFLAGS += $(INCLUDES)
+CFLAGS += $(INCLUDES)
+CXXFLAGS += $(INCLUDES)
+AFLAGS += $(INCLUDES)
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   NUTTX = "${shell cygpath -w $(TOPDIR)$(DELIM)nuttx$(EXEEXT)}"
 else
   NUTTX = "$(TOPDIR)$(DELIM)nuttx$(EXEEXT)"
+endif
+
+# Additional rules for system call wrapper
+
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION_SYSCALL),y)
+  EXTRALINKCMDS += @$(TOPDIR)/syscall/syscall_wraps.ldcmd
 endif
 
 # The "head" object
@@ -99,7 +105,7 @@ UOBJS = $(UAOBJS) $(UCOBJS)
 KBIN = libkarch$(LIBEXT)
 BIN  = libarch$(LIBEXT)
 
-LDFLAGS += $(ARCHSCRIPT)
+LDFLAGS += $(ARCHSCRIPT) $(EXTRALINKCMDS)
 
 # Override in Make.defs if linker is not 'ld'
 
@@ -126,9 +132,6 @@ LDLIBS = $(patsubst %.a,%,$(patsubst lib%,-l%,$(LINKLIBS)))
 ifeq ($(BOARDMAKE),y)
   LDLIBS += -lboard
 endif
-
-LIBGCC = "${shell "$(CC)" $(ARCHCPUFLAGS) -print-libgcc-file-name}"
-GCC_LIBDIR := ${shell dirname $(LIBGCC)}
 
 VPATH += chip
 VPATH += common
@@ -162,13 +165,13 @@ $(KBIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
 board$(DELIM)libboard$(LIBEXT):
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT)
 	$(Q) echo "LD: nuttx"
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
-		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LIBGCC) $(LDENDGROUP)
+		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
@@ -191,19 +194,26 @@ endif
 
 # Dependencies
 
-.depend: Makefile chip$(DELIM)Make.defs $(SRCS)
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) $(HEAD_ASRC:.S=.dds)
+	$(call CATFILE, Make.dep, $^)
+	$(call DELFILE, $^)
+
+.depend: Makefile chip$(DELIM)Make.defs $(SRCS) $(TOPDIR)$(DELIM).config
 ifeq ($(BOARDMAKE),y)
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" depend
+	$(Q) $(MAKE) -C board depend
 endif
-	$(Q) $(MKDEP) $(patsubst %,--dep-path %,$(subst :, ,$(VPATH))) \
-	 "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MAKE) makedepfile DEPPATH="$(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))"
 	$(Q) touch $@
 
 depend: .depend
 
+context::
+
+clean_context::
+
 clean:
 ifeq ($(BOARDMAKE),y)
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" clean
+	$(Q) $(MAKE) -C board clean
 endif
 	$(call DELFILE, $(KBIN))
 	$(call DELFILE, $(BIN))
@@ -211,7 +221,7 @@ endif
 
 distclean: clean
 ifeq ($(BOARDMAKE),y)
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" distclean
+	$(Q) $(MAKE) -C board distclean
 endif
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)

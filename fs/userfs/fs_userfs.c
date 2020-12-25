@@ -114,7 +114,8 @@ static int     userfs_ioctl(FAR struct file *filep, int cmd,
                  unsigned long arg);
 
 static int     userfs_sync(FAR struct file *filep);
-static int     userfs_dup(FAR const struct file *oldp, FAR struct file *newp);
+static int     userfs_dup(FAR const struct file *oldp,
+                          FAR struct file *newp);
 static int     userfs_fstat(FAR const struct file *filep,
                  FAR struct stat *buf);
 static int     userfs_truncate(FAR struct file *filep, off_t length);
@@ -143,8 +144,8 @@ static int     userfs_rmdir(FAR struct inode *mountpt,
                  FAR const char *relpath);
 static int     userfs_rename(FAR struct inode *mountpt,
                  FAR const char *oldrelpath, FAR const char *newrelpath);
-static int     userfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
-                 FAR struct stat *buf);
+static int     userfs_stat(FAR struct inode *mountpt,
+                 FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
  * Public Data
@@ -370,7 +371,7 @@ static ssize_t userfs_read(FAR struct file *filep, char *buffer,
   int respsize;
   int ret;
 
-  finfo("Read %d bytes from offset %d\n", buflen, filep->f_pos);
+  finfo("Read %zu bytes from offset %jd\n", buflen, (intmax_t)filep->f_pos);
 
   DEBUGASSERT(filep != NULL &&
               filep->f_inode != NULL &&
@@ -461,7 +462,7 @@ static ssize_t userfs_write(FAR struct file *filep, FAR const char *buffer,
   ssize_t nrecvd;
   int ret;
 
-  finfo("Write %d bytes to offset %d\n", buflen, filep->f_pos);
+  finfo("Write %zu bytes to offset %jd\n", buflen, (intmax_t)filep->f_pos);
 
   DEBUGASSERT(filep != NULL &&
               filep->f_inode != NULL &&
@@ -1334,7 +1335,7 @@ static int userfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   /* Allocate an instance of the UserFS state structure */
 
   iolen = USERFS_REQ_MAXSIZE + config->mxwrite;
-  priv  = (FAR struct userfs_state_s *)kmm_malloc(SIZEOF_USERFS_STATE_S(iolen));
+  priv  = kmm_malloc(SIZEOF_USERFS_STATE_S(iolen));
   if (priv == NULL)
     {
       ferr("ERROR: Failed to allocate state structure\n");
@@ -1870,9 +1871,9 @@ static int userfs_rename(FAR struct inode *mountpt,
   strncpy(&req->oldrelpath[oldpathlen], newrelpath, newpathlen);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
-                       SIZEOF_USERFS_RENAME_REQUEST_S(oldpathlen, newpathlen), 0,
-                       (FAR struct sockaddr *)&priv->server,
-                       sizeof(struct sockaddr_in));
+                      SIZEOF_USERFS_RENAME_REQUEST_S(oldpathlen, newpathlen),
+                      0, (FAR struct sockaddr *)&priv->server,
+                      sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);

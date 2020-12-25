@@ -115,8 +115,8 @@
  *
  *    FFFS SPPP III. AAAA .... ...V PPPP PBBB
  *
- * TODO: The TM4C also supports configuration of pins to trigger ADC and/or uDMA.
- * That configuration is not addressed in this this encoding.
+ * TODO: The TM4C also supports configuration of pins to trigger ADC and/or
+ * uDMA. That configuration is not addressed in this encoding.
  */
 
 /* These bits set the primary function of the pin:
@@ -200,7 +200,8 @@
 #  define GPIO_ALT_14                 (14 << GPIO_ALT_SHIFT)
 #  define GPIO_ALT_15                 (15 << GPIO_ALT_SHIFT)
 
-/* If the pin is an GPIO digital output, then this identifies the initial output value:
+/* If the pin is an GPIO digital output, then this identifies the initial
+ * output value:
  *    .... .... .... .... .... ...V .... ....
  */
 

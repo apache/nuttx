@@ -317,6 +317,8 @@ config ARCH_FAMILY_K66
 	select KINETIS_HAVE_TPM1
 	select KINETIS_HAVE_TPM2
 	select KINETIS_HAVE_DMA
+	select KINETIS_HAVE_FLEXCAN0
+	select KINETIS_HAVE_FLEXCAN1
 
 menu "Kinetis Peripheral Support"
 
@@ -353,6 +355,14 @@ config KINETIS_HAVE_TPM1
 	default n
 
 config KINETIS_HAVE_TPM2
+	bool
+	default n
+
+config KINETIS_HAVE_FLEXCAN0
+	bool
+	default n
+
+config KINETIS_HAVE_FLEXCAN1
 	bool
 	default n
 
@@ -503,14 +513,22 @@ config KINETIS_RNGB
 	---help---
 		Support the random number generator(K6x only)
 
+config KINETIS_FLEXCAN
+	bool
+	default n
+
 config KINETIS_FLEXCAN0
-	bool "FlexCAN0"
+	bool "FLEXCAN0"
+	select KINETIS_FLEXCAN
+	select NET_CAN_HAVE_TX_DEADLINE
 	default n
 	---help---
 		Support FlexCAN0
 
 config KINETIS_FLEXCAN1
-	bool "FlexCAN1"
+	bool "FLEXCAN1"
+	select KINETIS_FLEXCAN
+	select NET_CAN_HAVE_TX_DEADLINE
 	default n
 	---help---
 		Support FlexCAN1
@@ -694,6 +712,14 @@ config KINETIS_CMT
 	default n
 	---help---
 		Support Carrier Modulator Transmitter
+
+config KINETIS_USBHS
+	bool "USB HS"
+	default n
+	select USBHOST_HAVE_ASYNCH if USBHOST
+	select USBHOST_ASYNCH
+	---help---
+		Support USB HIGH SPEED (see also USBHOST and USBDEV)
 
 config KINETIS_USBOTG
 	bool "USB OTG"
@@ -947,6 +973,76 @@ config KINETIS_EMAC_RMIICLK1588CLKIN
 endchoice # RMII Clock Source
 endmenu # Kinetis Ethernet Configuration
 
+menu "Kinetis FLEXCAN0 Configuration"
+	depends on KINETIS_FLEXCAN0
+
+config FLEXCAN0_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN0_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 75
+
+config FLEXCAN0_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN0_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN0_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN0_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # KINETIS_FLEXCAN0
+
+menu "Kinetis FLEXCAN1 Configuration"
+	depends on KINETIS_FLEXCAN1
+
+config FLEXCAN1_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN1_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 75
+
+config FLEXCAN1_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN1_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN1_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN1_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # KINETIS_FLEXCAN1
+
 menu "Kinetis SDHC Configuration"
 	depends on KINETIS_SDHC
 
@@ -1017,6 +1113,41 @@ config KINETIS_SD4BIT_FREQ
 
 endif
 endmenu # Kinetis SDHC Configuration
+
+if KINETIS_USBHS && USBHOST
+
+menu "USB host controller driver (HCD) options"
+
+config KINETIS_EHCI_NQHS
+	int "Number of Queue Head (QH) structures"
+	default 4
+	---help---
+		Configurable number of Queue Head (QH) structures.
+
+config KINETIS_EHCI_NQTDS
+	int "Number of Queue Element Transfer Descriptor (qTDs)"
+	default 6
+	---help---
+		Configurable number of Queue Element Transfer Descriptor (qTDs).
+
+config KINETIS_EHCI_BUFSIZE
+	int "Size of one request/descriptor buffer"
+	default 128
+	---help---
+		The size of one request/descriptor buffer in bytes.  The TD buffe
+		size must be an even number of 32-bit words and must be large enough
+		to hangle the largest transfer via a SETUP request.
+
+config KINETIS_EHCI_PREALLOCATE
+	bool "Preallocate descriptor pool"
+	default y
+	---help---
+		Select this option to pre-allocate EHCI queue and descriptor
+		structure pools in .bss.  Otherwise, these pools will be
+		dynamically allocated using kmm_memalign().
+
+endmenu # USB host controller driver (HCD) options
+endif # KINETIS_USBHS && USBHOST
 
 #
 # MCU serial peripheral driver?

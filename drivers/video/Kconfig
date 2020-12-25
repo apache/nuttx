@@ -3,6 +3,37 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config FB_CMAP
+	bool
+	default n
+	---help---
+		Set by driver-specific configuration to indicate support for color
+		mapping.  Not directly user selectable.
+
+config FB_TRANSPARENCY
+	bool
+	default n
+	---help---
+		Set by driver-specific configuration to indicate support for color
+		transparency.  Not directly user selectable.
+
+config FB_UPDATE
+	bool
+	default n
+
+config FB_SYNC
+	bool "Hardware signals vertical sync"
+	default n
+
+config FB_OVERLAY
+	bool "Framebuffer overlay support"
+	default n
+
+config FB_OVERLAY_BLIT
+	bool "Framebuffer overlay blit support"
+	depends on FB_OVERLAY
+	default n
+
 menuconfig DRIVERS_VIDEO
 	bool "Video Device Support"
 	default n
@@ -13,37 +44,6 @@ if DRIVERS_VIDEO
 
 config VIDEO_FB
 	bool "Framebuffer character driver"
-	default n
-
-config FB_CMAP
-	bool
-	depends on VIDEO_FB
-	default n
-	---help---
-		Set by driver-specific configuration to indicate support for color
-		mapping.  Not directly user selectable.
-
-config FB_TRANSPARENCY
-	bool
-	depends on VIDEO_FB
-	default n
-	---help---
-		Set by driver-specific configuration to indicate support for color
-		transparency.  Not directly user selectable.
-
-config FB_SYNC
-	bool "Hardware signals vertical sync"
-	depends on VIDEO_FB
-	default n
-
-config FB_OVERLAY
-	bool "Framebuffer overlay support"
-	depends on VIDEO_FB
-	default n
-
-config FB_OVERLAY_BLIT
-	bool "Framebuffer overlay blit support"
-	depends on FB_OVERLAY
 	default n
 
 config VIDEO_STREAM

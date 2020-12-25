@@ -57,25 +57,12 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline int statroot(FAR struct stat *buf);
-int stat_recursive(FAR const char *path, FAR struct stat *buf);
+static int stat_recursive(FAR const char *path,
+                          FAR struct stat *buf, int resolve);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: statroot
- ****************************************************************************/
-
-static inline int statroot(FAR struct stat *buf)
-{
-  /* There is no inode associated with the fake root directory */
-
-  RESET_BUF(buf);
-  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
-  return OK;
-}
 
 /****************************************************************************
  * Name: stat_recursive
@@ -93,7 +80,8 @@ static inline int statroot(FAR struct stat *buf)
  *
  ****************************************************************************/
 
-int stat_recursive(FAR const char *path, FAR struct stat *buf)
+static int stat_recursive(FAR const char *path,
+                          FAR struct stat *buf, int resolve)
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
@@ -143,7 +131,7 @@ int stat_recursive(FAR const char *path, FAR struct stat *buf)
        * recurse if soft links are supported in the pseudo file system.
        */
 
-      ret = inode_stat(inode, buf);
+      ret = inode_stat(inode, buf, resolve);
     }
 
   inode_release(inode);
@@ -171,7 +159,7 @@ errout_with_search:
  *
  ****************************************************************************/
 
-int nx_stat(FAR const char *path, FAR struct stat *buf)
+int nx_stat(FAR const char *path, FAR struct stat *buf, int resolve)
 {
   /* Sanity checks */
 
@@ -185,13 +173,6 @@ int nx_stat(FAR const char *path, FAR struct stat *buf)
       return -ENOENT;
     }
 
-  /* Check for the fake root directory (which has no inode) */
-
-  if (strcmp(path, "/") == 0)
-    {
-      return statroot(buf);
-    }
-
   /* The perform the stat() operation on the path.  This is potentially
    * recursive if soft link support is enabled.
    */
@@ -199,7 +180,7 @@ int nx_stat(FAR const char *path, FAR struct stat *buf)
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
   buf->st_count = 0;
 #endif
-  return stat_recursive(path, buf);
+  return stat_recursive(path, buf, resolve);
 }
 
 /****************************************************************************
@@ -222,7 +203,21 @@ int stat(FAR const char *path, FAR struct stat *buf)
 {
   int ret;
 
-  ret = nx_stat(path, buf);
+  ret = nx_stat(path, buf, 1);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
+}
+
+int lstat(FAR const char *path, FAR struct stat *buf)
+{
+  int ret;
+
+  ret = nx_stat(path, buf, 0);
   if (ret < 0)
     {
       set_errno(-ret);
@@ -243,9 +238,10 @@ int stat(FAR const char *path, FAR struct stat *buf)
  *   <sys/stat.h>, into which information is placed concerning the file.
  *
  * Input Parameters:
- *   inode - The indoe of interest
- *   buf   - The caller provide location in which to return information about
- *           the inode.
+ *   inode   - The inode of interest
+ *   buf     - The caller provide location in which to return information
+ *             about the inode.
+ *   resolve - Whether to resolve the symbolic link
  *
  * Returned Value:
  *   Zero (OK) returned on success.  Otherwise, a negated errno value is
@@ -253,7 +249,7 @@ int stat(FAR const char *path, FAR struct stat *buf)
  *
  ****************************************************************************/
 
-int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
+int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 {
   DEBUGASSERT(inode != NULL && buf != NULL);
 
@@ -321,42 +317,47 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
 
       if (INODE_IS_SOFTLINK(inode))
         {
-          int ret;
-
-          /* Increment the link counter.  This is necessary to avoid
-           * infinite recursion if loops are encountered in the traversal.
-           * If we encounter more SYMLOOP_MAX symbolic links at any time
-           * during the traversal, error out.
-           *
-           * NOTE: That inode_search() will automatically skip over
-           * consecutive, intermediate symbolic links.  Those numbers will
-           * not be included in the total.
-           */
-
-          if (++buf->st_count > SYMLOOP_MAX)
+          if (resolve)
             {
-              return -ELOOP;
+              int ret;
+
+              /* Increment the link counter.  This is necessary to avoid
+               * infinite recursion if loops are encountered in the
+               * traversal. If we encounter more SYMLOOP_MAX symbolic links
+               * at any time during the traversal, error out.
+               *
+               * NOTE: That inode_search() will automatically skip over
+               * consecutive, intermediate symbolic links.  Those numbers
+               * will not be included in the total.
+               */
+
+              if (++buf->st_count > SYMLOOP_MAX)
+                {
+                  return -ELOOP;
+                }
+
+              DEBUGASSERT(buf->st_count > 0);  /* Check for unsigned integer overflow */
+
+              /* stat() the target of the soft link. */
+
+              ret = stat_recursive(inode->u.i_link, buf, 1);
+
+              /* If stat() fails, then there is a problem with the target of
+               * the symbolic link, but not with the symbolic link itself.
+               * We should still report success, just with less information.
+               */
+
+              if (ret < 0)
+                {
+                  RESET_BUF(buf);
+                }
             }
-
-          DEBUGASSERT(buf->st_count > 0);  /* Check for unsigned integer overflow */
-
-          /* stat() the target of the soft link. */
-
-          ret = stat_recursive((FAR const char *)inode->u.i_link, buf);
-
-          /* If stat() fails, then there is a problem with the target of the
-           * symbolic link, but not with the symbolic link itself.  We should
-           * still report success, just with less information.
-           */
-
-          if (ret < 0)
+          else
             {
-              RESET_BUF(buf);
+              /* Make sure the caller knows that this is a symbolic link. */
+
+              buf->st_mode = S_IRWXO | S_IRWXG | S_IRWXU | S_IFLNK;
             }
-
-          /* Make sure the caller knows that this really a symbolic link. */
-
-          buf->st_mode |= S_IFLNK;
         }
       else
 #endif

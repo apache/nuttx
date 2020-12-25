@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/wchar/lib_mbrtowc.c
+ * libs/libc/wchar/lib_mbrlen.c
  *
  *   Copyright (c) 2002-2004 Tim J. Robbins.
  *   All rights reserved.
@@ -60,7 +60,7 @@
  *
  ****************************************************************************/
 
-size_t mbrlen(const char *s, size_t n, mbstate_t *ps)
+size_t mbrlen(FAR const char *s, size_t n, FAR mbstate_t *ps)
 {
   return mbrtowc(NULL, s, n, ps);
 }

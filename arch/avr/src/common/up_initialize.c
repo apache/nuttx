@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/avr/src/common/up_initialize.c
  *
- *   Copyright (C) 2010, 2012-2013, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2013, 2015-2017 Gregory Nutt. All rights
+ *   reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,12 +43,12 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
+#include <nuttx/note/note_driver.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
@@ -64,7 +65,8 @@
 
 /* Determine which (if any) console driver to use.  This will probably cause
  * up_serialinit to be incorrectly called if there is no USART configured to
- * be an RS-232 device (see as an example arch/avr/src/at32uc23/at32uc3_config.h)
+ * be an RS-232 device (see as an example
+ * arch/avr/src/at32uc23/at32uc3_config.h)
  * This will probably have to be revisited someday.
  *
  * If a console is enabled and no other console device is specified, then a
@@ -166,8 +168,8 @@ void up_initialize(void)
 #endif
 
 #ifdef CONFIG_ARCH_DMA
-  /* Initialize the DMA subsystem if the weak function up_dma_initialize has been
-   * brought into the build
+  /* Initialize the DMA subsystem if the weak function up_dma_initialize has
+   * been brought into the build
    */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
@@ -200,8 +202,7 @@ void up_initialize(void)
   loop_register();      /* Standard /dev/loop */
 #endif
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_DRIVER_NOTE)
+#if defined(CONFIG_DRIVER_NOTE)
   note_register();      /* Non-standard /dev/note */
 #endif
 

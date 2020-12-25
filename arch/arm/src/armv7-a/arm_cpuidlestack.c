@@ -133,10 +133,9 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
 
   /* Get the top of the stack */
 
-
   stack_alloc          = (uintptr_t)g_cpu_stackalloc[cpu];
   DEBUGASSERT(stack_alloc != 0 && STACK_ISALIGNED(stack_alloc));
-  top_of_stack         = stack_alloc + SMP_STACK_TOP;
+  top_of_stack         = stack_alloc + SMP_STACK_SIZE;
 
   tcb->adj_stack_size  = SMP_STACK_SIZE;
   tcb->stack_alloc_ptr = (FAR uint32_t *)stack_alloc;

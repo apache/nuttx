@@ -94,16 +94,39 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
 
   if (path != NULL)
     {
-      /* Yes, close the stream */
+      /* Yes, open the file directly if no stream is opened yet */
 
-      if (stream)
+      if (stream == NULL)
         {
-          fclose(stream);
+          return fopen(path, mode);
         }
 
-      /* And attempt to reopen the file at the provided path */
+      /* Otherwise, open the file */
 
-      return fopen(path, mode);
+      oflags = lib_mode2oflags(mode);
+      if (oflags < 0)
+        {
+          return NULL;
+        }
+
+      fd = open(path, oflags, 0666);
+      if (fd < 0)
+        {
+          return NULL;
+        }
+
+      /* Flush the stream and duplicate the new fd to it */
+
+      fflush(stream);
+      ret = dup2(fd, fileno(stream));
+      close(fd);
+      if (ret < 0)
+        {
+          return NULL;
+        }
+
+      clearerr(stream);
+      return stream;
     }
 
   /* Otherwise, we are just changing the mode of the current file. */

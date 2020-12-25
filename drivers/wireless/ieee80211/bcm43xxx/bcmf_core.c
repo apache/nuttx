@@ -43,6 +43,7 @@
 #include <debug.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <string.h>
 
 #include <nuttx/arch.h>
@@ -165,7 +166,7 @@ int bcmf_upload_binary(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
       int ret = bcmf_core_set_backplane_window(sbus, address);
       if (ret != OK)
         {
-          wlerr("Backplane setting failed at %08x\n", address);
+          wlerr("Backplane setting failed at %08" PRIx32 "\n", address);
           return ret;
         }
 
@@ -181,10 +182,11 @@ int bcmf_upload_binary(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
       /* Transfer firmware data */
 
       ret = bcmf_transfer_bytes(sbus, true, 1,
-                                address & SBSDIO_SB_OFT_ADDR_MASK, buf, size);
+                                address & SBSDIO_SB_OFT_ADDR_MASK, buf,
+                                size);
       if (ret != OK)
         {
-          wlerr("transfer failed %d %x %d\n", ret, address, size);
+          wlerr("transfer failed %d %" PRIx32 " %d\n", ret, address, size);
           return ret;
         }
 
@@ -344,8 +346,8 @@ int bcmf_upload_nvram(FAR struct bcmf_sdio_dev_s *sbus)
 
   nvram_sz = (*sbus->chip->nvram_image_size + 63) & (-64);
 
-  wlinfo("nvram size is %d %d bytes\n", nvram_sz,
-                                       *sbus->chip->nvram_image_size);
+  wlinfo("nvram size is %" PRId32 " %d bytes\n",
+         nvram_sz, *sbus->chip->nvram_image_size);
 
   /* Write image */
 
@@ -584,7 +586,8 @@ void bcmf_core_reset(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
 
   /* Run initialization sequence */
 
-  bcmf_write_sbregb(sbus, base + BCMA_IOCTL, BCMA_IOCTL_FGC | BCMA_IOCTL_CLK);
+  bcmf_write_sbregb(sbus, base + BCMA_IOCTL,
+                    BCMA_IOCTL_FGC | BCMA_IOCTL_CLK);
   bcmf_read_sbregw(sbus, base + BCMA_IOCTL, &value);
 
   bcmf_write_sbregb(sbus, base + BCMA_RESET_CTL, 0);

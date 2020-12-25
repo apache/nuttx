@@ -233,15 +233,16 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
  *   fd[2] - The user provided array in which to catch the pipe file
  *   descriptors
  *   bufsize - The size of the in-memory, circular buffer in bytes.
+ *   flags - The file status flags.
  *
  * Returned Value:
- *   0 is returned on success; otherwise, the negative error code return
- *   appropriately.
+ *   0 is returned on success; a negated errno value is returned on a
+ *   failure.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
-int nx_pipe(int fd[2], size_t bufsize);
+int nx_pipe(int fd[2], size_t bufsize, int flags);
 #endif
 
 /****************************************************************************
@@ -273,8 +274,8 @@ int nx_pipe(int fd[2], size_t bufsize);
  *   bufsize - The size of the in-memory, circular buffer in bytes.
  *
  * Returned Value:
- *   0 is returned on success; otherwise, the negative error code return
- *   appropriately.
+ *   0 is returned on success; a negated errno value is returned on a
+ *   failure.
  *
  ****************************************************************************/
 

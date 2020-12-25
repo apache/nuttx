@@ -35,8 +35,6 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
-
 ifneq ($(RCSRCS)$(RCRAWS),)
 ETCDIR := etctmp
 ETCSRC := $(ETCDIR:%=%.c)
@@ -107,14 +105,9 @@ $(CXXOBJS) $(LINKOBJS): %$(OBJEXT): %.cxx
 	$(call COMPILEXX, $<, $@)
 
 libboard$(LIBEXT): $(OBJS) $(CXXOBJS)
-ifneq ($(OBJS),)
-	$(call ARCHIVE, $@, $(OBJS))
-endif
-ifneq ($(CXXOBJS),)
-	$(call ARCHIVE, $@, $(CXXOBJS))
-endif
+	$(call ARCHIVE, $@, $(OBJS) $(CXXOBJS))
 
-.depend: Makefile $(SRCS) $(CXXSRCS) $(RCSRCS)
+.depend: Makefile $(SRCS) $(CXXSRCS) $(RCSRCS) $(TOPDIR)$(DELIM).config
 ifneq ($(ZDSVERSION),)
 	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 else
@@ -130,20 +123,16 @@ endif
 
 depend: .depend
 
-ifneq ($(BOARD_CONTEXT),y)
-context:
-endif
+context::
 
-clean:
+clean::
 	$(call DELFILE, libboard$(LIBEXT))
 	$(call DELFILE, $(ETCSRC))
 	$(call DELDIR, $(ETCDIR))
 	$(call CLEAN)
-	$(EXTRA_CLEAN)
 
-distclean: clean
+distclean:: clean
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
-	$(EXTRA_DISTCLEAN)
 
 -include Make.dep

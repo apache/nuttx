@@ -47,6 +47,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -65,7 +66,9 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
+
 /* Per the data sheet, the SST25 parts can be driven with either SPI mode 0 (CPOL=0
  * and CPHA=0) or mode 3 (CPOL=1 and CPHA=1). But I have heard that other devices
  * can operate in mode 0 or 1.  So you may need to specify CONFIG_SST25_SPIMODE to
@@ -84,8 +87,11 @@
 #endif
 
 /* SST25 Instructions ***************************************************************/
+
 /*      Command                    Value      Description               Addr   Data */
+
 /*                                                                         Dummy    */
+
 #define SST25_READ                  0x03    /* Read data bytes           3   0  >=1 */
 #define SST25_FAST_READ             0x0b    /* Higher speed read         3   1  >=1 */
 #define SST25_SE                    0x20    /* 4Kb Sector erase          3   0   0  */
@@ -107,6 +113,7 @@
 #define SST25_DBSY                  0x80    /* Disable SO RY/BY# status  0   0   0  */
 
 /* SST25 Registers ******************************************************************/
+
 /* Read ID (RDID) register values */
 
 #define SST25_MANUFACTURER          0xbf  /* SST manufacturer ID */
@@ -134,22 +141,29 @@
 #  define SST25_SR_BP_UPPERQTR      (5 << SST25_SR_BP_SHIFT) /* Upper quarter */
 #  define SST25_SR_BP_UPPERHALF     (6 << SST25_SR_BP_SHIFT) /* Upper half */
 #  define SST25_SR_BP_ALL           (7 << SST25_SR_BP_SHIFT) /* All sectors */
+
 #define SST25_SR_AAI                (1 << 6)  /* Bit 6: Auto Address increment programming */
 #define SST25_SR_SRWD               (1 << 7)  /* Bit 7: Status register write protect */
 
 #define SST25_DUMMY                 0xa5
 
 /* Chip Geometries ******************************************************************/
+
 /* SST25VF512 capacity is 512Kbit (64Kbit x 8)   =  64Kb (8Kb x 8) */
+
 /* SST25VF010 capacity is 1Mbit   (128Kbit x 8)  = 128Kb (16Kb x 8 */
+
 /* SST25VF520 capacity is 2Mbit   (256Kbit x 8)  = 256Kb (32Kb x 8) */
+
 /* SST25VF540 capacity is 4Mbit   (512Kbit x 8)  = 512Kb (64Kb x 8) */
+
 /* SST25VF080 capacity is 8Mbit   (1024Kbit x 8) =   1Mb (128Kb x 8) */
+
 /* Not yet supported */
 
 /* SST25VF016 capacity is 16Mbit  (2048Kbit x 8) =   2Mb (256Kb x 8) */
 
-#define SST25_VF016_SECTOR_SHIFT  12          /* Sector size 1 << 12 = 4Kb */
+#define SST25_VF016_SECTOR_SHIFT  12         /* Sector size 1 << 12 = 4Kb */
 #define SST25_VF016_NSECTORS      512        /* 512 sectors x 4096 bytes/sector = 2Mb */
 
 /* SST25VF032 capacity is 32Mbit  (4096Kbit x 8) =   4Mb (512kb x 8) */
@@ -616,7 +630,8 @@ static void sst25_bytewrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
           /* Wait for any preceding write or erase operation to complete. */
 
           status = sst25_waitwritecomplete(priv);
-          DEBUGASSERT((status & (SST25_SR_WEL | SST25_SR_BP_MASK | SST25_SR_AAI)) == 0);
+          DEBUGASSERT((status & (SST25_SR_WEL | SST25_SR_BP_MASK |
+                                 SST25_SR_AAI)) == 0);
 
           /* Enable write access to the FLASH */
 
@@ -747,7 +762,6 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
              (buffer[0] != SST25_ERASED_STATE ||
               buffer[1] != SST25_ERASED_STATE))
         {
-
           /* Select this FLASH part */
 
           SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
@@ -792,9 +806,9 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
 #if defined(CONFIG_SST25_SECTOR512) && !defined(CONFIG_SST25_READONLY)
 static void sst25_cacheflush(struct sst25_dev_s *priv)
 {
-  /* If the cached is dirty (meaning that it no longer matches the old FLASH contents)
-   * or was erased (with the cache containing the correct FLASH contents), then write
-   * the cached erase block to FLASH.
+  /* If the cached is dirty (meaning that it no longer matches the old FLASH
+   * contents) or was erased (with the cache containing the correct FLASH
+   * contents), then write the cached erase block to FLASH.
    */
 
   if (IS_DIRTY(priv) || IS_ERASED(priv))
@@ -847,7 +861,8 @@ static FAR uint8_t *sst25_cacheread(struct sst25_dev_s *priv, off_t sector)
 
       /* Read the erase block into the cache */
 
-      sst25_byteread(priv, priv->sector, (esectno << priv->sectorshift), 1 << priv->sectorshift);
+      sst25_byteread(priv, priv->sector, (esectno << priv->sectorshift),
+                     1 << priv->sectorshift);
 
       /* Mark the sector as cached */
 
@@ -1001,7 +1016,8 @@ static int sst25_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbloc
  * Name: sst25_bread
  ************************************************************************************/
 
-static ssize_t sst25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+static ssize_t sst25_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+                           size_t nblocks,
                            FAR uint8_t *buffer)
 {
 #ifdef CONFIG_SST25_SECTOR512
@@ -1011,7 +1027,8 @@ static ssize_t sst25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
 
   /* On this device, we can handle the block read just like the byte-oriented read */
 
-  nbytes = sst25_read(dev, startblock << SST25_SECTOR_SHIFT, nblocks << SST25_SECTOR_SHIFT, buffer);
+  nbytes = sst25_read(dev, startblock << SST25_SECTOR_SHIFT,
+                      nblocks << SST25_SECTOR_SHIFT, buffer);
   if (nbytes > 0)
     {
       return nbytes >> SST25_SECTOR_SHIFT;
@@ -1026,7 +1043,8 @@ static ssize_t sst25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
 
   /* On this device, we can handle the block read just like the byte-oriented read */
 
-  nbytes = sst25_read(dev, startblock << priv->sectorshift, nblocks << priv->sectorshift, buffer);
+  nbytes = sst25_read(dev, startblock << priv->sectorshift,
+                      nblocks << priv->sectorshift, buffer);
   if (nbytes > 0)
     {
       return nbytes >> priv->sectorshift;
@@ -1040,7 +1058,8 @@ static ssize_t sst25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
  * Name: sst25_bwrite
  ************************************************************************************/
 
-static ssize_t sst25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+static ssize_t sst25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                            size_t nblocks,
                             FAR const uint8_t *buffer)
 {
 #ifdef CONFIG_SST25_READONLY
@@ -1105,7 +1124,8 @@ static int sst25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)
+                                           ((uintptr_t)arg);
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -1128,7 +1148,8 @@ static int sst25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #endif
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %" PRId32 " erasesize: %" PRId32
+                    " neraseblocks: %" PRId32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -1226,7 +1247,9 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
           priv->sector = (FAR uint8_t *)kmm_malloc(1 << priv->sectorshift);
           if (!priv->sector)
             {
-              /* Allocation failed! Discard all of that work we just did and return NULL */
+              /* Allocation failed! Discard all of that work we just did and
+               * return NULL
+               */
 
               ferr("ERROR: Allocation failed\n");
               kmm_free(priv);

@@ -153,7 +153,8 @@ static int cs43l22_attach(FAR const struct cs43l22_lower_s *lower,
   if (isr)
     {
       /* Just save the address of the handler and its argument for now.  The
-       * new handler will called via cs43l22_interrupt() when the interrupt occurs.
+       * new handler will called via cs43l22_interrupt() when the interrupt
+       * occurs.
        */
 
       audinfo("Attaching %p\n", isr);
@@ -171,7 +172,8 @@ static int cs43l22_attach(FAR const struct cs43l22_lower_s *lower,
   return OK;
 }
 
-static bool cs43l22_enable(FAR const struct cs43l22_lower_s *lower, bool enable)
+static bool cs43l22_enable(FAR const struct cs43l22_lower_s *lower,
+                           bool enable)
 {
   static bool enabled;
   irqstate_t flags;
@@ -187,14 +189,17 @@ static bool cs43l22_enable(FAR const struct cs43l22_lower_s *lower, bool enable)
       if (enable && g_cs43l22info.handler)
         {
           audinfo("Enabling\n");
+
           /* TODO: stm32_pioirqenable(IRQ_INT_CS43L22); */
+
           enabled = true;
         }
       else
         {
-
           audinfo("Disabling\n");
+
           /* TODO: stm32_pioirqdisable(IRQ_INT_CS43L22); */
+
           enabled = false;
         }
     }
@@ -207,7 +212,7 @@ static bool cs43l22_enable(FAR const struct cs43l22_lower_s *lower, bool enable)
 #if 0
 static int cs43l22_interrupt(int irq, FAR void *context)
 {
-   Just forward the interrupt to the CS43L22 driver
+  /* Just forward the interrupt to the CS43L22 driver */
 
   audinfo("handler %p\n", g_cs43l22info.handler);
   if (g_cs43l22info.handler)
@@ -215,10 +220,12 @@ static int cs43l22_interrupt(int irq, FAR void *context)
       return g_cs43l22info.handler(&g_cs43l22info.lower, g_cs43l22info.arg);
     }
 
-   We got an interrupt with no handler.  This should not
-   happen.
+  /* We got an interrupt with no handler.  This should not
+   * happen.
+   */
 
-   TODO: stm32_pioirqdisable(IRQ_INT_CS43L22);
+  /* TODO: stm32_pioirqdisable(IRQ_INT_CS43L22); */
+
   return OK;
 }
 #endif
@@ -272,10 +279,11 @@ int stm32_cs43l22_initialize(int minor)
   audinfo("minor %d\n", minor);
   DEBUGASSERT(minor >= 0 && minor <= 25);
 
-  /* Have we already initialized?  Since we never uninitialize we must prevent
-   * multiple initializations.  This is necessary, for example, when the
-   * touchscreen example is used as a built-in application in NSH and can be
-   * called numerous time.  It will attempt to initialize each time.
+  /* Have we already initialized?  Since we never uninitialize we must
+   * prevent multiple initializations.  This is necessary, for example,
+   * when the touchscreen example is used as a built-in application in
+   * NSH and can be called numerous time.  It will attempt to initialize
+   * each time.
    */
 
   if (!initialized)
@@ -295,9 +303,10 @@ int stm32_cs43l22_initialize(int minor)
           ret = -ENODEV;
           goto errout;
         }
+
       /* Get an instance of the I2S interface for the CS43L22 data channel */
 
-      i2s = stm32_i2sdev_initialize(CS43L22_I2S_BUS);
+      i2s = stm32_i2sbus_initialize(CS43L22_I2S_BUS);
       if (!i2s)
         {
           auderr("ERROR: Failed to initialize I2S%d\n", CS43L22_I2S_BUS);
@@ -305,8 +314,8 @@ int stm32_cs43l22_initialize(int minor)
           goto errout_with_i2c;
         }
 
-      /* Configure the DAC master clock.  This clock is provided by PCK2 (PB10)
-       * that is connected to the CS43L22 MCLK.
+      /* Configure the DAC master clock.  This clock is provided by
+       * PCK2 (PB10) that is connected to the CS43L22 MCLK.
        */
 
       /* Configure CS43L22 interrupts */
@@ -332,6 +341,7 @@ int stm32_cs43l22_initialize(int minor)
           ret = -ENODEV;
           goto errout_with_irq;
         }
+
       /* No we can embed the CS43L22/I2C/I2S conglomerate into a PCM decoder
        * instance so that we will have a PCM front end for the the CS43L22
        * driver.
@@ -344,6 +354,7 @@ int stm32_cs43l22_initialize(int minor)
           ret = -ENODEV;
           goto errout_with_cs43l22;
         }
+
       /* Create a device name */
 
       snprintf(devname, 12, "pcm%d",  minor);

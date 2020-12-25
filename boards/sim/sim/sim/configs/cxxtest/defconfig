@@ -5,7 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
-# CONFIG_UCLIBCXX_EXCEPTION is not set
+# CONFIG_CXX_EXCEPTION is not set
 CONFIG_ARCH="sim"
 CONFIG_ARCH_BOARD="sim"
 CONFIG_ARCH_BOARD_SIM=y

@@ -1,54 +1,43 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_wdt.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright 2020 Falker Automacao Agricola LTDA.
+ *   Author: Leomar Mateus Radke <leomar@falker.com.br>
+ *   Author: Ricardo Wartchow <wartchow@gmail.com>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_WDT_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_WDT_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* WDT register offsets *********************************************************************/
+/* WDT register offsets *****************************************************/
 
 #define SAM_WDT_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_WDT_CONFIG_OFFSET      0x0001  /* Configuration register */
@@ -59,7 +48,7 @@
 #define SAM_WDT_SYNCBUSY_OFFSET    0x0008  /* Synchronization busy register */
 #define SAM_WDT_CLEAR_OFFSET       0x000c  /* Clear register */
 
-/* WDT register addresses *******************************************************************/
+/* WDT register addresses ***************************************************/
 
 #define SAM_WDT_CTRLA              (SAM_WDT_BASE + SAM_WDT_CTRLA_OFFSET)
 #define SAM_WDT_CONFIG             (SAM_WDT_BASE + SAM_WDT_CONFIG_OFFSET)
@@ -70,7 +59,7 @@
 #define SAM_WDT_SYNCBUSY           (SAM_WDT_BASE + SAM_WDT_SYNCBUSY_OFFSET)
 #define SAM_WDT_CLEAR              (SAM_WDT_BASE + SAM_WDT_CLEAR_OFFSET)
 
-/* WDT register bit definitions *************************************************************/
+/* WDT register bit definitions *********************************************/
 
 /* Control register */
 
@@ -80,33 +69,34 @@
 
 /* Configuration register */
 
-#define WDT_CONFIG_PER_SHIFT       (0)       /* Bits 0–3: Time-Out Period */
+#define WDT_CONFIG_PER_SHIFT       (0)                              /* Bits 0–3: Time-Out Period */
 #define WDT_CONFIG_PER_MASK        (15 << WDT_CONFIG_PER_SHIFT)
-#  define WDT_CONFIG_PER_8         (0  << WDT_CONFIG_PER_SHIFT) /* 8 clock cycles */
-#  define WDT_CONFIG_PER_16        (1  << WDT_CONFIG_PER_SHIFT) /* 16 clock cycles */
-#  define WDT_CONFIG_PER_32        (2  << WDT_CONFIG_PER_SHIFT) /* 32 clock cycles */
-#  define WDT_CONFIG_PER_64        (3  << WDT_CONFIG_PER_SHIFT) /* 64 clock cycles */
-#  define WDT_CONFIG_PER_128       (4  << WDT_CONFIG_PER_SHIFT) /* 128 clock cycles */
-#  define WDT_CONFIG_PER_256       (5  << WDT_CONFIG_PER_SHIFT) /* 256 clocks cycles */
-#  define WDT_CONFIG_PER_512       (6  << WDT_CONFIG_PER_SHIFT) /* 512 clocks cycles */
-#  define WDT_CONFIG_PER_1K        (7  << WDT_CONFIG_PER_SHIFT) /* 1024 clock cycles */
-#  define WDT_CONFIG_PER_2K        (8  << WDT_CONFIG_PER_SHIFT) /* 2048 clock cycles */
-#  define WDT_CONFIG_PER_4K        (9  << WDT_CONFIG_PER_SHIFT) /* 4096 clock cycles */
-#  define WDT_CONFIG_PER_8k        (10 << WDT_CONFIG_PER_SHIFT) /* 8192 clock cycles */
-#  define WDT_CONFIG_PER_16K       (11 << WDT_CONFIG_PER_SHIFT) /* 16384 clock cycles */
-#define WDT_CONFIG_WINDOW_SHIFT    (4)       /* Bits 4-7: Window Mode Time-Out Period */
+#  define WDT_CONFIG_PER_8         (0  << WDT_CONFIG_PER_SHIFT)     /* 8 clock cycles */
+#  define WDT_CONFIG_PER_16        (1  << WDT_CONFIG_PER_SHIFT)     /* 16 clock cycles */
+#  define WDT_CONFIG_PER_32        (2  << WDT_CONFIG_PER_SHIFT)     /* 32 clock cycles */
+#  define WDT_CONFIG_PER_64        (3  << WDT_CONFIG_PER_SHIFT)     /* 64 clock cycles */
+#  define WDT_CONFIG_PER_128       (4  << WDT_CONFIG_PER_SHIFT)     /* 128 clock cycles */
+#  define WDT_CONFIG_PER_256       (5  << WDT_CONFIG_PER_SHIFT)     /* 256 clocks cycles */
+#  define WDT_CONFIG_PER_512       (6  << WDT_CONFIG_PER_SHIFT)     /* 512 clocks cycles */
+#  define WDT_CONFIG_PER_1K        (7  << WDT_CONFIG_PER_SHIFT)     /* 1024 clock cycles */
+#  define WDT_CONFIG_PER_2K        (8  << WDT_CONFIG_PER_SHIFT)     /* 2048 clock cycles */
+#  define WDT_CONFIG_PER_4K        (9  << WDT_CONFIG_PER_SHIFT)     /* 4096 clock cycles */
+#  define WDT_CONFIG_PER_8K        (10 << WDT_CONFIG_PER_SHIFT)     /* 8192 clock cycles */
+#  define WDT_CONFIG_PER_16K       (11 << WDT_CONFIG_PER_SHIFT)     /* 16384 clock cycles */
+
+#define WDT_CONFIG_WINDOW_SHIFT    (4)                              /* Bits 4-7: Window Mode Time-Out Period */
 #define WDT_CONFIG_WINDOW_MASK     (15 << WDT_CONFIG_WINDOW_SHIFT)
-#  define WDT_CONFIG_WINDOW_8      (0  << WDT_CONFIG_WINDOW_SHIFT) /* 8 clock cycles */
-#  define WDT_CONFIG_WINDOW_16     (1  << WDT_CONFIG_WINDOW_SHIFT) /* 16 clock cycles */
-#  define WDT_CONFIG_WINDOW_32     (2  << WDT_CONFIG_WINDOW_SHIFT) /* 32 clock cycles */
-#  define WDT_CONFIG_WINDOW_64     (3  << WDT_CONFIG_WINDOW_SHIFT) /* 64 clock cycles */
-#  define WDT_CONFIG_WINDOW_128    (4  << WDT_CONFIG_WINDOW_SHIFT) /* 128 clock cycles */
-#  define WDT_CONFIG_WINDOW_256    (5  << WDT_CONFIG_WINDOW_SHIFT) /* 256 clocks cycles */
-#  define WDT_CONFIG_WINDOW_512    (6  << WDT_CONFIG_WINDOW_SHIFT) /* 512 clocks cycles */
-#  define WDT_CONFIG_WINDOW_1K     (7  << WDT_CONFIG_WINDOW_SHIFT) /* 1024 clock cycles */
-#  define WDT_CONFIG_WINDOW_2K     (8  << WDT_CONFIG_WINDOW_SHIFT) /* 2048 clock cycles */
-#  define WDT_CONFIG_WINDOW_4K     (9  << WDT_CONFIG_WINDOW_SHIFT) /* 4096 clock cycles */
-#  define WDT_CONFIG_WINDOW_8k     (10 << WDT_CONFIG_WINDOW_SHIFT) /* 8192 clock cycles */
+#  define WDT_CONFIG_WINDOW_8      (0  << WDT_CONFIG_WINDOW_SHIFT)  /* 8 clock cycles */
+#  define WDT_CONFIG_WINDOW_16     (1  << WDT_CONFIG_WINDOW_SHIFT)  /* 16 clock cycles */
+#  define WDT_CONFIG_WINDOW_32     (2  << WDT_CONFIG_WINDOW_SHIFT)  /* 32 clock cycles */
+#  define WDT_CONFIG_WINDOW_64     (3  << WDT_CONFIG_WINDOW_SHIFT)  /* 64 clock cycles */
+#  define WDT_CONFIG_WINDOW_128    (4  << WDT_CONFIG_WINDOW_SHIFT)  /* 128 clock cycles */
+#  define WDT_CONFIG_WINDOW_256    (5  << WDT_CONFIG_WINDOW_SHIFT)  /* 256 clocks cycles */
+#  define WDT_CONFIG_WINDOW_512    (6  << WDT_CONFIG_WINDOW_SHIFT)  /* 512 clocks cycles */
+#  define WDT_CONFIG_WINDOW_1K     (7  << WDT_CONFIG_WINDOW_SHIFT)  /* 1024 clock cycles */
+#  define WDT_CONFIG_WINDOW_2K     (8  << WDT_CONFIG_WINDOW_SHIFT)  /* 2048 clock cycles */
+#  define WDT_CONFIG_WINDOW_4K     (9  << WDT_CONFIG_WINDOW_SHIFT)  /* 4096 clock cycles */
+#  define WDT_CONFIG_WINDOW_8k     (10 << WDT_CONFIG_WINDOW_SHIFT)  /* 8192 clock cycles */
 
 /* Early warning interrupt control register */
 
@@ -125,8 +115,8 @@
 #  define WDT_EWCTRL_EWOFFSET_8k   (10 << WDT_EWCTRL_EWOFFSET_SHIFT) /* 8192 clock cycles */
 #  define WDT_EWCTRL_EWOFFSET_16K  (11 << WDT_EWCTRL_EWOFFSET_SHIFT) /* 16384 clock cycles */
 
-/* Interrupt enable clear, interrupt enable set register, interrupt flag status and clear
- * registers
+/* Interrupt enable clear, interrupt enable set register,
+ * interrupt flag status and clear registers.
  */
 
 #define WDT_INT_EW                 (1 << 0)  /* Bit 0:  Early warning interrupt */
@@ -145,16 +135,12 @@
 #define WDT_CLEAR_CLEAR_MASK       (0xff << WDT_CLEAR_CLEAR_SHIFT)
 #  define WDT_CLEAR_CLEAR          (0xa5 << WDT_CLEAR_CLEAR_SHIFT)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
-
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_WDT_H */

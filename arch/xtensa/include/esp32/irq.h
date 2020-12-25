@@ -181,8 +181,9 @@
  *   0x03c0     Double exception
  *
  * REVISIT: In more architectures supported by NuttX, exception errors
- * tie into the normal interrupt handling via special IRQ numbers.  I
- * is still to be determined what will be done for the ESP32.
+ * tie into the normal interrupt handling via special IRQ numbers.
+ * It is still to be determined what will be done for the ESP32.
+ *
  */
 
 /* IRQ numbers for internal interrupts that are dispatched like peripheral
@@ -234,9 +235,9 @@
 #define ESP32_IRQ_CPU_CPU2          (XTENSA_IRQ_FIRSTPERIPH+ESP32_PERIPH_CPU_CPU2)
 #define ESP32_IRQ_CPU_CPU3          (XTENSA_IRQ_FIRSTPERIPH+ESP32_PERIPH_CPU_CPU3)
 #define ESP32_IRQ_SPI0              (XTENSA_IRQ_FIRSTPERIPH+ESP32_PERIPH_SPI0)
-#define ESP32_IRQ_SPI1              (XTENSA_IRQ_FIRSTPERIPH+ESP32_PERIPH_SPI1
+#define ESP32_IRQ_SPI1              (XTENSA_IRQ_FIRSTPERIPH+ESP32_PERIPH_SPI1)
 #define ESP32_IRQ_SPI2              (XTENSA_IRQ_FIRSTPERIPH+ESP32_PERIPH_SPI2)
-#define ESP32_IRQ_SPI3              (XTENSA_IRQ_FIRSTPERIPH+ESP32_PERIPH_SPI3
+#define ESP32_IRQ_SPI3              (XTENSA_IRQ_FIRSTPERIPH+ESP32_PERIPH_SPI3)
 
 #define ESP32_IRQ_SREG0             ESP32_IRQ_MAC
 #define ESP32_NIRQS_SREG0           32
@@ -332,9 +333,9 @@
  * CPU peripheral interrupts can be a assigned to a CPU interrupt using the
  * PRO_*_MAP_REG or APP_*_MAP_REG.  There are a pair of these registers for
  * each peripheral source.  Multiple peripheral interrupt sources can be
- * mapped to the same.
+ * mapped to the same CPU interrupt.
  *
- * The remaining, five, internal CPU interrupts are:
+ * The remaining, six, internal CPU interrupts are:
  *
  *   6   Timer0    - Priority 1
  *   7   Software  - Priority 1

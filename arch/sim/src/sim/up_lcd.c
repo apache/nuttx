@@ -49,6 +49,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/lcd/lcd.h>
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,18 +70,6 @@
 #endif
 
 /* Simulated LCD geometry and color format */
-
-#ifndef CONFIG_SIM_FBWIDTH
-#  define CONFIG_SIM_FBWIDTH  320 /* Framebuffer width in pixels */
-#endif
-
-#ifndef CONFIG_SIM_FBHEIGHT
-#  define CONFIG_SIM_FBHEIGHT 240 /* Framebuffer height in pixels */
-#endif
-
-#ifndef CONFIG_SIM_FBBPP
-#  define CONFIG_SIM_FBBPP    16  /* Framebuffer bytes per pixel (RGB) */
-#endif
 
 #define FB_STRIDE ((CONFIG_SIM_FBBPP * CONFIG_SIM_FBWIDTH + 7) >> 3)
 
@@ -126,6 +115,9 @@ struct sim_dev_s
 
 static int sim_putrun(fb_coord_t row, fb_coord_t col,
                       FAR const uint8_t *buffer, size_t npixels);
+static int sim_putarea(fb_coord_t row_start, fb_coord_t row_end,
+                       fb_coord_t col_start, fb_coord_t col_end,
+                       FAR const uint8_t *buffer);
 static int sim_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                       size_t npixels);
 
@@ -159,6 +151,7 @@ static int sim_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
  * Private Data
  ****************************************************************************/
 
+#ifndef CONFIG_SIM_X11FB
 /* This is working memory allocated by the LCD driver for each LCD device
  * and for each color plane.  This memory will hold one raster line of data.
  * The size of the allocated run buffer must therefore be at least
@@ -171,6 +164,12 @@ static int sim_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
  */
 
 static uint8_t g_runbuffer[FB_STRIDE];
+#else
+static size_t g_fblen;
+static unsigned short g_stride;
+
+static struct work_s g_updatework;
+#endif
 
 /* This structure describes the overall LCD video controller */
 
@@ -184,12 +183,14 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 /* This is the standard, NuttX Plane information object */
 
-static const struct lcd_planeinfo_s g_planeinfo =
+static struct lcd_planeinfo_s g_planeinfo =
 {
   .putrun  = sim_putrun,                 /* Put a run into LCD memory */
+  .putarea = sim_putarea,                /* Put a rectangular area to LCD */
   .getrun  = sim_getrun,                 /* Get a run from LCD memory */
+#ifndef CONFIG_SIM_X11FB
   .buffer  = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
-  .display = 0,                          /* Display number */
+#endif
   .bpp     = CONFIG_SIM_FBBPP,           /* Bits-per-pixel */
 };
 
@@ -239,6 +240,69 @@ static int sim_putrun(fb_coord_t row, fb_coord_t col,
                       FAR const uint8_t *buffer, size_t npixels)
 {
   lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
+
+#ifdef CONFIG_SIM_X11FB
+  memcpy(&g_planeinfo.buffer[row * g_stride + col * (g_planeinfo.bpp / 8)],
+         buffer, npixels * g_planeinfo.bpp / 8);
+#endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name:  sim_putarea
+ *
+ * Description:
+ *   This method can be used to write a partial raster line to the LCD:
+ *
+ *   row_start - Starting row to write to (range: 0 <= row < yres)
+ *   row_end   - Ending row to write to (range: row_start <= row < yres)
+ *   col_start - Starting column to write to (range: 0 <= col <= xres)
+ *   col_end   - Ending column to write to
+ *               (range: col_start <= col_end < xres)
+ *   buffer    - The buffer containing the area to be written to the LCD
+ *
+ ****************************************************************************/
+
+static int sim_putarea(fb_coord_t row_start, fb_coord_t row_end,
+                       fb_coord_t col_start, fb_coord_t col_end,
+                       FAR const uint8_t *buffer)
+{
+  fb_coord_t row;
+  size_t rows;
+  size_t cols;
+  size_t row_size;
+
+  lcdinfo("row_start: %d row_end: %d col_start: %d col_end: %d\n",
+          row_start, row_end, col_start, col_end);
+
+  cols = col_end - col_start + 1;
+  rows = row_end - row_start + 1;
+  row_size = cols * (g_planeinfo.bpp >> 3);
+
+#ifdef CONFIG_SIM_X11FB
+  if (col_start == 0 && col_end == (g_videoinfo.xres - 1) &&
+      g_stride == row_size)
+    {
+      /* simpler case, we can just memcpy() the whole buffer */
+
+      memcpy(&g_planeinfo.buffer[row_start * g_stride], buffer,
+             rows * row_size);
+    }
+  else
+    {
+      /* We have to go row by row */
+
+      for (row = row_start; row <= row_end; row++)
+        {
+          memcpy(&g_planeinfo.buffer[row * g_stride + col_start *
+                                     (g_planeinfo.bpp >> 3)],
+                 &buffer[(row - row_start) * row_size],
+                 cols * (g_planeinfo.bpp >> 3));
+        }
+    }
+#endif
+
   return OK;
 }
 
@@ -366,6 +430,18 @@ static int sim_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 }
 
 /****************************************************************************
+ * Name: up_updatework
+ ****************************************************************************/
+
+#ifdef CONFIG_SIM_X11FB
+static void up_updatework(FAR void *arg)
+{
+  work_queue(LPWORK, &g_updatework, up_updatework, NULL, MSEC2TICK(33));
+  up_x11update();
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -381,8 +457,23 @@ static int sim_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
 int board_lcd_initialize(void)
 {
+  int ret = OK;
+
   ginfo("Initializing\n");
-  return OK;
+
+#ifdef CONFIG_SIM_X11FB
+  ret = up_x11initialize(CONFIG_SIM_FBWIDTH, CONFIG_SIM_FBHEIGHT,
+                         (void**)&g_planeinfo.buffer, &g_fblen,
+                         &g_planeinfo.bpp, &g_stride);
+
+  if (ret == OK)
+    {
+      work_queue(LPWORK, &g_updatework, up_updatework, NULL, MSEC2TICK(33));
+    }
+
+#endif
+
+  return ret;
 }
 
 /****************************************************************************

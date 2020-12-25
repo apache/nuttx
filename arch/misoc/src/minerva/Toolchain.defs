@@ -36,9 +36,35 @@
 ############################################################################
 
 CROSSDEV = riscv32-unknown-elf-
-ARCROSSDEV = riscv32-unknown-elf-
 ARCHCPUFLAGS = -march=rv32i
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),)
 MAXOPTIMIZATION ?= -Os
+endif
+
+# Default toolchain
+
+CC = $(CROSSDEV)gcc
+CXX = $(CROSSDEV)g++
+CPP = $(CROSSDEV)gcc -E -P -x c
+LD = $(CROSSDEV)ld
+STRIP = $(CROSSDEV)strip --strip-unneeded
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
+OBJCOPY = $(CROSSDEV)objcopy
+OBJDUMP = $(CROSSDEV)objdump
+
+# Add the builtin library
+
+EXTRA_LIBS += -lgcc
+EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name`"}"
+
+ifneq ($(CONFIG_LIBM),y)
+  EXTRA_LIBS += -lm
+  EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a`"}"
+endif
+
+ifeq ($(CONFIG_CXX_LIBSUPCXX),y)
+  EXTRA_LIBS += -lsupc++
+  EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a`"}"
 endif

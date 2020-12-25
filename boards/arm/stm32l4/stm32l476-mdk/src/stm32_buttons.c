@@ -79,7 +79,7 @@ static const uint32_t g_buttons[NUM_BUTTONS] =
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -91,6 +91,8 @@ void board_button_initialize(void)
     {
       stm32l4_configgpio(g_buttons[i]);
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
@@ -106,22 +108,22 @@ uint32_t board_buttons(void)
 
   for (i = 0; i < NUM_BUTTONS; i++)
     {
-       /* A LOW value means that the key is pressed. */
+      /* A LOW value means that the key is pressed. */
 
-       bool released = stm32l4_gpioread(g_buttons[i]);
+      bool released = stm32l4_gpioread(g_buttons[i]);
 
-       /* Accumulate the set of depressed (not released) keys */
+      /* Accumulate the set of depressed (not released) keys */
 
-       if (!released)
-         {
-            ret |= (1 << i);
-         }
+      if (!released)
+        {
+           ret |= (1 << i);
+        }
     }
 
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Button support.
  *
  * Description:
@@ -136,8 +138,8 @@ uint32_t board_buttons(void)
  *   BUTTON_*_BIT definitions in board.h for the meaning of each bit.
  *
  *   board_button_irq() may be called to register an interrupt handler that
- *   will be called when a button is depressed or released.  The ID value
- *   is a button enumeration value that uniquely identifies a button resource.
+ *   will be called when a button is depressed or released.  The ID value is
+ *   a button enumeration value that uniquely identifies a button resource.
  *   See the BUTTON_* definitions in board.h for the meaning of enumeration
  *   value.
  *

@@ -681,12 +681,17 @@
 #define AESPEED_INIT                (AE_BASE+0x0031)
 #define AESPEED_FAST                (AE_BASE+0x0032)
 #define FASTMOVE_TIMEOUT            (AE_BASE+0x003D)
+#define AE_START_LEVEL              (AE_BASE+0x0040)
 
 /* AWB OFFSET */
 
 #define ATW_INITMASK                (AWB_BASE+0x0004)
 #define INIT_GAINS                  (AWB_BASE+0x0023)
 #define INIT_SFTLMT                 (AWB_BASE+0x002C)
+#define INIT_CONT_INR               (AWB_BASE+0x0038)
+#define INIT_CONT_INB               (AWB_BASE+0x003A)
+#define INIT_CONT_OUTR              (AWB_BASE+0x003C)
+#define INIT_CONT_OUTB              (AWB_BASE+0x003E)
 
 /* AF OFFSET */
 
@@ -803,6 +808,7 @@
 /* AUTOCOM OFFSET */
 
 #define MIPIOUT_EN                  (AUTOCOM_BASE+0x0031)
+#define AELEVEL                     (AUTOCOM_BASE+0x0099)
 
 /* VFRMPARA OFFSET */
 
@@ -1258,6 +1264,10 @@
 
 /* SOUT OFFSET */
 
+#define AESTS                       (SOUT_BASE+0x0000)
+#define AWBSTS                      (SOUT_BASE+0x0024)
+#define RATIO_R                     (SOUT_BASE+0x002E)
+#define RATIO_B                     (SOUT_BASE+0x0030)
 #define CAP_END_F                   (SOUT_BASE+0x0078)
 #define AF_STATE                    (SOUT_BASE+0x018A)
 #define AF_RESULT                   (SOUT_BASE+0x018B)
@@ -1335,8 +1345,11 @@
 #define REGVAL_FPSTYPE_6FPS         (6)
 #define REGVAL_FPSTYPE_5FPS         (7)
 
-#define REGVAL_CPUEXT_BIT_AESTOP    (0x01)
-#define REGVAL_CPUEXT_BIT_AWBSTOP   (0x02)
+#define REGVAL_CPUEXT_BIT_AESTOP    (0x02)
+#define REGVAL_CPUEXT_BIT_AWBSTOP   (0x04)
+
+#define REGVAL_AESTS_STOP           (0)
+#define REGVAL_AWBSTS_STOP          (2)
 
 #define REGVAL_READVECT_BIT_V       (0x01)
 #define REGVAL_READVECT_BIT_H       (0x02)

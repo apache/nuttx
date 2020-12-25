@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* There are five push button switches on the SAMA5D3X-EK base board:
  *
  *   1. One Reset, board reset (BP1)
@@ -84,9 +85,10 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   sam_configpio(PIO_USER1);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

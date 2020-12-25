@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_simsmp.c
+ * arch/sim/src/sim/up_smpsignal.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,6 +45,83 @@
 
 #include "sched/sched.h"
 #include "up_internal.h"
+
+/* These spinlocks are used in the SMP configuration in order to implement
+ * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
+ *
+ * 1. The up_cpu_pause() implementation on CPUn locks both g_cpu_wait[m]
+ *    and g_cpu_paused[m].  CPUn then waits spinning on g_cpu_paused[m].
+ * 2. CPUm receives the interrupt it (1) unlocks g_cpu_paused[m] and
+ *    (2) locks g_cpu_wait[m].  The first unblocks CPUn and the second
+ *    blocks CPUm in the interrupt handler.
+ *
+ * When CPUm resumes, CPUn unlocks g_cpu_wait[m] and the interrupt handler
+ * on CPUm continues.  CPUm must, of course, also then unlock g_cpu_wait[m]
+ * so that it will be ready for the next pause operation.
+ */
+
+static volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
+static volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sim_cpupause_handler
+ *
+ * Description:
+ *   This is the SIGUSR signal handler.  It implements the core logic of
+ *   up_cpu_pause() on the thread of execution the simulated CPU.
+ *
+ * Input Parameters:
+ *   irq - the interrupt number
+ *   context  - not used
+ *   arg      - not used
+ *
+ * Returned Value:
+ *   In case of success OK (0) is returned otherwise a negative value.
+ *
+ ****************************************************************************/
+
+static int sim_cpupause_handler(int irq, FAR void *context, FAR void *arg)
+{
+  int cpu = this_cpu();
+
+  /* Check for false alarms.  Such false could occur as a consequence of
+   * some deadlock breaking logic that might have already serviced the SG2
+   * interrupt by calling up_cpu_paused().  If the pause event has already
+   * been processed then g_cpu_paused[cpu] will not be locked.
+   */
+
+  if (up_cpu_pausereq(cpu))
+    {
+      /* NOTE: The following enter_critical_section() will call
+       * up_cpu_paused() to process a pause request to break a deadlock
+       * because the caller held a critical section. Once up_cpu_paused()
+       * finished, the caller will proceed and release the g_cpu_irqlock.
+       * Then this CPU will acquire g_cpu_irqlock in the function.
+       */
+
+      irqstate_t flags = enter_critical_section();
+
+      /* NOTE: the pause request should not exist here */
+
+      DEBUGVERIFY(!up_cpu_pausereq(cpu));
+
+      leave_critical_section(flags);
+    }
+  else
+    {
+      /* NOTE: sim specific logic
+       * In the case of no pause request, call sim_timer_handler()
+       */
+
+      sim_timer_handler();
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Public Functions
@@ -99,60 +176,56 @@ bool up_cpu_pausereq(int cpu)
 
 int up_cpu_paused(int cpu)
 {
-  struct tcb_s *rtcb = current_task(cpu);
+  struct tcb_s *tcb = current_task(cpu);
 
   /* Update scheduler parameters */
 
-  nxsched_suspend_scheduler(rtcb);
+  nxsched_suspend_scheduler(tcb);
 
-  /* Copy the exception context into the TCB at the (old) head of the
-   * CPUs assigned task list. if up_setjmp returns a non-zero value, then
-   * this is really the previously running task restarting!
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that we are paused */
+
+  sched_note_cpu_paused(tcb);
+#endif
+
+  /* Save the current context at CURRENT_REGS into the TCB at the head
+   * of the assigned task list for this CPU.
    */
 
-  if (up_setjmp(rtcb->xcp.regs) == 0)
-    {
-      /* Unlock the g_cpu_paused spinlock to indicate that we are in the
-       * paused state
-       */
+  up_savestate(tcb->xcp.regs);
 
-      spin_unlock(&g_cpu_paused[cpu]);
+  /* Wait for the spinlock to be released */
 
-      /* Spin until we are asked to resume.  When we resume, we need to
-       * inicate that we are not longer paused.
-       */
+  spin_unlock(&g_cpu_paused[cpu]);
+  spin_lock(&g_cpu_wait[cpu]);
 
-      spin_lock(&g_cpu_wait[cpu]);
-      spin_unlock(&g_cpu_wait[cpu]);
+  /* Restore the exception context of the tcb at the (new) head of the
+   * assigned task list.
+   */
 
-      /* While we were paused, logic on a different CPU probably changed
-       * the task as that head of the assigned task list.  So now we need
-       * restore the exception context of the rtcb at the (new) head
-       * of the assigned list in order to instantiate the new task.
-       */
+  tcb = current_task(cpu);
 
-      rtcb = current_task(cpu);
+  /* The way that we handle signals in the simulation is kind of a
+   * kludge.  This would be unsafe in a truly multi-threaded,
+   * interrupt driven environment.
+   */
 
-      /* The way that we handle signals in the simulation is kind of a
-       * kludge.  This would be unsafe in a truly multi-threaded,
-       * interrupt driven environment.
-       */
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that we have resumed */
 
-      if (rtcb->xcp.sigdeliver)
-        {
-          sinfo("CPU%d: Delivering signals TCB=%p\n", cpu, rtcb);
-          ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
-          rtcb->xcp.sigdeliver = NULL;
-        }
+  sched_note_cpu_resumed(tcb);
+#endif
 
-      /* Reset scheduler parameters */
+  /* Reset scheduler parameters */
 
-      nxsched_resume_scheduler(rtcb);
+  nxsched_resume_scheduler(tcb);
 
-      /* Then switch contexts */
+  /* Then switch contexts.  Any necessary address environment changes
+   * will be made when the interrupt returns.
+   */
 
-      up_longjmp(rtcb->xcp.regs, 1);
-    }
+  up_restorestate(tcb->xcp.regs);
+  spin_unlock(&g_cpu_wait[cpu]);
 
   return OK;
 }
@@ -170,8 +243,163 @@ void up_cpu_started(void)
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   FAR struct tcb_s *tcb = this_task();
 
+  /* Notify that this CPU has started */
+
+  sched_note_cpu_started(tcb);
+
   /* Announce that the IDLE task has started */
 
   sched_note_start(tcb);
 #endif
+}
+
+/****************************************************************************
+ * Name: up_this_task
+ *
+ * Description:
+ *   Return the currrent task tcb.
+ *
+ ****************************************************************************/
+
+struct tcb_s *up_this_task(void)
+{
+  return this_task();
+}
+
+/****************************************************************************
+ * Name: up_cpu_set_pause_handler
+ *
+ * Description:
+ *   Attach the CPU pause request interrupt to the NuttX logic.
+ *
+ * Input Parameters:
+ *   irq - the SIGUSR1 interrupt number
+ *
+ * Returned Value:
+ *   On success returns OK (0), otherwise a negative value.
+ ****************************************************************************/
+
+int up_cpu_set_pause_handler(int irq)
+{
+  up_enable_irq(irq);
+  return irq_attach(irq, sim_cpupause_handler, NULL);
+}
+
+/****************************************************************************
+ * Name: up_cpu_pause
+ *
+ * Description:
+ *   Save the state of the current task at the head of the
+ *   g_assignedtasks[cpu] task list and then pause task execution on the
+ *   CPU.
+ *
+ *   This function is called by the OS when the logic executing on one CPU
+ *   needs to modify the state of the g_assignedtasks[cpu] list for another
+ *   CPU.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be stopped
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_cpu_pause(int cpu)
+{
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the pause event */
+
+  sched_note_cpu_pause(this_task(), cpu);
+#endif
+
+  /* Take the both spinlocks.  The g_cpu_wait spinlock will prevent the
+   * handler from returning until up_cpu_resume() is called; g_cpu_paused
+   * is a handshake that will prefent this function from returning until
+   * the CPU is actually paused.
+   */
+
+  DEBUGASSERT(!spin_islocked(&g_cpu_wait[cpu]) &&
+              !spin_islocked(&g_cpu_paused[cpu]));
+
+  spin_lock(&g_cpu_wait[cpu]);
+  spin_lock(&g_cpu_paused[cpu]);
+
+  /* Generate IRQ for CPU(cpu) */
+
+  sim_send_ipi(cpu);
+
+  /* Wait for the other CPU to unlock g_cpu_paused meaning that
+   * it is fully paused and ready for up_cpu_resume();
+   */
+
+  spin_lock(&g_cpu_paused[cpu]);
+  spin_unlock(&g_cpu_paused[cpu]);
+
+  /* On successful return g_cpu_wait will be locked, the other CPU will be
+   * spinning on g_cpu_wait and will not continue until g_cpu_resume() is
+   * called.  g_cpu_paused will be unlocked in any case.
+   */
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_cpu_resume
+ *
+ * Description:
+ *   Restart the cpu after it was paused via up_cpu_pause(), restoring the
+ *   state of the task at the head of the g_assignedtasks[cpu] list, and
+ *   resume normal tasking.
+ *
+ *   This function is called after up_cpu_pause in order resume operation of
+ *   the CPU after modifying its g_assignedtasks[cpu] list.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU being re-started.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_cpu_resume(int cpu)
+{
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the resume event */
+
+  sched_note_cpu_resume(this_task(), cpu);
+#endif
+
+  /* Release the spinlock.  Releasing the spinlock will cause the SGI2
+   * handler on 'cpu' to continue and return from interrupt to the newly
+   * established thread.
+   */
+
+  DEBUGASSERT(spin_islocked(&g_cpu_wait[cpu]) &&
+              !spin_islocked(&g_cpu_paused[cpu]));
+
+  spin_unlock(&g_cpu_wait[cpu]);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: sim_sigdeliver
+ ****************************************************************************/
+
+void sim_sigdeliver(void)
+{
+  int cpu = this_cpu();
+  struct tcb_s *tcb = current_task(cpu);
+
+  if (tcb->xcp.sigdeliver)
+    {
+      sinfo("Delivering signals TCB=%p\n", tcb);
+      ((sig_deliver_t)tcb->xcp.sigdeliver)(tcb);
+      tcb->xcp.sigdeliver = NULL;
+    }
 }

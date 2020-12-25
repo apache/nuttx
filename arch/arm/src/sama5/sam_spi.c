@@ -45,6 +45,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -57,6 +58,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
@@ -169,7 +171,7 @@ struct sam_spics_s
 #ifdef CONFIG_SAMA5_SPI_DMA
   bool candma;                 /* DMA is supported */
   sem_t dmawait;               /* Used to wait for DMA completion */
-  WDOG_ID dmadog;              /* Watchdog that handles DMA timeouts */
+  struct wdog_s dmadog;        /* Watchdog that handles DMA timeouts */
   int result;                  /* DMA result */
   DMA_HANDLE rxdma;            /* SPI RX DMA handle */
   DMA_HANDLE txdma;            /* SPI TX DMA handle */
@@ -711,8 +713,7 @@ static void spi_dma_sampledone(struct sam_spics_s *spics)
  *   DMA.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -723,7 +724,7 @@ static void spi_dma_sampledone(struct sam_spics_s *spics)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SPI_DMA
-static void spi_dmatimeout(int argc, uint32_t arg, ...)
+static void spi_dmatimeout(wdparm_t arg)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)arg;
   DEBUGASSERT(spics != NULL);
@@ -768,7 +769,7 @@ static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(spics->dmadog);
+  wd_cancel(&spics->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -972,7 +973,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   uint32_t regval;
   unsigned int offset;
 
-  spiinfo("cs=%d frequency=%d\n", spics->cs, frequency);
+  spiinfo("cs=%d frequency=%" PRId32 "\n", spics->cs, frequency);
 
   /* Check if the requested frequency is the same as the frequency
    * selection
@@ -1045,14 +1046,15 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   /* Calculate the new actual frequency */
 
   actual = SAM_SPI_CLOCK / scbr;
-  spiinfo("csr[offset=%02x]=%08x actual=%d\n", offset, regval, actual);
+  spiinfo("csr[offset=%02x]=%08" PRIx32 " actual=%" PRId32 "\n",
+          offset, regval, actual);
 
   /* Save the frequency setting */
 
   spics->frequency = frequency;
   spics->actual    = actual;
 
-  spiinfo("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %" PRId32 "->%" PRId32 "\n", frequency, actual);
   return actual;
 }
 
@@ -1121,7 +1123,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
         }
 
       spi_putreg(spi, regval, offset);
-      spiinfo("csr[offset=%02x]=%08x\n", offset, regval);
+      spiinfo("csr[offset=%02x]=%08" PRIx32 "\n", offset, regval);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -1137,7 +1139,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests
+ *   nbits - The number of bits requested
  *
  * Returned Value:
  *   none
@@ -1152,7 +1154,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
   unsigned int offset;
 
   spiinfo("cs=%d nbits=%d\n", spics->cs, nbits);
-  DEBUGASSERT(spics && nbits > 7 && nbits < 17);
+  DEBUGASSERT(nbits > 7 && nbits < 17);
 
   /* NOTE:  The logic in spi_send and in spi_exchange only handles 8-bit
    * data at the present time.  So the following extra assertion is a
@@ -1173,10 +1175,10 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
       regval |= SPI_CSR_BITS(nbits);
       spi_putreg(spi, regval, offset);
 
-      spiinfo("csr[offset=%02x]=%08x\n", offset, regval);
+      spiinfo("csr[offset=%02x]=%08" PRIx32 "\n", offset, regval);
 
-      /* Save the selection so the subsequence re-configurations will be
-       * faster
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
        */
 
       spics->nbits = nbits;
@@ -1516,8 +1518,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       /* Start (or re-start) the watchdog timeout */
 
-      ret = wd_start(spics->dmadog, DMA_TIMEOUT_TICKS,
-                     spi_dmatimeout, 1, (uint32_t)spics);
+      ret = wd_start(&spics->dmadog, DMA_TIMEOUT_TICKS,
+                     spi_dmatimeout, (wdparm_t)spics);
       if (ret < 0)
         {
            spierr("ERROR: wd_start failed: %d\n", ret);
@@ -1529,7 +1531,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       /* Cancel the watchdog timeout */
 
-      wd_cancel(spics->dmadog);
+      wd_cancel(&spics->dmadog);
 
       /* Check if we were awakened by an error of some kind. */
 
@@ -1674,7 +1676,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
    * chip select structures.
    */
 
-  spics = (struct sam_spics_s *)zalloc(sizeof(struct sam_spics_s));
+  spics = (struct sam_spics_s *)kmm_zalloc(sizeof(struct sam_spics_s));
   if (!spics)
     {
       spierr("ERROR: Failed to allocate a chip select structure\n");
@@ -1682,7 +1684,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
     }
 
   /* Set up the initial state for this chip select structure.  Other fields
-   * were zeroed by zalloc().
+   * were zeroed by kmm_zalloc().
    */
 
 #ifdef CONFIG_SAMA5_SPI_DMA
@@ -1818,11 +1820,6 @@ struct spi_dev_s *sam_spibus_initialize(int port)
 
       nxsem_init(&spics->dmawait, 0, 0);
       nxsem_set_protocol(&spics->dmawait, SEM_PRIO_NONE);
-
-      /* Create a watchdog time to catch DMA timeouts */
-
-      spics->dmadog = wd_create();
-      DEBUGASSERT(spics->dmadog);
 #endif
 
       spi_dumpregs(spi, "After initialization");
@@ -1839,7 +1836,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   spi_putreg(spi, regval, offset);
 
   spics->nbits = 8;
-  spiinfo("csr[offset=%02x]=%08x\n", offset, regval);
+  spiinfo("csr[offset=%02x]=%08" PRIx32 "\n", offset, regval);
 
   return &spics->spidev;
 }

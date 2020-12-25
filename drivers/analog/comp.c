@@ -98,7 +98,7 @@ static const struct comp_callback_s g_comp_callback =
  * Name: comp_pollnotify
  *
  * Description:
- *   This function is called to notificy any waiters of poll-reated events.
+ *   This function is called to notify any waiters of poll-reated events.
  *
  ****************************************************************************/
 
@@ -190,7 +190,7 @@ static int comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
       if (i >= CONFIG_DEV_COMP_NPOLLWAITERS)
         {
           fds->priv   = NULL;
-          ret          = -EBUSY;
+          ret         = -EBUSY;
           goto errout;
         }
     }
@@ -223,8 +223,8 @@ errout:
  * Name: comp_notify
  *
  * Description:
- *   This function is called from the lower half driver to notify
- *   the change of the comparator output.
+ *   This function is called from the lower half driver to notify the change
+ *   of the comparator output.
  *
  ****************************************************************************/
 
@@ -255,13 +255,15 @@ static int comp_open(FAR struct file *filep)
   uint8_t                tmp;
   int                    ret;
 
-  /* If the port is the middle of closing, wait until the close is finished */
+  /* If the port is the middle of closing, wait until the close is
+   * finished.
+   */
 
   ret = nxsem_wait(&dev->ad_sem);
   if (ret >= 0)
     {
-      /* Increment the count of references to the device.  If this the first
-       * time that the driver has been opened for this device, then
+      /* Increment the count of references to the device.  If this is the
+       * first time that the driver has been opened for this device, then
        * initialize the device.
        */
 

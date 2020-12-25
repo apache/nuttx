@@ -149,17 +149,17 @@ SYMBOL(up_longjmp):
 
 	/* Restore registers */
 
-	movq	JB_RBX(REGS),%rbx	/* Save 1: rbx */
-	movq	JB_RSP(REGS),%rsp	/* Save 2: rsp */
-	movq	JB_RBP(REGS),%rbp	/* Save 3: rdi */
-	movq	JB_R12(REGS),%r12	/* Save 4: r12 */
-	movq	JB_R13(REGS),%r13	/* Save 5: r13 */
-	movq	JB_R14(REGS),%r14	/* Save 6: r14 */
-	movq	JB_R15(REGS),%r15	/* Save 7: rbp */
+	movq	JB_RBX(REGS),%rbx	/* Load 1: rbx */
+	movq	JB_RSP(REGS),%rsp	/* Load 2: rsp */
+	movq	JB_RBP(REGS),%rbp	/* Load 3: rdi */
+	movq	JB_R12(REGS),%r12	/* Load 4: r12 */
+	movq	JB_R13(REGS),%r13	/* Load 5: r13 */
+	movq	JB_R14(REGS),%r14	/* Load 6: r14 */
+	movq	JB_R15(REGS),%r15	/* Load 7: rbp */
 
-	/* And return */
+	/* Jump to the saved return address (rsi)  */
 
-	jmp		*JB_RSI(REGS)	/* Save 8: rsi */
+	jmp		*JB_RSI(REGS)
 
 #ifdef __ELF__
 	.size SYMBOL(up_longjmp), . - SYMBOL(up_longjmp)

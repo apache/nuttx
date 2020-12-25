@@ -67,7 +67,7 @@
  *   This function is called by the OS when one or more
  *   signal handling actions have been queued for execution.
  *   The architecture specific code must configure things so
- *   that the 'igdeliver' callback is executed on the thread
+ *   that the 'sigdeliver' callback is executed on the thread
  *   specified by 'tcb' as soon as possible.
  *
  *   This function may be called from interrupt handling logic.
@@ -167,7 +167,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               up_savestate(tcb->xcp.regs);
 
               sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
-                    tcb->xcp.saved_epc, tcb->xcp.saved_status,
+                    tcb->xcp.saved_epc, tcb->xcp.saved_int_ctx,
                     g_current_regs[REG_EPC], g_current_regs[REG_STATUS]);
             }
         }
@@ -200,7 +200,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.regs[REG_INT_CTX]  = int_ctx;
 
           sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
-                tcb->xcp.saved_epc, tcb->xcp.saved_status,
+                tcb->xcp.saved_epc, tcb->xcp.saved_int_ctx,
                 tcb->xcp.regs[REG_EPC], tcb->xcp.regs[REG_STATUS]);
         }
     }

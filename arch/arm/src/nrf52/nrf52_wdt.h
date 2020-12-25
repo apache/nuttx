@@ -41,62 +41,137 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#ifdef CONFIG_WATCHDOG
+#include <stdbool.h>
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-enum wdt_behaviour_e
-{
-  WDG_PAUSE = 0,
-  WDG_RUN = 1
-};
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
 /****************************************************************************
- * Name: nrf52_wdt_initialize
+ * Name: nrf52_wdt_int_enable
  *
  * Description:
- *   Initialize the WDT watchdog time.  The watchdog timer is initialized and
- *   registers as 'devpath.  The initial state of the watchdog time is
- *   disabled.
+ *   Enable watchdog interrupt.
  *
- * Input Parameters:
- *   devpath    - The full path to the watchdog.  This should be of the form
- *                /dev/watchdog0
- *   mode_sleep - The behaviour of watchdog when CPU enter sleep mode
- *   mode_halt  - The behaviour of watchdog when CPU was  HALT by
- *                debugger
+ * Input Parameter:
+ *   int_mask - Interrupt mask
  *
  * Returned Values:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   None
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NRF52_WDT
-int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
-                         int16_t mode_halt);
-#endif
+void nrf52_wdt_int_enable(uint32_t int_mask);
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
+/****************************************************************************
+ * Name: nrf52_wdt_task_trigger
+ *
+ * Description:
+ *   Starts the watchdog
+ *
+ * Input Parameter:
+ *   None
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
 
-#endif /* CONFIG_WATCHDOG */
+void nrf52_wdt_task_trigger(void);
+
+/****************************************************************************
+ * Name: nrf52_wdt_reload_register_enable
+ *
+ * Description:
+ *   Enable/disable a given reload register
+ *
+ * Input Parameter:
+ *   rr_register - Reload request register
+ *   enable - true to enable, false to disable
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+void nrf52_wdt_reload_register_enable(int rr_register, bool enable);
+
+/****************************************************************************
+ * Name: nrf52_wdt_reload_request_set
+ *
+ * Description:
+ *   Setting a specific reload request register
+ *
+ * Input Parameter:
+ *   rr_register - Reload request register to set
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+void nrf52_wdt_reload_request_set(int rr_register);
+
+/****************************************************************************
+ * Name: nrf52_wdt_behaviour_set
+ *
+ * Description:
+ *   Configure the watchdog behaviour when the CPU is sleeping or halted
+ *
+ * Input Parameter:
+ *   behavior - The behaviour to be configured
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+void nrf52_wdt_behaviour_set(int behaviour);
+
+/****************************************************************************
+ * Name: nrf52_wdt_reload_value_set
+ *
+ * Description:
+ *   Setup the watchdog reload value
+ *
+ * Input Parameter:
+ *   reload_value - Watchdog counter initial value
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+void nrf52_wdt_reload_value_set(uint32_t reload_value);
+
+/****************************************************************************
+ * Name: nrf52_wdt_reload_value_get
+ *
+ * Description:
+ *   Read the watchdog reload value
+ *
+ * Returned Values:
+ *   Watchdog counter initial value
+ *
+ ****************************************************************************/
+
+uint32_t nrf52_wdt_reload_value_get(void);
+
+/****************************************************************************
+ * Name: nrf52_wdt_running
+ *
+ * Description:
+ *   Check if watchdog is running
+ *
+ * Returned Values:
+ *   true if watchdog is running, false otherwise
+ *
+ ****************************************************************************/
+
+bool nrf52_wdt_running(void);
+
 #endif /* __ARCH_ARM_SRC_NRF52_NRF52_WDT_H */

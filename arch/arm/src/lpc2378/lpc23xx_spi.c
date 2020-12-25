@@ -234,7 +234,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 
   DEBUGASSERT(frequency <= SPI_CLOCK / 2);
 
-  /* Check if the requested frequency is the same as the frequency selection */
+  /* Check if the requested frequency is the same as the frequency
+   * selection.
+   */
 
   DEBUGASSERT(priv != NULL);
   if (priv->frequency == frequency)
@@ -248,7 +250,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 
   divisor = SPI_CLOCK / frequency;
 
-  /* The SPI CCR register must contain an even number greater than or equal to 8. */
+  /* The SPI CCR register must contain an even number greater than or equal
+   * to 8.
+   */
 
   if (divisor < 8)
     {
@@ -332,7 +336,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
       putreg32(regval, SPI_CR);
 
-      /* Save the mode so that subsequent re-configuratins will be faster */
+      /* Save the mode so that subsequent re-configurations will be faster */
 
       priv->mode = mode;
     }
@@ -346,7 +350,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests
+ *   nbits - The number of bits requested
  *
  * Returned Value:
  *   none
@@ -373,7 +377,9 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       regval |= SPI_CR_BITENABLE;
       putreg32(regval, SPI_CR);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
+       */
 
       priv->nbits = nbits;
     }

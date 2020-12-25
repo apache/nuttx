@@ -155,6 +155,11 @@ config IMXRT_HAVE_LPUART
 	bool
 	default n
 
+config IMXRT_FLEXCAN
+	bool
+	default n
+	select ARCH_HAVE_NETDEV_STATISTICS
+
 config IMXRT_LPI2C
 	bool
 	default n
@@ -162,6 +167,10 @@ config IMXRT_LPI2C
 config IMXRT_LPSPI
 	bool
 	default n
+
+config IMXRT_ADC
+    bool
+    default n
 
 config IMXRT_ENC
 	bool
@@ -207,6 +216,11 @@ config IMXRT_LCD
 	bool "LCD controller"
 	default n
 	depends on IMXRT_HAVE_LCD
+
+config IMXRT_WDOG
+	bool "Watchdog 1"
+	default n
+	depends on WATCHDOG
 
 menu "FlexIO Peripherals"
 
@@ -405,7 +419,103 @@ config IMXRT_LPUART_INVERT
 		Enable signal inversion UART support. The option enables support for the
 		TIOCSINVERT ioctl in the IMXRT serial driver.
 
+config IMXRT_LPUART_SINGLEWIRE
+	bool "Single Wire Support"
+	default n
+	depends on IMXRT_HAVE_LPUART
+	---help---
+		Enable single wire UART support.  The option enables support for the
+		TIOCSSINGLEWIRE ioctl in the IMXRT serial driver.
+
 endmenu # LPUART Configuration
+
+menu "FLEXCAN Peripherals"
+
+config IMXRT_FLEXCAN1
+	bool "FLEXCAN1"
+	default n
+	select IMXRT_FLEXCAN
+	select NET_CAN_HAVE_TX_DEADLINE
+
+config IMXRT_FLEXCAN2
+	bool "FLEXCAN2"
+	default n
+	select IMXRT_FLEXCAN
+	select NET_CAN_HAVE_TX_DEADLINE
+
+config IMXRT_FLEXCAN3
+	bool "FLEXCAN3"
+	default n
+	select IMXRT_FLEXCAN
+	select NET_CAN_HAVE_TX_DEADLINE
+	select NET_CAN_HAVE_CANFD
+
+endmenu # FLEXCAN Peripherals
+
+menu "FLEXCAN1 Configuration"
+	depends on IMXRT_FLEXCAN1
+
+config FLEXCAN1_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN1_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+endmenu # IMXRT_FLEXCAN1
+
+menu "FLEXCAN2 Configuration"
+	depends on IMXRT_FLEXCAN2
+
+config FLEXCAN2_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN2_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+endmenu # IMXRT_FLEXCAN2
+
+menu "FLEXCAN3 Configuration"
+	depends on IMXRT_FLEXCAN3
+
+config FLEXCAN3_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN3_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+config FLEXCAN3_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN3_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN3_DATA_BITRATE
+	int "CAN FD Data phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN3_DATA_SAMPLEP
+	int "CAN FD Data phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # IMXRT_FLEXCAN3
 
 menu "LPI2C Peripherals"
 
@@ -517,6 +627,20 @@ menuconfig IMXRT_LPSPI4
 	select IMXRT_LPSPI
 
 endmenu # LPSPI Peripherals
+
+menu "ADC Peripherals"
+
+menuconfig IMXRT_ADC1
+    bool "ADC1"
+    default n
+    select IMXRT_ADC
+
+menuconfig IMXRT_ADC2
+    bool "ADC2"
+    default n
+    select IMXRT_ADC
+
+endmenu
 
 config IMXRT_SEMC
 	bool "Smart External Memory Controller (SEMC)"
@@ -948,7 +1072,7 @@ endif # IMXRT_GPIO_IRQ
 menu "Ethernet Configuration"
 	depends on IMXRT_ENET
 
-config MXRT_ENET_NRXBUFFERS
+config IMXRT_ENET_NRXBUFFERS
 	int "Number Rx buffers"
 	default 6
 

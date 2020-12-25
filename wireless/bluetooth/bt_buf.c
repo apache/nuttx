@@ -365,7 +365,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
       buf->data = buf->frame->io_data + reserve_head;
     }
 
-  wlinfo("buf %p type %d reserve %u\n", buf, buf->type, reserve_head);
+  wlinfo("buf %p type %d reserve %zu\n", buf, buf->type, reserve_head);
   return buf;
 }
 
@@ -388,9 +388,11 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
 
 void bt_buf_release(FAR struct bt_buf_s *buf)
 {
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
   enum bt_buf_type_e type;
-  irqstate_t flags;
   uint16_t handle;
+#endif
+  irqstate_t flags;
 
   wlinfo("buf %p ref %u type %d\n", buf, buf->ref, buf->type);
 
@@ -400,8 +402,10 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
       return;
     }
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
   handle = buf->u.acl.handle;
   type   = buf->type;
+#endif
 
   /* Free the contained frame and return the container to the correct memory
    * pool.
@@ -460,6 +464,7 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
 
   wlinfo("Buffer freed: %p\n", buf);
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
   if (type == BT_ACL_IN)
     {
       FAR struct bt_hci_cp_host_num_completed_packets_s *cp;
@@ -484,6 +489,7 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
 
       bt_hci_cmd_send(BT_HCI_OP_HOST_NUM_COMPLETED_PACKETS, buf);
     }
+#endif
 }
 
 /****************************************************************************
@@ -525,7 +531,7 @@ FAR void *bt_buf_extend(FAR struct bt_buf_s *buf, size_t len)
 {
   FAR uint8_t *tail = bt_buf_tail(buf);
 
-  wlinfo("buf %p len %u\n", buf, len);
+  wlinfo("buf %p len %zu\n", buf, len);
 
   DEBUGASSERT(bt_buf_tailroom(buf) >= len);
 
@@ -576,7 +582,7 @@ void bt_buf_put_le16(FAR struct bt_buf_s *buf, uint16_t value)
 
 FAR void *bt_buf_provide(FAR struct bt_buf_s *buf, size_t len)
 {
-  wlinfo("buf %p len %u\n", buf, len);
+  wlinfo("buf %p len %zu\n", buf, len);
 
   DEBUGASSERT(buf != NULL && buf->frame != NULL &&
               bt_buf_headroom(buf) >= len);
@@ -603,7 +609,7 @@ FAR void *bt_buf_provide(FAR struct bt_buf_s *buf, size_t len)
 
 FAR void *bt_buf_consume(FAR struct bt_buf_s *buf, size_t len)
 {
-  wlinfo("buf %p len %u\n", buf, len);
+  wlinfo("buf %p len %zu\n", buf, len);
 
   DEBUGASSERT(buf->len >= len);
 

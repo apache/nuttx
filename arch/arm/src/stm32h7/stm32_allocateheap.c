@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -314,7 +315,7 @@ static void addregion (uintptr_t start, uint32_t size, const char *desc)
 {
   /* Display memory ranges to help debugging */
 
-  minfo("%uKb of %s at %p\n", size / 1024, desc, (FAR void *)start);
+  minfo("%" PRIu32 "Kb of %s at %p\n", size / 1024, desc, (FAR void *)start);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
@@ -344,9 +345,15 @@ static void addregion (uintptr_t start, uint32_t size, const char *desc)
 
 void arm_addregion(void)
 {
-  addregion (SRAM123_START, SRAM123_END - SRAM123_START, "SRAM1,2,3");
+  /* At this point there is already one region allocated for "kernel" heap */
 
   unsigned mm_regions = 1;
+
+  if (mm_regions < CONFIG_MM_REGIONS)
+    {
+      addregion (SRAM123_START, SRAM123_END - SRAM123_START, "SRAM1,2,3");
+      mm_regions++;
+    }
 
   if (mm_regions < CONFIG_MM_REGIONS)
     {

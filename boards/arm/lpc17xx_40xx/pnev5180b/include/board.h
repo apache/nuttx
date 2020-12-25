@@ -36,12 +36,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_INCLUDE_BOARD_H
 #define __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_INCLUDE_BOARD_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -53,11 +53,11 @@
 #  include <nuttx/irq.h>
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Clocking ******************************************************************/
+/* Clocking *****************************************************************/
 
 /* NOTE:  The following definitions require lpc17_40_syscon.h.  It is not
  * included here because the including C file may not have that file in its
@@ -138,13 +138,15 @@
 #define CONFIG_LP17_FLASH          1
 #define BOARD_FLASHCFG_VALUE       0x0000403a
 
-/* LED definitions ***********************************************************/
+/* LED definitions **********************************************************/
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LEDs on the
- * PNEV5180B board.  The following definitions describe how NuttX controls the
- * LEDs:
+ * PNEV5180B board.  The following definitions describe how NuttX controls
+ * the LEDs:
  */
+
                              /* LD201  LD200  LD202  LD203                 */
+
                              /* RED    ORANGE BLUE   GREEN                 */
 #define LED_STARTED       0  /* ON     ON     ON     ON                    */
 #define LED_HEAPALLOCATE  1  /* OFF    OFF    OFF    ON                    */
@@ -155,7 +157,7 @@
 #define LED_ASSERTION     6  /* OFF    ON     OFF    OFF    (momentary)    */
 #define LED_PANIC         7  /* ON     OFF    OFF    OFF    (1Hz flashing) */
 
-/* Alternate pin selections **************************************************/
+/* Alternate pin selections *************************************************/
 
 /* Pin Description                      On Board       Connector
  *  -------------------------------- ---------------- -------------
@@ -180,15 +182,15 @@
  * P3.26/STCLK/MAT0.1/PWM1.3          LD202            BLUE LED
  */
 
-/*****************************************************************************
+/****************************************************************************
  * Public Types
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/*****************************************************************************
+/****************************************************************************
  * Public Data
- *****************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -199,30 +201,30 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: lpc17_40_boardinitialize
  *
  * Description:
- *   All LPC17xx/LPC40xx architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have
+ *   All LPC17xx/LPC40xx architectures must provide the following entry
+ *   point. This entry point is called early in the initialization -- after
+ *   all memory has been configured and mapped but before any devices have
  *   been initialized.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void lpc17_40_boardinitialize(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: lpc17_40_led
  *
  * Description:
  *   Once the system has booted, these functions can be used to control LED 1
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void lpc17_40_led(int lednum, int state);

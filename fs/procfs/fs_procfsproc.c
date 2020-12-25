@@ -25,13 +25,13 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/statfs.h>
 #include <sys/stat.h>
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <string.h>
 #include <fcntl.h>
 #include <assert.h>
@@ -362,7 +362,7 @@ static FAR const struct proc_node_s * const g_groupinfo[] =
 
 /* Names of task/thread states */
 
-static FAR const char *g_statenames[] =
+static FAR const char * const g_statenames[] =
 {
   "Invalid",
   "Waiting,Unlock",
@@ -383,7 +383,7 @@ static FAR const char *g_statenames[] =
 #endif
 };
 
-static FAR const char *g_ttypenames[4] =
+static FAR const char * const g_ttypenames[4] =
 {
   "Task",
   "pthread",
@@ -407,7 +407,12 @@ static FAR const struct proc_node_s *proc_findnode(FAR const char *relpath)
 
   for (i = 0; i < PROC_NNODES; i++)
     {
-      if (strcmp(g_nodeinfo[i]->relpath, relpath) == 0)
+      size_t len = strlen(g_nodeinfo[i]->relpath);
+
+      if (strncmp(g_nodeinfo[i]->relpath, relpath, len) == 0 &&
+          (relpath[len] == '\0' || (relpath[len] == '/' &&
+           relpath[len + 1] == '\0' &&
+           g_nodeinfo[i]->dtype == DTYPE_DIRECTORY)))
         {
           return g_nodeinfo[i];
         }
@@ -626,9 +631,9 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
       return totalsize;
     }
 
-  /* Show the signal mask */
+  /* Show the signal mask. Note: sigset_t is uint32_t on NuttX. */
 
-  linesize = snprintf(procfile->line, STATUS_LINELEN, "%-12s%08x\n",
+  linesize = snprintf(procfile->line, STATUS_LINELEN, "%-12s%08" PRIx32 "\n",
                       "SigMask:", tcb->sigprocmask);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
@@ -765,7 +770,8 @@ static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
       fracpart = 0;
     }
 
-  linesize = snprintf(procfile->line, STATUS_LINELEN, "%3d.%01d%%",
+  linesize = snprintf(procfile->line, STATUS_LINELEN,
+                      "%3" PRId32 ".%01" PRId32 "%%",
                       intpart, fracpart);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                            &offset);

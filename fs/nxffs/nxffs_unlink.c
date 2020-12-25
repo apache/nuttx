@@ -41,6 +41,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -60,7 +61,7 @@
  *
  * Description:
  *   Remove an inode from FLASH.  This is the internal implementation of
- *   the file system unlinke operation.
+ *   the file system unlink operation.
  *
  * Input Parameters:
  *   volume - Describes the NXFFS volume.
@@ -111,8 +112,8 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   ret = nxffs_rdcache(volume, volume->ioblock);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to read block %d into cache: %d\n",
-           volume->ioblock, ret);
+      ferr("ERROR: Failed to read block %jd into cache: %d\n",
+           (intmax_t)volume->ioblock, ret);
       goto errout_with_entry;
     }
 
@@ -126,8 +127,8 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   ret = nxffs_wrcache(volume);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to write block %d: %d\n",
-           volume->ioblock, ret);
+      ferr("ERROR: Failed to write block %jd: %d\n",
+           (intmax_t)volume->ioblock, ret);
     }
 
 errout_with_entry:

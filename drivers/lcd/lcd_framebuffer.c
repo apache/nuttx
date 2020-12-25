@@ -47,8 +47,6 @@
 
 #include <nuttx/board.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxglib.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/video/fb.h>
 
@@ -88,8 +86,8 @@ struct lcdfb_dev_s
 
 /* Update the LCD when there is a change to the framebuffer */
 
-static int lcdfb_update(FAR struct lcdfb_dev_s *priv,
-             FAR const struct nxgl_rect_s *rect);
+static int lcdfb_updateearea(FAR struct fb_vtable_s *vtable,
+             FAR const struct fb_area_s *area);
 
 /* Get information about the video controller configuration and the
  * configuration of each color plane.
@@ -167,16 +165,17 @@ static FAR struct lcdfb_dev_s *lcdfb_find(int display)
 }
 
 /****************************************************************************
- * Name: lcdfb_update
+ * Name: lcdfb_updateearea
  *
  * Description:
  * Update the LCD when there is a change to the framebuffer.
  *
  ****************************************************************************/
 
-static int lcdfb_update(FAR struct lcdfb_dev_s *priv,
-                        FAR const struct nxgl_rect_s *rect)
+static int lcdfb_updateearea(FAR struct fb_vtable_s *vtable,
+                             FAR const struct fb_area_s *area)
 {
+  FAR struct lcdfb_dev_s *priv = (FAR struct lcdfb_dev_s *)vtable;
   FAR struct lcd_planeinfo_s *pinfo = &priv->pinfo;
   FAR uint8_t *run;
   fb_coord_t row;
@@ -187,30 +186,34 @@ static int lcdfb_update(FAR struct lcdfb_dev_s *priv,
   fb_coord_t endy;
   int ret;
 
+  DEBUGASSERT(area != NULL);
+  DEBUGASSERT(area->w >= 1);
+  DEBUGASSERT(area->h >= 1);
+
   /* Clip to fit in the framebuffer */
 
-  startx = rect->pt1.x;
+  startx = area->x;
   if (startx < 0)
     {
       startx = 0;
     }
 
-  endx = rect->pt2.x;
+  endx = startx + area->w - 1;
   if (endx >= priv->xres)
     {
-      endx = priv->xres-1;
+      endx = priv->xres - 1;
     }
 
-  starty = rect->pt1.y;
+  starty = area->y;
   if (starty < 0)
     {
       starty = 0;
     }
 
-  endy = rect->pt2.y;
+  endy = starty + area->h - 1;
   if (endy >= priv->yres)
     {
-      endy = priv->yres-1;
+      endy = priv->yres - 1;
     }
 
   /* If the display uses a value of BPP < 8, then we may have to extend the
@@ -330,7 +333,7 @@ static int lcdfb_getcmap(FAR struct fb_vtable_s *vtable,
 
   if (priv != NULL && cmap != NULL)
     {
-      /* Get the video info from the contained LCD */
+      /* Get the color map from the contained LCD */
 
       lcd = priv->lcd
       DEBUGASSERT(lcd->getcmap != NULL);
@@ -364,7 +367,7 @@ static int lcdfb_putcmap(FAR struct fb_vtable_s *vtable,
 
   if (priv != NULL && cmap != NULL)
     {
-      /* Get the video info from the contained LCD */
+      /* Set the color map to the contained LCD */
 
       lcd = priv->lcd
       DEBUGASSERT(lcd->putcmap != NULL);
@@ -399,7 +402,7 @@ static int lcdfb_getcursor(FAR struct fb_vtable_s *vtable,
 
   if (priv != NULL && attrib != NULL)
     {
-      /* Get the video info from the contained LCD */
+      /* Get the cursor info from the contained LCD */
 
       lcd = priv->lcd
       DEBUGASSERT(lcd->getcursor != NULL);
@@ -433,7 +436,7 @@ static int lcdfb_setcursor(FAR struct fb_vtable_s *vtable,
 
   if (priv != NULL && settings != NULL)
     {
-      /* Get the video info from the contained LCD */
+      /* Set the cursor info to the contained LCD */
 
       lcd = priv->lcd
       DEBUGASSERT(lcd->setcursor != NULL);
@@ -473,7 +476,7 @@ int up_fbinitialize(int display)
   FAR struct lcdfb_dev_s *priv;
   FAR struct lcd_dev_s *lcd;
   struct fb_videoinfo_s vinfo;
-  struct nxgl_rect_s rect;
+  struct fb_area_s area;
   int ret;
 
   lcdinfo("display=%d\n", display);
@@ -502,6 +505,7 @@ int up_fbinitialize(int display)
   priv->vtable.getcursor    = lcdfb_getcursor,
   priv->vtable.setcursor    = lcdfb_setcursor,
 #endif
+  priv->vtable.updatearea   = lcdfb_updateearea,
 
 #ifdef CONFIG_LCD_EXTERNINIT
   /* Use external graphics driver initialization */
@@ -510,7 +514,8 @@ int up_fbinitialize(int display)
   if (lcd == NULL)
     {
       gerr("ERROR: board_graphics_setup failed, devno=%d\n", display);
-      return EXIT_FAILURE;
+      ret = -ENODEV;
+      goto errout_with_state;
     }
 #else
   /* Initialize the LCD device */
@@ -576,12 +581,12 @@ int up_fbinitialize(int display)
 
   /* Write the entire framebuffer to the LCD */
 
-  rect.pt1.x = 0;
-  rect.pt1.y = 0;
-  rect.pt2.x = priv->xres - 1;
-  rect.pt2.y = priv->yres - 1;
+  area.x = 0;
+  area.y = 0;
+  area.w = priv->xres;
+  area.h = priv->yres;
 
-  ret = lcdfb_update(priv, &rect);
+  ret = lcdfb_updateearea(&priv->vtable, &area);
   if (ret < 0)
     {
       lcderr("FB update failed: %d\n", ret);
@@ -589,15 +594,15 @@ int up_fbinitialize(int display)
 
   /* Turn the LCD on at 75% power */
 
-  priv->lcd->setpower(priv->lcd, ((3*CONFIG_LCD_MAXPOWER + 3)/4));
+  priv->lcd->setpower(priv->lcd, ((3*CONFIG_LCD_MAXPOWER + 3) / 4));
   return OK;
 
 errout_with_lcd:
 #ifndef CONFIG_LCD_EXTERNINIT
   board_lcd_uninitialize();
+#endif
 
 errout_with_state:
-#endif
   kmm_free(priv);
   return ret;
 }
@@ -607,7 +612,8 @@ errout_with_state:
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
- *   plane of the specified plane.  Many OSDs support multiple planes of video.
+ *   plane of the specified plane.  Many OSDs support multiple planes of
+ *   video.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
@@ -697,58 +703,5 @@ void up_fbuninitialize(int display)
         }
     }
 }
-
-/****************************************************************************
- * Name: nx_notify_rectangle
- *
- * Description:
- *   When CONFIG_LCD_UPDATE=y, then the graphics system will callout to
- *   inform some external module that the display has been updated.  This
- *   would be useful in a couple for cases.
- *
- *   - When a serial LCD is used, but a framebuffer is used to access the
- *     LCD.  In this case, the update callout can be used to refresh the
- *     affected region of the display.
- *
- *   - When VNC is enabled.  This is case, this callout is necessary to
- *     update the remote frame buffer to match the local framebuffer.
- *
- *   When this feature is enabled, some external logic must provide this
- *   interface.  This is the function that will handle the notification.  It
- *   receives the rectangular region that was updated on the provided plane.
- *
- *   NOTE: This function is also required for use with the LCD framebuffer
- *   driver front end when CONFIG_LCD_UPDATE=y, although that use does not
- *   depend on CONFIG_NX (and this function seems misnamed in that case).
- *
- ****************************************************************************/
-
-#if defined(CONFIG_LCD_UPDATE) || defined(CONFIG_NX_UPDATE)
-void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
-                         FAR const struct nxgl_rect_s *rect)
-{
-  FAR struct fb_planeinfo_s *fpinfo = (FAR struct fb_planeinfo_s *)pinfo;
-  FAR struct lcdfb_dev_s *priv;
-  int ret;
-
-  DEBUGASSERT(fpinfo != NULL && rect != NULL);
-
-  /* Look up the LCD framebuffer state structure for this display.
-   *
-   * REVISIT:  If many LCD framebuffers are used, then this lookup would be
-   * a performance issue.
-   */
-
-  priv = lcdfb_find(fpinfo->display);
-  if (priv != NULL)
-    {
-      ret = lcdfb_update(priv, rect);
-      if (ret < 0)
-        {
-          lcderr("FB update failed: %d\n", ret);
-        }
-    }
-}
-#endif
 
 #endif /* CONFIG_LCD_FRAMEBUFFER */

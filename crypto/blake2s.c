@@ -52,6 +52,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/crypto/blake2s.h>
 
 /****************************************************************************
@@ -330,7 +331,7 @@ static int blake2s_selftest(void)
   blake2s_state ctx;
   int ret = -1;
 
-  in = malloc(1024);
+  in = kmm_malloc(1024);
   if (!in)
     {
       goto out;
@@ -372,7 +373,7 @@ static int blake2s_selftest(void)
   ret = 0;
 
 out:
-  free(in);
+  kmm_free(in);
   return ret;
 }
 #endif

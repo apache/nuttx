@@ -94,7 +94,7 @@ int setuid(uid_t uid)
 
   /* Set the task group's group identity. */
 
-  DEBUGASSERT(group != NULL);
+  DEBUGASSERT(rgroup != NULL);
   rgroup->tg_uid = uid;
   return OK;
 }

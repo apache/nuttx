@@ -66,9 +66,9 @@ typedef struct
   volatile uint32_t START_HI;     /* Timer start Register for high 32-bits */
   volatile uint32_t RESET_LO;     /* Timer reset Register for low 32-bits */
   volatile uint32_t RESET_HI;     /* Timer reset Register for high 32-bits */
-} BASIC_TIM_reg_t;
+} basic_tim_reg_t;
 
-#define BASIC_TIM   ((BASIC_TIM_reg_t*)(CORE_PERI_BASE + 0x0400UL))
+#define BASIC_TIM   ((basic_tim_reg_t*)(CORE_PERI_BASE + 0x0400UL))
 
 #define BASIC_TIM_CASC_ENABLE   (1L << 31)
 #define BASIC_TIM_CASC_DISABLE  (0L << 31)
@@ -91,10 +91,10 @@ typedef struct
   volatile uint32_t ICACHE_LX_SEL_FLUSH;      /* Cluster Icache Level-X Flush Register or FC Flush Selected Address Register */
   volatile uint32_t ICACHE_SEL_FLUSH_STATUS;  /* Cluster Icache Flush Selected Address Register or FC ICACHE status */
   volatile uint32_t ICACHE_IS_PRI;            /* Cluster Icache is private Icache */
-} SCBC_reg_t;
+} scbc_reg_t;
 
 #define CORE_SCBC_BASE      (CORE_PERI_BASE +  0x1400UL)   /* RISC Core System Control Block Cache Base Address */
-#define SCBC                ((SCBC_reg_t*)CORE_SCBC_BASE)  /* Icache SCBC configuration struct */
+#define SCBC                ((scbc_reg_t*)CORE_SCBC_BASE)  /* Icache SCBC configuration struct */
 
 /* FLL_CTRL */
 
@@ -109,23 +109,27 @@ typedef struct
   volatile uint32_t CLUSTER_CONF2;             /* Configuration2 register */
   volatile uint32_t CLUSTER_INTEGRATOR;        /* INTEGRATOR register     */
   volatile uint32_t FLL_CONVERGE;              /* Fll Converge register   */
-} FLL_CTRL_reg_t;
+} fll_ctrl_reg_t;
 
-#define FLL_CTRL             ((FLL_CTRL_reg_t *)SOC_PERI_BASE)
+#define FLL_CTRL             ((fll_ctrl_reg_t *)SOC_PERI_BASE)
 
 /* FLL_STATUS - FLL_CTRL status register */
 
 #define FLL_CTRL_STATUS_MULTI_FACTOR_MASK          (0xFFFFU)
 #define FLL_CTRL_STATUS_MULTI_FACTOR_SHIFT         (0U)
+
 #define FLL_CTRL_STATUS_MULTI_FACTOR(x)            (((uint32_t)(x) /* << FLL_CTRL_STATUS_MULTI_FACTOR_SHIFT */) & FLL_CTRL_STATUS_MULTI_FACTOR_MASK)
-#define READ_FLL_CTRL_STATUS_MULTI_FACTOR(x)       (((uint32_t)(x) & FLL_CTRL_STATUS_MULTI_FACTOR_MASK) /*>> FLL_CTRL_STATUS_MULTI_FACTOR_SHIFT*/)
+
+#define READ_FLL_CTRL_STATUS_MULTI_FACTOR(x)       (((uint32_t)(x) & FLL_CTRL_STATUS_MULTI_FACTOR_MASK) /* >> FLL_CTRL_STATUS_MULTI_FACTOR_SHIFT */)
 
 /* SOC_CONF1 - FLL_CTRL configuration 1 register */
 
 #define FLL_CTRL_CONF1_MULTI_FACTOR_MASK           (0xFFFFU)
 #define FLL_CTRL_CONF1_MULTI_FACTOR_SHIFT          (0U)
+
 #define FLL_CTRL_CONF1_MULTI_FACTOR(x)             (((uint32_t)(x) /* << FLL_CTRL_CONF1_MULTI_FACTOR_SHIFT */) & FLL_CTRL_CONF1_MULTI_FACTOR_MASK)
-#define READ_FLL_CTRL_CONF1_MULTI_FACTOR(x)        (((uint32_t)(x) & FLL_CTRL_CONF1_MULTI_FACTOR_MASK) /*>> FLL_CTRL_CONF1_MULTI_FACTOR_SHIFT*/)
+
+#define READ_FLL_CTRL_CONF1_MULTI_FACTOR(x)        (((uint32_t)(x) & FLL_CTRL_CONF1_MULTI_FACTOR_MASK) /* >> FLL_CTRL_CONF1_MULTI_FACTOR_SHIFT */)
 
 #define FLL_CTRL_CONF1_DCO_INPUT_MASK              (0x3FF0000U)
 #define FLL_CTRL_CONF1_DCO_INPUT_SHIFT             (16U)
@@ -151,8 +155,10 @@ typedef struct
 
 #define FLL_CTRL_CONF2_LOOPGAIN_MASK               (0xFU)
 #define FLL_CTRL_CONF2_LOOPGAIN_SHIF  T            (0U)
+
 #define FLL_CTRL_CONF2_LOOPGAIN(x)                 (((uint32_t)(x) /* << FLL_CTRL_CONF2_LOOPGAIN_SHIFT */) & FLL_CTRL_CONF2_LOOPGAIN_MASK)
-#define READ_FLL_CTRL_CONF2_LOOPGAIN(x)            (((uint32_t)(x) & FLL_CTRL_CONF2_LOOPGAIN_MASK)/* >> FLL_CTRL_CONF2_LOOPGAIN_SHIFT*/)
+
+#define READ_FLL_CTRL_CONF2_LOOPGAIN(x)            (((uint32_t)(x) & FLL_CTRL_CONF2_LOOPGAIN_MASK)/* >> FLL_CTRL_CONF2_LOOPGAIN_SHIFT */)
 
 #define FLL_CTRL_CONF2_DEASSERT_CYCLES_MASK        (0x3F0U)
 #define FLL_CTRL_CONF2_DEASSERT_CYCLES_SHIFT       (4U)
@@ -200,8 +206,10 @@ typedef struct
 
 #define FLL_CTRL_SOC_FLL_CONV_MASK                 (0x1U)
 #define FLL_CTRL_SOC_FLL_CONV_SHIFT                (0U)
-#define FLL_CTRL_SOC_FLL_CONV(x)                   (((uint32_t)(x) /*<< FLL_CTRL_SOC_FLL_CONV_SHIFT */) & FLL_CTRL_SOC_FLL_CONV_MASK)
-#define READ_FLL_CTRL_SOC_FLL_CONV(x)              (((uint32_t)(x) & FLL_CTRL_SOC_FLL_CONV_MASK) /*>> FLL_CTRL_SOC_FLL_CONV_SHIFT*/)
+
+#define FLL_CTRL_SOC_FLL_CONV(x)                   (((uint32_t)(x) /* << FLL_CTRL_SOC_FLL_CONV_SHIFT */) & FLL_CTRL_SOC_FLL_CONV_MASK)
+
+#define READ_FLL_CTRL_SOC_FLL_CONV(x)              (((uint32_t)(x) & FLL_CTRL_SOC_FLL_CONV_MASK) /* >> FLL_CTRL_SOC_FLL_CONV_SHIFT */)
 
 #define FLL_CTRL_CLUSTER_FLL_CONV_MASK             (0x2U)
 #define FLL_CTRL_CLUSTER_FLL_CONV_SHIFT            (1U)
@@ -228,7 +236,7 @@ typedef struct
   volatile uint32_t INTSTATUS;   /* gpio int status register */
   volatile uint32_t EN;          /* gpio enable register */
   volatile uint32_t PADCFG[8];   /* pad configuration registers */
-} GPIO_reg_t;
+} gpio_reg_t;
 
 #define GPIO_INTCFG_TYPE_MASK                     (0x3U)
 #define GPIO_INTCFG_TYPE_SHIFT                    (0U)
@@ -238,7 +246,7 @@ typedef struct
 
 /* Peripheral GPIOA base pointer */
 
-#define GPIOA                                   ((GPIO_reg_t *)(SOC_PERI_BASE + 0x1000u))
+#define GPIOA                                   ((gpio_reg_t *)(SOC_PERI_BASE + 0x1000u))
 
 /* UDMA - General Register Layout Typedef */
 
@@ -252,13 +260,13 @@ typedef struct
   volatile uint32_t TX_SIZE;        /* TX UDMA buffer transfer size register */
   volatile uint32_t TX_CFG;         /* TX UDMA transfer configuration register */
   volatile uint32_t TX_INITCFG;     /* Reserved */
-} UDMA_reg_t;
+} udma_reg_t;
 
 /* RX_SADDR - RX TX UDMA buffer transfer address register */
 
 #define UDMA_SADDR_ADDR_MASK                 (0xFFFFU)
 #define UDMA_SADDR_ADDR_SHIFT                (0U)
-#define UDMA_SADDR_ADDR(x)                   (((uint32_t)(x) /*<< UDMA_SADDR_ADDR_SHIFT*/) & UDMA_SADDR_ADDR_MASK)
+#define UDMA_SADDR_ADDR(x)                   (((uint32_t)(x) /* << UDMA_SADDR_ADDR_SHIFT */) & UDMA_SADDR_ADDR_MASK)
 
 /* RX_SIZE - RX TX UDMA buffer transfer size register */
 
@@ -270,7 +278,7 @@ typedef struct
 
 #define UDMA_CFG_CONTINOUS_MASK              (0x1U)
 #define UDMA_CFG_CONTINOUS_SHIFT             (0U)
-#define UDMA_CFG_CONTINOUS(x)                (((uint32_t)(x) /*<< UDMA_CFG_CONTINOUS_SHIFT*/) & UDMA_CFG_CONTINOUS_MASK)
+#define UDMA_CFG_CONTINOUS(x)                (((uint32_t)(x) /* << UDMA_CFG_CONTINOUS_SHIFT */) & UDMA_CFG_CONTINOUS_MASK)
 #define UDMA_CFG_DATA_SIZE_MASK              (0x6U)
 #define UDMA_CFG_DATA_SIZE_SHIFT             (1U)
 #define UDMA_CFG_DATA_SIZE(x)                (((uint32_t)(x) << UDMA_CFG_DATA_SIZE_SHIFT) & UDMA_CFG_DATA_SIZE_MASK)
@@ -291,12 +299,14 @@ typedef struct
 {
   volatile uint32_t CG;          /* clock gating register */
   volatile uint32_t EVTIN;       /* input event register */
-} UDMA_GC_reg_t;
+} udma_gc_reg_t;
 
 #define UDMA_GC_BASE                    (UDMA_BASE + 0x780u)
-#define UDMA_GC                         ((UDMA_GC_reg_t *)UDMA_GC_BASE)
+#define UDMA_GC                         ((udma_gc_reg_t *)UDMA_GC_BASE)
 
-/* UDMA_GC - UDMA event in register, User chooses which events can come to UDMA as reference events, support up to 4 choices */
+/* UDMA_GC - UDMA event in register, User chooses which events can come to
+ *           UDMA as reference events, support up to 4 choices
+ */
 
 #define UDMA_GC_EVTIN_CHOICE0_MASK      (0xFFU)
 #define UDMA_GC_EVTIN_CHOICE0_SHIFT     (0U)
@@ -318,20 +328,20 @@ typedef struct
 
 typedef struct
 {
-  UDMA_reg_t    UDMA_LVDS;           /* UDMA general register */
+  udma_reg_t    UDMA_LVDS;           /* UDMA general register */
   volatile  uint32_t RF_CFG;         /* configuration register */
   volatile  uint32_t RF_GPIO;        /* Reserved */
   volatile  uint32_t RF_STATUS;      /* Status register */
-} LVDS_reg_t;
+} lvds_reg_t;
 
 #define LVDS_BASE                                 (UDMA_BASE + 0 * 128U)
-#define LVDS                                      ((LVDS_reg_t *)LVDS_BASE)
+#define LVDS                                      ((lvds_reg_t *)LVDS_BASE)
 
 /* RF_CFG - LVDS configuration register */
 
 #define LVDS_RF_CFG_TX_ENB_MASK                  (0x1U)
 #define LVDS_RF_CFG_TX_ENB_SHIFT                 (0U)
-#define LVDS_RF_CFG_TX_ENB(x)                    (((uint32_t)(x) << /*LVDS_RF_CFG_TX_ENB_SHIFT*/) & LVDS_RF_CFG_TX_ENB_MASK)
+#define LVDS_RF_CFG_TX_ENB(x)                    (((uint32_t)(x) << /* LVDS_RF_CFG_TX_ENB_SHIFT */) & LVDS_RF_CFG_TX_ENB_MASK)
 
 #define LVDS_RF_CFG_TX_OEB_MASK                  (0x2U)
 #define LVDS_RF_CFG_TX_OEB_SHIFT                 (1U)
@@ -385,13 +395,13 @@ typedef struct
 
 #define LVDS_RF_STATUS_SYNC_FLAG_MASK            (0x1U)
 #define LVDS_RF_STATUS_SYNC_FLAG_SHIFT           (0U)
-#define LVDS_RF_STATUS_SYNC_FLAG(x)              (((uint32_t)(x) /*<< LVDS_RF_STATUS_SYNC_FLAG_SHIFT*/) & LVDS_RF_STATUS_SYNC_FLAG_MASK)
+#define LVDS_RF_STATUS_SYNC_FLAG(x)              (((uint32_t)(x) /* << LVDS_RF_STATUS_SYNC_FLAG_SHIFT */) & LVDS_RF_STATUS_SYNC_FLAG_MASK)
 
 /* ORCA - Register Layout Typedef */
 
 typedef struct
 {
-  UDMA_reg_t    UDMA_ORCA;           /* ORCA UDMA general register */
+  udma_reg_t    UDMA_ORCA;           /* ORCA UDMA general register */
   volatile  uint32_t RF_CFG;         /* ORCA configuration register */
   volatile  uint32_t RF_GPIO;        /* Reserved */
   volatile  uint32_t RF_STATUS;      /* ORCA Status register */
@@ -401,16 +411,16 @@ typedef struct
   volatile  uint32_t CLKDIV_UPD;     /* ORCA uDMA clock divider data register */
   volatile  uint32_t ORCA_CFG;       /* ORCA configuration register */
   volatile  uint32_t CNT_EVENT;      /* ORCA Status register */
-} ORCA_reg_t;
+} orca_reg_t;
 
 #define ORCA_BASE                                 (UDMA_BASE + 0 * 128U)
-#define ORCA                                      ((ORCA_reg_t *)ORCA_BASE)
+#define ORCA                                      ((orca_reg_t *)ORCA_BASE)
 
 /* RF_CFG - ORCA configuration register */
 
 #define ORCA_RF_CFG_TX_ENB_MASK                  (0x1U)
 #define ORCA_RF_CFG_TX_ENB_SHIFT                 (0U)
-#define ORCA_RF_CFG_TX_ENB(x)                    (((uint32_t)(x) /*<< ORCA_RF_CFG_TX_ENB_SHIFT*/) & ORCA_RF_CFG_TX_ENB_MASK)
+#define ORCA_RF_CFG_TX_ENB(x)                    (((uint32_t)(x) /* << ORCA_RF_CFG_TX_ENB_SHIFT */) & ORCA_RF_CFG_TX_ENB_MASK)
 
 #define ORCA_RF_CFG_TX_OEB_MASK                  (0x2U)
 #define ORCA_RF_CFG_TX_OEB_SHIFT                 (1U)
@@ -464,31 +474,31 @@ typedef struct
 
 #define ORCA_RF_STATUS_SYNC_FLAG_MASK            (0x1U)
 #define ORCA_RF_STATUS_SYNC_FLAG_SHIFT           (0U)
-#define ORCA_RF_STATUS_SYNC_FLAG(x)              (((uint32_t)(x) /*<< ORCA_RF_STATUS_SYNC_FLAG_SHIFT*/) & ORCA_RF_STATUS_SYNC_FLAG_MASK)
+#define ORCA_RF_STATUS_SYNC_FLAG(x)              (((uint32_t)(x) /* << ORCA_RF_STATUS_SYNC_FLAG_SHIFT */) & ORCA_RF_STATUS_SYNC_FLAG_MASK)
 
 /* CLKDIV_EN - ORCA uDMA clock divider enable register */
 
 #define ORCA_CLKDIV_EN_MASK              (0x1U)
 #define ORCA_CLKDIV_EN_SHIFT             (0U)
-#define ORCA_CLKDIV_EN(x)                (((uint32_t)(x) /*<< ORCA_CLKDIV_EN_SHIFT*/) & ORCA_CLKDIV_EN_MASK)
+#define ORCA_CLKDIV_EN(x)                (((uint32_t)(x) /* << ORCA_CLKDIV_EN_SHIFT */) & ORCA_CLKDIV_EN_MASK)
 
 /* CLKDIV_CFG - ORCA uDMA clock divider configuration register */
 
 #define ORCA_CLKDIV_CFG_MASK             (0xFFU)
 #define ORCA_CLKDIV_CFG_SHIFT            (0U)
-#define ORCA_CLKDIV_CFG(x)               (((uint32_t)(x) /*<< ORCA_CLKDIV_CFG_SHIFT*/) & ORCA_CLKDIV_CFG_MASK)
+#define ORCA_CLKDIV_CFG(x)               (((uint32_t)(x) /* << ORCA_CLKDIV_CFG_SHIFT */) & ORCA_CLKDIV_CFG_MASK)
 
 /* CLKDIV_UDP - ORCA uDMA clock divider enable register */
 
 #define ORCA_CLKDIV_UDP_MASK             (0x1U)
 #define ORCA_CLKDIV_UDP_SHIFT            (0U)
-#define ORCA_CLKDIV_UDP(x)               (((uint32_t)(x) /*<< ORCA_CLKDIV_UDP_SHIFT*/) & ORCA_CLKDIV_UDP_MASK)
+#define ORCA_CLKDIV_UDP(x)               (((uint32_t)(x) /* << ORCA_CLKDIV_UDP_SHIFT */) & ORCA_CLKDIV_UDP_MASK)
 
 /* ORCA_CFG - ORCA configuration register */
 
 #define ORCA_CFG_SIZE_MASK               (0xFU)
 #define ORCA_CFG_SIZE_SHIFT              (0U)
-#define ORCA_CFG_SIZE(x)                 (((uint32_t)(x) /*<< ORCA_CFG_SIZE_SHIFT*/) & ORCA_CFG_SIZE_MASK)
+#define ORCA_CFG_SIZE(x)                 (((uint32_t)(x) /* << ORCA_CFG_SIZE_SHIFT */) & ORCA_CFG_SIZE_MASK)
 
 #define ORCA_CFG_DELAY_MASK              (0xF0U)
 #define ORCA_CFG_DELAY_SHIFT             (4U)
@@ -502,13 +512,13 @@ typedef struct
 
 typedef struct
 {
-  UDMA_reg_t    UDMA_SPIM;              /* SPIM UDMA general register */
-} SPIM_reg_t;
+  udma_reg_t    UDMA_SPIM;              /* SPIM UDMA general register */
+} spim_reg_t;
 
 #define SPIM0_BASE                                (UDMA_BASE + 1 * 128U)
-#define SPIM0                                     ((SPIM_reg_t *)SPIM0_BASE)
+#define SPIM0                                     ((spim_reg_t *)SPIM0_BASE)
 #define SPIM1_BASE                                (UDMA_BASE + 2 * 128U)
-#define SPIM1                                     ((SPIM_reg_t *)SPIM1_BASE)
+#define SPIM1                                     ((spim_reg_t *)SPIM1_BASE)
 
 /* uDMA - SPIM uDMA control CMD */
 
@@ -536,7 +546,7 @@ typedef struct
 
 #define SPIM_CMD_CFG_CLKDIV_MASK                  (0xFFU)
 #define SPIM_CMD_CFG_CLKDIV_SHIFT                 (0U)
-#define SPIM_CMD_CFG_CLKDIV(x)                    (((uint32_t)(x) /*<< SPIM_CMD_CFG_CLKDIV_SHIFT*/) & SPIM_CMD_CFG_CLKDIV_MASK)
+#define SPIM_CMD_CFG_CLKDIV(x)                    (((uint32_t)(x) /* << SPIM_CMD_CFG_CLKDIV_SHIFT */) & SPIM_CMD_CFG_CLKDIV_MASK)
 #define SPIM_CMD_CFG_CPHA_MASK                    (0x100U)
 #define SPIM_CMD_CFG_CPHA_SHIFT                   (8U)
 #define SPIM_CMD_CFG_CPHA(x)                      (((uint32_t)(x) << SPIM_CMD_CFG_CPHA_SHIFT) & SPIM_CMD_CFG_CPHA_MASK)
@@ -554,7 +564,7 @@ typedef struct
 
 #define SPIM_CMD_SEND_VALUEL_MASK                (0xFFU)
 #define SPIM_CMD_SEND_VALUEL_SHIFT                (0U)
-#define SPIM_CMD_SEND_VALUEL(x)                   (((uint32_t)(x) /*<< SPIM_CMD_SEND_VALUEL_SHIFT*/) & SPIM_CMD_SEND_VALUEL_MASK)
+#define SPIM_CMD_SEND_VALUEL(x)                   (((uint32_t)(x) /* << SPIM_CMD_SEND_VALUEL_SHIFT */) & SPIM_CMD_SEND_VALUEL_MASK)
 #define SPIM_CMD_SEND_VALUEH_MASK                 (0xFF00U)
 #define SPIM_CMD_SEND_VALUEH_SHIFT                (8U)
 #define SPIM_CMD_SEND_VALUEH(x)                   (((uint32_t)(x) << SPIM_CMD_SEND_VALUEH_SHIFT) & SPIM_CMD_SEND_VALUEH_MASK)
@@ -569,7 +579,7 @@ typedef struct
 
 #define SPIM_CMD_SEND_ADDR_VALUE_MASK             (0xFFFFU)
 #define SPIM_CMD_SEND_ADDR_VALUE_SHIFT            (0U)
-#define SPIM_CMD_SEND_ADDR_VALUE(x)               (((uint32_t)(x) /*<< SPIM_CMD_SEND_ADDR_VALUE_SHIFT*/) & SPIM_CMD_SEND_ADDR_VALUE_MASK)
+#define SPIM_CMD_SEND_ADDR_VALUE(x)               (((uint32_t)(x) /* << SPIM_CMD_SEND_ADDR_VALUE_SHIFT */) & SPIM_CMD_SEND_ADDR_VALUE_MASK)
 #define SPIM_CMD_SEND_ADDR_CMD_SIZE_MASK          (0x1F0000U)
 #define SPIM_CMD_SEND_ADDR_CMD_SIZE_SHIFT         (16U)
 #define SPIM_CMD_SEND_ADDR_CMD_SIZE(x)            (((uint32_t)(x) << SPIM_CMD_SEND_ADDR_CMD_SIZE_SHIFT) & SPIM_CMD_SEND_ADDR_CMD_SIZE_MASK)
@@ -587,13 +597,13 @@ typedef struct
 
 #define SPIM_CMD_WAIT_EVENT_ID_MASK               (0x3U)
 #define SPIM_CMD_WAIT_EVENT_ID_SHIFT              (0U)
-#define SPIM_CMD_WAIT_EVENT_ID(x)                 (((uint32_t)(x) /*<< SPIM_CMD_WAIT_EVENT_ID_SHIFT*/) & SPIM_CMD_WAIT_EVENT_ID_MASK)
+#define SPIM_CMD_WAIT_EVENT_ID(x)                 (((uint32_t)(x) /* << SPIM_CMD_WAIT_EVENT_ID_SHIFT */) & SPIM_CMD_WAIT_EVENT_ID_MASK)
 
 /* CMD_TX_DATA - SPIM send data */
 
 #define SPIM_CMD_TX_DATA_SIZE_MASK                (0xFFFFU)
 #define SPIM_CMD_TX_DATA_SIZE_SHIFT               (0U)
-#define SPIM_CMD_TX_DATA_SIZE(x)                  (((uint32_t)(x) /*<< SPIM_CMD_TX_DATA_SIZE_SHIFT*/) & SPIM_CMD_TX_DATA_SIZE_MASK)
+#define SPIM_CMD_TX_DATA_SIZE(x)                  (((uint32_t)(x) /* << SPIM_CMD_TX_DATA_SIZE_SHIFT */) & SPIM_CMD_TX_DATA_SIZE_MASK)
 #define SPIM_CMD_TX_DATA_BYTE_ALIGN_MASK          (0x4000000U)
 #define SPIM_CMD_TX_DATA_BYTE_ALIGN_SHIFT         (26U)
 #define SPIM_CMD_TX_DATA_BYTE_ALIGN(x)            (((uint32_t)(x) << SPIM_CMD_TX_DATA_BYTE_ALIGN_SHIFT) & SPIM_CMD_TX_DATA_BYTE_ALIGN_MASK)
@@ -605,7 +615,7 @@ typedef struct
 
 #define SPIM_CMD_RX_DATA_SIZE_MASK                (0xFFFFU)
 #define SPIM_CMD_RX_DATA_SIZE_SHIFT               (0U)
-#define SPIM_CMD_RX_DATA_SIZE(x)                  (((uint32_t)(x) /*<< SPIM_CMD_RX_DATA_SIZE_SHIFT*/) & SPIM_CMD_RX_DATA_SIZE_MASK)
+#define SPIM_CMD_RX_DATA_SIZE(x)                  (((uint32_t)(x) /* << SPIM_CMD_RX_DATA_SIZE_SHIFT */) & SPIM_CMD_RX_DATA_SIZE_MASK)
 #define SPIM_CMD_RX_DATA_BYTE_ALIGN_MASK          (0x4000000U)
 #define SPIM_CMD_RX_DATA_BYTE_ALIGN_SHIFT         (26U)
 #define SPIM_CMD_RX_DATA_BYTE_ALIGN(x)            (((uint32_t)(x) << SPIM_CMD_RX_DATA_BYTE_ALIGN_SHIFT) & SPIM_CMD_RX_DATA_BYTE_ALIGN_MASK)
@@ -617,25 +627,25 @@ typedef struct
 
 #define SPIM_CMD_RPT_CNT_MASK                     (0xFFFFU)
 #define SPIM_CMD_RPT_CNT_SHIFT                    (0U)
-#define SPIM_CMD_RPT_CNT(x)                       (((uint32_t)(x) /*<< SPIM_CMD_RPT_CNT_SHIFT*/) & SPIM_CMD_RPT_CNT_MASK)
+#define SPIM_CMD_RPT_CNT(x)                       (((uint32_t)(x) /* << SPIM_CMD_RPT_CNT_SHIFT */) & SPIM_CMD_RPT_CNT_MASK)
 
 /* CMD_EOT - SPIM clears the chip select (CS), and send a end event or not  */
 
 #define SPIM_CMD_EOT_EVENT_GEN_MASK                (0x1U)
 #define SPIM_CMD_EOT_EVENT_GEN_SHIFT               (0U)
-#define SPIM_CMD_EOT_EVENT_GEN(x)                  (((uint32_t)(x) /*<< SPIM_CMD_EOT_EVENT_GEN_SHIFT*/) & SPIM_CMD_EOT_EVENT_GEN_MASK)
+#define SPIM_CMD_EOT_EVENT_GEN(x)                  (((uint32_t)(x) /* << SPIM_CMD_EOT_EVENT_GEN_SHIFT */) & SPIM_CMD_EOT_EVENT_GEN_MASK)
 
 /* CMD_RPT_END - SPIM End of the repeat loop */
 
 #define SPIM_CMD_RPT_END_SPI_CMD_MASK              (0xFU)
 #define SPIM_CMD_RPT_END_SPI_CMD_SHIFT             (0U)
-#define SPIM_CMD_RPT_END_SPI_CMD(x)                (((uint32_t)(x) /*<< SPIM_CMD_RPT_END_SPI_CMD_SHIFT*/) & SPIM_CMD_RPT_END_SPI_CMD_MASK)
+#define SPIM_CMD_RPT_END_SPI_CMD(x)                (((uint32_t)(x) /* << SPIM_CMD_RPT_END_SPI_CMD_SHIFT */) & SPIM_CMD_RPT_END_SPI_CMD_MASK)
 
 /* CMD_RX_CHECK - SPIM check up to 16 bits of data against an expected value  */
 
 #define SPIM_CMD_RX_CHECK_COMP_DATA_MASK            (0xFFFFU)
 #define SPIM_CMD_RX_CHECK_COMP_DATA_SHIFT           (0U)
-#define SPIM_CMD_RX_CHECK_COMP_DATA(x)              (((uint32_t)(x) /*<< SPIM_CMD_RX_CHECK_COMP_DATA_SHIFT*/) & SPIM_CMD_RX_CHECK_COMP_DATA_MASK)
+#define SPIM_CMD_RX_CHECK_COMP_DATA(x)              (((uint32_t)(x) /* << SPIM_CMD_RX_CHECK_COMP_DATA_SHIFT */) & SPIM_CMD_RX_CHECK_COMP_DATA_MASK)
 
 /* The number of bits to check, maximum is 16bits */
 
@@ -643,7 +653,9 @@ typedef struct
 #define SPIM_CMD_RX_CHECK_STATUS_SIZE_SHIFT         (16U)
 #define SPIM_CMD_RX_CHECK_STATUS_SIZE(x)            (((uint32_t)(x) << SPIM_CMD_RX_CHECK_STATUS_SIZE_SHIFT) & SPIM_CMD_RX_CHECK_STATUS_SIZE_MASK)
 
-/* The type of checking, 0 - Equal; 1 - check the bits of one; 2 - check the bits of zero */
+/* The type of checking, 0 - Equal; 1 - check the bits of one;
+ * 2 - check the bits of zero
+ */
 
 #define SPIM_CMD_RX_CHECK_CHECK_TYPE_MASK           (0x3000000U)
 #define SPIM_CMD_RX_CHECK_CHECK_TYPE_SHIFT          (24U)
@@ -662,7 +674,7 @@ typedef struct
 
 #define SPIM_CMD_FULL_SIZE_CMD_MASK                 (0xFFFFU)
 #define SPIM_CMD_FULL_SIZE_CMD_SHIFT                (0U)
-#define SPIM_CMD_FULL_SIZE_CMD(x)                   (((uint32_t)(x) /*<< SPIM_CMD_FULL_SIZE_CMD_SHIFT*/) & SPIM_CMD_FULL_SIZE_CMD_MASK)
+#define SPIM_CMD_FULL_SIZE_CMD(x)                   (((uint32_t)(x) /* << SPIM_CMD_FULL_SIZE_CMD_SHIFT */) & SPIM_CMD_FULL_SIZE_CMD_MASK)
 #define SPIM_CMD_FULL_BYTE_ALIGN_CMD_MASK           (0x4000000U)
 #define SPIM_CMD_FULL_BYTE_ALIGN_CMD_SHIFT          (26U)
 #define SPIM_CMD_FULL_BYTE_ALIGN_CMD(x)             (((uint32_t)(x) << SPIM_CMD_FULL_BYTE_ALIGN_CMD_SHIFT) & SPIM_CMD_FULL_BYTE_ALIGN_CMD_MASK)
@@ -731,7 +743,7 @@ typedef struct
 
 typedef struct
 {
-  UDMA_reg_t    UDMA_HYPERBUS;        /* UDMA general register */
+  udma_reg_t    UDMA_HYPERBUS;        /* UDMA general register */
   volatile  uint32_t EXT_ADDR;        /* Memory access address register */
   volatile  uint32_t EXT_CFG;         /* Reserved */
   volatile  uint32_t MEM_CFG0;        /* Memory control Configuration register0 */
@@ -742,10 +754,10 @@ typedef struct
   volatile  uint32_t MEM_CFG5;        /* Memory control Configuration register5 */
   volatile  uint32_t MEM_CFG6;        /* Memory control Configuration register6 */
   volatile  uint32_t MEM_CFG7;        /* Memory control Configuration register7 */
-} HYPERBUS_reg_t;
+} hyperbus_reg_t;
 
 #define HYPERBUS_BASE0                                 (UDMA_BASE + 3 * 128U)
-#define HYPERBUS0                                      ((HYPERBUS_reg_t *)HYPERBUS_BASE0)
+#define HYPERBUS0                                      ((hyperbus_reg_t *)HYPERBUS_BASE0)
 
 /* MEM_CFG0 - HYPERBUS Memory control Configuration register0 */
 
@@ -880,13 +892,13 @@ typedef struct
 
 typedef struct
 {
-  UDMA_reg_t    UDMA_UART;      /* UDMA general register */
+  udma_reg_t    UDMA_UART;      /* UDMA general register */
   volatile  uint32_t STATUS;    /* Status register */
   volatile  uint32_t SETUP;     /* Configuration register */
-} UART_reg_t;
+} uart_reg_t;
 
 #define UART_BASE                                 (UDMA_BASE + 4 * 128U)
-#define UART                                      ((UART_reg_t *)UART_BASE)
+#define UART                                      ((uart_reg_t *)UART_BASE)
 
 /* STATUS - UART Status register */
 
@@ -930,16 +942,15 @@ typedef struct
 
 typedef struct
 {
-  UDMA_reg_t     UDMA_I2C;        /* UDMA general register */
+  udma_reg_t     UDMA_I2C;        /* UDMA general register */
   volatile  uint32_t STATUS;      /* Status register */
   volatile  uint32_t SETUP;       /* Configuration register */
-
-} I2C_reg_t;
+} i2c_reg_t;
 
 #define I2C0_BASE                                (UDMA_BASE + 5 * 128U)
-#define I2C0                                     ((I2C_reg_t *)I2C0_BASE)
+#define I2C0                                     ((i2c_reg_t *)I2C0_BASE)
 #define I2C1_BASE                                (UDMA_BASE + 6 * 128U)
-#define I2C1                                     ((I2C_reg_t *)I2C1_BASE)
+#define I2C1                                     ((i2c_reg_t *)I2C1_BASE)
 
 /* STATUS - I2C Status register */
 
@@ -975,13 +986,13 @@ typedef struct
 
 typedef struct
 {
-  UDMA_reg_t     UDMA_TCDM;        /* UDMA general register */
+  udma_reg_t     UDMA_TCDM;        /* UDMA general register */
   volatile  uint32_t DST_ADDR;     /* destination address register */
   volatile  uint32_t SRC_ADDR;     /* source address register */
-} TCDM_reg_t;
+} tcdm_reg_t;
 
 #define TCDM_BASE                                 (UDMA_BASE + 7 * 128U)
-#define TCDM                                      ((TCDM_reg_t *)TCDM_BASE)
+#define TCDM                                      ((tcdm_reg_t *)TCDM_BASE)
 
 /* DST_ADDR - TCDM destination address register */
 
@@ -999,17 +1010,17 @@ typedef struct
 
 typedef struct
 {
-  UDMA_reg_t      UDMA_I2S;            /* UDMA general register */
+  udma_reg_t      UDMA_I2S;            /* UDMA general register */
   volatile  uint32_t EXT;              /* external clock configuration register */
   volatile  uint32_t CFG_CLKGEN0;      /* clock/WS generator 0 configuration register */
   volatile  uint32_t CFG_CLKGEN1;      /* clock/WS generator 1 configuration register */
   volatile  uint32_t CHMODE;           /* channels mode configuration register */
   volatile  uint32_t FILT_CH0;         /* channels 0 filtering configuration register */
   volatile  uint32_t FILT_CH1;         /* channels 0 filtering configuration register */
-} I2S_reg_t;
+} i2s_reg_t;
 
 #define I2S_BASE                                 (UDMA_BASE + 8 * 128U)
-#define I2S                                      ((I2S_reg_t *)I2S_BASE)
+#define I2S                                      ((i2s_reg_t *)I2S_BASE)
 
 /* EXT - I2S external clock configuration Register */
 
@@ -1103,16 +1114,16 @@ typedef struct
 
 typedef struct
 {
-  UDMA_reg_t     UDMA_CPI;          /* UDMA general register */
+  udma_reg_t     UDMA_CPI;          /* UDMA general register */
   volatile  uint32_t CFG_GLOB;      /* global configuration register */
   volatile  uint32_t CFG_LL;        /* lower left comer configuration register */
   volatile  uint32_t CFG_UR;        /* upper right comer configuration register */
   volatile  uint32_t CFG_SIZE;      /* horizontal resolution configuration register */
   volatile  uint32_t CFG_FILTER;    /* RGB coefficients configuration register */
-} CPI_reg_t;
+} cpi_reg_t;
 
 #define CPI_BASE                                 (UDMA_BASE + 9 * 128U)
-#define CPI                                      ((CPI_reg_t *)CPI_BASE)
+#define CPI                                      ((cpi_reg_t *)CPI_BASE)
 
 /* CFG_GLOB - CPI global configuration register */
 
@@ -1192,11 +1203,10 @@ typedef struct
   volatile  uint32_t _reserved2[3];       /* reserved */
   volatile  uint32_t CORE_STATUS;         /* SOC_CTRL Slepp control register */
   volatile  uint32_t CORE_STATUS_EOC;     /* SOC_CTRL Slepp control register */
-
-} SOC_CTRL_reg_t;
+} soc_strl_reg_t;
 
 #define SOC_CTRL_BASE                                (0x1A104000)
-#define SOC_CTRL                                     ((SOC_CTRL_reg_t *)SOC_CTRL_BASE)
+#define SOC_CTRL                                     ((soc_strl_reg_t *)SOC_CTRL_BASE)
 
 /* CLUSTER_BYPASS - SOC_CTRL information register */
 
@@ -1263,17 +1273,20 @@ typedef struct
   volatile uint32_t RAR_DCDC;        /* CTRL control register */
   volatile uint32_t SLEEP_CTRL;      /* CTRL sleep control register */
   volatile uint32_t FORCE;           /* CTRL register */
-} SOC_CTRL_PMU_reg_t;
+} soc_ctrl_pmu_reg_t;
 
 #define PMU_CTRL_BASE                               (SOC_CTRL_BASE + 0x0100u)
-#define PMU_CTRL                                    ((SOC_CTRL_PMU_reg_t *)PMU_CTRL_BASE)
+#define PMU_CTRL                                    ((soc_ctrl_pmu_reg_t *)PMU_CTRL_BASE)
 
 /* RAR_DCDC - PMU control register */
 
 #define PMU_CTRL_RAR_DCDC_NV_MASK         (0x1FU)
 #define PMU_CTRL_RAR_DCDC_NV_SHIFT        (0U)
-#define PMU_CTRL_RAR_DCDC_NV(x)           (((uint32_t)(x) /* << PMU_CTRL_RAR_DCDC_NV_SHIFT*/) & PMU_CTRL_RAR_DCDC_NV_MASK)
-#define READ_PMU_CTRL_RAR_DCDC_NV(x)      (((uint32_t)(x) & PMU_CTRL_RAR_DCDC_NV_MASK) /*>> PMU_CTRL_RAR_DCDC_NV_SHIFT*/)
+
+#define PMU_CTRL_RAR_DCDC_NV(x)           (((uint32_t)(x) /* << PMU_CTRL_RAR_DCDC_NV_SHIFT */) & PMU_CTRL_RAR_DCDC_NV_MASK)
+
+#define READ_PMU_CTRL_RAR_DCDC_NV(x)      (((uint32_t)(x) & PMU_CTRL_RAR_DCDC_NV_MASK) /* >> PMU_CTRL_RAR_DCDC_NV_SHIFT */)
+
 #define PMU_CTRL_RAR_DCDC_MV_MASK         (0x1F00U)
 #define PMU_CTRL_RAR_DCDC_MV_SHIFT        (8U)
 #define PMU_CTRL_RAR_DCDC_MV(x)           (((uint32_t)(x) << PMU_CTRL_RAR_DCDC_MV_SHIFT) & PMU_CTRL_RAR_DCDC_MV_MASK)
@@ -1291,8 +1304,10 @@ typedef struct
 
 #define PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET_MASK         (0xFU)
 #define PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET_SHIFT        (0U)
-#define PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET(x)           (((uint32_t)(x) /* << PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET_SHIFT*/) & PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET_MASK)
-#define READ_PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET(x)      (((uint32_t)(x) & PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET_MASK) /*>> PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET_SHIFT*/)
+
+#define PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET(x)           (((uint32_t)(x) /* << PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET_SHIFT */) & PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET_MASK)
+
+#define READ_PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET(x)      (((uint32_t)(x) & PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET_MASK) /* >> PMU_CTRL_SLEEP_CTRL_CFG_MEM_RET_SHIFT */)
 
 #define PMU_CTRL_SLEEP_CTRL_CFG_FLL_SOC_RET_MASK     (0x10U)
 #define PMU_CTRL_SLEEP_CTRL_CFG_FLL_SOC_RET_SHIFT    (4U)
@@ -1366,10 +1381,10 @@ typedef struct
   volatile  uint32_t PAD_SLEEP;          /* PORT pad sleep register */
   volatile  uint32_t _reserved0[7];      /* reserved */
   volatile  uint32_t PADCFG[16];         /* PORT pad configuration register 0 */
-} PORT_reg_t;
+} port_reg_t;
 
 #define PORTA_BASE                              (SOC_CTRL_BASE + 0x0140u)
-#define PORTA                                   ((PORT_reg_t *)PORTA_BASE)
+#define PORTA                                   ((port_reg_t *)PORTA_BASE)
 
 #define GPIO_NUM                                 32
 
@@ -1392,10 +1407,10 @@ typedef struct
   volatile  uint32_t GPIO_ISO;       /* GPIO power domains isolation */
   volatile  uint32_t CAM_ISO;        /* Cemera power domains isolation */
   volatile  uint32_t LVDS_ISO;       /* LVDS power domains isolation */
-} IO_ISO_reg_t;
+} io_iso_reg_t;
 
 #define IO_ISO_BASE                               (SOC_CTRL_BASE + 0x01C0u)
-#define IO_ISO                                    ((IO_ISO_reg_t *)IO_ISO_BASE)
+#define IO_ISO                                    ((io_iso_reg_t *)IO_ISO_BASE)
 
 #define IO_ISO_GPIO_ISO_MASK                 (0x1U)
 #define IO_ISO_GPIO_ISO_SHIFT                (0U)
@@ -1415,10 +1430,10 @@ typedef struct
 {
   volatile  uint32_t EVENT_CFG;       /* event configuration register */
   volatile  uint32_t CH_EN;           /* channel enable register */
-} PWM_CTRL_reg_t;
+} pwm_ctrl_reg_t;
 
 #define PWM_CTRL_BASE                                (SOC_PERI_BASE + 0x05100u)
-#define PWM_CTRL                                     ((PWM_CTRL_reg_t *)PWM_CTRL_BASE)
+#define PWM_CTRL                                     ((pwm_ctrl_reg_t *)PWM_CTRL_BASE)
 
 /* Set Event. */
 
@@ -1448,16 +1463,16 @@ typedef struct
   volatile  uint32_t CH_TH[4];         /* Channles' threshold register */
   volatile  uint32_t CH_LUT[4];        /* Channles' LUT register */
   volatile  uint32_t COUNTER;          /* Counter register */
-} PWM_reg_t;
+} pwm_reg_t;
 
 #define PWM0_BASE                               (SOC_PERI_BASE + 0x05000u)
-#define PWM0                                    ((PWM_reg_t *)PWM0_BASE)
+#define PWM0                                    ((pwm_reg_t *)PWM0_BASE)
 #define PWM1_BASE                               (PWM0_BASE + 0x40u)
-#define PWM1                                    ((PWM_reg_t *)PWM1_BASE)
+#define PWM1                                    ((pwm_reg_t *)PWM1_BASE)
 #define PWM2_BASE                               (PWM1_BASE + 0x40u)
-#define PWM2                                    ((PWM_reg_t *)PWM2_BASE)
+#define PWM2                                    ((pwm_reg_t *)PWM2_BASE)
 #define PWM3_BASE                               (PWM2_BASE + 0x40u)
-#define PWM3                                    ((PWM_reg_t *)PWM3_BASE)
+#define PWM3                                    ((pwm_reg_t *)PWM3_BASE)
 
 /* Send command. */
 
@@ -1522,10 +1537,10 @@ typedef struct
   volatile  uint32_t ERR_MASK_LSB;    /* error mask LSB register */
   volatile  uint32_t TIMER_SEL_HI;    /* timer high register */
   volatile  uint32_t TIMER_SEL_LO;    /* timer low register */
-} SOCEU_reg_t;
+} soceu_reg_t;
 
 #define SOCEU_BASE                               (SOC_PERI_BASE + 0x06000u)
-#define SOCEU                                    ((SOCEU_reg_t *)SOCEU_BASE)
+#define SOCEU                                    ((soceu_reg_t *)SOCEU_BASE)
 
 /* The SOC events number */
 
@@ -1544,10 +1559,10 @@ typedef struct
   volatile uint32_t DLC_IOIFR;       /* PMU DLC register */
   volatile uint32_t DLC_IDIFR;       /* PMU DLC register */
   volatile uint32_t DLC_IMCIFR;      /* PMU DLC register */
-} PMU_DLC_reg_t;
+} pmu_dlc_reg_t;
 
 #define PMU_DLC_BASE                                (SOC_PERI_BASE + 0x7000u)
-#define PMU_DLC                                     ((PMU_DLC_reg_t *)PMU_DLC_BASE)
+#define PMU_DLC                                     ((pmu_dlc_reg_t *)PMU_DLC_BASE)
 
 /* PCTRL - PMU DLC PICL control register */
 
@@ -1633,7 +1648,9 @@ typedef struct
 #define PMU_DLC_IMCIFR_ICU_MODE_CHANGED_FLAG_SHIFT    (1U)
 #define PMU_DLC_IMCIFR_ICU_MODE_CHANGED_FLAG(x)       (((uint32_t)(x) << PMU_DLC_IMCIFR_ICU_MODE_CHANGED_FLAG_SHIFT) & PMU_DLC_IMCIFR_ICU_MODE_CHANGED_FLAG_MASK)
 
-/* PCTRL_PADDR The address to write in the DLC_PADDR register is CHIP_SEL_ADDR[4:0] concatenated with REG_ADDR[4:0]. */
+/* PCTRL_PADDR The address to write in the DLC_PADDR register is
+ * CHIP_SEL_ADDR[4:0] concatenated with REG_ADDR[4:0].
+ */
 
 #define PMU_DLC_PICL_REG_ADDR_MASK          (0x1FU)
 #define PMU_DLC_PICL_REG_ADDR_SHIFT         (0U)
@@ -1689,10 +1706,10 @@ typedef struct
   volatile  uint32_t IRQ_CTRL;     /* RTC_APB_IRQ_Control register */
   volatile  uint32_t IRQ_MASK;     /* RTC_APB_IRQ_Mask register */
   volatile  uint32_t IRQ_FLAG;     /* RTC_APB_IRQ_Flag register */
-} RTC_APB_reg_t;
+} rtc_apb_reg_t;
 
 #define RTC_APB_BASE                               (SOC_PERI_BASE + 0x08000u)
-#define RTC_APB                                    ((RTC_APB_reg_t *)RTC_APB_BASE)
+#define RTC_APB                                    ((rtc_apb_reg_t *)RTC_APB_BASE)
 
 /* STATUS - RTC_APB STATUS register */
 
@@ -1850,10 +1867,10 @@ typedef struct
 {
   volatile  uint32_t CMD;       /* EFUSE_Control register */
   volatile  uint32_t CFG;       /* EFUSE_Control register */
-} EFUSE_CTRL_reg_t;
+} efuse_ctrl_reg_t;
 
 #define EFUSE_CTRL_BASE                               (SOC_PERI_BASE + 0x09000u)
-#define EFUSE_CTRL                                    ((EFUSE_CTRL_reg_t *)EFUSE_CTRL_BASE)
+#define EFUSE_CTRL                                    ((efuse_ctrl_reg_t *)EFUSE_CTRL_BASE)
 
 #define    EFUSE_CTRL_CMD_READ       0x1
 #define    EFUSE_CTRL_CMD_WRITE      0x2
@@ -1871,10 +1888,10 @@ typedef struct
   volatile  uint32_t WAIT_XTAL_DELTA_MSB;     /**< EFUSE_WAIT_XTAL_DELTA_MSB register, offset: 0x06C */
   volatile  uint32_t WAIT_XTAL_MIN;           /**< EFUSE_WAIT_XTAL_MIN registers, offset: 0x070 */
   volatile  uint32_t WAIT_XTAL_MAX;           /**< EFUSE_WAIT_XTAL_MAX registers, offset: 0x074 */
-} EFUSE_REGS_reg_t;
+} efuse_regs_reg_t;
 
 #define EFUSE_REGS_BASE                                (SOC_PERI_BASE + 0x09200u)
-#define EFUSE_REGS                                     ((EFUSE_REGS_reg_t *)EFUSE_REGS_BASE)
+#define EFUSE_REGS                                     ((efuse_regs_reg_t *)EFUSE_REGS_BASE)
 
 /* INFO - EFUSE information register */
 
@@ -1899,10 +1916,10 @@ typedef struct
 typedef struct
 {
   volatile  uint32_t PUTC[16];      /* FC_STDOUT INFO register, offset: 0x000 */
-} FC_STDOUT_reg_t;
+} fc_stdout_reg_t;
 
 #define FC_STDOUT_BASE                                (SOC_PERI_BASE + 0x10000u + (32 << 7))
-#define FC_STDOUT                                     ((FC_STDOUT_reg_t *)FC_STDOUT_BASE)
+#define FC_STDOUT                                     ((fc_stdout_reg_t *)FC_STDOUT_BASE)
 
 #ifdef FEATURE_CLUSTER
 /* CLUSTER_STDOUT - Registers Layout Typedef */
@@ -1910,10 +1927,10 @@ typedef struct
 typedef struct
 {
   volatile  uint32_t PUTC[16];       /* CLUSTER_STDOUT INFO register, offset: 0x000 */
-} CLUSTER_STDOUT_reg_t;
+} cluster_stdout_reg_t;
 
 #define CLUSTER_STDOUT_BASE                                (SOC_PERI_BASE + 0x10000u)
-#define CLUSTER_STDOUT                                     ((CLUSTER_STDOUT_reg_t *)CLUSTER_STDOUT_BASE)
+#define CLUSTER_STDOUT                                     ((cluster_stdout_reg_t *)CLUSTER_STDOUT_BASE)
 
 /* HWCE - Registers Layout Typedef */
 
@@ -1947,10 +1964,10 @@ typedef struct
   volatile  uint32_t HWCE_W_REG;                    /* W register */
   volatile  uint32_t HWCE_JOB_CONFIG0_REG;          /* Job_Config0 register */
   volatile  uint32_t HWCE_JOB_CONFIG1_REG;          /* Job_Config1 register */
-} HWCE_reg_t;
+} hwce_reg_t;
 
 #define HWCE_BASE                                (CORE_PERI_BASE + 0x00001000)
-#define HWCE                                     ((HWCE_reg_t *) HWCE_BASE)
+#define HWCE                                     ((hwce_reg_t *) HWCE_BASE)
 
 /* Internal registers */
 

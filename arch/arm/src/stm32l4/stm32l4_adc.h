@@ -1,60 +1,43 @@
-/************************************************************************************
- * arch/arm/src/stm32L4/stm32l4_adc.h
+/*****************************************************************************
+ * arch/arm/src/stm32l4/stm32l4_adc.h
  *
- *   Copyright (C) 2009, 2011, 2015-2017 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
- *            David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ *****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_ADC_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_ADC_H
 
-/************************************************************************************
+/*****************************************************************************
  * Included Files
- ************************************************************************************/
+ *****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/analog/adc.h>
 #include "chip.h"
 #include "hardware/stm32l4_adc.h"
 
-/************************************************************************************
+/*****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ *****************************************************************************/
 
-/* Timer devices may be used for different purposes.  One special purpose is to
- * control periodic ADC sampling.  If CONFIG_STM32L4_TIMn is defined then
+/* Configuration *************************************************************/
+
+/* Timer devices may be used for different purposes.  One special purpose is
+ * to control periodic ADC sampling.  If CONFIG_STM32L4_TIMn is defined then
  * CONFIG_STM32L4_TIMn_ADC must also be defined to indicate that timer "n" is
  * intended to be used for that purpose. Timers 1,2,3,6 and 15 may be used on
  * STM32L4X3, while STM32L4X6 adds support for timers 4 and 8 as well.
@@ -178,6 +161,14 @@
 #  undef  ADC3_HAVE_DMA
 #endif
 
+/* Injected channels support */
+
+#if (defined(CONFIG_STM32L4_ADC1) && (CONFIG_STM32L4_ADC1_INJ_CHAN > 0)) || \
+    (defined(CONFIG_STM32L4_ADC2) && (CONFIG_STM32L4_ADC2_INJ_CHAN > 0)) || \
+    (defined(CONFIG_STM32L4_ADC3) && (CONFIG_STM32L4_ADC3_INJ_CHAN > 0))
+#  define ADC_HAVE_INJECTED
+#endif
+
 /* Timer configuration:  If a timer trigger is specified, then get
  * information about the timer.
  */
@@ -186,30 +177,37 @@
 #    define ADC1_HAVE_TIMER           1
 #    define ADC1_TIMER_BASE           STM32L4_TIM1_BASE
 #    define ADC1_TIMER_PCLK_FREQUENCY STM32L4_APB2_TIM1_CLKIN
+#    define ADC1_TIMER_CHANNEL        CONFIG_STM32L4_TIM1_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM2_ADC1)
 #    define ADC1_HAVE_TIMER           1
 #    define ADC1_TIMER_BASE           STM32L4_TIM2_BASE
 #    define ADC1_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM2_CLKIN
+#    define ADC1_TIMER_CHANNEL        CONFIG_STM32L4_TIM2_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM3_ADC1)
 #    define ADC1_HAVE_TIMER           1
 #    define ADC1_TIMER_BASE           STM32L4_TIM3_BASE
 #    define ADC1_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM3_CLKIN
+#    define ADC1_TIMER_CHANNEL        CONFIG_STM32L4_TIM3_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM4_ADC1)
 #    define ADC1_HAVE_TIMER           1
 #    define ADC1_TIMER_BASE           STM32L4_TIM4_BASE
 #    define ADC1_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM4_CLKIN
+#    define ADC1_TIMER_CHANNEL        CONFIG_STM32L4_TIM4_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM6_ADC1)
 #    define ADC1_HAVE_TIMER           1
 #    define ADC1_TIMER_BASE           STM32L4_TIM6_BASE
 #    define ADC1_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM6_CLKIN
+#    define ADC1_TIMER_CHANNEL        CONFIG_STM32L4_TIM6_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM8_ADC1)
 #    define ADC1_HAVE_TIMER           1
 #    define ADC1_TIMER_BASE           STM32L4_TIM8_BASE
 #    define ADC1_TIMER_PCLK_FREQUENCY STM32L4_APB2_TIM8_CLKIN
+#    define ADC1_TIMER_CHANNEL        CONFIG_STM32L4_TIM8_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM15_ADC1)
 #    define ADC1_HAVE_TIMER           1
 #    define ADC1_TIMER_BASE           STM32L4_TIM15_BASE
 #    define ADC1_TIMER_PCLK_FREQUENCY STM32L4_APB2_TIM15_CLKIN
+#    define ADC1_TIMER_CHANNEL        CONFIG_STM32L4_TIM15_ADC_CHAN
 #else
 #    undef  ADC1_HAVE_TIMER
 #endif
@@ -228,30 +226,37 @@
 #    define ADC2_HAVE_TIMER           1
 #    define ADC2_TIMER_BASE           STM32L4_TIM1_BASE
 #    define ADC2_TIMER_PCLK_FREQUENCY STM32L4_APB2_TIM1_CLKIN
+#    define ADC2_TIMER_CHANNEL        CONFIG_STM32L4_TIM1_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM2_ADC2)
 #    define ADC2_HAVE_TIMER           1
 #    define ADC2_TIMER_BASE           STM32L4_TIM2_BASE
 #    define ADC2_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM2_CLKIN
+#    define ADC2_TIMER_CHANNEL        CONFIG_STM32L4_TIM2_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM3_ADC2)
 #    define ADC2_HAVE_TIMER           1
 #    define ADC2_TIMER_BASE           STM32L4_TIM3_BASE
 #    define ADC2_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM3_CLKIN
+#    define ADC2_TIMER_CHANNEL        CONFIG_STM32L4_TIM3_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM4_ADC2)
 #    define ADC2_HAVE_TIMER           1
 #    define ADC2_TIMER_BASE           STM32L4_TIM4_BASE
 #    define ADC2_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM4_CLKIN
+#    define ADC2_TIMER_CHANNEL        CONFIG_STM32L4_TIM4_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM6_ADC2)
 #    define ADC2_HAVE_TIMER           1
 #    define ADC2_TIMER_BASE           STM32L4_TIM6_BASE
 #    define ADC2_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM6_CLKIN
+#    define ADC2_TIMER_CHANNEL        CONFIG_STM32L4_TIM6_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM8_ADC2)
 #    define ADC2_HAVE_TIMER           1
 #    define ADC2_TIMER_BASE           STM32L4_TIM8_BASE
 #    define ADC2_TIMER_PCLK_FREQUENCY STM32L4_APB2_TIM8_CLKIN
+#    define ADC2_TIMER_CHANNEL        CONFIG_STM32L4_TIM8_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM15_ADC2)
 #    define ADC2_HAVE_TIMER           1
 #    define ADC2_TIMER_BASE           STM32L4_TIM15_BASE
 #    define ADC2_TIMER_PCLK_FREQUENCY STM32L4_APB2_TIM15_CLKIN
+#    define ADC2_TIMER_CHANNEL        CONFIG_STM32L4_TIM15_ADC_CHAN
 #else
 #    undef  ADC2_HAVE_TIMER
 #endif
@@ -270,30 +275,37 @@
 #    define ADC3_HAVE_TIMER           1
 #    define ADC3_TIMER_BASE           STM32L4_TIM1_BASE
 #    define ADC3_TIMER_PCLK_FREQUENCY STM32L4_APB2_TIM1_CLKIN
+#    define ADC3_TIMER_CHANNEL        CONFIG_STM32L4_TIM1_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM2_ADC3)
 #    define ADC3_HAVE_TIMER           1
 #    define ADC3_TIMER_BASE           STM32L4_TIM2_BASE
 #    define ADC3_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM2_CLKIN
+#    define ADC3_TIMER_CHANNEL        CONFIG_STM32L4_TIM1_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM3_ADC3)
 #    define ADC3_HAVE_TIMER           1
 #    define ADC3_TIMER_BASE           STM32L4_TIM3_BASE
 #    define ADC3_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM3_CLKIN
+#    define ADC3_TIMER_CHANNEL        CONFIG_STM32L4_TIM3_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM4_ADC3)
 #    define ADC3_HAVE_TIMER           1
 #    define ADC3_TIMER_BASE           STM32L4_TIM4_BASE
 #    define ADC3_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM4_CLKIN
+#    define ADC3_TIMER_CHANNEL        CONFIG_STM32L4_TIM4_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM6_ADC3)
 #    define ADC3_HAVE_TIMER           1
 #    define ADC3_TIMER_BASE           STM32L4_TIM6_BASE
 #    define ADC3_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM6_CLKIN
+#    define ADC3_TIMER_CHANNEL        CONFIG_STM32L4_TIM6_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM8_ADC3)
 #    define ADC3_HAVE_TIMER           1
 #    define ADC3_TIMER_BASE           STM32L4_TIM8_BASE
 #    define ADC3_TIMER_PCLK_FREQUENCY STM32L4_APB2_TIM8_CLKIN
+#    define ADC3_TIMER_CHANNEL        CONFIG_STM32L4_TIM8_ADC_CHAN
 #elif defined(CONFIG_STM32L4_TIM15_ADC3)
 #    define ADC3_HAVE_TIMER           1
 #    define ADC3_TIMER_BASE           STM32L4_TIM15_BASE
 #    define ADC3_TIMER_PCLK_FREQUENCY STM32L4_APB2_TIM15_CLKIN
+#    define ADC3_TIMER_CHANNEL        CONFIG_STM32L4_TIM15_ADC_CHAN
 #else
 #    undef  ADC3_HAVE_TIMER
 #endif
@@ -441,6 +453,15 @@
 #define ADC3_EXTSEL_T15CC4     ADC_CFGR_EXTSEL_T15CC4
 #define ADC3_EXTSEL_T15TRGO    ADC_CFGR_EXTSEL_T15TRGO
 
+/* EXTSEL configuration ******************************************************/
+
+/* ADCx_EXTSEL_VALUE can be set by this driver or by board specific logic in
+ * board.h file.
+ */
+
+#ifndef ADC_EXTREG_EXTEN_DEFAULT
+#  define ADC_EXTREG_EXTEN_DEFAULT     ADC_CFGR_EXTEN_RISING
+#endif
 
 #if defined(CONFIG_STM32L4_TIM1_ADC1)
 #  if CONFIG_STM32L4_ADC1_TIMTRIG == 0
@@ -754,13 +775,444 @@
 #  endif
 #endif
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+#ifdef ADC1_EXTSEL_VALUE
+#  define ADC1_HAVE_EXTCFG  1
+#  define ADC1_EXTCFG_VALUE (ADC1_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
+#else
+#  undef ADC1_HAVE_EXTCFG
+#endif
+#ifdef ADC2_EXTSEL_VALUE
+#  define ADC2_HAVE_EXTCFG  1
+#  define ADC2_EXTCFG_VALUE (ADC2_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
+#else
+#  undef ADC2_HAVE_EXTCFG
+#endif
+#ifdef ADC3_EXTSEL_VALUE
+#  define ADC3_HAVE_EXTCFG  1
+#  define ADC3_EXTCFG_VALUE (ADC3_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
+#else
+#  undef ADC3_HAVE_EXTCFG
+#endif
 
-/************************************************************************************
+#if defined(ADC1_HAVE_EXTCFG) || defined(ADC2_HAVE_EXTCFG) || \
+    defined(ADC3_HAVE_EXTCFG) || defined(ADC3_HAVE_EXTCFG)
+#  define ADC_HAVE_EXTCFG
+#endif
+
+/* JEXTSEL configuration *****************************************************/
+
+#ifndef ADC_JEXTREG_JEXTEN_DEFAULT
+#  define ADC_JEXTREG_JEXTEN_DEFAULT   ADC_JSQR_JEXTEN_RISING
+#endif
+
+#if (CONFIG_STM32L4_ADC1_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM1)
+#  if CONFIG_STM32L4_ADC1_JTIMTRIG == 3
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T1CC4
+#  elif CONFIG_STM32L4_ADC1_JTIMTRIG == 4
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T1TRGO
+#  elif CONFIG_STM32L4_ADC1_JTIMTRIG == 5
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T1TRGO2
+#  else
+#    error "CONFIG_STM32L4_ADC1_TIMTRIG is out of range"
+#  endif
+#endif
+
+#if (CONFIG_STM32L4_ADC1_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM2)
+#  if CONFIG_STM32L4_ADC1_JTIMTRIG == 0
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T2CC1
+#  elif CONFIG_STM32L4_ADC1_JTIMTRIG == 4
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T2TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC1_TIMTRIG is out of range"
+#  endif
+#endif
+
+#if (CONFIG_STM32L4_ADC1_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM3)
+#  if CONFIG_STM32L4_ADC1_JTIMTRIG == 0
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T3CC1
+#  elif CONFIG_STM32L4_ADC1_JTIMTRIG == 2
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T3CC3
+#  elif CONFIG_STM32L4_ADC1_JTIMTRIG == 3
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T3CC4
+#  elif CONFIG_STM32L4_ADC1_JTIMTRIG == 4
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T3TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC1_TIMTRIG is out of range"
+#  endif
+#endif
+
+#if (CONFIG_STM32L4_ADC1_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM4)
+#  if CONFIG_STM32L4_ADC1_JTIMTRIG == 4
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T4TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC1_TIMTRIG is out of range"
+#  endif
+#endif
+
+#if (CONFIG_STM32L4_ADC1_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM6)
+#  if CONFIG_STM32L4_ADC1_JTIMTRIG == 4
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T6TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC1_TIMTRIG is out of range"
+#  endif
+#endif
+
+#if (CONFIG_STM32L4_ADC1_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM8)
+#  if CONFIG_STM32L4_ADC1_JTIMTRIG == 3
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T8CC4
+#  elif CONFIG_STM32L4_ADC1_JTIMTRIG == 4
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T8TRGO
+#  elif CONFIG_STM32L4_ADC1_JTIMTRIG == 5
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T8TRGO2
+#  else
+#    error "CONFIG_STM32L4_ADC1_TIMTRIG is out of range"
+#  endif
+#endif
+
+#if (CONFIG_STM32L4_ADC1_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM15)
+#  if CONFIG_STM32L4_ADC1_JTIMTRIG == 4
+#    define ADC1_JEXTSEL_VALUE ADC_JEXTSEL_T15TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC1_TIMTRIG is out of range"
+#  endif
+#endif
+
+#ifdef ADC1_JEXTSEL_VALUE
+#  define ADC1_HAVE_JEXTCFG  1
+#  define ADC1_JEXTCFG_VALUE (ADC1_JEXTSEL_VALUE | ADC_JEXTREG_JEXTEN_DEFAULT)
+#endif
+
+#ifdef CONFIG_STM32L4_ADC2
+#if (CONFIG_STM32L4_ADC2_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM1)
+#  if CONFIG_STM32L4_ADC2_JTIMTRIG == 3
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T1CC4
+#  elif CONFIG_STM32L4_ADC2_JTIMTRIG == 4
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T1TRGO
+#  elif CONFIG_STM32L4_ADC2_JTIMTRIG == 5
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T1TRGO2
+#  else
+#    error "CONFIG_STM32L4_ADC2_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_ADC2
+#if (CONFIG_STM32L4_ADC2_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM2)
+#  if CONFIG_STM32L4_ADC2_JTIMTRIG == 0
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T2CC1
+#  elif CONFIG_STM32L4_ADC2_JTIMTRIG == 4
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T2TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC2_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_ADC2
+#if (CONFIG_STM32L4_ADC2_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM3)
+#  if CONFIG_STM32L4_ADC2_JTIMTRIG == 0
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T3CC1
+#  elif CONFIG_STM32L4_ADC2_JTIMTRIG == 2
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T3CC3
+#  elif CONFIG_STM32L4_ADC2_JTIMTRIG == 3
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T3CC4
+#  elif CONFIG_STM32L4_ADC2_JTIMTRIG == 4
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T3TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC2_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_ADC2
+#if (CONFIG_STM32L4_ADC2_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM4)
+#  if CONFIG_STM32L4_ADC2_JTIMTRIG == 4
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T4TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC2_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_ADC2
+#if (CONFIG_STM32L4_ADC2_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM6)
+#  if CONFIG_STM32L4_ADC2_JTIMTRIG == 4
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T6TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC2_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_ADC2
+#if (CONFIG_STM32L4_ADC2_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM8)
+#  if CONFIG_STM32L4_ADC2_JTIMTRIG == 3
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T8CC4
+#  elif CONFIG_STM32L4_ADC2_JTIMTRIG == 4
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T8TRGO
+#  elif CONFIG_STM32L4_ADC2_JTIMTRIG == 5
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T8TRGO2
+#  else
+#    error "CONFIG_STM32L4_ADC2_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_ADC2
+#if (CONFIG_STM32L4_ADC2_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM15)
+#  if CONFIG_STM32L4_ADC2_JTIMTRIG == 4
+#    define ADC2_JEXTSEL_VALUE ADC_JEXTSEL_T15TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC2_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef ADC2_JEXTSEL_VALUE
+#  define ADC2_HAVE_JEXTCFG  1
+#  define ADC2_JEXTCFG_VALUE (ADC2_JEXTSEL_VALUE | ADC_JEXTREG_JEXTEN_DEFAULT)
+#endif
+
+#ifdef CONFIG_STM32L4_ADC3
+#if (CONFIG_STM32L4_ADC3_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM1)
+#  if CONFIG_STM32L4_ADC3_JTIMTRIG == 3
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T1CC4
+#  elif CONFIG_STM32L4_ADC3_JTIMTRIG == 4
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T1TRGO
+#  elif CONFIG_STM32L4_ADC3_JTIMTRIG == 5
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T1TRGO2
+#  else
+#    error "CONFIG_STM32L4_ADC3_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_ADC3
+#if (CONFIG_STM32L4_ADC3_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM2)
+#  if CONFIG_STM32L4_ADC3_JTIMTRIG == 0
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T2CC1
+#  elif CONFIG_STM32L4_ADC3_JTIMTRIG == 4
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T2TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC3_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_ADC3
+#if (CONFIG_STM32L4_ADC3_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM3)
+#  if CONFIG_STM32L4_ADC3_JTIMTRIG == 0
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T3CC1
+#  elif CONFIG_STM32L4_ADC3_JTIMTRIG == 2
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T3CC3
+#  elif CONFIG_STM32L4_ADC3_JTIMTRIG == 3
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T3CC4
+#  elif CONFIG_STM32L4_ADC3_JTIMTRIG == 4
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T3TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC3_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_ADC3
+#if (CONFIG_STM32L4_ADC3_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM4)
+#  if CONFIG_STM32L4_ADC3_JTIMTRIG == 4
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T4TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC3_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_ADC3
+#if (CONFIG_STM32L4_ADC3_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM6)
+#  if CONFIG_STM32L4_ADC3_JTIMTRIG == 4
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T6TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC3_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_ADC3
+#if (CONFIG_STM32L4_ADC3_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM8)
+#  if CONFIG_STM32L4_ADC3_JTIMTRIG == 3
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T8CC4
+#  elif CONFIG_STM32L4_ADC3_JTIMTRIG == 4
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T8TRGO
+#  elif CONFIG_STM32L4_ADC3_JTIMTRIG == 5
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T8TRGO2
+#  else
+#    error "CONFIG_STM32L4_ADC3_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_ADC3
+#if (CONFIG_STM32L4_ADC3_INJ_CHAN > 0) && defined(CONFIG_STM32L4_TIM15)
+#  if CONFIG_STM32L4_ADC3_JTIMTRIG == 4
+#    define ADC3_JEXTSEL_VALUE ADC_JEXTSEL_T15TRGO
+#  else
+#    error "CONFIG_STM32L4_ADC3_TIMTRIG is out of range"
+#  endif
+#endif
+#endif
+
+#ifdef ADC3_JEXTSEL_VALUE
+#  define ADC3_HAVE_JEXTCFG  1
+#  define ADC3_JEXTCFG_VALUE (ADC3_JEXTSEL_VALUE | ADC_JEXTREG_JEXTEN_DEFAULT)
+#endif
+
+#if defined(ADC1_HAVE_JEXTCFG) || defined(ADC2_HAVE_JEXTCFG) || \
+    defined(ADC3_HAVE_JEXTCFG)
+#  define ADC_HAVE_JEXTCFG
+#endif
+
+/* ADC interrupts ************************************************************/
+
+#define ADC_ISR_EOC                  ADC_INT_EOC
+#define ADC_IER_EOC                  ADC_INT_EOC
+#define ADC_ISR_EOS                  ADC_INT_EOS
+#define ADC_IER_EOS                  ADC_INT_EOS
+#define ADC_ISR_AWD                  ADC_INT_AWD1
+#define ADC_IER_AWD                  ADC_INT_AWD1
+#define ADC_ISR_JEOC                 ADC_INT_JEOC
+#define ADC_IER_JEOC                 ADC_INT_JEOC
+#define ADC_ISR_OVR                  ADC_INT_OVR
+#define ADC_IER_OVR                  ADC_INT_OVR
+#define ADC_ISR_JEOS                 ADC_INT_JEOS
+#define ADC_IER_JEOS                 ADC_INT_JEOS
+
+#define ADC_ISR_ALLINTS (ADC_ISR_EOC | ADC_ISR_EOS | ADC_ISR_AWD | \
+                         ADC_ISR_JEOC | ADC_ISR_JEOS | ADC_ISR_OVR)
+#define ADC_IER_ALLINTS (ADC_IER_EOC | ADC_IER_EOS | ADC_IER_AWD | \
+                         ADC_IER_JEOC | ADC_IER_JEOS | ADC_IER_OVR)
+
+/* Low-level ops helpers *****************************************************/
+
+#define ADC_INT_ACK(adc, source)                     \
+        (adc)->llops->int_ack(adc, source)
+#define ADC_INT_GET(adc)                             \
+        (adc)->llops->int_get(adc)
+#define ADC_INT_ENABLE(adc, source)                  \
+        (adc)->llops->int_en(adc, source)
+#define ADC_INT_DISABLE(adc, source)                 \
+        (adc)->llops->int_dis(adc, source)
+#define ADC_REGDATA_GET(adc)                         \
+        (adc)->llops->val_get(adc)
+#define ADC_INJDATA_GET(adc, chan)                   \
+        (adc)->llops->inj_get(adc, chan)
+#define ADC_REGBUF_REGISTER(adc, buffer, len)        \
+        (adc)->llops->regbuf_reg(adc, buffer, len)
+#define ADC_REG_STARTCONV(adc, state)                \
+        (adc)->llops->reg_startconv(adc, state)
+#define ADC_INJ_STARTCONV(adc, state)         \
+        (adc)->llops->inj_startconv(adc, state)
+#define ADC_OFFSET_SET(adc, ch, i, o)                \
+        (adc)->llops->offset_set(adc, ch, i, o)
+#define ADC_EXTSEL_SET(adc, extcfg)                  \
+        (adc)->llops->extsel_set(adc, extcfg)
+#define ADC_DUMP_REGS(adc)                           \
+        (adc)->llops->dump_regs(adc)
+
+/* IOCTL Commands ************************************************************
+ *
+ * Cmd: ANIOC_STM32L4_TRIGGER_REG           Arg:
+ * Cmd: ANIOC_STM32L4_TRIGGER_INJ           Arg:
+ *
+ */
+
+#define ANIOC_STM32L4_TRIGGER_REG           _ANIOC(AN_STM32L4_FIRST + 0)
+#define ANIOC_STM32L4_TRIGGER_INJ           _ANIOC(AN_STM32L4_FIRST + 1)
+
+/*****************************************************************************
+ * Public Types
+ *****************************************************************************/
+
+#ifdef CONFIG_STM32L4_ADC_LL_OPS
+
+/* This structure provides the publicly visable representation of the
+ * "lower-half" ADC driver structure.
+ */
+
+struct stm32_adc_dev_s
+{
+  /* Publicly visible portion of the "lower-half" ADC driver structure */
+
+  FAR const struct stm32_adc_ops_s *llops;
+
+  /* Require cast-compatibility with private "lower-half" ADC strucutre */
+};
+
+/* Low-level operations for ADC */
+
+struct stm32_adc_ops_s
+{
+  /* Acknowledge interrupts */
+
+  void (*int_ack)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+
+  /* Get pending interrupts */
+
+  uint32_t (*int_get)(FAR struct stm32_adc_dev_s *dev);
+
+  /* Enable interrupts */
+
+  void (*int_en)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+
+  /* Disable interrupts */
+
+  void (*int_dis)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+
+  /* Get current ADC data register */
+
+  uint32_t (*val_get)(FAR struct stm32_adc_dev_s *dev);
+
+  /* Register buffer for ADC DMA transfer */
+
+  int (*regbuf_reg)(FAR struct stm32_adc_dev_s *dev, uint16_t *buffer,
+                    uint8_t len);
+
+  /* Start/stop regular conversion */
+
+  void (*reg_startconv)(FAR struct stm32_adc_dev_s *dev, bool state);
+
+  /* Set offset for channel */
+
+  int (*offset_set)(FAR struct stm32_adc_dev_s *dev, uint8_t ch, uint8_t i,
+                    uint16_t offset);
+
+  /* Configure external event for regular group */
+
+  int (*extsel_set)(FAR struct stm32_adc_dev_s *dev, uint32_t extcfg);
+
+#ifdef ADC_HAVE_JEXTCFG
+  /* Configure the ADC external trigger for injected conversion */
+
+  void (*jextsel_set)(FAR struct stm32_adc_dev_s *dev, uint32_t jextcfg);
+#endif
+
+#ifdef ADC_HAVE_INJECTED
+  /* Get current ADC injected data register */
+
+  uint32_t (*inj_get)(FAR struct stm32_adc_dev_s *dev, uint8_t chan);
+
+  /* Start/stop injected conversion */
+
+  void (*inj_startconv)(FAR struct stm32_adc_dev_s *dev, bool state);
+#endif
+
+  /* Dump ADC regs */
+
+  void (*dump_regs)(FAR struct stm32_adc_dev_s *dev);
+};
+
+#endif  /* CONFIG_STM32L4_ADC_LL_OPS */
+
+/*****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ *****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -771,7 +1223,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
+/*****************************************************************************
  * Name: stm32l4_adc_initialize
  *
  * Description:
@@ -785,7 +1237,7 @@ extern "C"
  * Returned Value:
  *   Valid ADC device structure reference on success; a NULL on failure
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 struct adc_dev_s;
 struct adc_dev_s *stm32l4_adc_initialize(int intf,

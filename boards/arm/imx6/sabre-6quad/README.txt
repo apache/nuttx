@@ -592,24 +592,7 @@ Debugging with QEMU
 
 The nuttx ELF image can be debugged with QEMU.
 
-1. Before debugging, following change (enabling wfi instruction in up_idle)
-   is recommended to reduce CPU usage on host PC.
-
-diff --git a/arch/arm/src/common/up_idle.c b/arch/arm/src/common/up_idle.c
-index 45fab0b7c6..c54c1178a1 100644
---- a/arch/arm/src/common/up_idle.c
-+++ b/arch/arm/src/common/up_idle.c
-@@ -71,7 +71,7 @@ void up_idle(void)
-
-   /* Sleep until an interrupt occurs to save power */
-
--#if 0
-+#if 1
-   asm("WFI");  /* For example */
- #endif
- #endif
-
-2. Also, to debug the nuttx (ELF) with symbols, following change must
+1. To debug the nuttx (ELF) with symbols, following change must
    be applied to defconfig.
 
 diff --git a/boards/arm/imx6/sabre-6quad/configs/nsh/defconfig b/boards/arm/imx6/sabre-6quad/configs/nsh/defconfig
@@ -624,6 +607,33 @@ index b15becbb51..3ad4d13ad7 100644
 +CONFIG_DEBUG_SYMBOLS=y
  CONFIG_DEV_ZERO=y
 
+2. Please note that QEMU does not report PL310 (L2CC) related
+   registers correctly, so if you enable CONFIG_DEBUG_ASSERTION
+   the nuttx will stop with DEBUGASSERT(). To avoid this,
+   comment out the following lines.
+
+--- a/arch/arm/src/armv7-a/arm_l2cc_pl310.c
++++ b/arch/arm/src/armv7-a/arm_l2cc_pl310.c
+@@ -333,7 +333,7 @@ void arm_l2ccinitialize(void)
+ #if defined(CONFIG_ARMV7A_ASSOCIATIVITY_8WAY)
+   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == 0);
+ #elif defined(CONFIG_ARMV7A_ASSOCIATIVITY_16WAY)
+- DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == L2CC_ACR_ASS);
++ //DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == L2CC_ACR_ASS);
+ #else
+ # error No associativity selected
+ #endif
+@@ -345,8 +345,8 @@ void arm_l2ccinitialize(void)
+   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) ==
+               L2CC_ACR_WAYSIZE_32KB);
+ #elif defined(CONFIG_ARMV7A_WAYSIZE_64KB)
+- DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) ==
+- L2CC_ACR_WAYSIZE_64KB);
++ // DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) ==
++ // L2CC_ACR_WAYSIZE_64KB);
+ #elif defined(CONFIG_ARMV7A_WAYSIZE_128KB)
+   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) ==
+               L2CC_ACR_WAYSIZE_128KB);
 
 3. Run QEMU
 
@@ -691,58 +701,7 @@ Open Issues:
    This will cause the interrupt handlers on other CPUs to spin until
    leave_critical_section() is called.  More verification is needed.
 
-2. Cache Concurrency.  Cache coherency in SMP configurations is managed by the
-   MPCore snoop control unit (SCU).  But I don't think I have the set up
-   correctly yet.
-
-   Currently cache inconsistencies appear to be the root cause of all current SMP
-   issues.  SMP works as expected if the caches are disabled, but otherwise there
-   are problems (usually hangs):
-
-   This will disable the caches:
-
-diff --git a/arch/arm/src/armv7-a/arm_head.S b/arch/arm/src/armv7-a/arm_head.S
-index 27c2a5b..2a6274c 100644
---- a/arch/arm/src/armv7-a/arm_head.S
-+++ b/arch/arm/src/armv7-a/arm_head.S
-@@ -454,6 +454,7 @@ __start:
-         * after SMP cache coherency has been setup.
-         */
-
-+#if 0 // REMOVE ME
- #if !defined(CPU_DCACHE_DISABLE) && !defined(CONFIG_SMP)
-        /* Dcache enable
-         *
-@@ -471,6 +472,7 @@ __start:
-
-        orr             r0, r0, #(SCTLR_I)
- #endif
-+#endif // REMOVE ME
-
- #ifdef CPU_ALIGNMENT_TRAP
-        /* Alignment abort enable
-diff --git a/arch/arm/src/armv7-a/arm_scu.c b/arch/arm/src/armv7-a/arm_scu.c
-index eedf179..1db2092 100644
---- a/arch/arm/src/armv7-a/arm_scu.c
-+++ b/arch/arm/src/armv7-a/arm_scu.c
-@@ -156,6 +156,7 @@ static inline void arm_set_actlr(uint32_t actlr)
-
- void arm_enable_smp(int cpu)
- {
-+#if 0 // REMOVE ME
-   uint32_t regval;
-
-   /* Handle actions unique to CPU0 which comes up first */
-@@ -222,6 +223,7 @@ void arm_enable_smp(int cpu)
-   regval  = arm_get_sctlr();
-   regval |= SCTLR_C;
-   arm_set_sctlr(regval);
-+#endif // REMOVE ME
- }
-
- #endif
-
-3. Recent redesigns to SMP of another ARMv7-M platform have made changes to the OS
+2. Recent redesigns to SMP of another ARMv7-M platform have made changes to the OS
    SMP support.  There are no known problem but the changes have not been verified
    fully (see STATUS above for 2019-02-06).
 

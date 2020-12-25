@@ -97,6 +97,10 @@
 #define _NXTERMBASE     (0x2900) /* NxTerm character driver ioctl commands */
 #define _RFIOCBASE      (0x2a00) /* RF devices ioctl commands */
 #define _RPTUNBASE      (0x2b00) /* Remote processor tunnel ioctl commands */
+#define _NOTECTLBASE    (0x2c00) /* Note filter control ioctl commands*/
+#define _NOTERAMBASE    (0x2d00) /* Noteram device ioctl commands*/
+#define _RCIOCBASE      (0x2e00) /* Remote Control device ioctl commands */
+#define _HIMEMBASE      (0x2f00) /* Himem device ioctl commands*/
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -120,6 +124,10 @@
 #define _TIOC(nr)       _IOC(_TIOCBASE,nr)
 
 /* Terminal I/O IOCTL definitions are retained in tioctl.h */
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <nuttx/serial/tioctl.h>
 
@@ -175,6 +183,16 @@
 #define FIONBIO         _FIOC(0x000b)     /* IN:  Boolean option takes an
                                            *      int value.
                                            * OUT: Origin option.
+                                           */
+#define FIOC_MINOR      _FIOC(0x000c)     /* IN:  None
+                                           * OUT: Integer that contains device
+                                           *      minor number
+                                           */
+#define FIOCLEX         _FIOC(0x000d)     /* IN:  None
+                                           * OUT: None
+                                           */
+#define FIONCLEX        _FIOC(0x000e)     /* IN:  None
+                                           * OUT: None
                                            */
 
 /* NuttX file system ioctl definitions **************************************/
@@ -298,7 +316,7 @@
 #define _SNIOCVALID(c)    (_IOC_TYPE(c)==_SNIOCBASE)
 #define _SNIOC(nr)        _IOC(_SNIOCBASE,nr)
 
-/* Nuttx Analog (DAC/ADC) ioctl commands (see nuttx/analog/ioctl.h **********/
+/* NuttX Analog (DAC/ADC) ioctl commands (see nuttx/analog/ioctl.h **********/
 
 #define _ANIOCVALID(c)    (_IOC_TYPE(c)==_ANIOCBASE)
 #define _ANIOC(nr)        _IOC(_ANIOCBASE,nr)
@@ -309,6 +327,7 @@
 #define _PWMIOC(nr)       _IOC(_PWMIOCBASE,nr)
 
 /* NuttX USB CDC/ACM serial driver ioctl definitions ************************/
+
 /* (see nuttx/usb/cdcacm.h) */
 
 #define _CAIOCVALID(c)    (_IOC_TYPE(c)==_CAIOCBASE)
@@ -322,6 +341,7 @@
 #define _BATIOC(nr)       _IOC(_BATIOCBASE,nr)
 
 /* NuttX Quadrature Encoder driver ioctl definitions ************************/
+
 /* (see nuttx/power/battery.h) */
 
 #define _QEIOCVALID(c)    (_IOC_TYPE(c)==_QEIOCBASE)
@@ -349,6 +369,7 @@
 #define _SLCDIOC(nr)      _IOC(_SLCDIOCBASE,nr)
 
 /* Wireless driver character driver ioctl definitions ***********************/
+
 /* (see nuttx/include/wireless/ioctl.h */
 
 #define _WLCIOCVALID(c)   (_IOC_TYPE(c)==_WLCIOCBASE)
@@ -368,7 +389,7 @@
 #define _TCIOCVALID(c)    (_IOC_TYPE(c)==_TCIOCBASE)
 #define _TCIOC(nr)        _IOC(_TCIOCBASE,nr)
 
-/* Joystick driver ioctl definitions ***************************************/
+/* Joystick driver ioctl definitions ****************************************/
 
 /* Discrete Joystick (see nuttx/include/input/djoystick.h */
 
@@ -509,6 +530,26 @@
 
 #define _RPTUNIOCVALID(c)   (_IOC_TYPE(c)==_RPTUNBASE)
 #define _RPTUNIOC(nr)       _IOC(_RPTUNBASE,nr)
+
+/* Notectl drivers **********************************************************/
+
+#define _NOTECTLIOCVALID(c) (_IOC_TYPE(c) == _NOTECTLBASE)
+#define _NOTECTLIOC(nr)     _IOC(_NOTECTLBASE, nr)
+
+/* Noteram drivers **********************************************************/
+
+#define _NOTERAMIOCVALID(c) (_IOC_TYPE(c) == _NOTERAMBASE)
+#define _NOTERAMIOC(nr)     _IOC(_NOTERAMBASE, nr)
+
+/* Remote Control drivers ***************************************************/
+
+#define _RCIOCVALID(c)    (_IOC_TYPE(c)==_RCIOCBASE)
+#define _RCIOC(nr)        _IOC(_RCIOCBASE,nr)
+
+/* Hime drivers *************************************************************/
+
+#define _HIMEMIOCVALID(c)   (_IOC_TYPE(c) == _HIMEMBASE)
+#define _HIMEMIOC(nr)       _IOC(_HIMEMBASE, nr)
 
 /* Wireless driver network ioctl definitions ********************************/
 

@@ -682,6 +682,32 @@ static void stm32l4_stdclockconfig(void)
   uint32_t regval;
   volatile int32_t timeout;
 
+  /* Enable FLASH prefetch, instruction cache, data cache,
+   * and 4 wait states. We do this early since the default is zero
+   * wait states and if we are about to increase clock frequency
+   * bad things will happen.
+   *
+   * TODO: could reduce flash wait states according to vcore range
+   * and freq
+   */
+
+#ifdef CONFIG_STM32L4_FLASH_PREFETCH
+  regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN |
+            FLASH_ACR_PRFTEN);
+#else
+  regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
+#endif
+  putreg32(regval, STM32L4_FLASH_ACR);
+
+  /* Wait until the requested number of wait states is set */
+
+  while ((getreg32(STM32L4_FLASH_ACR) & FLASH_ACR_LATENCY_MASK) !=
+         FLASH_ACR_LATENCY_4)
+    {
+    }
+
+  /* Proceed to clock configuration */
+
 #if defined(STM32L4_BOARD_USEHSI) || defined(STM32L4_I2C_USE_HSI16)
   /* Enable Internal High-Speed Clock (HSI) */
 
@@ -723,24 +749,33 @@ static void stm32l4_stdclockconfig(void)
         }
     }
 
-  /* Enable MSI and choosing frequency */
+  /* Choose MSI frequency */
 
   regval  = getreg32(STM32L4_RCC_CR);
   regval &= ~RCC_CR_MSIRANGE_MASK;
-  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION | RCC_CR_MSIRGSEL);
+  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSIRGSEL);
   putreg32(regval, STM32L4_RCC_CR);
 
-  /* Wait until the MSI is ready (or until a timeout elapsed) */
-
-  for (timeout = MSIRDY_TIMEOUT; timeout > 0; timeout--)
+  if (!(regval & RCC_CR_MSION))
     {
-      /* Check if the MSIRDY flag is the set in the CR */
+      /* Enable MSI */
 
-      if ((getreg32(STM32L4_RCC_CR) & RCC_CR_MSIRDY) != 0)
+      regval  = getreg32(STM32L4_RCC_CR);
+      regval |= RCC_CR_MSION;
+      putreg32(regval, STM32L4_RCC_CR);
+
+      /* Wait until the MSI is ready (or until a timeout elapsed) */
+
+      for (timeout = MSIRDY_TIMEOUT; timeout > 0; timeout--)
         {
-          /* If so, then break-out with timeout > 0 */
+          /* Check if the MSIRDY flag is the set in the CR */
 
-          break;
+          if ((getreg32(STM32L4_RCC_CR) & RCC_CR_MSIRDY) != 0)
+            {
+              /* If so, then break-out with timeout > 0 */
+
+              break;
+            }
         }
     }
 
@@ -777,17 +812,17 @@ static void stm32l4_stdclockconfig(void)
 
   if (timeout > 0)
     {
-      /* Ensure Power control is enabled before modifying it. */
-
-      stm32l4_pwr_enableclk(true);
-
       if (STM32L4_SYSCLK_FREQUENCY > 24000000ul)
         {
           /* Select regulator voltage output Scale 1 mode to support system
            * frequencies up to 168 MHz.
            */
 
+          /* TODO: this seems to hang on STM32L476, at least for MSI@48MHz */
+#if 0
+          stm32l4_pwr_enableclk(true);
           stm32_pwr_setvos(1);
+#endif
         }
       else
         {
@@ -795,6 +830,7 @@ static void stm32l4_stdclockconfig(void)
            * frequencies below 24 MHz
            */
 
+          stm32l4_pwr_enableclk(true);
           stm32_pwr_setvos(2);
         }
 
@@ -828,6 +864,7 @@ static void stm32l4_stdclockconfig(void)
       putreg32(regval, STM32L4_RCC_CFGR);
 #endif
 
+#ifndef STM32L4_BOARD_NOPLL
       /* Set the PLL source and main divider */
 
       regval  = getreg32(STM32L4_RCC_PLLCFG);
@@ -864,7 +901,6 @@ static void stm32l4_stdclockconfig(void)
       regval |= RCC_PLLCFG_PLLSRC_HSE;
 #endif
 
-#ifndef STM32L4_BOARD_NOPLL
       /* Use the main PLL as SYSCLK, so enable it first */
 
       putreg32(regval, STM32L4_RCC_PLLCFG);
@@ -948,20 +984,6 @@ static void stm32l4_stdclockconfig(void)
         {
         }
 #endif
-
-      /* Enable FLASH prefetch, instruction cache, data cache,
-       * and 4 wait states.
-       * TODO: could reduce flash wait states according to vcore range
-       * and freq
-       */
-
-#ifdef CONFIG_STM32L4_FLASH_PREFETCH
-      regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN |
-                FLASH_ACR_PRFTEN);
-#else
-      regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
-#endif
-      putreg32(regval, STM32L4_FLASH_ACR);
 
       /* Select the system clock source */
 

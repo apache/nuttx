@@ -47,26 +47,47 @@
 /* Supported prctl() commands.
  *
  *  PR_SET_NAME
+ *    Set the name of the calling thread, using the value in the location
+ *    pointed to by (char *) arg2. The name can be up to
+ *    CONFIG_TASK_NAME_SIZE long, including the terminating null byte.
+ *    (If the length of the string, including the terminating null byte,
+ *    exceeds CONFIG_TASK_NAME_SIZE bytes, the string is silently truncated.)
+ *    As an example:
+ *
+ *      prctl(PR_SET_NAME, "MyName");
+ *
+ *  PR_GET_NAME
+ *    Return the name of the calling thread, in the buffer pointed to by
+ *    (char *) arg2.  The buffer should allow space for up to
+ *    CONFIG_TASK_NAME_SIZE bytes; the returned string will be
+ *    null-terminated. As an example:
+ *
+ *      char myname[CONFIG_TASK_NAME_SIZE];
+ *      prctl(PR_GET_NAME, myname);
+ *
+ *  PR_SET_NAME_EXT
  *    Set the task (or thread) name for the thread whose ID is in required
  *    arg2 (int), using the value in the location pointed to by required arg1
  *    (char*).  The name can be up to CONFIG_TASK_NAME_SIZE long (including
  *    any null termination).  The thread ID of 0 will set the name of the
  *    calling thread. As an example:
  *
- *      prctl(PR_SET_NAME, "MyName", 0);
+ *      prctl(PR_SET_NAME_EXT, "MyName", pid);
  *
- *  PR_GET_NAME
+ *  PR_GET_NAME_EXT
  *    Return the task (or thread) name for the for the thread whose ID is
- *    optional arg2 (int), in the buffer pointed to by optional arg1 (char *).
- *    The buffer must be CONFIG_TASK_NAME_SIZE long (including any null
- *    termination). As an example:
+ *    optional arg2 (int), in the buffer pointed to by optional arg1
+ *    (char *). The buffer must be CONFIG_TASK_NAME_SIZE long (including
+ *    any null termination). As an example:
  *
  *      char myname[CONFIG_TASK_NAME_SIZE];
- *      prctl(PR_GET_NAME, myname, 0);
+ *      prctl(PR_GET_NAME_EXT, myname, pid);
  */
 
-#define PR_SET_NAME 1
-#define PR_GET_NAME 2
+#define PR_SET_NAME     1
+#define PR_GET_NAME     2
+#define PR_SET_NAME_EXT 3
+#define PR_GET_NAME_EXT 4
 
 /****************************************************************************
  * Public Type Definitions

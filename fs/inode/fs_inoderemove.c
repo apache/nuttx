@@ -74,9 +74,9 @@ FAR struct inode *inode_unlink(FAR const char *path)
   FAR struct inode *node = NULL;
   int ret;
 
-  /* Verify parameters.  Ignore null paths and relative paths */
+  /* Verify parameters.  Ignore null paths */
 
-  if (path == NULL || path[0] != '/')
+  if (path == NULL)
     {
       return NULL;
     }
@@ -100,20 +100,12 @@ FAR struct inode *inode_unlink(FAR const char *path)
           desc.peer->i_peer = node->i_peer;
         }
 
-      /* If parent is non-null, then remove the node from head of
-       * of the list of children.
-       */
-
-      else if (desc.parent)
-        {
-          desc.parent->i_child = node->i_peer;
-        }
-
-      /* Otherwise, we must be removing the root inode. */
+      /* Then remove the node from head of the list of children. */
 
       else
         {
-           g_root_inode = node->i_peer;
+          DEBUGASSERT(desc.parent != NULL);
+          desc.parent->i_child = node->i_peer;
         }
 
       node->i_peer = NULL;
@@ -162,7 +154,8 @@ int inode_remove(FAR const char *path)
       else
         {
           /* And delete it now -- recursively to delete all of its children.
-           * Since it has been unlinked, then the peer pointer should be NULL.
+           * Since it has been unlinked, then the peer pointer should be
+           * NULL.
            */
 
           DEBUGASSERT(node->i_peer == NULL);

@@ -57,14 +57,14 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_GPIO_IRQ
-static uint8_t g_gpio_cpuint;
+static int g_gpio_cpuint;
 #endif
 
 static const uint8_t g_pin2func[40] =
 {
   0x44, 0x88, 0x40, 0x84, 0x48, 0x6c, 0x60, 0x64,  /* 0-7 */
   0x68, 0x54, 0x58, 0x5c, 0x34, 0x38, 0x30, 0x3c,  /* 8-15 */
-  0x4c, 0x50, 0x70, 0x74, 0x78, 0x7c, 0x80, 0x8c,  /* 16-23 */
+  0x4c, 0x50, 0x70, 0x74, _NA_, 0x7c, 0x80, 0x8c,  /* 16-19, N/A, 21-23 */
   _NA_, 0x24, 0x28, 0x2c, _NA_, _NA_, _NA_, _NA_,  /* N/A, 25-27, N/A, N/A, N/A, N/A */
   0x1c, 0x20, 0x14, 0x18, 0x04, 0x08, 0x0c, 0x10   /* 32-39 */
 };
@@ -161,9 +161,8 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
   uintptr_t regaddr;
   uint32_t func;
   uint32_t cntrl;
-  unsigned int pinmode;
 
-  DEBUGASSERT(pin >= 0 && pin <= ESP32_NIRQ_GPIO);
+  DEBUGASSERT(pin >= 0 && pin <= ESP32_NGPIOS);
 
   /* Handle input pins */
 
@@ -213,18 +212,17 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
 
   func |= FUN_IE;
 
-  pinmode = (attr & PINMODE_MASK);
-  if (pinmode == INPUT || pinmode == OUTPUT)
+  /* Select the pad's function.  If no function was given, consider it a
+   * normal input or output (i.e. function3).
+   */
+
+  if ((attr & FUNCTION_MASK) != 0)
     {
-      func |= (uint32_t)(2 << MCU_SEL_S);
+      func |= (uint32_t)(((attr >> FUNCTION_SHIFT) - 1) << MCU_SEL_S);
     }
-  else if ((attr & FUNCTION_MASK) == SPECIAL)
+  else
     {
-      func |= (uint32_t)((((pin) == 1 || (pin) == 3) ? 0 : 1) << MCU_SEL_S);
-    }
-  else /* if ((attr & FUNCTION) != 0) */
-    {
-      func |= (uint32_t)((attr >> FUNCTION_SHIFT) << MCU_SEL_S);
+      func |= (uint32_t)((2 >> FUNCTION_SHIFT) << MCU_SEL_S);
     }
 
   if ((attr & OPEN_DRAIN) != 0)
@@ -250,7 +248,7 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
 
 void esp32_gpiowrite(int pin, bool value)
 {
-  DEBUGASSERT(pin >= 0 && pin <= ESP32_NIRQ_GPIO);
+  DEBUGASSERT(pin >= 0 && pin <= ESP32_NGPIOS);
 
   if (value)
     {
@@ -288,7 +286,7 @@ bool esp32_gpioread(int pin)
 {
   uint32_t regval;
 
-  DEBUGASSERT(pin >= 0 && pin <= ESP32_NIRQ_GPIO);
+  DEBUGASSERT(pin >= 0 && pin <= ESP32_NGPIOS);
 
   if (pin < 32)
     {
@@ -354,10 +352,12 @@ void esp32_gpioirqenable(int irq, gpio_intrtype_t intrtype)
 {
   uintptr_t regaddr;
   uint32_t regval;
+#ifdef CONFIG_SMP
   int cpu;
+#endif
   int pin;
 
-  DEBUGASSERT(irq <= ESP32_FIRST_GPIOIRQ && irq <= ESP32_LAST_GPIOIRQ);
+  DEBUGASSERT(irq >= ESP32_FIRST_GPIOIRQ && irq <= ESP32_LAST_GPIOIRQ);
 
   /* Convert the IRQ number to a pin number */
 
@@ -380,18 +380,20 @@ void esp32_gpioirqenable(int irq, gpio_intrtype_t intrtype)
    *   Bit 5: SDIO's extent interrupt enable.
    */
 
+#ifdef CONFIG_SMP
   cpu = up_cpu_index();
-  if (cpu == 0)
-    {
-      /* PRO_CPU */
-
-      regval |= ((1 << 2) << GPIO_PIN_INT_ENA_S);
-    }
-  else
+  if (cpu != 0)
     {
       /* APP_CPU */
 
       regval |= ((1 << 0) << GPIO_PIN_INT_ENA_S);
+    }
+  else
+#endif
+    {
+      /* PRO_CPU */
+
+      regval |= ((1 << 2) << GPIO_PIN_INT_ENA_S);
     }
 
   regval |= (intrtype << GPIO_PIN_INT_TYPE_S);
@@ -416,7 +418,7 @@ void esp32_gpioirqdisable(int irq)
   uint32_t regval;
   int pin;
 
-  DEBUGASSERT(irq <= ESP32_FIRST_GPIOIRQ && irq <= ESP32_LAST_GPIOIRQ);
+  DEBUGASSERT(irq >= ESP32_FIRST_GPIOIRQ && irq <= ESP32_LAST_GPIOIRQ);
 
   /* Convert the IRQ number to a pin number */
 

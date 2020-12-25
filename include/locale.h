@@ -47,13 +47,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define LC_ALL      0
-#define LC_COLLATE  1
-#define LC_CTYPE    2
-#define LC_MONETARY 3
-#define LC_NUMERIC  4
-#define LC_TIME     5
-#define LC_MESSAGES 6
+#define LC_ALL           0
+#define LC_COLLATE       1
+#define LC_CTYPE         2
+#define LC_MONETARY      3
+#define LC_NUMERIC       4
+#define LC_TIME          5
+#define LC_MESSAGES      6
+
+#define LC_COLLATE_MASK  (1 << LC_COLLATE)
+#define LC_CTYPE_MASK    (1 << LC_CTYPE)
+#define LC_MONETARY_MASK (1 << LC_MONETARY)
+#define LC_NUMERIC_MASK  (1 << LC_NUMERIC)
+#define LC_TIME_MASK     (1 << LC_TIME)
+#define LC_MESSAGES_MASK (1 << LC_MESSAGES)
+
+#define LC_ALL_MASK      (LC_COLLATE_MASK  | LC_CTYPE_MASK   | \
+                          LC_MONETARY_MASK | LC_NUMERIC_MASK | \
+                          LC_TIME_MASK     | LC_MESSAGES_MASK)
 
 /****************************************************************************
  * Public Type Definitions
@@ -111,6 +122,12 @@ extern "C"
 
 FAR char *setlocale(int category, FAR const char *locale);
 FAR struct lconv *localeconv(void);
+
+locale_t newlocale(int category_mask, FAR const char *locale, locale_t base);
+locale_t duplocale(locale_t locobj);
+void freelocale(locale_t locobj);
+
+locale_t uselocale(locale_t newloc);
 
 #undef EXTERN
 #ifdef __cplusplus

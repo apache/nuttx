@@ -49,7 +49,12 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
+
+#ifdef CONFIG_SERIAL_TERMIOS
+#  include <termios.h>
+#endif
 
 #include <arch/board/board.h>
 
@@ -131,7 +136,7 @@ static int  nrf52_attach(struct uart_dev_s *dev);
 static void nrf52_detach(struct uart_dev_s *dev);
 static int  nrf52_interrupt(int irq, void *context, FAR void *arg);
 static int  nrf52_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  nrf52_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  nrf52_receive(struct uart_dev_s *dev, unsigned int *status);
 static void nrf52_rxint(struct uart_dev_s *dev, bool enable);
 static bool nrf52_rxavailable(struct uart_dev_s *dev);
 static void nrf52_send(struct uart_dev_s *dev, int ch);
@@ -423,6 +428,23 @@ static int nrf52_interrupt(int irq, void *context, FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: nrf52_set_format
+ *
+ * Description:
+ *   Set the serial line format and speed.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_TERMIOS
+void nrf52_set_format(struct uart_dev_s *dev)
+{
+  struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
+
+  nrf52_usart_setformat(priv->uartbase, &priv->config);
+}
+#endif
+
+/****************************************************************************
  * Name: nrf52_ioctl
  *
  * Description:
@@ -432,7 +454,116 @@ static int nrf52_interrupt(int irq, void *context, FAR void *arg)
 
 static int nrf52_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  return -ENOTTY;
+#ifdef CONFIG_SERIAL_TERMIOS
+  struct inode         *inode  = filep->f_inode;
+  struct uart_dev_s    *dev    = inode->i_private;
+  struct nrf52_dev_s   *priv   = (struct nrf52_dev_s *)dev->priv;
+  struct uart_config_s *config = &priv->config;
+#endif
+  int                   ret    = OK;
+
+  switch (cmd)
+    {
+#ifdef CONFIG_SERIAL_TERMIOS
+      case TCGETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
+
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          termiosp->c_cflag = ((config->parity != 0) ? PARENB : 0)
+                              | ((config->parity == 1) ? PARODD : 0)
+                              | ((config->stopbits2) ? CSTOPB : 0) |
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+                              ((config->oflow) ? CCTS_OFLOW : 0) |
+#endif
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+                              ((config->iflow) ? CRTS_IFLOW : 0) |
+#endif
+                              CS8;
+
+          cfsetispeed(termiosp, config->baud);
+
+          break;
+        }
+
+      case TCSETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
+
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          /* Perform some sanity checks before accepting any changes */
+
+          if ((termiosp->c_cflag & CSIZE) != CS8)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+#ifndef HAVE_UART_STOPBITS
+          if ((termiosp->c_cflag & CSTOPB) != 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
+#endif
+
+          if (termiosp->c_cflag & PARODD)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          /* TODO: CCTS_OFLOW and CRTS_IFLOW */
+
+          /* Parity */
+
+          if (termiosp->c_cflag & PARENB)
+            {
+              config->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+            }
+          else
+            {
+              config->parity = 0;
+            }
+
+#ifdef HAVE_UART_STOPBITS
+          /* Stop bits */
+
+          config->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
+#endif
+
+          /* Note that only cfgetispeed is used because we have knowledge
+           * that only one speed is supported.
+           */
+
+          config->baud = cfgetispeed(termiosp);
+
+          /* Effect the changes */
+
+          nrf52_set_format(dev);
+
+          break;
+        }
+#endif
+
+      default:
+        {
+          ret = -ENOTTY;
+          break;
+        }
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -445,7 +576,7 @@ static int nrf52_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int nrf52_receive(struct uart_dev_s *dev, uint32_t *status)
+static int nrf52_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
   uint32_t data;
@@ -618,8 +749,8 @@ static bool nrf52_txempty(struct uart_dev_s *dev)
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before nrf52_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in nrf52_lowsetup() and main clock iniialization
- *   performed in nrf_clock_configure().
+ *   configuration performed in nrf52_lowsetup() and main clock
+ *   initialization performed in nrf_clock_configure().
  *
  ****************************************************************************/
 

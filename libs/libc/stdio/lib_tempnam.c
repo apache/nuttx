@@ -43,6 +43,8 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -85,21 +87,24 @@
 
 FAR char *tempnam(FAR const char *dir, FAR const char *pfx)
 {
+  FAR char *template;
   FAR char *path;
-  int ret;
 
-  asprintf(&path, "%s/%s-XXXXXX.tmp", dir, pfx);
-  if (path)
+  asprintf(&template, "%s/%s-XXXXXX", dir, pfx);
+  if (template)
     {
-      ret = mktemp(path);
-      if (ret == OK)
+      path = mktemp(template);
+      if (path != NULL)
         {
           return path;
         }
 
-      free(path);
+      lib_free(template);
+    }
+  else
+    {
+      set_errno(ENOMEM);
     }
 
-  set_errno(ENOMEM);
   return NULL;
 }

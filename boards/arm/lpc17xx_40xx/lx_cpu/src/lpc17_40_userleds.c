@@ -86,12 +86,13 @@ static uint32_t g_ledcfg[BOARD_NLEDS] =
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED1-2 GPIOs for output */
 
   lpc17_40_configgpio(GPIO_LED1);
   lpc17_40_configgpio(GPIO_LED2);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -110,7 +111,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   lpc17_40_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
   lpc17_40_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);

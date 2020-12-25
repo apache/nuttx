@@ -64,12 +64,13 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED GPIOs for output */
 
   sam_configgpio(GPIO_LED0);
   sam_configgpio(GPIO_LED1);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -100,7 +101,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   /* Low illuminates */
 

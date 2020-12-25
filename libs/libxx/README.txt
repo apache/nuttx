@@ -1,28 +1,31 @@
 libs/libxx/README.txt
 ^^^^^^^^^^^^^^^^^^^^^
 
-This directory contains a fragmentary C++ library that will allow to build
-only the simplest of C++ applications.  In the deeply embedded world, that
-is probably all that is necessary.  If you have a need for more extensive
-C++ support, the following libraries are recommended:
+This directory contains three C++ library:
 
- - libstdc++  (part of GCC)
- - STLport    http://www.stlport.org/
- - uClibc++   http://cxx.uclibc.org/
- - uSTL       http://ustl.sourceforge.net/
+ - A fragmentary C++ library that will allow to build only the simplest of
+   C++ applications. In the deeply embedded world, that is probably all
+   that is necessary.
 
-There is a version of uClibc++ that has been customized for use with NuttX.
-That version that can be found in the NuttX uClibc++ GIT repository.  Refer
-to the top-level uClibc++ README.txt file for installation instructions.
+   At present, only the following are supported here:
 
-At present, only the following are supported here:
+     - void *operator new(std::size_t nbytes);
+     - void operator delete(void* ptr);
+     - void operator delete[](void *ptr);
+     - void __cxa_pure_virtual(void);
+     - int __aeabi_atexit(void* object, void (*destroyer)(void*),
+                          void *dso_handle);
+     - int __cxa_atexit(__cxa_exitfunc_t func, FAR void *arg,
+                        FAR void *dso_handle);
 
- - void *operator new(std::size_t nbytes);
- - void operator delete(void* ptr);
- - void operator delete[](void *ptr);
- - void __cxa_pure_virtual(void);
- - int __aeabi_atexit(void* object, void (*destroyer)(void*), void *dso_handle);
- - int __cxa_atexit(__cxa_exitfunc_t func, FAR void *arg, FAR void *dso_handle);
+   This implementation is selected when neither of the following
+   two options are enabled.
+
+ - LLVM "libc++" C++ library (http://libcxx.llvm.org/)
+   This implementation is selected with CONFIG_LIBCXX=y.
+
+ - uClibc++ C++ library (http://cxx.uclibc.org/)
+   This implementation is selected with CONFIG_UCLIBCXX=y.
 
 operator new
 ------------

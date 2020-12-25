@@ -68,6 +68,7 @@
     PTHREAD_DEFAULT_PRIORITY, /* priority */ \
     PTHREAD_DEFAULT_POLICY,   /* policy */ \
     PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
+    PTHREAD_CREATE_JOINABLE,  /* detachstate */ \
     0,                        /* low_priority */ \
     0,                        /* max_repl */ \
     0,                        /* affinity */ \
@@ -82,6 +83,7 @@
     PTHREAD_DEFAULT_PRIORITY, /* priority */ \
     PTHREAD_DEFAULT_POLICY,   /* policy */ \
     PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
+    PTHREAD_CREATE_JOINABLE,  /* detachstate */ \
     0,                        /* low_priority */ \
     0,                        /* max_repl */ \
     NULL,                     /* stackaddr */ \
@@ -95,6 +97,7 @@
     PTHREAD_DEFAULT_PRIORITY, /* priority */ \
     PTHREAD_DEFAULT_POLICY,   /* policy */ \
     PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
+    PTHREAD_CREATE_JOINABLE,  /* detachstate */ \
     0,                        /* affinity */ \
     NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
@@ -105,6 +108,7 @@
     PTHREAD_DEFAULT_PRIORITY, /* priority */ \
     PTHREAD_DEFAULT_POLICY,   /* policy */ \
     PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
+    PTHREAD_CREATE_JOINABLE,  /* detachstate */ \
     NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
   }

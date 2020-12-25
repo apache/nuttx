@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -439,7 +440,7 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
 
           rtcb->flags         |= TCB_FLAG_SYSCALL;
 #else
-          svcerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
+          svcerr("ERROR: Bad SYS call: %" PRId64 "\n", regs[REG_A0]);
 #endif
         }
         break;

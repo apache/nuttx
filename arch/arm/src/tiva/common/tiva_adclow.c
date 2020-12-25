@@ -589,7 +589,9 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
           fifo_count = tiva_adc_sse_data(priv->devno, sse, buf);
 
-          /* Verify that the upper-half driver has bound its callback functions */
+          /* Verify that the upper-half driver has bound its callback
+           * functions
+           */
 
           if (priv->cb != NULL)
             {

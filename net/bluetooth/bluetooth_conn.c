@@ -105,8 +105,16 @@ void bluetooth_conn_initialize(void)
   dq_init(&g_free_bluetooth_connections);
   dq_init(&g_active_bluetooth_connections);
 
+  /* Mark connections as uninitialized */
+
+  memset(g_bluetooth_connections, 0, sizeof(g_bluetooth_connections));
+
   for (i = 0; i < CONFIG_NET_BLUETOOTH_NCONNS; i++)
     {
+      /* Indicate a connection unbound with BTPROTO_NONE */
+
+      g_bluetooth_connections[i].bc_proto = BTPROTO_NONE;
+
       /* Link each pre-allocated connection structure into the free list. */
 
       dq_addlast(&g_bluetooth_connections[i].bc_node,
@@ -192,6 +200,11 @@ void bluetooth_conn_free(FAR struct bluetooth_conn_s *conn)
   /* Free the connection */
 
   dq_addlast(&conn->bc_node, &g_free_bluetooth_connections);
+
+  /* Mark as unbound */
+
+  conn->bc_proto = BTPROTO_NONE;
+
   net_unlock();
 }
 
@@ -214,21 +227,52 @@ FAR struct bluetooth_conn_s *
 
   DEBUGASSERT(meta != NULL);
 
-  for (conn  = (FAR struct bluetooth_conn_s *)g_active_bluetooth_connections.head;
+  for (conn =
+       (FAR struct bluetooth_conn_s *)g_active_bluetooth_connections.head;
        conn != NULL;
        conn = (FAR struct bluetooth_conn_s *)conn->bc_node.flink)
     {
-      /* Does the destination address match the bound address of the socket. */
+      /* match protocol and channel first */
 
-      if ((BLUETOOTH_ADDRCMP(&conn->bc_raddr, &meta->bm_raddr) ||
-           BLUETOOTH_ADDRCMP(&conn->bc_raddr, &g_any_addr)) &&
-          (meta->bm_channel == conn->bc_channel ||
-           BT_CHANNEL_ANY   == conn->bc_channel))
+      if (meta->bm_proto != conn->bc_proto ||
+          meta->bm_channel != conn->bc_channel)
         {
           continue;
         }
+
+      switch (meta->bm_proto)
+        {
+          /* For BTPROTO_HCI, the socket will not be connected but only
+           * bound, thus we match for the device directly
+           */
+
+          case BTPROTO_HCI:
+
+            /* TODO: handle when multiple devices supported, need to add ID
+             * to meta and conn structures
+             */
+
+            goto stop;
+
+            break;
+
+          /* For BTPROTO_L2CAP, the destination address must match the
+           * bound address of the socket
+           */
+
+          case BTPROTO_L2CAP:
+            if ((BLUETOOTH_ADDRCMP(&conn->bc_raddr, &meta->bm_raddr) ||
+                 BLUETOOTH_ADDRCMP(&conn->bc_raddr, &g_any_addr)) &&
+                (meta->bm_channel == conn->bc_channel))
+              {
+                goto stop;
+              }
+
+            break;
+        }
     }
 
+stop:
   return conn;
 }
 

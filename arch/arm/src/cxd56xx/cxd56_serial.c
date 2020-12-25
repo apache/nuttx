@@ -65,6 +65,7 @@
 
 #include "cxd56_config.h"
 #include "cxd56_serial.h"
+#include "cxd56_powermgr.h"
 
 /****************************************************************************
  * Pre-processor definitions
@@ -89,8 +90,14 @@ struct up_dev_s
   uint8_t id;         /* ID=0,1,2,3 */
   uint8_t irq;        /* IRQ associated with this UART */
   uint8_t parity;     /* 0=none, 1=odd, 2=even */
-  uint8_t bits;       /* Number of bits (7 or 8) */
+  uint8_t bits;       /* Number of bits (5,6,7 or 8) */
   bool stopbits2;     /* true: Configure with 2 stop bits instead of 1 */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  bool iflow;         /* input flow control (RTS) enabled */
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  bool oflow;         /* output flow control (CTS) enabled */
+#endif
 #ifdef HAVE_RS485
   bool dtrdir;        /* DTR pin is the direction bit */
 #endif
@@ -101,6 +108,9 @@ struct up_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+static void up_set_format(struct uart_dev_s *dev);
+#endif
 static int up_setup(FAR struct uart_dev_s *dev);
 static void up_shutdown(FAR struct uart_dev_s *dev);
 static int up_attach(FAR struct uart_dev_s *dev);
@@ -111,7 +121,7 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static bool up_rxflowcontrol(FAR struct uart_dev_s *dev,
                              unsigned int nbuffered, bool upper);
 #endif
-static int up_receive(FAR struct uart_dev_s *dev, FAR uint32_t *status);
+static int up_receive(FAR struct uart_dev_s *dev, FAR unsigned int *status);
 static void up_rxint(FAR struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(FAR struct uart_dev_s *dev);
 static void up_send(FAR struct uart_dev_s *dev, int ch);
@@ -187,6 +197,12 @@ static struct up_dev_s g_uart1priv =
   .parity    = CONFIG_UART1_PARITY,
   .bits      = CONFIG_UART1_BITS,
   .stopbits2 = CONFIG_UART1_2STOP,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .iflow     = false, /* flow control is not supported */
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  .oflow     = false, /* flow control is not supported */
+#endif
 };
 
 static uart_dev_t g_uart1port =
@@ -220,6 +236,12 @@ static struct up_dev_s g_uart2priv =
   .parity    = CONFIG_UART2_PARITY,
   .bits      = CONFIG_UART2_BITS,
   .stopbits2 = CONFIG_UART2_2STOP,
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART2_IFLOWCONTROL)
+  .iflow     = true,
+#endif
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART2_OFLOWCONTROL)
+  .oflow     = true,
+#endif
 };
 
 static uart_dev_t g_uart2port =
@@ -283,7 +305,7 @@ static inline void up_disableuartint(FAR struct up_dev_s *priv,
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave();
   if (ier)
     {
       *ier = priv->ier & UART_INTR_ALL;
@@ -291,7 +313,7 @@ static inline void up_disableuartint(FAR struct up_dev_s *priv,
 
   priv->ier &= ~UART_INTR_ALL;
   up_serialout(priv, CXD56_UART_IMSC, priv->ier);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 }
 
 /****************************************************************************
@@ -302,10 +324,10 @@ static inline void up_restoreuartint(FAR struct up_dev_s *priv, uint32_t ier)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave();
   priv->ier |= ier & UART_INTR_ALL;
   up_serialout(priv, CXD56_UART_IMSC, priv->ier);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 }
 
 /****************************************************************************
@@ -326,6 +348,116 @@ static inline void up_enablebreaks(FAR struct up_dev_s *priv, bool enable)
 
   up_serialout(priv, CXD56_UART_LCR_H, lcr);
 }
+
+/****************************************************************************
+ * Name: cxd56_serial2_pm_event
+ ****************************************************************************/
+
+#ifdef CONFIG_CXD56_UART2
+static int cxd56_serial2_pm_event(uint8_t id)
+{
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_uart2priv;
+
+  switch (id)
+    {
+      case CXD56_PM_CALLBACK_ID_CLK_CHG_START:
+        break;
+      case CXD56_PM_CALLBACK_ID_CLK_CHG_END:
+        cxd56_setbaud(priv->uartbase, priv->basefreq, priv->baud);
+        break;
+      default:
+        break;
+    }
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: up_set_format
+ *
+ * Description:
+ *   Set the serial line format and speed.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+static void up_set_format(struct uart_dev_s *dev)
+{
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->priv;
+  uint32_t lcr;
+  uint32_t cr;
+  uint32_t cr_en;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave();
+
+  /* Get the original state of control register */
+
+  cr    = up_serialin(priv, CXD56_UART_CR);
+  cr_en = cr & UART_CR_EN;
+  cr   &= ~UART_CR_EN;
+
+  /* Disable until the format bits and baud rate registers are updated */
+
+  up_serialout(priv, CXD56_UART_CR, cr);
+
+  /* Set the BAUD divisor */
+
+  cxd56_setbaud(priv->uartbase, priv->basefreq, priv->baud);
+
+  /* Set up the LCR */
+
+  lcr = up_serialin(priv, CXD56_UART_LCR_H);
+
+  lcr &= ~(UART_LCR_WLEN(8) | UART_LCR_STP2 | UART_LCR_EPS | UART_LCR_PEN);
+
+  if ((5 <= priv->bits) && (priv->bits < 8))
+    {
+      lcr |= UART_LCR_WLEN(priv->bits);
+    }
+  else
+    {
+      lcr |= UART_LCR_WLEN(8);
+    }
+
+  if (priv->stopbits2)
+    {
+      lcr |= UART_LCR_STP2;
+    }
+
+  if (priv->parity == 1)
+    {
+      lcr |= (UART_LCR_PEN);
+    }
+  else if (priv->parity == 2)
+    {
+      lcr |= (UART_LCR_PEN | UART_LCR_EPS);
+    }
+
+  up_serialout(priv, CXD56_UART_LCR_H, lcr);
+
+  /* Enable Auto-RTS and Auto-CS Flow Control in the Modem Control Register */
+
+  cr &= ~(UART_CR_RTSEN | UART_CR_CTSEN);
+  cr |= UART_CR_RTS;
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  if ((priv->iflow) && (priv->uartbase == CXD56_UART2_BASE))
+    {
+      cr |= UART_CR_RTSEN;
+    }
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  if ((priv->oflow) && (priv->uartbase == CXD56_UART2_BASE))
+    {
+      cr |= UART_CR_CTSEN;
+    }
+#endif
+  up_serialout(priv, CXD56_UART_CR, cr | cr_en);
+
+  spin_unlock_irqrestore(flags);
+}
+#endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
 /****************************************************************************
  * Name: up_setup
@@ -356,76 +488,35 @@ static int up_setup(FAR struct uart_dev_s *dev)
 
   priv->ier = up_serialin(priv, CXD56_UART_IMSC);
 
-  /* Set the BAUD divisor */
+  /* Configure the UART line format and speed. */
 
-  cxd56_setbaud(priv->uartbase, priv->basefreq, priv->baud);
+  up_set_format(dev);
 
-  /* Set up the LCR */
-
-  lcr = 0;
-  if (priv->bits == 7)
-    {
-      lcr |= UART_LCR_WLEN(7);
-    }
-  else
-    {
-      lcr |= UART_LCR_WLEN(8);
-    }
-
-  if (priv->stopbits2)
-    {
-      lcr |= UART_LCR_STP2;
-    }
-
-  if (priv->parity == 1)
-    {
-      lcr |= (UART_LCR_PEN);
-    }
-  else if (priv->parity == 2)
-    {
-      lcr |= (UART_LCR_PEN | UART_LCR_EPS);
-    }
-
-  /* Save the LCR */
-
-  up_serialout(priv, CXD56_UART_LCR_H, lcr);
+  /* Set interrupt FIFO level */
 
   up_serialout(priv, CXD56_UART_IFLS, 0);
+
+  /* Clear all interrupts */
+
   up_serialout(priv, CXD56_UART_ICR, 0x7ff);
-
-  cr = UART_CR_RXE | UART_CR_TXE;
-
-  /* Enable Auto-RTS and Auto-CS Flow Control in the Modem Control Register */
-
-#  ifdef CONFIG_UART1_FLOWCONTROL
-  if (priv->uartbase == CXD56_UART1_BASE)
-    {
-      cr |= UART_CR_CTSEN | UART_CR_RTSEN;
-    }
-#  endif
-
-  /* Enable Auto-RTS and Auto-CS Flow Control in UART2 */
-
-#  ifdef CONFIG_UART2_IFLOWCONTROL
-  if (priv->uartbase == CXD56_UART2_BASE)
-    {
-      cr |= UART_CR_RTSEN;
-    }
-#  endif
-#  ifdef CONFIG_UART2_OFLOWCONTROL
-  if (priv->uartbase == CXD56_UART2_BASE)
-    {
-      cr |= UART_CR_CTSEN;
-    }
-#  endif
-  up_serialout(priv, CXD56_UART_CR, cr);
 
   /* Enable FIFO and UART in the last */
 
+  lcr = up_serialin(priv, CXD56_UART_LCR_H);
   lcr |= UART_LCR_FEN;
   up_serialout(priv, CXD56_UART_LCR_H, lcr);
-  cr |= UART_CR_EN;
+
+  cr = up_serialin(priv, CXD56_UART_CR);
+  cr |= UART_CR_RXE | UART_CR_TXE | UART_CR_EN;
   up_serialout(priv, CXD56_UART_CR, cr);
+#endif
+
+#if defined(CONFIG_CXD56_UART2) && !defined(CONFIG_UART2_SERIAL_CONSOLE)
+  if ((!priv->pmhandle) && (priv->uartbase == CXD56_UART2_BASE))
+    {
+      priv->pmhandle = cxd56_pm_register_callback(PM_CLOCK_APP_UART,
+                                                  cxd56_serial2_pm_event);
+    }
 #endif
 
   return OK;
@@ -460,6 +551,14 @@ static void up_shutdown(FAR struct uart_dev_s *dev)
       default:
         break;
     }
+
+#ifndef CONFIG_UART2_SERIAL_CONSOLE
+  if ((priv->pmhandle) && (priv->uartbase == CXD56_UART2_BASE))
+    {
+      cxd56_pm_unregister_callback(priv->pmhandle);
+      priv->pmhandle = NULL;
+    }
+#endif
 }
 
 /****************************************************************************
@@ -669,6 +768,7 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TCGETS:
         {
           FAR struct termios *termiosp = (FAR struct termios *)arg;
+          irqstate_t flags;
 
           if (!termiosp)
             {
@@ -676,18 +776,48 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          /* TODO:  Other termios fields are not yet returned.
-           * Note that only cfsetospeed is not necessary because we have
-           * knowledge that only one speed is supported.
-           */
+          flags = spin_lock_irqsave();
+
+          termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
+                              ((priv->parity == 1) ? PARODD : 0) |
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+                              ((priv->oflow) ? CCTS_OFLOW : 0) |
+#endif
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+                              ((priv->iflow) ? CRTS_IFLOW : 0) |
+#endif
+                              ((priv->stopbits2) ? CSTOPB : 0);
 
           cfsetispeed(termiosp, priv->baud);
+
+          switch (priv->bits)
+            {
+              case 5:
+                termiosp->c_cflag |= CS5;
+                break;
+
+              case 6:
+                termiosp->c_cflag |= CS6;
+                break;
+
+              case 7:
+                termiosp->c_cflag |= CS7;
+                break;
+
+              case 8:
+              default:
+                termiosp->c_cflag |= CS8;
+                break;
+            }
+
+          spin_unlock_irqrestore(flags);
         }
         break;
 
       case TCSETS:
         {
           FAR struct termios *termiosp = (FAR struct termios *)arg;
+          irqstate_t flags;
 
           if (!termiosp)
             {
@@ -695,31 +825,70 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          /* TODO:  Handle other termios settings.
-           * Note that only cfgetispeed is used besued we have knowledge
-           * that only one speed is supported.
-           */
+          flags = spin_lock_irqsave();
 
+          switch (termiosp->c_cflag & CSIZE)
+            {
+              case CS5:
+                priv->bits = 5;
+                break;
+
+              case CS6:
+                priv->bits = 6;
+                break;
+
+              case CS7:
+                priv->bits = 7;
+                break;
+
+              case CS8:
+              default:
+                priv->bits = 8;
+                break;
+            }
+
+          if ((termiosp->c_cflag & PARENB) != 0)
+            {
+              priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+            }
+          else
+            {
+              priv->parity = 0;
+            }
+
+          priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
+
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+          priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
+#endif
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+          priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
+#endif
           priv->baud = cfgetispeed(termiosp);
-          cxd56_setbaud(priv->uartbase, priv->basefreq, priv->baud);
+
+          /* Configure the UART line format and speed. */
+
+          up_set_format(dev);
+
+          spin_unlock_irqrestore(flags);
         }
         break;
 #endif
 
       case TIOCSBRK: /* BSD compatibility: Turn break on, unconditionally */
         {
-          irqstate_t flags = enter_critical_section();
+          irqstate_t flags = spin_lock_irqsave();
           up_enablebreaks(priv, true);
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(flags);
         }
         break;
 
       case TIOCCBRK: /* BSD compatibility: Turn break off, unconditionally */
         {
           irqstate_t flags;
-          flags = enter_critical_section();
+          flags = spin_lock_irqsave();
           up_enablebreaks(priv, false);
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(flags);
         }
         break;
 
@@ -747,7 +916,7 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int up_receive(FAR struct uart_dev_s *dev, FAR uint32_t *status)
+static int up_receive(FAR struct uart_dev_s *dev, FAR unsigned int *status)
 {
   FAR struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t rbr;
@@ -770,7 +939,7 @@ static void up_rxint(FAR struct uart_dev_s *dev, bool enable)
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave();
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -783,7 +952,7 @@ static void up_rxint(FAR struct uart_dev_s *dev, bool enable)
     }
 
   up_serialout(priv, CXD56_UART_IMSC, priv->ier);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 }
 
 /****************************************************************************

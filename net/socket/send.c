@@ -91,12 +91,10 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
   /* Verify that non-NULL pointers were passed */
 
-#ifdef CONFIG_DEBUG_FEATURES
   if (buf == NULL)
     {
       return -EINVAL;
     }
-#endif
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -112,7 +110,8 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
   ret = psock->s_sockif->si_send(psock, buf, len, flags);
   if (ret < 0)
     {
-      nerr("ERROR: socket si_send() (or usrsock_sendto()) failed: %d\n", ret);
+      nerr("ERROR: socket si_send() (or usrsock_sendto()) failed: %zd\n",
+           ret);
     }
 
   return ret;

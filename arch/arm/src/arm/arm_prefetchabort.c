@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <debug.h>
 
@@ -84,7 +85,7 @@ void arm_prefetchabort(uint32_t *regs)
    * virtual addresses.
    */
 
-  pginfo("VADDR: %08x VBASE: %08x VEND: %08x\n",
+  pginfo("VADDR: %08" PRIx32 " VBASE: %08x VEND: %08x\n",
          regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
 
   if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
@@ -122,7 +123,7 @@ void arm_prefetchabort(uint32_t *regs)
   else
 #endif
     {
-      _alert("Prefetch abort. PC: %08x\n", regs[REG_PC]);
+      _alert("Prefetch abort. PC: %08" PRIx32 "\n", regs[REG_PC]);
       PANIC();
     }
 }

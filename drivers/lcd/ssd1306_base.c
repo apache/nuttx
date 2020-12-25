@@ -1,21 +1,22 @@
-/**************************************************************************************
+/****************************************************************************
  * drivers/lcd/ssd1306_base.c
- * Driver for Univision UG-2864HSWEG01 OLED display or UG-2832HSWEG04 both with the
- * Univision SSD1306 controller in SPI mode and Densitron DD-12864WO-4A with SSD1309
- * in SPI mode.
+ *
+ * Driver for Univision UG-2864HSWEG01 OLED display or UG-2832HSWEG04 both
+ * with the Univision SSD1306 controller in SPI mode and Densitron
+ * DD-12864WO-4A with SSD1309 in SPI mode.
  *
  *   Copyright (C) 2012-2013, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
- *   1. Product Specification (Preliminary), Part Name: OEL Display Module, Part ID:
+ *   1. Product Specification, Part Name: OEL Display Module, Part ID:
  *      UG-2864HSWEG01, Doc No: SAS1-9046-B, Univision Technology Inc.
- *   2. Product Specification, Part Name: OEL Display Module, Part ID: UG-2832HSWEG04,
- *      Doc No.: SAS1-B020-B, Univision Technology Inc.
- *   3. SSD1306, 128 X 64 Dot Matrix OLED/PLED, Preliminary Segment/Common Driver with
- *      Controller,  Solomon Systech
- *   4. SSD1309, 128 x 64 Dot Matrix OLED/PLED Segment/Common Driver with Controller,
- *      Solomon Systech
+ *   2. Product Specification, Part Name: OEL Display Module, Part ID:
+ *      UG-2832HSWEG04, Doc No.: SAS1-B020-B, Univision Technology Inc.
+ *   3. SSD1306, 128 X 64 Dot Matrix OLED/PLED, Preliminary Segment/Common
+ *      Driver with Controller, Solomon Systech
+ *   4. SSD1309, 128 x 64 Dot Matrix OLED/PLED Segment/Common Driver with
+ *      Controller, Solomon Systech
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,8 +45,9 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
-/**************************************************************************************
+ ****************************************************************************/
+
+/****************************************************************************
  * Device memory organization:
  *
  *          +----------------------------+
@@ -77,30 +79,30 @@
  *  Page 7  |    |   |   |   |     |     |
  *  --------+----+---+---+---+-...-+-----+
  *
- *  -----------------------------------+---------------------------------------
- *  Landscape Display:                 | Reverse Landscape Display:
- *  --------+-----------------------+  |  --------+---------------------------+
- *          |       Column          |  |          |         Column            |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 0  | 0 | 1 | 2 |     | 127 |  |  Page 7  | 127 | 126 | 125 |     | 0 |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 1  | V                     |  |  Page 6  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 2  | V                     |  |  Page 5  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 3  | V                     |  |  Page 4  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 4  | V                     |  |  Page 3  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 5  | V                     |  |  Page 2  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 6  | V                     |  |  Page 1  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 7  | V                     |  |  Page 0  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  -----------------------------------+---------------------------------------
+ *  ----------------------------------+--------------------------------------
+ *  Landscape Display:                | Reverse Landscape Display:
+ *  --------+----------------------+  |  --------+--------------------------+
+ *          |       Column         |  |          |         Column           |
+ *  --------+---+---+---+-..-+-----+  |  --------+-----+-----+-----+-..-+---+
+ *  Page 0  | 0 | 1 | 2 |    | 127 |  |  Page 7  | 127 | 126 | 125 |    | 0 |
+ *  --------+---+---+---+-..-+-----+  |  --------+-----+-----+-----+-..-+---+
+ *  Page 1  | V                    |  |  Page 6  |                        ^ |
+ *  --------+---+---+---+-..-+-----+  |  --------+-----+-----+-----+-..-+---+
+ *  Page 2  | V                    |  |  Page 5  |                        ^ |
+ *  --------+---+---+---+-..-+-----+  |  --------+-----+-----+-----+-..-+---+
+ *  Page 3  | V                    |  |  Page 4  |                        ^ |
+ *  --------+---+---+---+-..-+-----+  |  --------+-----+-----+-----+-..-+---+
+ *  Page 4  | V                    |  |  Page 3  |                        ^ |
+ *  --------+---+---+---+-..-+-----+  |  --------+-----+-----+-----+-..-+---+
+ *  Page 5  | V                    |  |  Page 2  |                        ^ |
+ *  --------+---+---+---+-..-+-----+  |  --------+-----+-----+-----+-..-+---+
+ *  Page 6  | V                    |  |  Page 1  |                        ^ |
+ *  --------+---+---+---+-..-+-----+  |  --------+-----+-----+-----+-..-+---+
+ *  Page 7  | V                    |  |  Page 0  |                        ^ |
+ *  --------+---+---+---+-..-+-----+  |  --------+-----+-----+-----+-..-+---+
+ *  ----------------------------------+--------------------------------------
  *
- *  -----------------------------------+---------------------------------------
+ *  -----------------------------------+-------------------------------------
  *  Portrait Display:                  | Reverse Portrait Display:
  *  -----------+---------------------+ |  -----------+---------------------+
  *             |         Page        | |             |       Page          |
@@ -115,12 +117,12 @@
  *  -----------+---+---+---+-...-+---+ |  -----------+---+---+---+-...-+---+
  *  Column 127 |                     | |  Column 0   | <   <   <    <    < |
  *  -----------+---+---+---+-...-+---+ |  -----------+---+---+---+-...-+---+
- *  -----------------------------------+----------------------------------------
- **************************************************************************************/
+ *  -----------------------------------+-------------------------------------
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -143,22 +145,23 @@
 
 #ifdef CONFIG_LCD_SSD1306
 
-/**************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- **************************************************************************************/
+ ****************************************************************************/
 
 /* LCD Data Transfer Methods */
 
 static int ssd1306_putrun(fb_coord_t row, fb_coord_t col,
                           FAR const uint8_t *buffer, size_t npixels);
-static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                          size_t npixels);
+static int ssd1306_getrun(fb_coord_t row, fb_coord_t col,
+                          FAR uint8_t *buffer, size_t npixels);
 
 /* LCD Configuration */
 
 static int ssd1306_getvideoinfo(FAR struct lcd_dev_s *dev,
                                 FAR struct fb_videoinfo_s *vinfo);
-static int ssd1306_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int ssd1306_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                unsigned int planeno,
                                 FAR struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
@@ -178,15 +181,16 @@ static int ssd1306_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 static int  ssd1306_getpower(struct lcd_dev_s *dev);
 static int  ssd1306_setpower(struct lcd_dev_s *dev, int power);
 static int  ssd1306_getcontrast(struct lcd_dev_s *dev);
-static int  ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
+static int  ssd1306_setcontrast(struct lcd_dev_s *dev,
+                                unsigned int contrast);
 
 static int  ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on);
 static int  ssd1306_configuredisplay(struct ssd1306_dev_s *priv);
 static int  ssd1306_redrawfb(struct ssd1306_dev_s *priv);
 
-/**************************************************************************************
+/****************************************************************************
  * Private Data
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This is working memory allocated by the LCD driver for each LCD device
  * and for each color plane.  This memory will hold one raster line of data.
@@ -231,6 +235,7 @@ static const struct lcd_dev_s g_oleddev_dev =
   .getplaneinfo = ssd1306_getplaneinfo,
 
   /* LCD RGB Mapping -- Not supported */
+
   /* Cursor Controls -- Not supported */
 
   /* LCD Specific Controls */
@@ -241,15 +246,17 @@ static const struct lcd_dev_s g_oleddev_dev =
   .setcontrast  = ssd1306_setcontrast,
 };
 
-/* This is the OLED driver instance (only a single device is supported for now) */
+/* This is the OLED driver instance. Only a single device is supported
+ * for now.
+ */
 
 static struct ssd1306_dev_s g_oleddev;
 
-/**************************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_putrun
  *
  * Description:
@@ -262,14 +269,13 @@ static struct ssd1306_dev_s g_oleddev;
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
-static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+static int ssd1306_putrun(fb_coord_t row, fb_coord_t col,
+                          FAR const uint8_t *buffer,
                           size_t npixels)
 {
-  /* Because of this line of code, we will only be able to support a single UG device */
-
   FAR struct ssd1306_dev_s *priv = (FAR struct ssd1306_dev_s *)&g_oleddev;
   FAR uint8_t *fbptr;
   FAR uint8_t *ptr;
@@ -287,7 +293,8 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
   /* Clip the run to the display */
 
   pixlen = npixels;
-  if ((unsigned int)col + (unsigned int)pixlen > (unsigned int)SSD1306_DEV_XRES)
+  if ((unsigned int)col + (unsigned int)pixlen >
+      (unsigned int)SSD1306_DEV_XRES)
     {
       pixlen = (int)SSD1306_DEV_XRES - (int)col;
     }
@@ -305,7 +312,7 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
    */
 
 #ifdef SSD1306_DEV_REVERSEY
-  row = (SSD1306_DEV_YRES-1) - row;
+  row = (SSD1306_DEV_YRES - 1) - row;
 #endif
 
   /* If the column is switched then the start of the run is the mirror of
@@ -322,7 +329,7 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
    */
 
 #ifdef SSD1306_DEV_REVERSEX
-  col  = (SSD1306_DEV_XRES-1) - col;
+  col  = (SSD1306_DEV_XRES - 1) - col;
   col -= (pixlen - 1);
 #endif
 
@@ -432,6 +439,7 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
   ssd1306_cmddata(priv, true);
 
   /* Set the starting position for the run */
+
   /* Set the column address to the XOFFSET value */
 
   ret = ssd1306_sendbyte(priv, SSD1306_SETCOLL(devcol & 0x0f));
@@ -475,7 +483,7 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
 #  error "Configuration not implemented"
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_getrun
  *
  * Description:
@@ -490,14 +498,12 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
-static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                      size_t npixels)
+static int ssd1306_getrun(fb_coord_t row, fb_coord_t col,
+                          FAR uint8_t *buffer, size_t npixels)
 {
-  /* Because of this line of code, we will only be able to support a single UG device */
-
   FAR struct ssd1306_dev_s *priv = &g_oleddev;
   FAR uint8_t *fbptr;
   uint8_t page;
@@ -512,7 +518,8 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   /* Clip the run to the display */
 
   pixlen = npixels;
-  if ((unsigned int)col + (unsigned int)pixlen > (unsigned int)SSD1306_DEV_XRES)
+  if ((unsigned int)col + (unsigned int)pixlen >
+      (unsigned int)SSD1306_DEV_XRES)
     {
       pixlen = (int)SSD1306_DEV_XRES - (int)col;
     }
@@ -530,7 +537,7 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
    */
 
 #ifdef SSD1306_DEV_REVERSEY
-  row = (SSD1306_DEV_YRES-1) - row;
+  row = (SSD1306_DEV_YRES - 1) - row;
 #endif
 
   /* If the column is switched then the start of the run is the mirror of
@@ -547,10 +554,11 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
    */
 
 #ifdef SSD1306_DEV_REVERSEX
-  col  = (SSD1306_DEV_XRES-1) - col;
+  col = (SSD1306_DEV_XRES - 1) - col;
 #endif
 
   /* Then transfer the display data from the shadow frame buffer memory */
+
   /* Get the page number.  The range of 64 lines is divided up into eight
    * pages of 8 lines each.
    */
@@ -637,49 +645,54 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 #  error "Configuration not implemented"
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ssd1306_getvideoinfo(FAR struct lcd_dev_s *dev,
                                 FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
   lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
-          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
+          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres,
+          g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int ssd1306_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int ssd1306_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                unsigned int planeno,
                                 FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(pinfo && planeno == 0);
+
   lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on. On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status:
+ *     0: full off
+ *     CONFIG_LCD_MAXPOWER: full on
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ssd1306_getpower(FAR struct lcd_dev_s *dev)
 {
@@ -690,13 +703,13 @@ static int ssd1306_getpower(FAR struct lcd_dev_s *dev)
   return priv->on ? CONFIG_LCD_MAXPOWER : 0;
 }
 
- /**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_do_disponoff
  *
  * Description:
  *   Enable/disable LCD panel power
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on)
 {
@@ -722,22 +735,25 @@ static int ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on)
   return ret;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power:
+ *     0: full off
+ *     CONFIG_LCD_MAXPOWER: full on
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
 {
   struct ssd1306_dev_s *priv = (struct ssd1306_dev_s *)dev;
   int ret;
 
+  DEBUGASSERT(priv);
   lcdinfo("power: %d [%d]\n", power, priv->on ? CONFIG_LCD_MAXPOWER : 0);
-  DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
+  DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   if (power <= 0)
     {
@@ -806,13 +822,13 @@ static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ssd1306_getcontrast(struct lcd_dev_s *dev)
 {
@@ -823,13 +839,13 @@ static int ssd1306_getcontrast(struct lcd_dev_s *dev)
   return priv->contrast;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
@@ -889,13 +905,13 @@ static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_configuredisplay
  *
  * Description:
  *   Setup LCD display.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
 {
@@ -911,25 +927,31 @@ static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
 
   /* Configure OLED SPI or I/O, must be delayed 1-10ms */
 
-  up_mdelay(5);
+  nxsig_usleep(5000);
 
   /* Configure the device */
 
 #ifdef IS_SSD1309
 
-  ret = ssd1306_sendbyte(priv, SSD1309_PROTOFF);         /* Unlock driver IC */
+  /* Unlock driver IC */
+
+  ret = ssd1306_sendbyte(priv, SSD1309_PROTOFF);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFF);         /* Display off 0xae */
+  /* Display off 0xae */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFF);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1309_SETMEMORY);       /* Set page addressing mode: 0x0, 0x01 or 0x02 */
+  /* Set page addressing mode: 0x0, 0x01 or 0x02 */
+
+  ret = ssd1306_sendbyte(priv, SSD1309_SETMEMORY);
   if (ret < 0)
     {
       return ret;
@@ -941,79 +963,105 @@ static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));      /* Set lower column address 0x00 */
+  /* Set lower column address 0x00 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));      /* Set higher column address 0x10 */
+  /* Set higher column address 0x10 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));    /* Set display start line 0x40 */
+  /* Set display start line 0x40 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_PAGEADDR(0));     /* Set page address (Can ignore) */
+  /* Set page address (Can ignore) */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_PAGEADDR(0));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);   /* Contrast control 0x81 */
+  /* Contrast control 0x81 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv ,SSD1306_CONTRAST(SSD1309_DEV_CONTRAST));  /* Default contrast 0xff */
+  /* Default contrast 0xff */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CONTRAST(SSD1309_DEV_CONTRAST));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);      /* Set segment remap left 95 to 0 | 0xa1 */
+  /* Set segment remap left 95 to 0 | 0xa1 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_EDISPOFF);        /* Normal display off 0xa4 (Can ignore) */
+  /* Normal display off 0xa4 (Can ignore) */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_EDISPOFF);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_NORMAL);          /* Normal (un-reversed) display mode 0xa6 */
+  /* Normal (un-reversed) display mode 0xa6 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_NORMAL);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);     /* Multiplex ratio 0xa8 */
+  /* Multiplex ratio 0xa8 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_MRATIO(SSD1306_DEV_DUTY));  /* Duty = 1/64 or 1/32 */
+  /* Duty = 1/64 or 1/32 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_MRATIO(SSD1306_DEV_DUTY));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_SCANFROMCOM0);    /* Com scan direction: Scan from COM[0] to COM[n-1] */
+  /* Com scan direction: Scan from COM[0] to COM[n-1] */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_SCANFROMCOM0);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);   /* Set display offset 0xd3 */
+  /* Set display offset 0xd3 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);
   if (ret < 0)
     {
       return ret;
@@ -1025,49 +1073,63 @@ static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);      /* Set clock divider 0xd5 */
+  /* Set clock divider 0xd5 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CLKDIV(7,0));     /* 0x70 */
+  /* 0x70 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CLKDIV(7, 0));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);     /* Set pre-charge period 0xd9 */
+  /* Set pre-charge period 0xd9 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f,0x0a)); /* 0xfa: Fh cycles for discharge and Ah cycles for pre-charge */
+  /* 0xfa: Fh cycles for discharge and Ah cycles for pre-charge */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f, 0x0a));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);   /* Set common pads / set com pins hardware configuration 0xda */
+  /* Set common pads / set com pins hardware configuration 0xda */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD)); /* 0x12 or 0x02 */
+  /* 0x12 or 0x02 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_VCOM_SET);        /* set vcomh 0xdb */
+  /* set vcomh 0xdb */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_VCOM_SET);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_VCOM(0x3C));
+  ret = ssd1306_sendbyte(priv, SSD1306_VCOM(0x3c));
   if (ret < 0)
     {
       return ret;
@@ -1075,91 +1137,89 @@ static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
 
 #else
 
-  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFF);          /* Display off 0xae */
+  /* Display off 0xae */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFF);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));       /* Set lower column address 0x00 */
+  /* Set lower column address 0x00 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));       /* Set higher column address 0x10 */
+  /* Set higher column address 0x10 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));     /* Set display start line 0x40 */
+  /* Set display start line 0x40 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));
   if (ret < 0)
     {
       return ret;
     }
 
-#if 0
-  ret = ssd1306_sendbyte(priv, SSD1306_PAGEADDR(0));    /* Set page address  (Can ignore) */
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
+  /* Contrast control 0x81 */
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);    /* Contrast control 0x81 */
+  ret = ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CONTRAST(SSD1306_DEV_CONTRAST));  /* Default contrast 0xCF */
+  /* Default contrast 0xcf */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CONTRAST(SSD1306_DEV_CONTRAST));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);       /* Set segment remap left 95 to 0 | 0xa1 */
+  /* Set segment remap left 95 to 0 | 0xa1 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);
   if (ret < 0)
     {
       return ret;
     }
 
-#if 0
-  ret = ssd1306_sendbyte(priv, SSD1306_EDISPOFF);       /* Normal display off 0xa4 (Can ignore) */
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
+  /* Normal (un-reversed) display mode 0xa6 */
 
-  ret = ssd1306_sendbyte(priv, SSD1306_NORMAL);           /* Normal (un-reversed) display mode 0xa6 */
+  ret = ssd1306_sendbyte(priv, SSD1306_NORMAL);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);      /* Multiplex ratio 0xa8 */
+  /* Multiplex ratio 0xa8 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_MRATIO(SSD1306_DEV_DUTY));  /* Duty = 1/64 or 1/32 */
+  /* Duty = 1/64 or 1/32 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_MRATIO(SSD1306_DEV_DUTY));
   if (ret < 0)
     {
       return ret;
     }
 
-#if 0
-  ret = ssd1306_sendbyte(priv, SSD1306_SCANTOCOM0);     /* Com scan direction: Scan from COM[n-1] to COM[0] (Can ignore) */
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
+  /* Set display offset 0xd3 */
 
-  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);    /* Set display offset 0xd3 */
+  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);
   if (ret < 0)
     {
       return ret;
@@ -1171,43 +1231,57 @@ static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);       /* Set clock divider 0xd5 */
+  /* Set clock divider 0xd5 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CLKDIV(8, 0));     /* 0x80 */
+  /* 0x80 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CLKDIV(8, 0));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);      /* Set pre-charge period 0xd9 */
+  /* Set pre-charge period 0xd9 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f, 1)); /* 0xf1 or 0x22 Enhanced mode */
+  /* 0xf1 or 0x22 Enhanced mode */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f, 1));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);    /* Set common pads / set com pins hardware configuration 0xda */
+  /* Set common pads / set com pins hardware configuration 0xda */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD)); /* 0x12 or 0x02 */
+  /* 0x12 or 0x02 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_VCOM_SET);         /* set vcomh 0xdb */
+  /* set vcomh 0xdb */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_VCOM_SET);
   if (ret < 0)
     {
       return ret;
@@ -1219,34 +1293,27 @@ static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CHRPUMP_SET);      /* Set Charge Pump enable/disable 0x8d ssd1306 */
+  /* Set Charge Pump enable/disable 0x8d ssd1306 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CHRPUMP_SET);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = ssd1306_sendbyte(priv, SSD1306_CHRPUMP_ON);       /* 0x14 close 0x10 */
+  /* 0x14 close 0x10 */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CHRPUMP_ON);
   if (ret < 0)
     {
       return ret;
     }
 
-#if 0
-  ret = ssd1306_sendbyte(priv, SSD1306_DCDC_MODE);      /* DC/DC control mode: on (SSD1306 Not supported) */
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = ssd1306_sendbyte(priv, SSD1306_DCDC_ON);
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
 #endif
 
-  ret = ssd1306_sendbyte(priv, SSD1306_DISPON);           /* Display ON 0xaf */
+  /* Display ON 0xaf */
+
+  ret = ssd1306_sendbyte(priv, SSD1306_DISPON);
   if (ret < 0)
     {
       return ret;
@@ -1256,13 +1323,13 @@ static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
 
   ssd1306_select(priv, false);
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   priv->is_conf = true;
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_redrawfb
  *
  * Description:
@@ -1274,7 +1341,7 @@ static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
  * Assumptions:
  *   Caller has selected the OLED section.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ssd1306_redrawfb(struct ssd1306_dev_s *priv)
 {
@@ -1335,39 +1402,40 @@ static int ssd1306_redrawfb(struct ssd1306_dev_s *priv)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_initialize
  *
  * Description:
- *   Initialize the UG-2864HSWEG01 video hardware.  The initial state of the
- *   OLED is fully initialized, display memory cleared, and the OLED ready
+ *   Initialize the video hardware.  The initial state of the OLED is
+ *   fully initialized, display memory cleared, and the OLED ready
  *   to use, but with the power setting at 0 (full off == sleep mode).
  *
  * Input Parameters:
  *
- *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 through CONFIG_SSD1306_NINTERFACES-1.
- *     This allows support for multiple OLED devices.
+ *   dev - A reference to the SPI/I2C driver instance.
+ *   board_priv - Board specific structure.
+ *   devno - A device number when there are multiple OLED devices.
+ *     Currently must be zero.
  *
  * Returned Value:
  *
  *   On success, this function returns a reference to the LCD object for
  *   the specified OLED.  NULL is returned on any failure.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LCD_SSD1306_SPI
 FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *dev,
-                                         FAR const struct ssd1306_priv_s *board_priv,
-                                         unsigned int devno)
+                          FAR const struct ssd1306_priv_s *board_priv,
+                          unsigned int devno)
 #else
 FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev,
-                                         FAR const struct ssd1306_priv_s *board_priv,
-                                         unsigned int devno)
+                          FAR const struct ssd1306_priv_s *board_priv,
+                          unsigned int devno)
 #endif
 {
   FAR struct ssd1306_dev_s *priv = &g_oleddev;
@@ -1408,20 +1476,22 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev,
   return &priv->dev;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_fill
  *
  * Description:
- *   This non-standard method can be used to clear the entire display by writing one
- *   color to the display.  This is much faster than writing a series of runs.
+ *   This non-standard method can be used to clear the entire display by
+ *   writing one color to the display.  This is much faster than writing a
+ *   series of runs.
  *
  * Input Parameters:
- *   priv   - Reference to private driver structure
+ *   dev   - Reference to LCD object
+ *   color - Desired color
  *
  * Assumptions:
  *   Caller has selected the OLED section.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 int ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color)
 {

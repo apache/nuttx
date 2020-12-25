@@ -60,11 +60,12 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   kinetis_pinconfig(GPIO_LED_R);
   kinetis_pinconfig(GPIO_LED_G);
   kinetis_pinconfig(GPIO_LED_B);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -99,7 +100,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   /* Low illuminates */
 

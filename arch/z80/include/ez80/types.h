@@ -84,6 +84,9 @@ typedef unsigned int       _uint24_t;
 typedef signed long        _int32_t;
 typedef unsigned long      _uint32_t;
 
+typedef _int32_t           _intmax_t;
+typedef _uint32_t          _uintmax_t;
+
 /* A pointer is 2 or 3 bytes, depending upon if the ez80 is in z80
  * compatibility mode or not
  *

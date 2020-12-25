@@ -194,7 +194,7 @@ volatile dq_queue_t g_waitingforfill;
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
 /* This is the list of all tasks that have been stopped
- * via SIGSTOP or SIGSTP
+ * via SIGSTOP or SIGTSTP
  */
 
 volatile dq_queue_t g_stoppedtasks;
@@ -450,12 +450,12 @@ void nx_start(void)
       if (cpu > 0)
         {
           g_idletcb[cpu].cmn.start      = nx_idle_trampoline;
-          g_idletcb[cpu].cmn.entry.main = nx_idle_task;
+          g_idletcb[cpu].cmn.entry.main = (main_t)nx_idle_trampoline;
         }
       else
 #endif
         {
-          g_idletcb[cpu].cmn.start      = (start_t)nx_start;
+          g_idletcb[cpu].cmn.start      = nx_start;
           g_idletcb[cpu].cmn.entry.main = (main_t)nx_start;
         }
 
@@ -528,9 +528,14 @@ void nx_start(void)
 
       g_running_tasks[cpu] = &g_idletcb[cpu].cmn;
 
-      /* Initialize the processor-specific portion of the TCB */
+      /* Initialize the 1st processor-specific portion of the TCB
+       * Note: other idle thread get initialized in nx_smpstart
+       */
 
-      up_initial_state(&g_idletcb[cpu].cmn);
+      if (cpu == 0)
+        {
+          up_initial_state(&g_idletcb[cpu].cmn);
+        }
     }
 
   /* Task lists are initialized */
@@ -608,6 +613,10 @@ void nx_start(void)
     }
 #endif
 
+  /* Initialize the file system (needed to support device drivers) */
+
+  fs_initialize();
+
   /* Initialize the interrupt handling subsystem (if included) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
@@ -674,10 +683,6 @@ void nx_start(void)
       pthread_initialize();
     }
 #endif
-
-  /* Initialize the file system (needed to support device drivers) */
-
-  fs_initialize();
 
 #ifdef CONFIG_NET
   /* Initialize the networking system */

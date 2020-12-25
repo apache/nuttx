@@ -99,7 +99,6 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
 
           /* Remove the structure from the device event list */
 
-          DEBUGASSERT(curr);
           if (curr != NULL)
             {
               if (prev)
@@ -502,10 +501,6 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
 
           flags = cb->event(dev, pvconn, cb->priv, flags);
         }
-
-      /* Set up for the next time through the loop */
-
-      cb = next;
     }
 
   net_unlock();

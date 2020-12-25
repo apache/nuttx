@@ -39,8 +39,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/esp32/core-isa.h>
+#include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_specregs.h>
+#include <arch/xtensa/xtensa_corebits.h>
+
 #include "xtensa_abi.h"
 
 /****************************************************************************
@@ -144,13 +146,13 @@ _xtensa_window_spill:
 
 	rsr		a2, WINDOWBASE
 	addi	a2, a2, 1
-	ssr		a2						/* sar = WINDOWBASE + 1 */
+	ssr		a2					   	  /* sar = WINDOWBASE + 1 */
 	rsr		a3, WINDOWSTART
-	srl		a2, a3					/* a2 is 0... | 000000xxxxxxxxxx = WINDOWSTART >> sar */
-	sll		a3, a3					/* a3 is 1yyyyy0000000000 | 0... = WINDOWSTART << (32 - sar) */
-	bgez	a3, .Linvalid_ws		/* verify that msbit is indeed set */
+	srl		a2, a3            /* a2 is 0... | 000000xxxxxxxxxx = WINDOWSTART >> sar */
+	sll		a3, a3            /* a3 is 1yyyyy0000000000 | 0... = WINDOWSTART << (32 - sar) */
+	bgez	a3, .Linvalid_ws	/* verify that msbit is indeed set */
 
-	srli	a3, a3, 32-WSBITS		/* a3 is 0... | 1yyyyy0000000000 = a3 >> (32-NAREG/4) */
+	srli	a3, a3, 32-WSBITS	/* a3 is 0... | 1yyyyy0000000000 = a3 >> (32-NAREG/4) */
 	or		a2, a2, a3				/* a2 is 0... | 1yyyyyxxxxxxxxxx */
 
 	/* FIND THE FIRST ONE
@@ -165,28 +167,28 @@ _xtensa_window_spill:
 	 */
 
 #if XCHAL_HAVE_NSA
-	neg		a3, a2					/* Keep only the least-significant bit set of a2 ... */
-	and		a3, a3, a2				/* ... in a3 */
-	nsau	a3, a3					/* Get index of that bit, numbered from msbit (32 if absent) */
+	neg		a3, a2			  /* Keep only the least-significant bit set of a2 ... */
+	and		a3, a3, a2		/* ... in a3 */
+	nsau	a3, a3				/* Get index of that bit, numbered from msbit (32 if absent) */
 	ssl		a3						/* Set sar = 32 - a3 = bit index numbered from lsbit + 1 */
 #else /* XCHAL_HAVE_NSA */
 	wsr		a2, WINDOWSTART			/* temporarily save rotated start bits
-									 * (we can use WINDOWSTART because WOE=0) */
+									           * (we can use WINDOWSTART because WOE=0) */
 
 	/* NOTE:  this could be optimized a bit, by explicit coding rather than the macro.
 	 */
 
-	find_ls_one	a3, a2				/* Set a3 to index of lsmost bit set in a2 (a2 clobbered) */
+	find_ls_one	a3, a2			/* Set a3 to index of lsmost bit set in a2 (a2 clobbered) */
 
-	addi	a2, a3, 1				/* Index+1 */
-	ssr		a2						/* Set sar = index + 1 */
-	rsr		a2, WINDOWSTART			/* Restore a2 (rotated start bits) */
+	addi	a2, a3, 1				  /* Index+1 */
+	ssr		a2						    /* Set sar = index + 1 */
+	rsr		a2, WINDOWSTART		/* Restore a2 (rotated start bits) */
 #endif /* XCHAL_HAVE_NSA */
 
-	srl		a2, a2					/* Right-justify the rotated start bits (dropping lsbit set) */
-	wsr		a2, WINDOWSTART			/* Save rotated + justified window start bits,
-									 * because a2 will disappear when modifying WINDOWBASE
-									 * again, we can use WINDOWSTART because WOE=0 */
+	srl		a2, a2					  /* Right-justify the rotated start bits (dropping lsbit set) */
+	wsr		a2, WINDOWSTART		/* Save rotated + justified window start bits,
+									         * because a2 will disappear when modifying WINDOWBASE
+									         * again, we can use WINDOWSTART because WOE=0 */
 
 	/* Rotate WindowBase so that a0 of the next window to spill is in a4
 	 * (ie. leaving us with a2 and a3 to play with, because a0 and a1
@@ -202,12 +204,12 @@ _xtensa_window_spill:
 	add		a3, a2, a3				/* a3 = WINDOWBASE + index */
 #endif /* XCHAL_HAVE_NSA */
 
-	wsr		a3, WINDOWBASE			/* Effectively do:  rotw index */
-	rsync							/* Wait for write to WINDOWBASE to complete */
+	wsr		a3, WINDOWBASE		/* Effectively do:  rotw index */
+	rsync							      /* Wait for write to WINDOWBASE to complete */
 
 	/* Now our registers have changed! */
 
-	rsr		a2, WINDOWSTART			/* Restore a2 (rotated + justified window start bits) */
+	rsr		a2, WINDOWSTART		/* Restore a2 (rotated + justified window start bits) */
 
 	/* We are now ready to start the window spill loop.
 	 * Relative to the above, a2 and WINDOWBASE are now as follows:
@@ -230,54 +232,53 @@ _xtensa_window_spill:
 	/* Top of save loop. */
 	/* Find the size of this call and branch to the appropriate save routine. */
 
-	beqz	a2, .Ldone				/* If no start bit remaining, we're done */
-	bbsi.l	a2, 0, .Lspill4			/* If next start bit is set, it's a call4 */
-	bbsi.l	a2, 1, .Lspill8			/* If 2nd next bit set, it's a call8 */
-	bbsi.l	a2, 2, .Lspill12		/* If 3rd next bit set, it's a call12 */
-	j		.Linvalid_window		/* Else it's an invalid window! */
+	beqz	a2, .Ldone				  /* If no start bit remaining, we're done */
+	bbsi.l	a2, 0, .Lspill4		/* If next start bit is set, it's a call4 */
+	bbsi.l	a2, 1, .Lspill8		/* If 2nd next bit set, it's a call8 */
+	bbsi.l	a2, 2, .Lspill12	/* If 3rd next bit set, it's a call12 */
+	j		.Linvalid_window		  /* Else it's an invalid window! */
 
 	/* SAVE A CALL4 */
 
 .Lspill4:
-	addi	a3, a9, -16				/* a3 gets call[i+1]'s sp - 16 */
-	s32i	a4, a3, 0				/* Store call[i]'s a0 */
-	s32i	a5, a3, 4				/* Store call[i]'s a1 */
-	s32i	a6, a3, 8				/* Store call[i]'s a2 */
-	s32i	a7, a3, 12				/* Store call[i]'s a3 */
+	addi	a3, a9, -16   /* a3 gets call[i+1]'s sp - 16 */
+	s32i	a4, a3, 0     /* Store call[i]'s a0 */
+	s32i	a5, a3, 4     /* Store call[i]'s a1 */
+	s32i	a6, a3, 8     /* Store call[i]'s a2 */
+	s32i	a7, a3, 12    /* Store call[i]'s a3 */
 
-	srli	a6, a2, 1				/* Move and shift the start bits */
-	rotw	1						/* Rotate the window */
+	srli	a6, a2, 1     /* Move and shift the start bits */
+	rotw	1             /* Rotate the window */
 
 	j		.Lspill_loop
 
 	/* SAVE A CALL8 */
 
 .Lspill8:
-	addi	a3, a13, -16			/* a0 gets call[i+1]'s sp - 16 */
-	s32i	a4, a3, 0				/* Store call[i]'s a0 */
-	s32i	a5, a3, 4				/* Store call[i]'s a1 */
-	s32i	a6, a3, 8				/* Store call[i]'s a2 */
-	s32i	a7, a3, 12				/* Store call[i]'s a3 */
+	addi	a3, a13, -16     /* a0 gets call[i+1]'s sp - 16 */
+	s32i	a4, a3, 0        /* Store call[i]'s a0 */
+	s32i	a5, a3, 4        /* Store call[i]'s a1 */
+	s32i	a6, a3, 8        /* Store call[i]'s a2 */
+	s32i	a7, a3, 12       /* Store call[i]'s a3 */
 
-	addi	a3, a5, -12				/* Call[i-1]'s sp address */
-	l32i	a3, a3, 0				/* a3 is call[i-1]'s sp
-									 * (load slot) */
-	addi	a3, a3, -32				/* a3 points to our spill area */
+	addi	a3, a5, -12      /* Call[i-1]'s sp address */
+	l32i	a3, a3, 0        /* a3 is call[i-1]'s sp (load slot) */
+	addi	a3, a3, -32      /* a3 points to our spill area */
 
-	s32i	a8, a3, 0				/* Store call[i]'s a4 */
-	s32i	a9, a3, 4				/* Store call[i]'s a5 */
-	s32i	a10, a3, 8				/* Store call[i]'s a6 */
-	s32i	a11, a3, 12				/* Store call[i]'s a7 */
+	s32i	a8, a3, 0        /* Store call[i]'s a4 */
+	s32i	a9, a3, 4        /* Store call[i]'s a5 */
+	s32i	a10, a3, 8       /* Store call[i]'s a6 */
+	s32i	a11, a3, 12      /* Store call[i]'s a7 */
 
-	srli	a10, a2, 2				/* Move and shift the start bits */
-	rotw	2						/* Rotate the window */
+	srli	a10, a2, 2       /* Move and shift the start bits */
+	rotw	2                /* Rotate the window */
 
 	j		.Lspill_loop
 
 	/* SAVE A CALL12 */
 
 .Lspill12:
-	rotw	1						/* Rotate to see call[i+1]'s sp */
+	rotw	1						      /* Rotate to see call[i+1]'s sp */
 
 	addi	a13, a13, -16			/* Set to the reg save area */
 	s32i	a0, a13, 0				/* Store call[i]'s a0 */
@@ -286,41 +287,41 @@ _xtensa_window_spill:
 	s32i	a3, a13, 12				/* Store call[i]'s a3 */
 
 	addi	a3, a1, -12				/* Call[i-1]'s sp address */
-	l32i	a3, a3, 0				/* a3 has call[i-1]'s sp */
+	l32i	a3, a3, 0				  /* a3 has call[i-1]'s sp */
 	addi	a13, a13, 16			/* Restore call[i+1]'s sp (here to fill load slot) */
 	addi	a3, a3, -48				/* a3 points to our save area */
 
-	s32i	a4, a3, 0				/* Store call[i]'s a4 */
-	s32i	a5, a3, 4				/* Store call[i]'s a5 */
-	s32i	a6, a3, 8				/* Store call[i]'s a6 */
+	s32i	a4, a3, 0			  	/* Store call[i]'s a4 */
+	s32i	a5, a3, 4				  /* Store call[i]'s a5 */
+	s32i	a6, a3, 8				  /* Store call[i]'s a6 */
 	s32i	a7, a3, 12				/* Store call[i]'s a7 */
 	s32i	a8, a3, 16				/* Store call[i]'s a4 */
 	s32i	a9, a3, 20				/* Store call[i]'s a5 */
 	s32i	a10, a3, 24				/* Store call[i]'s a6 */
 	s32i	a11, a3, 28				/* Store call[i]'s a7 */
 
-	rotw	-1						/* Rotate to see start bits (a2) */
+	rotw	-1						    /* Rotate to see start bits (a2) */
 	srli	a14, a2, 3				/* Move and shift the start bits */
-	rotw	3						/* Rotate to next window */
+	rotw	3						      /* Rotate to next window */
 
 	j		.Lspill_loop
 
 .Ldone:
-	rotw	1						/* Back to the original window */
-	rsr		a2, WINDOWBASE			/* Get (original) window base */
-	ssl		a2						/* Setup for shift left by WINDOWBASE */
+	rotw	1						      /* Back to the original window */
+	rsr		a2, WINDOWBASE		/* Get (original) window base */
+	ssl		a2						    /* Setup for shift left by WINDOWBASE */
 	movi	a2, 1
-	sll		a2, a2					/* Compute new WINDOWSTART = 1<<WINDOWBASE */
-	wsr		a2, WINDOWSTART			/* And apply it */
+	sll		a2, a2					  /* Compute new WINDOWSTART = 1<<WINDOWBASE */
+	wsr		a2, WINDOWSTART		/* And apply it */
 	rsync
-	movi	a2, 0					/* Done! */
+	movi	a2, 0					    /* Done! */
 	ret
 	/* jx	a0 */
 
 	/* Invalid WINDOWSTART register. */
 
 .Linvalid_ws:
-	movi	a2, 1					/* Indicate invalid WINDOWSTART */
+	movi	a2, 1				/* Indicate invalid WINDOWSTART */
 	ret								/* Return from subroutine */
 
 	/* Invalid window size!
@@ -336,14 +337,14 @@ _xtensa_window_spill:
 	 */
 
 .Linvalid_window:
-	slli	a2, a2, 1				/* Space for missing start bit */
-	addi	a2, a2, 1				/* Add missing start bit */
-	rsr		a3, WINDOWBASE			/* Get current WINDOWBASE */
-	bbsi.l	a2, WSBITS-1, 2f		/* Branch if current WINDOWBASE==original */
-1:	addi	a3, a3, -1				/* Decrement towards original WINDOWBASE */
-	slli	a2, a2, 1				/* Shift towards original WINDOWSTART alignment */
-	bbci.l	a2, WSBITS-1, 1b		/* Repeat until ms start bit set */
-	extui	a3, a3, 0, WBBITS		/* Mask out upper base bits, in case of carry-over */
+	slli	a2, a2, 1             /* Space for missing start bit */
+	addi	a2, a2, 1             /* Add missing start bit */
+	rsr		a3, WINDOWBASE        /* Get current WINDOWBASE */
+	bbsi.l	a2, WSBITS-1, 2f    /* Branch if current WINDOWBASE==original */
+1:	addi	a3, a3, -1          /* Decrement towards original WINDOWBASE */
+	slli	a2, a2, 1             /* Shift towards original WINDOWSTART alignment */
+	bbci.l	a2, WSBITS-1, 1b    /* Repeat until ms start bit set */
+	extui	a3, a3, 0, WBBITS     /* Mask out upper base bits, in case of carry-over */
 
 	/* Here, a3 = original WINDOWBASE;
 	 * and msbit of start bits in a2 is set, and no other bits above it.
@@ -351,18 +352,18 @@ _xtensa_window_spill:
 	 */
 
 2:
-	ssl		a3						/* Set shift left ... (sar = 32 - orig WB) */
-	slli	a3, a2, 32-WSBITS		/* Left-justify start bits */
-	src		a2, a2, a3				/* Rotate left by original WINDOWBASE */
-	extui	a2, a2, 0, WSBITS		/* Keep only significant start bits */
-	wsr		a2, WINDOWSTART			/* We've cleared only start bits of spilled windows */
-	rsr		a3, SAR					/* Retrieve 32 - original WINDOWBASE */
+	ssl		a3                  /* Set shift left ... (sar = 32 - orig WB) */
+	slli	a3, a2, 32-WSBITS   /* Left-justify start bits */
+	src		a2, a2, a3          /* Rotate left by original WINDOWBASE */
+	extui	a2, a2, 0, WSBITS   /* Keep only significant start bits */
+	wsr		a2, WINDOWSTART     /* We've cleared only start bits of spilled windows */
+	rsr		a3, SAR             /* Retrieve 32 - original WINDOWBASE */
 	movi	a2, 32
-	sub		a3, a2, a3				/* Restore original WINDOWBASE */
-	wsr		a3, WINDOWBASE			/* Back to original WINDOWBASE */
+	sub		a3, a2, a3          /* Restore original WINDOWBASE */
+	wsr		a3, WINDOWBASE      /* Back to original WINDOWBASE */
 	rsync
 
-	movi	a2, 2					/* Indicate invalid window size */
+	movi	a2, 2					      /* Indicate invalid window size */
 	ret
 
 #endif /* XCHAL_HAVE_WINDOWED */
@@ -391,7 +392,6 @@ _xtensa_window_spill:
  *
  ****************************************************************************/
 
-#if 0 /* Not used */
 	.text
 	.global	xtensa_window_spill
 	.type	xtensa_window_spill, @function
@@ -403,10 +403,10 @@ xtensa_window_spill:
 
 #if XCHAL_HAVE_WINDOWED
 	movi	a6, ~(PS_WOE_MASK|PS_INTLEVEL_MASK)	/* (using a6 ensures any window
-												 * using this a4..a7 is spilled) */
+												                     * using this a4..a7 is spilled) */
 	rsr		a5, PS
 	mov		a4, a0					/* Save a0 */
-	and		a2, a5, a6				/* Clear WOE, INTLEVEL */
+	and		a2, a5, a6			/* Clear WOE, INTLEVEL */
 	addi	a2, a2, XCHAL_EXCM_LEVEL /* Set INTLEVEL = XCHAL_EXCM_LEVEL */
 	wsr		a2, PS					/* Apply to PS */
 	rsync
@@ -419,4 +419,3 @@ xtensa_window_spill:
 	RET(16)
 
 	.size	xtensa_window_spill, . - xtensa_window_spill
-#endif

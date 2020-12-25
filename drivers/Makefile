@@ -56,6 +56,7 @@ include modem/Make.defs
 include mtd/Make.defs
 include eeprom/Make.defs
 include net/Make.defs
+include note/Make.defs
 include pipes/Make.defs
 include power/Make.defs
 include rptun/Make.defs
@@ -73,6 +74,7 @@ include wireless/Make.defs
 include contactless/Make.defs
 include 1wire/Make.defs
 include rf/Make.defs
+include rc/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 include platform/Make.defs
@@ -118,8 +120,12 @@ $(COBJS): %$(OBJEXT): %.c
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+	$(call CATFILE, Make.dep, $^)
+	$(call DELFILE, $^)
+
+.depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
+	$(Q) $(MAKE) makedepfile
 	$(Q) touch $@
 
 depend: .depend

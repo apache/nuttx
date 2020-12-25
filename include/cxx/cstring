@@ -88,11 +88,6 @@ namespace std
 
   // Declared in legacy strings.h
 
-  using ::bcmp;
-  using ::bcopy;
-  using ::bzero;
-  using ::index;
-  using ::rindex;
   using ::ffs;
   using ::strcasecmp;
   using ::strncasecmp;

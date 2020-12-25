@@ -39,18 +39,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef FS_HAVE_WRITABLE_MOUNTPOINT
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_STREAMS > 0
-#  define FS_HAVE_WRITABLE_MOUNTPOINT 1
-#endif
-
-#undef FS_HAVE_PSEUDOFS_OPERATIONS
-#if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && CONFIG_NFILE_STREAMS > 0
-#  define FS_HAVE_PSEUDOFS_OPERATIONS 1
-#endif
-
 #undef FS_HAVE_RENAME
-#if defined(FS_HAVE_WRITABLE_MOUNTPOINT) || defined(FS_HAVE_PSEUDOFS_OPERATIONS)
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
 #  define FS_HAVE_RENAME 1
 #endif
 
@@ -75,39 +65,7 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
   struct inode_search_s newdesc;
   FAR struct inode *newinode;
   FAR char *subdir = NULL;
-  FAR const char *name;
   int ret;
-
-  /* Special case the root directory.  There is no root inode and there is
-   * no name for the root.  inode_find() will fail to the find the root
-   * inode -- because there isn't one.
-   */
-
-  name = newpath;
-  while (*name == '/')
-    {
-      name++;
-    }
-
-  if (*name == '\0')
-    {
-      FAR char *subdirname;
-
-      /* In the newpath is the root directory, the target of the rename must
-       * be a directory entry under the root.
-       */
-
-      subdirname = basename((FAR char *)oldpath);
-
-      asprintf(&subdir, "/%s", subdirname);
-      if (subdir == NULL)
-        {
-          ret = -ENOMEM;
-          goto errout;
-        }
-
-      newpath = subdir;
-    }
 
   /* According to POSIX, any old inode at this path should be removed
    * first, provided that it is not a directory.
@@ -183,6 +141,7 @@ next_subdir:
            * over again.  A nasty goto is used because I am lazy.
            */
 
+          RELEASE_SEARCH(&newdesc);
           goto next_subdir;
         }
       else
@@ -275,6 +234,8 @@ errout_with_sem:
   inode_semgive();
 
 errout:
+  RELEASE_SEARCH(&newdesc);
+
   if (subdir != NULL)
     {
       kmm_free(subdir);
@@ -496,8 +457,8 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
    * name and cannot be moved
    */
 
-  if (!oldpath || *oldpath == '\0' || oldpath[0] != '/' ||
-      !newpath || *newpath == '\0' || newpath[0] != '/')
+  if (!oldpath || *oldpath == '\0' ||
+      !newpath || *newpath == '\0')
     {
       ret = -EINVAL;
       goto errout;
@@ -523,7 +484,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   /* Verify that the old inode is a valid mountpoint. */
 
-  if (INODE_IS_MOUNTPT(oldinode))
+  if (INODE_IS_MOUNTPT(oldinode) && *olddesc.relpath != '\0')
     {
       ret = mountptrename(oldpath, oldinode, olddesc.relpath, newpath);
     }

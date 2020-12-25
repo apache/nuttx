@@ -48,8 +48,6 @@ MEMORY
     sdram (W!RX) : ORIGIN = 0x20008000, LENGTH = 256M - 32K
 }
 
-OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
-OUTPUT_ARCH(arm)
 ENTRY(entry)
 ENTRY(_stext)
 

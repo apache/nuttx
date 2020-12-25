@@ -56,10 +56,11 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   tiva_configgpio(&g_gpio_gled);
   tiva_configgpio(&g_gpio_rled);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -90,7 +91,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   board_userled(BOARD_GLED, (ledset & BOARD_GLED_BIT) != 0);
   board_userled(BOARD_RLED, (ledset & BOARD_RLED_BIT) != 0);

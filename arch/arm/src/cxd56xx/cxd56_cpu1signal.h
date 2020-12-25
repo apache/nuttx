@@ -54,7 +54,8 @@
 #define CXD56_CPU1_DATA_TYPE_CPUFIFOAPI   13
 #define CXD56_CPU1_DATA_TYPE_SBAS         14
 #define CXD56_CPU1_DATA_TYPE_DCREPORT     15
-#define CXD56_CPU1_DATA_TYPE_MAX          16
+#define CXD56_CPU1_DATA_TYPE_SARRLM       16
+#define CXD56_CPU1_DATA_TYPE_MAX          17
 
 /* CPU1 devices */
 

@@ -46,6 +46,8 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "kinetis.h"
+
 #include "freedom-k64f.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
@@ -60,10 +62,10 @@
  * low-power wake up signal.
  * Also, only SW3 can be a non-maskable interrupt.
  *
- *   Switch    GPIO Function
- *   --------- ---------------------------------------------------------------
- *   SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
- *   SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
+ *   Switch   GPIO Function
+ *   -------- ---------------------------------------------------------------
+ *   SW2      PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
+ *   SW3      PTA4/FTM0_CH1/NMI_b/LLWU_P3
  */
 
 /****************************************************************************
@@ -81,12 +83,13 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* Configure the two buttons as inputs */
 
   kinetis_pinconfig(GPIO_SW2);
   kinetis_pinconfig(GPIO_SW3);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
@@ -107,7 +110,7 @@ uint32_t board_buttons(void)
       ret |= BUTTON_SW3_BIT;
     }
 
-  return ret
+  return ret;
 }
 
 /****************************************************************************
@@ -160,7 +163,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
    * Attach the new button handler.
    */
 
-  ret = kinetis_pinirqattach(pinset, irqhandler);
+  ret = kinetis_pinirqattach(pinset, irqhandler, NULL);
   if (ret >= 0)
     {
       /* Then make sure that interrupts are enabled on the pin */

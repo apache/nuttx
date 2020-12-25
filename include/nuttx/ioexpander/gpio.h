@@ -100,8 +100,11 @@
 
 enum gpio_pintype_e
 {
-  GPIO_INPUT_PIN = 0,
-  GPIO_OUTPUT_PIN,
+  GPIO_INPUT_PIN = 0, /* float */
+  GPIO_INPUT_PIN_PULLUP,
+  GPIO_INPUT_PIN_PULLDOWN,
+  GPIO_OUTPUT_PIN, /* push-pull */
+  GPIO_OUTPUT_PIN_OPENDRAIN,
   GPIO_INTERRUPT_PIN,
   GPIO_INTERRUPT_HIGH_PIN,
   GPIO_INTERRUPT_LOW_PIN,
@@ -141,7 +144,7 @@ struct gpio_operations_s
                             enum gpio_pintype_e pintype);
 };
 
- /* Signal information */
+/* Signal information */
 
 struct gpio_signal_s
 {

@@ -359,7 +359,6 @@ static int spwm_tim6_setup(FAR struct spwm_s *spwm)
 {
   FAR struct stm32l4_tim_dev_s *tim = NULL;
   uint64_t freq = 0;
-  uint32_t per = 0;
   int ret = OK;
 
   /* Get TIM6 interface */
@@ -380,18 +379,9 @@ static int spwm_tim6_setup(FAR struct spwm_s *spwm)
    */
 
   freq = spwm->samples * spwm->waveform_freq;
-  per = BOARD_TIM6_FREQUENCY / freq;
-  if (per > 0xffff)
-    {
-      printf("ERROR: can not achieve TIM6 frequency\n");
-      ret = -1;
-      goto errout;
-    }
 
-  /* TODO: TIM_SETFREQ */
-
-  STM32L4_TIM_SETCLOCK(tim, BOARD_TIM6_FREQUENCY);
-  STM32L4_TIM_SETPERIOD(tim, per);
+  STM32L4_TIM_SETFREQ(tim, freq);
+  STM32L4_TIM_ENABLE(tim);
 
   /* Attach TIM6 ram vector */
 

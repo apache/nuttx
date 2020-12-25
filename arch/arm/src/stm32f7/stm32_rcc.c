@@ -71,7 +71,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Included Files
  ****************************************************************************/
 
 /* Include chip-specific clocking initialization logic */
@@ -100,8 +100,8 @@
  *   configurationfile.
  *
  *   If CONFIG_STM32F7_CUSTOM_CLOCKCONFIG is defined, then clocking
- *   will be enabled by an externally provided, board-specific function called
- *   stm32_board_clockconfig().
+ *   will be enabled by an externally provided, board-specific function
+ *   called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -109,7 +109,7 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_clockconfig(void)
 {
@@ -132,39 +132,41 @@ void stm32_clockconfig(void)
 
 #else
 
-  /* Invoke standard, fixed clock configuration based on definitions in board.h */
+  /* Invoke standard, fixed clock configuration based on definitions
+   * in board.h
+   */
 
   stm32_stdclockconfig();
 
 #endif
+
+  /* Enable peripheral clocking */
+
+  rcc_enableperipherals();
 
 #ifdef CONFIG_STM32F7_SYSCFG_IOCOMPENSATION
   /* Enable I/O Compensation */
 
   stm32_iocompensation();
 #endif
-
-  /* Enable peripheral clocking */
-
-  rcc_enableperipherals();
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_clockenable
  *
  * Description:
- *   Re-enable the clock and restore the clock settings based on settings in board.h.
- *   This function is only available to support low-power modes of operation:  When
- *   re-awakening from deep-sleep modes, it is necessary to re-enable/re-start the
- *   PLL
+ *   Re-enable the clock and restore the clock settings based on settings
+ *   in board.h. This function is only available to support low-power
+ *   modes of operation:  When re-awakening from deep-sleep modes, it is
+ *   necessary to re-enable/re-start the PLL
  *
  *   This functional performs a subset of the operations performed by
- *   stm32_clockconfig():  It does not reset any devices, and it does not reset the
- *   currently enabled peripheral clocks.
+ *   stm32_clockconfig():  It does not reset any devices, and it does not
+ *   reset the currently enabled peripheral clocks.
  *
- *   If CONFIG_STM32F7_CUSTOM_CLOCKCONFIG is defined, then clocking will be enabled
- *   by an externally provided, board-specific function called
- *   stm32_board_clockconfig().
+ *   If CONFIG_STM32F7_CUSTOM_CLOCKCONFIG is defined, then clocking
+ *   will be enabled by an externally provided, board-specific function
+ *   called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -172,7 +174,7 @@ void stm32_clockconfig(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 void stm32_clockenable(void)
@@ -185,7 +187,9 @@ void stm32_clockenable(void)
 
 #else
 
-  /* Invoke standard, fixed clock configuration based on definitions in board.h */
+  /* Invoke standard, fixed clock configuration based on definitions
+   * in board.h
+   */
 
   stm32_stdclockconfig();
 

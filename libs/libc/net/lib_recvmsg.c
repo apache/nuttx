@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && !defined(CONFIG_NET_CMSG)
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -53,7 +53,8 @@
  * Function: recvmsg
  *
  * Description:
- *   The recvmsg() call is identical to recvfrom() with a NULL from parameter.
+ *   The recvmsg() call is identical to recvfrom() with a NULL from
+ *   parameter.
  *
  * Parameters:
  *   sockfd   Socket descriptor of socket
@@ -86,4 +87,4 @@ ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
     }
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET && !CONFIG_NET_CMSG */

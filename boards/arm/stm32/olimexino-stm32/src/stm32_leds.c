@@ -83,9 +83,9 @@ static bool g_initialized = false;
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void stm32_led_initialize(void)
+uint32_t stm32_led_initialize(void)
 #else
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 #endif
 {
   /* Configure all LED GPIO lines */
@@ -96,6 +96,7 @@ void board_userled_initialize(void)
   stm32_configgpio(GPIO_LED_GREEN);
 
   led_dumpgpio("board_*led_initialize() Exit");
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -121,7 +122,7 @@ void board_userled(int led, bool ledon)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   stm32_gpiowrite(GPIO_LED_GREEN, (ledset & BOARD_LED_YELLOW_BIT) == 0);
   stm32_gpiowrite(GPIO_LED_YELLOW, (ledset & BOARD_LED_YELLOW_BIT) == 0);

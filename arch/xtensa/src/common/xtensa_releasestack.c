@@ -46,6 +46,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "xtensa.h"
+#include "xtensa_mm.h"
 
 /****************************************************************************
  * Public Functions
@@ -103,9 +104,9 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype)
         {
           /* Use the user-space allocator if this is a task or pthread */
 
-          if (umm_heapmember(dtcb->stack_alloc_ptr))
+          if (UMM_HEAPMEMEBER(dtcb->stack_alloc_ptr))
             {
-              kumm_free(dtcb->stack_alloc_ptr);
+              UMM_FREE(dtcb->stack_alloc_ptr);
             }
         }
 

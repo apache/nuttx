@@ -44,23 +44,6 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Must match definitions in arch/sim/include/spinlock.h */
-
-#define SP_UNLOCKED 0   /* The Un-locked state */
-#define SP_LOCKED   1   /* The Locked state */
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* Must match definitions in arch/sim/include/spinlock.h */
-
-typedef uint8_t spinlock_t;
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -84,22 +67,22 @@ typedef uint8_t spinlock_t;
  *
  ****************************************************************************/
 
-spinlock_t up_testset(volatile spinlock_t *lock)
+uint8_t up_testset(volatile uint8_t *lock)
 {
 #ifdef CONFIG_SMP
   /* In the multi-CPU SMP case, we use atomic operation to assure that the
    * following test and set is atomic.
    */
 
-  return atomic_exchange(lock, SP_LOCKED);
+  return atomic_exchange((_Atomic uint8_t *)lock, 1);
 #else
 
   /* In the non-SMP case, the simulation is implemented with a single thread
    * the test-and-set operation is inherently atomic.
    */
 
-  spinlock_t ret = *lock;
-  *lock = SP_LOCKED;
+  uint8_t ret = *lock;
+  *lock = 1;
   return ret;
 #endif
 }

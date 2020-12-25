@@ -116,7 +116,7 @@ up_phyrestart:
 #if 1
 	ldr	pc, .LCbtldrentry		/* Restart bootloader */
 #else
-	b	__start				/* Restart Nuttx */
+	b	__start				/* Restart NuttX */
 #endif
 
 	.type	.LCphysrestart, %object

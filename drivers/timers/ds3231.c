@@ -425,20 +425,11 @@ int up_rtc_settime(FAR const struct timespec *tp)
       newtime++;
     }
 
-#ifdef CONFIG_LIBC_LOCALTIME
   if (localtime_r(&newtime, &newtm) == NULL)
     {
       rtcerr("ERROR: localtime_r failed\n");
       return -EINVAL;
     }
-
-#else
-  if (gmtime_r(&newtime, &newtm) == NULL)
-    {
-      rtcerr("ERROR: gmtime_r failed\n");
-      return -EINVAL;
-    }
-#endif
 
   rtc_dumptime(&newtm, "New time");
 

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/risc-v/src/nr5m100/nr5_custom_ops.h
  *
  *   Copyright (C) 2016 Ken Pettit. All rights reserved.
@@ -28,7 +28,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -44,17 +44,17 @@
  ****************************************************************************/
 
 .macro getq rd qs
-custom0 \rd,\qs,0,0
+custom0 \rd, \qs, 0, 0
 .endm
 
 .macro setq qd rs
-custom0 \qd,\rs,0,1
+custom0 \qd, \rs, 0, 1
 .endm
 
 .macro lsbenc rd rs
-custom0 \rd,\rs,0,2
+custom0 \rd, \rs, 0, 2
 .endm
 
 .macro timer rd rs
-custom0 \rd,\rs,0,5
+custom0 \rd, \rs, 0, 5
 .endm

@@ -49,6 +49,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -161,7 +162,7 @@ struct twi_dev_s
 
   sem_t               exclsem;    /* Only one thread can access at a time */
   sem_t               waitsem;    /* Wait for TWI transfer completion */
-  WDOG_ID             timeout;    /* Watchdog to recover from bus hangs */
+  struct wdog_s       timeout;    /* Watchdog to recover from bus hangs */
   volatile int        result;     /* The result of the transfer */
   volatile int        xfrd;       /* Number of bytes transfers */
 
@@ -206,7 +207,7 @@ static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
 static int  twi_wait(struct twi_dev_s *priv, unsigned int size);
 static void twi_wakeup(struct twi_dev_s *priv, int result);
 static int  twi_interrupt(int irq, FAR void *context, FAR void *arg);
-static void twi_timeout(int argc, uint32_t arg, ...);
+static void twi_timeout(wdparm_t arg);
 
 static void twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg);
 static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg);
@@ -480,7 +481,7 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
    * a TWI transfer stalls.
    */
 
-  wd_start(priv->timeout, timeout, twi_timeout, 1, (uint32_t)priv);
+  wd_start(&priv->timeout, timeout, twi_timeout, (wdparm_t)priv);
 
   /* Wait for either the TWI transfer or the timeout to complete */
 
@@ -493,7 +494,7 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
 
       if (ret < 0)
         {
-          wd_cancel(priv->timeout);
+          wd_cancel(&priv->timeout);
           return ret;
         }
     }
@@ -518,7 +519,7 @@ static void twi_wakeup(struct twi_dev_s *priv, int result)
 {
   /* Cancel any pending timeout */
 
-  wd_cancel(priv->timeout);
+  wd_cancel(&priv->timeout);
 
   /* Disable any further TWI interrupts */
 
@@ -555,7 +556,7 @@ static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
   imr     = twi_getrel(priv, SAM_TWI_IMR_OFFSET);
   pending = sr & imr;
 
-  i2cinfo("TWI%d pending: %08x\n", priv->attr->twi, pending);
+  i2cinfo("TWI%d pending: %08" PRIx32 "\n", priv->attr->twi, pending);
 
   /* Byte received */
 
@@ -651,7 +652,8 @@ static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
     {
       /* Wake up the thread with an I/O error indication */
 
-      i2cerr("ERROR: TWI%d pending: %08x\n", priv->attr->twi, pending);
+      i2cerr("ERROR: TWI%d pending: %08" PRIx32 "\n",
+             priv->attr->twi, pending);
       twi_wakeup(priv, -EIO);
     }
 
@@ -669,7 +671,7 @@ static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void twi_timeout(int argc, uint32_t arg, ...)
+static void twi_timeout(wdparm_t arg)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)arg;
 
@@ -1257,22 +1259,13 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
   flags = enter_critical_section();
 
-  /* Allocate a watchdog timer */
-
-  priv->timeout = wd_create();
-  if (priv->timeout == NULL)
-    {
-      ierr("ERROR: Failed to allocate a timer\n");
-      goto errout_with_irq;
-    }
-
   /* Attach Interrupt Handler */
 
   ret = irq_attach(priv->attr->irq, twi_interrupt, priv);
   if (ret < 0)
     {
       ierr("ERROR: Failed to attach irq %d\n", priv->attr->irq);
-      goto errout_with_wdog;
+      goto errout_with_lock;
     }
 
   /* Initialize the TWI driver structure */
@@ -1296,11 +1289,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
   leave_critical_section(flags);
   return &priv->dev;
 
-errout_with_wdog:
-  wd_delete(priv->timeout);
-  priv->timeout = NULL;
-
-errout_with_irq:
+errout_with_lock:
   leave_critical_section(flags);
   return NULL;
 }
@@ -1328,10 +1317,9 @@ int sam_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
   nxsem_destroy(&priv->exclsem);
   nxsem_destroy(&priv->waitsem);
 
-  /* Free the watchdog timer */
+  /* Cancel the watchdog timer */
 
-  wd_delete(priv->timeout);
-  priv->timeout = NULL;
+  wd_cancel(&priv->timeout);
 
   /* Detach Interrupt Handler */
 

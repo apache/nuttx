@@ -55,6 +55,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <string.h>
 
 #include "stm32l4_rcc.h"
@@ -298,12 +299,12 @@ uint32_t stm32l4_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
 
   regval = getreg32(STM32L4_FLASH_OPTR);
 
-  finfo("Flash option bytes before: 0x%x\n", regval);
+  finfo("Flash option bytes before: 0x%" PRIx32 "\n", regval);
 
   regval = (regval & ~clrbits) | setbits;
   putreg32(regval, STM32L4_FLASH_OPTR);
 
-  finfo("Flash option bytes after:  0x%x\n", regval);
+  finfo("Flash option bytes after:  0x%" PRIx32 "\n", regval);
 
   /* Start Option Bytes programming and wait for completion. */
 
@@ -581,7 +582,7 @@ out:
 
   if (ret != OK)
     {
-      ferr("flash write error: %d, status: 0x%x\n",
+      ferr("flash write error: %d, status: 0x%" PRIx32 "\n",
            ret, getreg32(STM32L4_FLASH_SR));
 
       modifyreg32(STM32L4_FLASH_SR, 0, FLASH_SR_ALLERRS);

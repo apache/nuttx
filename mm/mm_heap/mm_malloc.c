@@ -250,11 +250,11 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #ifdef CONFIG_DEBUG_MM
   if (!ret)
     {
-      mwarn("WARNING: Allocation failed, size %d\n", alignsize);
+      mwarn("WARNING: Allocation failed, size %zu\n", alignsize);
     }
   else
     {
-      minfo("Allocated %p, size %d\n", ret, alignsize);
+      minfo("Allocated %p, size %zu\n", ret, alignsize);
     }
 #endif
 

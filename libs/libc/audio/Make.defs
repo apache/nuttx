@@ -36,6 +36,8 @@
 ifeq ($(CONFIG_AUDIO),y)
 CSRCS += lib_buffer.c
 
+include audio/libsrc/Make.defs
+
 # Add the audio/ directory to the build
 
 DEPPATH += --dep-path audio

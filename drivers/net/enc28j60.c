@@ -242,8 +242,8 @@ struct enc_driver_s
 
   /* Timing */
 
-  WDOG_ID               txpoll;        /* TX poll timer */
-  WDOG_ID               txtimeout;     /* TX timeout timer */
+  struct wdog_s         txpoll;        /* TX poll timer */
+  struct wdog_s         txtimeout;     /* TX timeout timer */
 
   /* If we don't own the SPI bus, then we cannot do SPI accesses from the
    * interrupt handler.
@@ -335,9 +335,9 @@ static int  enc_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void enc_toworker(FAR void *arg);
-static void enc_txtimeout(int argc, uint32_t arg, ...);
+static void enc_txtimeout(wdparm_t arg);
 static void enc_pollworker(FAR void *arg);
-static void enc_polltimer(int argc, uint32_t arg, ...);
+static void enc_polltimer(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -567,7 +567,7 @@ static inline void enc_src(FAR struct enc_driver_s *priv)
    * workaround this condition.
    *
    * Also, "After a System Reset, all PHY registers should not be read or
-   * written to until at least 50 µs have passed since the Reset has ended.
+   * written to until at least 50 us have passed since the Reset has ended.
    * All registers will revert to their Reset default values. The dual
    * port buffer memory will maintain state throughout the System Reset."
    */
@@ -1000,7 +1000,7 @@ static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
 
   enc_wrbreg(priv, ENC_MICMD, MICMD_MIIRD);
 
-  /*   3. Wait 10.24 µs. Poll the MISTAT.BUSY bit to be certain that the
+  /*   3. Wait 10.24 us. Poll the MISTAT.BUSY bit to be certain that the
    *      operation is complete. While busy, the host controller should not
    *      start any MIISCAN operations or write to the MIWRH register.
    *
@@ -1068,7 +1068,7 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
   enc_wrbreg(priv, ENC_MIWRH, phydata >> 8);
 
   /*    The PHY register will be written after the MIIM operation completes,
-   *    which takes 10.24 µs. When the write operation has completed, BUSY
+   *    which takes 10.24 us. When the write operation has completed, BUSY
    *    bit will clear itself.
    *
    *    The host controller should not start any MIISCAN or MIIRD operations
@@ -1158,8 +1158,8 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
    * the timer is started?
    */
 
-  wd_start(priv->txtimeout, ENC_TXTIMEOUT, enc_txtimeout, 1,
-           (wdparm_t)priv);
+  wd_start(&priv->txtimeout, ENC_TXTIMEOUT,
+           enc_txtimeout, (wdparm_t)priv);
   return OK;
 }
 
@@ -1295,7 +1295,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
   /* If no further xmits are pending, then cancel the TX timeout */
 
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txtimeout);
 
   /* Then poll the network for new XMIT data */
 
@@ -1387,7 +1387,7 @@ static void enc_rxerif(FAR struct enc_driver_s *priv)
 static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 {
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(&priv->dev);
 #endif
@@ -1408,7 +1408,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
       ipv4_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -1446,7 +1446,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
       ipv6_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -1482,7 +1482,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
       arp_arpin(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -1932,8 +1932,7 @@ static void enc_toworker(FAR void *arg)
  *   The last TX never completed.  Perform work on the worker thread.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1942,7 +1941,7 @@ static void enc_toworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void enc_txtimeout(int argc, uint32_t arg, ...)
+static void enc_txtimeout(wdparm_t arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
   int ret;
@@ -1972,8 +1971,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
  *   Periodic timer handler continuation.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2016,8 +2014,8 @@ static void enc_pollworker(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
-           (wdparm_t)arg);
+  wd_start(&priv->txpoll, ENC_WDDELAY,
+           enc_polltimer, (wdparm_t)arg);
 }
 
 /****************************************************************************
@@ -2027,8 +2025,7 @@ static void enc_pollworker(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2037,7 +2034,7 @@ static void enc_pollworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void enc_polltimer(int argc, uint32_t arg, ...)
+static void enc_polltimer(wdparm_t arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
   int ret;
@@ -2084,8 +2081,10 @@ static int enc_ifup(struct net_driver_s *dev)
   int ret;
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -2116,8 +2115,8 @@ static int enc_ifup(struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-      wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
-               (wdparm_t)priv);
+      wd_start(&priv->txpoll, ENC_WDDELAY,
+               enc_polltimer, (wdparm_t)priv);
 
       /* Mark the interface up and enable the Ethernet interrupt at the
        * controller
@@ -2156,8 +2155,10 @@ static int enc_ifdown(struct net_driver_s *dev)
   int ret;
 
   ninfo("Taking down: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -2170,8 +2171,8 @@ static int enc_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txpoll);
+  wd_cancel(&priv->txtimeout);
 
   /* Reset the device and leave in the power save state */
 
@@ -2232,7 +2233,7 @@ static int enc_txavail(struct net_driver_s *dev)
            * poll the network for new XMIT data
            */
 
-          devif_poll(&priv->dev, enc_txpoll);
+          devif_timer(&priv->dev, 0, enc_txpoll);
         }
     }
 
@@ -2390,7 +2391,7 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
  *   a slightly modified procedure:
  *
  *   1. Wake-up by clearing ECON2.PWRSV.
- *   2. Wait at least 300 ìs for the PHY to stabilize. To accomplish the
+ *   2. Wait at least 300 us for the PHY to stabilize. To accomplish the
  *      delay, the host controller may poll ESTAT.CLKRDY and wait for it
  *      to become set.
  *   3. Restore receive capability by setting ECON1.RXEN.
@@ -2421,7 +2422,7 @@ static void enc_pwrfull(FAR struct enc_driver_s *priv)
 
   enc_bfcgreg(priv, ENC_ECON2, ECON2_PWRSV);
 
-  /* 2. Wait at least 300 ìs for the PHY to stabilize. To accomplish the
+  /* 2. Wait at least 300 us for the PHY to stabilize. To accomplish the
    * delay, the host controller may poll ESTAT.CLKRDY and wait for it to
    * become set.
    */
@@ -2656,13 +2657,8 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   priv->dev.d_rmmac   = enc_rmmac;    /* Remove multicast MAC address */
 #endif
   priv->dev.d_private = priv;         /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->txtimeout    = wd_create();   /* Create TX timeout timer */
-  priv->spi          = spi;           /* Save the SPI instance */
-  priv->lower        = lower;         /* Save the low-level MCU interface */
+  priv->spi           = spi;          /* Save the SPI instance */
+  priv->lower         = lower;        /* Save the low-level MCU interface */
 
   /* The interface should be in the down state.  However, this function is
    * called too early in initialization to perform the ENC28J60 reset in

@@ -73,7 +73,7 @@
 
 void psignal(int signum, FAR const char *message)
 {
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
   /* For now, just a brainless write to stderr (fd == 2).  C buffered I/O is
    * used!
    */

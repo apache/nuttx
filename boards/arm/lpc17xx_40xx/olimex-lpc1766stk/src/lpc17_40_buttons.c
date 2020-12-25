@@ -60,6 +60,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each STM3210E-EVAL button.  This array is indexed by
  * the BUTTON_* and JOYSTICK_* definitions in board.h
  */
@@ -96,13 +97,13 @@ static uint8_t g_buttonirq[NUM_BUTTONS] =
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
  *   interrupt handlers.
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -112,6 +113,8 @@ void board_button_initialize(void)
     {
       lpc17_40_configgpio(g_buttoncfg[i]);
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
@@ -159,8 +162,8 @@ uint32_t board_buttons(void)
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   After that, board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  *   board_button_irq() may be called to register an interrupt handler that
  *   will be called when a button is depressed or released.  The ID value is

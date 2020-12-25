@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -441,7 +442,7 @@ static uint32_t ssi_disable(struct tiva_ssidev_s *priv)
   retval = ssi_getreg(priv, TIVA_SSI_CR1_OFFSET);
   regval = (retval & ~SSI_CR1_SSE);
   ssi_putreg(priv, TIVA_SSI_CR1_OFFSET, regval);
-  spiinfo("CR1: %08x\n", regval);
+  spiinfo("CR1: %08" PRIx32 "\n", regval);
   return retval;
 }
 
@@ -468,7 +469,7 @@ static void ssi_enable(struct tiva_ssidev_s *priv, uint32_t enable)
   regval &= ~SSI_CR1_SSE;
   regval  |= (enable & SSI_CR1_SSE);
   ssi_putreg(priv, TIVA_SSI_CR1_OFFSET, regval);
-  spiinfo("CR1: %08x\n", regval);
+  spiinfo("CR1: %08" PRIx32 "\n", regval);
 }
 
 /****************************************************************************
@@ -1110,7 +1111,7 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
   uint32_t scr;
   uint32_t actual;
 
-  spiinfo("frequency: %d\n", frequency);
+  spiinfo("frequency: %" PRId32 "\n", frequency);
   DEBUGASSERT(frequency);
 
   /* Has the frequency changed? */
@@ -1180,7 +1181,7 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
       regval &= ~SSI_CR0_SCR_MASK;
       regval |= (scr << SSI_CR0_SCR_SHIFT);
       ssi_putreg(priv, TIVA_SSI_CR0_OFFSET, regval);
-      spiinfo("CR0: %08x CPSR: %08x\n", regval, cpsdvsr);
+      spiinfo("CR0: %08" PRIx32 " CPSR: %08" PRIx32 "\n", regval, cpsdvsr);
 
       /* Calculate the actual frequency */
 
@@ -1204,7 +1205,9 @@ static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev,
   uint32_t enable;
   uint32_t actual;
 
-  /* NOTE that the SSI must be disabled when setting any configuration registers. */
+  /* NOTE that the SSI must be disabled when setting any configuration
+   * registers.
+   */
 
   enable = ssi_disable(priv);
   actual = ssi_setfrequencyinternal(priv, frequency);
@@ -1273,9 +1276,9 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv,
       regval &= ~(SSI_CR0_FRF_MASK | SSI_CR0_SPH | SSI_CR0_SPO);
       regval |= modebits;
       ssi_putreg(priv, TIVA_SSI_CR0_OFFSET, regval);
-      spiinfo("CR0: %08x\n", regval);
+      spiinfo("CR0: %08" PRIx32 "\n", regval);
 
-      /* Save the mode so that subsequent re-configuratins will be faster */
+      /* Save the mode so that subsequent re-configurations will be faster */
 
       priv->mode = mode;
     }
@@ -1286,7 +1289,9 @@ static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   uint32_t enable;
 
-  /* NOTE that the SSI must be disabled when setting any configuration registers. */
+  /* NOTE that the SSI must be disabled when setting any configuration
+   * registers.
+   */
 
   enable = ssi_disable(priv);
   ssi_setmodeinternal(priv, mode);
@@ -1323,7 +1328,7 @@ static void ssi_setbitsinternal(struct tiva_ssidev_s *priv, int nbits)
       regval &= ~SSI_CR0_DSS_MASK;
       regval |= ((nbits - 1) << SSI_CR0_DSS_SHIFT);
       ssi_putreg(priv, TIVA_SSI_CR0_OFFSET, regval);
-      spiinfo("CR0: %08x\n", regval);
+      spiinfo("CR0: %08" PRIx32 "\n", regval);
 
       priv->nbits = nbits;
     }
@@ -1334,7 +1339,9 @@ static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits)
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   uint32_t enable;
 
-  /* NOTE that the SSI must be disabled when setting any configuration registers. */
+  /* NOTE that the SSI must be disabled when setting any configuration
+   * registers.
+   */
 
   enable = ssi_disable(priv);
   ssi_setbitsinternal(priv, nbits);
@@ -1631,7 +1638,9 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
 
   ssi_putreg(priv, TIVA_SSI_CR1_OFFSET, 0);
 
-  /* Set all CR0 fields to the reset state. This will also select Freescale SPI mode. */
+  /* Set all CR0 fields to the reset state. This will also select Freescale
+   * SPI mode.
+   */
 
   ssi_putreg(priv, TIVA_SSI_CR0_OFFSET, 0);
 

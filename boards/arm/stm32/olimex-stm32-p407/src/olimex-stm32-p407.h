@@ -48,6 +48,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
+#include <arch/stm32/chip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -158,17 +159,24 @@
 
 /* BUTTONS -- NOTE that all have EXTI interrupts configured */
 
-#define MIN_IRQBUTTON     BUTTON_TAMPER
-#define MAX_IRQBUTTON     BUTTON_CENTER
-#define NUM_IRQBUTTONS    7
+#ifdef CONFIG_DJOYSTICK
+#  define MIN_IRQBUTTON     BUTTON_TAMPER
+#  define MAX_IRQBUTTON     BUTTON_WKUP
+#  define NUM_IRQBUTTONS    2
+#else
+#  define MIN_IRQBUTTON     BUTTON_TAMPER
+#  define MAX_IRQBUTTON     JOYSTICK_CENTER
+#  define NUM_IRQBUTTONS    7
+#endif
 
 #define GPIO_BTN_TAMPER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
 #define GPIO_BTN_WKUP     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
-#define GPIO_BTN_RIGHT    (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN6)
-#define GPIO_BTN_UP       (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN7)
-#define GPIO_BTN_LEFT     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN11)
-#define GPIO_BTN_DOWN     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN8)
-#define GPIO_BTN_CENTER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN15)
+
+#define GPIO_JOY_RIGHT    (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN6)
+#define GPIO_JOY_UP       (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN7)
+#define GPIO_JOY_LEFT     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN11)
+#define GPIO_JOY_DOWN     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN8)
+#define GPIO_JOY_CENTER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN15)
 
 /* USB OTG FS
  *
@@ -186,6 +194,27 @@
 #else
 #  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTB|GPIO_PIN10)
 #endif
+
+/* The CS4344 depends on the CS4344 driver and I2S3 support */
+
+#if defined(CONFIG_AUDIO_CS4344) && defined(CONFIG_STM32_I2S3)
+#  define HAVE_CS4344
+#endif
+
+#ifdef HAVE_CS4344
+  /* The CS4344 transfers data on I2S3 */
+
+#  define CS4344_I2S_BUS      3
+#endif
+
+/* External ST7735 Pins */
+
+#define GPIO_ST7735_CS     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN6)
+#define GPIO_ST7735_AO     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN10)
+#define GPIO_ST7735_RST    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN12)
 
 #ifndef __ASSEMBLY__
 
@@ -208,6 +237,17 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+/****************************************************************************
+ * Name: stm32_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the olimex-stm32-p407
+ *   board.
+ *
+ ****************************************************************************/
+
+void weak_function stm32_spidev_initialize(void);
 
 /****************************************************************************
  * Name: stm32_stram_configure
@@ -288,6 +328,39 @@ int stm32_adc_setup(void);
 
 #ifdef CONFIG_CAN
 int stm32_can_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_cs4344_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the CS4344 device.  This function will register the driver
+ *   as /dev/audio/pcm[x] where x is determined by the minor device number.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_CS4344
+int stm32_cs4344_initialize(int minor);
+#endif
+
+/****************************************************************************
+ * Name: stm32_djoy_initialize
+ *
+ * Description:
+ *   Initialize and register the discrete joystick driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DJOYSTICK
+int stm32_djoy_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

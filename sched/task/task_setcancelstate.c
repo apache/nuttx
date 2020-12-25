@@ -114,18 +114,7 @@ int task_setcancelstate(int state, FAR int *oldstate)
 #ifdef CONFIG_CANCELLATION_POINTS
           /* If we are using deferred cancellation? */
 
-          if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
-            {
-              /* Yes.. If we are within a cancellation point, then
-               * notify of the cancellation.
-               */
-
-              if (tcb->cpcount > 0)
-                {
-                  nxnotify_cancellation(tcb);
-                }
-            }
-          else
+          if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) == 0)
 #endif
             {
               /* No.. We are using asynchronous cancellation.  If the

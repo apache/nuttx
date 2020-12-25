@@ -88,16 +88,20 @@
 #define GPIO_LED        (GPIO_OUTPUT | IOMUX_LED_DEFAULT | \
                          GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN9)  /* AD_BO_09 */
 
-/* Buttons ****************************************************************/
+#define LED_DRIVER_PATH "/dev/userleds"
+
+/* Buttons ******************************************************************/
 
 /* The IMXRT board has one external user button
  *
  * 1. SW8 (IRQ88)   GPIO5-00
  */
 
-#define GPIO_SW8       (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | \
+#define GPIO_SW8       (GPIO_INTERRUPT | GPIO_INTBOTH_EDGES | \
                         IOMUX_SW_DEFAULT | \
                         GPIO_PORT5 | GPIO_PIN0)    /* WAKEUP */
+
+#define GPIO_SW8_INT   (_IMXRT_GPIO5_0_15_BASE+0)
 
 /* LCD Backlight */
 
@@ -177,7 +181,7 @@
 #define GPIO_FT5X06_CTRSTn   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
                               GPIO_PORT1 | GPIO_PIN2 | IOMUX_FT5X06_RST)  /* AD_B0_02 */
 
-/* Test Pins **************************************************************/
+/* Test Pins ****************************************************************/
 
 #define BOARD_NGPIOIN   0 /* Amount of GPIO Input pins */
 #define BOARD_NGPIOOUT  4 /* Amount of GPIO Output pins */
@@ -210,10 +214,6 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: imxrt_bringup
  *
  * Description:
@@ -235,7 +235,7 @@ int imxrt_bringup(void);
 
 void imxrt_spidev_initialize(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: imxrt_mmcsd_spi_initialize
  *
  * Description:
@@ -275,6 +275,30 @@ void imxrt_autoled_initialize(void);
 
 #ifdef CONFIG_DEV_GPIO
 int imxrt_gpio_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: imxrt_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_FLEXCAN
+int imxrt_can_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: imxrt_adc_initialize
+ *
+ * Description:
+ *   Initialize ADC drivers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_ADC
+int imxrt_adc_initialize(void);
 #endif
 
 /****************************************************************************

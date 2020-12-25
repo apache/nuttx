@@ -129,7 +129,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * Just copy the g_current_regs into the OLD rtcb.
                */
 
-               up_copystate(rtcb->xcp.regs, g_current_regs);
+               up_savestate(rtcb->xcp.regs);
 
               /* Restore the exception context of the rtcb at the (new) head
                * of the ready-to-run task list.

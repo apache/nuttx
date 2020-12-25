@@ -359,10 +359,11 @@
 
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 
-/* The STM32 F2 and the STM32 F401/F411 have no CCM SRAM */
+/* The STM32 F2 and the STM32 F401/F411/F412 have no CCM SRAM */
 
 #  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F401) || \
-      defined(CONFIG_STM32_STM32F411) || defined(CONFIG_STM32_STM32F410)
+      defined(CONFIG_STM32_STM32F411) || defined(CONFIG_STM32_STM32F410) || \
+      defined(CONFIG_STM32_STM32F412)
 #    undef CONFIG_STM32_CCMEXCLUDE
 #    define CONFIG_STM32_CCMEXCLUDE 1
 #  endif
@@ -523,16 +524,29 @@
  * In addition, external FSMC SRAM may be available.
  */
 
-#elif defined(CONFIG_STM32_STM32G47XX)
+#elif defined(CONFIG_STM32_STM32G4XXX)
 
 /* Set the end of system SRAM */
 
+#if defined(CONFIG_STM32_STM32G47XX)
 #  define SRAM1_END                    0x20020000
+#elif defined(CONFIG_STM32_STM32G43XX)
+#  define SRAM1_END                    0x20005800
+#else
+#  error "Unsupported STM32G4 chip"
+#endif
 
 /* Set the range of CCM SRAM as well (although we may not use it) */
 
 #  define SRAM2_START                  0x10000000
-#  define SRAM2_END                    0x10008000
+
+#if defined(CONFIG_STM32_STM32G47XX)
+#    define SRAM2_END                  0x10008000
+#elif defined(CONFIG_STM32_STM32G43XX)
+#    define SRAM2_END                  0x10002700
+#else
+#  error "Unsupported STM32G4 chip"
+#endif
 
 /* There are 4 possible SRAM configurations:
  *

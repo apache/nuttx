@@ -93,7 +93,7 @@
 
 /* Calibration value for timing loop */
 
-#define SPI_BITBAND_LOOPSPERMSEC CONFIG_BOARD_LOOPSPERMSEC
+#define SPI_BITBANG_LOOPSPERMSEC CONFIG_BOARD_LOOPSPERMSEC
 
 /* SPI_PERBIT_NSEC is the minimum time to transfer one bit.  This determines
  * the maximum frequency and is also used to calculate delays to achieve
@@ -275,7 +275,8 @@ int sam_sdinitialize(int minor)
   ret = mmcsd_spislotinitialize(minor, SAM34_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to bind  bit bang SPI device to MMC/SD slot %d: %d\n",
+      ferr("ERROR: Failed to bind bit bang SPI device"
+            " to MMC/SD slot %d: %d\n",
             SAM34_MMCSDSLOTNO, ret);
       return ret;
     }

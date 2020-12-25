@@ -61,7 +61,8 @@
  *
  ****************************************************************************/
 
-size_t mbsrtowcs(wchar_t *dst, const char **src, size_t len, mbstate_t *ps)
+size_t mbsrtowcs(FAR wchar_t *dst, FAR const char **src,
+                 size_t len, FAR mbstate_t *ps)
 {
   return mbsnrtowcs(dst, src, SIZE_MAX, len, ps);
 }

@@ -79,6 +79,7 @@ struct gs2200m_connect_msg
 {
   char     cid;
   uint8_t  type;
+  uint16_t lport;
   char     addr[17];
   char     port[6];
 };
@@ -93,6 +94,7 @@ struct gs2200m_bind_msg
 
 struct gs2200m_accept_msg
 {
+  struct sockaddr_in addr;
   char     cid;
   uint8_t  type;
 };
@@ -116,6 +118,7 @@ struct gs2200m_recv_msg
   FAR uint8_t *buf;
   uint16_t    len;    /* actual buffer length */
   uint16_t    reqlen; /* requested size */
+  int32_t     flags;  /* MSG_* flags */
 };
 
 struct gs2200m_close_msg

@@ -80,9 +80,9 @@
 typedef void (*oneshot_handler_t)(void *arg);
 
 /* The oneshot client must allocate an instance of this structure and called
- * stm32_oneshot_initialize() before using the oneshot facilities.  The client
- * should not access the contents of this structure directly since the
- * contents are subject to change.
+ * stm32_oneshot_initialize() before using the oneshot facilities.  The
+ * client should not access the contents of this structure directly since
+ * the contents are subject to change.
  */
 
 struct stm32_oneshot_s

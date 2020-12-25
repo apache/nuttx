@@ -5,7 +5,7 @@
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
- *   "STMPE811 S-Touch® advanced resistive touchscreen controller with 8-bit
+ *   "STMPE811 S-Touch advanced resistive touchscreen controller with 8-bit
  *    GPIO expander," Doc ID 14489 Rev 6, CD00186725, STMicroelectronics"
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,14 +75,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define Direction_IN             0x00
-#define Direction_OUT            0x01
-
-#define Polarity_Low             0x00
-#define Polarity_High            0x04
-#define Type_Level               0x00
-#define Type_Edge                0x02
-
 #define IO_IT_0                  0x01
 #define IO_IT_1                  0x02
 #define IO_IT_2                  0x04
@@ -96,10 +88,10 @@
 #define IOE_TS_IT                (uint8_t)(IO_IT_0 | IO_IT_1 | IO_IT_2)
 #define IOE_INMEMS_IT            (uint8_t)(IO_IT_2 | IO_IT_3)
 
-#define EDGE_FALLING              0x01
-#define EDGE_RISING               0x02
-
-#define TIMEOUT_MAX    0x3000 /*<! The value of the maximal timeout for I2C waiting loops */
+#define EDGE_FALLING             0x01
+#define EDGE_RISING              0x02
+/* <! The value of the maximal timeout for I2C waiting loops */
+#define TIMEOUT_MAX              0x3000
 
 /****************************************************************************
  * Private Types
@@ -108,6 +100,7 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Internal logic */
 
 static void     stmpe811_notify(FAR struct stmpe811_dev_s *priv);
@@ -151,6 +144,7 @@ static const struct file_operations g_stmpe811fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: stmpe811_notify
  *
@@ -164,23 +158,10 @@ static void stmpe811_notify(FAR struct stmpe811_dev_s *priv)
 {
   int i;
 
-  /* If there are threads waiting for read data, then signal one of them
-   * that the read data is available.
-   */
-
-  if (priv->nwaiters > 0)
-    {
-      /* After posting this semaphore, we need to exit because the STMPE811
-       * is no longer available.
-       */
-
-      nxsem_post(&priv->waitsem);
-    }
-
-  /* If there are threads waiting on poll() for STMPE811 data to become available,
-   * then wake them up now.  NOTE: we wake up all waiting threads because we
-   * do not know that they are going to do.  If they all try to read the data,
-   * then some make end up blocking after all.
+  /* If there are threads waiting on poll() for STMPE811 data to become
+   * available, then wake them up now.  NOTE: we wake up all waiting threads
+   * because we do not know that they are going to do.  If they all try to
+   * read the data, then some make end up blocking after all.
    */
 
   for (i = 0; i < CONFIG_STMPE811_NPOLLWAITERS; i++)
@@ -192,6 +173,19 @@ static void stmpe811_notify(FAR struct stmpe811_dev_s *priv)
           iinfo("Report events: %02x\n", fds->revents);
           nxsem_post(fds->sem);
         }
+    }
+
+  /* If there are threads waiting for read data, then signal one of them
+   * that the read data is available.
+   */
+
+  if (priv->nwaiters > 0)
+    {
+      /* After posting this semaphore, we need to exit because the STMPE811
+       * is no longer available.
+       */
+
+      nxsem_post(&priv->waitsem);
     }
 }
 
@@ -238,15 +232,15 @@ static int stmpe811_sample(FAR struct stmpe811_dev_s *priv,
           priv->id++;
         }
       else if (sample->contact == CONTACT_DOWN)
-       {
+        {
           /* The sampling logic has detected pen-up in some condition other
-           * than CONTACT_MOVE. Set the next state to CONTACT_MOVE:  Further
-           * samples collected while the pen is down will reported as movement
-           * events.
+           * than CONTACT_MOVE. Set the next state to CONTACT_MOVE: Further
+           * samples collected while the pen is down will reported as
+           * movement events.
            */
 
          priv->sample.contact = CONTACT_MOVE;
-       }
+        }
 
       priv->penchange = false;
       ret = OK;
@@ -304,7 +298,7 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
     }
 
   /* Re-acquire the semaphore that manages mutually exclusive access to
-   * the device structure.  We may have to wait here.  But we have our sample.
+   * the device structure. We may have to wait here. But we have our sample.
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
 
@@ -432,7 +426,8 @@ static int stmpe811_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t stmpe811_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t stmpe811_read(FAR struct file *filep,
+                             FAR char *buffer, size_t len)
 {
   FAR struct inode          *inode;
   FAR struct stmpe811_dev_s  *priv;
@@ -483,7 +478,7 @@ static ssize_t stmpe811_read(FAR struct file *filep, FAR char *buffer, size_t le
         {
           ret = -EAGAIN;
           goto errout;
-       }
+        }
 
       /* Wait for sample data */
 
@@ -734,9 +729,9 @@ static void stmpe811_timeoutworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void stmpe811_timeout(int argc, uint32_t arg1, ...)
+static void stmpe811_timeout(wdparm_t arg)
 {
-  FAR struct stmpe811_dev_s *priv = (FAR struct stmpe811_dev_s *)((uintptr_t)arg1);
+  FAR struct stmpe811_dev_s *priv = (FAR struct stmpe811_dev_s *)arg;
   int ret;
 
   /* Are we still stuck in the pen down state? */
@@ -755,7 +750,8 @@ static void stmpe811_timeout(int argc, uint32_t arg1, ...)
            * action should be required to protect the work queue.
            */
 
-          ret = work_queue(HPWORK, &priv->timeout, stmpe811_timeoutworker, priv, 0);
+          ret = work_queue(HPWORK, &priv->timeout,
+                           stmpe811_timeoutworker, priv, 0);
           if (ret != 0)
             {
               ierr("ERROR: Failed to queue work: %d\n", ret);
@@ -811,8 +807,8 @@ static inline void stmpe811_tscinitialize(FAR struct stmpe811_dev_s *priv)
 
   /* Select 2 nF filter capacitor */
 
-  stmpe811_putreg8(priv, STMPE811_TSC_CFG,
-                 (TSC_CFG_AVE_CTRL_4SAMPLES | TSC_CFG_TOUCH_DELAY_500US | TSC_CFG_SETTLING_500US));
+  stmpe811_putreg8(priv, STMPE811_TSC_CFG, TSC_CFG_AVE_CTRL_4SAMPLES |
+                   TSC_CFG_TOUCH_DELAY_500US | TSC_CFG_SETTLING_500US);
 
   /* Select single point reading */
 
@@ -898,16 +894,6 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   priv->threshx   = 0;
   priv->threshy   = 0;
 
-  /* Create a timer for catching missed pen up conditions */
-
-  priv->wdog      = wd_create();
-  if (!priv->wdog)
-    {
-      ierr("ERROR: Failed to create a watchdog\n", errno);
-      nxsem_post(&priv->exclsem);
-      return -ENOSPC;
-    }
-
   /* Register the character driver */
 
   snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
@@ -926,7 +912,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   /* Inidicate that the touchscreen controller was successfully initialized */
 
   priv->inuse |= TSC_PIN_SET;                    /* Pins 4-7 are now in-use */
-  priv->flags |= STMPE811_FLAGS_TSC_INITIALIZED;  /* TSC function is initialized */
+  priv->flags |= STMPE811_FLAGS_TSC_INITIALIZED; /* TSC function is initialized */
   nxsem_post(&priv->exclsem);
   return ret;
 }
@@ -953,25 +939,25 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
 
   /* Cancel the missing pen up timer */
 
-  wd_cancel(priv->wdog);
+  wd_cancel(&priv->wdog);
 
-  /* Check for pen up or down from the TSC_STA ibit n the STMPE811_TSC_CTRL register. */
+  /* Check for pen up or down from the TSC_STA bit in STMPE811_TSC_CTRL. */
 
-  pendown = (stmpe811_getreg8(priv, STMPE811_TSC_CTRL) & TSC_CTRL_TSC_STA) != 0;
+  pendown = !!(stmpe811_getreg8(priv, STMPE811_TSC_CTRL) & TSC_CTRL_TSC_STA);
 
   /* Handle the change from pen down to pen up */
 
   if (!pendown)
     {
-      /* The pen is up.. reset thresholding variables.  FIFOs will read zero if
-       * there is no data available (hence the choice of (0,0))
+      /* The pen is up.. reset thresholding variables.  FIFOs will read zero
+       * if there is no data available (hence the choice of (0,0))
        */
 
       priv->threshx = 0;
       priv->threshy = 0;
 
-      /* Ignore the interrupt if the pen was already up (CONTACT_NONE == pen up and
-       * already reported; CONTACT_UP == pen up, but not reported)
+      /* Ignore the interrupt if the pen was already up (CONTACT_NONE == pen
+       * up and already reported; CONTACT_UP == pen up, but not reported)
        */
 
       if (priv->sample.contact == CONTACT_NONE ||
@@ -980,9 +966,9 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
           goto ignored;
         }
 
-      /* A pen-down to up transition has been detected.  CONTACT_UP indicates the
-       * initial loss of contact.  The state will be changed to CONTACT_NONE
-       * after the loss of contact is sampled.
+      /* A pen-down to up transition has been detected.  CONTACT_UP indicates
+       * the initial loss of contact.  The state will be changed to
+       * CONTACT_NONE after the loss of contact is sampled.
        */
 
        priv->sample.contact = CONTACT_UP;
@@ -1021,9 +1007,10 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
           goto ignored;
         }
 
-      /* Perform a thresholding operation so that the results will be more stable.
-       * If the difference from the last sample is small, then ignore the event.
-       * REVISIT:  Should a large change in pressure also generate a event?
+      /* Perform a thresholding operation so that the results will be more
+       * stable. If the difference from the last sample is small, then ignore
+       * the event. REVISIT:  Should a large change in pressure also generate
+       * a event?
        */
 
       xdiff = x > priv->threshx ? (x - priv->threshx) : (priv->threshx - x);
@@ -1031,7 +1018,9 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
 
       if (xdiff < CONFIG_STMPE811_THRESHX && ydiff < CONFIG_STMPE811_THRESHY)
         {
-          /* Little or no change in either direction ... don't report anything. */
+          /* Little or no change in either direction ...
+           * don't report anything.
+           */
 
           goto ignored;
         }
@@ -1093,8 +1082,8 @@ ignored:
   if (priv->sample.contact == CONTACT_DOWN ||
       priv->sample.contact == CONTACT_MOVE)
     {
-      wd_start(priv->wdog, STMPE811_PENUP_TICKS, stmpe811_timeout,
-               1, (uint32_t)((uintptr_t)priv));
+      wd_start(&priv->wdog, STMPE811_PENUP_TICKS,
+               stmpe811_timeout, (wdparm_t)priv);
     }
 
   /*  Reset and clear all data in the FIFO */

@@ -30,11 +30,11 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
-#include "rx65n/irq.h"
+#include "arch/rx65n/irq.h"
 #include "clock/clock.h"
 #include "up_internal.h"
 #include "up_arch.h"
-#include "rx65n/iodefine.h"
+#include "arch/rx65n/iodefine.h"
 #include "chip.h"
 #include "rx65n_cmt.h"
 

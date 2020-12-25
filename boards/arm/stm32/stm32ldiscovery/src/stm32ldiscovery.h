@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_H
-#define __BOARDS_ARM_STM32_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_H
+#ifndef __BOARDS_ARM_STM32_STM32LDISCOVERY_SRC_STM32LDISCOVERY_H
+#define __BOARDS_ARM_STM32_STM32LDISCOVERY_SRC_STM32LDISCOVERY_H
 
 /****************************************************************************
  * Included Files
@@ -289,4 +289,4 @@ int stm32_pwm_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_H */
+#endif /* __BOARDS_ARM_STM32_STM32LDISCOVERY_SRC_STM32LDISCOVERY_H */

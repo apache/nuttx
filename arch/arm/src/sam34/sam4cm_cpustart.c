@@ -83,6 +83,10 @@ volatile static spinlock_t g_cpu1_boot;
 extern int arm_pause_handler(int irq, void *c, FAR void *arg);
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: cpu1_boot
  *
  * Description:
@@ -134,7 +138,7 @@ static void cpu1_boot(void)
 
   /* Then transfer control to the IDLE task */
 
-  nx_idle_task(0, NULL);
+  nx_idle_trampoline();
 }
 
 /****************************************************************************
@@ -168,7 +172,7 @@ int up_cpu_start(int cpu)
 {
   struct tcb_s *tcb = current_task(cpu);
 
-  DPRINTF("cpu=%d\n",cpu);
+  DPRINTF("cpu=%d\n", cpu);
 
   if (cpu != 1)
     {

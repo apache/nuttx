@@ -5,11 +5,27 @@
 
 menuconfig SENSORS
 	bool "Sensor Device Support"
+	select MM_CIRCBUF
 	default n
 	---help---
 		Drivers for various sensors
 
 if SENSORS
+
+config SENSORS_NPOLLWAITERS
+	int "Number of poll threads"
+	default 2
+	---help---
+		Maximum number of threads than can be waiting for POLL events.
+		Default: 2
+
+config SENSORS_WTGAHRS2
+	bool "Wtgahrs2 Sensor Support"
+	default n
+	---help---
+		We can read sensor data by serial interface. It need the hardware sensor
+		wtgashrs2(JY901) as data source. This sensor can generate accelerometer,
+		gyroscope, magnetic, barometer and gps data.
 
 config SENSORS_APDS9960
 	bool "Avago APDS-9960 Gesture Sensor support"
@@ -131,6 +147,13 @@ config SENSORS_DHTXX
 	---help---
 		Enable driver support for the DHTxx humidity/temperature sensor.
 
+config SENSORS_FXOS8700CQ
+	bool "NXP FXOS8700CQ Motion Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the NXP FXOS8700CQ Motion sensor
+
 config SENSORS_HCSR04
 	bool "HC-SR04 Distance Measurement Sensor"
 	default n
@@ -200,8 +223,18 @@ config SENSORS_L3GD20
 	bool "STMicro L3GD20 Gyroscope Sensor support"
 	default n
 	select SPI
+	select SCHED_HPWORK if SENSORS_L3GD20_BUFFER_SIZE > 0
 	---help---
 		Enable driver support for the STMicro L3GD20 gyroscope sensor.
+
+config SENSORS_L3GD20_BUFFER_SIZE
+	int "size of buffer"
+	default 1
+	depends on SENSORS_L3GD20
+	---help---
+		The size of the circular buffer used. If the value equal to zero,
+		indicates that the circular buffer is disabled.
+
 
 config SENSOR_KXTJ9
 	bool "Kionix KXTJ9 Accelerometer support"
@@ -548,6 +581,11 @@ config MPU60X0_I2C
 		or MPU6050, autodetected during driver initialization)
 
 endchoice
+
+config MPU60X0_I2C_FREQ
+	int "MPU60x0 I2C Frequency"
+	depends on MPU60X0_I2C
+	default 400000
 
 config MPU60X0_EXTI
 	bool "Enable interrupts"

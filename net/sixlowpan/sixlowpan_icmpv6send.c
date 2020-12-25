@@ -103,7 +103,7 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
 
       if (ipv6icmpv6->ipv6.proto != IP_PROTO_ICMP6)
         {
-          nwarn("WARNING: Expected ICMPv6 prototype: %u vs %s\n",
+          nwarn("WARNING: Expected ICMPv6 prototype: %u vs %u\n",
                 ipv6icmpv6->ipv6.proto, IP_PROTO_ICMP6);
         }
       else
@@ -124,9 +124,9 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
               goto drop;
             }
 
-          /* Get the IPv6 + ICMPv6 combined header length.  NOTE:  This header
-           * size includes only the common 32-bit header at the beginning of
-           * each ICMPv6 message.
+          /* Get the IPv6 + ICMPv6 combined header length.  NOTE:  This
+           * header size includes only the common 32-bit header at the
+           * beginning of each ICMPv6 message.
            */
 
           hdrlen = IPv6_HDRLEN + ICMPv6_HDRLEN;
