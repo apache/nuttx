@@ -248,6 +248,7 @@ int up_rptun_init(void)
   return 0;
 }
 
+#if CONFIG_RPMSG_UART
 void rpmsg_serialinit(void)
 {
 #if CONFIG_SIM_RPTUN_MASTER
@@ -256,3 +257,4 @@ void rpmsg_serialinit(void)
   uart_rpmsg_init("server", "proxy", 4096, true);
 #endif
 }
+#endif
