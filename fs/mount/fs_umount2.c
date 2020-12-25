@@ -146,6 +146,7 @@ int nx_umount2(FAR const char *target, unsigned int flags)
 
       DEBUGASSERT(mountpt_inode->i_crefs > 0);
       mountpt_inode->i_crefs--;
+      inode_semgive();
     }
   else
 #endif
