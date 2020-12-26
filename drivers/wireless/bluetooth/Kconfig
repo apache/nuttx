@@ -26,10 +26,6 @@ choice
 	prompt "Bluetooth UART HCI device"
 	default BLUETOOTH_UART_OTHER
 
-config BLUETOOTH_UART_BT860
-	bool "Laird BT860"
-	select BLUETOOTH_UART_GENERIC
-
 config BLUETOOTH_UART_CC2564
 	bool "TI CC2564"
 	depends on EXPERIMENTAL
