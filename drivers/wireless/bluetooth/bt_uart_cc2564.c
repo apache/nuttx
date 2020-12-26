@@ -44,7 +44,6 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/wireless/bluetooth/bt_uart.h>
 
 #include "bt_uart.h"
 

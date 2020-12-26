@@ -51,6 +51,7 @@
 #include <stdbool.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
+#include <nuttx/wireless/bluetooth/bt_uart.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -76,8 +77,6 @@
 
 /* This type defines the state data generic UART upper half driver */
 
-struct btuart_lowerhalf_s; /* Forward reference */
-
 struct btuart_upperhalf_s
 {
   /* This structure must appear first in the structure so that this structure
@@ -101,8 +100,6 @@ struct btuart_upperhalf_s
  ****************************************************************************/
 
 /* Generic implementations of HCI UART methods */
-
-struct bt_buf_s;  /* Forward reference */
 
 int btuart_send(FAR const struct bt_driver_s *dev, FAR struct bt_buf_s *buf);
 int btuart_open(FAR const struct bt_driver_s *dev);

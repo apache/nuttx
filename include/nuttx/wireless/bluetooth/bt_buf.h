@@ -154,8 +154,6 @@ struct bt_bufferlist_s
  *
  ****************************************************************************/
 
-struct iob_s; /* Forward reference */
-
 FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
                                   FAR struct iob_s *iob,
                                   size_t reserve_head);

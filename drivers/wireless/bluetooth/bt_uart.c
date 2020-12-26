@@ -53,7 +53,6 @@
 #include <nuttx/wireless/bluetooth/bt_core.h>
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
-#include <nuttx/wireless/bluetooth/bt_uart.h>
 
 #include "bt_uart.h"
 
