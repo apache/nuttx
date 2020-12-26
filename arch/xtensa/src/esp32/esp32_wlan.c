@@ -53,8 +53,7 @@
 
 #define WLAN_STA_DEVNO            (0)
 
-/**
- * TX poll delay = 1 seconds.
+/* TX poll delay = 1 seconds.
  * CLK_TCK is the number of clock ticks per second
  */
 
@@ -64,12 +63,11 @@
 
 #define WLAN_TXTOUT               (60 * CLK_TCK)
 
-/* Low-priority workqueue processes RX/TX */
+/* Low-priority work queue processes RX/TX */
 
 #define WLAN_WORK                 LPWORK
 
-/**
- * Ethernet frame:
+/* Ethernet frame:
  *     Resource address   :   6 bytes
  *     Destination address:   6 bytes
  *     Type               :   2 bytes
@@ -85,9 +83,8 @@
 
 #define WLAN_RXBUF_NUM            (CONFIG_ESP32_WLAN_RXBUF_NUM)
 
-/**
- * Receive threshold which let the receive function to trigger a sheduler
- * to active application if possible.
+/* Receive threshold which allows the receive function to trigger a scheduler
+ * to activate the application if possible.
  */
 
 #ifdef CONFIG_MM_IOB
@@ -137,7 +134,7 @@ struct wlan_priv_s
 
   uint8_t       txbuf[WLAN_BUF_SIZE];
 
-  /* Rest data in TX buffer which needs being sent */
+  /* Rest of the data in the TX buffer that need to be sent */
 
   uint8_t       txrst;
 
@@ -209,8 +206,7 @@ static int esp32_net_initialize(unsigned int devno);
  * Private Functions
  ****************************************************************************/
 
-/**
- * Note:
+/* Note:
  *     All TX done/RX done/Error trigger functions are not called from
  *     interrupts, this is much different from ethernet driver, including:
  *       * wlan_rx_done
@@ -294,7 +290,7 @@ static inline struct wlan_rxbuf *wlan_alloc_buffer(struct wlan_priv_s *priv)
  * Function: wlan_free_buffer
  *
  * Description:
- *   Insert a free Rx buffer into free queue
+ *   Insert a free Rx buffer into the free queue
  *
  * Input Parameters:
  *   priv   - Reference to the driver state structure
@@ -323,8 +319,8 @@ static inline void wlan_free_buffer(struct wlan_priv_s *priv,
  * Name: wifi_tx_available
  *
  * Description:
- *   Check if WiFi can send data. This function will re-send rest data
- *   which was sent failed.
+ *   Check if WiFi can send data. This function will re-send the rest of the
+ *   data that we failed to send.
  *
  * Input Parameters:
  *   priv - Reference to the driver state structure
@@ -343,7 +339,7 @@ static bool wifi_tx_available(FAR struct wlan_priv_s *priv)
       ret = esp_wifi_sta_send_data(priv->txbuf, priv->txrst);
       if (ret)
         {
-          ninfo("ERROR: Failed to transmit rest frame\n");
+          ninfo("ERROR: Failed to transmit the rest of the frame\n");
           return false;
         }
       else
