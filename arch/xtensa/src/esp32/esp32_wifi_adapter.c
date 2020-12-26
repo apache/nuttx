@@ -698,7 +698,7 @@ static void esp32_ints_on(uint32_t mask)
 }
 
 /****************************************************************************
- * Name: esp32_ints_on
+ * Name: esp32_ints_off
  *
  * Description:
  *   Disable WiFi interrupt
@@ -800,8 +800,8 @@ static void esp_spin_lock_delete(void *lock)
  * Name: esp_wifi_int_disable
  *
  * Description:
- *   Enter critical by disable interrup, and take spin lock if
- *   in SMP mode
+ *   Enter critical section by disabling interrupts and taking the spin lock
+ *   if in SMP mode.
  *
  * Input Parameters:
  *   wifi_int_mux - Spin lock data pointer
@@ -828,8 +828,8 @@ static uint32_t IRAM_ATTR esp_wifi_int_disable(void *wifi_int_mux)
  * Name: esp_wifi_int_restore
  *
  * Description:
- *   Exit from critical by enable interrup, and release spin
- *   lock if in SMP mode
+ *   Exit from critical section by enabling interrupts and releasing the spin
+ *   lock if in SMP mode.
  *
  * Input Parameters:
  *   wifi_int_mux - Spin lock data pointer
@@ -1336,8 +1336,7 @@ static int32_t esp_queue_send_generic(void *queue, void *item,
 
   if (ticks == OSI_FUNCS_TIME_BLOCKING || ticks == 0)
     {
-      /**
-       * WiFi interrupt function will call this adapter function to send
+      /* WiFi interrupt function will call this adapter function to send
        * message to message queue, so here we should call kernel API
        * instead of application API
        */
@@ -1446,7 +1445,7 @@ static int32_t esp_queue_send_to_back(void *queue, void *item,
 }
 
 /****************************************************************************
- * Name: esp_queue_send_from_isr
+ * Name: esp_queue_send_from_to_front
  *
  * Description:
  *   Send message of high priority to queue within a certain period of time
@@ -1808,7 +1807,7 @@ static void *esp_task_get_current_task(void)
 }
 
 /****************************************************************************
- * Name: esp_task_get_current_task
+ * Name: esp_task_get_max_priority
  *
  * Description:
  *   Get OS task maxium priority
@@ -1827,7 +1826,7 @@ static int32_t esp_task_get_max_priority(void)
 }
 
 /****************************************************************************
- * Name: esp_malloc_internal
+ * Name: esp_malloc
  *
  * Description:
  *   Allocate a block of memory
@@ -2107,7 +2106,7 @@ int32_t esp_event_post(esp_event_base_t event_base,
 }
 
 /****************************************************************************
- * Name: esp_task_get_current_task
+ * Name: esp_get_free_heap_size
  *
  * Description:
  *   Get free heap size by byte
@@ -3489,7 +3488,7 @@ static void *esp_zalloc_internal(size_t size)
 }
 
 /****************************************************************************
- * Name: esp_malloc_internal
+ * Name: esp_wifi_malloc
  *
  * Description:
  *   Applications allocate a block of memory
@@ -3508,7 +3507,7 @@ static void *esp_wifi_malloc(size_t size)
 }
 
 /****************************************************************************
- * Name: esp_realloc_internal
+ * Name: esp_wifi_realloc
  *
  * Description:
  *   Applications allocate a block of memory by old memory block
@@ -3528,7 +3527,7 @@ static void *esp_wifi_realloc(void *ptr, size_t size)
 }
 
 /****************************************************************************
- * Name: esp_calloc_internal
+ * Name: esp_wifi_calloc
  *
  * Description:
  *   Applications allocate some continuous blocks of memory
@@ -3548,7 +3547,7 @@ static void *esp_wifi_calloc(size_t n, size_t size)
 }
 
 /****************************************************************************
- * Name: esp_zalloc_internal
+ * Name: esp_wifi_zalloc
  *
  * Description:
  *   Applications allocate a block of memory and clear it with 0
@@ -4008,7 +4007,7 @@ int net80211_printf(const char *format, ...)
 }
 
 /****************************************************************************
- * Functions needed by libnet80211.a
+ * Functions needed by libmesh.a
  ****************************************************************************/
 
 /****************************************************************************

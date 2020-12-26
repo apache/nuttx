@@ -175,8 +175,8 @@ end_wait:
  * Name: tcp_close_txnotify
  *
  * Description:
- *   Notify the appropriate device driver that we are have data ready to
- *   be send (TCP)
+ *   Notify the appropriate device driver that we have data ready to
+ *   be sent (TCP)
  *
  * Input Parameters:
  *   psock - Socket state structure
