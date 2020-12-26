@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/bluetooth/bt_ioctl.h
+ * include/nuttx/wireless/bluetooth/bt_ioctl.h
  * Bluetooth Network IOCTL commands.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
