@@ -100,24 +100,24 @@
 
 #ifdef CONFIG_ENDIAN_BIG
 #  define BT_GETUINT16(p) \
-     ((((uint16_t)(((FAR uint8_t *)(p))[1]) >> 8) & 0xff) | \
-      (((uint16_t)(((FAR uint8_t *)(p))[0]) & 0xff) << 8))
+     (((uint16_t)(((FAR uint8_t *)(p))[1])) | \
+      (((uint16_t)(((FAR uint8_t *)(p))[0])) << 8))
 #  define BT_PUTUINT16(p,v) \
      do \
        { \
-         ((FAR uint8_t *)(p))[0] = ((uint16_t)(v) >> 8) & 0xff; \
-         ((FAR uint8_t *)(p))[1] = ((uint16_t)(v) & 0xff) >> 8; \
+         ((FAR uint8_t *)(p))[0] = ((uint16_t)(v)) >> 8; \
+         ((FAR uint8_t *)(p))[1] = ((uint16_t)(v)) & 0xff; \
        } \
      while (0)
 #else
 #  define BT_GETUINT16(p) \
-     ((((uint16_t)(((FAR uint8_t *)(p))[0]) >> 8) & 0xff) | \
-      (((uint16_t)(((FAR uint8_t *)(p))[1]) & 0xff) << 8))
+     (((uint16_t)(((FAR uint8_t *)(p))[0])) | \
+      (((uint16_t)(((FAR uint8_t *)(p))[1])) << 8))
 #  define BT_PUTUINT16(p,v) \
      do \
        { \
-         ((FAR uint8_t *)(p))[0] = ((uint16_t)(v) & 0xff) >> 8; \
-         ((FAR uint8_t *)(p))[1] = ((uint16_t)(v) >> 8) & 0xff; \
+         ((FAR uint8_t *)(p))[0] = ((uint16_t)(v)) & 0xff; \
+         ((FAR uint8_t *)(p))[1] = ((uint16_t)(v)) >> 8; \
        } \
      while (0)
 #endif
