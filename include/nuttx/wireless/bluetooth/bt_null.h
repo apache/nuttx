@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/bluetooth/bt_null.h
+ * include/nuttx/wireless/bluetooth/bt_null.h
  * NULL based Bluetooth driver
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.

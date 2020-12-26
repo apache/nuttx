@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/bluetooth/bt_buf_s.c
+ * wireless/bluetooth/bt_buf.c
  * Bluetooth buffer management
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -111,7 +111,7 @@ static struct bt_buf_s *g_buf_free_irq;
 /* Pool of pre-allocated buffer structures */
 
 static struct bt_buf_s
-  g_buf_pool[CONFIG_BLUETOOTH_BUFFER_PREALLOC];
+g_buf_pool[CONFIG_BLUETOOTH_BUFFER_PREALLOC];
 
 static bool g_poolinit = false;
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/bluetooth/bt_hci.h
+ * include/nuttx/wireless/bluetooth/bt_hci.h
  * Bluetooth Host Control Interface definitions.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.

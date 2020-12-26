@@ -1,6 +1,6 @@
 /****************************************************************************
- * wireless/bluetooth/bt_uuid.h
- * B Bluetooth UUID handling.
+ * include/nuttx/wireless/bluetooth/bt_uuid.h
+ * Bluetooth UUID handling.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

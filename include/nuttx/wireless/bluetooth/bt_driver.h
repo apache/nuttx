@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/bluetooth/bt_driver.h
+ * include/nuttx/wireless/bluetooth/bt_driver.h
  * Bluetooth HCI driver API.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -96,7 +96,7 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev);
  * Description:
  *   Called by the Bluetooth low-level driver when new data is received from
  *   the radio.  This may be called from the low-level driver and is part of
- *   the driver interface prototyped in include/nuttx/wireless/bluetooth/bt_driver.h
+ *   the driver interface
  *
  * Input Parameters:
  *   buf - An instance of the buffer structure providing the received frame.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/bluetooth/bt_core.h
+ * include/nuttx/wireless/bluetooth/bt_core.h
  * Bluetooth subsystem core APIs.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -195,7 +195,7 @@ static inline int bt_addr_to_str(FAR const bt_addr_t *addr, FAR char *str,
  ****************************************************************************/
 
 static inline int bt_addr_le_to_str(FAR const bt_addr_le_t *addr, char *str,
-            size_t len)
+                                    size_t len)
 {
   char type[7];
 

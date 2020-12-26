@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/bluetooth/bt_gatt.h
+ * include/nuttx/wireless/bluetooth/bt_gatt.h
  * Generic Attribute Profile handling.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
