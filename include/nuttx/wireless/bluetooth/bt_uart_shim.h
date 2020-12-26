@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/bluetooth/bt_uart_shim.h
+ * include/nuttx/wireless/bluetooth/bt_uart_shim.h
  * Shim for connecting generic UART ports to bluetooth H4 interfaces
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
