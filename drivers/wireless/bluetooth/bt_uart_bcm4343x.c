@@ -43,8 +43,6 @@
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/serial/tioctl.h>
-#include <nuttx/wireless/bluetooth/bt_uart.h>
-#include <nuttx/wireless/bluetooth/bt_uart_shim.h>
 #include <termios.h>
 
 #include "bt_uart.h"
