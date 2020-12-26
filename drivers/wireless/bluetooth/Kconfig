@@ -32,7 +32,6 @@ config BLUETOOTH_UART_CC2564
 
 config BLUETOOTH_BCM4343X
 	bool "Broadcom (Cypress) BCM4343X device support"
-	select BLUETOOTH_UART_SHIM
 	---help---
 		Enables download support for the bluetooth component of BCM4343X devices.
 		Note that firmware needs to be provided for these devices to operate. In
