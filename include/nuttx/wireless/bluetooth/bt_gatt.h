@@ -12,20 +12,21 @@
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -722,9 +723,10 @@ int bt_gatt_attr_read_service(FAR struct bt_conn_s *conn,
  * Name: bt_gatt_attr_read_included
  *
  * Description:
- *   Read include service attribute value storing the result into buffer after
- *   encoding it.
- *   NOTE: Only use this with attributes which user_data is a bt_gatt_include.
+ *   Read include service attribute value storing the result into buffer
+ *   after encoding it.
+ *   NOTE: Only use this with attributes which user_data is a
+ *   bt_gatt_include.
  *
  * Input Parameters:
  *   conn   - Connection object.
@@ -765,8 +767,8 @@ int bt_gatt_attr_read_included(FAR struct bt_conn_s *conn,
  ****************************************************************************/
 
 int bt_gatt_attr_read_chrc(FAR struct bt_conn_s *conn,
-                           FAR const struct bt_gatt_attr_s *attr, FAR void *buf,
-                           uint8_t len, uint16_t offset);
+                           FAR const struct bt_gatt_attr_s *attr,
+                           FAR void *buf, uint8_t len, uint16_t offset);
 
 /****************************************************************************
  * Name: bt_gatt_attr_read_ccc
@@ -790,8 +792,8 @@ int bt_gatt_attr_read_chrc(FAR struct bt_conn_s *conn,
  ****************************************************************************/
 
 int bt_gatt_attr_read_ccc(FAR struct bt_conn_s *conn,
-                          FAR const struct bt_gatt_attr_s *attr, FAR void *buf,
-                          uint8_t len, uint16_t offset);
+                          FAR const struct bt_gatt_attr_s *attr,
+                          FAR void *buf, uint8_t len, uint16_t offset);
 
 /****************************************************************************
  * Name: bt_gatt_attr_write_ccc
@@ -815,7 +817,8 @@ int bt_gatt_attr_read_ccc(FAR struct bt_conn_s *conn,
 
 int bt_gatt_attr_write_ccc(FAR struct bt_conn_s *conn,
                            FAR const struct bt_gatt_attr_s *attr,
-                           FAR const void *buf, uint8_t len, uint16_t offset);
+                           FAR const void *buf, uint8_t len,
+                           uint16_t offset);
 
 /****************************************************************************
  * Name: bt_gatt_attr_read_cep
@@ -839,8 +842,8 @@ int bt_gatt_attr_write_ccc(FAR struct bt_conn_s *conn,
  ****************************************************************************/
 
 int bt_gatt_attr_read_cep(FAR struct bt_conn_s *conn,
-                          FAR const struct bt_gatt_attr_s *attr, FAR void *buf,
-                          uint8_t len, uint16_t offset);
+                          FAR const struct bt_gatt_attr_s *attr,
+                          FAR void *buf, uint8_t len, uint16_t offset);
 
 /****************************************************************************
  * Name: bt_gatt_notify
@@ -900,14 +903,15 @@ void bt_gatt_disconnected(FAR struct bt_conn_s *conn);
  *
  ****************************************************************************/
 
-int bt_gatt_exchange_mtu(FAR struct bt_conn_s *conn, bt_gatt_rsp_func_t func);
+int bt_gatt_exchange_mtu(FAR struct bt_conn_s *conn,
+                         bt_gatt_rsp_func_t func);
 
 /****************************************************************************
  * Name: bt_gatt_discover
  *
  * Description:
- *   This procedure is used by a client to discover a specific primary service on
- *   a server when only the Service UUID is known.
+ *   This procedure is used by a client to discover a specific primary
+ *   service on a server when only the Service UUID is known.
  *
  *   For each attribute found the callback is called which can then decide
  *   whether to continue discovering or stop.
@@ -930,8 +934,8 @@ int bt_gatt_discover(FAR struct bt_conn_s *conn,
  * Description:
  *   This procedure is used by a client to discover all characteristics on a
  *   server.
- *   Note: In case the UUID is set in the parameter it will be matched against
- *   the attributes found before calling the function callback.
+ *   Note: In case the UUID is set in the parameter it will be matched
+ *   against the attributes found before calling the function callback.
  *
  *   For each attribute found the callback is called which can then decide
  *   whether to continue discovering or stop.
@@ -946,15 +950,15 @@ int bt_gatt_discover(FAR struct bt_conn_s *conn,
  ****************************************************************************/
 
 int bt_gatt_discover_characteristic(FAR struct bt_conn_s *conn,
-                                    FAR struct bt_gatt_discover_params_s *params);
+                               FAR struct bt_gatt_discover_params_s *params);
 
 /****************************************************************************
  * Name: bt_gatt_discover_descriptor
  *
  * Description:
  *   This procedure is used by a client to discover descriptors on a server.
- *   Note: In case the UUID is set in the parameter it will be matched against
- *   the attributes found before calling the function callback.
+ *   Note: In case the UUID is set in the parameter it will be matched
+ *   against the attributes found before calling the function callback.
  *
  *   For each attribute found the callback is called which can then decide
  *   whether to continue discovering or stop.
@@ -969,7 +973,7 @@ int bt_gatt_discover_characteristic(FAR struct bt_conn_s *conn,
  ****************************************************************************/
 
 int bt_gatt_discover_descriptor(FAR struct bt_conn_s *conn,
-                                FAR struct bt_gatt_discover_params_s *params);
+                               FAR struct bt_gatt_discover_params_s *params);
 
 /****************************************************************************
  * Name: bt_gatt_read
@@ -988,8 +992,8 @@ int bt_gatt_discover_descriptor(FAR struct bt_conn_s *conn,
  *
  ****************************************************************************/
 
-int bt_gatt_read(FAR struct bt_conn_s *conn, uint16_t handle, uint16_t offset,
-                 bt_gatt_read_func_t func);
+int bt_gatt_read(FAR struct bt_conn_s *conn, uint16_t handle,
+                 uint16_t offset, bt_gatt_read_func_t func);
 
 /****************************************************************************
  * Name: bt_gatt_write

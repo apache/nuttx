@@ -12,20 +12,21 @@
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -105,8 +106,9 @@ static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
   return ntotal;
 }
 
-static FAR struct bt_buf_s *btuart_evt_recv(FAR struct btuart_upperhalf_s *upper,
-                                            FAR unsigned int *hdrlen)
+static FAR struct bt_buf_s *
+btuart_evt_recv(FAR struct btuart_upperhalf_s *upper,
+                FAR unsigned int *hdrlen)
 {
   FAR struct bt_buf_s *buf;
   struct bt_hci_evt_hdr_s hdr;
@@ -141,8 +143,9 @@ static FAR struct bt_buf_s *btuart_evt_recv(FAR struct btuart_upperhalf_s *upper
   return buf;
 }
 
-static FAR struct bt_buf_s *btuart_acl_recv(FAR struct btuart_upperhalf_s *upper,
-                                            FAR unsigned int *hdrlen)
+static FAR struct bt_buf_s *
+btuart_acl_recv(FAR struct btuart_upperhalf_s *upper,
+                FAR unsigned int *hdrlen)
 {
   FAR struct bt_buf_s *buf;
   struct bt_hci_acl_hdr_s hdr;
@@ -191,7 +194,9 @@ static void btuart_rxwork(FAR void *arg)
   DEBUGASSERT(upper != NULL && upper->lower != NULL);
   lower = upper->lower;
 
-  /* Beginning of a new packet.  Read the first byte to get the packet type. */
+  /* Beginning of a new packet.
+   * Read the first byte to get the packet type.
+   */
 
   buf    = NULL;
   hdrlen = 0;
