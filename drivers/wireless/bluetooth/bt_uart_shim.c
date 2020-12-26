@@ -58,7 +58,6 @@
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/serial/tioctl.h>
-#include <nuttx/wireless/bluetooth/bt_uart.h>
 #include <nuttx/wireless/bluetooth/bt_uart_shim.h>
 #include <termios.h>
 
@@ -431,7 +430,7 @@ static int hcicollecttask(int argc, FAR char **argv)
  *
  ****************************************************************************/
 
-FAR void *bt_uart_shim_getdevice(FAR char *path)
+FAR struct btuart_lowerhalf_s *bt_uart_shim_getdevice(FAR const char *path)
 {
   FAR struct hciuart_state_s *s;
   int ret;
@@ -474,5 +473,5 @@ FAR void *bt_uart_shim_getdevice(FAR char *path)
                                     CONFIG_BLUETOOTH_TXCONN_PRIORITY,
                                     1024, hcicollecttask, NULL);
 
-  return g_n;
+  return (FAR struct btuart_lowerhalf_s *)g_n;
 }
