@@ -639,7 +639,7 @@ uint16_t bt_buf_get_le16(FAR struct bt_buf_s * buf)
   value = BT_GETUINT16((FAR uint8_t *)buf->data);
   bt_buf_consume(buf, sizeof(value));
 
-  return BT_LE162HOST(value);
+  return value;
 }
 
 /****************************************************************************
