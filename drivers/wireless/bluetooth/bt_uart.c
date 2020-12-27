@@ -255,14 +255,6 @@ static void btuart_rxwork(FAR void *arg)
 
   wlinfo("Full packet received\n");
 
-  /* Drain any un-read bytes from the Rx buffer */
-
-  nread = lower->rxdrain(lower);
-  if (nread > 0)
-    {
-      wlwarn("WARNING: Discarded %ld bytes\n", (long)nread);
-    }
-
   /* Pass buffer to the stack */
 
   BT_DUMP("Received", buf->data, buf->len);
