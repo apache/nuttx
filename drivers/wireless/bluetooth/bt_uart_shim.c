@@ -126,10 +126,6 @@ static struct btuart_lowerhalf_s g_lowerstatic =
   .rxdrain = hciuart_rxdrain
 };
 
-/* This is held global because its inconvenient to pass to the task */
-
-static FAR struct hciuart_config_s *g_n;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -353,7 +349,12 @@ static ssize_t hciuart_rxdrain(FAR const struct btuart_lowerhalf_s *lower)
 
 static int hcicollecttask(int argc, FAR char **argv)
 {
-  FAR struct hciuart_state_s *s = &g_n->state;
+  FAR struct hciuart_config_s *n;
+  FAR struct hciuart_state_s *s;
+
+  n = (FAR struct hciuart_config_s *)
+    ((uintptr_t)strtoul(argv[1], NULL, 0));
+  s = &n->state;
 
   file_poll(&s->f, (struct pollfd *)&s->p, true);
 
@@ -390,19 +391,19 @@ static int hcicollecttask(int argc, FAR char **argv)
               /* We aren't expected to be listening, so drop these data */
 
               wlwarn("Dropping data\n");
-              hciuart_rxdrain(&g_n->lower);
+              hciuart_rxdrain(&n->lower);
             }
           else
             {
               if (s->callback != NULL)
                 {
                   wlinfo("Activating callback\n");
-                  s->callback(&g_n->lower, s->arg);
+                  s->callback(&n->lower, s->arg);
                 }
               else
                 {
                   wlwarn("Dropping data (no CB)\n");
-                  hciuart_rxdrain(&g_n->lower);
+                  hciuart_rxdrain(&n->lower);
                 }
             }
         }
@@ -432,32 +433,34 @@ static int hcicollecttask(int argc, FAR char **argv)
 
 FAR struct btuart_lowerhalf_s *bt_uart_shim_getdevice(FAR const char *path)
 {
+  FAR struct hciuart_config_s *n;
   FAR struct hciuart_state_s *s;
+  FAR char *argv[2];
+  char arg1[16];
   int ret;
 
   /* Get the memory for this shim instance */
 
-  g_n = (FAR struct hciuart_config_s *)
+  n = (FAR struct hciuart_config_s *)
     kmm_zalloc(sizeof(struct hciuart_config_s));
 
-  if (!g_n)
+  if (!n)
     {
-      return 0;
+      return NULL;
     }
 
-  s = &g_n->state;
+  s = &n->state;
 
   ret = file_open(&s->f, path, O_RDWR | O_BINARY);
   if (ret < 0)
     {
-      kmm_free(g_n);
-      g_n = 0;
-      return 0;
+      kmm_free(n);
+      return NULL;
     }
 
   /* Hook the routines in */
 
-  memcpy(&g_n->lower, &g_lowerstatic, sizeof(struct btuart_lowerhalf_s));
+  memcpy(&n->lower, &g_lowerstatic, sizeof(struct btuart_lowerhalf_s));
 
   /* Put materials into poll structure */
 
@@ -469,9 +472,15 @@ FAR struct btuart_lowerhalf_s *bt_uart_shim_getdevice(FAR const char *path)
 
   s->enabled = true;
 
+  /* Create the monitor thread */
+
+  snprintf(arg1, 16, "%p", n);
+  argv[0] = arg1;
+  argv[1] = NULL;
+
   s->serialmontask = kthread_create("BT HCI Rx",
                                     CONFIG_BLUETOOTH_TXCONN_PRIORITY,
-                                    1024, hcicollecttask, NULL);
+                                    1024, hcicollecttask, argv);
 
-  return (FAR struct btuart_lowerhalf_s *)g_n;
+  return (FAR struct btuart_lowerhalf_s *)n;
 }
