@@ -66,8 +66,8 @@ static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
                            size_t minread)
 {
   FAR const struct btuart_lowerhalf_s *lower;
-  ssize_t nread;
   ssize_t ntotal = 0;
+  ssize_t nread;
 
   wlinfo("buflen %lu minread %lu\n",
          (unsigned long)buflen, (unsigned long)minread);
@@ -91,7 +91,7 @@ static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
         }
       else if (nread < 0)
         {
-          wlwarn("Returned error %d\n", nread);
+          wlwarn("Returned error %d\n", (int)nread);
           return nread;
         }
 
@@ -137,7 +137,7 @@ btuart_evt_recv(FAR struct btuart_upperhalf_s *upper,
       wlerr("ERROR: No available event buffers!\n");
     }
 
-  *hdrlen = (int)hdr.len;
+  *hdrlen = hdr.len;
 
   wlinfo("hdrlen %u\n", hdr.len);
   return buf;
@@ -229,7 +229,7 @@ static void btuart_rxwork(FAR void *arg)
       wlwarn("WARNING: Discarded %ld bytes\n", (long)nread);
       goto errout_with_busy;
     }
-  else if ((hdrlen - 1) > bt_buf_tailroom(buf))
+  else if (hdrlen > bt_buf_tailroom(buf))
     {
       wlerr("ERROR: Not enough space in buffer\n");
       goto errout_with_buf;
@@ -243,7 +243,7 @@ static void btuart_rxwork(FAR void *arg)
       nread = btuart_read(upper, bt_buf_tail(buf), remaining, 0);
       if (nread < 0)
         {
-          wlerr("ERROR: Read returned error %d\n", nread);
+          wlerr("ERROR: Read returned error %d\n", (int)nread);
           goto errout_with_buf;
         }
 
@@ -265,7 +265,7 @@ static void btuart_rxwork(FAR void *arg)
 
   /* Pass buffer to the stack */
 
-  BT_DUMP("Received",  buf->data, buf->len);
+  BT_DUMP("Received", buf->data, buf->len);
   upper->busy = false;
   bt_hci_receive(buf);
   return;
@@ -275,7 +275,6 @@ errout_with_buf:
 
 errout_with_busy:
   upper->busy = false;
-  return;
 }
 
 static void btuart_rxcallback(FAR const struct btuart_lowerhalf_s *lower,
@@ -319,7 +318,7 @@ int btuart_send(FAR const struct bt_driver_s *dev, FAR struct bt_buf_s *buf)
       return -EINVAL;
     }
 
-  type = bt_buf_provide(buf, 1);
+  type = bt_buf_provide(buf, H4_HEADER_SIZE);
 
   switch (buf->type)
     {
@@ -350,7 +349,7 @@ int btuart_send(FAR const struct bt_driver_s *dev, FAR struct bt_buf_s *buf)
 
   if (nwritten < 0)
     {
-      return (int)nwritten;
+      return nwritten;
     }
 
   return -EIO;
