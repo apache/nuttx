@@ -49,6 +49,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <termios.h>
 #include <unistd.h>
 
 #include <nuttx/arch.h>
@@ -59,7 +60,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/serial/tioctl.h>
 #include <nuttx/wireless/bluetooth/bt_uart_shim.h>
-#include <termios.h>
 
 /****************************************************************************
  * Private Types
@@ -132,7 +132,7 @@ static void
 hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
                  btuart_rxcallback_t callback, FAR void *arg)
 {
-  struct hciuart_config_s *config = (struct hciuart_config_s *)lower;
+  struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   struct hciuart_state_s *state;
   irqstate_t flags;
 
@@ -153,7 +153,6 @@ hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
 
   else
     {
-      state->callback = NULL;
       state->arg = arg;
       state->callback = callback;
     }
@@ -183,7 +182,7 @@ static void hciuart_rxenable(FAR const struct btuart_lowerhalf_s *lower,
   irqstate_t flags = spin_lock_irqsave();
   if (enable != s->enabled)
     {
-      wlinfo(enable?"Enable\n":"Disable\n");
+      wlinfo(enable ? "Enable\n" : "Disable\n");
     }
 
   s->enabled = enable;
@@ -208,15 +207,11 @@ static void hciuart_rxenable(FAR const struct btuart_lowerhalf_s *lower,
 static int
 hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower, uint32_t baud)
 {
+#ifdef CONFIG_SERIAL_TERMIOS
   FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   FAR struct hciuart_state_s *state = &config->state;
-  int ret;
-
   struct termios tio;
-
-#ifndef CONFIG_SERIAL_TERMIOS
-#  error TERMIOS Support needed for hciuart_setbaud
-#endif
+  int ret;
 
   ret = file_ioctl(&state->f, TCGETS, (long unsigned int)&tio);
   if (ret)
@@ -234,8 +229,7 @@ hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower, uint32_t baud)
 
   tio.c_cflag |= CRTS_IFLOW | CCTS_OFLOW;
 
-  ret = file_ioctl(&state->f, TCSETS, (long unsigned int)&tio);
-
+  ret = file_ioctl(&state->f, TCSETS, (unsigned long int)&tio);
   if (ret)
     {
       wlerr("ERROR during TCSETS, does UART support CTS/RTS?\n");
@@ -243,6 +237,9 @@ hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower, uint32_t baud)
     }
 
   return OK;
+#else
+  return -ENOSYS;
+#endif
 }
 
 /****************************************************************************
@@ -263,17 +260,15 @@ hciuart_read(FAR const struct btuart_lowerhalf_s *lower,
 {
   FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   FAR struct hciuart_state_s *state = &config->state;
-  size_t ntotal;
 
   wlinfo("config %p buffer %p buflen %lu\n",
-         config, buffer, (size_t) buflen);
+         config, buffer, (unsigned long)buflen);
 
   /* NOTE: This assumes that the caller has exclusive access to the Rx
    * buffer, i.e., one lower half instance can server only one upper half!
    */
 
-  ntotal = file_read(&state->f, buffer, buflen);
-  return ntotal;
+  return file_read(&state->f, buffer, buflen);
 }
 
 /****************************************************************************
@@ -294,16 +289,13 @@ static ssize_t
 hciuart_write(FAR const struct btuart_lowerhalf_s *lower,
               FAR const void *buffer, size_t buflen)
 {
-  FAR const struct hciuart_config_s *config
-    = (FAR const struct hciuart_config_s *)lower;
-  FAR const struct hciuart_state_s *state = &config->state;
+  FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
+  FAR struct hciuart_state_s *state = &config->state;
 
   wlinfo("config %p buffer %p buflen %lu\n",
-         config, buffer, (size_t) buflen);
+         config, buffer, (unsigned long)buflen);
 
-  buflen = file_write((struct file *)&state->f, buffer, buflen);
-
-  return buflen;
+  return file_write(&state->f, buffer, buflen);
 }
 
 /****************************************************************************
@@ -319,8 +311,7 @@ static ssize_t hciuart_rxdrain(FAR const struct btuart_lowerhalf_s *lower)
   FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   FAR struct hciuart_state_s *s = &config->state;
 
-  file_ioctl(&s->f, TCDRN, 0);
-  return 0;
+  return file_ioctl(&s->f, TCDRN, 0);
 }
 
 /****************************************************************************
