@@ -79,7 +79,7 @@ static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
   while (buflen > 0)
     {
       nread = lower->read(lower, buffer, buflen);
-      if (nread == 0)
+      if (nread == 0 || nread == -EINTR)
         {
           wlwarn("Got zero bytes from UART\n");
           if (ntotal < minread)
@@ -298,7 +298,7 @@ int btuart_send(FAR const struct bt_driver_s *dev, FAR struct bt_buf_s *buf)
   FAR struct btuart_upperhalf_s *upper;
   FAR const struct btuart_lowerhalf_s *lower;
   FAR uint8_t *type;
-  ssize_t nwritten;
+  ssize_t ntotal = 0;
 
   upper = (FAR struct btuart_upperhalf_s *)dev;
   DEBUGASSERT(upper != NULL && upper->lower != NULL);
@@ -333,18 +333,22 @@ int btuart_send(FAR const struct bt_driver_s *dev, FAR struct bt_buf_s *buf)
 
   BT_DUMP("Sending",  buf->data, buf->len);
 
-  nwritten = lower->write(lower, buf->data, buf->len);
-  if (nwritten == buf->len)
+  while (ntotal < buf->len)
     {
-      return OK;
+      ssize_t nwritten;
+
+      nwritten = lower->write(lower, buf->data + ntotal, buf->len - ntotal);
+      if (nwritten >= 0)
+        {
+          ntotal += nwritten;
+        }
+      else if (nwritten != -EINTR)
+        {
+          return nwritten;
+        }
     }
 
-  if (nwritten < 0)
-    {
-      return nwritten;
-    }
-
-  return -EIO;
+  return OK;
 }
 
 int btuart_open(FAR const struct bt_driver_s *dev)
