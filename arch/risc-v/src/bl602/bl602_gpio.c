@@ -23,122 +23,183 @@
  ****************************************************************************/
 
 #include <stdint.h>
-#include "hardware/bl602_gpio.h"
-#include "hardware/bl602_glb.h"
+
 #include "riscv_arch.h"
+
+#include "hardware/bl602_glb.h"
+#include "bl602_gpio.h"
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+const uintptr_t g_gpio_base[] =
+{
+  BL602_GPIO_CFGCTL0,
+  BL602_GPIO_CFGCTL1,
+  BL602_GPIO_CFGCTL2,
+  BL602_GPIO_CFGCTL3,
+  BL602_GPIO_CFGCTL4,
+  BL602_GPIO_CFGCTL5,
+  BL602_GPIO_CFGCTL6,
+  BL602_GPIO_CFGCTL7,
+  BL602_GPIO_CFGCTL8,
+  BL602_GPIO_CFGCTL9,
+  BL602_GPIO_CFGCTL10,
+  BL602_GPIO_CFGCTL11,
+  BL602_GPIO_CFGCTL12,
+  BL602_GPIO_CFGCTL13,
+  BL602_GPIO_CFGCTL14
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bl602_gpio_init
+ * Name: bl602_configgpio
  *
  * Description:
- *   Init a gpio pin.
- *
- * Input Parameters:
- *   cfg: gpio configuration
+ *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
  * Returned Value:
- *   Description of the value returned by this function (if any),
- *   including an enumeration of all possible error values.
- *
- * Assumptions/Limitations:
- *   Anything else that one might need to know to use this function.
+ *   OK on success
+ *   ERROR on invalid port.
  *
  ****************************************************************************/
 
-void bl602_gpio_init(struct gpio_cfg_s *cfg)
+int bl602_configgpio(gpio_pinset_t cfgset)
 {
-  uint8_t   gpio_pin = cfg->gpio_pin;
-  uint32_t *p_out;
-  uint32_t  pos;
-  uint32_t  tmp_out;
-  uint32_t  tmp_val;
+  uint32_t mask;
+  uintptr_t regaddr;
+  uint32_t cfg = 0;
+  uint8_t pin = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
 
-  p_out   = (uint32_t *)(GLB_BASE + GLB_GPIO_OUTPUT_EN_OFFSET +
-                       ((gpio_pin >> 5) << 2));
-  pos     = gpio_pin % 32;
-  tmp_out = *p_out;
-
-  /* Disable output anyway */
-
-  tmp_out &= (~(1 << pos));
-  *p_out = tmp_out;
-
-  tmp_val = getreg32(GLB_BASE + GLB_GPIO_OFFSET + gpio_pin / 2 * 4);
-
-  if (gpio_pin % 2 == 0)
+  if (pin > 27)
     {
-      /* Set input or output */
+      return ERROR;
+    }
 
-      if (cfg->gpio_mode == GPIO_MODE_OUTPUT)
-        {
-          tmp_val = tmp_val & GLB_REG_GPIO_0_IE_UMSK;
-          tmp_out |= (1 << pos);
-        }
-      else
-        {
-          tmp_val = tmp_val | (1 << GLB_REG_GPIO_0_IE_POS);
-        }
+  /* The configuration masks will just use the defines for GPIO0 which is
+   * the same as all GPIO config bit fields besides the offset.
+   */
 
-      /* Set pull up or down */
+  if (cfgset & GPIO_INPUT)
+    {
+      cfg |= GPIO_CFGCTL0_GPIO_0_IE;
+    }
 
-      tmp_val &= GLB_REG_GPIO_0_PU_UMSK;
-      tmp_val &= GLB_REG_GPIO_0_PD_UMSK;
-      if (cfg->pull_type == GPIO_PULL_UP)
-        {
-          tmp_val = tmp_val | (1 << GLB_REG_GPIO_0_PU_POS);
-        }
-      else if (cfg->pull_type == GPIO_PULL_DOWN)
-        {
-          tmp_val = tmp_val | (1 << GLB_REG_GPIO_0_PD_POS);
-        }
+  if (cfgset & GPIO_PULLUP)
+    {
+      cfg |= GPIO_CFGCTL0_GPIO_0_PU;
+    }
 
-      tmp_val = (tmp_val & GLB_REG_GPIO_0_DRV_UMSK) |
-                (cfg->drive << GLB_REG_GPIO_0_DRV_POS);
-      tmp_val = (tmp_val & GLB_REG_GPIO_0_SMT_UMSK) |
-                (cfg->smt_ctrl << GLB_REG_GPIO_0_SMT_POS);
-      tmp_val = (tmp_val & GLB_REG_GPIO_0_FUNC_SEL_UMSK) |
-                (cfg->gpio_fun << GLB_REG_GPIO_0_FUNC_SEL_POS);
+  if (cfgset & GPIO_PULLDOWN)
+    {
+      cfg |= GPIO_CFGCTL0_GPIO_0_PD;
+    }
+
+  if (cfgset & GPIO_DRV_MASK)
+    {
+      cfg |= ((cfgset & GPIO_DRV_MASK) >> GPIO_DRV_SHIFT) << \
+        GPIO_CFGCTL0_GPIO_0_DRV_SHIFT;
+    }
+
+  if (cfgset & GPIO_SMT_EN)
+    {
+      cfg |= GPIO_CFGCTL0_GPIO_0_SMT;
+    }
+
+  if (cfgset & GPIO_FUNC_MASK)
+    {
+      cfg |= ((cfgset & GPIO_FUNC_MASK) >> GPIO_FUNC_SHIFT) << \
+        GPIO_CFGCTL0_GPIO_0_FUNC_SEL_SHIFT;
+    }
+
+  /* Grab the register that contains the pin config, this is shared between
+   * two pins so we must shift accordingly.
+   */
+
+  regaddr = g_gpio_base[pin / 2];
+  mask = 0xffff;
+  if ((pin & 1) == 1)
+    {
+      cfg = cfg << 16;
+      mask = mask << 16;
+    }
+
+  modifyreg32(regaddr, mask, cfg);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: bl602_config_uart_sel
+ *
+ * Description:
+ *   Configure the GPIO UART pin selection mux based on bit-encoded
+ *   description of the pin and the selection signal
+ *
+ * Returned Value:
+ *   OK on success
+ *   ERROR on invalid port.
+ *
+ ****************************************************************************/
+
+int bl602_config_uart_sel(gpio_pinset_t pinset, uint8_t sig_sel)
+{
+  irqstate_t flags;
+  uint8_t pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  uint8_t sel_idx;
+  uint32_t reg;
+
+  if ((pin > 27) || sig_sel > UART_SIG_SEL_UART1_RXD)
+    {
+      return ERROR;
+    }
+
+  sel_idx = pin % 8;
+  flags = enter_critical_section();
+
+  reg = getreg32(BL602_UART_SIG_SEL_0);
+  reg &= ~(0xf << (sel_idx * 4));
+  reg |= sig_sel << (sel_idx * 4);
+  putreg32(reg, BL602_UART_SIG_SEL_0);
+
+  leave_critical_section(flags);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: bl602_gpiowrite
+ *
+ * Description:
+ *   Write one or zero to the selected GPIO pin
+ *
+ ****************************************************************************/
+
+void bl602_gpiowrite(gpio_pinset_t pinset, bool value)
+{
+  uint8_t pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  if (value)
+    {
+      modifyreg32(BL602_GPIO_CFGCTL32, 0, (1 << pin));
     }
   else
     {
-      /* Set input or output */
-
-      if (cfg->gpio_mode == GPIO_MODE_OUTPUT)
-        {
-          tmp_val &= GLB_REG_GPIO_1_IE_UMSK;
-          tmp_out |= (1 << pos);
-        }
-      else
-        {
-          tmp_val = tmp_val | (1 << GLB_REG_GPIO_1_IE_POS);
-        }
-
-      /* Set pull up or down */
-
-      tmp_val &= GLB_REG_GPIO_1_PU_UMSK;
-      tmp_val &= GLB_REG_GPIO_1_PD_UMSK;
-      if (cfg->pull_type == GPIO_PULL_UP)
-        {
-          tmp_val = tmp_val | (1 << GLB_REG_GPIO_1_PU_POS);
-        }
-      else if (cfg->pull_type == GPIO_PULL_DOWN)
-        {
-          tmp_val = tmp_val | (1 << GLB_REG_GPIO_1_PD_POS);
-        }
-
-      tmp_val = (tmp_val & GLB_REG_GPIO_1_DRV_UMSK) |
-                (cfg->drive << GLB_REG_GPIO_1_DRV_POS);
-      tmp_val = (tmp_val & GLB_REG_GPIO_1_SMT_UMSK) |
-                (cfg->smt_ctrl << GLB_REG_GPIO_1_SMT_POS);
-      tmp_val = (tmp_val & GLB_REG_GPIO_1_FUNC_SEL_UMSK) |
-                (cfg->gpio_fun << GLB_REG_GPIO_1_FUNC_SEL_POS);
+      modifyreg32(BL602_GPIO_CFGCTL32, (1 << pin), 0);
     }
+}
 
-  putreg32(tmp_val, GLB_BASE + GLB_GPIO_OFFSET + gpio_pin / 2 * 4);
+/****************************************************************************
+ * Name: bl602_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin
+ *
+ ****************************************************************************/
 
-  *p_out = tmp_out;
+bool bl602_gpioread(gpio_pinset_t pinset)
+{
+  uint8_t pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  return (getreg32(BL602_GPIO_CFGCTL30) & (1 << pin)) == 1;
 }

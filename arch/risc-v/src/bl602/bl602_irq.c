@@ -36,7 +36,7 @@
 #include "riscv_internal.h"
 #include "riscv_arch.h"
 
-#include "hardware/clic.h"
+#include "hardware/bl602_clic.h"
 
 #include "chip.h"
 
@@ -46,22 +46,22 @@
 
 static inline void bl_irq_enable(unsigned int source)
 {
-  putreg8(1, CLIC_HART0_ADDR + CLIC_INTIE + source);
+  putreg8(1, BL602_CLIC_INTIE + source);
 }
 
 static inline void bl_irq_disable(unsigned int source)
 {
-  putreg8(0, CLIC_HART0_ADDR + CLIC_INTIE + source);
+  putreg8(0, BL602_CLIC_INTIE + source);
 }
 
 static inline void bl_irq_pending_set(unsigned int source)
 {
-  putreg8(1, CLIC_HART0_ADDR + CLIC_INTIP + source);
+  putreg8(1, BL602_CLIC_INTIP + source);
 }
 
 static inline void bl_irq_pending_clear(unsigned int source)
 {
-  putreg8(0, CLIC_HART0_ADDR + CLIC_INTIP + source);
+  putreg8(0, BL602_CLIC_INTIP + source);
 }
 
 /****************************************************************************

@@ -37,12 +37,12 @@
 
 #include <arch/board/board.h>
 
-#include "hardware/bl602_gpio.h"
-#include "hardware/bl602_glb.h"
 #include "hardware/bl602_hbn.h"
 #include "hardware/bl602_uart.h"
 
 #include "bl602_lowputc.h"
+#include "bl602_gpio.h"
+#include "bl602_hbn.h"
 #include "riscv_arch.h"
 #include "riscv_internal.h"
 
@@ -53,12 +53,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define UART_PARITY_NONE (0)
+#define UART_PARITY_ODD  (1)   
+#define UART_PARITY_EVEN (2)
+
 /* Select UART parameters for the selected console */
 
 #ifdef HAVE_SERIAL_CONSOLE
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #define BL602_CONSOLE_IDX    0
-#define BL602_CONSOLE_BASE   UART0_BASE
 #define BL602_CONSOLE_BAUD   CONFIG_UART0_BAUD
 #define BL602_CONSOLE_BITS   CONFIG_UART0_BITS
 #define BL602_CONSOLE_PARITY CONFIG_UART0_PARITY
@@ -73,14 +76,10 @@
 #else
 #define BL602_CONSOLE_OFLOWCTL 0
 #endif
-#define BL602_CONSOLE_TX_PIN  CONFIG_BL602_UART0_TX_PIN
-#define BL602_CONSOLE_RX_PIN  CONFIG_BL602_UART0_RX_PIN
-#define BL602_CONSOLE_RTS_PIN CONFIG_BL602_UART0_RTS_PIN
-#define BL602_CONSOLE_CTS_PIN CONFIG_BL602_UART0_CTS_PIN
+#endif
 #define HAVE_UART
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #define BL602_CONSOLE_IDX    1
-#define BL602_CONSOLE_BASE   UART1_BASE
 #define BL602_CONSOLE_BAUD   CONFIG_UART1_BAUD
 #define BL602_CONSOLE_BITS   CONFIG_UART1_BITS
 #define BL602_CONSOLE_PARITY CONFIG_UART1_PARITY
@@ -95,15 +94,11 @@
 #else
 #define BL602_CONSOLE_OFLOWCTL 0
 #endif
-#define BL602_CONSOLE_TX_PIN  CONFIG_BL602_UART1_TX_PIN
-#define BL602_CONSOLE_RX_PIN  CONFIG_BL602_UART1_RX_PIN
-#define BL602_CONSOLE_RTS_PIN CONFIG_BL602_UART1_RTS_PIN
-#define BL602_CONSOLE_CTS_PIN CONFIG_BL602_UART1_CTS_PIN
 #define HAVE_UART
-#endif
 #endif /* HAVE_CONSOLE */
 
 #define _BL602_UART_CLOCK (160 * 1000 * 1000UL) /* UART clock */
+#define HBN_UART_CLK_160M (1)
 
 /****************************************************************************
  * Private Data
@@ -128,10 +123,6 @@ static const struct uart_config_s g_bl602_console_config =
 #else
   .oflow_ctl = 0,
 #endif
-  .tx_pin  = BL602_CONSOLE_TX_PIN,
-  .rx_pin  = BL602_CONSOLE_RX_PIN,
-  .rts_pin = BL602_CONSOLE_RTS_PIN,
-  .cts_pin = BL602_CONSOLE_CTS_PIN,
 };
 #endif /* HAVE_SERIAL_CONSOLE */
 
@@ -139,145 +130,99 @@ static const struct uart_config_s g_bl602_console_config =
  * Private Functions
  ****************************************************************************/
 
-static void uart_gpio_init(uint8_t id,
-                           uint8_t tx_pin,
-                           uint8_t rx_pin,
-                           uint8_t cts_pin,
-                           uint8_t rts_pin)
+static void bl602_uart_gpio_init(uint8_t id)
 {
-  struct gpio_cfg_s cfg;
-  int               tx_sigfun;
-  int               rx_sigfun;
-
-  cfg.drive    = 1;
-  cfg.smt_ctrl = 1;
-  cfg.gpio_fun = 7;
-
-  cfg.gpio_pin  = rx_pin;
-  cfg.gpio_mode = GPIO_MODE_AF;
-  cfg.pull_type = GPIO_PULL_UP;
-  bl602_gpio_init(&cfg);
-
-  cfg.gpio_pin  = tx_pin;
-  cfg.gpio_mode = GPIO_MODE_AF;
-  cfg.pull_type = GPIO_PULL_UP;
-  bl602_gpio_init(&cfg);
-
-  /* select uart gpio function */
-
   if (id == 0)
     {
-      tx_sigfun = GLB_UART_SIG_FUN_UART0_TXD;
-      rx_sigfun = GLB_UART_SIG_FUN_UART0_RXD;
+#ifdef BOARD_UART_0_TX_PIN
+      bl602_config_uart_sel(BOARD_UART_0_TX_PIN, UART_SIG_SEL_UART0_TXD);
+      bl602_configgpio(BOARD_UART_0_TX_PIN);
+#endif
+#ifdef BOARD_UART_0_RX_PIN
+      bl602_config_uart_sel(BOARD_UART_0_RX_PIN, UART_SIG_SEL_UART0_RXD);
+      bl602_configgpio(BOARD_UART_0_RX_PIN);
+#endif
+#ifdef BOARD_UART_0_CTS_PIN
+      bl602_config_uart_sel(BOARD_UART_0_CTS_PIN, UART_SIG_SEL_UART0_CTS);
+      bl602_configgpio(BOARD_UART_0_CTS_PIN);
+#endif
+#ifdef BOARD_UART_0_RTS_PIN
+      bl602_config_uart_sel(BOARD_UART_0_RTS_PIN, UART_SIG_SEL_UART0_RTS);
+      bl602_configgpio(BOARD_UART_0_RTS_PIN);
+#endif
     }
   else
     {
-      tx_sigfun = GLB_UART_SIG_FUN_UART1_TXD;
-      rx_sigfun = GLB_UART_SIG_FUN_UART1_RXD;
+#ifdef BOARD_UART_1_TX_PIN
+      bl602_config_uart_sel(BOARD_UART_1_TX_PIN, UART_SIG_SEL_UART1_TXD);
+      bl602_configgpio(BOARD_UART_1_TX_PIN);
+#endif
+#ifdef BOARD_UART_1_RX_PIN
+      bl602_config_uart_sel(BOARD_UART_1_RX_PIN, UART_SIG_SEL_UART1_RXD);
+      bl602_configgpio(BOARD_UART_1_RX_PIN);
+#endif
+#ifdef BOARD_UART_1_CTS_PIN
+      bl602_config_uart_sel(BOARD_UART_1_CTS_PIN, UART_SIG_SEL_UART1_CTS);
+      bl602_configgpio(BOARD_UART_1_CTS_PIN);
+#endif
+#ifdef BOARD_UART_1_RTS_PIN
+      bl602_config_uart_sel(BOARD_UART_1_RTS_PIN, UART_SIG_SEL_UART1_RTS);
+      bl602_configgpio(BOARD_UART_1_RTS_PIN);
+#endif
     }
-
-  bl602_glb_uart_fun_sel(tx_pin % 8, tx_sigfun);
-  bl602_glb_uart_fun_sel(rx_pin % 8, rx_sigfun);
 }
 
 static void bl602_enable_uart_clk(uint8_t enable, int clk_sel, uint8_t div)
 {
-  uint32_t tmp_val;
-
   /* disable UART clock first */
 
-  bl602_up_serialmodify(GLB_BASE, GLB_CLK_CFG2_OFFSET, (1 << 4), 0);
+  modifyreg32(BL602_CLK_CFG2, CLK_CFG2_UART_CLK_EN, 0);
 
   /* Set div */
 
-  bl602_up_serialmodify(GLB_BASE, GLB_CLK_CFG2_OFFSET, 0x7, div);
+  modifyreg32(BL602_CLK_CFG2, CLK_CFG2_UART_CLK_DIV_MASK, div);
 
   /* Select clock source for uart */
 
-  bl602_hbn_set_uart_clk_sel(clk_sel);
+  bl602_set_uart_clk_sel(clk_sel);
 
   /* Set enable or disable */
 
-  tmp_val = bl602_up_serialin(GLB_BASE, GLB_CLK_CFG2_OFFSET);
   if (enable)
     {
-      tmp_val |= (1 << 4);
+      modifyreg32(BL602_CLK_CFG2, 0, CLK_CFG2_UART_CLK_EN);
     }
-  else
-    {
-      tmp_val &= ~(1 << 4);
-    }
-
-  bl602_up_serialout(GLB_BASE, GLB_CLK_CFG2_OFFSET, tmp_val);
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-uint32_t bl602_up_serialin(uint32_t reg_base, int offset)
+void bl602_uart_configure(const struct uart_config_s *config)
 {
-  return getreg32(reg_base + offset);
-}
+  uint32_t div;
+  uint32_t fraction;
+  uint32_t tx_cfg;
+  uint32_t rx_cfg;
+  uint8_t clk_div = 3;
 
-void bl602_up_serialout(uint32_t reg_base, int offset, uint32_t value)
-{
-  putreg32(value, reg_base + offset);
-}
+  bl602_enable_uart_clk(1, HBN_UART_CLK_160M, clk_div);
 
-void bl602_up_serialmodify(uint32_t reg_base,
-                           int      offset,
-                           uint32_t clearbits,
-                           uint32_t setbits)
-{
-  modifyreg32(reg_base + offset, clearbits, setbits);
-}
-
-/****************************************************************************
- * Name: bl602_data_setbits
- ****************************************************************************/
-
-static uint32_t bl602_data_setbits(uint32_t data,
-                                   uint32_t start,
-                                   uint32_t len,
-                                   uint32_t value)
-{
-  return (((data) & ~((~((~0) << (len))) << (start))) |
-          (((value) & ((~((~0) << (len))))) << (start)));
-}
-
-void bl602_uart_configure(uint32_t                    uartbase,
-                          const struct uart_config_s *config)
-{
-  uint32_t tmp_val;
-  uint32_t div        = 0;
-  uint32_t fraction   = 0;
-  uint32_t tmp_tx_cfg = 0;
-  uint32_t tmp_rx_cfg = 0;
-  int      data_bits;
-  int      stop_bits;
-
-  bl602_enable_uart_clk(1, HBN_UART_CLK_160M, 3);
-
-  uart_gpio_init(config->idx,
-                 config->tx_pin,
-                 config->rx_pin,
-                 config->cts_pin,
-                 config->rts_pin);
+  bl602_uart_gpio_init(config->idx);
 
   /* Disable all interrupt */
 
-  bl602_up_serialmodify(uartbase, UART_INT_MASK_OFFSET, 0, 0xff);
+  modifyreg32(BL602_UART_INT_MASK(config->idx), 0, 0xff);
 
   /* Disable uart before config */
 
-  bl602_up_serialmodify(uartbase, UART_UTX_CONFIG_OFFSET, 1, 0);
-  bl602_up_serialmodify(uartbase, UART_URX_CONFIG_OFFSET, 1, 0);
+  modifyreg32(BL602_UART_UTX_CONFIG(config->idx), UART_UTX_CONFIG_CR_EN, 0);
+  modifyreg32(BL602_UART_URX_CONFIG(config->idx), UART_URX_CONFIG_CR_EN, 0);
 
   /* cal the baud rate divisor */
 
-  fraction = (_BL602_UART_CLOCK / (3 + 1)) * 10 / config->baud % 10;
-  div      = (_BL602_UART_CLOCK / (3 + 1)) / config->baud;
+  fraction = (_BL602_UART_CLOCK / (clk_div + 1)) * 10 / config->baud % 10;
+  div      = (_BL602_UART_CLOCK / (clk_div + 1)) / config->baud;
   if (fraction >= 5)
     {
       ++div;
@@ -285,120 +230,106 @@ void bl602_uart_configure(uint32_t                    uartbase,
 
   /* set the baud rate register value */
 
-  bl602_up_serialout(uartbase,
-                     UART_BIT_PRD_OFFSET,
-                     ((div - 1) << 0x10) | ((div - 1) & 0xffff));
+  putreg32(((div - 1) << 0x10) | ((div - 1) & 0xffff),
+           BL602_UART_BIT_PRD(config->idx));
 
   /* configure parity type */
 
-  tmp_tx_cfg = bl602_up_serialin(uartbase, UART_UTX_CONFIG_OFFSET);
-  tmp_rx_cfg = bl602_up_serialin(uartbase, UART_URX_CONFIG_OFFSET);
+  tx_cfg = getreg32(BL602_UART_UTX_CONFIG(config->idx));
+  rx_cfg = getreg32(BL602_UART_URX_CONFIG(config->idx));
 
   switch (config->parity)
     {
     case UART_PARITY_NONE:
-      tmp_tx_cfg &= ~(1 << 4);
-      tmp_rx_cfg &= ~(1 << 4);
+      tx_cfg &= ~UART_UTX_CONFIG_CR_PRT_EN;
+      rx_cfg &= ~UART_URX_CONFIG_CR_PRT_EN;
       break;
     case UART_PARITY_ODD:
-      tmp_tx_cfg |= 1 << 4;
-      tmp_tx_cfg |= 1 << 5;
-      tmp_rx_cfg |= 1 << 4;
-      tmp_rx_cfg |= 1 << 5;
+      tx_cfg |= UART_UTX_CONFIG_CR_PRT_EN;
+      tx_cfg |= UART_UTX_CONFIG_CR_PRT_SEL;
+      rx_cfg |= UART_URX_CONFIG_CR_PRT_EN;
+      rx_cfg |= UART_URX_CONFIG_CR_PRT_SEL;
       break;
     case UART_PARITY_EVEN:
-      tmp_tx_cfg |= 1 << 4;
-      tmp_tx_cfg &= ~(1 << 5);
-      tmp_rx_cfg |= 1 << 4;
-      tmp_rx_cfg &= ~(1 << 5);
+      tx_cfg |= UART_UTX_CONFIG_CR_PRT_EN;
+      tx_cfg &= ~UART_UTX_CONFIG_CR_PRT_SEL;
+      rx_cfg |= UART_URX_CONFIG_CR_PRT_EN;
+      rx_cfg &= ~UART_URX_CONFIG_CR_PRT_SEL;
       break;
     default:
       break;
     }
 
-  if (config->data_bits == 5)
-    {
-      data_bits = UART_DATABITS_5;
-    }
-  else if (config->data_bits == 6)
-    {
-      data_bits = UART_DATABITS_6;
-    }
-  else if (config->data_bits == 7)
-    {
-      data_bits = UART_DATABITS_7;
-    }
-  else
-    {
-      data_bits = UART_DATABITS_8;
-    }
+  /* Configure data and stop bits */
 
-  if (config->stop_bits == 1)
-    {
-      stop_bits = UART_STOPBITS_2;
-    }
-  else
-    {
-      stop_bits = UART_STOPBITS_1;
-    }
+  rx_cfg &= ~UART_URX_CONFIG_CR_BIT_CNT_D_MASK;
+  rx_cfg |= ((uint32_t)config->data_bits - 1) << \
+            UART_URX_CONFIG_CR_BIT_CNT_D_SHIFT;
 
-  /* Configure data bits */
-
-  tmp_tx_cfg = bl602_data_setbits(tmp_tx_cfg, 8, 3, (data_bits + 4));
-  tmp_rx_cfg = bl602_data_setbits(tmp_tx_cfg, 8, 3, (data_bits + 4));
-
-  /* Configure tx stop bits */
-
-  tmp_tx_cfg = bl602_data_setbits(tmp_tx_cfg, 12, 2, (stop_bits + 1));
+  tx_cfg &= ~(UART_UTX_CONFIG_CR_BIT_CNT_D_MASK | \
+              UART_UTX_CONFIG_CR_BIT_CNT_P_MASK);
+  tx_cfg |= (((uint32_t)config->data_bits - 1) << \
+             UART_UTX_CONFIG_CR_BIT_CNT_D_SHIFT) | \
+            (((uint32_t)config->stop_bits + 1) << \
+             UART_UTX_CONFIG_CR_BIT_CNT_P_SHIFT);
 
   /* Configure tx cts flow control function */
 
   if (config->oflow_ctl)
     {
-      tmp_tx_cfg |= 1 << 1;
+      tx_cfg |= UART_UTX_CONFIG_CR_CTS_EN;
     }
   else
     {
-      tmp_tx_cfg &= ~(1 << 1);
+      tx_cfg &= ~(UART_UTX_CONFIG_CR_CTS_EN);
     }
 
   /* Disable rx input de-glitch function */
 
-  tmp_rx_cfg &= ~(1 << 11);
+  rx_cfg &= ~(UART_URX_CONFIG_CR_DEG_EN);
+
+  /* Configure rx rts flow control function */
+
+  /* TODO: What about UART_URX_CONFIG_CR_RTS_SW_VAL? */
 
   if (config->iflow_ctl)
     {
-      tmp_rx_cfg |= 1 << 1;
+      rx_cfg |= UART_URX_CONFIG_CR_RTS_SW_MODE;
     }
   else
     {
-      tmp_rx_cfg &= ~(1 << 1);
+      rx_cfg &= ~(UART_URX_CONFIG_CR_RTS_SW_MODE);
     }
 
   /* Write back */
 
-  bl602_up_serialout(uartbase, UART_UTX_CONFIG_OFFSET, tmp_tx_cfg);
-  bl602_up_serialout(uartbase, UART_URX_CONFIG_OFFSET, tmp_rx_cfg);
+  putreg32(rx_cfg, BL602_UART_URX_CONFIG(config->idx));
+  putreg32(tx_cfg, BL602_UART_UTX_CONFIG(config->idx));
 
   /* Configure LSB-first */
 
-  bl602_up_serialmodify(uartbase, UART_DATA_CONFIG_OFFSET, 1, 0);
+  modifyreg32(BL602_UART_DATA_CONFIG(config->idx),
+              UART_DATA_CONFIG_CR_UART_BIT_INV, 0);
 
   /* Enable tx free run mode */
 
-  bl602_up_serialmodify(uartbase, UART_UTX_CONFIG_OFFSET, 0, 1 << 2);
+  modifyreg32(BL602_UART_UTX_CONFIG(config->idx), 0,
+              UART_UTX_CONFIG_CR_FRM_EN);
 
-  /* Deal with uart fifo configure register */
+  /* Configure FIFO thresholds */
 
-  tmp_val = bl602_up_serialin(uartbase, UART_FIFO_CONFIG_1_OFFSET);
-  tmp_val = bl602_data_setbits(tmp_val, UART_TX_FIFO_TH_POS, 5, 0x10 - 1);
-  tmp_val = bl602_data_setbits(tmp_val, UART_RX_FIFO_TH_POS, 5, 0x10 - 1);
-  bl602_up_serialout(uartbase, UART_FIFO_CONFIG_1_OFFSET, tmp_val);
+  modifyreg32(BL602_UART_FIFO_CONFIG_1(config->idx),
+              (UART_FIFO_CONFIG_1_RX_TH_MASK | \
+               UART_FIFO_CONFIG_1_TX_TH_MASK),
+              ((0x10 - 1) << UART_FIFO_CONFIG_1_RX_TH_SHIFT) | \
+              ((0x10 - 1) << UART_FIFO_CONFIG_1_TX_TH_SHIFT));
 
   /* Enable UART tx rx unit */
 
-  bl602_up_serialmodify(uartbase, UART_UTX_CONFIG_OFFSET, 0, 1);
-  bl602_up_serialmodify(uartbase, UART_URX_CONFIG_OFFSET, 0, 1);
+  modifyreg32(BL602_UART_UTX_CONFIG(config->idx), 0,
+              UART_UTX_CONFIG_CR_EN);
+  modifyreg32(BL602_UART_URX_CONFIG(config->idx), 0,
+              UART_URX_CONFIG_CR_EN);
 }
 
 /****************************************************************************
@@ -414,13 +345,10 @@ void up_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait for FIFO */
 
-  while (
-    ((bl602_up_serialin(BL602_CONSOLE_BASE, UART_FIFO_CONFIG_1_OFFSET)) >>
-     (UART_TX_FIFO_CNT_POS)) &
-    (~((~0) << (6))))
-    ;
+  while ((getreg32(BL602_UART_FIFO_CONFIG_1(BL602_CONSOLE_IDX)) & \
+         UART_FIFO_CONFIG_1_TX_CNT_MASK) == 0);
 
-  bl602_up_serialout(BL602_CONSOLE_BASE, UART_FIFO_WDATA_OFFSET, ch);
+  putreg32(ch, BL602_UART_FIFO_WDATA(BL602_CONSOLE_IDX));
 #endif /* HAVE_CONSOLE */
 }
 
@@ -429,7 +357,7 @@ void bl602_lowsetup(void)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Configure the console UART (if any) */
 
-  bl602_uart_configure(BL602_CONSOLE_BASE, &g_bl602_console_config);
+  bl602_uart_configure(&g_bl602_console_config);
 
 #endif /* HAVE_SERIAL_CONSOLE */
 }

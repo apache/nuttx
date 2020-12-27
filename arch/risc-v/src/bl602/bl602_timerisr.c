@@ -31,7 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <arch/board/board.h>
-#include "hardware/bl602_clint.h"
+#include "hardware/bl602_clic.h"
 #include "riscv_arch.h"
 
 #include "chip.h"
@@ -61,21 +61,21 @@ static bool g_b_tick_started = false;
 
 static inline uint64_t bl602_clint_time_read(void)
 {
-  uint64_t r = getreg32(BL602_MTIMER_HIGH);
+  uint64_t r = getreg32(BL602_CLIC_MTIME + 4);
   r <<= 32;
-  r |= getreg32(BL602_MTIMER_LOW);
+  r |= getreg32(BL602_CLIC_MTIME);
 
   return r;
 }
 
 static inline uint64_t bl602_clint_time_cmp_read(void)
 {
-  return getreg64(BL602_MTIMER_CMP);
+  return getreg64(BL602_CLIC_MTIMECMP);
 }
 
 static inline void bl602_clint_time_cmp_write(uint64_t v)
 {
-  putreg64(v, BL602_MTIMER_CMP);
+  putreg64(v, BL602_CLIC_MTIMECMP);
 }
 
 /****************************************************************************

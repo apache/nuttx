@@ -22,87 +22,52 @@
  * Included Files
  ****************************************************************************/
 
-#include "hardware/bl602_glb.h"
+#include <nuttx/config.h>
+
+#include <stdint.h>
+
 #include "riscv_arch.h"
+#include "hardware/bl602_glb.h"
+
+/****************************************************************************
+ * Pre-Processor Declarations
+ ****************************************************************************/
+
+#define nop() asm volatile ("nop")
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bl602_glb_uart_fun_sel
+ * Name: bl602_swrst_ahb_slave1
  *
  * Description:
- *   Select UART signal function.
+ *   SW Reset ahb slave.
  *
  * Input Parameters:
- *   sig: UART signal
- *   fun: UART function
+ *   slave1: reset signal
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void bl602_glb_uart_fun_sel(int sig, int fun)
+void bl602_swrst_ahb_slave1(uint32_t slave1)
 {
-  uint32_t sig_pos = 0;
-  uint32_t tmp_val = 0;
-
-  tmp_val = getreg32(GLB_BASE + GLB_UART_SIG_SEL_0_OFFSET);
-
-  sig_pos = (sig * 4);
-
-  /* Clear original val */
-
-  tmp_val = tmp_val & (~(0xf << sig_pos));
-
-  /* Set new value */
-
-  tmp_val = tmp_val | (fun << sig_pos);
-  putreg32(tmp_val, GLB_BASE + GLB_UART_SIG_SEL_0_OFFSET);
-}
-
-/****************************************************************************
- * Name: bl602_glb_ahb_slave1_reset
- *
- * Description:
- *   Select UART signal function.
- *
- * Input Parameters:
- *   sig: UART signal
- *   fun: UART function
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void bl602_glb_ahb_slave1_reset(uint32_t slave1)
-{
-  uint32_t tmp_val = 0;
-
-  tmp_val = getreg32(GLB_BASE + GLB_SWRST_CFG1_OFFSET);
-  tmp_val &= (~(1 << slave1));
-  putreg32(tmp_val, GLB_BASE + GLB_SWRST_CFG1_OFFSET);
-
-  /* It is to prevent glitch, which cannot be accessed via bus immediately
-   * after certain register operations, so some nop is added
+  /* To prevent glitch from accessing bus immediately
+   * after certain register operations, so some nop delay is added
    */
 
-  BL_DRV_DUMMY();
-
-  tmp_val = getreg32(GLB_BASE + GLB_SWRST_CFG1_OFFSET);
-  tmp_val |= (1 << slave1);
-  putreg32(tmp_val, GLB_BASE + GLB_SWRST_CFG1_OFFSET);
-
-  /* It is to prevent glitch, which cannot be accessed via bus immediately
-   * after certain register operations, so some nop is added
-   */
-
-  BL_DRV_DUMMY();
-
-  tmp_val = getreg32(GLB_BASE + GLB_SWRST_CFG1_OFFSET);
-  tmp_val &= (~(1 << slave1));
-  putreg32(tmp_val, GLB_BASE + GLB_SWRST_CFG1_OFFSET);
+  modifyreg32(BL602_SWRST_CFG1, slave1, 0);
+  nop();
+  nop();
+  nop();
+  nop();
+  modifyreg32(BL602_SWRST_CFG1, 0, slave1);
+  nop();
+  nop();
+  nop();
+  nop();
+  modifyreg32(BL602_SWRST_CFG1, slave1, 0);
 }

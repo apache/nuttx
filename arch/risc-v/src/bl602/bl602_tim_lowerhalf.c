@@ -37,8 +37,10 @@
 #include <arch/board/board.h>
 #include "riscv_arch.h"
 
-#include <hardware/bl602_glb.h>
-#include <hardware/bl602_timer.h>
+#include "hardware/bl602_glb.h"
+#include "hardware/bl602_timer.h"
+#include "bl602_tim_lowerhalf.h"
+#include "bl602_glb.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -142,15 +144,15 @@ static int bl602_timer_handler(int irq, void *context, void *arg)
   uint32_t tmp_val;
   uint32_t tmp_addr;
 
-  int_id   = getreg32(TIMER_BASE + TIMER_TMSR2_OFFSET + 4 * priv->tim);
-  tmp_addr = TIMER_BASE + TIMER_TICR2_OFFSET + 4 * priv->tim;
+  int_id   = getreg32(BL602_TIMER_TMSR2 + 4 * priv->tim);
+  tmp_addr = BL602_TIMER_TICR2 + 4 * priv->tim;
   tmp_val  = getreg32(tmp_addr);
 
   /* Comparator 0 match interrupt */
 
-  if (((int_id) & (1 << (TIMER_TMSR_0_POS))) != 0)
+  if ((int_id & TIMER_TMSR2_TMSR_0) != 0)
     {
-      putreg32(tmp_val | (1 << TIMER_TCLR_0_POS), tmp_addr);
+      putreg32(tmp_val | TIMER_TMSR2_TMSR_0, tmp_addr);
       if (priv->callback(&next_interval_us, priv->arg))
         {
           if (next_interval_us > 0)
@@ -173,16 +175,16 @@ static int bl602_timer_handler(int irq, void *context, void *arg)
 
   /* Comparator 1 match interrupt */
 
-  if (((int_id) & (1 << (TIMER_TMSR_1_POS))) != 0)
+  if ((int_id & TIMER_TMSR2_TMSR_1) != 0)
     {
-      putreg32(tmp_val | (1 << TIMER_TCLR_1_POS), tmp_addr);
+      putreg32(tmp_val | TIMER_TICR2_TCLR_1, tmp_addr);
     }
 
   /* Comparator 2 match interrupt */
 
-  if (((int_id) & (1 << (TIMER_TMSR_2_POS))) != 0)
+  if ((int_id & TIMER_TMSR2_TMSR_2) != 0)
     {
-      putreg32(tmp_val | (1 << TIMER_TCLR_2_POS), tmp_addr);
+      putreg32(tmp_val | TIMER_TICR2_TCLR_2, tmp_addr);
     }
 
   return OK;
@@ -337,10 +339,11 @@ static int bl602_tim_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  * Input Parameters:
  *   lower    - A pointer the publicly visible representation of the
- *"lower-half" driver state structure. callback - The new timer expiration
- *function pointer.  If this function pointer is NULL, then the
- *reset-on-expiration behavior is restored, arg      - Argument that will be
- *provided in the callback
+ *              "lower-half" driver state structure.
+ *   callback - The new timer expiration function pointer.  If this function
+ *              pointer is NULL, then the reset-on-expiration behavior is
+ *              restored.
+ *   arg      - Argument that will be provided in the callback
  *
  * Returned Value:
  *   The previous timer expiration function pointer or NULL is there was
@@ -389,7 +392,7 @@ static void bl602_tim_setcallback(FAR struct timer_lowerhalf_s *lower,
 int bl602_timer_initialize(FAR const char *devpath, int timer)
 {
   FAR struct bl602_tim_lowerhalf_s *lower;
-  timer_cfg_t                       timstr;
+  struct timer_cfg_s                timstr;
 
   switch (timer)
     {
@@ -420,7 +423,7 @@ int bl602_timer_initialize(FAR const char *devpath, int timer)
   timstr.match_val2     = TIMER_MAX_VALUE;     /* Timer match 2 value 0 */
   timstr.pre_load_val   = TIMER_MAX_VALUE;     /* Timer preload value */
 
-  bl602_glb_ahb_slave1_reset(BL_AHB_SLAVE1_TMR);
+  bl602_swrst_ahb_slave1(AHB_SLAVE1_TMR);
 
   bl602_timer_intmask(lower->tim, TIMER_INT_ALL, 1);
 
