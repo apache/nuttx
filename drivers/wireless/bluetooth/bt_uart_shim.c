@@ -74,14 +74,10 @@ struct hciuart_state_s
   btuart_rxcallback_t callback; /* Rx callback function */
   FAR void *arg;                /* Rx callback argument */
 
-  int h;                        /* File handle to serial device */
-  struct file f;                /* File structure, detached */
-
-  sem_t dready;                 /* Semaphore used by the poll operation */
+  struct file f;                /* File structure */
   bool enabled;                 /* Flag indicating that reception is enabled */
 
   int serialmontask;            /* The receive serial octets task handle */
-  volatile struct pollfd p;     /* Polling structure for serial monitor task */
 };
 
 struct hciuart_config_s
@@ -326,40 +322,35 @@ static int hcicollecttask(int argc, FAR char **argv)
 {
   FAR struct hciuart_config_s *n;
   FAR struct hciuart_state_s *s;
+  struct pollfd p;
 
   n = (FAR struct hciuart_config_s *)
     ((uintptr_t)strtoul(argv[1], NULL, 0));
   s = &n->state;
 
-  file_poll(&s->f, (struct pollfd *)&s->p, true);
+  /* Put materials into poll structure */
+
+  p.ptr = &s->f;
+  p.events = POLLIN | POLLFILE;
 
   for (; ; )
     {
       /* Wait for data to arrive */
 
-      int ret = nxsem_wait(s->p.sem);
+      int ret = nx_poll(&p, 1, -1);
       if (ret < 0)
         {
           wlwarn("Poll interrupted %d\n", ret);
           continue;
         }
 
-      /* These flags can change dynamically as new events occur, so
-       * snapshot.
-       */
-
-      irqstate_t flags = enter_critical_section();
-      uint32_t tevents = s->p.revents;
-      s->p.revents = 0;
-      leave_critical_section(flags);
-
-      wlinfo("Poll completed %d\n", tevents);
+      wlinfo("Poll completed %d\n", p.revents);
 
       /* Given the nature of file_poll, there are multiple reasons why
        * we might be here, so make sure we only consider the read.
        */
 
-      if (tevents & POLLIN)
+      if (p.revents & POLLIN)
         {
           if (!s->enabled)
             {
@@ -441,16 +432,6 @@ FAR struct btuart_lowerhalf_s *bt_uart_shim_getdevice(FAR const char *path)
   n->lower.read     = hciuart_read;
   n->lower.write    = hciuart_write;
   n->lower.rxdrain  = hciuart_rxdrain;
-
-  /* Put materials into poll structure */
-
-  nxsem_set_protocol(&s->dready, SEM_PRIO_NONE);
-
-  s->p.fd = s->h;
-  s->p.events = POLLIN;
-  s->p.sem = &s->dready;
-
-  s->enabled = true;
 
   /* Create the monitor thread */
 
