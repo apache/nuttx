@@ -111,22 +111,6 @@ static ssize_t hciuart_write(FAR const struct btuart_lowerhalf_s *lower,
 static ssize_t hciuart_rxdrain(FAR const struct btuart_lowerhalf_s *lower);
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* This structure is the configuration of the HCI UART shim */
-
-static struct btuart_lowerhalf_s g_lowerstatic =
-{
-  .rxattach = hciuart_rxattach,
-  .rxenable = hciuart_rxenable,
-  .setbaud = hciuart_setbaud,
-  .read = hciuart_read,
-  .write = hciuart_write,
-  .rxdrain = hciuart_rxdrain
-};
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -460,7 +444,12 @@ FAR struct btuart_lowerhalf_s *bt_uart_shim_getdevice(FAR const char *path)
 
   /* Hook the routines in */
 
-  memcpy(&n->lower, &g_lowerstatic, sizeof(struct btuart_lowerhalf_s));
+  n->lower.rxattach = hciuart_rxattach;
+  n->lower.rxenable = hciuart_rxenable;
+  n->lower.setbaud  = hciuart_setbaud;
+  n->lower.read     = hciuart_read;
+  n->lower.write    = hciuart_write;
+  n->lower.rxdrain  = hciuart_rxdrain;
 
   /* Put materials into poll structure */
 
