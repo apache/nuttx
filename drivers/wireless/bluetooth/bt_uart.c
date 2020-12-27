@@ -184,9 +184,9 @@ static void btuart_rxwork(FAR void *arg)
 {
   FAR struct btuart_upperhalf_s *upper;
   FAR const struct btuart_lowerhalf_s *lower;
-  static FAR struct bt_buf_s *buf;
-  static unsigned int hdrlen;
-  static int remaining;
+  FAR struct bt_buf_s *buf;
+  unsigned int hdrlen;
+  int remaining;
   ssize_t nread;
   uint8_t type;
 
@@ -197,9 +197,6 @@ static void btuart_rxwork(FAR void *arg)
   /* Beginning of a new packet.
    * Read the first byte to get the packet type.
    */
-
-  buf    = NULL;
-  hdrlen = 0;
 
   nread = btuart_read(upper, &type, 1, 0);
   if (nread != 1)
