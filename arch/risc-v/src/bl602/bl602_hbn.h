@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/bl602/bl602_hbn.c
+ * arch/risc-v/src/bl602/bl602_hbn.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,15 +18,34 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_BL602_BL602_HBN_H
+#define __ARCH_RISCV_SRC_BL602_BL602_HBN_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include "hardware/bl602_hbn.h"
-#include "riscv_arch.h"
+#include <nuttx/config.h>
+
+#include <stdint.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -47,14 +66,12 @@
  *
  ****************************************************************************/
 
-void bl602_set_uart_clk_sel(int clk_sel)
-{
-  if (clk_sel)
-    {
-      modifyreg32(BL602_HBN_GLB, 0, HBN_GLB_HBN_UART_CLK_SEL);
-    }
-  else
-    {
-      modifyreg32(BL602_HBN_GLB, HBN_GLB_HBN_UART_CLK_SEL, 0);
-    }
+void bl602_set_uart_clk_sel(int clk_sel);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_HBN_H */

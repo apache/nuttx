@@ -64,15 +64,15 @@
 
 static uint8_t g_idle_stack[BL602_IDLESTACK_SIZE];
 
-/* Dont change the name of varaible, since we refer this
+/* Dont change the name of variable, since we refer this
  * boot2_partition_table in linker script
  */
 
 static struct
 {
-  uint8_t                        partition_active_idx;
-  uint8_t                        pad[3];
-  struct pt_table_stuff_config_s table;
+  uint8_t                  partition_active_idx;
+  uint8_t                  pad[3];
+  struct pt_stuff_config_s table;
 } boot2_partition_table;
 
 /****************************************************************************
@@ -98,8 +98,8 @@ uint32_t boot2_get_flash_addr(void)
   extern uint8_t __boot2_flash_cfg_src;
 
   return (uint32_t)(&__boot2_flash_cfg_src +
-                    (sizeof(boot2_partition_table.table.pt_entries[0]) *
-                     boot2_partition_table.table.pt_table.entry_cnt));
+                    (sizeof(boot2_partition_table.table.entries[0]) *
+                     boot2_partition_table.table.table.entry_cnt));
 }
 
 /****************************************************************************
@@ -108,8 +108,6 @@ uint32_t boot2_get_flash_addr(void)
 
 void bfl_main(void)
 {
-  uint32_t tmp_val;
-
   /* set interrupt vector */
 
   asm volatile("csrw mtvec, %0" ::"r"((uintptr_t)exception_common + 2));
@@ -120,10 +118,7 @@ void bfl_main(void)
 
   /* HBN Config AON pad input and SMT */
 
-  tmp_val = getreg32(HBN_BASE + HBN_IRQ_MODE_OFFSET);
-  tmp_val = (tmp_val & HBN_REG_AON_PAD_IE_SMT_UMSK) |
-            (1 << HBN_REG_AON_PAD_IE_SMT_POS);
-  putreg32(tmp_val, HBN_BASE + HBN_IRQ_MODE_OFFSET);
+  modifyreg32(BL602_HBN_IRQ_MODE, 0, HBN_IRQ_MODE_REG_AON_PAD_IE_SMT);
 
 #ifdef USE_EARLYSERIALINIT
   up_earlyserialinit();

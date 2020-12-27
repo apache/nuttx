@@ -27,9 +27,18 @@
 
 #include <nuttx/config.h>
 
+/* Do not include BL602 header files here. */
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* UART Configuration */
+
+#define BOARD_UART_0_RX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN7)
+#define BOARD_UART_0_TX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN16)
+#define BOARD_UART_1_RX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN3)
+#define BOARD_UART_1_TX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN4)
 
 /****************************************************************************
  * Public Types

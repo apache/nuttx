@@ -37,6 +37,7 @@
 #include "riscv_internal.h"
 
 #include <hardware/bl602_timer.h>
+#include "bl602_tim.h"
 #include "bl602_oneshot_lowerhalf.h"
 
 /****************************************************************************
@@ -72,7 +73,7 @@ struct bl602_oneshot_lowerhalf_s
   oneshot_callback_t callback; /* Internal handler that receives callback */
   FAR void *         arg;      /* Argument that is passed to the handler */
   uint8_t            tim;      /* timer tim 0,1 */
-  uint8_t            irq;      /* IRQ associated with this UART */
+  uint8_t            irq;      /* IRQ associated with this timer */
   bool               started;  /* True: Timer has been started */
 };
 
@@ -132,18 +133,27 @@ static int bl602_oneshot_handler(int irq, FAR void *context, FAR void *arg)
   /* Clear Interrupt Bits */
 
   uint32_t int_id;
-  uint32_t tmp_val;
-  uint32_t tmp_addr;
+  uint32_t ticr_val;
+  uint32_t ticr_addr;
 
-  int_id   = getreg32(TIMER_BASE + TIMER_TMSR2_OFFSET + 4 * priv->tim);
-  tmp_addr = TIMER_BASE + TIMER_TICR2_OFFSET + 4 * priv->tim;
-  tmp_val  = getreg32(tmp_addr);
+  if (priv->tim == 0)
+    {
+      int_id = getreg32(BL602_TIMER_TMSR2);
+      ticr_addr = BL602_TIMER_TICR2;
+    }
+  else
+    {
+      int_id = getreg32(BL602_TIMER_TMSR3);
+      ticr_addr = BL602_TIMER_TICR3;
+    }
+
+  ticr_val  = getreg32(ticr_addr);
 
   /* Comparator 0 match interrupt */
 
-  if (((int_id) & (1 << (TIMER_TMSR_0_POS))) != 0)
+  if ((int_id & TIMER_TMSR2_TMSR_0) != 0)
     {
-      putreg32(tmp_val | (1 << TIMER_TCLR_0_POS), tmp_addr);
+      putreg32(ticr_val | TIMER_TICR2_TCLR_0, ticr_addr);
       callback = priv->callback;
       cbarg    = priv->arg;
 
@@ -155,16 +165,16 @@ static int bl602_oneshot_handler(int irq, FAR void *context, FAR void *arg)
 
   /* Comparator 1 match interrupt */
 
-  if (((int_id) & (1 << (TIMER_TMSR_1_POS))) != 0)
+  if ((int_id & TIMER_TMSR2_TMSR_1) != 0)
     {
-      putreg32(tmp_val | (1 << TIMER_TCLR_1_POS), tmp_addr);
+      putreg32(ticr_val | TIMER_TICR2_TCLR_1, ticr_addr);
     }
 
   /* Comparator 2 match interrupt */
 
-  if (((int_id) & (1 << (TIMER_TMSR_2_POS))) != 0)
+  if ((int_id & TIMER_TMSR2_TMSR_2) != 0)
     {
-      putreg32(tmp_val | (1 << TIMER_TCLR_2_POS), tmp_addr);
+      putreg32(ticr_val | TIMER_TICR2_TCLR_2, ticr_addr);
     }
 
   return 0;
@@ -353,7 +363,7 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int      chan,
                                                    uint16_t resolution)
 {
   FAR struct bl602_oneshot_lowerhalf_s *priv;
-  timer_cfg_t                           timstr;
+  struct timer_cfg_s                    timstr;
 
   /* Allocate an instance of the lower half driver */
 
@@ -372,7 +382,7 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int      chan,
   priv->lh.ops  = &g_oneshot_ops;
   priv->freq    = TIMER_CLK_FREQ / resolution;
   priv->tim     = chan;
-  if (priv->tim == 0)
+  if (priv->tim == TIMER_CH0)
     {
       priv->irq = BL602_IRQ_TIMER_CH0;
     }
@@ -387,12 +397,12 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int      chan,
   timstr.clk_src  = TIMER_CLKSRC_FCLK; /* Timer clock source */
   timstr.pl_trig_src =
     TIMER_PRELOAD_TRIG_COMP0; /* Timer count register preload trigger source
-                               * slelect */
+                               * select */
 
   timstr.count_mode = TIMER_COUNT_PRELOAD; /* Timer count mode */
 
   timstr.clock_division =
-    (TIMER_CLK_DIV * resolution) - 1; /* Timer clock divison value */
+    (TIMER_CLK_DIV * resolution) - 1; /* Timer clock division value */
 
   timstr.match_val0 = TIMER_MAX_VALUE; /* Timer match 0 value 0 */
   timstr.match_val1 = TIMER_MAX_VALUE; /* Timer match 1 value 0 */

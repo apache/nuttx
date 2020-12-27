@@ -36,11 +36,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/serial/serial.h>
 
-#include <arch/board/board.h>
-
 #include "bl602_lowputc.h"
+#include "bl602_gpio.h"
 
-#include "hardware/bl602_gpio.h"
 #include "hardware/bl602_uart.h"
 #include "hardware/bl602_glb.h"
 
@@ -77,6 +75,7 @@
 #define HAVE_UART
 #endif
 #endif /* HAVE_CONSOLE */
+
 /* If we are not using the serial driver for the console, then we still must
  * provide some minimal implementation of up_putc.
  */
@@ -122,9 +121,8 @@
  * Private Types
  ****************************************************************************/
 
-struct up_dev_s
+struct bl602_uart_s
 {
-  const uint32_t       uartbase; /* Base address of UART registers */
   uint8_t              irq;      /* IRQ associated with this UART */
   struct uart_config_s config;
 };
@@ -135,18 +133,18 @@ struct up_dev_s
 
 /* Serial driver methods */
 
-static int  up_setup(struct uart_dev_s *dev);
-static void up_shutdown(struct uart_dev_s *dev);
-static int  up_attach(struct uart_dev_s *dev);
-static void up_detach(struct uart_dev_s *dev);
-static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
-static void up_rxint(struct uart_dev_s *dev, bool enable);
-static bool up_rxavailable(struct uart_dev_s *dev);
-static void up_send(struct uart_dev_s *dev, int ch);
-static void up_txint(struct uart_dev_s *dev, bool enable);
-static bool up_txready(struct uart_dev_s *dev);
-static bool up_txempty(struct uart_dev_s *dev);
+static int  bl602_setup(struct uart_dev_s *dev);
+static void bl602_shutdown(struct uart_dev_s *dev);
+static int  bl602_attach(struct uart_dev_s *dev);
+static void bl602_detach(struct uart_dev_s *dev);
+static int  bl602_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int  bl602_receive(struct uart_dev_s *dev, unsigned int *status);
+static void bl602_rxint(struct uart_dev_s *dev, bool enable);
+static bool bl602_rxavailable(struct uart_dev_s *dev);
+static void bl602_send(struct uart_dev_s *dev, int ch);
+static void bl602_txint(struct uart_dev_s *dev, bool enable);
+static bool bl602_txready(struct uart_dev_s *dev);
+static bool bl602_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -154,21 +152,21 @@ static bool up_txempty(struct uart_dev_s *dev);
 
 static const struct uart_ops_s g_uart_ops =
 {
-  .setup       = up_setup,
-  .shutdown    = up_shutdown,
-  .attach      = up_attach,
-  .detach      = up_detach,
-  .ioctl       = up_ioctl,
-  .receive     = up_receive,
-  .rxint       = up_rxint,
-  .rxavailable = up_rxavailable,
+  .setup       = bl602_setup,
+  .shutdown    = bl602_shutdown,
+  .attach      = bl602_attach,
+  .detach      = bl602_detach,
+  .ioctl       = bl602_ioctl,
+  .receive     = bl602_receive,
+  .rxint       = bl602_rxint,
+  .rxavailable = bl602_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rxflowcontrol = NULL,
 #endif
-  .send    = up_send,
-  .txint   = up_txint,
-  .txready = up_txready,
-  .txempty = up_txempty,
+  .send    = bl602_send,
+  .txint   = bl602_txint,
+  .txready = bl602_txready,
+  .txempty = bl602_txempty,
 };
 
 /* I/O buffers */
@@ -177,11 +175,9 @@ static const struct uart_ops_s g_uart_ops =
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
 
-static struct up_dev_s g_uart0priv =
+static struct bl602_uart_s g_uart0priv =
 {
-  .uartbase = UART0_BASE,
   .irq      = BL602_IRQ_UART0,
-
   .config =
     {
       .idx       = 0,
@@ -189,10 +185,6 @@ static struct up_dev_s g_uart0priv =
       .parity    = CONFIG_UART0_PARITY,
       .data_bits = CONFIG_UART0_BITS,
       .stop_bits = CONFIG_UART0_2STOP,
-      .tx_pin    = CONFIG_BL602_UART0_TX_PIN,
-      .rx_pin    = CONFIG_BL602_UART0_RX_PIN,
-      .rts_pin   = CONFIG_BL602_UART0_RTS_PIN,
-      .cts_pin   = CONFIG_BL602_UART0_CTS_PIN,
 
 #ifdef CONFIG_UART0_IFLOWCONTROL
       .iflow_ctl = CONFIG_UART0_IFLOWCONTROL,
@@ -232,11 +224,9 @@ static uart_dev_t g_uart0port =
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 
-static struct up_dev_s g_uart1priv =
+static struct bl602_uart_s g_uart1priv =
 {
-  .uartbase = UART1_BASE,
   .irq      = BL602_IRQ_UART1,
-
   .config =
     {
       .idx       = 1,
@@ -244,10 +234,6 @@ static struct up_dev_s g_uart1priv =
       .parity    = CONFIG_UART1_PARITY,
       .data_bits = CONFIG_UART1_BITS,
       .stop_bits = CONFIG_UART1_2STOP,
-      .tx_pin    = CONFIG_BL602_UART1_TX_PIN,
-      .rx_pin    = CONFIG_BL602_UART1_RX_PIN,
-      .rts_pin   = CONFIG_BL602_UART1_RTS_PIN,
-      .cts_pin   = CONFIG_BL602_UART1_CTS_PIN,
 
 #ifdef CONFIG_UART1_IFLOWCONTROL
       .iflow_ctl = CONFIG_UART1_IFLOWCONTROL,
@@ -307,20 +293,22 @@ static struct uart_dev_s *const g_uart_devs[] =
 
 static int __uart_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  uart_dev_t *     dev       = (uart_dev_t *)arg;
-  struct up_dev_s *uart_priv = dev->priv;
-  uint32_t         tmp_val   = 0;
-  uint32_t         mask_val  = 0;
+  uart_dev_t *dev           = (uart_dev_t *)arg;
+  struct bl602_uart_s *priv = dev->priv;
+  uint8_t uart_idx          = priv->config.idx;
+  uint32_t int_status;
+  uint32_t int_mask;
 
-  tmp_val  = bl602_up_serialin(uart_priv->uartbase, UART_INT_STS_OFFSET);
-  mask_val = bl602_up_serialin(uart_priv->uartbase, UART_INT_MASK_OFFSET);
+  int_status = getreg32(BL602_UART_INT_STS(uart_idx));
+  int_mask = getreg32(BL602_UART_INT_MASK(uart_idx));
 
   /* Length of uart rx data transfer arrived interrupt */
 
-  if ((tmp_val & (1 << UART_URX_END_INT_POS)) &&
-      !(mask_val & (1 << UART_CR_URX_END_MASK_POS)))
+  if ((int_status & UART_INT_STS_URX_END_INT) &&
+      !(int_mask & UART_INT_MASK_CR_URX_END_MASK))
     {
-      bl602_up_serialout(uart_priv->uartbase, UART_INT_CLEAR_OFFSET, 0x2);
+      putreg32(UART_INT_CLEAR_CR_URX_END_CLR,
+               BL602_UART_INT_CLEAR(uart_idx));
 
       /* Receive Data ready */
 
@@ -329,8 +317,8 @@ static int __uart_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Tx fifo ready interrupt,auto-cleared when data is pushed */
 
-  if ((tmp_val & (1 << UART_UTX_FIFO_INT_POS)) &&
-      !(mask_val & (1 << UART_CR_UTX_FIFO_MASK_POS)))
+  if ((int_status & UART_INT_STS_UTX_FIFO_INT) &&
+      !(int_mask & UART_INT_MASK_CR_UTX_FIFO_MASK))
     {
       /* Transmit data request interrupt */
 
@@ -339,8 +327,8 @@ static int __uart_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Rx fifo ready interrupt,auto-cleared when data is popped */
 
-  if ((tmp_val & (1 << UART_URX_FIFO_INT_POS)) &&
-      !(mask_val & (1 << UART_CR_URX_FIFO_MASK_POS)))
+  if ((int_status & UART_INT_STS_URX_FIFO_INT) &&
+      !(int_mask & UART_INT_MASK_CR_URX_FIFO_MASK))
     {
       /* Receive Data ready */
 
@@ -351,7 +339,7 @@ static int __uart_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Name: up_setup
+ * Name: bl602_setup
  *
  * Description:
  *   Configure the UART baud, bits, parity, etc. This method is called the
@@ -359,16 +347,16 @@ static int __uart_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int up_setup(struct uart_dev_s *dev)
+static int bl602_setup(struct uart_dev_s *dev)
 {
-  struct up_dev_s *uart_priv = (struct up_dev_s *)dev->priv;
+  struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
 
-  bl602_uart_configure(uart_priv->uartbase, &uart_priv->config);
+  bl602_uart_configure(&priv->config);
   return OK;
 }
 
 /****************************************************************************
- * Name: up_shutdown
+ * Name: bl602_shutdown
  *
  * Description:
  *   Disable the UART.  This method is called when the serial
@@ -376,18 +364,19 @@ static int up_setup(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void up_shutdown(struct uart_dev_s *dev)
+static void bl602_shutdown(struct uart_dev_s *dev)
 {
-  struct up_dev_s *uart_priv = (struct up_dev_s *)dev->priv;
+  struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
+  uint8_t uart_idx = priv->config.idx;
 
   /* Disable uart before config */
 
-  bl602_up_serialmodify(uart_priv->uartbase, UART_UTX_CONFIG_OFFSET, 1, 0);
-  bl602_up_serialmodify(uart_priv->uartbase, UART_URX_CONFIG_OFFSET, 1, 0);
+  modifyreg32(BL602_UART_UTX_CONFIG(uart_idx), UART_UTX_CONFIG_CR_EN, 0);
+  modifyreg32(BL602_UART_URX_CONFIG(uart_idx), UART_URX_CONFIG_CR_EN, 0);
 }
 
 /****************************************************************************
- * Name: up_attach
+ * Name: bl602_attach
  *
  * Description:
  *   Configure the UART to operation in interrupt driven mode.  This method
@@ -401,10 +390,10 @@ static void up_shutdown(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_attach(struct uart_dev_s *dev)
+static int bl602_attach(struct uart_dev_s *dev)
 {
   int              ret;
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
 
   ret = irq_attach(priv->irq, __uart_interrupt, (void *)dev);
   if (ret == OK)
@@ -416,7 +405,7 @@ static int up_attach(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: up_detach
+ * Name: bl602_detach
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
@@ -425,9 +414,9 @@ static int up_attach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void up_detach(struct uart_dev_s *dev)
+static void bl602_detach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
 
   /* Disable interrupts */
 
@@ -439,24 +428,14 @@ static void up_detach(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: bl602_data_getbits
- ****************************************************************************/
-
-static uint32_t
-bl602_data_getbits(uint32_t data, uint32_t start, uint32_t len)
-{
-  return (((data) >> (start)) & (~((~0) << (len))));
-}
-
-/****************************************************************************
- * Name: up_ioctl
+ * Name: bl602_ioctl
  *
  * Description:
  *   All ioctl calls will be routed through this method
  *
  ****************************************************************************/
 
-static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
+static int bl602_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
 #if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT)
   struct inode *     inode = filep->f_inode;
@@ -471,7 +450,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       do
         {
           struct termios * termiosp = (struct termios *)arg;
-          struct up_dev_s *priv     = (struct up_dev_s *)dev->priv;
+          struct bl602_uart_s *priv     = (struct bl602_uart_s *)dev->priv;
 
           if (!termiosp)
             {
@@ -527,7 +506,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       do
         {
           struct termios *     termiosp = (struct termios *)arg;
-          struct up_dev_s *    priv     = (struct up_dev_s *)dev->priv;
+          struct bl602_uart_s *    priv = (struct bl602_uart_s *)dev->priv;
           struct uart_config_s config;
           uint32_t             tmp_val;
 
@@ -615,11 +594,9 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
                * implement TCSADRAIN / TCSAFLUSH
                */
 
-              tmp_val =
-                bl602_up_serialin(priv->uartbase, UART_INT_MASK_OFFSET);
-              bl602_uart_configure(priv->uartbase, &config);
-              bl602_up_serialout(
-                priv->uartbase, UART_INT_MASK_OFFSET, tmp_val);
+              tmp_val = getreg32(BL602_UART_INT_MASK(config->idx));
+              bl602_uart_configure(&config);
+              putreg32(tmp_val, BL602_UART_INT_MASK(config->idx));
             }
         }
       while (0);
@@ -635,7 +612,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: up_receive
+ * Name: bl602_receive
  *
  * Description:
  *   Called (usually) from the interrupt level to receive one
@@ -644,10 +621,11 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int up_receive(struct uart_dev_s *dev, unsigned int *status)
+static int bl602_receive(struct uart_dev_s *dev, unsigned int *status)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  int              rxdata;
+  struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
+  uint8_t uart_idx = priv->config.idx;
+  int rxdata;
 
   /* Return status information */
 
@@ -658,12 +636,11 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 
   /* if uart fifo cnts > 0 */
 
-  if (bl602_data_getbits(
-        bl602_up_serialin(priv->uartbase, UART_FIFO_CONFIG_1_OFFSET),
-        UART_RX_FIFO_CNT_POS,
-        6) > 0)
+  if (getreg32(BL602_UART_FIFO_CONFIG_1(uart_idx)) & \
+      UART_FIFO_CONFIG_1_RX_CNT_MASK)
     {
-      rxdata = bl602_up_serialin(priv->uartbase, UART_FIFO_RDATA_OFFSET);
+      rxdata = getreg32(BL602_UART_FIFO_RDATA(uart_idx)) & \
+        UART_FIFO_RDATA_MASK;
     }
   else
     {
@@ -673,97 +650,94 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 }
 
 /****************************************************************************
- * Name: up_rxint
+ * Name: bl602_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
  *
  ****************************************************************************/
 
-static void up_rxint(struct uart_dev_s *dev, bool enable)
+static void bl602_rxint(struct uart_dev_s *dev, bool enable)
 {
-  uint32_t         tmp_val;
-  struct up_dev_s *priv  = (struct up_dev_s *)dev->priv;
+  uint32_t int_mask;
+  struct bl602_uart_s *priv  = (struct bl602_uart_s *)dev->priv;
+  uint8_t uart_idx = priv->config.idx;
   irqstate_t       flags = enter_critical_section();
 
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      tmp_val = bl602_up_serialin(priv->uartbase, UART_INT_MASK_OFFSET);
-      tmp_val &= ~(1 << UART_INT_RX_FIFO_REQ);
-      tmp_val &= ~(1 << UART_INT_RX_END);
-      bl602_up_serialout(priv->uartbase, UART_INT_MASK_OFFSET, tmp_val);
+      int_mask = getreg32(BL602_UART_INT_MASK(uart_idx));
+      int_mask &= ~(UART_INT_MASK_CR_URX_FIFO_MASK);
+      int_mask &= ~(UART_INT_MASK_CR_URX_END_MASK);
+      putreg32(int_mask, BL602_UART_INT_MASK(uart_idx));
 #endif
     }
   else
     {
-      tmp_val = bl602_up_serialin(priv->uartbase, UART_INT_MASK_OFFSET);
-      tmp_val |= (1 << UART_INT_RX_FIFO_REQ);
-      tmp_val |= (1 << UART_INT_RX_END);
-      bl602_up_serialout(priv->uartbase, UART_INT_MASK_OFFSET, tmp_val);
+      int_mask = getreg32(BL602_UART_INT_MASK(uart_idx));
+      int_mask |= UART_INT_MASK_CR_URX_FIFO_MASK;
+      int_mask |= UART_INT_MASK_CR_URX_END_MASK;
+      putreg32(int_mask, BL602_UART_INT_MASK(uart_idx));
     }
 
   leave_critical_section(flags);
 }
 
 /****************************************************************************
- * Name: up_rxavailable
+ * Name: bl602_rxavailable
  *
  * Description:
  *   Return true if the receive register is not empty
  *
  ****************************************************************************/
 
-static bool up_rxavailable(struct uart_dev_s *dev)
+static bool bl602_rxavailable(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
+  uint8_t uart_idx          = priv->config.idx;
 
   /* Return true is data is available in the receive data buffer */
 
-  uint32_t rxcnt = bl602_data_getbits(
-    bl602_up_serialin(priv->uartbase, UART_FIFO_CONFIG_1_OFFSET),
-    UART_RX_FIFO_CNT_POS,
-    6);
-
-  return rxcnt != 0;
+  return (getreg32(BL602_UART_FIFO_CONFIG_1(uart_idx)) & \
+          UART_FIFO_CONFIG_1_RX_CNT_MASK) != 0;
 }
 
 /****************************************************************************
- * Name: up_send
+ * Name: bl602_send
  *
  * Description:
  *   This method will send one byte on the UART.
  *
  ****************************************************************************/
 
-static void up_send(struct uart_dev_s *dev, int ch)
+static void bl602_send(struct uart_dev_s *dev, int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
+  uint8_t uart_idx          = priv->config.idx;
 
-  /* Wait for FIFO */
+  /* Wait for FIFO to be empty */
 
-  while (bl602_data_getbits(
-           bl602_up_serialin(priv->uartbase, UART_FIFO_CONFIG_1_OFFSET),
-           UART_TX_FIFO_CNT_POS,
-           6) == 0)
-    ;
+  while ((getreg32(BL602_UART_FIFO_CONFIG_1(uart_idx)) & \
+         UART_FIFO_CONFIG_1_TX_CNT_MASK) == 0);
 
-  bl602_up_serialout(priv->uartbase, UART_FIFO_WDATA_OFFSET, ch);
+  putreg32(ch, BL602_UART_FIFO_WDATA(uart_idx));
 }
 
 /****************************************************************************
- * Name: up_txint
+ * Name: bl602_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts
  *
  ****************************************************************************/
 
-static void up_txint(struct uart_dev_s *dev, bool enable)
+static void bl602_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
+  uint8_t uart_idx          = priv->config.idx;
   irqstate_t       flags;
-  uint32_t         tmp_val;
+  uint32_t         int_mask;
 
   flags = enter_critical_section();
 
@@ -772,9 +746,9 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       /* Enable the TX interrupt */
 
-      tmp_val = bl602_up_serialin(priv->uartbase, UART_INT_MASK_OFFSET);
-      tmp_val &= ~(1 << UART_INT_TX_FIFO_REQ);
-      bl602_up_serialout(priv->uartbase, UART_INT_MASK_OFFSET, tmp_val);
+      int_mask = getreg32(BL602_UART_INT_MASK(uart_idx));
+      int_mask &= ~(UART_INT_MASK_CR_UTX_FIFO_MASK);
+      putreg32(int_mask, BL602_UART_INT_MASK(uart_idx));
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -787,55 +761,48 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-      tmp_val = bl602_up_serialin(priv->uartbase, UART_INT_MASK_OFFSET);
-      tmp_val |= (1 << UART_INT_TX_FIFO_REQ);
-      bl602_up_serialout(priv->uartbase, UART_INT_MASK_OFFSET, tmp_val);
+      int_mask = getreg32(BL602_UART_INT_MASK(uart_idx));
+      int_mask |= UART_INT_MASK_CR_UTX_FIFO_MASK;
+      putreg32(int_mask, BL602_UART_INT_MASK(uart_idx));
     }
 
   leave_critical_section(flags);
 }
 
 /****************************************************************************
- * Name: up_txready
+ * Name: bl602_txready
  *
  * Description:
- *   Return true if the tranmsit data register is not full
+ *   Return true if the transmit data register is not full
  *
  ****************************************************************************/
 
-static bool up_txready(struct uart_dev_s *dev)
+static bool bl602_txready(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
+  uint8_t uart_idx          = priv->config.idx;
 
   /* Return TRUE if the TX FIFO is not full */
 
-  uint32_t txcnt =
-    bl602_up_serialin(priv->uartbase, UART_FIFO_CONFIG_1_OFFSET);
-  txcnt = (txcnt & UART_TX_FIFO_CNT_MSK) >> UART_TX_FIFO_CNT_POS;
-
-  return (txcnt != 0);
+  return (getreg32(BL602_UART_FIFO_CONFIG_1(uart_idx)) & \
+          UART_FIFO_CONFIG_1_TX_CNT_MASK) != 0;
 }
 
 /****************************************************************************
- * Name: up_txempty
+ * Name: bl602_txempty
  *
  * Description:
- *   Return true if the tranmsit data register is empty
+ *   Return true if the transmit data register is empty
  *
  ****************************************************************************/
 
-static bool up_txempty(struct uart_dev_s *dev)
+static bool bl602_txempty(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
+  uint8_t uart_idx          = priv->config.idx;
 
-  /* Return TRUE if the TX is pending */
-
-  uint32_t txcnt = bl602_data_getbits(
-    bl602_up_serialin(priv->uartbase, UART_FIFO_CONFIG_1_OFFSET),
-    UART_TX_FIFO_CNT_POS,
-    6);
-
-  return (txcnt == 0);
+  return (getreg32(BL602_UART_FIFO_CONFIG_1(uart_idx)) & \
+          UART_FIFO_CONFIG_1_TX_CNT_MASK) == 0;
 }
 
 /****************************************************************************
@@ -851,8 +818,8 @@ static bool up_txempty(struct uart_dev_s *dev)
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before up_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in up_consoleinit() and main clock iniialization
- *   performed in up_clkinitialize().
+ *   configuration performed in up_consoleinit() and main clock
+ *   initialization performed in up_clkinitialize().
  *
  ****************************************************************************/
 
@@ -862,7 +829,7 @@ void up_earlyserialinit(void)
   /* Configuration whichever one is the console */
 
   CONSOLE_DEV.isconsole = true;
-  up_setup(&CONSOLE_DEV);
+  bl602_setup(&CONSOLE_DEV);
 #endif
 }
 #endif
@@ -922,7 +889,7 @@ void up_serialinit(void)
 int up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
+  struct bl602_uart_s *priv = (struct bl602_uart_s *)CONSOLE_DEV.priv;
   (void)priv;
 
   irqstate_t flags = enter_critical_section();

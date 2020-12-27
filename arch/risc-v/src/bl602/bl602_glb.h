@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/bl602/hardware/bl602_clint.h
+ * arch/risc-v/src/bl602/bl602_glb.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,23 +18,56 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_CLINT_H
-#define __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_CLINT_H
+#ifndef __ARCH_RISCV_SRC_BL602_BL602_GLB_H
+#define __ARCH_RISCV_SRC_BL602_BL602_GLB_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdint.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Data
  ****************************************************************************/
 
-#define BL602_CLINT_BASE (0x02000000)
+#ifndef __ASSEMBLY__
 
-#define BL602_MTIMER_HIGH ((uint32_t *)(BL602_CLINT_BASE + 0xBFFC))
-#define BL602_MTIMER_LOW  ((uint32_t *)(BL602_CLINT_BASE + 0xBFF8))
-#define BL602_MTIMER_CMP  ((uint64_t *)(BL602_CLINT_BASE + 0x4000))
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
-#endif /* __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_CLINT_H */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: bl602_swrst_ahb_slave1
+ *
+ * Description:
+ *   SW Reset ahb slave.
+ *
+ * Input Parameters:
+ *   slave1: reset signal
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void bl602_swrst_ahb_slave1(uint32_t slave1);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_GLB_H */

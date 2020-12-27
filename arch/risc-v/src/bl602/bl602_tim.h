@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/bl602/bl602_tim.c
+ * arch/risc-v/src/bl602/bl602_tim.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,32 +18,105 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_BL602_BL602_TIM_H
+#define __ARCH_RISCV_SRC_BL602_BL602_TIM_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#include <hardware/bl602_timer.h>
-#include "bl602_tim.h"
-#include "riscv_arch.h"
-#include "riscv_internal.h"
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 
 /****************************************************************************
- * Name: bl602_data_setbits
+ * Pre-processor Definitions
  ****************************************************************************/
 
-static void bl602_wdt_access(void)
-{
-  modifyreg32(BL602_TIMER_WFAR, TIMER_WFAR_MASK, 0xbaba);
-  modifyreg32(BL602_TIMER_WFAR, TIMER_WSAR_MASK, 0xeb10);
-}
+/* TIMER channel type definition */
+
+#define TIMER_CH0    0 /* TIMER channel 0 port */
+#define TIMER_CH1    1 /* TIMER channel 1 port */
+#define TIMER_CH_MAX 2
+
+/* TIMER clock source type definition */
+
+#define TIMER_CLKSRC_FCLK 0 /* TIMER clock source :System CLK */
+#define TIMER_CLKSRC_32K  1 /* TIMER clock source :32K CLK */
+#define TIMER_CLKSRC_1K   2 /* TIMER clock source :1K CLK (not for WDT) */
+#define TIMER_CLKSRC_XTAL 3 /* TIMER clock source :XTAL CLK */
+
+/* TIMER match compare ID type definition */
+
+#define TIMER_COMP_ID_0 0 /* TIMER match compare ID 0 */
+#define TIMER_COMP_ID_1 1 /* TIMER match compare ID 1 */
+#define TIMER_COMP_ID_2 2 /* TIMER match compare ID 2 */
+#define TIMER_MAX_MATCH 3
+
+/* TIMER preload source type definition */
+
+#define TIMER_PRELOAD_TRIG_NONE   0 /* TIMER no preload source, free run */
+#define TIMER_PRELOAD_TRIG_COMP0  1 /* TIMER count register preload triggered by comparator 0 */
+#define TIMER_PRELOAD_TRIG_COMP1  2 /* TIMER count register preload triggered by comparator 1 */
+#define TIMER_PRELOAD_TRIG_COMP2  3 /* TIMER count register preload triggered by comparator 2 */
+
+/* TIMER count register run mode type definition */
+
+#define TIMER_COUNT_PRELOAD 0 /* TIMER count register preload from comparator register */
+#define TIMER_COUNT_FREERUN 1 /* TIMER count register free run */
+
+/* TIMER interrupt type definition */
+
+#define TIMER_INT_COMP_0 0 /* Comparator 0 match cause interrupt */
+#define TIMER_INT_COMP_1 1 /* Comparator 1 match cause interrupt */
+#define TIMER_INT_COMP_2 2 /* Comparator 2 match cause interrupt */
+#define TIMER_INT_ALL    3
+
+/* Watchdog timer interrupt type definition */
+
+#define WDT_INT     0 /* Comparator 0 match cause interrupt */
+#define WDT_INT_ALL 1
 
 /****************************************************************************
- * Public Functions
+ * Public Types
+ ****************************************************************************/
+
+struct timer_cfg_s
+{
+  uint8_t timer_ch; /* Timer channel */
+  uint8_t clk_src;  /* Timer clock source */
+
+  /* Timer count register preload trigger source select */
+
+  uint8_t pl_trig_src;
+
+  uint8_t count_mode;      /* Timer count mode */
+  uint8_t  clock_division; /* Timer clock division value */
+  uint32_t match_val0;     /* Timer match 0 value 0 */
+  uint32_t match_val1;     /* Timer match 1 value 0 */
+  uint32_t match_val2;     /* Timer match 2 value 0 */
+  uint32_t pre_load_val;   /* Timer preload value */
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -61,11 +134,7 @@ static void bl602_wdt_access(void)
  *
  ****************************************************************************/
 
-uint32_t bl602_timer_getcompvalue(uint8_t timer_ch, uint8_t cmp_no)
-{
-  return getreg32(BL602_TIMER_TMR2_0 + \
-                  4 * (TIMER_MAX_MATCH * timer_ch + cmp_no));
-}
+uint32_t bl602_timer_getcompvalue(uint8_t timer_ch, uint8_t cmp_no);
 
 /****************************************************************************
  * Name: bl602_timer_setcompvalue
@@ -83,13 +152,8 @@ uint32_t bl602_timer_getcompvalue(uint8_t timer_ch, uint8_t cmp_no)
  *
  ****************************************************************************/
 
-void bl602_timer_setcompvalue(uint8_t timer_ch,
-                              uint8_t cmp_no,
-                              uint32_t val)
-{
-  putreg32(val,
-           BL602_TIMER_TMR2_0 + 4 * (TIMER_MAX_MATCH * timer_ch + cmp_no));
-}
+void bl602_timer_setcompvalue(uint8_t timer_ch, uint8_t cmp_no,
+                              uint32_t val);
 
 /****************************************************************************
  * Name: bl602_timer_getcountervalue
@@ -105,26 +169,7 @@ void bl602_timer_setcompvalue(uint8_t timer_ch,
  *
  ****************************************************************************/
 
-uint32_t bl602_timer_getcountervalue(uint32_t timer_ch)
-{
-  uint32_t count;
-  uint32_t tcvwr_addr;
-
-  /* TO avoid risk of reading, don't read TCVWR directly
-   * request for read.  Why?  This register is read-only.
-   */
-
-  tcvwr_addr = BL602_TIMER_TCVWR2 + 4 * timer_ch;
-  putreg32(1, tcvwr_addr);
-
-  /* Need wait */
-
-  count = getreg32(tcvwr_addr);
-  count = getreg32(tcvwr_addr);
-  count = getreg32(tcvwr_addr);
-
-  return count;
-}
+uint32_t bl602_timer_getcountervalue(uint32_t timer_ch);
 
 /****************************************************************************
  * Name: bl602_timer_getmatchstatus
@@ -141,24 +186,7 @@ uint32_t bl602_timer_getcountervalue(uint32_t timer_ch)
  *
  ****************************************************************************/
 
-bool bl602_timer_getmatchstatus(uint32_t timer_ch, uint8_t cmp_no)
-{
-  uint32_t status = getreg32(BL602_TIMER_TMSR2 + 4 * timer_ch);
-
-  switch (cmp_no)
-    {
-    case TIMER_COMP_ID_0:
-      return ((status & TIMER_TMSR2_TMSR_0) != 0);
-    case TIMER_COMP_ID_1:
-      return ((status & TIMER_TMSR2_TMSR_1) != 0);
-    case TIMER_COMP_ID_2:
-      return ((status & TIMER_TMSR2_TMSR_2) != 0);
-    default:
-      break;
-    }
-
-  return false;
-}
+bool bl602_timer_getmatchstatus(uint32_t timer_ch, uint8_t cmp_no);
 
 /****************************************************************************
  * Name: bl602_timer_getpreloadvalue
@@ -174,10 +202,7 @@ bool bl602_timer_getmatchstatus(uint32_t timer_ch, uint8_t cmp_no)
  *
  ****************************************************************************/
 
-uint32_t bl602_timer_getpreloadvalue(uint32_t timer_ch)
-{
-  return getreg32(BL602_TIMER_TPLVR2 + 4 * timer_ch);
-}
+uint32_t bl602_timer_getpreloadvalue(uint32_t timer_ch);
 
 /****************************************************************************
  * Name: bl602_timer_setpreloadvalue
@@ -194,10 +219,7 @@ uint32_t bl602_timer_getpreloadvalue(uint32_t timer_ch)
  *
  ****************************************************************************/
 
-void bl602_timer_setpreloadvalue(uint8_t timer_ch, uint32_t val)
-{
-    putreg32(val, BL602_TIMER_TPLVR2 + 4 * timer_ch);
-}
+void bl602_timer_setpreloadvalue(uint8_t timer_ch, uint32_t val);
 
 /****************************************************************************
  * Name: bl602_timer_setpreloadtrigsrc
@@ -214,10 +236,7 @@ void bl602_timer_setpreloadvalue(uint8_t timer_ch, uint32_t val)
  *
  ****************************************************************************/
 
-void bl602_timer_setpreloadtrigsrc(uint8_t timer_ch, uint32_t pl_src)
-{
-  putreg32(pl_src, BL602_TIMER_TPLCR2 + 4 * timer_ch);
-}
+void bl602_timer_setpreloadtrigsrc(uint8_t timer_ch, uint32_t pl_src);
 
 /****************************************************************************
  * Name: bl602_timer_setcountmode
@@ -235,12 +254,7 @@ void bl602_timer_setpreloadtrigsrc(uint8_t timer_ch, uint32_t pl_src)
  *
  ****************************************************************************/
 
-void bl602_timer_setcountmode(uint32_t timer_ch, uint8_t count_mode)
-{
-  modifyreg32(BL602_TIMER_TCMR,
-              TIMER_TCMR_TIMER2_MODE << timer_ch,
-              count_mode ? TIMER_TCMR_TIMER2_MODE << timer_ch : 0);
-}
+void bl602_timer_setcountmode(uint32_t timer_ch, uint8_t count_mode);
 
 /****************************************************************************
  * Name: bl602_timer_clearintstatus
@@ -257,10 +271,7 @@ void bl602_timer_setcountmode(uint32_t timer_ch, uint8_t count_mode)
  *
  ****************************************************************************/
 
-void bl602_timer_clearintstatus(uint8_t timer_ch, uint32_t cmp_no)
-{
-  putreg32(BL602_TIMER_TICR2 + 4 * timer_ch, 1 << cmp_no);
-}
+void bl602_timer_clearintstatus(uint8_t timer_ch, uint32_t cmp_no);
 
 /****************************************************************************
  * Name: bl602_timer_init
@@ -276,57 +287,7 @@ void bl602_timer_clearintstatus(uint8_t timer_ch, uint32_t cmp_no)
  *
  ****************************************************************************/
 
-void bl602_timer_init(struct timer_cfg_s *timer_cfg)
-{
-  uint8_t timer_ch = timer_cfg->timer_ch;
-
-  /* Configure timer clock source */
-
-  if (timer_ch == TIMER_CH0)
-    {
-      modifyreg32(BL602_TIMER_TCCR, TIMER_TCCR_CS_1_MASK,
-                  timer_cfg->clk_src << TIMER_TCCR_CS_1_SHIFT);
-    }
-  else
-    {
-      modifyreg32(BL602_TIMER_TCCR, TIMER_TCCR_CS_2_MASK,
-                  timer_cfg->clk_src << TIMER_TCCR_CS_2_SHIFT);
-    }
-
-  /* Configure timer clock division */
-
-  if (timer_ch == TIMER_CH0)
-    {
-      modifyreg32(BL602_TIMER_TCDR, TIMER_TCDR_TCDR2_MASK,
-                  timer_cfg->clock_division << TIMER_TCDR_TCDR2_SHIFT);
-    }
-  else
-    {
-      modifyreg32(BL602_TIMER_TCDR, TIMER_TCDR_TCDR3_MASK,
-                  timer_cfg->clock_division << TIMER_TCDR_TCDR3_SHIFT);
-    }
-
-  /* Configure timer count mode: preload or free run */
-
-  bl602_timer_setcountmode(timer_ch, timer_cfg->count_mode);
-
-  /* Configure timer preload trigger src */
-
-  bl602_timer_setpreloadtrigsrc(timer_ch, timer_cfg->pl_trig_src);
-
-  if (timer_cfg->count_mode == TIMER_COUNT_PRELOAD)
-    {
-      /* Configure timer preload value */
-
-      bl602_timer_setpreloadvalue(timer_ch, timer_cfg->pre_load_val);
-    }
-
-  /* Configure match compare values */
-
-  bl602_timer_setcompvalue(timer_ch, 0, timer_cfg->match_val0);
-  bl602_timer_setcompvalue(timer_ch, 1, timer_cfg->match_val1);
-  bl602_timer_setcompvalue(timer_ch, 2, timer_cfg->match_val2);
-}
+void bl602_timer_init(struct timer_cfg_s *timer_cfg);
 
 /****************************************************************************
  * Name: bl602_timer_enable
@@ -342,10 +303,7 @@ void bl602_timer_init(struct timer_cfg_s *timer_cfg)
  *
  ****************************************************************************/
 
-void bl602_timer_enable(uint8_t timer_ch)
-{
-  modifyreg32(BL602_TIMER_TCER, 0, (TIMER_TCER_TIMER2_EN << timer_ch));
-}
+void bl602_timer_enable(uint8_t timer_ch);
 
 /****************************************************************************
  * Name: bl602_timer_disable
@@ -361,10 +319,7 @@ void bl602_timer_enable(uint8_t timer_ch)
  *
  ****************************************************************************/
 
-void bl602_timer_disable(uint8_t timer_ch)
-{
-  modifyreg32(BL602_TIMER_TCER, (TIMER_TCER_TIMER2_EN << timer_ch), 0);
-}
+void bl602_timer_disable(uint8_t timer_ch);
 
 /****************************************************************************
  * Name: bl602_timer_intmask
@@ -384,82 +339,7 @@ void bl602_timer_disable(uint8_t timer_ch)
  ****************************************************************************/
 
 void bl602_timer_intmask(uint8_t timer_ch, uint8_t int_type,
-                         uint8_t int_mask)
-{
-  uint32_t tier_addr = BL602_TIMER_TIER2 + 4 * timer_ch;
-
-  switch (int_type)
-    {
-    case TIMER_INT_COMP_0:
-      if (int_mask == 0)
-        {
-          /* Enable this interrupt */
-
-          modifyreg32(tier_addr, 0, TIMER_TIER2_TIER_0);
-        }
-      else
-        {
-          /* Disable this interrupt */
-
-          modifyreg32(tier_addr, TIMER_TIER2_TIER_0, 0);
-        }
-
-      break;
-
-    case TIMER_INT_COMP_1:
-      if (int_mask == 0)
-        {
-          /* Enable this interrupt */
-
-          modifyreg32(tier_addr, 0, TIMER_TIER2_TIER_1);
-        }
-      else
-        {
-          /* Disable this interrupt */
-
-          modifyreg32(tier_addr, TIMER_TIER2_TIER_1, 0);
-        }
-
-      break;
-
-    case TIMER_INT_COMP_2:
-      if (int_mask == 0)
-        {
-          /* Enable this interrupt */
-
-          modifyreg32(tier_addr, 0, TIMER_TIER2_TIER_2);
-        }
-      else
-        {
-          /* Disable this interrupt */
-
-          modifyreg32(tier_addr, TIMER_TIER2_TIER_2, 0);
-        }
-
-      break;
-
-    case TIMER_INT_ALL:
-      if (int_mask == 0)
-        {
-          /* Enable this interrupt */
-
-          modifyreg32(tier_addr, 0,
-            TIMER_TIER2_TIER_0 | TIMER_TIER2_TIER_1 | TIMER_TIER2_TIER_2);
-        }
-      else
-        {
-          /* Disable this interrupt */
-
-          modifyreg32(tier_addr,
-            TIMER_TIER2_TIER_0 | TIMER_TIER2_TIER_1 | TIMER_TIER2_TIER_2, 0);
-        }
-
-      break;
-
-    default:
-      break;
-    }
-}
+                         uint8_t int_mask);
 
 /****************************************************************************
  * Name: bl602_wdt_set_clock
@@ -476,18 +356,7 @@ void bl602_timer_intmask(uint8_t timer_ch, uint8_t int_type,
  *
  ****************************************************************************/
 
-void bl602_wdt_set_clock(uint8_t clk_src, uint8_t div)
-{
-  /* Configure watchdog timer clock source */
-
-  modifyreg32(BL602_TIMER_TCCR, TIMER_TCCR_CS_WDT_MASK,
-              clk_src << TIMER_TCCR_CS_WDT_SHIFT);
-
-  /* Configure watchdog timer clock division */
-
-  modifyreg32(BL602_TIMER_TCDR, TIMER_TCDR_WCDR_MASK,
-              div << TIMER_TCDR_WCDR_SHIFT);
-}
+void bl602_wdt_set_clock(uint8_t clk_src, uint8_t div);
 
 /****************************************************************************
  * Name: bl602_wdt_getmatchvalue
@@ -503,14 +372,7 @@ void bl602_wdt_set_clock(uint8_t clk_src, uint8_t div)
  *
  ****************************************************************************/
 
-uint16_t bl602_wdt_getmatchvalue(void)
-{
-  bl602_wdt_access();
-
-  /* Get watchdog timer match register value */
-
-  return (uint16_t)(getreg32(BL602_TIMER_WMR) & TIMER_WMR_WMR_MASK);
-}
+uint16_t bl602_wdt_getmatchvalue(void);
 
 /****************************************************************************
  * Name: bl602_wdt_setcompvalue
@@ -526,14 +388,7 @@ uint16_t bl602_wdt_getmatchvalue(void)
  *
  ****************************************************************************/
 
-void bl602_wdt_setcompvalue(uint16_t val)
-{
-  bl602_wdt_access();
-
-  /* Set watchdog timer match register value */
-
-  putreg32(val, BL602_TIMER_WMR);
-}
+void bl602_wdt_setcompvalue(uint16_t val);
 
 /****************************************************************************
  * Name: bl602_wdt_getcountervalue
@@ -549,14 +404,7 @@ void bl602_wdt_setcompvalue(uint16_t val)
  *
  ****************************************************************************/
 
-uint16_t bl602_wdt_getcountervalue(void)
-{
-  bl602_wdt_access();
-
-  /* Get watchdog timer count register value */
-
-  return (uint16_t)(getreg32(BL602_TIMER_WVR) & TIMER_WVR_WVR_MASK);
-}
+uint16_t bl602_wdt_getcountervalue(void);
 
 /****************************************************************************
  * Name: bl602_wdt_resetcountervalue
@@ -572,16 +420,7 @@ uint16_t bl602_wdt_getcountervalue(void)
  *
  ****************************************************************************/
 
-void bl602_wdt_resetcountervalue(void)
-{
-  /* Reset watchdog timer count register value */
-
-  bl602_wdt_access();
-
-  /* Set watchdog counter reset register bit0 to 1 */
-
-  modifyreg32(BL602_TIMER_WCR, 0, TIMER_WCR_WCR);
-}
+void bl602_wdt_resetcountervalue(void);
 
 /****************************************************************************
  * Name: bl602_wdt_getresetstatus
@@ -597,14 +436,7 @@ void bl602_wdt_resetcountervalue(void)
  *
  ****************************************************************************/
 
-bool bl602_wdt_getresetstatus(void)
-{
-  bl602_wdt_access();
-
-  /* Get watchdog status register */
-
-  return ((getreg32(BL602_TIMER_WSR) & TIMER_WSR_WTS) != 0);
-}
+bool bl602_wdt_getresetstatus(void);
 
 /****************************************************************************
  * Name: bl602_wdt_clearresetstatus
@@ -620,14 +452,7 @@ bool bl602_wdt_getresetstatus(void)
  *
  ****************************************************************************/
 
-void bl602_wdt_clearresetstatus(void)
-{
-  bl602_wdt_access();
-
-  /* Set watchdog status register */
-
-  modifyreg32(BL602_TIMER_WSR, TIMER_WSR_WTS, 0);
-}
+void bl602_wdt_clearresetstatus(void);
 
 /****************************************************************************
  * Name: bl602_wdt_enable
@@ -643,12 +468,7 @@ void bl602_wdt_clearresetstatus(void)
  *
  ****************************************************************************/
 
-void bl602_wdt_enable(void)
-{
-  bl602_wdt_access();
-
-  modifyreg32(BL602_TIMER_WMER, 0, TIMER_WMER_WE);
-}
+void bl602_wdt_enable(void);
 
 /****************************************************************************
  * Name: bl602_wdt_disable
@@ -664,12 +484,7 @@ void bl602_wdt_enable(void)
  *
  ****************************************************************************/
 
-void bl602_wdt_disable(void)
-{
-  bl602_wdt_access();
-
-  modifyreg32(BL602_TIMER_WMER, TIMER_WMER_WE, 0);
-}
+void bl602_wdt_disable(void);
 
 /****************************************************************************
  * Name: bl602_wdt_intmask
@@ -687,40 +502,12 @@ void bl602_wdt_disable(void)
  *
  ****************************************************************************/
 
-void bl602_wdt_intmask(uint8_t int_type, uint8_t int_mask)
-{
-  bl602_wdt_access();
+void bl602_wdt_intmask(uint8_t int_type, uint8_t int_mask);
 
-  /* Deal with watchdog match/interrupt enable register,WRIE:watchdog
-   * reset/interrupt enable
-   */
-
-  switch (int_type)
-    {
-    case WDT_INT:
-      if (int_mask == 0)
-        {
-          /* Enable this interrupt */
-
-          /* 0 means generates a watchdog interrupt,a watchdog timer reset is
-           * not generated
-           */
-
-          modifyreg32(BL602_TIMER_WMER, TIMER_WMER_WRIE, 0);
-        }
-      else
-        {
-          /* Disable this interrupt */
-
-          /* 1 means generates a watchdog timer reset,a watchdog interrupt is
-           * not generated
-           */
-
-          modifyreg32(BL602_TIMER_WMER, 0, TIMER_WMER_WRIE);
-        }
-
-      break;
-    default:
-      break;
-    }
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_TIM_H */

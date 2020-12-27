@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/bl602/bl602_tim_lowerhalf.h
+ * arch/risc-v/src/bl602/hardware/bl602_clic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,26 +18,40 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_BL602_TIM_LOWERHALF_H
-#define __ARCH_RISCV_SRC_BL602_TIM_LOWERHALF_H
+#ifndef __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_CLIC_H
+#define __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_CLIC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include "bl602_tim_lowerhalf.h"
-#include "bl602_tim.h"
+#include "bl602_memorymap.h"
 
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: bl602_timer_initialize
- ****************************************************************************/
+/* Register offsets *********************************************************/
 
-int bl602_timer_initialize(FAR const char *devpath, int timer);
+#define BL602_CLIC_MSIP_OFFSET           0x0000
+#define BL602_CLIC_MTIMECMP_OFFSET       0x4000
+#define BL602_CLIC_MTIME_OFFSET          0xbff8
 
-#endif /* __ARCH_RISCV_SRC_BL602_TIM_LOWERHALF_H */
+#define BL602_CLIC_INTIP_OFFSET          0x000
+#define BL602_CLIC_INTIE_OFFSET          0x400
+#define BL602_CLIC_INTCFG_OFFSET         0x800
+#define BL602_CLIC_CFG_OFFSET            0xc00
+
+/* Register definitions *****************************************************/
+
+#define BL602_CLIC_MSIP       (BL602_CLIC_CTRL_BASE + BL602_CLIC_MSIP_OFFSET)
+#define BL602_CLIC_MTIMECMP   (BL602_CLIC_CTRL_BASE + BL602_CLIC_MTIMECMP_OFFSET)
+#define BL602_CLIC_MTIME      (BL602_CLIC_CTRL_BASE + BL602_CLIC_MTIME_OFFSET)
+
+#define BL602_CLIC_INTIP      (BL602_CLIC_HART0_BASE + BL602_CLIC_INTIP_OFFSET)
+#define BL602_CLIC_INTIE      (BL602_CLIC_HART0_BASE + BL602_CLIC_INTIE_OFFSET)
+#define BL602_CLIC_INTCFG     (BL602_CLIC_HART0_BASE + BL602_CLIC_INTCFG_OFFSET)
+#define BL602_CLIC_CFG        (BL602_CLIC_HART0_BASE + BL602_CLIC_CFG_OFFSET)
+
+#endif /* __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_CLIC_H */
