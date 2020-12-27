@@ -480,7 +480,8 @@ FAR struct btuart_lowerhalf_s *bt_uart_shim_getdevice(FAR const char *path)
 
   s->serialmontask = kthread_create("BT HCI Rx",
                                     CONFIG_BLUETOOTH_TXCONN_PRIORITY,
-                                    1024, hcicollecttask, argv);
+                                    CONFIG_DEFAULT_TASK_STACKSIZE,
+                                    hcicollecttask, argv);
 
   return (FAR struct btuart_lowerhalf_s *)n;
 }
