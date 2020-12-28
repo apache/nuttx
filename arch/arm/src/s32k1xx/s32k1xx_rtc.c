@@ -304,7 +304,7 @@ int up_rtc_settime(FAR const struct timespec *ts)
 
   seconds = ts->tv_sec;
 #ifdef CONFIG_RTC_HIRES
-  prescaler = ts->tv_nsec * (CONFIG_RTC_FREQUENCY / 1000000000);
+  prescaler = ts->tv_nsec / (1000000000 / CONFIG_RTC_FREQUENCY);
 #else
   prescaler = 0;
 #endif
