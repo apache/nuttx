@@ -884,12 +884,12 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
                   ret = -ECONNRESET;
                 }
 
+              rpmsg_socket_lock(&conn->sendlock);
+
               if (ret < 0)
                 {
                   break;
                 }
-
-              rpmsg_socket_lock(&conn->sendlock);
             }
           else
             {
@@ -959,12 +959,12 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
               ret = -ECONNRESET;
             }
 
+          rpmsg_socket_lock(&conn->sendlock);
+
           if (ret < 0)
             {
               goto out;
             }
-
-          rpmsg_socket_lock(&conn->sendlock);
         }
       else
         {
