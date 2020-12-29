@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <string.h>
 #include <stdint.h>
 #include <debug.h>
 
@@ -84,7 +85,6 @@ void lib_dumpvbuffer(FAR const char *msg, FAR const struct iovec *iov,
                      int iovcnt)
 {
   FAR const struct iovec *piov = iov;
-  FAR const uint8_t *iov_buf;
   unsigned int len = 0;
   char line[_LINESIZE];
   unsigned int nitems;
@@ -103,11 +103,12 @@ void lib_dumpvbuffer(FAR const char *msg, FAR const struct iovec *iov,
 
   while (piov != &iov[iovcnt] && piov->iov_len)
     {
-      iov_buf = piov->iov_base;
       ptr = line;
 
       for (nitems = 0; nitems < _NITEMS; nitems++)
         {
+          FAR const uint8_t *iov_buf = piov->iov_base;
+
           *ptr++ = lib_nibble((iov_buf[len] >> 4) & 0xf);
           *ptr++ = lib_nibble(iov_buf[len] & 0xf);
           *ptr++ = ' ';
@@ -128,10 +129,11 @@ void lib_dumpvbuffer(FAR const char *msg, FAR const struct iovec *iov,
               len = 0;
               if (++piov == &iov[iovcnt])
                 {
-                  memset(ptr, ' ', (_NITEMS - nitems) * 3);
-                  memset(&line[_ASCIICHAR_OFFSET + nitems], ' ', _NITEMS - nitems);
+                  memset(ptr, ' ', (_NITEMS - nitems - 1) * 3);
+                  memset(&line[_ASCIICHAR_OFFSET + nitems + 1], ' ',
+                         _NITEMS - nitems - 1);
                   break;
-              }
+                }
             }
         }
 
