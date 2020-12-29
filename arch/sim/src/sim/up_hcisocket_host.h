@@ -33,8 +33,8 @@
  ****************************************************************************/
 
 int bthcisock_host_open(int dev_idx);
-int bthcisock_host_send(int fd, uint8_t pkt_type, uint8_t *data, size_t len);
-int bthcisock_host_read(int fd, uint8_t *type, void *buf, size_t len);
+int bthcisock_host_send(int fd, void *data, size_t len);
+int bthcisock_host_read(int fd, void *data, size_t len);
 int bthcisock_host_avail(int fd);
 int bthcisock_host_close(int fd);
 

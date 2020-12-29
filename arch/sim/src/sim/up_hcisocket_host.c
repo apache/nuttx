@@ -106,10 +106,9 @@ int bthcisock_host_avail(int fd)
  *   Send a Bluetooth packet out via the host user socket.
  *
  * Input Parameters:
- *   fd: Host Bluetooth socket fd
- *   pkt_type: Packet type as known to the Linux Bluetooth stack
+ *   fd  : Host Bluetooth socket fd
  *   data: Pointer to the HCI packet
- *   len: Length of packet
+ *   len : Length of packet
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
@@ -117,19 +116,15 @@ int bthcisock_host_avail(int fd)
  *
  ****************************************************************************/
 
-int bthcisock_host_send(int fd, uint8_t pkt_type, uint8_t *data, size_t len)
+int bthcisock_host_send(int fd, void *data, size_t len)
 {
-  struct iovec iv[2];
-
-  iv[0].iov_base = &pkt_type;
-  iv[0].iov_len = 1;
-  iv[1].iov_base = data;
-  iv[1].iov_len = len;
-
-  while (writev(fd, iv, 2) < 0)
+  while (write(fd, data, len) < 0)
     {
       if (errno == EAGAIN || errno == EINTR)
-        continue;
+        {
+          continue;
+        }
+
       return -1;
     }
 
@@ -143,9 +138,9 @@ int bthcisock_host_send(int fd, uint8_t pkt_type, uint8_t *data, size_t len)
  *   Read from the Host HCI socket interface.
  *
  * Input Parameters:
- *   fd: Host Bluetooth socket fd
+ *   fd  : Host Bluetooth socket fd
  *   data: Pointer to store HCI packet
- *   len: Maximum length of packet
+ *   len : Maximum length of packet
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
@@ -153,17 +148,11 @@ int bthcisock_host_send(int fd, uint8_t pkt_type, uint8_t *data, size_t len)
  *
  ****************************************************************************/
 
-int bthcisock_host_read(int fd, uint8_t *type, void *buf, size_t len)
+int bthcisock_host_read(int fd, void *data, size_t len)
 {
   int err;
-  struct iovec iv[2];
 
-  iv[0].iov_base = type;
-  iv[0].iov_len = 1;
-  iv[1].iov_base = buf;
-  iv[1].iov_len = len;
-
-  while ((err = readv(fd, iv, 2)) < 0 && (errno == EINTR));
+  while ((err = read(fd, data, len)) < 0 && (errno == EINTR));
 
   if (err <= 0)
     {
@@ -172,9 +161,9 @@ int bthcisock_host_read(int fd, uint8_t *type, void *buf, size_t len)
       return -1;
     }
 
-  /* Return the number of bytes written to buf so remove the header byte */
+  /* Return the number of bytes written to data */
 
-  return (err - 1);
+  return err;
 }
 
 /****************************************************************************
