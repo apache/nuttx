@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <debug.h>
+#include <signal.h>
 
 #include <nuttx/serial/serial.h>
 
