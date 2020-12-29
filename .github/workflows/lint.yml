@@ -9,4 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: 🧹 YAML Lint
-        uses: ibiqlik/action-yamllint@v3
+        uses: github/super-linter@v3
+        env:
+          VALIDATE_YAML: true
+          FILTER_REGEX_INCLUDE: .*\.github/.*
