@@ -120,7 +120,28 @@
  *
  ****************************************************************************/
 
+#if defined(CONFIG_ARCH_HAVE_TESTSET)
 spinlock_t up_testset(volatile FAR spinlock_t *lock);
+#elif !defined(CONFIG_SMP)
+static inline spinlock_t up_testset(volatile FAR spinlock_t *lock)
+{
+  irqstate_t flags;
+  spinlock_t ret;
+
+  flags = up_irq_save();
+
+  ret = *lock;
+
+  if (ret == SP_UNLOCKED)
+    {
+      *lock = SP_LOCKED;
+    }
+
+  up_irq_restore(flags);
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: spin_initialize
