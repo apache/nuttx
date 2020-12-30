@@ -191,11 +191,14 @@ int nx_unlink(FAR const char *pathname)
   RELEASE_SEARCH(&desc);
   return OK;
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 errout_with_sem:
   inode_semgive();
-
+#endif
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
 errout_with_inode:
   inode_release(inode);
+#endif
 
 errout_with_search:
   RELEASE_SEARCH(&desc);
