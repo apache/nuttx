@@ -232,7 +232,6 @@ menu "Tasks and Scheduling"
 config SPINLOCK
 	bool "Support Spinlocks"
 	default n
-	depends on ARCH_HAVE_TESTSET
 	---help---
 		Enables support for spinlocks.  Spinlocks are used primarily for
 		synchronization in SMP configurations but are available for general
@@ -275,6 +274,7 @@ config SMP
 	bool "Symmetric Multi-Processing (SMP)"
 	default n
 	depends on ARCH_HAVE_MULTICPU
+	depends on ARCH_HAVE_TESTSET
 	select SPINLOCK
 	select SCHED_RESUMESCHEDULER
 	select IRQCOUNT
