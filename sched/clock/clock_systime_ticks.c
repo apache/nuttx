@@ -154,3 +154,34 @@ clock_t clock_systime_ticks(void)
 # endif /* CONFIG_SYSTEM_TIME64 */
 #endif /* CONFIG_SCHED_TICKLESS */
 }
+
+/****************************************************************************
+ * Name:  clock_systime_steps
+ *
+ * Description:
+ *   Add system time by idle ticks.
+ *
+ * Input Parameters:
+ *   ticks - Idle ticks
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void clock_systime_steps(sclock_t ticks)
+{
+#ifdef CONFIG_SCHED_TICKLESS
+
+  serr("Not supoort adjusting system tick\n");
+
+#else /* CONFIG_SCHED_TICKLESS */
+  irqstate_t flags;
+  flags = enter_critical_section();
+
+  /* Adjust the current system time */
+
+  g_system_timer += ticks;
+  leave_critical_section(flags);
+#endif /* CONFIG_SCHED_TICKLESS */
+}

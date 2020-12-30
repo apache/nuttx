@@ -437,6 +437,22 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload);
 #endif
 
 /****************************************************************************
+ * Name:  clock_systime_steps
+ *
+ * Description:
+ *   Add system time by idle ticks.
+ *
+ * Input Parameters:
+ *   ticks - Idle ticks
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void clock_systime_steps(sclock_t ticks);
+
+/****************************************************************************
  * Name:  nxsched_oneshot_extclk
  *
  * Description:
