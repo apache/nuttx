@@ -1280,7 +1280,7 @@ static const struct stm32_config_s g_fdcan2const =
   // }
 };
 
-/* FDCAN1 variable driver state */
+/* FDCAN2 variable driver state */
 
 static struct stm32_fdcan_s g_fdcan2priv;
 static struct can_dev_s g_fdcan2dev;
@@ -1563,7 +1563,7 @@ static void fdcan_dumptxregs(FAR struct stm32_fdcan_s *priv,
 #endif
 
 /****************************************************************************
- * Name: stm32can_dumpramlayout
+ * Name: stm32can_showramlayout
  *
  * Description:
  *   Print the layout of the message RAM
