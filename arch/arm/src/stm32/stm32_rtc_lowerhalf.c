@@ -113,6 +113,7 @@ struct stm32_lowerhalf_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Prototypes for static methods in struct rtc_ops_s */
 
 static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
@@ -125,7 +126,7 @@ static bool stm32_havesettime(FAR struct rtc_lowerhalf_s *lower);
 static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
                           FAR const struct lower_setalarm_s *alarminfo);
 static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setrelative_s *alarminfo);
+                            FAR const struct lower_setrelative_s *alarminfo);
 static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
                              int alarmid);
 static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
@@ -134,13 +135,14 @@ static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 
 #ifdef CONFIG_RTC_PERIODIC
 static int stm32_setperiodic(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setperiodic_s *alarminfo);
+                            FAR const struct lower_setperiodic_s *alarminfo);
 static int stm32_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id);
 #endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* STM32 RTC driver operations */
 
 static const struct rtc_ops_s g_rtc_ops =
@@ -786,8 +788,9 @@ static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
  * Name: stm32_periodic_callback
  *
  * Description:
- *   This is the function that is called from the RTC driver when the periodic
- *   wakeup goes off.  It just invokes the upper half drivers callback.
+ *   This is the function that is called from the RTC driver when the
+ *   periodic wakeup goes off.  It just invokes the upper half drivers
+ *   callback.
  *
  * Input Parameters:
  *   None

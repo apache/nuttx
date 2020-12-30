@@ -367,7 +367,8 @@ static int adt7320_close(FAR struct file *filep)
  * Name: adt7320_read
  ****************************************************************************/
 
-static ssize_t adt7320_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t adt7320_read(FAR struct file *filep,
+                            FAR char *buffer, size_t buflen)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct adt7320_dev_s *priv = inode->i_private;
@@ -524,7 +525,8 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* Write to the critical temperature register. Arg: b16_t value */
 
       case SNIOC_WRITETCRIT:
-        adt7320_write_reg16(priv, ADT7320_TCRIT_REG, b16tob8((b16_t)arg) >> 1);
+        adt7320_write_reg16(priv, ADT7320_TCRIT_REG,
+                            b16tob8((b16_t)arg) >> 1);
         break;
 
       /* Read the hysteresis temperature register. Arg: b16_t* */
@@ -560,7 +562,8 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* Write to the low temperature register. Arg: b16_t value */
 
       case SNIOC_WRITETLOW:
-        adt7320_write_reg16(priv, ADT7320_TLOW_REG, b16tob8((b16_t)arg) >> 1);
+        adt7320_write_reg16(priv, ADT7320_TLOW_REG,
+                            b16tob8((b16_t)arg) >> 1);
         break;
 
       /* Read the high temperature register. Arg: b16_t* pointer */
@@ -578,7 +581,8 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* Write to the high temperature register. Arg: b16_t value */
 
       case SNIOC_WRITETHIGH:
-        adt7320_write_reg16(priv, ADT7320_THIGH_REG, b16tob8((b16_t)arg) >> 1);
+        adt7320_write_reg16(priv, ADT7320_THIGH_REG,
+                            b16tob8((b16_t)arg) >> 1);
         break;
 
       default:
@@ -602,7 +606,7 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
- *   spi - An instance of the SPI interface to use to communicate with ADT7320
+ *   spi - An instance of the SPI bus to use to communicate with ADT7320
  *   spidev - The SPI device number used to select the correct CS line
  *
  * Returned Value:
@@ -610,7 +614,8 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int adt7320_register(FAR const char *devpath, FAR struct spi_dev_s *spi, int spidev)
+int adt7320_register(FAR const char *devpath,
+                     FAR struct spi_dev_s *spi, int spidev)
 {
   FAR struct adt7320_dev_s *priv;
   int ret;
@@ -621,7 +626,7 @@ int adt7320_register(FAR const char *devpath, FAR struct spi_dev_s *spi, int spi
 
   /* Initialize the ADT7320 device structure */
 
-  priv = (FAR struct adt7320_dev_s *)kmm_malloc(sizeof(struct adt7320_dev_s));
+  priv = kmm_malloc(sizeof(struct adt7320_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");
