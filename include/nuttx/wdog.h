@@ -170,6 +170,39 @@ int wd_cancel(FAR struct wdog_s *wdog);
 
 int wd_gettime(FAR struct wdog_s *wdog);
 
+/****************************************************************************
+ * Name: wd_getidletime
+ *
+ * Description:
+ *   This function returns the idle time.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The time in system ticks remaining for idle.
+ *   Zero means system is busy.
+ *
+ ****************************************************************************/
+
+int wd_getidletime(void);
+
+/****************************************************************************
+ * Name: wd_setsleepticks
+ *
+ * Description:
+ *   This function will update watchdogs' lag.
+ *
+ * Input Parameters:
+ *   ticks - sleep ticks
+ *
+ * Returned Value:
+ *   Zero means success.
+ *
+ ****************************************************************************/
+
+int wd_setsleepticks(clock_t ticks);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

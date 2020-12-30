@@ -19,6 +19,7 @@
 ############################################################################
 
 CSRCS += wd_initialize.c wd_start.c wd_cancel.c wd_gettime.c wd_recover.c
+CSRCS += wd_getidletime.c wd_setsleepticks.c
 
 # Include wdog build support
 
