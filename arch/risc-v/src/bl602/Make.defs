@@ -59,7 +59,7 @@ ifeq ($(CONFIG_ONESHOT),y)
 CHIP_CSRCS  += bl602_oneshot_lowerhalf.c
 endif
 
-CHIP_CSRCS += bl602_glb.c bl602_gpio.c bl602_hbn.c
+CHIP_CSRCS += bl602_glb.c bl602_gpio.c bl602_hbn.c bl602_systemreset.c
 
 # INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)hardware}
 
