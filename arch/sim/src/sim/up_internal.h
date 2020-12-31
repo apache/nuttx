@@ -94,8 +94,9 @@
 
 /* Compatibility definitions */
 
-#  define JB_SP    JB_RSP
-#  define JB_PC    JB_RSI
+#  define JB_FP JB_RBP
+#  define JB_SP JB_RSP
+#  define JB_PC JB_RSI
 
 #elif defined(CONFIG_HOST_X86) || defined(CONFIG_SIM_M32)
 /* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
@@ -117,7 +118,13 @@
 #    define JB_PC  (5)
 
 #  endif /* __ASSEMBLY__ */
+
+/* Compatibility definitions */
+
+#  define JB_FP JB_EBP
+
 #elif defined(CONFIG_HOST_ARM)
+#  define JB_FP 7
 #  define JB_SP 8
 #  define JB_PC 9
 #endif
