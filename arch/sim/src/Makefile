@@ -58,13 +58,17 @@ REQUIREDOBJS = $(LINKOBJS)
 ifeq ($(CONFIG_HOST_X86_64),y)
 ifeq ($(CONFIG_SIM_M32),y)
   ASRCS += up_setjmp32.S
+  ASRCS += up_vfork32.S
 else
   ASRCS += up_setjmp64.S
+  ASRCS += up_vfork64.S
 endif
 else ifeq ($(CONFIG_HOST_X86),y)
   ASRCS += up_setjmp32.S
+  ASRCS += up_vfork32.S
 else ifeq ($(CONFIG_HOST_ARM),y)
   ASRCS += up_setjmp_arm.S
+  ASRCS += up_vfork_arm.S
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
@@ -74,6 +78,12 @@ CSRCS += up_createstack.c up_usestack.c up_releasestack.c up_stackframe.c
 CSRCS += up_unblocktask.c up_blocktask.c up_releasepending.c
 CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c
 CSRCS += up_allocateheap.c up_uart.c
+
+ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
+ifeq ($(CONFIG_SCHED_WAITPID),y)
+CSRCS += up_vfork.c
+endif
+endif
 
 VPATH = sim
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
