@@ -72,7 +72,7 @@ static int create_socket(int domain, int type, int protocol,
   int socketfd;
 
   socketfd = socket(domain, type, protocol);
-  if (socketfd < -1)
+  if (socketfd < 0)
     {
       return socketfd;
     }
@@ -162,12 +162,11 @@ int socketpair(int domain, int type, int protocol, int sv[2])
         }
 
       sv[0] = accept(listener, &addr[0].addr, &len);
+      close(listener);
       if (sv[0] < 0)
         {
           goto err;
         }
-
-      close(listener);
     }
 
   return 0;
