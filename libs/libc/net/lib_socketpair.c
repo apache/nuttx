@@ -45,28 +45,29 @@ union sockaddr_u
  * Private Functions
  ****************************************************************************/
 
-static inline int init_loop_addr(int domain, FAR union sockaddr_u *sock)
+static inline void init_loop_addr(int domain, FAR union sockaddr_u *addr,
+                                  FAR socklen_t *len)
 {
   if (domain == AF_INET6)
     {
       struct in6_addr init_sin6_addr = IN6ADDR_LOOPBACK_INIT;
 
-      memset(&sock->in6addr, 0, sizeof(sock->in6addr));
-      sock->in6addr.sin6_family = domain;
-      sock->in6addr.sin6_addr = init_sin6_addr;
-      return sizeof(sock->in6addr);
+      memset(&addr->in6addr, 0, sizeof(addr->in6addr));
+      addr->in6addr.sin6_family = domain;
+      addr->in6addr.sin6_addr = init_sin6_addr;
+      *len = sizeof(addr->in6addr);
     }
   else
     {
-      memset(&sock->inaddr, 0, sizeof(sock->inaddr));
-      sock->inaddr.sin_family = domain;
-      sock->inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-      return sizeof(sock->inaddr);
+      memset(&addr->inaddr, 0, sizeof(addr->inaddr));
+      addr->inaddr.sin_family = domain;
+      addr->inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+      *len = sizeof(addr->inaddr);
     }
 }
 
 static int create_socket(int domain, int type, int protocol,
-                         FAR union sockaddr_u *sock, FAR int *len)
+                         FAR union sockaddr_u *addr, FAR socklen_t *len)
 {
   int socketfd;
 
@@ -76,10 +77,10 @@ static int create_socket(int domain, int type, int protocol,
       return socketfd;
     }
 
-  *len = init_loop_addr(domain, sock);
-  if (bind(socketfd, &sock->addr, *len) == 0)
+  init_loop_addr(domain, addr, len);
+  if (bind(socketfd, &addr->addr, *len) == 0)
     {
-      if (getsockname(socketfd, &sock->addr, len) == 0)
+      if (getsockname(socketfd, &addr->addr, len) == 0)
         {
           return socketfd;
         }
@@ -107,8 +108,8 @@ static int create_socket(int domain, int type, int protocol,
 
 int socketpair(int domain, int type, int protocol, int sv[2])
 {
-  union sockaddr_u sock[2];
-  int              len;
+  union sockaddr_u addr[2];
+  socklen_t        len;
 
   if (domain != AF_UNIX && domain != AF_INET && domain != AF_INET6)
     {
@@ -127,8 +128,8 @@ int socketpair(int domain, int type, int protocol, int sv[2])
       domain = AF_INET;
     }
 
-  sv[0] = create_socket(domain, type, protocol, &sock[0], &len);
-  sv[1] = create_socket(domain, type, protocol, &sock[1], &len);
+  sv[0] = create_socket(domain, type, protocol, &addr[0], &len);
+  sv[1] = create_socket(domain, type, protocol, &addr[1], &len);
   if (sv[0] < 0 || sv[1] < 0)
     {
       goto err;
@@ -136,12 +137,12 @@ int socketpair(int domain, int type, int protocol, int sv[2])
 
   if (type == SOCK_DGRAM)
     {
-      if (connect(sv[0], &sock[1].addr, len) < 0)
+      if (connect(sv[0], &addr[1].addr, len) < 0)
         {
           goto err;
         }
 
-      if (connect(sv[1], &sock[0].addr, len) < 0)
+      if (connect(sv[1], &addr[0].addr, len) < 0)
         {
           goto err;
         }
@@ -155,12 +156,12 @@ int socketpair(int domain, int type, int protocol, int sv[2])
           goto err;
         }
 
-      if (connect(sv[1], &sock[0].addr, len) < 0)
+      if (connect(sv[1], &addr[0].addr, len) < 0)
         {
           goto err;
         }
 
-      sv[0] = accept(listener, &sock[0].addr, &len);
+      sv[0] = accept(listener, &addr[0].addr, &len);
       if (sv[0] < 0)
         {
           goto err;
