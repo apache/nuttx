@@ -34,4 +34,7 @@ config BL602_TIMER0
 
 config BL602_TIMER1
 	bool "TIMER1"
+
+config BL602_I2C
+	bool "I2C"
 endmenu

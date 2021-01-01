@@ -50,7 +50,7 @@
 #define BL602_HBN_SRAM_OFFSET          0x000034  /* HBN_SRAM */
 #define BL602_HBN_RSV0_OFFSET          0x000100  /* HBN_RSV0 */
 #define BL602_HBN_RSV1_OFFSET          0x000104  /* HBN_RSV1 */
-#define BL602_HBN_RSV2_OFFSET          0x000108  /* HBN_RSV2 */
+#define BL602_HBN_RSV2_OFFSET          0x000108  /* HBN_RSV2 sys core freq */
 #define BL602_HBN_RSV3_OFFSET          0x00010c  /* HBN_RSV3 */
 #define BL602_HBN_RC32K_CTRL0_OFFSET   0x000200  /* rc32k_ctrl0 */
 #define BL602_HBN_XTAL32K_OFFSET       0x000204  /* xtal32k */

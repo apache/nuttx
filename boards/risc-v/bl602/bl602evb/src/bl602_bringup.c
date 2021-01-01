@@ -35,6 +35,7 @@
 #include <nuttx/input/buttons.h>
 #include <bl602_tim_lowerhalf.h>
 #include <bl602_oneshot_lowerhalf.h>
+#include <bl602_i2c.h>
 
 #include "chip.h"
 
@@ -51,6 +52,9 @@ int bl602_bringup(void)
 #if defined(CONFIG_TIMER) && defined(CONFIG_ONESHOT) && \
   defined(CONFIG_BL602_TIMER1)
   struct oneshot_lowerhalf_s *os = NULL;
+#endif
+#ifdef CONFIG_BL602_I2C
+  struct i2c_master_s *i2c_bus;
 #endif
   int ret = OK;
 
@@ -107,6 +111,11 @@ int bl602_bringup(void)
 #endif
     }
 #endif
+#endif
+
+#ifdef CONFIG_BL602_I2C
+  i2c_bus = bl602_i2cbus_initialize();
+  i2c_register(i2c_bus, 0);
 #endif
 
   return ret;

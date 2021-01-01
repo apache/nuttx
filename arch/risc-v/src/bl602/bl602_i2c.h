@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/bl602/bl602evb/include/board.h
+ * arch/risc-v/src/bl602/bl602_i2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_BL602_BL602EVB_INCLUDE_BOARD_H
-#define __BOARDS_RISCV_BL602_BL602EVB_INCLUDE_BOARD_H
+#ifndef __ARCH_RISCV_SRC_BL602_BL602_I2C_H
+#define __ARCH_RISCV_SRC_BL602_BL602_I2C_H
 
 /****************************************************************************
  * Included Files
@@ -27,33 +27,15 @@
 
 #include <nuttx/config.h>
 
-/* Do not include BL602 header files here. */
+#include <stdint.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* UART Configuration */
-
-#define BOARD_UART_0_RX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN7)
-#define BOARD_UART_0_TX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN16)
-#define BOARD_UART_1_RX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN3)
-#define BOARD_UART_1_TX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN4)
-
-/* I2C Configuration */
-
-#define BOARD_I2C_SCL (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_I2C | GPIO_PIN4)
-#define BOARD_I2C_SDA (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_I2C | GPIO_PIN3)
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
+#include <nuttx/i2c/i2c_master.h>
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -69,14 +51,29 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: litex_boardinitialize
+ * Name: bl602_i2cbus_initialize
+ *
+ * Description:
+ *   Initialise an I2C device
+ *
  ****************************************************************************/
 
-void bl602_boardinitialize(void);
+struct i2c_master_s *bl602_i2cbus_initialize(void);
+
+/****************************************************************************
+ * Name: bl602_i2cbus_uninitialize
+ *
+ * Description:
+ *   Uninitialise an I2C device
+ *
+ ****************************************************************************/
+
+int bl602_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
+
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISC_V_BL602_BL602EVB_INCLUDE_BOARD_H */
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_I2C_H */
