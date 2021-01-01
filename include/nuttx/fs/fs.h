@@ -1467,6 +1467,72 @@ int nx_stat(FAR const char *path, FAR struct stat *buf, int resolve);
 
 int nx_unlink(FAR const char *pathname);
 
+/****************************************************************************
+ * Name: nx_pipe
+ *
+ * Description:
+ *   nx_pipe() creates a pair of file descriptors, pointing to a pipe inode,
+ *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
+ *   fd[1] is for writing.
+ *
+ *   NOTE: nx_pipe is a special, non-standard, NuttX-only interface.  Since
+ *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
+ *   to control the size of those buffers is critical for system tuning.
+ *
+ * Input Parameters:
+ *   fd[2] - The user provided array in which to catch the pipe file
+ *   descriptors
+ *   bufsize - The size of the in-memory, circular buffer in bytes.
+ *   flags - The file status flags.
+ *
+ * Returned Value:
+ *   0 is returned on success; a negated errno value is returned on a
+ *   failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
+int nx_pipe(int fd[2], size_t bufsize, int flags);
+#endif
+
+/****************************************************************************
+ * Name: nx_mkfifo
+ *
+ * Description:
+ *   nx_mkfifo() makes a FIFO device driver file with name 'pathname.' Unlike
+ *   Linux, a NuttX FIFO is not a special file type but simply a device
+ *   driver instance.  'mode' specifies the FIFO's permissions.
+ *
+ *   Once the FIFO has been created by nx_mkfifo(), any thread can open it
+ *   for reading or writing, in the same way as an ordinary file. However, it
+ *   must have been opened from both reading and writing before input or
+ *   output can be performed.  This FIFO implementation will block all
+ *   attempts to open a FIFO read-only until at least one thread has opened
+ *   the FIFO for  writing.
+ *
+ *   If all threads that write to the FIFO have closed, subsequent calls to
+ *   read() on the FIFO will return 0 (end-of-file).
+ *
+ *   NOTE: nx_mkfifo is a special, non-standard, NuttX-only interface.  Since
+ *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
+ *   to control the size of those buffers is critical for system tuning.
+ *
+ * Input Parameters:
+ *   pathname - The full path to the FIFO instance to attach to or to create
+ *     (if not already created).
+ *   mode - Ignored for now
+ *   bufsize - The size of the in-memory, circular buffer in bytes.
+ *
+ * Returned Value:
+ *   0 is returned on success; a negated errno value is returned on a
+ *   failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
+int nx_mkfifo(FAR const char *pathname, mode_t mode, size_t bufsize);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
