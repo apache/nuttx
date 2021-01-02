@@ -207,7 +207,7 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
   fd = files_allocate(inode, oflags, 0, 0);
   if (fd < 0)
     {
-      ret = -EMFILE;
+      ret = fd;
       goto errout_with_inode;
     }
 

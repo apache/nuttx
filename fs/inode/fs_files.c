@@ -336,7 +336,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
     }
 
   _files_semgive(list);
-  return ERROR;
+  return -EMFILE;
 }
 
 /****************************************************************************
