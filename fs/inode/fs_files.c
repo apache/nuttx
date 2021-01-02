@@ -135,7 +135,6 @@ void files_releaselist(FAR struct filelist *list)
 
 int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 {
-  FAR struct filelist *list;
   FAR struct inode *inode;
   struct file temp;
   int ret;
@@ -150,33 +149,13 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
       return OK;
     }
 
-  list = nxsched_get_files();
-
-  /* The file list can be NULL under two cases:  (1) One is an obscure
-   * cornercase:  When memory management debug output is enabled.  Then
-   * there may be attempts to write to stdout from malloc before the group
-   * data has been allocated.  The other other is (2) if this is a kernel
-   * thread.  Kernel threads have no allocated file descriptors.
-   */
-
-  if (list != NULL)
-    {
-      ret = _files_semtake(list);
-      if (ret < 0)
-        {
-          /* Probably canceled */
-
-          return ret;
-        }
-    }
-
   /* Increment the reference count on the contained inode */
 
   inode = filep1->f_inode;
   ret   = inode_addref(inode);
   if (ret < 0)
     {
-      goto errout_with_sem;
+      return ret;
     }
 
   /* Then clone the file structure */
@@ -211,7 +190,8 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 
       if (ret < 0)
         {
-          goto errout_with_inode;
+          inode_release(inode);
+          return ret;
         }
     }
 
@@ -225,26 +205,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
   /* Return the file structure */
 
   memcpy(filep2, &temp, sizeof(temp));
-
-  if (list != NULL)
-    {
-      _files_semgive(list);
-    }
-
   return OK;
-
-  /* Handle various error conditions */
-
-errout_with_inode:
-  inode_release(inode);
-
-errout_with_sem:
-  if (list != NULL)
-    {
-      _files_semgive(list);
-    }
-
-  return ret;
 }
 
 /****************************************************************************
@@ -291,6 +252,54 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
 
   _files_semgive(list);
   return -EMFILE;
+}
+
+/****************************************************************************
+ * Name: files_dupfd2
+ *
+ * Description:
+ *   Clone a file descriptor to a specific descriptor number.
+ *
+ * Returned Value:
+ *   fd2 is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int files_dupfd2(int fd1, int fd2)
+{
+  FAR struct filelist *list;
+  int ret;
+
+  if (fd1 < 0 || fd1 >= CONFIG_NFILE_DESCRIPTORS ||
+      fd2 < 0 || fd2 >= CONFIG_NFILE_DESCRIPTORS)
+    {
+      return -EBADF;
+    }
+
+  /* Get the file descriptor list.  It should not be NULL in this context. */
+
+  list = nxsched_get_files();
+  DEBUGASSERT(list != NULL);
+
+  ret = _files_semtake(list);
+  if (ret < 0)
+    {
+      /* Probably canceled */
+
+      return ret;
+    }
+
+  /* Perform the dup2 operation */
+
+  ret = file_dup2(&list->fl_files[fd1], &list->fl_files[fd2]);
+  _files_semgive(list);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return fd2;
 }
 
 /****************************************************************************

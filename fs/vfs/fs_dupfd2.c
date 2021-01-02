@@ -64,32 +64,5 @@
 
 int fs_dupfd2(int fd1, int fd2)
 {
-  FAR struct file *filep1;
-  FAR struct file *filep2 = NULL;
-  int ret;
-
-  /* Get the file structures corresponding to the file descriptors. */
-
-  ret = fs_getfilep(fd1, &filep1);
-  if (ret >= 0)
-    {
-      ret = fs_getfilep(fd2, &filep2);
-    }
-
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  DEBUGASSERT(filep1 != NULL && filep2 != NULL);
-
-  /* Perform the dup2 operation */
-
-  ret = file_dup2(filep1, filep2);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  return fd2;
+  return files_dupfd2(fd1, fd2);
 }
