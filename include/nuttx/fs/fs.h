@@ -714,7 +714,7 @@ void files_releaselist(FAR struct filelist *list);
  * Name: file_dup
  *
  * Description:
- *   Equivalent to the non-standard fs_dupfd() function except that it
+ *   Equivalent to the standard dup() function except that it
  *   accepts a struct file instance instead of a file descriptor.
  *
  * Returned Value:
@@ -724,24 +724,6 @@ void files_releaselist(FAR struct filelist *list);
  ****************************************************************************/
 
 int file_dup(FAR struct file *filep, int minfd);
-
-/****************************************************************************
- * Name: fs_dupfd
- *
- * Description:
- *   Clone a file descriptor 'fd' to an arbitrary descriptor number (any
- *   value greater than or equal to 'minfd').
- *
- *   This alternative naming is used when dup could operate on both file and
- *   socket descriptors to avoid drawing unused socket support into the link.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-int fs_dupfd(int fd, int minfd);
 
 /****************************************************************************
  * Name: nx_dup
@@ -768,7 +750,7 @@ int nx_dup(int fd);
  *   Assign an inode to a specific files structure.  This is the heart of
  *   dup2.
  *
- *   Equivalent to the non-standard fs_dupfd2() function except that it
+ *   Equivalent to the non-standard dup2() function except that it
  *   accepts struct file instances instead of file descriptors.
  *
  * Returned Value:
@@ -778,23 +760,6 @@ int nx_dup(int fd);
  ****************************************************************************/
 
 int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
-
-/****************************************************************************
- * Name: fs_dupfd2
- *
- * Description:
- *   Clone a file descriptor to a specific descriptor number.
- *
- *   This alternative naming is used when dup2 could operate on both file and
- *   socket descriptors to avoid drawing unused socket support into the link.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is return on
- *   any failure.
- *
- ****************************************************************************/
-
-int fs_dupfd2(int fd1, int fd2);
 
 /****************************************************************************
  * Name: nx_dup2

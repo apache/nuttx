@@ -35,7 +35,7 @@
 
 # Common file/socket descriptor support
 
-CSRCS += fs_close.c fs_dup.c fs_dup2.c fs_fcntl.c fs_dupfd.c fs_dupfd2.c
+CSRCS += fs_close.c fs_dup.c fs_dup2.c fs_fcntl.c
 CSRCS += fs_epoll.c fs_fstat.c fs_fstatfs.c fs_getfilep.c fs_ioctl.c
 CSRCS += fs_lseek.c fs_mkdir.c fs_open.c fs_poll.c  fs_read.c fs_rename.c
 CSRCS += fs_rmdir.c fs_statfs.c fs_stat.c fs_select.c fs_unlink.c fs_write.c
