@@ -137,6 +137,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 {
   FAR struct filelist *list;
   FAR struct inode *inode;
+  struct file temp;
   int ret;
 
   if (filep1 == NULL || filep1->f_inode == NULL || filep2 == NULL)
@@ -169,18 +170,6 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
         }
     }
 
-  /* If there is already an inode contained in the new file structure,
-   * close the file and release the inode.
-   */
-
-  ret = file_close(filep2);
-  if (ret < 0)
-    {
-      /* An error occurred while closing the driver */
-
-      goto errout_with_sem;
-    }
-
   /* Increment the reference count on the contained inode */
 
   inode = filep1->f_inode;
@@ -192,9 +181,10 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 
   /* Then clone the file structure */
 
-  filep2->f_oflags = filep1->f_oflags;
-  filep2->f_pos    = filep1->f_pos;
-  filep2->f_inode  = inode;
+  temp.f_oflags = filep1->f_oflags;
+  temp.f_pos    = filep1->f_pos;
+  temp.f_inode  = inode;
+  temp.f_priv   = filep1->f_priv;
 
   /* Call the open method on the file, driver, mountpoint so that it
    * can maintain the correct open counts.
@@ -207,14 +197,14 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
         {
           /* Dup the open file on the in the new file structure */
 
-          ret = inode->u.i_mops->dup(filep1, filep2);
+          ret = inode->u.i_mops->dup(filep1, &temp);
         }
       else
 #endif
         {
           /* (Re-)open the pseudo file or device driver */
 
-          ret = inode->u.i_ops->open(filep2);
+          ret = inode->u.i_ops->open(&temp);
         }
 
       /* Handle open failures */
@@ -224,6 +214,17 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
           goto errout_with_inode;
         }
     }
+
+  /* If there is already an inode contained in the new file structure,
+   * close the file and release the inode.
+   */
+
+  ret = file_close(filep2);
+  DEBUGASSERT(ret == 0);
+
+  /* Return the file structure */
+
+  memcpy(filep2, &temp, sizeof(temp));
 
   if (list != NULL)
     {
@@ -235,11 +236,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
   /* Handle various error conditions */
 
 errout_with_inode:
-
-  inode_release(filep2->f_inode);
-  filep2->f_oflags = 0;
-  filep2->f_pos    = 0;
-  filep2->f_inode  = NULL;
+  inode_release(inode);
 
 errout_with_sem:
   if (list != NULL)
