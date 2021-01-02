@@ -390,6 +390,20 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
                    FAR void *priv, int minfd);
 
 /****************************************************************************
+ * Name: files_dupfd2
+ *
+ * Description:
+ *   Clone a file descriptor to a specific descriptor number.
+ *
+ * Returned Value:
+ *   fd2 is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int files_dupfd2(int fd1, int fd2);
+
+/****************************************************************************
  * Name: files_close
  *
  * Description:
