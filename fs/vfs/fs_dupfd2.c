@@ -47,16 +47,6 @@
 #include "inode/inode.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define DUP_ISOPEN(filep) (filep->f_inode != NULL)
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -92,20 +82,6 @@ int fs_dupfd2(int fd1, int fd2)
     }
 
   DEBUGASSERT(filep1 != NULL && filep2 != NULL);
-
-  /* Verify that fd1 is a valid, open file descriptor */
-
-  if (!DUP_ISOPEN(filep1))
-    {
-      return -EBADF;
-    }
-
-  /* Handle a special case */
-
-  if (fd1 == fd2)
-    {
-      return fd1;
-    }
 
   /* Perform the dup2 operation */
 
