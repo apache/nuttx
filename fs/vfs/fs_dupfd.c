@@ -33,12 +33,6 @@
 #include "inode/inode.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define DUP_ISOPEN(filep) (filep->f_inode != NULL)
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -61,14 +55,7 @@ int file_dup(FAR struct file *filep, int minfd)
   int fd2;
   int ret;
 
-  /* Verify that fd is a valid, open file descriptor */
-
-  if (!DUP_ISOPEN(filep))
-    {
-      return -EBADF;
-    }
-
-  /* Then allocate a new file descriptor for the inode */
+  /* Allocate a new file descriptor for the inode */
 
   fd2 = files_allocate(NULL, 0, 0, minfd);
   if (fd2 < 0)

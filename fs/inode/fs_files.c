@@ -188,6 +188,11 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
       return -EBADF;
     }
 
+  if (filep1 == filep2)
+    {
+      return OK;
+    }
+
   list = nxsched_get_files();
 
   /* The file list can be NULL under two cases:  (1) One is an obscure
