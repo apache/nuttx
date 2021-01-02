@@ -491,7 +491,13 @@ begin_packed_struct struct can_msg_s
 
 struct can_rxfifo_s
 {
-  sem_t         rx_sem;                  /* Counting semaphore */
+  /* Binary semaphore. Indicates whether FIFO is available for reading
+   * AND not empty. Only take this sem inside a critical section to guarantee
+   * exclusive access to both the semaphore and the head/tail FIFO indices.
+   */
+
+  sem_t         rx_sem;
+
   uint8_t       rx_head;                 /* Index to the head [IN] in the circular buffer */
   uint8_t       rx_tail;                 /* Index to the tail [OUT] in the circular buffer */
                                          /* Circular buffer of CAN messages */
