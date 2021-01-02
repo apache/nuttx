@@ -204,7 +204,7 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
 
   /* Associate the inode with a file structure */
 
-  fd = files_allocate(inode, oflags, 0, 0);
+  fd = files_allocate(inode, oflags, 0, NULL, 0);
   if (fd < 0)
     {
       ret = fd;

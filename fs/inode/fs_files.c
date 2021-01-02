@@ -256,7 +256,8 @@ errout_with_sem:
  *
  ****************************************************************************/
 
-int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
+int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
+                   FAR void *priv, int minfd)
 {
   FAR struct filelist *list;
   int ret;
@@ -282,7 +283,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
           list->fl_files[i].f_oflags = oflags;
           list->fl_files[i].f_pos    = pos;
           list->fl_files[i].f_inode  = inode;
-          list->fl_files[i].f_priv   = NULL;
+          list->fl_files[i].f_priv   = priv;
           _files_semgive(list);
           return i;
         }
