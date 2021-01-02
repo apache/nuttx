@@ -85,5 +85,11 @@ int fs_dupfd2(int fd1, int fd2)
 
   /* Perform the dup2 operation */
 
-  return file_dup2(filep1, filep2);
+  ret = file_dup2(filep1, filep2);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return fd2;
 }
