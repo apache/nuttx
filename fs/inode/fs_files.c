@@ -56,50 +56,6 @@ static int _files_semtake(FAR struct filelist *list)
 #define _files_semgive(list) nxsem_post(&list->fl_sem)
 
 /****************************************************************************
- * Name: _files_close
- *
- * Description:
- *   Close an inode (if open)
- *
- * Assumptions:
- *   Caller holds the list semaphore because the file descriptor will be
- *   freed.
- *
- ****************************************************************************/
-
-static int _files_close(FAR struct file *filep)
-{
-  struct inode *inode = filep->f_inode;
-  int ret = OK;
-
-  /* Check if the struct file is open (i.e., assigned an inode) */
-
-  if (inode)
-    {
-      /* Close the file, driver, or mountpoint. */
-
-      if (inode->u.i_ops && inode->u.i_ops->close)
-        {
-          /* Perform the close operation */
-
-          ret = inode->u.i_ops->close(filep);
-        }
-
-      /* And release the inode */
-
-      inode_release(inode);
-
-      /* Release the file descriptor */
-
-      filep->f_oflags  = 0;
-      filep->f_pos     = 0;
-      filep->f_inode = NULL;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -152,7 +108,7 @@ void files_releaselist(FAR struct filelist *list)
 
   for (i = CONFIG_NFILE_DESCRIPTORS; i > 0; i--)
     {
-      _files_close(&list->fl_files[i - 1]);
+      file_close(&list->fl_files[i - 1]);
     }
 
   /* Destroy the semaphore */
@@ -217,7 +173,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
    * close the file and release the inode.
    */
 
-  ret = _files_close(filep2);
+  ret = file_close(filep2);
   if (ret < 0)
     {
       /* An error occurred while closing the driver */
@@ -376,7 +332,7 @@ int files_close(int fd)
   ret = _files_semtake(list);
   if (ret >= 0)
     {
-      ret = _files_close(&list->fl_files[fd]);
+      ret = file_close(&list->fl_files[fd]);
       _files_semgive(list);
     }
 
