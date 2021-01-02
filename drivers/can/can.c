@@ -372,7 +372,7 @@ static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
   reader->fifo.rx_head  = 0;
   reader->fifo.rx_tail  = 0;
 
-  nxsem_init(&reader->fifo.rx_sem, 0, 1);
+  nxsem_init(&reader->fifo.rx_sem, 0, 0);
   nxsem_set_protocol(&reader->fifo.rx_sem, SEM_PRIO_NONE);
   filep->f_priv = reader;
 
@@ -609,24 +609,24 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
 
       fifo = &reader->fifo;
 
-      while (fifo->rx_head == fifo->rx_tail)
+      if (filep->f_oflags & O_NONBLOCK)
         {
-          /* The receive FIFO is empty -- was non-blocking mode selected? */
-
-          if (filep->f_oflags & O_NONBLOCK)
-            {
-              ret = -EAGAIN;
-              goto return_with_irqdisabled;
-            }
-
-          /* Wait for a message to be received */
-
+          ret = nxsem_trywait(&fifo->rx_sem);
+        }
+      else
+        {
           ret = can_takesem(&fifo->rx_sem);
+        }
 
-          if (ret < 0)
-            {
-              goto return_with_irqdisabled;
-            }
+      if (ret < 0)
+        {
+          goto return_with_irqdisabled;
+        }
+
+      if (fifo->rx_head == fifo->rx_tail)
+        {
+          canerr("RX FIFO sem posted but FIFO is empty.\n");
+          goto return_with_irqdisabled;
         }
 
       /* The cd_recv FIFO is not empty.  Copy all buffered data that will fit
@@ -661,9 +661,17 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
         }
       while (fifo->rx_head != fifo->rx_tail);
 
-      /* All on the messages have bee transferred.  Return the number of
-       * bytes that were read.
-       */
+      if (fifo->rx_head != fifo->rx_tail)
+        {
+          /* The user's buffer was too small, so some messages remain in the
+           * FIFO. Post the semaphore so future calls to poll() or read()
+           * don't block.
+           */
+
+          can_givesem(&fifo->rx_sem);
+        }
+
+      /* Return the number of bytes that were read. */
 
       ret = nread;
 
@@ -1051,6 +1059,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct can_reader_s *reader = NULL;
   pollevent_t eventset;
   int ndx;
+  int sval;
   irqstate_t flags;
   int ret;
   int i;
@@ -1063,6 +1072,10 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
       return -ENODEV;
     }
 #endif
+
+  /* Ensure exclusive access to FIFO indices - don't want can_receive or
+   * can_read changing them in the middle of the comparison
+   */
 
   flags = enter_critical_section();
 
@@ -1142,25 +1155,28 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       can_givesem(&dev->cd_xmit.tx_sem);
 
-      /* Check if the receive buffer is empty.
-       *
-       * Get exclusive access to the cd_recv buffer indices.  NOTE: that
-       * we do not let this wait be interrupted by a signal (we probably
-       * should, but that would be a little awkward).
-       */
+      /* Check whether there are messages in the RX FIFO. */
 
-      do
+      ret = nxsem_get_value(&reader->fifo.rx_sem, &sval);
+
+      if (ret < 0)
         {
-          ret = can_takesem(&reader->fifo.rx_sem);
+          DEBUGASSERT(false);
+          goto return_with_irqdisabled;
         }
-      while (ret < 0);
-
-      if (reader->fifo.rx_head != reader->fifo.rx_tail)
+      else if (sval > 0)
         {
-          eventset |= fds->events & POLLIN;
-        }
+          if (reader->fifo.rx_head != reader->fifo.rx_tail)
+            {
+              /* No need to wait, just notify the application immediately */
 
-      can_givesem(&reader->fifo.rx_sem);
+              eventset |= fds->events & POLLIN;
+            }
+          else
+            {
+              canerr("RX FIFO sem not locked but FIFO is empty.\n");
+            }
+        }
 
       if (eventset != 0)
         {
@@ -1394,9 +1410,9 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
               return -EINVAL;
             }
 
-          /* Increment the counting semaphore. The maximum value should
-           * be CONFIG_CAN_FIFOSIZE -- one possible count for each allocated
-           * message buffer.
+          /* Unlock the binary semaphore, waking up can_read if it is
+           * blocked. If can_read were not blocked, we would not be
+           * executing this because interrupts would be disabled.
            */
 
           if (sval <= 0)
