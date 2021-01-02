@@ -60,7 +60,7 @@ int file_dup(FAR struct file *filep, int minfd)
   fd2 = files_allocate(NULL, 0, 0, minfd);
   if (fd2 < 0)
     {
-      return -EMFILE;
+      return fd2;
     }
 
   ret = fs_getfilep(fd2, &filep2);
