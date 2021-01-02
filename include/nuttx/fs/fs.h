@@ -882,41 +882,14 @@ int nx_open(FAR const char *path, int oflags, ...);
 int fs_getfilep(int fd, FAR struct file **filep);
 
 /****************************************************************************
- * Name: file_detach
- *
- * Description:
- *   This function is used to device drivers to create a task-independent
- *   handle to an entity in the file system.  file_detach() duplicates the
- *   'struct file' that underlies the file descriptor, then closes the file
- *   descriptor.
- *
- *   This function will fail if fd is not a valid file descriptor.  In
- *   particular, it will fail if fd is a socket descriptor.
- *
- * Input Parameters:
- *   fd    - The file descriptor to be detached.  This descriptor will be
- *           closed and invalid if the file was successfully detached.
- *   filep - A pointer to a user provided memory location in which to
- *           received the duplicated, detached file structure.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int file_detach(int fd, FAR struct file *filep);
-
-/****************************************************************************
  * Name: file_close
  *
  * Description:
- *   Close a file that was previously opened with file_open() (or detached
- *   with file_detach()).
+ *   Close a file that was previously opened with file_open().
  *
  * Input Parameters:
  *   filep - A pointer to a user provided memory location containing the
- *           open file data returned by file_detach().
+ *           open file data returned by file_open().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
