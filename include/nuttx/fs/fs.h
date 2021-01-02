@@ -401,7 +401,7 @@ struct file
   int               f_oflags;   /* Open mode flags */
   off_t             f_pos;      /* File position */
   FAR struct inode *f_inode;    /* Driver or file system interface */
-  void             *f_priv;     /* Per file driver private data */
+  FAR void         *f_priv;     /* Per file driver private data */
 };
 
 /* This defines a list of files indexed by the file descriptor */

@@ -387,7 +387,7 @@ void weak_function files_initialize(void);
  ****************************************************************************/
 
 int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
-                   int minfd);
+                   FAR void *priv, int minfd);
 
 /****************************************************************************
  * Name: files_close

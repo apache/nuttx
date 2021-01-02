@@ -51,30 +51,27 @@
 
 int file_dup(FAR struct file *filep, int minfd)
 {
-  FAR struct file *filep2;
+  struct file filep2;
   int fd2;
   int ret;
 
-  /* Allocate a new file descriptor for the inode */
+  /* Let file_dup2() do the real work */
 
-  fd2 = files_allocate(NULL, 0, 0, minfd);
+  memset(&filep2, 0, sizeof(filep2));
+  ret = file_dup2(filep, &filep2);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Then allocate a new file descriptor for the inode */
+
+  fd2 = files_allocate(filep2.f_inode, filep2.f_oflags,
+                       filep2.f_pos, filep2.f_priv, minfd);
   if (fd2 < 0)
     {
+      file_close(&filep2);
       return fd2;
-    }
-
-  ret = fs_getfilep(fd2, &filep2);
-  if (ret < 0)
-    {
-      files_release(fd2);
-      return ret;
-    }
-
-  ret = file_dup2(filep, filep2);
-  if (ret < 0)
-    {
-      files_release(fd2);
-      return ret;
     }
 
   return fd2;
