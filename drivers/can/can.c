@@ -49,6 +49,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <poll.h>
@@ -56,6 +57,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/can/can.h>
@@ -141,7 +143,7 @@ static ssize_t        can_read(FAR struct file *filep, FAR char *buffer,
 static int            can_xmit(FAR struct can_dev_s *dev);
 static ssize_t        can_write(FAR struct file *filep,
                                 FAR const char *buffer, size_t buflen);
-static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
+static inline ssize_t can_rtrread(FAR struct file *filep,
                                   FAR struct canioc_rtr_s *rtr);
 static int            can_ioctl(FAR struct file *filep, int cmd,
                                 unsigned long arg);
@@ -916,12 +918,15 @@ return_with_irqdisabled:
  *
  ****************************************************************************/
 
-static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
-                                  FAR struct canioc_rtr_s *rtr)
+static inline ssize_t can_rtrread(FAR struct file *filep,
+                                  FAR struct canioc_rtr_s *request)
 {
+  FAR struct can_dev_s *dev = filep->f_inode->i_private;
   FAR struct can_rtrwait_s *wait = NULL;
+  struct timespec           abstimeout;
   irqstate_t                flags;
   int                       i;
+  int                       sval;
   int                       ret = -ENOMEM;
 
   /* Disable interrupts through this operation */
@@ -933,26 +938,79 @@ static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
   for (i = 0; i < CONFIG_CAN_NPENDINGRTR; i++)
     {
       FAR struct can_rtrwait_s *tmp = &dev->cd_rtr[i];
-      if (!rtr->ci_msg)
+
+      ret = nxsem_get_value(&tmp->cr_sem, &sval);
+
+      if (ret < 0)
         {
-          tmp->cr_id  = rtr->ci_id;
-          tmp->cr_msg = rtr->ci_msg;
+          continue;
+        }
+
+      if (sval == 0)
+        {
+          /* No one is waiting on RTR transaction; take it. */
+
+          tmp->cr_msg     = request->ci_msg;
           dev->cd_npendrtr++;
-          wait        = tmp;
+
+          wait            = tmp;
           break;
         }
     }
 
   if (wait)
     {
-      /* Send the remote transmission request */
+      /* Send the remote transmission request with the "old method" unless
+       * the lower-half driver indicates otherwise.
+       */
 
-      ret = dev_remoterequest(dev, wait->cr_id);
+      if (dev->cd_ops->co_remoterequest != NULL)
+        {
+          if (request->ci_msg->cm_hdr.ch_id < CAN_MAX_STDMSGID
+#ifdef CONFIG_CAN_EXTID
+              && !request->ci_msg->cm_hdr.ch_extid
+#endif
+            )
+            {
+              ret = dev_remoterequest(dev,
+                                (uint16_t)(request->ci_msg->cm_hdr.ch_id));
+            }
+          else
+            {
+              ret = -EINVAL;
+            }
+        }
+      else
+        {
+#ifdef CONFIG_CAN_USE_RTR
+          /* Temporarily set the RTR bit, then send the remote transmission
+           * request message with the lower-half driver's regular function.
+           */
+
+          request->ci_msg->cm_hdr.ch_rtr = 1;
+          ret = can_write(filep,
+                          request->ci_msg,
+                          CAN_MSGLEN(request->ci_msg->cm_hdr.ch_dlc));
+          request->ci_msg->cm_hdr.ch_rtr = 0;
+#else
+          canerr("Error: Driver needs CONFIG_CAN_USE_RTR.\n");
+          ret = -ENOSYS;
+#endif
+        }
+
       if (ret >= 0)
         {
           /* Then wait for the response */
 
-          ret = can_takesem(&wait->cr_sem);
+          ret = clock_gettime(CLOCK_REALTIME, &abstimeout);
+
+          if (ret >= 0)
+            {
+              clock_timespec_add(&abstimeout,
+                                 &request->ci_timeout,
+                                 &abstimeout);
+              ret = nxsem_timedwait(&wait->cr_sem, &abstimeout);
+            }
         }
     }
 
@@ -984,7 +1042,8 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        */
 
       case CANIOC_RTR:
-        ret = can_rtrread(dev, (FAR struct canioc_rtr_s *)((uintptr_t)arg));
+        ret = can_rtrread(filep,
+                          (FAR struct canioc_rtr_s *)((uintptr_t)arg));
         break;
 
       /* Not a "built-in" ioctl command.. perhaps it is unique to this
@@ -1195,7 +1254,6 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
 
       nxsem_init(&dev->cd_rtr[i].cr_sem, 0, 0);
       nxsem_set_protocol(&dev->cd_rtr[i].cr_sem, SEM_PRIO_NONE);
-      dev->cd_rtr[i].cr_msg = NULL;
     }
 
   /* Initialize/reset the CAN hardware */
@@ -1237,6 +1295,8 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
   int                      nexttail;
   int                      errcode = -ENOMEM;
   int                      i;
+  int                      sval;
+  int                      ret;
 
   caninfo("ID: %" PRId32 " DLC: %d\n", (uint32_t)hdr->ch_id, hdr->ch_dlc);
 
@@ -1256,35 +1316,44 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
       for (i = 0; i < CONFIG_CAN_NPENDINGRTR; i++)
         {
-          FAR struct can_rtrwait_s *rtr = &dev->cd_rtr[i];
-          FAR struct can_msg_s     *msg = rtr->cr_msg;
+          FAR struct can_rtrwait_s *wait = &dev->cd_rtr[i];
+          FAR struct can_msg_s     *waitmsg = wait->cr_msg;
 
-          /* Check if the entry is valid and if the ID matches.  A valid
-           * entry has a non-NULL receiving address
-           */
+          /* Check if the entry is in use and whether the ID matches */
 
-          if (msg && hdr->ch_id == rtr->cr_id)
+          ret = nxsem_get_value(&wait->cr_sem, &sval);
+
+          if (ret < 0)
+            {
+              continue;
+            }
+
+          else if (sval < 0
+#ifdef CONFIG_CAN_ERRORS
+                && hdr->ch_error == false
+#endif
+#ifdef CONFIG_CAN_EXTID
+                && waitmsg->cm_hdr.ch_extid == hdr->ch_extid
+#endif
+                && waitmsg->cm_hdr.ch_id == hdr->ch_id)
             {
               int nbytes;
 
               /* We have the response... copy the data to the user's buffer */
 
-              memcpy(&msg->cm_hdr, hdr, sizeof(struct can_hdr_s));
+              memcpy(&waitmsg->cm_hdr, hdr, sizeof(struct can_hdr_s));
 
               nbytes = can_dlc2bytes(hdr->ch_dlc);
-              for (i = 0, dest = msg->cm_data; i < nbytes; i++)
+              for (i = 0, dest = waitmsg->cm_data; i < nbytes; i++)
                 {
                   *dest++ = *data++;
                 }
 
-              /* Mark the entry unused */
-
-              rtr->cr_msg = NULL;
               dev->cd_npendrtr--;
 
-              /* And restart the waiting thread */
+              /* Restart the waiting thread and mark the entry unused */
 
-              can_givesem(&rtr->cr_sem);
+              can_givesem(&wait->cr_sem);
             }
         }
     }
@@ -1305,7 +1374,6 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
       if (nexttail != fifo->rx_head)
         {
           int nbytes;
-          int sval;
 
           /* Add the new, decoded CAN message at the tail of the FIFO.
            *

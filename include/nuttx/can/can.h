@@ -47,6 +47,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include <nuttx/list.h>
 #include <nuttx/fs/fs.h>
@@ -113,8 +114,23 @@
 /* Ioctl commands supported by the upper half CAN driver.
  *
  * CANIOC_RTR:
- *   Description:  Send the remote transmission request and wait for the response.
- *   Argument:     A reference to struct canioc_rtr_s
+ *   Description:    Send the given message as a remote request. On sucessful
+ *                   return, the passed message structure is updated with
+ *                   the contents of the received message; i.e. the message
+ *                   ID and the standard/extended ID indication bit stay the
+ *                   same, but the DLC and data bits are updated with the
+ *                   contents of the received message. If no response is
+ *                   received after the specified timeout, ioctl will return.
+ *
+ *                   Note: Lower-half drivers that do not implement
+ *                         CONFIG_CAN_USE_RTR and implement co_remoterequest
+ *                         will result in EINVAL if this ioctl is called
+ *                         with an extended-ID message.
+ *
+ *   Argument:       A pointer to struct canioc_rtr_s
+ *   Returned Value: Zero (OK) is returned on success. Otherwise, -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error (for example, ETIMEDOUT)
  *
  * Ioctl commands that may or may not be supported by the lower half CAN driver.
  *
@@ -502,8 +518,7 @@ struct can_txfifo_s
 
 struct can_rtrwait_s
 {
-  sem_t         cr_sem;                  /* Wait for RTR response */
-  uint16_t      cr_id;                   /* The ID that is waited for */
+  sem_t         cr_sem;                  /* Wait for response/is the cd_rtr entry available */
   FAR struct can_msg_s *cr_msg;          /* This is where the RTR response goes */
 };
 
@@ -547,7 +562,13 @@ struct can_ops_s
 
   CODE int (*co_ioctl)(FAR struct can_dev_s *dev, int cmd, unsigned long arg);
 
-  /* Send a remote request */
+  /* Send a remote request. Lower-half drivers should NOT implement this if
+   * they support sending RTR messages with the regular send function
+   * (i.e. CONFIG_CAN_USE_RTR). Instead, they should mention CAN_USE_RTR
+   * in their Kconfig help and set this to NULL to indicate that the normal
+   * send function should be used instead. Lower-half drivers must implement
+   * either this or CONFIG_CAN_USE_RTR to support CANIOC_RTR.
+   */
 
   CODE int (*co_remoterequest)(FAR struct can_dev_s *dev, uint16_t id);
 
@@ -611,8 +632,21 @@ struct can_dev_s
 
 struct canioc_rtr_s
 {
-  uint16_t              ci_id;           /* The 11-bit ID to use in the RTR message */
-  FAR struct can_msg_s *ci_msg;          /* The location to return the RTR response */
+  /* How long to wait for the response */
+
+  struct timespec       ci_timeout;
+
+  /* The location to return the RTR response. The arbitration fields
+   * (i.e. message ID and extended ID indication, if applicable) should be
+   * set to the values the driver will watch for. On return from the ioctl,
+   * the DLC and data fields will be updated by the received message.
+   *
+   * The block of memory must be large enough to hold an message of size
+   * CAN_MSGLEN(CAN_MAXDATALEN) even if a smaller DLC is requested, since
+   * the response DLC may not match the requested one.
+   */
+
+  FAR struct can_msg_s *ci_msg;
 };
 
 /* CANIOC_GET_BITTIMING/CANIOC_SET_BITTIMING:
