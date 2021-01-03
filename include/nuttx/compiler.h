@@ -155,6 +155,7 @@
 #  define printflike(a, b) __attribute__((__format__ (__printf__, a, b)))
 #  define sysloglike(a, b) __attribute__((__format__ (__syslog__, a, b)))
 #  define scanflike(a, b) __attribute__((__format__ (__scanf__, a, b)))
+#  define strftimelike(a) __attribute__((__format__ (__strftime__, a, 0)))
 
 /* GCC does not use storage classes to qualify addressing */
 
@@ -374,6 +375,7 @@
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
+#  define strftimelike(a)
 
 /* The reentrant attribute informs SDCC that the function
  * must be reentrant.  In this case, SDCC will store input
@@ -504,6 +506,7 @@
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
+#  define strftimelike(a)
 
 /* REVISIT: */
 
@@ -607,6 +610,7 @@
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
+#  define strftimelike(a)
 
 #  define FAR
 #  define NEAR
@@ -665,6 +669,7 @@
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
+#  define strftimelike(a)
 
 #  define FAR
 #  define NEAR
