@@ -1499,6 +1499,7 @@ int nx_unlink(FAR const char *pathname);
  ****************************************************************************/
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
+int file_pipe(FAR struct file *filep[2], size_t bufsize, int flags);
 int nx_pipe(int fd[2], size_t bufsize, int flags);
 #endif
 
