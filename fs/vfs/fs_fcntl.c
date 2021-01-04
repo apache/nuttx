@@ -53,29 +53,14 @@
 #include "inode/inode.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: file_vfcntl
- *
- * Description:
- *   Similar to the standard vfcntl function except that is accepts a struct
- *   struct file instance instead of a file descriptor.
- *
- * Input Parameters:
- *   filep - Instance for struct file for the opened file.
- *   cmd   - Identifies the operation to be performed.
- *   ap    - Variable argument following the command.
- *
- * Returned Value:
- *   The nature of the return value depends on the command.  Non-negative
- *   values indicate success.  Failures are reported as negated errno
- *   values.
- *
  ****************************************************************************/
 
-int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
+static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 {
   int ret = -EINVAL;
 
@@ -245,64 +230,10 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 }
 
 /****************************************************************************
- * Name: file_fcntl
- *
- * Description:
- *   Similar to the standard fcntl function except that is accepts a struct
- *   struct file instance instead of a file descriptor.
- *
- * Input Parameters:
- *   filep - Instance for struct file for the opened file.
- *   cmd   - Identifies the operation to be performed.  Command specific
- *           arguments may follow.
- *
- * Returned Value:
- *   The nature of the return value depends on the command.  Non-negative
- *   values indicate success.  Failures are reported as negated errno
- *   values.
- *
+ * Name: nx_vfcntl
  ****************************************************************************/
 
-int file_fcntl(FAR struct file *filep, int cmd, ...)
-{
-  va_list ap;
-  int ret;
-
-  /* Setup to access the variable argument list */
-
-  va_start(ap, cmd);
-
-  /* Let file_vfcntl() do the real work.  The errno is not set on
-   * failures.
-   */
-
-  ret = file_vfcntl(filep, cmd, ap);
-
-  va_end(ap);
-  return ret;
-}
-
-/****************************************************************************
- * Name: nx_fcntl and nx_vfcntl
- *
- * Description:
- *   nx_fcntl() is similar to the standard 'fcntl' interface except that is
- *   not a cancellation point and it does not modify the errno variable.
- *
- *   nx_vfcntl() is identical except that it accepts a va_list as an argument
- *   versus taking a variable length list of arguments.
- *
- *   nx_fcntl() and nx_vfcntl are internal NuttX interface and should not be
- *   called from applications.
- *
- * Returned Value:
- *   Returns a non-negative number on success;  A negated errno value is
- *   returned on any failure (see comments fcntl() for a list of appropriate
- *   errno values).
- *
- ****************************************************************************/
-
-int nx_vfcntl(int fd, int cmd, va_list ap)
+static int nx_vfcntl(int fd, int cmd, va_list ap)
 {
   FAR struct file *filep;
   int ret;
@@ -349,6 +280,65 @@ int nx_vfcntl(int fd, int cmd, va_list ap)
 
   return ret;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: file_fcntl
+ *
+ * Description:
+ *   Similar to the standard fcntl function except that is accepts a struct
+ *   struct file instance instead of a file descriptor.
+ *
+ * Input Parameters:
+ *   filep - Instance for struct file for the opened file.
+ *   cmd   - Identifies the operation to be performed.  Command specific
+ *           arguments may follow.
+ *
+ * Returned Value:
+ *   The nature of the return value depends on the command.  Non-negative
+ *   values indicate success.  Failures are reported as negated errno
+ *   values.
+ *
+ ****************************************************************************/
+
+int file_fcntl(FAR struct file *filep, int cmd, ...)
+{
+  va_list ap;
+  int ret;
+
+  /* Setup to access the variable argument list */
+
+  va_start(ap, cmd);
+
+  /* Let file_vfcntl() do the real work.  The errno is not set on
+   * failures.
+   */
+
+  ret = file_vfcntl(filep, cmd, ap);
+
+  va_end(ap);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nx_fcntl
+ *
+ * Description:
+ *   nx_fcntl() is similar to the standard 'fcntl' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_fcntl() is an internal NuttX interface and should not be called
+ *   from applications.
+ *
+ * Returned Value:
+ *   Returns a non-negative number on success;  A negated errno value is
+ *   returned on any failure (see comments fcntl() for a list of appropriate
+ *   errno values).
+ *
+ ****************************************************************************/
 
 int nx_fcntl(int fd, int cmd, ...)
 {
