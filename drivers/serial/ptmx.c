@@ -166,9 +166,9 @@ static int ptmx_minor_allocate(void)
 
 static int ptmx_open(FAR struct file *filep)
 {
+  struct file temp;
   char devname[16];
   int minor;
-  int fd;
   int ret;
 
   /* Get exclusive access */
@@ -205,23 +205,25 @@ static int ptmx_open(FAR struct file *filep)
   /* Open the master device:  /dev/ptyN, where N=minor */
 
   snprintf(devname, 16, "/dev/pty%d", minor);
-  fd = nx_open(devname, O_RDWR);
-  DEBUGASSERT(fd >= 0);  /* nx_open() should never fail */
+  memcpy(&temp, filep, sizeof(temp));
+  ret = file_open(filep, devname, O_RDWR);
+  DEBUGASSERT(ret >= 0);  /* open() should never fail */
 
-  /* No unlink the master.  This will remove it from the VFS namespace,
+  /* Close the multiplexor device: /dev/ptmx */
+
+  ret = file_close(&temp);
+  DEBUGASSERT(ret >= 0);  /* close() should never fail */
+
+  /* Now unlink the master.  This will remove it from the VFS namespace,
    * the driver will still persist because of the open count on the
    * driver.
    */
 
-  ret = unlink(devname);
+  ret = nx_unlink(devname);
   DEBUGASSERT(ret >= 0);  /* unlink() should never fail */
-  UNUSED(ret);
-
-  /* Return the encoded, master file descriptor */
 
   nxsem_post(&g_ptmx.px_exclsem);
-  DEBUGASSERT((unsigned)fd <= OPEN_MAXFD);
-  return (int)OPEN_SETFD(fd);
+  return OK;
 
 errout_with_minor:
   ptmx_minor_free(minor);
