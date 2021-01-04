@@ -157,36 +157,6 @@
 #define DIRENT_SETPSEUDONODE(f) do (f) |= DIRENTFLAGS_PSEUDONODE; while (0)
 #define DIRENT_ISPSEUDONODE(f) (((f) & DIRENTFLAGS_PSEUDONODE) != 0)
 
-/* The struct file_operations open(0) normally returns zero on success and
- * a negated errno value on failure.  There is one case, however, where
- * the open method will redirect to another driver and return a file
- * descriptor instead.
- *
- * This case is when SUSv1 pseudo-terminals are used
- * (CONFIG_PSEUDOTERM_SUSV1=y).  In this case, the output is encoded and
- * decoded using these macros in order to support (a) returning file
- * descriptor 0 (which really should not happen), and (b) avoiding
- * confusion if some other open method returns a positive, non-zero value
- * hich is not a file descriptor.
- *
- *   OPEN_ISFD(r) tests if the return value from the open method is
- *     really a file descriptor.
- *   OPEN_SETFD(f) is used by an implementation of the open() method
- *     in order to encode a file descriptor in the return value.
- *   OPEN_GETFD(r) is use by the upper level open() logic to decode
- *     the file descriptor encoded in the return value.
- *
- * REVISIT: This only works for file descriptors in the in range 0-255.
- */
-
-#define OPEN_MAGIC      0x4200
-#define OPEN_MASK       0x00ff
-#define OPEN_MAXFD      0x00ff
-
-#define OPEN_ISFD(r)    (((r) & ~OPEN_MASK) == OPEN_MAGIC)
-#define OPEN_SETFD(f)   ((f) | OPEN_MAGIC)
-#define OPEN_GETFD(r)   ((r) & OPEN_MASK)
-
 /* nx_umount() is equivalent to nx_umount2() with flags = 0 */
 
 #define umount(t)       umount2(t,0)
