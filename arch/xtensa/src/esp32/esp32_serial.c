@@ -1154,10 +1154,13 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
 
 static bool esp32_txready(struct uart_dev_s *dev)
 {
+  uint32_t txcnt;
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
 
-  return ((esp32_serialin(priv, UART_STATUS_OFFSET) & UART_TXFIFO_CNT_M) <
-          0x7f);
+  txcnt = (esp32_serialin(priv, UART_STATUS_OFFSET) >> UART_TXFIFO_CNT_S) &
+          UART_TXFIFO_CNT_V;
+
+  return txcnt < 0x7f;
 }
 
 /****************************************************************************
