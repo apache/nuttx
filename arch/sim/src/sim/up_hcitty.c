@@ -121,7 +121,7 @@ static void bthcitty_pollnotify(FAR struct bthcitty_s *dev,
   ret = nxsem_wait_uninterruptible(&dev->fdslock);
   if (ret < 0)
     {
-      return ret;
+      return;
     }
 
   for (i = 0; i < CONFIG_HCI_NPOLLWAITERS; i++)
