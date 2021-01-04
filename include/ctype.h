@@ -143,7 +143,7 @@ int isgraph(int c);
 #ifdef __cplusplus
 static inline int iscntrl(int c)
 {
-  return !isprint(c);
+  return c < 0x20 || c == 0x7f;
 }
 #else
 int iscntrl(int c);
