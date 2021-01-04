@@ -72,8 +72,8 @@ $(CXXOBJS): %$(OBJEXT): %.cxx
 $(CPPOBJS): %$(OBJEXT): %.cpp
 	$(call COMPILEXX, $<, $@)
 
-$(BIN):	$(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+$(BIN): $(OBJS)
+	$(call ARCHIVE, $@, $^)
 
 dirlinks::
 

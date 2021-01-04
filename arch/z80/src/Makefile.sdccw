@@ -129,7 +129,7 @@ asm_mem.h:
 # Combine all objects in this directory into a library
 
 libarch$(LIBEXT): asm_mem.h $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+	$(call ARCHIVE, $@, $(filter-out asm_mem.h, $^))
 
 # This builds the libboard library in the board\ subdirectory
 
