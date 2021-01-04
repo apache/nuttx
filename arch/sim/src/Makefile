@@ -282,7 +282,7 @@ $(HOSTOBJS): %$(OBJEXT): %.c
 # The architecture-specific library
 
 libarch$(LIBEXT): $(NUTTXOBJS)
-	$(call ARCHIVE, $@, $(NUTTXOBJS))
+	$(call ARCHIVE, $@, $^)
 
 # The "board"-specific library. Of course, there really are no boards in
 # the simulation.  However, this is a good place to keep parts of the simulation
@@ -318,9 +318,10 @@ nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(LINKOBJS) $(HOSTOBJS)
 	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' -e 's/__init_array_start/_sinit/g' \
 	         -e 's/__init_array_end/_einit/g' -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
 	$(Q) echo "__init_array_start = .; __init_array_end = .; __fini_array_start = .; __fini_array_end = .;" >>nuttx.ld
+	$(eval _HOSTOBJS=$(filter-out libarch$(LIBEXT) board/libboard$(LIBEXT) $(LINKOBJS) nuttx-names.dat, $^))
 	$(if $(CONFIG_HAVE_CXX),\
-	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS),\
-	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS))
+	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(_HOSTOBJS) $(DRVLIB) $(STDLIBS),\
+	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(_HOSTOBJS) $(DRVLIB) $(STDLIBS))
 	$(Q) $(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map
