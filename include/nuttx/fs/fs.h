@@ -835,22 +835,17 @@ int nx_dup2(int fd1, int fd2);
  *
  ****************************************************************************/
 
-int file_vopen(FAR struct file *filep,
-               FAR const char *path, int oflags, va_list ap);
 int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...);
 
 /****************************************************************************
- * Name: nx_open and nx_vopen
+ * Name: nx_open
  *
  * Description:
  *   nx_open() is similar to the standard 'open' interface except that is is
  *   not a cancellation point and it does not modify the errno variable.
  *
- *   nx_vopen() is identical except that it accepts a va_list as an argument
- *   versus taking a variable length list of arguments.
- *
- *   nx_open() and nx_vopen are internal NuttX interface and should not be
- *   called from applications.
+ *   nx_open() is an internal NuttX interface and should not be called
+ *   from applications.
  *
  * Returned Value:
  *   The new file descriptor is returned on success; a negated errno value is
@@ -858,7 +853,6 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...);
  *
  ****************************************************************************/
 
-int nx_vopen(FAR const char *path, int oflags, va_list ap);
 int nx_open(FAR const char *path, int oflags, ...);
 
 /****************************************************************************
@@ -1190,7 +1184,7 @@ int file_truncate(FAR struct file *filep, off_t length);
 #endif
 
 /****************************************************************************
- * Name: file_ioctl and file_vioctl
+ * Name: file_ioctl
  *
  * Description:
  *   Perform device specific operations.
@@ -1207,11 +1201,10 @@ int file_truncate(FAR struct file *filep, off_t length);
  *
  ****************************************************************************/
 
-int file_vioctl(FAR struct file *filep, int req, va_list ap);
 int file_ioctl(FAR struct file *filep, int req, ...);
 
 /****************************************************************************
- * Name: nx_ioctl and nx_vioctl
+ * Name: nx_ioctl
  *
  * Description:
  *   nx_ioctl() is similar to the standard 'ioctl' interface except that is
@@ -1227,29 +1220,7 @@ int file_ioctl(FAR struct file *filep, int req, ...);
  *
  ****************************************************************************/
 
-int nx_vioctl(int fd, int req, va_list ap);
 int nx_ioctl(int fd, int req, ...);
-
-/****************************************************************************
- * Name: file_vfcntl
- *
- * Description:
- *   Similar to the standard vfcntl function except that is accepts a struct
- *   struct file instance instead of a file descriptor.
- *
- * Input Parameters:
- *   filep - Instance for struct file for the opened file.
- *   cmd   - Identifies the operation to be performed.
- *   ap    - Variable argument following the command.
- *
- * Returned Value:
- *   The nature of the return value depends on the command.  Non-negative
- *   values indicate success.  Failures are reported as negated errno
- *   values.
- *
- ****************************************************************************/
-
-int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
 
 /****************************************************************************
  * Name: file_fcntl
@@ -1273,17 +1244,14 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
 int file_fcntl(FAR struct file *filep, int cmd, ...);
 
 /****************************************************************************
- * Name: nx_fcntl and nx_vfcntl
+ * Name: nx_fcntl
  *
  * Description:
  *   nx_fcntl() is similar to the standard 'fcntl' interface except that is
  *   not a cancellation point and it does not modify the errno variable.
  *
- *   nx_vfcntl() is identical except that it accepts a va_list as an argument
- *   versus taking a variable length list of arguments.
- *
- *   nx_fcntl() and nx_vfcntl are internal NuttX interface and should not be
- *   called from applications.
+ *   nx_fcntl() is an internal NuttX interface and should not be called
+ *   from applications.
  *
  * Returned Value:
  *   Returns a non-negative number on success;  A negated errno value is
@@ -1292,7 +1260,6 @@ int file_fcntl(FAR struct file *filep, int cmd, ...);
  *
  ****************************************************************************/
 
-int nx_vfcntl(int fd, int cmd, va_list ap);
 int nx_fcntl(int fd, int cmd, ...);
 
 /****************************************************************************

@@ -55,48 +55,15 @@
 #include "driver/driver.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: inode_checkflags
- *
- * Description:
- *   Check if the access described by 'oflags' is supported on 'inode'
- *
- ****************************************************************************/
-
-int inode_checkflags(FAR struct inode *inode, int oflags)
-{
-  if (((oflags & O_RDOK) != 0 && !inode->u.i_ops->read) ||
-      ((oflags & O_WROK) != 0 && !inode->u.i_ops->write))
-    {
-      return -EACCES;
-    }
-  else
-    {
-      return OK;
-    }
-}
 
 /****************************************************************************
  * Name: file_vopen
- *
- * Description:
- *   file_vopen() is identical to 'file_open' except that it accepts va_list
- *   as an argument versus taking a variable length list of arguments.
- *
- *   file_vopen() is an internal NuttX interface and should not be called
- *   from applications.
- *
- * Returned Value:
- *   Zero (OK) is returned on success.  On failure, a negated errno value is
- *   returned.
- *
  ****************************************************************************/
 
-int file_vopen(FAR struct file *filep,
-               FAR const char *path, int oflags, va_list ap)
+static int file_vopen(FAR struct file *filep,
+                      FAR const char *path, int oflags, va_list ap)
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
@@ -237,6 +204,62 @@ errout_with_search:
 }
 
 /****************************************************************************
+ * Name: nx_vopen
+ ****************************************************************************/
+
+static int nx_vopen(FAR const char *path, int oflags, va_list ap)
+{
+  struct file filep;
+  int ret;
+  int fd;
+
+  /* Let file_vopen() do all of the work */
+
+  ret = file_vopen(&filep, path, oflags, ap);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Allocate a new file descriptor for the inode */
+
+  fd = files_allocate(filep.f_inode, filep.f_oflags,
+                      filep.f_pos, filep.f_priv, 0);
+  if (fd < 0)
+    {
+      file_close(&filep);
+      return fd;
+    }
+
+  return fd;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: inode_checkflags
+ *
+ * Description:
+ *   Check if the access described by 'oflags' is supported on 'inode'
+ *
+ ****************************************************************************/
+
+int inode_checkflags(FAR struct inode *inode, int oflags)
+{
+  if (((oflags & O_RDOK) != 0 && !inode->u.i_ops->read) ||
+      ((oflags & O_WROK) != 0 && !inode->u.i_ops->write))
+    {
+      return -EACCES;
+    }
+  else
+    {
+      return OK;
+    }
+}
+
+/****************************************************************************
  * Name: file_open
  *
  * Description:
@@ -267,49 +290,6 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
   va_end(ap);
 
   return ret;
-}
-
-/****************************************************************************
- * Name: nx_vopen
- *
- * Description:
- *   nx_vopen() is identical to 'nx_open' except that it accepts a va_list
- *   as an argument versus taking a variable length list of arguments.
- *
- *   nx_vopen() is an internal NuttX interface and should not be called from
- *   applications.
- *
- * Returned Value:
- *   The new file descriptor is returned on success; a negated errno value is
- *   returned on any failure.
- *
- ****************************************************************************/
-
-int nx_vopen(FAR const char *path, int oflags, va_list ap)
-{
-  struct file filep;
-  int ret;
-  int fd;
-
-  /* Let file_vopen() do all of the work */
-
-  ret = file_vopen(&filep, path, oflags, ap);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Allocate a new file descriptor for the inode */
-
-  fd = files_allocate(filep.f_inode, filep.f_oflags,
-                      filep.f_pos, filep.f_priv, 0);
-  if (fd < 0)
-    {
-      file_close(&filep);
-      return fd;
-    }
-
-  return fd;
 }
 
 /****************************************************************************

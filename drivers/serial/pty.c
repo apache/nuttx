@@ -47,8 +47,8 @@
  *    or sink pipe file structures before each file_read() or file_write()
  *    operation to assure that the O_NONBLOCK is set correctly when the
  *    pipe read or write operation is performed.  This might be done with
- *    file_vfcntl() (there is no file_fcntl(), yet) or directly into the
- *    source/sink file structure oflags mode settings.
+ *    file_fcntl() or directly into the source/sink file structure oflags
+ *    mode settings.
  *
  *    This would require (1) the ability to lock each pipe individually,
  *    setting the blocking mode for the source or sink pipe to match the
@@ -549,7 +549,7 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
                *
                * REVISIT: Should not block if the oflags include O_NONBLOCK.
                * How would we ripple the O_NONBLOCK characteristic to the
-               * contained source pipe?  file_vfcntl()?  Or FIONREAD? See the
+               * contained source pipe?  file_fcntl()?  Or FIONREAD? See the
                * TODO comment at the top of this file.
                */
 
@@ -602,7 +602,7 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
        *
        * REVISIT: Should not block if the oflags include O_NONBLOCK.
        * How would we ripple the O_NONBLOCK characteristic to the
-       * contained source pipe? file_vfcntl()?  Or FIONREAD?  See the
+       * contained source pipe? file_fcntl()?  Or FIONREAD?  See the
        * TODO comment at the top of this file.
        */
 
@@ -670,7 +670,7 @@ static ssize_t pty_write(FAR struct file *filep,
                *
                * REVISIT: Should not block if the oflags include O_NONBLOCK.
                * How would we ripple the O_NONBLOCK characteristic to the
-               * contained sink pipe?  file_vfcntl()?  Or FIONSPACE?  See the
+               * contained sink pipe?  file_fcntl()?  Or FIONSPACE?  See the
                * TODO comment at the top of this file.
                *
                * NOTE: The newline is not included in total number of bytes
@@ -691,7 +691,7 @@ static ssize_t pty_write(FAR struct file *filep,
            *
            * REVISIT: Should not block if the oflags include O_NONBLOCK.
            * How would we ripple the O_NONBLOCK characteristic to the
-           * contained sink pipe?  file_vfcntl()?  Or FIONSPACe?  See the
+           * contained sink pipe?  file_fcntl()?  Or FIONSPACe?  See the
            * TODO comment at the top of this file.
            */
 
@@ -715,7 +715,7 @@ static ssize_t pty_write(FAR struct file *filep,
        *
        * REVISIT: Should not block if the oflags include O_NONBLOCK.
        * How would we ripple the O_NONBLOCK characteristic to the
-       * contained sink pipe?  file_vfcntl()?  Or FIONSPACE?  See the
+       * contained sink pipe?  file_fcntl()?  Or FIONSPACE?  See the
        * TODO comment at the top of this file.
        */
 
