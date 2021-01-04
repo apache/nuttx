@@ -189,7 +189,7 @@ fi
 
 if [ -r ${dest_config} ]; then
   if [ "X${enforce_distclean}" = "Xy" ]; then
-    make -C ${TOPDIR} distclean $*
+    make -C ${TOPDIR} distclean
   else
     if cmp -s ${src_config} ${backup_config}; then
       echo "No configuration change."
@@ -197,7 +197,7 @@ if [ -r ${dest_config} ]; then
     fi
 
     if [ "X${distclean}" = "Xy" ]; then
-      make -C ${TOPDIR} distclean $*
+      make -C ${TOPDIR} distclean
     else
       echo "Already configured!"
       echo "Please 'make distclean' and try again."
