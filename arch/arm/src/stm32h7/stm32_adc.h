@@ -1,7 +1,8 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/stm32_adc.h
  *
- *   Copyright (C) 2009, 2011, 2015-2017,2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2015-2017,2019 Gregory Nutt. All rights
+ *   reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
@@ -34,30 +35,32 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_STM32_ADC_H
 #define __ARCH_ARM_SRC_STM32H7_STM32_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/analog/adc.h>
 #include "chip.h"
 #include "hardware/stm32_adc.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
 
-/* Timer devices may be used for different purposes.  One special purpose is to
- * control periodic ADC sampling.  If CONFIG_STM32H7_TIMn is defined then
- * CONFIG_STM32H7_TIMn_ADC must also be defined to indicate that timer "n" is
- * intended to be used for that purpose. Timers 1,2,3,6 and 15 may be used on
- * STM32H7X3, while STM32H7X6 adds support for timers 4 and 8 as well.
+/* Configuration ************************************************************/
+
+/* Timer devices may be used for different purposes.  One special purpose is
+ * to control periodic ADC sampling.  If CONFIG_STM32H7_TIMn is defined then
+ * CONFIG_STM32H7_TIMn_ADC must also be defined to indicate that timer "n"
+ * is intended to be used for that purpose. Timers 1,2,3,6 and 15 may be
+ * used on STM32H7X3, while STM32H7X6 adds support for timers 4 and 8 as
+ * well.
  */
 
 #ifndef CONFIG_STM32H7_TIM1
@@ -469,7 +472,6 @@
 #define ADC3_EXTSEL_T15CC4     ADC_CFGR_EXTSEL_T15CC4
 #define ADC3_EXTSEL_T15TRGO    ADC_CFGR_EXTSEL_T15TRGO
 
-
 #if defined(CONFIG_STM32H7_TIM1_ADC1)
 #  if CONFIG_STM32H7_ADC1_TIMTRIG == 0
 #    define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T1CC1
@@ -782,13 +784,13 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
