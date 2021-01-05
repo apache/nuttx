@@ -296,7 +296,7 @@ done
 
 if [ "X${defappdir}" = "Xy" ]; then
   # In-place edit can mess up permissions on Windows
-  # sed -i -e "/^CONFIG_APPS_DIR/d" "${dest_config}"
+  # sed -i.bak -e "/^CONFIG_APPS_DIR/d" "${dest_config}"
   sed -e "/^CONFIG_APPS_DIR/d" "${dest_config}" > "${dest_config}-temp"
   mv "${dest_config}-temp" "${dest_config}"
 

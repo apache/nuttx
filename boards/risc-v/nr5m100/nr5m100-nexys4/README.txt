@@ -143,7 +143,7 @@ Debugger
      shadowed variable warnings, so disable the -Werror flag also:
 
      cd openocd
-     sed -i 's/ -Werror//g' configure.ac
+     sed -i.bak 's/ -Werror//g' configure.ac
      ./bootstrap
      ./configure  --enable-jlink --enable-maintainer-mode --enable-ftdi --prefix=~/riscv CFLAGS=-g
 
