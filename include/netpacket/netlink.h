@@ -46,6 +46,8 @@
 #include <sys/socket.h>
 #include <stdint.h>
 
+#include <netpacket/if_addr.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -291,21 +293,6 @@
 #define RTM_BASE             16
 #define RTM_MAX              67
 
-/* Definitions for struct ifaddrmsg  ****************************************/
-
-#define IFA_RTA(r)          ((FAR struct rtattr *) \
-                             (((FAR char *)(r)) + \
-                              NLMSG_ALIGN(sizeof(struct ifaddrmsg))))
-#define IFA_PAYLOAD(n)      NLMSG_PAYLOAD(n, sizeof(struct ifaddrmsg))
-
-/* ifa_flags definitions:  ifa_flags is a flag word of IFA_F_SECONDARY for
- * secondary address (old alias interface), IFA_F_PERMANENT for a permanent
- * address set by the user and other undocumented flags.
- */
-
-#define IFA_F_SECONDARY      0x01
-#define IFA_F_PERMANENT      0x80
-
 /* Definitions for struct ifinfomsg *****************************************/
 
 #define IFLA_RTA(r)          ((FAR struct rtattr *) \
@@ -481,22 +468,6 @@ struct ifinfomsg
 struct rtgenmsg
 {
   uint8_t  rtgen_family;
-};
-
-/* RTM_NEWADDR, RTM_DELADDR, RTM_GETADDR
- *
- * Add, remove or receive information about an IP address associated with
- * an interface.  These messages contain an ifaddrmsg structure, optionally
- * followed by rtattr routing attributes.
- */
-
-struct ifaddrmsg
-{
-  uint8_t  ifa_family;    /* Address type:  AF_INET or AF_INET6 */
-  uint8_t  ifa_prefixlen; /* Prefix length of address */
-  uint8_t  ifa_flags;     /* Address flags.  See IFA_F_* definitions */
-  uint8_t  ifa_scope;     /* Address scope */
-  int32_t  ifa_index;     /* Unique interface index */
 };
 
 /* RTM_NEWNEIGH, RTM_DELNEIGH, RTM_GETNEIGH
