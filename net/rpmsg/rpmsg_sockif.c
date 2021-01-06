@@ -283,11 +283,23 @@ static int rpmsg_socket_wakeup(FAR struct rpmsg_socket_conn_s *conn)
 static int rpmsg_socket_sync(FAR struct rpmsg_socket_conn_s *conn)
 {
   struct rpmsg_socket_sync_s msg;
+  int ret;
 
   msg.cmd  = RPMSG_SOCKET_CMD_SYNC;
   msg.size = circbuf_size(&conn->recvbuf);
 
-  return rpmsg_send(&conn->ept, &msg, sizeof(msg));
+  ret = rpmsg_send(&conn->ept, &msg, sizeof(msg));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (conn->sendsize == 0)
+    {
+      ret = net_timedwait(&conn->sendsem, _SO_TIMEOUT(psock->s_rcvtimeo));
+    }
+
+  return ret;
 }
 
 static inline uint32_t rpmsg_socket_get_space(
@@ -503,7 +515,7 @@ static int rpmsg_socket_getaddr(FAR struct rpmsg_socket_conn_s *conn,
                                 FAR struct sockaddr *addr,
                                 FAR socklen_t *addrlen)
 {
-  if (*addrlen < sizeof(struct sockaddr_rpmsg))
+  if (!addr || *addrlen < sizeof(struct sockaddr_rpmsg))
     {
       return -EINVAL;
     }
@@ -721,10 +733,7 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
           newsock->s_conn   = conn;
           newsock->s_crefs  = 1;
 
-          if (addr)
-            {
-              rpmsg_socket_getaddr(conn, addr, addrlen);
-            }
+          rpmsg_socket_getaddr(conn, addr, addrlen);
 
           break;
         }
@@ -1112,21 +1121,21 @@ static ssize_t rpmsg_socket_recvfrom(FAR struct socket *psock,
   if (ret > 0)
     {
       rpmsg_socket_wakeup(conn);
-      rpmsg_socket_unlock(&conn->recvlock);
-      return ret;
+      goto out;
     }
 
   if (!conn->ept.rdev)
     {
       /* return EOF if lower IPC closed */
 
-      return 0;
+      ret = 0;
+      goto out;
     }
 
   if (_SS_ISNONBLOCK(psock->s_flags))
     {
-      rpmsg_socket_unlock(&conn->recvlock);
-      return -EAGAIN;
+      ret = -EAGAIN;
+      goto out;
     }
 
   conn->recvdata = buf;
@@ -1152,7 +1161,14 @@ static ssize_t rpmsg_socket_recvfrom(FAR struct socket *psock,
       conn->recvdata = NULL;
     }
 
+out:
   rpmsg_socket_unlock(&conn->recvlock);
+
+  if (ret > 0)
+    {
+      rpmsg_socket_getaddr(conn, from, fromlen);
+    }
+
   return ret;
 }
 
