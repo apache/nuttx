@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/stm32_dma.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_STM32_DMA_H
 #define __ARCH_ARM_SRC_STM32H7_STM32_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -46,8 +46,8 @@
 #include "hardware/stm32_dma.h"
 #include "hardware/stm32_dmamux.h"
 
-/* These definitions provide the bit encoding of the 'status' parameter passed to the
- * DMA callback function (see dma_callback_t).
+/* These definitions provide the bit encoding of the 'status' parameter
+ * passed to the DMA callback function (see dma_callback_t).
  */
 
 #define DMA_STATUS_FEIF           0                    /* Stream FIFO error (ignored) */
@@ -56,12 +56,12 @@
 #define DMA_STATUS_HTIF           DMA_STREAM_HTIF_BIT  /* Stream Half Transfer */
 #define DMA_STATUS_TCIF           DMA_STREAM_TCIF_BIT  /* Stream Transfer Complete */
 
-#define DMA_STATUS_ERROR          (DMA_STATUS_FEIF|DMA_STATUS_DMEIF|DMA_STATUS_TEIF)
-#define DMA_STATUS_SUCCESS        (DMA_STATUS_TCIF|DMA_STATUS_HTIF)
+#define DMA_STATUS_ERROR          (DMA_STATUS_FEIF | DMA_STATUS_DMEIF | DMA_STATUS_TEIF)
+#define DMA_STATUS_SUCCESS        (DMA_STATUS_TCIF | DMA_STATUS_HTIF)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* DMA channel configuration - common for DMA1 DMA2 MDMA and BDMA */
 
@@ -84,7 +84,7 @@ struct stm32_dma_config_s
 
 typedef struct stm32_dma_config_s stm32_dmacfg_t;
 
-/* DMA_HANDLE Provides an opaque are reference that can be used to represent a DMA
+/* DMA_HANDLE Provides an opaque are reference that can be used to represent
  * a DMA stream.
  */
 
@@ -92,23 +92,23 @@ typedef FAR void *DMA_HANDLE;
 
 /* Description:
  *   This is the type of the callback that is used to inform the user of the
- *   completion of the DMA.  NOTE:  The DMA module does *NOT* perform any cache
- *   operations.  It is the responsibility of the DMA client to invalidate DMA
- *   buffers after completion of the DMA RX operations.
+ *   completion of the DMA.  NOTE:  The DMA module does *NOT* perform any
+ *   cache operations.  It is the responsibility of the DMA client to
+ *   invalidate DMA buffers after completion of the DMA RX operations.
  *
  * Input Parameters:
  *   handle - Refers tot he DMA channel or stream
- *   status - A bit encoded value that provides the completion status.  See the
- *            DMASTATUS_* definitions above.
- *   arg    - A user-provided value that was provided when stm32_dmastart() was
- *            called.
+ *   status - A bit encoded value that provides the completion status.  See
+ *            the DMASTATUS_* definitions above.
+ *   arg    - A user-provided value that was provided when stm32_dmastart()
+ *            was called.
  */
 
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -121,9 +121,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_dmachannel
@@ -160,7 +160,8 @@ DMA_HANDLE stm32_dmachannel(unsigned int dmamap);
  *   Release a DMA channel and unmap DMAMUX if required.
  *
  *   NOTE:  The 'handle' used in this argument must NEVER be used again
- *   until stm32_dmachannel() is called again to re-gain access to the channel.
+ *   until stm32_dmachannel() is called again to re-gain access to the
+ *   channel.
  *
  * Returned Value:
  *   None
