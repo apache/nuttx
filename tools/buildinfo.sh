@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-echo "ram.build.version=$RELEASE_ID"
+echo "ro.build.version=$RELEASE_ID"
