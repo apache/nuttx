@@ -280,7 +280,8 @@ static int rpmsg_socket_wakeup(FAR struct rpmsg_socket_conn_s *conn)
   return ret;
 }
 
-static int rpmsg_socket_sync(FAR struct rpmsg_socket_conn_s *conn)
+static int rpmsg_socket_sync(FAR struct rpmsg_socket_conn_s *conn,
+                             unsigned int timeout)
 {
   struct rpmsg_socket_sync_s msg;
   int ret;
@@ -296,7 +297,7 @@ static int rpmsg_socket_sync(FAR struct rpmsg_socket_conn_s *conn)
 
   if (conn->sendsize == 0)
     {
-      ret = net_timedwait(&conn->sendsem, _SO_TIMEOUT(psock->s_rcvtimeo));
+      ret = net_timedwait(&conn->sendsem, timeout);
     }
 
   return ret;
@@ -648,7 +649,7 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
 
   for (tc = 0; tc < timeout * 1000;)
     {
-      ret = rpmsg_socket_sync(conn);
+      ret = rpmsg_socket_sync(conn, timeout);
       if (ret != RPMSG_ERR_ADDR)
         {
           break;
@@ -720,7 +721,7 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
           server->next = conn->next;
           conn->next = NULL;
 
-          rpmsg_socket_sync(conn);
+          rpmsg_socket_sync(conn, _SO_TIMEOUT(psock->s_rcvtimeo));
 
           rpmsg_register_callback(conn,
                                   rpmsg_socket_device_created,
