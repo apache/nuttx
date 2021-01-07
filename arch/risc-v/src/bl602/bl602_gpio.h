@@ -71,6 +71,7 @@
 #define GPIO_MODE_SHIFT  (14)                    /* Bits 14: Port Mode */
 #define GPIO_MODE_MASK   (1 << GPIO_MODE_SHIFT)
 #  define GPIO_INPUT     (1 << GPIO_MODE_SHIFT)  /* Input Enable */
+#  define GPIO_OUTPUT    (0 << GPIO_MODE_SHIFT)  /* Output Enable */
 
 /* Input/output pull-ups/downs:
  *
@@ -215,6 +216,20 @@ extern "C"
  ****************************************************************************/
 
 int bl602_configgpio(gpio_pinset_t cfgset);
+
+/****************************************************************************
+ * Name: bl602_gpio_deinit
+ *
+ * Description:
+ *   Deinit a GPIO (Set GPIO to floating input state)
+ *
+ * Returned Value:
+ *   OK on success
+ *   ERROR on invalid port.
+ *
+ ****************************************************************************/
+
+int bl602_gpio_deinit(uint8_t pin);
 
 /****************************************************************************
  * Name: bl602_config_uart_sel

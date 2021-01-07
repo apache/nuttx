@@ -34,7 +34,7 @@
 
 /* PWM0,1,2,3,4 are the same so create this helper for register offsets */
 
-#define BL602_PWM_N_BASE_OFFSET(n)    (BL602_PWM_BASE + (BL602_PWM1_BASE_OFFSET - BL602_PWM0_BASE_OFFSET))
+#define BL602_PWM_N_BASE_OFFSET(n)    (BL602_PWM_BASE + ((n) * 0x20))
 
 /* Register offsets *********************************************************/
 
@@ -85,59 +85,74 @@
 #define BL602_PWM_N_CONFIG(n)     (BL602_PWM_N_BASE_OFFSET(n) + BL602_PWM0_CONFIG_OFFSET)
 #define BL602_PWM_N_INTERRUPT(n)  (BL602_PWM_N_BASE_OFFSET(n) + BL602_PWM0_INTERRUPT_OFFSET)
 #define BL602_PWM0_CLKDIV          BL602_PWM_N_CLKDIV(0)
-#define BL602_PWM0_THRE1           BL602_PWM_N_THRE1(0)    
-#define BL602_PWM0_THRE2           BL602_PWM_N_THRE2(0)    
-#define BL602_PWM0_PERIOD          BL602_PWM_N_PERIOD(0)   
-#define BL602_PWM0_CONFIG          BL602_PWM_N_CONFIG(0)   
+#define BL602_PWM0_THRE1           BL602_PWM_N_THRE1(0)
+#define BL602_PWM0_THRE2           BL602_PWM_N_THRE2(0)
+#define BL602_PWM0_PERIOD          BL602_PWM_N_PERIOD(0)
+#define BL602_PWM0_CONFIG          BL602_PWM_N_CONFIG(0)
 #define BL602_PWM0_INTERRUPT       BL602_PWM_N_INTERRUPT(0)
 #define BL602_PWM1_CLKDIV          BL602_PWM_N_CLKDIV(1)
-#define BL602_PWM1_THRE1           BL602_PWM_N_THRE1(1)    
-#define BL602_PWM1_THRE2           BL602_PWM_N_THRE2(1)    
-#define BL602_PWM1_PERIOD          BL602_PWM_N_PERIOD(1)   
-#define BL602_PWM1_CONFIG          BL602_PWM_N_CONFIG(1)   
+#define BL602_PWM1_THRE1           BL602_PWM_N_THRE1(1)
+#define BL602_PWM1_THRE2           BL602_PWM_N_THRE2(1)
+#define BL602_PWM1_PERIOD          BL602_PWM_N_PERIOD(1)
+#define BL602_PWM1_CONFIG          BL602_PWM_N_CONFIG(1)
 #define BL602_PWM1_INTERRUPT       BL602_PWM_N_INTERRUPT(1)
 #define BL602_PWM2_CLKDIV          BL602_PWM_N_CLKDIV(2)
-#define BL602_PWM2_THRE1           BL602_PWM_N_THRE1(2)    
-#define BL602_PWM2_THRE2           BL602_PWM_N_THRE2(2)    
-#define BL602_PWM2_PERIOD          BL602_PWM_N_PERIOD(2)   
-#define BL602_PWM2_CONFIG          BL602_PWM_N_CONFIG(2)   
+#define BL602_PWM2_THRE1           BL602_PWM_N_THRE1(2)
+#define BL602_PWM2_THRE2           BL602_PWM_N_THRE2(2)
+#define BL602_PWM2_PERIOD          BL602_PWM_N_PERIOD(2)
+#define BL602_PWM2_CONFIG          BL602_PWM_N_CONFIG(2)
 #define BL602_PWM2_INTERRUPT       BL602_PWM_N_INTERRUPT(2)
 #define BL602_PWM3_CLKDIV          BL602_PWM_N_CLKDIV(3)
-#define BL602_PWM3_THRE1           BL602_PWM_N_THRE1(3)    
-#define BL602_PWM3_THRE2           BL602_PWM_N_THRE2(3)    
-#define BL602_PWM3_PERIOD          BL602_PWM_N_PERIOD(3)   
-#define BL602_PWM3_CONFIG          BL602_PWM_N_CONFIG(3)   
+#define BL602_PWM3_THRE1           BL602_PWM_N_THRE1(3)
+#define BL602_PWM3_THRE2           BL602_PWM_N_THRE2(3)
+#define BL602_PWM3_PERIOD          BL602_PWM_N_PERIOD(3)
+#define BL602_PWM3_CONFIG          BL602_PWM_N_CONFIG(3)
 #define BL602_PWM3_INTERRUPT       BL602_PWM_N_INTERRUPT(3)
 #define BL602_PWM4_CLKDIV          BL602_PWM_N_CLKDIV(4)
-#define BL602_PWM4_THRE1           BL602_PWM_N_THRE1(4)    
-#define BL602_PWM4_THRE2           BL602_PWM_N_THRE2(4)    
-#define BL602_PWM4_PERIOD          BL602_PWM_N_PERIOD(4)   
-#define BL602_PWM4_CONFIG          BL602_PWM_N_CONFIG(4)   
+#define BL602_PWM4_THRE1           BL602_PWM_N_THRE1(4)
+#define BL602_PWM4_THRE2           BL602_PWM_N_THRE2(4)
+#define BL602_PWM4_PERIOD          BL602_PWM_N_PERIOD(4)
+#define BL602_PWM4_CONFIG          BL602_PWM_N_CONFIG(4)
 #define BL602_PWM4_INTERRUPT       BL602_PWM_N_INTERRUPT(4)
 
 /* Register bit definitions *************************************************/
 
-#define INT_CONFIG_PWM_INT_CLEAR_SHIFT      (8)  
-#define INT_CONFIG_PWM_INT_CLEAR_MASK       (0x3f << INT_CONFIG_PWM_INT_CLEAR_SHIFT)
-#define INT_CONFIG_PWM_INTERRUPT_STS_MASK   (0x3f)  
+#define INT_CONFIG_PWM_INT_CLEAR_MASK      (0x3f << 8)
+#define INT_CONFIG_PWM_INTERRUPT_STS_MASK  (0x3f)
 
-#define CLKDIV_PWM_CLK_DIV_MASK            (0xffff)  
+#define CLKDIV_PWM_CLK_DIV_MASK            (0xffff)
 
-#define THRE1_PWM_THRE1_MASK               (0xffff)  
+#define THRE1_PWM_THRE1_MASK               (0xffff)
 
-#define THRE2_PWM_THRE2_MASK               (0xffff)  
+#define THRE2_PWM_THRE2_MASK               (0xffff)
 
-#define PERIOD_PWM_PERIOD_MASK             (0xffff)  
+#define PERIOD_PWM_PERIOD_MASK             (0xffff)
 
-#define CONFIG_PWM_STS_TOP                 (1 << 7)  
-#define CONFIG_PWM_STOP_EN                 (1 << 6)  
-#define CONFIG_PWM_SW_MODE                 (1 << 5)  
-#define CONFIG_PWM_SW_FORCE_VAL            (1 << 4)  
-#define CONFIG_PWM_STOP_MODE               (1 << 3)  
-#define CONFIG_PWM_OUT_INV                 (1 << 2)  
-#define CONFIG_REG_CLK_SEL_MASK            (0x03)  
+#define CONFIG_PWM_STS_TOP                 (1 << 7)
+#define CONFIG_PWM_STOP_EN                 (1 << 6)
+#define CONFIG_PWM_SW_MODE                 (1 << 5)
+#define CONFIG_PWM_SW_FORCE_VAL            (1 << 4)
+#define CONFIG_PWM_STOP_MODE               (1 << 3)
+#define CONFIG_PWM_OUT_INV                 (1 << 2)
+#define CONFIG_REG_CLK_SEL_MASK            (0x03)
 
-#define INTERRUPT_PWM_INT_ENABLE           (1 << 16)  
-#define INTERRUPT_PWM_INT_PERIOD_CNT_MASK  (0xffff)  
+#define INTERRUPT_PWM_INT_ENABLE           (1 << 16)
+#define INTERRUPT_PWM_INT_PERIOD_CNT_MASK  (0xffff)
+
+#define   BL602_PWM_CH0                     0  /* PWM Channel 0 */
+#define   BL602_PWM_CH1                     1  /* PWM Channel 1 define */
+#define   BL602_PWM_CH2                     2  /* PWM Channel 2 define */
+#define   BL602_PWM_CH3                     3  /* PWM Channel 3 define */
+#define   BL602_PWM_CH4                     4  /* PWM Channel 4 define */
+
+#define   BL602_PWM_CLK_XCLK                0  /* PWM Clock source :XTAL */
+#define   BL602_PWM_CLK_BCLK                1  /* PWM Clock source :Bus */
+#define   BL602_PWM_CLK_32K                 2  /* PWM Clock source :32K */
+
+#define   BL602_PWM_STOP_ABRUPT             0  /* PWM stop abrupt */
+#define   BL602_PWM_STOP_GRACEFUL           1  /* PWM stop graceful */
+
+#define   BL602_PWM_POL_NORMAL              0  /* PWM normal polarity */
+#define   BL602_PWM_POL_INVERT              1  /* PWM invert polarity */
 
 #endif /* __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_PWM_H */

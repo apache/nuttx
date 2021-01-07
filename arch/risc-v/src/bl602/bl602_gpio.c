@@ -133,6 +133,24 @@ int bl602_configgpio(gpio_pinset_t cfgset)
 }
 
 /****************************************************************************
+ * Name: bl602_gpio_deinit
+ *
+ * Description:
+ *   Deinit a GPIO (Set GPIO to floating input state)
+ *
+ * Returned Value:
+ *   OK on success
+ *   ERROR on invalid port.
+ *
+ ****************************************************************************/
+
+int bl602_gpio_deinit(uint8_t pin)
+{
+  bl602_configgpio(GPIO_INPUT | GPIO_FLOAT | pin);
+  return OK;
+}
+
+/****************************************************************************
  * Name: bl602_config_uart_sel
  *
  * Description:

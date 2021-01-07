@@ -95,5 +95,12 @@ struct pt_stuff_config_s
   uint32_t                 crc32;                 /* Entries crc32 */
 };
 
+struct boot2_partition_table_s
+{
+  uint8_t                  partition_active_idx;
+  uint8_t                  pad[3];
+  struct pt_stuff_config_s table;
+};
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_BOOT2_H */
