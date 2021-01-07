@@ -39,7 +39,7 @@
 static void bl602_wdt_access(void)
 {
   modifyreg32(BL602_TIMER_WFAR, TIMER_WFAR_MASK, 0xbaba);
-  modifyreg32(BL602_TIMER_WFAR, TIMER_WSAR_MASK, 0xeb10);
+  modifyreg32(BL602_TIMER_WSAR, TIMER_WSAR_MASK, 0xeb10);
 }
 
 /****************************************************************************

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_BL602_ONESHOT_H
-#define __ARCH_ARM_SRC_BL602_ONESHOT_H
+#ifndef __ARCH_RISCV_SRC_BL602_BL602_ONESHOT_LOWERHALF_H
+#define __ARCH_RISCV_SRC_BL602_BL602_ONESHOT_LOWERHALF_H
 
 /****************************************************************************
  * Included Files
@@ -196,4 +196,4 @@ int bl602_oneshot_cancel(struct bl602_oneshot_s *oneshot,
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_BL602_ONESHOT */
-#endif /* __ARCH_ARM_SRC_BL602_ONESHOT_H */
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_ONESHOT_LOWERHALF_H */

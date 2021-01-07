@@ -65,15 +65,11 @@
 static uint8_t g_idle_stack[BL602_IDLESTACK_SIZE];
 
 /* Dont change the name of variable, since we refer this
- * boot2_partition_table in linker script
+ * g_boot2_partition_table in linker script
  */
 
-static struct
-{
-  uint8_t                  partition_active_idx;
-  uint8_t                  pad[3];
-  struct pt_stuff_config_s table;
-} boot2_partition_table;
+static struct boot2_partition_table_s g_boot2_partition_table \
+              __attribute__((used));
 
 /****************************************************************************
  * Public Data
@@ -98,8 +94,8 @@ uint32_t boot2_get_flash_addr(void)
   extern uint8_t __boot2_flash_cfg_src;
 
   return (uint32_t)(&__boot2_flash_cfg_src +
-                    (sizeof(boot2_partition_table.table.entries[0]) *
-                     boot2_partition_table.table.table.entry_cnt));
+                    (sizeof(g_boot2_partition_table.table.entries[0]) *
+                     g_boot2_partition_table.table.table.entry_cnt));
 }
 
 /****************************************************************************

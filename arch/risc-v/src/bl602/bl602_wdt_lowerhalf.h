@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/bl602/bl602evb/include/board.h
+ * arch/risc-v/src/bl602/bl602_pwm_lowerhalf.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_BL602_BL602EVB_INCLUDE_BOARD_H
-#define __BOARDS_RISCV_BL602_BL602EVB_INCLUDE_BOARD_H
+#ifndef __ARCH_RISCV_SRC_BL602_BL602_WDT_LOWERHALF_H
+#define __ARCH_RISCV_SRC_BL602_BL602_WDT_LOWERHALF_H
 
 /****************************************************************************
  * Included Files
@@ -27,39 +27,15 @@
 
 #include <nuttx/config.h>
 
-/* Do not include BL602 header files here. */
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* UART Configuration */
-
-#define BOARD_UART_0_RX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN7)
-#define BOARD_UART_0_TX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN16)
-#define BOARD_UART_1_RX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN3)
-#define BOARD_UART_1_TX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN4)
-
-/* PWM Configuration */
-
-#define BOARD_PWM_CH0_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | GPIO_FUNC_PWM | GPIO_PIN0)
-#define BOARD_PWM_CH1_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | GPIO_FUNC_PWM | GPIO_PIN1)
-#define BOARD_PWM_CH2_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | GPIO_FUNC_PWM | GPIO_PIN2)
-#define BOARD_PWM_CH3_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | GPIO_FUNC_PWM | GPIO_PIN3)
-#define BOARD_PWM_CH4_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | GPIO_FUNC_PWM | GPIO_PIN4)
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
 {
@@ -72,14 +48,22 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: litex_boardinitialize
+ * Name: bl602_wdt_initialize
+ *
+ * Description:
+ *   Initialize the WDT watchdog time.  The watchdog timer is initialized and
+ *   registers as 'devpath.  The initial state of the watchdog time is
+ *   disabled.
+ *
+ * Input Parameters:
+ *   devpath    - The full path to the watchdog.  This should be of the form
+ *                /dev/watchdog0
+ * Returned Values:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
  ****************************************************************************/
 
-void bl602_boardinitialize(void);
+int bl602_wdt_initialize(FAR const char *devpath);
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISC_V_BL602_BL602EVB_INCLUDE_BOARD_H */
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_WDT_LOWERHALF_H */

@@ -35,6 +35,8 @@
 #include <nuttx/input/buttons.h>
 #include <bl602_tim_lowerhalf.h>
 #include <bl602_oneshot_lowerhalf.h>
+#include <bl602_pwm_lowerhalf.h>
+#include <bl602_wdt_lowerhalf.h>
 
 #include "chip.h"
 
@@ -107,6 +109,34 @@ int bl602_bringup(void)
 #endif
     }
 #endif
+#endif
+
+#ifdef CONFIG_PWM
+  struct pwm_lowerhalf_s *pwm;
+
+  /* Initialize PWM and register the PWM driver. */
+
+  pwm = bl602_pwminitialize(0);
+  if (pwm == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: bl602_pwminitialize failed\n");
+    }
+  else
+    {
+      ret = pwm_register("/dev/pwm0", pwm);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: pwm_register failed: %d\n", ret);
+        }
+    }
+#endif
+
+#ifdef CONFIG_WATCHDOG
+  ret = bl602_wdt_initialize(CONFIG_WATCHDOG_DEVPATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: bl602_wdt_initialize failed: %d\n", ret);
+    }
 #endif
 
   return ret;

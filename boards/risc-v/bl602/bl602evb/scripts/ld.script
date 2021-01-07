@@ -100,7 +100,7 @@ SECTIONS
     *(.srodata.cst4)
     *(.srodata.cst2)
     *(.srodata .srodata.*)
-    
+
     . = ALIGN(8);
     *(._k_queue.static.*)
     *(._k_sem.static.*)
@@ -117,14 +117,13 @@ SECTIONS
 
   .boot2 (NOLOAD) :
   {
-      PROVIDE ( __boot2_pt_addr_start = . );
-      *(.bss.boot2_partition_table)
-      PROVIDE ( __boot2_pt_addr_end   = . );
+    PROVIDE ( __boot2_pt_addr_start = . );
+    *(.bss.g_boot2_partition_table)
+    PROVIDE ( __boot2_pt_addr_end   = . );
 
-      PROVIDE ( __boot2_flash_cfg_start = . );
-      *(.bss.boot2_flashCfg)
-      PROVIDE ( __boot2_flash_cfg_end = . );
-
+    PROVIDE ( __boot2_flash_cfg_start = . );
+    *(.bss.g_bl602_romflash_cfg)
+    PROVIDE ( __boot2_flash_cfg_end = . );
   } > ram_tcm
 
   .bss (NOLOAD)   :
@@ -154,8 +153,8 @@ SECTIONS
   /*CFG FW used in code*/
   PROVIDE( _ld_bl_static_cfg_entry_start = _bl_static_fw_cfg_entry_start );
   PROVIDE( _ld_bl_static_cfg_entry_end   = _bl_static_fw_cfg_entry_end );
-  
+
   /*BOOT2 sections*/
   PROVIDE ( __boot2_pt_addr_src = BOOT2_PT_ADDR );
-  PROVIDE ( __boot2_flash_cfg_src = BOOT2_FLASHCFG_ADDR ); 
+  PROVIDE ( __boot2_flash_cfg_src = BOOT2_FLASHCFG_ADDR );
 }
