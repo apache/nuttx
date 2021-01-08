@@ -23,11 +23,14 @@
  ****************************************************************************/
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/nuttx.h>
 
 #include <string.h>
 #include <stdio.h>
 #include <poll.h>
+#include <queue.h>
 
 #include "up_internal.h"
 #include "up_hcisocket_host.h"
@@ -46,6 +49,7 @@
 
 struct bthcitty_s
 {
+  sq_entry_t              link;
   uint8_t                 recvbuf[CONFIG_HCI_RECVBUF_SIZE];
   size_t                  recvpos;
   size_t                  recvlen;
@@ -92,10 +96,7 @@ static const struct file_operations g_hcitty_ops =
   .poll   = bthcitty_poll
 };
 
-static struct bthcitty_s g_hcitty =
-{
-  .fd = -1,
-};
+static sq_queue_t g_hcitty_list;
 
 /****************************************************************************
  * Private Functions
@@ -342,25 +343,55 @@ static int bthcitty_poll(FAR struct file *filep,
 
 void bthcitty_loop(void)
 {
-  if (bthcisock_host_avail(g_hcitty.fd))
+  FAR struct bthcitty_s *dev;
+  FAR sq_entry_t *entry;
+
+  for (entry = sq_peek(&g_hcitty_list); entry; entry = sq_next(entry))
     {
-      bthcitty_pollnotify(&g_hcitty, POLLIN);
+      dev = container_of(entry, struct bthcitty_s, link);
+      if (bthcisock_host_avail(dev->fd))
+        {
+          bthcitty_pollnotify(dev, POLLIN);
+        }
     }
 }
 
 int bthcitty_register(int dev_id)
 {
+  FAR struct bthcitty_s *dev;
   unsigned char name[16];
+  int ret;
 
   snprintf(name, sizeof(name), "/dev/ttyBT%d", dev_id);
 
-  g_hcitty.id = dev_id;
+  dev = (FAR struct bthcitty_s *)kmm_zalloc(sizeof(struct bthcitty_s));
+  if (dev == NULL)
+    {
+      return -ENOMEM;
+    }
 
-  nxsem_init(&g_hcitty.recvlock, 0, 1);
-  nxsem_init(&g_hcitty.sendlock, 0, 1);
-  nxsem_init(&g_hcitty.recvsem, 0, 0);
-  nxsem_set_protocol(&g_hcitty.recvsem, SEM_PRIO_NONE);
-  nxsem_init(&g_hcitty.fdslock, 0, 1);
+  dev->fd = -1;
+  dev->id = dev_id;
 
-  return register_driver(name, &g_hcitty_ops, 0666, &g_hcitty);
+  nxsem_init(&dev->recvlock, 0, 1);
+  nxsem_init(&dev->sendlock, 0, 1);
+  nxsem_init(&dev->recvsem, 0, 0);
+  nxsem_init(&dev->fdslock, 0, 1);
+
+  nxsem_set_protocol(&dev->recvsem, SEM_PRIO_NONE);
+
+  ret = register_driver(name, &g_hcitty_ops, 0666, dev);
+  if (ret < 0)
+    {
+      nxsem_destroy(&dev->recvlock);
+      nxsem_destroy(&dev->sendlock);
+      nxsem_destroy(&dev->recvsem);
+      nxsem_destroy(&dev->fdslock);
+      kmm_free(dev);
+      return ret;
+    }
+
+  sq_addlast(&dev->link, &g_hcitty_list);
+
+  return 0;
 }
