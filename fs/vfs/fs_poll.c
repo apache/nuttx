@@ -308,7 +308,8 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
        * If not, return -ENOSYS
        */
 
-      if ((INODE_IS_DRIVER(inode) || INODE_IS_SOCKET(inode)) &&
+      if ((INODE_IS_DRIVER(inode) || INODE_IS_MQUEUE(inode) ||
+          INODE_IS_SOCKET(inode)) &&
           inode->u.i_ops != NULL && inode->u.i_ops->poll != NULL)
         {
           /* Yes, it does... Setup the poll */
