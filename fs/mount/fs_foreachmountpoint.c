@@ -106,7 +106,7 @@ static int mountpoint_filter(FAR struct inode *node,
 
       if (pathlen + namlen > PATH_MAX)
         {
-          return -ENAMETOOLONG;
+          return OK;
         }
 
       /* Append the inode name to the directory path */
@@ -115,8 +115,7 @@ static int mountpoint_filter(FAR struct inode *node,
 
       /* Get the status of the file system */
 
-      ret = node->u.i_mops->statfs(node, &statbuf);
-      if (ret == OK)
+      if (node->u.i_mops->statfs(node, &statbuf) == OK)
         {
           /* And pass the full path and file system status to the handler */
 
