@@ -32,6 +32,9 @@
 #include <poll.h>
 #include <queue.h>
 
+#include <nuttx/wireless/bluetooth/bt_uart.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
+
 #include "up_internal.h"
 #include "up_hcisocket_host.h"
 
@@ -46,6 +49,14 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+union bt_hdr_u
+{
+  struct bt_hci_cmd_hdr_s cmd;
+  struct bt_hci_acl_hdr_s acl;
+  struct bt_hci_evt_hdr_s evt;
+  struct bt_hci_iso_hdr_s iso;
+};
 
 struct bthcitty_s
 {
@@ -231,8 +242,9 @@ static ssize_t bthcitty_write(FAR struct file *filep,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct bthcitty_s *dev = inode->i_private;
-  size_t minlen = 1 + 2 + 1; /* header + opcode + len */
-  size_t len = buflen;
+  FAR union bt_hdr_u *hdr;
+  size_t pktlen;
+  size_t hdrlen;
   int ret;
 
   ret = nxsem_wait_uninterruptible(&dev->sendlock);
@@ -241,26 +253,74 @@ static ssize_t bthcitty_write(FAR struct file *filep,
       return ret;
     }
 
-  if (dev->sendlen > 0 || buflen < minlen)
+  if (dev->sendlen + buflen > CONFIG_HCI_SENDBUF_SIZE)
     {
-      memcpy(dev->sendbuf + dev->sendlen, buffer, buflen);
-      dev->sendlen += buflen;
-
-      buffer = dev->sendbuf;
-      len = dev->sendlen;
+      ret = -EINVAL;
+      goto err;
     }
 
-  if (len >= minlen)
+  memcpy(dev->sendbuf + dev->sendlen, buffer, buflen);
+  dev->sendlen += buflen;
+
+  hdr = (FAR union bt_hdr_u *)(dev->sendbuf + 1);
+
+  while (1)
     {
-      ret = bthcisock_host_send(dev->fd, buffer, len);
-      if (ret >= 0)
+      switch (dev->sendbuf[0])
         {
-          dev->sendlen = 0;
+          case H4_CMD:
+            hdrlen = sizeof(struct bt_hci_cmd_hdr_s);
+            pktlen = hdr->cmd.param_len;
+            break;
+          case H4_ACL:
+            hdrlen = sizeof(struct bt_hci_acl_hdr_s);
+            pktlen = hdr->acl.len;
+            break;
+          case H4_ISO:
+            hdrlen = sizeof(struct bt_hci_iso_hdr_s);
+            pktlen = hdr->iso.len;
+            break;
+          default:
+            ret = -EINVAL;
+            goto err;
         }
+
+      /* Reassembly is incomplete ? */
+
+      hdrlen += H4_HEADER_SIZE;
+
+      if (dev->sendlen < hdrlen)
+        {
+          goto out;
+        }
+
+      pktlen += hdrlen;
+      if (dev->sendlen < pktlen)
+        {
+          goto out;
+        }
+
+      /* Got the full packet, send out */
+
+      ret = bthcisock_host_send(dev->fd, dev->sendbuf, pktlen);
+      if (ret < 0)
+        {
+          goto err;
+        }
+
+      dev->sendlen -= pktlen;
+      if (dev->sendlen == 0)
+        {
+          goto out;
+        }
+
+      memmove(dev->sendbuf, dev->sendbuf + pktlen, dev->sendlen);
     }
 
+err:
+  dev->sendlen = 0;
+out:
   nxsem_post(&dev->sendlock);
-
   return ret < 0 ? ret : buflen;
 }
 
@@ -362,7 +422,7 @@ int bthcitty_register(int dev_id)
   unsigned char name[16];
   int ret;
 
-  snprintf(name, sizeof(name), "/dev/ttyBT%d", dev_id);
+  snprintf(name, sizeof(name), "/dev/ttyHCI%d", dev_id);
 
   dev = (FAR struct bthcitty_s *)kmm_zalloc(sizeof(struct bthcitty_s));
   if (dev == NULL)
