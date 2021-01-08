@@ -35,6 +35,7 @@
 #include <stdbool.h>
 #include <mqueue.h>
 #include <queue.h>
+#include <poll.h>
 
 #if CONFIG_MQ_MAXMSGSIZE > 0
 
@@ -99,6 +100,7 @@ struct mqueue_inode_s
   pid_t ntpid;                /* Notification: Receiving Task's PID */
   struct sigevent ntevent;    /* Notification description */
   struct sigwork_s ntwork;    /* Notification work */
+  FAR struct pollfd *fds[CONFIG_FS_MQUEUE_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -393,6 +395,24 @@ void nxmq_free_msgq(FAR struct mqueue_inode_s *msgq);
 
 FAR struct mqueue_inode_s *nxmq_alloc_msgq(mode_t mode,
                                            FAR struct mq_attr *attr);
+
+/****************************************************************************
+ * Name: nxmq_pollnotify
+ *
+ * Description:
+ *   pollnotify, used for notify the poll
+ *
+ * Input Parameters:
+ *   msgq     - Named essage queue
+ *   eventset - evnet
+ *
+ * Returned Value:
+ *   The allocated and initialized message queue structure or NULL in the
+ *   event of a failure.
+ *
+ ****************************************************************************/
+
+void nxmq_pollnotify(FAR struct mqueue_inode_s *msgq, pollevent_t eventset);
 
 /****************************************************************************
  * Name: file_mq_open

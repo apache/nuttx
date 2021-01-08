@@ -203,7 +203,10 @@ int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
 
   if (newmsg)
     {
-      msgq->nmsgs--;
+      if (msgq->nmsgs-- == msgq->maxmsgs)
+        {
+          nxmq_pollnotify(msgq, POLLOUT);
+        }
     }
 
   *rcvmsg = newmsg;
