@@ -124,7 +124,7 @@
 #define BT_OGF_VENDOR                         0x18
 #define BT_HC_VN_READ_CONT_FEATURES           BT_OP(BT_OGF_VENDOR, 0x06E)
 
-#define BT_OP(ogf, ocf)          ((ocf) | ((ogf) << 10))
+#define BT_OP(ogf, ocf)                       ((ocf) | ((ogf) << 10))
 
 #define BT_HCI_OP_DISCONNECT                  BT_OP(BT_OGF_LINK_CTRL, 0x0006)
 #define BT_HCI_OP_SET_EVENT_MASK              BT_OP(BT_OGF_BASEBAND, 0x0001)
@@ -182,21 +182,88 @@
 
 /* Event definitions */
 
-#define BT_HCI_EVT_DISCONN_COMPLETE           0x05
-#define BT_HCI_EVT_ENCRYPT_CHANGE             0x08
-#define BT_HCI_EVT_CMD_COMPLETE               0x0e
-#define BT_HCI_EVT_CMD_STATUS                 0x0f
-#define BT_HCI_EVT_NUM_COMPLETED_PACKETS      0x13
+#define BT_HCI_EVT_INQUIRY_COMPLETE             0x01
+#define BT_HCI_EVT_INQUIRY_RESULT               0x02
+#define BT_HCI_EVT_CONN_COMPLETE                0x03
+#define BT_HCI_EVT_CONN_REQUEST                 0x04
+#define BT_HCI_EVT_DISCONN_COMPLETE             0x05
+#define BT_HCI_EVT_AUTH_COMPLETE                0x06
+#define BT_HCI_EVT_REMOTE_NAME_REQ_COMPLETE     0x07
+#define BT_HCI_EVT_ENCRYPT_CHANGE               0x08
+#define BT_HCI_EVT_CHANGE_CONN_LINK_KEY         0x09
+#define BT_HCI_EVT_CENTRAL_LINK_KEY_COMP        0x0a
+#define BT_HCI_EVT_REMOTE_FEATURES              0x0b
+#define BT_HCI_EVT_REMOTE_VERSION_INFO          0x0c
+#define BT_HCI_EVT_QOS_SETUP_COMP               0x0d
+#define BT_HCI_EVT_CMD_COMPLETE                 0x0e
+#define BT_HCI_EVT_CMD_STATUS                   0x0f
+#define BT_HCI_EVT_HARDWARE_ERROR               0x10
+#define BT_HCI_FLUSH_OCCURED                    0x11
+#define BT_HCI_EVT_ROLE_CHANGE                  0x12
+#define BT_HCI_EVT_NUM_COMPLETED_PACKETS        0x13
+#define BT_HCI_EVT_MODE_CHANGE                  0x14
+#define BT_HCI_EVT_RETURN_LINK_KEYS             0x15
+#define BT_HCI_EVT_PIN_CODE_REQ                 0x16
+#define BT_HCI_EVT_LINK_KEY_REQ                 0x17
+#define BT_HCI_EVT_LINK_KEY_NOTIFY              0x18
+#define BT_HCI_EVT_LOOPBACK_COMMAND             0x19
+#define BT_HCI_EVT_DATA_BUF_OVERFLOW            0x1a
+#define BT_HCI_EVT_MAX_SLOTS_CHANGED            0x1b
+#define BT_HCI_EVT_READ_CLOCK_OFF_COMP          0x1c
+#define BT_HCI_EVT_CONN_PKT_TYPE_CHANGE         0x1d
+#define BT_HCI_EVT_QOS_VIOLATION                0x1e
+#define BT_HCI_EVT_PAGE_SCAN_MODE_CHANGE        0x1f
+#define BT_HCI_EVT_PAGE_SCAN_REP_MODE_CHNG      0x20
+#define BT_HCI_EVT_FLOW_SPECIFICATION_COMP      0x21
+#define BT_HCI_EVT_INQUIRY_RESULT_WITH_RSSI     0x22
+#define BT_HCI_EVT_REMOTE_EXT_FEATURES          0x23
+#define BT_HCI_EVT_SYNC_CONN_COMPLETE           0x2c
+#define BT_HCI_EVT_ESCO_CONNECTION_CHANGED      0x2d
+#define BT_HCI_EVT_SNIFF_SUB_RATE               0x2e
+#define BT_HCI_EVT_EXTENDED_INQUIRY_RESULT      0x2f
 #define BT_HCI_EVT_ENCRYPT_KEY_REFRESH_COMPLETE 0x30
-#define BT_HCI_EVT_LE_META_EVENT              0x3e
+#define BT_HCI_EVT_IO_CAPA_REQ                  0x31
+#define BT_HCI_EVT_IO_CAPA_RESP                 0x32
+#define BT_HCI_EVT_USER_CONFIRM_REQ             0x33
+#define BT_HCI_EVT_USER_PASSKEY_REQ             0x34
+#define BT_HCI_EVT_REMOTE_OOB_DATA_REQUEST      0x35
+#define BT_HCI_EVT_SSP_COMPLETE                 0x36
+#define BT_HCI_EVT_LINK_SUPER_TOUT_CHANGED      0x38
+#define BT_HCI_EVT_ENHANCED_FLUSH_COMPLETE      0x39
+#define BT_HCI_EVT_USER_PASSKEY_NOTIFY          0x3b
+#define BT_HCI_EVT_KEYPRESS_NOTIFY              0x3c
+#define BT_HCI_EVT_RMT_HOST_SUP_FEAT_NOTIFY     0x3d
+#define BT_HCI_EVT_LE_META_EVENT                0x3e
 
-#define BT_HCI_EVT_LE_CONN_COMPLETE           0x01
-#  define BT_HCI_ROLE_MASTER                  0x00
-#  define BT_HCI_ROLE_SLAVE                   0x01
-#define BT_HCI_EVT_LE_ADVERTISING_REPORT      0x02
-#define BT_HCI_EVT_LE_CONN_UPDATE             0x03
-#define BT_HCI_EVT_LE_READ_REM_FEAT_COMPLETE  0x04
-#define BT_HCI_EVT_LE_LTK_REQUEST             0x05
+#define BT_HCI_EVT_LE_CONN_COMPLETE             0x01
+#  define BT_HCI_ROLE_MASTER                    0x00
+#  define BT_HCI_ROLE_SLAVE                     0x01
+#define BT_HCI_EVT_LE_ADVERTISING_REPORT        0x02
+#define BT_HCI_EVT_LE_CONN_UPDATE_COMPLETE      0x03
+#define BT_HCI_EVT_LE_READ_REM_FEAT_COMPLETE    0x04
+#define BT_HCI_EVT_LE_LTK_REQUEST               0x05
+#define BT_HCI_EVT_LE_CONN_PARAM_REQ            0x06
+#define BT_HCI_EVT_LE_DATA_LEN_CHANGE           0x07
+#define BT_HCI_EVT_LE_P256_PUBLIC_KEY_COMPLETE  0x08
+#define BT_HCI_EVT_LE_GENERATE_DHKEY_COMPLETE   0x09
+#define BT_HCI_EVT_LE_ENH_CONN_COMPLETE         0x0a
+#define BT_HCI_EVT_LE_DIRECT_ADV_REPORT         0x0b
+#define BT_HCI_EVT_LE_PHY_UPDATE_COMPLETE       0x0c
+#define BT_HCI_EVT_LE_EXT_ADVERTISING_REPORT    0x0d
+#define BT_HCI_EVT_LE_PER_ADV_SYNC_ESTABLISHED  0x0e
+#define BT_HCI_EVT_LE_PER_ADVERTISING_REPORT    0x0f
+#define BT_HCI_EVT_LE_PER_ADV_SYNC_LOST         0x10
+#define BT_HCI_EVT_LE_SCAN_TIMEOUT              0x11
+#define BT_HCI_EVT_LE_ADV_SET_TERMINATED        0x12
+#define BT_HCI_EVT_LE_SCAN_REQ_RECEIVED         0x13
+#define BT_HCI_EVT_LE_CHAN_SEL_ALGO             0x14
+#define BT_HCI_EVT_LE_CIS_ESTABLISHED           0x19
+#define BT_HCI_EVT_LE_CIS_REQ                   0x1a
+#define BT_HCI_EVT_LE_BIG_COMPLETE              0x1b
+#define BT_HCI_EVT_LE_BIG_TERMINATE             0x1c
+#define BT_HCI_EVT_LE_BIG_SYNC_ESTABLISHED      0x1d
+#define BT_HCI_EVT_LE_BIG_SYNC_LOST             0x1e
+#define BT_HCI_EVT_LE_REQ_PEER_SCA_COMPLETE     0x1f
 
 /* Packet boundary flags for ACL packets */
 
@@ -229,6 +296,12 @@ begin_packed_struct struct bt_hci_acl_hdr_s
   uint16_t handle          : 12;
   uint16_t packet_boundary : 2;
   uint16_t broadcast       : 2;
+  uint16_t len;
+} end_packed_struct;
+
+begin_packed_struct struct bt_hci_iso_hdr_s
+{
+  uint16_t handle;
   uint16_t len;
 } end_packed_struct;
 
@@ -489,6 +562,24 @@ begin_packed_struct struct bt_hci_evt_encrypt_key_refresh_complete_s
   uint16_t handle;
 } end_packed_struct;
 
+begin_packed_struct struct bt_hci_evt_remote_version_info_s
+{
+  uint8_t  status;
+  uint16_t handle;
+  uint8_t  version;
+  uint16_t manufacturer;
+  uint16_t subversion;
+} end_packed_struct;
+
+begin_packed_struct struct bt_hci_evt_conn_complete_s
+{
+  uint8_t   status;
+  uint16_t  handle;
+  bt_addr_t bdaddr;
+  uint8_t   link_type;
+  uint8_t   encr_enabled;
+} end_packed_struct;
+
 begin_packed_struct struct bt_hci_evt_le_meta_event_s
 {
   uint8_t subevent;
@@ -504,6 +595,20 @@ begin_packed_struct struct bt_hci_evt_le_conn_complete_s
   uint16_t latency;
   uint16_t supv_timeout;
   uint8_t clock_accuracy;
+} end_packed_struct;
+
+begin_packed_struct struct bt_hci_evt_le_enh_conn_complete_s
+{
+  uint8_t      status;
+  uint16_t     handle;
+  uint8_t      role;
+  bt_addr_le_t peer_addr;
+  bt_addr_t    local_rpa;
+  bt_addr_t    peer_rpa;
+  uint16_t     interval;
+  uint16_t     latency;
+  uint16_t     supv_timeout;
+  uint8_t      clock_accuracy;
 } end_packed_struct;
 
 begin_packed_struct struct bt_hci_evt_le_conn_update_s
