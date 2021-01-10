@@ -59,6 +59,7 @@
 #define H4_ACL           0x02
 #define H4_SCO           0x03
 #define H4_EVT           0x04
+#define H4_ISO           0x05
 
 #ifdef CONFIG_BLUETOOTH_UART_DUMP
 #  define BT_DUMP(m,b,l) lib_dumpbuffer(m,b,l)
