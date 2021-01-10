@@ -51,7 +51,7 @@
 
 #include <stdint.h>
 
-#ifdef CONFIG_WIRELESS_BLUETOOTH
+#if defined(CONFIG_WIRELESS_BLUETOOTH) || defined(CONFIG_DRIVERS_BLUETOOTH)
 
 /****************************************************************************
  * Pre-processor Definitions
