@@ -241,6 +241,15 @@ int esp32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_DEV_GPIO
+  ret = esp32_gpio_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.

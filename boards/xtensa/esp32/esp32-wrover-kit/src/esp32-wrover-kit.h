@@ -108,5 +108,13 @@ int esp32_spiflash_init(void);
 void esp32_spiflash_encrypt_test(void);
 #endif
 
+/****************************************************************************
+ * Name: esp32_gpio_init
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int esp32_gpio_init(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_WROVERKIT_SRC_ESP32_WROVERKIT_H */
