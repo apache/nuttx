@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <syslog.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/board.h>
@@ -37,6 +38,10 @@
 #include <bl602_oneshot_lowerhalf.h>
 #include <bl602_pwm_lowerhalf.h>
 #include <bl602_wdt_lowerhalf.h>
+
+#if defined(CONFIG_BL602_SPIFLASH)
+#include <bl602_spiflash.h>
+#endif
 
 #include "chip.h"
 
@@ -54,6 +59,10 @@ int bl602_bringup(void)
   defined(CONFIG_BL602_TIMER1)
   struct oneshot_lowerhalf_s *os = NULL;
 #endif
+#if defined(CONFIG_BL602_SPIFLASH)
+  FAR struct mtd_dev_s *mtd_part = NULL;
+  const char *path = "/dev/mtdflash";
+#endif
   int ret = OK;
 
 #ifdef CONFIG_FS_PROCFS
@@ -62,8 +71,8 @@ int bl602_bringup(void)
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-      syslog(
-        LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+      syslog(LOG_DEBUG,
+        "ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
       return ret;
     }
 #endif
@@ -73,7 +82,8 @@ int bl602_bringup(void)
   ret = bl602_timer_initialize("/dev/timer0", 0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize /dev/timer0 Driver: %d\n", ret);
+      syslog(LOG_DEBUG,
+        "Failed to initialize /dev/timer0 Driver: %d\n", ret);
       return ret;
     }
 #endif
@@ -82,14 +92,15 @@ int bl602_bringup(void)
   ret = bl602_timer_initialize("/dev/timer1", 1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize /dev/timer1 Driver: %d\n", ret);
+      syslog(LOG_DEBUG,
+        "Failed to initialize /dev/timer1 Driver: %d\n", ret);
       return ret;
     }
 #elif defined(CONFIG_BL602_TIMER1) && defined(CONFIG_ONESHOT)
   os = oneshot_initialize(1, 1);
   if (os == NULL)
     {
-      syslog(LOG_ERR, "ERROR: oneshot_initialize failed\n");
+      syslog(LOG_DEBUG, "ERROR: oneshot_initialize failed\n");
     }
   else
     {
@@ -102,9 +113,8 @@ int bl602_bringup(void)
       ret = oneshot_register("/dev/oneshot", os);
       if (ret < 0)
         {
-          syslog(LOG_ERR,
-                 "ERROR: Failed to register oneshot at /dev/oneshot: %d\n",
-                 ret);
+          syslog(LOG_DEBUG,
+            "ERROR: Failed to register oneshot at /dev/oneshot: %d\n", ret);
         }
 #endif
     }
@@ -114,19 +124,19 @@ int bl602_bringup(void)
 #ifdef CONFIG_PWM
   struct pwm_lowerhalf_s *pwm;
 
-  /* Initialize PWM and register the PWM driver. */
+  /* Initialize PWM and register the PWM driver */
 
   pwm = bl602_pwminitialize(0);
   if (pwm == NULL)
     {
-      syslog(LOG_ERR, "ERROR: bl602_pwminitialize failed\n");
+      syslog(LOG_DEBUG, "ERROR: bl602_pwminitialize failed\n");
     }
   else
     {
       ret = pwm_register("/dev/pwm0", pwm);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: pwm_register failed: %d\n", ret);
+          syslog(LOG_DEBUG, "ERROR: pwm_register failed: %d\n", ret);
         }
     }
 #endif
@@ -135,9 +145,42 @@ int bl602_bringup(void)
   ret = bl602_wdt_initialize(CONFIG_WATCHDOG_DEVPATH);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: bl602_wdt_initialize failed: %d\n", ret);
+      syslog(LOG_DEBUG, "ERROR: bl602_wdt_initialize failed: %d\n", ret);
     }
 #endif
+
+#ifdef CONFIG_BL602_SPIFLASH
+  mtd_part = bl602_spiflash_alloc_mtdpart();
+
+  if (!mtd_part)
+    {
+      syslog(LOG_DEBUG,
+        "ERROR: Failed to alloc MTD partition of SPI Flash\n");
+      return -1;
+    }
+
+  /* Register the MTD driver so that it can be accessed from the  VFS */
+
+  ret = register_mtddriver(path, mtd_part, 0777, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_DEBUG, "ERROR: Failed to regitser MTD: %d\n", ret);
+      return -1;
+    }
+
+  /* Mount the SPIFFS file system */
+
+#ifdef CONFIG_FS_LITTLEFS
+  ret = mount(path, "/mnt/lfs", "littlefs", 0, "autoformat");
+  if (ret < 0)
+    {
+      syslog(LOG_DEBUG,
+        "ERROR: Failed to mount littlefs at /mnt/llfs: %d\n", ret);
+      return -1;
+    }
+
+#endif /* CONFIG_FS_LITTLEFS */
+#endif /* CONFIG_BL602_SPIFLASH */
 
   return ret;
 }

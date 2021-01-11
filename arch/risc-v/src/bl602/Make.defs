@@ -60,6 +60,10 @@ endif
 ifeq ($(CONFIG_PWM),y)
 CHIP_CSRCS  += bl602_pwm_lowerhalf.c
 endif
+ifeq ($(CONFIG_BL602_SPIFLASH),y)
+CHIP_CSRCS += bl602_flash.c bl602_spiflash.c
+endif
+
 CHIP_CSRCS += bl602_glb.c bl602_gpio.c bl602_hbn.c bl602_systemreset.c
 
 # INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)hardware}

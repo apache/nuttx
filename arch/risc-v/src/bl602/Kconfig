@@ -39,4 +39,27 @@ config BL602_TIMER1
 config BL602_PWM0
 	bool "PWM0"
 
+config BL602_SPIFLASH
+	bool "SPI Flash"
+	default n
+	select MTD
+	select MTD_PARTITION
+
+menu "SPI Flash configuration"
+	depends on BL602_SPIFLASH
+
+config BL602_MTD_OFFSET
+	hex "MTD base address in SPI Flash"
+	default 0x001c5000
+	help
+		MTD base address in SPI Flash.
+
+config BL602_MTD_SIZE
+	hex "MTD size in SPI Flash"
+	default 0x30000
+	help
+		MTD size in SPI Flash.
+
+endmenu # BL602_SPIFLASH
+
 endmenu
