@@ -281,7 +281,8 @@ static const struct spi_sctrlrops_s esp32_spi3slv_ops =
   .unbind   = esp32_spislv_unbind,
   .enqueue  = esp32_spislv_enqueue,
   .qfull    = esp32_spislv_qfull,
-  .qflush   = esp32_spislv_qflush
+  .qflush   = esp32_spislv_qflush,
+  .qpoll    = esp32_spislv_qpoll
 };
 
 static struct esp32_spislv_priv_s esp32_spi3slv_priv =
