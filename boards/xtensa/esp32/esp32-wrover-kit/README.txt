@@ -43,3 +43,37 @@ Buttons and LEDs
   and USB activity.
   There is an RGB LED available for software.
 
+Configurations
+==============
+
+  nsh
+  ---
+
+  Basic configuration to run the NuttShell (nsh).
+
+  wapi
+  ___
+
+  This is a congiuration to test the Wifi driver using WAPI.
+  The Wifi passphrase and SSID can be configured from menuconfig, then once
+  booted you can check if an IP address was assigned:
+    nsh>  ifconfig
+
+  If not configured at startup, you can connect to a network with the following:
+
+    wapi psk wlan0 mypassword 1
+    wapi essid wlan0 myssid 1
+
+  gpio
+  ---
+  
+  This is a test for the GPIO driver.  It includes the 3 LEDs and one,
+  arbitrary, GPIO.  For this example, GPIO22 was used.
+  At the nsh, we can turn LEDs on and off with the following.
+    nsh> gpio -o 1 /dev/gpout0
+    nsh> gpio -o 0 /dev/gpout1
+
+  We can use the interrupt pin to send a signal when the interrupt fires:
+    nsh> gpio -w 14 /dev/gpint3
+  The pin is configured to as a rising edge interrupt, so after issuing the
+  above command, connect it to 3.3V.
