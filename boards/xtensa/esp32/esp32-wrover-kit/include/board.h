@@ -105,4 +105,9 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* LED1  + N/C  + N/C */
 
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOOUT    3 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_WROVER_KIT_INCLUDE_BOARD_H */
