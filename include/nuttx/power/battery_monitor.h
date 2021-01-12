@@ -284,7 +284,7 @@ struct battery_monitor_operations_s
 
   int (*soc)(struct battery_monitor_dev_s *dev, b16_t *value);
 
-  /* Get the battery pack Couloumb count value*/
+  /* Get the battery pack Couloumb count value */
 
   int (*coulombs)(struct battery_monitor_dev_s *dev, int *value);
 
@@ -307,7 +307,9 @@ struct battery_monitor_operations_s
   int (*setlimits)(struct battery_monitor_dev_s *dev,
       struct battery_monitor_limits_s *limits);
 
-  /* Set the state of charge/discharge switches to allow battery to source/sink power */
+  /* Set the state of charge/discharge switches to allow battery to
+   * source/sink power
+   */
 
   int (*chgdsg)(struct battery_monitor_dev_s *dev,
       struct battery_monitor_switches_s *sw);
@@ -328,7 +330,7 @@ struct battery_monitor_dev_s
   /* Fields required by the upper-half driver */
 
   FAR const struct battery_monitor_operations_s *ops; /* Battery operations */
-  sem_t batsem;  /* Enforce mutually exclusive access */
+  sem_t batsem;                                       /* Enforce mutually exclusive access */
 
   /* Data fields specific to the lower-half driver may follow */
 };
@@ -413,13 +415,10 @@ int battery_monitor_register(FAR const char *devpath,
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_BQ769X0)
 
 struct i2c_master_s;
-FAR struct battery_monitor_dev_s *bq769x0_initialize(FAR struct i2c_master_s *i2c,
-                                                     uint8_t addr,
-                                                     uint32_t frequency,
-                                                     bool crc,
-                                                     uint8_t cellcount,
-                                                     uint8_t chip,
-                                                     uint32_t sense_r);
+FAR struct battery_monitor_dev_s *
+bq769x0_initialize(FAR struct i2c_master_s *i2c,
+                   uint8_t addr, uint32_t frequency, bool crc,
+                   uint8_t cellcount, uint8_t chip, uint32_t sense_r);
 #endif
 
 #undef EXTERN

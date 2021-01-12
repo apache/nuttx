@@ -205,7 +205,8 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
   attr.mq_msgsize = NX_MXSVRMSGLEN;
   attr.mq_flags   = 0;
 
-  ret = nxmq_open(mqname, O_RDONLY | O_CREAT, 0666, &attr, &nxmu->conn.crdmq);
+  ret = nxmq_open(mqname, O_RDONLY | O_CREAT,
+                  0666, &attr, &nxmu->conn.crdmq);
   if (ret < 0)
     {
       gerr("ERROR: nxmq_open(%s) failed: %d\n", mqname, ret);

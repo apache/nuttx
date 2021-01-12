@@ -621,7 +621,9 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
         {
           char tmpch;
 
-          /* Read handling retries.  We get out of this loop if a key is press. */
+          /* Read handling retries.
+           * We get out of this loop if a key is press.
+           */
 
           for (; ; )
             {

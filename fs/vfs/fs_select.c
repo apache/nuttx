@@ -168,7 +168,9 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
           incr                 = 1;
         }
 
-      /* The exceptfds set holds the set of FDs that are watched for exceptions */
+      /* The exceptfds set holds the set of FDs that are watched for
+       * exceptions
+       */
 
       if (exceptfds && FD_ISSET(fd, exceptfds))
         {
