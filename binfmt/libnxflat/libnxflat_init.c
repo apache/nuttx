@@ -55,8 +55,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
- * defined or CONFIG_NXFLAT_DUMPBUFFER does nothing.
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to
+ * be defined or CONFIG_NXFLAT_DUMPBUFFER does nothing.
  */
 
 #if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
@@ -137,8 +137,8 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
     {
       /* This is not an error because we will be called to attempt loading
        * EVERY binary.  Returning -ENOEXEC simply informs the system that
-       * the file is not an NXFLAT file.  Besides, if there is something worth
-       * complaining about, nnxflat_verifyheader() has already
+       * the file is not an NXFLAT file.  Besides, if there is something
+       * worth complaining about, nnxflat_verifyheader() has already
        * done so.
        */
 

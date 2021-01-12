@@ -916,7 +916,8 @@ static int cxd56_gnss_save_backup_data(FAR struct file *filep,
       return -ENOMEM;
     }
 
-  fd = nx_open(CONFIG_CXD56_GNSS_BACKUP_FILENAME, O_WRONLY | O_CREAT | O_TRUNC);
+  fd = nx_open(CONFIG_CXD56_GNSS_BACKUP_FILENAME,
+               O_WRONLY | O_CREAT | O_TRUNC);
   if (fd < 0)
     {
       kmm_free(buf);
