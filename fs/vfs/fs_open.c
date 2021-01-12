@@ -294,7 +294,7 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
 
   /* Let file_vopen() do all of the work */
 
-  ret = file_vopen(&filep, path, oflag, ap);
+  ret = file_vopen(&filep, path, oflags, ap);
   if (ret < 0)
     {
       return ret;
