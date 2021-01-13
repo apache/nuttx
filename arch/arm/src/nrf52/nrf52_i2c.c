@@ -30,6 +30,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/kmalloc.h>
 #include <arch/board/board.h>
 
 #include "arm_arch.h"
@@ -207,6 +208,9 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
   FAR struct nrf52_i2c_priv_s *priv = (FAR struct nrf52_i2c_priv_s *)dev;
   uint32_t regval = 0;
   int      ret = OK;
+#ifndef CONFIG_NRF52_I2C_MASTER_DISABLE_NOSTART
+  uint8_t *pack_buf = NULL;
+#endif
 
   ret = nxsem_wait(&priv->sem_excl);
   if (ret < 0)
@@ -291,6 +295,56 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
 
       if ((priv->flags & I2C_M_READ) == 0)
         {
+#ifndef CONFIG_NRF52_I2C_MASTER_DISABLE_NOSTART
+          /* Check if we need to combine messages */
+
+          if (priv->msgc > 1)
+            {
+              if (priv->msgv[1].flags & I2C_M_NOSTART)
+                {
+                  /* More than 2 messages not supported */
+
+                  DEBUGASSERT(priv->msgc < 3);
+
+                  /* Combine buffers */
+
+                  pack_buf = kmm_malloc(priv->msgv[0].length +
+                                        priv->msgv[1].length);
+                  if (pack_buf == NULL)
+                    {
+                      return -1;
+                    }
+
+                  /* Combine messages */
+
+                  memcpy(pack_buf, priv->msgv[0].buffer,
+                         priv->msgv[0].length);
+                  memcpy(pack_buf + priv->msgv[0].length,
+                         priv->msgv[1].buffer, priv->msgv[1].length);
+
+                  /* Use new buffer to transmit data */
+
+                  priv->ptr  = pack_buf;
+                  priv->dcnt = priv->msgv[0].length + priv->msgv[1].length;
+
+                  /* Next message */
+
+                  priv->msgc -= 1;
+                  priv->msgv += 1;
+                }
+            }
+#else
+          if (priv->msgc > 1)
+            {
+              if (priv->msgv[1].flags & I2C_M_NOSTART)
+                {
+                  /* Not supported */
+
+                  DEBUGASSERT(0);
+                }
+            }
+#endif
+
           /* Write TXD data pointer */
 
           regval = (uint32_t)priv->ptr;
@@ -441,6 +495,13 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
 #endif
 
 errout:
+#ifndef CONFIG_NRF52_I2C_MASTER_DISABLE_NOSTART
+  if (pack_buf != NULL)
+    {
+      kmm_free(pack_buf);
+    }
+#endif
+
   nxsem_post(&priv->sem_excl);
   return ret;
 }
