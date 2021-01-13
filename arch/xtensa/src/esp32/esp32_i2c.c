@@ -858,12 +858,12 @@ FAR struct i2c_master_s *esp32_i2cbus_initialize(int port)
     {
 #ifdef CONFIG_ESP32_I2C0
     case 0:
-      priv = (struct esp32_i2c_priv_s *)&esp32_i2c0_priv;
+      priv = &esp32_i2c0_priv;
       break;
 #endif
 #ifdef CONFIG_ESP32_I2C1
     case 1:
-      priv = (struct esp32_i2c_priv_s *)&esp32_i2c1_priv;
+      priv = &esp32_i2c1_priv;
       break;
 #endif
     default:
