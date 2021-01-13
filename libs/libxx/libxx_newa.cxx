@@ -96,3 +96,18 @@ FAR void *operator new[](std::size_t nbytes)
 
   return alloc;
 }
+
+FAR void *operator new[](std::size_t nbytes, FAR void *ptr)
+{
+
+#ifdef CONFIG_DEBUG_ERROR
+  if (ptr == nullptr)
+    {
+      _err("ERROR: Failed to placement new[]\n");
+    }
+#endif
+
+  // Return the ptr pointer
+
+  return ptr;
+}
