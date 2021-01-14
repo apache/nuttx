@@ -138,6 +138,12 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   ret = 0;
 #endif
 
+#if defined(CONFIG_SYSLOG_PROCESSID)
+  /* Pre-pend the Process ID */
+
+  ret += lib_sprintf(&stream.public, "[%2d] ", (int)getpid());
+#endif
+
 #if defined(CONFIG_SYSLOG_PREFIX)
   /* Pre-pend the prefix, if available */
 
