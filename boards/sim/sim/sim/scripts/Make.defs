@@ -154,14 +154,6 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   CCLINKFLAGS += -g
 endif
 
-ifeq ($(CONFIG_BT_LIBUSB),y)
-  STDLIBS += -lusb-1.0
-endif
-
-ifeq ($(CONFIG_FLUORIDE_HCI_USB),y)
-  STDLIBS += -lusb-1.0
-endif
-
 ifeq ($(CONFIG_SIM_M32),y)
   LDLINKFLAGS += -melf_i386
   CCLINKFLAGS += -m32
