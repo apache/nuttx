@@ -51,6 +51,18 @@
 #include <nuttx/syslog/syslog.h>
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_SYSLOG_PRIORITY)
+static FAR const char * g_priority_str[] =
+  {
+    "EMERG", "ALERT", "CRIT", "ERROR",
+    "WARN", "NOTICE", "INFO", "DEBUG"
+  };
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -158,6 +170,10 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #endif
 #else
   ret = 0;
+#endif
+
+#if defined(CONFIG_SYSLOG_PRIORITY)
+  ret += lib_sprintf(&stream.public, "[%6s] ", g_priority_str[priority]);
 #endif
 
 #if defined(CONFIG_SYSLOG_PREFIX)
