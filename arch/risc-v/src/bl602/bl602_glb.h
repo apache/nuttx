@@ -64,6 +64,22 @@ extern "C"
 
 void bl602_swrst_ahb_slave1(uint32_t slave1);
 
+/****************************************************************************
+ * Name: bl602_glb_get_bclk_div
+ *
+ * Description:
+ *   get bus clock div.
+ *
+ * Input Parameters:
+ *   void
+ *
+ * Returned Value:
+ *   bus clock div
+ *
+ ****************************************************************************/
+
+uint8_t bl602_glb_get_bclk_div(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

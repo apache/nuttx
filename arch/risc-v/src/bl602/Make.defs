@@ -48,6 +48,10 @@ CHIP_CSRCS += bl602_idle.c bl602_irq.c bl602_irq_dispatch.c
 CHIP_CSRCS += bl602_serial.c bl602_lowputc.c bl602_tim.c
 CHIP_CSRCS += bl602_start.c bl602_timerisr.c
 
+ifeq ($(CONFIG_I2C),y)                                                                               
+CHIP_CSRCS += bl602_i2c.c
+endif
+
 ifeq ($(CONFIG_TIMER),y)
 CHIP_CSRCS  += bl602_tim_lowerhalf.c
 endif

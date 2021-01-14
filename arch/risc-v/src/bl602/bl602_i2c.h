@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/bl602/bl602_glb.c
+ * arch/risc-v/src/bl602/bl602_i2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,80 +18,75 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_BL602_BL602_I2C_H
+#define __ARCH_RISCV_SRC_BL602_BL602_I2C_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
-#include "riscv_arch.h"
-#include "hardware/bl602_glb.h"
+#include <nuttx/i2c/i2c_master.h>
 
 /****************************************************************************
- * Pre-Processor Declarations
+ * Public Data
  ****************************************************************************/
 
-#define nop() asm volatile("nop")
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bl602_swrst_ahb_slave1
+ * Name: bl602_i2cbus_initialize
  *
  * Description:
- *   SW Reset ahb slave.
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
  *
  * Input Parameters:
- *   slave1: reset signal
+ *   Port number (for hardware that has multiple I2C interfaces)
  *
  * Returned Value:
- *   None
+ *   Valid I2C device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-void bl602_swrst_ahb_slave1(uint32_t slave1)
-{
-  /* To prevent glitch from accessing bus immediately
-   * after certain register operations, so some nop delay is added
-   */
-
-  modifyreg32(BL602_SWRST_CFG1, slave1, 0);
-  nop();
-  nop();
-  nop();
-  nop();
-  modifyreg32(BL602_SWRST_CFG1, 0, slave1);
-  nop();
-  nop();
-  nop();
-  nop();
-  modifyreg32(BL602_SWRST_CFG1, slave1, 0);
-}
+struct i2c_master_s *bl602_i2cbus_initialize(int port);
 
 /****************************************************************************
- * Name: bl602_glb_get_bclk_div
+ * Name: bl602_i2cbus_uninitialize
  *
  * Description:
- *   get bus clock div.
+ *   De-initialize the selected I2C port, and power down the device.
  *
  * Input Parameters:
- *   void
+ *   Device structure as returned by the bl602_i2cbus_initialize()
  *
  * Returned Value:
- *   bus clock div
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
  *
  ****************************************************************************/
 
-uint8_t bl602_glb_get_bclk_div(void)
-{
-  uint32_t tmp_val;
+int bl602_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 
-  tmp_val = getreg32(BL602_CLK_CFG0);
-  tmp_val =
-    (CLK_CFG0_REG_BCLK_DIV_MASK & tmp_val) >> CLK_CFG0_REG_BCLK_DIV_SHIFT;
-
-  return (uint8_t)tmp_val;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_HBN_H */

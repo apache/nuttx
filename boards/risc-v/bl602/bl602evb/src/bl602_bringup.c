@@ -38,6 +38,8 @@
 #include <bl602_oneshot_lowerhalf.h>
 #include <bl602_pwm_lowerhalf.h>
 #include <bl602_wdt_lowerhalf.h>
+#include <bl602_gpio.h>
+#include <bl602_i2c.h>
 
 #if defined(CONFIG_BL602_SPIFLASH)
 #include <bl602_spiflash.h>
@@ -62,6 +64,9 @@ int bl602_bringup(void)
 #if defined(CONFIG_BL602_SPIFLASH)
   FAR struct mtd_dev_s *mtd_part = NULL;
   const char *path = "/dev/mtdflash";
+#endif
+#ifdef CONFIG_I2C
+  struct i2c_master_s *i2c_bus;
 #endif
   int ret = OK;
 
@@ -147,6 +152,20 @@ int bl602_bringup(void)
     {
       syslog(LOG_DEBUG, "ERROR: bl602_wdt_initialize failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+  ret = bl602_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_I2C
+  i2c_bus = bl602_i2cbus_initialize(0);
+  i2c_register(i2c_bus, 0);
 #endif
 
 #ifdef CONFIG_BL602_SPIFLASH
