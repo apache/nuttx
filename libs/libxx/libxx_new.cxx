@@ -93,7 +93,7 @@ FAR void *operator new(std::size_t nbytes, FAR void *ptr)
 {
 
 #ifdef CONFIG_DEBUG_ERROR
-  if (ptr == nullptr)
+  if (ptr == 0)
     {
       _err("ERROR: Failed to placement new\n");
     }
