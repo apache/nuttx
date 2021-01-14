@@ -1386,7 +1386,14 @@ static void esp32_spi_deinit(FAR struct spi_dev_s *dev)
       modifyreg32(DPORT_PERIP_CLK_EN_REG, priv->config->dma_clk_bit, 0);
     }
 
+  modifyreg32(DPORT_PERIP_RST_EN_REG, 0, priv->config->clk_bit);
   modifyreg32(DPORT_PERIP_CLK_EN_REG, priv->config->clk_bit, 0);
+
+  priv->frequency = 0;
+  priv->actual    = 0;
+  priv->mode      = SPIDEV_MODE0;
+  priv->nbits     = 0;
+  priv->dma_chan  = 0;
 }
 
 /****************************************************************************

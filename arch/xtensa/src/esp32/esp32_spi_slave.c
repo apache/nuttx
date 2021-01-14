@@ -963,7 +963,17 @@ static void esp32_spislv_deinit(FAR struct spi_sctrlr_s *dev)
 
   esp32_gpioirqdisable(ESP32_PIN2IRQ(priv->config->cs_pin));
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_INT_EN_M);
+
+  modifyreg32(DPORT_PERIP_RST_EN_REG, 0, priv->config->clk_bit);
   modifyreg32(DPORT_PERIP_CLK_EN_REG, priv->config->clk_bit, 0);
+
+  priv->mode = SPIDEV_MODE0;
+  priv->nbits = 0;
+  priv->txlen = 0;
+  priv->rxlen = 0;
+  priv->process = false;
+  priv->txen = false;
+  priv->dma_chan = false;
 }
 
 /****************************************************************************
@@ -1353,6 +1363,10 @@ int esp32_spislv_sctrlr_uninitialize(FAR struct spi_sctrlr_s *sctrlr)
     }
 
   up_disable_irq(priv->cpuint);
+  esp32_detach_peripheral(priv->config->cpu,
+                          priv->config->periph,
+                          priv->cpuint);
+  esp32_free_cpuint(priv->cpuint);
 
   esp32_spislv_deinit(sctrlr);
 
