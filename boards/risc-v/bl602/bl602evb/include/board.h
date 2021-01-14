@@ -33,20 +33,47 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* GPIO Configuration */
+
+#define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
+#define BOARD_GPIO_IN1    (GPIO_INPUT | GPIO_PULLUP | \
+                            GPIO_FUNC_SWGPIO | GPIO_PIN0)
+#define BOARD_GPIO_OUT1   (GPIO_OUTPUT | GPIO_PULLDOWN | \
+                            GPIO_FUNC_SWGPIO | GPIO_PIN1)
+#define BOARD_GPIO_INT1   (GPIO_INPUT | GPIO_PULLUP | \
+                            GPIO_FUNC_SWGPIO | GPIO_PIN2)
+
 /* UART Configuration */
 
-#define BOARD_UART_0_RX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN7)
-#define BOARD_UART_0_TX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN16)
-#define BOARD_UART_1_RX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN3)
-#define BOARD_UART_1_TX_PIN (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_UART | GPIO_PIN4)
+#define BOARD_UART_0_RX_PIN (GPIO_INPUT | GPIO_PULLUP | \
+                              GPIO_FUNC_UART | GPIO_PIN7)
+#define BOARD_UART_0_TX_PIN (GPIO_INPUT | GPIO_PULLUP | \
+                              GPIO_FUNC_UART | GPIO_PIN16)
+#define BOARD_UART_1_RX_PIN (GPIO_INPUT | GPIO_PULLUP | \
+                              GPIO_FUNC_UART | GPIO_PIN3)
+#define BOARD_UART_1_TX_PIN (GPIO_INPUT | GPIO_PULLUP | \
+                              GPIO_FUNC_UART | GPIO_PIN4)
 
 /* PWM Configuration */
 
-#define BOARD_PWM_CH0_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | GPIO_FUNC_PWM | GPIO_PIN0)
-#define BOARD_PWM_CH1_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | GPIO_FUNC_PWM | GPIO_PIN1)
-#define BOARD_PWM_CH2_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | GPIO_FUNC_PWM | GPIO_PIN2)
-#define BOARD_PWM_CH3_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | GPIO_FUNC_PWM | GPIO_PIN3)
-#define BOARD_PWM_CH4_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | GPIO_FUNC_PWM | GPIO_PIN4)
+#define BOARD_PWM_CH0_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | \
+                            GPIO_FUNC_PWM | GPIO_PIN0)
+#define BOARD_PWM_CH1_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | \
+                            GPIO_FUNC_PWM | GPIO_PIN1)
+#define BOARD_PWM_CH2_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | \
+                            GPIO_FUNC_PWM | GPIO_PIN2)
+#define BOARD_PWM_CH3_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | \
+                            GPIO_FUNC_PWM | GPIO_PIN3)
+#define BOARD_PWM_CH4_PIN (GPIO_OUTPUT | GPIO_PULLDOWN | \
+                            GPIO_FUNC_PWM | GPIO_PIN4)
+
+/* I2C Configuration */
+
+#define BOARD_I2C_SCL (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_I2C | GPIO_PIN4)
+#define BOARD_I2C_SDA (GPIO_INPUT | GPIO_PULLUP | GPIO_FUNC_I2C | GPIO_PIN3)
 
 /****************************************************************************
  * Public Types

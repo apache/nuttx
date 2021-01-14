@@ -28,8 +28,8 @@
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
-#  include <stdint.h>
-#  include <stdbool.h>
+#include <stdint.h>
+#include <stdbool.h>
 #endif
 
 #include <nuttx/irq.h>
@@ -81,11 +81,11 @@
  * ..UU .... .... ....
  */
 
-#define GPIO_PUPD_SHIFT  (12)                   /* Bits 16-17: Pull-up/down */
-#define GPIO_PUPD_MASK   (3 << GPIO_PUPD_SHIFT)
-#  define GPIO_FLOAT     (0 << GPIO_PUPD_SHIFT) /* No pull-up, pull-down */
-#  define GPIO_PULLUP    (1 << GPIO_PUPD_SHIFT) /* Pull-up */
-#  define GPIO_PULLDOWN  (2 << GPIO_PUPD_SHIFT) /* Pull-down */
+#define GPIO_PUPD_SHIFT (12) /* Bits 16-17: Pull-up/down */
+#define GPIO_PUPD_MASK  (3 << GPIO_PUPD_SHIFT)
+#define GPIO_FLOAT      (0 << GPIO_PUPD_SHIFT) /* No pull-up, pull-down */
+#define GPIO_PULLUP     (1 << GPIO_PUPD_SHIFT) /* Pull-up */
+#define GPIO_PULLDOWN   (2 << GPIO_PUPD_SHIFT) /* Pull-down */
 
 /* Drive:
  *
@@ -95,12 +95,12 @@
  * .... DD.. .... ....
  */
 
-#define GPIO_DRV_SHIFT   (10)                   /* Bits 10-11: Drive */
-#define GPIO_DRV_MASK    (3 << GPIO_DRV_SHIFT)
-#  define GPIO_DRV_0     (0 << GPIO_DRV_SHIFT)
-#  define GPIO_DRV_1     (1 << GPIO_DRV_SHIFT)
-#  define GPIO_DRV_2     (2 << GPIO_DRV_SHIFT)
-#  define GPIO_DRV_3     (3 << GPIO_DRV_SHIFT)
+#define GPIO_DRV_SHIFT (10) /* Bits 10-11: Drive */
+#define GPIO_DRV_MASK  (3 << GPIO_DRV_SHIFT)
+#define GPIO_DRV_0     (0 << GPIO_DRV_SHIFT)
+#define GPIO_DRV_1     (1 << GPIO_DRV_SHIFT)
+#define GPIO_DRV_2     (2 << GPIO_DRV_SHIFT)
+#define GPIO_DRV_3     (3 << GPIO_DRV_SHIFT)
 
 /* Input Schmitt trigger:
  *
@@ -110,10 +110,10 @@
  * .... ..S. .... ....
  */
 
-#define GPIO_SMT_SHIFT   (9)                   /* Bits 9: SMT Enable */
-#define GPIO_SMT_MASK    (3 << GPIO_SMT_SHIFT)
-#  define GPIO_SMT_DIS   (0 << GPIO_SMT_SHIFT)
-#  define GPIO_SMT_EN    (1 << GPIO_SMT_SHIFT)
+#define GPIO_SMT_SHIFT (9) /* Bits 9: SMT Enable */
+#define GPIO_SMT_MASK  (3 << GPIO_SMT_SHIFT)
+#define GPIO_SMT_DIS   (0 << GPIO_SMT_SHIFT)
+#define GPIO_SMT_EN    (1 << GPIO_SMT_SHIFT)
 
 /* GPIO type selection:
  *
@@ -123,18 +123,18 @@
  * .... ...F FFF. ....
  */
 
-#define GPIO_FUNC_SHIFT      (5)                     /* Bits 5-8: GPIO Type */
-#define GPIO_FUNC_MASK       (15 << GPIO_FUNC_SHIFT)
-#  define GPIO_FUNC_SDIO     (1 << GPIO_FUNC_SHIFT)   /* SDIO */
-#  define GPIO_FUNC_FLASH    (2 << GPIO_FUNC_SHIFT)   /* Flash */
-#  define GPIO_FUNC_SPI      (4 << GPIO_FUNC_SHIFT)   /* SPI */
-#  define GPIO_FUNC_I2C      (6 << GPIO_FUNC_SHIFT)   /* I2C */
-#  define GPIO_FUNC_UART     (7 << GPIO_FUNC_SHIFT)   /* UART */
-#  define GPIO_FUNC_PWM      (8 << GPIO_FUNC_SHIFT)   /* PWM */
-#  define GPIO_FUNC_EXT_PA   (9 << GPIO_FUNC_SHIFT)   /* Analog */
-#  define GPIO_FUNC_ANA      (10 << GPIO_FUNC_SHIFT)  /* Analog */
-#  define GPIO_FUNC_SWGPIO   (11 << GPIO_FUNC_SHIFT)  /* Software GPIO */
-#  define GPIO_FUNC_JTAG     (14 << GPIO_FUNC_SHIFT)  /* JTAG */
+#define GPIO_FUNC_SHIFT  (5) /* Bits 5-8: GPIO Type */
+#define GPIO_FUNC_MASK   (15 << GPIO_FUNC_SHIFT)
+#define GPIO_FUNC_SDIO   (1 << GPIO_FUNC_SHIFT)  /* SDIO */
+#define GPIO_FUNC_FLASH  (2 << GPIO_FUNC_SHIFT)  /* Flash */
+#define GPIO_FUNC_SPI    (4 << GPIO_FUNC_SHIFT)  /* SPI */
+#define GPIO_FUNC_I2C    (6 << GPIO_FUNC_SHIFT)  /* I2C */
+#define GPIO_FUNC_UART   (7 << GPIO_FUNC_SHIFT)  /* UART */
+#define GPIO_FUNC_PWM    (8 << GPIO_FUNC_SHIFT)  /* PWM */
+#define GPIO_FUNC_EXT_PA (9 << GPIO_FUNC_SHIFT)  /* Analog */
+#define GPIO_FUNC_ANA    (10 << GPIO_FUNC_SHIFT) /* Analog */
+#define GPIO_FUNC_SWGPIO (11 << GPIO_FUNC_SHIFT) /* Software GPIO */
+#define GPIO_FUNC_JTAG   (14 << GPIO_FUNC_SHIFT) /* JTAG */
 
 /* This identifies the bit in the port:
  *
@@ -146,35 +146,49 @@
 
 #define GPIO_PIN_SHIFT (0) /* Bits 0-4: GPIO number: 0-28 */
 #define GPIO_PIN_MASK  (0x1f << GPIO_PIN_SHIFT)
-#  define GPIO_PIN0    (0 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN1    (1 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN2    (2 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN3    (3 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN4    (4 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN5    (5 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN6    (6 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN7    (7 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN8    (8 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN9    (9 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN10   (10 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN11   (11 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN12   (12 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN13   (13 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN14   (14 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN15   (15 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN16   (16 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN17   (17 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN18   (18 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN19   (19 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN20   (20 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN21   (21 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN22   (22 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN23   (23 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN24   (24 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN25   (25 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN26   (26 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN27   (27 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN28   (28 << GPIO_PIN_SHIFT)
+#define GPIO_PIN0      (0 << GPIO_PIN_SHIFT)
+#define GPIO_PIN1      (1 << GPIO_PIN_SHIFT)
+#define GPIO_PIN2      (2 << GPIO_PIN_SHIFT)
+#define GPIO_PIN3      (3 << GPIO_PIN_SHIFT)
+#define GPIO_PIN4      (4 << GPIO_PIN_SHIFT)
+#define GPIO_PIN5      (5 << GPIO_PIN_SHIFT)
+#define GPIO_PIN6      (6 << GPIO_PIN_SHIFT)
+#define GPIO_PIN7      (7 << GPIO_PIN_SHIFT)
+#define GPIO_PIN8      (8 << GPIO_PIN_SHIFT)
+#define GPIO_PIN9      (9 << GPIO_PIN_SHIFT)
+#define GPIO_PIN10     (10 << GPIO_PIN_SHIFT)
+#define GPIO_PIN11     (11 << GPIO_PIN_SHIFT)
+#define GPIO_PIN12     (12 << GPIO_PIN_SHIFT)
+#define GPIO_PIN13     (13 << GPIO_PIN_SHIFT)
+#define GPIO_PIN14     (14 << GPIO_PIN_SHIFT)
+#define GPIO_PIN15     (15 << GPIO_PIN_SHIFT)
+#define GPIO_PIN16     (16 << GPIO_PIN_SHIFT)
+#define GPIO_PIN17     (17 << GPIO_PIN_SHIFT)
+#define GPIO_PIN18     (18 << GPIO_PIN_SHIFT)
+#define GPIO_PIN19     (19 << GPIO_PIN_SHIFT)
+#define GPIO_PIN20     (20 << GPIO_PIN_SHIFT)
+#define GPIO_PIN21     (21 << GPIO_PIN_SHIFT)
+#define GPIO_PIN22     (22 << GPIO_PIN_SHIFT)
+#define GPIO_PIN23     (23 << GPIO_PIN_SHIFT)
+#define GPIO_PIN24     (24 << GPIO_PIN_SHIFT)
+#define GPIO_PIN25     (25 << GPIO_PIN_SHIFT)
+#define GPIO_PIN26     (26 << GPIO_PIN_SHIFT)
+#define GPIO_PIN27     (27 << GPIO_PIN_SHIFT)
+#define GPIO_PIN28     (28 << GPIO_PIN_SHIFT)
+
+/* GLB GPIO interrupt trigger mode type definition */
+
+#define GLB_GPIO_INT_TRIG_NEG_PULSE \
+  0 /* GPIO negedge pulse trigger interrupt */
+
+#define GLB_GPIO_INT_TRIG_POS_PULSE \
+  1 /* GPIO posedge pulse trigger interrupt */
+
+#define GLB_GPIO_INT_TRIG_NEG_LEVEL \
+  2 /* GPIO negedge level trigger interrupt (32k 3T) */
+
+#define GLB_GPIO_INT_TRIG_POS_LEVEL \
+  3 /* GPIO posedge level trigger interrupt (32k 3T) */
 
 /****************************************************************************
  * Public Types
@@ -286,8 +300,22 @@ bool bl602_gpioread(gpio_pinset_t pinset);
  *
  ****************************************************************************/
 
-int bl602_gpiosetevent(gpio_pinset_t pinset, bool risingedge,
-                       bool fallingedge, bool event, xcpt_t func, void *arg);
+int bl602_gpiosetevent(gpio_pinset_t pinset,
+                       bool          risingedge,
+                       bool          fallingedge,
+                       bool          event,
+                       xcpt_t        func,
+                       void *        arg);
+
+/****************************************************************************
+ * Name: bl602_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *
+ ****************************************************************************/
+
+int bl602_gpio_initialize(void);
 
 /****************************************************************************
  * Function:  bl602_dumpgpio
@@ -300,7 +328,7 @@ int bl602_gpiosetevent(gpio_pinset_t pinset, bool risingedge,
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int bl602_dumpgpio(gpio_pinset_t pinset, const char *msg);
 #else
-#  define bl602_dumpgpio(p,m)
+#define bl602_dumpgpio(p, m)
 #endif
 
 #undef EXTERN

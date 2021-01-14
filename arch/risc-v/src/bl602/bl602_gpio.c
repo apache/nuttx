@@ -219,5 +219,5 @@ void bl602_gpiowrite(gpio_pinset_t pinset, bool value)
 bool bl602_gpioread(gpio_pinset_t pinset)
 {
   uint8_t pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  return (getreg32(BL602_GPIO_CFGCTL30) & (1 << pin)) == 1;
+  return ((getreg32(BL602_GPIO_CFGCTL30) & (1 << pin)) ? 1 : 0);
 }
