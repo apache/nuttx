@@ -163,7 +163,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
- *   a negated errno value is retruend.  See send() for the complete list
+ *   a negated errno value is returned.  See send() for the complete list
  *   of return values.
  *
  ****************************************************************************/
@@ -192,7 +192,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
   /* Perform the send operation */
 
-  /* Initialize the state structure. This is done with the network locked
+  /* Initialize the state structure.  This is done with the network locked
    * because we don't want anything to happen until we are ready.
    */
 
@@ -244,7 +244,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
   nxsem_destroy(&state.snd_sem);
   net_unlock();
 
-  /* Check for a errors, Errors are signalled by negative errno values
+  /* Check for errors.  Errors are signalled by negative errno values
    * for the send length
    */
 

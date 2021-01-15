@@ -177,8 +177,8 @@ static int bluetooth_sockif_alloc(FAR struct socket *psock)
 static int bluetooth_setup(FAR struct socket *psock, int protocol)
 {
   /* Allocate the appropriate connection structure.  This reserves the
-   * the connection structure is is unallocated at this point.  It will
-   * not actually be initialized until the socket is connected.
+   * connection structure, it is unallocated at this point.  It will not
+   * actually be initialized until the socket is connected.
    *
    * Only SOCK_RAW is supported
    */

@@ -240,7 +240,7 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_PKT */
 
 /****************************************************************************
- * Name: devif_poll_pkt_connections
+ * Name: devif_poll_can_connections
  *
  * Description:
  *   Poll all packet connections for available packets to send.
@@ -705,7 +705,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 #endif
 #ifdef CONFIG_NET_CAN
     {
-      /* Check for pending packet socket transfer */
+      /* Check for pending CAN socket transfer */
 
       bstop = devif_poll_can_connections(dev, callback);
     }
