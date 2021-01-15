@@ -101,6 +101,7 @@
 #define _NOTERAMBASE    (0x2d00) /* Noteram device ioctl commands*/
 #define _RCIOCBASE      (0x2e00) /* Remote Control device ioctl commands */
 #define _HIMEMBASE      (0x2f00) /* Himem device ioctl commands*/
+#define _EFUSEBASE      (0x3000) /* Efuse device ioctl commands*/
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -550,6 +551,11 @@
 
 #define _HIMEMIOCVALID(c)   (_IOC_TYPE(c) == _HIMEMBASE)
 #define _HIMEMIOC(nr)       _IOC(_HIMEMBASE, nr)
+
+/* Efuse drivers ************************************************************/
+
+#define _EFUSEIOCVALID(c)   (_IOC_TYPE(c) == _EFUSEBASE)
+#define _EFUSEIOC(nr)       _IOC(_EFUSEBASE, nr)
 
 /* Wireless driver network ioctl definitions ********************************/
 
