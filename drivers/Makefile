@@ -55,6 +55,7 @@ include mmcsd/Make.defs
 include modem/Make.defs
 include mtd/Make.defs
 include eeprom/Make.defs
+include efuse/Make.defs
 include net/Make.defs
 include note/Make.defs
 include pipes/Make.defs
