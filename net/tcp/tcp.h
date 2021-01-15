@@ -1361,7 +1361,6 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
  *
  ****************************************************************************/
 
-struct socket;
 ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len, int flags);
 
