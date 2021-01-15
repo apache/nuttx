@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_STM32_SDMMC_H
 #define __ARCH_ARM_SRC_STM32H7_STM32_SDMMC_H
@@ -48,7 +48,7 @@
 #include "hardware/stm32_sdmmc.h"
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
