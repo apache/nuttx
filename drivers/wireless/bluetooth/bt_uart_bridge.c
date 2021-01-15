@@ -39,7 +39,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define HCI_RECVBUF_SIZE     2048
+#define HCI_RECVBUF_SIZE     4096
 #define HCI_SENDBUF_SIZE     1024
 #define HCI_NPOLLWAITERS     2
 
@@ -63,7 +63,7 @@ struct bt_uart_bridge_device_s
 
   struct circbuf_s               recvbuf;
   sem_t                          recvlock;
-  uint8_t                        sendbuf[HCI_SENDBUF_SIZE];
+  char                           sendbuf[HCI_SENDBUF_SIZE];
   size_t                         sendlen;
 };
 
@@ -75,7 +75,7 @@ struct bt_uart_bridge_s
   sem_t                          sendlock;
 
   struct file                    filep;
-  uint8_t                        tmpbuf[HCI_RECVBUF_SIZE];
+  char                           tmpbuf[HCI_RECVBUF_SIZE];
 };
 
 /****************************************************************************
@@ -152,6 +152,26 @@ bt_uart_circbuf_write(FAR struct bt_uart_bridge_device_s *device,
   return ret;
 }
 
+static ssize_t bt_uart_file_read(FAR struct file *filep,
+                                 FAR char *buffer, size_t buflen)
+{
+  size_t nread = 0;
+  ssize_t ret;
+
+  while (buflen != nread)
+    {
+      ret = file_read(filep, buffer + nread, buflen - nread);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      nread += ret;
+    }
+
+  return nread;
+}
+
 static int bt_uart_bridge_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
@@ -178,7 +198,9 @@ static ssize_t bt_uart_bridge_read(FAR struct file *filep,
   FAR struct bt_uart_bridge_device_s *device = inode->i_private;
   FAR struct bt_uart_bridge_s *bridge = device->bridge;
   FAR struct bt_uart_bridge_device_s *iterator;
-  int recvlen;
+  FAR union bt_hci_hdr_u *hdr;
+  size_t pktlen;
+  size_t hdrlen;
   int ret;
   int i;
 
@@ -188,36 +210,95 @@ static ssize_t bt_uart_bridge_read(FAR struct file *filep,
       return ret;
     }
 
-  ret = nxsem_wait_uninterruptible(&bridge->recvlock);
-  if (ret < 0)
+  while (1)
     {
-      return ret;
-    }
-
-  while (circbuf_is_empty(&device->recvbuf))
-    {
-      recvlen = file_read(&bridge->filep,
-                          bridge->tmpbuf, HCI_RECVBUF_SIZE);
-      if (recvlen < 0)
+      ret = nxsem_wait_uninterruptible(&bridge->recvlock);
+      if (ret < 0)
         {
-          nxsem_post(&bridge->recvlock);
-          return recvlen;
+          return ret;
         }
 
+      if (!circbuf_is_empty(&device->recvbuf))
+        {
+          nxsem_post(&bridge->recvlock);
+          break;
+        }
+
+      ret = bt_uart_file_read(&bridge->filep,
+                              bridge->tmpbuf, H4_HEADER_SIZE);
+      if (ret < 0)
+        {
+          goto err;
+        }
+
+      switch (bridge->tmpbuf[0])
+        {
+          case H4_EVT:
+            hdrlen = sizeof(struct bt_hci_evt_hdr_s);
+            break;
+          case H4_ACL:
+            hdrlen = sizeof(struct bt_hci_acl_hdr_s);
+            break;
+          case H4_ISO:
+            hdrlen = sizeof(struct bt_hci_iso_hdr_s);
+            break;
+          default:
+            ret = -EINVAL;
+            goto err;
+        }
+
+      ret = bt_uart_file_read(&bridge->filep,
+                              bridge->tmpbuf +
+                              H4_HEADER_SIZE, hdrlen);
+      if (ret < 0)
+        {
+          goto err;
+        }
+
+      hdr = (FAR union bt_hci_hdr_u *)(bridge->tmpbuf + H4_HEADER_SIZE);
+      switch (bridge->tmpbuf[0])
+        {
+          case H4_EVT:
+            pktlen = hdr->evt.len;
+            break;
+          case H4_ACL:
+            pktlen = hdr->acl.len;
+            break;
+          case H4_ISO:
+            pktlen = hdr->iso.len;
+            break;
+          default:
+            ret = -EINVAL;
+            goto err;
+        }
+
+      ret = bt_uart_file_read(&bridge->filep,
+                              bridge->tmpbuf +
+                              H4_HEADER_SIZE + hdrlen, pktlen);
+      if (ret < 0)
+        {
+          goto err;
+        }
+
+      ret += H4_HEADER_SIZE + hdrlen;
       for (i = 0; i < BT_UART_FILTER_TYPE_COUNT; i++)
         {
           iterator = &bridge->device[i];
           if (bt_uart_filter_forward_recv(&iterator->filter,
-                                          bridge->tmpbuf, recvlen))
+                                          bridge->tmpbuf, ret))
             {
-              bt_uart_circbuf_write(iterator, bridge->tmpbuf, recvlen);
+              bt_uart_circbuf_write(iterator, bridge->tmpbuf, ret);
             }
         }
+
+      nxsem_post(&bridge->recvlock);
     }
 
-  nxsem_post(&bridge->recvlock);
-
   return bt_uart_circbuf_read(device, buffer, buflen);
+
+err:
+  nxsem_post(&bridge->recvlock);
+  return ret;
 }
 
 static ssize_t bt_uart_bridge_write(FAR struct file *filep,
@@ -230,7 +311,6 @@ static ssize_t bt_uart_bridge_write(FAR struct file *filep,
   size_t pktlen;
   size_t hdrlen;
   int ret;
-  int i;
 
   ret = nxsem_wait_uninterruptible(&bridge->sendlock);
   if (ret < 0)
