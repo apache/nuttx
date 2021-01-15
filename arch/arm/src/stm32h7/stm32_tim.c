@@ -508,7 +508,9 @@ static void stm32_tim_disable(FAR struct stm32_tim_dev_s *dev)
   stm32_putreg16(dev, STM32_BTIM_CR1_OFFSET, val);
 }
 
-/* Reset timer into system default state, but do not affect output/input pins */
+/* Reset timer into system default state, but do not affect output/input
+ * pins
+ */
 
 static void stm32_tim_reset(FAR struct stm32_tim_dev_s *dev)
 {
