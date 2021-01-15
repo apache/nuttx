@@ -304,7 +304,6 @@ void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn);
  *
  ****************************************************************************/
 
-struct socket;
 ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len);
 
