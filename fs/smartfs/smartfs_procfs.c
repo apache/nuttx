@@ -656,7 +656,7 @@ static int smartfs_readdir(struct fs_dirent_s *dir)
 
           dir->fd_dir.d_type = DTYPE_DIRECTORY;
           strncpy(dir->fd_dir.d_name, level1->mount->fs_blkdriver->i_name,
-                  NAME_MAX + 1);
+                  NAME_MAX);
 
           /* Advance to next entry */
 
@@ -669,7 +669,7 @@ static int smartfs_readdir(struct fs_dirent_s *dir)
 
           dir->fd_dir.d_type = g_direntry[level1->base.index].type;
           strncpy(dir->fd_dir.d_name, g_direntry[level1->base.index++].name,
-                  NAME_MAX + 1);
+                  NAME_MAX);
         }
       else if (level1->base.level == 3)
         {
@@ -677,7 +677,7 @@ static int smartfs_readdir(struct fs_dirent_s *dir)
 
           dir->fd_dir.d_type = g_direntry[level1->base.index].type;
           strncpy(dir->fd_dir.d_name, g_direntry[level1->direntry].name,
-                  NAME_MAX + 1);
+                  NAME_MAX);
           level1->base.index++;
         }
 
