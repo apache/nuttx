@@ -56,7 +56,46 @@ Usage
 =====
 
 No special python modules are needed, it should be possible to run the
-application simply as shown below;
+application simply as shown below:
+
+In the first terminal execute the openocd command to connect to the board.
+Assuming that you already flashed to firmware (nuttx.bin) with the LWL
+console support. For stm32f4discovery board I use this command:
+
+------------------------------------------
+$ sudo openocd -f board/stm32f4discovery.cfg
+Open On-Chip Debugger  v0.10.0-esp32-20200526-6-g4c41a632 (2020-06-23-10:12)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+srst_only separate srst_nogate srst_open_drain connect_deassert_srst
+
+Info : Listening on port 6666 for tcl connections
+Info : Listening on port 4444 for telnet connections
+Info : clock speed 2000 kHz
+Info : STLINK V2J17S0 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.216252
+Info : stm32f4x.cpu: hardware has 6 breakpoints, 4 watchpoints
+Info : Listening on port 3333 for gdb connections
+Info : accepting 'tcl' connection on tcp/6666
+invalid command name "ocd_mdw"
+0x20000000: 000000ff 
+
+0x20000000: 000000ff 
+
+0x20000004: 7216a318 
+
+0x2000000c: 994b5b1b 
+
+0x2000000c: 994b5b1b 
+
+0x2000000c: 994b5b1b
+...
+
+The "0x2000000c:..." will repeat all the time.
+
+Now in another terminal execute:
 
 ------------------------------------------
 $ ./ocdconsole.py
