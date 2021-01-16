@@ -641,7 +641,7 @@ static int tiva_txpoll(struct net_driver_s *dev)
   ninfo("Poll result: d_len=%d\n", priv->ld_dev.d_len);
   if (priv->ld_dev.d_len > 0)
     {
-      DEBUGASSERT(!!(tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX));
+      DEBUGASSERT(!(tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX));
 
       /* Look up the destination MAC address and add it to the Ethernet
        * header.
