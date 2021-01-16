@@ -568,6 +568,10 @@ static int nrf52_i2c_init(FAR struct nrf52_i2c_priv_s *priv)
   int pin         = 0;
   int port        = 0;
 
+  /* Disable TWI interface */
+
+  nrf52_i2c_putreg(priv, NRF52_TWIM_ENABLE_OFFSET, TWIM_ENABLE_DIS);
+
   /* Configure SCL and SDA pins */
 
   nrf52_gpio_config(priv->scl_pin);
@@ -593,7 +597,7 @@ static int nrf52_i2c_init(FAR struct nrf52_i2c_priv_s *priv)
 
   /* Enable TWI interface */
 
-  nrf52_i2c_putreg(priv, NRF52_TWIS_ENABLE_OFFSET, TWIM_ENABLE_EN);
+  nrf52_i2c_putreg(priv, NRF52_TWIM_ENABLE_OFFSET, TWIM_ENABLE_EN);
 
 #ifndef CONFIG_I2C_POLLED
   /* Enable I2C interrupts */
@@ -671,9 +675,9 @@ static int nrf52_i2c_sem_destroy(FAR struct nrf52_i2c_priv_s *priv)
 
 static int nrf52_i2c_deinit(FAR struct nrf52_i2c_priv_s *priv)
 {
-  /* Enable TWI interface */
+  /* Disable TWI interface */
 
-  nrf52_i2c_putreg(priv, TWIM_ENABLE_DIS, NRF52_TWIS_ENABLE_OFFSET);
+  nrf52_i2c_putreg(priv, NRF52_TWIM_ENABLE_OFFSET, TWIM_ENABLE_DIS);
 
   /* Unconfigure GPIO pins */
 
