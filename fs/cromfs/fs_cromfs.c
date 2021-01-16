@@ -1285,7 +1285,7 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
   name = (FAR char *)cromfs_offset2addr(fs, node->cn_name);
   finfo("Entry %lu: %s\n", (unsigned long)offset, name);
-  strncpy(dir->fd_dir.d_name, name, NAME_MAX + 1);
+  strncpy(dir->fd_dir.d_name, name, NAME_MAX);
 
   switch (node->cn_mode & S_IFMT)
     {

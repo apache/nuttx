@@ -1756,7 +1756,7 @@ static int proc_readdir(struct fs_dirent_s *dir)
       /* Save the filename and file type */
 
       dir->fd_dir.d_type = node->dtype;
-      strncpy(dir->fd_dir.d_name, node->name, NAME_MAX + 1);
+      strncpy(dir->fd_dir.d_name, node->name, NAME_MAX);
 
       /* Set up the next directory entry offset.  NOTE that we could use the
        * standard f_pos instead of our own private index.
