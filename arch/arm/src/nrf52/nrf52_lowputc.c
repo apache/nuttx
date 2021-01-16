@@ -235,13 +235,11 @@ static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
 
   putreg32(br, base + NRF52_UART_BAUDRATE_OFFSET);
 }
-#endif
 
 /****************************************************************************
  * Name: nrf52_setparity
  ****************************************************************************/
 
-#ifdef HAVE_UART_DEVICE
 static void nrf52_setparity(uintptr_t base,
                             const struct uart_config_s *config)
 {
@@ -264,7 +262,6 @@ static void nrf52_setparity(uintptr_t base,
 
   putreg32(regval, base + NRF52_UART_CONFIG_OFFSET);
 }
-#endif
 
 /****************************************************************************
  * Name: nrf52_setstops
@@ -295,7 +292,6 @@ static void nrf52_setstops(uintptr_t base,
  * Name: nrf52_sethwflow
  ****************************************************************************/
 
-#ifdef HAVE_UART_DEVICE
 static void nrf52_sethwflow(uintptr_t base,
                             const struct uart_config_s *config)
 {
@@ -381,7 +377,6 @@ void nrf52_usart_configure(uintptr_t base,
 
   putreg32(NRF52_UART_ENABLE_ENABLE, base + NRF52_UART_ENABLE_OFFSET);
 }
-#endif
 
 /****************************************************************************
  * Name: nrf52_usart_disable
@@ -392,7 +387,6 @@ void nrf52_usart_configure(uintptr_t base,
  *
  ****************************************************************************/
 
-#ifdef HAVE_UART_DEVICE
 void nrf52_usart_disable(uintptr_t base, const struct uart_config_s *config)
 {
   /* Disable interrupts */
@@ -415,6 +409,36 @@ void nrf52_usart_disable(uintptr_t base, const struct uart_config_s *config)
 
   putreg32(UART_PSELTXD_RESET, base + NRF52_UART_PSELTXD_OFFSET);
   putreg32(UART_PSELRXD_RESET, base + NRF52_UART_PSELRXD_OFFSET);
+}
+
+/****************************************************************************
+ * Name: nrf52_usart_setformat
+ *
+ * Description:
+ *   Set the USART line format and speed.
+ *
+ ****************************************************************************/
+
+void nrf52_usart_setformat(uintptr_t base,
+                           FAR const struct uart_config_s *config)
+{
+  /* Configure baud */
+
+  nrf52_setbaud(base, config);
+
+  /* Configure polarity */
+
+  nrf52_setparity(base, config);
+
+#ifdef HAVE_UART_STOPBITS
+  /* Configure STOP bits */
+
+  nrf52_setstops(base, config);
+#endif
+
+  /* Configure hardware flow control */
+
+  nrf52_sethwflow(base, config);
 }
 #endif
 
@@ -439,35 +463,3 @@ void arm_lowputc(char ch)
   putreg32(1, CONSOLE_BASE + NRF52_UART_TASKS_STOPTX_OFFSET);
 #endif
 }
-
-/****************************************************************************
- * Name: nrf52_usart_setformat
- *
- * Description:
- *   Set the USART line format and speed.
- *
- ****************************************************************************/
-
-#ifdef HAVE_UART_DEVICE
-void nrf52_usart_setformat(uintptr_t base,
-                           FAR const struct uart_config_s *config)
-{
-  /* Configure baud */
-
-  nrf52_setbaud(base, config);
-
-  /* Configure polarity */
-
-  nrf52_setparity(base, config);
-
-#ifdef HAVE_UART_STOPBITS
-  /* Configure STOP bits */
-
-  nrf52_setstops(base, config);
-#endif
-
-  /* Configure hardware flow control */
-
-  nrf52_sethwflow(base, config);
-}
-#endif
