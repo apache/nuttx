@@ -920,6 +920,7 @@ static int nrf52_spi_hwfeatures(FAR struct spi_dev_s *dev,
   FAR struct nrf52_spidev_s *priv = (FAR struct nrf52_spidev_s *)dev;
   uint32_t setbits = 0;
   uint32_t clrbits = 0;
+  uint32_t regval;
 
   spiinfo("features=%08x\n", features);
 
