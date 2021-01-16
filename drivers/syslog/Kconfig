@@ -142,6 +142,12 @@ config SYSLOG_TIMESTAMP_BUFFER
 	---help---
 		Buffer size to store syslog formatted timestamps.
 
+config SYSLOG_COLOR_OUTPUT
+	bool "Colored syslog output"
+	default n
+	---help---
+		Enables colored output in syslog, according to message priority.
+
 config SYSLOG_PRIORITY
 	bool "Prepend priority to syslog message"
 	default n
