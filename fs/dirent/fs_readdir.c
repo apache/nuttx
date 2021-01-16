@@ -61,7 +61,7 @@ static inline int readpseudodir(struct fs_dirent_s *idir)
   /* Copy the inode name into the dirent structure */
 
   strncpy(idir->fd_dir.d_name, idir->u.pseudo.fd_next->i_name,
-          NAME_MAX + 1);
+          NAME_MAX);
 
   /* If the node has file operations, we will say that it is a file. */
 

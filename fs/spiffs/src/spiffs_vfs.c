@@ -330,7 +330,7 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
       DEBUGASSERT(dir != NULL);
       entryp = &dir->fd_dir;
 
-      strncpy(entryp->d_name, (FAR char *)objhdr.name, NAME_MAX + 1);
+      strncpy(entryp->d_name, (FAR char *)objhdr.name, NAME_MAX);
       entryp->d_type = objhdr.type;
       return OK;
     }
