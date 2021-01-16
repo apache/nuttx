@@ -586,7 +586,7 @@ static int nrf52_pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
 #else
       ret = nrf52_pwm_duty(dev,
-                           (priv->channels[0].channel - 1),
+                           (info->channels[0].channel - 1),
                            info->duty);
 #endif /* CONFIG_PWM_MULTICHAN */
 
