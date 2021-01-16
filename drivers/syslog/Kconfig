@@ -154,6 +154,12 @@ config SYSLOG_PRIORITY
 	---help---
 		Prepend log priority (severity) to syslog message.
 
+config SYSLOG_PROCESSID
+	bool "Prepend Process ID to syslog message"
+	default n
+	---help---
+		Prepend Process ID to syslog message.
+
 config SYSLOG_PREFIX
 	bool "Prepend prefix to syslog message"
 	default n
