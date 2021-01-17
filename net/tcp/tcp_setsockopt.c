@@ -133,8 +133,24 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
         break;
 
       case TCP_NODELAY: /* Avoid coalescing of small segments. */
-        nerr("ERROR: TCP_NODELAY not supported\n");
-        ret = -ENOSYS;
+        if (value_len != sizeof(int))
+          {
+            ret = -EDOM;
+          }
+        else
+          {
+            int nodelay = *(FAR int *)value;
+
+            if (nodelay)
+              {
+                ret = OK;
+              }
+            else
+              {
+                nerr("ERROR: TCP_NODELAY not supported\n");
+                ret = -ENOSYS;
+              }
+          }
         break;
 
       case TCP_KEEPIDLE:  /* Start keepalives after this IDLE period */
