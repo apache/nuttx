@@ -50,6 +50,8 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#include "nrf52-feather.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -90,6 +92,10 @@ int nrf52_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
+#endif
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+  nrf52_i2ctool();
 #endif
 
   UNUSED(ret);
