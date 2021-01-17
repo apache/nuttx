@@ -75,25 +75,17 @@
 
 int hciuart_dev_initialize(void)
 {
-  const struct btuart_lowerhalf_s *lower;
   int ret;
 
   /* Perform one-time initialization */
 
   hciuart_initialize();
 
-  /* Instantiate the HCI UART lower half interface */
+  /* Instantiate the HCI UART lower half interface
+   * Then initialize the HCI UART upper half driver with the bluetooth stack
+   */
 
-  lower = hciuart_instantiate(HCIUART_SERDEV);
-  if (lower == NULL)
-    {
-      wlerr("ERROR: Failed to instantiate HCIUART%d\n", HCIUART_SERDEV + 1);
-      return -ENODEV;
-    }
-
-  /* Then initialize the HCI UART upper half driver with the bluetooth stack */
-
-  ret = btuart_register(lower);
+  ret = btuart_register(hciuart_instantiate(HCIUART_SERDEV));
   if (ret < 0)
     {
       wlerr("ERROR: btuart_register() failed: %d\n", ret);
