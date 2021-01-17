@@ -151,9 +151,8 @@ static void bthcitty_pollnotify(FAR struct bthcitty_s *dev,
         }
     }
 
-  bthcitty_post(&dev->recvsem);
-
   nxsem_post(&dev->fdslock);
+  bthcitty_post(&dev->recvsem);
 }
 
 static int bthcitty_open(FAR struct file *filep)
