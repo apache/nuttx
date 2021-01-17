@@ -264,7 +264,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
 
       if (iob == NULL)
         {
-          nerr("ERROR: Failed to create new I/O buffer chain\n");
+          nwarn("ERROR: Failed to create new I/O buffer chain\n");
           return 0;
         }
     }
