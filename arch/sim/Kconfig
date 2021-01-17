@@ -545,6 +545,7 @@ config SIM_HCITTY
 	bool "Attach Host Bluetooth As TTY Device"
 	default false
 	depends on (DRIVERS_BLUETOOTH && HOST_LINUX && SIM_WALLTIME)
+	select BLUETOOTH_UART_SHIM if BLUETOOTH_UART
 	---help---
 		Attached the local bluetooth device to the simulation
 		target via HCI_CHANNEL_USER. This gives NuttX full
