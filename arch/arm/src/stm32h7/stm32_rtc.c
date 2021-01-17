@@ -860,16 +860,20 @@ static int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
    * ranges of values correspond between struct tm and the time register.
    */
 
-  tmp = (data & (RTC_ALRMR_SU_MASK | RTC_ALRMR_ST_MASK)) >> RTC_ALRMR_SU_SHIFT;
+  tmp = (data & (RTC_ALRMR_SU_MASK | RTC_ALRMR_ST_MASK)) >>
+        RTC_ALRMR_SU_SHIFT;
   tp->tm_sec = rtc_bcd2bin(tmp);
 
-  tmp = (data & (RTC_ALRMR_MNU_MASK | RTC_ALRMR_MNT_MASK)) >> RTC_ALRMR_MNU_SHIFT;
+  tmp = (data & (RTC_ALRMR_MNU_MASK | RTC_ALRMR_MNT_MASK)) >>
+        RTC_ALRMR_MNU_SHIFT;
   tp->tm_min = rtc_bcd2bin(tmp);
 
-  tmp = (data & (RTC_ALRMR_HU_MASK | RTC_ALRMR_HT_MASK)) >> RTC_ALRMR_HU_SHIFT;
+  tmp = (data & (RTC_ALRMR_HU_MASK | RTC_ALRMR_HT_MASK)) >>
+        RTC_ALRMR_HU_SHIFT;
   tp->tm_hour = rtc_bcd2bin(tmp);
 
-  tmp = (data & (RTC_ALRMR_DU_MASK | RTC_ALRMR_DT_MASK)) >> RTC_ALRMR_DU_SHIFT;
+  tmp = (data & (RTC_ALRMR_DU_MASK | RTC_ALRMR_DT_MASK)) >>
+        RTC_ALRMR_DU_SHIFT;
   tp->tm_mday = rtc_bcd2bin(tmp);
 
   return OK;
@@ -1790,7 +1794,8 @@ int stm32_rtc_setperiodic(FAR const struct timespec *period,
 #elif defined(CONFIG_STM32H7_RTC_LSICLOCK)
 #  error "Periodic wakeup not available for LSI (and it is too inaccurate!)"
 #elif defined(CONFIG_STM32H7_RTC_LSECLOCK)
-  const uint32_t rtc_div16_max_msecs = 16 * 1000 * 0xffffu / STM32_LSE_FREQUENCY;
+  const uint32_t rtc_div16_max_msecs = 16 * 1000 * 0xffffu /
+                                       STM32_LSE_FREQUENCY;
 #else
 #  error "No clock for RTC!"
 #endif
