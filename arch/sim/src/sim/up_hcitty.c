@@ -28,7 +28,6 @@
 #include <nuttx/nuttx.h>
 
 #include <string.h>
-#include <stdio.h>
 #include <poll.h>
 #include <queue.h>
 
@@ -411,13 +410,10 @@ void bthcitty_loop(void)
     }
 }
 
-int bthcitty_register(int dev_id)
+int bthcitty_register(const char *name, int id)
 {
   FAR struct bthcitty_s *dev;
-  unsigned char name[16];
   int ret;
-
-  snprintf(name, sizeof(name), "/dev/ttyHCI%d", dev_id);
 
   dev = (FAR struct bthcitty_s *)kmm_zalloc(sizeof(struct bthcitty_s));
   if (dev == NULL)
@@ -426,7 +422,7 @@ int bthcitty_register(int dev_id)
     }
 
   dev->fd = -1;
-  dev->id = dev_id;
+  dev->id = id;
 
   nxsem_init(&dev->recvlock, 0, 1);
   nxsem_init(&dev->sendlock, 0, 1);

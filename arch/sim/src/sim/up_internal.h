@@ -400,7 +400,7 @@ int bthcisock_loop(void);
 /* up_hcitty.c **************************************************************/
 
 #ifdef CONFIG_SIM_HCITTY
-int bthcitty_register(int dev_id);
+int  bthcitty_register(const char *name, int id);
 void bthcitty_loop(void);
 #endif
 
