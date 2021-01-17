@@ -68,6 +68,11 @@ struct nrf52_i2c_priv_s
   uint8_t                 msgc;     /* Message count */
   struct i2c_msg_s       *msgv;     /* Message list */
   uint8_t                *ptr;      /* Current message buffer */
+#ifdef CONFIG_NRF52_I2C_MASTER_COPY_BUF_SIZE
+  /* Static buffer used for continued messages */
+
+  uint8_t                 copy_buf[CONFIG_NRF52_I2C_MASTER_COPY_BUF_SIZE];
+#endif
   uint32_t                freq;     /* Current I2C frequency */
   int                     dcnt;     /* Current message length */
   uint16_t                flags;    /* Current message flags */
@@ -308,11 +313,20 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
 
                   /* Combine buffers */
 
-                  pack_buf = kmm_malloc(priv->msgv[0].length +
-                                        priv->msgv[1].length);
-                  if (pack_buf == NULL)
+                  if ((priv->msgv[0].length +
+                       priv->msgv[1].length) <=
+                      CONFIG_NRF52_I2C_MASTER_COPY_BUF_SIZE)
                     {
-                      return -1;
+                      pack_buf = priv->copy_buf;
+                    }
+                  else
+                    {
+                      pack_buf = kmm_malloc(priv->msgv[0].length +
+                                            priv->msgv[1].length);
+                      if (pack_buf == NULL)
+                        {
+                          return -ENOMEM;
+                        }
                     }
 
                   /* Combine messages */
@@ -496,7 +510,7 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
 
 errout:
 #ifndef CONFIG_NRF52_I2C_MASTER_DISABLE_NOSTART
-  if (pack_buf != NULL)
+  if (pack_buf != NULL && pack_buf != priv->copy_buf)
     {
       kmm_free(pack_buf);
     }
