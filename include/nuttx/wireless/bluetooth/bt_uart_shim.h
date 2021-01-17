@@ -49,7 +49,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR struct btuart_lowerhalf_s *bt_uart_shim_getdevice(FAR const char *path);
+FAR struct btuart_lowerhalf_s *btuart_shim_getdevice(FAR const char *path);
 
 #endif
 #endif

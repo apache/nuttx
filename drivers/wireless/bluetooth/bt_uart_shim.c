@@ -383,7 +383,7 @@ static int hcicollecttask(int argc, FAR char **argv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bt_uart_shim_getdevice
+ * Name: btuart_shim_getdevice
  *
  * Description:
  *   Get a pointer to the device that will be used to communicate with the
@@ -397,7 +397,7 @@ static int hcicollecttask(int argc, FAR char **argv)
  *
  ****************************************************************************/
 
-FAR struct btuart_lowerhalf_s *bt_uart_shim_getdevice(FAR const char *path)
+FAR struct btuart_lowerhalf_s *btuart_shim_getdevice(FAR const char *path)
 {
   FAR struct hciuart_config_s *n;
   FAR struct hciuart_state_s *s;
