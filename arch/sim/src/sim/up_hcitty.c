@@ -330,7 +330,7 @@ static int bthcitty_poll(FAR struct file *filep,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct bthcitty_s *dev = inode->i_private;
-  pollevent_t eventset;
+  pollevent_t eventset = 0;
   int ret;
   int i;
 
