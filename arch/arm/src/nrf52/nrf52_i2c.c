@@ -370,7 +370,7 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
                                         NRF52_TWIM_ERRORSRC_OFFSET) & 0x7;
               if (regval != 0)
                 {
-                  i2cerr("Error SRC: %x\n", regval);
+                  i2cerr("Error SRC: 0x%08" PRIx32 "\n", regval);
                   ret = -1;
                   nrf52_i2c_putreg(priv,
                                   NRF52_TWIM_ERRORSRC_OFFSET, 0x7);
@@ -421,7 +421,7 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
                                       NRF52_TWIM_ERRORSRC_OFFSET) & 0x7;
             if (regval != 0)
               {
-                i2cerr("Error SRC: %x\n", regval);
+                i2cerr("Error SRC: 0x%08" PRIx32 "\n", regval);
                 ret = -1;
                 nrf52_i2c_putreg(priv,
                                  NRF52_TWIM_ERRORSRC_OFFSET, 0x7);
@@ -468,7 +468,7 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
                                 NRF52_TWIM_ERRORSRC_OFFSET) & 0x7;
       if (regval != 0)
         {
-          i2cerr("Error SRC: %x\n", regval);
+          i2cerr("Error SRC: 0x%08" PRIx32 "\n", regval);
           ret = -1;
           nrf52_i2c_putreg(priv,
                            NRF52_TWIM_ERRORSRC_OFFSET, 0x7);
