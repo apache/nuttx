@@ -141,6 +141,14 @@ config SENSORS_BMP280
 	---help---
 		Enable driver for the Bosch BMP280 barometic pressure sensor.
 
+if SENSORS_BMP280
+
+config BMP280_I2C_FREQUENCY
+	int "BMP280 I2C frequency"
+	default 400000
+
+endif # SENSORS_BMP280
+
 config SENSORS_DHTXX
 	bool "DHTxx humidity/temperature Sensor support"
 	default n
