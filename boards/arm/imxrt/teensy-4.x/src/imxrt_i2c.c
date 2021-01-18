@@ -76,7 +76,7 @@ static void imxrt_i2c_register(int bus)
     {
       /* Register the BMP280 driver */
 
-      ret = bmp280_register(BMP280_DRIVER_PATH, i2c);
+      ret = bmp280_register(0, i2c);
       if (ret < 0)
         {
           serr("ERROR: Failed to register BMP280\n");
