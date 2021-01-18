@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_hcitty.c
+ * arch/sim/src/sim/up_btuart.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -57,7 +57,7 @@ union bt_hdr_u
   struct bt_hci_iso_hdr_s iso;
 };
 
-struct bthcitty_s
+struct sim_btuart_s
 {
   sq_entry_t              link;
   uint8_t                 recvbuf[CONFIG_HCI_RECVBUF_SIZE];
@@ -81,38 +81,38 @@ struct bthcitty_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int      bthcitty_open (FAR struct file *filep);
-static int      bthcitty_close(FAR struct file *filep);
-static ssize_t  bthcitty_read (FAR struct file *filep,
-                               FAR char *buffer, size_t buflen);
-static ssize_t  bthcitty_write(FAR struct file *filep,
-                               FAR const char *buffer, size_t buflen);
-static int      bthcitty_ioctl(FAR struct file *filep,
-                               int cmd, unsigned long arg);
-static int      bthcitty_poll (FAR struct file *filep,
-                               FAR struct pollfd *fds, bool setup);
+static int     sim_btuart_open (FAR struct file *filep);
+static int     sim_btuart_close(FAR struct file *filep);
+static ssize_t sim_btuart_read (FAR struct file *filep,
+                                FAR char *buffer, size_t buflen);
+static ssize_t sim_btuart_write(FAR struct file *filep,
+                                FAR const char *buffer, size_t buflen);
+static int     sim_btuart_ioctl(FAR struct file *filep,
+                                int cmd, unsigned long arg);
+static int     sim_btuart_poll (FAR struct file *filep,
+                                FAR struct pollfd *fds, bool setup);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_bthcitty_ops =
+static const struct file_operations g_sim_btuart_ops =
 {
-  .open  = bthcitty_open,
-  .close = bthcitty_close,
-  .read  = bthcitty_read,
-  .write = bthcitty_write,
-  .ioctl = bthcitty_ioctl,
-  .poll  = bthcitty_poll
+  .open  = sim_btuart_open,
+  .close = sim_btuart_close,
+  .read  = sim_btuart_read,
+  .write = sim_btuart_write,
+  .ioctl = sim_btuart_ioctl,
+  .poll  = sim_btuart_poll
 };
 
-static sq_queue_t g_bthcitty_list;
+static sq_queue_t g_sim_btuart_list;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static inline void bthcitty_post(FAR sem_t *sem)
+static inline void sim_btuart_post(FAR sem_t *sem)
 {
   int semcount;
 
@@ -123,8 +123,8 @@ static inline void bthcitty_post(FAR sem_t *sem)
     }
 }
 
-static void bthcitty_pollnotify(FAR struct bthcitty_s *dev,
-                                pollevent_t eventset)
+static void sim_btuart_pollnotify(FAR struct sim_btuart_s *dev,
+                                  pollevent_t eventset)
 {
   int i;
 
@@ -138,18 +138,18 @@ static void bthcitty_pollnotify(FAR struct bthcitty_s *dev,
 
           if (fds->revents != 0)
             {
-              bthcitty_post(fds->sem);
+              sim_btuart_post(fds->sem);
             }
         }
     }
 
-  bthcitty_post(&dev->recvsem);
+  sim_btuart_post(&dev->recvsem);
 }
 
-static int bthcitty_open(FAR struct file *filep)
+static int sim_btuart_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct bthcitty_s *dev = inode->i_private;
+  FAR struct sim_btuart_s *dev = inode->i_private;
   int fd;
 
   fd = bthcisock_host_open(dev->id);
@@ -166,24 +166,24 @@ static int bthcitty_open(FAR struct file *filep)
   return OK;
 }
 
-static int bthcitty_close(FAR struct file *filep)
+static int sim_btuart_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct bthcitty_s *dev = inode->i_private;
+  FAR struct sim_btuart_s *dev = inode->i_private;
 
   bthcisock_host_close(dev->fd);
 
   dev->fd = -1;
 
-  bthcitty_pollnotify(dev, POLLIN | POLLOUT);
+  sim_btuart_pollnotify(dev, POLLIN | POLLOUT);
   return OK;
 }
 
-static ssize_t bthcitty_read(FAR struct file *filep,
-                             FAR char *buffer, size_t buflen)
+static ssize_t sim_btuart_read(FAR struct file *filep,
+                               FAR char *buffer, size_t buflen)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct bthcitty_s *dev = inode->i_private;
+  FAR struct sim_btuart_s *dev = inode->i_private;
   size_t len = dev->recvlen;
   int ret;
 
@@ -224,11 +224,11 @@ static ssize_t bthcitty_read(FAR struct file *filep,
   return buflen;
 }
 
-static ssize_t bthcitty_write(FAR struct file *filep,
-                              FAR const char *buffer, size_t buflen)
+static ssize_t sim_btuart_write(FAR struct file *filep,
+                                FAR const char *buffer, size_t buflen)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct bthcitty_s *dev = inode->i_private;
+  FAR struct sim_btuart_s *dev = inode->i_private;
   FAR union bt_hdr_u *hdr;
   size_t pktlen;
   size_t hdrlen;
@@ -311,17 +311,17 @@ out:
   return ret < 0 ? ret : buflen;
 }
 
-static int bthcitty_ioctl(FAR struct file *filep,
-                          int cmd, unsigned long arg)
+static int sim_btuart_ioctl(FAR struct file *filep,
+                            int cmd, unsigned long arg)
 {
   return OK;
 }
 
-static int bthcitty_poll(FAR struct file *filep,
-                         FAR struct pollfd *fds, bool setup)
+static int sim_btuart_poll(FAR struct file *filep,
+                           FAR struct pollfd *fds, bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct bthcitty_s *dev = inode->i_private;
+  FAR struct sim_btuart_s *dev = inode->i_private;
   pollevent_t eventset = 0;
   int ret;
   int i;
@@ -363,7 +363,7 @@ static int bthcitty_poll(FAR struct file *filep,
 
       if (eventset)
         {
-          bthcitty_pollnotify(dev, eventset);
+          sim_btuart_pollnotify(dev, eventset);
         }
     }
   else if (fds->priv != NULL)
@@ -387,27 +387,27 @@ static int bthcitty_poll(FAR struct file *filep,
  * Public Functions
  ****************************************************************************/
 
-void bthcitty_loop(void)
+void sim_btuart_loop(void)
 {
-  FAR struct bthcitty_s *dev;
+  FAR struct sim_btuart_s *dev;
   FAR sq_entry_t *entry;
 
-  for (entry = sq_peek(&g_bthcitty_list); entry; entry = sq_next(entry))
+  for (entry = sq_peek(&g_sim_btuart_list); entry; entry = sq_next(entry))
     {
-      dev = container_of(entry, struct bthcitty_s, link);
+      dev = container_of(entry, struct sim_btuart_s, link);
       if (bthcisock_host_avail(dev->fd))
         {
-          bthcitty_pollnotify(dev, POLLIN);
+          sim_btuart_pollnotify(dev, POLLIN);
         }
     }
 }
 
-int bthcitty_register(const char *name, int id)
+int sim_btuart_register(const char *name, int id)
 {
-  FAR struct bthcitty_s *dev;
+  FAR struct sim_btuart_s *dev;
   int ret;
 
-  dev = (FAR struct bthcitty_s *)kmm_zalloc(sizeof(struct bthcitty_s));
+  dev = (FAR struct sim_btuart_s *)kmm_zalloc(sizeof(struct sim_btuart_s));
   if (dev == NULL)
     {
       return -ENOMEM;
@@ -423,7 +423,7 @@ int bthcitty_register(const char *name, int id)
 
   nxsem_set_protocol(&dev->recvsem, SEM_PRIO_NONE);
 
-  ret = register_driver(name, &g_bthcitty_ops, 0666, dev);
+  ret = register_driver(name, &g_sim_btuart_ops, 0666, dev);
   if (ret < 0)
     {
       nxsem_destroy(&dev->recvlock);
@@ -434,6 +434,6 @@ int bthcitty_register(const char *name, int id)
       return ret;
     }
 
-  sq_addlast(&dev->link, &g_bthcitty_list);
+  sq_addlast(&dev->link, &g_sim_btuart_list);
   return OK;
 }

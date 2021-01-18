@@ -219,9 +219,9 @@ ifeq ($(CONFIG_SIM_HCISOCKET),y)
   CSRCS += up_hcisocket.c
 endif
 
-ifeq ($(CONFIG_SIM_HCITTY),y)
+ifeq ($(CONFIG_SIM_BTUART),y)
   HOSTSRCS += up_hcisocket_host.c
-  CSRCS += up_hcitty.c
+  CSRCS += up_btuart.c
 endif
 
 ifeq ($(CONFIG_I2C_RESET),y)

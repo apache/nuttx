@@ -404,11 +404,11 @@ int bthcisock_register(int dev_id);
 int bthcisock_loop(void);
 #endif
 
-/* up_hcitty.c **************************************************************/
+/* up_btuart.c **************************************************************/
 
-#ifdef CONFIG_SIM_HCITTY
-int  bthcitty_register(const char *name, int id);
-void bthcitty_loop(void);
+#ifdef CONFIG_SIM_BTUART
+int  sim_btuart_register(const char *name, int id);
+void sim_btuart_loop(void);
 #endif
 
 /* up_audio.c ***************************************************************/
