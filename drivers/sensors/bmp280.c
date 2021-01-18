@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 #define BMP280_ADDR         0x76
-#define BMP280_FREQ         400000
+#define BMP280_FREQ         CONFIG_BMP280_I2C_FREQUENCY
 #define DEVID               0x58
 
 #define BMP280_DIG_T1_LSB   0x88
@@ -539,7 +539,7 @@ static uint32_t bmp280_getpressure(FAR struct bmp280_dev_s *priv)
   press = (uint32_t)COMBINE(buf);
   temp = COMBINE(&buf[3]);
 
-  sninfo("press = %d, temp = %d\n", press, temp);
+  sninfo("press = %"PRIu32", temp = %"PRIi32"\n", press, temp);
 
   if (priv->compensated == ENABLE_COMPENSATED)
     {
@@ -566,7 +566,7 @@ static uint32_t bmp280_gettemp(FAR struct bmp280_dev_s *priv)
 
   temp = COMBINE(buf);
 
-  sninfo("temp = %d\n", temp);
+  sninfo("temp = %"PRIi32"\n", temp);
 
   if (priv->compensated == ENABLE_COMPENSATED)
     {
@@ -589,7 +589,7 @@ static int bmp280_open(FAR struct file *filep)
   FAR struct inode        *inode = filep->f_inode;
   FAR struct bmp280_dev_s *priv  = inode->i_private;
 
-  /* Set power mode to normal and standard sampling resolusion. */
+  /* Set power mode to normal and standard sampling resolution. */
 
   bmp280_putreg8(priv, BMP280_CTRL_MEAS, BMP280_NORMAL_MODE |
                  BMP280_OS_STANDARD_RES);
@@ -671,6 +671,7 @@ static int bmp280_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_GET_TEMP:
         *(uint32_t *)arg = bmp280_gettemp(priv);
+        break;
 
       default:
         snerr("Unrecognized cmd: %d\n", cmd);
