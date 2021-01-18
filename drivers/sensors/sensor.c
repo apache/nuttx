@@ -370,7 +370,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
 
           ret = lower->ops->set_interval ?
-                lower->ops->set_interval(lower, val) : -ENOTSUP;
+                lower->ops->set_interval(lower, *val) : -ENOTSUP;
           if (ret >= 0)
             {
               upper->interval = *val;
