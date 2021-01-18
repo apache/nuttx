@@ -172,10 +172,6 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   ret = 0;
 #endif
 
-#if defined(CONFIG_SYSLOG_PRIORITY)
-  ret += lib_sprintf(&stream.public, "[%6s] ", g_priority_str[priority]);
-#endif
-
 #if defined(CONFIG_SYSLOG_PROCESSID)
   /* Pre-pend the Process ID */
 
@@ -218,6 +214,12 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
         ret += lib_sprintf(&stream.public, "\e[2m");
         break;
     }
+#endif
+
+#if defined(CONFIG_SYSLOG_PRIORITY)
+  /* Pre-pend the message priority. */
+
+  ret += lib_sprintf(&stream.public, "[%6s] ", g_priority_str[priority]);
 #endif
 
 #if defined(CONFIG_SYSLOG_PREFIX)
