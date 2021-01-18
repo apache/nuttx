@@ -433,16 +433,6 @@ int ipv4_input(FAR struct net_driver_s *dev)
     }
   else
 #endif
-#ifdef CONFIG_NET_ICMP
-  /* In other cases, the device must be assigned a non-zero IP address. */
-
-  if (net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
-    {
-      nwarn("WARNING: No IP address assigned\n");
-      goto drop;
-    }
-  else
-#endif
 #if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
   /* The address is not the broadcast address and we have been assigned a
    * address.  So there is also the possibility that the destination address
@@ -503,6 +493,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
             }
           else
 #endif
+          if (ipv4->proto != IP_PROTO_UDP)
             {
               /* Not destined for us and not forwardable... Drop the
                * packet.
@@ -518,6 +509,15 @@ int ipv4_input(FAR struct net_driver_s *dev)
             }
         }
     }
+#ifdef CONFIG_NET_ICMP
+  /* In other cases, the device must be assigned a non-zero IP address. */
+
+  else if (net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
+    {
+      nwarn("WARNING: No IP address assigned\n");
+      goto drop;
+    }
+#endif
 
   if (ipv4_chksum(dev) != 0xffff)
     {
