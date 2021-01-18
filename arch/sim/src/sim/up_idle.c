@@ -116,7 +116,7 @@ void up_idle(void)
 #endif
 
 #ifdef CONFIG_SIM_HCITTY
-  bthcitty_loop();
+  sim_btuart_loop();
 #endif
 
 #ifdef CONFIG_SIM_SOUND
