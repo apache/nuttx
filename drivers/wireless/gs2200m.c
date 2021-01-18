@@ -865,18 +865,18 @@ retry:
 
   _write_data(dev, hdr, sizeof(hdr));
 
+  /* NOTE: busy wait 30us
+   * workaround to avoid an invalid frame response
+   */
+
+  up_udelay(30);
+
   /* Wait for data ready */
 
   while (!dev->lower->dready(NULL))
     {
       /* TODO: timeout */
     }
-
-  /* NOTE: busy wait 50us
-   * workaround to avoid an invalid frame response
-   */
-
-  up_udelay(50);
 
   /* Read frame response */
 
