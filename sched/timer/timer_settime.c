@@ -238,7 +238,7 @@ int timer_settime(timer_t timerid, int flags,
       /* Convert that to a struct timespec and return it */
 
       clock_ticks2time(delay, &ovalue->it_value);
-      clock_ticks2time(timer->pt_last, &ovalue->it_interval);
+      clock_ticks2time(timer->pt_delay, &ovalue->it_interval);
     }
 
   /* Disarm the timer (in case the timer was already armed when
