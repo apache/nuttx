@@ -57,7 +57,10 @@
  *   None
  *
  * Returned Value:
- *   None
+ *   OK (0) on success; a (non-negated) errno value on failure. The errno
+ *   variable is not set. EBUSY is returned when the implementation has
+ *   detected an attempt to destroy the object referenced by cond while
+ *   it is referenced. EINVAL is returned when cond is invalid.
  *
  * Assumptions:
  *
@@ -66,6 +69,7 @@
 int pthread_cond_destroy(FAR pthread_cond_t *cond)
 {
   int ret = OK;
+  int sval = 0;
 
   sinfo("cond=0x%p\n", cond);
 
@@ -76,9 +80,24 @@ int pthread_cond_destroy(FAR pthread_cond_t *cond)
 
   /* Destroy the semaphore contained in the structure */
 
-  else if (sem_destroy((FAR sem_t *)&cond->sem) != OK)
+  else
     {
-      ret = EINVAL;
+      ret = sem_getvalue(&cond->sem, &sval);
+      if (ret < 0)
+        {
+          ret = -ret;
+        }
+      else
+        {
+          if (sval < 0)
+            {
+              ret = EBUSY;
+            }
+          else if (sem_destroy(&cond->sem) != OK)
+            {
+              ret = EINVAL;
+            }
+        }
     }
 
   sinfo("Returning %d\n", ret);
