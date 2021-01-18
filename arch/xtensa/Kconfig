@@ -139,6 +139,19 @@ config XTENSA_IMEM_PROCFS
 	default n
 	depends on XTENSA_USE_SEPARATE_IMEM && !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
 
+config XTENSA_LWL_CONSOLE
+	bool "Lightweight Link Console Support"
+	default n
+	depends on DEV_CONSOLE && ARCH_CHIP_ESP32
+	---help---
+		Use the lightweight link console which provides console over a
+		debug channel by means of shared memory.  A terminal application
+		for openocd as the debugger is available in tools/ocdconsole.py.
+
+		Currently only available for ESP32 architectures, but can easily be
+		added to other Xtensa architectures by adding xtensa_low_console.c to
+		the architecture Make.defs file.
+
 source arch/xtensa/src/lx6/Kconfig
 if ARCH_CHIP_ESP32
 source arch/xtensa/src/esp32/Kconfig

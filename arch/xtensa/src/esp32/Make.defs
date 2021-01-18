@@ -86,6 +86,10 @@ ifeq ($(CONFIG_FS_HOSTFS),y)
   CMN_CSRCS += xtensa_hostfs.c
 endif
 
+ifeq ($(CONFIG_XTENSA_LWL_CONSOLE),y)
+CMN_CSRCS += xtensa_lwl_console.c
+endif
+
 # Required ESP32 files (arch/xtensa/src/lx6)
 
 CHIP_CSRCS  = esp32_allocateheap.c esp32_clockconfig.c esp32_cpuint.c

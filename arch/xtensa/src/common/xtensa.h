@@ -64,7 +64,10 @@
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
 #else
-#  if defined(CONFIG_CONSOLE_SYSLOG)
+#  if defined(CONFIG_XTENSA_LWL_CONSOLE)
+#    undef  USE_SERIALDRIVER
+#    undef  USE_EARLYSERIALINIT
+#  elif defined(CONFIG_CONSOLE_SYSLOG)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #  else
@@ -324,10 +327,22 @@ void xtensa_add_region(void);
 /* Serial output */
 
 void up_lowputc(char ch);
+
+#ifdef USE_EARLYSERIALINIT
 void xtensa_early_serial_initialize(void);
+#endif
+
+#ifdef USE_SERIALDRIVER
 void xtensa_serial_initialize(void);
+#endif
 
 void rpmsg_serialinit(void);
+
+#ifdef CONFIG_XTENSA_LWL_CONSOLE
+/* Defined in src/common/xtensa_lwl_console.c */
+
+void lwlconsole_init(void);
+#endif
 
 /* Network */
 

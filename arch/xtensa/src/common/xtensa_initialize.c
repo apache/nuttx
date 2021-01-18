@@ -207,7 +207,9 @@ void up_initialize(void)
    * serial driver).
    */
 
-#if defined(CONFIG_CONSOLE_SYSLOG)
+#if defined (CONFIG_XTENSA_LWL_CONSOLE)
+  lwlconsole_init();
+#elif defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
 #endif
 
