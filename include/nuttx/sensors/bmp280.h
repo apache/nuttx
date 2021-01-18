@@ -85,7 +85,7 @@ extern "C"
 
 /* Standby duration */
 
-#define BMP280_STANDBY_1_MS    (0x00) /* 0.5 ms */
+#define BMP280_STANDBY_05_MS   (0x00) /* 0.5 ms */
 #define BMP280_STANDBY_63_MS   (0x01) /* 62.5 ms */
 #define BMP280_STANDBY_125_MS  (0x02) /* 125 ms */
 #define BMP280_STANDBY_250_MS  (0x03) /* 250 ms */
@@ -173,10 +173,10 @@ int bmp280_init(FAR struct i2c_master_s *i2c, int port);
  * Name: bmp280_register
  *
  * Description:
- *   Register the BMP280 character device as 'devpath'
+ *   Register the BMP280 character device
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/press"
+ *   devno   - Instance number for driver
  *   i2c     - An instance of the I2C interface to use to communicate with
  *             BMP280
  *
@@ -184,13 +184,14 @@ int bmp280_init(FAR struct i2c_master_s *i2c, int port);
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
+
 #ifdef CONFIG_SENSORS_BMP280_SCU
 int bmp280press_register(FAR const char *devpath, int minor,
                          FAR struct i2c_master_s *i2c, int port);
 int bmp280temp_register(FAR const char *devpath, int minor,
                         FAR struct i2c_master_s *i2c, int port);
 #else
-int bmp280_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
+int bmp280_register(int devno, FAR struct i2c_master_s *i2c);
 #endif
 
 #undef EXTERN

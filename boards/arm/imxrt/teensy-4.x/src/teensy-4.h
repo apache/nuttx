@@ -61,8 +61,6 @@
 
 #  define LED_DRIVER_PATH "/dev/userleds"
 
-#  define BMP280_DRIVER_PATH "/dev/press0"
-
 /* LPSPI3 CS:  GPIO_AD_B1_12 */
 
 #  define IOMUX_LPSPI3_CS (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \

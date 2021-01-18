@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/nuttx.h>
 
 #include <stdlib.h>
 #include <fixedmath.h>
@@ -48,6 +49,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/bmp280.h>
+#include <nuttx/sensors/sensor.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BMP280)
 
@@ -136,10 +138,12 @@
 
 struct bmp280_dev_s
 {
+  FAR struct sensor_lowerhalf_s sensor_lower;
   FAR struct i2c_master_s *i2c; /* I2C interface */
   uint8_t addr;                 /* BMP280 I2C address */
   int freq;                     /* BMP280 Frequency <= 3.4MHz */
-  int compensated;              /* 0: uncompensated, 1:compensated */
+  bool activated;
+
   struct bmp280_calib_s
   {
     uint16_t t1;
@@ -165,34 +169,27 @@ struct bmp280_dev_s
 
 static uint8_t bmp280_getreg8(FAR struct bmp280_dev_s *priv,
                               uint8_t regaddr);
-static void bmp280_putreg8(FAR struct bmp280_dev_s *priv, uint8_t regaddr,
-                           uint8_t regval);
-static uint32_t bmp280_getpressure(FAR struct bmp280_dev_s *priv);
+static int bmp280_putreg8(FAR struct bmp280_dev_s *priv, uint8_t regaddr,
+                          uint8_t regval);
 
-/* Character driver methods */
+/* Sensor methods */
 
-static int bmp280_open(FAR struct file *filep);
-static int bmp280_close(FAR struct file *filep);
-static ssize_t bmp280_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen);
-static int bmp280_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int bmp280_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                               FAR unsigned int *period_us);
+static int bmp280_activate(FAR struct sensor_lowerhalf_s *lower,
+                           bool enable);
+static int bmp280_fetch(FAR struct sensor_lowerhalf_s *lower,
+                        FAR char *buffer, size_t buflen);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_bmp280fops =
+static const struct sensor_ops_s g_sensor_ops =
 {
-  bmp280_open,                  /* open */
-  bmp280_close,                 /* close */
-  bmp280_read,                  /* read */
-  0,                            /* write */
-  0,                            /* seek */
-  bmp280_ioctl,                 /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,                            /* poll */
-#endif
-  0                             /* unlink */
+  .activate      = bmp280_activate,
+  .fetch         = bmp280_fetch,
+  .set_interval  = bmp280_set_interval,
 };
 
 /****************************************************************************
@@ -279,8 +276,8 @@ static int bmp280_getregs(FAR struct bmp280_dev_s *priv, uint8_t regaddr,
  *
  ****************************************************************************/
 
-static void bmp280_putreg8(FAR struct bmp280_dev_s *priv, uint8_t regaddr,
-                           uint8_t regval)
+static int bmp280_putreg8(FAR struct bmp280_dev_s *priv, uint8_t regaddr,
+                          uint8_t regval)
 {
   struct i2c_msg_s msg[2];
   uint8_t txbuffer[2];
@@ -300,6 +297,8 @@ static void bmp280_putreg8(FAR struct bmp280_dev_s *priv, uint8_t regaddr,
     {
       snerr("I2C_TRANSFER failed: %d\n", ret);
     }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -417,9 +416,9 @@ static int bmp280_initialize(FAR struct bmp280_dev_s *priv)
 
   bmp280_putreg8(priv, BMP280_CTRL_MEAS, BMP280_SLEEP_MODE);
 
-  /* Set stand-by time to 1 ms, no IIR filter */
+  /* Set stand-by time to 0.5 ms, no IIR filter */
 
-  ret = bmp280_set_standby(priv, BMP280_STANDBY_1_MS);
+  ret = bmp280_set_standby(priv, BMP280_STANDBY_05_MS);
   if (ret != OK)
     {
       snerr("Failed to set value for standby time.\n");
@@ -475,16 +474,12 @@ static int32_t bmp280_compensate_temp(FAR struct bmp280_dev_s *priv,
  ****************************************************************************/
 
 static uint32_t bmp280_compensate_press(FAR struct bmp280_dev_s *priv,
-                                        uint32_t press, int32_t temp)
+                                        uint32_t press)
 {
   struct bmp280_calib_s *c = &priv->calib;
   int32_t var1;
   int32_t var2;
   uint32_t p;
-
-  /* Update temperature fine value first. */
-
-  bmp280_compensate_temp(priv, temp);
 
   var1 = (priv->tempfine >> 1) - 64000;
   var2 = (((var1 >> 2) * (var1 >> 2)) >> 11) * ((int32_t)c->p6);
@@ -520,164 +515,158 @@ static uint32_t bmp280_compensate_press(FAR struct bmp280_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: bmp280_getpressure
- *
- * Description:
- *   Calculate the Barometric Pressure using the temperature compensated
- *   See BMP280 data sheet for details
- *
+ * Name: bmp280_set_interval
  ****************************************************************************/
 
-static uint32_t bmp280_getpressure(FAR struct bmp280_dev_s *priv)
+static int bmp280_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                               FAR unsigned int *period_us)
 {
+  FAR struct bmp280_dev_s *priv = (FAR struct bmp280_dev_s *)lower->priv;
+  int ret = 0;
+
+  uint8_t regval;
+
+  switch (*period_us)
+    {
+      case 500:
+        regval = BMP280_STANDBY_05_MS;
+        break;
+      case 62500:
+        regval = BMP280_STANDBY_63_MS;
+        break;
+      case 125000:
+        regval = BMP280_STANDBY_125_MS;
+        break;
+      case 250000:
+        regval = BMP280_STANDBY_250_MS;
+        break;
+      case 500000:
+        regval = BMP280_STANDBY_500_MS;
+        break;
+      case 1000000:
+        regval = BMP280_STANDBY_1000_MS;
+        break;
+      case 2000000:
+        regval = BMP280_STANDBY_2000_MS;
+        break;
+      case 4000000:
+        regval = BMP280_STANDBY_4000_MS;
+        break;
+      default:
+        ret = -EINVAL;
+        break;
+    }
+
+  if (ret == 0)
+    {
+      ret = bmp280_set_standby(priv, regval);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: bmp280_activate
+ ****************************************************************************/
+
+static int bmp280_activate(FAR struct sensor_lowerhalf_s *lower,
+                           bool enable)
+{
+  FAR struct bmp280_dev_s *priv = container_of(lower,
+                                               FAR struct bmp280_dev_s,
+                                               sensor_lower);
+  int ret;
+
+  if (enable)
+    {
+      /* Set power mode to normal and standard sampling resolution. */
+
+      ret = bmp280_putreg8(priv, BMP280_CTRL_MEAS, BMP280_NORMAL_MODE |
+                                 BMP280_OS_STANDARD_RES);
+    }
+  else
+    {
+      /* Set to sleep mode */
+
+      ret = bmp280_putreg8(priv, BMP280_CTRL_MEAS, BMP280_SLEEP_MODE);
+    }
+
+  if (ret >= 0)
+    {
+      priv->activated = enable;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: bmp280_fetch
+ ****************************************************************************/
+
+static int bmp280_fetch(FAR struct sensor_lowerhalf_s *lower,
+                        FAR char *buffer, size_t buflen)
+{
+  FAR struct bmp280_dev_s *priv = container_of(lower,
+                                               FAR struct bmp280_dev_s,
+                                               sensor_lower);
+
   uint8_t buf[6];
   uint32_t press;
   int32_t temp;
+  int ret;
+  struct timespec ts;
+  struct sensor_event_baro baro_data;
 
-  bmp280_getregs(priv, BMP280_PRESS_MSB, buf, 6);
+  if (buflen != sizeof(baro_data))
+    {
+      return -EINVAL;
+    }
+
+  if (!priv->activated)
+    {
+      /* Sensor is asleep, go to force mode to read once */
+
+      ret = bmp280_putreg8(priv, BMP280_CTRL_MEAS, BMP280_FORCED_MODE |
+                                 BMP280_OS_ULTRA_LOW_POWER);
+
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Wait time according to ultra low power mode set during sleep */
+
+      up_mdelay(6);
+    }
+
+  /* Read pressure & data */
+
+  ret = bmp280_getregs(priv, BMP280_PRESS_MSB, buf, 6);
+
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   press = (uint32_t)COMBINE(buf);
   temp = COMBINE(&buf[3]);
 
   sninfo("press = %"PRIu32", temp = %"PRIi32"\n", press, temp);
 
-  if (priv->compensated == ENABLE_COMPENSATED)
-    {
-      press = bmp280_compensate_press(priv, press, temp);
-    }
+  temp = bmp280_compensate_temp(priv, temp);
+  press = bmp280_compensate_press(priv, press);
 
-  return press;
-}
+#ifdef CONFIG_CLOCK_MONOTONIC
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+#else
+  clock_gettime(CLOCK_REALTIME, &ts);
+#endif
 
-/****************************************************************************
- * Name: bmp280_gettemp
- *
- * Description:
- *   Read temperature only
- *
- ****************************************************************************/
+  baro_data.timestamp = 1000000ull * ts.tv_sec + ts.tv_nsec / 1000;
+  baro_data.pressure = press / 100.0f;
+  baro_data.temperature = temp / 100.0f;
 
-static uint32_t bmp280_gettemp(FAR struct bmp280_dev_s *priv)
-{
-  uint8_t buf[3];
-  int32_t temp;
-
-  bmp280_getregs(priv, BMP280_TEMP_MSB, buf, 3);
-
-  temp = COMBINE(buf);
-
-  sninfo("temp = %"PRIi32"\n", temp);
-
-  if (priv->compensated == ENABLE_COMPENSATED)
-    {
-      temp = bmp280_compensate_temp(priv, temp);
-    }
-
-  return temp;
-}
-
-/****************************************************************************
- * Name: bmp280_open
- *
- * Description:
- *   This function is called whenever the BMP280 device is opened.
- *
- ****************************************************************************/
-
-static int bmp280_open(FAR struct file *filep)
-{
-  FAR struct inode        *inode = filep->f_inode;
-  FAR struct bmp280_dev_s *priv  = inode->i_private;
-
-  /* Set power mode to normal and standard sampling resolution. */
-
-  bmp280_putreg8(priv, BMP280_CTRL_MEAS, BMP280_NORMAL_MODE |
-                 BMP280_OS_STANDARD_RES);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: bmp280_close
- *
- * Description:
- *   This routine is called when the BMP280 device is closed.
- *
- ****************************************************************************/
-
-static int bmp280_close(FAR struct file *filep)
-{
-  FAR struct inode        *inode = filep->f_inode;
-  FAR struct bmp280_dev_s *priv  = inode->i_private;
-
-  /* Set power mode to sleep */
-
-  bmp280_putreg8(priv, BMP280_CTRL_MEAS, BMP280_SLEEP_MODE);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: bmp280_read
- ****************************************************************************/
-
-static ssize_t bmp280_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen)
-{
-  FAR struct inode        *inode = filep->f_inode;
-  FAR struct bmp280_dev_s *priv  = inode->i_private;
-  FAR uint32_t            *press = (FAR uint32_t *) buffer;
-
-  if (!buffer)
-    {
-      snerr("Buffer is null\n");
-      return -1;
-    }
-
-  if (buflen < 4)
-    {
-      snerr("You can't read something other than 32 bits (4 bytes)\n");
-      return -1;
-    }
-
-  /* Get the pressure compensated */
-
-  *press = bmp280_getpressure(priv);
-
-  /* Return size of uint32_t (4 bytes) */
-
-  return 4;
-}
-
-/****************************************************************************
- * Name: bmp280_ioctl
- ****************************************************************************/
-
-static int bmp280_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct bmp280_dev_s *priv  = inode->i_private;
-  int ret = OK;
-
-  switch (cmd)
-    {
-      case SNIOC_ENABLE_COMPENSATED:
-        priv->compensated = (int)arg;
-        break;
-
-      case SNIOC_SETSTB:
-        ret = bmp280_set_standby(priv, arg);
-        break;
-
-      case SNIOC_GET_TEMP:
-        *(uint32_t *)arg = bmp280_gettemp(priv);
-        break;
-
-      default:
-        snerr("Unrecognized cmd: %d\n", cmd);
-        ret = - ENOTTY;
-        break;
-    }
+  memcpy(buffer, &baro_data, sizeof(baro_data));
 
   return ret;
 }
@@ -690,10 +679,10 @@ static int bmp280_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: bmp280_register
  *
  * Description:
- *   Register the BMP280 character device as 'devpath'
+ *   Register the BMP280 character device
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/press0"
+ *   devno   - Instance number for driver
  *   i2c     - An instance of the I2C interface to use to communicate with
  *             BMP280
  *
@@ -702,14 +691,14 @@ static int bmp280_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int bmp280_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
+int bmp280_register(int devno, FAR struct i2c_master_s *i2c)
 {
   FAR struct bmp280_dev_s *priv;
   int ret;
 
   /* Initialize the BMP280 device structure */
 
-  priv = (FAR struct bmp280_dev_s *)kmm_malloc(sizeof(struct bmp280_dev_s));
+  priv = (FAR struct bmp280_dev_s *)kmm_zalloc(sizeof(struct bmp280_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");
@@ -719,11 +708,14 @@ int bmp280_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   priv->i2c = i2c;
   priv->addr = BMP280_ADDR;
   priv->freq = BMP280_FREQ;
-  priv->compensated = ENABLE_COMPENSATED;
+
+  priv->sensor_lower.ops = &g_sensor_ops;
+  priv->sensor_lower.type = SENSOR_TYPE_BAROMETER;
 
   /* Check Device ID */
 
   ret = bmp280_checkid(priv);
+
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);
@@ -732,6 +724,7 @@ int bmp280_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
     }
 
   ret = bmp280_initialize(priv);
+
   if (ret < 0)
     {
       snerr("Failed to initialize physical device bmp280:%d\n", ret);
@@ -741,7 +734,8 @@ int bmp280_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_bmp280fops, 0666, priv);
+  ret = sensor_register(&priv->sensor_lower, devno);
+
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);

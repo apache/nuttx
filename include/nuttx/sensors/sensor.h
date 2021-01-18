@@ -443,8 +443,11 @@ struct sensor_ops_s
    *
    * Description:
    *   Set the sensor output data period in microseconds for a given sensor.
-   *   If period_us > max_delay it will be truncated to max_dealy and if
-   *   period_us < min_delay it will be replaced by min_delay.
+   *   If *period_us > max_delay it will be truncated to max_delay and if
+   *   *period_us < min_delay it will be replaced by min_delay.
+   *
+   *   The lower-half can update update *period_us to reflect the actual
+   *   period in case the value is rounded up to nearest supported value.
    *
    *   Before changing the interval, you need to push the prepared data to
    *   ensure that they are not lost.
@@ -460,7 +463,7 @@ struct sensor_ops_s
    **************************************************************************/
 
   CODE int (*set_interval)(FAR struct sensor_lowerhalf_s *lower,
-                           FAR unsigned int period_us);
+                           FAR unsigned int *period_us);
 
   /**************************************************************************
    * Name: batch
