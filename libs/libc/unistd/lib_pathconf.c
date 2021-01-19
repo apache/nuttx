@@ -117,6 +117,21 @@ long fpathconf(int fildes, int name)
       case _PC_PATH_MAX:
         return PATH_MAX;
 
+      case _PC_LINK_MAX:
+        return _POSIX_LINK_MAX;
+
+      case _PC_NAME_MAX:
+        return _POSIX_NAME_MAX;
+
+      case _PC_PIPE_BUF:
+        return _POSIX_PIPE_BUF;
+
+      case _PC_MAX_CANON:
+        return _POSIX_MAX_CANON;
+
+      case _PC_MAX_INPUT:
+        return _POSIX_MAX_INPUT;
+
       default:
 
         /* Assume valid but not implemented for the time being */
