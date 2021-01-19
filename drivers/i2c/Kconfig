@@ -38,6 +38,47 @@ config I2C_NTRACE
 	default 32
 	depends on I2C_TRACE
 
+config I2C_BITBANG
+	bool "I2C bitbang implementation"
+	default n
+	---help---
+		Enable support for a bitbang implementation of I2C
+
+if I2C_BITBANG
+
+  config I2C_BITBANG_NO_DELAY
+  bool "Do not add delay"
+  default n
+  ---help---
+    If you want to go full speed (depending on how fast pins can be toggled)
+    you can enable this option. This will not respect the desired frequency
+    set during the I2C transfer operation.
+
+  config I2C_BITBANG_GPIO_OVERHEAD
+	int "GPIO overhead"
+	depends on !I2C_BITBANG_NO_DELAY
+	default 0
+	---help---
+		Overhead of GPIO toggling operation to consider when computing
+		delays. This overhead will be subtracted from sleep times to achieve
+		desired frquency.
+
+	config I2C_BITBANG_TIMEOUT
+	int "I2C timeout"
+	default 1000
+	---help---
+		Timeout (microseconds) to abort wait on slave
+
+	config I2C_BITBANG_CLOCK_STRETCHING
+	bool "Support clock stretching"
+	default n
+	---help---
+		This enables I2C clock stretching. This requires the hardware to set
+		the pin into open-collector mode (master sets SCL high and waits until
+		slave stops holding it low).
+
+endif # I2C_BITBANG
+
 config I2C_DRIVER
 	bool "I2C character driver"
 	default n

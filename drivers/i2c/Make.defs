@@ -44,6 +44,10 @@ ifeq ($(CONFIG_I2C_DRIVER),y)
 CSRCS += i2c_driver.c
 endif
 
+ifeq ($(CONFIG_I2C_BITBANG),y)
+CSRCS += i2c_bitbang.c
+endif
+
 # Include the selected I2C multiplexer drivers
 
 ifeq ($(CONFIG_I2CMULTIPLEXER_PCA9540BDP),y)
