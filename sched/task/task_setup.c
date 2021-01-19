@@ -368,6 +368,16 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
       tcb->flags         &= ~TCB_FLAG_TTYPE_MASK;
       tcb->flags         |= ttype;
 
+      /* Set the appropriate scheduling policy in the TCB */
+
+      tcb->flags         &= ~TCB_FLAG_POLICY_MASK;
+#if CONFIG_RR_INTERVAL > 0
+      tcb->flags         |= TCB_FLAG_SCHED_RR;
+      tcb->timeslice      = MSEC2TICK(CONFIG_RR_INTERVAL);
+#else
+      tcb->flags         |= TCB_FLAG_SCHED_FIFO;
+#endif
+
 #ifdef CONFIG_CANCELLATION_POINTS
       /* Set the deferred cancellation type */
 
