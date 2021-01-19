@@ -58,6 +58,12 @@ config ESP32_BT
 	---help---
 		No yet implemented
 
+config ESP32_EFUSE
+	bool "EFUSE support"
+	default n
+	---help---
+		Enable ESP32 efuse support.
+
 config ESP32_EMAC
 	bool "Ethernet MAC"
 	default n

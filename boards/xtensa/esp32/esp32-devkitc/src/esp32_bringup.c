@@ -170,6 +170,14 @@ int esp32_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_ESP32_EFUSE)
+  ret = esp32_efuse_initialize("/dev/efuse");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
