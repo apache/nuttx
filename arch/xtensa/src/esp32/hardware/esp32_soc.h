@@ -215,6 +215,7 @@
 #define DR_REG_RTCIO_BASE                       0x3ff48400
 #define DR_REG_SARADC_BASE                      0x3ff48800
 #define DR_REG_IO_MUX_BASE                      0x3ff49000
+#define DR_REG_EFUSE_BASE                       0x3ff5a000
 #define DR_REG_RTCMEM0_BASE                     0x3ff61000
 #define DR_REG_RTCMEM1_BASE                     0x3ff62000
 #define DR_REG_RTCMEM2_BASE                     0x3ff63000
