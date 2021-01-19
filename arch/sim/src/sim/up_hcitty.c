@@ -127,14 +127,7 @@ static inline void bthcitty_post(FAR sem_t *sem)
 static void bthcitty_pollnotify(FAR struct bthcitty_s *dev,
                                 pollevent_t eventset)
 {
-  int ret;
   int i;
-
-  ret = nxsem_wait_uninterruptible(&dev->fdslock);
-  if (ret < 0)
-    {
-      return;
-    }
 
   for (i = 0; i < CONFIG_HCI_NPOLLWAITERS; i++)
     {
@@ -152,8 +145,6 @@ static void bthcitty_pollnotify(FAR struct bthcitty_s *dev,
     }
 
   bthcitty_post(&dev->recvsem);
-
-  nxsem_post(&dev->fdslock);
 }
 
 static int bthcitty_open(FAR struct file *filep)
