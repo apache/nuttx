@@ -77,3 +77,19 @@ Configurations
     nsh> gpio -w 14 /dev/gpint3
   The pin is configured to as a rising edge interrupt, so after issuing the
   above command, connect it to 3.3V.
+
+  lwl
+  ---
+
+  This is the Lightweight Link configuration. After flashing your board with
+  the binary you need to run OpenOCD with the board configuration, i.e.:
+
+    $ sudo openocd -f board/esp32-wrover-kit-3.3v.cfg
+
+  Edit the tools/lwl/ocdconsole.py and use this DRAM baseaddr:
+
+    baseaddr = 0x3ffb0000
+
+  Then run the script to get the NSH running over the LWL channel.
+
+  For more information please read the tools/lwl/README.txt
