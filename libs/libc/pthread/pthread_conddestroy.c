@@ -79,9 +79,10 @@ int pthread_cond_destroy(FAR pthread_cond_t *cond)
     }
 
   /* Destroy the semaphore contained in the structure */
+
   else
     {
-      ret = sem_get_value(&cond->sem, &sval);
+      ret = sem_getvalue(&cond->sem, &sval);
       if (ret < 0)
         {
           ret = -ret;
