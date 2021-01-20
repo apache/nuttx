@@ -95,7 +95,7 @@
  */
 
 #define GPIO_DRIVE_SHIFT        (9)      /* Bits 9-11: Pin pull-up mode */
-#define GPIO_DRIVE_MASK         (0x3 << GPIO_DRIVE_SHIFT)
+#define GPIO_DRIVE_MASK         (0x7 << GPIO_DRIVE_SHIFT)
 #  define GPIO_DRIVE_S0S1       (0 << GPIO_DRIVE_SHIFT) /* Standard '0', standard '1' */
 #  define GPIO_DRIVE_H0S1       (1 << GPIO_DRIVE_SHIFT) /* High drive '0', standard '1' */
 #  define GPIO_DRIVE_S0H1       (2 << GPIO_DRIVE_SHIFT) /* */
