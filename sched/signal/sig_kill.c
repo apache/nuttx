@@ -97,7 +97,7 @@ int nxsig_kill(pid_t pid, int signo)
 
   /* We do not support sending signals to process groups */
 
-  if (pid <= 0)
+  if (pid < 0)
     {
       return -ENOSYS;
     }
