@@ -121,20 +121,19 @@ void xtensa_sig_deliver(void)
 
   sinfo("Resuming\n");
 
-  /* Call enter_critical_section() to disable local interrupts before
-   * restoring local context.
-   *
-   * Here, we should not use up_irq_save() in SMP mode.
-   * For example, if we call up_irq_save() here and another CPU might
-   * have called up_cpu_pause() to this cpu, hence g_cpu_irqlock has
-   * been locked by the cpu, in this case, we would see a deadlock in
-   * later call of enter_critical_section() to restore irqcount.
-   * To avoid this situation, we need to call enter_critical_section().
+#ifdef CONFIG_SMP
+  /* Restore the saved 'irqcount' and recover the critical section
+   * spinlocks.
    */
 
-#ifdef CONFIG_SMP
-  enter_critical_section();
-#else
+  DEBUGASSERT(rtcb->irqcount == 0);
+  while (rtcb->irqcount < saved_irqcount)
+    {
+      enter_critical_section();
+    }
+#endif
+
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_irq_save();
 #endif
 
@@ -189,22 +188,6 @@ void xtensa_sig_deliver(void)
    */
 
   rtcb->xcp.regs[REG_A0] = regs[REG_A0];
-
-#ifdef CONFIG_SMP
-  /* Restore the saved 'irqcount' and recover the critical section
-   * spinlocks.
-   *
-   * REVISIT:  irqcount should be one from the above call to
-   * enter_critical_section().  Could the saved_irqcount be zero?  That
-   * would be a problem.
-   */
-
-  DEBUGASSERT(rtcb->irqcount == 1);
-  while (rtcb->irqcount < saved_irqcount)
-    {
-      enter_critical_section();
-    }
-#endif
 
   /* Then restore the correct state for this thread of execution.
    * NOTE: The co-processor state should already be correct.
