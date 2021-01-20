@@ -127,6 +127,11 @@
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include "hardware/stm32f37xxx_pinmap.h"
 
+/* STM32 F412 Family ****************************************************************/
+
+#elif defined(CONFIG_STM32_STM32F412)
+#  include "hardware/stm32f412xx_pinmap.h"
+
 /* STM32 F4 Family ******************************************************************/
 
 #elif defined(CONFIG_STM32_STM32F4XXX)
