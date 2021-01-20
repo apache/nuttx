@@ -1962,7 +1962,7 @@ static int tmpfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   if (ret >= 0)
     {
       dir->u.tmpfs.tf_tdo   = tdo;
-      dir->u.tmpfs.tf_index = 0;
+      dir->u.tmpfs.tf_index = tdo->tdo_nentries;
 
       tmpfs_unlock_directory(tdo);
     }
@@ -2022,7 +2022,7 @@ static int tmpfs_readdir(FAR struct inode *mountpt,
   /* Have we reached the end of the directory? */
 
   index = dir->u.tmpfs.tf_index;
-  if (index >= tdo->tdo_nentries)
+  if (index-- == 0)
     {
       /* We signal the end of the directory by returning the special error:
        * -ENOENT
@@ -2059,9 +2059,9 @@ static int tmpfs_readdir(FAR struct inode *mountpt,
 
       strncpy(dir->fd_dir.d_name, tde->tde_name, NAME_MAX);
 
-      /* Increment the index for next time */
+      /* Save the index for next time */
 
-      dir->u.tmpfs.tf_index = index + 1;
+      dir->u.tmpfs.tf_index = index;
       ret = OK;
     }
 
@@ -2079,9 +2079,9 @@ static int tmpfs_rewinddir(FAR struct inode *mountpt,
   finfo("mountpt: %p dir: %p\n",  mountpt, dir);
   DEBUGASSERT(mountpt != NULL && dir != NULL);
 
-  /* Set the readdir index to zero */
+  /* Set the readdir index pass the end */
 
-  dir->u.tmpfs.tf_index = 0;
+  dir->u.tmpfs.tf_index = tdo->tdo_nentries;
   return OK;
 }
 
