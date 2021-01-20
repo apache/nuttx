@@ -2076,8 +2076,15 @@ static int tmpfs_readdir(FAR struct inode *mountpt,
 static int tmpfs_rewinddir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
+  FAR struct tmpfs_directory_s *tdo;
+
   finfo("mountpt: %p dir: %p\n",  mountpt, dir);
   DEBUGASSERT(mountpt != NULL && dir != NULL);
+
+  /* Get the directory structure from the dir argument and lock it */
+
+  tdo = dir->u.tmpfs.tf_tdo;
+  DEBUGASSERT(tdo != NULL);
 
   /* Set the readdir index pass the end */
 
