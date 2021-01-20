@@ -85,11 +85,6 @@ endif
 
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDFLAGS += -Map="${shell cygpath -w $(TOPDIR)/nuttx.map}"
-else
-  LDFLAGS += -Map=$(TOPDIR)/nuttx.map
-endif
 endif
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
