@@ -58,7 +58,7 @@
  * script as "_sheap".  Then end is defined here, as follows:
  */
 
-#define HEAP_REGION1_END 0x3ffe0000
+#define HEAP_REGION1_END    0x3ffdfff0
 
 /* Region 2 of the heap is the area from the end of the ROM data to the end
  * of DRAM.  The linker script has already set "_eheap" as the end of DRAM,
@@ -67,10 +67,10 @@
  * enabled include APP's region with the heap.
  */
 
-#ifdef CONFIG_SMP
-#  define HEAP_REGION2_START 0x3ffe4350
+#ifndef CONFIG_SMP
+#  define HEAP_REGION2_START  0x3ffe1330
 #else
-#  define HEAP_REGION2_START 0x3ffe0400
+#  define HEAP_REGION2_START  0x3ffe7e40
 #endif
 
 /****************************************************************************
