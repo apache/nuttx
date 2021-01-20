@@ -269,14 +269,17 @@ static inline void nrf52_gpio_drive(nrf52_pinset_t cfgset,
 
 int nrf52_gpio_config(nrf52_pinset_t cfgset)
 {
-  unsigned int port;
+  unsigned int port = 0;
   unsigned int pin;
   irqstate_t flags;
   int ret = OK;
 
   /* Verify that this hardware supports the select GPIO port */
 
+#ifdef CONFIG_NRF52_HAVE_PORT1
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+#endif
+
   if (port < NRF52_GPIO_NPORTS)
     {
       /* Get the pin number and select the port configuration register for
@@ -341,13 +344,15 @@ int nrf52_gpio_config(nrf52_pinset_t cfgset)
 int nrf52_gpio_unconfig(nrf52_pinset_t cfgset)
 {
   unsigned int pin;
-  unsigned int port;
+  unsigned int port = 0;
   uint32_t offset;
 
   /* Get port and pin number */
 
   pin  = GPIO_PIN_DECODE(cfgset);
+#ifdef CONFIG_NRF52_HAVE_PORT1
   port = GPIO_PORT_DECODE(cfgset);
+#endif
 
   /* Get address offset */
 
@@ -371,13 +376,15 @@ int nrf52_gpio_unconfig(nrf52_pinset_t cfgset)
 void nrf52_gpio_write(nrf52_pinset_t pinset, bool value)
 {
   unsigned int pin;
-  unsigned int port;
+  unsigned int port = 0;
   uint32_t offset;
 
   /* Get port and pin number */
 
   pin  = GPIO_PIN_DECODE(pinset);
+#ifdef CONFIG_NRF52_HAVE_PORT1
   port = GPIO_PORT_DECODE(pinset);
+#endif
 
   /* Get register address */
 
