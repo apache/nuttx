@@ -228,6 +228,10 @@ void up_earlyserialinit(void);
 void rpmsg_serialinit(void);
 #endif
 
+/* Exception Handler ********************************************************/
+
+void riscv_exception(uint32_t mcause, uint32_t *regs);
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION

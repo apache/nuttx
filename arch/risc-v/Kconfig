@@ -52,6 +52,14 @@ config ARCH_CHIP_BL602
 	---help---
 		BouffaloLab BL602(rv32imfc)
 
+config ARCH_CHIP_ESP32C3
+	bool "Espressif ESP32-C3"
+	select ARCH_RV32IM
+	select RV32IM_HW_MULDIV
+	select ARCH_VECNOTIRQ
+	---help---
+		Espressif ESP32-C3 (RV32IMC).
+
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
 	select ARCH_CHIP_CUSTOM
@@ -89,6 +97,7 @@ config ARCH_CHIP
 	default "nr5m100"	if ARCH_CHIP_NR5
 	default "gap8"		if ARCH_CHIP_GAP8
 	default "bl602"		if ARCH_CHIP_BL602
+	default "esp32c3"	if ARCH_CHIP_ESP32C3
 
 config NR5_MPU
 	bool "MPU support"
@@ -123,5 +132,8 @@ source arch/risc-v/src/gap8/Kconfig
 endif
 if ARCH_CHIP_BL602
 source arch/risc-v/src/bl602/Kconfig
+endif
+if ARCH_CHIP_ESP32C3
+source arch/risc-v/src/esp32c3/Kconfig
 endif
 endif
