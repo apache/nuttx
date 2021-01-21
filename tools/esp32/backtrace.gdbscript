@@ -20,12 +20,32 @@
 
 # Usage:
 #
+#       (gdb) esp32_bt <pc> <return address (a0)> <sp (a1)>
+#
+# Example 1:
+#
+#   -------
+#       xtensa_btdump: Backtrace0: 400d82a3:3ffdec60
+#       xtensa_btdump: Backtrace1: 400d82ff:3ffdec80
+#   -------
+#       (gdb) esp32_bt 0x400d82ff 0x400d82a3 0x3ffdec60
+#   -------
+#
+# Example 2:
+#
 #   -------
 #       xtensa_registerdump:    PC: 400d5775    PS: 00060e33
 #       xtensa_registerdump:    A0: 800d504c    A1: 3ffd8080    A2: 3ffdfb28    A3: 00000001
 #   -------
 #       (gdb) esp32_bt 0x400d5775 0x800d504c 0x3ffd8080
 #   -------
+#
+# Caveats:
+#
+#   This doesn't work if the specified register values are already
+#   inconsistent with the frames on the stack. It's usually the case
+#   when xtensa_registerdump saved the state by itself using
+#   xtensa_context_save.
 #
 # References:
 #
