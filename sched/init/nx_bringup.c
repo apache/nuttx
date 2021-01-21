@@ -251,6 +251,7 @@ static inline void nx_start_application(void)
    */
 
   sinfo("Starting init thread\n");
+  syslog(LOG_INFO, "Starting init thread\n");
 
 #ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);

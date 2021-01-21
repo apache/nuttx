@@ -373,6 +373,7 @@ void nx_start(void)
   int i;
 
   sinfo("Entry\n");
+  syslog(LOG_INFO, "NuttX RTOS Initializtion Entry\n");
 
   /* Boot up is complete */
 
@@ -825,6 +826,7 @@ void nx_start(void)
   /* When control is return to this point, the system is idle. */
 
   sinfo("CPU0: Beginning Idle Loop\n");
+  syslog(LOG_INFO, "CPU0: Beginning Idle Loop\n");
   for (; ; )
     {
       /* Perform any processor-specific idle state operations */
