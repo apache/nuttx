@@ -175,7 +175,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       ret = local_sync(&conn->lc_infile);
       if (ret < 0)
         {
-          nerr("ERROR: Failed to get packet length: %d\n", ret);
+          nwarn("ERROR: Failed to get packet length: %d\n", ret);
           return ret;
         }
       else if (ret > UINT16_MAX)
@@ -297,7 +297,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   ret = local_sync(&conn->lc_infile);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to get packet length: %d\n", ret);
+      nwarn("ERROR: Failed to get packet length: %d\n", ret);
       goto errout_with_infd;
     }
   else if (ret > UINT16_MAX)
