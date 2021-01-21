@@ -91,17 +91,14 @@
  *       currently executing task -- just call the signal
  *       handler now.
  *
+ * Assumptions:
+ *   Called from critical section
+ *
  ****************************************************************************/
 
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
-  irqstate_t flags;
-
   sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
-
-  /* Make sure that interrupts are disabled */
-
-  flags = enter_critical_section();
 
   /* Refuse to handle nested signal actions */
 
@@ -196,6 +193,4 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                 tcb->xcp.regs[REG_CSR_MEPC], tcb->xcp.regs[REG_CSR_MSTATUS]);
         }
     }
-
-  leave_critical_section(flags);
 }

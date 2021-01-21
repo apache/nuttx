@@ -82,6 +82,9 @@
  *       currently executing task -- just call the signal
  *       handler now.
  *
+ * Assumptions:
+ *   Called from critical section
+ *
  ****************************************************************************/
 
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
