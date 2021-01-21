@@ -99,6 +99,10 @@ size_t __attribute__((weak)) esp_himem_reserved_area_size(void)
 
 void IRAM_ATTR esp_spiram_init_cache(void)
 {
+#ifdef CONFIG_SMP
+  uint32_t regval;
+#endif
+
   /* Enable external RAM in MMU */
 
   cache_sram_mmu_set(0, 0, SOC_EXTRAM_DATA_LOW, 0, 32, 128);
@@ -106,8 +110,9 @@ void IRAM_ATTR esp_spiram_init_cache(void)
   /* Flush and enable icache for APP CPU */
 
 #ifdef CONFIG_SMP
-  DPORT_CLEAR_PERI_REG_MASK(DPORT_APP_CACHE_CTRL1_REG,
-                            DPORT_APP_CACHE_MASK_DRAM1);
+  regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
+  regval &= ~(1 << DPORT_APP_CACHE_MASK_DRAM1);
+  putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
   cache_sram_mmu_set(1, 0, SOC_EXTRAM_DATA_LOW, 0, 32, 128);
 #endif
 }
