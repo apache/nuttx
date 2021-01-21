@@ -95,17 +95,14 @@ static void ez80_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver,
  *       currently executing task -- just call the signal
  *       handler now.
  *
+ * Assumptions:
+ *   Called from critical section
+ *
  ****************************************************************************/
 
 void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
-  irqstate_t flags;
-
   sinfo("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16_t)sigdeliver);
-
-  /* Make sure that interrupts are disabled */
-
-  flags = enter_critical_section();
 
   /* Refuse to handle nested signal actions */
 
@@ -162,6 +159,4 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
           ez80_sigsetup(tcb, sigdeliver, tcb->xcp.regs);
         }
     }
-
-  leave_critical_section(flags);
 }
