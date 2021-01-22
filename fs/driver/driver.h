@@ -130,16 +130,8 @@ int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags);
  * Returned Value:
  *   If zero, non-zero inode pointer is returned on success.  This
  *   is the inode pointer of the nameless block driver that mediates
- *   accesses to the mtd driver.
- *
- *   Errors that may be returned:
- *
- *     ENOMEM - Failed to create a temporary path name.
- *
- *   Plus:
- *
- *     - Errors reported from ftl_initialize()
- *     - Errors reported from open() or unlink()
+ *   accesses to the mtd driver. A negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
