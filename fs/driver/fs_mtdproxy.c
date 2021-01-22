@@ -131,16 +131,8 @@ static FAR char *unique_blkdev(void)
  * Returned Value:
  *   If zero, non-zero inode pointer is returned on success.  This
  *   is the inode pointer of the nameless block driver that mediates
- *   accesses to the mtd driver.
- *
- *   Errors that may be returned:
- *
- *     ENOMEM - Failed to create a temporary path name.
- *
- *   Plus:
- *
- *     - Errors reported from ftl_initialize()
- *     - Errors reported from open() or unlink()
+ *   accesses to the mtd driver. A negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
@@ -193,7 +185,7 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
    */
 
 out_with_fltdev:
-  unlink(blkdev);
+  nx_unlink(blkdev);
 out_with_blkdev:
   kmm_free(blkdev);
   return ret;

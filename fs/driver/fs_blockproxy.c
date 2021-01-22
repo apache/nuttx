@@ -186,10 +186,9 @@ int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags)
    * a problem here!)
    */
 
-  ret = unlink(chardev);
+  ret = nx_unlink(chardev);
   if (ret < 0)
     {
-      ret = -errno;
       ferr("ERROR: Failed to unlink %s: %d\n", chardev, ret);
       goto errout_with_chardev;
     }
@@ -200,7 +199,7 @@ int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags)
   return OK;
 
 errout_with_bchdev:
-  unlink(chardev);
+  nx_unlink(chardev);
 
 errout_with_chardev:
   kmm_free(chardev);
