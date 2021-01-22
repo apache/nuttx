@@ -115,8 +115,7 @@ static int file_vopen(FAR struct file *filep,
   /* If the inode is block driver, then we may return a character driver
    * proxy for the block driver.  block_proxy() will instantiate a BCH
    * character driver wrapper around the block driver, open(), then
-   * unlink() the character driver.  On success, block_proxy() will
-   * return the file descriptor of the opened character driver.
+   * unlink() the character driver.
    *
    * NOTE: This will recurse to open the character driver proxy.
    */
@@ -128,7 +127,7 @@ static int file_vopen(FAR struct file *filep,
       inode_release(inode);
       RELEASE_SEARCH(&desc);
 
-      /* Get the file descriptor of the opened character driver proxy */
+      /* Get the file structure of the opened character driver proxy */
 
       return block_proxy(filep, path, oflags);
     }

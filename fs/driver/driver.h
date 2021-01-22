@@ -99,22 +99,14 @@ int find_blockdriver(FAR const char *pathname, int mountflags,
  *   oriented accessed to the block driver.
  *
  * Input Parameters:
+ *   filep  - The caller provided location in which to return the 'struct
+ *            file' instance.
  *   blkdev - The path to the block driver
  *   oflags - Character driver open flags
  *
  * Returned Value:
- *   If positive, non-zero file descriptor is returned on success.  This
- *   is the file descriptor of the nameless character driver that mediates
- *   accesses to the block driver.
- *
- *   Errors that may be returned:
- *
- *     ENOMEM - Failed to create a temporary path name.
- *
- *   Plus:
- *
- *     - Errors reported from bchdev_register()
- *     - Errors reported from open() or unlink()
+ *   Zero (OK) is returned on success.  On failure, a negated errno value is
+ *   returned.
  *
  ****************************************************************************/
 
