@@ -32,9 +32,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NRF52_PPI_NUM_CHANNELS              32    /* Total number of PPI channels */
-#define NRF52_PPI_NUM_CONFIGURABLE_CHANNELS 20    /* Number of configurable PPI channels */
-#define NRF52_PPI_NUM_GROUPS                6     /* Number of PPI channel groups */
+/* Nordic SDC makes use of PPI channels 17-31 */
+
+#ifdef CONFIG_NRF52_SOFTDEVICE_CONTROLLER
+#  define NRF52_PPI_NUM_CHANNELS              16    /* Total number of PPI channels */
+#  define NRF52_PPI_NUM_CONFIGURABLE_CHANNELS 16    /* Number of configurable PPI channels */
+#  define NRF52_PPI_NUM_GROUPS                6     /* Number of PPI channel groups */
+#else
+#  define NRF52_PPI_NUM_CHANNELS              32    /* Total number of PPI channels */
+#  define NRF52_PPI_NUM_CONFIGURABLE_CHANNELS 20    /* Number of configurable PPI channels */
+#  define NRF52_PPI_NUM_GROUPS                6     /* Number of PPI channel groups */
+#endif
 
 /****************************************************************************
  * Public Types

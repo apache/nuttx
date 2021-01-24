@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf52/nrf52832-mdk/src/nrf52_bringup.c
+ * arch/arm/src/chip/nrf52_sdc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,86 +18,48 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_NRF52_NRF52_SDC_H
+#define __ARCH_ARM_SRC_NRF52_NRF52_SDC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <syslog.h>
-
-#ifdef CONFIG_FS_PROCFS
-#include <sys/mount.h>
-#endif
-
-#ifdef CONFIG_NRF52_WDT
-#  include "nrf52_wdt_lowerhalf.h"
-#endif
-
-#ifdef CONFIG_USERLED
-#  include <nuttx/leds/userled.h>
-#endif
-
-#ifdef CONFIG_NRF52_SOFTDEVICE_CONTROLLER
-#include "nrf52_sdc.h"
-#endif
-
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf52_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
- *
+ * Public Types
  ****************************************************************************/
 
-int nrf52_bringup(void)
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  int ret;
-
-#ifdef CONFIG_FS_PROCFS
-  mount(NULL, "/proc", "procfs", 0, NULL);
+#else
+#define EXTERN extern
 #endif
 
-#ifdef CONFIG_NRF52_WDT
-  /* Start Watchdog timer */
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
 
-  ret = nrf52_wdt_initialize(CONFIG_WATCHDOG_DEVPATH, 1, 1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: nrf52_wdt_initialize failed: %d\n", ret);
-    }
-#endif
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#ifdef CONFIG_USERLED
-  /* Register the LED driver */
+int nrf52_sdc_initialize(void);
 
-  ret = userled_lower_initialize(CONFIG_EXAMPLES_LEDS_DEVPATH);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_NRF52_SOFTDEVICE_CONTROLLER
-  ret = nrf52_sdc_initialize();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: nrf52_sdc_initialize() failed: %d\n", ret);
-    }
-#endif
-
-  UNUSED(ret);
-  return OK;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __ARCH_ARM_SRC_NRF52_NRF52_SDC_H */

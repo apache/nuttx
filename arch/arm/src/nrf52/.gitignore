@@ -1,0 +1,4 @@
+CMSIS_5*
+sdk-nrfxlib*
+nrfx*
+*.tar.gz
