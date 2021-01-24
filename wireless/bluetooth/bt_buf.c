@@ -396,6 +396,8 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
 
   wlinfo("buf %p ref %u type %d\n", buf, buf->ref, buf->type);
 
+  DEBUGASSERT(buf->ref > 0);
+
   if (--buf->ref > 0)
     {
       wlinfo("Remaining references: %d\n", buf->ref);
