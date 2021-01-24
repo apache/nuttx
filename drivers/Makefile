@@ -87,6 +87,10 @@ endif
 
 CSRCS += dev_null.c dev_zero.c
 
+ifeq ($(CONFIG_LWL_CONSOLE),y)
+  CSRCS += lwl_console.c
+endif
+
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
   CSRCS += ramdisk.c
 ifeq ($(CONFIG_DRVR_MKRD),y)

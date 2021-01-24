@@ -217,6 +217,22 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset,
 ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
                      size_t len);
 
+/****************************************************************************
+ * Name: lwlconsole_init
+ *
+ * Description:
+ *   Register /dev/console
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void lwlconsole_init(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
