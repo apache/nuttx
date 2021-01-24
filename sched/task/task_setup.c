@@ -81,12 +81,13 @@ static int nxtask_assign_pid(FAR struct tcb_s *tcb)
   pid_t next_pid;
   int   hash_ndx;
   int   tries;
+  int   ret = ERROR;
 
-  /* Disable pre-emption.  This should provide sufficient protection
-   * for the following operation.
+  /* Protect the following operation with a critical section
+   * because g_pidhash is accessed from an interrupt context
    */
 
-  sched_lock();
+  irqstate_t flags = enter_critical_section();
 
   /* We'll try every allowable pid */
 
@@ -121,17 +122,18 @@ static int nxtask_assign_pid(FAR struct tcb_s *tcb)
 #endif
           tcb->pid = next_pid;
 
-          sched_unlock();
-          return OK;
+          ret = OK;
+          goto errout;
         }
     }
 
+errout:
   /* If we get here, then the g_pidhash[] table is completely full.
    * We cannot allow another task to be started.
    */
 
-  sched_unlock();
-  return ERROR;
+  leave_critical_section(flags);
+  return ret;
 }
 
 /****************************************************************************
