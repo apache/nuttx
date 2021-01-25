@@ -66,7 +66,7 @@
 #define CIOCFSESSION            102
 #define CIOCCRYPT               103
 
-typedef char* caddr_t;
+typedef char *caddr_t;
 
 struct session_op
 {
