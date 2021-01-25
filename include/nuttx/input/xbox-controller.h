@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/input/xbox-controller.h
  *
  *   Copyright (C) 2016 Brian Webb.
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_INPUT_XBOX_CONTROLLER_H
 #define __INCLUDE_NUTTX_INPUT_XBOX_CONTROLLER_H

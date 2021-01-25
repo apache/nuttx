@@ -71,6 +71,7 @@
 #endif
 
 /* Joystick Interface *******************************************************/
+
 /* These definitions provide the meaning of all of the bits that may be
  * reported in the ajoy_buttonset_t bitset.
  */
@@ -140,9 +141,10 @@
  * Description: Specify the set of button events that can cause a poll()
  *              to awaken.  The default is all button depressions and all
  *              button releases (all supported buttons);
- * Argument:    A read-only pointer to an instance of struct ajoy_pollevents_s
- * Return:      Zero (OK) on success.  Minus one will be returned on failure
- *              with the errno value set appropriately.
+ * Argument:    A read-only pointer to an instance of struct
+ *              ajoy_pollevents_s
+ * Return:      Zero (OK) on success.  Minus one will be returned on
+ *              failure with the errno value set appropriately.
  */
 
 #define AJOYIOC_POLLEVENTS  _AJOYIOC(0x0002)
@@ -169,9 +171,9 @@
 
 typedef uint8_t ajoy_buttonset_t;
 
-/* A reference to this structure is provided with the AJOYIOC_POLLEVENTS IOCTL
- * command and describes the conditions under which the client would like
- * to receive notification.
+/* A reference to this structure is provided with the AJOYIOC_POLLEVENTS
+ * IOCTL command and describes the conditions under which the client would
+ * like to receive notification.
  */
 
 struct ajoy_pollevents_s
@@ -234,24 +236,30 @@ struct ajoy_lowerhalf_s
 {
   /* Return the set of buttons supported on the analog joystick device */
 
-  CODE ajoy_buttonset_t (*al_supported)(FAR const struct ajoy_lowerhalf_s *lower);
+  CODE ajoy_buttonset_t (*al_supported)
+                        (FAR const struct ajoy_lowerhalf_s *lower);
 
-  /* Return the current state of all analog joystick position and button data */
+  /* Return the current state of all analog joystick position
+   * and button data
+   */
 
   CODE int (*al_sample)(FAR const struct ajoy_lowerhalf_s *lower,
                         FAR struct ajoy_sample_s *sample);
 
   /* Return the current state of button data (only) */
 
-  CODE ajoy_buttonset_t (*al_buttons)(FAR const struct ajoy_lowerhalf_s *lower);
+  CODE ajoy_buttonset_t (*al_buttons)
+                        (FAR const struct ajoy_lowerhalf_s *lower);
 
-  /* Enable interrupts on the selected set of joystick buttons.  An empty
-   * set will disable all interrupts.
+  /* Enable interrupts on the selected set of joystick buttons.
+   * An empty set will disable all interrupts.
    */
 
   CODE void (*al_enable)(FAR const struct ajoy_lowerhalf_s *lower,
-                         ajoy_buttonset_t press, ajoy_buttonset_t release,
-                         ajoy_handler_t handler, FAR void *arg);
+                         ajoy_buttonset_t press,
+                         ajoy_buttonset_t release,
+                         ajoy_handler_t handler,
+                         FAR void *arg);
 };
 
 /****************************************************************************

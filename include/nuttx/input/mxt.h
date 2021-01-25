@@ -52,7 +52,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Maximum number of threads than can be waiting for POLL events */
 
 #ifndef CONFIG_MXT_NPOLLWAITERS

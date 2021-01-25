@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/input/buttons.h
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_INPUT_BUTTONS_H
 #define __INCLUDE_NUTTX_INPUT_BUTTONS_H
@@ -148,11 +148,13 @@ struct btn_lowerhalf_s
 {
   /* Return the set of buttons supported by the board */
 
-  CODE btn_buttonset_t (*bl_supported)(FAR const struct btn_lowerhalf_s *lower);
+  CODE btn_buttonset_t (*bl_supported)
+                       (FAR const struct btn_lowerhalf_s *lower);
 
   /* Return the current state of button data (only) */
 
-  CODE btn_buttonset_t (*bl_buttons)(FAR const struct btn_lowerhalf_s *lower);
+  CODE btn_buttonset_t (*bl_buttons)
+                       (FAR const struct btn_lowerhalf_s *lower);
 
   /* Enable interrupts on the selected set of buttons.  An empty set will
    * disable all interrupts.
