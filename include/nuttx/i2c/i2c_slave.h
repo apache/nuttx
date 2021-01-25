@@ -49,6 +49,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* I2C address calculation.  Convert 7- and 10-bit address to 8-bit and
  * 16-bit read/write address
  */
@@ -111,7 +112,8 @@
  *
  * Input Parameters:
  *   dev    - Device-specific state data
- *   buffer - A pointer to the read-only buffer of data to be written to device
+ *   buffer - A pointer to the read-only buffer of data to be written to
+ *            device
  *   buflen - The number of bytes to send from the buffer
  *
  * Returned Value:
@@ -132,7 +134,8 @@
  *
  * Input Parameters:
  *   dev    - Device-specific state data
- *   buffer - A pointer to a buffer of data to receive the data from the device
+ *   buffer - A pointer to a buffer of data to receive the data from the
+ *            device
  *   buflen - The requested number of bytes to be read
  *
  * Returned Value:
@@ -189,7 +192,7 @@ struct i2c_slave_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN

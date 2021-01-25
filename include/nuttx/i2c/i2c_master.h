@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* I2C address calculation.  Convert 7- and 10-bit address to 8-bit and
  * 16-bit read/write address
  */
@@ -117,6 +118,7 @@
 #define I2C_SPEED_HIGH       3400000 /* High speed     (3.4Mhz) */
 
 /* I2C Character Driver IOCTL Commands **************************************/
+
 /* The I2C driver is intended to support application testing of the I2C bus.
  * The I2C driver simply wraps an instance of struct i2c_dev_s and then
  * provides the following IOCTL commands to access each method of the I2c
@@ -166,7 +168,7 @@
 
 #define I2C_TRANSFER(d,m,c) ((d)->ops->transfer(d,m,c))
 
-/************************************************************************************
+/****************************************************************************
  * Name: I2C_RESET
  *
  * Description:
@@ -178,7 +180,7 @@
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 #  define I2C_RESET(d) ((d)->ops->reset(d))
@@ -214,8 +216,8 @@ struct i2c_config_s
 };
 
 /* I2C transaction segment beginning with a START. A number of these can
- * be transferred together to form an arbitrary sequence of write/read transfer
- * to an I2C slave device.
+ * be transferred together to form an arbitrary sequence of write/read
+ * transfer to an I2C slave device.
  */
 
 struct i2c_msg_s
@@ -248,7 +250,7 @@ struct i2c_transfer_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN
@@ -296,9 +298,11 @@ int i2c_register(FAR struct i2c_master_s *i2c, int bus);
  * Input Parameters:
  *   dev     - Device-specific state data
  *   config  - Described the I2C configuration
- *   wbuffer - A pointer to the read-only buffer of data to be written to device
+ *   wbuffer - A pointer to the read-only buffer of data to be written to
+ *             device
  *   wbuflen - The number of bytes to send from the buffer
- *   rbuffer - A pointer to a buffer of data to receive the data from the device
+ *   rbuffer - A pointer to a buffer of data to receive the data from the
+ *             device
  *   rbuflen - The requested number of bytes to be read
  *
  * Returned Value:
@@ -322,7 +326,8 @@ int i2c_writeread(FAR struct i2c_master_s *dev,
  * Input Parameters:
  *   dev    - Device-specific state data
  *   config  - Described the I2C configuration
- *   buffer - A pointer to the read-only buffer of data to be written to device
+ *   buffer - A pointer to the read-only buffer of data to be written to
+ *            device
  *   buflen - The number of bytes to send from the buffer
  *
  * Returned Value:
@@ -344,7 +349,8 @@ int i2c_write(FAR struct i2c_master_s *dev,
  *
  * Input Parameters:
  *   dev    - Device-specific state data
- *   buffer - A pointer to a buffer of data to receive the data from the device
+ *   buffer - A pointer to a buffer of data to receive the data from the
+ *            device
  *   buflen - The requested number of bytes to be read
  *
  * Returned Value:
