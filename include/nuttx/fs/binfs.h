@@ -64,7 +64,8 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* The "bindir" is file system that supports access to the builtin applications.
+/* The "bindir" is file system that supports access to the builtin
+ * applications.
  * It is typically mounted under /bin.
  */
 

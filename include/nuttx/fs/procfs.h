@@ -46,6 +46,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Data entry declaration prototypes ****************************************/
 
 /* Procfs operations are a subset of the mountpt_operations */
@@ -61,14 +62,18 @@ struct procfs_operations
   int     (*open)(FAR struct file *filep, FAR const char *relpath,
                   int oflags, mode_t mode);
 
-  /* The following methods must be identical in signature and position because
-   * the struct file_operations and struct mountp_operations are treated like
-   * unions.
+  /* The following methods must be identical in signature and position
+   * because the struct file_operations and struct mountp_operations are
+   * treated like unions.
    */
 
   int     (*close)(FAR struct file *filep);
-  ssize_t (*read)(FAR struct file *filep, FAR char *buffer, size_t buflen);
-  ssize_t (*write)(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+  ssize_t (*read)(FAR struct file *filep,
+                  FAR char *buffer,
+                  size_t buflen);
+  ssize_t (*write)(FAR struct file *filep,
+                   FAR const char *buffer,
+                   size_t buflen);
 
   /* The two structures need not be common after this point. The following
    * are extended methods needed to deal with the unique needs of mounted
@@ -77,11 +82,13 @@ struct procfs_operations
    * Additional open-file-specific procfs operations:
    */
 
-  int     (*dup)(FAR const struct file *oldp, FAR struct file *newp);
+  int     (*dup)(FAR const struct file *oldp,
+                 FAR struct file *newp);
 
   /* Directory operations */
 
-  int     (*opendir)(FAR const char *relpath, FAR struct fs_dirent_s *dir);
+  int     (*opendir)(FAR const char *relpath,
+                     FAR struct fs_dirent_s *dir);
   int     (*closedir)(FAR struct fs_dirent_s *dir);
   int     (*readdir)(FAR struct fs_dirent_s *dir);
   int     (*rewinddir)(FAR struct fs_dirent_s *dir);
@@ -161,9 +168,10 @@ extern "C"
  *
  *   procfs_memcpy() is a helper function.  Each read() method should
  *   provide data in a local data buffer ('src' and 'srclen').  This
- *   will transfer the data to the user receive buffer ('dest' and 'destlen'),
- *   respecting both (1) the size of the destination buffer so that it will
- *   write beyond the user receiver and (1) the file position, 'offset'.
+ *   will transfer the data to the user receive buffer ('dest' and
+ *   'destlen'), respecting both (1) the size of the destination buffer so
+ *   that it will write beyond the user receiver and (1) the file position,
+ *   'offset'.
  *
  *   This function will skip over data until the under of bytes specified
  *   by 'offset' have been skipped.  Then it will transfer data from the

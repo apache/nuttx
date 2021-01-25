@@ -106,8 +106,8 @@ int fat_setattrib(FAR const char *path, fat_attrib_t setbits,
  *   is the corresponding function that will be called to free the DMA-
  *   capable memory.
  *
- *   This functions may be simple wrappers around gran_alloc() and gran_free()
- *   (See nuttx/mm/gran.h).
+ *   This functions may be simple wrappers around gran_alloc() and
+ *   gran_free()  (See nuttx/mm/gran.h).
  *
  ****************************************************************************/
 
