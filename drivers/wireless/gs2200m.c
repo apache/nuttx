@@ -828,19 +828,17 @@ static void _write_data(FAR struct gs2200m_dev_s *dev,
 
 /****************************************************************************
  * Name: _read_data
- * NOTE: See 3.2.2.1 SPI Byte Stuffing for the idle character
+ * NOTE: See 3.2.2.2 SPI Command Response (SPI-DMA)
  ****************************************************************************/
 
 static void _read_data(FAR struct gs2200m_dev_s *dev,
                        FAR uint8_t  *buff,
                        FAR uint16_t len)
 {
-  uint8_t req = 0xf5; /* idle character */
-
   memset(buff, 0, len);
 
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), true);
-  SPI_EXCHANGE(dev->spi, &req, buff, len);
+  SPI_RECVBLOCK(dev->spi, buff, len);
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), false);
 }
 
