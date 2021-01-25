@@ -62,7 +62,8 @@
 #define CONFIG_LTC4151_ADDR8    (CONFIG_LTC4151_BASEADDR + 8)
 #define CONFIG_LTC4151_ADDR9    (CONFIG_LTC4151_BASEADDR + 9)
 
-/* LTC4151 Register Definitions ***********************************************/
+/* LTC4151 Register Definitions *********************************************/
+
 /* LTC4151 Registers addresses */
 
 #define LTC4151_CURR_REG        0x00     /* Current Register start address */
@@ -103,14 +104,15 @@ extern "C"
  * Name: ltc4151_register
  *
  * Description:
- *   Register the ltc4151 character device as 'devpath'
+ *  Register the ltc4151 character device as 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/pwrmntr0"
- *   i2c - An instance of the I2C interface to use to communicate with LTC4151
- *   addr - The I2C address of the LTC4151.  The base I2C address of the LTC4151
- *   is 0x18.  Bits 0-3 can be controlled to get 8 unique addresses from 0x18
- *   through 0x1f.
+ *  devpath - The full path to the driver to register. E.g., "/dev/pwrmntr0"
+ *  i2c - An instance of the I2C interface to use to communicate with LTC4151
+ *  addr - The I2C address of the LTC4151.
+ *         The base I2C address of the LTC4151 is 0x18.
+ *         Bits 0-3 can be controlled to get 8 unique addresses from 0x18
+ *         through 0x1f.
  *   shunt_resistor_value - resistor value in ohm
  *
  * Returned Value:

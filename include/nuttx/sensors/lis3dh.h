@@ -100,7 +100,7 @@
 #define LIS3DH_ACT_THS        (0x3E)
 #define LIS3DH_ACT_DUR        (0x3F)
 
-/* LIS3DH STATUS_REG_AUX Definitions **********************************************/
+/* LIS3DH STATUS_REG_AUX Definitions ****************************************/
 
 #define LIS3DH_STATUS_REG_AUX_321OR       (1 << 7)
 #define LIS3DH_STATUS_REG_AUX_3OR         (1 << 6)
@@ -111,16 +111,16 @@
 #define LIS3DH_STATUS_REG_AUX_2DA         (1 << 1)
 #define LIS3DH_STATUS_REG_AUX_1DA         (1 << 0)
 
-/* LIS3DH CTRL_REG0 Definitions **********************************************/
+/* LIS3DH CTRL_REG0 Definitions *********************************************/
 
 #define LIS3DH_CTRL_REG0_SDO_PU_DISC      (1 << 7)  /* Disconnect SDO/SA0 pull-up */
 
-/* LIS3DH TEMP_CFG_REG Definitions **********************************************/
+/* LIS3DH TEMP_CFG_REG Definitions ******************************************/
 
 #define LIS3DH_TEMP_CFG_REG_ADC_EN        (1 << 7)  /* ADC enable */
 #define LIS3DH_TEMP_CFG_REG_TEMP_EN       (1 << 6)  /* Temperator sensor enable */
 
-/* LIS3DH CTRL_REG1 Definitions **********************************************/
+/* LIS3DH CTRL_REG1 Definitions *********************************************/
 
 #define LIS3DH_CTRL_REG1_ODR_SHIFT        (4)
 #define LIS3DH_CTRL_REG1_ODR_MASK         (0xf << LIS3DH_CTRL_REG1_ODR_SHIFT)
@@ -142,9 +142,9 @@
 #define LIS3DH_CTRL_REG1_YEN              (1 << 1)  /* Y axis enable */
 #define LIS3DH_CTRL_REG1_XEN              (1 << 0)  /* X axis enable */
 
-/* LIS3DH CTRL_REG2 Definitions **********************************************/
+/* LIS3DH CTRL_REG2 Definitions *********************************************/
 
-/* LIS3DH CTRL_REG3 Definitions **********************************************/
+/* LIS3DH CTRL_REG3 Definitions *********************************************/
 
 #define LIS3DH_CTRL_REG3_I1_CLICK         (1 << 6) /* Click interrupt on INT1 */
 #define LIS3DH_CTRL_REG3_I1_IA1           (1 << 6) /* IA1 interrupt on INT1 */
@@ -154,7 +154,7 @@
 #define LIS3DH_CTRL_REG3_I1_WTM           (1 << 2) /* FIFO watermark interrupt on INT1 */
 #define LIS3DH_CTRL_REG3_I1_OVERRUN       (1 << 1) /* FIFO overrun interrupt on INT1 */
 
-/* LIS3DH CTRL_REG4 Definitions **********************************************/
+/* LIS3DH CTRL_REG4 Definitions *********************************************/
 
 #define LIS3DH_CTRL_REG4_BDU              (1 << 7) /* Block data update */
 #define LIS3DH_CTRL_REG4_BLE              (1 << 6) /* Endian selection. 0: LSB first, 1: MSB first */
@@ -167,7 +167,7 @@
 #define LIS3DH_CTRL_REG4_ST0              (1 << 1) /* Self test 0 */
 #define LIS3DH_CTRL_REG4_SIM              (1 << 0) /* SPI serial interface mode selection (0: 4-wire, 1: 3-wire) */
 
-/* LIS3DH CTRL_REG5 Definitions **********************************************/
+/* LIS3DH CTRL_REG5 Definitions *********************************************/
 
 #define LIS3DH_CTRL_REG5_BOOT             (1 << 7) /* Reboot memory content */
 #define LIS3DH_CTRL_REG5_FIFO_EN          (1 << 6) /* FIFO enable */
@@ -176,7 +176,7 @@
 #define LIS3DH_CTRL_REG5_LIR_INT2         (1 << 1) /* Latch interrupt request on INT2_SRC register */
 #define LIS3DH_CTRL_REG5_D4D_INT2         (1 << 0) /* 4D detection enable on INT2 */
 
-/* LIS3DH CTRL_REG6 Definitions **********************************************/
+/* LIS3DH CTRL_REG6 Definitions *********************************************/
 
 #define LIS3DH_CTRL_REG6_I2_CLICK         (1 << 6) /* Click interrupt on INT2 */
 #define LIS3DH_CTRL_REG6_I2_IA1           (1 << 6) /* IA1 interrupt on INT2 */
@@ -185,7 +185,7 @@
 #define LIS3DH_CTRL_REG6_I2_ACT           (1 << 3) /* Enable activity interrupt on INT2 */
 #define LIS3DH_CTRL_REG6_INT_POLARITY     (1 << 1) /* INT1 and INT2 pin polarity */
 
-/* LIS3DH STATUS_REG Definitions **********************************************/
+/* LIS3DH STATUS_REG Definitions ********************************************/
 
 #define LIS3DH_STATUS_ZYXOR               (1 << 7) /* X,Y,Z axis data overrun */
 #define LIS3DH_STATUS_ZOR                 (1 << 6) /* Z axis data overrun */
@@ -196,7 +196,7 @@
 #define LIS3DH_STATUS_REG_YDA             (1 << 1) /* Y axis data available */
 #define LIS3DH_STATUS_REG_XDA             (1 << 0) /* X axis data available */
 
-/* LIS3DH FIFO_CTRL_REG Definitions **********************************************/
+/* LIS3DH FIFO_CTRL_REG Definitions *****************************************/
 
 #define LIS3DH_FIFO_CTRL_REG_MODE_STREAM2 (3 << 6)
 #define LIS3DH_FIFO_CTRL_REG_MODE_STREAM  (2 << 6)
@@ -204,24 +204,24 @@
 #define LIS3DH_FIFO_CTRL_REG_MODE_BYPASS  (0 << 6)
 #define LIS3DH_FIFO_CTRL_REG_TR           (1 << 5)
 
-/* LIS3DH FIFO_SRC_REG Definitions **********************************************/
+/* LIS3DH FIFO_SRC_REG Definitions ******************************************/
 
 #define LIS3DH_FIFO_SRC_REG_WTM           (1 << 7)
 #define LIS3DH_FIFO_SRC_REG_OVRN_FIFO     (1 << 6)
 #define LIS3DH_FIFO_SRC_REG_EMPTY         (1 << 5)
 
-/* SPI parameters ***************************************************************/
+/* SPI parameters ***********************************************************/
 
 #define LIS3DH_SPI_FREQUENCY    (9600000)        /* SPI Clock Frequency */
 #define LIS3DH_SPI_MODE         (SPIDEV_MODE3)   /* Device uses SPI Mode 3: CPOL=1, CPHA=1 */
 
-/* Power Modes ******************************************************************/
+/* Power Modes **************************************************************/
 
 #define LIS3DH_POWER_LOW        (0x0) /* Lower power 8bit output */
 #define LIS3DH_POWER_NORMAL     (0x1) /* Normal 10bit */
 #define LIS3DH_POWER_HIGH       (0x2) /* HR 12bit mode */
 
-/* Output Data Rates  ***********************************************************/
+/* Output Data Rates  *******************************************************/
 
 #define LIS3DH_ODR_POWER_DOWN   (0)   /* Disable output */
 #define LIS3DH_ODR_1HZ          (0x1) /* 1Hz in all power modes */

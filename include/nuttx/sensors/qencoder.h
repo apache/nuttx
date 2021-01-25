@@ -50,7 +50,8 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************
- * CONFIG_SENSORS_QENCODER - Enables support for the quadrature encoder upper half
+ * CONFIG_SENSORS_QENCODER - Enables support for the quadrature encoder upper
+ * half
  */
 
 /* IOCTL Commands ***********************************************************/

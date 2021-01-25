@@ -36,6 +36,9 @@
 #ifndef __INCLUDE_NUTTX_SENSORS_APDS9930_H
 #define __INCLUDE_NUTTX_SENSORS_APDS9930_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 #include <nuttx/config.h>
 
 #if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_APDS9930) || defined(CONFIG_SENSORS_APDS9930_SCU))

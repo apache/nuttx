@@ -64,7 +64,6 @@
  * NOTE: The RSV Bit 1 needs to be always 1
  */
 
-
 #define VEML6070_CMD_SD           0x01 /* Shutdown command */
 #define VEML6070_CMD_RSV          0x02
 #define VEML6070_CMD_IT_0_5T      0x00 /* IT1=0 : IT0=0 */
@@ -72,8 +71,8 @@
 #define VEML6070_CMD_IT_2T        0x08 /* IT1=1 : IT0=0 */
 #define VEML6070_CMD_IT_4T        0x0c /* IT1=1 : IT0=1 */
 #define VEML6070_CMD_ACK_THD      0x10 /* Acknowledge threshold:
-                                          0 = 102 steps
-                                          1 = 145 steps */
+                                        *  0 = 102 steps
+                                        *  1 = 145 steps */
 #define VEML6070_CMD_ACK          0x20 /* Acknowledge activity */
 
 /****************************************************************************

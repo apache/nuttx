@@ -91,7 +91,8 @@ struct sps30_conv_data_s
  *   Register the SPS30 character device as 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/particle0"
+ *   devpath - The full path to the driver to register. E.g.,
+ *             "/dev/particle0"
  *   i2c     - An instance of the I2C interface to use to communicate with
  *             the SPS30
  *   addr    - The I2C address of the SPS30. The I2C address of SPS30

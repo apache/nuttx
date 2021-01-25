@@ -48,6 +48,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************
  * Prerequisites:
  *
@@ -69,6 +70,7 @@
 #define AS5048B_MAX           0x3fff   /* Maximum value (14 bits) */
 
 /* Register Definitions *****************************************************/
+
 /* Register Addresses */
 
 #define AS5048B_PROG_REG      0x03     /* Programming Control Register */
@@ -124,13 +126,15 @@ extern "C"
  *   addr - The I2C address of the AS5048B.
  *
  * Returned Value:
- *   A new lower half quadrature encoder interface for the AS5048B on success;
+ *   A new lower half quadrature encoder interface for the AS5048B
+ *        on success;
  *   NULL on failure.
  *
  ****************************************************************************/
 
 FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_master_s *i2c,
-                                              uint8_t addr, uint32_t frequency);
+                                              uint8_t addr,
+                                              uint32_t frequency);
 
 #undef EXTERN
 #ifdef __cplusplus

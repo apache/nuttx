@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * drivers/sensors/mpl115a.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -31,33 +31,42 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_SENSORS_MPL115A_H
 #define __INCLUDE_NUTTX_SENSORS_MPL115A_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MPL115A)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Configuration ****************************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
 /* Prerequisites:
  *
  * CONFIG_SENSORS_MPL115A
  *   Enables support for the MPL115A driver
  * CONFIG_MPL115A_REGDEBUG
- *   Enable very low register-level debug output.  Requires CONFIG_DEBUG_FEATURES.
+ *   Enable very low register-level debug output.
+ *  Requires CONFIG_DEBUG_FEATURES.
  */
 
-/* There are two types of MPL115A chips. The MPL115A1 communicates with the target CPU
- * via a SPI interface. The MPL115A2 communicates via I2C interface.
+/* There are two types of MPL115A chips.
+ * The MPL115A1 communicates with the target CPU via a SPI interface.
+ * The MPL115A2 communicates via I2C interface.
  * Note: This driver only supports MPL115A1 (SPI Interface).
  */
 
-/* SPI **************************************************************************************/
+/* SPI **********************************************************************/
+
 /* The device always operates in mode 0 */
 
 #define MPL115A_SPI_MODE            SPIDEV_MODE0 /* Mode 0 */
@@ -66,7 +75,8 @@
 
 #define MPL115A_SPI_MAXFREQUENCY    800000       /* 8MHz */
 
-/* MPL115A Registers ************************************************************************/
+/* MPL115A Registers ********************************************************/
+
 /* Register Addresses */
 
 #define MPL115A_BASE_CMD            0x80
@@ -85,15 +95,15 @@
                                           /* 0x0c - 0x11 are reserved */
 #define MPL115A_CONVERT             0x12  /* Start Pressure and Temperature Conversion */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 struct spi_dev_s;
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

@@ -63,8 +63,8 @@
  * interface and is permitted to be called from a kernel task, this function
  * is reused. But rather than being called by the board initialization
  * function, the cluster drivers registration function is called from the
- * board initialization function; and the cluster drivers registration function
- *  calls the leaf driver's registration function.
+ * board initialization function; and the cluster drivers registration
+ * function calls the leaf driver's registration function.
  *
  * To be "cluster driver interface" enabled the leaf driver's registration
  * function must communicate the leaf driver's instance back to the cluster
@@ -91,8 +91,8 @@
  *   leaf_handle (struct spi_dev_s *) field that is also passed as an in/out
  *   parameter in the leaf driver's registration function.
  *
- * With the above information, the sensor cluster driver may efficiently access
- * multiple sensors and aggregate their data.
+ * With the above information, the sensor cluster driver may efficiently
+ * access multiple sensors and aggregate their data.
  *
  ****************************************************************************/
 
@@ -118,9 +118,9 @@ struct sensor_cluster_operations_s
   CODE int (*driver_resume)(FAR void *instance_handle, int32_t arg);
 };
 
-/**************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- **************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -130,7 +130,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: xxxxxx_register   <-- for a leaf driver.
  *
  * Description:
@@ -149,11 +149,11 @@ extern "C"
  * Input Parameters:
  *   devpath  - The full path to the leaf driver to register. E.g.,
  *           "/dev/acl0"
- *   spi      - An instance of the SPI interface to use to communicate with the
- *              leaf driver. Or, it could be the I2C driver instance if the
- *              sensor is on an I2C bus.
- *   config   - configuration struct for the sensor leaf driver. This struct is
- *              defined in the leaf driver's xxxxxx.h file.
+ *   spi      - An instance of the SPI interface to use to communicate with
+ *              the leaf driver. Or, it could be the I2C driver instance if
+ *              the sensor is on an I2C bus.
+ *   config   - configuration struct for the sensor leaf driver.
+ *              This struct is defined in the leaf driver's xxxxxx.h file.
  *
  *  For a SPI sensor, this structure must contain:
  *

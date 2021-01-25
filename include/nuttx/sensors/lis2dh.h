@@ -58,7 +58,7 @@ extern "C"
 
 #define ST_LIS2DH_WHOAMI_VALUE          0x33    /* Valid WHOAMI register value */
 
-/* LIS2DH Internal Registers **********************************************/
+/* LIS2DH Internal Registers ************************************************/
 
 #define ST_LIS2DH_WHOAMI_REG            0x0f    /* WHOAMI register */
 
@@ -142,7 +142,7 @@ extern "C"
 #define ST_LIS2DH_CTRL_REG6             0x25
 #define ST_LIS2DH_REFERENCE_REG         0x26
 
-#define ST_LIS2DH_STATUS_REG            0x27      /* Status Register */
+#define ST_LIS2DH_STATUS_REG            0x27    /* Status Register */
 #define ST_LIS2DH_SR_ZYXOR              0x80    /* OR'ed X,Y and Z data over-run  */
 #define ST_LIS2DH_SR_ZOR                0x40    /* individual data over-run ... */
 #define ST_LIS2DH_SR_YOR                0x20
@@ -217,9 +217,9 @@ extern "C"
 
 #define ST_LIS2DH_ACT_DUR_REG           0x3f
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 enum lis2dh_ouput_data_rate
 {
@@ -275,7 +275,9 @@ enum lis2dh_interrupt_mode
 
 begin_packed_struct struct lis2dh_vector_s
 {
-  int16_t  x, y, z;
+  int16_t x;
+  int16_t y;
+  int16_t z;
 } end_packed_struct;
 
 begin_packed_struct struct lis2dh_res_header
@@ -389,14 +391,17 @@ struct lis2dh_config_s
    * callbacks to isolate the lis2dh driver from differences in GPIO
    * interrupt handling by varying boards and MCUs.
    *
-   *   irq_attach   - Attach the lis2dh interrupt handler to the GPIO interrupt
-   *   irq_enable   - Enable or disable the GPIO interrupt
-   *   clear_irq    - Acknowledge/clear any pending GPIO interrupt
+   * irq_attach - Attach the lis2dh interrupt handler to the GPIO interrupt
+   * irq_enable - Enable or disable the GPIO interrupt
+   * clear_irq  - Acknowledge/clear any pending GPIO interrupt
    *
    */
 
-  CODE int  (*irq_attach)(FAR struct lis2dh_config_s *state, xcpt_t isr, FAR void *arg);
-  CODE void (*irq_enable)(FAR const struct lis2dh_config_s *state, bool enable);
+  CODE int  (*irq_attach)(FAR struct lis2dh_config_s *state,
+                          xcpt_t isr,
+                          FAR void *arg);
+  CODE void (*irq_enable)(FAR const struct lis2dh_config_s *state,
+                          bool enable);
   CODE void (*irq_clear)(FAR const struct lis2dh_config_s *state);
   CODE bool (*read_int1_pin)(void);
   CODE bool (*read_int2_pin)(void);
@@ -419,15 +424,17 @@ typedef struct lis2dh_raw_data_s lis2dh_raw_data_t;
  * Name: lis2dh_register
  *
  * Description:
- *   Register the LIS2DH character device as 'devpath'
+ *  Register the LIS2DH character device as 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/acc0"
- *   i2c     - An instance of the I2C interface to use to communicate with LIS2DH
- *   addr    - The I2C address of the LIS2DH.  The base I2C address of the LIS2DH
- *             is 0x18.  Bit 0 can be controlled via SA0 pad - when connected to
- *             voltage supply the address is 0x19.
- *   config  - Pointer to LIS2DH configuration
+ *  devpath - The full path to the driver to register. E.g., "/dev/acc0"
+ *  i2c     - An instance of the I2C interface to use to communicate with
+ *            LIS2DH
+ *  addr    - The I2C address of the LIS2DH. The base I2C address of the
+ *            LIS2DH is 0x18.
+ *            Bit 0 can be controlled via SA0 pad - when connected to
+ *            voltage supply the address is 0x19.
+ *  config  - Pointer to LIS2DH configuration
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.

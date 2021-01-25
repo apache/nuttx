@@ -103,15 +103,15 @@ extern "C"
  * Name: mcp9844_register
  *
  * Description:
- *   Register the MCP9844 character device as 'devpath'
+ *  Register the MCP9844 character device as 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
- *   i2c - An instance of the I2C interface to use to communicate with MCP9844
- *   addr - The I2C address of the MCP9844.
+ *  devpath - The full path to the driver to register. E.g., "/dev/temp0"
+ *  i2c - An instance of the I2C interface to use to communicate with MCP9844
+ *  addr - The I2C address of the MCP9844.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *  Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 

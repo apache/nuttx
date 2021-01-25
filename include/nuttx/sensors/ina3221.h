@@ -54,7 +54,8 @@
 #define INA3221_I2C_ADDR2   0x42
 #define INA3221_I2C_ADDR3   0x43
 
-/* INA3221 Register Definitions ***********************************************/
+/* INA3221 Register Definitions *********************************************/
+
 /* INA3221 Config Register bits */
 
 #define INA3221_CONFIG_MODE_POWERDOWN   0x0
@@ -137,19 +138,20 @@ extern "C"
  * Name: ina3221_register
  *
  * Description:
- *   Register the ina3221 character device as 'devpath'
+ *  Register the ina3221 character device as 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/pwrmntr0"
- *   i2c - An instance of the I2C interface to use to communicate with INA3221
- *   addr - The I2C address of the INA3221.  The base I2C address of the INA3221
- *   is 0x80.  Bits 0-1 can be controlled to get 4 unique addresses from 0x80
- *   through 0x83.
- *   shuntval - resistor value in microohms
- *   config - a combination of the constants defined earlier in this file
+ *  devpath - The full path to the driver to register. E.g., "/dev/pwrmntr0"
+ *  i2c - An instance of the I2C interface to use to communicate with INA3221
+ *  addr - The I2C address of the INA3221.
+ *         The base I2C address of the INA3221 is 0x80.
+ *         Bits 0-1 can be controlled to get 4 unique addresses from 0x80
+ *         through 0x83.
+ *  shuntval - resistor value in microohms
+ *  config - a combination of the constants defined earlier in this file
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *  Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 

@@ -49,7 +49,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* INA219 Register Definitions ***********************************************/
+/* INA219 Register Definitions **********************************************/
+
 /* INA219 Config Register bits */
 
 #define INA219_CONFIG_SADC_SHIFT     3
@@ -116,19 +117,19 @@ extern "C"
  * Name: ina219_register
  *
  * Description:
- *   Register the ina219 character device as 'devpath'
+ *  Register the ina219 character device as 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/pwrmntr0"
- *   i2c - An instance of the I2C interface to use to communicate with INA219
- *   addr - The I2C address of the INA219.  The base I2C address of the INA219
- *   is 0x40.  Bits 0-3 can be controlled to get 16 unique addresses from 0x40
- *   through 0x4f.
- *   shuntval - resistor value in microohms
- *   config - a combination of the constants defined earlier in this file
+ *  devpath - The full path to the driver to register. E.g., "/dev/pwrmntr0"
+ *  i2c - An instance of the I2C interface to use to communicate with INA219
+ *  addr - The I2C address of the INA219.  The base I2C address of the INA219
+ *  is 0x40.  Bits 0-3 can be controlled to get 16 unique addresses from 0x40
+ *  through 0x4f.
+ *  shuntval - resistor value in microohms
+ *  config - a combination of the constants defined earlier in this file
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *  Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 

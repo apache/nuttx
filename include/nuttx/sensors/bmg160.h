@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * include/nuttx/sensors/bmg160.h
  *
  *   Copyright (C) 2016 DS-Automotion GmbH. All rights reserved.
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_SENSORS_BMG160_H
 #define __INCLUDE_NUTTX_SENSORS_BMG160_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/irq.h>
 #include <nuttx/config.h>
@@ -48,11 +48,11 @@
 
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_BMG160)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* BMG160 Register Definitions **************************************************************/
+/* BMG160 Register Definitions **********************************************/
 
 /* Chip ID */
 
@@ -140,7 +140,7 @@
                                                 * the FIFO-full flag cleared when writing to FIFO_CONFIG_1 register */
 #define BMG160_FIFO_DATA_REG           (0x3F)  /* FIFO data readout register */
 
-/* Control Register Definitions *************************************************************/
+/* Control Register Definitions *********************************************/
 
 /* BMG160 RANGE_REG Definitions */
 
@@ -178,8 +178,7 @@
 #define BMG160_HBW_REG_DATA_HIGH_BW_bm (1 << 7)  /* Enable unfiltered data reading */
 #define BMG160_HBW_REG_SHW_DIS_bm      (1 << 6)  /* Disable shadow mechanism for the rate data output register */
 
-
-/* Interrupt Status Register Definitions ****************************************************/
+/* Interrupt Status Register Definitions ************************************/
 
 /* BMG160 INT_EN_0_REG Definitions */
 
@@ -219,7 +218,7 @@
 
 #define BMG160_INT_ZERO_REG_SLOW_OFF_UN_bm    (1 << 5)   /* Selects unfiltered data for slow offset compensation */
 #define BMG160_INT_ZERO_REG_HIGH_UN_D_bm      (1 << 3)   /* Selects unfiltered data for high rate interrupt */
-#define BMG160_INT_ZERO_REG_ANY_UN_D_bm       (1 << 1)   /* Selects unfiltered data for any motion interrupt
+#define BMG160_INT_ZERO_REG_ANY_UN_D_bm       (1 << 1)   /* Selects unfiltered data for any motion interrupt */
 
 /* BMG160 INT_ONE_REG Definitions */
 
@@ -233,7 +232,7 @@
 
 /* BMG160 INT_FOUR_REG Definitions */
 
-#define BMG160_INT_FOUR_REG_FIFO_WM_EN_bm     (1 << 2)   /* Enables fifo water mark level interrupt
+#define BMG160_INT_FOUR_REG_FIFO_WM_EN_bm     (1 << 2)   /* Enables fifo water mark level interrupt */
 
 /* BMG160 INT_RST_LATCH_REG Definitions */
 
@@ -245,7 +244,7 @@
 #define BMG160_INT_RST_LATCH_REG_LATCH_INT_1_bm (1 << 1) /* Latch mode selection bit 1 */
 #define BMG160_INT_RST_LATCH_REG_LATCH_INT_0_bm (1 << 0) /* Latch mode selection bit 0 */
 
-/* Interrupt High Rate Configuration Register Definitions ************************************/
+/* Interrupt High Rate Configuration Register Definitions *******************/
 
 /* BMG160 HIGH_TH_X_REG Definitions */
 
@@ -313,7 +312,7 @@
 #define BMG160_HIGH_DUR_Z_REG_1_bm       (1 << 1)
 #define BMG160_HIGH_DUR_Z_REG_0_bm       (1 << 0)
 
-/* Offset Register Definitions **************************************************************/
+/* Offset Register Definitions **********************************************/
 
 /* BMG160 SOC_REG */
 
@@ -328,7 +327,7 @@
 #define BMG160_FOC_REG_FAST_OFF_EN_Y_bm  (1 << 1)  /* Enables fast offset compensation for y-axis */
 #define BMG160_FOC_REG_FAST_OFF_EN_X_bm  (1 << 0)  /* Enables fast offset compensation for x-axis */
 
-/* NVM Control Register Definitions *********************************************************/
+/* NVM Control Register Definitions *****************************************/
 
 /* BMG160 TRIM_NVM_CTRL_REG */
 
@@ -338,7 +337,7 @@
                                                             * the NVM_RDY flag must be '1' prior to triggering the update */
 #define BMG160_TRIM_NVM_CTRL_REG_NVM_PROG_MODE_bm (1 << 0) /* unlock NVM write operation */
 
-/* Digital Interface Register Definitions ***************************************************/
+/* Digital Interface Register Definitions ***********************************/
 
 /* BMG160 BGW_SPI3_WDT_REG */
 
@@ -346,9 +345,9 @@
 #define BMG160_BGW_SPI3_WDT_REG_I2C_WDT_SEL_bm (1 << 1)  /* Select an I2C watchdog timer period of 50ms */
 #define BMG160_BGW_SPI3_WDT_REG_SPI3_bm        (1 << 0)  /* Enable 3-wire SPI mode */
 
-/* Offset Configuration Register Definitions ************************************************/
+/* Offset Configuration Register Definitions ********************************/
 
-/* FIFO Register Definitions ****************************************************************/
+/* FIFO Register Definitions ************************************************/
 
 /* BMG160 FIFO_CONFIG_0_REG */
 
@@ -361,14 +360,14 @@
 #define BMG160_FIFO_CONFIG_1_REG_DATA_SEL_1_bm (1 << 1)  /* FIFO data selection bit 1 */
 #define BMG160_FIFO_CONFIG_1_REG_DATA_SEL_0_bm (1 << 0)  /* FIFO data selection bit 0 */
 
-/* SPI BUS PARAMETERS ***********************************************************************/
+/* SPI BUS PARAMETERS *******************************************************/
 
 #define BMG160_SPI_FREQUENCY  (4000000)        /* 4 MHz */
 #define BMG160_SPI_MODE       (SPIDEV_MODE3)   /* Device uses SPI Mode 3: CPOL=1, CPHA=1 */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* A reference to a structure of this type must be passed to the BMG160
  * driver. This structure provides information about the configuration
@@ -400,9 +399,9 @@ struct bmg160_config_s
   int (*attach)(FAR struct bmg160_config_s *, xcpt_t);
 };
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -412,7 +411,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Name: bmg160_register
  *
  * Description:
@@ -421,12 +420,13 @@ extern "C"
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/gyr0"
  *   spi - An instance of the SPI interface to use to communicate with BMG160
- *   config - configuration for the BMG160 driver. For details see description above.
+ *   config - configuration for the BMG160 driver.
+ *  For details see description above.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int bmg160_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
                     FAR struct bmg160_config_s *config);

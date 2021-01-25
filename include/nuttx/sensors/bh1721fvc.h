@@ -36,6 +36,10 @@
 #ifndef __INCLUDE_NUTTX_SENSORS_BH1721FVC_H
 #define __INCLUDE_NUTTX_SENSORS_BH1721FVC_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BH1721FVC) || defined(CONFIG_SENSORS_BH1721FVC_SCU)
@@ -92,10 +96,12 @@ int bh1721fvc_init(FAR struct i2c_master_s *i2c, int port);
  * Name: bh1721fvcals_register
  *
  * Description:
- *   Register the BH1721FVC ambient light sensor character device as 'devpath'
+ *   Register the BH1721FVC ambient light sensor character device as
+ *   'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/light0"
+ *   devpath - The full path to the driver to register. E.g.,
+ *             "/dev/light0"
  *   minor   - minor device number
  *   i2c     - An instance of the I2C interface to use to communicate with
  *             BH1721FVC

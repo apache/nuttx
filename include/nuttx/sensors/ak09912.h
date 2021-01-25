@@ -36,10 +36,12 @@
 #ifndef __INCLUDE_NUTTX_SENSORS_AK09912_H
 #define __INCLUDE_NUTTX_SENSORS_AK09912_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 #include <nuttx/config.h>
 
 #if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_AK09912) || defined (CONFIG_SENSORS_AK09912_SCU))
-
 
 /****************************************************************************
  * Pre-processor Definitions
