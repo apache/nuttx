@@ -63,6 +63,12 @@
  *   symbolic links. The 'size' argument is the size in bytes of the
  *   character array pointed to by the 'buf' argument.
  *
+ *   As an extension to the POSIX.1-2001 standard, getcwd() allocates
+ *   the buffer dynamically using lib_malloc if buf is NULL. In this case,
+ *   the allocated buffer has the length size unless size is zero, when buf
+ *   is allocated as big as necessary. The caller should free the
+ *   returned buffer.
+ *
  * Input Parameters:
  *   buf - a pointer to the location in which the current working directory
  *     pathname is returned.
@@ -74,7 +80,7 @@
  *   the error:
  *
  *   EINVAL
- *     The 'size' argument is 0 or the 'buf' argument is NULL.
+ *     The 'size' argument is 0 and the 'buf' argument is not NULL.
  *   ERANGE
  *     The size argument is greater than 0, but is smaller than the length
  *     of the current working directory pathname +1.
@@ -91,18 +97,21 @@ FAR char *getcwd(FAR char *buf, size_t size)
 
   /* Verify input parameters */
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!buf || !size)
+  if (buf && size == 0)
     {
       set_errno(EINVAL);
       return NULL;
     }
-#endif
+
+  if (size == 0)
+    {
+      size = PATH_MAX + 1;
+    }
 
   /* If no working directory is defined, then default to the home directory */
 
   pwd = getenv("PWD");
-  if (!pwd)
+  if (pwd == NULL)
     {
       pwd = CONFIG_LIB_HOMEDIR;
     }
@@ -113,6 +122,16 @@ FAR char *getcwd(FAR char *buf, size_t size)
     {
       set_errno(ERANGE);
       return NULL;
+    }
+
+  if (buf == NULL)
+    {
+      buf = lib_malloc(size);
+      if (!buf)
+        {
+          set_errno(ENOMEM);
+          return NULL;
+        }
     }
 
   /* Copy the cwd to the user buffer */
