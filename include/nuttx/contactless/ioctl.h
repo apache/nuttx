@@ -104,7 +104,7 @@ struct mifare_tag_data_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -114,7 +114,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
 
 #undef EXTERN
 #ifdef __cplusplus

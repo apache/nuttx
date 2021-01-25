@@ -75,7 +75,7 @@ struct pn532_config_s
   /* External CS, if NULL then SPIDEV_WIRELESS(n) CS is used */
 
   int (*select)(struct pn532_dev_s *dev, bool sel);
-  int (*irqattach)(void* dev, xcpt_t isr);
+  int (*irqattach)(void *dev, xcpt_t isr);
 };
 
 enum PN_SAM_MODE
@@ -97,9 +97,8 @@ enum PN_RF_CONFIG_ITEM
 {
   PN_RF_CONFIG_RF_FIELD         = 0x01,
   PN_RF_CONFIG_VARIOUS_TIMINGS  = 0x02,
-
-  PN_RF_CONFIG_ITEM_ANALOG_106A = 0x0A,
-  PN_RF_CONFIG_ITEM_ANALOG_212  = 0x0B,
+  PN_RF_CONFIG_ITEM_ANALOG_106A = 0x0a,
+  PN_RF_CONFIG_ITEM_ANALOG_212  = 0x0b,
 };
 
 struct pn_rf_config_s
@@ -116,7 +115,7 @@ struct pn_mifare_tag_data_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -135,7 +134,8 @@ extern "C"
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/nfc0"
- *   spi     - An instance of the SPI interface to use to communicate with PN532
+ *   spi     - An instance of the SPI interface to use to communicate with
+ *             PN532
  *   config  - Device persistent board data
  *
  * Returned Value:
