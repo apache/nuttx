@@ -52,13 +52,14 @@
  ****************************************************************************/
 
 /* IOCTL Commands ***********************************************************/
-/* Cmd: ANIOC_LMP92001_DAC_SET_REF          Arg: bool value
- * Cmd: ANIOC_LMP92001_DAC_UPDATEALL        Arg: uint16_t value
- * Cmd: ANIOC_LMP92001_ADC_SET_REF          Arg: bool value
- * Cmd: ANIOC_LMP92001_ADC_ENABLE           Arg: lmp92001_adc_enable_e channel
- * Cmd: ANIOC_LMP92001_ADC_SINGLESHOT_CONV  Arg: none
- * Cmd: ANIOC_LMP92001_ADC_CONTINUOUS_CONV  Arg: none
- * Cmd: ANIOC_LMP92001_ADC_READ_CHANNEL     Arg: struct adc_msg_s *channel
+
+/* Cmd: ANIOC_LMP92001_DAC_SET_REF         Arg: bool value
+ * Cmd: ANIOC_LMP92001_DAC_UPDATEALL       Arg: uint16_t value
+ * Cmd: ANIOC_LMP92001_ADC_SET_REF         Arg: bool value
+ * Cmd: ANIOC_LMP92001_ADC_ENABLE          Arg: lmp92001_adc_enable_e channel
+ * Cmd: ANIOC_LMP92001_ADC_SINGLESHOT_CONV Arg: none
+ * Cmd: ANIOC_LMP92001_ADC_CONTINUOUS_CONV Arg: none
+ * Cmd: ANIOC_LMP92001_ADC_READ_CHANNEL    Arg: struct adc_msg_s *channel
  */
 
 #define ANIOC_LMP92001_DAC_SET_REF          _ANIOC(AN_LMP92001_FIRST + 0)
@@ -98,7 +99,7 @@ enum lmp92001_adc_enable_e
   LMP92001_ADC_EN_CH15  = 1 << 14U,
   LMP92001_ADC_EN_CH16  = 1 << 15U,
   LMP92001_ADC_EN_CH17  = 1 << 16U,
-  LMP92001_ADC_EN_ALL   = 0x1FFFFU
+  LMP92001_ADC_EN_ALL   = 0x1ffffu
 };
 
 /****************************************************************************
