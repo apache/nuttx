@@ -70,9 +70,13 @@ enum max44009_integration_time_e
 
 struct max44009_config_s
 {
-  CODE int (*irq_attach)(FAR struct max44009_config_s * state, xcpt_t isr, FAR void *arg);
-  CODE void (*irq_enable)(FAR const struct max44009_config_s * state, bool enable);
-  CODE int (*set_power)(FAR const struct max44009_config_s * state, bool on);
+  CODE int (*irq_attach)(FAR struct max44009_config_s * state,
+                         xcpt_t isr,
+                         FAR void *arg);
+  CODE void (*irq_enable)(FAR const struct max44009_config_s * state,
+                          bool enable);
+  CODE int (*set_power)(FAR const struct max44009_config_s * state,
+                        bool on);
 };
 
 /* Configuration structure for MAX44009 */
@@ -87,6 +91,7 @@ struct max44009_init_s
                                * photodiode current goes to the ADC, true -
                                * 1/8 (must be used in high-brightness
                                * situations) */
+
   enum max44009_integration_time_e integr_time;  /* Integration time */
 };
 
@@ -95,8 +100,9 @@ struct max44009_threshold_s
   uint8_t upper_threshold;    /* Upper threshold high-byte */
   uint8_t lower_threshold;    /* Lower threshold high-byte */
   uint8_t threshold_timer;    /* 0 - interrupt will be triggered as soon as
-                               * the light level exceeds either threshold */
-} ;
+                               * the light level exceeds either threshold
+                               */
+};
 
 /* Data transfer structure */
 

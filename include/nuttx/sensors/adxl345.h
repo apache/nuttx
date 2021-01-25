@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * include/nuttx/input/adxl345.h
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
@@ -31,24 +31,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_INPUT_ADXL345_H
 #define __INCLUDE_NUTTX_INPUT_ADXL345_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
 #if defined(CONFIG_SENSORS_ADXL345)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Configuration ****************************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
 /* Prerequisites:
  *
  * CONFIG_SCHED_WORKQUEUE - Work queue support is required
@@ -64,15 +66,16 @@
  *    going high, it will start high and will go low when an interrupt
  *    is fired. Default:  Active high/rising edge.
  * CONFIG_ADXL345_REGDEBUG
- *   Enable very low register-level debug output.  Requires CONFIG_DEBUG_FEATURES.
+ *   Enable very low register-level debug output.
+ *    Requires CONFIG_DEBUG_FEATURES.
  */
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
 #endif
 
-/* The ADXL345 interfaces with the target CPU via a I2C or SPI interface. The pin IN_1
- * allows the selection of interface protocol at reset state.
+/* The ADXL345 interfaces with the target CPU via a I2C or SPI interface.
+ * The pin IN_1 allows the selection of interface protocol at reset state.
  */
 
 #if !defined(CONFIG_ADXL345_SPI) && !defined(CONFIG_ADXL345_I2C)
@@ -93,9 +96,10 @@
 #  endif
 #endif
 
-/* I2C **************************************************************************************/
-/* ADXL345 Address:  The ADXL345 may have 7-bit address 0x41 or 0x44, depending upon the
- * state of the ADDR0 pin.
+/* I2C **********************************************************************/
+
+/* ADXL345 Address:  The ADXL345 may have 7-bit address 0x41 or 0x44,
+ * depending upon the state of the ADDR0 pin.
  */
 
 #define ADXL345_I2C_ADDRESS_MASK    (0x78)       /* Bits 3-7: Invariant part of ADXL345 address */
@@ -109,7 +113,8 @@
 
 #define ADXL345_I2C_MAXFREQUENCY    400000       /* 400KHz */
 
-/* SPI **************************************************************************************/
+/* SPI **********************************************************************/
+
 /* The device always operates in mode 0 */
 
 #define ADXL345_SPI_MODE            SPIDEV_MODE0 /* Mode 0 */
@@ -118,11 +123,12 @@
 
 #define ADXL345_SPI_MAXFREQUENCY    500000       /* 5MHz */
 
-/* ADXL345 Registers ************************************************************************/
+/* ADXL345 Registers ********************************************************/
+
 /* Register Addresses */
 
 #define ADXL345_DEVID               0x00  /* Device identification (8-bit) */
-                                          /* 0x01 to 0x1C Reserved*/
+                                          /* 0x01 to 0x1C Reserved */
 #define ADXL345_THRESH_TAP          0x1d  /* Tap threshold */
 #define ADXL345_OFSX                0x1e  /* X-axis offset */
 #define ADXL345_OFSY                0x1f  /* Y-axis offset */
@@ -189,9 +195,9 @@
 
 /* Register 0x2C - BW_RATE */
 
-#define BWR_RATE_SHIFT              0  /* Bit 0-3: Rate bits: up to 3200Hz output data rate */
+#define BWR_RATE_SHIFT              0                   /* Bit 0-3: Rate bits: up to 3200Hz output data rate */
 #define BWR_RATE_MASK               (15 << RATE_SHIFT)  /* Bit 0: Master interrupt enable */
-#define BWR_LOW_POWER               (1 << 4)  /* Bit 4: Set low power operation */
+#define BWR_LOW_POWER               (1 << 4)            /* Bit 4: Set low power operation */
 
 /* Register 0x2d - POWER_CTL */
 
@@ -271,23 +277,27 @@
 #define FIFO_STATUS_ENTRIES_MASK    (63 << FIFO_STATUS_ENTRIES_SHIFT)
 #define FIFO_STATUS_TRIG            (1 << 7)  /* Bit 7: A 1 reports a trigger event occurred, 0 means no event */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Form of the GPIO "interrupt handler" callback. Callbacks do not occur from an interrupt
- * handler but rather from the context of the worker thread with interrupts enabled.
+/* Form of the GPIO "interrupt handler" callback.
+ * Callbacks do not occur from an interrupt handler but rather from the
+ * context of the worker thread with interrupts enabled.
  */
 
-typedef CODE void (*adxl345_handler_t)(FAR struct adxl345_config_s *config, FAR void *arg);
+typedef CODE void (*adxl345_handler_t)(FAR struct adxl345_config_s *config,
+                                       FAR void *arg);
 
-/* A reference to a structure of this type must be passed to the ADXL345 driver when the
- * driver is instantiated. This structure provides information about the configuration of the
- * ADXL345 and provides some board-specific hooks.
+/* A reference to a structure of this type must be passed to the ADXL345
+ * driver when the driver is instantiated.
+ * This structure provides information about the configuration of the ADXL345
+ * and provides some board-specific hooks.
  *
- * Memory for this structure is provided by the caller.  It is not copied by the driver
- * and is presumed to persist while the driver is active. The memory must be writeable
- * because, under certain circumstances, the driver may modify the frequency.
+ * Memory for this structure is provided by the caller.
+ * It is not copied by the driver and is presumed to persist while the driver
+ * is active. The memory must be writeable because, under certain
+ * circumstances, the driver may modify the frequency.
  */
 
 struct adxl345_config_s
@@ -308,7 +318,8 @@ struct adxl345_config_s
    * clear   - Acknowledge/clear any pending GPIO interrupt
    */
 
-  int  (*attach)(FAR struct adxl345_config_s *state, adxl345_handler_t handler,
+  int  (*attach)(FAR struct adxl345_config_s *state,
+                 adxl345_handler_t handler,
                  FAR void *arg);
   void (*enable)(FAR struct adxl345_config_s *state, bool enable);
   void (*clear)(FAR struct adxl345_config_s *state);
@@ -319,9 +330,9 @@ typedef FAR void *ADXL345_HANDLE;
 struct i2c_master_s;
 struct spi_dev_s;
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -331,22 +342,23 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Name: adxl345_instantiate
  *
  * Description:
- *   Instantiate and configure the ADXL345 device driver to use the provided I2C or SPI
- *   device instance.
+ *   Instantiate and configure the ADXL345 device driver to use the provided
+ *   I2C or SPI device instance.
  *
  * Input Parameters:
  *   dev     - An I2C or SPI driver instance
  *   config  - Persistent board configuration data
  *
  * Returned Value:
- *   A non-zero handle is returned on success.  This handle may then be used to configure
- *   the ADXL345 driver as necessary.  A NULL handle value is returned on failure.
+ *   A non-zero handle is returned on success.
+ *   This handle may then be used to configure the ADXL345 driver as
+ *   necessary. A NULL handle value is returned on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADXL345_SPI
 ADXL345_HANDLE adxl345_instantiate(FAR struct spi_dev_s *dev,
@@ -356,7 +368,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
                                    FAR struct adxl345_config_s *config);
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Name: adxl345_register
  *
  * Description:
@@ -368,10 +380,10 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
  *   minor     - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned to indicate
- *   the nature of the failure.
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int adxl345_register(ADXL345_HANDLE handle, int minor);
 

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/sensors/ioctl.h
  *
  *   Copyright (C) 2016-2019 Gregory Nutt. All rights reserved.
@@ -31,21 +31,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_SENSORS_IOCTL_H
 #define __INCLUDE_NUTTX_SENSORS_IOCTL_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* IOCTL commands unique to the BH1750FVI */
 
@@ -260,25 +260,30 @@
 #define SNIOC_BATCH                _SNIOC(0x0069)
 
 /* Command:      SNIOC_GET_NEVENTBUF
- * Description:  the number of sensor events that sensor buffer of upper half holds.
+ * Description:  the number of sensor events that sensor buffer of upper half
+ *               holds.
  * Argument:     This is the number of events pointer, is output parameter.
- * Note:         Tell the application layer number of sensor events in sensor buffer.
- *               This buffer is used to solve the problem that the application layer
- *               can't read the sensor event in time. Recommend the number of sensor
- *               events in application layer's buffer is same as result by call this
- *               function.
- *               This is number of sensor events rather than the length of buffer.
+ * Note:         Tell the application layer number of sensor events in sensor
+ *               buffer.
+ *               This buffer is used to solve the problem that the
+ *               application layer can't read the sensor event in time.
+ *               Recommend the number of sensor events in application layer's
+ *               buffer is same as result by call this function.
+ *               This is number of sensor events rather than the length of
+ *               buffer.
  *               See sensor.h(struct sensor_lower_half_s buffer_bytes).
  */
 
 #define SNIOC_GET_NEVENTBUF        _SNIOC(0x0070)
 
 /* Command:      SNIOC_SET_BUFFER_SIZE
- * Description:  Set size of intermediate circualr buffer in upper half driver.
+ * Description:  Set size of intermediate circualr buffer in upper half
+ *               driver.
  * Argument:     This is the size of buffer pointer.
- * Note:         The application layer can set size of intermediate circualr buffer
- *               by this ioctl command. The size is in bytes, it should be a multiple
- *               of an event.
+ * Note:         The application layer can set size of intermediate circualr
+ *               buffer
+ *               by this ioctl command. The size is in bytes, it should be a
+ *               multiple of an event.
  */
 
 #define SNIOC_SET_BUFFER_SIZE      _SNIOC(0x0071)

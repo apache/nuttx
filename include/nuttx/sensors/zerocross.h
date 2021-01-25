@@ -50,9 +50,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************
- * CONFIG_SENSORS_ZEROCROSS - Enables support for the zero cross AC detection upper
- *   half
+ * CONFIG_SENSORS_ZEROCROSS - Enables support for the zero cross AC detection
+ *   upper half
  */
 
 /* Command:     ZCIOC_REGISTER

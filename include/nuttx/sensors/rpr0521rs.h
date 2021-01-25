@@ -36,6 +36,10 @@
 #ifndef __INCLUDE_NUTTX_SENSORS_RPR0521RS_H
 #define __INCLUDE_NUTTX_SENSORS_RPR0521RS_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_RPR0521RS) || defined(CONFIG_SENSORS_RPR0521RS_SCU))
@@ -100,7 +104,8 @@ int rpr0521rs_init(FAR struct i2c_master_s *i2c, int port);
  * Name: rpr0521rsals_register
  *
  * Description:
- *   Register the RPR0521RS ambient light sensor character device as 'devpath'
+ *   Register the RPR0521RS ambient light sensor character device as
+ *   'devpath'
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/light0"

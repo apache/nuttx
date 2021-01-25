@@ -36,6 +36,10 @@
 #ifndef __INCLUDE_NUTTX_SENSORS_BH1745NUC_H
 #define __INCLUDE_NUTTX_SENSORS_BH1745NUC_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_BH1745NUC) || defined(CONFIG_SENSORS_BH1745NUC_SCU))

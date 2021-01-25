@@ -36,6 +36,10 @@
 #ifndef __INCLUDE_NUTTX_SENSORS_BM1383GLV_H
 #define __INCLUDE_NUTTX_SENSORS_BM1383GLV_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BM1383GLV) || defined(CONFIG_SENSORS_BM1383GLV_SCU)
