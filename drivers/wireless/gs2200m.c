@@ -1895,8 +1895,8 @@ gs2200m_create_clnt(FAR struct gs2200m_dev_s *dev,
 
   if (r != TYPE_OK || pkt_dat.n == 0)
     {
-      wlinfo("+++ error: r=%d pkt_dat.msg[0]=%s \n",
-             r, pkt_dat.msg[0]);
+      wlerr("+++ error: r=%d pkt_dat.msg[0]=%s \n",
+            r, pkt_dat.msg[0]);
       goto errout;
     }
 
@@ -2165,8 +2165,8 @@ static enum pkt_type_e gs2200m_get_cstatus(FAR struct gs2200m_dev_s *dev,
 
   if (r != TYPE_OK || pkt_dat.n <= 2)
     {
-      wlinfo("+++ error: r=%d pkt_dat.msg[0]=%s \n",
-             r, pkt_dat.msg[0]);
+      wlerr("+++ error: r=%d pkt_dat.msg[0]=%s \n",
+            r, pkt_dat.msg[0]);
 
       goto errout;
     }
@@ -2737,8 +2737,8 @@ static int gs2200m_ioctl_iwreq(FAR struct gs2200m_dev_s *dev,
 
   if (r != TYPE_OK || pkt_dat.n <= 7)
     {
-      wlinfo("+++ error: r=%d pkt_dat.msg[0]=%s \n",
-             r, pkt_dat.msg[0]);
+      wlerr("+++ error: r=%d pkt_dat.msg[0]=%s \n",
+            r, pkt_dat.msg[0]);
 
       goto errout;
     }
@@ -2749,7 +2749,7 @@ static int gs2200m_ioctl_iwreq(FAR struct gs2200m_dev_s *dev,
     {
       if (strstr(pkt_dat.msg[2], "BSSID=") == NULL)
         {
-          wlinfo("+++ error: pkt_dat.msg[2]=%s \n", pkt_dat.msg[2]);
+          wlerr("+++ error: pkt_dat.msg[2]=%s \n", pkt_dat.msg[2]);
           goto errout;
         }
 
@@ -2768,7 +2768,7 @@ static int gs2200m_ioctl_iwreq(FAR struct gs2200m_dev_s *dev,
     {
       if (strstr(pkt_dat.msg[2], "CHANNEL=") == NULL)
         {
-          wlinfo("+++ error: pkt_dat.msg[2]=%s \n", pkt_dat.msg[2]);
+          wlerr("+++ error: pkt_dat.msg[2]=%s \n", pkt_dat.msg[2]);
           goto errout;
         }
 
@@ -2781,7 +2781,7 @@ static int gs2200m_ioctl_iwreq(FAR struct gs2200m_dev_s *dev,
     {
       if (strstr(pkt_dat.msg[3], "RSSI=") == NULL)
         {
-          wlinfo("+++ error: pkt_dat.msg[3]=%s \n", pkt_dat.msg[3]);
+          wlerr("+++ error: pkt_dat.msg[3]=%s \n", pkt_dat.msg[3]);
           goto errout;
         }
 
@@ -3195,8 +3195,8 @@ repeat:
     {
       /* An error event? */
 
-      wlinfo("=== ignore (type=%d msg[0]=%s|) \n",
-             pkt_dat->type, pkt_dat->msg[0]);
+      wlerr("=== ignore (type=%d msg[0]=%s|) \n",
+            pkt_dat->type, pkt_dat->msg[0]);
 
       ignored = true;
       goto errout;
