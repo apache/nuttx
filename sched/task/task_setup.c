@@ -83,6 +83,11 @@ static int nxtask_assign_pid(FAR struct tcb_s *tcb)
   int   tries;
   int   ret = ERROR;
 
+  /* NOTE:
+   * ERROR means that the g_pidhash[] table is completely full.
+   * We cannot allow another task to be started.
+   */
+
   /* Protect the following operation with a critical section
    * because g_pidhash is accessed from an interrupt context
    */
@@ -123,14 +128,11 @@ static int nxtask_assign_pid(FAR struct tcb_s *tcb)
           tcb->pid = next_pid;
 
           ret = OK;
-          goto errout;
+          goto out;
         }
     }
 
-errout:
-  /* If we get here, then the g_pidhash[] table is completely full.
-   * We cannot allow another task to be started.
-   */
+out:
 
   leave_critical_section(flags);
   return ret;
