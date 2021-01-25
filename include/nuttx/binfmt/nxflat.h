@@ -77,8 +77,9 @@ struct nxflat_loadinfo_s
   /* Data Space (DSpace): This region contains all information that is
    * referenced as data (other than the stack which is separately allocated).
    *
-   * If CONFIG_ARCH_ADDRENV=n, DSpace will be allocated using kmm_malloc() (or
-   * kmm_zalloc()).  If CONFIG_ARCH_ADDRENV-y, then DSpace will be allocated using
+   * If CONFIG_ARCH_ADDRENV=n, DSpace will be allocated using kmm_malloc()
+   * (or kmm_zalloc()).
+   * If CONFIG_ARCH_ADDRENV-y, then DSpace will be allocated using
    * up_addrenv_create().  In either case, there will be a unique instance
    * of DSpace (and stack) for each instance of a process.
    */
@@ -117,7 +118,7 @@ struct nxflat_loadinfo_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN
@@ -243,8 +244,8 @@ int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer,
  * Description:
  *   Bind the imported symbol names in the loaded module described by
  *   'loadinfo' using the exported symbol values provided by 'symtab'
- *   After binding the module, clear the BSS region (which held the relocation
- *   data) in preparation for execution.
+ *   After binding the module, clear the BSS region (which held the
+ *   relocation data) in preparation for execution.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on

@@ -97,13 +97,14 @@ struct elf_loadinfo_s
   /* elfalloc is the base address of the memory that is allocated to hold the
    * ELF program image.
    *
-   * If CONFIG_ARCH_ADDRENV=n, elfalloc will be allocated using kmm_malloc() (or
-   * kmm_zalloc()).  If CONFIG_ARCH_ADDRENV-y, then elfalloc will be allocated using
+   * If CONFIG_ARCH_ADDRENV=n, elfalloc will be allocated using kmm_malloc()
+   * (or kmm_zalloc()).
+   * If CONFIG_ARCH_ADDRENV-y, then elfalloc will be allocated using
    * up_addrenv_create().  In either case, there will be a unique instance
    * of elfalloc (and stack) for each instance of a process.
    *
-   * The alloc[] array in struct binary_s will hold memory that persists after
-   * the ELF module has been loaded.
+   * The alloc[] array in struct binary_s will hold memory that persists
+   * after the ELF module has been loaded.
    */
 
   uintptr_t         textalloc;   /* .text memory allocated when ELF file was loaded */
