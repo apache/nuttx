@@ -1,6 +1,8 @@
-/* SPDX-License-Identifier: ((GPL-2.0-only WITH Linux-syscall-note) OR BSD-3-Clause) */
+/* SPDX-License-Identifier:
+ * ((GPL-2.0-only WITH Linux-syscall-note) OR BSD-3-Clause)
+ */
 
-/************************************************************************************
+/****************************************************************************
  * linux/can/error.h
  *
  * Definitions of the CAN error messages to be filtered and passed to the
@@ -42,7 +44,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef _UAPI_CAN_ERROR_H
 #define _UAPI_CAN_ERROR_H
