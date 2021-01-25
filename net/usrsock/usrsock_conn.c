@@ -216,8 +216,6 @@ int usrsock_connidx(FAR struct usrsock_conn_s *conn)
  *   Find a connection structure that is the appropriate
  *   connection for usrsock
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 FAR struct usrsock_conn_s *usrsock_active(int16_t usockid)

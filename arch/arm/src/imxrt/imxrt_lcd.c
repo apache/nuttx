@@ -139,12 +139,12 @@ static const struct fb_planeinfo_s g_planeinfo =
 
 struct pixel_format_reg
 {
-    uint32_t regCtrl;  /* Value of register CTRL. */
-    uint32_t regCtrl1; /* Value of register CTRL1. */
+    uint32_t reg_ctrl;  /* Value of register CTRL. */
+    uint32_t reg_ctrl1; /* Value of register CTRL1. */
 };
 
 #if defined (CONFIG_IMXRT_LCD_INPUT_BPP8) || defined (CONFIG_IMXRT_LCD_INPUT_BPP8_LUT)
-  static const struct pixel_format_reg pixelFormat =
+  static const struct pixel_format_reg pixel_format =
   {
     /* Register CTRL. */
 
@@ -152,14 +152,14 @@ struct pixel_format_reg
 
     /* Register CTRL1. */
 
-    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fU)
+    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fu)
   };
-  const uint32_t dataBus = LCDIF_CTRL_LCD_DATABUS_WIDTH(1);
+  const uint32_t data_bus = LCDIF_CTRL_LCD_DATABUS_WIDTH(1);
 
 #else
 
 #  if defined (CONFIG_IMXRT_LCD_INPUT_BPP15)
-  static const struct pixel_format_reg pixelFormat =
+  static const struct pixel_format_reg pixel_format =
   {
     /* Register CTRL. */
 
@@ -167,10 +167,10 @@ struct pixel_format_reg
 
     /* Register CTRL1. */
 
-    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fU)
+    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fu)
   };
 #  elif defined (CONFIG_IMXRT_LCD_INPUT_BPP16)
-  static const struct pixel_format_reg pixelFormat =
+  static const struct pixel_format_reg pixel_format =
   {
     /* Register CTRL. */
 
@@ -178,10 +178,10 @@ struct pixel_format_reg
 
     /* Register CTRL1. */
 
-    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fU)
+    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fu)
   };
 #  elif defined (CONFIG_IMXRT_LCD_INPUT_BPP24)
-  static const struct pixel_format_reg pixelFormat =
+  static const struct pixel_format_reg pixel_format =
   {
     /* Register CTRL. 24-bit. */
 
@@ -189,10 +189,10 @@ struct pixel_format_reg
 
     /* Register CTRL1. */
 
-    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fU)
+    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fu)
   };
 #  elif defined (CONFIG_IMXRT_LCD_INPUT_BPP32)
-  static const struct pixel_format_reg pixelFormat =
+  static const struct pixel_format_reg pixel_format =
   {
     /* Register CTRL. 24-bit. */
 
@@ -200,18 +200,18 @@ struct pixel_format_reg
 
     /* Register CTRL1. */
 
-    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x07U)
+    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x07u)
   };
 #  endif
 
 #  if defined (CONFIG_IMXRT_LCD_OUTPUT_8)
-  const uint32_t dataBus = LCDIF_CTRL_LCD_DATABUS_WIDTH(1);
+  const uint32_t data_bus = LCDIF_CTRL_LCD_DATABUS_WIDTH(1);
 #  elif defined (CONFIG_IMXRT_LCD_OUTPUT_16)
-  const uint32_t dataBus = LCDIF_CTRL_LCD_DATABUS_WIDTH(0);
+  const uint32_t data_bus = LCDIF_CTRL_LCD_DATABUS_WIDTH(0);
 #  elif defined (CONFIG_IMXRT_LCD_OUTPUT_18)
-  const uint32_t dataBus = LCDIF_CTRL_LCD_DATABUS_WIDTH(2);
+  const uint32_t data_bus = LCDIF_CTRL_LCD_DATABUS_WIDTH(2);
 #  elif defined (CONFIG_IMXRT_LCD_OUTPUT_24)
-  const uint32_t dataBus = LCDIF_CTRL_LCD_DATABUS_WIDTH(3);
+  const uint32_t data_bus = LCDIF_CTRL_LCD_DATABUS_WIDTH(3);
 #  endif
 
 #endif
@@ -344,7 +344,6 @@ static int imxrt_putcmap(FAR struct fb_vtable_s *vtable,
 
   for (n = 0; n < cmap->len; n++)
     {
-
 #if defined (CONFIG_IMXRT_LCD_OUTPUT_24)
       putreg32((uint32_t)0xff000000             |
                ((uint32_t)cmap->red[n]   << 16) |
@@ -435,7 +434,6 @@ static void imxrt_lcdreset(void)
 
 int up_fbinitialize(int display)
 {
-
 #if defined (CONFIG_IMXRT_LCD_INPUT_BPP8_LUT) || defined (CONFIG_IMXRT_LCD_INPUT_BPP8)
   uint32_t n;
 #endif
@@ -513,12 +511,12 @@ int up_fbinitialize(int display)
 
   lcdinfo("Configuring the LCD controller\n");
 
-  putreg32(pixelFormat.regCtrl | dataBus |
+  putreg32(pixel_format.reg_ctrl | data_bus |
       LCDIF_CTRL_DOTCLK_MODE_MASK |
       LCDIF_CTRL_BYPASS_COUNT_MASK |
       LCDIF_CTRL_MASTER_MASK, IMXRT_LCDIF_CTRL);
 
-  putreg32(pixelFormat.regCtrl1, IMXRT_LCDIF_CTRL1);
+  putreg32(pixel_format.reg_ctrl1, IMXRT_LCDIF_CTRL1);
 
   putreg32((CONFIG_IMXRT_LCD_VHEIGHT << LCDIF_TRANSFER_COUNT_V_COUNT_SHIFT) |
       (CONFIG_IMXRT_LCD_HWIDTH << LCDIF_TRANSFER_COUNT_H_COUNT_SHIFT),
@@ -535,7 +533,8 @@ int up_fbinitialize(int display)
       CONFIG_IMXRT_LCD_VFRONTPORCH + CONFIG_IMXRT_LCD_VBACKPORCH,
       IMXRT_LCDIF_VDCTRL1);
 
-  putreg32((CONFIG_IMXRT_LCD_HPULSE << LCDIF_VDCTRL2_HSYNC_PULSE_WIDTH_SHIFT) |
+  putreg32((CONFIG_IMXRT_LCD_HPULSE <<
+            LCDIF_VDCTRL2_HSYNC_PULSE_WIDTH_SHIFT) |
       ((CONFIG_IMXRT_LCD_HFRONTPORCH + CONFIG_IMXRT_LCD_HBACKPORCH +
         CONFIG_IMXRT_LCD_HWIDTH + CONFIG_IMXRT_LCD_HPULSE)
           << LCDIF_VDCTRL2_HSYNC_PERIOD_SHIFT),
@@ -548,7 +547,8 @@ int up_fbinitialize(int display)
       IMXRT_LCDIF_VDCTRL3);
 
   putreg32(LCDIF_VDCTRL4_SYNC_SIGNALS_ON_MASK |
-      (CONFIG_IMXRT_LCD_HWIDTH << LCDIF_VDCTRL4_DOTCLK_H_VALID_DATA_CNT_SHIFT),
+      (CONFIG_IMXRT_LCD_HWIDTH <<
+       LCDIF_VDCTRL4_DOTCLK_H_VALID_DATA_CNT_SHIFT),
       IMXRT_LCDIF_VDCTRL4);
 
 #ifdef CONFIG_IMXRT_LCD_BGR
@@ -685,7 +685,6 @@ void up_fbuninitialize(int display)
   imxrt_clockoff_lcdif_pix();
 
   imxrt_clockoff_lcd();
-
 }
 
 /****************************************************************************
@@ -725,8 +724,8 @@ void imxrt_lcdclear(nxgl_mxpixel_t color)
 #elif IMXRT_BPP > 8
   uint16_t *dest = (uint16_t *)CONFIG_IMXRT_LCD_VRAMBASE;
 
-  lcdinfo("Clearing display: color=%04x VRAM=%08x size=%d\n",
-          color, CONFIG_IMXRT_LCD_VRAMBASE,
+  lcdinfo("Clearing display: color=%04jx VRAM=%08x size=%d\n",
+          (uintmax_t)color, CONFIG_IMXRT_LCD_VRAMBASE,
           size * sizeof(uint16_t));
 #else
   uint8_t *dest = (uint8_t *)CONFIG_IMXRT_LCD_VRAMBASE;

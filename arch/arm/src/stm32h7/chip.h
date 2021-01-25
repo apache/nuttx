@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/chip.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,19 +31,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_CHIP_H
 #define __ARCH_ARM_SRC_STM32H7_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/* Include the memory map and the chip definitions file.  Other chip hardware files
- * should then include this file for the proper setup.
+/* Include the memory map and the chip definitions file.  Other chip
+ * hardware files should then include this file for the proper setup.
  */
 
 #include <arch/irq.h>
@@ -51,14 +51,14 @@
 #include "hardware/stm32_pinmap.h"
 #include "hardware/stm32_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* If the common ARMv7-M vector handling logic is used, then it expects the
- * following definition in this file that provides the number of supported external
- * interrupts which, for this architecture, is provided in the arch/stm32h7/chip.h
- * header file.
+ * following definition in this file that provides the number of supported
+ * external interrupts which, for this architecture, is provided in the
+ * arch/stm32h7/chip.h header file.
  */
 
 #define ARMV7M_PERIPHERAL_INTERRUPTS STM32_IRQ_NEXTINTS
@@ -68,16 +68,16 @@
 #define ARMV7M_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
 #define ARMV7M_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32H7_CHIP_H */

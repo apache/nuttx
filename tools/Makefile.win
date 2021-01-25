@@ -454,7 +454,7 @@ nconfig: apps_preconfig
 
 savedefconfig: apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-conf --savedefconfig defconfig.tmp Kconfig
-	$(Q) sed -i -e "/CONFIG_APPS_DIR=/d" defconfig.tmp
+	$(Q) kconfig-tweak --file defconfig.tmp -u CONFIG_APPS_DIR
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
 	-$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp
 	-$(Q) grep "CONFIG_ARCH_CHIP=" .config >> defconfig.tmp
@@ -526,10 +526,8 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 endif
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, defconfig)
-	$(call DELFILE, defconfig.tmp-e)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
-	$(call DELFILE, .config-e)
 	$(call DELFILE, .clean_context)
 	$(Q) $(MAKE) -C tools -f Makefile.host clean
 

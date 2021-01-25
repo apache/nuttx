@@ -50,6 +50,24 @@
 
 #define HSERDY_TIMEOUT (100 * CONFIG_BOARD_LOOPSPERMSEC)
 
+/* The FLASH latency depends on the system clock.
+ *
+ * Calculate the wait cycles, based on STM32_SYSCLK_FREQUENCY:
+ * 0WS from 0-24MHz
+ * 1WS from 24-48MHz
+ * 2WS from 48-72MHz
+ */
+
+#if (STM32_SYSCLK_FREQUENCY <= 24000000)
+#  define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_0
+#elif (STM32_SYSCLK_FREQUENCY <= 48000000)
+#  define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_1
+#elif (STM32_SYSCLK_FREQUENCY <= 72000000)
+#  define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_2
+#else
+#  error "STM32_SYSCLK_FREQUENCY is out of range!"
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -72,7 +90,8 @@ static inline void rcc_reset(void)
 
   putreg32(0, STM32_RCC_APB2RSTR);          /* Disable APB2 Peripheral Reset */
   putreg32(0, STM32_RCC_APB1RSTR);          /* Disable APB1 Peripheral Reset */
-  putreg32(RCC_AHBENR_FLITFEN | RCC_AHBENR_SRAMEN, STM32_RCC_AHBENR); /* FLITF and SRAM Clock ON */
+  putreg32(RCC_AHBENR_FLITFEN | RCC_AHBENR_SRAMEN,
+           STM32_RCC_AHBENR);               /* FLITF and SRAM Clock ON */
   putreg32(0, STM32_RCC_APB2ENR);           /* Disable APB2 Peripheral Clock */
   putreg32(0, STM32_RCC_APB1ENR);           /* Disable APB1 Peripheral Clock */
 
@@ -91,8 +110,9 @@ static inline void rcc_reset(void)
   putreg32(regval, STM32_RCC_CFGR2);
 
   regval  = getreg32(STM32_RCC_CFGR3);       /* Reset all U[S]ARTs, I2C1, TIM1 and HRTIM1 bits */
-  regval &= ~(RCC_CFGR3_USART1SW_MASK | RCC_CFGR3_USART2SW_MASK | RCC_CFGR3_USART3SW_MASK | \
-              RCC_CFGR3_I2C1SW | RCC_CFGR3_TIM1SW | RCC_CFGR3_HRTIM1SW);
+  regval &= ~(RCC_CFGR3_USART1SW_MASK | RCC_CFGR3_USART2SW_MASK | \
+              RCC_CFGR3_USART3SW_MASK | RCC_CFGR3_I2C1SW | \
+              RCC_CFGR3_TIM1SW | RCC_CFGR3_HRTIM1SW);
   putreg32(regval, STM32_RCC_CFGR3);
 
   regval  = getreg32(STM32_RCC_CR);         /* Reset HSEON, CSSON and PLLON bits */
@@ -356,40 +376,40 @@ static void stm32_stdclockconfig(void)
   /* If the PLL is using the HSE, or the HSE is the system clock */
 
 #if (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE)
-  {
-    volatile int32_t timeout;
+    {
+      volatile int32_t timeout;
 
-    /* Enable External High-Speed Clock (HSE) */
+      /* Enable External High-Speed Clock (HSE) */
 
-    regval  = getreg32(STM32_RCC_CR);
-    regval &= ~RCC_CR_HSEBYP;         /* Disable HSE clock bypass */
-    regval |= RCC_CR_HSEON;           /* Enable HSE */
-    putreg32(regval, STM32_RCC_CR);
+      regval  = getreg32(STM32_RCC_CR);
+      regval &= ~RCC_CR_HSEBYP;         /* Disable HSE clock bypass */
+      regval |= RCC_CR_HSEON;           /* Enable HSE */
+      putreg32(regval, STM32_RCC_CR);
 
-    /* Wait until the HSE is ready (or until a timeout elapsed) */
+      /* Wait until the HSE is ready (or until a timeout elapsed) */
 
-    for (timeout = HSERDY_TIMEOUT; timeout > 0; timeout--)
-      {
-        /* Check if the HSERDY flag is the set in the CR */
+      for (timeout = HSERDY_TIMEOUT; timeout > 0; timeout--)
+        {
+          /* Check if the HSERDY flag is the set in the CR */
 
-        if ((getreg32(STM32_RCC_CR) & RCC_CR_HSERDY) != 0)
-          {
-            /* If so, then break-out with timeout > 0 */
+          if ((getreg32(STM32_RCC_CR) & RCC_CR_HSERDY) != 0)
+            {
+              /* If so, then break-out with timeout > 0 */
 
-            break;
-          }
-      }
+              break;
+            }
+        }
 
-    if (timeout == 0)
-      {
-        /* In the case of a timeout starting the HSE, we really don't have a
-         * strategy.  This is almost always a hardware failure or
-         * misconfiguration.
-         */
+      if (timeout == 0)
+        {
+          /* In the case of a timeout starting the HSE, we really don't have
+           * a strategy.  This is almost always a hardware failure or
+           * misconfiguration.
+           */
 
-        return;
-      }
-  }
+          return;
+        }
+    }
 
 #endif
 
@@ -416,6 +436,7 @@ static void stm32_stdclockconfig(void)
 
 #if STM32_SYSCLK_SW == RCC_CFGR_SW_PLL
   /* If we are using the PLL, configure and start it */
+
   /* Set the PLL divider and multiplier */
 
   regval = getreg32(STM32_RCC_CFGR);
@@ -435,25 +456,11 @@ static void stm32_stdclockconfig(void)
 
 #endif
 
-  /* Set flash wait states according to sysclk:
-   *
-   *   0WS from 0-24MHz
-   *   1WS from 24-48MHz
-   *   2WS from 48-72MHz
-   */
+  /* Enable FLASH prefetch and wait states */
 
   regval = getreg32(STM32_FLASH_ACR);
   regval &= ~(FLASH_ACR_LATENCY_MASK);
-
-#if STM32_SYSCLK_FREQUENCY <= 24000000
-  regval |= FLASH_ACR_LATENCY_0;
-#elif STM32_SYSCLK_FREQUENCY <= 48000000
-  regval |= FLASH_ACR_LATENCY_1;
-#else
-  regval |= FLASH_ACR_LATENCY_2;
-#endif
-
-  regval |= FLASH_ACR_PRTFBE;
+  regval |= (FLASH_ACR_LATENCY_SETTING | FLASH_ACR_PRTFBE);
   putreg32(regval, STM32_FLASH_ACR);
 
   /* Select the system clock source (probably the PLL) */

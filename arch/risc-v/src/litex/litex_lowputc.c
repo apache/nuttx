@@ -111,7 +111,7 @@ void litex_lowsetup(void)
 
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
 
-  /* defualt baudrate set by fpga fabric is 1e6 */
+  /* default baudrate set by fpga fabric is 1e6 */
 
   /* Enable TX */
 

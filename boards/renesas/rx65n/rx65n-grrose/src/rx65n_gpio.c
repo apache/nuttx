@@ -179,6 +179,26 @@ void r_usbdev_port_enable(void)
 #endif
 
 /****************************************************************************
+ * Name: r_usb_port_enable
+ *
+ * Description:
+ * USB Enabling for RX65N RSK2MB
+ ****************************************************************************/
+
+#if defined(CONFIG_USBHOST)
+void r_usb_port_enable(void)
+{
+  /* Set VBUS pin for USB */
+
+  MPC.P16PFS.BYTE = 0x11u;
+
+  /* PORT1.PMR.BYTE |= 0x40; */
+
+  PORT1.PMR.BIT.B6 = 1u;
+}
+#endif
+
+/****************************************************************************
  * Name: sci0_init_port
  *
  * Description:

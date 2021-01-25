@@ -237,7 +237,7 @@ static void spiffs_unlock_reentrant(FAR struct spiffs_sem_s *rsem)
 }
 
 /****************************************************************************
- * Name: spiffs_readdir_callback
+ * Name: spiffs_consistency_check
  ****************************************************************************/
 
 static int spiffs_consistency_check(FAR struct spiffs_s *fs)
@@ -330,7 +330,18 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
       DEBUGASSERT(dir != NULL);
       entryp = &dir->fd_dir;
 
-      strncpy(entryp->d_name, (FAR char *)objhdr.name, NAME_MAX + 1);
+#ifdef CONFIG_SPIFFS_LEADING_SLASH
+      /* Skip the leading '/'. */
+
+      if (objhdr.name[0] != '/')
+        {
+          return -EINVAL; /* The filesystem is corrupted */
+        }
+#endif
+
+      strncpy(entryp->d_name,
+              (FAR char *)objhdr.name + SPIFFS_LEADING_SLASH_SIZE,
+              NAME_MAX + 1);
       entryp->d_type = objhdr.type;
       return OK;
     }
@@ -1506,7 +1517,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
         (unsigned int)SPIFFS_GEO_PAGE_SIZE(fs));
   finfo("object lookup pages:         %u\n",
         (unsigned int)SPIFFS_OBJ_LOOKUP_PAGES(fs));
-  finfo("page pages per block:        %u\n",
+  finfo("pages per block:             %u\n",
         (unsigned int)SPIFFS_GEO_PAGES_PER_BLOCK(fs));
   finfo("page header length:          %u\n",
         (unsigned int)sizeof(struct spiffs_page_header_s));

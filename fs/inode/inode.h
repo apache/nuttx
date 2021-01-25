@@ -387,7 +387,21 @@ void weak_function files_initialize(void);
  ****************************************************************************/
 
 int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
-                   int minfd);
+                   FAR void *priv, int minfd);
+
+/****************************************************************************
+ * Name: files_dup2
+ *
+ * Description:
+ *   Clone a file descriptor to a specific descriptor number.
+ *
+ * Returned Value:
+ *   fd2 is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int files_dup2(int fd1, int fd2);
 
 /****************************************************************************
  * Name: files_close

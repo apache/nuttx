@@ -94,8 +94,9 @@
 
 /* Compatibility definitions */
 
-#  define JB_SP    JB_RSP
-#  define JB_PC    JB_RSI
+#  define JB_FP JB_RBP
+#  define JB_SP JB_RSP
+#  define JB_PC JB_RSI
 
 #elif defined(CONFIG_HOST_X86) || defined(CONFIG_SIM_M32)
 /* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
@@ -117,7 +118,13 @@
 #    define JB_PC  (5)
 
 #  endif /* __ASSEMBLY__ */
+
+/* Compatibility definitions */
+
+#  define JB_FP JB_EBP
+
 #elif defined(CONFIG_HOST_ARM)
+#  define JB_FP 7
 #  define JB_SP 8
 #  define JB_PC 9
 #endif
@@ -127,6 +134,11 @@
 /* Size of the simulated heap */
 
 #define SIM_HEAP_SIZE (64*1024*1024)
+
+/* Macros to handle saving and restoring interrupt state ********************/
+
+#define up_savestate(regs) up_copyfullstate(regs, (xcpt_reg_t *)CURRENT_REGS)
+#define up_restorestate(regs) (CURRENT_REGS = regs)
 
 /* File System Definitions **************************************************/
 
@@ -188,28 +200,17 @@ extern volatile void *g_current_regs[1];
 
 #endif
 
-#ifdef CONFIG_SMP
-/* These spinlocks are used in the SMP configuration in order to implement
- * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
- *
- * 1. The up_cpu_pause() implementation on CPUn locks both g_cpu_wait[m]
- *    and g_cpu_paused[m].  CPUn then waits spinning on g_cpu_paused[m].
- * 2. CPUm receives the interrupt it (1) unlocks g_cpu_paused[m] and
- *    (2) locks g_cpu_wait[m].  The first unblocks CPUn and the second
- *    blocks CPUm in the interrupt handler.
- *
- * When CPUm resumes, CPUn unlocks g_cpu_wait[m] and the interrupt handler
- * on CPUm continues.  CPUm must, of course, also then unlock g_cpu_wait[m]
- * so that it will be ready for the next pause operation.
- */
-
-extern volatile uint8_t g_cpu_wait[CONFIG_SMP_NCPUS];
-extern volatile uint8_t g_cpu_paused[CONFIG_SMP_NCPUS];
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/* Context switching */
+
+#if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
+void up_copyfullstate(unsigned long *dest, unsigned long *src);
+#else
+void up_copyfullstate(uint32_t *dest, uint32_t *src);
+#endif
 
 void *up_doirq(int irq, void *regs);
 
@@ -243,6 +244,10 @@ void sim_cpu0_start(void);
 void up_cpu_started(void);
 int up_cpu_paused(int cpu);
 struct tcb_s *up_this_task(void);
+int up_cpu_set_pause_handler(int irq);
+void sim_send_ipi(int cpu);
+void sim_timer_handler(void);
+void sim_sigdeliver(void);
 #endif
 
 /* up_oneshot.c *************************************************************/
@@ -397,6 +402,13 @@ struct qspi_dev_s *up_qspiflashinitialize(void);
 #ifdef CONFIG_SIM_HCISOCKET
 int bthcisock_register(int dev_id);
 int bthcisock_loop(void);
+#endif
+
+/* up_hcitty.c **************************************************************/
+
+#ifdef CONFIG_SIM_HCITTY
+int  bthcitty_register(const char *name, int id);
+void bthcitty_loop(void);
 #endif
 
 /* up_audio.c ***************************************************************/

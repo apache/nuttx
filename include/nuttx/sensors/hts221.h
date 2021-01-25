@@ -52,6 +52,8 @@
  * Public Types
  ****************************************************************************/
 
+struct i2c_master_s; /* Forward reference */
+
 /* Number of temperature samples */
 
 typedef enum hts221_avrg_temp_e
@@ -100,16 +102,16 @@ typedef struct hts221_settings_s
   hts221_avrg_humid_t humid_resol;    /* Humidity resolution. The more
                                        * samples sensor takes, the more power
                                        * it uses */
-  hts221_odr_t odr;           /* Output data rate */
-  bool is_bdu;                /* If read operation is not faster than output
-                               * operation, then this variable must be set to true */
-  bool is_data_rdy;           /* Must be set to true, if interrupt needed.
-                               * Default is 0, disabled */
-  bool is_high_edge;          /* High or low interrupt signal from device.
-                               * Default is high, 0 */
-  bool is_open_drain;         /* Open drain or push-pull on data-ready pin.
-                               * Default is push-pull, 0 */
-  bool is_boot;               /* Refresh the content of the internal registers */
+  hts221_odr_t odr;                   /* Output data rate */
+  bool is_bdu;                        /* If read operation is not faster than output
+                                       * operation, then this variable must be set to true */
+  bool is_data_rdy;                   /* Must be set to true, if interrupt needed.
+                                       * Default is 0, disabled */
+  bool is_high_edge;                  /* High or low interrupt signal from device.
+                                       * Default is high, 0 */
+  bool is_open_drain;                 /* Open drain or push-pull on data-ready pin.
+                                       * Default is push-pull, 0 */
+  bool is_boot;                       /* Refresh the content of the internal registers */
 } hts221_settings_t;
 
 /* Interrupt configuration data structure */

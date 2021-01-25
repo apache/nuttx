@@ -27,7 +27,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include <nuttx/drivers/drivers.h>
+#include <nuttx/fs/fs.h>
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
 

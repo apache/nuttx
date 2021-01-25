@@ -146,26 +146,23 @@ int net_routesize(FAR const char *path, size_t entrysize)
 
   /* Get information about the file */
 
-  ret = stat(path, &buf);
+  ret = nx_stat(path, &buf, 1);
   if (ret < 0)
     {
-      int errcode;
-
-      /* stat() failed, but is that because the routing table has not been
+      /* nx_stat() failed, but is that because the routing table has not been
        * created yet?
        */
 
-      errcode = get_errno();
-      if (errcode == ENOENT)
+      if (ret == -ENOENT)
         {
-          /* The routing table file has not been created.  Return size zero. */
+          /* The routing table file has not been created.  Return zero. */
 
           return 0;
         }
 
       /* Some other error */
 
-      return -errcode;
+      return ret;
     }
 
   /* The directory entry at this path must be a regular file */
@@ -311,7 +308,7 @@ int net_openroute_ipv6(int oflags, FAR struct file *filep)
  *   Read one route entry from the IPv4/IPv6 routing table.
  *
  * Input Parameters:
- *   filep - Detached file instance obtained by net_openroute_ipv{4|6}[_rdonly]
+ *   filep - File instance obtained by net_openroute_ipv{4|6}[_rdonly]
  *   route - Location to return the next route read from the file
  *
  * Returned Value:
@@ -424,7 +421,7 @@ ssize_t net_readroute_ipv6(FAR struct file *filep,
  *   Write one route entry to the IPv4/IPv6 routing table.
  *
  * Input Parameters:
- *   filep - Detached file instance obtained by net_openroute_ipv{4|6}[_rdonly]
+ *   filep - File instance obtained by net_openroute_ipv{4|6}[_rdonly]
  *   route - Location to return the next route read from the file
  *
  * Returned Value:
@@ -536,7 +533,7 @@ ssize_t net_writeroute_ipv6(FAR struct file *filep,
  *   Seek to a specific entry entry to the IPv4/IPv6 routing table.
  *
  * Input Parameters:
- *   filep - Detached file instance obtained by net_openroute_ipv{4|6}[_rdonly]
+ *   filep - File instance obtained by net_openroute_ipv{4|6}[_rdonly]
  *   index - The index of the routing table entry to seek to.
  *
  * Returned Value:
@@ -824,7 +821,7 @@ int net_unlockroute_ipv6(void)
  *   Close the IPv4/IPv6 routing table.
  *
  * Input Parameters:
- *   filep - Detached file instance obtained by net_openroute_ipv{4|6}[_rdonly]
+ *   filep - File instance obtained by net_openroute_ipv{4|6}[_rdonly]
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  A negated errno value is returned on

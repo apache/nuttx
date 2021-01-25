@@ -51,6 +51,7 @@
 #include <string.h>
 #include <limits.h>
 #include <nuttx/mutex.h>
+#include <nuttx/signal.h>
 
 #include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>

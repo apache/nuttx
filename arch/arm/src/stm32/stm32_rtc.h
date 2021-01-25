@@ -4,7 +4,8 @@
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Copyright (C) 2011-2013, 2015-2018 Gregory Nutt. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu> (Original for the F1)
- *           Gregory Nutt <gnutt@nuttx.org> (On-going support and development)
+ *           Gregory Nutt <gnutt@nuttx.org> (On-going support and
+ *                                           development)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,17 +47,17 @@
 
 #include "chip.h"
 
-/* The STM32 F1 has a simple battery-backed counter for its RTC and has a separate
- * block for the BKP registers.
+/* The STM32 F1 has a simple battery-backed counter for its RTC and has a
+ * separate block for the BKP registers.
  */
 
 #if defined(CONFIG_STM32_STM32F10XX)
 #  include "hardware/stm32_rtc.h"
 #  include "hardware/stm32_bkp.h"
 
-/* The other families use a more traditional Realtime Clock/Calendar (RTCC) with
- * broken-out data/time in BCD format.  The backup registers are integrated into
- * the RTCC in these families.
+/* The other families use a more traditional Realtime Clock/Calendar (RTCC)
+ * with broken-out data/time in BCD format.  The backup registers are
+ * integrated into the RTCC in these families.
  */
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
@@ -138,7 +139,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************

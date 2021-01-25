@@ -232,7 +232,6 @@ menu "Tasks and Scheduling"
 config SPINLOCK
 	bool "Support Spinlocks"
 	default n
-	depends on ARCH_HAVE_TESTSET
 	---help---
 		Enables support for spinlocks.  Spinlocks are used primarily for
 		synchronization in SMP configurations but are available for general
@@ -275,6 +274,7 @@ config SMP
 	bool "Symmetric Multi-Processing (SMP)"
 	default n
 	depends on ARCH_HAVE_MULTICPU
+	depends on ARCH_HAVE_TESTSET
 	select SPINLOCK
 	select SCHED_RESUMESCHEDULER
 	select IRQCOUNT
@@ -726,10 +726,10 @@ config SCHED_CRITMONITOR
 	---help---
 		Enables logic that monitors the duration of time that a thread keeps
 		interrupts or pre-emption disabled.  These global locks can have
-		negative consequences to real timer performance:  Disabling interrupts
-		adds jitter in the time when a interrupt request is asserted until
-		the hardware can responds with the interrupt.  Disabling pre-emption
-		adds jitter in the timer from when the event is posted in the
+		negative consequences to real time performance:  Disabling interrupts
+		adds jitter in the time when an interrupt request is asserted until
+		the hardware can respond with the interrupt.  Disabling pre-emption
+		adds jitter in the time from when the event is posted in the
 		interrupt handler until the task that responds to the event can run.
 
 		If this option is selected, then the following interfaces must be
@@ -749,7 +749,7 @@ config SCHED_CRITMONITOR
 		in unknown units) can be obtained by subtracting a start time from
 		the current time.
 
-		The second interface simple converts an elapsed time into well known
+		The second interface simply converts an elapsed time into well known
 		units for presentation by the ProcFS file system.
 
 config SCHED_CPULOAD
@@ -760,15 +760,15 @@ config SCHED_CPULOAD
 		If this option is selected, the timer interrupt handler will monitor
 		if the system is IDLE or busy at the time of that the timer interrupt
 		occurs.  This is a very coarse measurement, but over a period of time,
-		it can very accurately determined the percentage of the time that the
+		it can very accurately determine the percentage of the time that the
 		CPU is IDLE.
 
-		The statistics collected in this could be used, for example in the
+		The statistics collected in this could be used, for example, in the
 		PROCFS file system to provide CPU load measurements when read.
 
 		Note that in tickless mode of operation (SCHED_TICKLESS) there is
 		no system timer interrupt and CPU load measurements will not be
-		possible unless you provide an alternative clock to driver the
+		possible unless you provide an alternative clock to drive the
 		sampling and select SCHED_CPULOAD_EXTCLK.
 
 if SCHED_CPULOAD
@@ -1309,6 +1309,12 @@ endmenu # RTOS hooks
 
 menu "Signal Configuration"
 
+config SIG_PREALLOC_IRQ_ACTIONS
+	int "Number of pre-allocated irq actions"
+	default 8
+	---help---
+		The number of pre-allocated irq action structures.
+
 config SIG_EVTHREAD
 	bool "Support SIGEV_THHREAD"
 	default n
@@ -1535,6 +1541,12 @@ config PREALLOC_MQ_MSGS
 	---help---
 		The number of pre-allocated message structures.  The system manages
 		a pool of preallocated message structures to minimize dynamic allocations
+
+config PREALLOC_MQ_IRQ_MSGS
+	int "Number of pre-allocated irq messages"
+	default 8
+	---help---
+		The number of pre-allocated irq message structures.
 
 config MQ_MAXMSGSIZE
 	int "Maximum message size"

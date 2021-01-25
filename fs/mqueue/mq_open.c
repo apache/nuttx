@@ -39,58 +39,80 @@
 #include "mqueue/mqueue.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions Prototypes
  ****************************************************************************/
+
+static int nxmq_file_close(FAR struct file *filep);
 
 /****************************************************************************
- * Name: nxmq_open
- *
- * Description:
- *   This function establish a connection between a named message queue and
- *   the calling task. This is an internal OS interface.  It is functionally
- *   equivalent to mq_open() except that:
- *
- *   - It is not a cancellation point, and
- *   - It does not modify the errno value.
- *
- *  See comments with mq_open() for a more complete description of the
- *  behavior of this function
- *
- * Input Parameters:
- *   mq_name - Name of the queue to open
- *   oflags - open flags
- *   Optional parameters.  When the O_CREAT flag is specified, two optional
- *   parameters are expected:
- *
- *     1. mode_t mode (ignored), and
- *     2. struct mq_attr *attr.  The mq_maxmsg attribute
- *        is used at the time that the message queue is
- *        created to determine the maximum number of
- *        messages that may be placed in the message queue.
- *
- * Returned Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success, mqdes point to the new message queue descriptor.
- *   A negated errno value is returned on failure.
- *
+ * Private Data
  ****************************************************************************/
 
-int nxmq_open(FAR const char *mq_name, int oflags, mode_t mode,
-              FAR struct mq_attr *attr, FAR mqd_t *mqdes)
+static const struct file_operations g_nxmq_fileops =
+{
+  NULL,             /* open */
+  nxmq_file_close,  /* close */
+  NULL,             /* read */
+  NULL,             /* write */
+  NULL,             /* seek */
+  NULL,             /* ioctl */
+  NULL,             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  NULL,             /* unlink */
+#endif
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static int nxmq_file_close(FAR struct file *filep)
+{
+  FAR struct inode *inode = filep->f_inode;
+
+  if (inode->i_crefs <= 1 && (inode->i_flags & FSNODEFLAG_DELETED))
+    {
+      FAR struct mqueue_inode_s *msgq = inode->i_private;
+
+      if (msgq)
+        {
+          nxmq_free_msgq(msgq);
+          inode->i_private = NULL;
+        }
+    }
+
+  return 0;
+}
+
+static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
+                         int oflags, va_list ap, int *created)
 {
   FAR struct inode *inode;
   FAR struct mqueue_inode_s *msgq;
+  FAR struct mq_attr *attr = NULL;
   struct inode_search_s desc;
   char fullpath[MAX_MQUEUE_PATH];
+  mode_t mode = 0;
   int ret;
 
   /* Make sure that a non-NULL name is supplied */
 
-  if (mq_name == NULL || *mq_name == '\0')
+  if (!mq || !mq_name || *mq_name == '\0')
     {
       ret = -EINVAL;
       goto errout;
+    }
+
+  /* Were we asked to create it? */
+
+  if ((oflags & O_CREAT) != 0)
+    {
+      /* We have to extract the additional
+       * parameters from the variable argument list.
+       */
+
+      mode = va_arg(ap, mode_t);
+      attr = va_arg(ap, FAR struct mq_attr *);
     }
 
   /* Skip over any leading '/'.  All message queue paths are relative to
@@ -147,14 +169,16 @@ int nxmq_open(FAR const char *mq_name, int oflags, mode_t mode,
           goto errout_with_inode;
         }
 
-      /* Create a message queue descriptor for the current thread */
+      /* Associate the inode with a file structure */
 
-      msgq  = inode->u.i_mqueue;
-      *mqdes = nxmq_create_des(NULL, msgq, oflags);
-      if (!*mqdes)
+      mq->f_oflags  = oflags;
+      mq->f_pos     = 0;
+      mq->f_inode   = inode;
+      mq->f_priv    = NULL;
+
+      if (created)
         {
-          ret = -ENOMEM;
-          goto errout_with_inode;
+          *created = 1;
         }
     }
   else
@@ -196,33 +220,31 @@ int nxmq_open(FAR const char *mq_name, int oflags, mode_t mode,
           goto errout_with_inode;
         }
 
-      /* Create a message queue descriptor for the TCB */
+      /* Associate the inode with a file structure */
 
-      *mqdes = nxmq_create_des(NULL, msgq, oflags);
-      if (!*mqdes)
-        {
-          ret = -ENOMEM;
-          goto errout_with_msgq;
-        }
-
-      /* Bind the message queue and the inode structure */
+      mq->f_oflags  = oflags;
+      mq->f_pos     = 0;
+      mq->f_inode   = inode;
+      mq->f_priv    = NULL;
 
       INODE_SET_MQUEUE(inode);
-      inode->u.i_mqueue = msgq;
+      inode->u.i_ops    = &g_nxmq_fileops;
+      inode->i_private  = msgq;
       msgq->inode       = inode;
 
       /* Set the initial reference count on this inode to one */
 
       inode->i_crefs    = 1;
+
+      if (created)
+        {
+          *created = 0;
+        }
     }
 
   RELEASE_SEARCH(&desc);
   sched_unlock();
   return OK;
-
-errout_with_msgq:
-  nxmq_free_msgq(msgq);
-  inode->u.i_mqueue = NULL;
 
 errout_with_inode:
   inode_release(inode);
@@ -232,6 +254,129 @@ errout_with_lock:
   sched_unlock();
 
 errout:
+  return ret;
+}
+
+static mqd_t nxmq_vopen(FAR const char *mq_name, int oflags, va_list ap)
+{
+  struct file mq;
+  int created;
+  int ret;
+
+  ret = file_mq_vopen(&mq, mq_name, oflags, ap, &created);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = files_allocate(mq.f_inode, mq.f_oflags, mq.f_pos, mq.f_priv, 0);
+  if (ret < 0)
+    {
+      file_mq_close(&mq);
+
+      if (created)
+        {
+          file_mq_unlink(mq_name);
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: file_mq_open
+ *
+ * Description:
+ *   This function establish a connection between a named message queue and
+ *   the calling task. This is an internal OS interface.  It is functionally
+ *   equivalent to mq_open() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_open() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mq_name - Name of the queue to open
+ *   oflags - open flags
+ *   Optional parameters.  When the O_CREAT flag is specified, two optional
+ *   parameters are expected:
+ *
+ *     1. mode_t mode (ignored), and
+ *     2. struct mq_attr *attr.  The mq_maxmsg attribute
+ *        is used at the time that the message queue is
+ *        created to determine the maximum number of
+ *        messages that may be placed in the message queue.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success, mqdes point to the new message queue descriptor.
+ *   A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int file_mq_open(FAR struct file *mq,
+                 FAR const char *mq_name, int oflags, ...)
+{
+  va_list ap;
+  int ret;
+
+  va_start(ap, oflags);
+  ret = file_mq_vopen(mq, mq_name, oflags, ap, NULL);
+  va_end(ap);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxmq_open
+ *
+ * Description:
+ *   This function establish a connection between a named message queue and
+ *   the calling task. This is an internal OS interface.  It is functionally
+ *   equivalent to mq_open() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_open() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mq_name - Name of the queue to open
+ *   oflags - open flags
+ *   Optional parameters.  When the O_CREAT flag is specified, two optional
+ *   parameters are expected:
+ *
+ *     1. mode_t mode (ignored), and
+ *     2. struct mq_attr *attr.  The mq_maxmsg attribute
+ *        is used at the time that the message queue is
+ *        created to determine the maximum number of
+ *        messages that may be placed in the message queue.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success, mqdes point to the new message queue descriptor.
+ *   A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+mqd_t nxmq_open(FAR const char *mq_name, int oflags, ...)
+{
+  va_list ap;
+  mqd_t ret;
+
+  va_start(ap, oflags);
+  ret = nxmq_vopen(mq_name, oflags, ap);
+  va_end(ap);
+
   return ret;
 }
 
@@ -266,32 +411,17 @@ errout:
 
 mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
 {
-  FAR struct mq_attr *attr = NULL;
-  mode_t mode = 0;
-  mqd_t mqdes;
   va_list ap;
-  int ret;
+  mqd_t ret;
 
-  /* Were we asked to create it? */
-
-  if ((oflags & O_CREAT) != 0)
-    {
-      /* We have to extract the additional
-       * parameters from the variable argument list.
-       */
-
-      va_start(ap, oflags);
-      mode = va_arg(ap, mode_t);
-      attr = va_arg(ap, FAR struct mq_attr *);
-      va_end(ap);
-    }
-
-  ret = nxmq_open(mq_name, oflags, mode, attr, &mqdes);
+  va_start(ap, oflags);
+  ret = nxmq_vopen(mq_name, oflags, ap);
+  va_end(ap);
   if (ret < 0)
     {
       set_errno(-ret);
-      mqdes = (mqd_t)ERROR;
+      return ERROR;
     }
 
-  return mqdes;
+  return ret;
 }

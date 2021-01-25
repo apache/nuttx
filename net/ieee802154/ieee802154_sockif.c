@@ -178,8 +178,8 @@ static int ieee802154_sockif_alloc(FAR struct socket *psock)
 static int ieee802154_setup(FAR struct socket *psock, int protocol)
 {
   /* Allocate the appropriate connection structure.  This reserves the
-   * the connection structure is is unallocated at this point.  It will
-   * not actually be initialized until the socket is connected.
+   * connection structure, it is unallocated at this point.  It will not
+   * actually be initialized until the socket is connected.
    *
    * Only SOCK_DGRAM is supported (since the MAC header is stripped)
    */
@@ -344,7 +344,7 @@ static int ieee802154_connect(FAR struct socket *psock,
  *
  * Returned Value:
  *   Returns 0 (OK) on success.  On failure, it returns a negated errno
- *   value.  See accept() for a desrciption of the appropriate error value.
+ *   value.  See accept() for a description of the appropriate error value.
  *
  * Assumptions:
  *   The network is locked.
@@ -594,7 +594,7 @@ static int ieee802154_getpeername(FAR struct socket *psock,
  *
  * Returned Value:
  *   On success, zero is returned. On error, a negated errno value is
- *   returned.  See list() for the set of appropriate error values.
+ *   returned.  See listen() for the set of appropriate error values.
  *
  ****************************************************************************/
 

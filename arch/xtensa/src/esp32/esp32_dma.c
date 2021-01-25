@@ -69,7 +69,7 @@ uint32_t esp32_dma_init(struct esp32_dmadesc_s *dmadesc, uint32_t num,
   DEBUGASSERT(pbuf && len);
   if (isrx)
     {
-      DEBUGASSERT((len % 3) == 0);
+      DEBUGASSERT((len & 3) == 0);
     }
 
   for (i = 0; i < num; i++)

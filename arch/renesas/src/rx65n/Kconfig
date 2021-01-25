@@ -424,6 +424,11 @@ config RX65N_TEST_INTEP
 
 endif #RX65N_USBDEV
 
+config RX65N_USBHOST
+	bool "USB host"
+	select USBHOST
+	select USBHOST_HAVE_ASYNCH
+
 config RX65N_DTC
 	bool "DTC"
 	default n
@@ -802,6 +807,11 @@ config RX65N_TEST_INTEP
 	depends on SERIAL_IFLOWCONTROL && CDCACM_IFLOWCONTROL
 
 endif #RX65N_USBDEV
+
+config RX65N_USBHOST
+	bool "USB host"
+	select USBHOST
+	select USBHOST_HAVE_ASYNCH
 
 config RX65N_DTC
 	bool "DTC"

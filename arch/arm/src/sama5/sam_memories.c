@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <assert.h>
 #include <debug.h>
@@ -185,8 +186,8 @@ static inline uintptr_t sysc_physregaddr(uintptr_t virtregaddr)
  * Name: isram_physramaddr
  *
  * Description:
- *   Given the virtual address of an internal SRAM memory location, return the
- *   physical address of that location
+ *   Given the virtual address of an internal SRAM memory location, return
+ *   the physical address of that location
  *
  ****************************************************************************/
 
@@ -766,7 +767,7 @@ uintptr_t sam_physregaddr(uintptr_t virtregaddr)
    * address
    */
 
-  serr("ERROR: Bad virtual address: %08lx\n", virtregaddr);
+  serr("ERROR: Bad virtual address: %08" PRIxPTR "\n", virtregaddr);
   DEBUGPANIC();
   return virtregaddr;
 }
@@ -817,8 +818,9 @@ uintptr_t sam_physramaddr(uintptr_t virtramaddr)
    * CONFIG_RAM_VSTART, and CONFIG_RAM_SIZE when CONFIG_SAMA5_BOOT_SDRAM or
    * CONFIG_BOOT_SDRAM_DATA is selected.
    *
-   *   CONFIG_SAMA5_BOOT_SDRAM -- We were booted into DRAM by some bootloader.
-   *      DRAM support is not enabled, SAMA5_DDRCS_SIZE is not valid.
+   *   CONFIG_SAMA5_BOOT_SDRAM -- We were booted into DRAM by some
+   *      bootloader. DRAM support is not enabled, SAMA5_DDRCS_SIZE is not
+   *      valid.
    *   CONFIG_BOOT_SDRAM_DATA -- We are running from NOR or ISRAM, but our
    *      .bss, .data, and primary heap are in DRAM (In this case, I would
    *      expect CONFIG_SAMA5_DDRCS to also be set, however).
@@ -925,7 +927,7 @@ uintptr_t sam_physramaddr(uintptr_t virtramaddr)
 
   if (virtramaddr != 0)
     {
-      serr("ERROR: Bad virtual address: %08lx\n", virtramaddr);
+      serr("ERROR: Bad virtual address: %08" PRIxPTR "\n", virtramaddr);
       DEBUGPANIC();
     }
 
@@ -1058,7 +1060,7 @@ uintptr_t sam_virtramaddr(uintptr_t physramaddr)
 
   if (physramaddr != 0)
     {
-      serr("ERROR: Bad physical address: %08lx\n|", physramaddr);
+      serr("ERROR: Bad physical address: %08" PRIxPTR "\n|", physramaddr);
       DEBUGPANIC();
     }
 

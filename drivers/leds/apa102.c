@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/apa102.c
+ * drivers/leds/apa102.c
  * Character driver to control LED strips with APA102.
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.

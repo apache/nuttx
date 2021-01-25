@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -602,13 +603,13 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 
   if (mbi == TXMBCOUNT)
     {
-      nwarn("No TX MB available mbi %i\r\n", mbi);
+      nwarn("No TX MB available mbi %" PRIi32 "\r\n", mbi);
       return 0;       /* No transmission for you! */
     }
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   struct timespec ts;
-  clock_systimespec(&ts);
+  clock_systime_timespec(&ts);
 
   if (priv->dev.d_sndlen > priv->dev.d_len)
     {
@@ -1068,7 +1069,7 @@ static void imxrt_txtimeout_work(FAR void *arg)
 
   struct timespec ts;
   struct timeval *now = (struct timeval *)&ts;
-  clock_systimespec(&ts);
+  clock_systime_timespec(&ts);
   now->tv_usec = ts.tv_nsec / 1000; /* timespec to timeval conversion */
 
   /* The watchdog timed out, yet we still check mailboxes in case the
@@ -1298,7 +1299,7 @@ static void imxrt_txavail_work(FAR void *arg)
            * new XMIT data.
            */
 
-          devif_poll(&priv->dev, imxrt_txpoll);
+          devif_timer(&priv->dev, 0, imxrt_txpoll);
         }
     }
 
@@ -1567,7 +1568,7 @@ static int imxrt_initialize(struct imxrt_driver_s *priv)
 
   for (i = 0; i < RXMBCOUNT; i++)
     {
-      ninfo("Set MB%i to receive %p\r\n", i, &priv->rx[i]);
+      ninfo("Set MB%" PRIi32 " to receive %p\r\n", i, &priv->rx[i]);
       priv->rx[i].cs.edl = 0x1;
       priv->rx[i].cs.brs = 0x1;
       priv->rx[i].cs.esi = 0x0;
@@ -1631,8 +1632,8 @@ static void imxrt_reset(struct imxrt_driver_s *priv)
 
   for (i = 0; i < TOTALMBCOUNT; i++)
     {
-      ninfo("MB %i %p\r\n", i, &priv->rx[i]);
-      ninfo("MB %i %p\r\n", i, &priv->rx[i].id.w);
+      ninfo("MB %" PRIi32 " %p\r\n", i, &priv->rx[i]);
+      ninfo("MB %" PRIi32 " %p\r\n", i, &priv->rx[i].id.w);
       priv->rx[i].cs.cs = 0x0;
       priv->rx[i].id.w = 0x0;
       priv->rx[i].data[0].w00 = 0x0;

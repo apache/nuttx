@@ -200,12 +200,16 @@ static int do_sendto_request(FAR struct usrsock_conn_s *conn,
  *   returned when the socket was not actually connected.
  *
  * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   psock    A reference to the socket structure of the socket
  *   buf      Data to send
  *   len      Length of data to send
  *   flags    Send flags (ignored)
  *   to       Address of recipient
  *   tolen    The length of the address structure
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On any failure, a
+ *   negated errno value is returned.
  *
  ****************************************************************************/
 

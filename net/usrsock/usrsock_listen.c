@@ -135,7 +135,7 @@ static int do_listen_request(FAR struct usrsock_conn_s *conn, int backlog)
  *
  * Returned Value:
  *   On success, zero is returned. On error, a negated errno value is
- *   returned.  See list() for the set of appropriate error values.
+ *   returned.  See listen() for the set of appropriate error values.
  *
  ****************************************************************************/
 

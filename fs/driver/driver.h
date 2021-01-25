@@ -99,27 +99,19 @@ int find_blockdriver(FAR const char *pathname, int mountflags,
  *   oriented accessed to the block driver.
  *
  * Input Parameters:
+ *   filep  - The caller provided location in which to return the 'struct
+ *            file' instance.
  *   blkdev - The path to the block driver
  *   oflags - Character driver open flags
  *
  * Returned Value:
- *   If positive, non-zero file descriptor is returned on success.  This
- *   is the file descriptor of the nameless character driver that mediates
- *   accesses to the block driver.
- *
- *   Errors that may be returned:
- *
- *     ENOMEM - Failed to create a temporary path name.
- *
- *   Plus:
- *
- *     - Errors reported from bchdev_register()
- *     - Errors reported from open() or unlink()
+ *   Zero (OK) is returned on success.  On failure, a negated errno value is
+ *   returned.
  *
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT)
-int block_proxy(FAR const char *blkdev, int oflags);
+int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags);
 #endif
 
 /****************************************************************************
@@ -138,16 +130,8 @@ int block_proxy(FAR const char *blkdev, int oflags);
  * Returned Value:
  *   If zero, non-zero inode pointer is returned on success.  This
  *   is the inode pointer of the nameless block driver that mediates
- *   accesses to the mtd driver.
- *
- *   Errors that may be returned:
- *
- *     ENOMEM - Failed to create a temporary path name.
- *
- *   Plus:
- *
- *     - Errors reported from ftl_initialize()
- *     - Errors reported from open() or unlink()
+ *   accesses to the mtd driver. A negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 

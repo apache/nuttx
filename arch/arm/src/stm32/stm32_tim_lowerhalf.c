@@ -93,6 +93,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure provides the private representation of the "lower-half"
  * driver state structure.  This structure must be cast-compatible with the
  * timer_lowerhalf_s structure.
@@ -111,6 +112,7 @@ struct stm32_lowerhalf_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 static int stm32_timer_handler(int irq, void * context, void * arg);
 
 /* "Lower half" driver methods **********************************************/
@@ -125,6 +127,7 @@ static void stm32_setcallback(FAR struct timer_lowerhalf_s *lower,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* "Lower half" driver methods */
 
 static const struct timer_ops_s g_timer_ops =
@@ -294,8 +297,8 @@ static int stm32_timer_handler(int irq, void * context, void * arg)
  *   Start the timer, resetting the time to the current timeout,
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -332,8 +335,8 @@ static int stm32_start(FAR struct timer_lowerhalf_s *lower)
  *   Stop the timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -365,8 +368,8 @@ static int stm32_stop(struct timer_lowerhalf_s *lower)
  *   Set a new timeout value (and reset the timer)
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of the
+ *             "lower-half" driver state structure.
  *   timeout - The new timeout value in microseconds.
  *
  * Returned Value:
@@ -374,7 +377,8 @@ static int stm32_stop(struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int stm32_settimeout(FAR struct timer_lowerhalf_s *lower, uint32_t timeout)
+static int stm32_settimeout(FAR struct timer_lowerhalf_s *lower,
+                            uint32_t timeout)
 {
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
   uint64_t maxtimeout;
@@ -407,8 +411,8 @@ static int stm32_settimeout(FAR struct timer_lowerhalf_s *lower, uint32_t timeou
  *   Call this user provided timeout callback.
  *
  * Input Parameters:
- *   lower      - A pointer the publicly visible representation of the "lower-half"
- *                driver state structure.
+ *   lower      - A pointer the publicly visible representation of the
+ *                "lower-half" driver state structure.
  *   callback - The new timer expiration function pointer.  If this
  *                function pointer is NULL, then the reset-on-expiration
  *                behavior is restored,

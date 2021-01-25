@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_powermgr.c
  *
- *   Copyright 2018 Sony Semiconductor Solutions Corporation
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name of Sony Semiconductor Solutions Corporation nor
- *    the names of its contributors may be used to endorse or promote
- *    products derived from this software without specific prior written
- *    permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -42,11 +27,11 @@
 
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mqueue.h>
 
 #include <debug.h>
 #include <errno.h>
 #include <sched.h>
-#include <mqueue.h>
 #include <fcntl.h>
 #include <queue.h>
 
@@ -172,16 +157,16 @@ static int cxd56_pmmsghandler(int cpuid, int protoid, uint32_t pdata,
  ****************************************************************************/
 
 static struct cxd56_pm_target_id_s g_target_id_table;
-static mqd_t      g_queuedesc;
-static sem_t      g_bootsync;
-static sem_t      g_regcblock;
-static sem_t      g_freqlock;
-static sem_t      g_freqlockwait;
-static dq_queue_t g_cbqueue;
-static sq_queue_t g_freqlockqueue;
-static sq_queue_t g_wakelockqueue;
-static uint32_t   g_clockcange_start;
-static int        g_freqlock_flag;
+static struct file g_queuedesc;
+static sem_t       g_bootsync;
+static sem_t       g_regcblock;
+static sem_t       g_freqlock;
+static sem_t       g_freqlockwait;
+static dq_queue_t  g_cbqueue;
+static sq_queue_t  g_freqlockqueue;
+static sq_queue_t  g_wakelockqueue;
+static uint32_t    g_clockcange_start;
+static int         g_freqlock_flag;
 
 static struct pm_cpu_wakelock_s g_wlock =
   PM_CPUWAKELOCK_INIT(PM_CPUWAKELOCK_TAG('P', 'M', 0));
@@ -433,20 +418,23 @@ static void cxd56_pm_do_hotsleep(uint32_t idletime)
 
 static int cxd56_pm_maintask(int argc, FAR char *argv[])
 {
-  int size;
   struct cxd56_pm_message_s message;
   struct mq_attr attr;
+  int size;
+  int ret;
 
   attr.mq_maxmsg  = 8;
   attr.mq_msgsize = sizeof(struct cxd56_pm_message_s);
   attr.mq_curmsgs = 0;
   attr.mq_flags   = 0;
 
-  g_queuedesc = mq_open("cxd56_pm_message", O_RDWR | O_CREAT, 0666, &attr);
-  DEBUGASSERT((int)g_queuedesc != ERROR);
-  if (g_queuedesc < 0)
+  ret = file_mq_open(&g_queuedesc, "cxd56_pm_message",
+                     O_RDWR | O_CREAT, 0666, &attr);
+  DEBUGASSERT(ret >= 0);
+  if (ret < 0)
     {
       pmerr("Failed to create message queue\n");
+      return ret;
     }
 
   /* Register power manager messaging protocol handler. */
@@ -461,8 +449,8 @@ static int cxd56_pm_maintask(int argc, FAR char *argv[])
 
   while (1)
     {
-      size = mq_receive(g_queuedesc, (FAR char *)&message, sizeof(message),
-                        NULL);
+      size = file_mq_receive(&g_queuedesc, (FAR char *)&message,
+                             sizeof(message), NULL);
       if (size == sizeof(message))
         {
           switch (message.mid)
@@ -530,21 +518,21 @@ static int cxd56_pmmsghandler(int cpuid, int protoid, uint32_t pdata,
   if (msgid == MSGID_CLK_CHG_START)
     {
       message.mid = MQMSG_CLK_CHG_START;
-      ret = mq_send(g_queuedesc, (FAR const char *)&message, sizeof(message),
-                    CXD56_PM_MESSAGE_PRIO);
+      ret = file_mq_send(&g_queuedesc, (FAR const char *)&message,
+                         sizeof(message), CXD56_PM_MESSAGE_PRIO);
       if (ret < 0)
         {
-          pmerr("ERR:mq_send(CLK_CHG_START)\n");
+          pmerr("ERR:file_mq_send(CLK_CHG_START)\n");
         }
     }
   else if (msgid == MSGID_CLK_CHG_END)
     {
       message.mid = MQMSG_CLK_CHG_END;
-      ret = mq_send(g_queuedesc, (FAR const char *)&message, sizeof(message),
-                    CXD56_PM_MESSAGE_PRIO);
+      ret = file_mq_send(&g_queuedesc, (FAR const char *)&message,
+                         sizeof(message), CXD56_PM_MESSAGE_PRIO);
       if (ret < 0)
         {
-          pmerr("ERR:mq_send(CLK_CHG_END)\n");
+          pmerr("ERR:file_mq_send(CLK_CHG_END)\n");
         }
     }
   else if (msgid == MSGID_FREQLOCK)
@@ -800,11 +788,11 @@ int cxd56_pm_hotsleep(int idletime)
 
   message.mid = MQMSG_HOT_SLEEP;
   message.data = (uint32_t)idletime;
-  ret = mq_send(g_queuedesc, (FAR const char *)&message, sizeof(message),
-                CXD56_PM_MESSAGE_PRIO);
+  ret = file_mq_send(&g_queuedesc, (FAR const char *)&message,
+                     sizeof(message), CXD56_PM_MESSAGE_PRIO);
   if (ret < 0)
     {
-      pmerr("ERR:mq_send(HOT_SLEEP)\n");
+      pmerr("ERR:file_mq_send(HOT_SLEEP)\n");
       return -1;
     }
 

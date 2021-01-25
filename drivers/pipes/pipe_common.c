@@ -755,7 +755,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       /* Change POLLOUT to POLLERR, if no readers and policy 0. */
 
-      if ((eventset | POLLOUT) &&
+      if ((eventset & POLLOUT) &&
           PIPE_IS_POLICY_0(dev->d_flags) &&
           dev->d_nreaders <= 0)
         {

@@ -49,6 +49,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <termios.h>
 #include <unistd.h>
 
 #include <nuttx/arch.h>
@@ -58,9 +59,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/serial/tioctl.h>
-#include <nuttx/wireless/bluetooth/bt_uart.h>
 #include <nuttx/wireless/bluetooth/bt_uart_shim.h>
-#include <termios.h>
 
 /****************************************************************************
  * Private Types
@@ -75,14 +74,10 @@ struct hciuart_state_s
   btuart_rxcallback_t callback; /* Rx callback function */
   FAR void *arg;                /* Rx callback argument */
 
-  int h;                        /* File handle to serial device */
-  struct file f;                /* File structure, detached */
-
-  sem_t dready;                 /* Semaphore used by the poll operation */
+  struct file f;                /* File structure */
   bool enabled;                 /* Flag indicating that reception is enabled */
 
   int serialmontask;            /* The receive serial octets task handle */
-  volatile struct pollfd p;     /* Polling structure for serial monitor task */
 };
 
 struct hciuart_config_s
@@ -112,26 +107,6 @@ static ssize_t hciuart_write(FAR const struct btuart_lowerhalf_s *lower,
 static ssize_t hciuart_rxdrain(FAR const struct btuart_lowerhalf_s *lower);
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* This structure is the configuration of the HCI UART shim */
-
-static struct btuart_lowerhalf_s g_lowerstatic =
-{
-  .rxattach = hciuart_rxattach,
-  .rxenable = hciuart_rxenable,
-  .setbaud = hciuart_setbaud,
-  .read = hciuart_read,
-  .write = hciuart_write,
-  .rxdrain = hciuart_rxdrain
-};
-
-/* This is held global because its inconvenient to pass to the task */
-
-static FAR struct hciuart_config_s *g_n;
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -153,7 +128,7 @@ static void
 hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
                  btuart_rxcallback_t callback, FAR void *arg)
 {
-  struct hciuart_config_s *config = (struct hciuart_config_s *)lower;
+  struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   struct hciuart_state_s *state;
   irqstate_t flags;
 
@@ -174,7 +149,6 @@ hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
 
   else
     {
-      state->callback = NULL;
       state->arg = arg;
       state->callback = callback;
     }
@@ -204,7 +178,7 @@ static void hciuart_rxenable(FAR const struct btuart_lowerhalf_s *lower,
   irqstate_t flags = spin_lock_irqsave();
   if (enable != s->enabled)
     {
-      wlinfo(enable?"Enable\n":"Disable\n");
+      wlinfo(enable ? "Enable\n" : "Disable\n");
     }
 
   s->enabled = enable;
@@ -229,15 +203,11 @@ static void hciuart_rxenable(FAR const struct btuart_lowerhalf_s *lower,
 static int
 hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower, uint32_t baud)
 {
+#ifdef CONFIG_SERIAL_TERMIOS
   FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   FAR struct hciuart_state_s *state = &config->state;
-  int ret;
-
   struct termios tio;
-
-#ifndef CONFIG_SERIAL_TERMIOS
-#  error TERMIOS Support needed for hciuart_setbaud
-#endif
+  int ret;
 
   ret = file_ioctl(&state->f, TCGETS, (long unsigned int)&tio);
   if (ret)
@@ -255,8 +225,7 @@ hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower, uint32_t baud)
 
   tio.c_cflag |= CRTS_IFLOW | CCTS_OFLOW;
 
-  ret = file_ioctl(&state->f, TCSETS, (long unsigned int)&tio);
-
+  ret = file_ioctl(&state->f, TCSETS, (unsigned long int)&tio);
   if (ret)
     {
       wlerr("ERROR during TCSETS, does UART support CTS/RTS?\n");
@@ -264,6 +233,9 @@ hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower, uint32_t baud)
     }
 
   return OK;
+#else
+  return -ENOSYS;
+#endif
 }
 
 /****************************************************************************
@@ -284,17 +256,15 @@ hciuart_read(FAR const struct btuart_lowerhalf_s *lower,
 {
   FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   FAR struct hciuart_state_s *state = &config->state;
-  size_t ntotal;
 
   wlinfo("config %p buffer %p buflen %lu\n",
-         config, buffer, (size_t) buflen);
+         config, buffer, (unsigned long)buflen);
 
   /* NOTE: This assumes that the caller has exclusive access to the Rx
    * buffer, i.e., one lower half instance can server only one upper half!
    */
 
-  ntotal = file_read(&state->f, buffer, buflen);
-  return ntotal;
+  return file_read(&state->f, buffer, buflen);
 }
 
 /****************************************************************************
@@ -315,16 +285,13 @@ static ssize_t
 hciuart_write(FAR const struct btuart_lowerhalf_s *lower,
               FAR const void *buffer, size_t buflen)
 {
-  FAR const struct hciuart_config_s *config
-    = (FAR const struct hciuart_config_s *)lower;
-  FAR const struct hciuart_state_s *state = &config->state;
+  FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
+  FAR struct hciuart_state_s *state = &config->state;
 
   wlinfo("config %p buffer %p buflen %lu\n",
-         config, buffer, (size_t) buflen);
+         config, buffer, (unsigned long)buflen);
 
-  buflen = file_write((struct file *)&state->f, buffer, buflen);
-
-  return buflen;
+  return file_write(&state->f, buffer, buflen);
 }
 
 /****************************************************************************
@@ -340,8 +307,7 @@ static ssize_t hciuart_rxdrain(FAR const struct btuart_lowerhalf_s *lower)
   FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   FAR struct hciuart_state_s *s = &config->state;
 
-  file_ioctl(&s->f, TCDRN, 0);
-  return 0;
+  return file_ioctl(&s->f, TCDRN, 0);
 }
 
 /****************************************************************************
@@ -354,56 +320,56 @@ static ssize_t hciuart_rxdrain(FAR const struct btuart_lowerhalf_s *lower)
 
 static int hcicollecttask(int argc, FAR char **argv)
 {
-  FAR struct hciuart_state_s *s = &g_n->state;
+  FAR struct hciuart_config_s *n;
+  FAR struct hciuart_state_s *s;
+  struct pollfd p;
 
-  file_poll(&s->f, (struct pollfd *)&s->p, true);
+  n = (FAR struct hciuart_config_s *)
+    ((uintptr_t)strtoul(argv[1], NULL, 0));
+  s = &n->state;
+
+  /* Put materials into poll structure */
+
+  p.ptr = &s->f;
+  p.events = POLLIN | POLLFILE;
 
   for (; ; )
     {
       /* Wait for data to arrive */
 
-      int ret = nxsem_wait(s->p.sem);
+      int ret = nx_poll(&p, 1, -1);
       if (ret < 0)
         {
           wlwarn("Poll interrupted %d\n", ret);
           continue;
         }
 
-      /* These flags can change dynamically as new events occur, so
-       * snapshot.
-       */
-
-      irqstate_t flags = enter_critical_section();
-      uint32_t tevents = s->p.revents;
-      s->p.revents = 0;
-      leave_critical_section(flags);
-
-      wlinfo("Poll completed %d\n", tevents);
+      wlinfo("Poll completed %d\n", p.revents);
 
       /* Given the nature of file_poll, there are multiple reasons why
        * we might be here, so make sure we only consider the read.
        */
 
-      if (tevents & POLLIN)
+      if (p.revents & POLLIN)
         {
           if (!s->enabled)
             {
               /* We aren't expected to be listening, so drop these data */
 
               wlwarn("Dropping data\n");
-              hciuart_rxdrain(&g_n->lower);
+              hciuart_rxdrain(&n->lower);
             }
           else
             {
               if (s->callback != NULL)
                 {
                   wlinfo("Activating callback\n");
-                  s->callback(&g_n->lower, s->arg);
+                  s->callback(&n->lower, s->arg);
                 }
               else
                 {
                   wlwarn("Dropping data (no CB)\n");
-                  hciuart_rxdrain(&g_n->lower);
+                  hciuart_rxdrain(&n->lower);
                 }
             }
         }
@@ -417,7 +383,7 @@ static int hcicollecttask(int argc, FAR char **argv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bt_uart_shim_getdevice
+ * Name: btuart_shim_getdevice
  *
  * Description:
  *   Get a pointer to the device that will be used to communicate with the
@@ -431,48 +397,52 @@ static int hcicollecttask(int argc, FAR char **argv)
  *
  ****************************************************************************/
 
-FAR void *bt_uart_shim_getdevice(FAR char *path)
+FAR struct btuart_lowerhalf_s *btuart_shim_getdevice(FAR const char *path)
 {
+  FAR struct hciuart_config_s *n;
   FAR struct hciuart_state_s *s;
+  FAR char *argv[2];
+  char arg1[16];
   int ret;
 
   /* Get the memory for this shim instance */
 
-  g_n = (FAR struct hciuart_config_s *)
+  n = (FAR struct hciuart_config_s *)
     kmm_zalloc(sizeof(struct hciuart_config_s));
 
-  if (!g_n)
+  if (!n)
     {
-      return 0;
+      return NULL;
     }
 
-  s = &g_n->state;
+  s = &n->state;
 
   ret = file_open(&s->f, path, O_RDWR | O_BINARY);
   if (ret < 0)
     {
-      kmm_free(g_n);
-      g_n = 0;
-      return 0;
+      kmm_free(n);
+      return NULL;
     }
 
   /* Hook the routines in */
 
-  memcpy(&g_n->lower, &g_lowerstatic, sizeof(struct btuart_lowerhalf_s));
+  n->lower.rxattach = hciuart_rxattach;
+  n->lower.rxenable = hciuart_rxenable;
+  n->lower.setbaud  = hciuart_setbaud;
+  n->lower.read     = hciuart_read;
+  n->lower.write    = hciuart_write;
+  n->lower.rxdrain  = hciuart_rxdrain;
 
-  /* Put materials into poll structure */
+  /* Create the monitor thread */
 
-  nxsem_set_protocol(&s->dready, SEM_PRIO_NONE);
-
-  s->p.fd = s->h;
-  s->p.events = POLLIN;
-  s->p.sem = &s->dready;
-
-  s->enabled = true;
+  snprintf(arg1, 16, "%p", n);
+  argv[0] = arg1;
+  argv[1] = NULL;
 
   s->serialmontask = kthread_create("BT HCI Rx",
                                     CONFIG_BLUETOOTH_TXCONN_PRIORITY,
-                                    1024, hcicollecttask, NULL);
+                                    CONFIG_DEFAULT_TASK_STACKSIZE,
+                                    hcicollecttask, argv);
 
-  return g_n;
+  return (FAR struct btuart_lowerhalf_s *)n;
 }

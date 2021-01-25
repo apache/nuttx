@@ -2017,7 +2017,7 @@ static void c5471_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          devif_poll(&priv->c_dev, c5471_txpoll);
+          devif_timer(&priv->c_dev, 0, c5471_txpoll);
         }
     }
 

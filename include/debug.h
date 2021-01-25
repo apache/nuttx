@@ -51,6 +51,7 @@
 #endif
 
 #include <syslog.h>
+#include <sys/uio.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -105,7 +106,9 @@
  */
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
-#  define _none(x...)
+/* don't call syslog while performing the compiler's format check. */
+#  define _none(format, ...) \
+    do { if (0) syslog(LOG_ERR, format, ##__VA_ARGS__); } while (0)
 #else
 #  define _none       (void)
 #endif
@@ -1019,6 +1022,11 @@ extern "C"
 
 void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
                     unsigned int buflen);
+
+/* Do a pretty buffer dump from multiple buffers. */
+
+void lib_dumpvbuffer(FAR const char *msg, FAR const struct iovec *iov,
+                     int iovcnt);
 
 /* The system logging interfaces are normally accessed via the macros
  * provided above.  If the cross-compiler's C pre-processor supports a

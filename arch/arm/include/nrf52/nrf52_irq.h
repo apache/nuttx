@@ -99,7 +99,7 @@
 #  define NRF52_IRQ_PWM3        (NRF52_IRQ_EXTINT+45)  /* Pulse Width Modulation Unit 3 */
 #endif
 #ifdef CONFIG_NRF52_HAVE_SPI3_MASTER
-#  define NRF52_IRQ_SPIM3       (NRF52_IRQ_EXTINT+47)  /* SPI Master 3 */
+#  define NRF52_IRQ_SPI3        (NRF52_IRQ_EXTINT+47)  /* SPI Master 3 */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_NRF52832)

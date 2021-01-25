@@ -74,12 +74,15 @@ static void exited_child(FAR struct tcb_s *rtcb,
    * information).
    */
 
-  info->si_signo           = SIGCHLD;
-  info->si_code            = CLD_EXITED;
-  info->si_errno           = OK;
-  info->si_value.sival_ptr = NULL;
-  info->si_pid             = child->ch_pid;
-  info->si_status          = child->ch_status;
+  if (info)
+    {
+      info->si_signo           = SIGCHLD;
+      info->si_code            = CLD_EXITED;
+      info->si_errno           = OK;
+      info->si_value.sival_ptr = NULL;
+      info->si_pid             = child->ch_pid;
+      info->si_status          = child->ch_status;
+    }
 
   /* Discard the child entry */
 
@@ -149,11 +152,11 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
 
 #ifdef CONFIG_SMP
   irqstate_t flags = enter_critical_section();
-#endif
-
+#else
   /* Disable pre-emption so that nothing changes while the loop executes */
 
   sched_lock();
+#endif
 
   /* Verify that this task actually has children and that the requested
    * TCB is actually a child of this task.
@@ -178,15 +181,17 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
        */
 
       ctcb = nxsched_get_tcb((pid_t)id);
-
-#ifdef HAVE_GROUP_MEMBERS
-      if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
-#else
-      if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
-#endif
+      if (ctcb != NULL)
         {
-          ret = -ECHILD;
-          goto errout;
+#ifdef HAVE_GROUP_MEMBERS
+          if (ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
+#else
+          if (ctcb->group->tg_ppid != rtcb->pid)
+#endif
+            {
+              ret = -ECHILD;
+              goto errout;
+            }
         }
 
       /* Does this task retain child status? */
@@ -362,6 +367,19 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
                 {
                   /* Yes... return success */
 
+#ifdef CONFIG_SCHED_CHILD_STATUS
+                  if (retains)
+                    {
+                      child = group_find_child(rtcb->group, info->si_pid);
+                      DEBUGASSERT(child);
+
+                      if ((child->ch_flags & CHILD_FLAG_EXITED) != 0)
+                        {
+                          exited_child(rtcb, child, NULL);
+                        }
+                    }
+#endif
+
                   break;
                 }
             }
@@ -371,6 +389,19 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
           else if (idtype == P_ALL)
             {
               /* Return success */
+
+#ifdef CONFIG_SCHED_CHILD_STATUS
+                  if (retains)
+                    {
+                      child = group_find_child(rtcb->group, info->si_pid);
+
+                      if (child &&
+                          (child->ch_flags & CHILD_FLAG_EXITED) != 0)
+                        {
+                          exited_child(rtcb, child, NULL);
+                        }
+                    }
+#endif
 
               break;
             }
@@ -386,10 +417,11 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
     }
 
 errout:
-  sched_unlock();
 
 #ifdef CONFIG_SMP
   leave_critical_section(flags);
+#else
+  sched_unlock();
 #endif
 
   return ret;

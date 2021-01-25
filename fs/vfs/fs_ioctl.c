@@ -55,25 +55,11 @@
 #include "inode/inode.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: file_ioctl and file_vioctl
- *
- * Description:
- *   Perform device specific operations.
- *
- * Input Parameters:
- *   file     File structure instance
- *   req      The ioctl command
- *   ap       The argument of the ioctl cmd
- *
- * Returned Value:
- *   Returns a non-negative number on success;  A negated errno value is
- *   returned on any failure (see comments ioctl() for a list of appropriate
- *   errno values).
- *
+ * Name: file_vioctl
  ****************************************************************************/
 
 int file_vioctl(FAR struct file *filep, int req, va_list ap)
@@ -102,38 +88,11 @@ int file_vioctl(FAR struct file *filep, int req, va_list ap)
   return inode->u.i_ops->ioctl(filep, req, va_arg(ap, unsigned long));
 }
 
-int file_ioctl(FAR struct file *filep, int req, ...)
-{
-  va_list ap;
-  int ret;
-
-  /* Let file_vioctl() do the real work. */
-
-  va_start(ap, req);
-  ret = file_vioctl(filep, req, ap);
-  va_end(ap);
-
-  return ret;
-}
-
 /****************************************************************************
- * Name: nx_ioctl and nx_vioctl
- *
- * Description:
- *   nx_ioctl() is similar to the standard 'ioctl' interface except that is
- *   not a cancellation point and it does not modify the errno variable.
- *
- *   nx_ioctl() is an internal NuttX interface and should not be called from
- *   applications.
- *
- * Returned Value:
- *   Returns a non-negative number on success;  A negated errno value is
- *   returned on any failure (see comments ioctl() for a list of appropriate
- *   errno values).
- *
+ * Name: nx_vioctl
  ****************************************************************************/
 
-int nx_vioctl(int fd, int req, va_list ap)
+static int nx_vioctl(int fd, int req, va_list ap)
 {
   FAR struct file *filep;
   FAR int *arg;
@@ -205,6 +164,59 @@ int nx_vioctl(int fd, int req, va_list ap)
 
   return ret;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: file_ioctl
+ *
+ * Description:
+ *   Perform device specific operations.
+ *
+ * Input Parameters:
+ *   file     File structure instance
+ *   req      The ioctl command
+ *   ap       The argument of the ioctl cmd
+ *
+ * Returned Value:
+ *   Returns a non-negative number on success;  A negated errno value is
+ *   returned on any failure (see comments ioctl() for a list of appropriate
+ *   errno values).
+ *
+ ****************************************************************************/
+
+int file_ioctl(FAR struct file *filep, int req, ...)
+{
+  va_list ap;
+  int ret;
+
+  /* Let file_vioctl() do the real work. */
+
+  va_start(ap, req);
+  ret = file_vioctl(filep, req, ap);
+  va_end(ap);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nx_ioctl
+ *
+ * Description:
+ *   nx_ioctl() is similar to the standard 'ioctl' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_ioctl() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   Returns a non-negative number on success;  A negated errno value is
+ *   returned on any failure (see comments ioctl() for a list of appropriate
+ *   errno values).
+ *
+ ****************************************************************************/
 
 int nx_ioctl(int fd, int req, ...)
 {

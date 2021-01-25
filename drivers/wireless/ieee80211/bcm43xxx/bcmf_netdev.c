@@ -680,8 +680,10 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 #endif
 #ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
@@ -795,7 +797,7 @@ static void bcmf_txavail_work(FAR void *arg)
 
       priv->bc_dev.d_buf = priv->cur_tx_frame->data;
       priv->bc_dev.d_len = 0;
-      devif_poll(&priv->bc_dev, bcmf_txpoll);
+      devif_timer(&priv->bc_dev, 0, bcmf_txpoll);
     }
 
 exit_unlock:

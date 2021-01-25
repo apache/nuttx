@@ -30,7 +30,7 @@ CSRCS += open-amp/lib/virtio/virtio.c
 CSRCS += open-amp/lib/virtio/virtqueue.c
 
 open-amp.zip:
-	$(Q) wget https://github.com/OpenAMP/open-amp/archive/v$(VERSION).zip -O open-amp.zip
+	$(Q) curl -L https://github.com/OpenAMP/open-amp/archive/v$(VERSION).zip -o open-amp.zip
 	$(Q) unzip -o open-amp.zip
 	$(Q) mv open-amp-$(VERSION) open-amp
 	$(Q) patch -p0 < 0001-rpmsg-remove-the-address-check-in-rpmsg_send-rpmsg_t.patch

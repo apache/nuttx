@@ -348,6 +348,16 @@ int sim_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SIM_HCITTY
+  /* Register the HCI TTY device via HCI socket */
+
+  ret = bthcitty_register("/dev/ttyHCI", 0);  /* Use HCI0 */
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: bthcitty_register() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_SIM_I2CBUS
   /* Initialize the i2c master bus device */
 

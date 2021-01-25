@@ -43,6 +43,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/signal.h>
 
 #include <sys/types.h>
@@ -98,8 +99,6 @@
 
 /* This structure defines a message queue */
 
-struct mq_des; /* forward reference */
-
 struct mqueue_inode_s
 {
   FAR struct inode *inode;    /* Containing inode */
@@ -113,21 +112,9 @@ struct mqueue_inode_s
 #else
   uint16_t maxmsgsize;        /* Max size of message in message queue */
 #endif
-  FAR struct mq_des *ntmqdes; /* Notification: Owning mqdes (NULL if none) */
   pid_t ntpid;                /* Notification: Receiving Task's PID */
   struct sigevent ntevent;    /* Notification description */
   struct sigwork_s ntwork;    /* Notification work */
-};
-
-/* This describes the message queue descriptor that is held in the
- * task's TCB
- */
-
-struct mq_des
-{
-  FAR struct mq_des *flink;        /* Forward link to next message descriptor */
-  FAR struct mqueue_inode_s *msgq; /* Pointer to associated message queue */
-  int oflags;                      /* Flags set when message queue was opened */
 };
 
 /****************************************************************************
@@ -185,8 +172,7 @@ struct task_group_s;  /* Forward reference */
  *
  ****************************************************************************/
 
-int nxmq_open(FAR const char *mq_name, int oflags, mode_t mode,
-              FAR struct mq_attr *attr, FAR mqd_t *mqdes);
+mqd_t nxmq_open(FAR const char *mq_name, int oflags, ...);
 
 /****************************************************************************
  * Name: nxmq_close
@@ -425,67 +411,285 @@ FAR struct mqueue_inode_s *nxmq_alloc_msgq(mode_t mode,
                                            FAR struct mq_attr *attr);
 
 /****************************************************************************
- * Name: nxmq_create_des
+ * Name: file_mq_open
  *
  * Description:
- *   Create a message queue descriptor for the specified TCB
+ *   This function establish a connection between a named message queue and
+ *   the calling task. This is an internal OS interface.  It is functionally
+ *   equivalent to mq_open() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_open() for a more complete description of the
+ *  behavior of this function
  *
  * Input Parameters:
- *   TCB - task that needs the descriptor.
- *   msgq - Named message queue containing the message
- *   oflags - access rights for the descriptor
+ *   mq_name - Name of the queue to open
+ *   oflags  - open flags
+ *   Optional parameters.  When the O_CREAT flag is specified, two optional
+ *   parameters are expected:
+ *
+ *     1. mode_t mode (ignored), and
+ *     2. struct mq_attr *attr.  The mq_maxmsg attribute
+ *        is used at the time that the message queue is
+ *        created to determine the maximum number of
+ *        messages that may be placed in the message queue.
  *
  * Returned Value:
- *   On success, the message queue descriptor is returned.  NULL is returned
- *   on a failure to allocate.
+ *   This is an internal OS interface and should not be used by applications.
+ *   NOT NULL Message queue descriptor, NULL failed.
  *
  ****************************************************************************/
 
-mqd_t nxmq_create_des(FAR struct tcb_s *mtcb,
-                      FAR struct mqueue_inode_s *msgq, int oflags);
+int file_mq_open(FAR struct file *mq,
+                 FAR const char *mq_name, int oflags, ...);
 
 /****************************************************************************
- * Name: nxmq_close_group
+ * Name: file_mq_close
  *
  * Description:
- *   This function is used to indicate that all threads in the group are
- *   finished with the specified message queue mqdes.  nxmq_close_group()
- *   deallocates any system resources allocated by the system for use by
- *   this task for its message queue.
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   mq_close() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_close() for a more complete description of the
+ *  behavior of this function
  *
  * Input Parameters:
- *   mqdes - Message queue descriptor.
- *   group - Group that has the open descriptor.
+ *   mq - Message queue descriptor.
  *
  * Returned Value:
- *   Zero (OK) if the message queue is closed successfully.  Otherwise, a
- *   negated errno value is returned.
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success. A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int nxmq_close_group(mqd_t mqdes, FAR struct task_group_s *group);
+int file_mq_close(FAR struct file *mq);
 
 /****************************************************************************
- * Name: nxmq_desclose_group
+ * Name: file_mq_unlink
  *
  * Description:
- *   This function performs the portion of the mq_close operation related
- *   to freeing resource used by the message queue descriptor itself.
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   mq_unlink() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_unlink() for a more complete description of the
+ *  behavior of this function
  *
  * Input Parameters:
- *   mqdes - Message queue descriptor.
- *   group - Group that has the open descriptor.
+ *   mq_name - Name of the message queue
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   and failure.
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success. A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int file_mq_unlink(FAR const char *mq_name);
+
+/****************************************************************************
+ * Name: file_mq_send
+ *
+ * Description:
+ *   This function adds the specified message (msg) to the message queue
+ *   (mq).  This is an internal OS interface.  It is functionally
+ *   equivalent to mq_send() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_send() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mq     - Message queue descriptor
+ *   msg    - Message to send
+ *   msglen - The length of the message in bytes
+ *   prio   - The priority of the message
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   (see mq_send() for the list list valid return values).
+ *
+ ****************************************************************************/
+
+int file_mq_send(FAR struct file *mq, FAR const char *msg, size_t msglen,
+                 unsigned int prio);
+
+/****************************************************************************
+ * Name: file_mq_timedsend
+ *
+ * Description:
+ *   This function adds the specified message (msg) to the message queue
+ *   (mq).  file_mq_timedsend() behaves just like mq_send(), except that if
+ *   the queue is full and the O_NONBLOCK flag is not enabled for the
+ *   message queue description, then abstime points to a structure which
+ *   specifies a ceiling on the time for which the call will block.
+ *
+ *   file_mq_timedsend() is functionally equivalent to mq_timedsend() except
+ *   that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_timedsend() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mq      - Message queue descriptor
+ *   msg     - Message to send
+ *   msglen  - The length of the message in bytes
+ *   prio    - The priority of the message
+ *   abstime - the absolute time to wait until a timeout is decleared
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   (see mq_timedsend() for the list list valid return values).
+ *
+ *   EAGAIN   The queue was empty, and the O_NONBLOCK flag was set for the
+ *            message queue description referred to by mq.
+ *   EINVAL   Either msg or mq is NULL or the value of prio is invalid.
+ *   EPERM    Message queue opened not opened for writing.
+ *   EMSGSIZE 'msglen' was greater than the maxmsgsize attribute of the
+ *            message queue.
+ *   EINTR    The call was interrupted by a signal handler.
+ *
+ ****************************************************************************/
+
+int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
+                      size_t msglen, unsigned int prio,
+                      FAR const struct timespec *abstime);
+
+/****************************************************************************
+ * Name: file_mq_receive
+ *
+ * Description:
+ *   This function receives the oldest of the highest priority messages
+ *   from the message queue specified by "mq."  This is an internal OS
+ *   interface.  It is functionally equivalent to mq_receive except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_receive() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mq     - Message Queue Descriptor
+ *   msg    - Buffer to receive the message
+ *   msglen - Size of the buffer in bytes
+ *   prio   - If not NULL, the location to store message priority.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   (see mq_receive() for the list list valid return values).
+ *
+ ****************************************************************************/
+
+ssize_t file_mq_receive(FAR struct file *mq, FAR char *msg, size_t msglen,
+                        FAR unsigned int *prio);
+
+/****************************************************************************
+ * Name: file_mq_timedreceive
+ *
+ * Description:
+ *   This function receives the oldest of the highest priority messages from
+ *   the message queue specified by "mq."  If the message queue is empty
+ *   and O_NONBLOCK was not set, file_mq_timedreceive() will block until a
+ *   message is added to the message queue (or until a timeout occurs).
+ *
+ *   file_mq_timedreceive() is an internal OS interface.  It is functionally
+ *   equivalent to mq_timedreceive() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_timedreceive() for a more complete description of
+ *  the behavior of this function
+ *
+ * Input Parameters:
+ *   mq      - Message Queue Descriptor
+ *   msg     - Buffer to receive the message
+ *   msglen  - Size of the buffer in bytes
+ *   prio    - If not NULL, the location to store message priority.
+ *   abstime - the absolute time to wait until a timeout is declared.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   (see mq_timedreceive() for the list list valid return values).
+ *
+ ****************************************************************************/
+
+ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
+                             size_t msglen, FAR unsigned int *prio,
+                             FAR const struct timespec *abstime);
+
+/****************************************************************************
+ * Name:  file_mq_setattr
+ *
+ * Description:
+ *   This function sets the attributes associated with the
+ *   specified message queue "mq".  Only the "O_NONBLOCK"
+ *   bit of the "mq_flags" can be changed.
+ *
+ *   If "oldstat" is non-null, mq_setattr() will store the
+ *   previous message queue attributes at that location (just
+ *   as would have been returned by file_mq_getattr()).
+ *
+ * Input Parameters:
+ *   mqdes - Message queue descriptor
+ *   mq_stat - New attributes
+ *   oldstate - Old attributes
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
  *
  * Assumptions:
- * - Called only from mq_close() with the scheduler locked.
  *
  ****************************************************************************/
 
-int nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group);
+int file_mq_setattr(FAR struct file *mq, FAR const struct mq_attr *mq_stat,
+                    FAR struct mq_attr *oldstat);
+
+/****************************************************************************
+ * Name:  file_mq_getattr
+ *
+ * Description:
+ *   This functions gets status information and attributes
+ *   associated with the specified message queue.
+ *
+ * Input Parameters:
+ *   mq      - Message queue descriptor
+ *   mq_stat - Buffer in which to return attributes
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int file_mq_getattr(FAR struct file *mq, FAR struct mq_attr *mq_stat);
 
 #undef EXTERN
 #ifdef __cplusplus

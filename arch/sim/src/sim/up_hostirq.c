@@ -111,6 +111,11 @@ void up_irq_restore(uint64_t flags)
 
 void up_irqinitialize(void)
 {
+#ifdef CONFIG_SMP
+  /* Register the pause handler */
+
+  up_cpu_set_pause_handler(SIGUSR1);
+#endif
 }
 
 /****************************************************************************

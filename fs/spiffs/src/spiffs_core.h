@@ -76,7 +76,8 @@
  * Entire area must be block_size * x
  * page_size must be block_size / (2^y) where y > 2
  *
- * ex: area = 1024*1024 bytes, block size = 65536 bytes, page size = 256 bytes
+ * ex: area = 1024*1024 bytes, block size = 65536 bytes,
+ * page size = 256 bytes
  *
  * BLOCK 0  PAGE 0       object lookup 1
  *          PAGE 1       object lookup 2
@@ -97,19 +98,23 @@
  *          PAGE 2n+2m-1 object data m
  * ...
  *
- * n is number of object lookup pages, which is number of pages needed to index all pages
- * in a block by object objid
+ * n is number of object lookup pages, which is number of pages needed to
+ * index all pages in a block by object objid
  *   : block_size / page_size * sizeof(objid) / page_size
- * m is number data pages, which is number of pages in block minus number of lookup pages
- *   : block_size / page_size - block_size / page_size * sizeof(objid) / page_size
+ * m is number data pages, which is number of pages in block minus number of
+ * lookup pages
+ *   : block_size / page_size - block_size / page_size * sizeof(objid) /
+ *     page_size
  * thus, n+m is total number of pages in a block
  *   : block_size / page_size
  *
- * ex: n = 65536/256*2/256 = 2, m = 65536/256 - 2 = 254 => n+m = 65536/256 = 256
+ * ex: n = 65536/256*2/256 = 2, m = 65536/256 - 2 = 254 =>
+ *     n+m = 65536/256 = 256
  *
- * Object lookup pages contain object objid entries. Each entry represent the corresponding
- * data page.
- * Assuming a 16 bit object objid, an object objid being 0xffff represents a free page.
+ * Object lookup pages contain object objid entries. Each entry represent the
+ * corresponding data page.
+ * Assuming a 16 bit object objid, an object objid being 0xffff represents a
+ * free page.
  * An object objid being 0x0000 represents a deleted page.
  *
  * ex: page 0 : lookup : 0008 0001 0aaa ffff ffff ffff ffff ffff ..
@@ -121,14 +126,18 @@
  *
  *
  * Object data pages can be either object index pages or object content.
- * All object data pages contains a data page header, containing object objid and span index.
- * The span index denotes the object page ordering amongst data pages with same object objid.
- * This applies to both object index pages (when index spans more than one page of entries),
- * and object data pages.
- * An object index page contains page entries pointing to object content page. The entry index
- * in a object index page correlates to the span index in the actual object data page.
- * The first object index page (span index 0) is called object index header page, and also
- * contains object flags (directory/file), size, object name etc.
+ * All object data pages contains a data page header, containing object objid
+ * and span index.
+ * The span index denotes the object page ordering amongst data pages with
+ * same object objid.
+ * This applies to both object index pages (when index spans more than one
+ * page of entries), and object data pages.
+ * An object index page contains page entries pointing to object content
+ * page. The entry index in a object index page correlates to the span index
+ * in the actual object data page.
+ * The first object index page (span index 0) is called object index header
+ * page, and also contains object flags (directory/file), size, object name
+ * etc.
  *
  * ex:
  *  BLOCK 1
@@ -184,6 +193,7 @@
 #define SPIFFS_ERR_INDEX_INVALID        (SPIFFS_ERR_INTERNAL - 13)
 
 /* These are not errors, but live in the same number space */
+
 /* Visitor result, continue searching */
 
 #define SPIFFS_VIS_COUNTINUE            (SPIFFS_ERR_INTERNAL - 14)
@@ -349,7 +359,9 @@
 
 #define SPIFFS_VIS_CHECK_ID     (1<<0)
 
-/* report argument object objid to visitor - else object lookup objid is reported */
+/* report argument object objid to visitor - else object lookup objid is
+ * reported
+ */
 
 #define SPIFFS_VIS_CHECK_PH     (1<<1)
 
@@ -385,12 +397,23 @@ begin_packed_struct struct spiffs_page_header_s
 
 /* Object index header page header */
 
+#ifdef CONFIG_SPIFFS_LEADING_SLASH
+#define	SPIFFS_LEADING_SLASH_SIZE	1
+#else
+#define	SPIFFS_LEADING_SLASH_SIZE	0
+#endif
+
 begin_packed_struct struct spiffs_pgobj_ndxheader_s
 {
   struct spiffs_page_header_s phdr;     /* common page header */
+#ifndef CONFIG_SPIFFS_COMPAT_OLD_NUTTX
+  uint8_t _align[4 - ((sizeof(struct spiffs_page_header_s) & 3) ==
+                 0 ? 4 : (sizeof(struct spiffs_page_header_s) & 3))];
+#endif
   uint32_t size;                        /* size of object */
   uint8_t type;                         /* type of object */
-  uint8_t name[CONFIG_SPIFFS_NAME_MAX]; /* name of object */
+  uint8_t name[SPIFFS_LEADING_SLASH_SIZE +
+               CONFIG_SPIFFS_NAME_MAX]; /* name of object */
 } end_packed_struct;
 
 /* Object index page header */
@@ -450,7 +473,8 @@ int     spiffs_fobj_create(FAR struct spiffs_s *fs,
           int16_t objid, const uint8_t name[], uint8_t type,
           FAR int16_t *objhdr_pgndx);
 int     spiffs_fobj_update_ndxhdr(FAR struct spiffs_s *fs,
-          FAR struct spiffs_file_s *fobj, int16_t objid, int16_t objhdr_pgndx,
+          FAR struct spiffs_file_s *fobj, int16_t objid,
+          int16_t objhdr_pgndx,
           FAR uint8_t *new_objhdr_data, const uint8_t name[],
           uint32_t size, FAR int16_t *new_pgndx);
 void    spiffs_fobj_event(FAR struct spiffs_s *fs,

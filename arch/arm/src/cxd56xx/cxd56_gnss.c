@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_gnss.c
  *
- *   Copyright 2018, 2019 Sony Semiconductor Solutions Corporation
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name of Sony Semiconductor Solutions Corporation nor
- *    the names of its contributors may be used to endorse or promote
- *    products derived from this software without specific prior written
- *    permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -174,7 +159,7 @@ struct cxd56_gnss_dev_s
   sem_t                           syncsem;
   uint8_t                         num_open;
   uint8_t                         notify_data;
-  FAR FILE *                      cepfp;
+  struct file                     cepfp;
   FAR void *                      cepbuf;
   FAR struct pollfd              *fds[CONFIG_CXD56_GNSS_NPOLLWAITERS];
 #if !defined(CONFIG_DISABLE_SIGNAL) && \
@@ -906,7 +891,7 @@ static int cxd56_gnss_save_backup_data(FAR struct file *filep,
                                        unsigned long    arg)
 {
   FAR char *buf;
-  FAR FILE *fp;
+  int       fd;
   int       n = 0;
   int32_t   offset = 0;
 
@@ -916,11 +901,12 @@ static int cxd56_gnss_save_backup_data(FAR struct file *filep,
       return -ENOMEM;
     }
 
-  fp = fopen(CONFIG_CXD56_GNSS_BACKUP_FILENAME, "wb");
-  if (fp == NULL)
+  fd = nx_open(CONFIG_CXD56_GNSS_BACKUP_FILENAME,
+               O_WRONLY | O_CREAT | O_TRUNC);
+  if (fd < 0)
     {
       kmm_free(buf);
-      return -ENOENT;
+      return fd;
     }
 
   do
@@ -932,13 +918,13 @@ static int cxd56_gnss_save_backup_data(FAR struct file *filep,
           break;
         }
 
-      n = fwrite(buf, 1, n, fp);
+      n = nx_write(fd, buf, n);
       offset += n;
     }
   while (n == CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
 
   kmm_free(buf);
-  fclose(fp);
+  nx_close(fd);
 
   return n < 0 ? n : 0;
 }
@@ -2155,11 +2141,11 @@ static int cxd56_gnss_wait_notify(FAR sem_t *sem, time_t waitsec)
  *
  ****************************************************************************/
 
-static FAR char *cxd56_gnss_read_cep_file(FAR FILE *fp, int32_t offset,
-                                          size_t len, FAR int *retval)
+static FAR char *
+cxd56_gnss_read_cep_file(FAR struct file *fp, int32_t offset,
+                         size_t len, FAR int *retval)
 {
   FAR char *buf;
-  size_t    n = 0;
   int       ret;
 
   if (fp == NULL)
@@ -2175,21 +2161,19 @@ static FAR char *cxd56_gnss_read_cep_file(FAR FILE *fp, int32_t offset,
       goto _err0;
     }
 
-  ret = fseek(fp, offset, SEEK_SET);
+  ret = file_seek(fp, offset, SEEK_SET);
   if (ret < 0)
     {
       goto _err1;
     }
 
-  n = fread(buf, 1, len, fp);
-  if (n <= 0)
+  ret = file_read(fp, buf, len);
+  if (ret <= 0)
     {
-      ret = n < 0 ? n : ferror(fp) ? -errno : 0;
-      clearerr(fp);
       goto _err1;
     }
 
-  *retval = n;
+  *retval = ret;
   cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_CEP, (uint32_t)buf);
 
   return buf;
@@ -2224,7 +2208,7 @@ static FAR char *cxd56_gnss_read_cep_file(FAR FILE *fp, int32_t offset,
 static void cxd56_gnss_read_backup_file(FAR int *retval)
 {
   FAR char *  buf;
-  FAR FILE *  fp;
+  int         fd;
   int32_t     offset = 0;
   size_t      n;
   int         ret = 0;
@@ -2236,20 +2220,20 @@ static void cxd56_gnss_read_backup_file(FAR int *retval)
       goto _err;
     }
 
-  fp = fopen(CONFIG_CXD56_GNSS_BACKUP_FILENAME, "rb");
-  if (fp == NULL)
+  fd = nx_open(CONFIG_CXD56_GNSS_BACKUP_FILENAME, O_RDONLY);
+  if (fd < 0)
     {
       kmm_free(buf);
-      ret = -ENOENT;
+      ret = fd;
       goto _err;
     }
 
   do
     {
-      n = fread(buf, 1, CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE, fp);
+      n = nx_read(fd, buf, CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
       if (n <= 0)
         {
-          ret = n < 0 ? n : ferror(fp) ? -ENFILE : 0;
+          ret = n;
           break;
         }
 
@@ -2263,7 +2247,7 @@ static void cxd56_gnss_read_backup_file(FAR int *retval)
     }
   while (n > 0);
 
-  fclose(fp);
+  nx_close(fd);
   kmm_free(buf);
 
   /* Notify the termination of backup sequence by write zero length data */
@@ -2316,7 +2300,7 @@ static void cxd56_gnss_common_signalhandler(uint32_t data,
           union sigval value;
 
           value.sival_ptr = &sig->info;
-          sigqueue(sig->pid, sig->info.signo, value);
+          nxsig_queue(sig->pid, sig->info.signo, value);
           issetmask = 1;
         }
     }
@@ -2363,7 +2347,7 @@ static void cxd56_gnss_default_sighandler(uint32_t data, FAR void *userdata)
     case CXD56_GNSS_NOTIFY_TYPE_REQCEPDAT:
       {
         priv->cepbuf = cxd56_gnss_read_cep_file(
-          priv->cepfp, priv->shared_info.argv[GNSS_ARGS_FILE_OFFSET],
+          &priv->cepfp, priv->shared_info.argv[GNSS_ARGS_FILE_OFFSET],
           priv->shared_info.argv[GNSS_ARGS_FILE_LENGTH],
           &priv->shared_info.retval);
         return;
@@ -2395,19 +2379,18 @@ static void cxd56_gnss_default_sighandler(uint32_t data, FAR void *userdata)
       return;
 
     case CXD56_GNSS_NOTIFY_TYPE_REQCEPOPEN:
-      if (priv->cepfp != NULL)
+      if (priv->cepfp.f_inode != NULL)
         {
-          fclose(priv->cepfp);
+          file_close(&priv->cepfp);
         }
 
-      priv->cepfp = fopen(CONFIG_CXD56_GNSS_CEP_FILENAME, "rb");
+      file_open(&priv->cepfp, CONFIG_CXD56_GNSS_CEP_FILENAME, O_RDONLY);
       return;
 
     case CXD56_GNSS_NOTIFY_TYPE_REQCEPCLOSE:
-      if (priv->cepfp != NULL)
+      if (priv->cepfp.f_inode != NULL)
         {
-          fclose(priv->cepfp);
-          priv->cepfp = NULL;
+          file_close(&priv->cepfp);
         }
 
       return;

@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32l4/nucleo-l452re/src/stm32_adc.c
  *
  *   Copyright (C) 2017 Haltian Ltd. All rights reserved.
@@ -41,6 +41,7 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <inttypes.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -63,7 +64,9 @@
 
 /* STM32 chip specific calibration values ***********************************/
 
-/* Voltage used for calibration of internal analog reference voltage (Vrefint) */
+/* Voltage used for calibration of internal analog reference voltagei
+ * (Vrefint)
+ */
 
 #if defined(CONFIG_ARCH_CHIP_STM32F7) \
  || defined(CONFIG_ARCH_CHIP_STM32F4) \
@@ -146,9 +149,9 @@ static const uint8_t g_chanlist[ADC1_NCHANNELS] =
 
 static const uint32_t g_pinlist[ADC1_NCHANNELS] =
 {
-  0xffffffffU,
-  0xffffffffU,
-  0xffffffffU,
+  0xffffffffu,
+  0xffffffffu,
+  0xffffffffu,
   GPIO_MEASURE_ADC,
 };
 
@@ -164,11 +167,16 @@ static const uint32_t g_pinlist[ADC1_NCHANNELS] =
  *
  ****************************************************************************/
 
-int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *vext)
+int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat,
+                                 uint32_t *vext)
 {
   FAR struct file filestruct;
   ssize_t nbytes;
-  struct adc_msg_s sample[ADC1_NCHANNELS] = { 0 };
+  struct adc_msg_s sample[ADC1_NCHANNELS] =
+    {
+      0
+    };
+
   int nsamples;
   int ret;
 
@@ -222,8 +230,8 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
 
       for (i = 0; i < nsamples ; i++)
         {
-          ainfo("%d: channel: %d value: %d\n",
-                i+1, sample[i].am_channel, sample[i].am_data);
+          ainfo("%d: channel: %d value: %" PRId32 "\n",
+                i + 1, sample[i].am_channel, sample[i].am_data);
 
           /* Add the raw value to entropy pool. */
 
@@ -232,10 +240,14 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
           switch (sample[i].am_channel)
             {
               case ADC1_INTERNAL_VREFINT_CHANNEL:
-                /* Calculate corrected Vrefint with factory calibration value. */
+                /* Calculate corrected Vrefint with factory calibration
+                 * value.
+                 */
 
-                *vrefint = STM32_VREFINT_MVOLTS * STM32_VREFINT_CAL / sample[i].am_data;
-                ainfo("VREFINT: %d -> %u mV\n", sample[i].am_data, *vrefint);
+                *vrefint = STM32_VREFINT_MVOLTS * STM32_VREFINT_CAL /
+                           sample[i].am_data;
+                ainfo("VREFINT: %" PRId32 " -> %" PRIu32 " mV\n",
+                      sample[i].am_data, *vrefint);
                 break;
 
               case ADC1_INTERNAL_TSENSE_CHANNEL:
@@ -243,20 +255,23 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
                  * so it does not matter much if we use integer type here.
                  */
 
-                tsense = (110 - 30) * (sample[i].am_data - STM32_TSENSE_TSCAL1)
-                                    / (STM32_TSENSE_TSCAL2 - STM32_TSENSE_TSCAL1) + 30;
-                ainfo("TSENSE: %d -> %d °C\n", sample[i].am_data, tsense);
+                tsense = (110 - 30) *
+                         (sample[i].am_data - STM32_TSENSE_TSCAL1)
+                         / (STM32_TSENSE_TSCAL2 - STM32_TSENSE_TSCAL1) + 30;
+                ainfo("TSENSE: %" PRId32 " -> %" PRId32 " °C\n",
+                      sample[i].am_data, tsense);
                 UNUSED(tsense);
                 break;
 
               case ADC1_INTERNAL_VBATDIV3_CHANNEL:
                 *vbat = 3 * sample[i].am_data;
-                ainfo("VBAT/3: %d -> %u mV\n", sample[i].am_data, *vbat);
+                ainfo("VBAT/3: %" PRId32 " -> %" PRIu32 " mV\n",
+                      sample[i].am_data, *vbat);
                 break;
 
               case ADC1_MEASURE_CHANNEL:
                 *vext = sample[i].am_data;
-                ainfo("External channel: %d\n", *vext);
+                ainfo("External channel: %" PRId32 "\n", *vext);
                 break;
 
               default:
@@ -285,19 +300,22 @@ int stm32l4_adc_setup(void)
   if (!initialized)
     {
 #ifdef CONFIG_STM32L4_ADC1
-      int ret, i;
+      int ret;
+      int i;
 
       /* Configure the pins as analog inputs for the selected channels */
 
       for (i = 0; i < ADC1_NCHANNELS; i++)
         {
-          if (g_pinlist[i] != 0xffffffffU)
+          if (g_pinlist[i] != 0xffffffffu)
             {
               stm32l4_configgpio(g_pinlist[i]);
             }
         }
 
-      /* Call stm32l4_adc_initialize() to get an instance of the ADC interface */
+      /* Call stm32l4_adc_initialize() to get an instance of the ADC
+       * interface
+       */
 
       g_adc = stm32l4_adc_initialize(1, g_chanlist, ADC1_NCHANNELS);
       if (g_adc == NULL)
@@ -315,6 +333,7 @@ int stm32l4_adc_setup(void)
           return ret;
         }
 #endif
+
       initialized = true;
     }
 

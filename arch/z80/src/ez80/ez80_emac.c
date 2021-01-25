@@ -2223,7 +2223,7 @@ static void ez80emac_txavail_work(FAR void *arg)
 
       /* If so, then poll the network for new XMIT data */
 
-      devif_poll(&priv->dev, ez80emac_txpoll);
+      devif_timer(&priv->dev, 0, ez80emac_txpoll);
     }
 
   net_unlock();

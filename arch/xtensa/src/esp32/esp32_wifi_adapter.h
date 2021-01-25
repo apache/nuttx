@@ -60,6 +60,9 @@ enum wifi_adpt_evt_e
 
 typedef void (*wifi_evt_cb_t)(void *p);
 
+typedef void (* wifi_tx_done_cb_t)(uint8_t ifidx, uint8_t *data,
+                                   uint16_t *len, bool txstatus);
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -213,6 +216,22 @@ int esp_wifi_set_ssid(const uint8_t *pdata, uint8_t len);
  ****************************************************************************/
 
 int esp_wifi_connect_internal(void);
+
+/****************************************************************************
+ * Name: esp_wifi_sta_register_txdone_cb
+ *
+ * Description:
+ *   Register the txDone callback function of type wifi_tx_done_cb_t
+ *
+ * Input Parameters:
+ *   callback - The callback function
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int esp_wifi_sta_register_txdone_cb(void *callback);
 
 #ifdef __cplusplus
 }

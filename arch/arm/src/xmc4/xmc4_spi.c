@@ -1814,7 +1814,7 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
     }
 
   /* Set up the initial state for this chip select structure.  Other fields
-   * were zeroed by zalloc().
+   * were zeroed by kmm_zalloc().
    */
 
 #ifdef CONFIG_XMC4_SPI_DMA

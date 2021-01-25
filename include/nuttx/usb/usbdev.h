@@ -89,8 +89,8 @@
 #  define EP_ALLOCBUFFER(ep,nb)    (ep)->ops->allocbuffer(ep,nb)
 #  define EP_FREEBUFFER(ep,buf)    (ep)->ops->freebuffer(ep,buf)
 #else
-#  define EP_ALLOCBUFFER(ep,nb)    malloc(nb)
-#  define EP_FREEBUFFER(ep,buf)    free(buf)
+#  define EP_ALLOCBUFFER(ep,nb)    kmm_malloc(nb)
+#  define EP_FREEBUFFER(ep,buf)    kmm_free(buf)
 #endif
 
 /* Submit an I/O request to the endpoint */

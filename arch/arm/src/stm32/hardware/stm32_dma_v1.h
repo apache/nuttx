@@ -770,7 +770,7 @@
 #  define DMACHAN_TIM18_UP_2      STM32_DMA2_CHAN5
 #  define DMACHAN_DAC2_CH1_2      STM32_DMA2_CHAN5
 
-#elif defined(CONFIG_STM32_STM32G47XX)
+#elif defined(CONFIG_STM32_STM32G4XXX)
 
   /* This family uses a DMAMUX. The code to support this needs to be ported
    * to this family from STM32L4R.

@@ -96,7 +96,7 @@ const struct sock_intf_s g_usrsock_sockif =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inet_setup
+ * Name: usrsock_sockif_setup
  *
  * Description:
  *   Called for socket() to verify that the provided socket type and
@@ -262,8 +262,6 @@ static ssize_t usrsock_sockif_send(FAR struct socket *psock,
  *
  * Returned Value:
  *   0 on success; -1 on error with errno set appropriately.
- *
- * Assumptions:
  *
  ****************************************************************************/
 

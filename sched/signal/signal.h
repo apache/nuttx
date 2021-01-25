@@ -60,9 +60,7 @@
 
 #define NUM_SIGNAL_ACTIONS       4
 #define NUM_PENDING_ACTIONS      4
-#define NUM_PENDING_INT_ACTIONS  8
 #define NUM_SIGNALS_PENDING      4
-#define NUM_INT_SIGNALS_PENDING  8
 
 /****************************************************************************
  * Public Type Definitions

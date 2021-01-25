@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -1658,7 +1659,7 @@ static inline int sam_single(struct sam_dmach_s *dmach)
 
   sam_putdmach(dmach, dmach->cfg, SAM_DMAC_CH_CFG_OFFSET);
 
-  /* Enable the channel by writing a ‘1’ to the CHER enable bit */
+  /* Enable the channel by writing a 1 to the CHER enable bit */
 
   sam_putdmac(dmac, DMAC_CHER_ENA(dmach->chan), SAM_DMAC_CHER_OFFSET);
 
@@ -1714,11 +1715,13 @@ static inline int sam_multiple(struct sam_dmach_s *dmach)
 
   sam_putdmach(dmach, dmach->cfg, SAM_DMAC_CH_CFG_OFFSET);
 
-  /* Program the DSCR register with the pointer to the firstlink list entry. */
+  /* Program the DSCR register with the pointer to the firstlink list
+   * entry.
+   */
 
   sam_putdmach(dmach, (uint32_t)llhead, SAM_DMAC_CH_DSCR_OFFSET);
 
-  /* Finally, enable the channel by writing a ‘1’ to the CHER enable */
+  /* Finally, enable the channel by writing a 1 to the CHER enable */
 
   sam_putdmac(dmac, DMAC_CHER_ENA(dmach->chan), SAM_DMAC_CHER_OFFSET);
 
@@ -1829,7 +1832,7 @@ static int sam_dmac_interrupt(int irq, void *context, FAR void *arg)
                 {
                   /* Yes... Terminate the transfer with an error? */
 
-                  dmaerr("ERROR: DMA failed: %08x\n", regval);
+                  dmaerr("ERROR: DMA failed: %08" PRIx32 "\n", regval);
                   sam_dmaterminate(dmach, -EIO);
                 }
 
@@ -2299,7 +2302,9 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
   if (dmach->llhead)
     {
-      /* Save the callback info.  This will be invoked whent the DMA completes */
+      /* Save the callback info.  This will be invoked whent the DMA
+       * completes
+       */
 
       dmach->callback = callback;
       dmach->arg      = arg;

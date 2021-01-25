@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/lsm330.c
+ * drivers/sensors/lsm330_spi.c
  * Character driver for the ST LSM330 Tri-axis accelerometer and gyroscope.
  *
  *   Copyright (C) 2017-2018 RAF Research LLC. All rights reserved.
@@ -77,13 +77,13 @@ struct lsm330_dev_s
   FAR struct spi_dev_s *spi;          /* Pointer to the SPI instance */
   FAR struct lsm330_config_s *config; /* Pointer to the configuration of the
                                        * LSM330 sensor */
-  sem_t devicesem;                /* Manages exclusive access to this
-                                   * device */
-  sem_t datasem;                  /* Manages exclusive access to this
-                                   * structure */
-  struct sensor_data_s data;      /* The data as measured by the sensor */
-  uint8_t seek_address;           /* Current device address. */
-  uint8_t readonly;               /* 0 = writing to the device in enabled */
+  sem_t devicesem;                    /* Manages exclusive access to this
+                                       * device */
+  sem_t datasem;                      /* Manages exclusive access to this
+                                       * structure */
+  struct sensor_data_s data;          /* The data as measured by the sensor */
+  uint8_t seek_address;               /* Current device address. */
+  uint8_t readonly;                   /* 0 = writing to the device in enabled */
 };
 
 /****************************************************************************
@@ -241,56 +241,63 @@ static struct lsm330_dev_s *g_lsm330g_list = NULL;
 
 static struct lsm330_reg_pair_s g_default_lsm330_aclcr_values[] =
 {
-  /* CR5 ODR[3:0]        BDU ZEN YEN XEN             */
-  /*     0000=Off         0   0   0   0=all disabled */
+  /* CR5 ODR[3:0]        BDU ZEN YEN XEN
+   *     0000=Off         0   0   0   0=all disabled
+   */
 
   {
     .addr  = LSM330_ACL_CTRL_REG5,
     .value = 0x00
   },
 
-  /* CR6 BW[2:1]   FSCALE[2:0] - -  SIM       */
-  /*     00=800Hz   10 0=16g   0 0  0=4-wire  */
+  /* CR6 BW[2:1]   FSCALE[2:0] - -  SIM
+   *     00=800Hz   10 0=16g   0 0  0=4-wire
+   */
 
   {
     .addr  = LSM330_ACL_CTRL_REG6,
     .value = 0x20
   },
 
-  /* CR7 BOOT FIFO_EN WTM_EN ADD_INC P1_MTY P1_WTM P1_OVR WTM_EN*/
-  /*      0      0      0      1       0      0      0       0  */
+  /* CR7 BOOT FIFO_EN WTM_EN ADD_INC P1_MTY P1_WTM P1_OVR WTM_EN
+   *      0      0      0      1       0      0      0       0
+   */
 
   {
     .addr  = LSM330_ACL_CTRL_REG7,
     .value = 0x10
   },
 
-  /* CR2 HYST1 -  SM1_PIN - - SM1_EN */
-  /*     000   0     0    0 0    0   */
+  /* CR2 HYST1 -  SM1_PIN - - SM1_EN
+   *     000   0     0    0 0    0
+   */
 
   {
     .addr  = LSM330_ACL_CTRL_REG2,
     .value = 0x00
   },
 
-  /* CR3 HYST2 -  SM2_PIN - - SM2_EN */
-  /*     000   0     0    0 0    0   */
+  /* CR3 HYST2 -  SM2_PIN - - SM2_EN
+   *     000   0     0    0 0    0
+   */
 
   {
     .addr  = LSM330_ACL_CTRL_REG3,
     .value = 0x00
   },
 
-  /* CR4 DR_EN IEA IEL INT2_EN INT1_EN  VFILT STRT */
-  /*       1    1   0     0       0       0    0   */
+  /* CR4 DR_EN IEA IEL INT2_EN INT1_EN  VFILT STRT
+   *       1    1   0     0       0       0    0
+   */
 
   {
     .addr  = LSM330_ACL_CTRL_REG4,
     .value = 0xc0
   },
 
-  /* CR5 ODR[3:0]        BDU ZEN YEN XEN            */
-  /*     1001=1600Hz      1   1   1   1=all enabled */
+  /* CR5 ODR[3:0]        BDU ZEN YEN XEN
+   *     1001=1600Hz      1   1   1   1=all enabled
+  */
 
   {
     .addr  = LSM330_ACL_CTRL_REG5,
@@ -311,40 +318,45 @@ static struct lsm330_reg_pair_s g_default_lsm330_aclcr_values[] =
 
 static struct lsm330_reg_pair_s g_default_lsm330_gyrocr_values[] =
 {
-  /* CR1  DR[1:0]   BW[1:0]    PD Zen Xen Yen  */
-  /*      1 1=760Hz 1 1=100Hz  1   1   1   1   */
+  /* CR1  DR[1:0]   BW[1:0]    PD Zen Xen Yen
+   *      1 1=760Hz 1 1=100Hz  1   1   1   1
+   */
 
   {
     .addr =  LSM330_GYRO_CTRL_REG1,
     .value = 0xff
   },
 
-  /* CR2 EXTRen LVLen HPM[1:0]  HPCF[3:0]     */
-  /*      0      0    00=Normal xxxx  Default */
+  /* CR2 EXTRen LVLen HPM[1:0]  HPCF[3:0]
+   *      0      0    00=Normal xxxx  Default
+   */
 
   {
     .addr  = LSM330_GYRO_CTRL_REG2,
     .value = 0x00
   },
 
-  /* CR3 I1_Int1 I1_Boot H_Lactive PP_OD I2_DRDY I2_WTM I2_ORun I2_Empty */
-  /*       0        0       0        0      0      0      0        0     */
+  /* CR3 I1_Int1 I1_Boot H_Lactive PP_OD I2_DRDY I2_WTM I2_ORun I2_Empty
+   *       0        0       0        0      0      0      0        0
+   */
 
   {
     .addr  = LSM330_GYRO_CTRL_REG3,
     .value = 0x00
   },
 
-  /* CR4 BDU BLE FS[1:0]   0 0 0 SIM      */
-  /*      1   0  01=500dps 0 0 0 0=4-wire */
+  /* CR4 BDU BLE FS[1:0]   0 0 0 SIM
+   *      1   0  01=500dps 0 0 0 0=4-wire
+   */
 
   {
     .addr  = LSM330_GYRO_CTRL_REG4,
     .value = 0x90
   },
 
-  /* CR5 BOOT FIFO_EN  - HPen INT1_Sel[1:0] Out_Sel[1:0] */
-  /*      0     0      0  0    00=LPF1        00=LPF1    */
+  /* CR5 BOOT FIFO_EN  - HPen INT1_Sel[1:0] Out_Sel[1:0]
+   *      0     0      0  0    00=LPF1        00=LPF1
+   */
 
   {
     .addr  = LSM330_GYRO_CTRL_REG5,
@@ -352,7 +364,7 @@ static struct lsm330_reg_pair_s g_default_lsm330_gyrocr_values[] =
   }
 };
 
-/******************************************************************************
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -365,7 +377,9 @@ static uint8_t lsm330_read_register(FAR struct lsm330_dev_s *dev,
 {
   uint8_t reg_data;
 
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it
+   * at the same time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -396,16 +410,18 @@ static uint8_t lsm330_read_register(FAR struct lsm330_dev_s *dev,
   return reg_data;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: lsm330_read_acl_registerblk
- ******************************************************************************/
+ ****************************************************************************/
 
 static void lsm330_read_acl_registerblk(FAR struct lsm330_dev_s *dev,
                                         uint8_t reg_addr,
                                         FAR uint8_t *reg_data,
                                         uint8_t xfercnt)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it
+   * at the same time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -438,16 +454,18 @@ static void lsm330_read_acl_registerblk(FAR struct lsm330_dev_s *dev,
   SPI_LOCK(dev->spi, false);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: lsm330_read_gyro_registerblk
- ******************************************************************************/
+ ****************************************************************************/
 
 static void lsm330_read_gyro_registerblk(FAR struct lsm330_dev_s *dev,
                                          uint8_t reg_addr,
                                          FAR uint8_t *reg_data,
                                          uint8_t xfercnt)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it
+   * at the same time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -489,7 +507,9 @@ static void lsm330_write_register(FAR struct lsm330_dev_s *dev,
                                   uint8_t reg_addr,
                                   uint8_t reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it
+   * at the same time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -528,7 +548,9 @@ static void lsm330_write_acl_registerblk(FAR struct lsm330_dev_s *dev,
                                          FAR uint8_t *reg_data,
                                          uint8_t xfercnt)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it
+   * at the same time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -570,7 +592,9 @@ static void lsm330_write_gyro_registerblk(FAR struct lsm330_dev_s *dev,
                                           FAR uint8_t *reg_data,
                                           uint8_t xfercnt)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it
+   * at the same time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -671,8 +695,7 @@ static int lsm330acl_dvr_open(FAR void *instance_handle, int32_t arg)
     {
       sninfo("INFO: LSM330 Accelerometer is already open.\n");
 
-      set_errno(-EBUSY);
-      return -1;
+      return -EBUSY;
     }
 
   /* Read the ID Register */
@@ -686,11 +709,10 @@ static int lsm330acl_dvr_open(FAR void *instance_handle, int32_t arg)
     {
       /* Made info log level to permit open being used as a device probe. */
 
-      snwarn("INFO: "
-             "Device ID (0x%02X) does not match expected LSM330 Acl ID (0x%02).\n",
+      snwarn("INFO: Device ID (0x%02X) "
+             "does not match expected LSM330 Acl ID (0x%02).\n",
              reg_content, LSM330_ACL_IDREG_VALUE);
 
-      set_errno(ENODEV);
       priv->readonly = true;
     }
   else  /* ID matches */
@@ -765,8 +787,7 @@ static int lsm330gyro_dvr_open(FAR void *instance_handle, int32_t arg)
   if (ret < 0)
     {
       sninfo("INFO: LSM330 Gyroscope is already open.\n");
-      set_errno(-EBUSY);
-      return -1;
+      return -EBUSY;
     }
 
   /* Read the ID Register */
@@ -778,13 +799,14 @@ static int lsm330gyro_dvr_open(FAR void *instance_handle, int32_t arg)
 
   if (reg_content != LSM330_GYRO_IDREG_VALUE)
     {
-      /* Made warning log level to permit open being used as a device probe. */
+      /* Made warning log level to permit open being used as
+       * a device probe.
+       */
 
-      snwarn("INFO: "
-             "Device ID (0x%02X) does not match expected LSM330 Gyro ID (0x%02).\n",
+      snwarn("INFO: Device ID (0x%02X) "
+             "does not match expected LSM330 Gyro ID (0x%02).\n",
              reg_content, LSM330_GYRO_IDREG_VALUE);
 
-      set_errno(ENODEV);
       priv->readonly = true;
     }
   else /* ID matches */
@@ -838,7 +860,7 @@ static int lsm330gyro_dvr_open(FAR void *instance_handle, int32_t arg)
 
 /****************************************************************************
  * Name: lsm330acl_dvr_close
- ******************************************************************************/
+ ****************************************************************************/
 
 static int lsm330acl_dvr_close(FAR void *instance_handle, int32_t arg)
 {
@@ -859,7 +881,7 @@ static int lsm330acl_dvr_close(FAR void *instance_handle, int32_t arg)
 
 /****************************************************************************
  * Name: lsm330gyro_dvr_close
- ******************************************************************************/
+ ****************************************************************************/
 
 static int lsm330gyro_dvr_close(FAR void *instance_handle, int32_t arg)
 {
@@ -900,8 +922,8 @@ static ssize_t lsm330acl_dvr_read(FAR void *instance_handle,
  * Name: lsm330gyro_dvr_read
  ****************************************************************************/
 
-static ssize_t lsm330gyro_dvr_read(FAR void *instance_handle, FAR char *buffer,
-                           size_t buflen)
+static ssize_t lsm330gyro_dvr_read(FAR void *instance_handle,
+                                   FAR char *buffer, size_t buflen)
 {
   FAR struct lsm330_dev_s *priv = (FAR struct lsm330_dev_s *)instance_handle;
 
@@ -925,8 +947,7 @@ static ssize_t lsm330acl_dvr_write(FAR void *instance_handle,
 
   if (priv->readonly)
     {
-      set_errno(-EROFS);
-      return -1;
+      return -EROFS;
     }
 
   lsm330_write_acl_registerblk(priv, priv->seek_address, (uint8_t *)buffer,
@@ -947,8 +968,7 @@ static ssize_t lsm330gyro_dvr_write(FAR void *instance_handle,
 
   if (priv->readonly)
     {
-      set_errno(-EROFS);
-      return -1;
+      return -EROFS;
     }
 
   lsm330_write_gyro_registerblk(priv, priv->seek_address,
@@ -960,7 +980,8 @@ static ssize_t lsm330gyro_dvr_write(FAR void *instance_handle,
  * Name: lsm330acl_dvr_seek
  ****************************************************************************/
 
-static off_t lsm330acl_dvr_seek(FAR void *instance_handle, off_t offset, int whence)
+static off_t lsm330acl_dvr_seek(FAR void *instance_handle,
+                                off_t offset, int whence)
 {
   FAR struct lsm330_dev_s *priv = (FAR struct lsm330_dev_s *)instance_handle;
   off_t reg;
@@ -973,8 +994,7 @@ static off_t lsm330acl_dvr_seek(FAR void *instance_handle, off_t offset, int whe
         reg = priv->seek_address + offset;
         if (0 > reg || reg > LSM330_ACL_LAST)
           {
-            set_errno(-EINVAL);
-            return -1;
+            return -EINVAL;
           }
 
         priv->seek_address = reg;
@@ -987,16 +1007,14 @@ static off_t lsm330acl_dvr_seek(FAR void *instance_handle, off_t offset, int whe
       case SEEK_SET:  /* seek to designated address */
         if (0 > offset || offset > LSM330_ACL_LAST)
           {
-            set_errno(-EINVAL);
-            return -1;
+            return -EINVAL;
           }
 
         priv->seek_address = offset;
         break;
 
     default:  /* Invalid whence */
-        set_errno(-EINVAL);
-        return -1;
+        return -EINVAL;
     }
 
   return priv->seek_address;
@@ -1020,8 +1038,7 @@ static off_t lsm330gyro_dvr_seek(FAR void *instance_handle, off_t offset,
         reg = priv->seek_address + offset;
         if (0 > reg || reg > LSM330_GYRO_LAST)
           {
-            set_errno(-EINVAL);
-            return -1;
+            return -EINVAL;
           }
 
         priv->seek_address = reg;
@@ -1034,16 +1051,14 @@ static off_t lsm330gyro_dvr_seek(FAR void *instance_handle, off_t offset,
       case SEEK_SET:  /* seek to designated address */
         if (0 > offset || offset > LSM330_GYRO_LAST)
           {
-            set_errno(-EINVAL);
-            return -1;
+            return -EINVAL;
           }
 
         priv->seek_address = offset;
         break;
 
       default:  /* Invalid whence */
-        set_errno(-EINVAL);
-        return -1;
+        return -EINVAL;
     }
 
   return priv->seek_address;
@@ -1090,7 +1105,7 @@ static int lsm330_dvr_ioctl(FAR void *instance_handle, int cmd,
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void lsm330_dvr_exchange(FAR void *instance_handle,
                                 FAR const void *txbuffer,
@@ -1101,7 +1116,9 @@ static void lsm330_dvr_exchange(FAR void *instance_handle,
 
   sninfo("In lsm330_dvr_exchange: Handle=0x%08X\n", instance_handle);
 
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it
+   * at the same time
+   */
 
   SPI_LOCK(spi, true);
 
@@ -1253,7 +1270,8 @@ static off_t lsm330acl_seek(FAR struct file *filep, off_t offset, int whence)
  * Name: lsm330gyro_seek
  ****************************************************************************/
 
-static off_t lsm330gyro_seek(FAR struct file *filep, off_t offset, int whence)
+static off_t lsm330gyro_seek(FAR struct file *filep,
+                             off_t offset, int whence)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct lsm330_dev_s *priv = inode->i_private;

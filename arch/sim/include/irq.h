@@ -52,12 +52,15 @@
   /* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
 
 #  define XCPTCONTEXT_REGS    8
+#  define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
 #elif defined(CONFIG_HOST_X86) || defined(CONFIG_SIM_M32)
   /* Storage order: %ebx, %esi, %edi, %ebp, sp, and return PC */
 
 #  define XCPTCONTEXT_REGS    6
+#  define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 #elif defined(CONFIG_HOST_ARM)
 #  define XCPTCONTEXT_REGS    16
+#  define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 #endif
 
 /****************************************************************************
@@ -69,7 +72,7 @@
 #if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
 typedef unsigned long xcpt_reg_t;
 #else
-typedef int xcpt_reg_t;
+typedef unsigned int xcpt_reg_t;
 #endif
 
 /* This struct defines the way the registers are stored */

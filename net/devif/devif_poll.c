@@ -167,20 +167,24 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
 
               if (ipv6->proto == IP_PROTO_ICMP6)
                 {
-                  /* Let 6LoWPAN convert IPv6 ICMPv6 output into radio frames. */
+                  /* Let 6LoWPAN convert IPv6 ICMPv6 output into radio
+                   * frames.
+                   */
 
                   sixlowpan_icmpv6_send(dev, dev, ipv6);
                 }
               else
                 {
-                  nerr("ERROR: ICMPv6 protocol error: %u...  Packet dropped\n",
+                  nerr("ERROR: ICMPv6 protocol error: %u..."
+                        "  Packet dropped\n",
                        ipv6->proto);
                 }
             }
           else
 #endif
             {
-              nerr("ERROR: Unhandled packet dropped.  pkttype=%u protocol=%u\n",
+              nerr("ERROR: Unhandled packet dropped."
+                    "  pkttype=%u protocol=%u\n",
                     pkttype, ipv6->proto);
             }
 
@@ -212,7 +216,9 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
   FAR struct pkt_conn_s *pkt_conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated packet connections and perform the poll action */
+  /* Traverse all of the allocated packet connections and perform the poll
+   * action.
+   */
 
   while (!bstop && (pkt_conn = pkt_nextconn(pkt_conn)))
     {
@@ -234,7 +240,7 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_PKT */
 
 /****************************************************************************
- * Name: devif_poll_pkt_connections
+ * Name: devif_poll_can_connections
  *
  * Description:
  *   Poll all packet connections for available packets to send.
@@ -290,7 +296,9 @@ static int devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
   FAR struct bluetooth_conn_s *bluetooth_conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated packet connections and perform the poll action */
+  /* Traverse all of the allocated packet connections and perform the poll
+   * action.
+   */
 
   while (!bstop && (bluetooth_conn = bluetooth_conn_next(bluetooth_conn)))
     {
@@ -326,7 +334,9 @@ static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
   FAR struct ieee802154_conn_s *ieee802154_conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated packet connections and perform the poll action */
+  /* Traverse all of the allocated packet connections and perform the poll
+   * action.
+   */
 
   while (!bstop && (ieee802154_conn = ieee802154_conn_next(ieee802154_conn)))
     {
@@ -358,7 +368,9 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
   FAR struct icmp_conn_s *conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated ICMP connections and perform the poll action */
+  /* Traverse all of the allocated ICMP connections and perform the poll
+   * action.
+   */
 
   while (!bstop && (conn = icmp_nextconn(conn)) != NULL)
     {
@@ -394,14 +406,16 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
   FAR struct icmpv6_conn_s *conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated ICMPV6 connections and perform the poll action */
+  /* Traverse all of the allocated ICMPV6 connections and perform the poll
+   * action.
+   */
 
   do
     {
       /* Perform the ICMPV6 poll
-       * Note: conn equal NULL in the first iteration means poll dev's callback list
-       * since icmpv6_autoconfig and icmpv6_neighbor still append it's callback into
-       * this list.
+       * Note: conn equal NULL in the first iteration means poll dev's
+       * callback list since icmpv6_autoconfig and icmpv6_neighbor still
+       * append it's callback into this list.
        */
 
       icmpv6_poll(dev, conn);
@@ -526,7 +540,9 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
   FAR struct udp_conn_s *conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated UDP connections and perform the poll action */
+  /* Traverse all of the allocated UDP connections and perform the poll
+   * action.
+   */
 
   while (!bstop && (conn = udp_nextconn(conn)))
     {
@@ -610,7 +626,9 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
   FAR struct tcp_conn_s *conn  = NULL;
   int bstop = 0;
 
-  /* Traverse all of the active TCP connections and perform the poll action. */
+  /* Traverse all of the active TCP connections and perform the poll
+   * action.
+   */
 
   while (!bstop && (conn = tcp_nextconn(conn)))
     {
@@ -652,9 +670,9 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
  *   should do only if it cannot accept further write data).
  *
  *   When the callback function is called, there may be an outbound packet
- *   waiting for service in the device packet buffer, and if so the d_len field
- *   is set to a value larger than zero. The device driver should then send
- *   out the packet.
+ *   waiting for service in the device packet buffer, and if so the d_len
+ *   field is set to a value larger than zero. The device driver should then
+ *   send out the packet.
  *
  * Assumptions:
  *   This function is called from the MAC device driver with the network
@@ -687,7 +705,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 #endif
 #ifdef CONFIG_NET_CAN
     {
-      /* Check for pending packet socket transfer */
+      /* Check for pending CAN socket transfer */
 
       bstop = devif_poll_can_connections(dev, callback);
     }
@@ -772,7 +790,9 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 #endif
 #ifdef CONFIG_NET_IPFORWARD
     {
-      /* Traverse all of the tasks waiting to forward a packet to this device. */
+      /* Traverse all of the tasks waiting to forward a packet to this
+       * device.
+       */
 
       bstop = devif_poll_forward(dev, callback);
     }
@@ -790,7 +810,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
  * Name: devif_timer
  *
  * Description:
- *   These function will traverse each active network connection structure and
+ *   This function will traverse each active network connection structure and
  *   perform network timer operations. The Ethernet driver MUST implement
  *   logic to periodically call devif_timer().
  *
@@ -800,9 +820,9 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
  *   should do only if it cannot accept further write data).
  *
  *   When the callback function is called, there may be an outbound packet
- *   waiting for service in the device packet buffer, and if so the d_len field
- *   is set to a value larger than zero. The device driver should then send
- *   out the packet.
+ *   waiting for service in the device packet buffer, and if so the d_len
+ *   field is set to a value larger than zero.  The device driver should then
+ *   send out the packet.
  *
  * Assumptions:
  *   This function is called from the MAC device driver with the network
@@ -817,16 +837,6 @@ int devif_timer(FAR struct net_driver_s *dev, int delay,
   int hsec = TICK2HSEC(delay);
 #endif
   int bstop = false;
-
-#ifdef CONFIG_NET_IPv4_REASSEMBLY
-  /* Increment the timer used by the IP reassembly logic */
-
-  if (g_reassembly_timer != 0 &&
-      g_reassembly_timer < CONFIG_NET_IPv4_REASS_MAXAGE)
-    {
-      g_reassembly_timer += hsec;
-    }
-#endif
 
 #ifdef NET_TCP_HAVE_STACK
   /* Traverse all of the active TCP connections and perform the

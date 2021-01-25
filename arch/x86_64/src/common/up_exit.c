@@ -153,6 +153,12 @@ void up_exit(int status)
 
   tcb = this_task();
 
+  /* Adjusts time slice for SCHED_RR & SCHED_SPORADIC cases
+   * NOTE: the API also adjusts the global IRQ control for SMP
+   */
+
+  nxsched_resume_scheduler(tcb);
+
   /* Context switch, rearrange MMU */
 
   up_restore_auxstate(tcb);

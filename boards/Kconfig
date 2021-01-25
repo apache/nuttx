@@ -74,6 +74,13 @@ config ARCH_BOARD_AXOLOTI
 		Axoloti synthesizer board based on the STMicro STM32F427IGH6 MCU.
 		See: http://www.axoloti.com/
 
+config ARCH_BOARD_BL602EVB
+	bool "BouffaloLab BL602EVB Board"
+	depends on ARCH_CHIP_BL602
+	---help---
+		This is the board configuration for the port of NuttX to the BouffaloLab BL602EVB
+		board.  This board features the RISC-V rv32imfc core
+
 config ARCH_BOARD_C5471EVM
 	bool "Spectrum Digital C5471 evaluation board"
 	depends on ARCH_CHIP_C5471
@@ -188,8 +195,8 @@ config ARCH_BOARD_QUICKFEATHER
 		MC3635 accelerometer, DPS310 pressure sensor, IM69D130 PDM microphone,
 		internal programmable FPGA fabric.
 
-config ARCH_BOARD_ESP32CORE
-	bool "Espressif ESP32 Core board V2"
+config ARCH_BOARD_ESP32_DEVKITC
+	bool "Espressif ESP32 DevkitC board V4"
 	depends on ARCH_CHIP_ESP32
 	select ARCH_HAVE_LEDS
 	---help---
@@ -199,6 +206,26 @@ config ARCH_BOARD_ESP32CORE
 		bus of these CPUs. With some minor exceptions, the address mapping
 		of two CPUs is symmetric, meaning they use the same addresses to
 		access the same memory.
+
+config ARCH_BOARD_ESP32_ETHERNETKIT
+	bool "Espressif ESP32 Ethernet Kit"
+	depends on ARCH_CHIP_ESP32
+	---help---
+		The ESP32-Ethernet-Kit is an Ethernet-to-Wi-Fi development board that enables
+  		Ethernet devices to be interconnected over Wi-Fi. At the same time, to provide
+  		more flexible power supply options, the ESP32-Ethernet-Kit also supports power
+  		over Ethernet (PoE).
+
+config ARCH_BOARD_ESP32_WROVERKIT
+	bool "Espressif ESP-WROVER-KIT"
+	depends on ARCH_CHIP_ESP32
+	select ARCH_HAVE_LEDS
+	---help---
+		ESP-WROVER-KIT is an ESP32-based development board produced by Espressif.
+		ESP-WROVER-KIT features the following integrated components:
+  			ESP32-WROVER-B module
+  			LCD screen
+  			MicroSD card slot
 
 config ARCH_BOARD_EZ80F910200KITG
 	bool "ZiLOG ez80f910200kitg development kit"
@@ -1757,6 +1784,15 @@ config ARCH_BOARD_B_G474E_DPOW1
 		MCU, a Cortex-M4 with FPU, 170 MHz, 128 KB SRAM, 512 KB code.
 		See boards/arm/stm32/b-g474e-dpow1/README.txt.
 
+config ARCH_BOARD_NUCLEO_G431RB
+	bool "STM32G431RB Nucleo G431RB"
+	depends on ARCH_CHIP_STM32G431R
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo-G431RB board based on the STMicro STM32G431RB MCU.
+
 config ARCH_BOARD_B_L072Z_LRWAN1
 	bool "B-L072Z-LRWAN1"
 	depends on ARCH_CHIP_STM32L072CZ
@@ -1877,6 +1913,16 @@ config ARCH_BOARD_TEENSY_3X
 		Teensy-3.0 has the same schematic (although some pins are not used on the
 		Teensy-3.0).  the primary difference is that the Teensy 3.0 has a
 		MK20DX128VLH5 with slightly less capability.
+
+config ARCH_BOARD_TEENSY_4X
+	bool "PJRC Teensy++ 4.x board"
+	depends on ARCH_CHIP_MIMXRT1062DVL6A
+	select ARCH_HAVE_LEDS
+	---help---
+		This is the port of NuttX to the PJRC Teensy++ 4.x board.  This board is
+		developed by http://pjrc.com/teensy/.  The Teensy++ 4.x is based
+		on an NXP MIMXRT1062DVL6A MCU. The port can support both Teensy 4.0 and
+		Teensy 4.1 boards.
 
 config ARCH_BOARD_TEENSY_LC
 	bool "Teensy LC"
@@ -2153,6 +2199,7 @@ config ARCH_BOARD
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
 	default "axoloti"                  if ARCH_BOARD_AXOLOTI
 	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
+	default "bl602evb"                 if ARCH_BOARD_BL602EVB
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
 	default "clicker2-stm32"           if ARCH_BOARD_CLICKER2_STM32
 	default "cloudctrl"                if ARCH_BOARD_CLOUDCTRL
@@ -2165,7 +2212,9 @@ config ARCH_BOARD
 	default "efm32gg-stk3700"          if ARCH_BOARD_EFM32GG_STK3700
 	default "ekk-lm3s9b96"             if ARCH_BOARD_EKKLM3S9B96
 	default "quickfeather"             if ARCH_BOARD_QUICKFEATHER
-	default "esp32-core"               if ARCH_BOARD_ESP32CORE
+	default "esp32-devkitc"            if ARCH_BOARD_ESP32_DEVKITC
+	default "esp32-ethernet-kit"       if ARCH_BOARD_ESP32_ETHERNETKIT
+	default "esp32-wrover-kit"         if ARCH_BOARD_ESP32_WROVERKIT
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
@@ -2320,6 +2369,7 @@ config ARCH_BOARD
 	default "stm32h747i-disco"         if ARCH_BOARD_STM32H747I_DISCO
 	default "stm32f746-ws"             if ARCH_BOARD_STM32F746_WS
 	default "b-g474e-dpow1"            if ARCH_BOARD_B_G474E_DPOW1
+	default "nucleo-g431rb"            if ARCH_BOARD_NUCLEO_G431RB
 	default "b-l072z-lrwan1"           if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"           if ARCH_BOARD_B_L475E_IOT01A
 	default "stm32l476vg-disco"        if ARCH_BOARD_STM32L476VG_DISCO
@@ -2331,6 +2381,7 @@ config ARCH_BOARD
 	default "sure-pic32mx"             if ARCH_BOARD_SUREPIC32MX
 	default "teensy-2.0"               if ARCH_BOARD_TEENSY_20
 	default "teensy-3.x"               if ARCH_BOARD_TEENSY_3X
+	default "teensy-4.x"               if ARCH_BOARD_TEENSY_4X
 	default "teensy-lc"                if ARCH_BOARD_TEENSY_LC
 	default "tm4c123g-launchpad"       if ARCH_BOARD_TM4C123G_LAUNCHPAD
 	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
@@ -2442,6 +2493,9 @@ source "boards/arm/imxrt/imxrt1050-evk/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1060_EVK
 source "boards/arm/imxrt/imxrt1060-evk/Kconfig"
+endif
+if ARCH_BOARD_TEENSY_4X
+source "boards/arm/imxrt/teensy-4.x/Kconfig"
 endif
 if ARCH_BOARD_FREEDOM_K28F
 source "boards/arm/kinetis/freedom-k28f/Kconfig"
@@ -2637,6 +2691,9 @@ source "boards/arm/samv7/samv71-xult/Kconfig"
 endif
 if ARCH_BOARD_B_G474E_DPOW1
 source "boards/arm/stm32/b-g474e-dpow1/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_G431RB
+source "boards/arm/stm32/nucleo-g431rb/Kconfig"
 endif
 if ARCH_BOARD_B_L072Z_LRWAN1
 source "boards/arm/stm32f0l0g0/b-l072z-lrwan1/Kconfig"
@@ -2980,8 +3037,14 @@ endif
 if ARCH_BOARD_RX65N_GRROSE
 source "boards/renesas/rx65n/rx65n-grrose/Kconfig"
 endif
-if ARCH_BOARD_ESP32CORE
-source "boards/xtensa/esp32/esp32-core/Kconfig"
+if ARCH_BOARD_ESP32_DEVKITC
+source "boards/xtensa/esp32/esp32-devkitc/Kconfig"
+endif
+if ARCH_BOARD_ESP32_ETHERNETKIT
+source "boards/xtensa/esp32/esp32-ethernet-kit/Kconfig"
+endif
+if ARCH_BOARD_ESP32_WROVERKIT
+source "boards/xtensa/esp32/esp32-wrover-kit/Kconfig"
 endif
 if ARCH_BOARD_Z16F2800100ZCOG
 source "boards/z16/z16f/z16f2800100zcog/Kconfig"
@@ -3009,6 +3072,9 @@ source "boards/z80/ez80/z20x/Kconfig"
 endif
 if ARCH_BOARD_Z80SIM
 source "boards/z80/z80/z80sim/Kconfig"
+endif
+if ARCH_BOARD_BL602EVB
+source "boards/risc-v/bl602/bl602evb/Kconfig"
 endif
 
 config BOARD_CRASHDUMP

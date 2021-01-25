@@ -51,6 +51,18 @@
 #include <nuttx/syslog/syslog.h>
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_SYSLOG_PRIORITY)
+static FAR const char * g_priority_str[] =
+  {
+    "EMERG", "ALERT", "CRIT", "ERROR",
+    "WARN", "NOTICE", "INFO", "DEBUG"
+  };
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -71,6 +83,11 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
   struct lib_syslogstream_s stream;
   int ret;
+#if defined(CONFIG_SYSLOG_TIMESTAMP_FORMATTED)
+  time_t time;
+  struct tm tm;
+  char date_buf[CONFIG_SYSLOG_TIMESTAMP_BUFFER];
+#endif
 
 #ifdef CONFIG_SYSLOG_TIMESTAMP
   struct timespec ts;
@@ -132,10 +149,77 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #if defined(CONFIG_SYSLOG_TIMESTAMP)
   /* Pre-pend the message with the current time, if available */
 
+#if defined(CONFIG_SYSLOG_TIMESTAMP_FORMATTED)
+  time = ts.tv_sec;
+#if defined(CONFIG_SYSLOG_TIMESTAMP_LOCALTIME)
+  localtime_r(&time, &tm);
+#else
+  gmtime_r(&time, &tm);
+#endif
+
+  ret = strftime(date_buf, CONFIG_SYSLOG_TIMESTAMP_BUFFER,
+                 CONFIG_SYSLOG_TIMESTAMP_FORMAT, &tm);
+
+  if (ret > 0)
+    {
+      ret = lib_sprintf(&stream.public, "[%s] ", date_buf);
+    }
+#else
   ret = lib_sprintf(&stream.public, "[%5jd.%06ld] ",
                     (uintmax_t)ts.tv_sec, ts.tv_nsec / 1000);
+#endif
 #else
   ret = 0;
+#endif
+
+#if defined(CONFIG_SYSLOG_PROCESSID)
+  /* Pre-pend the Process ID */
+
+  ret += lib_sprintf(&stream.public, "[%2d] ", (int)getpid());
+#endif
+
+#if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
+  /* Set the terminal style according to message priority. */
+
+  switch (priority)
+    {
+      case LOG_EMERG:   /* Red, Bold, Blinking */
+        ret += lib_sprintf(&stream.public, "\e[31;1;5m");
+        break;
+
+      case LOG_ALERT:   /* Red, Bold */
+        ret += lib_sprintf(&stream.public, "\e[31;1m");
+        break;
+
+      case LOG_CRIT:    /* Red, Bold */
+        ret += lib_sprintf(&stream.public, "\e[31;1m");
+        break;
+
+      case LOG_ERR:     /* Red */
+        ret += lib_sprintf(&stream.public, "\e[31m");
+        break;
+
+      case LOG_WARNING: /* Yellow */
+        ret += lib_sprintf(&stream.public, "\e[33m");
+        break;
+
+      case LOG_NOTICE:  /* Bold */
+        ret += lib_sprintf(&stream.public, "\e[1m");
+        break;
+
+      case LOG_INFO:    /* Normal */
+        break;
+
+      case LOG_DEBUG:   /* Dim */
+        ret += lib_sprintf(&stream.public, "\e[2m");
+        break;
+    }
+#endif
+
+#if defined(CONFIG_SYSLOG_PRIORITY)
+  /* Pre-pend the message priority. */
+
+  ret += lib_sprintf(&stream.public, "[%6s] ", g_priority_str[priority]);
 #endif
 
 #if defined(CONFIG_SYSLOG_PREFIX)
@@ -147,6 +231,12 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   /* Generate the output */
 
   ret += lib_vsprintf(&stream.public, fmt, *ap);
+
+#if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
+  /* Reset the terminal style back to normal. */
+
+  ret += lib_sprintf(&stream.public, "\e[0m");
+#endif
 
 #ifdef CONFIG_SYSLOG_BUFFER
   /* Flush and destroy the syslog stream buffer */

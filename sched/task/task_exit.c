@@ -119,11 +119,11 @@ int nxtask_exit(void)
   rtcb = this_task();
 #endif
 
-  /* Because clearing the global IRQ control in nxsched_remove_readytorun()
-   * was moved to nxsched_resume_scheduler(). So call the API here.
+  /* NOTE: nxsched_resume_scheduler() was moved to up_exit()
+   * because the global IRQ control for SMP should be deferred until
+   * context switching, otherwise, the context switching would be done
+   * without a critical section
    */
-
-  nxsched_resume_scheduler(rtcb);
 
   /* We are now in a bad state -- the head of the ready to run task list
    * does not correspond to the thread that is running.  Disabling pre-
@@ -162,12 +162,6 @@ int nxtask_exit(void)
    * To prevent from aquiring, increment rtcb->irqcount here.
    */
 
-  if (rtcb->irqcount == 0)
-    {
-      spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
-                  &g_cpu_irqlock);
-    }
-
   rtcb->irqcount++;
 #endif
 
@@ -175,12 +169,6 @@ int nxtask_exit(void)
 
 #ifdef CONFIG_SMP
   rtcb->irqcount--;
-
-  if (rtcb->irqcount == 0)
-    {
-      spin_clrbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
-                  &g_cpu_irqlock);
-    }
 #endif
 
   rtcb->task_state = TSTATE_TASK_RUNNING;

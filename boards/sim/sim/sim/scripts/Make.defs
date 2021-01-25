@@ -54,13 +54,13 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
 endif
 
 ARCHCPUFLAGS = -fno-builtin
-ARCHCPUFLAGSXX = -fno-builtin -nostdinc++ -fcheck-new
+ARCHCPUFLAGSXX = -fno-builtin -nostdinc++
 ifeq ($(CONFIG_CXX_EXCEPTION),)
-  ARCHCPUFLAGSXX += -fno-exceptions
+  ARCHCPUFLAGSXX += -fno-exceptions -fcheck-new
 endif
 ARCHPICFLAGS = -fpic
-ARCHWARNINGS = -Wstrict-prototypes -Wundef
-ARCHWARNINGSXX = -Wundef
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 
 # Add -fvisibility=hidden
 # Because we don't want export nuttx's symbols to share libraries
@@ -93,12 +93,38 @@ NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
+# Note: -fshort-wchar for the case where NuttX and the host OS have
+# differnt wchar_t. On Nuttx, it's uint16_t. On macOS, it's 32-bit.
 CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+   $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe \
+   -fshort-wchar
 CXXFLAGS := $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGSXX) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
-CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+   $(ARCHCPUFLAGSXX) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe \
+   -fshort-wchar
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) \
+   -fshort-wchar
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+
+ifeq ($(CONFIG_LIBCXX),y)
+  # Why c++14?
+  #  * libcxx seems to require c++11.
+  #  * The compiler defaults varies:
+  #      clang/macOS (from xcode): 199711L
+  #      gcc/ubuntu:               201402L
+  #  * There is a precedent to use c++14.
+  #    (boards/arm/stm32l4/nucleo-l476rg/scripts/Make.defs)
+  CXXFLAGS += -std=c++14
+
+  ifeq ($(CONFIG_HOST_MACOS),y)
+    # macOS uses libc++abi
+    CXXFLAGS += -DLIBCXX_BUILDING_LIBCXXABI
+  else
+    # Linux C++ ABI seems vary.
+    # Probably __GLIBCXX__ is the best bet.
+    # XXX what to do for windows?
+    CXXFLAGS += -D__GLIBCXX__
+  endif
+endif
 
 # Loadable module definitions
 

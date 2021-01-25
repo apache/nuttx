@@ -872,7 +872,7 @@ static void cdcecm_txavail_work(FAR void *arg)
 
   if (self->bifup)
     {
-      devif_poll(&self->dev, cdcecm_txpoll);
+      devif_timer(&self->dev, 0, cdcecm_txpoll);
     }
 
   net_unlock();

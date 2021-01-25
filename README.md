@@ -102,6 +102,10 @@ Get help using NuttX or contribute to the project on our mailing lists:
     * View the archives at:
       <https://www.mail-archive.com/commits@nuttx.apache.org/>
 
+## Reporting Security Issues
+
+Found a vulnerability? See our security policy [here](.github/SECURITY.md).
+
 ## Issue Tracker
 
 ### Bug Reports:
@@ -284,7 +288,7 @@ Cygwin configuration:
           gcc-core         byacc        libmpfr-dev
           gcc-g++          gperf        libmpc-dev
           flex             gdb          automake-1.15
-          libncurses-dev   libgmp-dev
+          libncurses-dev   libgmp-dev   curl
 
 After installing Cygwin, you will get lots of links for installed
 tools and shells.  I use the RXVT native shell.  It is fast and reliable
@@ -315,6 +319,7 @@ README.txt file in the tools repository.  This requires the following
 additional tools:
 
     pacman -S bison
+    pacman -S curl
     pacman -S gperf
     pacman -S ncurses-devel
     pacman -S automake-wrapper
@@ -1932,7 +1937,9 @@ Below is a guide to the available README files in the NuttX source tree:
      |   |   |- imxrt/
      |   |   |   |- imxrt1050-evk/
      |   |   |   |   `- README.txt
-     |   |   |   `- imxrt1060-evk/
+     |   |   |   |- imxrt1060-evk/
+     |   |   |   |   `- README.txt
+     |   |   |   `- teensy-4.x/
      |   |   |       `- README.txt
      |   |   |- kinetis/
      |   |   |   |- freedom-k28f/

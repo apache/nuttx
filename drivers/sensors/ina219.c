@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
@@ -94,7 +95,7 @@ struct ina219_dev_s
   FAR struct i2c_master_s *i2c;  /* I2C interface */
   uint8_t addr;                  /* I2C address */
   uint16_t config;               /* INA 219 config shadow */
-  int32_t shunt_resistor_value; /* micro-ohms, max 2.15 kohms */
+  int32_t shunt_resistor_value;  /* micro-ohms, max 2.15 kohms */
 };
 
 /****************************************************************************
@@ -150,14 +151,16 @@ static int ina219_access(FAR struct ina219_dev_s *priv,
   struct i2c_msg_s msg[I2C_NOSTARTSTOP_MSGS];
   int ret;
 
-  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].frequency = CONFIG_INA219_I2C_FREQUENCY;
+  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].frequency =
+    CONFIG_INA219_I2C_FREQUENCY;
 
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr = priv->addr;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].flags = 0;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].buffer = &start_register_address;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].length = 1;
 
-  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].addr = msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr;
+  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].addr =
+    msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr;
   msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].flags = reading ? I2C_M_READ : 0;
   msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].buffer = register_value;
   msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].length = data_length;
@@ -257,7 +260,7 @@ static int ina219_readpower(FAR struct ina219_dev_s *priv,
 
   buffer->current = (int32_t)tmp;
 
-  sninfo("Voltage: %u uV, Current: %d uA\n",
+  sninfo("Voltage: %" PRIu32 " uV, Current: %" PRId32 " uA\n",
          buffer->voltage, buffer->current);
 
   return OK;

@@ -47,7 +47,6 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/drivers/drivers.h>
 #include <nuttx/semaphore.h>
 
 #include "pipe_common.h"
@@ -160,6 +159,83 @@ static int pipe_close(FAR struct file *filep)
 }
 
 /****************************************************************************
+ * Name: pipe_register
+ ****************************************************************************/
+
+static int pipe_register(size_t bufsize, int flags,
+                         FAR char *devname, size_t namesize)
+{
+  FAR struct pipe_dev_s *dev;
+  int pipeno;
+  int ret;
+
+  /* Get exclusive access to the pipe allocation data */
+
+  ret = nxsem_wait(&g_pipesem);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* Allocate a minor number for the pipe device */
+
+  pipeno = pipe_allocate();
+  if (pipeno < 0)
+    {
+      ret = pipeno;
+      goto errout_with_sem;
+    }
+
+  /* Create a pathname to the pipe device */
+
+  snprintf(devname, namesize, "/dev/pipe%d", pipeno);
+
+  /* Check if the pipe device has already been created */
+
+  if ((g_pipecreated & (1 << pipeno)) == 0)
+    {
+      /* No.. Allocate and initialize a new device structure instance */
+
+      dev = pipecommon_allocdev(bufsize);
+      if (!dev)
+        {
+          ret = -ENOMEM;
+          goto errout_with_pipe;
+        }
+
+      dev->d_pipeno = pipeno;
+
+      /* Register the pipe device */
+
+      ret = register_driver(devname, &pipe_fops, 0666, (FAR void *)dev);
+      if (ret != 0)
+        {
+          nxsem_post(&g_pipesem);
+          goto errout_with_dev;
+        }
+
+      /* Remember that we created this device */
+
+       g_pipecreated |= (1 << pipeno);
+    }
+
+  nxsem_post(&g_pipesem);
+  return OK;
+
+errout_with_dev:
+  pipecommon_freedev(dev);
+
+errout_with_pipe:
+  pipe_free(pipeno);
+
+errout_with_sem:
+  nxsem_post(&g_pipesem);
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -187,66 +263,57 @@ static int pipe_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-int nx_pipe(int fd[2], size_t bufsize, int flags)
+int file_pipe(FAR struct file *filep[2], size_t bufsize, int flags)
 {
-  FAR struct pipe_dev_s *dev = NULL;
   char devname[16];
-  int pipeno;
   int ret;
 
-  /* Get exclusive access to the pipe allocation data */
+  /* Register a new pipe device */
 
-  ret = nxsem_wait(&g_pipesem);
+  ret = pipe_register(bufsize, flags, devname, sizeof(devname));
   if (ret < 0)
     {
-      goto errout;
+      return ret;
     }
 
-  /* Allocate a minor number for the pipe device */
+  /* Get a write file descriptor */
 
-  pipeno = pipe_allocate();
-  if (pipeno < 0)
+  ret = file_open(filep[1], devname, O_WRONLY | flags);
+  if (ret < 0)
     {
-      nxsem_post(&g_pipesem);
-      ret = pipeno;
-      goto errout;
+      goto errout_with_driver;
     }
 
-  /* Create a pathname to the pipe device */
+  /* Get a read file descriptor */
 
-  snprintf(devname, sizeof(devname), "/dev/pipe%d", pipeno);
-
-  /* Check if the pipe device has already been created */
-
-  if ((g_pipecreated & (1 << pipeno)) == 0)
+  ret = file_open(filep[0], devname, O_RDONLY | flags);
+  if (ret < 0)
     {
-      /* No.. Allocate and initialize a new device structure instance */
-
-      dev = pipecommon_allocdev(bufsize);
-      if (!dev)
-        {
-          nxsem_post(&g_pipesem);
-          ret = -ENOMEM;
-          goto errout_with_pipe;
-        }
-
-      dev->d_pipeno = pipeno;
-
-      /* Register the pipe device */
-
-      ret = register_driver(devname, &pipe_fops, 0666, (FAR void *)dev);
-      if (ret != 0)
-        {
-          nxsem_post(&g_pipesem);
-          goto errout_with_dev;
-        }
-
-      /* Remember that we created this device */
-
-       g_pipecreated |= (1 << pipeno);
+      goto errout_with_wrfd;
     }
 
-  nxsem_post(&g_pipesem);
+  return OK;
+
+errout_with_wrfd:
+  file_close(filep[1]);
+
+errout_with_driver:
+  unregister_driver(devname);
+  return ret;
+}
+
+int nx_pipe(int fd[2], size_t bufsize, int flags)
+{
+  char devname[16];
+  int ret;
+
+  /* Register a new pipe device */
+
+  ret = pipe_register(bufsize, flags, devname, sizeof(devname));
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Get a write file descriptor */
 
@@ -273,17 +340,6 @@ errout_with_wrfd:
 
 errout_with_driver:
   unregister_driver(devname);
-
-errout_with_dev:
-  if (dev)
-    {
-      pipecommon_freedev(dev);
-    }
-
-errout_with_pipe:
-  pipe_free(pipeno);
-
-errout:
   return ret;
 }
 

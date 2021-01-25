@@ -190,8 +190,6 @@ static int do_socket_request(FAR struct usrsock_conn_s *conn, int domain,
  *     The protocol type or the specified protocol is not supported within
  *     this domain.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 int usrsock_socket(int domain, int type, int protocol,

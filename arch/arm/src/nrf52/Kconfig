@@ -626,3 +626,30 @@ config NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
 		Enable the workaround to fix SPI Master 1 byte transfer bug
 		which occurs in NRF52832 revision 1 and revision 2.
 endmenu
+
+menu "I2C Master Configuration"
+
+config NRF52_I2C_MASTER_DISABLE_NOSTART
+	bool "Disable the I2C Master NOSTART flag support"
+	default n
+	---help---
+		To combine two i2c messages that are part of a
+		single transaction (NO_STOP-NO_START) the nrf52
+		hardware requires these be joined into a single
+		transfer. This can be expensive and some devices
+		can get away with multi-part transfers as separate
+		transfers.  Enable this at your own risk!
+
+config NRF52_I2C_MASTER_COPY_BUF_SIZE
+	int "Static buffer size for NOSTART flag support"
+	depends on !NRF52_I2C_MASTER_DISABLE_NOSTART
+	default 4
+	---help---
+		To combine two i2c messages that are part of a
+		single transaction (NO_STOP-NO_START) the nrf52
+		hardware requires these be joined into a single
+		transfer. This static buffer will be used if the
+		transaction will fit otherwise it will fall back
+		on malloc.
+
+endmenu

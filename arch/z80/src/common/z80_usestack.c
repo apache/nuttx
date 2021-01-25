@@ -95,10 +95,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    */
 
 #ifdef CONFIG_STACK_COLORATION
-  if (tcb->pid != 0)
-    {
-      memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
-    }
+  memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
 #endif
 
   /* The Z80 uses a push-down stack:  the stack grows toward lower

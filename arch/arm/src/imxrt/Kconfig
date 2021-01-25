@@ -419,6 +419,14 @@ config IMXRT_LPUART_INVERT
 		Enable signal inversion UART support. The option enables support for the
 		TIOCSINVERT ioctl in the IMXRT serial driver.
 
+config IMXRT_LPUART_SINGLEWIRE
+	bool "Single Wire Support"
+	default n
+	depends on IMXRT_HAVE_LPUART
+	---help---
+		Enable single wire UART support.  The option enables support for the
+		TIOCSSINGLEWIRE ioctl in the IMXRT serial driver.
+
 endmenu # LPUART Configuration
 
 menu "FLEXCAN Peripherals"

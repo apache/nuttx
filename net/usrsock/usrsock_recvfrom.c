@@ -206,12 +206,18 @@ static int do_recvfrom_request(FAR struct usrsock_conn_s *conn,
  *   on return to indicate the actual size of the address stored there.
  *
  * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   psock    A reference to the socket structure of the socket
  *   buf      Buffer to receive data
  *   len      Length of buffer
  *   flags    Receive flags (ignored)
  *   from     Address of source (may be NULL)
  *   fromlen  The length of the address structure
+ *
+ * Returned Value:
+ *   On success, returns the number of characters received.  If no data is
+ *   available to be received and the peer has performed an orderly shutdown,
+ *   recvfrom() will return 0.  Otherwise, on any failure, a negated errno
+ *   value is returned.
  *
  ****************************************************************************/
 

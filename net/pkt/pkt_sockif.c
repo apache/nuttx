@@ -176,8 +176,8 @@ static int pkt_sockif_alloc(FAR struct socket *psock)
 static int pkt_setup(FAR struct socket *psock, int protocol)
 {
   /* Allocate the appropriate connection structure.  This reserves the
-   * the connection structure is is unallocated at this point.  It will
-   * not actually be initialized until the socket is connected.
+   * connection structure, it is unallocated at this point.  It will not
+   * actually be initialized until the socket is connected.
    *
    * Only SOCK_RAW is supported.
    */
@@ -314,7 +314,7 @@ static int pkt_connect(FAR struct socket *psock,
  *
  * Returned Value:
  *   Returns 0 (OK) on success.  On failure, it returns a negated errno
- *   value.  See accept() for a desrciption of the appropriate error value.
+ *   value.  See accept() for a description of the appropriate error value.
  *
  * Assumptions:
  *   The network is locked.
@@ -361,14 +361,14 @@ static int pkt_bind(FAR struct socket *psock,
       return -EBADF;
     }
 
-  /* Bind a raw socket to an network device. */
+  /* Bind a raw socket to a network device. */
 
   if (psock->s_type == SOCK_RAW)
     {
       FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
       FAR struct net_driver_s *dev;
 
-      /* Look at the addr and identify network interface */
+      /* Look at the addr and identify the network interface */
 
       ifindex = ((FAR struct sockaddr_ll *)addr)->sll_ifindex;
 
@@ -490,7 +490,7 @@ static int pkt_getpeername(FAR struct socket *psock,
  *
  * Returned Value:
  *   On success, zero is returned. On error, a negated errno value is
- *   returned.  See list() for the set of appropriate error values.
+ *   returned.  See listen() for the set of appropriate error values.
  *
  ****************************************************************************/
 

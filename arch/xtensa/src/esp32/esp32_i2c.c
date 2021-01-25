@@ -548,6 +548,8 @@ static void esp32_i2c_deinit(FAR struct esp32_i2c_priv_s *priv)
 {
   const struct esp32_i2c_config_s *config = priv->config;
 
+  priv->clk_freq = 0;
+
   modifyreg32(DPORT_PERIP_RST_EN_REG, 0, config->rst_bit);
   modifyreg32(DPORT_PERIP_CLK_EN_REG, config->clk_bit, 0);
 }
@@ -709,6 +711,7 @@ static int esp32_i2c_transfer(FAR struct i2c_master_s *dev,
           if (priv->error)
             {
               ret = -EIO;
+              break;
             }
           else
             {
@@ -782,6 +785,7 @@ static int esp32_i2c_irq(int cpuint, void *context, FAR void *arg)
   if (I2C_INT_ERR_EN_BITS & status)
     {
       priv->error = status & I2C_INT_ERR_EN_BITS;
+      esp32_i2c_set_reg(priv, I2C_INT_ENA_OFFSET, 0);
       nxsem_post(&priv->sem_isr);
     }
   else
@@ -858,12 +862,12 @@ FAR struct i2c_master_s *esp32_i2cbus_initialize(int port)
     {
 #ifdef CONFIG_ESP32_I2C0
     case 0:
-      priv = (struct esp32_i2c_priv_s *)&esp32_i2c0_priv;
+      priv = &esp32_i2c0_priv;
       break;
 #endif
 #ifdef CONFIG_ESP32_I2C1
     case 1:
-      priv = (struct esp32_i2c_priv_s *)&esp32_i2c1_priv;
+      priv = &esp32_i2c1_priv;
       break;
 #endif
     default:
@@ -945,6 +949,12 @@ int esp32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
     }
 
   leave_critical_section(flags);
+
+  up_disable_irq(priv->cpuint);
+  esp32_detach_peripheral(priv->config->cpu,
+                          priv->config->periph,
+                          priv->cpuint);
+  esp32_free_cpuint(priv->cpuint);
 
   esp32_i2c_deinit(priv);
 

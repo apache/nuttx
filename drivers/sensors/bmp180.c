@@ -43,6 +43,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <fixedmath.h>
 #include <errno.h>
@@ -135,8 +136,10 @@ struct bmp180_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr);
-static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr);
+static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv,
+                              uint8_t regaddr);
+static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv,
+                                uint8_t regaddr);
 static void bmp180_putreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr,
                            uint8_t regval);
 static void bmp180_updatecaldata(FAR struct bmp180_dev_s *priv);
@@ -223,7 +226,8 @@ static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
  *
  ****************************************************************************/
 
-static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
+static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv,
+                                uint8_t regaddr)
 {
   struct i2c_config_s config;
   uint16_t msb;
@@ -423,8 +427,8 @@ static void bmp180_read_press_temp(FAR struct bmp180_dev_s *priv)
   priv->bmp180_upress |= bmp180_getreg8(priv, BMP180_ADC_OUT_XLSB);
   priv->bmp180_upress = priv->bmp180_upress >> (8 - (oss >> 6));
 
-  sninfo("Uncompensated temperature = %d\n", priv->bmp180_utemp);
-  sninfo("Uncompensated pressure = %d\n", priv->bmp180_upress);
+  sninfo("Uncompensated temperature = %" PRId32 "\n", priv->bmp180_utemp);
+  sninfo("Uncompensated pressure = %" PRId32 "\n", priv->bmp180_upress);
 }
 
 /****************************************************************************
@@ -472,12 +476,13 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
 
   /* Calculate true temperature */
 
-  x1   = ((priv->bmp180_utemp - priv->bmp180_cal_ac6) * priv->bmp180_cal_ac5) >> 15;
+  x1   = ((priv->bmp180_utemp - priv->bmp180_cal_ac6) *
+          priv->bmp180_cal_ac5) >> 15;
   x2   = (priv->bmp180_cal_mc << 11) / (x1 + priv->bmp180_cal_md);
   b5   = x1 + x2;
 
   temp = (b5 + 8) >> 4;
-  sninfo("Compensated temperature = %d\n", temp);
+  sninfo("Compensated temperature = %" PRId32 "\n", temp);
   UNUSED(temp);
 
   /* Calculate true pressure */
@@ -508,7 +513,7 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
 
   press = press + ((x1 + x2 + 3791) >> 4);
 
-  sninfo("Compressed pressure = %d\n", press);
+  sninfo("Compressed pressure = %" PRId32 "\n", press);
   return press;
 }
 
@@ -557,7 +562,8 @@ static ssize_t bmp180_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen != 4)
     {
-      snerr("ERROR: You can't read something other than 32 bits (4 bytes)\n");
+      snerr("ERROR: You can't read something "
+            "other than 32 bits (4 bytes)\n");
       return -1;
     }
 

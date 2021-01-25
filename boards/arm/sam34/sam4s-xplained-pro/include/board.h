@@ -261,4 +261,20 @@
 
 #define BUTTON_SW0_BIT       (1 << BUTTON_SW0)
 
+/* NAND *********************************************************************/
+
+#define GPIO_SMC_RB   (GPIO_INPUT | GPIO_SMC_NWAIT)
+
+/* Address for transferring command bytes to the nandflash, CLE A22 */
+
+#define BOARD_NCS0_NAND_CMDADDR   0x60400000
+
+/* Address for transferring address bytes to the nandflash, ALE A21 */
+
+#define BOARD_NCS0_NAND_ADDRADDR  0x60200000
+
+/* Address for transferring data bytes to the nandflash. */
+
+#define BOARD_NCS0_NAND_DATAADDR  0x60000000
+
 #endif /* __BOARDS_ARM_SAM34_SAM4S_XPLAINED_PRO_INCLUDE_BOARD_H */

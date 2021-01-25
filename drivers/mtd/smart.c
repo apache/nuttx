@@ -6362,8 +6362,8 @@ static int smart_losetup(int minor, FAR const char *filename,
       for (x = 0; x < 256; x++)
         {
           snprintf(devpath, sizeof(devpath), "/dev/smart%d", x);
-          ret = stat(devpath, &sb);
-          if (ret != 0)
+          ret = nx_stat(devpath, &sb, 1);
+          if (ret < 0)
             {
               /* We can use this minor number */
 

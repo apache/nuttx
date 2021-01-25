@@ -86,7 +86,7 @@
 enum idtype_e
 {
   P_PID = 1,
-  P_GID = 2,
+  P_PGID = 2,
   P_ALL = 3
 };
 typedef enum idtype_e idtype_t;

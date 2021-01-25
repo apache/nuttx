@@ -43,7 +43,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <nuttx/drivers/drivers.h>
+#include <nuttx/fs/fs.h>
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
 

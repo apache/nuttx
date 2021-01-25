@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <debug.h>
 
@@ -103,7 +104,7 @@ static inline void rx65n_registerdump(void)
         ptr[REG_PC], ptr[REG_PSW]);
 
   _alert("FPSW: %08x ACC0LO: %08x ACC0HI: %08x ACC0GU: %08x"
-         "ACC1LO: %08x ACC1HI: %08x ACC1GU: %0.8x\n",
+         "ACC1LO: %08x ACC1HI: %08x ACC1GU: %08x\n",
          ptr[REG_FPSW], ptr[REG_ACC0LO], ptr[REG_ACC0HI],
          ptr[REG_ACC0GU], ptr[REG_ACC1LO],
          ptr[REG_ACC1HI], ptr[REG_ACC1GU]);
@@ -152,10 +153,10 @@ void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  _alert("sp:     %04x\n", sp);
+  _alert("sp:     %04" PRIx32 "\n", sp);
   _alert("IRQ stack:\n");
-  _alert("  base: %04x\n", istackbase);
-  _alert("  size: %04x\n", istacksize);
+  _alert("  base: %04" PRIx32 "\n", istackbase);
+  _alert("  size: %04" PRIx32 "\n", istacksize);
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -170,7 +171,7 @@ void up_dumpstate(void)
       /* Extract the user stack pointer from the register area */
 
       sp = rx65n_getusersp();
-      _alert("sp:     %04x\n", sp);
+      _alert("sp:     %04" PRIx32 "\n", sp);
     }
   else if (g_current_regs)
     {
@@ -181,12 +182,12 @@ void up_dumpstate(void)
   /* Show user stack info */
 
   _alert("User stack:\n");
-  _alert("  base: %04x\n", ustackbase);
-  _alert("  size: %04x\n", ustacksize);
+  _alert("  base: %04" PRIx32 "\n", ustackbase);
+  _alert("  size: %04" PRIx32 "\n", ustacksize);
 #else
-  _alert("sp:         %04x\n", sp);
-  _alert("stack base: %04x\n", ustackbase);
-  _alert("stack size: %04x\n", ustacksize);
+  _alert("sp:         %04" PRIx32 "\n", sp);
+  _alert("stack base: %04" PRIx32 "\n", ustackbase);
+  _alert("stack size: %04" PRIx32 "\n", ustacksize);
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user

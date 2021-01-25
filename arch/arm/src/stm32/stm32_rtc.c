@@ -41,14 +41,11 @@
 
 #include "chip.h"
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/* This file is only a thin shell that includes the correct RTC implementation
- * for the selected STM32 family.  The correct file cannot be selected by
- * the make system because it needs the intelligence that only exists in
- * chip.h that can associate an STM32 part number with an STM32 family.
+/* This file is only a thin shell that includes the correct RTC
+ * implementation for the selected STM32 family.  The correct file cannot be
+ * selected by the make system because it needs the intelligence that only
+ * exists in chip.h that can associate an STM32 part number with an STM32
+ * family.
  */
 
 /* The STM32 F1 has a simple battery-backed counter for its RTC and has a
@@ -58,9 +55,9 @@
 #if defined(CONFIG_STM32_STM32F10XX)
 #  include "stm32_rtcounter.c"
 
-/* The other families use a more traditional Realtime Clock/Calendar (RTCC) with
- * broken-out data/time in BCD format.  The backup registers are integrated into
- * the RTCC in these families.
+/* The other families use a more traditional Realtime Clock/Calendar (RTCC)
+ * with broken-out data/time in BCD format.  The backup registers are
+ * integrated into the RTCC in these families.
  */
 
 #elif defined(CONFIG_STM32_STM32F20XX) || \
@@ -71,3 +68,7 @@
 #elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "stm32f40xxx_rtcc.c"
 #endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

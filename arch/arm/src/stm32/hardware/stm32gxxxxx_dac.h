@@ -28,8 +28,6 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#ifdef CONFIG_STM32_STM32G47XX
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -488,5 +486,4 @@
 #define DAC_STR_STINCDATA_SHIFT        (16)                           /* DAC channel 1 Sawtooth increment value (12.4 bit format) */
 #define DAC_STR_STINCDATA_MASK         (0xffff << DAC_STR_STINCDATA_SHIFT)
 
-#endif /* CONFIG_STM32_STM32G47XX */
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32GXXXXX_DAC_H */

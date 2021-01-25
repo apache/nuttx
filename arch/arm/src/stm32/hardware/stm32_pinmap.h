@@ -127,6 +127,11 @@
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include "hardware/stm32f37xxx_pinmap.h"
 
+/* STM32 F412 Family ****************************************************************/
+
+#elif defined(CONFIG_STM32_STM32F412)
+#  include "hardware/stm32f412xx_pinmap.h"
+
 /* STM32 F4 Family ******************************************************************/
 
 #elif defined(CONFIG_STM32_STM32F4XXX)
@@ -134,8 +139,8 @@
 
 /* STM32 G4 Family ******************************************************************/
 
-#elif defined(CONFIG_STM32_STM32G47XX)
-#  include "hardware/stm32g47xxx_pinmap.h"
+#elif defined(CONFIG_STM32_STM32G4XXX)
+#  include "hardware/stm32g4xxxx_pinmap.h"
 
 #else
 #  error "No pinmap file for this STM32 chip"

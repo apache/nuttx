@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <assert.h>
 #include <debug.h>
@@ -102,17 +103,17 @@ void sam_eic_dumpregs(void)
   irqinfo("       CTRLA:  %02x\n", getreg8(SAM_EIC_CTRLA));
   irqinfo("     NMICTRL:  %02x\n", getreg8(SAM_EIC_NMICTRL));
   irqinfo("     NMIFLAG:  %04x\n", getreg16(SAM_EIC_NMIFLAG));
-  irqinfo("    SYNCBUSY:  %08x\n", getreg32(SAM_EIC_SYNCBUSY));
-  irqinfo("      EVCTRL:  %08x\n", getreg32(SAM_EIC_EVCTRL));
-  irqinfo("    INTENCLR:  %08x\n", getreg32(SAM_EIC_INTENCLR));
-  irqinfo("    INTENSET:  %08x\n", getreg32(SAM_EIC_INTENSET));
-  irqinfo("     INTFLAG:  %08x\n", getreg32(SAM_EIC_INTFLAG));
-  irqinfo("      ASYNCH:  %08x\n", getreg32(SAM_EIC_ASYNCH));
-  irqinfo("     CONFIG0:  %08x\n", getreg32(SAM_EIC_CONFIG0));
-  irqinfo("     CONFIG1:  %08x\n", getreg32(SAM_EIC_CONFIG1));
-  irqinfo("   DEBOUNCEN:  %08x\n", getreg32(SAM_EIC_DEBOUNCEN));
-  irqinfo("  DPRESCALER:  %08x\n", getreg32(SAM_EIC_DPRESCALER));
-  irqinfo("    PINSTATE:  %08x\n", getreg32(SAM_EIC_PINSTATE));
+  irqinfo("    SYNCBUSY:  %08" PRIx32 "\n", getreg32(SAM_EIC_SYNCBUSY));
+  irqinfo("      EVCTRL:  %08" PRIx32 "\n", getreg32(SAM_EIC_EVCTRL));
+  irqinfo("    INTENCLR:  %08" PRIx32 "\n", getreg32(SAM_EIC_INTENCLR));
+  irqinfo("    INTENSET:  %08" PRIx32 "\n", getreg32(SAM_EIC_INTENSET));
+  irqinfo("     INTFLAG:  %08" PRIx32 "\n", getreg32(SAM_EIC_INTFLAG));
+  irqinfo("      ASYNCH:  %08" PRIx32 "\n", getreg32(SAM_EIC_ASYNCH));
+  irqinfo("     CONFIG0:  %08" PRIx32 "\n", getreg32(SAM_EIC_CONFIG0));
+  irqinfo("     CONFIG1:  %08" PRIx32 "\n", getreg32(SAM_EIC_CONFIG1));
+  irqinfo("   DEBOUNCEN:  %08" PRIx32 "\n", getreg32(SAM_EIC_DEBOUNCEN));
+  irqinfo("  DPRESCALER:  %08" PRIx32 "\n", getreg32(SAM_EIC_DPRESCALER));
+  irqinfo("    PINSTATE:  %08" PRIx32 "\n", getreg32(SAM_EIC_PINSTATE));
 }
 
 /****************************************************************************

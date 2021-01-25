@@ -172,6 +172,12 @@ void up_exit(int status)
 
   tcb = this_task();
 
+  /* Adjusts time slice for SCHED_RR & SCHED_SPORADIC cases
+   * NOTE: the API also adjusts the global IRQ control for SMP
+   */
+
+  nxsched_resume_scheduler(tcb);
+
 #if XCHAL_CP_NUM > 0
   /* Set up the co-processor state for the newly started thread. */
 

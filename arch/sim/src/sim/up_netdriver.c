@@ -303,7 +303,7 @@ static void netdriver_txavail_work(FAR void *arg)
   net_lock();
   if (IFF_IS_UP(dev->d_flags))
     {
-      devif_poll(dev, netdriver_txpoll);
+      devif_timer(dev, 0, netdriver_txpoll);
     }
 
   net_unlock();

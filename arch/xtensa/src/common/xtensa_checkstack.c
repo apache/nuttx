@@ -98,7 +98,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
   DEBUGASSERT((alloc & TLS_STACK_MASK) == 0);
 #endif
   start = alloc + sizeof(struct tls_info_s);
-  end   = (alloc + size + 3) & ~3;
+  end   = (alloc + size + 15) & ~15;
 
   /* Get the adjusted size based on the top and bottom of the stack */
 

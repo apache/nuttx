@@ -55,7 +55,7 @@
 #define EMAC_INTF 0
 
 /************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -89,7 +89,29 @@ extern "C"
  *
  ************************************************************************************/
 
+#if !defined(CONFIG_NETDEV_LATEINIT)
 void arm_netinitialize(void);
+#else
+
+/************************************************************************************
+ * Function: imxrt_netinitialize
+ *
+ * Description:
+ *   Initialize the Ethernet controller and driver
+ *
+ * Input Parameters:
+ *   intf - In the case where there are multiple EMACs, this value identifies which
+ *          EMAC is to be initialized.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ************************************************************************************/
+
+int imxrt_netinitialize(int intf);
+#endif
 
 /************************************************************************************
  * Function: imxrt_phy_boardinitialize

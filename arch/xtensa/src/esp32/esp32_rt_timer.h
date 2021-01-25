@@ -151,6 +151,22 @@ void rt_timer_stop(FAR struct rt_timer_s *timer);
 void rt_timer_delete(FAR struct rt_timer_s *timer);
 
 /****************************************************************************
+ * Name: rt_timer_time_us
+ *
+ * Description:
+ *   Get time of RT timer by micro second.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Time of RT timer by micro second.
+ *
+ ****************************************************************************/
+
+uint64_t rt_timer_time_us(void);
+
+/****************************************************************************
  * Name: esp32_rt_timer_init
  *
  * Description:

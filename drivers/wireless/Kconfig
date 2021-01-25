@@ -86,7 +86,6 @@ source drivers/wireless/ieee80211/Kconfig
 menuconfig DRIVERS_BLUETOOTH
 	bool "Bluetooth Device Support"
 	default n
-	depends on WIRELESS_BLUETOOTH
 	---help---
 		Select to enable building of Bluetooth device drivers.
 

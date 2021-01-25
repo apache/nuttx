@@ -43,19 +43,16 @@
  * Private Data Types
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_BINFMT_INFO
 struct rname_code_s
 {
   const char *name;
   int type;
 };
-#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_BINFMT_INFO
 static struct rname_code_s _rname_table[] =
 {
   {"RELAX", R_RISCV_RELAX},
@@ -68,14 +65,12 @@ static struct rname_code_s _rname_table[] =
   {"RVC_JUMP", R_RISCV_RVC_JUMP},
   {"RVC_BRANCH", R_RISCV_RVC_BRANCH},
 };
-#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_BINFMT_INFO
-const char *_get_rname(int type)
+static const char *_get_rname(int type)
 {
   int i = 0;
 
@@ -91,7 +86,6 @@ const char *_get_rname(int type)
 
   return "?????";
 }
-#endif
 
 /****************************************************************************
  * Name: _get_val, set_val, _add_val

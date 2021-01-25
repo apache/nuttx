@@ -272,6 +272,7 @@
 #  undef USE_OVER8
 
   /* Calculate USART BAUD rate divider */
+
   /* Baud rate for standard USART (SPI mode included):
    *
    * In case of oversampling by 16, the equation is:
@@ -289,7 +290,9 @@
 #  define STM32_USARTDIV16 \
     ((STM32_APBCLOCK + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
 
-   /* Use oversampling by 8 only if the divisor is small.  But what is small? */
+  /* Use oversampling by 8 only if the divisor is small.  But what is
+   * small?
+   */
 
 #  if STM32_USARTDIV8 > 100
 #    define STM32_BRR_VALUE STM32_USARTDIV16
@@ -337,7 +340,8 @@ void arm_lowputc(char ch)
 #ifdef HAVE_CONSOLE
   /* Wait until the TX data register is empty */
 
-  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) & USART_ISR_TXE) == 0);
+  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) &
+          USART_ISR_TXE) == 0);
 #ifdef STM32_CONSOLE_RS485_DIR
   stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
@@ -347,8 +351,10 @@ void arm_lowputc(char ch)
   putreg32((uint32_t)ch, STM32_CONSOLE_BASE + STM32_USART_TDR_OFFSET);
 
 #ifdef STM32_CONSOLE_RS485_DIR
-  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) & USART_ISR_TC) == 0);
-  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, !STM32_CONSOLE_RS485_DIR_POLARITY);
+  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) &
+          USART_ISR_TC) == 0);
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
+                  !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
 #endif /* HAVE_CONSOLE */
@@ -391,7 +397,8 @@ void stm32_lowsetup(void)
 
 #ifdef STM32_CONSOLE_RS485_DIR
   stm32_configgpio(STM32_CONSOLE_RS485_DIR);
-  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, !STM32_CONSOLE_RS485_DIR_POLARITY);
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
+                  !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
   /* Enable and configure the selected console device */

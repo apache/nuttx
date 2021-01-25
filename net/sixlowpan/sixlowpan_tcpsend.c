@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -262,6 +263,10 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
 
       ipv6tcp->tcp.wnd[0] = recvwndo >> 8;
       ipv6tcp->tcp.wnd[1] = recvwndo & 0xff;
+
+      /* Update the Receiver Window */
+
+      conn->rcv_wnd = recvwndo;
     }
 
   /* Calculate TCP checksum. */
@@ -332,7 +337,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
-  ninfo("flags: %04x acked: %u sent: %zu\n",
+  ninfo("flags: %04x acked: %" PRIu32 " sent: %zu\n",
         flags, sinfo->s_acked, sinfo->s_sent);
 
   /* If this packet contains an acknowledgement, then update the count of
@@ -350,7 +355,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
        */
 
       sinfo->s_acked = tcp_getsequence(tcp->ackno) - sinfo->s_isn;
-      ninfo("ACK: acked=%d sent=%zd buflen=%zd\n",
+      ninfo("ACK: acked=%" PRId32 " sent=%zd buflen=%zd\n",
             sinfo->s_acked, sinfo->s_sent, sinfo->s_buflen);
 
       /* Have all of the bytes in the buffer been sent and acknowledged? */
@@ -445,14 +450,14 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
           sndlen = conn->mss;
         }
 
-      winleft = conn->winsize - sinfo->s_sent + sinfo->s_acked;
+      winleft = conn->snd_wnd - sinfo->s_sent + sinfo->s_acked;
       if (sndlen > winleft)
         {
           sndlen = winleft;
         }
 
-      ninfo("s_buflen=%zu s_sent=%zu mss=%u winsize=%u sndlen=%d\n",
-            sinfo->s_buflen, sinfo->s_sent, conn->mss, conn->winsize,
+      ninfo("s_buflen=%zu s_sent=%zu mss=%u snd_wnd=%u sndlen=%d\n",
+            sinfo->s_buflen, sinfo->s_sent, conn->mss, conn->snd_wnd,
             sndlen);
 
       if (sndlen > 0)
@@ -466,8 +471,8 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
            */
 
           seqno = sinfo->s_sent + sinfo->s_isn;
-          ninfo("Sending: sndseq %08lx->%08x\n",
-                (unsigned long)tcp_getsequence(conn->sndseq), seqno);
+          ninfo("Sending: sndseq %08" PRIx32 "->%08" PRIx32 "\n",
+                tcp_getsequence(conn->sndseq), seqno);
 
           tcp_setsequence(conn->sndseq, seqno);
 
@@ -518,9 +523,10 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
           g_netstats.tcp.sent++;
 #endif
 
-          ninfo("Sent: acked=%d sent=%zd buflen=%zd tx_unacked=%d\n",
+          ninfo("Sent: acked=%" PRId32 " sent=%zd "
+                "buflen=%zd tx_unacked=%" PRId32 "\n",
                 sinfo->s_acked, sinfo->s_sent, sinfo->s_buflen,
-                conn->tx_unacked);
+                (uint32_t)conn->tx_unacked);
         }
     }
 

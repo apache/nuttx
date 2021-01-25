@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/bluetooth/bt_core.h
+ * include/nuttx/wireless/bluetooth/bt_core.h
  * Bluetooth subsystem core APIs.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -12,20 +12,21 @@
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -100,24 +101,24 @@
 
 #ifdef CONFIG_ENDIAN_BIG
 #  define BT_GETUINT16(p) \
-     ((((uint16_t)(((FAR uint8_t *)(p))[1]) >> 8) & 0xff) | \
-      (((uint16_t)(((FAR uint8_t *)(p))[0]) & 0xff) << 8))
+     (((uint16_t)(((FAR uint8_t *)(p))[1])) | \
+      (((uint16_t)(((FAR uint8_t *)(p))[0])) << 8))
 #  define BT_PUTUINT16(p,v) \
      do \
        { \
-         ((FAR uint8_t *)(p))[0] = ((uint16_t)(v) >> 8) & 0xff; \
-         ((FAR uint8_t *)(p))[1] = ((uint16_t)(v) & 0xff) >> 8; \
+         ((FAR uint8_t *)(p))[0] = ((uint16_t)(v)) >> 8; \
+         ((FAR uint8_t *)(p))[1] = ((uint16_t)(v)) & 0xff; \
        } \
      while (0)
 #else
 #  define BT_GETUINT16(p) \
-     ((((uint16_t)(((FAR uint8_t *)(p))[0]) >> 8) & 0xff) | \
-      (((uint16_t)(((FAR uint8_t *)(p))[1]) & 0xff) << 8))
+     (((uint16_t)(((FAR uint8_t *)(p))[0])) | \
+      (((uint16_t)(((FAR uint8_t *)(p))[1])) << 8))
 #  define BT_PUTUINT16(p,v) \
      do \
        { \
-         ((FAR uint8_t *)(p))[0] = ((uint16_t)(v) & 0xff) >> 8; \
-         ((FAR uint8_t *)(p))[1] = ((uint16_t)(v) >> 8) & 0xff; \
+         ((FAR uint8_t *)(p))[0] = ((uint16_t)(v)) & 0xff; \
+         ((FAR uint8_t *)(p))[1] = ((uint16_t)(v)) >> 8; \
        } \
      while (0)
 #endif
@@ -195,7 +196,7 @@ static inline int bt_addr_to_str(FAR const bt_addr_t *addr, FAR char *str,
  ****************************************************************************/
 
 static inline int bt_addr_le_to_str(FAR const bt_addr_le_t *addr, char *str,
-            size_t len)
+                                    size_t len)
 {
   char type[7];
 

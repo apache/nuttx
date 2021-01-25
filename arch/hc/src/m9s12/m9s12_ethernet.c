@@ -664,7 +664,7 @@ static int emac_txavail(struct net_driver_s *dev)
 
       /* If so, then poll the network for new XMIT data */
 
-      devif_poll(&priv->d_dev, emac_txpoll);
+      devif_timer(&priv->d_dev, 0, emac_txpoll);
     }
 
   leave_critical_section(flags);

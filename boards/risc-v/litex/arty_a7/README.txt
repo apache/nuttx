@@ -8,8 +8,8 @@
 3. Configure and build NuttX
 
   $ mkdir ./nuttx; cd ./nuttx
-  $ git clone https://bitbucket.org/nuttx/nuttx.git
-  $ git clone https://bitbucket.org/nuttx/apps.git
+  $ git clone https://github.com/apache/incubator-nuttx.git
+  $ git clone https://github.com/apache/incubator-nuttx-apps.git
   $ cd nuttx
   $ make distclean
   $ ./tools/configure.sh arty_a7:nsh

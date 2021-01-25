@@ -80,7 +80,6 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
 
   /* Verify that the PID corresponds to a real task */
 
-  sched_lock();
   if (!pid)
     {
       tcb = this_task();
@@ -93,7 +92,7 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
   if (tcb == NULL)
     {
       ret = -ESRCH;
-      goto errout_with_lock;
+      goto errout;
     }
 
   /* Don't permit changing the affinity mask of any task locked to a CPU
@@ -143,8 +142,7 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
 errout_with_csection:
   leave_critical_section(flags);
 
-errout_with_lock:
-  sched_unlock();
+errout:
   return ret;
 }
 

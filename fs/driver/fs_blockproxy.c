@@ -105,10 +105,10 @@ static FAR char *unique_chardev(void)
 
       /* Make sure that file name is not in use */
 
-      ret = stat(devbuf, &statbuf);
+      ret = nx_stat(devbuf, &statbuf, 1);
       if (ret < 0)
         {
-          DEBUGASSERT(errno == ENOENT);
+          DEBUGASSERT(ret == -ENOENT);
           return strdup(devbuf);
         }
 
@@ -128,31 +128,22 @@ static FAR char *unique_chardev(void)
  *   oriented accessed to the block driver.
  *
  * Input Parameters:
+ *   filep  - The caller provided location in which to return the 'struct
+ *            file' instance.
  *   blkdev - The path to the block driver
  *   oflags - Character driver open flags
  *
  * Returned Value:
- *   If positive, non-zero file descriptor is returned on success.  This
- *   is the file descriptor of the nameless character driver that mediates
- *   accesses to the block driver.
- *
- *   Errors that may be returned:
- *
- *     ENOMEM - Failed to create a temporary path name.
- *
- *   Plus:
- *
- *     - Errors reported from bchdev_register()
- *     - Errors reported from open() or unlink()
+ *   Zero (OK) is returned on success.  On failure, a negated errno value is
+ *   returned.
  *
  ****************************************************************************/
 
-int block_proxy(FAR const char *blkdev, int oflags)
+int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags)
 {
   FAR char *chardev;
   bool readonly;
   int ret;
-  int fd;
 
   DEBUGASSERT(blkdev);
 
@@ -183,10 +174,9 @@ int block_proxy(FAR const char *blkdev, int oflags)
   /* Open the newly created character driver */
 
   oflags &= ~(O_CREAT | O_EXCL | O_APPEND | O_TRUNC);
-  fd = nx_open(chardev, oflags);
-  if (fd < 0)
+  ret = file_open(filep, chardev, oflags);
+  if (ret < 0)
     {
-      ret = fd;
       ferr("ERROR: Failed to open %s: %d\n", chardev, ret);
       goto errout_with_bchdev;
     }
@@ -196,23 +186,20 @@ int block_proxy(FAR const char *blkdev, int oflags)
    * a problem here!)
    */
 
-  ret = unlink(chardev);
+  ret = nx_unlink(chardev);
   if (ret < 0)
     {
-      ret = -errno;
       ferr("ERROR: Failed to unlink %s: %d\n", chardev, ret);
       goto errout_with_chardev;
     }
 
-  /* Free the allocate character driver name and return the open file
-   * descriptor.
-   */
+  /* Free the allocated character driver name. */
 
   kmm_free(chardev);
-  return fd;
+  return OK;
 
 errout_with_bchdev:
-  unlink(chardev);
+  nx_unlink(chardev);
 
 errout_with_chardev:
   kmm_free(chardev);

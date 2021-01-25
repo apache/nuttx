@@ -369,7 +369,7 @@ void stm32_pwr_configurewkup(uint32_t pin, bool en, bool rising, uint32_t pull)
       regval     |= STM32_PWR_WKUPP(pin);
     }
 
-  /* Set to the no pull-up state by default*/
+  /* Set to the no pull-up state by default */
 
   regval &= ~ (STM32_PWR_WKUPPUPD_MASK << STM32_PWR_WKUPPUPD_SHIFT(pin));
 

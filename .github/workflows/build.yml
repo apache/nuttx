@@ -142,15 +142,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker Pull
-        uses: nick-invision/retry@v1
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          retry_wait_seconds: 10
-          command: docker pull docker.pkg.github.com/apache/incubator-nuttx-testing/nuttx-ci-linux
-
+        run: docker pull docker.pkg.github.com/apache/incubator-nuttx-testing/nuttx-ci-linux
       - name: Export NuttX Repo SHA
-        run:  echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
+        run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
       - name: Run builds
         uses: ./sources/testing/.github/actions/ci-container
         env:
@@ -168,6 +162,7 @@ jobs:
         with:
           name: linux-builds
           path: buildartifacts/
+        continue-on-error: true
 
   macOS:
     runs-on: macos-10.15
@@ -193,7 +188,7 @@ jobs:
           key: ${{ runner.os }}-tools-${{ hashFiles('./sources/testing/cibuild.sh') }}
 
       - name: Export NuttX Repo SHA
-        run:  echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
+        run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
       - name: Run Builds
         run: |
           echo "::add-matcher::sources/nuttx/.github/gcc.json"
@@ -207,3 +202,4 @@ jobs:
         with:
           name: macos-builds
           path: buildartifacts/
+        continue-on-error: true

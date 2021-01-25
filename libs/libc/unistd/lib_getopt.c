@@ -134,7 +134,7 @@ int getopt(int argc, FAR char * const argv[], FAR const char *optstring)
 
   /* Verify input parameters. */
 
-  if (argv != NULL && optstring != NULL && argc > 1)
+  if (argv != NULL && optstring != NULL)
     {
       FAR char *optchar;
       int noarg_ret = '?';

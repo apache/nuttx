@@ -125,30 +125,6 @@ static struct work_s g_hp_work;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bt_send
- *
- * Description:
- *   Add the provided buffer 'buf' to the head selected buffer list 'list'
- *
- * Input Parameters:
- *   btdev - An instance of the low-level drivers interface structure.
- *   buf   - The buffer to be sent by the driver
- *
- * Returned Value:
- *   Zero is returned on success; a negated errno value is returned on any
- *   failure.
- *
- ****************************************************************************/
-
-static int bt_send(FAR const struct bt_driver_s *btdev,
-                   FAR struct bt_buf_s *buf)
-{
-  /* TODDO: Hook here to notify hci monitor */
-
-  return btdev->send(btdev, buf);
-}
-
-/****************************************************************************
  * Name: bt_enqueue_bufwork
  *
  * Description:
@@ -354,9 +330,17 @@ static void hci_cmd_done(uint16_t opcode, uint8_t status,
       return;
     }
 
+  if (g_btdev.sent_cmd == NULL)
+    {
+      wlerr("ERROR: Request cmd missing!\n");
+      return;
+    }
+
   if (g_btdev.sent_cmd->u.hci.opcode != opcode)
     {
-      wlerr("ERROR:  Unexpected completion of opcode 0x%04x\n", opcode);
+      wlerr("ERROR:  Unexpected completion of opcode 0x%04x " \
+            "expected 0x%04x\n",
+            opcode, g_btdev.sent_cmd->u.hci.opcode);
       return;
     }
 
@@ -380,10 +364,8 @@ static void hci_cmd_done(uint16_t opcode, uint8_t status,
 
       nxsem_post(sem);
     }
-  else
-    {
-      bt_buf_release(sent);
-    }
+
+  bt_buf_release(sent);
 }
 
 static void hci_cmd_complete(FAR struct bt_buf_s *buf)
@@ -1030,7 +1012,7 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
       /* Get next command - wait if necessary */
 
       buf = NULL;
-      ret = bt_queue_receive(g_btdev.tx_queue, &buf);
+      ret = bt_queue_receive(&g_btdev.tx_queue, &buf);
       DEBUGASSERT(ret >= 0 && buf != NULL);
       UNUSED(ret);
 
@@ -1045,12 +1027,13 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
           g_btdev.sent_cmd = NULL;
         }
 
-      g_btdev.sent_cmd = buf;
+      g_btdev.sent_cmd = bt_buf_addref(buf);
 
       wlinfo("Sending command %04x buf %p to driver\n",
              buf->u.hci.opcode, buf);
 
-      btdev->send(btdev, buf);
+      bt_send(btdev, buf);
+      bt_buf_release(buf);
     }
 
   return EXIT_SUCCESS;  /* Can't get here */
@@ -1104,6 +1087,7 @@ static void hci_rx_work(FAR void *arg)
 #else
       g_hci_cb->received(buf, g_hci_cb->context);
 #endif
+      bt_buf_release(buf);
     }
 }
 
@@ -1171,6 +1155,7 @@ static void priority_rx_work(FAR void *arg)
 
       g_hci_cb->received(buf, g_hci_cb->context);
 #endif
+      bt_buf_release(buf);
     }
 }
 
@@ -1465,10 +1450,9 @@ static void cmd_queue_init(void)
    * the Tx queue and received by logic on the Tx kernel thread.
    */
 
-  g_btdev.tx_queue = NULL;
   ret = bt_queue_open(BT_HCI_TX, O_RDWR | O_CREAT,
                       CONFIG_BLUETOOTH_TXCMD_NMSGS, &g_btdev.tx_queue);
-  DEBUGASSERT(ret >= 0 &&  g_btdev.tx_queue != NULL);
+  DEBUGASSERT(ret >= 0);
   UNUSED(ret);
 
   nxsem_init(&g_btdev.ncmd_sem, 0, 1);
@@ -1485,6 +1469,36 @@ static void cmd_queue_init(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: bt_send
+ *
+ * Description:
+ *   Send the provided buffer to the bluetooth driver
+ *
+ * Input Parameters:
+ *   btdev - An instance of the low-level drivers interface structure.
+ *   buf   - The buffer to be sent by the driver
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int bt_send(FAR const struct bt_driver_s *btdev,
+            FAR struct bt_buf_s *buf)
+{
+  int ret;
+
+  /* Send to driver */
+
+  ret = btdev->send(btdev, buf);
+
+  /* TODO: Hook here to notify hci monitor */
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: bt_initialize
@@ -1731,6 +1745,15 @@ int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
           return -ENOBUFS;
         }
     }
+  else
+    {
+      /* We manage the refcount the same for supplied and created
+       * buffers so increment the supplied count so we can manage
+       * it as-if we crated it.
+       */
+
+      bt_buf_addref(buf);
+    }
 
   wlinfo("opcode %04x len %u\n", opcode, buf->len);
 
@@ -1745,7 +1768,7 @@ int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
       return 0;
     }
 
-  ret = bt_queue_send(g_btdev.tx_queue, buf, BT_NORMAL_PRIO);
+  ret = bt_queue_send(&g_btdev.tx_queue, buf, BT_NORMAL_PRIO);
   if (ret < 0)
     {
       wlerr("ERROR: bt_queue_send() failed: %d\n", ret);
@@ -1774,6 +1797,10 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
           return -ENOBUFS;
         }
     }
+  else
+    {
+      bt_buf_addref(buf);
+    }
 
   wlinfo("opcode %04x len %u\n", opcode, buf->len);
 
@@ -1785,7 +1812,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
 
   /* Send the frame */
 
-  ret = bt_queue_send(g_btdev.tx_queue, buf, BT_NORMAL_PRIO);
+  ret = bt_queue_send(&g_btdev.tx_queue, buf, BT_NORMAL_PRIO);
   if (ret < 0)
     {
       wlerr("ERROR: bt_queue_send() failed: %d\n", ret);
@@ -1850,12 +1877,21 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
         }
     }
 
+  /* Note: if ret < 0 the packet might just be delayed and could still
+   * be sent.  We cannot decrease the ref count since it if it was sent
+   * it buf could be pointed a completely different request.
+   */
+
   if (rsp != NULL)
     {
+      /* If the response is expected provide the sync response */
+
       *rsp = buf->u.hci.sync;
     }
   else if (buf->u.hci.sync != NULL)
     {
+      /* If a sync response was given but not requested drop it */
+
       bt_buf_release(buf->u.hci.sync);
     }
 
@@ -2144,7 +2180,6 @@ void bt_conn_cb_register(FAR struct bt_conn_cb_s *cb)
   g_callback_list = cb;
 }
 
-#ifdef CONFIG_DEBUG_WIRELESS_ERROR
 FAR const char *bt_addr_str(FAR const bt_addr_t *addr)
 {
   static char bufs[2][18];
@@ -2170,7 +2205,6 @@ FAR const char *bt_addr_le_str(FAR const bt_addr_le_t *addr)
 
   return str;
 }
-#endif /* CONFIG_DEBUG_WIRELESS_ERROR */
 
 #else
 

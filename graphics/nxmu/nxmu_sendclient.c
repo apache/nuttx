@@ -73,7 +73,7 @@ int nxmu_sendclient(FAR struct nxmu_conn_s *conn, FAR const void *msg,
 {
   int ret;
 
-  DEBUGASSERT(conn != NULL && conn->swrmq != NULL && msg != NULL);
+  DEBUGASSERT(conn != NULL && msg != NULL);
 
   /* Send the message to the client */
 

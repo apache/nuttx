@@ -12,20 +12,21 @@
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -39,6 +40,9 @@
  *
  ****************************************************************************/
 
+#ifndef __DRIVER_WIRELESS_BLUETOOTH_BT_UART_H
+#define __DRIVER_WIRELESS_BLUETOOTH_BT_UART_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -48,17 +52,11 @@
 #include <stdbool.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
+#include <nuttx/wireless/bluetooth/bt_uart.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define H4_HEADER_SIZE  1
-
-#define H4_CMD           0x01
-#define H4_ACL           0x02
-#define H4_SCO           0x03
-#define H4_EVT           0x04
 
 #ifdef CONFIG_BLUETOOTH_UART_DUMP
 #  define BT_DUMP(m,b,l) lib_dumpbuffer(m,b,l)
@@ -67,12 +65,10 @@
 #endif
 
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
 /* This type defines the state data generic UART upper half driver */
-
-struct btuart_lowerhalf_s; /* Forward reference */
 
 struct btuart_upperhalf_s
 {
@@ -98,7 +94,7 @@ struct btuart_upperhalf_s
 
 /* Generic implementations of HCI UART methods */
 
-struct bt_buf_s;  /* Forward reference */
-
 int btuart_send(FAR const struct bt_driver_s *dev, FAR struct bt_buf_s *buf);
 int btuart_open(FAR const struct bt_driver_s *dev);
+
+#endif /* __DRIVER_WIRELESS_BLUETOOTH_BT_UART_H */

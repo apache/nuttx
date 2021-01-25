@@ -187,12 +187,12 @@ struct pg_source_s
 };
 #endif
 
-/* State structured needd to support paging through the M25P* MTD interface. */
+/* State structured support paging through the M25P* MTD interface. */
 
 #if defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
 struct pg_source_s
 {
-  /* If interrupts or DMA are used, then we will have to defer initialization */
+  /* If interrupts/DMA are used, then we will have to defer initialization */
 
   bool initialized;  /* TRUE: we are initialized */
 
@@ -333,7 +333,8 @@ static inline void lpc31_initsrc(void)
       DEBUGASSERT(ret >= 0);
       capacity = g_pgsrc.geo.erasesize*g_pgsrc.geo.neraseblocks;
       pginfo("capacity: %d\n", capacity);
-      DEBUGASSERT(capacity >= (CONFIG_EA3131_PAGING_BINOFFSET + PG_TEXT_VSIZE));
+      DEBUGASSERT(capacity >=
+                  CONFIG_EA3131_PAGING_BINOFFSET + PG_TEXT_VSIZE);
 #endif
 
       /* We are now initialized */
@@ -397,7 +398,8 @@ static inline void lpc31_initsrc(void)
  * Assumptions:
  *   - This function is called from the normal tasking context (but
  *     interrupts siabled).  The implementation must take whatever actions
- *     are necessary to assure that the operation is safe within this context.
+ *     are necessary to assure that the operation is safe within this
+ *     context.
  *   - Upon return, the caller will sleep waiting for the page fill callback
  *     to occur.  The callback function will perform the wakeup.
  *
@@ -419,7 +421,8 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 #endif
 
   pginfo("TCB: %p vpage: %p far: %08x\n", tcb, vpage, tcb->xcp.far);
-  DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
+  DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE &&
+              tcb->xcp.far < PG_PAGED_VEND);
 
   /* If BINPATH is defined, then it is the full path to a file on a mounted
    * file system.  In this case initialization will be deferred until the
@@ -440,7 +443,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 
   /* Seek to that position */
 
-  pos = lseek(g_pgsrc.fd, offset, SEEK_SET);
+  pos = nx_seek(g_pgsrc.fd, offset, SEEK_SET);
   DEBUGASSERT(pos != (off_t)-1);
 
   /* And read the page data from that offset */
@@ -459,7 +462,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
    * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
    */
 
-  offset = (off_t)tcb->xcp.far - PG_LOCKED_VBASE + CONFIG_EA3131_PAGING_BINOFFSET;
+  offset = tcb->xcp.far - PG_LOCKED_VBASE + CONFIG_EA3131_PAGING_BINOFFSET;
 
   /* Read the page at the correct offset into the SPI FLASH device */
 
@@ -483,7 +486,8 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage,
                 up_pgcallback_t pg_callback)
 {
   pginfo("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
-  DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
+  DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE &&
+              tcb->xcp.far < PG_PAGED_VEND);
 
 #if defined(CONFIG_PAGING_BINPATH)
 #  error "File system-based paging must always be implemented with blocking calls"
@@ -517,17 +521,17 @@ void weak_function lpc31_pginitialize(void)
    *   lpc31_spidev_initialize(void);
    * - Set up resources to support up_fillpage() operation.  For example,
    *   perhaps the text image is stored in a named binary file.
-   *   In this case, the virtual text addresses might map to offsets into that
-   *   file.
-   * - Do whatever else is necessary to make up_fillpage() ready for the first
-   *   time that it is called.
+   *   In this case, the virtual text addresses might map to offsets into
+   *   that file.
+   * - Do whatever else is necessary to make up_fillpage() ready for the
+   *   first time that it is called.
    *
    * In reality, however, this function is not very useful:
    * This function is called from a low level (before nx_start() is even
-   * called), it may not be possible to perform file system operations or even
-   * to get debug output yet.  Therefore, to keep life simple, initialization
-   * will be deferred in all cases until the first time that up_fillpage()
-   * is called.
+   * called), it may not be possible to perform file system operations or
+   * even to get debug output yet.  Therefore, to keep life simple,
+   * initialization will be deferred in all cases until the first time that
+   * up_fillpage() is called.
    */
 }
 

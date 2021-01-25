@@ -56,50 +56,6 @@ static int _files_semtake(FAR struct filelist *list)
 #define _files_semgive(list) nxsem_post(&list->fl_sem)
 
 /****************************************************************************
- * Name: _files_close
- *
- * Description:
- *   Close an inode (if open)
- *
- * Assumptions:
- *   Caller holds the list semaphore because the file descriptor will be
- *   freed.
- *
- ****************************************************************************/
-
-static int _files_close(FAR struct file *filep)
-{
-  struct inode *inode = filep->f_inode;
-  int ret = OK;
-
-  /* Check if the struct file is open (i.e., assigned an inode) */
-
-  if (inode)
-    {
-      /* Close the file, driver, or mountpoint. */
-
-      if (inode->u.i_ops && inode->u.i_ops->close)
-        {
-          /* Perform the close operation */
-
-          ret = inode->u.i_ops->close(filep);
-        }
-
-      /* And release the inode */
-
-      inode_release(inode);
-
-      /* Release the file descriptor */
-
-      filep->f_oflags  = 0;
-      filep->f_pos     = 0;
-      filep->f_inode = NULL;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -152,141 +108,12 @@ void files_releaselist(FAR struct filelist *list)
 
   for (i = CONFIG_NFILE_DESCRIPTORS; i > 0; i--)
     {
-      _files_close(&list->fl_files[i - 1]);
+      file_close(&list->fl_files[i - 1]);
     }
 
   /* Destroy the semaphore */
 
   nxsem_destroy(&list->fl_sem);
-}
-
-/****************************************************************************
- * Name: file_dup2
- *
- * Description:
- *   Assign an inode to a specific files structure.  This is the heart of
- *   dup2.
- *
- *   Equivalent to the non-standard fs_dupfd2() function except that it
- *   accepts struct file instances instead of file descriptors and it does
- *   not set the errno variable.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is return on
- *   any failure.
- *
- ****************************************************************************/
-
-int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
-{
-  FAR struct filelist *list;
-  FAR struct inode *inode;
-  int ret;
-
-  if (filep1 == NULL || filep1->f_inode == NULL || filep2 == NULL)
-    {
-      return -EBADF;
-    }
-
-  list = nxsched_get_files();
-
-  /* The file list can be NULL under two cases:  (1) One is an obscure
-   * cornercase:  When memory management debug output is enabled.  Then
-   * there may be attempts to write to stdout from malloc before the group
-   * data has been allocated.  The other other is (2) if this is a kernel
-   * thread.  Kernel threads have no allocated file descriptors.
-   */
-
-  if (list != NULL)
-    {
-      ret = _files_semtake(list);
-      if (ret < 0)
-        {
-          /* Probably canceled */
-
-          return ret;
-        }
-    }
-
-  /* If there is already an inode contained in the new file structure,
-   * close the file and release the inode.
-   */
-
-  ret = _files_close(filep2);
-  if (ret < 0)
-    {
-      /* An error occurred while closing the driver */
-
-      goto errout_with_sem;
-    }
-
-  /* Increment the reference count on the contained inode */
-
-  inode = filep1->f_inode;
-  ret   = inode_addref(inode);
-  if (ret < 0)
-    {
-      goto errout_with_sem;
-    }
-
-  /* Then clone the file structure */
-
-  filep2->f_oflags = filep1->f_oflags;
-  filep2->f_pos    = filep1->f_pos;
-  filep2->f_inode  = inode;
-
-  /* Call the open method on the file, driver, mountpoint so that it
-   * can maintain the correct open counts.
-   */
-
-  if (inode->u.i_ops && inode->u.i_ops->open)
-    {
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-      if (INODE_IS_MOUNTPT(inode))
-        {
-          /* Dup the open file on the in the new file structure */
-
-          ret = inode->u.i_mops->dup(filep1, filep2);
-        }
-      else
-#endif
-        {
-          /* (Re-)open the pseudo file or device driver */
-
-          ret = inode->u.i_ops->open(filep2);
-        }
-
-      /* Handle open failures */
-
-      if (ret < 0)
-        {
-          goto errout_with_inode;
-        }
-    }
-
-  if (list != NULL)
-    {
-      _files_semgive(list);
-    }
-
-  return OK;
-
-  /* Handle various error conditions */
-
-errout_with_inode:
-
-  inode_release(filep2->f_inode);
-  filep2->f_oflags = 0;
-  filep2->f_pos    = 0;
-  filep2->f_inode  = NULL;
-
-errout_with_sem:
-  if (list != NULL)
-    {
-      _files_semgive(list);
-    }
-
-  return ret;
 }
 
 /****************************************************************************
@@ -298,7 +125,8 @@ errout_with_sem:
  *
  ****************************************************************************/
 
-int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
+int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
+                   FAR void *priv, int minfd)
 {
   FAR struct filelist *list;
   int ret;
@@ -324,14 +152,62 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
           list->fl_files[i].f_oflags = oflags;
           list->fl_files[i].f_pos    = pos;
           list->fl_files[i].f_inode  = inode;
-          list->fl_files[i].f_priv   = NULL;
+          list->fl_files[i].f_priv   = priv;
           _files_semgive(list);
           return i;
         }
     }
 
   _files_semgive(list);
-  return ERROR;
+  return -EMFILE;
+}
+
+/****************************************************************************
+ * Name: files_dup2
+ *
+ * Description:
+ *   Clone a file descriptor to a specific descriptor number.
+ *
+ * Returned Value:
+ *   fd2 is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int files_dup2(int fd1, int fd2)
+{
+  FAR struct filelist *list;
+  int ret;
+
+  if (fd1 < 0 || fd1 >= CONFIG_NFILE_DESCRIPTORS ||
+      fd2 < 0 || fd2 >= CONFIG_NFILE_DESCRIPTORS)
+    {
+      return -EBADF;
+    }
+
+  /* Get the file descriptor list.  It should not be NULL in this context. */
+
+  list = nxsched_get_files();
+  DEBUGASSERT(list != NULL);
+
+  ret = _files_semtake(list);
+  if (ret < 0)
+    {
+      /* Probably canceled */
+
+      return ret;
+    }
+
+  /* Perform the dup2 operation */
+
+  ret = file_dup2(&list->fl_files[fd1], &list->fl_files[fd2]);
+  _files_semgive(list);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return fd2;
 }
 
 /****************************************************************************
@@ -371,7 +247,7 @@ int files_close(int fd)
   ret = _files_semtake(list);
   if (ret >= 0)
     {
-      ret = _files_close(&list->fl_files[fd]);
+      ret = file_close(&list->fl_files[fd]);
       _files_semgive(list);
     }
 

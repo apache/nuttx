@@ -68,8 +68,10 @@ void up_initial_state(struct tcb_s *tcb)
 {
   if (tcb->pid == 0)
     {
-      up_use_stack(tcb, (void *)(sim_getsp() -
-        CONFIG_IDLETHREAD_STACKSIZE), CONFIG_IDLETHREAD_STACKSIZE);
+      tcb->stack_alloc_ptr = (void *)(sim_getsp() -
+                                      CONFIG_IDLETHREAD_STACKSIZE);
+      tcb->adj_stack_ptr   = (void *)sim_getsp();
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
     }
 
   memset(&tcb->xcp, 0, sizeof(struct xcptcontext));

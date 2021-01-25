@@ -237,16 +237,20 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
       /* Enable slave select (low enables) */
 
       putreg32(bit, CS_CLR_REGISTER);
+#ifdef CONFIG_DEBUG_SPI_INFO
       spiinfo("CS asserted: %08" PRIx32 "->%08" PRIx32 "\n",
               regval, getreg32(CS_PIN_REGISTER));
+#endif
     }
   else
     {
       /* Disable slave select (low enables) */
 
       putreg32(bit, CS_SET_REGISTER);
+#ifdef CONFIG_DEBUG_SPI_INFO
       spiinfo("CS de-asserted: %08" PRIx32 "->%08" PRIx32 "\n", regval,
                getreg32(CS_PIN_REGISTER));
+#endif
 
       /* Wait for the TX FIFO not full indication */
 
@@ -382,16 +386,20 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
       /* L: the inputs at D0 to D7 are transferred to the command registers */
 
       putreg32(bit, CS_CLR_REGISTER);
+#ifdef CONFIG_DEBUG_SPI_INFO
       spiinfo("Command: %08" PRIx32 "->%08" PRIx32 "\n",
               regval, getreg32(CS_PIN_REGISTER));
+#endif
     }
   else
     {
       /* H: the inputs at D0 to D7 are treated as display data. */
 
       putreg32(bit, CS_SET_REGISTER);
+#ifdef CONFIG_DEBUG_SPI_INFO
       spiinfo("Data: %08" PRIx32 "->%08" PRIx32 "\n",
               regval, getreg32(CS_PIN_REGISTER));
+#endif
     }
 
   return OK;

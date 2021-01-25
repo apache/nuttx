@@ -55,56 +55,22 @@
 #include "driver/driver.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inode_checkflags
- *
- * Description:
- *   Check if the access described by 'oflags' is supported on 'inode'
- *
+ * Name: file_vopen
  ****************************************************************************/
 
-int inode_checkflags(FAR struct inode *inode, int oflags)
-{
-  if (((oflags & O_RDOK) != 0 && !inode->u.i_ops->read) ||
-      ((oflags & O_WROK) != 0 && !inode->u.i_ops->write))
-    {
-      return -EACCES;
-    }
-  else
-    {
-      return OK;
-    }
-}
-
-/****************************************************************************
- * Name: nx_vopen
- *
- * Description:
- *   nx_vopen() is identical to 'nx_open' except that it accepts a va_list
- *   as an argument versus taking a variable length list of arguments.
- *
- *   nx_vopen() is an internal NuttX interface and should not be called from
- *   applications.
- *
- * Returned Value:
- *   The new file descriptor is returned on success; a negated errno value is
- *   returned on any failure.
- *
- ****************************************************************************/
-
-int nx_vopen(FAR const char *path, int oflags, va_list ap)
+static int file_vopen(FAR struct file *filep,
+                      FAR const char *path, int oflags, va_list ap)
 {
   struct inode_search_s desc;
-  FAR struct file *filep;
   FAR struct inode *inode;
 #if defined(CONFIG_FILE_MODE) || !defined(CONFIG_DISABLE_MOUNTPOINT)
   mode_t mode = 0666;
 #endif
   int ret;
-  int fd;
 
   if (path == NULL)
     {
@@ -149,8 +115,7 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
   /* If the inode is block driver, then we may return a character driver
    * proxy for the block driver.  block_proxy() will instantiate a BCH
    * character driver wrapper around the block driver, open(), then
-   * unlink() the character driver.  On success, block_proxy() will
-   * return the file descriptor of the opened character driver.
+   * unlink() the character driver.
    *
    * NOTE: This will recurse to open the character driver proxy.
    */
@@ -160,20 +125,11 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
       /* Release the inode reference */
 
       inode_release(inode);
-
-      /* Get the file descriptor of the opened character driver proxy */
-
-      fd = block_proxy(path, oflags);
-      if (fd < 0)
-        {
-          ret = fd;
-          goto errout_with_search;
-        }
-
-      /* Return the file descriptor */
-
       RELEASE_SEARCH(&desc);
-      return fd;
+
+      /* Get the file structure of the opened character driver proxy */
+
+      return block_proxy(filep, path, oflags);
     }
   else
 #endif
@@ -204,20 +160,10 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
 
   /* Associate the inode with a file structure */
 
-  fd = files_allocate(inode, oflags, 0, 0);
-  if (fd < 0)
-    {
-      ret = -EMFILE;
-      goto errout_with_inode;
-    }
-
-  /* Get the file structure corresponding to the file descriptor. */
-
-  ret = fs_getfilep(fd, &filep);
-  if (ret < 0)
-    {
-      goto errout_with_inode;
-    }
+  filep->f_oflags = oflags;
+  filep->f_pos    = 0;
+  filep->f_inode  = inode;
+  filep->f_priv   = NULL;
 
   /* Perform the driver open operation.  NOTE that the open method may be
    * called many times.  The driver/mountpoint logic should handled this
@@ -241,55 +187,107 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
 
   if (ret < 0)
     {
-      goto errout_with_fd;
+      goto errout_with_inode;
     }
-
-#ifdef CONFIG_PSEUDOTERM_SUSV1
-  /* If the return value from the open method is > 0, then it may actually
-   * be an encoded file descriptor.  This kind of logic is currently only
-   * needed for /dev/ptmx:  When dev ptmx is opened, it does not return a
-   * file descriptor associated with the /dev/ptmx inode, but rather with
-   * the inode of master device created by the /dev/ptmx open method.
-   *
-   * The encoding supports (a) returning file descriptor 0 (which really
-   * should not happen), and (b) avoiding confusion if some other open
-   * method returns a positive, non-zero value which is not a file
-   * descriptor.
-   */
-
-  if (OPEN_ISFD(ret))
-    {
-      /* Release file descriptor and inode that we allocated.  We don't
-       * need those.
-       */
-
-      files_release(fd);
-      inode_release(inode);
-
-      /* Instead, decode and return the descriptor associated with the
-       * master side device.
-       */
-
-      fd = (int)OPEN_GETFD(ret);
-      DEBUGASSERT((unsigned)fd < (CONFIG_NFILE_DESCRIPTORS
-#ifdef CONFIG_NET
-                                  + CONFIG_NSOCKET_DESCRIPTORS
-#endif
-      ));
-    }
-#endif
 
   RELEASE_SEARCH(&desc);
-  return fd;
-
-errout_with_fd:
-  files_release(fd);
+  return OK;
 
 errout_with_inode:
+  filep->f_inode = NULL;
   inode_release(inode);
 
 errout_with_search:
   RELEASE_SEARCH(&desc);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nx_vopen
+ ****************************************************************************/
+
+static int nx_vopen(FAR const char *path, int oflags, va_list ap)
+{
+  struct file filep;
+  int ret;
+  int fd;
+
+  /* Let file_vopen() do all of the work */
+
+  ret = file_vopen(&filep, path, oflags, ap);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Allocate a new file descriptor for the inode */
+
+  fd = files_allocate(filep.f_inode, filep.f_oflags,
+                      filep.f_pos, filep.f_priv, 0);
+  if (fd < 0)
+    {
+      file_close(&filep);
+      return fd;
+    }
+
+  return fd;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: inode_checkflags
+ *
+ * Description:
+ *   Check if the access described by 'oflags' is supported on 'inode'
+ *
+ ****************************************************************************/
+
+int inode_checkflags(FAR struct inode *inode, int oflags)
+{
+  if (((oflags & O_RDOK) != 0 && !inode->u.i_ops->read) ||
+      ((oflags & O_WROK) != 0 && !inode->u.i_ops->write))
+    {
+      return -EACCES;
+    }
+  else
+    {
+      return OK;
+    }
+}
+
+/****************************************************************************
+ * Name: file_open
+ *
+ * Description:
+ *   file_open() is similar to the standard 'open' interface except that it
+ *   returns an instance of 'struct file' rather than a file descriptor.  It
+ *   also is not a cancellation point and does not modify the errno variable.
+ *
+ * Input Parameters:
+ *   filep  - The caller provided location in which to return the 'struct
+ *            file' instance.
+ *   path   - The full path to the file to be open.
+ *   oflags - open flags
+ *   ...    - Variable number of arguments, may include 'mode_t mode'
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  On failure, a negated errno value is
+ *   returned.
+ *
+ ****************************************************************************/
+
+int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
+{
+  va_list ap;
+  int ret;
+
+  va_start(ap, oflags);
+  ret = file_vopen(filep, path, oflags, ap);
+  va_end(ap);
+
   return ret;
 }
 

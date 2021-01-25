@@ -71,7 +71,7 @@ while [ ! -z "$1" ]; do
     echo "    show this help message and exit"
     echo "  -v <major.minor.patch>"
     echo "    The NuttX version number expressed as a major, minor and patch"
-    echo "    number seperated by a period"
+    echo "    number separated by a period"
     echo "   <outfile-path>"
     echo "    The full path to the version file to be created"
     exit 0
@@ -86,13 +86,14 @@ done
 OUTFILE=$1
 
 if [ -z ${VERSION} ] ; then
-  VERSION=`git -C ${WD} tag --sort=taggerdate | tail -1 | cut -d'-' -f2`
+  VERSION=`git -C ${WD} describe 2>/dev/null | tail -1 | cut -d'-' -f2`
 
-  # Earlier tags used the format "major.minor", append a "0" for a patch.
+  # If the VERSION does not match X.Y.Z, retrieve version from the tag
 
-  if [[ ${VERSION} =~ ^([0-9]+[\.][0-9]+)$ ]] ; then
-    VERSION=${VERSION}.0
+  if [[ ! ${VERSION} =~ ([0-9]+)\.([0-9]+)\.([0-9]+) ]] ; then
+    VERSION=`git -C ${WD} tag --sort=v:refname | grep -E "nuttx-[0-9]+\.[0-9]+\.[0-9]+" | tail -1 | cut -d'-' -f2`
   fi
+
 fi
 
 # Make sure we know what is going on

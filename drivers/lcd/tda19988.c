@@ -159,8 +159,10 @@ static ssize_t tda19988_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 static ssize_t tda19988_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
-static off_t   tda19988_seek(FAR struct file *filep, off_t offset, int whence);
-static int     tda19988_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static off_t   tda19988_seek(FAR struct file *filep, off_t offset,
+                 int whence);
+static int     tda19988_ioctl(FAR struct file *filep, int cmd,
+                 unsigned long arg);
 static int     tda19988_poll(FAR struct file *filep, FAR struct pollfd *fds,
                  bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -664,7 +666,8 @@ static int tda19988_fetch_edid_block(FAR struct tda1988_dev_s *priv,
   /* Block 0 */
 
   tda19988_hdmi_putreg(priv, HDMI_EDID_DEV_ADDR_REG, 0xa0);
-  tda19988_hdmi_putreg(priv, HDMI_EDID_OFFSET_REG, (block & 1) != 0 ? 128 : 0);
+  tda19988_hdmi_putreg(priv, HDMI_EDID_OFFSET_REG,
+                       (block & 1) != 0 ? 128 : 0);
   tda19988_hdmi_putreg(priv, HDMI_EDID_SEGM_ADDR_REG, 0x60);
   tda19988_hdmi_putreg(priv, HDMI_EDID_DDC_SEGM_REG, block >> 1);
 
@@ -741,7 +744,7 @@ static int tda19988_fetch_edid(struct tda1988_dev_s *priv)
 
       if (edid == NULL)
         {
-          lcderr("ERROR:  Failed to realloc EDID\n");
+          lcderr("ERROR:  Failed to kmm_realloc EDID\n");
           ret = -ENOMEM;
           goto done;
         }
@@ -786,7 +789,6 @@ done:
  *   errno value is returned on any failure.
  *
  ****************************************************************************/
-
 
 static ssize_t tda19988_read_internal(FAR struct tda1988_dev_s *priv,
                                       off_t offset, FAR uint8_t *buffer,
@@ -973,8 +975,8 @@ static ssize_t tda19988_read(FAR struct file *filep, FAR char *buffer,
  *   Standard character driver write method.
  *
  * Returned Value:
- *   The number of bytes written is returned on success; A negated errno value
- *   is returned on any failure.
+ *   The number of bytes written is returned on success; A negated errno
+ *   value is returned on any failure.
  *
  ****************************************************************************/
 
@@ -1072,6 +1074,7 @@ static off_t tda19988_seek(FAR struct file *filep, off_t offset, int whence)
         break;
 
       default:
+
         /* Return EINVAL if the whence argument is invalid */
 
         pos = (off_t)-EINVAL;
@@ -1558,17 +1561,22 @@ static int
 
   tda19988_hdmi_putreg16(priv, HDMI_CTRL_MUX_VS_LINE_STRT_1_MSB_REG,
                          vs1_line_start);
-  tda19988_hdmi_putreg16(priv, HDMI_CTRL_MUX_VS_PIX_STRT_1_MSB_REG, vs1_pix_start);
-  tda19988_hdmi_putreg16(priv, HDMI_CTRL_VS_LINE_END_1_MSB_REG, vs1_line_end);
+  tda19988_hdmi_putreg16(priv, HDMI_CTRL_MUX_VS_PIX_STRT_1_MSB_REG,
+                         vs1_pix_start);
+  tda19988_hdmi_putreg16(priv, HDMI_CTRL_VS_LINE_END_1_MSB_REG,
+                         vs1_line_end);
   tda19988_hdmi_putreg16(priv, HDMI_CTRL_VS_PIX_END_1_MSB_REG, vs1_pix_stop);
   tda19988_hdmi_putreg16(priv, HDMI_CTRL_VS_LINE_STRT_2_MSB_REG,
                          vs2_line_start);
-  tda19988_hdmi_putreg16(priv, HDMI_CTRL_VS_PIX_STRT_2_MSB_REG, vs2_pix_start);
-  tda19988_hdmi_putreg16(priv, HDMI_CTRL_VS_LINE_END_2_MSB_REG, vs2_line_end);
+  tda19988_hdmi_putreg16(priv, HDMI_CTRL_VS_PIX_STRT_2_MSB_REG,
+                         vs2_pix_start);
+  tda19988_hdmi_putreg16(priv, HDMI_CTRL_VS_LINE_END_2_MSB_REG,
+                         vs2_line_end);
   tda19988_hdmi_putreg16(priv, HDMI_CTRL_VS_PIX_END_2_MSB_REG, vs2_pix_stop);
   tda19988_hdmi_putreg16(priv, HDMI_CTRL_HS_PIX_START_MSB_REG, hs_pix_start);
   tda19988_hdmi_putreg16(priv, HDMI_CTRL_HS_PIX_STOP_MSB_REG, hs_pix_stop);
-  tda19988_hdmi_putreg16(priv, HDMI_CTRL_VWIN_START_1_MSB_REG, vwin1_line_start);
+  tda19988_hdmi_putreg16(priv, HDMI_CTRL_VWIN_START_1_MSB_REG,
+                         vwin1_line_start);
   tda19988_hdmi_putreg16(priv, HDMI_CTRL_VWIN_END_1_MSB_REG, vwin1_line_end);
   tda19988_hdmi_putreg16(priv, HDMI_CTRL_VWIN_START_2_MSB_REG,
                          vwin2_line_start);
@@ -1659,7 +1667,8 @@ TDA19988_HANDLE tda19988_register(FAR const char *devpath,
 
   /* Allocate an instance of the TDA19988 driver */
 
-  priv = (FAR struct tda1988_dev_s *)kmm_zalloc(sizeof(struct tda1988_dev_s));
+  priv = (FAR struct tda1988_dev_s *)
+    kmm_zalloc(sizeof(struct tda1988_dev_s));
   if (priv == NULL)
     {
       lcderr("ERROR: Failed to allocate device structure\n");

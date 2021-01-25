@@ -1798,6 +1798,16 @@ One board is supported in this family:
 **NuttX-9.1**. Initial support for booting NuttX to a functional NSH
 prompt on this board.
 
+STMicro STM32 G431x
+-------------------
+
+One board is supported in this family:
+
+-  **Nucleo-G431RB**. Initial board support for the
+   Nucleo-G431RB was added in NuttX-10.0. Refer to the NuttX board
+   `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/stm32/nucleo-g431rb/README.txt>`__
+   file for further information.
+
 STMicro STM32 L475
 ------------------
 
@@ -2627,6 +2637,10 @@ NuttX-7.27.
    `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/imxrt/imxrt1020-evk/README.txt>`__
    file for further information.
 
+-  The basic Teensy-4.x port is complete. Refer to the NuttX board
+   `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/imxrt/teensy-4.x/README.txt>`__
+   file for further information.
+
 **i.MX RT Driver Status:**
 
 -  **NuttX-7.25**. The initial release in NuttX-7.25 includes UART,
@@ -3046,9 +3060,9 @@ Basic architectural support for Xtensa LX6 processors and the port for
 the Espressif ESP32 were added in NuttX-7.19. The basic ESP32 port is
 function in both single CPU and dual CPU SMP configurations.
 
-**Espressif ESP32 Core v2 Board** The NuttX release includes support for
-Espressif ESP32 Core v2 board. There is an NSH configuration for each
-CPU configuration and an OS test configuration for verificatin of the
+**Espressif ESP32 DevkitC V4 Board** The NuttX release includes support for
+Espressif ESP32 DevkitC V4 board. There is an NSH configuration for each
+CPU configuration and an OS test configuration for verification of the
 port.
 
 **STATUS**. ESP32 support in NuttX-7.19 is functional, but very
@@ -3057,10 +3071,11 @@ Outstanding issues include missing clock configuration logic, missing
 partition tables to support correct configuration from FLASH, and some
 serial driver pin configuration issues. The configuration is usable
 despite these limitations. Refer to the NuttX board
-`README <https://github.com/apache/incubator-nuttx/blob/master/boards/xtensa/esp32/esp32-core/README.txt>`__
+`README <https://github.com/apache/incubator-nuttx/blob/master/boards/xtensa/esp32/esp32-devkitc/README.txt>`__
 file for further information.
 
-
+Release NuttX-10.0.0 brought a bunch of additions to the ESP32 port.  This
+includes: I2C, SPI, RTC, PM, Timers, Watchdog Timer and Ethernet.
 
 Zilog ZNEO Z16F
 ===============

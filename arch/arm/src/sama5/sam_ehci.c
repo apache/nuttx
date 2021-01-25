@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -3215,7 +3216,7 @@ static int sam_ehci_tophalf(int irq, FAR void *context, FAR void *arg)
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace1(EHCI_VTRACE1_TOPHALF, usbsts & regval);
 #else
-  uinfo("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
+  uinfo("USBSTS: %08" PRIx32 " USBINTR: %08" PRIx32 "\n", usbsts, regval);
 #endif
 
   /* Handle all unmasked interrupt sources */

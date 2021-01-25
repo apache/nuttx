@@ -416,10 +416,9 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
    * for use within the OS.
    */
 
-  ret = waitpid(proxy, &status, 0);
+  ret = nx_waitpid(proxy, &status, 0);
   if (ret < 0)
     {
-      ret = -get_errno();
       serr("ERROR: waitpid() failed: %d\n", ret);
       goto errout_with_lock;
     }

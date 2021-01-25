@@ -53,6 +53,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -189,7 +190,7 @@ static int onfi_readstatus(uintptr_t cmdaddr, uintptr_t dataaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_MTD_NAND_EMBEDDEDECC
-bool onfi_have_embeddedecc(FAR struct onfi_pgparam_s *onfi)
+bool onfi_have_embeddedecc(FAR const struct onfi_pgparam_s *onfi)
 {
   /* Check if the Nandflash has an embedded ECC controller.  Known memories
    * with this feature:
@@ -243,8 +244,8 @@ bool onfi_compatible(uintptr_t cmdaddr, uintptr_t addraddr,
   parmtab[3] = READ_NAND(dataaddr);
 
   return
-   (parmtab[0] == 'O' && parmtab[1] == 'N' &&
-    parmtab[2] == 'F' && parmtab[3] == 'I');
+      (parmtab[0] == 'O' && parmtab[1] == 'N' &&
+      parmtab[2] == 'F' && parmtab[3] == 'I');
 }
 
 /****************************************************************************
@@ -318,7 +319,7 @@ int onfi_read(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr,
     {
       ferr("ERROR: Failed to read ONFI parameter table\n");
       return -EIO;
-   }
+    }
 
   /* JEDEC manufacturer ID */
 
@@ -357,15 +358,15 @@ int onfi_read(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr,
   onfi->model = *(FAR uint8_t *)(parmtab + 49);
 
   finfo("Returning:\n");
-  finfo("  manufacturer:  0x%02x\n", onfi->manufacturer);
-  finfo("  buswidth:      %d\n",     onfi->buswidth);
-  finfo("  luns:          %d\n",     onfi->luns);
-  finfo("  eccsize:       %d\n",     onfi->eccsize);
-  finfo("  model:         0x%02s\n", onfi->model);
-  finfo("  sparesize:     %d\n",     onfi->sparesize);
-  finfo("  pagesperblock: %d\n",     onfi->pagesperblock);
-  finfo("  blocksperlun:  %d\n",     onfi->blocksperlun);
-  finfo("  pagesize:      %d\n",     onfi->pagesize);
+  finfo("  manufacturer:  0x%02x\n",      onfi->manufacturer);
+  finfo("  buswidth:      %d\n",          onfi->buswidth);
+  finfo("  luns:          %d\n",          onfi->luns);
+  finfo("  eccsize:       %d\n",          onfi->eccsize);
+  finfo("  model:         0x%02x\n",      onfi->model);
+  finfo("  sparesize:     %d\n",          onfi->sparesize);
+  finfo("  pagesperblock: %d\n",          onfi->pagesperblock);
+  finfo("  blocksperlun:  %d\n",          onfi->blocksperlun);
+  finfo("  pagesize:      %" PRId32 "\n", onfi->pagesize);
   return OK;
 }
 
@@ -398,6 +399,7 @@ bool onfi_embeddedecc(FAR const struct onfi_pgparam_s *onfi,
   if (onfi_have_embeddedecc(onfi))
     {
       /* Yes... enable or disable it */
+
       /* Perform common setup */
 
       WRITE_NAND_COMMAND(NAND_CMD_SET_FEATURE, cmdaddr);
@@ -411,7 +413,6 @@ bool onfi_embeddedecc(FAR const struct onfi_pgparam_s *onfi,
           WRITE_NAND(0x00, dataaddr);
           WRITE_NAND(0x00, dataaddr);
           WRITE_NAND(0x00, dataaddr);
-          setSmcOpEccType(SMC_ECC_INTERNAL);
         }
       else
         {
@@ -499,7 +500,7 @@ bool onfi_ebidetect(uintptr_t cmdaddr, uintptr_t addraddr,
            */
 
           found = true;
-       }
+        }
     }
 
   return found;

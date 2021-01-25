@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
@@ -80,7 +81,8 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
 
   if (ehdr->e_ident[EI_CLASS] != ELFCLASS32)
     {
-      berr("ERROR: Need 32-bit objects: e_ident[EI_CLASS]=%02x\n", ehdr->e_ident[EI_CLASS]);
+      berr("ERROR: Need 32-bit objects: e_ident[EI_CLASS]=%02x\n",
+           ehdr->e_ident[EI_CLASS]);
       return false;
     }
 
@@ -92,7 +94,8 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
   if (ehdr->e_ident[EI_DATA] != ELFDATA2LSB)
 #endif
     {
-      berr("ERROR: Wrong endian-ness: e_ident[EI_DATA]=%02x\n", ehdr->e_ident[EI_DATA]);
+      berr("ERROR: Wrong endian-ness: e_ident[EI_DATA]=%02x\n",
+           ehdr->e_ident[EI_DATA]);
       return false;
     }
 
@@ -100,11 +103,13 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
 
   if ((ehdr->e_entry & 3) != 0)
     {
-      berr("ERROR: Entry point is not properly aligned: %08x\n", ehdr->e_entry);
+      berr("ERROR: Entry point is not properly aligned: %08" PRIx32 "\n",
+           ehdr->e_entry);
       return false;
     }
 
   /* TODO:  Check ABI here. */
+
   return true;
 }
 
@@ -160,8 +165,10 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_CALL:
     case R_ARM_JUMP24:
       {
-        binfo("Performing PC24 [%d] link at addr %08lx [%08lx] to sym '%p' st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr, (long)(*(uint32_t *)addr),
+        binfo("Performing PC24 [%" PRId32 "] link "
+              "at addr %08lx [%08lx] to sym '%p' st_value=%08lx\n",
+              ELF32_R_TYPE(rel->r_info), (long)addr,
+              (long)(*(uint32_t *)addr),
               sym, (long)sym->st_value);
 
         offset = (*(uint32_t *)addr & 0x00ffffff) << 2;
@@ -171,9 +178,11 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
           }
 
         offset += sym->st_value - addr;
-        if (offset & 3 || offset < (int32_t) 0xfe000000 || offset >= (int32_t) 0x02000000)
+        if (offset & 3 || offset < (int32_t) 0xfe000000 ||
+            offset >= (int32_t) 0x02000000)
           {
-            berr("ERROR: PC24 [%d] relocation out of range, offset=%08lx\n",
+            berr("ERROR: PC24 [%" PRId32 "] relocation out of range, "
+                 "offset=%08lx\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -189,8 +198,10 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_ABS32:
     case R_ARM_TARGET1:  /* New ABI:  TARGET1 always treated as ABS32 */
       {
-        binfo("Performing ABS32 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              (long)addr, (long)(*(uint32_t *)addr), sym, (long)sym->st_value);
+        binfo("Performing ABS32 link "
+              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+              (long)addr, (long)(*(uint32_t *)addr), sym,
+              (long)sym->st_value);
 
         *(uint32_t *)addr += sym->st_value;
       }
@@ -213,8 +224,10 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
     case R_ARM_PREL31:
       {
-        binfo("Performing PREL31 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              (long)addr, (long)(*(uint32_t *)addr), sym, (long)sym->st_value);
+        binfo("Performing PREL31 link "
+              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+              (long)addr, (long)(*(uint32_t *)addr), sym,
+              (long)sym->st_value);
 
         offset            = *(uint32_t *)addr + sym->st_value - addr;
         *(uint32_t *)addr = offset & 0x7fffffff;
@@ -224,8 +237,10 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_MOVW_ABS_NC:
     case R_ARM_MOVT_ABS:
       {
-        binfo("Performing MOVx_ABS [%d] link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr, (long)(*(uint32_t *)addr),
+        binfo("Performing MOVx_ABS [%" PRId32 "] link "
+              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+              ELF32_R_TYPE(rel->r_info), (long)addr,
+              (long)(*(uint32_t *)addr),
               sym, (long)sym->st_value);
 
         offset = *(uint32_t *)addr;
@@ -243,7 +258,8 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
       break;
 
     default:
-      berr("ERROR: Unsupported relocation: %d\n", ELF32_R_TYPE(rel->r_info));
+      berr("ERROR: Unsupported relocation: %" PRId32 "\n",
+           ELF32_R_TYPE(rel->r_info));
       return -EINVAL;
     }
 

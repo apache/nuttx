@@ -804,8 +804,8 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                * should have caught it.
                */
 
-              wlwarn("Unknown frame type: %d\n",
-                     frame[XBEE_APIFRAMEINDEX_TYPE]);
+              wlwarn("Unknown frame type: %p\n",
+                     &frame[XBEE_APIFRAMEINDEX_TYPE]);
             }
             break;
         }

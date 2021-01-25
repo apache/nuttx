@@ -95,12 +95,12 @@ static int  u16550_attach(FAR struct uart_dev_s *dev);
 static void u16550_detach(FAR struct uart_dev_s *dev);
 static int  u16550_interrupt(int irq, FAR void *context, FAR void *arg);
 static int  u16550_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int  u16550_receive(FAR struct uart_dev_s *dev, uint32_t *status);
+static int  u16550_receive(FAR struct uart_dev_s *dev, unsigned int *status);
 static void u16550_rxint(FAR struct uart_dev_s *dev, bool enable);
 static bool u16550_rxavailable(FAR struct uart_dev_s *dev);
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool u16550_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
-                                 bool upper);
+static bool u16550_rxflowcontrol(struct uart_dev_s *dev,
+                                 unsigned int nbuffered, bool upper);
 #endif
 #ifdef CONFIG_SERIAL_TXDMA
 static void u16550_dmasend(FAR struct uart_dev_s *dev);
@@ -237,7 +237,7 @@ static uart_dev_t g_uart1port =
   {
     .size   = CONFIG_16550_UART1_TXBUFSIZE,
     .buffer = g_uart1txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart1priv,
 };
@@ -275,7 +275,7 @@ static uart_dev_t g_uart2port =
   {
     .size   = CONFIG_16550_UART2_TXBUFSIZE,
     .buffer = g_uart2txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart2priv,
 };
@@ -313,12 +313,11 @@ static uart_dev_t g_uart3port =
   {
     .size   = CONFIG_16550_UART3_TXBUFSIZE,
     .buffer = g_uart3txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart3priv,
 };
 #endif
-
 
 /* Which UART with be tty0/console and which tty1? tty2? tty3? */
 
@@ -523,7 +522,8 @@ static uart_dev_t g_uart3port =
  * Name: u16550_serialin
  ****************************************************************************/
 
-static inline uart_datawidth_t u16550_serialin(FAR struct u16550_s *priv, int offset)
+static inline uart_datawidth_t u16550_serialin(FAR struct u16550_s *priv,
+                                               int offset)
 {
 #ifdef CONFIG_SERIAL_UART_ARCH_MMIO
   return *((FAR volatile uart_addrwidth_t *)priv->uartbase + offset);
@@ -746,14 +746,15 @@ static void u16550_shutdown(struct uart_dev_s *dev)
  * Name: u16550_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -784,8 +785,8 @@ static int u16550_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.
+ *   The exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -1080,7 +1081,7 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int u16550_receive(struct uart_dev_s *dev, uint32_t *status)
+static int u16550_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
   uint32_t rbr;
@@ -1137,8 +1138,8 @@ static bool u16550_rxavailable(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool u16550_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
-                                 bool upper)
+static bool u16550_rxflowcontrol(struct uart_dev_s *dev,
+                                 unsigned int nbuffered, bool upper)
 {
 #ifndef CONFIG_16550_SUPRESS_CONFIG
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;

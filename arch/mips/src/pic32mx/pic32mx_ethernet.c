@@ -42,6 +42,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_PIC32MX_ETHERNET)
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
@@ -1251,7 +1252,7 @@ static void pic32mx_poll(struct pic32mx_driver_s *priv)
           /* And perform the poll */
 
           priv->pd_polling = true;
-          devif_poll(&priv->pd_dev, pic32mx_txpoll);
+          devif_timer(&priv->pd_dev, 0, pic32mx_txpoll);
 
           /* Free any buffer left attached after the poll */
 
@@ -1418,7 +1419,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
       if ((rxdesc->rsv2 & RXDESC_RSV2_OK) == 0)
         {
-          nerr("ERROR. rsv1: %08x rsv2: %08x\n",
+          nerr("ERROR. rsv1: %08" PRIx32 " rsv2: %08" PRIx32 "\n",
                rxdesc->rsv1, rxdesc->rsv2);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
@@ -1432,7 +1433,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
       else if (priv->pd_dev.d_len > CONFIG_NET_ETH_PKTSIZE)
         {
-          nerr("ERROR: Too big. packet length: %d rxdesc: %08x\n",
+          nerr("ERROR: Too big. packet length: %d rxdesc: %08" PRIx32 "\n",
                priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
@@ -1445,7 +1446,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
       else if ((rxdesc->status & (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP)) !=
                (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP))
         {
-          nerr("ERROR: Fragment. packet length: %d rxdesc: %08x\n",
+          nerr("ERROR: Fragment. packet length: %d rxdesc: %08" PRIx32 "\n",
                priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXFRAGMENTS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
@@ -1748,23 +1749,24 @@ static void pic32mx_interrupt_work(void *arg)
 
       /* RXOVFLW: Receive FIFO Over Flow Error.  RXOVFLW is set by the RXBM
        * Logic for an RX FIFO Overflow condition. It is cleared by either a
-       * Reset or CPU write of a ‘1’ to the CLR register.
+       * Reset or CPU write of a 1 to the CLR register.
        */
 
       if ((status & ETH_INT_RXOVFLW) != 0)
         {
-          nerr("ERROR: RX Overrun. status: %08x\n", status);
+          nerr("ERROR: RX Overrun. status: %08" PRIx32 "\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
       /* RXBUFNA: Receive Buffer Not Available Interrupt.  This bit is set by
        * a RX Buffer Descriptor Overrun condition. It is cleared by either a
-       * Reset or a CPU write of a ‘1’ to the CLR register.
+       * Reset or a CPU write of a 1 to the CLR register.
        */
 
       if ((status & ETH_INT_RXBUFNA) != 0)
         {
-          nerr("ERROR: RX buffer descriptor overrun. status: %08x\n",
+          nerr("ERROR: RX buffer descriptor overrun. "
+               "status: %08" PRIx32 "\n",
                status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
@@ -1776,7 +1778,7 @@ static void pic32mx_interrupt_work(void *arg)
 
       if ((status & ETH_INT_RXBUSE) != 0)
         {
-          nerr("ERROR: RX BVCI bus error. status: %08x\n", status);
+          nerr("ERROR: RX BVCI bus error. status: %08" PRIx32 "\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1815,31 +1817,31 @@ static void pic32mx_interrupt_work(void *arg)
        * - Excessive defer abort
        * - Late collision abort
        * - Excessive collisions abort
-       * This bit is cleared by either a Reset or CPU write of a ‘1’ to the
+       * This bit is cleared by either a Reset or CPU write of a 1 to the
        * CLR register.
        */
 
       if ((status & ETH_INT_TXABORT) != 0)
         {
-          nerr("ERROR: TX abort. status: %08x\n", status);
+          nerr("ERROR: TX abort. status: %08" PRIx32 "\n", status);
           NETDEV_TXERRORS(&priv->pd_dev);
         }
 
       /* TXBUSE: Transmit BVCI Bus Error Interrupt. This bit is set when the
        * TX DMA encounters a BVCI Bus error during a memory access. It is
-       * cleared by either a Reset or CPU write of a ‘1’ to the CLR register.
+       * cleared by either a Reset or CPU write of a 1 to the CLR register.
        */
 
       if ((status & ETH_INT_TXBUSE) != 0)
         {
-          nerr("ERROR: TX BVCI bus error. status: %08x\n", status);
+          nerr("ERROR: TX BVCI bus error. status: %08" PRIx32 "\n", status);
           NETDEV_TXERRORS(&priv->pd_dev);
         }
 
       /* TXDONE: Transmit Done Interrupt.  This bit is set when the currently
        * transmitted TX packet completes transmission, and the Transmit
        * Status Vector is loaded into the first descriptor used for the
-       * packet. It is cleared by either a Reset or CPU write of a ‘1’ to
+       * packet. It is cleared by either a Reset or CPU write of a 1 to
        * the CLR register.
        */
 
@@ -1857,15 +1859,15 @@ static void pic32mx_interrupt_work(void *arg)
       /* EWMARK: Empty Watermark Interrupt.  This bit is set when the RX
        * Descriptor Buffer Count is less than or equal to the value in the
        * RXEWM bit (ETHRXWM:0-7) value. It is cleared by BUFCNT bit
-       * (ETHSTAT:16-23) being incremented by hardware. Writing a ‘0’ or
-       * a ‘1’ has no effect.
+       * (ETHSTAT:16-23) being incremented by hardware. Writing a 0 or
+       * a 1 has no effect.
        */
 
       /* FWMARK: Full Watermark Interrupt.  This bit is set when the RX
        * escriptor Buffer Count is greater than or equal to the value in the
        * RXFWM bit (ETHRXWM:16-23) field. It is cleared by writing the
        * BUFCDEC (ETHCON1:0) bit to decrement the BUFCNT counter. Writing a
-       * ‘0’ or a ‘1’ has no effect.
+       * 0 or a 1 has no effect.
        */
     }
 
@@ -2123,8 +2125,10 @@ static int pic32mx_ifup(struct net_driver_s *dev)
   int ret;
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Reset the Ethernet controller (again) */
 

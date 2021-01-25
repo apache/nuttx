@@ -70,7 +70,7 @@ int board_bmp280_initialize(int bus)
       return -ENODEV;
     }
 
-  ret = bmp280_register("/dev/press0", i2c);
+  ret = bmp280_register(0, i2c);
   if (ret < 0)
     {
       snerr("Error registering BMP280\n");

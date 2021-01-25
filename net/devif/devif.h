@@ -279,12 +279,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_NET_IPv4_REASSEMBLY
-/* Reassembly timer (units: deci-seconds) */
-
-EXTERN uint8_t g_reassembly_timer;
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

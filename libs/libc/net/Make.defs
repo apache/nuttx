@@ -35,12 +35,13 @@
 
 # Add the networking C files to the build
 
-CSRCS += lib_addrconfig.c lib_etherntoa.c lib_htons.c lib_htonl.c
+CSRCS += lib_addrconfig.c lib_base64.c lib_htons.c lib_htonl.c
 CSRCS += lib_inetaddr.c lib_inetaton.c lib_inetntoa.c
 CSRCS += lib_inetntop.c lib_inetpton.c
+CSRCS += lib_etherntoa.c lib_etheraton.c
 
 ifeq ($(CONFIG_NET),y)
-CSRCS += lib_recvmsg.c lib_sendmsg.c lib_shutdown.c
+CSRCS += lib_recvmsg.c lib_sendmsg.c lib_shutdown.c lib_socketpair.c
 endif
 
 ifeq ($(CONFIG_NET_LOOPBACK),y)

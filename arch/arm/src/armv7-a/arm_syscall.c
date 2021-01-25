@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <syscall.h>
@@ -142,14 +143,16 @@ uint32_t *arm_syscall(uint32_t *regs)
    * and R1..R7 =  variable number of arguments depending on the system call.
    */
 
-  svcinfo("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
-  svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  svcinfo("SYSCALL Entry: regs: %p cmd: %" PRId32 "\n", regs, cmd);
+  svcinfo("  R0: %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+          " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n",
           regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
           regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  svcinfo("  R8: %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+          " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n",
           regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
           regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcinfo("CPSR: %08x\n", regs[REG_CPSR]);
+  svcinfo("CPSR: %08" PRIx32 "\n", regs[REG_CPSR]);
 
   /* Handle the SVCall according to the command in R0 */
 
@@ -479,13 +482,15 @@ uint32_t *arm_syscall(uint32_t *regs)
   /* Report what happened */
 
   svcinfo("SYSCALL Exit: regs: %p\n", regs);
-  svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  svcinfo("  R0: %" PRIx32 " %" PRIx32 " %" PRIx32 " %" PRIx32
+          " %" PRIx32 " %" PRIx32 " %" PRIx32 " %" PRIx32 "\n",
           regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
           regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  svcinfo("  R8: %" PRIx32 " %" PRIx32 " %" PRIx32 " %" PRIx32
+          " %" PRIx32 " %" PRIx32 " %" PRIx32 " %" PRIx32 "\n",
           regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcinfo("CPSR: %08x\n", regs[REG_CPSR]);
+          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  svcinfo("CPSR: %08" PRIx32 "\n", regs[REG_CPSR]);
 
   /* Return the last value of curent_regs.  This supports context switches
    * on return from the exception.  That capability is only used with the

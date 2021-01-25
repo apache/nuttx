@@ -1228,7 +1228,7 @@ static void lan91c111_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          devif_poll(dev, lan91c111_txpoll);
+          devif_timer(dev, 0, lan91c111_txpoll);
         }
     }
 

@@ -45,16 +45,6 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/wireless/bluetooth/bt_uart.h>
-
-#if 0
-#include <stddef.h>
-#include <errno.h>
-
-#include <nuttx/wireless/bluetooth/bt_core.h>
-#include <nuttx/wireless/bluetooth/bt_hci.h>
-#include <nuttx/wireless/bluetooth/bt_driver.h>
-#endif
 
 #include "bt_uart.h"
 
@@ -85,7 +75,11 @@ int btuart_register(FAR const struct btuart_lowerhalf_s *lower)
 
   wlinfo("lower %p\n", lower);
 
-  DEBUGASSERT(lower != NULL);
+  if (lower == NULL)
+    {
+      wlerr("ERROR: btuart lower half is NULL\n");
+      return -ENODEV;
+    }
 
   /* Allocate a new instance of the upper half driver state structure */
 

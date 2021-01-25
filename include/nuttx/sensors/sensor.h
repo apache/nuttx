@@ -443,8 +443,11 @@ struct sensor_ops_s
    *
    * Description:
    *   Set the sensor output data period in microseconds for a given sensor.
-   *   If *period_us > max_delay it will be truncated to max_dealy and if
+   *   If *period_us > max_delay it will be truncated to max_delay and if
    *   *period_us < min_delay it will be replaced by min_delay.
+   *
+   *   The lower-half can update update *period_us to reflect the actual
+   *   period in case the value is rounded up to nearest supported value.
    *
    *   Before changing the interval, you need to push the prepared data to
    *   ensure that they are not lost.
@@ -571,13 +574,14 @@ struct sensor_lowerhalf_s
   int type;
 
   /* The size of the circular buffer used, in bytes units.
-   * This sensor circular buffer is used to slove issue that application
-   * can't read sensor event in time. If this length of buffer is too large,
-   * the latency of sensor event will be too larage. If the length of buffer
-   * is too small, the event will be overwrite before application read them.
-   * So, it's recommended to set according to sensor odr. If odr is low, you
-   * can set to a length of sensor event. If odr is high, you can set to two
-   * or three length of sensor event.
+   * This sensor circular buffer is used to solve the issue where the
+   * application can't read sensor event in time. If this length of buffer
+   * is too large, the latency of the sensor event will be too large.
+   * If the length of buffer is too small, the events will be overwriten
+   * before the application can read them.
+   * So, it's recommended to set the size according to sensor ODR. If ODR is
+   * low, you can set to a length of sensor event. If ODR is high, you can
+   * set to two or three times the length of sensor event.
    */
 
   uint32_t buffer_size;
@@ -599,7 +603,7 @@ struct sensor_lowerhalf_s
        * Name: push_event
        *
        * Description:
-       *   Lower half driver push sensor event by calling this function.
+       *   Lower half driver pushes a sensor event by calling this function.
        *   It is provided by upper half driver to lower half driver.
        *
        * Input Parameters:
@@ -615,8 +619,9 @@ struct sensor_lowerhalf_s
        * Name: notify_event
        *
        * Description:
-       *   Lower half driver notify sensor data ready and can read by fetch.
-       *   It is provided by upper half driver to lower half driver.
+       *   Lower half driver notifies that sensor data is ready and can be
+       *   read by fetch. It is provided by upper half driver to lower half
+       *   driver.
        *
        *   This api is used when sensor_ops_s::fetch isn't NULL.
        *

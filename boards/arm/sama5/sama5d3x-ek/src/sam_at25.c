@@ -96,12 +96,15 @@ int sam_at25_automount(int minor)
       mtd = at25_initialize(spi);
       if (!mtd)
         {
-          ferr("ERROR: Failed to bind SPI port %d to the AT25 FLASH driver\n");
+          ferr("ERROR: Failed to bind SPI port %d "
+               "to the AT25 FLASH driver\n", AT25_PORT);
           return -ENODEV;
         }
 
 #if defined(CONFIG_SAMA5D3xEK_AT25_FTL)
-      /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+      /* And finally, use the FTL layer to wrap the MTD driver as a block
+       * driver
+       */
 
       ret = ftl_initialize(AT25_MINOR, mtd);
       if (ret < 0)
@@ -129,6 +132,7 @@ int sam_at25_automount(int minor)
           return ret;
         }
 #endif
+
       /* Now we are initializeed */
 
       initialized = true;

@@ -41,6 +41,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <fcntl.h>
 #include <time.h>
@@ -348,8 +349,8 @@ static inline int nxffs_wrname(FAR struct nxffs_volume_s *volume,
   ret = nxffs_rdcache(volume, volume->ioblock);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to read inode name block %d: %d\n",
-           volume->ioblock, -ret);
+      ferr("ERROR: Failed to read inode name block %jd: %d\n",
+           (intmax_t)volume->ioblock, -ret);
       return ret;
     }
 
@@ -359,8 +360,8 @@ static inline int nxffs_wrname(FAR struct nxffs_volume_s *volume,
   ret = nxffs_wrcache(volume);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to write inode header block %d: %d\n",
-           volume->ioblock, -ret);
+      ferr("ERROR: Failed to write inode header block %jd: %d\n",
+           (intmax_t)volume->ioblock, -ret);
     }
 
   return ret;
@@ -1234,8 +1235,8 @@ int nxffs_wrinode(FAR struct nxffs_volume_s *volume,
   ret = nxffs_rdcache(volume, volume->ioblock);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to read inode header block %d: %d\n",
-           volume->ioblock, -ret);
+      ferr("ERROR: Failed to read inode header block %jd: %d\n",
+           (intmax_t)volume->ioblock, -ret);
       goto errout;
     }
 
@@ -1273,8 +1274,8 @@ int nxffs_wrinode(FAR struct nxffs_volume_s *volume,
   ret = nxffs_wrcache(volume);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to write inode header block %d: %d\n",
-           volume->ioblock, -ret);
+      ferr("ERROR: Failed to write inode header block %jd: %d\n",
+           (intmax_t)volume->ioblock, -ret);
     }
 
   /* The volume is now available for other writers */

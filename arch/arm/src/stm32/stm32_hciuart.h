@@ -77,7 +77,8 @@ enum hciuart_devno_e
  *
  ****************************************************************************/
 
-const struct btuart_lowerhalf_s *hciuart_instantiate(enum hciuart_devno_e uart);
+const struct btuart_lowerhalf_s *
+hciuart_instantiate(enum hciuart_devno_e uart);
 
 /****************************************************************************
  * Name: hciuart_initialize

@@ -111,204 +111,14 @@
 /* Macros */
 
 #define BUF                  ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define FBUF                 ((FAR struct ipv4_hdr_s *)&g_reassembly_buffer[0])
-
-/* IP fragment re-assembly.
- *
- * REVISIT:  There are multiple issues with the current implementation:
- * 1. IPv4 reassembly is untested.
- * 2. Currently can only work with Ethernet due to the definition of
- *    IPv4_REASS_BUFSIZE.
- * 3. Since there is only a single reassembly buffer, IPv4 reassembly cannot
- *    be used in a context where multiple network devices may be concurrently
- *    re-assembling packets.
- */
-
-#define IP_MF                0x20  /* See IP_FLAG_MOREFRAGS */
-#define IPv4_REASS_BUFSIZE   (CONFIG_NET_ETH_PKTSIZE - ETH_HDRLEN)
-#define IPv4_REASS_LASTFRAG  0x01
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4_REASSEMBLY
-
-static uint8_t g_reassembly_buffer[IPv4_REASS_BUFSIZE];
-static uint8_t g_reassembly_bitmap[IPv4_REASS_BUFSIZE / (8 * 8)];
-
-static const uint8_t g_bitmap_bits[8] =
-{
-  0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01
-};
-
-static uint16_t g_reassembly_len;
-static uint8_t g_reassembly_flags;
-
-#endif /* CONFIG_NET_IPv4_REASSEMBLY */
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: devif_reassembly
- *
- * Description:
- *   IP fragment reassembly: not well-tested.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv4_REASSEMBLY
-static uint8_t devif_reassembly(FAR struct net_driver_s *dev)
-{
-  FAR struct ipv4_hdr_s *ipv4  = BUF;
-  FAR struct ipv4_hdr_s *fipv4 = FBUF;
-  uint16_t offset;
-  uint16_t len;
-  uint16_t i;
-
-  /* If g_reassembly_timer is zero, no packet is present in the buffer, so
-   * we write the IP header of the fragment into the reassembly buffer.  The
-   * timer is updated with the maximum age.
-   */
-
-  if (!g_reassembly_timer)
-    {
-      memcpy(g_reassembly_buffer, &ipv4->vhl, IPv4_HDRLEN);
-      g_reassembly_timer = CONFIG_NET_IPv4_REASS_MAXAGE;
-      g_reassembly_flags = 0;
-
-      /* Clear the bitmap. */
-
-      memset(g_reassembly_bitmap, 0, sizeof(g_reassembly_bitmap));
-    }
-
-  /* Check if the incoming fragment matches the one currently present
-   * in the reassembly buffer. If so, we proceed with copying the
-   * fragment into the buffer.
-   */
-
-  if (net_ipv4addr_hdrcmp(ipv4->srcipaddr, fipv4->srcipaddr) &&
-      net_ipv4addr_hdrcmp(ipv4->destipaddr, fipv4->destipaddr) &&
-      ipv4->ipid[0] == fipv4->ipid[0] && ipv4->ipid[1] == fipv4->ipid[1])
-    {
-      len    = ((uint16_t)ipv4->len[0] << 8) + (uint16_t)ipv4->len[1] -
-               (uint16_t)(ipv4->vhl & 0x0f) * 4;
-      offset = (((ipv4->ipoffset[0] & 0x3f) << 8) + ipv4->ipoffset[1]) * 8;
-
-      /* If the offset or the offset + fragment length overflows the
-       * reassembly buffer, we discard the entire packet.
-       */
-
-      if (offset > IPv4_REASS_BUFSIZE || offset + len > IPv4_REASS_BUFSIZE)
-        {
-          g_reassembly_timer = 0;
-          goto nullreturn;
-        }
-
-      /* Copy the fragment into the reassembly buffer, at the right offset. */
-
-      memcpy(&g_reassembly_buffer[IPv4_HDRLEN + offset],
-             (FAR char *)ipv4 + (int)((ipv4->vhl & 0x0f) * 4), len);
-
-      /* Update the bitmap. */
-
-      if (offset / (8 * 8) == (offset + len) / (8 * 8))
-        {
-          /* If the two endpoints are in the same byte, we only update that byte. */
-
-          g_reassembly_bitmap[offset / (8 * 8)] |=
-            g_bitmap_bits[(offset / 8) & 7] &
-              ~g_bitmap_bits[((offset + len) / 8) & 7];
-        }
-      else
-        {
-          /* If the two endpoints are in different bytes, we update the bytes
-           * in the endpoints and fill the stuff in between with 0xff.
-           */
-
-          g_reassembly_bitmap[offset / (8 * 8)] |=
-            g_bitmap_bits[(offset / 8) & 7];
-
-          for (i = 1 + offset / (8 * 8); i < (offset + len) / (8 * 8); ++i)
-            {
-              g_reassembly_bitmap[i] = 0xff;
-            }
-
-          g_reassembly_bitmap[(offset + len) / (8 * 8)] |=
-            ~g_bitmap_bits[((offset + len) / 8) & 7];
-        }
-
-      /* If this fragment has the More Fragments flag set to zero, we know that
-       * this is the last fragment, so we can calculate the size of the entire
-       * packet. We also set the IP_REASS_FLAG_LASTFRAG flag to indicate that
-       * we have received the final fragment.
-       */
-
-      if ((ipv4->ipoffset[0] & IP_MF) == 0)
-        {
-          g_reassembly_flags |= IPv4_REASS_LASTFRAG;
-          g_reassembly_len = offset + len;
-        }
-
-      /* Finally, we check if we have a full packet in the buffer. We do this
-       * by checking if we have the last fragment and if all bits in the bitmap
-       * are set.
-       */
-
-      if (g_reassembly_flags & IPv4_REASS_LASTFRAG)
-        {
-          /* Check all bytes up to and including all but the last byte in
-           * the bitmap.
-           */
-
-          for (i = 0; i < g_reassembly_len / (8 * 8) - 1; ++i)
-            {
-              if (g_reassembly_bitmap[i] != 0xff)
-                {
-                  goto nullreturn;
-                }
-            }
-
-          /* Check the last byte in the bitmap. It should contain just the
-           * right amount of bits.
-           */
-
-          if (g_reassembly_bitmap[g_reassembly_len / (8 * 8)] !=
-              (uint8_t)~g_bitmap_bits[g_reassembly_len / 8 & 7])
-            {
-              goto nullreturn;
-            }
-
-          /* If we have come this far, we have a full packet in the buffer,
-           * so we allocate a ipv4 and copy the packet into it. We also reset
-           * the timer.
-           */
-
-          g_reassembly_timer = 0;
-          memcpy(ipv4, fipv4, g_reassembly_len);
-
-          /* Pretend to be a "normal" (i.e., not fragmented) IP packet from
-           * now on.
-           */
-
-          ipv4->ipoffset[0] = ipv4->ipoffset[1] = 0;
-          ipv4->len[0] = g_reassembly_len >> 8;
-          ipv4->len[1] = g_reassembly_len & 0xff;
-          ipv4->ipchksum = 0;
-          ipv4->ipchksum = ~(ipv4_chksum(dev));
-
-          return g_reassembly_len;
-        }
-    }
-
-nullreturn:
-  return 0;
-}
-#endif /* CONFIG_NET_IPv4_REASSEMBLY */
 
 /****************************************************************************
  * Public Functions
@@ -396,18 +206,12 @@ int ipv4_input(FAR struct net_driver_s *dev)
 
   if ((ipv4->ipoffset[0] & 0x3f) != 0 || ipv4->ipoffset[1] != 0)
     {
-#ifdef CONFIG_NET_IPv4_REASSEMBLY
-      dev->d_len = devif_reassembly(dev);
-      if (dev->d_len == 0)
-#endif
-        {
 #ifdef CONFIG_NET_STATISTICS
-          g_netstats.ipv4.drop++;
-          g_netstats.ipv4.fragerr++;
+       g_netstats.ipv4.drop++;
+       g_netstats.ipv4.fragerr++;
 #endif
-          nwarn("WARNING: IP fragment dropped\n");
-          goto drop;
-        }
+       nwarn("WARNING: IP fragment dropped\n");
+       goto drop;
     }
 
   /* Get the destination IP address in a friendlier form */

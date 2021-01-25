@@ -51,6 +51,98 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: file_dup2
+ *
+ * Description:
+ *   Assign an inode to a specific files structure.  This is the heart of
+ *   dup2.
+ *
+ *   Equivalent to the non-standard dup2() function except that it
+ *   accepts struct file instances instead of file descriptors and it does
+ *   not set the errno variable.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
+{
+  FAR struct inode *inode;
+  struct file temp;
+  int ret;
+
+  if (filep1 == NULL || filep1->f_inode == NULL || filep2 == NULL)
+    {
+      return -EBADF;
+    }
+
+  if (filep1 == filep2)
+    {
+      return OK;
+    }
+
+  /* Increment the reference count on the contained inode */
+
+  inode = filep1->f_inode;
+  ret   = inode_addref(inode);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Then clone the file structure */
+
+  temp.f_oflags = filep1->f_oflags;
+  temp.f_pos    = filep1->f_pos;
+  temp.f_inode  = inode;
+  temp.f_priv   = NULL;
+
+  /* Call the open method on the file, driver, mountpoint so that it
+   * can maintain the correct open counts.
+   */
+
+  if (inode->u.i_ops && inode->u.i_ops->open)
+    {
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+      if (INODE_IS_MOUNTPT(inode))
+        {
+          /* Dup the open file on the in the new file structure */
+
+          ret = inode->u.i_mops->dup(filep1, &temp);
+        }
+      else
+#endif
+        {
+          /* (Re-)open the pseudo file or device driver */
+
+          ret = inode->u.i_ops->open(&temp);
+        }
+
+      /* Handle open failures */
+
+      if (ret < 0)
+        {
+          inode_release(inode);
+          return ret;
+        }
+    }
+
+  /* If there is already an inode contained in the new file structure,
+   * close the file and release the inode.
+   */
+
+  ret = file_close(filep2);
+  DEBUGASSERT(ret == 0);
+
+  /* Return the file structure */
+
+  memcpy(filep2, &temp, sizeof(temp));
+  return OK;
+}
+
+/****************************************************************************
  * Name: nx_dup2
  *
  * Description:
@@ -98,7 +190,7 @@ int nx_dup2(int fd1, int fd2)
       /* Its a valid file descriptor.. dup the file descriptor.
        */
 
-      return fs_dupfd2(fd1, fd2);
+      return files_dup2(fd1, fd2);
     }
 }
 

@@ -31,18 +31,6 @@
 #include "mqueue/mqueue.h"
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/* This is a container for a list of message queue descriptors. */
-
-struct mq_des_block_s
-{
-  sq_entry_t    queue;
-  struct mq_des mqdes[NUM_MSG_DESCRIPTORS];
-};
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -59,13 +47,6 @@ sq_queue_t  g_msgfree;
 
 sq_queue_t  g_msgfreeirq;
 
-/* The g_desfree data structure is a list of message descriptors available
- * to the operating system for general use. The number of messages in the
- * pool is a constant.
- */
-
-sq_queue_t  g_desfree;
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -81,10 +62,6 @@ static struct mqueue_msg_s  *g_msgalloc;
  */
 
 static struct mqueue_msg_s  *g_msgfreeirqalloc;
-
-/* g_desalloc is a list of allocated block of message queue descriptors. */
-
-static sq_queue_t g_desalloc;
 
 /****************************************************************************
  * Private Functions
@@ -155,7 +132,6 @@ void nxmq_initialize(void)
 
   sq_init(&g_msgfree);
   sq_init(&g_msgfreeirq);
-  sq_init(&g_desalloc);
 
   /* Allocate a block of messages for general use */
 
@@ -168,52 +144,6 @@ void nxmq_initialize(void)
    */
 
   g_msgfreeirqalloc =
-    mq_msgblockalloc(&g_msgfreeirq, NUM_INTERRUPT_MSGS,
+    mq_msgblockalloc(&g_msgfreeirq, CONFIG_PREALLOC_MQ_IRQ_MSGS,
                      MQ_ALLOC_IRQ);
-
-  /* Allocate a block of message queue descriptors */
-
-  nxmq_alloc_desblock();
-}
-
-/****************************************************************************
- * Name: nxmq_alloc_desblock
- *
- * Description:
- *   Allocate a block of message descriptors and place them on the free
- *   list.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void nxmq_alloc_desblock(void)
-{
-  FAR struct mq_des_block_s *mqdesblock;
-
-  /* Allocate a block of message descriptors */
-
-  mqdesblock = (FAR struct mq_des_block_s *)
-    kmm_malloc(sizeof(struct mq_des_block_s));
-  if (mqdesblock)
-    {
-      int i;
-
-      /* Add the block to the list of allocated blocks (in case
-       * we ever need to reclaim the memory).
-       */
-
-      sq_addlast((FAR sq_entry_t *)&mqdesblock->queue, &g_desalloc);
-
-      /* Then add each message queue descriptor to the free list */
-
-      for (i = 0; i < NUM_MSG_DESCRIPTORS; i++)
-        {
-          sq_addlast((FAR sq_entry_t *)&mqdesblock->mqdes[i], &g_desfree);
-        }
-    }
 }

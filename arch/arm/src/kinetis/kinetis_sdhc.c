@@ -773,7 +773,7 @@ static void kinetis_transmit(struct kinetis_dev_s *priv)
    * (PRSSTAT.BWEN)
    */
 
-  mcinfo("Entry: remaining: %d IRQSTAT: %08x\n",
+  mcinfo("Entry: remaining: %d IRQSTAT: %08" PRIx32 "\n",
          priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
 
   while (priv->remaining > 0 &&
@@ -819,7 +819,7 @@ static void kinetis_transmit(struct kinetis_dev_s *priv)
 
   putreg32(SDHC_INT_BWR, KINETIS_SDHC_IRQSTAT);
 
-  mcinfo("Exit: remaining: %d IRQSTAT: %08x\n",
+  mcinfo("Exit: remaining: %d IRQSTAT: %08" PRIx32 "\n",
          priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
 }
 #endif
@@ -858,7 +858,7 @@ static void kinetis_receive(struct kinetis_dev_s *priv)
    * ready (BRR)
    */
 
-  mcinfo("Entry: remaining: %d IRQSTAT: %08x\n",
+  mcinfo("Entry: remaining: %d IRQSTAT: %08" PRIx32 "\n",
          priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
 
   while (priv->remaining > 0 &&
@@ -910,7 +910,7 @@ static void kinetis_receive(struct kinetis_dev_s *priv)
 
   putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);
 
-  mcinfo("Exit: remaining: %d IRQSTAT: %08x WML: %08x\n",
+  mcinfo("Exit: remaining: %d IRQSTAT: %08" PRIx32 " WML: %08" PRIx32 "\n",
          priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT),
          getreg32(KINETIS_SDHC_WML));
 }

@@ -111,6 +111,55 @@ config SYSLOG_TIMESTAMP_REALTIME
 		CLOCK_MONOTONIC, if enabled, will be used or the system timer
 		is not.
 
+config SYSLOG_TIMESTAMP_FORMATTED
+	bool "Formatted syslog time"
+	default n
+	depends on SYSLOG_TIMESTAMP_REALTIME
+	---help---
+		Syslog timestamp will be formatted according to the
+		SYSLOG_TIMESTAMP_FORMAT format string.		
+
+config SYSLOG_TIMESTAMP_LOCALTIME
+	bool "Use local-time timestamp"
+	default n
+	depends on SYSLOG_TIMESTAMP_FORMATTED
+	---help---
+		If selected local time will be used for the timestamps.
+		Else, timestamps will be in UTC.
+
+config SYSLOG_TIMESTAMP_FORMAT
+	string "Time format"
+	default "%e/%m/%y %H:%M:%S"
+	depends on SYSLOG_TIMESTAMP_FORMATTED
+	---help---
+		Formatter string for syslog timestamp printing.
+		Uses the standard "strftime" format specifiers.
+
+config SYSLOG_TIMESTAMP_BUFFER
+	int "Formatted timestamp buffer size"
+	default 64
+	depends on SYSLOG_TIMESTAMP_FORMATTED
+	---help---
+		Buffer size to store syslog formatted timestamps.
+
+config SYSLOG_COLOR_OUTPUT
+	bool "Colored syslog output"
+	default n
+	---help---
+		Enables colored output in syslog, according to message priority.
+
+config SYSLOG_PRIORITY
+	bool "Prepend priority to syslog message"
+	default n
+	---help---
+		Prepend log priority (severity) to syslog message.
+
+config SYSLOG_PROCESSID
+	bool "Prepend Process ID to syslog message"
+	default n
+	---help---
+		Prepend Process ID to syslog message.
+
 config SYSLOG_PREFIX
 	bool "Prepend prefix to syslog message"
 	default n

@@ -2092,7 +2092,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   regval |= (SPI_CON_ENHBUF | SPI_CON_SRXISEL_HALF | SPI_CON_STXISEL_HALF);
 #endif
   spi_putreg(priv, PIC32MZ_SPI_CON_OFFSET, regval);
-  spiinfo("CON: %08x\n", regval);
+  spiinfo("CON: %08" PRIx32 "\n", regval);
 
   /* Set the initial SPI configuration */
 

@@ -16,6 +16,8 @@ Contents
   - RSPI
   - RIIC
   - DTC
+  - USB Host
+  - USB Host Hub
   - Debugging
 
 Board Features
@@ -193,6 +195,20 @@ Channel1: Pin number 35 and 36 in JA3 is used for MOSIB and MISOB respectively
 Channel2: Pin number 18 and 19 in JA3 is used for MOSIC and MISOC respectively
 and for enabling these pin need to select DSW-SEL0 by making off SW4-4
 
+USB Host
+=============
+For the RX65N RSK2MB board, to be used as USB Device, the following Jumper settings need to be done
+
+J7     Short Pin 1 & Pin 2
+J16    Short Pin 2 & Pin 3
+
+USB Device
+=============
+For the RX65N RSK2MB board, to be used as USB Device, the following Jumper settings need to be done
+
+J7     Short Pin 2 & Pin 3
+J16    Short Pin 1 & Pin 2
+
 RTC
 ==========
 
@@ -272,6 +288,76 @@ DTC Testing
 
 DTC has been tested using RSPI driver.
 
+USB Host Configurations
+--------------------------
+The following configurations need to be enabled for USB Host Mode driver to 
+support USB HID Keyboard class and MSC Class.
+
+CONFIG_USBHOST=y
+CONFIG_USBHOST_HIDKBD=y
+CONFIG_FS_FAT=y
+CONFIG_EXAMPLES_HIDKBD=y
+
+USB Host Driver Testing
+------------------------
+The Following Class Drivers were tested as mentioned below : 
+
+- USB HID Keyboard Class
+On the NuttX Console "hidkbd" application was executed 
+
+nsh> hidkbd
+The characters typed from the keyboard were executed correctly.
+
+- USB MSC Class
+
+The MSC device is enumerated as sda in /dev directory.
+
+The block device is mounted using the command as mentioned below : 
+
+mount -t vfat /dev/sda /mnt
+
+The MSC device is mounted in /dev directory 
+
+The copy command is executed to test the Read/Write functionality
+
+cp /mnt/<file.txt> /mnt/file_copy.txt
+
+USB Host Hub Configurations
+--------------------------
+The following configurations need to be enabled for USB Host Mode driver to 
+support USB HID Keyboard class and MSC Class.
+
+CONFIG_RX65N_USBHOST=y
+CONFIG_USBHOST_HUB=y
+CONFIG_USBHOST_ASYNCH=y
+CONFIG_USBHOST=y
+CONFIG_USBHOST_HIDKBD=y
+CONFIG_FS_FAT=y
+CONFIG_EXAMPLES_HIDKBD=y
+
+USB Host Hub Driver Testing
+------------------------
+The Following Class Drivers were tested as mentioned below : 
+
+- USB HID Keyboard Class
+On the NuttX Console "hidkbd" application was executed 
+
+nsh> hidkbd
+The characters typed from the keyboard were executed correctly.
+
+- USB MSC Class
+The MSC device is enumerated as sda in /dev directory.
+
+The block device is mounted using the command as mentioned below : 
+
+mount -t vfat /dev/sda /mnt
+
+The MSC device is mounted in /dev directory 
+
+The copy command is executed to test the Read/Write functionality
+
+cp /mnt/<file.txt> /mnt/file_copy.txt
+
 Debugging
 ==========
 1. NuttX needs to be compiled in Cygwin environment on Windows.
@@ -304,8 +390,3 @@ endif
    Select Motorola SREC format.
 4. Download Renesas flash programmer tool from https://www.renesas.com/in/en/products/software-tools/tools/programmer/renesas-flash-programmer-programming-gui.html#downloads
 5. Refer to the user manual document, for steps to flash NuttX binary using RFP tool.
-Changes Made in NuttX 8.2 Code
-================================
-1. In wd_start.c file, in function wd_expiration(), typecasting is done when the signal handler nxsig_timeout() is invoked.
-2. In rtc.c, (drivers/timers/rtc.c) file, in function rtc_periodic_callback(), alarminfo->active = false is commented.
-The reason being, periodic interrupt should not be disabled. Uncommenting the above mentioned line (alarminfo->active = false), will make the periodic interrupt come only once.

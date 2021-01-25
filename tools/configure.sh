@@ -148,11 +148,14 @@ if [ ! -d ${configpath} ]; then
 
   configpath=${TOPDIR}/${boardconfig}
   if [ ! -d ${configpath} ]; then
-    echo "Directory for ${boardconfig} does not exist."
-    echo ""
-    echo "Run tools/configure.sh -L to list available configurations."
-    echo "$USAGE"
-    exit 3
+    configpath=${boardconfig}
+    if [ ! -d ${configpath} ]; then
+      echo "Directory for ${boardconfig} does not exist."
+      echo ""
+      echo "Run tools/configure.sh -L to list available configurations."
+      echo "$USAGE"
+      exit 3
+    fi
   fi
 fi
 
@@ -163,9 +166,9 @@ if [ ! -r ${src_makedefs} ]; then
   src_makedefs=${TOPDIR}/boards/*/*/${boarddir}/scripts/Make.defs
 
   if [ ! -r ${src_makedefs} ]; then
-    src_makedefs=${TOPDIR}/${boardconfig}/Make.defs
+    src_makedefs=${configpath}/Make.defs
     if [ ! -r ${src_makedefs} ]; then
-      src_makedefs=${TOPDIR}/${boardconfig}/../../scripts/Make.defs
+      src_makedefs=${configpath}/../../scripts/Make.defs
 
       if [ ! -r ${src_makedefs} ]; then
         echo "File Make.defs could not be found"
@@ -186,7 +189,7 @@ fi
 
 if [ -r ${dest_config} ]; then
   if [ "X${enforce_distclean}" = "Xy" ]; then
-    make -C ${TOPDIR} distclean $*
+    make -C ${TOPDIR} distclean
   else
     if cmp -s ${src_config} ${backup_config}; then
       echo "No configuration change."
@@ -194,7 +197,7 @@ if [ -r ${dest_config} ]; then
     fi
 
     if [ "X${distclean}" = "Xy" ]; then
-      make -C ${TOPDIR} distclean $*
+      make -C ${TOPDIR} distclean
     else
       echo "Already configured!"
       echo "Please 'make distclean' and try again."
@@ -293,7 +296,7 @@ done
 
 if [ "X${defappdir}" = "Xy" ]; then
   # In-place edit can mess up permissions on Windows
-  # sed -i -e "/^CONFIG_APPS_DIR/d" "${dest_config}"
+  # sed -i.bak -e "/^CONFIG_APPS_DIR/d" "${dest_config}"
   sed -e "/^CONFIG_APPS_DIR/d" "${dest_config}" > "${dest_config}-temp"
   mv "${dest_config}-temp" "${dest_config}"
 

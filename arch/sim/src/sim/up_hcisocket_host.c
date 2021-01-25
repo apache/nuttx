@@ -63,16 +63,52 @@ struct sockaddr_hci
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: bthcisock_host_avail
+ *
+ * Description:
+ *   Monitor the host user channel to see if I/O is possible on socket.
+ *
+ * Input Parameters:
+ *   fd: Host Bluetooth socket fd
+ *
+ * Returned Value:
+ *   TRUE is returned on I/O available
+ *
+ ****************************************************************************/
+
+int bthcisock_host_avail(int fd)
+{
+  struct timeval tv;
+  fd_set fdset;
+
+  /* We can't do anything if we failed to open the user channel */
+
+  if (fd < 0)
+    {
+      return 0;
+    }
+
+  /* Wait for data on the user channel (or a timeout) */
+
+  tv.tv_sec  = 0;
+  tv.tv_usec = 0;
+
+  FD_ZERO(&fdset);
+  FD_SET(fd, &fdset);
+
+  return select(fd + 1, &fdset, NULL, NULL, &tv) > 0;
+}
+
+/****************************************************************************
  * Name: bthcisock_host_send
  *
  * Description:
  *   Send a Bluetooth packet out via the host user socket.
  *
  * Input Parameters:
- *   fd: Host Bluetooth socket fd
- *   pkt_type: Packet type as known to the Linux Bluetooth stack
+ *   fd  : Host Bluetooth socket fd
  *   data: Pointer to the HCI packet
- *   len: Length of packet
+ *   len : Length of packet
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
@@ -80,19 +116,15 @@ struct sockaddr_hci
  *
  ****************************************************************************/
 
-int bthcisock_host_send(int fd, uint8_t pkt_type, uint8_t *data, size_t len)
+int bthcisock_host_send(int fd, const void *data, size_t len)
 {
-  struct iovec iv[2];
-
-  iv[0].iov_base = &pkt_type;
-  iv[0].iov_len = 1;
-  iv[1].iov_base = data;
-  iv[1].iov_len = len;
-
-  while (writev(fd, iv, 2) < 0)
+  while (write(fd, data, len) < 0)
     {
       if (errno == EAGAIN || errno == EINTR)
-        continue;
+        {
+          continue;
+        }
+
       return -1;
     }
 
@@ -106,9 +138,9 @@ int bthcisock_host_send(int fd, uint8_t pkt_type, uint8_t *data, size_t len)
  *   Read from the Host HCI socket interface.
  *
  * Input Parameters:
- *   fd: Host Bluetooth socket fd
+ *   fd  : Host Bluetooth socket fd
  *   data: Pointer to store HCI packet
- *   len: Maximum length of packet
+ *   len : Maximum length of packet
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
@@ -116,17 +148,11 @@ int bthcisock_host_send(int fd, uint8_t pkt_type, uint8_t *data, size_t len)
  *
  ****************************************************************************/
 
-int bthcisock_host_read(int fd, uint8_t *type, void *buf, size_t len)
+int bthcisock_host_read(int fd, void *data, size_t len)
 {
   int err;
-  struct iovec iv[2];
 
-  iv[0].iov_base = type;
-  iv[0].iov_len = 1;
-  iv[1].iov_base = buf;
-  iv[1].iov_len = len;
-
-  while ((err = readv(fd, iv, 2)) < 0 && (errno == EINTR));
+  while ((err = read(fd, data, len)) < 0 && (errno == EINTR));
 
   if (err <= 0)
     {
@@ -135,9 +161,9 @@ int bthcisock_host_read(int fd, uint8_t *type, void *buf, size_t len)
       return -1;
     }
 
-  /* Return the number of bytes written to buf so remove the header byte */
+  /* Return the number of bytes written to data */
 
-  return (err - 1);
+  return err;
 }
 
 /****************************************************************************
@@ -189,4 +215,24 @@ int bthcisock_host_open(int dev_idx)
     }
 
   return fd;
+}
+
+/****************************************************************************
+ * Name: bthcisock_host_close
+ *
+ * Description:
+ *   Close a User Channel HCI socket on the Host for the given device idx.
+ *
+ * Input Parameters:
+ *   fd: The resources associated with the open user channel are freed.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int bthcisock_host_close(int fd)
+{
+  return close(fd);
 }

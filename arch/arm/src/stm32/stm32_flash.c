@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_flash.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -31,15 +31,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Provides standard flash access functions, to be used by the  flash mtd driver.
- * The interface is defined in the include/nuttx/progmem.h
+/* Provides standard flash access functions, to be used by the  flash mtd
+ * driver.  The interface is defined in the include/nuttx/progmem.h
  */
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,3 +54,7 @@
 #else
 #  warning "No FLASH support for the selected part"
 #endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/

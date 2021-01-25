@@ -587,7 +587,8 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
     /* Command:     DJOYIOC_SUPPORTED
-     * Description: Report the set of button events supported by the hardware;
+     * Description: Report the set of button events supported by the
+     *              hardware;
      * Argument:    A pointer to writeable integer value in which to return
      *              the set of supported buttons.
      * Return:      Zero (OK) on success.  Minus one will be returned on
@@ -673,7 +674,7 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      ierr("ERROR: Unrecognized command: %ld\n", cmd);
+      ierr("ERROR: Unrecognized command: %d\n", cmd);
       ret = -ENOTTY;
       break;
     }
@@ -793,7 +794,6 @@ errout_with_dusem:
 
 int djoy_register(FAR const char *devname,
                   FAR const struct djoy_lowerhalf_s *lower)
-
 {
   FAR struct djoy_upperhalf_s *priv;
   int ret;
