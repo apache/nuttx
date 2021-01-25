@@ -64,9 +64,9 @@
  * Name: ONEWIRE_RESET
  *
  * Description:
- *   Reset pulse and presence detect. Each write operational will be an 'atomic'
- *   operation in the sense that any other 1-Wire actions will be serialized
- *   and pend until this write completes.
+ *   Reset pulse and presence detect. Each write operational will be an
+ *   'atomic' operation in the sense that any other 1-Wire actions will be
+ *   serialized and pend until this write completes.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
@@ -82,14 +82,14 @@
  * Name: ONEWIRE_WRITE
  *
  * Description:
- *   Send a block of data on 1-Wire. Each write operational will be an 'atomic'
- *   operation in the sense that any other 1-Wire actions will be serialized
- *   and pend until this write completes.
+ *   Send a block of data on 1-Wire. Each write operational will be an
+ *   'atomic' operation in the sense that any other 1-Wire actions will be
+ *   serialized and pend until this write completes.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
- *   buffer - A pointer to the read-only buffer of data to be written to device
- *   buflen - The number of bytes to send from the buffer
+ *   buffer - A pointer to the read-only buffer of data to be written to
+ *   device buflen - The number of bytes to send from the buffer
  *
  * Returned Value:
  *   0: success, <0: A negated errno
@@ -102,14 +102,14 @@
  * Name: ONEWIRE_READ
  *
  * Description:
- *   Receive a block of data from 1-Wire. Each read operational will be an 'atomic'
- *   operation in the sense that any other 1-Wire actions will be serialized
- *   and pend until this read completes.
+ *   Receive a block of data from 1-Wire. Each read operational will be an
+ *   'atomic' operation in the sense that any other 1-Wire actions will be
+ *   serialized and pend until this read completes.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
- *   buffer - A pointer to a buffer of data to receive the data from the device
- *   buflen - The requested number of bytes to be read
+ *   buffer - A pointer to a buffer of data to receive the data from the
+ *   device buflen - The requested number of bytes to be read
  *
  * Returned Value:
  *   0: success, <0: A negated errno
@@ -122,17 +122,19 @@
  * Name: ONEWIRE_EXCHANGE
  *
  * Description:
- *   Reset pulse and presence detect, send a block of data and receive a block
- *   of data from 1-Wire. Each write operational will be an 'atomic'
- *   operation in the sense that any other 1-Wire actions will be serialized
- *   and pend until this write completes.
+ *   Reset pulse and presence detect, send a block of data and receive a
+ *   block of data from 1-Wire. Each write operational will be an 'atomic'
+ *   operation in the sense that any other 1-Wire actions will be
+ *   serialized and pend until this write completes.
  *
  * Input Parameters:
  *   dev      - Device-specific state data
  *   reset    - Reset pulse and presence detect
- *   txbuffer - A pointer to the read-only buffer of data to be written to device
+ *   txbuffer - A pointer to the read-only buffer of data to be written to
+ *              device
  *   txbuflen - The number of bytes to send from the buffer
- *   rxbuffer - A pointer to a buffer of data to receive the data from the device
+ *   rxbuffer - A pointer to a buffer of data to receive the data from the
+ *              device
  *   rxbuflen - The requested number of bytes to be read
  *
  * Returned Value:
@@ -165,9 +167,9 @@
  * Name: ONEWIRE_READBIT
  *
  * Description:
- *   Sample a single bit from 1-Wire. Each read operational will be an 'atomic'
- *   operation in the sense that any other 1-Wire actions will be serialized
- *   and pend until this read completes.
+ *   Sample a single bit from 1-Wire. Each read operational will be an
+ *   'atomic' operation in the sense that any other 1-Wire actions will be
+ *   serialized and pend until this read completes.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
@@ -212,7 +214,7 @@ struct onewire_dev_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #endif /* __INCLUDE_NUTTX_DRIVERS_1WIRE_H */
