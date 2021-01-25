@@ -91,7 +91,9 @@ typedef struct blake2s_param__
   uint8_t xof_length[2];                        /* 14 */
   uint8_t node_depth;                           /* 15 */
   uint8_t inner_length;                         /* 16 */
+
   /* uint8_t  reserved[0]; */
+
   uint8_t salt[BLAKE2S_SALTBYTES];              /* 24 */
   uint8_t personal[BLAKE2S_PERSONALBYTES];      /* 32 */
 } blake2s_param;
@@ -109,15 +111,20 @@ typedef uint16_t uint16_alias_t __attribute__((may_alias, aligned(1)));
 /* Streaming API */
 
 int blake2s_init(FAR blake2s_state *S, size_t outlen);
-int blake2s_init_key(FAR blake2s_state *S, size_t outlen, FAR const void *key,
+int blake2s_init_key(FAR blake2s_state *S, size_t outlen,
+                     FAR const void *key,
                      size_t keylen);
-int blake2s_init_param(FAR blake2s_state *S, FAR const blake2s_param *P);
-int blake2s_update(FAR blake2s_state *S, FAR const void *in, size_t inlen);
-int blake2s_final(FAR blake2s_state *S, FAR void *out, size_t outlen);
+int blake2s_init_param(FAR blake2s_state *S,
+                       FAR const blake2s_param *P);
+int blake2s_update(FAR blake2s_state *S,
+                   FAR const void *in, size_t inlen);
+int blake2s_final(FAR blake2s_state *S,
+                  FAR void *out, size_t outlen);
 
 /* Simple API */
 
-int blake2s(FAR void *out, size_t outlen, FAR const void *in, size_t inlen,
+int blake2s(FAR void *out, size_t outlen,
+            FAR const void *in, size_t inlen,
             FAR const void *key, size_t keylen);
 
 /****************************************************************************
