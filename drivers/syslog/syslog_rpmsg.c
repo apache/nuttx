@@ -186,7 +186,8 @@ static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
         }
     }
 
-  if (last && !priv->suspend && !priv->transfer)
+  if (last && !priv->suspend && !priv->transfer &&
+          is_rpmsg_ept_ready(&priv->ept))
     {
       clock_t delay = SYSLOG_RPMSG_WORK_DELAY;
       size_t space = SYSLOG_RPMSG_SPACE(priv->head, priv->tail, priv->size);
