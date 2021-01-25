@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************
  * Automounter configuration
  *   CONFIG_FS_AUTOMOUNTER - Enables automount support
@@ -71,6 +72,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This is the type of the automount media change handler.  The lower level
  * code will intercept the interrupt and provide the upper level with the
  * private data that was provided when the interrupt was attached and will
@@ -161,7 +163,8 @@ extern "C"
  *   lower - Persistent board configuration data
  *
  * Returned Value:
- *   A void* handle.  The only use for this handle is with automount_uninitialize().
+ *   A void* handle.
+ *           The only use for this handle is with automount_uninitialize().
  *   NULL is returned on any failure.
  *
  ****************************************************************************/

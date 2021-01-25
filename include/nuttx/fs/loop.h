@@ -122,8 +122,8 @@ void loop_register(void);
  * Name: losetup
  *
  * Description:
- *   Setup the loop device so that it exports the file referenced by 'filename'
- *   as a block device.
+ *   Setup the loop device so that it exports the file referenced by
+ *   'filename' as a block device.
  *
  ****************************************************************************/
 

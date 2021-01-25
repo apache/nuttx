@@ -49,7 +49,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* If the erased state of FLASH memory is anything other than 0xff, then this
  * configuration should be provided.
  */
@@ -144,8 +146,9 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd);
  * Name: nxffs_dump
  *
  * Description:
- *   Dump a summary of the contents of an NXFFS file system.  CONFIG_DEBUG_FEATURES
- *   and CONFIG_DEBUG_FS must be enabled for this function to do anything.
+ *   Dump a summary of the contents of an NXFFS file system.
+ *   CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_FS must be enabled for this
+ *   function to do anything.
  *
  * Input Parameters:
  *   mtd - The MTD device that provides the interface to NXFFS-formatted
