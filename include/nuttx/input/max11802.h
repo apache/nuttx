@@ -55,7 +55,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* SPI Frequency.  Default:  100KHz */
 
 #ifndef CONFIG_MAX11802_FREQUENCY
@@ -159,7 +161,7 @@ extern "C"
  *
  ****************************************************************************/
 
- int max11802_register(FAR struct spi_dev_s *spi,
+int max11802_register(FAR struct spi_dev_s *spi,
                        FAR struct max11802_config_s *config, int minor);
 
 #undef EXTERN

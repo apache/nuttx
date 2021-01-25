@@ -34,9 +34,9 @@
  ****************************************************************************/
 
 /* This header file provides definition for Nintendo Wii Nunchuck joystick
- * interface.  The Nunchuck joystick  provides X/Y  positional data as integer
- * values. The analog positional data may also be accompanied by discrete button
- * data.
+ * interface.  The Nunchuck joystick  provides X/Y  positional data as
+ * integer values. The analog positional data may also be accompanied by
+ * discrete button data.
  *
  * The nunchuck joystick driver exports a standard character driver
  * interface. By convention, the nunchuck joystick is registered as an input
@@ -61,6 +61,7 @@
 #define NUNCHUCK_I2C_FREQ          100000  /* 100Khz */
 
 /* Joystick Interface *******************************************************/
+
 /* These definitions provide the meaning of all of the bits that may be
  * reported in the nunchuck_buttonset_t bitset.
  */
@@ -90,10 +91,10 @@
  * seek() methods.  The remaining driver methods behave as follows:
  *
  * 1) The read() method will always return a single value of size
- *    struct nunchuck_sample_s represent the current joystick positional and the
- *    state of all joystick buttons. read() never blocks.  X an Y position
- *    data is raw converted data.  Zeroing and scaling must be performed by
- *    the application.
+ *    struct nunchuck_sample_s represent the current joystick positional and
+ *    the state of all joystick buttons. read() never blocks.  X an Y
+ *    position data is raw converted data.
+ *     Zeroing and scaling must be performed by the application.
  * 2) The ioctl() method supports the commands documented below:
  */
 
