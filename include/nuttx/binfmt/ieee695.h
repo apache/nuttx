@@ -168,6 +168,7 @@
 #define IEEE695_COMENT_PASS2         0x01  /* Records generated from Pass 2 of the linker */
 
 /* Standard Functions, Identifiers and Commands *************************************/
+
 /* Standard functions */
 
 #define IEEE695_FUNC_F               0xa0
@@ -347,6 +348,7 @@
 #define IEEE695_SYMCLASS_DEFINE      4  /* C #define constant */
 
 /* Helper Macros ********************************************************************/
+
 /* These macros extract un-aligned, little-endian values from the object file */
 
 #define IEEE695_GETUINT16(p) \
@@ -441,7 +443,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ************************************************************************************/
 
 #undef EXTERN
