@@ -111,8 +111,10 @@ extern "C"
  *
  ****************************************************************************/
 
- struct spi_dev_s;  /* Forward reference */
-int max7219_leds_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
+struct spi_dev_s;  /* Forward reference */
+
+int max7219_leds_register(FAR const char *devpath,
+                          FAR struct spi_dev_s *spi);
 
 #undef EXTERN
 #ifdef __cplusplus

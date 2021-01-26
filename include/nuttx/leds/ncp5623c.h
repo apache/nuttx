@@ -94,11 +94,12 @@ enum led_select_e
   LED_3 = NCP5623C_PWM3
 };
 
-/* This structure is used in an IOCTL command for setting the PWM of an individual
- * LED. The desired LED is selected by setting the 'led' parameter accordingly
- * whereas the 'led_pwm' field governs the brightness of the selected LED. A value
- * of 0 (0x00) leads to a duty cycle of 0 % = LED off while a value of 255 (0xFF)
- * leads to a duty cycle of 99.6 % = Maximum brightness.
+/* This structure is used in an IOCTL command for setting the PWM of an
+ * individual LED. The desired LED is selected by setting the 'led' parameter
+ * accordingly whereas the 'led_pwm' field governs the brightness of the
+ * selected LED. A value of 0 (0x00) leads to a duty cycle of 0 % = LED off
+ * while a value of 255 (0xFF) leads to a duty cycle of 99.6 % = Maximum
+ * brightness.
  */
 
 struct ncp5623c_set_reg_s
