@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/spresense/include/cxd56_i2cdev.h
+ * boards/arm/cxd56xx/common/src/cxd56_i2cdev_bitbang.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,50 +18,22 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_I2CDEV_H
-#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_I2CDEV_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdint.h>
+#include <nuttx/i2c/i2c_master.h>
+
+#include <stdio.h>
+#include <debug.h>
+#include <errno.h>
+
+#include "cxd56_i2c_bitbang.h"
 
 /****************************************************************************
- * Public Types
+ * Public Functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_i2cdev_initialize
- *
- * Description:
- *   Initialize i2c driver and register the /dev/i2c device.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_CXD56_I2C_DRIVER
-int board_i2cdev_initialize(int bus);
-#endif
 
 /****************************************************************************
  * Name: board_i2cdev_bitbang_initialize
@@ -78,14 +50,34 @@ int board_i2cdev_initialize(int bus);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_BITBANG
-int board_i2cdev_bitbang_initialize(uint32_t sda_pin, uint32_t scl_pin);
+int board_i2cdev_bitbang_initialize(uint32_t sda_pin, uint32_t scl_pin)
+{
+  int ret = 0;
+  FAR struct i2c_master_s *i2c;
+  int port;
+
+  /* Use a sda pin number as port number */
+
+  port = sda_pin;
+
+  _info("Initializing /dev/i2c%d..\n", port);
+
+  /* Initialize i2c bitbang device */
+
+  i2c = cxd56_i2c_bitbang_initialize(sda_pin, scl_pin);
+  if (!i2c)
+    {
+      _err("ERROR: Failed to initialize i2c%d.\n", port);
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_I2C_DRIVER
+  ret = i2c_register(i2c, port);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to register i2c%d: %d\n", port, ret);
+    }
 #endif
 
-#undef EXTERN
-#if defined(__cplusplus)
+  return ret;
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_I2CDEV_H */
