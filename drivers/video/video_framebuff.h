@@ -21,12 +21,20 @@
 #ifndef __VIDEO_VIDEO_FRAMEBUFF_H__
 #define __VIDEO_VIDEO_FRAMEBUFF_H__
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/video/video.h>
 #include <nuttx/semaphore.h>
 
+/****************************************************************************
+ * Public Functions Definistions
+ ****************************************************************************/
+
 struct vbuf_container_s
 {
-  struct v4l2_buffer       buf;    /* Buffer information */
+  struct v4l2_buffer       buf;   /* Buffer information */
   struct vbuf_container_s *next;  /* pointer to next buffer */
 };
 
