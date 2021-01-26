@@ -153,7 +153,11 @@
 #define PICO_PSRAM_CLK_IO          6
 
 #ifndef CONFIG_PICO_PSRAM_CS_IO    /* Default is 10 */
-#  define PICO_PSRAM_CS_IO         10
+#  define CONFIG_PICO_PSRAM_CS_IO  10
+#endif
+
+#ifndef CONFIG_ESP32_SPIRAM_SPIWP_SD3_PIN /* Default is 7 */
+#  define CONFIG_ESP32_SPIRAM_SPIWP_SD3_PIN 7
 #endif
 
 #define PSRAM_INTERNAL_IO_28       28
