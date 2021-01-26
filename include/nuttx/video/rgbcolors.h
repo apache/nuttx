@@ -44,7 +44,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Color Creation and Conversion Macros *************************************/
+
 /* This macro creates RGB24 from 8:8:8 RGB */
 
 #define RGBTO24(r,g,b) \
@@ -100,6 +102,7 @@
   (((rgb16 & 0xf800) << 8) | ((rgb16 & 0x07e0) << 5)  | ((rgb16 & 0x001f) << 3))
 
 /* Standard Color Definitions ***********************************************/
+
 /* RGB24-888: 00000000 RRRRRRRR GGGGGGGG BBBBBBBB */
 
 #define RGB24_BLACK          0x00000000
@@ -226,7 +229,9 @@
 #define RGB12_SNOW           0x0fff
 #define RGB12_YELLOW         0x0ff0
 
-/* RGB8-332: RRRGGGBB (really not enough color resolution for the following) */
+/* RGB8-332: RRRGGGBB
+ * (really not enough color resolution for the following)
+ */
 
 #define RGB8_BLACK           0x00
 #define RGB8_WHITE           0xff

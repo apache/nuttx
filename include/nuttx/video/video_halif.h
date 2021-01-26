@@ -68,7 +68,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 int video_common_notify_dma_done(uint8_t  err_code,
