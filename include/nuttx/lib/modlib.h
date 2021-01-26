@@ -155,7 +155,9 @@ struct mod_info_s
 
 typedef CODE int (*mod_initializer_t)(FAR struct mod_info_s *modinfo);
 
-/* This is the type of the callback function used by modlib_registry_foreach() */
+/* This is the type of the callback function used by
+ * modlib_registry_foreach()
+ */
 
 struct module_s;
 typedef CODE int (*mod_callback_t)(FAR struct module_s *modp, FAR void *arg);

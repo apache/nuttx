@@ -4,7 +4,8 @@
  *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Reference: http://pubs.opengroup.org/onlinepubs/009695399/basedefs/float.h.html
+ * Reference:
+ * http://pubs.opengroup.org/onlinepubs/009695399/basedefs/float.h.html
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
