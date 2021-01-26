@@ -34,16 +34,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Theory of Operation
  *
  * The MAX7456 is a single-channel, monochrome, on-screen-display generator
  * that accepts an NTSC or PAL video input signal, overlays user-defined
  * character data, and renders the combined stream to CVBS (analog) output.
- * The typical use case then forwards that CVBS output to a video transmitter,
- * analog display, recording device, and/or other external components.
+ * The typical use case then forwards that CVBS output to a video
+ * transmitter, analog display, recording device, and/or other external
+ * components.
  *
  * The chip is fundamentally an SPI slave device with a register bank to
  * configure the chip's analog components, update values in the display frame
@@ -72,8 +73,8 @@
  *
  * Note: Although we use the term "frame buffer", we cannot use the NuttX
  * standard /dev/fbN interface because our buffer memory is accessible only
- * across SPI. This is an inexpensive, slow, simple chip, and you wouldn't use
- * it for intensive work, but you WOULD use it on a memory-constrained
+ * across SPI. This is an inexpensive, slow, simple chip, and you wouldn't
+ * use it for intensive work, but you WOULD use it on a memory-constrained
  * device. We keep our RAM footprint small by not keeping a local copy of the
  * framebuffer data.
  *
@@ -439,10 +440,10 @@ static int regaddr_from_name(FAR const char *name)
  *
  * Description:
  *   Reads @len bytes into @buf from @dev, starting at register address
- *   @addr. This is a low-level function used for reading a sequence of one or
- *   more register values, and isn't usually called directly unless you REALLY
- *   know what you are doing. Consider one of the register-specific helper
- *   functions defined below whenever possible.
+ *   @addr. This is a low-level function used for reading a sequence of one
+ *   or more register values, and isn't usually called directly unless you
+ *   REALLY know what you are doing. Consider one of the register-specific
+ *   helper functions defined below whenever possible.
  *
  * Note: The caller must hold @dev->lock before calling this function.
  *
@@ -505,8 +506,8 @@ static int __mx7_read_reg(FAR struct mx7_dev_s *dev,
  *   Writes @len bytes from @buf to @dev, starting at @addr. This is a
  *   low-level function used for updating a sequence of one or more register
  *   values, and it DOES NOT check that the register being requested is
- *   write-capable. This function isn't called directly unless you REALLY know
- *   what you are doing.
+ *   write-capable. This function isn't called directly unless you REALLY
+ *   know what you are doing.
  *
  *   Consider one of the register-specific helper functions defined below
  *   whenever possible. If a helper function for the register you desire to
@@ -628,7 +629,8 @@ static inline int __mx7_read_reg__dmm(FAR struct mx7_dev_s *dev)
  *
  ****************************************************************************/
 
-static inline int __mx7_write_reg__vm0(FAR struct mx7_dev_s *dev, uint8_t val)
+static inline int __mx7_write_reg__vm0(FAR struct mx7_dev_s *dev,
+                                       uint8_t val)
 {
   return __mx7_write_reg(dev, VM0, &val, sizeof(val));
 }
@@ -687,7 +689,8 @@ static inline int __mx7_write_reg__cmah(FAR struct mx7_dev_s *dev,
  *
  ****************************************************************************/
 
-static inline int __mx7_write_reg__cmm(FAR struct mx7_dev_s *dev, uint8_t val)
+static inline int __mx7_write_reg__cmm(FAR struct mx7_dev_s *dev,
+                                       uint8_t val)
 {
   return __mx7_write_reg(dev, CMM, &val, sizeof(val));
 }
@@ -789,7 +792,8 @@ static inline int __mx7_read_reg__cmdo(FAR struct mx7_dev_s *dev)
  *
  ****************************************************************************/
 
-static inline int __mx7_write_reg__dmm(FAR struct mx7_dev_s *dev, uint8_t val)
+static inline int __mx7_write_reg__dmm(FAR struct mx7_dev_s *dev,
+                                       uint8_t val)
 {
   return __mx7_write_reg(dev, DMM, &val, sizeof(val));
 }
@@ -966,7 +970,7 @@ static void mx7_reset(FAR struct mx7_dev_s *dev)
   __unlock(dev);
 }
 
-/************************************************************************
+/****************************************************************************
  * Name: __write_fb
  *
  * Description:
@@ -1143,7 +1147,8 @@ static ssize_t __write_fb(FAR struct mx7_dev_s *dev,
  *    Each row in the CA EEPROM is 64 bytes wide, but only the first 54 bytes
  *    are used. The rest are marked as "unused memory" in the datasheet. All
  *    64 bytes of each row are included in the data we return, if the user's
- *    request spans that area. We assume that the user understands the format.
+ *    request spans that area. We assume that the user understands the
+ *    format.
  *
  *    In total, the chip has 64 bytes per row x 256 rows of EEPROM.
  *
@@ -1241,6 +1246,7 @@ static ssize_t __read_cm(FAR struct mx7_dev_s *dev,
       /* The shadow RAM is large enough to hold an entire row, so we don't
        * need to go back for another until we've read all of this one.
        */
+
       do
         {
           __mx7_write_reg__cmal(dev, cmal);
@@ -1424,14 +1430,14 @@ static ssize_t mx7_write_fb(FAR struct file *filep, FAR const char *buf,
  *
  *   We use the approach you see here so that we don't have to have one
  *   distinct function (and a separate file_operations structure) for each of
- *   the many interfaces we're likely to create for interacting with this chip
- *   in its various useful ways. This schema also lets us re-use the interface
- *   code internally (see the test-pattern generator at startup.)
+ *   the many interfaces we're likely to create for interacting with this
+ *   chip in its various useful ways. This schema also lets us re-use the
+ *   interface code internally (see the test-pattern generator at startup.)
  *
- *   In general, any function we call from here uses the combination of seek()
- *   and write() to implement a zero-copy frame buffer. The seek() parameter
- *   sets the current cursor position, and successive write()s provide the
- *   character data starting at that position.
+ *   In general, any function we call from here uses the combination of
+ *   seek() and write() to implement a zero-copy frame buffer. The seek()
+ *   parameter sets the current cursor position, and successive write()s
+ *   provide the character data starting at that position.
  *
  *   TODO: At the moment, we have no mechanism for setting the character
  *   attribute (the LBC, BLK, and INV fields in DMM) for the data arriving
@@ -1439,9 +1445,9 @@ static ssize_t mx7_write_fb(FAR struct file *filep, FAR const char *buf,
  *   for the basic stuff.
  *
  *   The above isn't a hard problem to solve, I just don't need to solve it
- *   right now. And, I don't know what the most convenient solution would look
- *   like: the obvious choice is ioctl(), but I don't like ioctl() because I
- *   can't test it from the command line.
+ *   right now. And, I don't know what the most convenient solution would
+ *   look like: the obvious choice is ioctl(), but I don't like ioctl()
+ *   because I can't test it from the command line.
  *
  *   One idea is to have "fb", "blink", "inv", and other entry points for
  *   writing data with specific attributes. That has a nice feel to it,
@@ -1598,18 +1604,18 @@ static int mx7_debug_close(FAR struct file *filep)
  *   "/dev/osd0/VM0", etc., and reads from all of those interfaces arrive
  *   here.
  *
- *   Utilities like cat(1) will exit automatically at EOF, which can be tricky
- *   to deliver at the right time. We achieve this by reading the associated
- *   register value only once, when filep->f_pos is at the beginning of the
- *   "file" we're emulating. The value obtained is stored in dev->debug[], and
- *   we work our way through that and increment the "file position"
- *   accordingly to keep track (because the user may ask for only one byte
- *   at a time, and our register values require two bytes to express as
- *   ascii-hex text).
+ *   Utilities like cat(1) will exit automatically at EOF, which can be
+ *   tricky to deliver at the right time. We achieve this by reading the
+ *   associated register value only once, when filep->f_pos is at the
+ *   beginning of the "file" we're emulating. The value obtained is stored
+ *   in dev->debug[], and we work our way through that and increment the
+ *   "file position" accordingly to keep track (because the user may ask for
+ *   only one byte at a time, and our register values require two bytes to
+ *   express as ascii-hex text).
  *
- *   When we reach the end of dev->debug[], we return EOF. If the user wants a
- *   fresh copy, they can either close and reopen the interface, or move the
- *   file pointer back to 0 via a seek operation.
+ *   When we reach the end of dev->debug[], we return EOF. If the user wants
+ *   a fresh copy, they can either close and reopen the interface, or move
+ *   the file pointer back to 0 via a seek operation.
  *
  ****************************************************************************/
 
