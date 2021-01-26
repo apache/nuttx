@@ -198,7 +198,8 @@ void usub64(FAR const struct uint64_s *minuend,
  *
  ****************************************************************************/
 
-void umul32(uint32_t factor1, uint32_t factor2, FAR struct uint64_s *product);
+void umul32(uint32_t factor1, uint32_t factor2,
+            FAR struct uint64_s *product);
 
 /****************************************************************************
  * Name: umul32x64
