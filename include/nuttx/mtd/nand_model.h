@@ -124,7 +124,8 @@ EXTERN const struct nand_model_s g_nandmodels[NAND_NMODELS];
  * Input Parameters:
  *   modeltab  List of nand_model_s instances.
  *   size      Number of models in list.
- *   chipid    Identifier returned by the Nand(id1|(id2<<8)|(id3<<16)|(id4<<24)).
+ *   chipid    Identifier returned by the
+ *             Nand(id1|(id2<<8)|(id3<<16)|(id4<<24)).
  *   model     nand_model_s instance to update with the model parameters.
  *
  * Returned Value:

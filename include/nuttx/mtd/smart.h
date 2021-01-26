@@ -63,8 +63,8 @@
 struct smart_alloc_s
 {
   size_t                size;             /* Size of the allocation */
-  void*                 ptr;              /* Pointer to the data */
-  const char*           name;             /* Name of the allocation */
+  void                 *ptr;              /* Pointer to the data */
+  const char           *name;             /* Name of the allocation */
 };
 #endif
 
@@ -87,12 +87,12 @@ struct mtd_smart_procfs_data_s
   uint32_t            blockerases;      /* Number block erase operations */
 
 #ifdef CONFIG_MTD_SMART_SECTOR_ERASE_DEBUG
-  FAR const uint8_t*  erasecounts;      /* Array of erase counts per erase block */
+  FAR const uint8_t  *erasecounts;      /* Array of erase counts per erase block */
   size_t              neraseblocks;     /* Number of erase blocks */
 #endif
 #ifdef CONFIG_MTD_SMART_ALLOC_DEBUG
   FAR const struct smart_alloc_s  *allocs; /* Array of allocations */
-  uint16_t            alloccount;       /* Number of items in the array */
+  uint16_t            alloccount;          /* Number of items in the array */
 #endif
 #ifdef CONFIG_MTD_SMART_WEAR_LEVEL
   uint32_t            uneven_wearcount; /* Number of uneven block erases */
@@ -100,7 +100,7 @@ struct mtd_smart_procfs_data_s
 };
 
 /* The following defines debug command data passed from the procfs layer to
-   the SMART MTD layer for debug purposes.
+ *  the SMART MTD layer for debug purposes.
  */
 
 struct mtd_smart_debug_data_s
