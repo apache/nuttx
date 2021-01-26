@@ -594,7 +594,7 @@ static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size)
   uint32_t addr;
   uint32_t page;
 
-  page_start = MMU_ALIGNDOWN_SIZE(size);
+  page_start = MMU_ALIGNDOWN_SIZE(start);
   size += (start - page_start);
   size = MMU_ALIGNUP_SIZE(size);
 
