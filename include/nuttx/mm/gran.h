@@ -53,6 +53,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* CONFIG_GRAN - Enable granule allocator support
  * CONFIG_GRAN_INTR - Normally mutual exclusive access to granule allocator
  *   data is assured using a semaphore.  If this option is set then, instead,
@@ -110,7 +111,7 @@ extern "C"
  *   attribute to position a DMA heap in memory (logic in the linker script
  *   would assign the section .dmaheap to the DMA memory.
  *
- *     FAR uint32_t g_dmaheap[DMAHEAP_SIZE] __attribute__((section(.dmaheap)));
+ *   FAR uint32_t g_dmaheap[DMAHEAP_SIZE] __attribute__((section(.dmaheap)));
  *
  *   The heap is created by calling gran_initialize.  Here the granule size
  *   is set to 64 bytes and the alignment to 16 bytes:
