@@ -106,9 +106,10 @@ struct nxgl_vector_s
   struct nxgl_point_s pt2; /* End position */
 };
 
-/* Describes a run, i.e., a horizontal line.  Note that the start/end positions
- * have fractional precision.  This is necessary for good joining of trapezoids
- * when a more complex shape is decomposed into trapezoids.
+/* Describes a run, i.e., a horizontal line.
+ * Note that the start/end positions have fractional precision.
+ * This is necessary for good joining of trapezoids when a more complex
+ * shape is decomposed into trapezoids.
  */
 
 struct nxgl_run_s

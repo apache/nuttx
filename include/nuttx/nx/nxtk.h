@@ -47,6 +47,7 @@
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_NXTK_BORDERWIDTH
@@ -321,8 +322,8 @@ int nxtk_raise(NXTKWINDOW hfwnd);
  *   bottom of the display.
  *
  * Input Parameters:
- *   hfwnd - the window to be lowered.  This must have been previously created
- *           by nxtk_openwindow().
+ *   hfwnd - the window to be lowered.  This must have been previously
+ *           created by nxtk_openwindow().
  *
  * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -393,7 +394,8 @@ bool nxtk_ishidden(NXTKWINDOW hfwnd);
  * Name: nxtk_fillwindow
  *
  * Description:
- *  Fill the specified rectangle in the client window with the specified color
+ *  Fill the specified rectangle in the client window with the specified
+ *  color
  *
  * Input Parameters:
  *   hfwnd - The window handle returned by nxtk_openwindow
@@ -437,7 +439,8 @@ int nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  * Name: nxtk_filltrapwindow
  *
  * Description:
- *  Fill the specified trapezoid in the client window with the specified color
+ *  Fill the specified trapezoid in the client window with the specified
+ *  color
  *
  * Input Parameters:
  *   hfwnd - The window handle returned by nxtk_openwindow
@@ -474,9 +477,11 @@ int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
+int nxtk_drawlinewindow(NXTKWINDOW hfwnd,
+                        FAR struct nxgl_vector_s *vector,
                         nxgl_coord_t width,
-                        nxgl_mxpixel_t color[CONFIG_NX_NPLANES], uint8_t caps);
+                        nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
+                                             uint8_t caps);
 
 /****************************************************************************
  * Name: nxtk_drawcirclewindow
@@ -527,7 +532,8 @@ int nxtk_fillcirclewindow(NXWINDOW hfwnd,
  * Name: nxtk_movewindow
  *
  * Description:
- *   Move a rectangular region within the client sub-window of a framed window
+ *   Move a rectangular region within the client sub-window of a framed
+ *   window
  *
  * Input Parameters:
  *   hfwnd   - The client sub-window within which the move is to be done.
@@ -559,8 +565,8 @@ int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *   src    - The start of the source image(s). This is an array source
  *            images of size CONFIG_NX_NPLANES.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
- *            Both dest and origin are in sub-window coordinates, however, the
- *            origin may lie outside of the sub-window display.
+ *            Both dest and origin are in sub-window coordinates, however,
+ *             the origin may lie outside of the sub-window display.
  *   stride - The width of the full source image in pixels.
  *
  * Returned Value:
@@ -583,7 +589,8 @@ int nxtk_bitmapwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
  *   hfwnd  - The handle returned by nxtk_openwindow
  *   height - The requested height of the toolbar in pixels
  *   cb     - Callbacks used to process toolbar events
- *   arg    - User provided value that will be returned with toolbar callbacks.
+ *   arg    - User provided value that will be returned with toolbar
+ *            callbacks.
  *
  * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -636,7 +643,8 @@ int nxtk_toolbarbounds(NXTKWINDOW hfwnd, FAR struct nxgl_rect_s *bounds);
  * Name: nxtk_filltoolbar
  *
  * Description:
- *  Fill the specified rectangle in the toolbar sub-window with the specified color
+ *  Fill the specified rectangle in the toolbar sub-window with the specified
+ *  color
  *
  * Input Parameters:
  *   hfwnd - The handle returned by nxtk_openwindow
@@ -680,7 +688,8 @@ int nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  * Name: nxtk_filltraptoolbar
  *
  * Description:
- *  Fill the specified trapezoid in the toolbar sub-window with the specified color
+ *  Fill the specified trapezoid in the toolbar sub-window with the specified
+ *  color
  *
  * Input Parameters:
  *   hfwnd - The handle returned by nxtk_openwindow
@@ -718,9 +727,11 @@ int nxtk_filltraptoolbar(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
+int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd,
+                         FAR struct nxgl_vector_s *vector,
                          nxgl_coord_t width,
-                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES], uint8_t caps);
+                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
+                                              uint8_t caps);
 
 /****************************************************************************
  * Name: nxtk_drawcircletoolbar
@@ -771,7 +782,8 @@ int nxtk_fillcircletoolbar(NXWINDOW hfwnd,
  * Name: nxtk_movetoolbar
  *
  * Description:
- *   Move a rectangular region within the toolbar sub-window of a framed window
+ *   Move a rectangular region within the toolbar sub-window of a framed
+ *   window
  *
  * Input Parameters:
  *   hfwnd  - The sub-window containing the toolbar within which the move is
@@ -803,8 +815,8 @@ int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *            will receive the bit map.
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
- *            Both dest and origin are in sub-window coordinates, however, the
- *            origin may lie outside of the sub-window display.
+ *            Both dest and origin are in sub-window coordinates, however,
+ *            the origin may lie outside of the sub-window display.
  *   stride - The width of the full source image in bytes.
  *
  * Returned Value:
