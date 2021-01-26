@@ -51,8 +51,8 @@
  *
  * CONFIG_P14201_SPIMODE - Controls the SPI mode
  * CONFIG_P14201_FREQUENCY - Define to use a different bus frequency
- * CONFIG_P14201_NINTERFACES - Specifies the number of physical P14201 devices
- *   that will be supported.
+ * CONFIG_P14201_NINTERFACES - Specifies the number of physical P14201
+ *   devices that will be supported.
  * CONFIG_P14201_FRAMEBUFFER - If defined, accesses will be performed using
  *   an in-memory copy of the OLEDs GDDRAM.  This cost of this buffer is
  *   128 * 96 / 2 = 6Kb.  If this is defined, then the driver will be fully

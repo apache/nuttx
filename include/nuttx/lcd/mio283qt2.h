@@ -50,7 +50,9 @@
 /**************************************************************************************
  * Pre-processor Definitions
  **************************************************************************************/
+
 /* Configuration **********************************************************************/
+
 /* CONFIG_LCD_MIO283QT2 - Enables support for the MIO283QT2-based LCD.
  * CONFIG_LCD_NOGETRUN
  *   NX components need to know if it can read from the LCD or not. If reading from the

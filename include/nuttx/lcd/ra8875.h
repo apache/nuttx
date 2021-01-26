@@ -50,7 +50,9 @@
 /**************************************************************************************
  * Pre-processor Definitions
  **************************************************************************************/
+
 /* Configuration **********************************************************************/
+
 /* CONFIG_LCD_RA8875 - Enables support for the RA8875-based LCD.
  * CONFIG_LCD_NOGETRUN
  *   NX components need to know if it can read from the LCD or not. If reading from the

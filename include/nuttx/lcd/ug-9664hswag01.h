@@ -62,7 +62,8 @@
  *
  * Required LCD driver settings:
  * CONFIG_LCD_UG9664HSWAG01 - Enable UG-9664HSWAG01 support
- * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+ * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be
+ *                        accepted.
  * CONFIG_LCD_MAXPOWER should be 2:  0=off, 1=dim, 2=normal
  *
  * Required SPI driver settings:
@@ -108,7 +109,8 @@ extern "C"
  * Input Parameters:
  *
  *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 through CONFIG_UG9664HSWAG01_NINTERFACES-1.
+ *   devno - A value in the range of 0 through
+ *           CONFIG_UG9664HSWAG01_NINTERFACES-1.
  *     This allows support for multiple OLED devices.
  *
  * Returned Value:
@@ -120,7 +122,8 @@ extern "C"
 
 struct lcd_dev_s; /* see nuttx/lcd.h */
 struct spi_dev_s; /* see nuttx/spi/spi.h */
-FAR struct lcd_dev_s *ug_initialize(FAR struct spi_dev_s *spi, unsigned int devno);
+FAR struct lcd_dev_s *ug_initialize(FAR struct spi_dev_s *spi,
+                                    unsigned int devno);
 
 /****************************************************************************
  * Name:  ug_power
@@ -132,14 +135,15 @@ FAR struct lcd_dev_s *ug_initialize(FAR struct spi_dev_s *spi, unsigned int devn
  *
  * Input Parameters:
  *
- *   devno - A value in the range of 0 through CONFIG_UG9664HSWAG01_NINTERFACES-1.
+ *   devno - A value in the range of 0 through
+ *           CONFIG_UG9664HSWAG01_NINTERFACES-1.
  *     This allows support for multiple OLED devices.
  *   on - true:turn power on, false: turn power off.
  *
  * Returned Value:
  *   None
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_UG9664HSWAG01_POWER
 void ug_power(unsigned int devno, bool on);

@@ -46,6 +46,7 @@
 /**************************************************************************************
  * Pre-processor Definitions
  **************************************************************************************/
+
 /* ILI9341 ID code */
 
 #define ILI9341_DEVICE_CODE                    0x9341
@@ -142,7 +143,9 @@
 #define ILI9341_PUMP_RATIO_CONTROL             0xf7 /* Pump ration control */
 
 /* ILI9341 LCD Register Bit Definitions ***********************************************/
+
 /* Pixel format set */
+
 #define ILI9341_PIXEL_FORMAT_SET_DPI_SHIFT     (4)
 #define ILI9341_PIXEL_FORMAT_SET_DPI_MASK      (7 << ILI9341_PIXEL_FORMAT_SET_DPI_SHIFT)
 #define ILI9341_PIXEL_FORMAT_SET_DPI(n)        ((n) << ILI9341_PIXEL_FORMAT_SET_DPI_SHIFT)
@@ -238,7 +241,6 @@ struct ili9341_lcd_s
 
   /* mcu interface specific data following */
 };
-
 
 /**************************************************************************************
  * Public Data
