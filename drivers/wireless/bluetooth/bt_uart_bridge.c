@@ -177,7 +177,7 @@ static int bt_uart_bridge_open(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct bt_uart_bridge_device_s *device = inode->i_private;
 
-  if (filep->f_inode->i_crefs == 0)
+  if (filep->f_inode->i_crefs == 1)
     {
       device->sendlen = 0;
       circbuf_reset(&device->recvbuf);
