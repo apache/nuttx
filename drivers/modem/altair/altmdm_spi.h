@@ -106,8 +106,11 @@ struct altmdm_spi_rx_s
   int8_t status_info;                 /* Header status information */
   int32_t actual_size;                /* Actual data size */
   int32_t total_size;                 /* Data size of 4byte alignment. */
+
   FAR struct altmdm_spi_rxbuff_s *rxbuff; /* Current receive buffer. */
-  bool rxabort;                       /* Indicates whether the rx process is aborted. */
+  bool rxabort;                           /* Indicates whether the rx process
+                                           * is aborted.
+                                           */
 };
 
 /* This structure describes the parameters for sleep modem. */
@@ -135,12 +138,15 @@ struct altmdm_spi_dev_s
   bool is_not_run;                    /* Indicates xfer task is not run. */
   int32_t task_id;                    /* xfer task ID. */
   bool is_xferready;                  /* Indicates whether the modem is ready to xfer. */
+
   struct altmdm_sys_flag_s xferready_flag;    /* Used for waiting ready to
                                                * xfer.
                                                */
+
   struct altmdm_sys_flag_s xfer_flag; /* Used for event handling of xfer
                                        * task.
                                        */
+
   struct altmdm_sys_flag_s dma_done_flag; /* Notify that DMA transfer has
                                            * been completed.
                                            */
