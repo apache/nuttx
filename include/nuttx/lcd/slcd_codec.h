@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/lcd/slcd_codec.h
  * Serialize and marshaling data and events for character-based, segment LCDs
  *
@@ -32,7 +32,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_LCD_SLCD_CODEC_H
 #define __INCLUDE_NUTTX_LCD_SLCD_CODEC_H

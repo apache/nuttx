@@ -1,4 +1,4 @@
-/**************************************************************************************
+/****************************************************************************
  * include/nuttx/lcd/ili9325.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
@@ -31,25 +31,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_LCD_ILI9325_H
 #define __INCLUDE_NUTTX_LCD_ILI9325_H
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
+ ****************************************************************************/
+
 /* ILI9325 ID code */
 
 #define ILI9325_DEVICE_CODE                    0x9325
 
-/* ILI9325 LCD Register Addresses *****************************************************/
+/* ILI9325 LCD Register Addresses *******************************************/
 
 #define ILI9325_DEVICE_CODE_REG                0x00 /* Driver Code Register */
 #define ILI9325_START_OSC_CTRL                 0x00 /* Start Oscillator Control */
@@ -103,7 +104,8 @@
 #define ILI9325_OTP_VCM_STATUS_AND_ENABLE      0xa2 /* OTP VCM Status and Enable */
 #define ILI9325_OTP_PROG_ID_KEY                0xa5 /* OTP Programming ID Key */
 
-/* ILI9325 LCD Register Bit Definitions ***********************************************/
+/* ILI9325 LCD Register Bit Definitions *************************************/
+
 /* ILI9325_START_OSC_CTRL, Start Oscillator Control, Offset: 0x00)  */
 
 #define ILI9325_START_OSC_CTRL_EN              (1 << 0)
@@ -184,7 +186,9 @@
 #  define ILI9325_DISP_CTRL4_FMI(n)            ((uint16_t)(n) << ILI9325_DISP_CTRL4_FMI_SHIFT)
 #define ILI9325_DISP_CTRL4_FMARKOE             (1 << 3)
 
-/* ILI9325_RGB_DISP_INTERFACE_CTRL1, RGB Display Interface Control 1, Offset: 0x0c */
+/* ILI9325_RGB_DISP_INTERFACE_CTRL1,
+ * RGB Display Interface Control 1, Offset: 0x0c
+ */
 
 #define ILI9325_RGB_DISP_INTERFACE_CTRL1_RIM_SHIFT 0
 #define ILI9325_RGB_DISP_INTERFACE_CTRL1_RIM_MASK  (3 << ILI9325_RGB_DISP_INTERFACE_CTRL1_RIM_SHIFT)
@@ -205,7 +209,9 @@
 #define ILI9325_FRAME_MAKER_SHIFT_FMP_MASK     (0x1ff << ILI9325_FRAME_MAKER_SHIFT_FMP_SHIFT)
 #  define ILI9325_FRAME_MAKER_SHIFT_FMP(n)     ((uint16_t)(n) << ILI9325_FRAME_MAKER_SHIFT_FMP_SHIFT)
 
-/* ILI9325_RGB_DISP_INTERFACE_CTRL2, RGB Display Interface Control 2, Offset: 0x0f */
+/* ILI9325_RGB_DISP_INTERFACE_CTRL2,
+ * RGB Display Interface Control 2, Offset: 0x0f
+ */
 
 #define ILI9325_RGB_DISP_INTERFACE_CTRL2_EPL   (1 << 0)
 #define ILI9325_RGB_DISP_INTERFACE_CTRL2_DPL   (1 << 1)
@@ -252,13 +258,17 @@
 #define ILI9325_POWER_CTRL4_VDV_MASK           (0x1f << ILI9325_POWER_CTRL4_VDV_SHIFT)
 #  define ILI9325_POWER_CTRL4_VDV(n)           ((uint16_t)(n) << ILI9325_POWER_CTRL4_VDV_SHIFT)
 
-/* ILI9325_HORIZONTAL_GRAM_ADDR_SET, Horizontal GRAM Address Set, Offset: 0x20 */
+/* ILI9325_HORIZONTAL_GRAM_ADDR_SET,
+ * Horizontal GRAM Address Set, Offset: 0x20
+ */
 
 #define ILI9325_HORIZONTAL_GRAM_ADDR_SET_AD_SHIFT 0
 #define ILI9325_HORIZONTAL_GRAM_ADDR_SET_AD_MASK  (0xff << ILI9325_HORIZONTAL_GRAM_ADDR_SET_AD_SHIFT)
 #  define ILI9325_HORIZONTAL_GRAM_ADDR_SET_AD(n)  ((uint16_t)(n) << ILI9325_HORIZONTAL_GRAM_ADDR_SET_AD_SHIFT)
 
-/* ILI9325_VERTICAL_GRAM_ADDR_SET, Vertical  GRAM Address Set, Offset: 0x21 */
+/* ILI9325_VERTICAL_GRAM_ADDR_SET,
+ * Vertical  GRAM Address Set, Offset: 0x21
+ */
 
 #define ILI9325_VERTICAL_GRAM_ADDR_SET_AD_SHIFT 0
 #define ILI9325_VERTICAL_GRAM_ADDR_SET_AD_MASK  (0xff << ILI9325_VERTICAL_GRAM_ADDR_SET_AD_SHIFT)
@@ -270,7 +280,9 @@
 #define ILI9325_POWER_CTRL7_VCM_MASK           (0x3f << ILI9325_POWER_CTRL7_VCM_SHIFT)
 #define ILI9325_POWER_CTRL7_VCM(n)             ((uint16_t)(n) << ILI9325_POWER_CTRL7_VCM_SHIFT)
 
-/* ILI9325_FRAME_RATE_AND_COLOR_CTRL, Frame Rate and Color Control, Offset: 0x2b */
+/* ILI9325_FRAME_RATE_AND_COLOR_CTRL,
+ * Frame Rate and Color Control, Offset: 0x2b
+ */
 
 #define ILI9325_FRAME_RATE_AND_COLOR_CTRL_FRS_SHIFT 0
 #define ILI9325_FRAME_RATE_AND_COLOR_CTRL_FRS_MASK  (0xf << ILI9325_FRAME_RATE_AND_COLOR_CTRL_FRS_SHIFT)
@@ -366,31 +378,41 @@
 #define ILI9325_GAMMA_CTRL10_VRN1_MASK         (0x1f << ILI9325_GAMMA_CTRL10_VRN1_SHIFT)
 #  define ILI9325_GAMMA_CTRL10_VRN1(n)         ((uint16_t)(n) << ILI9325_GAMMA_CTRL10_VRN1_SHIFT)
 
-/* ILI9325_HORIZONTAL_ADDR_START, Horizontal Address Start Position, Offset: 0x50 */
+/* ILI9325_HORIZONTAL_ADDR_START,
+ * Horizontal Address Start Position, Offset: 0x50
+ */
 
 #define ILI9325_HORIZONTAL_ADDR_START_HSA_SHIFT 0
 #define ILI9325_HORIZONTAL_ADDR_START_HSA_MASK  (0xff << ILI9325_HORIZONTAL_ADDR_START_HSA_SHIFT)
 #define ILI9325_HORIZONTAL_ADDR_START_HSA(n)    ((uint16_t)(n) << ILI9325_HORIZONTAL_ADDR_START_HSA_SHIFT)
 
-/* ILI9325_HORIZONTAL_ADDR_END, Horizontal Address End Position, Offset: 0x51 */
+/* ILI9325_HORIZONTAL_ADDR_END,
+ * Horizontal Address End Position, Offset: 0x51
+ */
 
 #define ILI9325_HORIZONTAL_ADDR_END_HEA_SHIFT  0
 #define ILI9325_HORIZONTAL_ADDR_END_HEA_MASK   (0xff << ILI9325_HORIZONTAL_ADDR_END_HEA_SHIFT)
 #  define ILI9325_HORIZONTAL_ADDR_END_HEA(n)   ((uint16_t)(n) << ILI9325_HORIZONTAL_ADDR_END_HEA_SHIFT)
 
-/* ILI9325_VERTICAL_ADDR_START, Vertical Address Start Position, Offset: 0x52 */
+/* ILI9325_VERTICAL_ADDR_START,
+ * Vertical Address Start Position, Offset: 0x52
+ */
 
 #define ILI9325_VERTICAL_ADDR_START_VSA_SHIFT  0
 #define ILI9325_VERTICAL_ADDR_START_VSA_MASK   (0x1ff << ILI9325_VERTICAL_ADDR_START_VSA_SHIFT)
 #  define ILI9325_VERTICAL_ADDR_START_VSA(n)   ((uint16_t)(n) << ILI9325_VERTICAL_ADDR_START_VSA_SHIFT)
 
-/* ILI9325_VERTICAL_ADDR_END, Vertical Address End Position, Offset: 0x53 */
+/* ILI9325_VERTICAL_ADDR_END,
+ * Vertical Address End Position, Offset: 0x53
+ */
 
 #define ILI9325_VERTICAL_ADDR_END_VEA_SHIFT    0
 #define ILI9325_VERTICAL_ADDR_END_VEA_MASK     (0x1ff << ILI9325_VERTICAL_ADDR_END_VEA_SHIFT)
 #  define ILI9325_VERTICAL_ADDR_END_VEA(n)     ((uint16_t)(n) << ILI9325_VERTICAL_ADDR_END_VEA_SHIFT)
 
-/* ILI9325_DRIVER_OUTPUT_CTRL2, Driver Output Control 2, Offset: 0x60 */
+/* ILI9325_DRIVER_OUTPUT_CTRL2,
+ * Driver Output Control 2, Offset: 0x60
+ */
 
 #define ILI9325_DRIVER_OUTPUT_CTRL2_SCN_SHIFT  0
 #define ILI9325_DRIVER_OUTPUT_CTRL2_SCN_MASK   (0x3f << ILI9325_DRIVER_OUTPUT_CTRL2_SCN_SHIFT)
@@ -400,55 +422,73 @@
 #  define ILI9325_DRIVER_OUTPUT_CTRL2_NL(n)    ((uint16_t)(n) << ILI9325_DRIVER_OUTPUT_CTRL2_NL_SHIFT)
 #define ILI9325_DRIVER_OUTPUT_CTRL2_GS         (1 << 15)
 
-/* ILI9325_BASE_IMG_DISP_CTRL, Base Image Display Control, Offset: 0x61 */
+/* ILI9325_BASE_IMG_DISP_CTRL,
+ * Base Image Display Control, Offset: 0x61
+ */
 
 #define ILI9325_BASE_IMG_DISP_CTRL_REV         (1 << 0)
 #define ILI9325_BASE_IMG_DISP_CTRL_VLE         (1 << 1)
 #define ILI9325_BASE_IMG_DISP_CTRL_NDL         (1 << 2)
 
-/* ILI9325_VERTICAL_SCROLL_CTRL, Vertical Scroll Control, Offset: 0x6a */
+/* ILI9325_VERTICAL_SCROLL_CTRL,
+ * Vertical Scroll Control, Offset: 0x6a
+ */
 
 #define ILI9325_VERTICAL_SCROLL_CTRL_VL_SHIFT  0
 #define ILI9325_VERTICAL_SCROLL_CTRL_VL_MASK   (0x1ff << ILI9325_VERTICAL_SCROLL_CTRL_VL_SHIFT)
 #  define ILI9325_VERTICAL_SCROLL_CTRL_VL(n)   ((uint16_t)(n) << ILI9325_VERTICAL_SCROLL_CTRL_VL_SHIFT)
 
-/* ILI9325_PARTIAL_IMG1_DISP_SHIFT, Partial Image 1 Display Position, Offset: 0x80 */
+/* ILI9325_PARTIAL_IMG1_DISP_SHIFT,
+ * Partial Image 1 Display Position, Offset: 0x80
+ */
 
 #define ILI9325_PARTIAL_IMG1_DISP_SHIFT_PTDP0_SHIFT 0
 #define ILI9325_PARTIAL_IMG1_DISP_SHIFT_PTDP0_MASK  (0x1ff << ILI9325_PARTIAL_IMG1_DISP_SHIFT_PTDP0_SHIFT)
 #define ILI9325_PARTIAL_IMG1_DISP_SHIFT_PTDP0(n)    ((uint16_t)(n) << ILI9325_PARTIAL_IMG1_DISP_SHIFT_PTDP0_SHIFT)
 
-/* ILI9325_PARTIAL_IMG1_AREA_START_LINE, Partial Image 1 Area (Start Line), Offset: 0x81 */
+/* ILI9325_PARTIAL_IMG1_AREA_START_LINE,
+ * Partial Image 1 Area (Start Line), Offset: 0x81
+ */
 
 #define ILI9325_PARTIAL_IMG1_AREA_START_LINE_PTSA0_SHIFT 0
 #define ILI9325_PARTIAL_IMG1_AREA_START_LINE_PTSA0_MASK  (0x1ff << ILI9325_PARTIAL_IMG1_AREA_START_LINE_PTSA0_SHIFT)
 #  define ILI9325_PARTIAL_IMG1_AREA_START_LINE_PTSA0(n)  ((uint16_t)(n) << ILI9325_PARTIAL_IMG1_AREA_START_LINE_PTSA0_SHIFT)
 
-/* ILI9325_PARTIAL_IMG1_AREA_END_LINE, Partial Image 1 Area (End Line), Offset: 0x82 */
+/* ILI9325_PARTIAL_IMG1_AREA_END_LINE,
+ * Partial Image 1 Area (End Line), Offset: 0x82
+ */
 
 #define ILI9325_PARTIAL_IMG1_AREA_END_LINE_PTEA0_SHIFT 0
 #define ILI9325_PARTIAL_IMG1_AREA_END_LINE_PTEA0_MASK  (0x1ff << ILI9325_PARTIAL_IMG1_AREA_END_LINE_PTEA0_SHIFT)
 #  define ILI9325_PARTIAL_IMG1_AREA_END_LINE_PTEA0(n)  ((uint16_t)(n) << ILI9325_PARTIAL_IMG1_AREA_END_LINE_PTEA0_SHIFT)
 
-/* ILI9325_PARTIAL_IMG2_DISP_SHIFT, Partial Image 2 Display Position, Offset: 0x83 */
+/* ILI9325_PARTIAL_IMG2_DISP_SHIFT,
+ * Partial Image 2 Display Position, Offset: 0x83
+ */
 
 #define ILI9325_PARTIAL_IMG2_DISP_SHIFT_PTDP1_SHIFT 0
 #define ILI9325_PARTIAL_IMG2_DISP_SHIFT_PTDP1_MASK  (0x1ff << ILI9325_PARTIAL_IMG2_DISP_SHIFT_PTDP1_SHIFT)
 #  define ILI9325_PARTIAL_IMG2_DISP_SHIFT_PTDP1(n)  ((uint16_t)(n) << ILI9325_PARTIAL_IMG2_DISP_SHIFT_PTDP1_SHIFT)
 
-/* ILI9325_PARTIAL_IMG2_AREA_START_LINE, Partial Image 2 Area (Start Line), Offset: 0x84 */
+/* ILI9325_PARTIAL_IMG2_AREA_START_LINE,
+ * Partial Image 2 Area (Start Line), Offset: 0x84
+ */
 
 #define ILI9325_PARTIAL_IMG2_AREA_START_LINE_PTSA1_SHIFT 0
 #define ILI9325_PARTIAL_IMG2_AREA_START_LINE_PTSA1_MASK  (0x1ff << ILI9325_PARTIAL_IMG2_AREA_START_LINE_PTSA1_SHIFT)
 #  define ILI9325_PARTIAL_IMG2_AREA_START_LINE_PTSA1(n)  ((uint16_t)(n) << ILI9325_PARTIAL_IMG2_AREA_START_LINE_PTSA1_SHIFT)
 
-/* ILI9325_PARTIAL_IMG2_AREA_END_LINE, Partial Image 2 Area (End Line), Offset: 0x85 */
+/* ILI9325_PARTIAL_IMG2_AREA_END_LINE,
+ * Partial Image 2 Area (End Line), Offset: 0x85
+ */
 
 #define ILI9325_PARTIAL_IMG2_AREA_END_LINE_PTEA1_SHIFT 0
 #define ILI9325_PARTIAL_IMG2_AREA_END_LINE_PTEA1_MASK  (0x1ff << ILI9325_PARTIAL_IMG2_AREA_END_LINE_PTEA1_SHIFT)
 #  define ILI9325_PARTIAL_IMG2_AREA_END_LINE_PTEA1(n)  ((uint16_t)(n) << ILI9325_PARTIAL_IMG2_AREA_END_LINE_PTEA1_SHIFT)
 
-/* ILI9325_PANEL_INTERFACE_CTRL1, Panel Interface Control 1, Offset: 0x90 */
+/* ILI9325_PANEL_INTERFACE_CTRL1,
+ * Panel Interface Control 1, Offset: 0x90
+ */
 
 #define ILI9325_PANEL_INTERFACE_CTRL1_RTNI_SHIFT 0
 #define ILI9325_PANEL_INTERFACE_CTRL1_RTNI_MASK  (0x1f << ILI9325_PANEL_INTERFACE_CTRL1_RTNI_SHIFT)
@@ -457,13 +497,17 @@
 #define ILI9325_PANEL_INTERFACE_CTRL1_DIVI_MASK  (3 << ILI9325_PANEL_INTERFACE_CTRL1_DIVI_SHIFT)
 #  define ILI9325_PANEL_INTERFACE_CTRL1_DIVI(n)  ((uint16_t)(n) << ILI9325_PANEL_INTERFACE_CTRL1_DIVI_SHIFT)
 
-/* ILI9325_PANEL_INTERFACE_CTRL2, Panel Interface Control 2, Offset: 0x92 */
+/* ILI9325_PANEL_INTERFACE_CTRL2,
+ * Panel Interface Control 2, Offset: 0x92
+ */
 
 #define ILI9325_PANEL_INTERFACE_CTRL2_NOWI_SHIFT 8
 #define ILI9325_PANEL_INTERFACE_CTRL2_NOWI_MASK  (7 << ILI9325_PANEL_INTERFACE_CTRL2_NOWI_SHIFT)
 #  define ILI9325_PANEL_INTERFACE_CTRL2_NOWI(n)  ((uint16_t)(n) << ILI9325_PANEL_INTERFACE_CTRL2_NOWI_SHIFT)
 
-/* ILI9325_PANEL_INTERFACE_CTRL4, Panel Interface Control 4, Offset: 0x95 */
+/* ILI9325_PANEL_INTERFACE_CTRL4,
+ * Panel Interface Control 4, Offset: 0x95
+ */
 
 #define ILI9325_PANEL_INTERFACE_CTRL4_RTNE_SHIFT 0
 #define ILI9325_PANEL_INTERFACE_CTRL4_RTNE_MASK  (0x3f << ILI9325_PANEL_INTERFACE_CTRL4_RTNE_SHIFT)
@@ -472,14 +516,18 @@
 #define ILI9325_PANEL_INTERFACE_CTRL4_DIVE_MASK  (3 << ILI9325_PANEL_INTERFACE_CTRL4_DIVE_SHIFT)
 #  define ILI9325_PANEL_INTERFACE_CTRL4_DIVE(n)  ((uint16_t)(n) << ILI9325_PANEL_INTERFACE_CTRL4_DIVE_SHIFT)
 
-/* ILI9325_OTP_VCM_PROG_CTRL, OTP VCM Programming Control, Offset: 0xa1 */
+/* ILI9325_OTP_VCM_PROG_CTRL,
+ * OTP VCM Programming Control, Offset: 0xa1
+ */
 
 #define ILI9325_OTP_VCM_PROG_CTRL_VCM_OTP_SHIFT 0
 #define ILI9325_OTP_VCM_PROG_CTRL_VCM_OTP_MASK  (0x3f << ILI9325_OTP_VCM_PROG_CTRL_VCM_OTP_SHIFT)
 #  define ILI9325_OTP_VCM_PROG_CTRL_VCM_OTP(n)  ((uint16_t)(n) << ILI9325_OTP_VCM_PROG_CTRL_VCM_OTP_SHIFT)
 #define ILI9325_OTP_VCM_PROG_CTRL_OTP_PGM_EN    (1 << 11)
 
-/* ILI9325_OTP_VCM_STATUS_AND_ENABLE, OTP VCM Status and Enable, Offset: 0xa2 */
+/* ILI9325_OTP_VCM_STATUS_AND_ENABLE,
+ * OTP VCM Status and Enable, Offset: 0xa2
+ */
 
 #define ILI9325_OTP_VCM_STATUS_AND_ENABLE_VCM_EN        (1 << 0)
 #define ILI9325_OTP_VCM_STATUS_AND_ENABLE_VCM_D_SHIFT   8
@@ -489,19 +537,21 @@
 #define ILI9325_OTP_VCM_STATUS_AND_ENABLE_PGM_CNT_MASK  (3 << ILI9325_OTP_VCM_STATUS_AND_ENABLE_PGM_CNT_SHIFT)
 #  define ILI9325_OTP_VCM_STATUS_AND_ENABLE_PGM_CNT(n)  ((uint16_t)(n) << IILI9325_OTP_VCM_STATUS_AND_ENABLE_PGM_CNT_SHIFT)
 
-/* ILI9325_OTP_PROG_ID_KEY, OTP Programming ID Key, Offset: 0xa5 */
+/* ILI9325_OTP_PROG_ID_KEY,
+ * OTP Programming ID Key, Offset: 0xa5
+ */
 
 #define ILI9325_OTP_PROG_ID_KEY_KEY_SHIFT      0
 #define ILI9325_OTP_PROG_ID_KEY_KEY_MASK      (0xffffu << ILI9325_OTP_PROG_ID_KEY_KEY_SHIFT)
 #  define ILI9325_OTP_PROG_ID_KEY_KEY(n)      ((uint16_t)(n) << ILI9325_OTP_PROG_ID_KEY_KEY_SHIFT)
 
-/**************************************************************************************
+/****************************************************************************
  * Public Types
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Public Data
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -511,9 +561,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- **************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -145,7 +145,7 @@ extern "C"
  *
  ****************************************************************************/
 
- struct i2c_master_s;  /* Forward reference */
+struct i2c_master_s;  /* Forward reference */
 
 int st7032_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
 

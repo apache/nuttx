@@ -50,7 +50,9 @@
 /**************************************************************************************
  * Pre-processor Definitions
  **************************************************************************************/
+
 /* Configuration **********************************************************************/
+
 /* CONFIG_LCD_SSD1289 - Enables support for the SSD1289-based LCD.
  * CONFIG_LCD_NOGETRUN
  *   NX components need to know if it can read from the LCD or not. If reading from the

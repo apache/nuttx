@@ -63,7 +63,8 @@
  *
  * Required LCD driver settings:
  * CONFIG_LCD_PCD8544 - Enable PCD8544 support
- * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+ * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be
+ *                        accepted.
  * CONFIG_LCD_MAXPOWER should be 2:  0=off, 1=dim, 2=normal
  *
  * Required SPI driver settings:
@@ -108,7 +109,8 @@ extern "C"
  * Input Parameters:
  *
  *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 thropcd8544h CONFIG_PCD8544_NINTERFACES-1.
+ *   devno - A value in the range of 0 thropcd8544h
+ *            CONFIG_PCD8544_NINTERFACES-1.
  *     This allows support for multiple LCD devices.
  *
  * Returned Value:
@@ -120,7 +122,8 @@ extern "C"
 
 struct lcd_dev_s; /* see nuttx/lcd.h */
 struct spi_dev_s; /* see nuttx/spi/spi.h */
-FAR struct lcd_dev_s *pcd8544_initialize(FAR struct spi_dev_s *spi, unsigned int devno);
+FAR struct lcd_dev_s *pcd8544_initialize(FAR struct spi_dev_s *spi,
+                                         unsigned int devno);
 
 #ifdef __cplusplus
 }

@@ -47,6 +47,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* IOCTL commands that may be supported by some SLCD drivers */
 
 /* SLCDIOC_GETATTRIBUTES:  Get the attributes of the SLCD

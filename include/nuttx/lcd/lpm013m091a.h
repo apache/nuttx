@@ -101,8 +101,8 @@ struct lpm013m091a_lcd_s
  *
  * Input Parameters:
  *
- *   lcd - A reference to the platform specific driver instance to control the
- *     lpm013m091a display driver.
+ *   lcd - A reference to the platform specific driver instance to control
+ *         the lpm013m091a display driver.
  *   devno - This is for compat. must be zero.
  *
  * Returned Value:
