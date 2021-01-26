@@ -260,9 +260,9 @@ static const struct file_operations g_bmi160fops =
   bmi160_open,    /* open */
   bmi160_close,   /* close */
   bmi160_read,    /* read */
-  0,               /* write */
-  0,               /* seek */
-  bmi160_ioctl,    /* ioctl */
+  0,              /* write */
+  0,              /* seek */
+  bmi160_ioctl,   /* ioctl */
 };
 
 /****************************************************************************
@@ -544,7 +544,8 @@ static void bmi160_set_normal_imu(FAR struct bmi160_dev_s *priv)
 
   bmi160_putreg8(priv, BMI160_ACCEL_CONFIG,
                  ACCEL_NORMAL_AVG4 | ACCEL_ODR_100HZ);
-  bmi160_putreg8(priv, BMI160_GYRO_CONFIG, GYRO_NORMAL_MODE | GYRO_ODR_100HZ);
+  bmi160_putreg8(priv, BMI160_GYRO_CONFIG,
+                 GYRO_NORMAL_MODE | GYRO_ODR_100HZ);
 }
 
 /****************************************************************************
