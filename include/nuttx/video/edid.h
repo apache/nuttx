@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * include/nuttx/video/edid.h
  * EDID (Extended Display Identification Data) Format
  *
@@ -7,8 +7,8 @@
  *
  * Reference:  Wikipedia (initial version)
  *
- * Updated and extended with definitions from FreeBSD which has a compatible 2-clause BSD
- * license:
+ * Updated and extended with definitions from FreeBSD which has a compatible
+ * 2-clause BSD license:
  *
  *  Copyright (c) 2006 Itronix Inc. All rights reserved.
  *  Written by Garrett D'Amore for Itronix Inc.
@@ -40,25 +40,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_VIDEO_EDID_H
 #define __INCLUDE_NUTTX_VIDEO_EDID_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <stdint.h>
 #include <nuttx/video/videomode.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 #define EDID_LENGTH                   128
 
-/* EDID data offsets ************************************************************************/
+/* EDID data offsets ********************************************************/
+
 /* Bytes 0-7:  Header Information */
 
 #define EDID_HEADER_MAGIC_OFFSET        0     /* Fixed header pattern: 00 FF FF FF FF FF FF 00 */
@@ -141,7 +142,7 @@
 #define EDID_TRAILER_NEXTENSIONS_OFFSET 126  /* Number of extensions to follow */
 #define EDID_TRAILER_CHECKSUM_OFFSET    127  /* Checksum. Sum of all 128 bytes should equal 0 */
 
-/* EDID Bitfield Definitions ****************************************************************/
+/* EDID Bitfield Definitions ************************************************/
 
 #define EDID_MAGIC                        {0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0}
 
@@ -425,7 +426,8 @@
 #define EDID_DESC_ZERO_3                  4         /* Byte 4: Zero */
 #define EDID_DESC_INFO                    5         /* Bytes 5-17: Determined by descriptor type */
 
-                                                    /* 0x00-0x0f:  Manufacturer reserved descriptors */
+/* 0x00-0x0f:  Manufacturer reserved descriptors */
+
 #define EDID_DESCTYPE_DUMMY               0x10      /* Dummy identifier */
 #define EDID_DESCTYPE_STDTIMING           0xf7      /* Additional standard timing 3 */
 #define EDID_DESCTYPE_CVT                 0xf8      /* CVT 3-Byte Timing Codes */
@@ -467,7 +469,8 @@
 #define EDID_DESC_STD_TIMING_START_OFFSET 5
 #define EDID_DESC_STD_TIMING_COUNT_OFFSET 6
 
-/* Extended EDID data offsets ****************************************************************/
+/* Extended EDID data offsets ***********************************************/
+
 /* To be provided */
 
 /* EDID Extensions assigned by VESA (First byte of the Extended EDID block) */
@@ -490,9 +493,9 @@
                                                      * from manufacturer.  However, the value is
                                                      * later used by DDDB. */
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* These structures is a user-friendly digest of the EDID data. */
 
@@ -551,30 +554,30 @@ struct edid_info_s
   struct videomode_s edid_modes[64];
 };
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Name:  edid_parse
  *
  * Description:
- *   Given a block of raw EDID data, parse the data and convert it to the 'digested' form
- *   of struct edid_info_s.
+ *   Given a block of raw EDID data, parse the data and convert it to the
+ *   'digested' form of struct edid_info_s.
  *
  * Input Parameters:
  *   data - A reference to the raw EDID data
  *   edid - The location to return the digested EDID data.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; otherwise a negated errno value is returned to
- *   indicate the nature of the failure.
+ *   Zero (OK) is returned on success; otherwise a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid);
 
-/********************************************************************************************
+/****************************************************************************
  * Name:  edid_dump
  *
  * Description:
@@ -586,7 +589,7 @@ int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid);
  * Returned Value:
  *   None
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 void edid_dump(FAR const struct edid_info_s *edid);
 

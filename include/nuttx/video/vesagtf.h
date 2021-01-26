@@ -1,4 +1,4 @@
-/**************************************************************************7
+/****************************************************************************
  * include/nuttx/video/vesagtf.h
  * EDID (Extended Display Identification Data) Format
  *
@@ -38,7 +38,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_VIDEO_VESAGTF
 #define __INCLUDE_NUTTX_VIDEO_VESAGTF
@@ -113,7 +113,9 @@ void vesagtf_mode(unsigned int x, unsigned int y, unsigned int refresh,
  *
  ****************************************************************************/
 
-void vesagtf_mode_params(unsigned int x, unsigned int y, unsigned int refresh,
+void vesagtf_mode_params(unsigned int x,
+                         unsigned int y,
+                         unsigned int refresh,
                          FAR struct vesagtf_params *params,
                          unsigned int flags,
                          FAR struct videomode_s *videomode);

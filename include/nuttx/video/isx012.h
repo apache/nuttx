@@ -48,6 +48,7 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 FAR struct video_devops_s *isx012_initialize(void);
 int isx012_uninitialize(void);
 

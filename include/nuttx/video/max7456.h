@@ -34,7 +34,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_VIDEO_MAX7456_H
 #define __INCLUDE_NUTTX_VIDEO_MAX7456_H
@@ -78,4 +78,4 @@ struct mx7_config_s
 
 int max7456_register(FAR const char *path, FAR struct mx7_config_s *config);
 
-#endif /*__INCLUDE_NUTTX_VIDEO_MAX7456_H */
+#endif /* __INCLUDE_NUTTX_VIDEO_MAX7456_H */
