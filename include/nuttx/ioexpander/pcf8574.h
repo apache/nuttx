@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_IOEXPANDER_PCF8574_H
 #define __INCLUDE_NUTTX_IOEXPANDER_PCF8574_H
@@ -94,8 +94,8 @@ struct pcf8574_config_s
  * Name: pcf8574_initialize
  *
  * Description:
- *   Instantiate and configure the PCF8574xx device driver to use the provided
- *   I2C device instance.
+ *   Instantiate and configure the PCF8574xx device driver to use the
+ *   provided I2C device instance.
  *
  * Input Parameters:
  *   i2c     - An I2C driver instance
@@ -109,6 +109,6 @@ struct pcf8574_config_s
 
 struct i2c_master_s;
 FAR struct ioexpander_dev_s *pcf8574_initialize(FAR struct i2c_master_s *i2c,
-                                                FAR struct pcf8574_config_s *config);
+                                        FAR struct pcf8574_config_s *config);
 
 #endif /* __INCLUDE_NUTTX_IOEXPANDER_PCF8574_H */
