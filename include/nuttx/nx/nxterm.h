@@ -68,25 +68,28 @@
  * Output text/graphics options:
  *
  * CONFIG_NXTERM_BPP
- *   Currently, NxTerm supports only a single pixel depth. This
- *   configuration setting must be provided to support that single pixel depth.
+ *   Currently, NxTerm supports only a single pixel depth.
+ *   This configuration setting must be provided to support that single
+ *   pixel depth.
  *   Default: The smallest enabled pixel depth. (see CONFIG_NX_DISABLE_*BPP)
  * CONFIG_NXTERM_CURSORCHAR
  *   The bitmap code to use as the cursor.  Default '_'
  * CONFIG_NXTERM_MXCHARS
  *   NxTerm needs to remember every character written to the console so
  *   that it can redraw the window. This setting determines the size of some
- *   internal memory allocations used to hold the character data. Default: 128.
+ *   internal memory allocations used to hold the character data.
+ *   Default: 128.
  * CONFIG_NXTERM_CACHESIZE
  *   NxTerm supports caching of rendered fonts. This font caching is required
  *   for two reasons: (1) First, it improves text performance, but more
- *   importantly (2) it preserves the font memory. Since the NX server runs on
- *   a separate server thread, it requires that the rendered font memory persist
- *   until the server has a chance to render the font. (NOTE: There is still
- *   inherently a race condition in this!). Unfortunately, the font cache would
- *   be quite large if all fonts were saved. The CONFIG_NXTERM_CACHESIZE setting
- *   will control the size of the font cache (in number of glyphs). Only that
- *   number of the most recently used glyphs will be retained. Default: 16.
+ *   importantly (2) it preserves the font memory. Since the NX server runs
+ *   on a separate server thread, it requires that the rendered font memory
+ *   persist until the server has a chance to render the font. (NOTE: There
+ *   is still inherently a race condition in this!). Unfortunately, the font
+ *   cache would be quite large if all fonts were saved.
+ *   The CONFIG_NXTERM_CACHESIZE setting will control the size of the font
+ *   cache (in number of glyphs). Only that number of the most recently
+ *   used glyphs will be retained. Default: 16.
  * CONFIG_NXTERM_LINESEPARATION
  *   This the space (in rows) between each row of test.  Default: 0
  * CONFIG_NXTERM_NOWRAP
@@ -154,8 +157,11 @@
 #    define CONFIG_NXTERM_BPP 8
 #  elif !defined(CONFIG_NX_DISABLE_16BPP)
 #    define CONFIG_NXTERM_BPP 16
-//#elif !defined(CONFIG_NX_DISABLE_24BPP)
-//#    define CONFIG_NXTERM_BPP 24
+
+/* #elif !defined(CONFIG_NX_DISABLE_24BPP)
+ * #    define CONFIG_NXTERM_BPP 24
+ */
+
 #  elif !defined(CONFIG_NX_DISABLE_32BPP)
 #    define CONFIG_NXTERM_BPP 32
 #  else
@@ -325,7 +331,7 @@ NXTERM nx_register(NXWINDOW hwnd, FAR struct nxterm_window_s *wndo,
  *   the boardctl(BOARDIOC_NXTERM) interface.
  *
  * Input Parameters:
- *   hfwnd - A handle that will be used to access the window.  The window must
+ *   hfwnd - A handle that will be used to access the window. The window must
  *     persist and this handle must be valid for the life of the NX console.
  *   wndo - Describes the window and font to be used.  The information in
  *     this structure is copied and the original need not persist after

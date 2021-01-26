@@ -151,7 +151,7 @@ enum nxmsg_e
   NX_SVRMSG_RAISE,            /* Move the window to the top */
   NX_SVRMSG_LOWER,            /* Move the window to the bottom */
   NX_SVRMSG_MODAL,            /* Select/de-slect window modal state */
-  NX_SVRMSG_SETVISIBILITY,          /* Show or hide a window */
+  NX_SVRMSG_SETVISIBILITY,    /* Show or hide a window */
   NX_SVRMSG_SETPIXEL,         /* Set a single pixel in the window with a color */
   NX_SVRMSG_FILL,             /* Fill a rectangle in the window with a color */
   NX_SVRMSG_GETRECTANGLE,     /* Get a rectangular region in the window */
@@ -200,7 +200,9 @@ struct nxclimsg_redraw_s
   bool more;                     /* true: more redraw messages follow */
 };
 
-/* This message informs the client of the new size or position of the window  */
+/* This message informs the client of the new size
+ * or position of the window
+ */
 
 struct nxclimsg_newposition_s
 {
@@ -247,9 +249,10 @@ struct nxclimsg_event_s
 
 /* Client-to-Server Message Structures **************************************/
 
-/* The generic message structure.  All server messages begin with this form.  Also
- * messages that have no additional data fields use this structure.  This includes:
- * NX_SVRMSG_CONNECT and NX_SVRMSG_DISCONNECT.
+/* The generic message structure.
+ * All server messages begin with this form.
+ * Also messages that have no additional data fields use this structure.
+ * This includes: NX_SVRMSG_CONNECT and NX_SVRMSG_DISCONNECT.
  */
 
 struct nxsvrmsg_s                 /* Generic server message */
@@ -333,8 +336,9 @@ struct nxsvrmsg_requestbkgd_s
 {
   uint32_t msgid;                  /* NX_SVRMSG_REQUESTBKGD */
   FAR struct nxmu_conn_s *conn;    /* The specific connection sending the message */
+
   FAR const struct nx_callback_s *cb; /* Event handling callbacks */
-  FAR void *arg;                   /* Client argument used with callbacks */
+  FAR void *arg;                      /* Client argument used with callbacks */
 };
 
 /* This message informs the server that client wishes to close a window */
@@ -344,7 +348,9 @@ struct nxsvrmsg_releasebkgd_s
   uint32_t msgid;                  /* NX_SVRMSG_RELEASEBKGD */
 };
 
-/* This message informs the server that the size or position of the window has changed */
+/* This message informs the server that the size
+ * or position of the window has changed
+ */
 
 struct nxsvrmsg_setposition_s
 {
@@ -353,7 +359,9 @@ struct nxsvrmsg_setposition_s
   FAR struct nxgl_point_s pos;     /* The new window position */
 };
 
-/* This message informs the server that the size or position of the window has changed */
+/* This message informs the server that the size
+ * or position of the window has changed
+ */
 
 struct nxsvrmsg_setsize_s
 {
@@ -362,7 +370,9 @@ struct nxsvrmsg_setsize_s
   FAR struct nxgl_size_s  size;    /* The new window size */
 };
 
-/* This message informs the server that the size or position of the window has changed */
+/* This message informs the server that the size
+ * or position of the window has changed
+ */
 
 struct nxsvrmsg_getposition_s
 {
@@ -370,7 +380,9 @@ struct nxsvrmsg_getposition_s
   FAR struct nxbe_window_s *wnd;   /* The window whose position/size has changed */
 };
 
-/* This message informs the server to raise this window to the top of the display */
+/* This message informs the server to raise this window to
+ * the top of the display
+ */
 
 struct nxsvrmsg_raise_s
 {
@@ -378,7 +390,9 @@ struct nxsvrmsg_raise_s
   FAR struct nxbe_window_s *wnd;   /* The window to be raised */
 };
 
-/* This message informs the server to lower this window to the bottom of the display */
+/* This message informs the server to lower this window to
+ * the bottom of the display
+ */
 
 struct nxsvrmsg_lower_s
 {
@@ -415,6 +429,7 @@ struct nxsvrmsg_setpixel_s
   uint32_t msgid;                  /* NX_SVRMSG_SETPIXEL */
   FAR struct nxbe_window_s *wnd;   /* The window to fill  */
   struct nxgl_point_s pos;         /* The position of the pixel in the window */
+
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the fill */
 };
 
@@ -425,6 +440,7 @@ struct nxsvrmsg_fill_s
   uint32_t msgid;                  /* NX_SVRMSG_FILL */
   FAR struct nxbe_window_s *wnd;   /* The window to fill  */
   struct nxgl_rect_s rect;         /* The rectangle in the window to fill */
+
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the fill */
 };
 
@@ -449,6 +465,7 @@ struct nxsvrmsg_filltrapezoid_s
   FAR struct nxbe_window_s *wnd;   /* The window to fill  */
   FAR struct nxgl_rect_s clip;     /* The clipping window */
   struct nxgl_trapezoid_s trap;    /* The trapezoidal region in the window to fill */
+
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the fill */
 };
 
@@ -469,7 +486,9 @@ struct nxsvrmsg_bitmap_s
   uint32_t msgid;                 /* NX_SVRMSG_BITMAP */
   FAR struct nxbe_window_s *wnd;  /* The window with will receive the bitmap image  */
   struct nxgl_rect_s dest;        /* Destination location of the bitmap in the window */
+
   FAR const void *src[CONFIG_NX_NPLANES]; /* The start of the source image. */
+
   struct nxgl_point_s origin;     /* Offset into the source image data */
   unsigned int stride;            /* The width of the full source image in pixels. */
   sem_t *sem_done;                /* Semaphore to report when command is done. */
@@ -479,13 +498,13 @@ struct nxsvrmsg_bitmap_s
 
 struct nxsvrmsg_setbgcolor_s
 {
-  uint32_t msgid;                  /* NX_SVRMSG_SETBGCOLOR */
+  uint32_t msgid;                          /* NX_SVRMSG_SETBGCOLOR */
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the background */
 };
 
-/* This message reports a new mouse event from a hardware controller attached to
- * the server as a regular client (this message may have even been sent from an
- * interrupt handler).
+/* This message reports a new mouse event from a hardware controller
+ * attached to the server as a regular client (this message may have
+ * even been sent from an interrupt handler).
  */
 
 #ifdef CONFIG_NX_XYINPUT
@@ -497,9 +516,9 @@ struct nxsvrmsg_mousein_s
 };
 #endif
 
-/* This message reports a new keyboard event from a hardware controller attached to
- * some kind of keypad (this message may have even been sent from an
- * interrupt handler).
+/* This message reports a new keyboard event from a hardware controller
+ * attached to some kind of keypad (this message may have even been sent
+ * from an interrupt handler).
  */
 
 #ifdef CONFIG_NX_KBD
@@ -534,7 +553,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
