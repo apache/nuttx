@@ -20,6 +20,8 @@
 
 #include <nuttx/config.h>
 
+set +e
+
 #define CONCAT_(x, y) x##y
 #define CONCAT(x, y)  CONCAT_(x, y)
 
