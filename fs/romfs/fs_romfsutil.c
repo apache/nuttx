@@ -982,7 +982,7 @@ int romfs_datastart(struct romfs_mountpt_s *rm, uint32_t offset,
       /* Get the offset to the next chunk */
 
       offset += 16;
-      if (offset >= rm->rm_volsize)
+      if (offset > rm->rm_volsize)
         {
           return -EIO;
         }
