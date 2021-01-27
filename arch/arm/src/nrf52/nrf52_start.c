@@ -81,6 +81,12 @@
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARMV7M_STACKCHECK
+/* we need to get r10 set before we can allow instrumentation calls */
+
+void __start(void) __attribute__ ((no_instrument_function));
+#endif
+
 #ifdef CONFIG_STACK_COLORATION
 static void go_nx_start(void *pv, unsigned int nbytes)
   __attribute__ ((naked, no_instrument_function, noreturn));
@@ -230,6 +236,13 @@ void __start(void)
 {
   const uint32_t *src;
   uint32_t *dest;
+
+#ifdef CONFIG_ARMV7M_STACKCHECK
+  /* Set the stack limit before we attempt to call any functions */
+
+  __asm__ volatile("sub r10, sp, %0" : :
+                   "r"(CONFIG_IDLETHREAD_STACKSIZE - 64) :);
+#endif
 
   /* Make sure that interrupts are disabled */
 
