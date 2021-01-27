@@ -203,7 +203,7 @@ struct mx35_dev_s
 {
   struct mtd_dev_s mtd;      /* MTD interface */
   FAR struct spi_dev_s *dev; /* Saved SPI interface instance */
-  uint8_t highCapacity;
+  uint8_t highcapacity;
   uint8_t  sectorshift;      /* 17 */
   uint16_t nsectors;         /* 1024 or 2048 */
   uint8_t  pageshift;        /* 11 */
@@ -258,7 +258,7 @@ static int mx35_ioctl(FAR struct mtd_dev_s *dev,
                       int cmd,
                       unsigned long arg);
 static inline void mx35_eccstatusread(struct mx35_dev_s *priv);
-static inline void mx35_enableECC(struct mx35_dev_s *priv);
+static inline void mx35_enableecc(struct mx35_dev_s *priv);
 static inline void mx35_unlockblocks(struct mx35_dev_s *priv);
 
 /****************************************************************************
@@ -345,7 +345,7 @@ static int mx35_readid(struct mx35_dev_s *priv)
         {
           /* Save the FLASH geometry */
 
-          priv->highCapacity = 0;
+          priv->highcapacity = 0;
           priv->sectorshift = MX35_MX35LF1GE4AB_SECTOR_SHIFT;
           priv->nsectors    = MX35_MX35LF1GE4AB_NSECTORS;
           priv->pageshift   = MX35_MX35LF1GE4AB_PAGE_SHIFT;
@@ -355,7 +355,7 @@ static int mx35_readid(struct mx35_dev_s *priv)
         {
           /* Save the FLASH geometry */
 
-          priv->highCapacity = 1;
+          priv->highcapacity = 1;
           priv->sectorshift = MX35_MX35LF2GE4AB_SECTOR_SHIFT;
           priv->nsectors    = MX35_MX35LF2GE4AB_NSECTORS;
           priv->pageshift   = MX35_MX35LF2GE4AB_PAGE_SHIFT;
@@ -454,7 +454,7 @@ static inline uint32_t mx35_addresstorow(FAR struct mx35_dev_s *priv,
 
   uint32_t row = address >> priv->pageshift;
 
-  if (priv->highCapacity)
+  if (priv->highcapacity)
     {
       const uint32_t plane = (row >> (16 - 6)) & 0x40;
 
@@ -479,7 +479,7 @@ static inline uint32_t mx35_addresstocolumn(FAR struct mx35_dev_s *priv,
 {
   uint32_t column = address % (1 << priv->pageshift);
 
-  if (priv->highCapacity)
+  if (priv->highcapacity)
     {
       /* Convert to page */
 
@@ -872,12 +872,12 @@ static inline void mx35_eccstatusread(struct mx35_dev_s *priv)
 }
 
 /****************************************************************************
- * Name:  mx35_enableECC
+ * Name:  mx35_enableecc
  ****************************************************************************/
 
-static inline void mx35_enableECC(struct mx35_dev_s *priv)
+static inline void mx35_enableecc(struct mx35_dev_s *priv)
 {
-  uint8_t secureOTP = MX35_SOTP_ECC;
+  uint8_t secureotp = MX35_SOTP_ECC;
 
   mx35_lock(priv->dev);
   mx35_writeenable(priv);
@@ -885,7 +885,7 @@ static inline void mx35_enableECC(struct mx35_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
   SPI_SEND(priv->dev, MX35_SET_FEATURE);
   SPI_SEND(priv->dev, MX35_SECURE_OTP);
-  SPI_SEND(priv->dev, secureOTP);
+  SPI_SEND(priv->dev, secureotp);
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 
   mx35_writedisable(priv);
@@ -984,7 +984,7 @@ FAR struct mtd_dev_s *mx35_initialize(FAR struct spi_dev_s *dev)
           return NULL;
         }
 
-      mx35_enableECC(priv);
+      mx35_enableecc(priv);
       mx35_unlockblocks(priv);
     }
 
