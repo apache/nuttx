@@ -616,8 +616,8 @@ static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size)
           Cache_Flush(0);
 #ifndef CONFIG_SMP
           Cache_Flush(1);
-        }
 #endif
+        }
     }
 }
 
