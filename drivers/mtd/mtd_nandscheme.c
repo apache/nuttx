@@ -344,7 +344,7 @@ void nandscheme_writeextra(FAR const struct nand_scheme_s *scheme,
  *
  * Input Parameters:
  *   scheme  Pointer to a nand_scheme_s instance.
- *   spareSize Size of spare area.
+ *   sparesize Size of spare area.
  *   offset  Index where to write the first extra byte.
  *   size    Number of extra bytes to write.
  *   offset  Index where to write the first extra byte.
@@ -355,12 +355,12 @@ void nandscheme_writeextra(FAR const struct nand_scheme_s *scheme,
  ****************************************************************************/
 
 int nandscheme_build4086(FAR struct nand_scheme_s *scheme,
-                         unsigned int spareSize, unsigned int eccOffset)
+                         unsigned int sparesize, unsigned int eccoffset)
 {
   uint8_t eccsize = g_nand_sparescheme4096.eccsize;
   int i;
 
-  if ((eccOffset + eccsize) > spareSize)
+  if ((eccoffset + eccsize) > sparesize)
     {
       return -E2BIG;
     }
@@ -370,10 +370,10 @@ int nandscheme_build4086(FAR struct nand_scheme_s *scheme,
 
   for (i = 0; i < eccsize; i++)
     {
-      scheme->eccbytepos[i] = eccOffset + i;
+      scheme->eccbytepos[i] = eccoffset + i;
     }
 
-  scheme->nxbytes = spareSize - eccsize - 2;
+  scheme->nxbytes = sparesize - eccsize - 2;
 
   for (i = 0; i < scheme->nxbytes; i++)
     {
