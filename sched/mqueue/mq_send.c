@@ -113,7 +113,7 @@ int file_mq_send(FAR struct file *mq, FAR const char *msg, size_t msglen,
     {
       /* No.. Not in an interrupt handler.  Is the message queue FULL? */
 
-      if (msgq->nmsgs >= msgq->maxmsgs) /* Message queue not-FULL? */
+      if (msgq->nmsgs >= msgq->maxmsgs)
         {
           /* Yes.. the message queue is full.  Wait for space to become
            * available in the message queue.
