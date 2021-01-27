@@ -3343,25 +3343,27 @@ static uint32_t esp_rand(void)
 static void esp_log_writev(uint32_t level, const char *tag,
                            const char *format, va_list args)
 {
-  int pri;
-
   switch (level)
     {
+#ifdef CONFIG_DEBUG_WIRELESS_ERROR
       case ESP_LOG_ERROR:
-        pri = LOG_ERR;
+        vsyslog(LOG_ERR, format, args);
         break;
+#endif
+#ifdef CONFIG_DEBUG_WIRELESS_WARN
       case ESP_LOG_WARN:
-        pri = LOG_WARNING;
+        vsyslog(LOG_WARNING, format, args);
         break;
+#endif
+#ifdef CONFIG_DEBUG_WIRELESS_INFO
       case ESP_LOG_INFO:
-        pri = LOG_INFO;
+        vsyslog(LOG_INFO, format, args);
         break;
       default:
-        pri = LOG_DEBUG;
+        vsyslog(LOG_DEBUG, format, args);
         break;
+#endif
     }
-
-  vsyslog(pri, format, args);
 }
 
 /****************************************************************************
@@ -3993,11 +3995,13 @@ int phy_printf(const char *format, ...)
 
 int net80211_printf(const char *format, ...)
 {
+#ifdef CONFIG_DEBUG_WIRELESS_INFO
   va_list arg;
 
   va_start(arg, format);
   vsyslog(LOG_INFO, format, arg);
   va_end(arg);
+#endif
 
   return 0;
 }
