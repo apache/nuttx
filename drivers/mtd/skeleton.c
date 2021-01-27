@@ -90,6 +90,7 @@ static int     skel_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This structure holds the state of the MTD driver */
 
 static struct skel_dev_s g_skeldev =
@@ -255,13 +256,14 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
           FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
           if (geo)
             {
-              /* Populate the geometry structure with information needed to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information needed to
+               * know the capacity and how to access the device.
                *
-               * NOTE: that the device is treated as though it where just an array
-               * of fixed size blocks.  That is most likely not true, but the client
-               * will expect the device logic to do whatever is necessary to make it
-               * appear so.
+               * NOTE:
+               * that the device is treated as though it where just an array
+               * of fixed size blocks. That is most likely not true, but the
+               * client will expect the device logic to do whatever is
+               * necessary to make it appear so.
                */
 
               geo->blocksize    = 512;  /* Size of one read/write block */

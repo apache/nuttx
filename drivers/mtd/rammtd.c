@@ -53,6 +53,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_RAMMTD_BLOCKSIZE
@@ -117,18 +118,29 @@ static void *ram_write(FAR void *dest, FAR const void *src, size_t len);
 
 /* MTD driver methods */
 
-static int ram_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
-static ssize_t ram_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                          FAR uint8_t *buf);
-static ssize_t ram_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                           FAR const uint8_t *buf);
-static ssize_t ram_byteread(FAR struct mtd_dev_s *dev, off_t offset,
+static int ram_erase(FAR struct mtd_dev_s *dev,
+                     off_t startblock,
+                     size_t nblocks);
+static ssize_t ram_bread(FAR struct mtd_dev_s *dev,
+                         off_t startblock,
+                         size_t nblocks,
+                         FAR uint8_t *buf);
+static ssize_t ram_bwrite(FAR struct mtd_dev_s *dev,
+                          off_t startblock,
+                          size_t nblocks,
+                          FAR const uint8_t *buf);
+static ssize_t ram_byteread(FAR struct mtd_dev_s *dev,
+                            off_t offset,
                             size_t nbytes, FAR uint8_t *buf);
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t ram_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
-                             size_t nbytes, FAR const uint8_t *buf);
+static ssize_t ram_bytewrite(FAR struct mtd_dev_s *dev,
+                             off_t offset,
+                             size_t nbytes,
+                             FAR const uint8_t *buf);
 #endif
-static int ram_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+static int ram_ioctl(FAR struct mtd_dev_s *dev,
+                     int cmd,
+                     unsigned long arg);
 
 /****************************************************************************
  * Private Functions
@@ -232,8 +244,10 @@ static int ram_erase(FAR struct mtd_dev_s *dev, off_t startblock,
  * Name: ram_bread
  ****************************************************************************/
 
-static ssize_t ram_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                          FAR uint8_t *buf)
+static ssize_t ram_bread(FAR struct mtd_dev_s *dev,
+                         off_t startblock,
+                         size_t nblocks,
+                         FAR uint8_t *buf)
 {
   FAR struct ram_dev_s *priv = (FAR struct ram_dev_s *)dev;
   off_t offset;
@@ -322,9 +336,9 @@ static ssize_t ram_byteread(FAR struct mtd_dev_s *dev, off_t offset,
   /* Don't let read read past end of buffer */
 
   if (offset + nbytes > priv->nblocks * CONFIG_RAMMTD_ERASESIZE)
-   {
-     return 0;
-   }
+    {
+      return 0;
+    }
 
   ram_read(buf, &priv->start[offset], nbytes);
   return nbytes;
@@ -371,11 +385,12 @@ static int ram_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo =
+                              (FAR struct mtd_geometry_s *)((uintptr_t)arg);
           if (geo)
             {
-              /* Populate the geometry structure with information need to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information need to
+               * know the capacity and how to access the device.
                */
 
               geo->blocksize    = CONFIG_RAMMTD_BLOCKSIZE;

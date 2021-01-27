@@ -1,7 +1,7 @@
-/************************************************************************************
+/****************************************************************************
  * drivers/mtd/m25px.c
- * Driver for SPI-based M25P1 (128Kbit),  M25P64 (32Mbit), M25P64 (64Mbit), and
- * M25P128 (128Mbit) FLASH (and compatible).
+ * Driver for SPI-based M25P1 (128Kbit),  M25P64 (32Mbit), M25P64 (64Mbit),
+ * and M25P128 (128Mbit) FLASH (and compatible).
  *
  *   Copyright (C) 2009-2011, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,11 +33,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -56,17 +56,18 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
-/* Per the data sheet, M25P10 parts can be driven with either SPI mode 0 (CPOL=0 and
- * CPHA=0) or mode 3 (CPOL=1 and CPHA=1). But I have heard that other devices can
- * operated in mode 0 or 1.  So you may need to specify CONFIG_M25P_SPIMODE to
- * select the best mode for your device.  If CONFIG_M25P_SPIMODE is not defined,
- * mode 0 will be used.
+/* Per the data sheet, M25P10 parts can be driven with either SPI mode 0
+ * (CPOL=0 and CPHA=0) or mode 3 (CPOL=1 and CPHA=1). But I have heard that
+ * other devices can operated in mode 0 or 1.
+ * So you may need to specify CONFIG_M25P_SPIMODE to
+ * select the best mode for your device.
+ * If CONFIG_M25P_SPIMODE is not defined, mode 0 will be used.
  */
 
 #ifndef CONFIG_M25P_SPIMODE
@@ -77,9 +78,10 @@
 #  define CONFIG_M25P_SPIFREQUENCY 20000000
 #endif
 
-/* Various manufacturers may have produced the parts.  0x20 is the manufacturer ID
- * for the STMicro MP25x serial FLASH.  If, for example, you are using the a Macronix
- * International MX25 serial FLASH, the correct manufacturer ID would be 0xc2.
+/* Various manufacturers may have produced the parts.
+ * 0x20 is the manufacturer ID for the STMicro MP25x serial FLASH.
+ * If, for example, you are using the a Macronix International MX25
+ * serial FLASH, the correct manufacturer ID would be 0xc2.
  */
 
 #ifndef CONFIG_M25P_MANUFACTURER
@@ -94,7 +96,7 @@
 #  define CONFIG_MT25Q_MEMORY_TYPE  0xBA
 #endif
 
-/* M25P Registers *******************************************************************/
+/* M25P Registers ***********************************************************/
 
 /* Identification register values */
 
@@ -187,20 +189,20 @@
 
 /* Instructions */
 
-/*      Command        Value      N Description             Addr Dummy Data   */
-#define M25P_WREN      0x06    /* 1 Write Enable              0   0     0     */
-#define M25P_WRDI      0x04    /* 1 Write Disable             0   0     0     */
-#define M25P_RDID      0x9f    /* 1 Read Identification       0   0     1-3   */
-#define M25P_RDSR      0x05    /* 1 Read Status Register      0   0     >=1   */
-#define M25P_WRSR      0x01    /* 1 Write Status Register     0   0     1     */
-#define M25P_READ      0x03    /* 1 Read Data Bytes           3   0     >=1   */
-#define M25P_FAST_READ 0x0b    /* 1 Higher speed read         3   1     >=1   */
-#define M25P_PP        0x02    /* 1 Page Program              3   0     1-256 */
-#define M25P_SE        0xd8    /* 1 Sector Erase              3   0     0     */
-#define M25P_BE        0xc7    /* 1 Bulk Erase                0   0     0     */
-#define M25P_DP        0xb9    /* 2 Deep power down           0   0     0     */
-#define M25P_RES       0xab    /* 2 Read Electronic Signature 0   3     >=1   */
-#define M25P_SSE       0x20    /* 3 Sub-Sector Erase          0   0     0     */
+/*    Command          Value    N Description             Addr Dummy Data   */
+#define M25P_WREN      0x06  /* 1 Write Enable              0   0     0     */
+#define M25P_WRDI      0x04  /* 1 Write Disable             0   0     0     */
+#define M25P_RDID      0x9f  /* 1 Read Identification       0   0     1-3   */
+#define M25P_RDSR      0x05  /* 1 Read Status Register      0   0     >=1   */
+#define M25P_WRSR      0x01  /* 1 Write Status Register     0   0     1     */
+#define M25P_READ      0x03  /* 1 Read Data Bytes           3   0     >=1   */
+#define M25P_FAST_READ 0x0b  /* 1 Higher speed read         3   1     >=1   */
+#define M25P_PP        0x02  /* 1 Page Program              3   0     1-256 */
+#define M25P_SE        0xd8  /* 1 Sector Erase              3   0     0     */
+#define M25P_BE        0xc7  /* 1 Bulk Erase                0   0     0     */
+#define M25P_DP        0xb9  /* 2 Deep power down           0   0     0     */
+#define M25P_RES       0xab  /* 2 Read Electronic Signature 0   3     >=1   */
+#define M25P_SSE       0x20  /* 3 Sub-Sector Erase          0   0     0     */
 
 /* NOTE 1: All parts.
  * NOTE 2: M25P632/M25P64
@@ -227,9 +229,9 @@
 
 #define M25P_DUMMY     0xa5
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This type represents the state of the MTD device.  The struct mtd_dev_s
  * must appear at the beginning of the definition so that you can freely
@@ -249,9 +251,9 @@ struct m25p_dev_s
 #endif
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Helpers */
 
@@ -260,38 +262,51 @@ static inline void m25p_unlock(FAR struct spi_dev_s *dev);
 static inline int m25p_readid(struct m25p_dev_s *priv);
 static void m25p_waitwritecomplete(struct m25p_dev_s *priv);
 static void m25p_writeenable(struct m25p_dev_s *priv);
-static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t offset,
+static inline void m25p_sectorerase(struct m25p_dev_s *priv,
+                                    off_t offset,
                                     uint8_t type);
 static inline int  m25p_bulkerase(struct m25p_dev_s *priv);
-static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const uint8_t *buffer,
+static inline void m25p_pagewrite(struct m25p_dev_s *priv,
+                                  FAR const uint8_t *buffer,
                                   off_t offset);
 
 /* MTD driver methods */
 
-static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
-static ssize_t m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                          size_t nblocks, FAR uint8_t *buf);
-static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR const uint8_t *buf);
-static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+static int m25p_erase(FAR struct mtd_dev_s *dev,
+                      off_t startblock,
+                      size_t nblocks);
+static ssize_t m25p_bread(FAR struct mtd_dev_s *dev,
+                          off_t startblock,
+                          size_t nblocks,
+                          FAR uint8_t *buf);
+static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev,
+                           off_t startblock,
+                           size_t nblocks,
+                           FAR const uint8_t *buf);
+static ssize_t m25p_read(FAR struct mtd_dev_s *dev,
+                         off_t offset, size_t nbytes,
                          FAR uint8_t *buffer);
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t m25p_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR const uint8_t *buffer);
+static ssize_t m25p_write(FAR struct mtd_dev_s *dev,
+                          off_t offset,
+                          size_t nbytes,
+                          FAR const uint8_t *buffer);
 #endif
-static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+static int m25p_ioctl(FAR struct mtd_dev_s *dev,
+                      int cmd,
+                      unsigned long arg);
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: m25p_lock
- ************************************************************************************/
+ ****************************************************************************/
 
 static void m25p_lock(FAR struct spi_dev_s *dev)
 {
@@ -299,16 +314,18 @@ static void m25p_lock(FAR struct spi_dev_s *dev)
    * lock SPI to have exclusive access to the buses for a sequence of
    * transfers.  The bus should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusive access to
-   * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
+   * This is a blocking call and will not return until we have exclusive
+   * access to the SPI bus.  We will retain that exclusive access until the
+   * bus is unlocked.
    */
 
   SPI_LOCK(dev, true);
 
-  /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
-   * setmode methods to make sure that the SPI is properly configured for the device.
-   * If the SPI bus is being shared, then it may have been left in an incompatible
-   * state.
+  /* After locking the SPI bus, the we also need call the setfrequency,
+   * setbits, and setmode methods to make sure that the SPI is properly
+   * configured for the device.
+   * If the SPI bus is being shared, then it may have been left in an
+   * incompatible state.
    */
 
   SPI_SETMODE(dev, CONFIG_M25P_SPIMODE);
@@ -317,18 +334,18 @@ static void m25p_lock(FAR struct spi_dev_s *dev)
   SPI_SETFREQUENCY(dev, CONFIG_M25P_SPIFREQUENCY);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: m25p_unlock
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void m25p_unlock(FAR struct spi_dev_s *dev)
 {
   SPI_LOCK(dev, false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: m25p_readid
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int m25p_readid(struct m25p_dev_s *priv)
 {
@@ -463,9 +480,9 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
   return -ENODEV;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: m25p_waitwritecomplete
- ************************************************************************************/
+ ****************************************************************************/
 
 static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
 {
@@ -483,7 +500,9 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
 
       SPI_SEND(priv->dev, M25P_RDSR);
 
-      /* Send a dummy byte to generate the clock needed to shift out the status */
+      /* Send a dummy byte to generate the clock needed to shift out the
+       * status
+       */
 
       status = SPI_SEND(priv->dev, M25P_DUMMY);
 
@@ -491,9 +510,10 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
 
       SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 
-      /* Given that writing could take up to few tens of milliseconds, and erasing
-       * could take more.  The following short delay in the "busy" case will allow
-       * other peripherals to access the SPI bus.
+      /* Given that writing could take up to few tens of milliseconds, and
+       * erasing could take more.
+       * The following short delay in the "busy" case will allow other
+       * peripherals to access the SPI bus.
        */
 
       if ((status & M25P_SR_WIP) != 0)
@@ -508,9 +528,9 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
   finfo("Complete\n");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  m25p_writeenable
- ************************************************************************************/
+ ****************************************************************************/
 
 static void m25p_writeenable(struct m25p_dev_s *priv)
 {
@@ -528,11 +548,13 @@ static void m25p_writeenable(struct m25p_dev_s *priv)
   finfo("Enabled\n");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  m25p_sectorerase
- ************************************************************************************/
+ ****************************************************************************/
 
-static void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector, uint8_t type)
+static void m25p_sectorerase(struct m25p_dev_s *priv,
+                             off_t sector,
+                             uint8_t type)
 {
   off_t offset;
 
@@ -549,7 +571,7 @@ static void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector, uint8_t type
 
   finfo("sector: %08lx\n", (long)sector);
 
-  /* Wait for any preceding write to complete.  We could simplify things by
+  /* Wait for any preceding write to complete. We could simplify things by
    * perform this wait at the end of each write operation (rather than at
    * the beginning of ALL operations), but have the wait first will slightly
    * improve performance.
@@ -586,9 +608,9 @@ static void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector, uint8_t type
   finfo("Erased\n");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  m25p_bulkerase
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int m25p_bulkerase(struct m25p_dev_s *priv)
 {
@@ -621,11 +643,12 @@ static inline int m25p_bulkerase(struct m25p_dev_s *priv)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  m25p_pagewrite
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const uint8_t *buffer,
+static inline void m25p_pagewrite(struct m25p_dev_s *priv,
+                                  FAR const uint8_t *buffer,
                                   off_t page)
 {
   off_t offset = page << priv->pageshift;
@@ -668,13 +691,15 @@ static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const uint8_t *bu
   finfo("Written\n");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  m25p_bytewrite
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-static inline void m25p_bytewrite(struct m25p_dev_s *priv, FAR const uint8_t *buffer,
-                                  off_t offset, uint16_t count)
+static inline void m25p_bytewrite(struct m25p_dev_s *priv,
+                                  FAR const uint8_t *buffer,
+                                  off_t offset,
+                                  uint16_t count)
 {
   finfo("offset: %08lx  count:%d\n", (long)offset, count);
 
@@ -715,11 +740,13 @@ static inline void m25p_bytewrite(struct m25p_dev_s *priv, FAR const uint8_t *bu
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: m25p_erase
- ************************************************************************************/
+ ****************************************************************************/
 
-static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
+static int m25p_erase(FAR struct mtd_dev_s *dev,
+                      off_t startblock,
+                      size_t nblocks)
 {
   FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
   size_t blocksleft = nblocks;
@@ -782,9 +809,9 @@ static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
   return (int)nblocks;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: m25p_bread
- ************************************************************************************/
+ ****************************************************************************/
 
 static ssize_t m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                           size_t nblocks,
@@ -809,9 +836,9 @@ static ssize_t m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock,
   return (int)nbytes;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: m25p_bwrite
- ************************************************************************************/
+ ****************************************************************************/
 
 static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                            size_t nblocks,
@@ -837,11 +864,13 @@ static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   return nblocks;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: m25p_read
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+static ssize_t m25p_read(FAR struct mtd_dev_s *dev,
+                         off_t offset,
+                         size_t nbytes,
                          FAR uint8_t *buffer)
 {
   FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
@@ -889,13 +918,15 @@ static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
   return nbytes;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: m25p_write
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t m25p_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR const uint8_t *buffer)
+static ssize_t m25p_write(FAR struct mtd_dev_s *dev,
+                          off_t offset,
+                          size_t nbytes,
+                          FAR const uint8_t *buffer)
 {
   FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
   int    startpage;
@@ -963,9 +994,9 @@ static ssize_t m25p_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
 }
 #endif /* CONFIG_MTD_BYTE_WRITE */
 
-/************************************************************************************
+/****************************************************************************
  * Name: m25p_ioctl
- ************************************************************************************/
+ ****************************************************************************/
 
 static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 {
@@ -982,13 +1013,15 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                                            ((uintptr_t)arg);
           if (geo)
             {
-              /* Populate the geometry structure with information need to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information need to
+               * know the capacity and how to access the device.
                *
-               * NOTE: that the device is treated as though it where just an array
-               * of fixed size blocks.  That is most likely not true, but the client
-               * will expect the device logic to do whatever is necessary to make it
-               * appear so.
+               * NOTE:
+               * that the device is treated as though it where just an array
+               * of fixed size blocks.
+               * That is most likely not true, but the client will expect the
+               * device logic to do whatever is necessary to make it appear
+               * so.
                */
 
               geo->blocksize = (1 << priv->pageshift);
@@ -996,8 +1029,9 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               if (priv->subsectorshift > 0)
                 {
                   geo->erasesize    = (1 << priv->subsectorshift);
-                  geo->neraseblocks = priv->nsectors * (1 << (priv->sectorshift -
-                              priv->subsectorshift));
+                  geo->neraseblocks = priv->nsectors *
+                                     (1 << (priv->sectorshift -
+                                      priv->subsectorshift));
                 }
               else
 #endif
@@ -1035,19 +1069,20 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: m25p_initialize
  *
  * Description:
- *   Create an initialize MTD device instance.  MTD devices are not registered
- *   in the file system, but are created as instances that can be bound to
- *   other functions (such as a block or character driver front end).
+ *   Create an initialize MTD device instance.
+ *   MTD devices are not registered in the file system, but are created as
+ *   instances that can be bound to other functions (such as a block or
+ *   character driver front end).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
 {
@@ -1059,8 +1094,8 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
    * The current implementation would handle only one FLASH part per SPI
-   * device (only because of the SPIDEV_FLASH(0) definition) and so would have
-   * to be extended to handle multiple FLASH parts on the same SPI bus.
+   * device (only because of the SPIDEV_FLASH(0) definition) and so would
+   * have to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
   priv = (FAR struct m25p_dev_s *)kmm_zalloc(sizeof(struct m25p_dev_s));
@@ -1090,7 +1125,9 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
       ret = m25p_readid(priv);
       if (ret != OK)
         {
-          /* Unrecognized! Discard all of that work we just did and return NULL */
+          /* Unrecognized!
+           * Discard all of that work we just did and return NULL
+           */
 
           ferr("ERROR: Unrecognized\n");
           kmm_free(priv);
