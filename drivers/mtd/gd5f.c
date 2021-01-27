@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * drivers/mtd/gd5f.c
  * Driver for GigaDevice SPI nand flash.
  *
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,11 +54,11 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_GD5F_SPIMODE
 #  define CONFIG_GD5F_SPIMODE SPIDEV_MODE0
@@ -68,33 +68,33 @@
 #  define CONFIG_GD5F_SPIFREQUENCY  20000000
 #endif
 
-/* GD5F Instructions ****************************************************************/
+/* GD5F Instructions ********************************************************/
 
-/*      Command                    Value     Description             Addr   Data    */
-/*                                                                      Dummy       */
+/*      Command                  Value     Description       Addr   Data    */
 
-#define GD5F_GET_FEATURE            0x0f   /* Get features           1   0   1      */
-#define GD5F_SET_FEATURE            0x1f   /* Set features           1   0   1      */
-#define GD5F_PAGE_READ              0x13   /* Array read             3   0   0      */
-#define GD5F_READ_FROM_CACHE        0x03   /* Output cache data
-                                            *  on SO                 2   1   1-2112 */
-#define GD5F_READ_ID                0x9f   /* Read device ID         0   1   2      */
-#define GD5F_ECC_STATUS_READ        0x7c   /* Internal ECC status
-                                            *  output                0   1   1      */
-#define GD5F_BLOCK_ERASE            0xd8   /* Block erase            3   0   0      */
-#define GD5F_PROGRAM_EXECUTE        0x10   /* Enter block/page
-                                            *  address, execute      3   0   0      */
-#define GD5F_PROGRAM_LOAD           0x02   /* Load program data with
-                                            *  cache reset first     2   0   1-2112 */
-#define GD5F_PROGRAM_LOAD_RANDOM    0x84   /* Load program data
-                                            *  without cache reset   2   0   1-2112 */
-#define GD5F_WRITE_ENABLE           0x06   /*                        0   0   0      */
-#define GD5F_WRITE_DISABLE          0x04   /*                        0   0   0      */
-#define GD5F_RESET                  0xff   /* Reset the device       0   0   0      */
+/*                                                                    Dummy */
 
-#define GD5F_DUMMY                  0x00   /* No Operation           0   0   0      */
+#define GD5F_GET_FEATURE          0x0f /* Get features        1   0   1     */
+#define GD5F_SET_FEATURE          0x1f /* Set features        1   0   1     */
+#define GD5F_PAGE_READ            0x13 /* Array read          3   0   0     */
+#define GD5F_READ_FROM_CACHE      0x03 /* Output cache data
+                                        *  on SO              2   1   1-2112 */
+#define GD5F_READ_ID              0x9f /* Read device ID      0   1   2     */
+#define GD5F_ECC_STATUS_READ      0x7c /* Internal ECC status
+                                        *  output             0   1   1     */
+#define GD5F_BLOCK_ERASE          0xd8 /* Block erase         3   0   0     */
+#define GD5F_PROGRAM_EXECUTE      0x10 /* Enter block/page
+                                        * address, execute    3   0   0     */
+#define GD5F_PROGRAM_LOAD         0x02 /* Load program data with
+                                        * cache reset first   2   0   1-2112 */
+#define GD5F_PROGRAM_LOAD_RANDOM  0x84 /* Load program data
+                                        * without cache reset 2   0   1-2112 */
+#define GD5F_WRITE_ENABLE         0x06 /*                     0   0   0     */
+#define GD5F_WRITE_DISABLE        0x04 /*                     0   0   0     */
+#define GD5F_RESET                0xff /* Reset the device    0   0   0     */
+#define GD5F_DUMMY                0x00 /* No Operation        0   0   0     */
 
-/* Feature register *****************************************************************/
+/* Feature register *********************************************************/
 
 /* JEDEC Read ID register values */
 
@@ -153,9 +153,9 @@
 #define GD5F_FEATURE_ECC_OFFSET     4
 #define GD5F_ECC_STATUS_MASK        0x0f
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This type represents the state of the MTD device.  The struct mtd_dev_s
  * must appear at the beginning of the definition so that you can freely
@@ -173,9 +173,9 @@ struct gd5f_dev_s
   uint8_t              eccstatus;       /* Internal ECC status */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Helpers */
 
@@ -183,18 +183,26 @@ static inline void gd5f_lock(FAR struct spi_dev_s *dev);
 static inline void gd5f_unlock(FAR struct spi_dev_s *dev);
 
 static int gd5f_readid(FAR struct gd5f_dev_s *priv);
-static bool gd5f_waitstatus(FAR struct gd5f_dev_s *priv, uint8_t mask,
+static bool gd5f_waitstatus(FAR struct gd5f_dev_s *priv,
+                            uint8_t mask,
                             bool successif);
 static inline void gd5f_writeenable(FAR struct gd5f_dev_s *priv);
 static inline void gd5f_writedisable(FAR struct gd5f_dev_s *priv);
-static bool gd5f_sectorerase(FAR struct gd5f_dev_s *priv, off_t startsector);
-static void gd5f_readbuffer(FAR struct gd5f_dev_s *priv, uint32_t address,
-                            uint8_t *buffer, size_t length);
-static bool gd5f_read_page(FAR struct gd5f_dev_s *priv, uint32_t position);
+static bool gd5f_sectorerase(FAR struct gd5f_dev_s *priv,
+                             off_t startsector);
+static void gd5f_readbuffer(FAR struct gd5f_dev_s *priv,
+                            uint32_t address,
+                            uint8_t *buffer,
+                            size_t length);
+static bool gd5f_read_page(FAR struct gd5f_dev_s *priv,
+                           uint32_t position);
 
-static void gd5f_write_to_cache(FAR struct gd5f_dev_s *priv, uint32_t address,
-                                const uint8_t *buffer, size_t length);
-static bool gd5f_execute_write(FAR struct gd5f_dev_s *priv, uint32_t position);
+static void gd5f_write_to_cache(FAR struct gd5f_dev_s *priv,
+                                uint32_t address,
+                                const uint8_t *buffer,
+                                size_t length);
+static bool gd5f_execute_write(FAR struct gd5f_dev_s *priv,
+                               uint32_t position);
 
 static inline void gd5f_eccstatusread(FAR struct gd5f_dev_s *priv);
 static inline void gd5f_enable_ecc(FAR struct gd5f_dev_s *priv);
@@ -202,24 +210,36 @@ static inline void gd5f_unlockblocks(FAR struct gd5f_dev_s *priv);
 
 /* MTD driver methods */
 
-static ssize_t gd5f_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                          size_t nblocks, FAR uint8_t *buffer);
-static ssize_t gd5f_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+static ssize_t gd5f_bread(FAR struct mtd_dev_s *dev,
+                          off_t startblock,
+                          size_t nblocks,
+                          FAR uint8_t *buffer);
+static ssize_t gd5f_read(FAR struct mtd_dev_s *dev,
+                         off_t offset,
+                         size_t nbytes,
                          FAR uint8_t *buffer);
-static ssize_t gd5f_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR const uint8_t *buffer);
-static ssize_t gd5f_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR const uint8_t *buffer);
-static int gd5f_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
-static int gd5f_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
+static ssize_t gd5f_bwrite(FAR struct mtd_dev_s *dev,
+                           off_t startblock,
+                           size_t nblocks,
+                           FAR const uint8_t *buffer);
+static ssize_t gd5f_write(FAR struct mtd_dev_s *dev,
+                          off_t offset,
+                          size_t nbytes,
+                          FAR const uint8_t *buffer);
+static int gd5f_ioctl(FAR struct mtd_dev_s *dev,
+                      int cmd,
+                      unsigned long arg);
+static int gd5f_erase(FAR struct mtd_dev_s *dev,
+                      off_t startblock,
+                      size_t nblocks);
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: gd5f_lock
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void gd5f_lock(FAR struct spi_dev_s *dev)
 {
@@ -231,18 +251,18 @@ static inline void gd5f_lock(FAR struct spi_dev_s *dev)
   SPI_SETFREQUENCY(dev, CONFIG_GD5F_SPIFREQUENCY);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: gd5f_unlock
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void gd5f_unlock(FAR struct spi_dev_s *dev)
 {
   SPI_LOCK(dev, false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: gd5f_readid
- ************************************************************************************/
+ ****************************************************************************/
 
 static int gd5f_readid(FAR struct gd5f_dev_s *priv)
 {
@@ -303,11 +323,13 @@ static int gd5f_readid(FAR struct gd5f_dev_s *priv)
   return -ENODEV;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: gd5f_waitstatus
- ************************************************************************************/
+ ****************************************************************************/
 
-static bool gd5f_waitstatus(FAR struct gd5f_dev_s *priv, uint8_t mask, bool successif)
+static bool gd5f_waitstatus(FAR struct gd5f_dev_s *priv,
+                            uint8_t mask,
+                            bool successif)
 {
   uint8_t status;
 
@@ -337,9 +359,9 @@ static bool gd5f_waitstatus(FAR struct gd5f_dev_s *priv, uint8_t mask, bool succ
   return successif ? ((status & mask) != 0) : ((status & mask) == 0);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  gd5f_writeenable
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void gd5f_writeenable(FAR struct gd5f_dev_s *priv)
 {
@@ -356,9 +378,9 @@ static inline void gd5f_writeenable(FAR struct gd5f_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH(priv->spi_devid), false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  gd5f_writedisable
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void gd5f_writedisable(FAR struct gd5f_dev_s *priv)
 {
@@ -375,13 +397,15 @@ static inline void gd5f_writedisable(FAR struct gd5f_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH(priv->spi_devid), false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  gd5f_sectorerase (128K)
- ************************************************************************************/
+ ****************************************************************************/
 
-static bool gd5f_sectorerase(FAR struct gd5f_dev_s *priv, off_t startsector)
+static bool gd5f_sectorerase(FAR struct gd5f_dev_s *priv,
+                             off_t startsector)
 {
-  const uint32_t block = startsector << (priv->sectorshift - priv->pageshift);
+  const uint32_t block = startsector << (priv->sectorshift -
+                                         priv->pageshift);
 
   finfo("block sector: %08lx\n", (long)block);
 
@@ -408,16 +432,20 @@ static bool gd5f_sectorerase(FAR struct gd5f_dev_s *priv, off_t startsector)
   return gd5f_waitstatus(priv, GD5F_SR_E_FAIL, false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: gd5f_erase
- ************************************************************************************/
+ ****************************************************************************/
 
-static int gd5f_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
+static int gd5f_erase(FAR struct mtd_dev_s *dev,
+                      off_t startblock,
+                      size_t nblocks)
 {
   FAR struct gd5f_dev_s *priv = (FAR struct gd5f_dev_s *)dev;
   size_t blocksleft = nblocks;
 
-  finfo("Erase: startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  finfo("Erase: startblock: %08lx nblocks: %d\n",
+        (long)startblock,
+        (int)nblocks);
 
   /* Lock access to the SPI bus until we complete the erase */
 
@@ -442,12 +470,14 @@ static int gd5f_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
   return nblocks - blocksleft;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: gd5f_readbuffer
- ************************************************************************************/
+ ****************************************************************************/
 
-static void gd5f_readbuffer(FAR struct gd5f_dev_s *priv, uint32_t address,
-                            uint8_t *buffer, size_t length)
+static void gd5f_readbuffer(FAR struct gd5f_dev_s *priv,
+                            uint32_t address,
+                            uint8_t *buffer,
+                            size_t length)
 {
   const uint16_t offset = address & ((1 << priv->pageshift) - 1);
 
@@ -475,9 +505,9 @@ static void gd5f_readbuffer(FAR struct gd5f_dev_s *priv, uint32_t address,
   SPI_SELECT(priv->dev, SPIDEV_FLASH(priv->spi_devid), false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: gd5f_read_page
- ************************************************************************************/
+ ****************************************************************************/
 
 static bool gd5f_read_page(FAR struct gd5f_dev_s *priv, uint32_t pageaddress)
 {
@@ -515,11 +545,13 @@ static bool gd5f_read_page(FAR struct gd5f_dev_s *priv, uint32_t pageaddress)
   return true;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: gd5f_read
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t gd5f_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+static ssize_t gd5f_read(FAR struct mtd_dev_s *dev,
+                         off_t offset,
+                         size_t nbytes,
                          FAR uint8_t *buffer)
 {
   FAR struct gd5f_dev_s *priv = (FAR struct gd5f_dev_s *)dev;
@@ -538,9 +570,12 @@ static ssize_t gd5f_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 
   while (bytesleft)
     {
-      const uint32_t pageaddress = (position >> priv->pageshift) << priv->pageshift;
-      const uint32_t spaceleft = pageaddress + (1 << priv->pageshift) - position;
-      const size_t chunklength = bytesleft < spaceleft ? bytesleft : spaceleft;
+      const uint32_t pageaddress =
+                     (position >> priv->pageshift) << priv->pageshift;
+      const uint32_t spaceleft =
+                     pageaddress + (1 << priv->pageshift) - position;
+      const size_t chunklength =
+                   bytesleft < spaceleft ? bytesleft : spaceleft;
 
       if (!gd5f_read_page(priv, pageaddress))
         {
@@ -560,9 +595,9 @@ static ssize_t gd5f_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
   return nbytes - bytesleft;
 }
 
-/**************************************************************************
+/****************************************************************************
  * Name: gd5f_bread
- **************************************************************************/
+ ****************************************************************************/
 
 static ssize_t gd5f_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                           size_t nblocks, FAR uint8_t *buffer)
@@ -583,12 +618,14 @@ static ssize_t gd5f_bread(FAR struct mtd_dev_s *dev, off_t startblock,
   return nbytes;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: gd5f_write_to_cache
- ************************************************************************************/
+ ****************************************************************************/
 
-static void gd5f_write_to_cache(FAR struct gd5f_dev_s *priv, uint32_t address,
-                                const uint8_t *buffer, size_t length)
+static void gd5f_write_to_cache(FAR struct gd5f_dev_s *priv,
+                                uint32_t address,
+                                const uint8_t *buffer,
+                                size_t length)
 {
   const uint16_t offset = address & ((1 << priv->pageshift) - 1);
 
@@ -614,11 +651,12 @@ static void gd5f_write_to_cache(FAR struct gd5f_dev_s *priv, uint32_t address,
   SPI_SELECT(priv->dev, SPIDEV_FLASH(priv->spi_devid), false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: gd5f_execute_write
- ************************************************************************************/
+ ****************************************************************************/
 
-static bool gd5f_execute_write(FAR struct gd5f_dev_s *priv, uint32_t pageaddress)
+static bool gd5f_execute_write(FAR struct gd5f_dev_s *priv,
+                               uint32_t pageaddress)
 {
   const uint32_t row = pageaddress >> priv->pageshift;
 
@@ -640,11 +678,13 @@ static bool gd5f_execute_write(FAR struct gd5f_dev_s *priv, uint32_t pageaddress
   return gd5f_waitstatus(priv, GD5F_SR_P_FAIL, false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: gd5f_write
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t gd5f_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+static ssize_t gd5f_write(FAR struct mtd_dev_s *dev,
+                          off_t offset,
+                          size_t nbytes,
                           FAR const uint8_t *buffer)
 {
   FAR struct gd5f_dev_s *priv = (FAR struct gd5f_dev_s *)dev;
@@ -660,9 +700,12 @@ static ssize_t gd5f_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
 
   while (bytesleft)
     {
-      const uint32_t pageaddress = (position >> priv->pageshift) << priv->pageshift;
-      const uint32_t spaceleft = pageaddress + (1 << priv->pageshift) - position;
-      const size_t chunklength = bytesleft < spaceleft ? bytesleft : spaceleft;
+      const uint32_t pageaddress =
+                    (position >> priv->pageshift) << priv->pageshift;
+      const uint32_t spaceleft =
+                     pageaddress + (1 << priv->pageshift) - position;
+      const size_t chunklength =
+                   bytesleft < spaceleft ? bytesleft : spaceleft;
 
       gd5f_write_to_cache(priv, position, buffer, chunklength);
       gd5f_writeenable(priv);
@@ -681,9 +724,9 @@ static ssize_t gd5f_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
   return nbytes - bytesleft;
 }
 
-/**************************************************************************
+/****************************************************************************
  * Name: gd5f_bwrite
- **************************************************************************/
+ ****************************************************************************/
 
 static ssize_t gd5f_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
     size_t nblocks, FAR const uint8_t *buffer)
@@ -707,9 +750,9 @@ static ssize_t gd5f_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   return nbytes;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: mx25l_ioctl
- ************************************************************************************/
+ ****************************************************************************/
 
 static int gd5f_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 {
@@ -750,7 +793,8 @@ static int gd5f_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           uint8_t *result = (uint8_t *)arg;
           *result =
-              (priv->eccstatus & GD5F_FEATURE_ECC_MASK) >> GD5F_FEATURE_ECC_OFFSET;
+               (priv->eccstatus & GD5F_FEATURE_ECC_MASK)
+                >> GD5F_FEATURE_ECC_OFFSET;
 
           ret = OK;
         }
@@ -765,9 +809,9 @@ static int gd5f_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  gd5f_eccstatusread
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void gd5f_eccstatusread(FAR struct gd5f_dev_s *priv)
 {
@@ -778,9 +822,9 @@ static inline void gd5f_eccstatusread(FAR struct gd5f_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH(priv->spi_devid), false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  gd5f_enable_ecc
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void gd5f_enable_ecc(FAR struct gd5f_dev_s *priv)
 {
@@ -799,9 +843,9 @@ static inline void gd5f_enable_ecc(FAR struct gd5f_dev_s *priv)
   gd5f_unlock(priv->dev);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  gd5f_unlockblocks
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void gd5f_unlockblocks(FAR struct gd5f_dev_s *priv)
 {
@@ -820,19 +864,20 @@ static inline void gd5f_unlockblocks(FAR struct gd5f_dev_s *priv)
   gd5f_unlock(priv->dev);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: gd5f_initialize
  *
  * Description:
- *   Create an initialize MTD device instance.  MTD devices are not registered
- *   in the file system, but are created as instances that can be bound to
- *   other functions (such as a block or character driver front end).
+ *   Create an initialize MTD device instance.
+ *   MTD devices are not registered in the file system, but are created
+ *   as instances that can be bound to other functions(such as a block
+ *   or character driver front end).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct mtd_dev_s *gd5f_initialize(FAR struct spi_dev_s *dev,
                                       uint32_t spi_devid)
@@ -876,7 +921,9 @@ FAR struct mtd_dev_s *gd5f_initialize(FAR struct spi_dev_s *dev,
       ret = gd5f_readid(priv);
       if (ret != OK)
         {
-          /* Unrecognized! Discard all of that work we just did and return NULL */
+          /* Unrecognized! Discard all of that work we just did and
+           * return NULL
+           */
 
           ferr("ERROR: Unrecognized\n");
           kmm_free(priv);

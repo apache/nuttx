@@ -97,7 +97,11 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
   unsigned int sparesize;
   int ret;
 
-  finfo("block=%d page=%d data=%p spare=%d\n", (int)block, page, data, spare);
+  finfo("block=%d page=%d data=%p spare=%d\n",
+        (int)block,
+         page,
+         data,
+         spare);
 
   /* Get convenience pointers */
 
@@ -189,7 +193,11 @@ int nandecc_writepage(FAR struct nand_dev_s *nand, off_t block,
   unsigned int sparesize;
   int ret;
 
-  finfo("block=%d page=%d data=%p spare=%d\n", (int)block, page, data, spare);
+  finfo("block=%d page=%d data=%p spare=%d\n",
+        (int)block,
+         page,
+         data,
+         spare);
 
   /* Get convenience pointers */
 

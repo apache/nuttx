@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * drivers/mtd/sst25.c
  * Driver for SPI-based SST25 FLASH.
  *
@@ -37,11 +37,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -63,56 +63,57 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
-/* Per the data sheet, the SST25 parts can be driven with either SPI mode 0 (CPOL=0
- * and CPHA=0) or mode 3 (CPOL=1 and CPHA=1). But I have heard that other devices
- * can operate in mode 0 or 1.  So you may need to specify CONFIG_SST25_SPIMODE to
- * select the best mode for your device.  If CONFIG_SST25_SPIMODE is not defined,
- * mode 0 will be used.
+/* Per the data sheet, the SST25 parts can be driven with either SPI mode 0
+ * (CPOL=0 and CPHA=0) or mode 3 (CPOL=1 and CPHA=1).
+ * But I have heard that other devices can operate in mode 0 or 1.
+ * So you may need to specify CONFIG_SST25_SPIMODE to select the best mode
+ * for your device.  If CONFIG_SST25_SPIMODE is not defined, mode 0 will
+ * be used.
  */
 
 #ifndef CONFIG_SST25_SPIMODE
-#  define CONFIG_SST25_SPIMODE SPIDEV_MODE0
+#define CONFIG_SST25_SPIMODE SPIDEV_MODE0
 #endif
 
 /* SPI Frequency.  May be up to 25MHz. */
 
 #ifndef CONFIG_SST25_SPIFREQUENCY
-#  define CONFIG_SST25_SPIFREQUENCY 20000000
+#define CONFIG_SST25_SPIFREQUENCY 20000000
 #endif
 
-/* SST25 Instructions ***************************************************************/
+/* SST25 Instructions *******************************************************/
 
-/*      Command                    Value      Description               Addr   Data */
+/*    Command              Value      Description               Addr   Data */
 
-/*                                                                         Dummy    */
+/*                                                                 Dummy    */
 
-#define SST25_READ                  0x03    /* Read data bytes           3   0  >=1 */
-#define SST25_FAST_READ             0x0b    /* Higher speed read         3   1  >=1 */
-#define SST25_SE                    0x20    /* 4Kb Sector erase          3   0   0  */
-#define SST25_BE32                  0x52    /* 32Kbit block Erase        3   0   0  */
-#define SST25_BE64                  0xd8    /* 64Kbit block Erase        3   0   0  */
-#define SST25_CE                    0xc7    /* Chip erase                0   0   0  */
-#define SST25_CE_ALT                0x60    /* Chip erase (alternate)    0   0   0  */
-#define SST25_BP                    0x02    /* Byte program              3   0   1  */
-#define SST25_AAI                   0xad    /* Auto address increment    3   0  >=2 */
-#define SST25_RDSR                  0x05    /* Read status register      0   0  >=1 */
-#define SST25_EWSR                  0x50    /* Write enable status       0   0   0  */
-#define SST25_WRSR                  0x01    /* Write Status Register     0   0   1  */
-#define SST25_WREN                  0x06    /* Write Enable              0   0   0  */
-#define SST25_WRDI                  0x04    /* Write Disable             0   0   0  */
-#define SST25_RDID                  0xab    /* Read Identification       0   0  >=1 */
-#define SST25_RDID_ALT              0x90    /* Read Identification (alt) 0   0  >=1 */
-#define SST25_JEDEC_ID              0x9f    /* JEDEC ID read             0   0  >=3 */
-#define SST25_EBSY                  0x70    /* Enable SO RY/BY# status   0   0   0  */
-#define SST25_DBSY                  0x80    /* Disable SO RY/BY# status  0   0   0  */
+#define SST25_READ          0x03    /* Read data bytes           3   0  >=1 */
+#define SST25_FAST_READ     0x0b    /* Higher speed read         3   1  >=1 */
+#define SST25_SE            0x20    /* 4Kb Sector erase          3   0   0  */
+#define SST25_BE32          0x52    /* 32Kbit block Erase        3   0   0  */
+#define SST25_BE64          0xd8    /* 64Kbit block Erase        3   0   0  */
+#define SST25_CE            0xc7    /* Chip erase                0   0   0  */
+#define SST25_CE_ALT        0x60    /* Chip erase (alternate)    0   0   0  */
+#define SST25_BP            0x02    /* Byte program              3   0   1  */
+#define SST25_AAI           0xad    /* Auto address increment    3   0  >=2 */
+#define SST25_RDSR          0x05    /* Read status register      0   0  >=1 */
+#define SST25_EWSR          0x50    /* Write enable status       0   0   0  */
+#define SST25_WRSR          0x01    /* Write Status Register     0   0   1  */
+#define SST25_WREN          0x06    /* Write Enable              0   0   0  */
+#define SST25_WRDI          0x04    /* Write Disable             0   0   0  */
+#define SST25_RDID          0xab    /* Read Identification       0   0  >=1 */
+#define SST25_RDID_ALT      0x90    /* Read Identification (alt) 0   0  >=1 */
+#define SST25_JEDEC_ID      0x9f    /* JEDEC ID read             0   0  >=3 */
+#define SST25_EBSY          0x70    /* Enable SO RY/BY# status   0   0   0  */
+#define SST25_DBSY          0x80    /* Disable SO RY/BY# status  0   0   0  */
 
-/* SST25 Registers ******************************************************************/
+/* SST25 Registers **********************************************************/
 
 /* Read ID (RDID) register values */
 
@@ -129,25 +130,25 @@
 
 /* Status register bit definitions */
 
-#define SST25_SR_BUSY               (1 << 0)  /* Bit 0: Write in progress */
-#define SST25_SR_WEL                (1 << 1)  /* Bit 1: Write enable latch bit */
-#define SST25_SR_BP_SHIFT           (2)       /* Bits 2-5: Block protect bits */
-#define SST25_SR_BP_MASK            (15 << SST25_SR_BP_SHIFT)
-#  define SST25_SR_BP_NONE          (0 << SST25_SR_BP_SHIFT) /* Unprotected */
-#  define SST25_SR_BP_UPPER64th     (1 << SST25_SR_BP_SHIFT) /* Upper 64th */
-#  define SST25_SR_BP_UPPER32nd     (2 << SST25_SR_BP_SHIFT) /* Upper 32nd */
-#  define SST25_SR_BP_UPPER16th     (3 << SST25_SR_BP_SHIFT) /* Upper 16th */
-#  define SST25_SR_BP_UPPER8th      (4 << SST25_SR_BP_SHIFT) /* Upper 8th */
-#  define SST25_SR_BP_UPPERQTR      (5 << SST25_SR_BP_SHIFT) /* Upper quarter */
-#  define SST25_SR_BP_UPPERHALF     (6 << SST25_SR_BP_SHIFT) /* Upper half */
-#  define SST25_SR_BP_ALL           (7 << SST25_SR_BP_SHIFT) /* All sectors */
+#define SST25_SR_BUSY             (1 << 0)  /* Bit 0: Write in progress */
+#define SST25_SR_WEL              (1 << 1)  /* Bit 1: Write enable latch bit */
+#define SST25_SR_BP_SHIFT         (2)       /* Bits 2-5: Block protect bits */
+#define SST25_SR_BP_MASK          (15 << SST25_SR_BP_SHIFT)
+#define SST25_SR_BP_NONE          (0 << SST25_SR_BP_SHIFT) /* Unprotected */
+#define SST25_SR_BP_UPPER64th     (1 << SST25_SR_BP_SHIFT) /* Upper 64th */
+#define SST25_SR_BP_UPPER32nd     (2 << SST25_SR_BP_SHIFT) /* Upper 32nd */
+#define SST25_SR_BP_UPPER16th     (3 << SST25_SR_BP_SHIFT) /* Upper 16th */
+#define SST25_SR_BP_UPPER8th      (4 << SST25_SR_BP_SHIFT) /* Upper 8th */
+#define SST25_SR_BP_UPPERQTR      (5 << SST25_SR_BP_SHIFT) /* Upper quarter */
+#define SST25_SR_BP_UPPERHALF     (6 << SST25_SR_BP_SHIFT) /* Upper half */
+#define SST25_SR_BP_ALL           (7 << SST25_SR_BP_SHIFT) /* All sectors */
 
-#define SST25_SR_AAI                (1 << 6)  /* Bit 6: Auto Address increment programming */
-#define SST25_SR_SRWD               (1 << 7)  /* Bit 7: Status register write protect */
+#define SST25_SR_AAI              (1 << 6)  /* Bit 6: Auto Address increment programming */
+#define SST25_SR_SRWD             (1 << 7)  /* Bit 7: Status register write protect */
 
-#define SST25_DUMMY                 0xa5
+#define SST25_DUMMY               0xa5
 
-/* Chip Geometries ******************************************************************/
+/* Chip Geometries **********************************************************/
 
 /* SST25VF512 capacity is 512Kbit (64Kbit x 8)   =  64Kb (8Kb x 8) */
 
@@ -172,8 +173,8 @@
 #define SST25_VF032_NSECTORS      1024        /* 1024 sectors x 4096 bytes/sector = 4Mb */
 
 #ifdef CONFIG_SST25_SECTOR512                 /* Simulate a 512 byte sector */
-#  define SST25_SECTOR_SHIFT      9           /* Sector size 1 << 9 = 512 bytes */
-#  define SST25_SECTOR_SIZE       512         /* Sector size = 512 bytes */
+#define SST25_SECTOR_SHIFT      9           /* Sector size 1 << 9 = 512 bytes */
+#define SST25_SECTOR_SIZE       512         /* Sector size = 512 bytes */
 #endif
 
 #define SST25_ERASED_STATE        0xff        /* State of FLASH when erased */
@@ -196,13 +197,14 @@
 #define CLR_DIRTY(p)               do { (p)->flags &= ~SST25_CACHE_DIRTY; } while (0)
 #define CLR_ERASED(p)              do { (p)->flags &= ~SST25_CACHE_ERASED; } while (0)
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This type represents the state of the MTD device.  The struct mtd_dev_s must
- * appear at the beginning of the definition so that you can freely cast between
- * pointers to struct mtd_dev_s and struct sst25_dev_s.
+/* This type represents the state of the MTD device.
+ * The struct mtd_dev_s must appear at the beginning of the definition so
+ * that you can freely cast between pointers to struct mtd_dev_s and struct
+ * sst25_dev_s.
  */
 
 struct sst25_dev_s
@@ -219,9 +221,9 @@ struct sst25_dev_s
 #endif
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Helpers */
 
@@ -239,47 +241,67 @@ static inline void sst25_wrdi(FAR struct sst25_dev_s *priv);
 #endif
 static void sst25_sectorerase(FAR struct sst25_dev_s *priv, off_t offset);
 static inline int sst25_chiperase(FAR struct sst25_dev_s *priv);
-static void sst25_byteread(FAR struct sst25_dev_s *priv, FAR uint8_t *buffer,
-                           off_t address, size_t nbytes);
+static void sst25_byteread(FAR struct sst25_dev_s *priv,
+                           FAR uint8_t *buffer,
+                           off_t address,
+                           size_t nbytes);
 #ifndef CONFIG_SST25_READONLY
 #ifdef CONFIG_SST25_SLOWWRITE
-static void sst25_bytewrite(FAR struct sst25_dev_s *priv, FAR const uint8_t *buffer,
-                            off_t address, size_t nbytes);
+static void sst25_bytewrite(FAR struct sst25_dev_s *priv,
+                            FAR const uint8_t *buffer,
+                            off_t address,
+                            size_t nbytes);
 #else
-static void sst25_wordwrite(FAR struct sst25_dev_s *priv, FAR const uint8_t *buffer,
-                            off_t address, size_t nbytes);
+static void sst25_wordwrite(FAR struct sst25_dev_s *priv,
+                            FAR const uint8_t *buffer,
+                            off_t address,
+                            size_t nbytes);
 #endif
 #ifdef CONFIG_SST25_SECTOR512
 static void sst25_cacheflush(struct sst25_dev_s *priv);
-static FAR uint8_t *sst25_cacheread(struct sst25_dev_s *priv, off_t sector);
-static void sst25_cacheerase(struct sst25_dev_s *priv, off_t sector);
-static void sst25_cachewrite(FAR struct sst25_dev_s *priv, FAR const uint8_t *buffer,
-                             off_t sector, size_t nsectors);
+static FAR uint8_t *sst25_cacheread(struct sst25_dev_s *priv,
+                                    off_t sector);
+static void sst25_cacheerase(struct sst25_dev_s *priv,
+                             off_t sector);
+static void sst25_cachewrite(FAR struct sst25_dev_s *priv,
+                             FAR const uint8_t *buffer,
+                             off_t sector,
+                             size_t nsectors);
 #endif
 #endif
 
 /* MTD driver methods */
 
-static int sst25_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
-static ssize_t sst25_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR uint8_t *buf);
-static ssize_t sst25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                            size_t nblocks, FAR const uint8_t *buf);
-static ssize_t sst25_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+static int sst25_erase(FAR struct mtd_dev_s *dev,
+                       off_t startblock,
+                       size_t nblocks);
+static ssize_t sst25_bread(FAR struct mtd_dev_s *dev,
+                           off_t startblock,
+                           size_t nblocks,
+                           FAR uint8_t *buf);
+static ssize_t sst25_bwrite(FAR struct mtd_dev_s *dev,
+                            off_t startblock,
+                            size_t nblocks,
+                            FAR const uint8_t *buf);
+static ssize_t sst25_read(FAR struct mtd_dev_s *dev,
+                          off_t offset,
+                          size_t nbytes,
                           FAR uint8_t *buffer);
-static int sst25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+static int sst25_ioctl(FAR struct mtd_dev_s *dev,
+                       int cmd,
+                       unsigned long arg);
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_lock
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sst25_lock(FAR struct spi_dev_s *dev)
 {
@@ -287,16 +309,18 @@ static void sst25_lock(FAR struct spi_dev_s *dev)
    * lock SPI to have exclusive access to the buses for a sequence of
    * transfers.  The bus should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusive access to
-   * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
+   * This is a blocking call and will not return until we have exclusive
+   * access to the SPI bus.
+   * We will retain that exclusive access until the bus is unlocked.
    */
 
   SPI_LOCK(dev, true);
 
-  /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
-   * setmode methods to make sure that the SPI is properly configured for the device.
-   * If the SPI bus is being shared, then it may have been left in an incompatible
-   * state.
+  /* After locking the SPI bus, the we also need call the setfrequency,
+   * setbits, and setmode methods to make sure that the SPI is properly
+   * configured for the device.
+   * If the SPI bus is being shared, then it may have been left in an
+   * incompatible state.
    */
 
   SPI_SETMODE(dev, CONFIG_SST25_SPIMODE);
@@ -305,18 +329,18 @@ static void sst25_lock(FAR struct spi_dev_s *dev)
   SPI_SETFREQUENCY(dev, CONFIG_SST25_SPIFREQUENCY);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_unlock
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void sst25_unlock(FAR struct spi_dev_s *dev)
 {
   SPI_LOCK(dev, false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_readid
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int sst25_readid(struct sst25_dev_s *priv)
 {
@@ -378,9 +402,9 @@ static inline int sst25_readid(struct sst25_dev_s *priv)
   return -ENODEV;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_unprotect
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SST25_READONLY
 static void sst25_unprotect(struct sst25_dev_s *priv)
@@ -403,9 +427,9 @@ static void sst25_unprotect(struct sst25_dev_s *priv)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_waitwritecomplete
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint8_t sst25_waitwritecomplete(struct sst25_dev_s *priv)
 {
@@ -423,7 +447,9 @@ static uint8_t sst25_waitwritecomplete(struct sst25_dev_s *priv)
 
       SPI_SEND(priv->dev, SST25_RDSR);
 
-      /* Send a dummy byte to generate the clock needed to shift out the status */
+      /* Send a dummy byte to generate the clock needed to shift out the
+       * status
+       */
 
       status = SPI_SEND(priv->dev, SST25_DUMMY);
 
@@ -431,9 +457,9 @@ static uint8_t sst25_waitwritecomplete(struct sst25_dev_s *priv)
 
       SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 
-      /* Given that writing could take up to few tens of milliseconds, and erasing
-       * could take more.  The following short delay in the "busy" case will allow
-       * other peripherals to access the SPI bus.
+      /* Given that writing could take up to few tens of milliseconds, and
+       * erasing could take more. The following short delay in the "busy"
+       * case will allow other peripherals to access the SPI bus.
        */
 
 #if 0 /* Makes writes too slow */
@@ -450,9 +476,9 @@ static uint8_t sst25_waitwritecomplete(struct sst25_dev_s *priv)
   return status;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sst25_cmd
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void sst25_cmd(struct sst25_dev_s *priv, uint8_t cmd)
 {
@@ -469,9 +495,9 @@ static inline void sst25_cmd(struct sst25_dev_s *priv, uint8_t cmd)
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sst25_wren
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void sst25_wren(struct sst25_dev_s *priv)
 {
@@ -480,9 +506,9 @@ static inline void sst25_wren(struct sst25_dev_s *priv)
   sst25_cmd(priv, SST25_WREN);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sst25_wrdi
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_SST25_SLOWWRITE) && !defined(CONFIG_SST25_READONLY)
 static inline void sst25_wrdi(struct sst25_dev_s *priv)
@@ -493,9 +519,9 @@ static inline void sst25_wrdi(struct sst25_dev_s *priv)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sst25_sectorerase
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sst25_sectorerase(struct sst25_dev_s *priv, off_t sector)
 {
@@ -519,8 +545,8 @@ static void sst25_sectorerase(struct sst25_dev_s *priv, off_t sector)
 
   SPI_SEND(priv->dev, SST25_SE);
 
-  /* Send the sector address high byte first. Only the most significant bits (those
-   * corresponding to the sector) have any meaning.
+  /* Send the sector address high byte first. Only the most significant bits
+   * (those corresponding to the sector) have any meaning.
    */
 
   SPI_SEND(priv->dev, (address >> 16) & 0xff);
@@ -532,9 +558,9 @@ static void sst25_sectorerase(struct sst25_dev_s *priv, off_t sector)
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sst25_chiperase
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int sst25_chiperase(struct sst25_dev_s *priv)
 {
@@ -556,12 +582,14 @@ static inline int sst25_chiperase(struct sst25_dev_s *priv)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_byteread
- ************************************************************************************/
+ ****************************************************************************/
 
-static void sst25_byteread(FAR struct sst25_dev_s *priv, FAR uint8_t *buffer,
-                           off_t address, size_t nbytes)
+static void sst25_byteread(FAR struct sst25_dev_s *priv,
+                           FAR uint8_t *buffer,
+                           off_t address,
+                           size_t nbytes)
 {
   uint8_t status;
 
@@ -570,7 +598,9 @@ static void sst25_byteread(FAR struct sst25_dev_s *priv, FAR uint8_t *buffer,
   /* Wait for any preceding write or erase operation to complete. */
 
   status = sst25_waitwritecomplete(priv);
-  DEBUGASSERT((status & (SST25_SR_WEL | SST25_SR_BP_MASK | SST25_SR_AAI)) == 0);
+  DEBUGASSERT((status & (SST25_SR_WEL |
+                         SST25_SR_BP_MASK |
+                         SST25_SR_AAI)) == 0);
   UNUSED(status);
 
   /* Select this FLASH part */
@@ -606,13 +636,15 @@ static void sst25_byteread(FAR struct sst25_dev_s *priv, FAR uint8_t *buffer,
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sst25_bytewrite
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SST25_SLOWWRITE) && !defined(CONFIG_SST25_READONLY)
-static void sst25_bytewrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
-                            off_t address, size_t nbytes)
+static void sst25_bytewrite(struct sst25_dev_s *priv,
+                            FAR const uint8_t *buffer,
+                            off_t address,
+                            size_t nbytes)
 {
   uint8_t status;
 
@@ -655,7 +687,9 @@ static void sst25_bytewrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
 
           SPI_SEND(priv->dev, *buffer);
 
-          /* Deselect the FLASH and setup for the next pass through the loop */
+          /* Deselect the FLASH and setup for the next pass through the
+           * loop
+           */
 
           SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
         }
@@ -668,13 +702,15 @@ static void sst25_bytewrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sst25_wordwrite
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_SST25_SLOWWRITE) && !defined(CONFIG_SST25_READONLY)
-static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
-                            off_t address, size_t nbytes)
+static void sst25_wordwrite(struct sst25_dev_s *priv,
+                            FAR const uint8_t *buffer,
+                            off_t address,
+                            size_t nbytes)
 {
   size_t nwords = (nbytes + 1) >> 1;
   uint8_t status;
@@ -711,7 +747,9 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
       /* Wait for any preceding write or erase operation to complete. */
 
       status = sst25_waitwritecomplete(priv);
-      DEBUGASSERT((status & (SST25_SR_WEL | SST25_SR_BP_MASK | SST25_SR_AAI)) == 0);
+      DEBUGASSERT((status & (SST25_SR_WEL |
+                             SST25_SR_BP_MASK |
+                             SST25_SR_AAI)) == 0);
       UNUSED(status);
 
       /* Enable write access to the FLASH */
@@ -743,8 +781,11 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
       /* Wait for the preceding write to complete. */
 
       status = sst25_waitwritecomplete(priv);
-      DEBUGASSERT((status & (SST25_SR_WEL | SST25_SR_BP_MASK | SST25_SR_AAI)) ==
-                  (SST25_SR_WEL | SST25_SR_AAI));
+      DEBUGASSERT((status & (SST25_SR_WEL |
+                             SST25_SR_BP_MASK |
+                             SST25_SR_AAI)) ==
+                            (SST25_SR_WEL |
+                             SST25_SR_AAI));
       UNUSED(status);
 
       /* Decrement the word count and advance the write position */
@@ -781,8 +822,11 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
           /* Wait for the preceding write to complete. */
 
           status = sst25_waitwritecomplete(priv);
-          DEBUGASSERT((status & (SST25_SR_WEL | SST25_SR_BP_MASK | SST25_SR_AAI)) ==
-                      (SST25_SR_WEL | SST25_SR_AAI));
+          DEBUGASSERT((status & (SST25_SR_WEL |
+                                 SST25_SR_BP_MASK |
+                                 SST25_SR_AAI)) ==
+                                (SST25_SR_WEL |
+                                 SST25_SR_AAI));
           UNUSED(status);
 
           /* Decrement the word count and advance the write position */
@@ -799,9 +843,9 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_cacheflush
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SST25_SECTOR512) && !defined(CONFIG_SST25_READONLY)
 static void sst25_cacheflush(struct sst25_dev_s *priv)
@@ -816,11 +860,13 @@ static void sst25_cacheflush(struct sst25_dev_s *priv)
       /* Write entire erase block to FLASH */
 
 #ifdef CONFIG_SST25_SLOWWRITE
-      sst25_bytewrite(priv, priv->sector, (off_t)priv->esectno << priv->sectorshift,
-                      (1 << priv->sectorshift));
+      sst25_bytewrite(priv, priv->sector,
+                     (off_t)priv->esectno << priv->sectorshift,
+                     (1 << priv->sectorshift));
 #else
-      sst25_wordwrite(priv, priv->sector, (off_t)priv->esectno << priv->sectorshift,
-                      (1 << priv->sectorshift));
+      sst25_wordwrite(priv, priv->sector,
+                     (off_t)priv->esectno << priv->sectorshift,
+                     (1 << priv->sectorshift));
 #endif
 
       /* The case is no long dirty and the FLASH is no longer erased */
@@ -831,9 +877,9 @@ static void sst25_cacheflush(struct sst25_dev_s *priv)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_cacheread
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SST25_SECTOR512) && !defined(CONFIG_SST25_READONLY)
 static FAR uint8_t *sst25_cacheread(struct sst25_dev_s *priv, off_t sector)
@@ -842,9 +888,10 @@ static FAR uint8_t *sst25_cacheread(struct sst25_dev_s *priv, off_t sector)
   int   shift;
   int   index;
 
-  /* Convert from the 512 byte sector to the erase sector size of the device.  For
-   * exmample, if the actual erase sector size if 4Kb (1 << 12), then we first
-   * shift to the right by 3 to get the sector number in 4096 increments.
+  /* Convert from the 512 byte sector to the erase sector size of the device.
+   * For exmample, if the actual erase sector size if 4Kb (1 << 12), then we
+   * first shift to the right by 3 to get the sector number in 4096
+   * increments.
    */
 
   shift    = priv->sectorshift - SST25_SECTOR_SHIFT;
@@ -873,7 +920,9 @@ static FAR uint8_t *sst25_cacheread(struct sst25_dev_s *priv, off_t sector)
       CLR_ERASED(priv);         /* The underlying FLASH has not been erased */
     }
 
-  /* Get the index to the 512 sector in the erase block that holds the argument */
+  /* Get the index to the 512 sector in the erase block that holds the
+   * argument
+   */
 
   index = sector & ((1 << shift) - 1);
 
@@ -883,17 +932,17 @@ static FAR uint8_t *sst25_cacheread(struct sst25_dev_s *priv, off_t sector)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_cacheerase
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SST25_SECTOR512) && !defined(CONFIG_SST25_READONLY)
 static void sst25_cacheerase(struct sst25_dev_s *priv, off_t sector)
 {
   FAR uint8_t *dest;
 
-  /* First, make sure that the erase block containing the 512 byte sector is in
-   * the cache.
+  /* First, make sure that the erase block containing the 512 byte sector is
+   * in the cache.
    */
 
   dest = sst25_cacheread(priv, sector);
@@ -912,9 +961,9 @@ static void sst25_cacheerase(struct sst25_dev_s *priv, off_t sector)
       SET_ERASED(priv);
     }
 
-  /* Put the cached sector data into the erase state and mart the cache as dirty
-   * (but don't update the FLASH yet.  The caller will do that at a more optimal
-   * time).
+  /* Put the cached sector data into the erase state and mart the cache as
+   * dirty (but don't update the FLASH yet. The caller will do that at a
+   * more optimal time).
    */
 
   memset(dest, SST25_ERASED_STATE, SST25_SECTOR_SIZE);
@@ -922,32 +971,35 @@ static void sst25_cacheerase(struct sst25_dev_s *priv, off_t sector)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_cachewrite
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SST25_SECTOR512) && !defined(CONFIG_SST25_READONLY)
-static void sst25_cachewrite(FAR struct sst25_dev_s *priv, FAR const uint8_t *buffer,
-                            off_t sector, size_t nsectors)
+static void sst25_cachewrite(FAR struct sst25_dev_s *priv,
+                             FAR const uint8_t *buffer,
+                             off_t sector,
+                             size_t nsectors)
 {
   FAR uint8_t *dest;
 
   for (; nsectors > 0; nsectors--)
     {
-      /* First, make sure that the erase block containing 512 byte sector is in
-       * memory.
+      /* First, make sure that the erase block containing 512 byte sector is
+       * in memory.
        */
 
       dest = sst25_cacheread(priv, sector);
 
       /* Erase the block containing this sector if it is not already erased.
-       * The erased indicated will be cleared when the data from the erase sector
-       * is read into the cache and set here when we erase the sector.
+       * The erased indicated will be cleared when the data from the erase
+       * sector is read into the cache and set here when we erase the sector.
        */
 
       if (!IS_ERASED(priv))
         {
-          off_t esectno  = sector >> (priv->sectorshift - SST25_SECTOR_SHIFT);
+          off_t esectno  = sector >>
+                          (priv->sectorshift - SST25_SECTOR_SHIFT);
           finfo("sector: %ld esectno: %d\n", sector, esectno);
 
           sst25_sectorerase(priv, esectno);
@@ -971,11 +1023,13 @@ static void sst25_cachewrite(FAR struct sst25_dev_s *priv, FAR const uint8_t *bu
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_erase
- ************************************************************************************/
+ ****************************************************************************/
 
-static int sst25_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
+static int sst25_erase(FAR struct mtd_dev_s *dev,
+                       off_t startblock,
+                       size_t nblocks)
 {
 #ifdef CONFIG_SST25_READONLY
   return -EACESS
@@ -1012,9 +1066,9 @@ static int sst25_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbloc
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_bread
- ************************************************************************************/
+ ****************************************************************************/
 
 static ssize_t sst25_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                            size_t nblocks,
@@ -1025,7 +1079,9 @@ static ssize_t sst25_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
-  /* On this device, we can handle the block read just like the byte-oriented read */
+  /* On this device, we can handle the block read just like the byte-oriented
+   * read
+   */
 
   nbytes = sst25_read(dev, startblock << SST25_SECTOR_SHIFT,
                       nblocks << SST25_SECTOR_SHIFT, buffer);
@@ -1041,7 +1097,9 @@ static ssize_t sst25_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
-  /* On this device, we can handle the block read just like the byte-oriented read */
+  /* On this device, we can handle the block read just like the byte-oriented
+   * read
+   */
 
   nbytes = sst25_read(dev, startblock << priv->sectorshift,
                       nblocks << priv->sectorshift, buffer);
@@ -1054,9 +1112,9 @@ static ssize_t sst25_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_bwrite
- ************************************************************************************/
+ ****************************************************************************/
 
 static ssize_t sst25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                             size_t nblocks,
@@ -1088,11 +1146,13 @@ static ssize_t sst25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_read
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t sst25_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+static ssize_t sst25_read(FAR struct mtd_dev_s *dev,
+                          off_t offset,
+                          size_t nbytes,
                           FAR uint8_t *buffer)
 {
   FAR struct sst25_dev_s *priv = (FAR struct sst25_dev_s *)dev;
@@ -1109,9 +1169,9 @@ static ssize_t sst25_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
   return nbytes;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_ioctl
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sst25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 {
@@ -1128,13 +1188,14 @@ static int sst25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                                            ((uintptr_t)arg);
           if (geo)
             {
-              /* Populate the geometry structure with information need to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information need to
+               * know the capacity and how to access the device.
                *
-               * NOTE: that the device is treated as though it where just an array
-               * of fixed size blocks.  That is most likely not true, but the client
-               * will expect the device logic to do whatever is necessary to make it
-               * appear so.
+               * NOTE:
+               * that the device is treated as though it where just an array
+               * of fixed size blocks. That is most likely not true, but the
+               * client will expect the device logic to do whatever is
+               * necessary to make it appear so.
                */
 
 #ifdef CONFIG_SST25_SECTOR512
@@ -1175,19 +1236,19 @@ static int sst25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sst25_initialize
  *
  * Description:
- *   Create an initialize MTD device instance.  MTD devices are not registered
- *   in the file system, but are created as instances that can be bound to
- *   other functions (such as a block or character driver front end).
+ *  Create an initialize MTD device instance. MTD devices are not
+ *  registered in the file system, but are created as instances that can be
+ *  bound to other functions (such as a block or character driver front end).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
 {
@@ -1199,8 +1260,8 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
    * The current implementation would handle only one FLASH part per SPI
-   * device (only because of the SPIDEV_FLASH(0) definition) and so would have
-   * to be extended to handle multiple FLASH parts on the same SPI bus.
+   * device (only because of the SPIDEV_FLASH(0) definition) and so would
+   * have to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
   priv = (FAR struct sst25_dev_s *)kmm_zalloc(sizeof(struct sst25_dev_s));
@@ -1227,7 +1288,9 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
       ret = sst25_readid(priv);
       if (ret != OK)
         {
-          /* Unrecognized! Discard all of that work we just did and return NULL */
+          /* Unrecognized! Discard all of that work we just did and
+           * return NULL
+           */
 
           ferr("ERROR: Unrecognized\n");
           kmm_free(priv);
@@ -1235,7 +1298,9 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
         }
       else
         {
-          /* Make sure that the FLASH is unprotected so that we can write into it */
+          /* Make sure that the FLASH is unprotected so that we can
+           * write into it
+           */
 
 #ifndef CONFIG_SST25_READONLY
           sst25_unprotect(priv);
