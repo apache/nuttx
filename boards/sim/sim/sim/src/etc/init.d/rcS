@@ -56,6 +56,12 @@ testrunner >/system/testing/testrunner.log &
 
 #endif /* CONFIG_NSH_ROMFSETC */
 
+#ifdef CONFIG_KVDB
+
+kvdbd &
+
+#endif /* CONFIG_KVDB */
+
 #ifdef CONFIG_UORB
 
 uorb start &
