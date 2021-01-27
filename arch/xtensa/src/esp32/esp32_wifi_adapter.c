@@ -755,7 +755,7 @@ static void *esp_spin_lock_create(void)
   spinlock_t *lock;
   int tmp;
 
-  tmp = sizeof(struct spinlock_t);
+  tmp = sizeof(*lock);
   lock = kmm_malloc(tmp);
   if (!lock)
     {
@@ -3901,11 +3901,7 @@ static unsigned long esp_random_ulong(void)
 
 uint32_t IRAM_ATTR esp_dport_access_reg_read(uint32_t reg)
 {
-#ifdef CONFIG_SMP
-  DEBUGASSERT(0);
-#else
   return getreg32(reg);
-#endif
 }
 
 /****************************************************************************
