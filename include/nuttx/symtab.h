@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /* struct symbtab_s describes one entry in the symbol table.  A symbol table
- * is a fixed size array of struct symtab_s.  The information is intentionally
+ * is a fixed size array of struct symtab_s. The information is intentionally
  * minimal and supports only:
  *
  * 1. Function pointers as sym_values.  Of other kinds of values need to be
@@ -71,7 +71,7 @@ struct symtab_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN
@@ -123,9 +123,9 @@ symtab_findorderedbyname(FAR const struct symtab_s *symtab,
  *
  * Description:
  *   Find the symbol in the symbol table whose value closest (but not greater
- *   than), the provided value. This version assumes that table is not ordered
- *   with respect to symbol name and, hence, access time will be linear with
- *   respect to nsyms.
+ *   than), the provided value. This version assumes that table is not
+ *   ordered with respect to symbol name and, hence, access time will be
+ *   linear with respect to nsyms.
  *
  * Returned Value:
  *   A reference to the symbol table entry if an entry with the matching

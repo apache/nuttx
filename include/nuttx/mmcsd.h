@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN
@@ -81,9 +81,9 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev);
  * Input Parameters:
  *   minor - The MMC/SD minor device number.  The MMC/SD device will be
  *     registered as /dev/mmcsdN where N is the minor number
- *   slotno - The slot number to use.  This is only meaningful for architectures
- *     that support multiple MMC/SD slots.  This value must be in the range
- *     {0, ..., CONFIG_MMCSD_NSLOTS}.
+ *   slotno - The slot number to use.  This is only meaningful for
+ *     architectures that support multiple MMC/SD slots. This value must be
+ *     in the range {0, ..., CONFIG_MMCSD_NSLOTS}.
  *   spi - And instance of an SPI interface obtained by called the
  *     appropriate xyz_spibus_initialize() function for the MCU "xyz" with
  *     the appropriate port number.
@@ -91,7 +91,9 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev);
  ****************************************************************************/
 
 struct spi_dev_s; /* See nuttx/spi/spi.h */
-int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi);
+int mmcsd_spislotinitialize(int minor,
+                            int slotno,
+                            FAR struct spi_dev_s *spi);
 
 #undef EXTERN
 #if defined(__cplusplus)

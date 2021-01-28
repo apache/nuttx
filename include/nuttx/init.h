@@ -48,6 +48,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Macros for testing which OS services are available at this phase of
  * initialization.
  */
@@ -111,6 +112,7 @@ EXTERN uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
 int CONFIG_USER_ENTRYPOINT(int argc, char *argv[]);
 
 /* Functions contained in nx_task.c *****************************************/
+
 /* OS entry point called by boot logic */
 
 void nx_start(void) noreturn_function;
