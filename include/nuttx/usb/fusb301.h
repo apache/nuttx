@@ -37,6 +37,10 @@
 #ifndef __INCLUDE_NUTTX_USB_FUSB301_H
 #define __INCLUDE_NUTTX_USB_FUSB301_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
@@ -223,8 +227,10 @@ struct fusb301_config_s
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/usbc0"
- *   i2c     - An instance of the I2C interface to use to communicate with FUSB301
- *   addr    - The I2C address of the FUSB301. The I2C address of the FUSB301 is 0x25.
+ *   i2c     - An instance of the I2C interface to use to communicate with
+ *             FUSB301
+ *   addr    - The I2C address of the FUSB301.
+ *             The I2C address of the FUSB301 is 0x25.
  *   config  - Pointer to FUSB301 configuration
  *
  * Returned Value:

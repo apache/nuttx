@@ -55,7 +55,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ***************************************************************/
+/* Configuration ************************************************************/
+
 /* MAX3421E USB Host Driver Support
  *
  * Pre-requisites
@@ -74,6 +75,7 @@
  */
 
 /* Host Mode Register Addresses *********************************************/
+
 /* The command byte contains the register address, a direction bit, and an
  * ACKSTAT bit:
  *
@@ -108,6 +110,7 @@
 #define MAX3421E_USBHOST_HRSL           (31 << 3)
 
 /* Peripheral Mode Register Addresses ***************************************/
+
 /* The command byte contains the register address, a direction bit, and an
  * ACKSTAT bit:
  *

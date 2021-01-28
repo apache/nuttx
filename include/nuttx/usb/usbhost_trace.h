@@ -45,7 +45,9 @@
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Debug/Trace-related definitions */
 
 #ifndef CONFIG_DEBUG_FEATURES
@@ -57,7 +59,9 @@
 #  undef CONFIG_USBHOST_TRACE_VERBOSE
 #endif
 
-/* Trace support is needed if either USB host tracing or USB debug output is enabled */
+/* Trace support is needed if either USB host tracing or USB debug output is
+ * enabled
+ */
 
 #if defined(CONFIG_USBHOST_TRACE) || defined(CONFIG_DEBUG_USB)
 #  define HAVE_USBHOST_TRACE 1
@@ -101,7 +105,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

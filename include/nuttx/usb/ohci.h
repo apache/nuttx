@@ -51,6 +51,7 @@
  ****************************************************************************/
 
 /* Register offsets *********************************************************/
+
 /* Control and status registers (section 7.1) */
 
 #define OHCI_HCIREV_OFFSET          0x0000 /* HcRevision: Version of HCI specification */
@@ -154,6 +155,7 @@
 #define OHCI_INT_OC                 (1 << 30) /* Bit 30: Ownership change */
 #define OHCI_INT_MIE                (1 << 31) /* Bit 31: Master interrupt enable
                                                *         (Enable/disable only) */
+
 /* HcHCCA: HC communication area (7.2.1):
  *
  * 32-bits aligned to 256 byte boundary.
@@ -190,16 +192,19 @@
 #define OHCI_FMNO_FI_SHIFT          (0)       /* Bits 0-15: Frame number */
 #define OHCI_FMNO_FI_MASK           (0xffff << OHCI_FMINT_FI_SHIFT)
                                               /* Bits 16-31: Reserved */
+
 /* HcPeriodicStart: Time to start processing periodic list (7.3.4) */
 
 #define OHCI_PERSTART_SHIFT         (0)       /* Bits 0-13: Periodic start */
 #define OHCI_PERSTART_MASK          (0x3fff << OHCI_PERSTART_SHIFT)
                                               /* Bits 14-31: Reserved */
+
 /* HcLSThreshold: Commit to transfer threshold (7.3.5) */
 
 #define OHCI_LSTHRES_SHIFT          (0)       /* Bits 0-11: LS threshold */
 #define OHCI_LSTHRES_MASK           (0x0fff << OHCI_PERSTART_SHIFT)
                                               /* Bits 12-31: Reserved */
+
 /* HcRhDescriptorN: Describes root hub (part A) (7.4.1) */
 
 #define OHCI_RHDESCA_NDP_SHIFT      (0)       /* Bits 0-7: Number downstream ports */
@@ -254,6 +259,7 @@
                                               /* Bits 21-31: Reserved */
 
 /* Transfer Descriptors *****************************************************/
+
 /* Endpoint Descriptor Offsets (4.2.1) */
 
 #define ED_CONTROL_OFFSET          (0x00)     /* ED status/control bits */
@@ -273,6 +279,7 @@
 #  define ED_CONTROL_D_OUT         (1 << ED_CONTROL_D_SHIFT) /* OUT */
 #  define ED_CONTROL_D_IN          (2 << ED_CONTROL_D_SHIFT) /* IN */
 #  define ED_CONTROL_D_TD2         (3 << ED_CONTROL_D_SHIFT) /* Get direction from TD */
+
 #define ED_CONTROL_S               (1 << 13)  /* Bit 13: Speed (low) */
 #define ED_CONTROL_K               (1 << 14)  /* Bit 14: Skip */
 #define ED_CONTROL_F               (1 << 15)  /* Bit 15: Format (isochronous) */
@@ -292,13 +299,16 @@
 #define GTD_BE_OFFSET              (0x0c)     /* Buffer End (BE) */
 
 /* General Transfer Descriptor Bit Definitions */
+
                                               /* Bits 0-17: Reserved */
+
 #define GTD_STATUS_R               (1 << 18)  /* Bit 18: Buffer rounding */
 #define GTD_STATUS_DP_SHIFT        (19)       /* Bits 19-20: Direction/PID */
 #define GTD_STATUS_DP_MASK         (3 << GTD_STATUS_DP_SHIFT)
 #  define GTD_STATUS_DP_SETUP      (0 << GTD_STATUS_DP_SHIFT) /* To endpoint */
 #  define GTD_STATUS_DP_OUT        (1 << GTD_STATUS_DP_SHIFT) /* To endpoint */
 #  define GTD_STATUS_DP_IN         (2 << GTD_STATUS_DP_SHIFT) /* From endpoint */
+
 #define GTD_STATUS_DI_SHIFT        (21)      /* Bits 21-23: Delay input */
 #define GTD_STATUS_DI_MASK         (7 << GTD_STATUS_DI_SHIFT)
 #define GTD_STATUS_T_SHIFT         (24)      /* Bits 24-25: Data Toggle */
@@ -434,8 +444,8 @@ struct ohci_hcca_s
   volatile uint16_t pad1;
 
   /* HccaDoneHead: When the HC reaches the end of a frame and its deferred
-   * interrupt register is 0, it writes the current value of its HcDoneHead to
-   * this location and generates an interrupt.
+   * interrupt register is 0, it writes the current value of its HcDoneHead
+   * to this location and generates an interrupt.
    */
 
   volatile uint32_t donehead;
@@ -458,7 +468,6 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
 
 #undef EXTERN
 #ifdef __cplusplus
