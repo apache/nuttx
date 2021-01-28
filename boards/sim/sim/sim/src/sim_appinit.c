@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/board.h>
+#include <nuttx/sensors/fakesensor.h>
 #include <nuttx/sensors/wtgahrs2.h>
 #include <nuttx/rc/lirc_dev.h>
 #include <nuttx/rc/dummy.h>
@@ -96,6 +97,17 @@ int board_app_initialize(uintptr_t arg)
 #elif CONFIG_SIM_WTGAHRS2_UARTN == 3
   wtgahrs2_initialize(CONFIG_SIM_UART3_NAME, 3);
 #endif
+#endif
+
+#ifdef CONFIG_SENSORS_FAKESENSOR
+  fakesensor_init(SENSOR_TYPE_ACCELEROMETER,
+                  "/data/boards/sim/sim/sim/src/csv/accel.csv", 0);
+
+  fakesensor_init(SENSOR_TYPE_MAGNETIC_FIELD,
+                  "/data/boards/sim/sim/sim/src/csv/mag.csv", 0);
+
+  fakesensor_init(SENSOR_TYPE_GYROSCOPE,
+                  "/data/boards/sim/sim/sim/src/csv/gyro.csv", 0);
 #endif
 
 #ifdef CONFIG_RC_DUMMY

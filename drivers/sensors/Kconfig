@@ -27,6 +27,22 @@ config SENSORS_WTGAHRS2
 		wtgashrs2(JY901) as data source. This sensor can generate accelerometer,
 		gyroscope, magnetic, barometer and gps data.
 
+config SENSORS_FAKESENSOR
+	bool "Fake Sensor Support"
+	default n
+	---help---
+		Simulate physical sensor by reading data from csv file.
+		The file structure is as follows:
+		First row : set interval
+		Second row: csv file header
+		third row : data
+		(Each line should not exceed 50 characters)
+		For example:
+		interval:12
+		x,y,z
+		2.1234,3.23443,2.23456
+		...
+
 config SENSORS_APDS9960
 	bool "Avago APDS-9960 Gesture Sensor support"
 	default n
