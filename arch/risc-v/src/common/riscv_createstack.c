@@ -57,8 +57,9 @@
  * Pre-processor Macros
  ****************************************************************************/
 
-/* MIPS requires at least a 4-byte stack alignment.  For floating point use,
- * however, the stack must be aligned to 8-byte addresses.
+/* RISC-V requires at least a 4-byte stack alignment.
+ * For floating point use, however, the stack must be aligned to 8-byte
+ * addresses.
  */
 
 #if defined(CONFIG_LIBC_FLOATINGPOINT) || defined (CONFIG_ARCH_RV64GC)
@@ -224,7 +225,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size - 4;
 
-      /* The MIPS stack must be aligned at word (4 byte) boundaries; for
+      /* The RISC-V stack must be aligned at word (4 byte) boundaries; for
        * floating point use, the stack must be aligned to 8-byte addresses.
        * If necessary top_of_stack must be rounded down to the next
        * boundary to meet these alignment requirements.

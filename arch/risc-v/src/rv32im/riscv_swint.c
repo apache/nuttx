@@ -64,7 +64,7 @@ static void up_registerdump(const uint32_t *regs)
           regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
   svcinfo("S8:%08x S9:%08x S10:%08x S11:%08x\n",
           regs[REG_S8], regs[REG_S9], regs[REG_S10], regs[REG_S11]);
-#ifdef MIPS32_SAVE_GP
+#ifdef RISCV_SAVE_GP
   svcinfo("GP:%08x SP:%08x FP:%08x TP:%08x RA:%08x\n",
           regs[REG_GP], regs[REG_SP], regs[REG_FP],
           regs[REG_TP], regs[REG_RA]);

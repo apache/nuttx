@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_MIPS32_VFORK_H
-#define __ARCH_MIPS_SRC_MIPS32_VFORK_H
+#ifndef __ARCH_RISCV_SRC_RVIM32_VFORK_H
+#define __ARCH_RISCV_SRC_RVIM32_VFORK_H
 
 /****************************************************************************
  * Included Files
@@ -84,7 +84,7 @@
 #define VFORK_S6_OFFSET   (6*4)   /* Saved register s6 */
 #define VFORK_S7_OFFSET   (7*4)   /* Saved register s7 */
 
-#ifdef CONFIG_MIPS32_FRAMEPOINTER
+#ifdef CONFIG_RISCV_FRAMEPOINTER
 #  define VFORK_FP_OFFSET (8*4)   /* Frame pointer */
 #else
 #  define VFORK_S8_OFFSET (8*4)   /* Saved register s8 */
@@ -92,7 +92,7 @@
 
 #define VFORK_SP_OFFSET   (9*4)   /* Stack pointer*/
 #define VFORK_RA_OFFSET   (10*4)  /* Return address*/
-#ifdef MIPS32_SAVE_GP
+#ifdef RISCV_SAVE_GP
 #  define VFORK_GP_OFFSET (11*4)   /* Global pointer */
 #  define VFORK_SIZEOF    (12*4)
 #else
@@ -116,14 +116,14 @@ struct vfork_s
   uint32_t s5;   /* Saved register s5 */
   uint32_t s6;   /* Saved register s6 */
   uint32_t s7;   /* Saved register s7 */
-#ifdef CONFIG_MIPS32_FRAMEPOINTER
+#ifdef CONFIG_RISCV_FRAMEPOINTER
   uint32_t fp;   /* Frame pointer */
 #else
   uint32_t s8;   /* Saved register s8 */
 #endif
   uint32_t sp;   /* Stack pointer */
   uint32_t ra;   /* Return address */
-#ifdef MIPS32_SAVE_GP
+#ifdef RISCV_SAVE_GP
   uint32_t gp;   /* Global pointer */
 #endif
 
@@ -131,4 +131,4 @@ struct vfork_s
 };
 #endif
 
-#endif /* __ARCH_MIPS_SRC_MIPS32_VFORK_H */
+#endif /* __ARCH_RISCVRC_RVIM32_VFORK_H */
