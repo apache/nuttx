@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -108,6 +109,27 @@
 #define NENET_NBUFFERS \
   (CONFIG_IMX_ENET_NTXBUFFERS + CONFIG_IMX_ENET_NRXBUFFERS)
 
+/* Normally you would clean the cache after writing new values to the DMA
+ * memory so assure that the dirty cache lines are flushed to memory
+ * before the DMA occurs.  And you would invalid the cache after a data is
+ * received via DMA so that you fetch the actual content of the data from
+ * the cache.
+ *
+ * These conditions are not fully supported here.  If the write-throuch
+ * D-Cache is enabled, however, then many of these issues go away:  The
+ * cache clean operation does nothing (because there are not dirty cache
+ * lines) and the cache invalid operation is innocuous (because there are
+ * never dirty cache lines to be lost; valid data will always be reloaded).
+ *
+ * At present, we simply insist that write through cache be enabled.
+ */
+
+#if 0
+#if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
+#  error Write back D-Cache not yet supported
+#endif
+#endif
+
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
  * second.
  */
@@ -155,6 +177,11 @@
  * 7. BOARD_PHY_ISDUPLEX:  A macro that can convert the status register
  *    value into a boolean: true=duplex mode, false=half-duplex mode
  *
+ * The imxrt1050-evk board uses a KSZ8081 PHY
+ * The Versiboard2 uses a LAN8720 PHY
+ * The Teensy-4.1 board uses a DP83825I PHY
+ *
+ * ...and further PHY descriptions here.
  */
 
 /* TODO:
@@ -180,6 +207,15 @@
 #  define BOARD_PHY_10BASET(s)  (((s)&MII_LAN8720_SPSCR_10MBPS) != 0)
 #  define BOARD_PHY_100BASET(s) (((s)&MII_LAN8720_SPSCR_100MBPS) != 0)
 #  define BOARD_PHY_ISDUPLEX(s) (((s)&MII_LAN8720_SPSCR_DUPLEX) != 0)
+#elif defined(CONFIG_ETH0_PHY_DP83825I)
+#  define BOARD_PHY_NAME        "DP83825I"
+#  define BOARD_PHYID1          MII_PHYID1_DP83825I
+#  define BOARD_PHYID2          MII_PHYID2_DP83825I
+#  define BOARD_PHY_STATUS      MII_DP83825I_PHYSTS
+#  define BOARD_PHY_ADDR        (0)
+#  define BOARD_PHY_10BASET(s)  (((s) & MII_DP83825I_PHYSTS_SPEED) != 0)
+#  define BOARD_PHY_100BASET(s) (((s) & MII_DP83825I_PHYSTS_SPEED) == 0)
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_DP83825I_PHYSTS_DUPLEX) != 0)
 #else
 #  error "Unrecognized or missing PHY selection"
 #endif
@@ -360,6 +396,52 @@ static void imx_reset(struct imx_driver_s *priv);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: imx_swap16/32
+ *
+ * Description:
+ *   The descriptors are represented by structures  Unfortunately, when the
+ *   structures are overlaid on the data, the bytes are reversed because
+ *   the underlying hardware writes the data in big-endian byte order.
+ *
+ * Input Parameters:
+ *   value  - The value to be byte swapped
+ *
+ * Returned Value:
+ *   The byte swapped value
+ *
+ ****************************************************************************/
+
+#if 0 /* Use builtins if the compiler supports them */
+#ifndef CONFIG_ENDIAN_BIG
+static inline uint32_t imx_swap32(uint32_t value)
+{
+  uint32_t result = 0;
+
+  __asm__ __volatile__
+  (
+    "rev %0, %1"
+    :"=r" (result)
+    : "r"(value)
+  );
+  return result;
+}
+
+static inline uint16_t imx_swap16(uint16_t value)
+{
+  uint16_t result = 0;
+
+  __asm__ __volatile__
+  (
+    "revsh %0, %1"
+    :"=r" (result)
+    : "r"(value)
+  );
+  return result;
+}
+#endif
+#endif
 
 /****************************************************************************
  * Function: imx_txringfull
@@ -615,7 +697,7 @@ static inline void imx_dispatch(FAR struct imx_driver_s *priv)
   NETDEV_RXPACKETS(&priv->dev);
 
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(&priv->dev);
 #endif
@@ -636,7 +718,7 @@ static inline void imx_dispatch(FAR struct imx_driver_s *priv)
       ipv4_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -668,7 +750,7 @@ static inline void imx_dispatch(FAR struct imx_driver_s *priv)
 
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
-      ninfo("Iv6 frame\n");
+      ninfo("IPv6 frame\n");
       NETDEV_RXIPV6(&priv->dev);
 
       /* Give the IPv6 packet to the network layer */
@@ -676,7 +758,7 @@ static inline void imx_dispatch(FAR struct imx_driver_s *priv)
       ipv6_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -945,7 +1027,7 @@ static void imx_enet_interrupt_work(FAR void *arg)
 
       NETDEV_ERRORS(&priv->dev);
 
-      nerr("ERROR: Network interface error occurred (0x%08X)\n",
+      nerr("ERROR: Network interface error occurred (0x%08" PRIX32 ")\n",
            (pending & ERROR_INTERRUPTS));
     }
 
@@ -1020,7 +1102,7 @@ static void imx_enet_interrupt_work(FAR void *arg)
  * Function: imx_enet_interrupt
  *
  * Description:
- *   Three interrupt sources will vector this this function:
+ *   Three interrupt sources will vector to this function:
  *   1. Ethernet MAC transmit interrupt handler
  *   2. Ethernet MAC receive interrupt handler
  *   3.
@@ -1101,8 +1183,7 @@ static void imx_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1181,8 +1262,7 @@ static void imx_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1231,10 +1311,10 @@ static int imx_ifup_action(struct net_driver_s *dev, bool resetphy)
   int ret;
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        (int)dev->d_ipaddr & 0xff,
-        (int)(dev->d_ipaddr >> 8) & 0xff,
-        (int)(dev->d_ipaddr >> 16) & 0xff,
-        (int)dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Initialize ENET buffers */
 
@@ -2086,6 +2166,13 @@ static inline int imx_initphy(struct imx_driver_s *priv, bool renogphy)
       imx_writemii(priv, phyaddr, MII_KSZ8081_PHYCTRL2,
                      (phydata | (1 << 4)));
 
+      imx_writemii(priv, phyaddr, MII_ADVERTISE,
+                     MII_ADVERTISE_100BASETXFULL |
+                     MII_ADVERTISE_100BASETXHALF |
+                     MII_ADVERTISE_10BASETXFULL |
+                     MII_ADVERTISE_10BASETXHALF |
+                     MII_ADVERTISE_CSMA);
+
 #elif defined (CONFIG_ETH0_PHY_LAN8720)
       /* Make sure that PHY comes up in correct mode when it's reset */
 
@@ -2096,6 +2183,25 @@ static inline int imx_initphy(struct imx_driver_s *priv, bool renogphy)
       /* ...and reset PHY */
 
       imx_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
+
+#elif defined (CONFIG_ETH0_PHY_DP83825I)
+
+      /* Reset PHY */
+
+      imx_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
+
+      /* Set RMII mode and Indicate 50MHz clock */
+
+      imx_writemii(priv, phyaddr, MII_DP83825I_RCSR,
+                    MII_DP83825I_RCSC_ELAST_2 | MII_DP83825I_RCSC_RMIICS);
+
+      imx_writemii(priv, phyaddr, MII_ADVERTISE,
+                     MII_ADVERTISE_100BASETXFULL |
+                     MII_ADVERTISE_100BASETXHALF |
+                     MII_ADVERTISE_10BASETXFULL |
+                     MII_ADVERTISE_10BASETXHALF |
+                     MII_ADVERTISE_CSMA);
+
 #endif
 
       /* Start auto negotiation */
