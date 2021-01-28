@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/usb/usbdev_trace.h
  *
- *   Copyright (C) 2008, 2009-2010, 2012-2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009-2010, 2012-2013, 2017 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +55,7 @@
 #define TRACE_ID(event)          ((event) & 0xff00)
 #define TRACE_DATA(event)        ((event) & 0x00ff)
 
-/* Events ******************************************************************/
+/* Events *******************************************************************/
 
 /* Event class IDs */
 
@@ -144,7 +145,7 @@
 
 #define TRACE_CLASSSTATE(id)     TRACE_EVENT(TRACE_CLASSSTATE_ID, id)
 
-/* USB device controller interrupt events.  The 'id' is specific to the driver.
+/* USB device controller interrupt events.The 'id' is specific to the driver.
  * Particular values for 'id' are unique for a given implementation of a
  * controller driver
  */
@@ -175,6 +176,7 @@
 #define TRACE_CLSERROR(id)       TRACE_EVENT(TRACE_CLSERROR_ID, id)
 
 /* Event string descriptions ************************************************/
+
 /* Macros for defining the string arrays for display of the traces. */
 
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
@@ -183,7 +185,9 @@
 #endif
 
 /* USB Serial driver class events *******************************************/
+
 /* Used by both the CDC/ACM and the PL2303 serial class drivers */
+
 /* UART interface API calls */
 
 #define USBSER_TRACECLASSAPI_SETUP                   0x0001
@@ -467,11 +471,12 @@ EXTERN const struct trace_msg_t g_usb_trace_strings_intdecode[];
  * Name: usbtrace_enable
  *
  * Description:
- *  Enable/disable tracing per trace ID.  The initial state is all IDs enabled.
+ *  Enable/disable tracing per trace ID.
+ *  The initial state is all IDs enabled.
  *
  * Input Parameters:
- *  idset - The bitset of IDs to be masked.  TRACE_ALLIDS enables all IDS; zero
- *  masks all IDs.
+ *  idset - The bitset of IDs to be masked.
+ *          TRACE_ALLIDS enables all IDS; zero masks all IDs.
  *
  * Returned Value:
  *  The previous idset value.

@@ -85,7 +85,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -133,8 +133,12 @@ int usbmsc_configure(unsigned int nluns, FAR void **handle);
  *
  ****************************************************************************/
 
-int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath, unsigned int lunno,
-                   off_t startsector, size_t nsectors, bool readonly);
+int usbmsc_bindlun(FAR void *handle,
+                   FAR const char *drvrpath,
+                   unsigned int lunno,
+                   off_t startsector,
+                   size_t nsectors,
+                   bool readonly);
 
 /****************************************************************************
  * Name: usbmsc_unbindlun
@@ -187,7 +191,8 @@ int usbmsc_exportluns(FAR void *handle);
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
 struct usbdevclass_driver_s;
-int usbmsc_classobject(FAR void *handle, FAR struct usbdev_devinfo_s *devinfo,
+int usbmsc_classobject(FAR void *handle,
+                       FAR struct usbdev_devinfo_s *devinfo,
                        FAR struct usbdevclass_driver_s **classdev);
 #endif
 
@@ -214,8 +219,8 @@ void usbmsc_uninitialize(FAR void *handle);
  * Name: usbmsc_get_composite_devdesc
  *
  * Description:
- *   Helper function to fill in some constants into the composite configuration
- *   structure.
+ *   Helper function to fill in some constants into the composite
+ *   configuration structure.
  *
  * Input Parameters:
  *     dev - Pointer to the configuration struct we should fill

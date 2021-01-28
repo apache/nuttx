@@ -87,7 +87,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 struct usbhost_hubport_s;     /* Forward reference */
@@ -133,12 +133,12 @@ int usbhost_devaddr_create(FAR struct usbhost_hubport_s *hport);
  * Name: usbhost_devaddr_destroy
  *
  * Description:
- *   Release a device address previously assigned by usbhost_devaddr_create().
+ *  Release a device address previously assigned by usbhost_devaddr_create().
  *
  * Input Parameters:
- *   hport - A reference to a hub port structure from which a device has been
+ *  hport - A reference to a hub port structure from which a device has been
  *     disconnected and so no longer needs the function address.
- *   devaddr - The address to be released.
+ *  devaddr - The address to be released.
  *
  * Returned Value:
  *   None

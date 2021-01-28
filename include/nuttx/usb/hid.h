@@ -56,6 +56,7 @@
  ****************************************************************************/
 
 /* Subclass and Protocol ****************************************************/
+
 /* Subclass codes (HID 4.2) */
 
 #define USBHID_SUBCLASS_NONE              0 /* No subclass */
@@ -71,6 +72,7 @@
 #define USBHID_PROTOCOL_MOUSE             2
 
 /* Descriptor Requests ******************************************************/
+
 /* "When a Get_Descriptor(Configuration) request is issued, it returns the
  *  Configuration descriptor, all Interface descriptors, all Endpoint
  *  descriptors, and the HID descriptor for each interface."
@@ -79,7 +81,8 @@
 /* Standard Requests (HID 7.1)
  * GET_DESCRIPTOR (HID 7.1.1):
  *
- *   bmRequestType (USB_REQ_DIR_IN | USB_REQ_TYPE_STANDARD | USB_REQ_RECIPIENT_INTERFACE)
+ *   bmRequestType (USB_REQ_DIR_IN | USB_REQ_TYPE_STANDARD |
+ *                  USB_REQ_RECIPIENT_INTERFACE)
  *   bRequest      (USB_REQ_GETDESCRIPTOR)
  *   wValue        Descriptor Type (MS) and Descriptor Index (LS)
  *   wIndex        Interface Number
@@ -104,8 +107,9 @@
 
 /* Class-specific requests (HID 7.2)
  *
- *   bmRequestType (                 USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE) -or-
- *                 (USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE)
+ *   bmRequestType (USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE) -or-
+ *                 (USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS |
+ *                  USB_REQ_RECIPIENT_INTERFACE)
  *   bRequest      Class-specific request
  *   wValue        Varies according to request
  *   wIndex        Varies according to request
@@ -262,7 +266,7 @@
 #define USBHID_LOCAL_STRINGIDX_PREFIX     0x78 /* String Index */
 #define USBHID_LOCAL_STRINGMIN_PREFIX     0x88 /* String Minimum */
 #define USBHID_LOCAL_STRINGMAX_PREFIX     0x98 /* xx */
-#define USBHID_LOCAL_DELIMITER_PREFIX     0xa8 /*Delimiter */
+#define USBHID_LOCAL_DELIMITER_PREFIX     0xa8 /* Delimiter */
 
 /* Modifier Keys (HID 8.3) */
 
@@ -627,6 +631,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* HID Descriptor (HID 6.2.1) ***********************************************/
 
 struct usbhid_descriptor_s
@@ -652,6 +657,7 @@ struct usbhid_optdesc_s
 };
 
 /* Standard Reports *********************************************************/
+
 /* Keyboard input report (8 bytes) (HID B.1) */
 
 struct usbhid_kbdreport_s
@@ -661,7 +667,9 @@ struct usbhid_kbdreport_s
   uint8_t key[6];    /* Keycode 1-6 */
 };
 
-/* Keyboard output report (1 byte) (HID B.1), see USBHID_KBDOUT_* definitions */
+/* Keyboard output report (1 byte) (HID B.1),
+ * see USBHID_KBDOUT_* definitions
+ */
 
 /* Mouse input report (HID B.2) */
 

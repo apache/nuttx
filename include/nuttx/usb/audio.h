@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * include/nuttx/usb/audio.h
  * Audio Device Class (ADC) definitions
  *
@@ -42,29 +42,31 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_USB_AUDIO_H
 #define __INCLUDE_NUTTX_USB_AUDIO_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/usb/usb.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Preprocessor definitions
- ********************************************************************************************/
+ ****************************************************************************/
+
 /* Device Descriptor
  *
- * Because audio functionality is always considered to reside at the interface level, this
- * class specification does not define a specific audio device descriptor. For both composite
- * devices and audio-only devices, the device descriptor must indicate that class information
- * is to be found at the interface level. Therefore, the bDeviceClass, bDeviceSubClass and
- * bDeviceProtocol fields of the device descriptor must contain the values 0xef, 0x02, and
- * 0x01 respectively.
+ * Because audio functionality is always considered to reside at the
+ * interface level, this class specification does not define a specific audio
+ * device descriptor. For both composite devices and audio-only devices, the
+ * device descriptor must indicate that class information is to be found at
+ * the interface level. Therefore, the bDeviceClass, bDeviceSubClass and
+ * bDeviceProtocol fields of the device descriptor must contain the values
+ * 0xef, 0x02, and 0x01 respectively.
  */
 
 #define ADC_DEVICE_CLASS            USB_CLASS_MISC
@@ -470,22 +472,23 @@
 
 /* Encoder Error Codes */
 
-                                               /* <0: Reserved for vendor extensions */
-#define ADC_ENCODER_SUCCESS         0          /* No Error */
-#define ADC_ENCODER_ERROR_NOMEM     1          /* Out of Memory */
-#define ADC_ENCODER_ERROR_BW        2          /* Out of Bandwidth */
-#define ADC_ENCODER_ERROR_CYCLE     3          /* Out of Processing Cycles */
-#define ADC_ENCODER_ERROR_FRAME     4          /* General Format Frame Error */
-#define ADC_ENCODER_ERROR_TOOSMALL  5          /* Format Frame Too Small */
-#define ADC_ENCODER_ERROR_TOOBIG    6          /* Format Frame Too Large */
-#define ADC_ENCODER_ERROR_BADFORMAT 7          /* Bad Data Format */
-#define ADC_ENCODER_ERROR_NCHAN     8          /* Incorrect Number of Channels */
-#define ADC_ENCODER_ERROR_RATE      9          /* Incorrect Sampling Rate */
-#define ADC_ENCODER_ERROR_BITRATE   10         /* Unable to Meet Target Bitrate */
-#define ADC_ENCODER_ERROR_PARMS     11         /* Inconsistent Set of Parameters */
-#define ADC_ENCODER_ERROR_NOTREADY  12         /* Not Ready */
-#define ADC_ENCODER_ERROR_BUSY      13         /* Busy */
-                                               /* >13: Reserved */
+                                     /* <0: Reserved for vendor extensions */
+
+#define ADC_ENCODER_SUCCESS         0  /* No Error */
+#define ADC_ENCODER_ERROR_NOMEM     1  /* Out of Memory */
+#define ADC_ENCODER_ERROR_BW        2  /* Out of Bandwidth */
+#define ADC_ENCODER_ERROR_CYCLE     3  /* Out of Processing Cycles */
+#define ADC_ENCODER_ERROR_FRAME     4  /* General Format Frame Error */
+#define ADC_ENCODER_ERROR_TOOSMALL  5  /* Format Frame Too Small */
+#define ADC_ENCODER_ERROR_TOOBIG    6  /* Format Frame Too Large */
+#define ADC_ENCODER_ERROR_BADFORMAT 7  /* Bad Data Format */
+#define ADC_ENCODER_ERROR_NCHAN     8  /* Incorrect Number of Channels */
+#define ADC_ENCODER_ERROR_RATE      9  /* Incorrect Sampling Rate */
+#define ADC_ENCODER_ERROR_BITRATE   10 /* Unable to Meet Target Bitrate */
+#define ADC_ENCODER_ERROR_PARMS     11 /* Inconsistent Set of Parameters */
+#define ADC_ENCODER_ERROR_NOTREADY  12 /* Not Ready */
+#define ADC_ENCODER_ERROR_BUSY      13 /* Busy */
+                                       /* >13: Reserved */
 
 /* Format Type Codes */
 
@@ -516,7 +519,6 @@
 #define ADC_FORMAT_TYPEII_RAWDATA   (1 << 31)
 
 /* Audio Data Format Type III Bit Allocations */
-
 
 #define ADC_FORMAT_TYPEIII_IEC61937_AC3            (1 << 0)
 #define ADC_FORMAT_TYPEIII_IEC61937_MPEG1_L1       (1 << 1)
@@ -649,9 +651,10 @@
 #define ADC_EMBEDTERM_PERCUSSON     0x0716     /* Percussion Instrument */
 #define ADC_EMBEDTERM_INSTRUMENT    0x0717     /* Other Musical Instrument */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
+
 /* Audio Channel Cluster Descriptor */
 
 struct adc_cluster_desc_s
@@ -666,7 +669,7 @@ struct adc_cluster_desc_s
 
 struct adc_ac_ifdesc_s
 {
-  uint8_t ac_len;               /* 0: Descriptor length (9)*/
+  uint8_t ac_len;               /* 0: Descriptor length (9) */
   uint8_t ac_type;              /* 1: Descriptor type (ADC_CS_INTERFACE) */
   uint8_t ac_subtype;           /* 2: Descriptor sub-type (ADC_AC_HEADER) */
   uint8_t ac_adc[2];            /* 3: ADC spec version in BCD */
@@ -680,7 +683,7 @@ struct adc_ac_ifdesc_s
 
 struct adc_clksrc_desc_s
 {
-  uint8_t cs_len;               /* 0: Descriptor length (8)*/
+  uint8_t cs_len;               /* 0: Descriptor length (8) */
   uint8_t cs_type;              /* 1: Descriptor type (ADC_CS_INTERFACE) */
   uint8_t cs_subtype;           /* 2: Descriptor sub-type (ADC_AC_CLOCK_SOURCE) */
   uint8_t cs_clockid;           /* 3: Identifies clock source entity */
@@ -695,7 +698,7 @@ struct adc_clksrc_desc_s
 
 struct adc_clksel_desc_s
 {
-  uint8_t cl_len;               /* 0: Descriptor length (7+npins)*/
+  uint8_t cl_len;               /* 0: Descriptor length (7+npins) */
   uint8_t cl_type;              /* 1: Descriptor type (ADC_CS_INTERFACE) */
   uint8_t cl_subtype;           /* 2: Descriptor sub-type (ADC_AC_CLOCK_SELECTOR) */
   uint8_t cl_clockid;           /* 3: Identifies clock source entity */
@@ -723,7 +726,7 @@ struct adc_clkmult_desc_s
   uint8_t cm_clockid;           /* 3: Identifies clock source entity */
   uint8_t cm_csrcid;            /* 4: ID of clock input to list pin n */
   uint8_t cm_controls;          /* 5: Bits 0-1: Clock numerator control,
-                              *    Bits 2-3: Clock denominator control */
+                                 * Bits 2-3: Clock denominator control */
   uint8_t cm_clkmult;           /* 6: Index of clock multiplier name string */
 };
 #define USB_SIZEOF_ADC_CLKMULT_DESC 7
@@ -779,7 +782,7 @@ struct adc_outterm_desc_s
 
 struct adc_mixerunit_desc_s
 {
-  uint8_t mu_len;               /* 0: Descriptor length (13+npins+nchan)*/
+  uint8_t mu_len;               /* 0: Descriptor length (13+npins+nchan) */
   uint8_t mu_type;              /* 1: Descriptor type (ADC_CS_INTERFACE) */
   uint8_t mu_subtype;           /* 2: Descriptor sub-type (ADC_AC_MIXER_UNIT) */
   uint8_t mu_unitid;            /* 3: Identifies unit in audio function */
@@ -1105,7 +1108,7 @@ struct adc_extunit_desc_s
 
 struct adc_as_ifdesc_s
 {
-  uint8_t as_len;               /* 0: Descriptor length (9)*/
+  uint8_t as_len;               /* 0: Descriptor length (9) */
   uint8_t as_type;              /* 1: Descriptor type (ADC_CS_INTERFACE) */
   uint8_t as_subtype;           /* 2: Descriptor sub-type (ADC_AS_GENERAL) */
   uint8_t as_terminal;          /* 3: ID of connected terminal */
@@ -1314,7 +1317,8 @@ struct adc_audio_epdesc_s
 
 struct adc_l1_curparm_s
 {
-   uint8_t l1_cur;              /* 0: Setting of the CUR attribute of the addressed control */
+   uint8_t l1_cur; /* 0: Setting of the CUR attribute of the
+                    * addressed control */
 };
 
 #define USB_SIZEOF_ADC_LI_CURPARM 1
@@ -1323,15 +1327,15 @@ struct adc_l1_curparm_s
 
 begin_packed_struct struct adc_l1_subrange_s
 {
-   uint8_t l1_min;              /* 0: MIN attribute */
-   uint8_t l1_max;              /* 1: MAX attribute */
-   uint8_t l1_res;              /* 2: RES attribute */
+  uint8_t l1_min;              /* 0: MIN attribute */
+  uint8_t l1_max;              /* 1: MAX attribute */
+  uint8_t l1_res;              /* 2: RES attribute */
 } end_packed_struct;
 
 begin_packed_struct struct adc_l1_rangeparm_s
 {
-   uint8_t l1_nranges;          /* 0: Number of sub-ranges */
-   struct adc_l1_subrange_s l1_subrange[1];
+  uint8_t l1_nranges;          /* 0: Number of sub-ranges */
+  struct adc_l1_subrange_s l1_subrange[1];
 } end_packed_struct;
 
 #define USB_SIZEOF_ADC_LI_RANGEPARM(nranges) (1+3*(nranges))
@@ -1340,7 +1344,7 @@ begin_packed_struct struct adc_l1_rangeparm_s
 
 struct adc_l2_curparm_s
 {
-   uint8_t l2_cur[2];           /* 0: Setting of the CUR attribute of the addressed control */
+  uint8_t l2_cur[2];           /* 0: Setting of the CUR attribute of the addressed control */
 };
 
 #define USB_SIZEOF_ADC_L2_CURPARM 2
@@ -1349,15 +1353,15 @@ struct adc_l2_curparm_s
 
 struct adc_l2_subrange_s
 {
-   uint8_t l2_min[2];           /* 0: MIN attribute */
-   uint8_t l2_max[2];           /* 2: MAX attribute */
-   uint8_t l2_res[2];           /* 4: RES attribute */
+  uint8_t l2_min[2];           /* 0: MIN attribute */
+  uint8_t l2_max[2];           /* 2: MAX attribute */
+  uint8_t l2_res[2];           /* 4: RES attribute */
 };
 
 struct adc_l2_rangeparm_s
 {
-   uint8_t l2_nranges[2];       /* 0: Number of sub-ranges */
-   struct adc_l2_subrange_s l2_subrange[1];
+  uint8_t l2_nranges[2];       /* 0: Number of sub-ranges */
+  struct adc_l2_subrange_s l2_subrange[1];
 };
 
 #define USB_SIZEOF_ADC_L2_RANGEPARM(nranges) (2+6*(nranges))
@@ -1366,7 +1370,7 @@ struct adc_l2_rangeparm_s
 
 struct adc_l3_curparm_s
 {
-   uint8_t l3_cur[4];           /* 0: Setting of the CUR attribute of the addressed control */
+  uint8_t l3_cur[4];           /* 0: Setting of the CUR attribute of the addressed control */
 };
 
 #define USB_SIZEOF_ADC_L3_CURPARM 4
@@ -1375,15 +1379,15 @@ struct adc_l3_curparm_s
 
 struct adc_l3_subrange_s
 {
-   uint8_t l3_min[4];           /* 0: MIN attribute */
-   uint8_t l3_max[4];           /* 2: MAX attribute */
-   uint8_t l3_res[4];           /* 4: RES attribute */
+  uint8_t l3_min[4];           /* 0: MIN attribute */
+  uint8_t l3_max[4];           /* 2: MAX attribute */
+  uint8_t l3_res[4];           /* 4: RES attribute */
 };
 
 struct adc_l3_rangeparm_s
 {
-   uint8_t l3_nranges[2];       /* 0: Number of sub-ranges */
-   struct adc_l3_subrange_s l3_subrange[1];
+  uint8_t l3_nranges[2];       /* 0: Number of sub-ranges */
+  struct adc_l3_subrange_s l3_subrange[1];
 };
 
 #define USB_SIZEOF_ADC_L3_RANGEPARM(nranges) (2+12*(nranges))
@@ -1424,15 +1428,15 @@ struct adc_equalizer_curparm_s
 
 begin_packed_struct struct adc_eq_subrange_s
 {
-   uint8_t eq_min;              /* 0: MIN attribute */
-   uint8_t eq_max;              /* 1: MAX attribute */
-   uint8_t eq_res;              /* 2: RES attribute */
+  uint8_t eq_min;              /* 0: MIN attribute */
+  uint8_t eq_max;              /* 1: MAX attribute */
+  uint8_t eq_res;              /* 2: RES attribute */
 } end_packed_struct;
 
 begin_packed_struct struct adc_equalizer_rangeparm_s
 {
-   uint8_t eq_nranges;          /* 0: Number of sub-ranges */
-   struct adc_eq_subrange_s eq_subrange[1];
+  uint8_t eq_nranges;          /* 0: Number of sub-ranges */
+  struct adc_eq_subrange_s eq_subrange[1];
 } end_packed_struct;
 
 #define USB_SIZEOF_ADC_EQUALIZER_RANGEPARM(nranges) (1+3*(nranges))
@@ -1451,23 +1455,23 @@ struct adc_altsettings_curparm_s
 
 struct adc_hilo_curparm_s
 {
-   uint8_t hl_lo;               /* 0: CUR value of the low level scaling control */
-   uint8_t hl_hi;               /* 0: CUR value of the high level scaling control */
+  uint8_t hl_lo;               /* 0: CUR value of the low level scaling control */
+  uint8_t hl_hi;               /* 0: CUR value of the high level scaling control */
 };
 
 /* High/Low Scaling Control RANGE Parameter Block */
 
 begin_packed_struct struct adc_hl_subrange_s
 {
-   uint8_t hl_min;              /* 0: MIN attribute */
-   uint8_t hl_max;              /* 1: MAX attribute */
-   uint8_t hl_res;              /* 2: RES attribute */
+  uint8_t hl_min;              /* 0: MIN attribute */
+  uint8_t hl_max;              /* 1: MAX attribute */
+  uint8_t hl_res;              /* 2: RES attribute */
 } end_packed_struct;
 
 begin_packed_struct struct adc_hilo_rangeparm_s
 {
-   uint8_t hl_nranges[2];       /* 0: Number of sub-ranges */
-   struct adc_hl_subrange_s hl_subrange[1];
+  uint8_t hl_nranges[2];       /* 0: Number of sub-ranges */
+  struct adc_hl_subrange_s hl_subrange[1];
 } end_packed_struct;
 
 #define USB_SIZEOF_ADC_HILO_RANGEPARM(nranges) (2+3*(nranges))
@@ -1510,7 +1514,7 @@ struct adc_t2_format_desc_s
   uint8_t t2_subtype;           /* 2: Descriptor sub-type (ADC_AS_FORMAT_TYPE) */
   uint8_t t2_fmttype;           /* 3: Identifies the format type (ADC_FORMAT_TYPEII) */
   uint8_t t2_bitrate[2];        /* 4 Maximum number of bits per second */
-  uint8_t t2_slotsperframe[2];  /* 6: Number of PCM audio slots in one encoded audio frame*/
+  uint8_t t2_slotsperframe[2];  /* 6: Number of PCM audio slots in one encoded audio frame */
 };
 
 #define USB_SIZEOF_ADC_T2_FORMAT_DESC  8
@@ -1567,7 +1571,7 @@ struct adc_x2_format_desc_s
   uint8_t x2_subtype;           /* 2: Descriptor sub-type (ADC_AS_FORMAT_TYPE) */
   uint8_t x2_fmttype;           /* 3: Identifies the format type (ADC_FORMAT_TYPEII) */
   uint8_t x2_bitrate[2];        /* 4 Maximum number of bits per second */
-  uint8_t x2_samperframe[2];    /* 6: Number of PCM audio samples in one encoded audio frame*/
+  uint8_t x2_samperframe[2];    /* 6: Number of PCM audio samples in one encoded audio frame */
   uint8_t x2_hdrlen;            /* 8: Size of packet header (in bytes) */
   uint8_t x2_sbproto;           /* 9: Sideband protocol used in packet header and ctrl channel */
 };
@@ -1590,7 +1594,7 @@ struct adc_x3_format_desc_s
 
 #define USB_SIZEOF_ADC_X3_FORMAT_DESC  8
 
-/* Hi-Res Presentation TimeStamp Layout*/
+/* Hi-Res Presentation TimeStamp Layout */
 
 struct adc_hires_timestamp_s
 {
@@ -1598,9 +1602,9 @@ struct adc_hires_timestamp_s
   uint8_t hr_nsec[8];           /* Offset in nanoseconds from the beginning of the stream */
 };
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -37,6 +37,10 @@
 #ifndef __INCLUDE_NUTTX_USB_FUSB303_H
 #define __INCLUDE_NUTTX_USB_FUSB303_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
@@ -115,6 +119,7 @@ enum fusb303_mode_e
   MODE_TRY_SNK   = (1 << 4), /* For DRP only */
   MODE_TRY_SRC   = (1 << 5), /* For DRP only */
   MODE_ORIENTDEB = (1 << 6),
+
   /* Bit 7 reserved */
 };
 
@@ -169,6 +174,7 @@ enum fusb303_manual_e
   MANUAL_UNATT_SNK = (1 << 3),
   MANUAL_FORCE_SNK = (1 << 4),
   MANUAL_FORCE_SRC = (1 << 5),
+
   /* Bits 6:7 reserved */
 };
 
@@ -190,6 +196,7 @@ enum fusb303_int_mask_e
   INT_MASK_VBUS_CHG = (1 << 4),
   INT_MASK_FAULT    = (1 << 5),
   INT_MASK_ORIENT   = (1 << 6),
+
   /* Bit 7 reserved */
 };
 
@@ -200,10 +207,13 @@ enum fusb303_int_mask1_e
   INT_MASK1_REMEDY    = (1 << 0),
   INT_MASK1_FRC_SUCC  = (1 << 1),
   INT_MASK1_FRC_FAIL  = (1 << 2),
+
   /* Bit 4 reserved */
+
   INT_MASK1_REM_FAIL  = (1 << 3),
   INT_MASK1_REM_VBON  = (1 << 5),
   INT_MASK1_REM_VBOFF = (1 << 6),
+
   /* Bit 7 reserved */
 };
 
@@ -244,6 +254,7 @@ enum fusb303_type_e
   TYPE_SINK        = (1 << 4),
   TYPE_DEBUGSNK    = (1 << 5),
   TYPE_DEBUGSRC    = (1 << 6),
+
   /* Bit 7 reserved */
 };
 
@@ -258,6 +269,7 @@ enum fusb303_interrupt_e
   INTERRUPT_VBUS_CHG = (1 << 4),
   INTERRUPT_FAULT    = (1 << 5),
   INTERRUPT_ORIENT   = (1 << 6),
+
   /* Bit 7 reserved */
 };
 
@@ -269,9 +281,12 @@ enum fusb303_interrupt1_e
   INTERRUPT1_FRC_SUCC  = (1 << 1),
   INTERRUPT1_FRC_FAIL  = (1 << 2),
   INTERRUPT1_REM_FAIL  = (1 << 3),
+
   /* Bit 4 reserved */
+
   INTERRUPT1_REM_VBON  = (1 << 5),
   INTERRUPT1_REM_VBOFF = (1 << 6),
+
   /* Bit 7 reserved */
 };
 

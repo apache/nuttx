@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/usb/composite.h
  *
  *   Copyright (C) 2008-2011, 2015, 2017 Gregory Nutt. All rights reserved.
@@ -50,6 +50,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* CONFIG_USBDEV_COMPOSITE
  *   Enables USB composite device support
  */
@@ -83,7 +84,7 @@ extern "C"
 struct composite_devdesc_s;
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -120,7 +121,8 @@ FAR void *composite_initialize(uint8_t ndevices,
  *   class objects for each of the members of the composite.
  *
  * Input Parameters:
- *   handle - The handle returned by a previous call to composite_initialize().
+ *   handle - The handle returned by a previous call to
+ *            composite_initialize().
  *
  * Returned Value:
  *   None
