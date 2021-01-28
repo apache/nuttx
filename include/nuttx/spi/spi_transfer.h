@@ -52,6 +52,7 @@
 #ifdef CONFIG_SPI_EXCHANGE
 
 /* SPI Character Driver IOCTL Commands **************************************/
+
 /* The SPI driver is intended to support application testing of the SPI bus.
  * The SPI driver simply provides a user-accessible wrapper around the
  * OS internal spi_transfer() function.  The following IOCTL commands to
@@ -126,7 +127,7 @@ struct spi_sequence_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

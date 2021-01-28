@@ -48,7 +48,7 @@
 #ifdef CONFIG_SPI_BITBANG
 
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -139,7 +139,8 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *spi_create_bitbang(FAR const struct spi_bitbang_ops_s *low);
+FAR struct spi_dev_s *spi_create_bitbang(
+                         FAR const struct spi_bitbang_ops_s *low);
 
 #undef EXTERN
 #if defined(__cplusplus)
