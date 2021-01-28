@@ -6,7 +6,8 @@
  *   Copyright (C) 2007, 2009, 2011-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Derived largely from portions of uIP with has a similar BSD-styple license:
+ * Derived largely from portions of uIP with has a similar BSD-styple
+ * license:
  *
  *   Copyright (c) 2001-2003, Adam Dunkels.
  *   All rights reserved.
@@ -215,8 +216,8 @@ struct netdev_varaddr_s
 #endif
 
 /* This structure collects information that is specific to a specific network
- * interface driver.  If the hardware platform supports only a single instance
- * of this structure.
+ * interface driver.  If the hardware platform supports only a single
+ * instance of this structure.
  */
 
 struct devif_callback_s; /* Forward reference */
@@ -230,7 +231,8 @@ struct net_driver_s
 #ifdef CONFIG_NET
   FAR struct net_driver_s *flink;
 
-  /* This is the name of network device assigned when netdev_register was called.
+  /* This is the name of network device assigned when netdev_register was
+   * called.
    * This name is only used to support socket ioctl lookups by device name
    * Examples: "eth0"
    */
@@ -242,7 +244,9 @@ struct net_driver_s
 
   uint8_t d_flags;
 
-  /* Multi network devices using multiple link layer protocols are supported */
+  /* Multi network devices using multiple link layer protocols are
+   * supported
+   */
 
   uint8_t d_lltype;             /* See enum net_lltype_e */
   uint8_t d_llhdrlen;           /* Link layer header size */
@@ -309,7 +313,7 @@ struct net_driver_s
 
 #ifdef CONFIG_NET_TCPURGDATA
   /* This pointer points to any urgent TCP data that has been received. Only
-   * present if compiled with support for urgent data (CONFIG_NET_TCPURGDATA).
+   * present if compiled with support for urgent data(CONFIG_NET_TCPURGDATA).
    */
 
   FAR uint8_t *d_urgdata;
@@ -334,8 +338,8 @@ struct net_driver_s
 
   uint16_t d_len;
 
-  /* When d_buf contains outgoing xmit data, d_sndlen is non-zero and represents
-   * the amount of application data after d_appdata
+  /* When d_buf contains outgoing xmit data, d_sndlen is non-zero and
+   * represents the amount of application data after d_appdata
    */
 
   uint16_t d_sndlen;
@@ -579,9 +583,9 @@ void neighbor_out(FAR struct net_driver_s *dev);
  *
  * Description:
  *   This function should be called before sending out a packet. The function
- *   checks the destination address of the packet to see whether the target of
- *   packet is ourself and then consume the packet directly by calling input
- *   process functions.
+ *   checks the destination address of the packet to see whether the target
+ *   of packet is ourself and then consume the packet directly by calling
+ *   input process functions.
  *
  * Returned Value:
  *   Zero is returned if the packet don't loop back to ourself, otherwise
@@ -594,8 +598,8 @@ int devif_loopback(FAR struct net_driver_s *dev);
 /****************************************************************************
  * Carrier detection
  *
- * Call netdev_carrier_on when the carrier has become available and the device
- * is ready to receive/transmit packets.
+ * Call netdev_carrier_on when the carrier has become available and the
+ * device is ready to receive/transmit packets.
  *
  * Call detdev_carrier_off when the carrier disappeared and the device has
  * moved into non operational state.
@@ -642,7 +646,8 @@ ssize_t net_ioctl_arglen(int cmd);
  *
  *   buf - A pointer to the buffer over which the checksum is to be computed.
  *
- *   len - The length of the buffer over which the checksum is to be computed.
+ *   len - The length of the buffer over which the checksum is to be
+ *         computed.
  *
  * Returned Value:
  *   The Internet checksum of the buffer.

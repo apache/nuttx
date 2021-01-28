@@ -82,7 +82,7 @@
  *
  ****************************************************************************/
 
-struct radio_driver_s;    /* Forward reference */
+struct radio_driver_s;        /* Forward reference */
 struct ieee802154_data_ind_s; /* Forward reference */
 struct iob_s;                 /* Forward reference */
 

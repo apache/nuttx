@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/net/w5500.h
  * WIZnet W5500 Ethernet Controller
  *
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_NET_W5500_H
 #define __INCLUDE_NUTTX_NET_W5500_H
 
-/************************************************************************************'
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,11 +48,11 @@
 
 #ifdef CONFIG_NET_W5500
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/* W5500 Register Addresses *********************************************************/
+/* W5500 Register Addresses *************************************************/
 
 /* Common Register Block */
 
@@ -153,7 +153,7 @@
 #define W5500_SN_KPALVTR     0x002f  /* Keep alive timer */
                                      /* 0x0030-0xffff: Reserved */
 
-/* W5500 Register Bitfield Definitions **********************************************/
+/* W5500 Register Bitfield Definitions **************************************/
 
 /* Common Register Block */
 
@@ -197,6 +197,7 @@
 #  define PHYCFGR_OPMDC_POWER_DOWN   (6 << PHYCFGR_OPMDC_SHIFT) /* Power Down mode */
 #  define PHYCFGR_OPMDC_ALLCAP_AN    (7 << PHYCFGR_OPMDC_SHIFT) /* All capable,
                                                                  * Auto-negotiation */
+
 #define PHYCFGR_OPMD         (1 << 6)  /* Bit 6:  Configure PHY Operation Mode */
 #define PHYCFGR_RST          (1 << 7)  /* Bit 7:  Reset */
 
@@ -238,7 +239,9 @@
 #define SN_CR_SEND_KEEP      0x22      /* Send TCP keep-alive packet */
 #define SN_CR_RECV           0x40      /* Complete received data in Socket n RX buffer */
 
-/* Socket n Interrupt Register (SN_IR) and Socket n Interrupt Mask Register (SN_IMR)  */
+/* Socket n Interrupt Register (SN_IR) and
+ * Socket n Interrupt Mask Register (SN_IMR)
+ */
 
 #define SN_INT_CON           (1 << 0)  /* Bit 0:  Connection with peer successful */
 #define SN_INT_DISCON        (1 << 1)  /* Bit 1:  FIN or FIN/ACK received from peer */
@@ -281,9 +284,9 @@
 #define SN_TXBUF_8KB          5
 #define SN_TXBUF_16KB         16
 
-/************************************************************************************'
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This structure describes the lower-half interface provided by board-
  * specific logic.
@@ -308,11 +311,11 @@ struct w5500_lower_s
   void (*reset)(FAR const struct w5500_lower_s *lower, bool reset);
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: w5500_initialize
  *
  * Description:
@@ -326,7 +329,7 @@ struct w5500_lower_s
  *
  * Assumptions:
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int w5500_initialize(FAR struct w5500_lower_s *lower);
 

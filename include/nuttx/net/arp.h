@@ -114,7 +114,8 @@ struct net_driver_s; /* Forward reference */
  *   The arp_ipin() function should be called by Ethernet device drivers
  *   whenever an IP packet arrives from the network.  The function will
  *   check if the address is in the ARP cache, and if so the ARP cache entry
- *   will be refreshed. If no ARP cache entry was found, a new one is created.
+ *   will be refreshed.
+ *   If no ARP cache entry was found, a new one is created.
  *
  *   This function expects that an IP packet with an Ethernet header is
  *   present in the d_buf buffer and that the length of the packet is in the
@@ -144,10 +145,11 @@ void arp_ipin(FAR struct net_driver_s *dev);
  *   Ethernet header is present in the d_buf buffer and that the length of
  *   the packet is set in the d_len field.
  *
- *   When the function returns, the value of the field d_len indicates whether
- *   the device driver should send out the ARP reply packet or not. If d_len
- *   is zero, no packet should be sent; If d_len is non-zero, it contains the
- *   length of the outbound packet that is present in the d_buf buffer.
+ *   When the function returns, the value of the field d_len indicates
+ *   whether the device driver should send out the ARP reply packet or not.
+ *   If d_len is zero, no packet should be sent; If d_len is non-zero, it
+ *   contains the length of the outbound packet that is present in the d_buf
+ *   buffer.
  *
  ****************************************************************************/
 
