@@ -95,7 +95,7 @@ int pthread_cond_destroy(FAR pthread_cond_t *cond)
             }
           else if (sem_destroy(&cond->sem) != OK)
             {
-              ret = EINVAL;
+              ret = get_errno();
             }
         }
     }

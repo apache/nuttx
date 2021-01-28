@@ -113,7 +113,7 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
   if (ret != OK)
     {
       sched_unlock();
-      return EINVAL;
+      return get_errno();
     }
 
   /* If the number of waiters would be equal to the count, then we are done */

@@ -80,9 +80,9 @@ int pthread_cond_init(FAR pthread_cond_t *cond,
    * initial count = 0
    */
 
-  else if (sem_init((FAR sem_t *)&cond->sem, 0, 0) != OK)
+  else if (sem_init(&cond->sem, 0, 0) != OK)
     {
-      ret = EINVAL;
+      ret = get_errno();
     }
   else
     {
