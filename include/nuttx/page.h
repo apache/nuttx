@@ -55,6 +55,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* CONFIG_PAGING_PAGESIZE - The size of one managed page.  This must be a
  *   value supported by the processor's memory management unit.  The
  *   following may need to be extended to support additional page sizes at
@@ -96,9 +97,9 @@
  * from the beginning of this region for vectors or for a page table.
  * In such cases, either (1) CONFIG_PAGING_LOCKED_P/VBASE might take that
  * into consideration to prevent overlapping the locked memory region
- * and the system data at the beginning of SRAM, (2) you extend CONFIG_PAGING_NLOCKED
- * include these pages at the beginning of memory and map let them be
- * mapped read-only.
+ * and the system data at the beginning of SRAM, (2) you extend
+ * CONFIG_PAGING_NLOCKED  include these pages at the beginning
+ * of memory and map let them be mapped read-only.
  */
 
 #if defined(CONFIG_PAGING_LOCKED_PBASE) && defined(CONFIG_PAGING_LOCKED_VBASE)
@@ -117,13 +118,13 @@
 #endif
 
 /* CONFIG_PAGING_NPPAGED - This is the number of physical pages available to
- *   support the paged text region.
- * CONFIG_PAGING_NVPAGED - This actual size of the virtual paged text region (in
- *   pages).  This is also the number of virtual pages required to span
- *   the entire paged region. The on-demand paging  feature is intended to
- *   support only the case where the virtual paged text area is much larger
- *   the available physical pages.  Otherwise, why would you enable on-demand
- *   paging?
+ *  support the paged text region.
+ *  CONFIG_PAGING_NVPAGED - This actual size of the virtual paged text region
+ *  (in pages).  This is also the number of virtual pages required to span
+ *  the entire paged region. The on-demand paging  feature is intended to
+ *  support only the case where the virtual paged text area is much larger
+ *  the available physical pages.  Otherwise, why would you enable on-demand
+ *  paging?
  */
 
 #if CONFIG_PAGING_NPPAGED >= CONFIG_PAGING_NVPAGED
@@ -201,22 +202,22 @@
 #endif
 
 /* CONFIG_PAGING_DEFPRIO - The default, minimum priority of the page fill
- *   worker thread.  The priority of the page fill work thread will be boosted
- *   boosted dynamically so that it matches the priority of the task on behalf
- *   of which it performs the fill.  This defines the minimum priority that
- *   will be used. Default: 50.
+ *   worker thread.  The priority of the page fill work thread will be
+ *   boosted boosted dynamically so that it matches the priority of the
+ *   task on behalf of which it performs the fill.  This defines the
+ *   minimum priority that will be used. Default: 50.
  * CONFIG_PAGING_STACKSIZE - Defines the size of the allocated stack
  *   for the page fill worker thread. Default: 1024.
  * CONFIG_PAGING_BLOCKINGFILL - The architecture specific up_fillpage()
  *   function may be blocking or non-blocking.  If defined, this setting
- *   indicates that the up_fillpage() implementation will block until the
- *   transfer is completed. Default:  Undefined (non-blocking).
- * CONFIG_PAGING_WORKPERIOD - The page fill worker thread will wake periodically
- *   even if there is no mapping to do.  This selection controls that wake-up
- *   period (in microseconds).  This wake-up a failsafe that will handle any
- *   cases where a single is lost (that would really be a bug and shouldn't
- *   happen!) and also supports timeouts for case of non-blocking, asynchronous
- *   fills (see CONFIG_PAGING_TIMEOUT_TICKS).
+ *   indicates that the up_fillpage() implementation will block until
+ *   the transfer is completed. Default:  Undefined (non-blocking).
+ * CONFIG_PAGING_WORKPERIOD - The page fill worker thread will wake
+ *   periodically even if there is no mapping to do.  This selection controls
+ *   that wake-up period (in microseconds).  This wake-up a failsafe that
+ *   will handle any cases where a single is lost (that would really be a bug
+ *   and shouldn't happen!) and also supports timeouts for case of
+ *   non-blocking, asynchronous fills (see CONFIG_PAGING_TIMEOUT_TICKS).
  * CONFIG_PAGING_TIMEOUT_TICKS - If defined, the implementation will monitor
  *   the (asynchronous) page fill logic.  If the fill takes longer than this
  *   number if microseconds, then a fatal error will be declared.
@@ -329,9 +330,9 @@ void pg_miss(void);
  *   tcb - A reference to the task control block of the task that we believe
  *         needs to have a page fill.  Architecture-specific logic can
  *         retrieve page fault information from the architecture-specific
- *         context information in this TCB and can consult processor resources
- *         (page tables or TLBs or ???) to determine if the fill still needs
- *         to be performed or not.
+ *         context information in this TCB and can consult processor
+ *         resources (page tables or TLBs or ???) to determine if the fill
+ *         still needs to be performed or not.
  *
  * Returned Value:
  *   This function will return true if the mapping is in place and false
@@ -368,11 +369,12 @@ bool up_checkmapping(FAR struct tcb_s *tcb);
  *  NOTE 2: If an in-use page is un-mapped, it may be necessary to flush the
  *  instruction cache in some architectures.
  *
- *  NOTE 3: Allocating and filling a page is a two step process.  up_allocpage()
- *  allocates the page, and up_fillpage() fills it with data from some non-
- *  volatile storage device.  This distinction is made because up_allocpage()
- *  can probably be implemented in board-independent logic whereas up_fillpage()
- *  probably must be implemented as board-specific logic.
+ *  NOTE 3: Allocating and filling a page is a two step process.
+ *  up_allocpage() allocates the page, and up_fillpage() fills it with data
+ *  from some non- volatile storage device.  This distinction is made because
+ *  up_allocpage() can probably be implemented in board-independent logic
+ *  whereas up_fillpage() probably must be implemented as board-specific
+ *  logic.
  *
  *  NOTE 4: The initial mapping of vpage should be read-able and write-
  *  able (but not cached).  No special actions will be required of
@@ -412,11 +414,12 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage);
  *  This callback is assumed to occur from an interrupt level when the
  *  device driver completes the fill operation.
  *
- *  NOTE 1: Allocating and filling a page is a two step process.  up_allocpage()
- *  allocates the page, and up_fillpage() fills it with data from some non-
- *  volatile storage device.  This distinction is made because up_allocpage()
- *  can probably be implemented in board-independent logic whereas up_fillpage()
- *  probably must be implemented as board-specific logic.
+ *  NOTE 1: Allocating and filling a page is a two step process.
+ *  up_allocpage() allocates the page, and up_fillpage() fills it with data
+ *  from some non- volatile storage device. This distinction is made because
+ *  up_allocpage() can probably be implemented in board-independent logic
+ *  whereas up_fillpage() probably must be implemented as board-specific
+ *  logic.
  *
  *  NOTE 2: The initial mapping of vpage will be read-able, write-able,
  *  but non-cacheable.  No special actions will be required of
@@ -445,7 +448,8 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage);
  * Assumptions:
  *   - This function is called from the normal tasking context (but
  *     interrupts siabled).  The implementation must take whatever actions
- *     are necessary to assure that the operation is safe within this context.
+ *     are necessary to assure that the operation is safe within this
+ *     context.
  *   - Upon return, the caller will sleep waiting for the page fill callback
  *     to occur.  The callback function will perform the wakeup.
  *

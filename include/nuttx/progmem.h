@@ -61,7 +61,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -78,7 +78,7 @@ size_t up_progmem_neraseblocks(void);
  * Name: up_progmem_isuniform
  *
  * Description:
- *   Is program memory uniform or erase page and read/write page size differs?
+ *  Is program memory uniform or erase page and read/write page size differs?
  *
  ****************************************************************************/
 
@@ -98,7 +98,7 @@ size_t up_progmem_pagesize(size_t page);
  * Name: up_progmem_erasesize
  *
  * Description:
- *   Return erase block size. Must be a multiple of the read/write page size.
+ *  Return erase block size. Must be a multiple of the read/write page size.
  *
  ****************************************************************************/
 
@@ -111,11 +111,12 @@ size_t up_progmem_erasesize(size_t block);
  *   Address to read/write page conversion
  *
  * Input Parameters:
- *   addr - Address with or without flash offset (absolute or aligned to page0)
+ *  addr - Address with or without flash offset
+ *         (absolute or aligned to page0)
  *
  * Returned Value:
- *   Page or negative value on error.  The following errors are reported
- *   (errno is not set!):
+ *   Page or negative value on error.
+ *   The following errors are reported (errno is not set!):
  *
  *     -EFAULT: On invalid address
  *
@@ -149,8 +150,8 @@ size_t up_progmem_getaddress(size_t page);
  *   block - The erase block index to be erased.
  *
  * Returned Value:
- *   block size or negative value on error.  The following errors are reported
- *   (errno is not set!):
+ *   block size or negative value on error.
+ *   The following errors are reported (errno is not set!):
  *
  *     -EFAULT: On invalid page
  *     -EIO:    On unsuccessful erase
@@ -193,7 +194,8 @@ ssize_t up_progmem_ispageerased(size_t page);
  *   the address be aligned inside the page boundaries.
  *
  * Input Parameters:
- *   addr  - Address with or without flash offset (absolute or aligned to page0)
+ *   addr  - Address with or without flash offset
+ *           (absolute or aligned to page0)
  *   buf   - Pointer to buffer
  *   count - Number of bytes to write
  *

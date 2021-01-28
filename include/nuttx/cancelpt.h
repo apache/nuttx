@@ -60,8 +60,8 @@
  * mq_timedreceive() putmsg()                 sigsuspend()
  *
  * Each of the above function must call enter_cancellation_point() on entry
- * in order to establish the cancellation point and leave_cancellation_point()
- * on exit.  These functions are described below.
+ * in order to establish the cancellation point and
+ * leave_cancellation_point() on exit. These functions are described below.
  *
  ****************************************************************************/
 

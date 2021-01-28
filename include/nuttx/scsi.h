@@ -327,7 +327,7 @@
 /* Illegal Request KCQ values */
 
 #define SCSI_KCQIR_PARMLISTLENGTHERROR           0x051a00  /* Illegal Request - parm list length error */
-#define SCSI_KCQIR_INVALIDCOMMAND                0x052000 /* Illegal Request - invalid/unsupported command code */
+#define SCSI_KCQIR_INVALIDCOMMAND                0x052000  /* Illegal Request - invalid/unsupported command code */
 #define SCSI_KCQIR_LBAOUTOFRANGE                 0x052100  /* Illegal Request - LBA out of range */
 #define SCSI_KCQIR_INVALIDFIELDINCBA             0x052400  /* Illegal Request - invalid field in CDB (Command Descriptor Block) */
 #define SCSI_KCQIR_INVALIDLUN                    0x052500  /* Illegal Request - invalid LUN */
@@ -475,6 +475,7 @@
 #define SCSIRESP_INQUIRYFLAGS6_IUS               0x01  /* Bit 0: IUS */
 
 /* Sense data */
+
 /* Sense data response codes */
 
 #define SCSIRESP_SENSEDATA_CURRENTFIXED          0x70 /* Byte 1 is always the response code */
@@ -705,7 +706,7 @@ struct scsiresp_inquiry_s
   uint8_t version7[2];   /* 70-71: Version Descriptor 7 */
   uint8_t version8[2];   /* 72-73: Version Descriptor 8 */
   uint8_t reserved2[22]; /* 74-95: Reserved */
-                       /* 96-: Vendor-specific parameters may follow */
+                         /* 96-: Vendor-specific parameters may follow */
 };
 #define SCSIRESP_INQUIRY_SIZEOF 36 /* Minimum size */
 
@@ -787,7 +788,7 @@ struct scsicmd_read6_s
   uint8_t opcode;        /* 0: 0x08 */
   uint8_t mslba;         /* 1: Bits 5-7: reserved; Bits 0-6: MS Logical Block Address (LBA) */
   uint8_t lslba[2];      /* 2-3: LS Logical Block Address (LBA) */
-  uint8_t xfrlen;        /* 4: Transfer length (in contiguous logical blocks)*/
+  uint8_t xfrlen;        /* 4: Transfer length (in contiguous logical blocks) */
   uint8_t control;       /* 5: Control */
 };
 #define SCSICMD_READ6_SIZEOF 6
@@ -994,7 +995,7 @@ struct scsicmd_verify12_s
 #define SCSICMD_VERIFY12_SIZEOF 12
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN
