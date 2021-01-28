@@ -122,7 +122,7 @@ pid_t up_vfork(const struct vfork_s *context)
   struct task_tcb_s *child;
   size_t stacksize;
   uint32_t newsp;
-#ifdef CONFIG_MIPS32_FRAMEPOINTER
+#ifdef CONFIG_RISCV_FRAMEPOINTER
   uint32_t newfp;
 #endif
   uint32_t stackutil;
@@ -132,10 +132,10 @@ pid_t up_vfork(const struct vfork_s *context)
 
   sinfo("s0:%08x s1:%08x s2:%08x s3:%08x s4:%08x\n",
         context->s0, context->s1, context->s2, context->s3, context->s4);
-#ifdef CONFIG_MIPS32_FRAMEPOINTER
+#ifdef CONFIG_RISCV_FRAMEPOINTER
   sinfo("s5:%08x s6:%08x s7:%08x\n",
         context->s5, context->s6, context->s7);
-#ifdef MIPS32_SAVE_GP
+#ifdef RISCV_SAVE_GP
   sinfo("fp:%08x sp:%08x ra:%08x gp:%08x\n",
         context->fp, context->sp, context->ra, context->gp);
 #else
@@ -145,7 +145,7 @@ pid_t up_vfork(const struct vfork_s *context)
 #else
   sinfo("s5:%08x s6:%08x s7:%08x s8:%08x\n",
         context->s5, context->s6, context->s7, context->s8);
-#ifdef MIPS32_SAVE_GP
+#ifdef RISCV_SAVE_GP
   sinfo("sp:%08x ra:%08x gp:%08x\n",
         context->sp, context->ra, context->gp);
 #else
@@ -188,7 +188,7 @@ pid_t up_vfork(const struct vfork_s *context)
   argv = up_stack_frame((FAR struct tcb_s *)child, argsize);
   memcpy(argv, parent->adj_stack_ptr, argsize);
 
-  /* How much of the parent's stack was utilized?  The MIPS uses
+  /* How much of the parent's stack was utilized?  The RISC-V uses
    * a push-down stack so that the current stack pointer should
    * be lower than the initial, adjusted stack pointer.  The
    * stack usage should be the difference between those two.
@@ -211,7 +211,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
   /* Was there a frame pointer in place before? */
 
-#ifdef CONFIG_MIPS32_FRAMEPOINTER
+#ifdef CONFIG_RISCV_FRAMEPOINTER
   if (context->fp <= (uint32_t)parent->adj_stack_ptr &&
       context->fp >= (uint32_t)parent->adj_stack_ptr - stacksize)
     {
@@ -249,13 +249,13 @@ pid_t up_vfork(const struct vfork_s *context)
   child->cmn.xcp.regs[REG_S5]  = context->s5;  /* Volatile register s5 */
   child->cmn.xcp.regs[REG_S6]  = context->s6;  /* Volatile register s6 */
   child->cmn.xcp.regs[REG_S7]  = context->s7;  /* Volatile register s7 */
-#ifdef CONFIG_MIPS32_FRAMEPOINTER
+#ifdef CONFIG_RISCV_FRAMEPOINTER
   child->cmn.xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
 #else
   child->cmn.xcp.regs[REG_S8]  = context->s8;  /* Volatile register s8 */
 #endif
   child->cmn.xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
-#ifdef MIPS32_SAVE_GP
+#ifdef RISCV_SAVE_GP
   child->cmn.xcp.regs[REG_GP]  = newsp;        /* Global pointer */
 #endif
 
