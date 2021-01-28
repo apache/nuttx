@@ -64,7 +64,7 @@ int nxsem_destroy (FAR sem_t *sem)
     {
       /* There is really no particular action that we need
        * take to destroy a semaphore.  We will just reset
-       * the count to some reasonable value (1) and release
+       * the count to some reasonable value (0) and release
        * ownership.
        *
        * Check if other threads are waiting on the semaphore.
@@ -72,9 +72,9 @@ int nxsem_destroy (FAR sem_t *sem)
        * leave the count unchanged but still return OK.
        */
 
-      if (sem->semcount >= 0)
+      if (sem->semcount > 0)
         {
-          sem->semcount = 1;
+          sem->semcount = 0;
         }
 
       /* Release holders of the semaphore */
