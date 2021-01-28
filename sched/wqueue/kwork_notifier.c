@@ -86,12 +86,6 @@ static dq_queue_t g_notifier_free;
 
 static dq_queue_t g_notifier_pending;
 
-/* This semaphore is used as mutex to enforce mutually exclusive access to
- * the notification data structures.
- */
-
-static sem_t g_notifier_sem = SEM_INITIALIZER(1);
-
 /* Used for lookup key generation */
 
 static uint16_t g_notifier_key;
@@ -175,20 +169,21 @@ static void work_notifier_worker(FAR void *arg)
 {
   FAR struct work_notifier_entry_s *notifier =
     (FAR struct work_notifier_entry_s *)arg;
-  int ret;
+  irqstate_t flags;
 
   /* Forward to the real worker */
 
   notifier->info.worker(notifier->info.arg);
 
+  /* Disable interrupts very briefly. */
+
+  flags = enter_critical_section();
+
   /* Put the notification to the free list */
 
-  ret = nxsem_wait_uninterruptible(&g_notifier_sem);
-  if (ret >= 0)
-    {
-      dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
-      nxsem_post(&g_notifier_sem);
-    }
+  dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -217,23 +212,22 @@ static void work_notifier_worker(FAR void *arg)
 int work_notifier_setup(FAR struct work_notifier_s *info)
 {
   FAR struct work_notifier_entry_s *notifier;
+  irqstate_t flags;
   int ret;
 
   DEBUGASSERT(info != NULL && info->worker != NULL);
   DEBUGASSERT(info->qid == HPWORK || info->qid == LPWORK);
 
-  /* Get exclusive access to the notifier data structures */
+  /* Disable interrupts very briefly. */
 
-  ret = nxsem_wait(&g_notifier_sem);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  flags = enter_critical_section();
 
   /* Try to get the entry from the free list */
 
   notifier = (FAR struct work_notifier_entry_s *)
     dq_remfirst(&g_notifier_free);
+
+  leave_critical_section(flags);
 
   if (notifier == NULL)
     {
@@ -256,6 +250,10 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
 
       memcpy(&notifier->info, info, sizeof(struct work_notifier_s));
 
+      /* Disable interrupts very briefly. */
+
+      flags = enter_critical_section();
+
       /* Generate a unique key for this notification */
 
       notifier->key = work_notifier_key();
@@ -270,9 +268,10 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
 
       dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_pending);
       ret = notifier->key;
+
+      leave_critical_section(flags);
     }
 
-  nxsem_post(&g_notifier_sem);
   return ret;
 }
 
@@ -298,17 +297,14 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
 int work_notifier_teardown(int key)
 {
   FAR struct work_notifier_entry_s *notifier;
-  int ret;
+  irqstate_t flags;
+  int ret = OK;
 
   DEBUGASSERT(key > 0 && key <= INT16_MAX);
 
-  /* Get exclusive access to the notifier data structures */
+  /* Disable interrupts very briefly. */
 
-  ret = nxsem_wait(&g_notifier_sem);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  flags = enter_critical_section();
 
   /* Find the entry matching this PID in the g_notifier_pending list.  We
    * assume that there is only one.
@@ -330,10 +326,9 @@ int work_notifier_teardown(int key)
       /* Put the notification to the free list */
 
       dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
-      ret = OK;
     }
 
-  nxsem_post(&g_notifier_sem);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -364,22 +359,13 @@ void work_notifier_signal(enum work_evtype_e evtype,
   FAR struct work_notifier_entry_s *notifier;
   FAR dq_entry_t *entry;
   FAR dq_entry_t *next;
-  int ret;
-
-  /* Get exclusive access to the notifier data structure */
-
-  ret = nxsem_wait_uninterruptible(&g_notifier_sem);
-  if (ret < 0)
-    {
-      serr("ERROR: nxsem_wait_uninterruptible failed: %d\n", ret);
-      return;
-    }
+  irqstate_t flags;
 
   /* Don't let any newly started threads block this thread until all of
    * the notifications and been sent.
    */
 
-  sched_lock();
+  flags = enter_critical_section();
 
   /* Process the notification at the head of the pending list until the
    * pending list is empty
@@ -422,8 +408,7 @@ void work_notifier_signal(enum work_evtype_e evtype,
         }
     }
 
-  sched_unlock();
-  nxsem_post(&g_notifier_sem);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_WQUEUE_NOTIFIER */
