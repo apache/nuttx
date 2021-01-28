@@ -270,6 +270,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
                   /* Finally, we must free this TCP connection structure */
 
+                  conn->crefs = 0;
                   tcp_free(conn);
                   goto done;
                 }
