@@ -48,7 +48,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* CONFIG_CONSOLE_SYSLOG - Use the syslog logging output as a system console.
  *   If this feature is enabled (along with CONFIG_DEV_CONSOLE), then all
  *   console output will be re-directed to the SYSLOG output channel.  This
