@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/serial/uart_16550.h
  * Serial driver for 16550 UART
  *
@@ -32,24 +32,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_SERIAL_UART_16550_H
 #define __INCLUDE_NUTTX_SERIAL_UART_16550_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #ifdef CONFIG_16550_UART
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* CONFIGURATION ********************************************************************/
+/* CONFIGURATION ************************************************************/
 
 /* Are any UARTs enabled? */
 
@@ -59,8 +59,8 @@
 #  define HAVE_UART 1
 #endif
 
-/* We need to be told the address increment between registers and the register bit
- * width.
+/* We need to be told the address increment between registers and the
+ * register bit width.
  */
 
 #ifndef CONFIG_16550_REGINCR
@@ -87,7 +87,9 @@
 #  error "CONFIG_16550_ADDRWIDTH not supported"
 #endif
 
-/* If a UART is enabled, then its base address, clock, and IRQ must also be provided */
+/* If a UART is enabled, then its base address, clock, and IRQ
+ * must also be provided
+ */
 
 #ifdef CONFIG_16550_UART0
 #  ifndef CONFIG_16550_UART0_BASE
@@ -149,8 +151,8 @@
 #  endif
 #endif
 
-/* Is there a serial console? There should be at most one defined.  It could be on
- * any UARTn, n=0,1,2,3
+/* Is there a serial console? There should be at most one defined.
+ * It could be on any UARTn, n=0,1,2,3
  */
 
 #if defined(CONFIG_16550_UART0_SERIAL_CONSOLE) && defined(CONFIG_16550_UART0)
@@ -181,7 +183,7 @@
 #  undef HAVE_16550_CONSOLE
 #endif
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define UART_RBR_INCR          0 /* (DLAB =0) Receiver Buffer Register */
 #define UART_THR_INCR          0 /* (DLAB =0) Transmit Holding Register */
@@ -209,7 +211,7 @@
 #define UART_MSR_OFFSET        (CONFIG_16550_REGINCR*UART_MSR_INCR)
 #define UART_SCR_OFFSET        (CONFIG_16550_REGINCR*UART_SCR_INCR)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* RBR (DLAB =0) Receiver Buffer Register */
 
@@ -250,6 +252,7 @@
 #  define UART_IIR_INTID_RDA         (2 << UART_IIR_INTID_SHIFT) /* Receive Data Available (RDA) */
 #  define UART_IIR_INTID_RLS         (3 << UART_IIR_INTID_SHIFT) /* Receiver Line Status (RLS) */
 #  define UART_IIR_INTID_CTI         (6 << UART_IIR_INTID_SHIFT) /* Character Time-out Indicator (CTI) */
+
                                                /* Bits 4-5: Reserved */
 #define UART_IIR_FIFOEN_SHIFT        (6)       /* Bits 6-7: RCVR FIFO interrupt */
 #define UART_IIR_FIFOEN_MASK         (3 << UART_IIR_FIFOEN_SHIFT)
@@ -308,9 +311,9 @@
 
 #define UART_SCR_MASK                (0xff)    /* Bits 0-7: SCR data */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #if CONFIG_16550_REGWIDTH == 8
 typedef uint8_t uart_datawidth_t;
@@ -328,27 +331,29 @@ typedef uint16_t uart_addrwidth_t;
 typedef uint32_t uart_addrwidth_t;
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Defintions
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_getreg(), uart_putreg(), uart_ioctl()
  *
  * Description:
- *   These functions must be provided by the processor-specific code in order to
- *   correctly access 16550 registers
+ *   These functions must be provided by the processor-specific code in order
+ *   to correctly access 16550 registers
  *   uart_ioctl() is optional to provide custom IOCTLs
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SERIAL_UART_ARCH_MMIO
 uart_datawidth_t uart_getreg(uart_addrwidth_t base, unsigned int offset);
-void uart_putreg(uart_addrwidth_t base, unsigned int offset, uart_datawidth_t value);
+void uart_putreg(uart_addrwidth_t base,
+                 unsigned int offset,
+                 uart_datawidth_t value);
 #endif
 
 struct file;  /* Forward reference */

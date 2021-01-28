@@ -1,7 +1,8 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/serial/serial.h
  *
- *   Copyright (C) 2007-2008, 2012-2015, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2012-2015, 2018 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_SERIAL_SERIAL_H
 #define __INCLUDE_NUTTX_SERIAL_SERIAL_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -53,9 +54,9 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/semaphore.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Maximum number of threads than can be waiting for POLL events */
 
@@ -126,13 +127,13 @@
     (dev->ops->rxflowcontrol && dev->ops->rxflowcontrol(dev,n,u))
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This structure defines one serial I/O buffer.  The serial infrastructure will
- * initialize the 'sem' field but all other fields must be initialized by the
- * caller of uart_register().
+/* This structure defines one serial I/O buffer.
+ * The serial infrastructure will initialize the 'sem' field but all other
+ * fields must be initialized by the caller of uart_register().
  */
 
 struct uart_buffer_s
@@ -155,46 +156,47 @@ struct uart_dmaxfer_s
 };
 #endif /* CONFIG_SERIAL_RXDMA || CONFIG_SERIAL_TXDMA */
 
-/* This structure defines all of the operations providd by the architecture specific
- * logic.  All fields must be provided with non-NULL function pointers by the
- * caller of uart_register().
+/* This structure defines all of the operations providd by the architecture
+ * specific logic.  All fields must be provided with non-NULL function
+ * pointers by the caller of uart_register().
  */
 
 struct uart_dev_s;
 struct uart_ops_s
 {
   /* Configure the UART baud, bits, parity, fifos, etc. This method is called
-   * the first time that the serial port is opened.  For the serial console,
-   * this will occur very early in initialization; for other serial ports this
-   * will occur when the port is first opened.  This setup does not include
-   * attaching or enabling interrupts.  That portion of the UART setup is
-   * performed when the attach() method is called.
+   * the first time that the serial port is opened. For the serial console,
+   * this will occur very early in initialization; for other serial ports
+   * this will occur when the port is first opened. This setup does not
+   * include attaching or enabling interrupts. That portion of the UART setup
+   * is performed when the attach() method is called.
    */
 
   CODE int (*setup)(FAR struct uart_dev_s *dev);
 
   /* Disable the UART.  This method is called when the serial port is closed.
-   * This method reverses the operation the setup method.  NOTE that the serial
-   * console is never shutdown.
+   * This method reverses the operation the setup method.
+   * NOTE that the serial console is never shutdown.
    */
 
   CODE void (*shutdown)(FAR struct uart_dev_s *dev);
 
-  /* Configure the UART to operation in interrupt driven mode.  This method is
-   * called when the serial port is opened.  Normally, this is just after the
+  /* Configure the UART to operation in interrupt driven mode. This method is
+   * called when the serial port is opened. Normally, this is just after the
    * the setup() method is called, however, the serial console may operate in
    * a non-interrupt driven mode during the boot phase.
    *
-   * RX and TX interrupts are not enabled when by the attach method (unless the
-   * hardware supports multiple levels of interrupt enabling).  The RX and TX
-   * interrupts are not enabled until the txint() and rxint() methods are called.
+   * RX and TX interrupts are not enabled when by the attach method (unless
+   * the hardware supports multiple levels of interrupt enabling). The RX
+   * and TX interrupts are not enabled until the txint() and rxint() methods
+   * are called.
    */
 
   CODE int (*attach)(FAR struct uart_dev_s *dev);
 
-  /* Detach UART interrupts.  This method is called when the serial port is
-   * closed normally just before the shutdown method is called.  The exception is
-   * the serial console which is never shutdown.
+  /* Detach UART interrupts. This method is called when the serial port is
+   * closed normally just before the shutdown method is called.
+   * The exception is the serial console which is never shutdown.
    */
 
   CODE void (*detach)(FAR struct uart_dev_s *dev);
@@ -257,8 +259,8 @@ struct uart_ops_s
 
   CODE void (*txint)(FAR struct uart_dev_s *dev, bool enable);
 
-  /* Return true if the tranmsit hardware is ready to send another byte.  This
-   * is used to determine if send() method can be called.
+  /* Return true if the tranmsit hardware is ready to send another byte.
+   * This is used to determine if send() method can be called.
    */
 
   CODE bool (*txready)(FAR struct uart_dev_s *dev);
@@ -341,9 +343,9 @@ struct uart_dev_s
 
 typedef struct uart_dev_s uart_dev_t;
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -354,155 +356,159 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_register
  *
  * Description:
  *   Register serial console and serial ports.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int uart_register(FAR const char *path, FAR uart_dev_t *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_xmitchars
  *
  * Description:
- *   This function is called from the UART interrupt handler when an interrupt
- *   is received indicating that there is more space in the transmit FIFO.  This
- *   function will send characters from the tail of the xmit buffer while the driver
- *   write() logic adds data to the head of the xmit buffer.
+ *  This function is called from the UART interrupt handler when an interrupt
+ *  is received indicating that there is more space in the transmit FIFO.
+ *  This function will send characters from the tail of the xmit buffer while
+ *  the driver write() logic adds data to the head of the xmit buffer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void uart_xmitchars(FAR uart_dev_t *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_receivechars
  *
  * Description:
- *   This function is called from the UART interrupt handler when an interrupt
- *   is received indicating that are bytes available to be received.  This
- *   function will add chars to head of receive buffer.  Driver read() logic
- *   will take characters from the tail of the buffer.
+ *  This function is called from the UART interrupt handler when an interrupt
+ *  is received indicating that are bytes available to be received.  This
+ *  function will add chars to head of receive buffer.  Driver read() logic
+ *  will take characters from the tail of the buffer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void uart_recvchars(FAR uart_dev_t *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_datareceived
  *
  * Description:
- *   This function is called from uart_recvchars when new serial data is place in
- *   the driver's circular buffer.  This function will wake-up any stalled read()
- *   operations that are waiting for incoming data.
+ *  This function is called from uart_recvchars when new serial data is place
+ *  in the driver's circular buffer.  This function will wake-up any stalled
+ *  read() operations that are waiting for incoming data.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void uart_datareceived(FAR uart_dev_t *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_datasent
  *
  * Description:
- *   This function is called from uart_xmitchars after serial data has been sent,
- *   freeing up some space in the driver's circular buffer. This function will
- *   wake-up any stalled write() operations that was waiting for space to buffer
- *   outgoing data.
+ *  This function is called from uart_xmitchars after serial data has been
+ *  sent, freeing up some space in the driver's circular buffer.
+ *  This function will wake-up any stalled write() operations that was
+ *  waiting for space to buffer outgoing data.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void uart_datasent(FAR uart_dev_t *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_connected
  *
  * Description:
- *   Serial devices (like USB serial) can be removed.  In that case, the "upper
- *   half" serial driver must be informed that there is no longer a valid serial
- *   channel associated with the driver.
+ *  Serial devices (like USB serial) can be removed. In that case, the "upper
+ *  half" serial driver must be informed that there is no longer a valid
+ *  serial channel associated with the driver.
  *
- *   In this case, the driver will terminate all pending transfers wint ENOTCONN and
- *   will refuse all further transactions while the "lower half" is disconnected.
- *   The driver will continue to be registered, but will be in an unusable state.
+ *  In this case, the driver will terminate all pending transfers wint
+ *  ENOTCONN and will refuse all further transactions while the "lower half"
+ *  is disconnected.
+ *  The driver will continue to be registered, but will be in an unusable
+ *  state.
  *
- *   Conversely, the "upper half" serial driver needs to know when the serial
- *   device is reconnected so that it can resume normal operations.
+ *  Conversely, the "upper half" serial driver needs to know when the
+ *  serial device is reconnected so that it can resume normal operations.
  *
  * Assumptions/Limitations:
- *   This function may be called from an interrupt handler.
+ *  This function may be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_REMOVABLE
 void uart_connected(FAR uart_dev_t *dev, bool connected);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_xmitchars_dma
  *
  * Description:
- *   Set up to transfer bytes from the TX circular buffer using DMA
+ *  Set up to transfer bytes from the TX circular buffer using DMA
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_TXDMA
 void uart_xmitchars_dma(FAR uart_dev_t *dev);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_xmitchars_done
  *
  * Description:
- *   Perform operations necessary at the complete of DMA including adjusting the
- *   TX circular buffer indices and waking up of any threads that may have been
- *   waiting for space to become available in the TX circular buffer.
+ *  Perform operations necessary at the complete of DMA including adjusting
+ *  the TX circular buffer indices and waking up of any threads that may
+ *  have been waiting for space to become available in the TX circular
+ *  buffer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_TXDMA
 void uart_xmitchars_done(FAR uart_dev_t *dev);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_recvchars_dma
  *
  * Description:
- *   Set up to receive bytes into the RX circular buffer using DMA
+ *  Set up to receive bytes into the RX circular buffer using DMA
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_RXDMA
 void uart_recvchars_dma(FAR uart_dev_t *dev);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_recvchars_done
  *
  * Description:
- *   Perform operations necessary at the complete of DMA including adjusting the
- *   RX circular buffer indices and waking up of any threads that may have been
- *   waiting for new data to become available in the RX circular buffer.
+ *  Perform operations necessary at the complete of DMA including adjusting
+ *  the RX circular buffer indices and waking up of any threads that may have
+ *  been waiting for new data to become available in the RX circular buffer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_RXDMA
 void uart_recvchars_done(FAR uart_dev_t *dev);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_reset_sem
  *
  * Description:
- *   This function is called when need reset uart semaphore, this may used in
- *   kill one process, but this process was reading/writing with the semaphore.
+ *  This function is called when need reset uart semaphore, this may used in
+ *  kill one process, but this process was reading/writing with the
+ *  semaphore.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void uart_reset_sem(FAR uart_dev_t *dev);
 
