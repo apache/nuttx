@@ -32,6 +32,8 @@
   $ pip3 install kflash
   $ kflash -p /dev/ttyUSB0 -b 1500000 ./nuttx/nuttx.bin
 
+  NOTE: The kflash_gui is not recommended because it's unstable
+
 6. TODO
 
   Support peripherals such as GPIO/SPI/I2C/...
