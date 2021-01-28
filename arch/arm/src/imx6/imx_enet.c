@@ -269,6 +269,9 @@
 struct imx_driver_s
 {
   bool bifup;                  /* true:ifup false:ifdown */
+#if CONFIG_IMX_ENET_NTXBUFFERS == 1
+  bool txbusy;
+#endif
   uint8_t txtail;              /* The oldest busy TX descriptor */
   uint8_t txhead;              /* The next TX descriptor to use */
   uint8_t rxtail;              /* The next RX descriptor to use */
@@ -460,6 +463,7 @@ static inline uint16_t imx_swap16(uint16_t value)
 
 static bool imx_txringfull(FAR struct imx_driver_s *priv)
 {
+#if CONFIG_IMX_ENET_NTXBUFFERS > 1
   uint8_t txnext;
 
   /* Check if there is room in the hardware to hold another outgoing
@@ -474,6 +478,9 @@ static bool imx_txringfull(FAR struct imx_driver_s *priv)
     }
 
   return priv->txtail == txnext;
+#else
+  return priv->txbusy;
+#endif
 }
 
 /****************************************************************************
@@ -513,6 +520,10 @@ static int imx_transmit(FAR struct imx_driver_s *priv)
       return -EBUSY;
     }
 
+#if CONFIG_IMX_ENET_NTXBUFFERS == 1
+  priv->txbusy = true;
+#endif
+
   /* When we get here the TX descriptor should show that the previous
    * transfer has  completed.  If we get here, then we are committed to
    * sending a packet; Higher level logic must have assured that there is
@@ -530,8 +541,10 @@ static int imx_transmit(FAR struct imx_driver_s *priv)
   up_invalidate_dcache((uintptr_t)txdesc,
                        (uintptr_t)txdesc + sizeof(struct enet_desc_s));
 
-  DEBUGASSERT(priv->txtail != priv->txhead &&
-             (txdesc->status1 & TXDESC_R) == 0);
+#if CONFIG_IMX_ENET_NTXBUFFERS > 1
+  DEBUGASSERT(priv->txtail != priv->txhead)
+#endif
+  DEBUGASSERT((txdesc->status1 & TXDESC_R) == 0);
 #endif
 
   /* Increment statistics */
@@ -543,6 +556,9 @@ static int imx_transmit(FAR struct imx_driver_s *priv)
    */
 
   txdesc->length   = imx_swap16(priv->dev.d_len);
+
+  ninfo("Sending packet, length: %d\n", priv->dev.d_len);
+
 #ifdef CONFIG_IMX_ENETENHANCEDBD
   txdesc->bdu      = 0x00000000;
   txdesc->status2  = TXDESC_INT | TXDESC_TS; /* | TXDESC_IINS | TXDESC_PINS; */
@@ -585,6 +601,11 @@ static int imx_transmit(FAR struct imx_driver_s *priv)
   putreg32(ENET_TDAR, IMX_ENET_TDAR);
 
   spin_unlock_irqrestore(flags);
+
+#if CONFIG_IMX_ENET_NTXBUFFERS == 1
+  priv->txbusy = false;
+#endif
+
   return OK;
 }
 
@@ -621,6 +642,8 @@ static int imx_txpoll(struct net_driver_s *dev)
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
    */
+
+  ninfo("Poll result: d_len=%d\n", priv->dev.d_len);
 
   if (priv->dev.d_len > 0)
     {
@@ -831,6 +854,7 @@ static void imx_receive(FAR struct imx_driver_s *priv)
 {
   struct enet_desc_s *rxdesc;
   bool received;
+  int  pktlen;
 
   /* Loop while there are received packets to be processed */
 
@@ -856,7 +880,10 @@ static void imx_receive(FAR struct imx_driver_s *priv)
            * in priv->dev.d_len
            */
 
-          priv->dev.d_len = imx_swap16(rxdesc->length);
+          pktlen = imx_swap16(rxdesc->length);
+          ninfo("Receiving packet, pktlen: %d\n", pktlen);
+
+          priv->dev.d_len = pktlen;
           priv->dev.d_buf = (uint8_t *)imx_swap32((uint32_t)rxdesc->data);
 
           /* Invalidate the buffer so that the correct packet will be re-read
