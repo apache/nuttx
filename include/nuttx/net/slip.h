@@ -50,7 +50,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***********************************************************/
+
+/* Configuration ************************************************************/
+
 /* SLIP Configuration:
  *
  *   CONFIG_NET_SLIP - Enables building of the SLIP driver
@@ -58,8 +60,8 @@
  *     threads.  Default: 2048
  *   CONFIG_NET_SLIP_DEFPRIO - Provides the priority for SLIP RX and TX
  *     threads.  Default 128.
- *   CONFIG_NET_NET_SLIP_PKTSIZE - Provides the size of the SLIP packet buffers.
- *     Default 296
+ *   CONFIG_NET_NET_SLIP_PKTSIZE - Provides the size of the SLIP packet
+ *     buffers.  Default 296
  *
  *     The Linux slip module hard-codes its MTU size to 296 (40 bytes for the
  *     IP+TCP headers plus 256 bytes of data).  So you might as well set

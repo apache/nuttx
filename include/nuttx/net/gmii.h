@@ -1,4 +1,4 @@
-/*********************************************************************************************
+/****************************************************************************
  * include/nuttx/net/gmii.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_NET_GMII_H
 #define __INCLUDE_NUTTX_NET_GMII_H
 
-/*********************************************************************************************
+/****************************************************************************
  * Included Files
- *********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/net/mii.h>
 
-/*********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *********************************************************************************************/
+ ****************************************************************************/
 
-/* MII register offsets **********************************************************************/
+/* MII register offsets *****************************************************/
 
 /* Common MII management registers. The IEEE 802.3 standard specifies a
  * register set for controlling and gathering status from the PHY layer. The
@@ -71,9 +71,11 @@
 #define GMII_ERDRR                    13              /* Extend Register - Data Read Register */
 #define GMII_ESTATUS                  MII_ESTATUS     /* Extended MII status register */
 
-/* Extended Registers: Registers 16-31 may be used for vendor specific abilities */
+/* Extended Registers:
+ * Registers 16-31 may be used for vendor specific abilities
+  */
 
-/* Micrel KSZ9021/31 Vendor Specific Register Addresses **************************************/
+/* Micrel KSZ9021/31 Vendor Specific Register Addresses *********************/
 
 #define GMII_KSZ90x1_RLPBK            17              /* Remote loopback, LED mode */
 #define GMII_KSZ90x1_LINKMD           18              /* LinkMD(c) cable diagnostic */
@@ -93,7 +95,7 @@
 #define GMII_KSZ90X1_RRDPSR           261             /* RGMII RX data pad skew */
 #define GMII_KSZ90x1_ATR              263             /* Analog test register */
 
-/* MII register bit settings *****************************************************************/
+/* MII register bit settings ************************************************/
 
 /* MII Control register bit definitions */
 
@@ -271,7 +273,7 @@
 
 /* Extend Register - Data Read Register (16-bit data value) */
 
-/* Micrel KSZ9021/31 Vendor Specific Register Bit Definitions ********************************/
+/* Micrel KSZ9021/31 Vendor Specific Register Bit Definitions ***************/
 
 /* KSZ8021/31 Register 27: Interrupt control/status */
 
@@ -293,13 +295,13 @@
 #define GMII_KSZ90x1_INT_RF           (1 << 1)  /* Remote fault interrupt */
 #define GMII_KSZ90x1_INT_LU           (1 << 0)  /* Link up interrupt */
 
-/*********************************************************************************************
+/****************************************************************************
  * Type Definitions
- *********************************************************************************************/
+ ****************************************************************************/
 
-/*********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- *********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

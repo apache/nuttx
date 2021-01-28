@@ -54,8 +54,8 @@
  * CONFIG_ENCX24J600 - Enabled ENCX24J600 support
  * CONFIG_ENCX24J600_SPIMODE - Controls the SPI mode
  * CONFIG_ENCX24J600_FREQUENCY - Define to use a different bus frequency
- * CONFIG_ENCX24J600_NINTERFACES - Specifies the number of physical ENCX24J600
- *   devices that will be supported.
+ * CONFIG_ENCX24J600_NINTERFACES - Specifies the number of physical
+ *                                 ENCX24J600 devices that will be supported.
  * CONFIG_ENCX24J600_HALFDUPPLEX - Default is full duplex
  */
 

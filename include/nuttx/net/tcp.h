@@ -189,7 +189,7 @@ struct tcp_stats_s
   net_stats_t rst;        /* Number of received TCP RST (reset) segments */
   net_stats_t rexmit;     /* Number of retransmitted TCP segments */
   net_stats_t syndrop;    /* Number of dropped SYNs due to too few
-                             available connections */
+                           * available connections */
   net_stats_t synrst;     /* Number of SYNs for closed ports triggering a RST */
 };
 #endif
