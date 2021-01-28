@@ -50,7 +50,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* IOCTL Commands ***********************************************************/
+
 /* The watchdog driver uses a standard character driver framework.  However,
  * since the watchdog driver is a device control interface and not a data
  * transfer interface, the majority of the functionality is implemented in
@@ -63,7 +65,8 @@
  * WDIOC_STOP       - Stop the watchdog timer
  *                    Argument: Ignored
  * WDIOC_GETSTATUS  - Get the status of the watchdog timer.
- *                    Argument:  A writeable pointer to struct watchdog_status_s.
+ *                    Argument:  A writeable pointer to struct
+ *                               watchdog_status_s.
  * WDIOC_SETTIMEOUT - Reset the watchdog timeout to this value
  *                    Argument: A 32-bit timeout value in milliseconds.
  * WDIOC_CAPTURE    - Do not reset.  Instead, called this handler.
@@ -90,6 +93,7 @@
 #define WDIOC_MINTIME    _WDIOC(0x080)
 
 /* Bit Settings *************************************************************/
+
 /* Bit settings for the struct watchdog_status_s flags field */
 
 #define WDFLAGS_ACTIVE   (1 << 0) /* 1=The watchdog timer is running */
@@ -100,6 +104,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This is the type of the argument passed to the WDIOC_CAPTURE ioctl */
 
 struct watchdog_capture_s
@@ -127,7 +132,8 @@ struct watchdog_status_s
 struct watchdog_lowerhalf_s;
 struct watchdog_ops_s
 {
-  /* Required methods ********************************************************/
+  /* Required methods *******************************************************/
+
   /* Start the watchdog timer, resetting the time to the current timeout */
 
   CODE int (*start)(FAR struct watchdog_lowerhalf_s *lower);
@@ -136,7 +142,8 @@ struct watchdog_ops_s
 
   CODE int (*stop)(FAR struct watchdog_lowerhalf_s *lower);
 
-  /* Optional methods ********************************************************/
+  /* Optional methods *******************************************************/
+
   /* Reset the watchdog timer to the current timeout value, prevent any
    * imminent watchdog timeouts.  This is sometimes referred as "pinging" the
    * watchdog timer or "petting the dog".
@@ -207,15 +214,15 @@ extern "C"
  * Name: watchdog_register
  *
  * Description:
- *   This function binds an instance of a "lower half" watchdog driver with the
- *   "upper half" watchdog device and registers that device so that can be used
- *   by application code.
+ *   This function binds an instance of a "lower half" watchdog driver with
+ *   the "upper half" watchdog device and registers that device so that can
+ *   be used by application code.
  *
  *   When this function is called, the "lower half" driver should be in the
  *   disabled state (as if the stop() method had already been called).
  *
- *   NOTE:  This function would not be called by application code.  Rather it is
- *   called indirectly through the architecture-specific interfaces.
+ *   NOTE:  This function would not be called by application code.  Rather it
+ *   is called indirectly through the architecture-specific interfaces.
  *
  * Input Parameters:
  *   dev path - The full path to the driver to be registers in the NuttX
