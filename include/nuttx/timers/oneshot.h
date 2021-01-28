@@ -52,7 +52,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* IOCTL commands ***********************************************************/
+
 /* These commands are used by applications to access the oneshot lower-half
  * logic via the oneshot character driver IOCTL command.  Since the oneshot
  * driver is a device control interface and not a data transfer interface,
@@ -187,8 +189,9 @@
  */
 
 struct oneshot_lowerhalf_s;
-typedef CODE void (*oneshot_callback_t)(FAR struct oneshot_lowerhalf_s *lower,
-                                        FAR void *arg);
+typedef CODE void (*oneshot_callback_t)
+                       (FAR struct oneshot_lowerhalf_s *lower,
+                        FAR void *arg);
 
 /* The one short operations supported by the lower half driver */
 
@@ -206,7 +209,9 @@ struct oneshot_operations_s
                       FAR struct timespec *ts);
 };
 
-/* This structure describes the state of the oneshot timer lower-half driver */
+/* This structure describes the state of the oneshot timer lower-half
+ * driver
+ */
 
 struct oneshot_lowerhalf_s
 {

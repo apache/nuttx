@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * include/nuttx/timers/cs2100-cp.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_TIMERS_CS2100_CP_H
 #define __INCLUDE_NUTTX_TIMERS_CS2100_CP_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,9 +47,10 @@
 
 #ifdef CONFIG_TIMERS_CS2100CP
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_I2C
@@ -65,7 +66,7 @@
 #  undef CONFIG_CS2100CP_REGDEBUG
 #endif
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define CS2100_DEVID                       0x01      /* Device ID and Revision */
 #define CS2100_DEVCTL                      0x02      /* Device Control */
@@ -79,7 +80,7 @@
 #define CS2100_FNCCFG2                     0x17      /* Function Configuration 2 */
 #define CS2100_FNCCFG3                     0x1e      /* Function Configuration 3 */
 
-/* Register Bit Field Definitions ***********************************************************/
+/* Register Bit Field Definitions *******************************************/
 
 /* Device ID and Revision */
 
@@ -104,6 +105,7 @@
 #  define CS2100_DEVCFG1_AUXOUTSRC_CLKIN   (1 << CS2100_DEVCFG1_AUXOUTSRC_SHIFT) /* CLK_IN */
 #  define CS2100_DEVCFG1_AUXOUTSRC_CLKOUT  (2 << CS2100_DEVCFG1_AUXOUTSRC_SHIFT) /* CLK_OUT */
 #  define CS2100_DEVCFG1_AUXOUTSRC_PLLLOCK (3 << CS2100_DEVCFG1_AUXOUTSRC_SHIFT) /* PLL Lock Status Indicator*/
+
 #define CS2100_DEVCFG1_RMODSEL_SHIFT       (5)       /* Bit 5-7: Selects R-Mod value */
 #define CS2100_DEVCFG1_RMODSEL_MASK        (7 << CS2100_DEVCFG1_RMODSEL_SHIFT)
 #  define CS2100_DEVCFG1_RMODSEL_NONE      (0 << CS2100_DEVCFG1_RMODSEL_SHIFT) /* Left-shift R-value by 0 (x 1) */
@@ -153,9 +155,9 @@
 #  define CS2100_FNCCFG3_CLKINBW_64HZ      (6 << CS2100_FNCCFG3_CLKINBW_SHIFT) /* 64 Hz */
 #  define CS2100_FNCCFG3_CLKINBW_128HZ     (7 << CS2100_FNCCFG3_CLKINBW_SHIFT) /* 128 Hz */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 struct cs2100_config_s
 {
@@ -169,9 +171,9 @@ struct cs2100_config_s
   bool xtal;                     /* false: Refclck, true: Crystal on XTI/XTO */
 };
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -181,13 +183,13 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 struct i2c_master_s;  /* Forward reference */
 
-/********************************************************************************************
+/****************************************************************************
  * Name: cs2100_enable
  *
  * Description:
@@ -199,39 +201,41 @@ struct i2c_master_s;  /* Forward reference */
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int cs2100_enable(FAR const struct cs2100_config_s *config);
 
-/********************************************************************************************
+/****************************************************************************
  * Name: cs2100_disable
  *
  * Description:
  *   Disable CS2100 CLK_OUT
  *
  * Input Parameters:
- *   config  - CS2100-CP configuration (Needed only for I2C access: i2c and i2caddr)
+ *   config  - CS2100-CP configuration
+ *             (Needed only for I2C access: i2c and i2caddr)
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int cs2100_disable(FAR const struct cs2100_config_s *config);
 
-/********************************************************************************************
+/****************************************************************************
  * Name: cs2100_dump
  *
  * Description:
  *   Dump CS2100-CP registers to the SysLog
  *
  * Input Parameters:
- *   config  - CS2100-CP configuration (Needed only for I2C access: i2c and i2caddr)
+ *   config  - CS2100-CP configuration
+ *            (Needed only for I2C access: i2c and i2caddr)
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_CS2100CP_DEBUG
 int cs2100_dump(FAR const struct cs2100_config_s *config);

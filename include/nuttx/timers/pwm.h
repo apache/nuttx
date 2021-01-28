@@ -38,9 +38,9 @@
 
 /* For the purposes of this driver, a PWM device is any device that generates
  * periodic output pulses s of controlled frequency and pulse width.  Such a
- * device might be used, for example, to perform pulse-width modulated output or
- * frequency/pulse-count modulated output (such as might be needed to control
- * a stepper motor).
+ * device might be used, for example, to perform pulse-width modulated output
+ * or frequency/pulse-count modulated output (such as might be needed to
+ * control a stepper motor).
  *
  * The PWM driver is split into two parts:
  *
@@ -87,34 +87,35 @@
  * ioctl calls.  The PWM ioctl commands are listed below:
  *
  * PWMIOC_SETCHARACTERISTICS - Set the characteristics of the next pulsed
- *   output.  This command will neither start nor stop the pulsed output.
- *   It will either setup the configuration that will be used when the
- *   output is started; or it will change the characteristics of the pulsed
- *   output on the fly if the timer is already started.  This command will
- *   set the PWM characteristics and return immediately.
+ *  output.  This command will neither start nor stop the pulsed output.
+ *  It will either setup the configuration that will be used when the
+ *  output is started; or it will change the characteristics of the pulsed
+ *  output on the fly if the timer is already started.  This command will
+ *  set the PWM characteristics and return immediately.
  *
- *   ioctl argument:  A read-only reference to struct pwm_info_s that provides
- *   the characteristics of the pulsed output.
+ *  ioctl argument: A read-only reference to struct pwm_info_s that provides
+ *  the characteristics of the pulsed output.
  *
  * PWMIOC_GETCHARACTERISTICS - Get the currently selected characteristics of
- *   the pulsed output (independent of whether the output is start or stopped).
+ *                             the pulsed output (independent of whether the
+ *                             output is start or stopped).
  *
- *   ioctl argument:  A reference to struct pwm_info_s to receive the
- *   characteristics of the pulsed output.
+ *  ioctl argument:  A reference to struct pwm_info_s to receive the
+ *  characteristics of the pulsed output.
  *
  * PWMIOC_START - Start the pulsed output.  The PWMIOC_SETCHARACTERISTICS
- *   command must have previously been sent. If CONFIG_PWM_PULSECOUNT is
- *   defined and the pulse count was configured to a non-zero value, then
- *   this ioctl call will, by default, block until the programmed pulse count
- *   completes.  That default blocking behavior can be overridden by using
- *   the O_NONBLOCK flag when the PWM driver is opened.
+ *  command must have previously been sent. If CONFIG_PWM_PULSECOUNT is
+ *  defined and the pulse count was configured to a non-zero value, then
+ *  this ioctl call will, by default, block until the programmed pulse count
+ *  completes.  That default blocking behavior can be overridden by using
+ *  the O_NONBLOCK flag when the PWM driver is opened.
  *
- *   ioctl argument:  None
+ *  ioctl argument:  None
  *
  * PWMIOC_STOP - Stop the pulsed output.  This command will stop the PWM
- *   and return immediately.
+ *  and return immediately.
  *
- *   ioctl argument:  None
+ *  ioctl argument:  None
  */
 
 #define PWMIOC_SETCHARACTERISTICS _PWMIOC(1)
@@ -146,6 +147,7 @@ struct pwm_info_s
 
 #ifdef CONFIG_PWM_MULTICHAN
                                 /* Per-channel output state */
+
   struct pwm_chan_s  channels[CONFIG_PWM_NCHANNELS];
 
 #else
@@ -175,8 +177,8 @@ struct pwm_ops_s
   CODE int (*setup)(FAR struct pwm_lowerhalf_s *dev);
 
   /* This method is called when the driver is closed.  The lower half driver
-   * should stop pulsed output, free any resources, disable the timer hardware, and
-   * put the system into the lowest possible power usage state
+   * should stop pulsed output, free any resources, disable the timer
+   * hardware, and put the system into the lowest possible power usage state
    */
 
   CODE int (*shutdown)(FAR struct pwm_lowerhalf_s *dev);
@@ -212,9 +214,9 @@ struct pwm_ops_s
  * maintain state information.
  *
  * Normally that timer logic will have its own, custom state structure
- * that is simply cast to struct pwm_lowerhalf_s.  In order to perform such casts,
- * the initial fields of the custom state structure match the initial fields
- * of the following generic PWM state structure.
+ * that is simply cast to struct pwm_lowerhalf_s.  In order to perform such
+ * casts, the initial fields of the custom state structure match the initial
+ * fields of the following generic PWM state structure.
  */
 
 struct pwm_lowerhalf_s
@@ -249,6 +251,7 @@ extern "C"
 /****************************************************************************
  * "Upper-Half" PWM Driver Interfaces
  ****************************************************************************/
+
 /****************************************************************************
  * Name: pwm_register
  *
@@ -265,7 +268,7 @@ extern "C"
  *     filesystem.  The recommended convention is to name all PWM drivers
  *     as "/dev/pwm0", "/dev/pwm1", etc.  where the driver path differs only
  *     in the "minor" number at the end of the device name.
- *   dev - A pointer to an instance of lower half timer driver.  This instance
+ *   dev - A pointer to an instance of lower half timer driver. This instance
  *     is bound to the PWM driver and must persists as long as the driver
  *     persists.
  *

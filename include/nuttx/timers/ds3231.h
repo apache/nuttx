@@ -56,18 +56,20 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: dsxxxx_rtc_initialize
  *
  * Description:
- *   Initialize the hardware RTC per the selected configuration.  This function is
- *   called once during the OS initialization sequence by board-specific logic.
+ *   Initialize the hardware RTC per the selected configuration.
+ *   This function is called once during the OS initialization sequence by
+ *   board-specific logic.
  *
- *   After dsxxxx_rtc_initialize() is called, the OS function clock_synchronize()
- *   should also be called to synchronize the system timer to the hardware RTC.  That
- *   operation is normally performed automatically by the system during clock
- *   initialization.  However, when an external RTC is used, the board logic will
- *   need to explicitly re-synchronize the system timer to the RTC when the RTC
+ *   After dsxxxx_rtc_initialize() is called, the OS function
+ *   clock_synchronize() should also be called to synchronize the system
+ *   timer to the hardware RTC.  That operation is normally performed
+ *   automatically by the system during clock initialization.
+ *   However, when an external RTC is used, the board logic will need to
+ *   explicitly re-synchronize the system timer to the RTC when the RTC
  *   becomes available.
  *
  * Input Parameters:
@@ -76,7 +78,7 @@ extern "C"
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 struct i2c_master_s; /* Forward reference */
 int dsxxxx_rtc_initialize(FAR struct i2c_master_s *i2c);
