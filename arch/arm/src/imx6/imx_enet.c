@@ -102,6 +102,10 @@
 #  error "Need at least one TX buffer"
 #endif
 
+#if !defined (CONFIG_NET_TCP_WRITE_BUFFERS) && (CONFIG_IMX_ENET_NTXBUFFERS != 1)
+#  error "CONFIG_IMX_ENET_NTXBUFFERS must be 1 without TCP_WRITE_BUFFERS"
+#endif
+
 #if CONFIG_IMX_ENET_NRXBUFFERS < 1
 #  error "Need at least one RX buffer"
 #endif
