@@ -135,9 +135,14 @@ static FAR struct work_notifier_entry_s *work_notifier_find(uint32_t key)
 
 static uint32_t work_notifier_key(void)
 {
-  static uint32_t g_notifier_key;
+  static uint32_t notifier_key;
 
-  return g_notifier_key++;
+  if (++notifier_key == 0)
+    {
+      ++notifier_key;
+    }
+
+  return notifier_key;
 }
 
 /****************************************************************************
@@ -282,8 +287,6 @@ int work_notifier_teardown(int key)
   FAR struct work_notifier_entry_s *notifier;
   irqstate_t flags;
   int ret = OK;
-
-  DEBUGASSERT(key > 0 && key <= INT16_MAX);
 
   /* Disable interrupts very briefly. */
 
