@@ -901,6 +901,12 @@ config ESP32_WIFI_CONNECT_TIMEOUT
 	help
 		Max waiting time of connecting to AP.
 
+config ESP32_WIFI_SCAN_RESULT_SIZE
+	int "Scan result buffer"
+	default 4096
+	help
+		Maximum scan result buffer size.
+
 config ESP32_WIFI_SAVE_PARAM
 	bool "Save WiFi Parameters"
 	default n
