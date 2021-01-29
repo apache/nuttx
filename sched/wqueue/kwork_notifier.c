@@ -65,7 +65,7 @@ struct work_notifier_entry_s
 
   /* Additional payload needed to manage the notification */
 
-  int16_t key;                  /* Unique ID for the notification */
+  uint32_t key;                 /* Unique ID for the notification */
 };
 
 /****************************************************************************
@@ -86,10 +86,6 @@ static dq_queue_t g_notifier_free;
 
 static dq_queue_t g_notifier_pending;
 
-/* Used for lookup key generation */
-
-static uint16_t g_notifier_key;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -103,7 +99,7 @@ static uint16_t g_notifier_key;
  *
  ****************************************************************************/
 
-static FAR struct work_notifier_entry_s *work_notifier_find(int16_t key)
+static FAR struct work_notifier_entry_s *work_notifier_find(uint32_t key)
 {
   FAR struct work_notifier_entry_s *notifier;
   FAR dq_entry_t *entry;
@@ -118,7 +114,7 @@ static FAR struct work_notifier_entry_s *work_notifier_find(int16_t key)
 
       /* Is this the one we were looking for? */
 
-      if (notifier->key ==  key)
+      if (notifier->key == key)
         {
           /* Yes.. return a reference to it */
 
@@ -137,24 +133,11 @@ static FAR struct work_notifier_entry_s *work_notifier_find(int16_t key)
  *
  ****************************************************************************/
 
-static int16_t work_notifier_key(void)
+static uint32_t work_notifier_key(void)
 {
-  int16_t key;
+  static uint32_t g_notifier_key;
 
-  /* Loop until a unique key is generated.  Range 1-INT16_MAX. */
-
-  do
-    {
-      if (g_notifier_key >= INT16_MAX)
-        {
-          g_notifier_key = 0;
-        }
-
-      key = (int16_t)++g_notifier_key;
-    }
-  while (work_notifier_find(key) != NULL);
-
-  return key;
+  return g_notifier_key++;
 }
 
 /****************************************************************************
