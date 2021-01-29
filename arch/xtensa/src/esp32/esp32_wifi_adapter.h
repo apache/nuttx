@@ -64,7 +64,8 @@ extern "C"
 
 enum wifi_adpt_evt_e
 {
-  WIFI_ADPT_EVT_STA_START = 0,
+  WIFI_ADPT_EVT_SCAN_DONE = 0,
+  WIFI_ADPT_EVT_STA_START,
   WIFI_ADPT_EVT_STA_CONNECT,
   WIFI_ADPT_EVT_STA_DISCONNECT,
   WIFI_ADPT_EVT_STA_AUTHMODE_CHANGE,
@@ -145,7 +146,8 @@ int esp_wifi_notify_subscribe(pid_t pid, FAR struct sigevent *event);
  *   None
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -161,7 +163,8 @@ int esp_wifi_sta_start(void);
  *   None
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -178,7 +181,8 @@ int esp_wifi_sta_stop(void);
  *   len  - Packet length
  *
  * Returned Value:
- *   0 if success or others if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -194,7 +198,8 @@ int esp_wifi_sta_send_data(void *pbuf, uint32_t len);
  *   recv_cb - Receive callback function
  *
  * Returned Value:
- *   0 if success or others if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -238,35 +243,55 @@ int esp_wifi_sta_read_mac(uint8_t *mac);
  * Name: esp_wifi_set_password
  *
  * Description:
- *   Set WiFi station password
+ *   Set/Get WiFi station password
  *
  * Input Parameters:
- *   pdata - Password buffer pointer
- *   len   - Password length
+ *   iwr - The argument of the ioctl cmd
+ *   set   - true: set data; false: get data
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
-int esp_wifi_sta_set_password(const uint8_t *pdata, uint8_t len);
+int esp_wifi_sta_password(struct iwreq *iwr, bool set);
 
 /****************************************************************************
- * Name: esp_wifi_set_ssid
+ * Name: esp_wifi_sta_essid
  *
  * Description:
- *   Set WiFi station SSID
+ *   Set/Get WiFi station ESSID
  *
  * Input Parameters:
- *   pdata - SSID buffer pointer
- *   len   - SSID length
+ *   iwr - The argument of the ioctl cmd
+ *   set   - true: set data; false: get data
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
-int esp_wifi_sta_set_ssid(const uint8_t *pdata, uint8_t len);
+int esp_wifi_sta_essid(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_sta_bssid
+ *
+ * Description:
+ *   Set/Get WiFi station BSSID
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set   - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_sta_bssid(struct iwreq *iwr, bool set);
 
 /****************************************************************************
  * Name: esp_wifi_sta_connect
@@ -278,7 +303,8 @@ int esp_wifi_sta_set_ssid(const uint8_t *pdata, uint8_t len);
  *   None
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -294,11 +320,156 @@ int esp_wifi_sta_connect(void);
  *   None
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
 int esp_wifi_sta_disconnect(void);
+
+/****************************************************************************
+ * Name: esp_wifi_sta_mode
+ *
+ * Description:
+ *   Set/Get WiFi Station mode code.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_sta_mode(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_sta_auth
+ *
+ * Description:
+ *   Set/Get station authentication mode params.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_sta_auth(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_sta_freq
+ *
+ * Description:
+ *   Get station frequency.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_sta_freq(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_sta_bitrate
+ *
+ * Description:
+ *   Get station default bit rate (Mbps).
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_sta_bitrate(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_sta_get_txpower
+ *
+ * Description:
+ *   Get station transmit power (dBm).
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_sta_txpower(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_sta_get_channel_range
+ *
+ * Description:
+ *   Get station range of channel parameters.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_sta_channel(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_sta_country
+ *
+ * Description:
+ *   Configure country info.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_sta_country(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_sta_rssi
+ *
+ * Description:
+ *   Get WiFi sensitivity (dBm).
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_sta_rssi(struct iwreq *iwr, bool set);
 #endif
 
 #ifdef ESP32_WLAN_HAS_SOFTAP
@@ -313,7 +484,8 @@ int esp_wifi_sta_disconnect(void);
  *   None
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -329,7 +501,8 @@ int esp_wifi_softap_start(void);
  *   None
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -346,7 +519,8 @@ int esp_wifi_softap_stop(void);
  *   len  - Packet length
  *
  * Returned Value:
- *   0 if success or others if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -362,7 +536,8 @@ int esp_wifi_softap_send_data(void *pbuf, uint32_t len);
  *   recv_cb - Receive callback function
  *
  * Returned Value:
- *   0 if success or others if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -403,38 +578,58 @@ void esp_wifi_softap_register_txdone_cb(wifi_txdone_cb_t cb);
 int esp_wifi_softap_read_mac(uint8_t *mac);
 
 /****************************************************************************
- * Name: esp_wifi_softap_set_password
+ * Name: esp_wifi_softap_password
  *
  * Description:
- *   Set WiFi softAP password
+ *   Set/Get WiFi SoftAP password
  *
  * Input Parameters:
- *   pdata - Password buffer pointer
- *   len   - Password length
+ *   iwr - The argument of the ioctl cmd
+ *   set   - true: set data; false: get data
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
-int esp_wifi_softap_set_password(const uint8_t *pdata, uint8_t len);
+int esp_wifi_softap_password(struct iwreq *iwr, bool set);
 
 /****************************************************************************
- * Name: esp_wifi_softap_set_ssid
+ * Name: esp_wifi_softap_essid
  *
  * Description:
- *   Set WiFi softAP SSID
+ *   Set/Get WiFi SoftAP ESSID
  *
  * Input Parameters:
- *   pdata - SSID buffer pointer
- *   len   - SSID length
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
-int esp_wifi_softap_set_ssid(const uint8_t *pdata, uint8_t len);
+int esp_wifi_softap_essid(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_softap_bssid
+ *
+ * Description:
+ *   Set/Get WiFi softAP BSSID
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set   - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_bssid(struct iwreq *iwr, bool set);
 
 /****************************************************************************
  * Name: esp_wifi_softap_connect
@@ -446,7 +641,8 @@ int esp_wifi_softap_set_ssid(const uint8_t *pdata, uint8_t len);
  *   None
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -462,11 +658,155 @@ int esp_wifi_softap_connect(void);
  *   None
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
 int esp_wifi_softap_disconnect(void);
+
+/****************************************************************************
+ * Name: esp_wifi_softap_mode
+ *
+ * Description:
+ *   Set/Get WiFi SoftAP mode code.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_mode(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_softap_auth
+ *
+ * Description:
+ *   Set/Get authentication mode params.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_auth(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_softap_freq
+ *
+ * Description:
+ *   Set/Get SoftAP frequency.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_freq(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_softap_get_bitrate
+ *
+ * Description:
+ *   Get SoftAP default bit rate (Mbps).
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_bitrate(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_softap_txpower
+ *
+ * Description:
+ *   Get SoftAP transmit power (dBm).
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_txpower(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_softap_channel
+ *
+ * Description:
+ *   Get SoftAP range of channel parameters.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_channel(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_softap_country
+ *
+ * Description:
+ *   Configure country info.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_country(struct iwreq *iwr, bool set);
+
+/****************************************************************************
+ * Name: esp_wifi_softap_rssi
+ *
+ * Description:
+ *   Get WiFi sensitivity (dBm).
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_rssi(struct iwreq *iwr, bool set);
 #endif
 
 #ifdef __cplusplus
