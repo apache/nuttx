@@ -246,7 +246,7 @@
 
 #define W25Q256_SECTOR_SIZE         (4 * 1024)
 #define W25Q256_SECTOR_SHIFT        (12)
-#define W25Q256_SECTOR_COUNT        (8196)
+#define W25Q256_SECTOR_COUNT        (8192)
 #define W25Q256_PAGE_SIZE           (256)
 #define W25Q256_PAGE_SHIFT          (8)
 
