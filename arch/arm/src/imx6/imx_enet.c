@@ -546,7 +546,7 @@ static int imx_transmit(FAR struct imx_driver_s *priv)
                        (uintptr_t)txdesc + sizeof(struct enet_desc_s));
 
 #if CONFIG_IMX_ENET_NTXBUFFERS > 1
-  DEBUGASSERT(priv->txtail != priv->txhead)
+  DEBUGASSERT(priv->txtail != priv->txhead);
 #endif
   DEBUGASSERT((txdesc->status1 & TXDESC_R) == 0);
 #endif
