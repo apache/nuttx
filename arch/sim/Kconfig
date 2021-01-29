@@ -551,7 +551,7 @@ config SIM_BTUART
 		target via HCI_CHANNEL_USER. This gives NuttX full
 		control of the device, but is abstracted from the
 		physical interface which is still handled by Linux.
-		Unlike SIM_HCISOCKET, HCITTY will wrap the bluetooth
+		Unlike SIM_HCISOCKET, BTUART will wrap the bluetooth
 		interface/controller as a TTY device, which provides
 		an option for developers to setup the bluetooth host in
 		userspace.
