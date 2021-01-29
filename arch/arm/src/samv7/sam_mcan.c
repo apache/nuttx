@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
@@ -912,8 +913,8 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg);
 
 /* Semaphore helpers */
 
-static void mcan_dev_lock(FAR struct sam_mcan_s *priv);
-static void mcan_dev_lock_noncancelable(FAR struct sam_mcan_s *priv);
+static int mcan_dev_lock(FAR struct sam_mcan_s *priv);
+static int mcan_dev_lock_noncancelable(FAR struct sam_mcan_s *priv);
 #define mcan_dev_unlock(priv) nxsem_post(&priv->locksem)
 
 static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv);
@@ -1375,7 +1376,7 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
 
 static int mcan_dev_lock(FAR struct sam_mcan_s *priv)
 {
-  ret = nxsem_wait_uninterruptible(&priv->locksem);
+  return nxsem_wait_uninterruptible(&priv->locksem);
 }
 
 /****************************************************************************
@@ -1388,14 +1389,14 @@ static int mcan_dev_lock(FAR struct sam_mcan_s *priv)
  *
  ****************************************************************************/
 
-static int mcan_dev_lock_noncancelable(FAR struct sam_can_s *priv)
+static int mcan_dev_lock_noncancelable(FAR struct sam_mcan_s *priv)
 {
   int result;
   int ret = OK;
 
   do
     {
-      result = nxsem_wait_uninterruptible(&priv->exclsem);
+      result = nxsem_wait_uninterruptible(&priv->locksem);
 
       /* The only expected error is ECANCELED which would occur if the
        * calling thread were canceled.
@@ -1571,7 +1572,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
         }
 #endif
 
-      /* The semaphore value is reasonable.  Wait for the next TC interrupt. */
+      /* The semaphore value is reasonable. Wait for the next TC interrupt. */
 
       ret = nxsem_wait(&priv->txfsem);
       leave_critical_section(flags);
@@ -1772,6 +1773,7 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
   int word;
   int bit;
   int ndx;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL && extconfig != NULL);
   config = priv->config;
@@ -1843,7 +1845,7 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
 
           /* Flush the filter entry into physical RAM */
 
-          up_clean_dcache((uintptr_t)extfilter, (uintptr_t)exfilter + 8);
+          up_clean_dcache((uintptr_t)extfilter, (uintptr_t)extfilter + 8);
 
           /* Is this the first extended filter? */
 
@@ -1922,6 +1924,7 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
   uint32_t regval;
   int word;
   int bit;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
@@ -2932,8 +2935,8 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   config = priv->config;
 
   caninfo("MCAN%d\n", config->port);
-  caninfo("MCAN%d ID: %d DLC: %d\n",
-          config->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  caninfo("MCAN%d ID: %"PRIu32" DLC: %u\n",
+          config->port, (uint32_t)msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   /* That that FIFO elements were configured.
    *
@@ -3148,6 +3151,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
   int tffl;
 #endif
   bool empty;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
 
@@ -3421,7 +3425,9 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   unsigned int nbytes;
   int ret;
 
-  /* Invalidate the D-Cache so that we reread the RX buffer data from memory. */
+  /* Invalidate the D-Cache to ensure
+   * that we reread the RX buffer data from memory.
+   */
 
   nbytes = (nwords << 2);
   up_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
@@ -3544,7 +3550,8 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
 
           if ((pending & MCAN_CMNERR_INTS) != 0)
             {
-              canerr("ERROR: Common %08x\n", pending & MCAN_CMNERR_INTS);
+              canerr("ERROR: Common %08"PRIx32"\n",
+                     pending & MCAN_CMNERR_INTS);
 
               /* Clear the error indications */
 
@@ -3555,7 +3562,7 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
 
           if ((pending & MCAN_TXERR_INTS) != 0)
             {
-              canerr("ERROR: TX %08x\n", pending & MCAN_TXERR_INTS);
+              canerr("ERROR: TX %08"PRIx32"\n", pending & MCAN_TXERR_INTS);
 
               /* An Acknowledge-Error will occur if for example the device
                * is not connected to the bus.
@@ -3589,7 +3596,7 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
 
           if ((pending & MCAN_RXERR_INTS) != 0)
             {
-              canerr("ERROR: RX %08x\n", pending & MCAN_RXERR_INTS);
+              canerr("ERROR: RX %08"PRIx32"\n", pending & MCAN_RXERR_INTS);
 
               /* To prevent Interrupt-Flooding the current active
                * RX error interrupts are disabled. After successfully
@@ -3746,7 +3753,7 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
 
           if ((regval & MCAN_RXF0S_RF0L) != 0)
             {
-              canerr("ERROR: Message lost: %08x\n", regval);
+              canerr("ERROR: Message lost: %08"PRIx32"\n", regval);
             }
           else
             {
@@ -3786,7 +3793,7 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
 
           if ((regval & MCAN_RXF0S_RF0L) != 0)
             {
-              canerr("ERROR: Message lost: %08x\n", regval);
+              canerr("ERROR: Message lost: %08"PRIx32"\n", regval);
             }
           else
             {
@@ -3815,6 +3822,8 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
         }
     }
   while (handled);
+
+  return OK;
 }
 
 /****************************************************************************
