@@ -1144,6 +1144,11 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
            */
 
           blresult = net_breaklock(&count);
+
+          /* NOTE: At least IOB needs to hold the packet */
+
+          DEBUGASSERT((CONFIG_IOB_NBUFFERS * CONFIG_IOB_BUFSIZE) > len);
+
           result = TCP_WBCOPYIN(wrb, (FAR uint8_t *)buf, len);
           if (blresult >= 0)
             {
