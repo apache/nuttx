@@ -621,6 +621,7 @@ menu "SPI Configuration"
 config NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
 	bool "Master 1 Byte transfer anomaly workaround"
 	depends on NRF52_SPI_MASTER && ARCH_CHIP_NRF52832
+	select NRF52_PPI
 	default y
 	---help---
 		Enable the workaround to fix SPI Master 1 byte transfer bug
