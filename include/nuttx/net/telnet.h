@@ -62,7 +62,8 @@
  *
  * Command:      SIOCTELNET
  * Description:  Create a Telnet sessions.
- * Argument:     A pointer to a write-able instance of struct telnet_session_s.
+ * Argument:     A pointer to a write-able instance of struct
+ *               telnet_session_s.
  * Dependencies: CONFIG_NETDEV_TELNET
  */
 
@@ -73,7 +74,7 @@ struct telnet_session_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
