@@ -1223,7 +1223,7 @@ static void nrf52_spi_sndblock(FAR struct spi_dev_s *dev,
                                FAR const void *txbuffer,
                                size_t nwords)
 {
-  spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
+  spiinfo("txbuffer=%p nwords=%zu\n", txbuffer, nwords);
   return nrf52_spi_exchange(dev, txbuffer, NULL, nwords);
 }
 
@@ -1249,8 +1249,8 @@ static void nrf52_spi_recvblock(FAR struct spi_dev_s *dev,
                                 FAR void *rxbuffer,
                                 size_t nwords)
 {
-  spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
-  return nrf52_spi_exchange(dev, rxbuffer, NULL, nwords);
+  spiinfo("txbuffer=%p nwords=%zu\n", rxbuffer, nwords);
+  return nrf52_spi_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif /* CONFIG_SPI_EXCHANGE */
 
