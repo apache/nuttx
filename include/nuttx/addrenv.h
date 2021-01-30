@@ -52,7 +52,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Pre-requisites */
 
 #ifndef CONFIG_MM_PGALLOC
@@ -346,7 +348,8 @@ struct addrenv_reserve_s
  * If CONFIG_ARCH_STACK_DYNAMIC=y is selected then the platform specific
  * code must export these additional interfaces:
  *
- *   up_addrenv_kstackalloc  - Create a stack in the kernel address environment
+ *   up_addrenv_kstackalloc  - Create a stack in the kernel address
+ *                             environment
  *   up_addrenv_kstackfree   - Destroy the kernel stack.
  *
  ****************************************************************************/
