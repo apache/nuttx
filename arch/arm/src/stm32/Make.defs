@@ -63,10 +63,6 @@ ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
 CMN_CSRCS += arm_stackcheck.c
 endif
 
-ifeq ($(CONFIG_ARM_LWL_CONSOLE),y)
-CMN_CSRCS += arm_lwl_console.c
-endif
-
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
 CMN_ASRCS += arm_lazyexception.S
 else
