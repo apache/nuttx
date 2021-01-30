@@ -44,7 +44,7 @@
 
 #ifdef CONFIG_NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
 #  include "hardware/nrf52_gpiote.h"
-#  include "hardware/nrf52_ppi.h"
+#  include "nrf52_ppi.h"
 #endif
 
 /****************************************************************************
@@ -63,7 +63,7 @@
 /* Reserve PPI channel and GPIOTE channel for 1 byte transfer workaround */
 
 #ifdef CONFIG_NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
-#  define SPI_1B_WORKAROUND_PPI_CHAN    (18)
+#  define SPI_1B_WORKAROUND_PPI_CHAN    (NRF52_PPI_NUM_CONFIGURABLE_CHANNELS - 1)
 #  define SPI_1B_WORKAROUND_GPIOTE_CHAN (7)
 #endif
 
@@ -1016,29 +1016,29 @@ static void nrf52_spi_1b_workaround(FAR struct spi_dev_s *dev, bool enable)
 
       /* Stop the SPIM instance when SCK toggles */
 
-      putreg32(NRF52_GPIOTE_EVENTS_IN(SPI_1B_WORKAROUND_GPIOTE_CHAN),
-               NRF52_PPI_CHEEP(SPI_1B_WORKAROUND_PPI_CHAN));
+      nrf52_ppi_set_event_ep(SPI_1B_WORKAROUND_PPI_CHAN,
+                             NRF52_GPIOTE_EVENTS_IN(
+                               SPI_1B_WORKAROUND_GPIOTE_CHAN));
 
-      putreg32((priv->base + NRF52_SPIM_TASK_STOP_OFFSET),
-               NRF52_PPI_CHTEP(SPI_1B_WORKAROUND_PPI_CHAN));
+      nrf52_ppi_set_task_ep(SPI_1B_WORKAROUND_PPI_CHAN,
+                            priv->base + NRF52_SPIM_TASK_STOP_OFFSET);
 
       /* Enable PPI channel */
 
-      modifyreg32(NRF52_PPI_CHEN, 0,
-                  PPI_CHEN_CH(SPI_1B_WORKAROUND_PPI_CHAN));
+      nrf52_ppi_channel_enable(SPI_1B_WORKAROUND_PPI_CHAN, true);
     }
   else
     {
       /* Disable event */
 
       putreg32(0, NRF52_GPIOTE_CONFIG(SPI_1B_WORKAROUND_GPIOTE_CHAN));
-      putreg32(0, NRF52_PPI_CHEEP(SPI_1B_WORKAROUND_PPI_CHAN));
-      putreg32(0, NRF52_PPI_CHTEP(SPI_1B_WORKAROUND_PPI_CHAN));
+
+      nrf52_ppi_set_event_ep(SPI_1B_WORKAROUND_PPI_CHAN, 0);
+      nrf52_ppi_set_task_ep(SPI_1B_WORKAROUND_PPI_CHAN, 0);
 
       /* Disable PPI channel */
 
-      modifyreg32(NRF52_PPI_CHEN,
-                  PPI_CHEN_CH(SPI_1B_WORKAROUND_PPI_CHAN), 0);
+      nrf52_ppi_channel_enable(SPI_1B_WORKAROUND_PPI_CHAN, false);
     }
 }
 #endif
