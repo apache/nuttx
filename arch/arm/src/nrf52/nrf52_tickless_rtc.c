@@ -51,16 +51,6 @@
 #  error "Support for RTC2 is not enabled"
 #endif
 
-/* TIMER configuration */
-
-#if (CONFIG_NRF52_SYSTIMER_RTC_INSTANCE == 0)
-#  define NRF52_RTC_BASE     NRF52_RTC0_BASE
-#elif (CONFIG_NRF52_SYSTIMER_RTC_INSTANCE == 1)
-#  define NRF52_RTC_BASE     NRF52_RTC1_BASE
-#elif (CONFIG_NRF52_SYSTIMER_RTC_INSTANCE == 2)
-#  define NRF52_RTC_BASE     NRF52_RTC2_BASE
-#endif
-
 #define NRF52_RTC_PERIOD   (512)
 #define NRF52_RTC_MAX      (0x00ffffff)
 #define NRF52_RTC_MAX_TIME (NRF52_RTC_MAX * 31)
@@ -111,7 +101,7 @@ struct nrf52_tickless_dev_s g_tickless_dev;
  * Private Functions
  ****************************************************************************/
 
-static void rtc_counter_to_ts(uint32_t counter, struct timespec *now)
+static inline void rtc_counter_to_ts(uint32_t counter, struct timespec *now)
 {
   uint32_t usec;
 
@@ -129,42 +119,63 @@ static void rtc_prepare_alarm(void)
   uint32_t usec;
   uint32_t counter;
   uint32_t target_counter;
+  const uint32_t rtc_base = NRF52_RTC_GETBASE(g_tickless_dev.rtc);
 
-  /* get current counter and absolute time */
+  /* Get current absolute time */
 
-  NRF52_RTC_GETCOUNTER(g_tickless_dev.rtc, &counter);
+  counter = NRF52_RTC_GETCOUNTER_REG(rtc_base);
   rtc_counter_to_ts(counter, &now);
 
-  /* obtain relative time to alarm */
+  /* Obtain relative time to alarm */
 
   clock_timespec_subtract(&g_tickless_dev.alarm, &now, &delta);
   usec = delta.tv_sec * USEC_PER_SEC + delta.tv_nsec / NSEC_PER_USEC;
 
-  /* if the alarm is to expire within one RTC period, we can set the CC */
+  /* Check if the alarm is to expire within one RTC period, if so we can set
+   * the CC.
+   */
 
   if (usec < NRF52_RTC_PERIOD * USEC_PER_SEC)
     {
-      /* usec is the time w.r.t. now, so we compute the counter compare value
-       * from current counter. as this may be "behind" the counter, we wrap
-       * around one full timer period
+      /* Obtain absolute number of microseconds of alarm within current
+       * RTC period.
        */
+
+      usec = (g_tickless_dev.alarm.tv_sec % NRF52_RTC_PERIOD) *
+             USEC_PER_SEC + g_tickless_dev.alarm.tv_nsec / NSEC_PER_USEC;
+
+      /* Compute counter value for that point in time */
 
       target_counter = USEC_TO_COUNTER(usec);
 
-      if (target_counter < 2)
-        {
-          /* ensure counter fires, from nRF52832_PS_v1.4 (p. 245):
-           * "If the COUNTER is N, writing N+2 to a CC register is
-           * guaranteed to trigger a COMPARE event at N+2."
-           */
+      /* Enable interrupt. First set CC to distant value to ensure
+       * no match will be generated. Doing things this way we now that
+       * once we write a CC value it should be ready to match.
+       */
 
-          target_counter = 2;
-        }
-
-      target_counter = (counter + target_counter) % (NRF52_RTC_MAX + 1);
-
-      NRF52_RTC_SETCC(g_tickless_dev.rtc, NRF52_RTC_CC0, target_counter);
+      NRF52_RTC_SETCC_REG(rtc_base, 0, counter - 1);
       NRF52_RTC_ENABLEINT(g_tickless_dev.rtc, NRF52_RTC_EVT_COMPARE0);
+
+      /* Set CC to desired value */
+
+      NRF52_RTC_SETCC_REG(rtc_base, 0, target_counter);
+
+      /* Ensure counter fires: from nRF52832_PS_v1.4 (p. 245) we know that
+       * "If the COUNTER is N, writing N+2 to a CC register is
+       * guaranteed to trigger a COMPARE event at N+2.", so anything
+       * less than that is not guaranteed and it may not ever match.
+       *
+       * To ensure this, we check if CC < N + 2, and if so we set CC = N+2.
+       * We repeat this until this is satisfied (as the counter may change
+       * in between calculations).
+       */
+
+      while (NRF52_RTC_GETCC_REG(rtc_base, 0) <
+             NRF52_RTC_GETCOUNTER_REG(rtc_base) + 2)
+        {
+          NRF52_RTC_SETCC_REG(rtc_base, 0,
+                              NRF52_RTC_GETCOUNTER_REG(rtc_base) + 2);
+        }
     }
 }
 
@@ -180,7 +191,7 @@ static int rtc_handler(int irq, void *context, void *arg)
 
   /* if the timer wrapped-around */
 
-  if (getreg32(NRF52_RTC_BASE + NRF52_RTC_EVENTS_OVRFLW_OFFSET))
+  if (NRF52_RTC_CHECKINT(g_tickless_dev.rtc, NRF52_RTC_EVT_OVRFLW))
     {
       /* ack interrupt */
 
@@ -200,7 +211,7 @@ static int rtc_handler(int irq, void *context, void *arg)
 
   /* if the compare event fired */
 
-  if (getreg32(NRF52_RTC_BASE + NRF52_RTC_EVENTS_COMPARE_OFFSET(0)))
+  if (NRF52_RTC_CHECKINT(g_tickless_dev.rtc, NRF52_RTC_EVT_COMPARE0))
     {
       struct timespec now;
 

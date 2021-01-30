@@ -93,6 +93,7 @@ static int nrf52_rtc_ackint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s);
 static int nrf52_rtc_enableevt(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt);
 static int nrf52_rtc_disableevt(FAR struct nrf52_rtc_dev_s *dev,
                                 uint8_t evt);
+static uint32_t nrf52_rtc_getbase(FAR struct nrf52_rtc_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -117,6 +118,7 @@ struct nrf52_rtc_ops_s nrf52_rtc_ops =
   .ackint     = nrf52_rtc_ackint,
   .enableevt  = nrf52_rtc_enableevt,
   .disableevt = nrf52_rtc_disableevt,
+  .getbase    = nrf52_rtc_getbase,
 };
 
 #ifdef CONFIG_NRF52_RTC0
@@ -722,6 +724,18 @@ static int nrf52_rtc_disableevt(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt)
 
 errout:
   return ret;
+}
+
+/****************************************************************************
+ * Name: nrf52_rtc_getbase
+ ****************************************************************************/
+
+static uint32_t nrf52_rtc_getbase(FAR struct nrf52_rtc_dev_s *dev)
+{
+  FAR struct nrf52_rtc_priv_s *rtc = (FAR struct nrf52_rtc_priv_s *)dev;
+  DEBUGASSERT(dev);
+
+  return rtc->base;
 }
 
 /****************************************************************************
