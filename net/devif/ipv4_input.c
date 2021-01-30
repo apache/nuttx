@@ -207,11 +207,11 @@ int ipv4_input(FAR struct net_driver_s *dev)
   if ((ipv4->ipoffset[0] & 0x3f) != 0 || ipv4->ipoffset[1] != 0)
     {
 #ifdef CONFIG_NET_STATISTICS
-       g_netstats.ipv4.drop++;
-       g_netstats.ipv4.fragerr++;
+      g_netstats.ipv4.drop++;
+      g_netstats.ipv4.fragerr++;
 #endif
-       nwarn("WARNING: IP fragment dropped\n");
-       goto drop;
+      nwarn("WARNING: IP fragment dropped\n");
+      goto drop;
     }
 
   /* Get the destination IP address in a friendlier form */
@@ -314,6 +314,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
         }
     }
 #ifdef CONFIG_NET_ICMP
+
   /* In other cases, the device must be assigned a non-zero IP address. */
 
   else if (net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
