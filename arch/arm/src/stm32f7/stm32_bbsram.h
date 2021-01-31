@@ -91,7 +91,7 @@ struct bbsramd_s
 {
   uint8_t flags;               /* The crc is valid and the file was closed */
   uint8_t fileno;              /* The minor number */
-  uint16_t len;                /* Total Bytes in this file*/
+  uint16_t len;                /* Total Bytes in this file */
   struct timespec lastwrite;   /* Last write time */
 };
 
@@ -111,6 +111,7 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Function: stm32_bbsraminitialize
  *
@@ -136,22 +137,22 @@ extern "C"
 int stm32_bbsraminitialize(char *devpath, int *sizes);
 
 /****************************************************************************
-* Function: stm32_bbsram_savepanic
-*
-* Description:
-*   Saves the panic context in a previously allocated BBSRAM file
-*
-* Parameters:
-*   fileno  - the value returned by the ioctl STM32F7_BBSRAM_GETDESC_IOCTL
-*   context - Pointer to a any array of bytes to save
-*   length  - The length of the data pointed to byt context
-*
-* Returned Value:
-*   Length saved or negated errno.
-*
-* Assumptions:
-*
-****************************************************************************/
+ * Function: stm32_bbsram_savepanic
+ *
+ * Description:
+ *   Saves the panic context in a previously allocated BBSRAM file
+ *
+ * Parameters:
+ *   fileno  - the value returned by the ioctl STM32F7_BBSRAM_GETDESC_IOCTL
+ *   context - Pointer to a any array of bytes to save
+ *   length  - The length of the data pointed to byt context
+ *
+ * Returned Value:
+ *   Length saved or negated errno.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32F7_SAVE_CRASHDUMP)
 int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length);
