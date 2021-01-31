@@ -78,8 +78,8 @@
 #define FLAGEFF                     (1 << 31) /* Extended frame format */
 #define FLAGRTR                     (1 << 30) /* Remote transmission request */
 
-#define RXMBCOUNT                   5
-#define TXMBCOUNT                   2
+#define RXMBCOUNT                   10
+#define TXMBCOUNT                   4
 #define TOTALMBCOUNT                RXMBCOUNT + TXMBCOUNT
 
 #define IFLAG1_RX                   ((1 << RXMBCOUNT)-1)
@@ -473,6 +473,9 @@ static void imxrt_setfreeze(uint32_t base, uint32_t freeze);
 static uint32_t imxrt_waitmcr_change(uint32_t base,
                                        uint32_t mask,
                                        uint32_t target_state);
+static uint32_t imxrt_waitesr2_change(uint32_t base,
+                                       uint32_t mask,
+                                       uint32_t target_state);
 
 /* Interrupt handling */
 
@@ -577,6 +580,18 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   int32_t timeout;
 #endif
+
+  if (!imxrt_waitesr2_change(priv->base, CAN_ESR2_IMB, 1))
+    {
+      nwarn("Waiting for ESR2_IMB failed\r\n");
+      return 0;       /* No transmission for you! */
+    }
+
+  if (!imxrt_waitesr2_change(priv->base, CAN_ESR2_VPS, 1))
+    {
+      nwarn("Waiting for ESR2_VPS failed\r\n");
+      return 0;       /* No transmission for you! */
+    }
 
   if ((getreg32(priv->base + IMXRT_CAN_ESR2_OFFSET) &
       (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
@@ -982,7 +997,7 @@ static void imxrt_txdone(FAR void *arg)
    */
 
   net_lock();
-  devif_poll(&priv->dev, imxrt_txpoll);
+  devif_timer(&priv->dev, 0, imxrt_txpoll);
   net_unlock();
 }
 
@@ -1171,6 +1186,27 @@ static uint32_t imxrt_waitmcr_change(uint32_t base, uint32_t mask,
   for (wait_ack = 0; wait_ack < timeout; wait_ack++)
     {
       const bool state = (getreg32(base + IMXRT_CAN_MCR_OFFSET) & mask)
+          != 0;
+      if (state == target_state)
+        {
+          return true;
+        }
+
+      up_udelay(10);
+    }
+
+  return false;
+}
+
+static uint32_t imxrt_waitesr2_change(uint32_t base, uint32_t mask,
+                                       uint32_t target_state)
+{
+  const uint32_t timeout = 1000;
+  uint32_t wait_ack;
+
+  for (wait_ack = 0; wait_ack < timeout; wait_ack++)
+    {
+      const bool state = (getreg32(base + IMXRT_CAN_ESR2_OFFSET) & mask)
           != 0;
       if (state == target_state)
         {
