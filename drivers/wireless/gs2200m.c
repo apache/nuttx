@@ -969,11 +969,12 @@ retry:
 
   _read_data(dev, res, sizeof(res));
 
-  /* In case of NOK, retry */
+  /* In case of NOK or 0x0, retry */
 
-  if (WR_RESP_NOK == res[1])
+  if (WR_RESP_NOK == res[1] || 0x0 == res[1])
     {
-      wlwarn("*** warning: WR_RESP_NOK received.. retrying. (n=%d) \n", n);
+      wlwarn("*** warning: 0x%x received.. retrying. (n=%d) \n",
+             res[1], n);
       nxsig_usleep(10 * 1000);
 
       if (WR_MAX_RETRY < n)
