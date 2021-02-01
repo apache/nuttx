@@ -38,14 +38,6 @@ extern uint8_t _heap_size;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_addregion
- ****************************************************************************/
-
-void up_addregion(void)
-{
-}
-
-/****************************************************************************
  * Name: up_allocate_heap
  *
  * Description:
@@ -65,3 +57,19 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   *heap_start = (FAR void *)&_heap_start;
   *heap_size  = (size_t)&_heap_size;
 }
+
+/****************************************************************************
+ * Name: riscv_addregion
+ *
+ * Description:
+ *   RAM may be added in non-contiguous chunks.  This routine adds all chunks
+ *   that may be used for heap.
+ *
+ ****************************************************************************/
+
+#if CONFIG_MM_REGIONS > 1
+void riscv_addregion(void)
+{
+}
+#endif
+

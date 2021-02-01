@@ -114,7 +114,7 @@ void up_initialize(void)
 
   /* Add any extra memory fragments to the memory manager */
 
-  up_addregion();
+  riscv_addregion();
 
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
