@@ -172,7 +172,12 @@ void up_boot(void);
 
 /* Memory allocation ********************************************************/
 
-void up_addregion(void);
+#if CONFIG_MM_REGIONS > 1
+void riscv_addregion(void);
+#else
+# define riscv_addregion()
+#endif
+
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
 
 /* IRQ initialization *******************************************************/

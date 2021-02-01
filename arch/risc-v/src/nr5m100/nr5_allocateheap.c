@@ -49,7 +49,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_addregion
+ * Name: riscv_addregion
  *
  * Description:
  *   RAM may be added in non-contiguous chunks.  This routine adds all chunks
@@ -57,6 +57,9 @@
  *
  ************************************************************************************/
 
-void up_addregion(void)
+#if CONFIG_MM_REGIONS > 1
+void riscv_addregion(void)
 {
 }
+#endif
+
