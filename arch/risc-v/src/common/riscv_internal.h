@@ -228,10 +228,6 @@ void up_earlyserialinit(void);
 void rpmsg_serialinit(void);
 #endif
 
-/* The OS start routine    **************************************************/
-
-void nx_start(void);
-
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
