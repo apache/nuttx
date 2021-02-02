@@ -321,6 +321,8 @@ static const char g_wildabbr[] = WILDABBR;
 static char g_lcl_tzname[MY_TZNAME_MAX + 1];
 static int g_lcl_isset;
 static int g_gmt_isset;
+static sem_t g_lcl_sem = SEM_INITIALIZER(1);
+static sem_t g_gmt_sem = SEM_INITIALIZER(1);
 
 /* Section 4.12.3 of X3.159-1989 requires that
  *    Except for the strftime function, these functions [asctime,
@@ -413,6 +415,28 @@ static FAR struct state_s *gmtptr;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+void tz_semtake(FAR sem_t *sem)
+{
+  int errcode = 0;
+  int ret;
+
+  do
+    {
+      ret = _SEM_WAIT(sem);
+      if (ret < 0)
+        {
+          errcode = _SEM_ERRNO(ret);
+          DEBUGASSERT(errcode == EINTR || errcode == ECANCELED);
+        }
+    }
+  while (ret < 0 && errcode == EINTR);
+}
+
+void tz_semgive(FAR sem_t *sem)
+{
+  DEBUGVERIFY(_SEM_POST(sem));
+}
 
 static int_fast32_t detzcode(FAR const char *const codep)
 {
@@ -1639,29 +1663,29 @@ static void gmtload(FAR struct state_s *const sp)
 
 static void tzsetwall(void)
 {
+  tz_semtake(&g_lcl_sem);
+
   if (g_lcl_isset < 0)
     {
+      tz_semgive(&g_lcl_sem);
       return;
     }
-
-  g_lcl_isset = -1;
 
   if (lclptr == NULL)
     {
       lclptr = lib_malloc(sizeof *lclptr);
-      if (lclptr == NULL)
-        {
-          settzname();          /* all we can do */
-          return;
-        }
     }
 
-  if (tzload(NULL, lclptr, TRUE) != 0)
+  if (lclptr != NULL && tzload(NULL, lclptr, TRUE) != 0)
     {
       gmtload(lclptr);
     }
 
   settzname();
+
+  g_lcl_isset = -1;
+
+  tz_semgive(&g_lcl_sem);
 }
 
 /* The easy way to behave "as if no library function calls" localtime
@@ -1791,15 +1815,19 @@ static struct tm *localsub(FAR const time_t * const timep,
 static struct tm *gmtsub(FAR const time_t * const timep,
                          const int_fast32_t offset, struct tm *const tmp)
 {
+  tz_semtake(&g_gmt_sem);
+
   if (!g_gmt_isset)
     {
       gmtptr = lib_malloc(sizeof *gmtptr);
-      g_gmt_isset = gmtptr != NULL;
-      if (g_gmt_isset)
+      if (gmtptr != NULL)
         {
           gmtload(gmtptr);
+          g_gmt_isset = 1;
         }
     }
+
+  tz_semgive(&g_gmt_sem);
 
   return timesub(timep, offset, gmtptr, tmp);
 }
