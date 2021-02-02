@@ -34,10 +34,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdint.h>
-
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
+#include <nuttx/init.h>
 #include <arch/board/board.h>
 
 #include "fe310_clockconfig.h"

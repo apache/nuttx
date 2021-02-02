@@ -36,6 +36,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/init.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 

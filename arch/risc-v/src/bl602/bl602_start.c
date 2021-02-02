@@ -22,11 +22,12 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdint.h>
 
-#include <nuttx/config.h>
+#include <nuttx/init.h>
 #include <nuttx/arch.h>
-
 #include <arch/board/board.h>
 
 #include "riscv_arch.h"
