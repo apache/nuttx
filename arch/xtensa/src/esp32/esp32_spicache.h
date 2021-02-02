@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_spiflash.h
+ * arch/xtensa/src/esp32/esp32_spicache.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_SPIFLASH_H
-#define __ARCH_XTENSA_SRC_ESP32_ESP32_SPIFLASH_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_SPICACHE_H
+#define __ARCH_XTENSA_SRC_ESP32_ESP32_SPICACHE_H
 
 /****************************************************************************
  * Included Files
@@ -49,52 +49,38 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_spiflash_init
+ * Name: spi_disable_cache
  *
  * Description:
- *   Alloc ESP32 SPI Flash MTD.
+ *   Disable cache for SPI FLASH on a CPU
  *
  * Input Parameters:
- *   None
+ *   - cpu: ID of CPU to disable cache
+ *   - state: pointer to cache reg state that will be returned
  *
  * Returned Value:
- *   ESP32 SPI Flash MTD data pointer if success or NULL if fail.
+ *   None (the return will be over *state)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(void);
+void IRAM_ATTR spi_disable_cache(int cpu, uint32_t *state);
 
 /****************************************************************************
- * Name: esp32_spiflash_get_mtd
+ * Name: spi_enable_cache
  *
  * Description:
- *   Get ESP32 SPI Flash raw MTD.
+ *   Enable cache for SPI FLASH on a CPU
  *
  * Input Parameters:
- *   None
+ *   - cpu: ID of CPU to enable cache
+ *   - state: the cache reg state to be set
  *
  * Returned Value:
- *   ESP32 SPI Flash raw MTD data pointer.
+ *   None
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *esp32_spiflash_get_mtd(void);
-
-/****************************************************************************
- * Name: esp32_spiflash_get_mtd
- *
- * Description:
- *   Get ESP32 SPI Flash encryption raw MTD.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   ESP32 SPI Flash encryption raw MTD data pointer.
- *
- ****************************************************************************/
-
-FAR struct mtd_dev_s *esp32_spiflash_encrypt_get_mtd(void);
+void IRAM_ATTR spi_enable_cache(int cpu, uint32_t state);
 
 #ifdef __cplusplus
 }
@@ -102,4 +88,4 @@ FAR struct mtd_dev_s *esp32_spiflash_encrypt_get_mtd(void);
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_SPIFLASH_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_SPICACHE_H */

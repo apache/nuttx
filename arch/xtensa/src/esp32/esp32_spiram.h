@@ -35,6 +35,45 @@
 #define ESP_SPIRAM_SIZE_64MBITS   2   /* SPI RAM size is 64 MBits */
 #define ESP_SPIRAM_SIZE_INVALID   3   /* SPI RAM size is invalid  */
 
+/* Errors that can be returned by cache_sram_* */
+
+#define MMU_SET_ADDR_ALIGNED_ERROR 1
+#define MMU_SET_PAGE_SIZE_ERROR    3
+#define MMU_SET_VADDR_OUT_RANGE    5
+
+#define PROCACHE_MMU_ADDR_BASE     0x3FF10000
+#define APPCACHE_MMU_ADDR_BASE     0x3FF12000
+
+/* sram address */
+
+#define PRO_DRAM1_START_ADDR       0x3F800000
+#define PRO_DRAM1_END_ADDR(psize)  (PRO_DRAM1_START_ADDR + ((psize) << 17))
+
+/* cache mmu register file address */
+
+#define CACHE_MMU_ADDRESS_BASE(cpu_no) ((cpu_no) ? (APPCACHE_MMU_ADDR_BASE) :\
+                                        (PROCACHE_MMU_ADDR_BASE))
+
+/* virtual address, physical address check */
+
+#define ADDRESS_CHECK(addr,psize) (((addr) & (0xFFFF >>((64/(psize))-1))) != 0)
+
+/* CPU number check */
+
+#define CPU_NUMBER_CHECK(cpu_no)  (((cpu_no)<0) || ((cpu_no)>1))
+
+/* PID check */
+
+#define PID_CHECK(pid)  (((pid)<0) || ((pid)>7))
+
+/* flash MMU edge check (flash size default : 16*1024 K) */
+
+#define FLASH_MMU_EDGE_CHECK(mmu_val,num) (((mmu_val) + (num)) > 256)
+
+/* sram MMU edge check (sram size default : 8*1024 K) */
+
+#define SRAM_MMU_EDGE_CHECK(mmu_val,num,psize) (((mmu_val) + (num)) > ((8*1024)/(psize)))
+
 /* Description: get SPI RAM size
  * return
  *   - ESP_SPIRAM_SIZE_INVALID if SPI RAM not enabled or not valid
