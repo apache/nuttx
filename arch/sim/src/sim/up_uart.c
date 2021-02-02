@@ -81,6 +81,8 @@ static int  tty_ioctl(FAR struct file *filep, int cmd,
 static int  tty_receive(FAR struct uart_dev_s *dev, uint32_t *status);
 static void tty_rxint(FAR struct uart_dev_s *dev, bool enable);
 static bool tty_rxavailable(FAR struct uart_dev_s *dev);
+static bool tty_rxflowcontrol(FAR struct uart_dev_s *dev,
+                              unsigned int nbuffered, bool upper);
 static void tty_send(FAR struct uart_dev_s *dev, int ch);
 static void tty_txint(FAR struct uart_dev_s *dev, bool enable);
 static bool tty_txready(FAR struct uart_dev_s *dev);
@@ -100,6 +102,7 @@ static const struct uart_ops_s g_tty_ops =
   .receive        = tty_receive,
   .rxint          = tty_rxint,
   .rxavailable    = tty_rxavailable,
+  .rxflowcontrol  = tty_rxflowcontrol,
   .send           = tty_send,
   .txint          = tty_txint,
   .txready        = tty_txready,
@@ -413,6 +416,26 @@ static bool tty_rxavailable(struct uart_dev_s *dev)
   FAR struct tty_priv_s *priv = dev->priv;
 
   return simuart_checkc(dev->isconsole ? 0 : priv->fd);
+}
+
+/****************************************************************************
+ * Name: tty_rxflowcontrol
+ *
+ * Description:
+ *   Return true if UART activated RX flow control to block more incoming
+ *   data.
+ *
+ ****************************************************************************/
+
+static bool tty_rxflowcontrol(FAR struct uart_dev_s *dev,
+                              unsigned int nbuffered, bool upper)
+{
+  FAR struct uart_buffer_s *rxbuf = &dev->recv;
+
+  if (nbuffered == rxbuf->size)
+    return true;
+
+  return false;
 }
 
 /****************************************************************************
