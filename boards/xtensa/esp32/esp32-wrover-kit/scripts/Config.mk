@@ -32,10 +32,15 @@ else
 	PARTITION_TABLE=$(IDF_PATH)/hello_world/build/partition_table/partition-table.bin
 endif
 
-ifeq ($(CONFIG_ESP32_WROVERKIT_FLASH_IMAGE),y)
+ifeq ($(CONFIG_ESP32_QEMU_IMAGE),y)
+	MK_QEMU_IMG=$(TOPDIR)/tools/esp32/mk_qemu_img.sh $(BOOTLOADER) $(PARTITION_TABLE) $(NUTTXNAME)
+else
+	MK_QEMU_IMG=
+endif
+
 define POSTBUILD
 	@echo "MKIMAGE: ESP32 binary"
-        $(Q) if ! esptool.py version ; then \
+	$(Q) if ! esptool.py version ; then \
 		echo ""; \
 		echo "Please install ESP-IDF tools"; \
 		echo ""; \
@@ -48,15 +53,6 @@ define POSTBUILD
 		echo "Generating: $(NUTTXNAME).bin (ESP32 compatible)"; \
 		esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o $(NUTTXNAME).bin nuttx; \
 		echo "Generated: $(NUTTXNAME).bin (ESP32 compatible)"; \
-		echo "Generating: flash_image.bin"; \
-		echo "  Bootloader: $(BOOTLOADER)"; \
-		echo "  Parition Table: $(PARTITION_TABLE)"; \
-		dd if=/dev/zero bs=1024 count=4096 of=flash_image.bin && \
-		dd if=$(BOOTLOADER) bs=1 seek=$(shell printf "%d" 0x1000) of=flash_image.bin conv=notrunc && \
-		dd if=$(PARTITION_TABLE) bs=1 seek=$(shell printf "%d" 0x8000) of=flash_image.bin conv=notrunc && \
-		dd if=$(NUTTXNAME).bin bs=1 seek=$(shell printf "%d" 0x10000) of=flash_image.bin conv=notrunc && \
-		echo "Generated: flash_image.bin (it can be run with 'qemu-system-xtensa -nographic -machine esp32 -drive file=flash_image.bin,if=mtd,format=raw')"; \
-		echo "flash_image.bin" >> $(NUTTXNAME).manifest; \
 	fi
+	$(MK_QEMU_IMG)
 endef
-endif
