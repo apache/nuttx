@@ -1,5 +1,5 @@
 /************************************************************************************
- * arm/risc-v/src/nr5m100/nr5_timer.c
+ * arch/risc-v/src/nr5m100/nr5_timer.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
