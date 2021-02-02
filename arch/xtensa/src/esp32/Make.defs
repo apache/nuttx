@@ -118,6 +118,14 @@ CHIP_CSRCS += esp32_spi.c
   endif
 endif
 
+# SPIFLASH and SPIRAM need spicache.c
+
+ifeq ($(CONFIG_ESP32_SPIFLASH),y)
+CHIP_CSRCS += esp32_spicache.c
+else ifeq ($(CONFIG_ESP32_SPIRAM),y)
+CHIP_CSRCS += esp32_spicache.c
+endif
+
 ifeq ($(CONFIG_ESP32_SPIFLASH),y)
 CHIP_CSRCS += esp32_spiflash.c
 endif

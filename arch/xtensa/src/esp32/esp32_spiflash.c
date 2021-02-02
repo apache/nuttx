@@ -51,6 +51,7 @@
 #include "esp32_spiram.h"
 #endif
 
+#include "esp32_spicache.h"
 #include "esp32_spiflash.h"
 
 /****************************************************************************
@@ -395,85 +396,6 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
   uint32_t tmp = getreg32(priv->config->reg_base + offset);
 
   putreg32(tmp & (~bits), priv->config->reg_base + offset);
-}
-
-/****************************************************************************
- * Name: spiflash_disable_cache
- ****************************************************************************/
-
-static void IRAM_ATTR spi_disable_cache(int cpu, uint32_t *state)
-{
-  const uint32_t cache_mask = 0x3f; /* Caches' bits in CTRL1_REG */
-  uint32_t regval;
-  uint32_t ret = 0;
-
-  if (cpu == 0)
-    {
-      ret |= (getreg32(DPORT_PRO_CACHE_CTRL1_REG) & cache_mask);
-      while (((getreg32(DPORT_PRO_DCACHE_DBUG0_REG) >>
-                      DPORT_PRO_CACHE_STATE_S) & DPORT_PRO_CACHE_STATE) != 1)
-        {
-          ;
-        }
-
-      regval  = getreg32(DPORT_PRO_CACHE_CTRL_REG);
-      regval &= ~DPORT_PRO_CACHE_ENABLE_M;
-      putreg32(regval, DPORT_PRO_CACHE_CTRL_REG);
-    }
-#ifdef CONFIG_SMP
-  else
-    {
-      ret |= (getreg32(DPORT_APP_CACHE_CTRL1_REG) & cache_mask);
-      while (((getreg32(DPORT_APP_DCACHE_DBUG0_REG) >>
-                      DPORT_APP_CACHE_STATE_S) & DPORT_APP_CACHE_STATE) != 1)
-        {
-          ;
-        }
-
-      regval  = getreg32(DPORT_APP_CACHE_CTRL_REG);
-      regval &= ~DPORT_APP_CACHE_ENABLE_M;
-      putreg32(regval, DPORT_APP_CACHE_CTRL_REG);
-    }
-
-#endif
-  *state = ret;
-}
-
-/****************************************************************************
- * Name: spiflash_enable_cache
- ****************************************************************************/
-
-static void IRAM_ATTR spi_enable_cache(int cpu, uint32_t state)
-{
-  const uint32_t cache_mask = 0x3f;  /* Caches' bits in CTRL1_REG */
-  uint32_t regval;
-  uint32_t ctrlreg;
-  uint32_t ctrl1reg;
-  uint32_t ctrlmask;
-
-  if (cpu == 0)
-    {
-      ctrlreg = DPORT_PRO_CACHE_CTRL_REG;
-      ctrl1reg = DPORT_PRO_CACHE_CTRL1_REG;
-      ctrlmask = DPORT_PRO_CACHE_ENABLE_M;
-    }
-#ifdef CONFIG_SMP
-  else
-    {
-      ctrlreg = DPORT_APP_CACHE_CTRL_REG;
-      ctrl1reg = DPORT_APP_CACHE_CTRL1_REG;
-      ctrlmask = DPORT_APP_CACHE_ENABLE_M;
-    }
-#endif
-
-  regval  = getreg32(ctrlreg);
-  regval |= ctrlmask;
-  putreg32(regval, ctrlreg);
-
-  regval  = getreg32(ctrl1reg);
-  regval &= ~cache_mask;
-  regval |= state;
-  putreg32(regval, ctrl1reg);
 }
 
 /****************************************************************************

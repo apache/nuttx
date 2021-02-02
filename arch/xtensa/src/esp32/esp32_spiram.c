@@ -33,8 +33,10 @@
 #include <string.h>
 #include <sys/param.h>
 #include <nuttx/config.h>
+#include <nuttx/irq.h>
 
 #include "esp32_spiram.h"
+#include "esp32_spicache.h"
 #include "esp32_psram.h"
 #include "xtensa.h"
 #include "xtensa_attr.h"
@@ -96,6 +98,138 @@ size_t __attribute__((weak)) esp_himem_reserved_area_size(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
+                                          unsigned int vaddr,
+                                          unsigned int paddr,
+                                          int psize, int num)
+{
+  uint32_t regval;
+  uint32_t statecpu0;
+#ifdef CONFIG_SMP
+  uint32_t statecpu1;
+#endif
+  unsigned int i;
+  unsigned int shift;
+  unsigned int mask_s;
+  unsigned int mmu_addr;
+  unsigned int mmu_table_val;
+  irqstate_t flags;
+
+  /* address check */
+
+  if ((ADDRESS_CHECK(vaddr, psize)) || (ADDRESS_CHECK(paddr, psize)))
+    {
+      return MMU_SET_ADDR_ALIGNED_ERROR;
+    }
+
+  /* psize check */
+
+  if (psize == 32)
+    {
+      shift  = 15;
+      mask_s = 0;
+    }
+  else if (psize == 16)
+    {
+      shift  = 14;
+      mask_s = 1;
+    }
+  else if (psize == 8)
+    {
+      shift  = 13;
+      mask_s = 2;
+    }
+  else if (psize == 4)
+    {
+      shift  = 12;
+      mask_s = 3;
+    }
+  else if (psize == 2)
+    {
+      shift  = 11;
+      mask_s = 4;
+    }
+  else
+    {
+      return MMU_SET_PAGE_SIZE_ERROR;
+    }
+
+  /* mmu value */
+
+  mmu_table_val = paddr >> shift;
+
+  /* mmu_addr */
+
+  if (pid == 0 || pid == 1)
+    {
+      if (vaddr >= PRO_DRAM1_START_ADDR && vaddr < PRO_DRAM1_END_ADDR(psize))
+        {
+          mmu_addr = 1152 + ((vaddr & (0x3fffff >> mask_s)) >> shift);
+        }
+      else
+        {
+          return MMU_SET_VADDR_OUT_RANGE;
+        }
+    }
+  else
+    {
+      if (vaddr >= PRO_DRAM1_START_ADDR && vaddr < PRO_DRAM1_END_ADDR(psize))
+        {
+          mmu_addr = (1024 + (pid << 7)) +
+                     ((vaddr & (0x3fffff >> mask_s)) >> shift);
+        }
+      else
+        {
+          return MMU_SET_VADDR_OUT_RANGE;
+        }
+    }
+
+  /* The MMU registers are implemented in such a way that lookups from the
+   * cache subsystem may collide with CPU access to the MMU registers. We use
+   * the flash guards to make sure the cache is disabled.
+   */
+
+  flags = spin_lock_irqsave();
+
+  spi_disable_cache(0, &statecpu0);
+
+#ifdef CONFIG_SMP
+  spi_disable_cache(1, &statecpu1);
+#endif
+
+  /* mmu change */
+
+  for (i = 0; i < num; i++)
+    {
+      *(volatile unsigned int *)(CACHE_MMU_ADDRESS_BASE(cpu_no) +
+        mmu_addr * 4) = mmu_table_val + i; /* write table */
+      mmu_addr++;
+    }
+
+  if (cpu_no == 0)
+    {
+      regval  = getreg32(DPORT_PRO_CACHE_CTRL1_REG);
+      regval &= ~DPORT_PRO_CMMU_SRAM_PAGE_MODE;
+      regval |= mask_s;
+      putreg32(regval, DPORT_PRO_CACHE_CTRL1_REG);
+    }
+  else
+    {
+      regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
+      regval &= ~DPORT_APP_CMMU_SRAM_PAGE_MODE;
+      regval |= mask_s;
+      putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
+    }
+
+  spi_enable_cache(0, statecpu0);
+#ifdef CONFIG_SMP
+  spi_enable_cache(1, statecpu1);
+#endif
+
+  spin_unlock_irqrestore(flags);
+  return 0;
+}
 
 void IRAM_ATTR esp_spiram_init_cache(void)
 {
