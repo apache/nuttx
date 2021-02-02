@@ -111,7 +111,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
 
   size  = end - start;
 
-  /* The ARM uses a push-down stack:  the stack grows toward lower addresses
+  /* RISC-V uses a push-down stack:  the stack grows toward lower addresses
    * in memory.  We need to start at the lowest address in the stack memory
    * allocation and search to higher addresses.  The first word we encounter
    * that does not have the magic value is the high water mark.
