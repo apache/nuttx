@@ -78,8 +78,8 @@
 #define FLAGEFF                     (1 << 31) /* Extended frame format */
 #define FLAGRTR                     (1 << 30) /* Remote transmission request */
 
-#define RXMBCOUNT                   5
-#define TXMBCOUNT                   2
+#define RXMBCOUNT                   10
+#define TXMBCOUNT                   4
 #define TOTALMBCOUNT                RXMBCOUNT + TXMBCOUNT
 
 #define IFLAG1_RX                   ((1 << RXMBCOUNT)-1)
@@ -473,12 +473,16 @@ static void imxrt_setfreeze(uint32_t base, uint32_t freeze);
 static uint32_t imxrt_waitmcr_change(uint32_t base,
                                        uint32_t mask,
                                        uint32_t target_state);
+static uint32_t imxrt_waitesr2_change(uint32_t base,
+                                       uint32_t mask,
+                                       uint32_t target_state);
 
 /* Interrupt handling */
 
 static void imxrt_receive(FAR struct imxrt_driver_s *priv,
                             uint32_t flags);
-static void imxrt_txdone(FAR void *arg);
+static void imxrt_txdone_work(FAR void *arg);
+static void imxrt_txdone(FAR struct imxrt_driver_s *priv);
 
 static int  imxrt_flexcan_interrupt(int irq, FAR void *context,
                                       FAR void *arg);
@@ -604,6 +608,7 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
   if (mbi == TXMBCOUNT)
     {
       nwarn("No TX MB available mbi %" PRIi32 "\r\n", mbi);
+      NETDEV_TXERRORS(&priv->dev);
       return 0;       /* No transmission for you! */
     }
 
@@ -764,6 +769,8 @@ static int imxrt_txpoll(struct net_driver_s *dev)
     {
       if (!devif_loopback(&priv->dev))
         {
+          imxrt_txdone(priv);
+
           /* Send the packet */
 
           imxrt_transmit(priv);
@@ -772,9 +779,14 @@ static int imxrt_txpoll(struct net_driver_s *dev)
            * not, return a non-zero value to terminate the poll.
            */
 
-          if (imxrt_txringfull(priv))
+          if ((getreg32(priv->base + IMXRT_CAN_ESR2_OFFSET) &
+              (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
+              (CAN_ESR2_IMB | CAN_ESR2_VPS))
             {
-              return -EBUSY;
+              if (!imxrt_txringfull(priv))
+                {
+                  return -EBUSY;
+                }
             }
         }
     }
@@ -929,23 +941,18 @@ static void imxrt_receive(FAR struct imxrt_driver_s *priv,
  * Function: imxrt_txdone
  *
  * Description:
- *   An interrupt was received indicating that the last TX packet(s) is done
+ *   Check transmit interrupt flags and clear them
  *
  * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *   We are not in an interrupt context so that we can lock the network.
+ *   None.
  *
  ****************************************************************************/
 
-static void imxrt_txdone(FAR void *arg)
+static void imxrt_txdone(FAR struct imxrt_driver_s *priv)
 {
-  FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
   uint32_t flags;
   uint32_t mbi;
   uint32_t mb_bit;
@@ -976,13 +983,38 @@ static void imxrt_txdone(FAR void *arg)
 
       mb_bit <<= 1;
     }
+}
+
+/****************************************************************************
+ * Function: imxrt_txdone_work
+ *
+ * Description:
+ *   An interrupt was received indicating that the last TX packet(s) is done
+ *
+ * Input Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
+ *   We are not in an interrupt context so that we can lock the network.
+ *
+ ****************************************************************************/
+
+static void imxrt_txdone_work(FAR void *arg)
+{
+  FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
+
+  imxrt_txdone(priv);
 
   /* There should be space for a new TX in any event.  Poll the network for
    * new XMIT data
    */
 
   net_lock();
-  devif_poll(&priv->dev, imxrt_txpoll);
+  devif_timer(&priv->dev, 0, imxrt_txpoll);
   net_unlock();
 }
 
@@ -1038,7 +1070,7 @@ static int imxrt_flexcan_interrupt(int irq, FAR void *context,
           flags  = getreg32(priv->base + IMXRT_CAN_IMASK1_OFFSET);
           flags &= ~(IFLAG1_TX);
           putreg32(flags, priv->base + IMXRT_CAN_IMASK1_OFFSET);
-          work_queue(CANWORK, &priv->irqwork, imxrt_txdone, priv, 0);
+          work_queue(CANWORK, &priv->irqwork, imxrt_txdone_work, priv, 0);
         }
     }
 
@@ -1189,6 +1221,26 @@ static uint32_t imxrt_waitfreezeack_change(uint32_t base,
   return imxrt_waitmcr_change(base, CAN_MCR_FRZACK, target_state);
 }
 
+static uint32_t imxrt_waitesr2_change(uint32_t base, uint32_t mask,
+                                       uint32_t target_state)
+{
+  const uint32_t timeout = 1000;
+  uint32_t wait_ack;
+
+  for (wait_ack = 0; wait_ack < timeout; wait_ack++)
+    {
+      uint32_t state = (getreg32(base + IMXRT_CAN_ESR2_OFFSET) & mask);
+      if (state == target_state)
+        {
+          return true;
+        }
+
+      up_udelay(10);
+    }
+
+  return false;
+}
+
 /****************************************************************************
  * Function: imxrt_ifup
  *
@@ -1293,7 +1345,9 @@ static void imxrt_txavail_work(FAR void *arg)
        * packet.
        */
 
-      if (!imxrt_txringfull(priv))
+      if (imxrt_waitesr2_change(priv->base,
+                             (CAN_ESR2_IMB | CAN_ESR2_VPS),
+                             (CAN_ESR2_IMB | CAN_ESR2_VPS)))
         {
           /* No, there is space for another transfer.  Poll the network for
            * new XMIT data.

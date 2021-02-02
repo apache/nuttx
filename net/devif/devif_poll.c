@@ -266,11 +266,14 @@ static int devif_poll_can_connections(FAR struct net_driver_s *dev,
     {
       /* Perform the packet TX poll */
 
-      can_poll(dev, can_conn);
+      if (dev == can_conn->dev)
+        {
+          can_poll(dev, can_conn);
 
-      /* Call back into the driver */
+          /* Call back into the driver */
 
-      bstop = callback(dev);
+          bstop = callback(dev);
+        }
     }
 
   return bstop;
