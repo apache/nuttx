@@ -1807,7 +1807,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
       return 0;
     }
 
-  spiinfo("frequency=%d\n", frequency);
+  spiinfo("frequency=%ld\n", frequency);
   DEBUGASSERT(priv);
 
   /* Wait till BUSY flag reset */
@@ -1861,14 +1861,14 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   /* Calculate the new actual frequency */
 
   actual = STL32F7_QSPI_CLOCK / prescaler;
-  spiinfo("prescaler=%d actual=%d\n", prescaler, actual);
+  spiinfo("prescaler=%ld actual=%ld\n", prescaler, actual);
 
   /* Save the frequency setting */
 
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spiinfo("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %ld->%ld\n", frequency, actual);
   return actual;
 }
 
@@ -1939,7 +1939,7 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
         }
 
       qspi_putreg(priv, regval, STM32_QUADSPI_DCR_OFFSET);
-      spiinfo("DCR=%08x\n", regval);
+      spiinfo("DCR=%08" PRIx32 "\n", regval);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
