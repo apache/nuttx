@@ -1,5 +1,5 @@
 ############################################################################
-# boards/xtensa/esp32/esp32-wrover-kit/scripts/Config.mk
+# tools/esp32/Config.mk
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
