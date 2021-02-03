@@ -1132,10 +1132,12 @@
 #define RCC_BDCR_LSERDY                 (1 << 1)                     /* Bit 1: External Low Speed oscillator Ready */
 #define RCC_BDCR_LSEBYP                 (1 << 2)                     /* Bit 2: External Low Speed oscillator Bypass */
 #define RCC_BDCR_LSEDRV_SHIFT           (3)                          /* Bits 4:3: LSE oscillator Drive selection */
-#define RCC_BDCR_LSEDRV_MASK            (3 << RCC_BDCR_LSEDRV_SHIFT)
+#define RCC_BDCR_LSEDRV_MASK            (3 << RCC_BDCR_LSEDRV_SHIFT) /* See errata ES0392 Rev 7. 2.2.14 */
 #  define RCC_BDCR_LSEDRV_LOW           (0 << RCC_BDCR_LSEDRV_SHIFT) /* 00: Low driving capability */
-#  define RCC_BDCR_LSEDRV_MEDHI         (1 << RCC_BDCR_LSEDRV_SHIFT) /* 01: Medium high driving capability */
-#  define RCC_BDCR_LSEDRV_MEDLO         (2 << RCC_BDCR_LSEDRV_SHIFT) /* 10: Medium low driving capability */
+#  define RCC_BDCR_LSEDRV_MEDHI_Y       (1 << RCC_BDCR_LSEDRV_SHIFT) /* 01: Medium high driving capability rev y */
+#  define RCC_BDCR_LSEDRV_MEDHI         (2 << RCC_BDCR_LSEDRV_SHIFT) /* 10: Medium high driving capability */
+#  define RCC_BDCR_LSEDRV_MEDLO_Y       (2 << RCC_BDCR_LSEDRV_SHIFT) /* 10: Medium low driving capability rev y */
+#  define RCC_BDCR_LSEDRV_MEDLO         (1 << RCC_BDCR_LSEDRV_SHIFT) /* 01: Medium low driving capability */
 #  define RCC_BDCR_LSEDRV_HIGH          (3 << RCC_BDCR_LSEDRV_SHIFT) /* 11: High driving capability */
 #define RCC_BDCR_LSECSSON               (1 << 5)                     /* Bit 5: LSE clock security system enable */
 #define RCC_BDCR_LSECSSD                (1 << 6)                     /* Bit 6: LSE clock security system failure detection */

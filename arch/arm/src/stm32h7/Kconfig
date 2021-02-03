@@ -1493,25 +1493,59 @@ endchoice #"RTC clock source"
 
 if STM32H7_RTC_LSECLOCK
 
+config STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+	bool "Automaticaly boost the LSE oscillator drive capability level until it starts-up"
+	default n
+	---help---
+		This will cycle through the correct* values from low to high. To avoid
+		damaging the the crystal. We want to use the lowest setting that gets
+		the OSC running. See app note AN2867
+
+			0 = Low drive capability (default)
+			1 = Medium high drive capability
+			2 = Medium low drive capability
+			3 = High drive capability
+
+		*It will take into account the rev of the silicon and use
+		the correct code points to achive the drive strength.
+		See Eratta ES0392 Rev 7 2.2.14 LSE oscillator driving capability
+		selection bits are swapped.
+
 config STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY
 	int "LSE oscillator drive capability level at LSE start-up"
 	default 0
 	range 0 3
+	depends on !STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 	---help---
 		0 = Low drive capability (default)
 		1 = Medium high drive capability
 		2 = Medium low drive capability
 		3 = High drive capability
 
+		It will take into account the rev of the silicon and use
+		the correct code points tp achive the drive strength.
+		See Eratta ES0392 Rev 7 2.2.14 LSE oscillator driving capability
+		selection bits are swapped.
+
 config STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
 	int "LSE oscillator drive capability level after LSE start-up"
 	default 0
 	range 0 3
+	depends on !STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 	---help---
 		0 = Low drive capability (default)
 		1 = Medium high drive capability
 		2 = Medium low drive capability
 		3 = High drive capability
+
+		It will take into account the rev of the silicon and use
+		the correct code points tp achive the drive strength.
+		See Eratta ES0392 Rev 7 2.2.14 LSE oscillator driving capability
+		selection bits are swapped.
+
+		WARNING this RUN setting does not apear to work!
+		it apears that the LSEDRV bits can not be changes once the OSC
+		is running.
 
 endif # STM32H7_RTC_LSECLOCK
 
