@@ -113,7 +113,8 @@ static __inline int ieee80211_is_8021x_akm(enum ieee80211_akm akm)
 
 static __inline int ieee80211_is_sha256_akm(enum ieee80211_akm akm)
 {
-  return akm == IEEE80211_AKM_SHA256_8021X || akm == IEEE80211_AKM_SHA256_PSK;
+  return akm == IEEE80211_AKM_SHA256_8021X ||
+                akm == IEEE80211_AKM_SHA256_PSK;
 }
 
 #endif /* __INCLUDE_NUTTX_WIRELESS_IEEE80211_IEEE80211_CRYPTO_H */

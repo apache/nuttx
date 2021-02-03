@@ -61,7 +61,7 @@ struct ether_header
 {
   uint8_t  ether_dhost[ETHER_ADDR_LEN];   /* Destination Ethernet address */
   uint8_t  ether_shost[ETHER_ADDR_LEN];   /* Source Ethernet address */
-  uint16_t ether_type;                    /* Ethernet packet type*/
+  uint16_t ether_type;                    /* Ethernet packet type */
 };
 
 /****************************************************************************

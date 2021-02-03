@@ -37,7 +37,7 @@
 #define __INCLUDE_NUTTX_WIRELESS_IEEE802154_MRF24J40_H
 
 /****************************************************************************
- * Included files
+ * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
@@ -52,7 +52,8 @@
  * following structure provides an MCU-independent mechanism for controlling
  * the MRF24J40 GPIO interrupt.
  *
- * The MRF24J40 interrupt is an active low, *level* interrupt. From Datasheet:
+ * The MRF24J40 interrupt is an active low, *level* interrupt.
+ * From Datasheet:
  * "Note 1: The INTEDGE polarity defaults to:
  *
  *   0 = Falling Edge. Ensure that the interrupt polarity matches the
@@ -85,8 +86,8 @@ extern "C"
  * Name: mrf24j40_init
  *
  * Description:
- *   Initialize the IEEE802.15.4 driver.  The MRF24J40 device is assumed to be
- *   in the post-reset state upon entry to this function.
+ *   Initialize the IEEE802.15.4 driver. The MRF24J40 device is assumed to
+ *   be in the post-reset state upon entry to this function.
  *
  * Input Parameters:
  *   spi   - A reference to the platform's SPI driver for the MRF24J40

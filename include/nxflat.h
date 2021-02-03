@@ -159,8 +159,8 @@ struct nxflat_reloc_s
 
 #define NXFLAT_RELOC_TYPE(r)    ((uint32_t)(r) >> 30)
 
-/* The bottom 28 bits of the relocation info is the (non-negative) offset into
- * the D-Space that needs the fixup.
+/* The bottom 28 bits of the relocation info is the (non-negative) offset
+ * into the D-Space that needs the fixup.
  */
 
 #define NXFLAT_RELOC_OFFSET(r)  ((uint32_t)(r) & 0x3fffffff)
@@ -169,7 +169,8 @@ struct nxflat_reloc_s
  *
  * NXFLAT_RELOC_TYPE_REL32I  Meaning: Object file contains a 32-bit offset
  *                                    into I-Space at the offset.
- *                           Fixup:   Add mapped I-Space address to the offset.
+ *                           Fixup:   Add mapped I-Space address to the
+ *                                    offset.
  * NXFLAT_RELOC_TYPE_REL32D  Meaning: Object file contains a 32-bit offset
  *                                    into D-Space at the offset.
  *                           Fixup:   Add allocated D-Space address to the

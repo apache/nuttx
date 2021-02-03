@@ -37,7 +37,7 @@
 #define __INCLUDE_NUTTX_WIRELESS_IEEE802154_XBEE_H
 
 /****************************************************************************
- * Included files
+ * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
@@ -112,8 +112,8 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
  * Name: xbee_netdev_register
  *
  * Description:
- *   Register XBee network device.  The network device is what binds the XBee MAC
- *   to the network layer (6LoWPAN, PF_IEEE802154).
+ *   Register XBee network device.  The network device is what binds the XBee
+ *   MAC to the network layer (6LoWPAN, PF_IEEE802154).
  *
  * Input Parameters:
  *   xbee   - A reference to the XBee Mac driver

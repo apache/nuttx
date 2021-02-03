@@ -51,8 +51,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/*
- * CRC64_CHECK is the CRC64 of the string "123456789" without the null byte.
+/* CRC64_CHECK is the CRC64 of the string "123456789" without the null byte.
  *
  *   const uint8_t checkbuf[] =
  *   {

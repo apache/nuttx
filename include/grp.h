@@ -76,9 +76,13 @@ extern "C"
 
 FAR struct group *getgrnam(FAR const char *name);
 FAR struct group *getgrgid(gid_t gid);
-int getgrnam_r(FAR const char *name, FAR struct group *grp, FAR char *buf,
-               size_t buflen, FAR struct group **result);
-int getgrgid_r(gid_t gid, FAR struct group *grp, FAR char *buf, size_t buflen,
+int getgrnam_r(FAR const char *name,
+               FAR struct group *grp,
+               FAR char *buf,
+               size_t buflen,
+               FAR struct group **result);
+int getgrgid_r(gid_t gid, FAR struct group *grp,
+               FAR char *buf, size_t buflen,
                FAR struct group **result);
 int initgroups(FAR const char *user, gid_t group);
 

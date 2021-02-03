@@ -1,4 +1,4 @@
-/**************************************************************************************
+/****************************************************************************
  * include/nuttx/lcd/ili9341.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
@@ -32,26 +32,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_LCD_ILI9341_H
 #define __INCLUDE_NUTTX_LCD_ILI9341_H
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
+ ****************************************************************************/
 
 /* ILI9341 ID code */
 
 #define ILI9341_DEVICE_CODE                    0x9341
 
-/* ILI9341 LCD Register Addresses *****************************************************/
+/* ILI9341 LCD Register Addresses *******************************************/
 
 /* Level 1 commands */
 
@@ -142,7 +142,7 @@
 #define ILI9341_INTERFACE_CONTROL              0xf6 /* Interface control */
 #define ILI9341_PUMP_RATIO_CONTROL             0xf7 /* Pump ration control */
 
-/* ILI9341 LCD Register Bit Definitions ***********************************************/
+/* ILI9341 LCD Register Bit Definitions *************************************/
 
 /* Pixel format set */
 
@@ -205,15 +205,16 @@
 #define ILI9341_INTERFACE_CONTROL_RCM(n)       ((n) << ILI9341_INTERFACE_CONTROL_RCM_SHIFT)
 #define ILI9341_INTERFACE_CONTROL_BPASS        (1 << 7)
 
-/**************************************************************************************
+/****************************************************************************
  * Public Types
- **************************************************************************************/
+ ****************************************************************************/
 
 struct ili9341_lcd_s
 {
   /* Interface to control the ILI9341 lcd driver
    *
-   *  - select      Select the device (as necessary) before performing any operations.
+   *  - select      Select the device (as necessary) before performing any
+   *                operations.
    *  - deselect    Deselect the device (as necessary).
    *  - sendcmd     Send specific command to the LCD driver.
    *  - sendparam   Send specific parameter to the LCD driver.
@@ -242,9 +243,9 @@ struct ili9341_lcd_s
   /* mcu interface specific data following */
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Public Data
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -254,11 +255,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ili9341_initialize
  *
  * Description:
@@ -269,28 +270,29 @@ extern "C"
  *
  * Input Parameters:
  *
- *   lcd - A reference to the platform specific driver instance to control the
- *     ili9341 display driver.
+ *   lcd - A reference to the platform specific driver instance to control
+ *     the ili9341 display driver.
  *   devno - A value in the range of 0 through CONFIG_ILI9341_NINTERFACES-1.
  *     This allows support for multiple LCD devices.
  *
  * Returned Value:
  *
- *   On success, this function returns a reference to the LCD driver object for
- *   the specified LCD driver. NULL is returned on any failure.
+ *   On success, this function returns a reference to the LCD driver object
+ *   for the specified LCD driver. NULL is returned on any failure.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-FAR struct lcd_dev_s *ili9341_initialize(FAR struct ili9341_lcd_s *lcd, int devno);
+FAR struct lcd_dev_s *ili9341_initialize(FAR struct ili9341_lcd_s *lcd,
+                                         int devno);
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ili9341_clear
  *
  * Description:
- *   This is a non-standard LCD interface.  Because of the various rotations, clearing
- *   the display in the normal way by writing a sequences of runs that covers the
- *   entire display can be very slow.  Here the display is cleared by simply setting
- *   all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface.  Because of the various rotations,
+ *   clearing the display in the normal way by writing a sequences of runs
+ *   that covers the entire display can be very slow.  Here the display is
+ *   cleared by simply setting all GRAM memory to the specified color.
  *
  * Input Parameters:
  *   dev   - A reference to the lcd driver structure
@@ -301,7 +303,7 @@ FAR struct lcd_dev_s *ili9341_initialize(FAR struct ili9341_lcd_s *lcd, int devn
  *  On success - OK
  *  On error   - -EINVAL
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 int ili9341_clear(FAR struct lcd_dev_s *dev, uint16_t color);
 #undef EXTERN

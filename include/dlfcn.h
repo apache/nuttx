@@ -222,7 +222,7 @@ int dlsymtab(FAR const struct symtab_s *symtab, int nsymbols);
  *
  * Reference: OpenGroup.org
  *
- * ****************************************************************************/
+ * **************************************************************************/
 
 FAR void *dlopen(FAR const char *file, int mode);
 
@@ -297,7 +297,7 @@ FAR void *dlsym(FAR void *handle, FAR const char *name);
  *   diagnostic information will be available through dlerror().
  *
  * Reference: OpenGroup.org
- *  ****************************************************************************/
+ *  *************************************************************************/
 
 int dlclose(FAR void *handle);
 

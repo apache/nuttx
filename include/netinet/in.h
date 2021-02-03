@@ -103,14 +103,17 @@
                                                     * blocked multicast source */
 #define IP_BLOCK_SOURCE       (__SO_PROTOCOL + 7)  /* Stop receiving multicast
                                                     * data from source */
+
 #define IP_ADD_SOURCE_MEMBERSHIP (__SO_PROTOCOL + 8) /* Join a multicast group;
-                                                    * allow receive only from
-                                                    * source */
+                                                      * allow receive only from
+                                                      * source */
+
 #define IP_DROP_SOURCE_MEMBERSHIP (__SO_PROTOCOL + 9) /* Leave a source-specific
-                                                    * group.  Stop receiving
-                                                    * data from a given
-                                                    * multicast group that come
-                                                    * from a given source */
+                                                       * group.  Stop receiving
+                                                       * data from a given
+                                                       * multicast group that come
+                                                       * from a given source */
+
 #define IP_MSFILTER           (__SO_PROTOCOL + 10) /* Access advanced, full-
                                                     * state filtering API */
 #define IP_MULTICAST_ALL      (__SO_PROTOCOL + 11) /* Modify the delivery policy

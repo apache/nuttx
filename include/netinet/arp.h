@@ -79,10 +79,10 @@
 
 struct arpreq
 {
-  struct sockaddr arp_pa;          /* Protocol address */
-  struct sockaddr arp_ha;          /* Hardware address */
-  struct sockaddr arp_netmask;     /* Netmask of protocol address */
-  uint8_t         arp_flags;       /* Flags */
+  struct sockaddr arp_pa;                /* Protocol address */
+  struct sockaddr arp_ha;                /* Hardware address */
+  struct sockaddr arp_netmask;           /* Netmask of protocol address */
+  uint8_t         arp_flags;             /* Flags */
   uint8_t         arp_dev[IFNAMSIZ + 1]; /* Device name (zero terminated) */
 };
 

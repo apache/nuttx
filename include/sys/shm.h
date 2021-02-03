@@ -49,6 +49,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Definitions required by POSIX */
 
 #define SHM_RDONLY 0x01 /* Attach read-only (else read-write) */
