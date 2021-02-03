@@ -55,11 +55,12 @@
 #define TCP_NODELAY   (__SO_PROTOCOL + 0) /* Avoid coalescing of small segments. */
 
 /*   "The macro shall be defined in the header.  The implementation need not
- *    allow the value of the option to be set via setsockopt() or retrieved via
- *    getsockopt()."
+ *    allow the value of the option to be set via setsockopt() or retrieved
+ *    via getsockopt()."
  */
 
 /* Additional TCP protocol socket operations not specified at OpenGroup.org */
+
 /* TCP protocol socket operations needed to support TCP Keep-Alive: */
 
 #define TCP_KEEPIDLE  (__SO_PROTOCOL + 1) /* Start keeplives after this IDLE period

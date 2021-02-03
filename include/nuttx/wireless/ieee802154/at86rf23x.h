@@ -52,12 +52,13 @@
  * following structure provides an MCU-independent mechanixm for controlling
  * the at86rf23x GPIO interrupt.
  *
- * The at86rf23x interrupt is an active low, *level* interrupt. From Datasheet:
+ * The at86rf23x interrupt is an active low, *level* interrupt.
+ * From Datasheet:
  * "Note 1: The INTEDGE polarity defaults to: 0 = Falling Edge. Ensure that
  *  the interrupt polarity matches the interrupt pin polarity of the host
  *  microcontroller.
- * "Note 2: The INT pin will remain high or low, depending on INTEDGE polarity
- *  setting, until INTSTAT register is read."
+ * "Note 2: The INT pin will remain high or low, depending on INTEDGE
+ *  polarity setting, until INTSTAT register is read."
  */
 
 struct at86rf23x_lower_s
@@ -85,8 +86,8 @@ extern "C"
  * Function: at86rf23x_init
  *
  * Description:
- *   Initialize the IEEE802.15.4 driver.  The at86rf23x device is assumed to be
- *   in the post-reset state upon entry to this function.
+ *   Initialize the IEEE802.15.4 driver.  The at86rf23x device is assumed to
+ *   be in the post-reset state upon entry to this function.
  *
  * Input Parameters:
  *   spi   - A reference to the platform's SPI driver for the at86rf23x

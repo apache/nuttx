@@ -206,8 +206,8 @@ void pktradio_metadata_initialize(void);
  *   None
  *
  * Returned Value:
- *   A reference to the allocated metadata structure.  All user fields in this
- *   structure have been zeroed.  On a failure to allocate, NULL is
+ *   A reference to the allocated metadata structure.  All user fields in
+ *   this structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
  *
  ****************************************************************************/

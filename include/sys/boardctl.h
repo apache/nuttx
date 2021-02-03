@@ -431,11 +431,12 @@ extern "C"
  *   calls.  This, however, may not be practical in many cases and will lead
  *   to "correct" but awkward implementations.
  *
- *   boardctl() is non-standard OS interface to alleviate the problem.  It
- *   basically circumvents the normal device driver ioctl interlace and allows
- *   the application to perform direct IOCTL-like calls to the board-specific
- *   logic.  It is especially useful for setting up board operational and
- *   test configurations.
+ *   boardctl() is non-standard OS interface to alleviate the problem.
+ *   It basically circumvents the normal device driver ioctl interlace and
+ *   allows the application to perform direct IOCTL-like calls to the
+ *   board-specific logic.
+ *   It is especially useful for setting up board operational and test
+ *   configurations.
  *
  * Input Parameters:
  *   cmd - Identifies the board command to be executed

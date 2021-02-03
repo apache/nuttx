@@ -1,4 +1,4 @@
-/*******************************************************************************************
+/****************************************************************************
  * include/net/if.h
  *
  *   Copyright (C) 2007, 2008, 2012, 2015 Gregory Nutt. All rights reserved.
@@ -31,21 +31,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NET_IF_H
 #define __INCLUDE_NET_IF_H
 
-/*******************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************/
+ ****************************************************************************/
 
 #include <signal.h>
 #include <sys/socket.h>
 
-/*******************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************/
+ ****************************************************************************/
 
 /* Sizing parameters */
 
@@ -78,8 +78,8 @@
 #define IFF_IS_RUNNING(f)  (((f) & IFF_RUNNING) != 0)
 #define IFF_IS_NOARP(f)    (((f) & IFF_NOARP) != 0)
 
-/* We only need to manage the IPv6 bit if both IPv6 and IPv4 are supported.  Otherwise,
- * we can save a few bytes by ignoring it.
+/* We only need to manage the IPv6 bit if both IPv6 and IPv4 are supported.
+ *  Otherwise, we can save a few bytes by ignoring it.
  */
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
@@ -110,12 +110,12 @@
 #  define IFF_IS_IPv4(f)   (1)
 #endif
 
-/*******************************************************************************************
+/****************************************************************************
  * Public Type Definitions
- *******************************************************************************************/
+ ****************************************************************************/
 
-/* Structure passed with the SIOCMIINOTIFY ioctl command to enable notification of
- * of PHY state changes.
+/* Structure passed with the SIOCMIINOTIFY ioctl command to enable
+ * notification of of PHY state changes.
  */
 
 struct mii_ioctl_notify_s
@@ -124,8 +124,8 @@ struct mii_ioctl_notify_s
   struct sigevent event; /* Describe the way a task is to be notified */
 };
 
-/* Structure passed to read from or write to the MII/PHY management interface via the
- * SIOCxMIIREG ioctl commands.
+/* Structure passed to read from or write to the MII/PHY management
+ * interface via the SIOCxMIIREG ioctl commands.
  */
 
 struct mii_ioctl_data_s
@@ -148,9 +148,10 @@ struct can_ioctl_data_s
   uint16_t data_samplep; /* Data phase sample point % */
 };
 
-/* There are two forms of the I/F request structure.  One for IPv6 and one for IPv4.
- * Notice that they are (and must be) cast compatible and really different only
- * in the size of the structure allocation.
+/* There are two forms of the I/F request structure.
+ * One for IPv6 and one for IPv4.
+ * Notice that they are (and must be) cast compatible and really different
+ * only in the size of the structure allocation.
  *
  * This is the I/F request that should be used with IPv6.
  */
@@ -258,9 +259,9 @@ struct ifconf
 #define ifc_buf              ifc_ifcu.ifcu_buf          /* Buffer address */
 #define ifc_req              ifc_ifcu.ifcu_req          /* Array of ifreq structures */
 
-/*******************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- *******************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -270,38 +271,43 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/*******************************************************************************************
+/****************************************************************************
  * Name: if_nametoindex
  *
  * Description:
- *   The if_nametoindex() function returns the interface index corresponding to name ifname.
+ *   The if_nametoindex() function returns the interface index corresponding
+ *  to name ifname.
  *
  * Input Parameters:
  *   ifname - The interface name
  *
  * Returned Value:
- *   The corresponding index if ifname is the name of an interface; otherwise, zero.
+ *   The corresponding index if ifname is the name of an interface;
+ *   otherwise, zero.
  *
- *******************************************************************************************/
+ ****************************************************************************/
 
 unsigned int if_nametoindex(FAR const char *ifname);
 
-/*******************************************************************************************
+/****************************************************************************
  * Name: if_indextoname
  *
  * Description:
- *   The if_indextoname() function maps an interface index to its corresponding name.
+ *   The if_indextoname() function maps an interface index to its
+ *   corresponding name.
  *
  * Input Parameters:
- *   ifname  - Points to a buffer of at least IF_NAMESIZE bytes.  if_indextoname() will
- *             place in this buffer the name of the interface with index ifindex.
+ *   ifname  - Points to a buffer of at least IF_NAMESIZE bytes.
+ *             if_indextoname() will place in this buffer the name
+ *              of the interface with index ifindex.
  *
  * Returned Value:
- *   If ifindex is an interface index, then the function will return the value supplied by
- *   ifname. Otherwise, the function returns a NULL pointer and sets errno to indicate the
- *   error.
+ *   If ifindex is an interface index, then the function will return the
+ *   value supplied by ifname.
+ *   Otherwise, the function returns a NULL pointer and sets errno to
+ *   indicate the error.
  *
- *******************************************************************************************/
+ ****************************************************************************/
 
 FAR char *if_indextoname(unsigned int ifindex, FAR char *ifname);
 

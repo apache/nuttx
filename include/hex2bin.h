@@ -118,8 +118,8 @@ extern "C"
  *   the binary to the seek-able serial OUT stream.
  *
  *   These streams may be files or, in another usage example, the IN stream
- *   could be a serial port and the OUT stream could be a memory stream.  This
- *   would decode and write the serial input to memory.
+ *   could be a serial port and the OUT stream could be a memory stream.
+ *   This would decode and write the serial input to memory.
  *
  * Input Parameters:
  *   instream  - The incoming stream from which Intel HEX data will be
