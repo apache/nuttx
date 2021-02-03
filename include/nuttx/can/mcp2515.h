@@ -119,7 +119,8 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct mcp2515_can_s *mcp2515_instantiate(FAR struct mcp2515_config_s *config);
+FAR struct mcp2515_can_s *mcp2515_instantiate(
+                                        FAR struct mcp2515_config_s *config);
 
 /****************************************************************************
  * Name: mcp2515_initialize
@@ -137,7 +138,8 @@ FAR struct mcp2515_can_s *mcp2515_instantiate(FAR struct mcp2515_config_s *confi
  *
  ****************************************************************************/
 
-FAR struct can_dev_s *mcp2515_initialize(FAR struct mcp2515_can_s *mcp2515can);
+FAR struct can_dev_s *mcp2515_initialize(
+                                      FAR struct mcp2515_can_s *mcp2515can);
 
 #undef EXTERN
 #ifdef __cplusplus
