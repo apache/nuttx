@@ -66,6 +66,7 @@ static struct rname_code_s _rname_table[] =
   {"HI20", R_RISCV_HI20},
   {"LO12_I", R_RISCV_LO12_I},
   {"CALL", R_RISCV_CALL},
+  {"CALL_PLT", R_RISCV_CALL_PLT},
   {"BRANCH", R_RISCV_BRANCH},
   {"RVC_JUMP", R_RISCV_RVC_JUMP},
   {"RVC_BRANCH", R_RISCV_RVC_BRANCH},
@@ -318,6 +319,7 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
 
       case R_RISCV_PCREL_HI20:
       case R_RISCV_CALL:
+      case R_RISCV_CALL_PLT:
         {
           binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
                 "to sym=%p st_value=%08" PRIx64 "\n",
