@@ -5945,9 +5945,9 @@ static int smart_fsck_directory(FAR struct smart_struct_s *dev,
               (const char *) (cur + sizeof(struct smart_entry_header_s)),
               dev->namesize);
       entryname[dev->namesize] = '\0';
-#endif
       finfo("Check entry (name=%s flags=%02x logsector=%02x)\n",
             entryname, entry->flags, entry->firstsector);
+#endif
 
       if (entry->flags & SMARTFS_DIRENT_ACTIVE)
         {
@@ -5969,8 +5969,10 @@ static int smart_fsck_directory(FAR struct smart_struct_s *dev,
 
       if (ret != OK)
         {
+#ifdef CONFIG_DEBUG_FS_INFO
           finfo("Remove entry (name=%s flags=%02x)\n",
                 entryname, entry->flags);
+#endif
 
           if ((cur + (2 * entrysize)) <= bottom)
             {
