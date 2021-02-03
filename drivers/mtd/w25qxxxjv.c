@@ -118,6 +118,8 @@
                                         *  0xd8 | A23-A16 | A15-A8 | A7-A0       */
 #define W25QXXXJV_CHIP_ERASE      0x60 /* Chip Erase:                            *
                                         *  0xc7 or 0x60                          */
+#define W25QXXXJV_ENTER_4BT_MODE  0xB7 /* Enter 4-byte address mode              */
+#define W25QXXXJV_EXIT_4BT_MODE   0xE9 /* Exit 4-byte address mode               */
 
 /* Read Commands ************************************************************
  *      Command                  Value    Description:                      *
@@ -139,7 +141,6 @@
  *      Command                  Value    Description:                      *
  *                                            Data sequence                 *
  */
-
 #define W25QXXXJV_JEDEC_ID        0x9f  /* JEDEC ID:                        *
                                          * 0x9f | Manufacturer | MemoryType | *
                                          * Capacity                         */
@@ -177,7 +178,7 @@
 #define STATUS_BP_SHIFT      (2)      /* Bits 2-4: Block protect bits     */
 #define STATUS_BP_MASK       (7 << STATUS_BP_SHIFT)
 #define STATUS_BP_NONE       (0 << STATUS_BP_SHIFT)
-#define STATUS_BP_ALL        (7 << STATUS_BP_SHIFT)
+#define STATUS_BP_ALL        (15 << STATUS_BP_SHIFT)
 #define STATUS_TB_MASK       (1 << 5) /* Bit 5: Top / Bottom Protect      */
 #define STATUS_TB_TOP        (0 << 5) /*   0 = BP2-BP0 protect Top down   */
 #define STATUS_TB_BOTTOM     (1 << 5) /*   1 = BP2-BP0 protect Bottom up  */
@@ -187,6 +188,13 @@
 #define STATUS_SRP_MASK      (1 << 7) /* Bit 7: Status register protect 0 */
 #define STATUS_SRP_UNLOCKED  (0 << 7) /*   see blow for details           */
 #define STATUS_SRP_LOCKED    (1 << 7) /*   see blow for details           */
+
+/* Some chips have four protect bits                                      */
+
+/* Bits 2-5: Block protect bits                                           */
+#define STATUS_BP_4_MASK     (15 << STATUS_BP_SHIFT)
+/* Some chips have top/bottom bit at sixth bit                            */
+#define STATUS_TB_6_MASK     (1 << 6) /* Bit 6: Top / Bottom Protect      */
 
 /* Status Register Protect (SRP, SRL)
  * SRL SRP /WP Status Register         Description
@@ -316,6 +324,9 @@ struct w25qxxxjv_dev_s
   uint16_t               nsectors;    /* Number of erase sectors */
   uint8_t                sectorshift; /* Log2 of sector size */
   uint8_t                pageshift;   /* Log2 of page size */
+  uint8_t                addresslen;  /* Length of address 3 or 4 bytes */
+  uint8_t                protectmask; /* Mask for protect bits in status register */
+  uint8_t                tbmask;      /* Mask for top/bottom bit in status register */
   FAR uint8_t           *cmdbuf;      /* Allocated command buffer */
   FAR uint8_t           *readbuf;     /* Allocated status read buffer */
 
@@ -637,42 +648,63 @@ static inline int w25qxxxjv_readid(struct w25qxxxjv_dev_s *priv)
         priv->sectorshift = W25Q016_SECTOR_SHIFT;
         priv->pageshift   = W25Q016_PAGE_SHIFT;
         priv->nsectors    = W25Q016_SECTOR_COUNT;
+        priv->addresslen  = 3;
+        priv->protectmask = STATUS_BP_MASK;
+        priv->tbmask      = STATUS_TB_MASK;
         break;
 
       case W25Q032_JEDEC_CAPACITY:
         priv->sectorshift = W25Q032_SECTOR_SHIFT;
         priv->pageshift   = W25Q032_PAGE_SHIFT;
         priv->nsectors    = W25Q032_SECTOR_COUNT;
+        priv->addresslen  = 3;
+        priv->protectmask = STATUS_BP_MASK;
+        priv->tbmask      = STATUS_TB_MASK;
         break;
 
       case W25Q064_JEDEC_CAPACITY:
         priv->sectorshift = W25Q064_SECTOR_SHIFT;
         priv->pageshift   = W25Q064_PAGE_SHIFT;
         priv->nsectors    = W25Q064_SECTOR_COUNT;
+        priv->addresslen  = 3;
+        priv->protectmask = STATUS_BP_4_MASK;
+        priv->tbmask      = STATUS_TB_6_MASK;
         break;
 
       case W25Q128_JEDEC_CAPACITY:
         priv->sectorshift = W25Q128_SECTOR_SHIFT;
         priv->pageshift   = W25Q128_PAGE_SHIFT;
         priv->nsectors    = W25Q128_SECTOR_COUNT;
+        priv->addresslen  = 3;
+        priv->protectmask = STATUS_BP_MASK;
+        priv->tbmask      = STATUS_TB_MASK;
         break;
 
       case W25Q256_JEDEC_CAPACITY:
         priv->sectorshift = W25Q256_SECTOR_SHIFT;
         priv->pageshift   = W25Q256_PAGE_SHIFT;
         priv->nsectors    = W25Q256_SECTOR_COUNT;
+        priv->addresslen  = 4;
+        priv->protectmask = STATUS_BP_4_MASK;
+        priv->tbmask      = STATUS_TB_6_MASK;
         break;
 
       case W25Q512_JEDEC_CAPACITY:
         priv->sectorshift = W25Q512_SECTOR_SHIFT;
         priv->pageshift   = W25Q512_PAGE_SHIFT;
         priv->nsectors    = W25Q512_SECTOR_COUNT;
+        priv->addresslen  = 4;
+        priv->protectmask = STATUS_BP_4_MASK;
+        priv->tbmask      = STATUS_TB_6_MASK;
         break;
 
       case W25Q01_JEDEC_CAPACITY:
         priv->sectorshift = W25Q01_SECTOR_SHIFT;
         priv->pageshift   = W25Q01_PAGE_SHIFT;
         priv->nsectors    = W25Q01_SECTOR_COUNT;
+        priv->addresslen  = 4;
+        priv->protectmask = STATUS_BP_4_MASK;
+        priv->tbmask      = STATUS_TB_6_MASK;
         break;
 
       /* Support for this part is not implemented yet */
@@ -696,7 +728,8 @@ static int w25qxxxjv_protect(FAR struct w25qxxxjv_dev_s *priv,
 
   priv->cmdbuf[0] = w25qxxxjv_read_status(priv);
 
-  if ((priv->cmdbuf[0] & STATUS_BP_MASK) == STATUS_BP_ALL)
+  if ((priv->cmdbuf[0] & priv->protectmask) ==
+                           (STATUS_BP_ALL & priv->protectmask))
     {
       /* Protection already enabled */
 
@@ -705,13 +738,14 @@ static int w25qxxxjv_protect(FAR struct w25qxxxjv_dev_s *priv,
 
   /* set the BP bits as necessary to protect the range of sectors. */
 
-  priv->cmdbuf[0] |= STATUS_BP_ALL;
+  priv->cmdbuf[0] |= (STATUS_BP_ALL & priv->protectmask);
   w25qxxxjv_write_status(priv);
 
   /* Check the new status */
 
   priv->cmdbuf[0] = w25qxxxjv_read_status(priv);
-  if ((priv->cmdbuf[0] & STATUS_BP_MASK) != STATUS_BP_ALL)
+  if ((priv->cmdbuf[0] & priv->protectmask) !=
+                            (STATUS_BP_ALL & priv->protectmask))
     {
       return -EACCES;
     }
@@ -730,7 +764,7 @@ static int w25qxxxjv_unprotect(FAR struct w25qxxxjv_dev_s *priv,
 
   priv->cmdbuf[0] = w25qxxxjv_read_status(priv);
 
-  if ((priv->cmdbuf[0] & STATUS_BP_MASK) == STATUS_BP_NONE)
+  if ((priv->cmdbuf[0] & priv->protectmask) == STATUS_BP_NONE)
     {
       /* Protection already disabled */
 
@@ -742,13 +776,13 @@ static int w25qxxxjv_unprotect(FAR struct w25qxxxjv_dev_s *priv,
    * necessary to unprotect the range of sectors.
    */
 
-  priv->cmdbuf[0] &= ~STATUS_BP_MASK;
+  priv->cmdbuf[0] &= ~priv->protectmask;
   w25qxxxjv_write_status(priv);
 
   /* Check the new status */
 
   priv->cmdbuf[0] = w25qxxxjv_read_status(priv);
-  if ((priv->cmdbuf[0] & (STATUS_SRP_MASK | STATUS_BP_MASK)) != 0)
+  if ((priv->cmdbuf[0] & (STATUS_SRP_MASK | priv->protectmask)) != 0)
     {
       return -EACCES;
     }
@@ -771,7 +805,7 @@ static bool w25qxxxjv_isprotected(FAR struct w25qxxxjv_dev_s *priv,
 
   /* The BP field is spread across non-contiguous bits */
 
-  bp = (status & STATUS_BP_MASK) >> STATUS_BP_SHIFT;
+  bp = (status & priv->protectmask) >> STATUS_BP_SHIFT;
 
   /* the BP field is essentially the power-of-two of the number of 64k
    * sectors, saturated to the device size.
@@ -794,7 +828,7 @@ static bool w25qxxxjv_isprotected(FAR struct w25qxxxjv_dev_s *priv,
    * configured top-down or bottom up  (assuming CMP=0).
    */
 
-  if ((status & STATUS_TB_MASK) != 0)
+  if ((status & priv->tbmask) != 0)
     {
       protstart = 0x00000000;
       protend   = protstart + protsize;
@@ -834,7 +868,7 @@ static int w25qxxxjv_erase_sector(FAR struct w25qxxxjv_dev_s *priv,
 
   address = (off_t)sector << priv->sectorshift;
 
-  if ((status & STATUS_BP_MASK) != 0 &&
+  if ((status & priv->protectmask) != 0 &&
        w25qxxxjv_isprotected(priv, status, address))
     {
       ferr("ERROR: Flash protected: %02x", status);
@@ -846,7 +880,7 @@ static int w25qxxxjv_erase_sector(FAR struct w25qxxxjv_dev_s *priv,
   w25qxxxjv_write_enable(priv);
   w25qxxxjv_command_address(priv->qspi,
                             W25QXXXJV_SECTOR_ERASE,
-                            address, 3);
+                            address, priv->addresslen);
 
   /* Wait for erasure to finish */
 
@@ -866,7 +900,7 @@ static int w25qxxxjv_erase_chip(FAR struct w25qxxxjv_dev_s *priv)
   /* Check if the FLASH is protected */
 
   status = w25qxxxjv_read_status(priv);
-  if ((status & STATUS_BP_MASK) != 0)
+  if ((status & priv->protectmask) != 0)
     {
       ferr("ERROR: FLASH is Protected: %02x", status);
       return -EACCES;
@@ -902,7 +936,7 @@ static int w25qxxxjv_read_byte(FAR struct w25qxxxjv_dev_s *priv,
   finfo("address: %08lx nbytes: %d\n", (long)address, (int)buflen);
 
   meminfo.flags   = QSPIMEM_READ | QSPIMEM_QUADIO;
-  meminfo.addrlen = 3;
+  meminfo.addrlen = priv->addresslen;
   meminfo.dummies = CONFIG_W25QXXXJV_DUMMIES;
   meminfo.buflen  = buflen;
   meminfo.cmd     = W25QXXXJV_FAST_READ_QUADIO;
@@ -937,7 +971,7 @@ static int w25qxxxjv_write_page(struct w25qxxxjv_dev_s *priv,
 
   meminfo.flags   = QSPIMEM_WRITE;
   meminfo.cmd     = W25QXXXJV_PAGE_PROGRAM;
-  meminfo.addrlen = 3;
+  meminfo.addrlen = priv->addresslen;
   meminfo.buflen  = pagesize;
   meminfo.dummies = 0;
 
@@ -1383,7 +1417,7 @@ static int w25qxxxjv_ioctl(FAR struct mtd_dev_s *dev,
 #endif
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %lu erasesize: %lu neraseblocks: %lu\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -1507,6 +1541,20 @@ FAR struct mtd_dev_s *w25qxxxjv_initialize(FAR struct qspi_dev_s *qspi,
 
           ferr("ERROR Unrecognized QSPI device\n");
           goto errout_with_readbuf;
+        }
+
+      /* Enter 4-byte address mode if chip is 4-byte addressable */
+
+      if (priv->addresslen == 4)
+        {
+          w25qxxxjv_lock(priv->qspi);
+          ret = w25qxxxjv_command(priv->qspi, W25QXXXJV_ENTER_4BT_MODE);
+          if (ret != OK)
+            {
+              ferr("ERROR: Failed to enter 4 byte mode\n");
+            }
+
+          w25qxxxjv_unlock(priv->qspi);
         }
 
       /* Unprotect FLASH sectors if so requested. */
