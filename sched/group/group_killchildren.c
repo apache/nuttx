@@ -131,14 +131,26 @@ int group_kill_children(FAR struct tcb_s *tcb)
 {
   int ret;
 
+#ifdef CONFIG_SMP
+  /* NOTE: sched_lock() is not enough for SMP
+   * because tcb->group will be accessed from the child tasks
+   */
+
+  irqstate_t flags = enter_critical_section();
+#else
   /* Lock the scheduler so that there this thread will not lose priority
    * until all of its children are suspended.
    */
 
   sched_lock();
+#endif
   ret = group_foreachchild(tcb->group, group_kill_children_handler,
                            (FAR void *)((uintptr_t)tcb->pid));
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#else
   sched_unlock();
+#endif
   return ret;
 }
 
