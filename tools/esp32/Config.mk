@@ -39,18 +39,14 @@ else
 endif
 
 define POSTBUILD
-	@echo "MKIMAGE: ESP32 binary"
-	$(Q) if ! esptool.py version ; then \
+	$(Q)echo "MKIMAGE: ESP32 binary"
+	$(Q) if ! esptool.py version 1>/dev/null 2>&1; then \
 		echo ""; \
-		echo "Please install ESP-IDF tools"; \
+		echo "esptool.py not found.  Please run: \"pip install esptool.py\""; \
+		echo "Or run: \"make -C tools/esp32\" to install all IDF tools."; \
 		echo ""; \
-		echo "Check https://docs.espressif.com/projects/esp-idf/en/v4.0/get-started/index.html#installation-step-by-step or run the following command"; \
-		echo ""; \
-		echo "cd tools/esp32 && make && cd ../.."; \
-		echo ""; \
-		echo "run make again to create the nuttx.bin image."; \
+		echo "Run make again to create the nuttx.bin image."; \
 	else \
-		echo "Generating: $(NUTTXNAME).bin (ESP32 compatible)"; \
 		esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o $(NUTTXNAME).bin nuttx; \
 		echo "Generated: $(NUTTXNAME).bin (ESP32 compatible)"; \
 	fi

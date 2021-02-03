@@ -44,9 +44,9 @@ printf "\tBootloader: %s\n" "${BOOTLOADER}"
 printf "\tPartition Table: %s\n" "${PARTITION_TABLE}"
 
 dd if=/dev/zero bs=1024 count=4096 of=esp32_qemu_image.bin && \
-  dd if="${BOOTLOADER}" bs=1 seek="$(printf '%d' 0x1000)" of=esp32_qemu_image.bin conv=notrunc && \
-  dd if="${PARTITION_TABLE}" bs=1 seek="$(printf '%d' 0x8000)" of=esp32_qemu_image.bin conv=notrunc && \
-  dd if="${NUTTXNAME}".bin bs=1 seek="$(printf '%d' 0x10000)" of=esp32_qemu_image.bin conv=notrunc
+dd if="${BOOTLOADER}" bs=1 seek="$(printf '%d' 0x1000)" of=esp32_qemu_image.bin conv=notrunc && \
+dd if="${PARTITION_TABLE}" bs=1 seek="$(printf '%d' 0x8000)" of=esp32_qemu_image.bin conv=notrunc && \
+dd if="${NUTTXNAME}".bin bs=1 seek="$(printf '%d' 0x10000)" of=esp32_qemu_image.bin conv=notrunc
 
 if [ ${?} -ne 0 ]; then
   printf "Failed to generate esp32_qemu_image.bin.\n"
