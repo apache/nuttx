@@ -73,7 +73,8 @@
  *
  ****************************************************************************/
 
-int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize);
+int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo,
+                         size_t envsize);
 
 /****************************************************************************
  * Name: nxflat_addrenv_select
@@ -97,7 +98,8 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
  * Name: nxflat_addrenv_restore
  *
  * Description:
- *   Restore the address environment before nxflat_addrenv_select() was called..
+ *   Restore the address environment before nxflat_addrenv_select() was
+ *   called..
  *
  * Input Parameters:
  *   loadinfo - Load state information

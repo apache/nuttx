@@ -86,7 +86,8 @@
  *
  ****************************************************************************/
 
-int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
+int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo,
+                         size_t envsize)
 {
   FAR struct dspace_s *dspace;
 #ifdef CONFIG_ARCH_ADDRENV
