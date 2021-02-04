@@ -42,6 +42,9 @@ config BL602_PWM0
 config BL602_I2C0
 	bool "I2C0"
 
+config BL602_SPI0
+	bool "SPI0"
+
 config BL602_SPIFLASH
 	bool "SPI Flash"
 	default n
