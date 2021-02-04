@@ -128,8 +128,8 @@ void rammap_initialize(void);
  *   offset  The offset into the file to map
  *
  * Returned Value:
- *   On success, rammmap() returns a pointer to the mapped area. On error, the
- *   value MAP_FAILED is returned, and errno is set  appropriately.
+ *   On success, rammmap() returns a pointer to the mapped area. On error,
+ *   the value MAP_FAILED is returned, and errno is set  appropriately.
  *
  *     EBADF
  *      'fd' is not a valid file descriptor.
