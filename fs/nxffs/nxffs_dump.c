@@ -147,8 +147,8 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
 
   if (doffs < blkinfo->offset + offset + SIZEOF_NXFFS_BLOCK_HDR)
     {
-      /* The first data block begins before the inode header.  This can't can't
-       * be a real inode header (or it is a corrupted one).
+      /* The first data block begins before the inode header.  This can't
+       * can't be a real inode header (or it is a corrupted one).
        */
 
       return ERROR;
@@ -197,7 +197,8 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
   nxffs_wrle32(inode.crc, 0);
 
   crc = crc32((FAR const uint8_t *)&inode, SIZEOF_NXFFS_INODE_HDR);
-  crc = crc32part(&blkinfo->buffer[noffs - blkinfo->offset], inode.namlen, crc);
+  crc = crc32part(&blkinfo->buffer[noffs - blkinfo->offset],
+                  inode.namlen, crc);
 
   if (crc != ecrc)
     {
@@ -273,7 +274,8 @@ static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
   nxffs_wrle32(dathdr.crc, 0);
 
   crc = crc32((FAR const uint8_t *)&dathdr, SIZEOF_NXFFS_DATA_HDR);
-  crc = crc32part(&blkinfo->buffer[offset + SIZEOF_NXFFS_DATA_HDR], datlen, crc);
+  crc = crc32part(&blkinfo->buffer[offset + SIZEOF_NXFFS_DATA_HDR],
+                  datlen, crc);
 
   if (crc != ecrc)
     {
@@ -329,7 +331,12 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
         {
           if (blkinfo->verbose)
             {
-              syslog(LOG_NOTICE, g_format, blkinfo->block, 0, "BLOCK", "ERASED ",
+              syslog(LOG_NOTICE,
+                     g_format,
+                     blkinfo->block,
+                     0,
+                     "BLOCK",
+                     "ERASED ",
                      blkinfo->geo.blocksize);
             }
 
@@ -409,8 +416,9 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
  * Name: nxffs_dump
  *
  * Description:
- *   Dump a summary of the contents of an NXFFS file system.  CONFIG_DEBUG_FEATURES
- *   and CONFIG_DEBUG_FS must be enabled for this function to do anything.
+ *   Dump a summary of the contents of an NXFFS file system.
+ *   CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_FS must be enabled
+ *   for this function to do anything.
  *
  * Input Parameters:
  *   mtd - The MTD device that provides the interface to NXFFS-formatted
@@ -435,7 +443,9 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
    */
 
   memset(&blkinfo, 0, sizeof(struct nxffs_blkinfo_s));
-  ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&blkinfo.geo));
+  ret = MTD_IOCTL(mtd,
+                  MTDIOC_GEOMETRY,
+                  (unsigned long)((uintptr_t)&blkinfo.geo));
   if (ret < 0)
     {
       ferr("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", -ret);

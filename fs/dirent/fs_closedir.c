@@ -89,8 +89,9 @@ int closedir(FAR DIR *dirp)
       goto errout;
     }
 
-  /* A special case is when we enumerate an "empty", unused inode.  That is
-   * an inode in the pseudo-filesystem that has no operations and no children.
+  /* A special case is when we enumerate an "empty", unused inode.
+   * That is an inode in the pseudo-filesystem that has no operations
+   * and no children.
    * This is a "dangling" directory entry that has lost its childre.
    */
 
