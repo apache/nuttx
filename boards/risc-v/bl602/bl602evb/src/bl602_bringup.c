@@ -40,6 +40,7 @@
 #include <bl602_wdt_lowerhalf.h>
 #include <bl602_gpio.h>
 #include <bl602_i2c.h>
+#include <bl602_spi.h>
 
 #if defined(CONFIG_BL602_SPIFLASH)
 #include <bl602_spiflash.h>
@@ -78,6 +79,9 @@ int bl602_bringup(void)
 #endif
 #ifdef CONFIG_I2C
   struct i2c_master_s *i2c_bus;
+#endif
+#ifdef CONFIG_SPI
+  struct spi_dev_s *spi_bus;
 #endif
   int ret = OK;
 
@@ -177,6 +181,11 @@ int bl602_bringup(void)
 #ifdef CONFIG_I2C
   i2c_bus = bl602_i2cbus_initialize(0);
   i2c_register(i2c_bus, 0);
+#endif
+
+#ifdef CONFIG_SPI
+  spi_bus = bl602_spibus_initialize(0);
+  spi_register(spi_bus, 0);
 #endif
 
 #ifdef CONFIG_BL602_SPIFLASH
