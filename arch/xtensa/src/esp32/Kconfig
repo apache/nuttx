@@ -5,6 +5,131 @@
 
 if ARCH_CHIP_ESP32
 
+comment "ESP32 Configuration Options"
+
+choice
+	prompt "ESP32 Chip Selection"
+	default ARCH_CHIP_ESP32WROVER
+	depends on ARCH_CHIP_ESP32
+
+config ARCH_CHIP_ESP32S0WD
+	bool "ESP32-S0WD"
+	select ESP32_ESP32SXWDXX
+	---help---
+		ESP32 chip with a single Xtensa LX6 core, no embedded Flash memory
+
+config ARCH_CHIP_ESP32D0WD
+	bool "ESP32-D0WD"
+	select ESP32_ESP32DXWDXX
+	---help---
+		ESP32 chip with a dual Xtensa LX6 core, no embedded Flash memory
+
+config ARCH_CHIP_ESP32D2WD
+	bool "ESP32-D2WD"
+	select ESP32_ESP32DXWDXX
+	select ESP32_FLASH_2M
+	---help---
+		ESP32 chip with a dual Xtensa LX6 core, 2 MB of in-package Flash memory
+
+config ARCH_CHIP_ESP32U4WD
+	bool "ESP32-U4WD"
+	select ESP32_ESP32UXWDXX
+	select ESP32_FLASH_4M
+	---help---
+		ESP32 chip with a single Xtensa LX6 core, 4 MB of in-package Flash memory
+
+config ARCH_CHIP_ESP32WROOM32
+	bool "ESP32-WROOM-32"
+	select ESP32_ESP32DXWDXX
+	select ESP32_FLASH_4M
+	---help---
+		Generic module with an embedded ESP32-D0WD chip, 4 MB of Flash memory
+
+config ARCH_CHIP_ESP32WROOM32_8MB
+	bool "ESP32-WROOM-32 (8MB)"
+	select ESP32_ESP32DXWDXX
+	select ESP32_FLASH_8M
+	---help---
+		Generic module with an embedded ESP32-D0WD chip, 8 MB of Flash memory
+
+config ARCH_CHIP_ESP32WROOM32_16MB
+	bool "ESP32-WROOM-32 (16MB)"
+	select ESP32_ESP32DXWDXX
+	select ESP32_FLASH_16M
+	---help---
+		Generic module with an embedded ESP32-D0WD chip, 16 MB of Flash memory
+
+config ARCH_CHIP_ESP32WROVER
+	bool "ESP32-WROVER"
+	select ESP32_ESP32DXWDXX
+	select ESP32_FLASH_4M
+	select ESP32_PSRAM_8M
+	---help---
+		Generic module with an embedded ESP32-D0WD chip, 4 MB of Flash memory,
+		8 MB of PSRAM
+
+config ARCH_CHIP_ESP32MINI1
+	bool "ESP32-MINI-1"
+	select ESP32_ESP32UXWDXX
+	select ESP32_FLASH_4M
+	---help---
+		Generic module with an embedded ESP32-U4WD chip
+
+config ARCH_CHIP_ESP32SOLO1
+	bool "ESP32-SOLO-1"
+	select ESP32_ESP32SXWDXX
+	select ESP32_FLASH_4M
+	---help---
+		Generic module with an embedded ESP32-S0WD chip, 4 MB of Flash memory
+
+endchoice # ESP32 Chip Selection
+
+comment "Selected ESP32 chip without embedded Flash, an external Flash memory is required."
+	depends on ARCH_CHIP_ESP32S0WD || ARCH_CHIP_ESP32D0WD
+
+config ESP32_SINGLE_CPU
+	bool
+	default n
+
+config ESP32_DUAL_CPU
+	bool
+	default n
+
+config ESP32_FLASH_2M
+	bool
+	default n
+
+config ESP32_FLASH_4M
+	bool
+	default n
+
+config ESP32_FLASH_8M
+	bool
+	default n
+
+config ESP32_FLASH_16M
+	bool
+	default n
+
+config ESP32_PSRAM_8M
+	bool
+	default n
+
+config ESP32_ESP32SXWDXX
+	bool
+	default n
+	select ESP32_SINGLE_CPU
+
+config ESP32_ESP32UXWDXX
+	bool
+	default n
+	select ESP32_SINGLE_CPU
+
+config ESP32_ESP32DXWDXX
+	bool
+	default n
+	select ESP32_DUAL_CPU
+
 choice ESP32_DEFAULT_CPU_FREQ
 	prompt "CPU frequency"
 	default ESP32_DEFAULT_CPU_FREQ_240

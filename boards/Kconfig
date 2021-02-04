@@ -197,7 +197,7 @@ config ARCH_BOARD_QUICKFEATHER
 
 config ARCH_BOARD_ESP32_DEVKITC
 	bool "Espressif ESP32 DevkitC board V4"
-	depends on ARCH_CHIP_ESP32
+	depends on ARCH_CHIP_ESP32WROOM32 || ARCH_CHIP_ESP32WROOM32_8MB || ARCH_CHIP_ESP32WROOM32_16MB || ARCH_CHIP_ESP32WROVER || ARCH_CHIP_ESP32SOLO1
 	select ARCH_HAVE_LEDS
 	---help---
 		The ESP32 is a dual-core system from Espressif with two Harvard
@@ -209,7 +209,7 @@ config ARCH_BOARD_ESP32_DEVKITC
 
 config ARCH_BOARD_ESP32_ETHERNETKIT
 	bool "Espressif ESP32 Ethernet Kit"
-	depends on ARCH_CHIP_ESP32
+	depends on ARCH_CHIP_ESP32WROVER
 	---help---
 		The ESP32-Ethernet-Kit is an Ethernet-to-Wi-Fi development board that enables
   		Ethernet devices to be interconnected over Wi-Fi. At the same time, to provide
@@ -218,7 +218,7 @@ config ARCH_BOARD_ESP32_ETHERNETKIT
 
 config ARCH_BOARD_ESP32_WROVERKIT
 	bool "Espressif ESP-WROVER-KIT"
-	depends on ARCH_CHIP_ESP32
+	depends on ARCH_CHIP_ESP32WROVER
 	select ARCH_HAVE_LEDS
 	---help---
 		ESP-WROVER-KIT is an ESP32-based development board produced by Espressif.
