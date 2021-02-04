@@ -33,7 +33,7 @@ else
 endif
 
 ifeq ($(CONFIG_ESP32_QEMU_IMAGE),y)
-	MK_QEMU_IMG=$(TOPDIR)/tools/esp32/mk_qemu_img.sh $(BOOTLOADER) $(PARTITION_TABLE) $(NUTTXNAME)
+	MK_QEMU_IMG=$(TOPDIR)/tools/esp32/mk_qemu_img.sh $(BOOTLOADER) $(PARTITION_TABLE)
 else
 	MK_QEMU_IMG=
 endif
@@ -47,8 +47,8 @@ define POSTBUILD
 		echo ""; \
 		echo "Run make again to create the nuttx.bin image."; \
 	else \
-		esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o $(NUTTXNAME).bin nuttx; \
-		echo "Generated: $(NUTTXNAME).bin (ESP32 compatible)"; \
+		esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o nuttx.bin nuttx; \
+		echo "Generated: nuttx.bin (ESP32 compatible)"; \
 	fi
 	$(MK_QEMU_IMG)
 endef
