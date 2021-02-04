@@ -20,7 +20,7 @@
 ############################################################################
 
 SCRIPT_NAME=$(basename "${0}")
-USAGE="USAGE: ${SCRIPT_NAME} <bootloader_img> <partition_table_img> [nuttx_name]"
+USAGE="USAGE: ${SCRIPT_NAME} <bootloader_img> <partition_table_img>"
 
 # Make sure we have the required argument(s)
 
@@ -32,12 +32,6 @@ fi
 
 BOOTLOADER=${1}
 PARTITION_TABLE=${2}
-NUTTXNAME=${3}
-
-if [ -z "${NUTTXNAME}" ]; then
-  NUTTXNAME="nuttx"
-  printf "NUTTXNAME not provided, assuming \"%s\".\n" "${NUTTXNAME}"
-fi
 
 printf "Generating esp32_qemu_image.bin...\n"
 printf "\tBootloader: %s\n" "${BOOTLOADER}"
@@ -46,7 +40,7 @@ printf "\tPartition Table: %s\n" "${PARTITION_TABLE}"
 dd if=/dev/zero bs=1024 count=4096 of=esp32_qemu_image.bin && \
 dd if="${BOOTLOADER}" bs=1 seek="$(printf '%d' 0x1000)" of=esp32_qemu_image.bin conv=notrunc && \
 dd if="${PARTITION_TABLE}" bs=1 seek="$(printf '%d' 0x8000)" of=esp32_qemu_image.bin conv=notrunc && \
-dd if="${NUTTXNAME}".bin bs=1 seek="$(printf '%d' 0x10000)" of=esp32_qemu_image.bin conv=notrunc
+dd if=nuttx.bin bs=1 seek="$(printf '%d' 0x10000)" of=esp32_qemu_image.bin conv=notrunc
 
 if [ ${?} -ne 0 ]; then
   printf "Failed to generate esp32_qemu_image.bin.\n"
@@ -57,4 +51,4 @@ printf "Generated esp32_qemu_image.bin successfully!\n"
 printf "You can use QEMU for executing it with the following command line:\n"
 printf "\tqemu-system-xtensa -nographic -machine esp32 -drive file=esp32_qemu_image.bin,if=mtd,format=raw\n"
 
-echo "esp32_qemu_image.bin" >> "${NUTTXNAME}".manifest
+echo "esp32_qemu_image.bin" >> nuttx.manifest

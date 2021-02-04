@@ -383,8 +383,8 @@ Below are the steps mentioned to flash NuttX binary using Renesas flash programm
 1.In order to flash using Renesas flash programmer tool, nuttx.mot file should be generated.
 2. Add the following lines in tools/Makefile.unix file :
 ifeq ($(CONFIG_MOTOROLA_SREC),y)
-	@echo "CP: $(NUTTXNAME).mot"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) $(BIN) -O srec -I elf32-rx-be-ns $(NUTTXNAME).mot
+	@echo "CP: nuttx.mot"
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) $(BIN) -O srec -I elf32-rx-be-ns nuttx.mot
 endif
 3. Add CONFIG_MOTOROLA_SREC=y in defconfig file or choose make menucofig->Build Setup-> Binary Output Format->
    Select Motorola SREC format.

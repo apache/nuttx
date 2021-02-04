@@ -128,8 +128,7 @@ endif
 
 # This is the name of the final target (relative to the top level directory)
 
-NUTTXNAME = nuttx
-BIN       = $(NUTTXNAME)$(EXEEXT)
+BIN = nuttx$(EXEEXT)
 
 all: $(BIN)
 .PHONY: dirlinks context clean_context configenv config oldconfig menuconfig nconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
@@ -392,22 +391,22 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) LINKLIBS="$(LINKLIBS)" USERLIBS="$(USERLIBS)" "$(CONFIG_PASS1_TARGET)"
 endif
 	$(Q) $(MAKE) -C $(ARCH_SRC) EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(LINKLIBS)" EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" $(BIN)
-	$(Q) echo $(BIN) > $(NUTTXNAME).manifest
-	$(Q) printf '%s\n' *.map >> $(NUTTXNAME).manifest
+	$(Q) echo $(BIN) > nuttx.manifest
+	$(Q) printf '%s\n' *.map >> nuttx.manifest
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
-	@echo "CP: $(NUTTXNAME).hex"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O ihex $(BIN) $(NUTTXNAME).hex
-	$(Q) echo $(NUTTXNAME).hex >> $(NUTTXNAME).manifest
+	@echo "CP: nuttx.hex"
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O ihex $(BIN) nuttx.hex
+	$(Q) echo nuttx.hex >> nuttx.manifest
 endif
 ifeq ($(CONFIG_MOTOROLA_SREC),y)
-	@echo "CP: $(NUTTXNAME).srec"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O srec $(BIN) $(NUTTXNAME).srec
-	$(Q) echo $(NUTTXNAME).srec >> $(NUTTXNAME).manifest
+	@echo "CP: nuttx.srec"
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O srec $(BIN) nuttx.srec
+	$(Q) echo nuttx.srec >> nuttx.manifest
 endif
 ifeq ($(CONFIG_RAW_BINARY),y)
-	@echo "CP: $(NUTTXNAME).bin"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary $(BIN) $(NUTTXNAME).bin
-	$(Q) echo $(NUTTXNAME).bin >> $(NUTTXNAME).manifest
+	@echo "CP: nuttx.bin"
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary $(BIN) nuttx.bin
+	$(Q) echo nuttx.bin >> nuttx.manifest
 endif
 	$(call POSTBUILD, $(TOPDIR))
 

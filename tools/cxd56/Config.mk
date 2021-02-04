@@ -28,11 +28,11 @@
 ifeq ($(CONFIG_CXD56_BINARY),y)
 
 define POSTBUILD
-	$(Q)echo "Generating: $(NUTTXNAME).spk"; \
+	$(Q)echo "Generating: nuttx.spk"; \
 
 	+$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)cxd56 -f Makefile.host
 	tools$(DELIM)cxd56$(DELIM)mkspk$(HOSTEXEEXT) -c2 nuttx nuttx nuttx.spk;
-	$(Q)([ $$? -eq 0 ] && echo nuttx.spk >> $(NUTTXNAME).manifest && echo "Done.")
+	$(Q)([ $$? -eq 0 ] && echo nuttx.spk >> nuttx.manifest && echo "Done.")
 endef
 
 endif
