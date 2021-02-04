@@ -56,6 +56,7 @@ define POSTBUILD
 		echo "Or run: \"make -C $(TOPDIR)/tools/esp32\" to install all IDF tools."; \
 		echo ""; \
 		echo "Run make again to create the nuttx.bin image."; \
+		exit 1; \
 	else \
 		if [ -z $(FLASH_SIZE) ]; then \
 			echo "Missing Flash memory size configuration for the ESP32 chip."; \
