@@ -173,7 +173,7 @@ struct spiflash_cachestate_s
  * ROM function prototypes
  ****************************************************************************/
 
-void Cache_Flush(int cpu);
+extern void Cache_Flush(int cpu);
 
 /****************************************************************************
  * Private Functions Prototypes
