@@ -47,6 +47,7 @@ config ARCH_CHIP_GAP8
 config ARCH_CHIP_BL602
 	bool "BouffaloLab BL602"
 	select ARCH_RV32IM
+	select ARCH_HAVE_FPU
 	select ARCH_HAVE_RESET
 	---help---
 		BouffaloLab BL602(rv32imfc)
