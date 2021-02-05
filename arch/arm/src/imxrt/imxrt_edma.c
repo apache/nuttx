@@ -92,7 +92,9 @@
 #  define EDMA_ALIGN_UP(n)  (((n) + EDMA_ALIGN_MASK) & ~EDMA_ALIGN_MASK)
 
 #else
-/* Special alignment is not required in this case, but we will align to 8-bytes */
+/* Special alignment is not required in this case,
+ * but we will align to 8-bytes
+ */
 
 #  define EDMA_ALIGN        8
 #  define EDMA_ALIGN_MASK   7
@@ -511,7 +513,7 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
 
   /* Check for an Rx (memory-to-peripheral/memory-to-memory) DMA transfer */
 
-  if (dmach->ttype == eDMA_MEM2MEM || dmach->ttype == eDMA_PERIPH2MEM)
+  if (dmach->ttype == EDMA_MEM2MEM || dmach->ttype == EDMA_PERIPH2MEM)
     {
       /* Invalidate the cache to force reloads from memory. */
 #warning Missing logic
@@ -1144,7 +1146,7 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE *handle,
 
   /* Check for an Rx (memory-to-peripheral/memory-to-memory) DMA transfer */
 
-  if (dmach->ttype == eDMA_MEM2MEM || dmach->ttype == eDMA_PERIPH2MEM)
+  if (dmach->ttype == EDMA_MEM2MEM || dmach->ttype == EDMA_PERIPH2MEM)
     {
       /* Invalidate caches associated with the destination DMA memory.
        * REVISIT:  nbytes is the number of bytes transferred on each
@@ -1158,7 +1160,7 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE *handle,
 
   /* Check for an Tx (peripheral-to-memory/memory-to-memory) DMA transfer */
 
-  if (dmach->ttype == eDMA_MEM2MEM || dmach->ttype == eDMA_MEM2PERIPH)
+  if (dmach->ttype == EDMA_MEM2MEM || dmach->ttype == EDMA_MEM2PERIPH)
     {
       /* Clean caches associated with the source DMA memory.
        * REVISIT:  nbytes is the number of bytes transferred on each
