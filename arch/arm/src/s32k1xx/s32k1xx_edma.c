@@ -92,7 +92,9 @@
 #  define EDMA_ALIGN_UP(n)  (((n) + EDMA_ALIGN_MASK) & ~EDMA_ALIGN_MASK)
 
 #else
-/* Special alignment is not required in this case, but we will align to 8-bytes */
+/* Special alignment is not required in this case,
+ * but we will align to 8-bytes
+ */
 
 #  define EDMA_ALIGN        8
 #  define EDMA_ALIGN_MASK   7
