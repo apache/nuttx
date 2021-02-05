@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv32im/up_blocktask.c
+ * arch/risc-v/src/rv32im/riscv_blocktask.c
  *
  *   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

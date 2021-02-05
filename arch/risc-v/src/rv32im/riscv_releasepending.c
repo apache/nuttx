@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/risc-v/src/rv32im/up_releasepending.c
+ *  arch/risc-v/src/rv32im/riscv_releasepending.c
  *
  *   Copyright (C) 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
