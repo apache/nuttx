@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/up_testset.S
+ * arch/risc-v/src/rv64gc/riscv_testset.S
  *
  *   Copyright (C) 2020 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>

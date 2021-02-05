@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/up_fault.c
+ * arch/risc-v/src/rv64gc/riscv_fault.c
  *
  *   Copyright (C) 2020 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>

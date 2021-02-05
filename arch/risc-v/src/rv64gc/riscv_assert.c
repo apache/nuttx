@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/up_assert.c
+ * arch/risc-v/src/rv64gc/riscv_assert.c
  *
  *   Copyright (C) 2011-2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

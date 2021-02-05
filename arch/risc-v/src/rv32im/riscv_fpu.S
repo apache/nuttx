@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/risc-v/src/rv32im/up_fpu.S
+ * arch/risc-v/src/rv32im/riscv_fpu.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

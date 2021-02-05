@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/riscv/src/rv32im/up_syscall.S
+ * arch/riscv/src/rv32im/riscv_syscall.S
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
