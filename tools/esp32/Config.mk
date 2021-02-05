@@ -22,8 +22,6 @@
 # and assemble source files and to insert the resulting object files into an
 # archive.  These replace the default definitions at tools/Config.mk
 
-# POSTBUILD -- Perform post build operations
-
 ifdef BLOBDIR
 	BOOTLOADER=${BLOBDIR}/esp32core/bootloader.bin
 	PARTITION_TABLE=${BLOBDIR}/esp32core/partition-table.bin
@@ -48,6 +46,8 @@ else
 	MK_QEMU_IMG=
 endif
 
+# POSTBUILD -- Perform post build operations
+
 define POSTBUILD
 	$(Q) echo "MKIMAGE: ESP32 binary"
 	$(Q) if ! esptool.py version 1>/dev/null 2>&1; then \
@@ -66,4 +66,19 @@ define POSTBUILD
 		echo "Generated: nuttx.bin (ESP32 compatible)"; \
 	fi
 	$(Q) $(MK_QEMU_IMG)
+endef
+
+# ESPTOOL_BAUD -- Serial port baud rate used when flashing/reading via esptool.py
+
+ESPTOOL_BAUD ?= 921600
+
+# DOWNLOAD -- Download binary image via esptool.py
+
+define DOWNLOAD
+	$(Q) if [ -z $(ESPTOOL_PORT) ]; then \
+		echo "DOWNLOAD error: Missing serial port device argument."; \
+		echo "USAGE: make download ESPTOOL_PORT=<port> [ ESPTOOL_BAUD=<baud> ]"; \
+		exit 1; \
+	fi
+	esptool.py --chip esp32 --port $(ESPTOOL_PORT) --baud $(ESPTOOL_BAUD) write_flash 0x1000 $(BOOTLOADER) 0x8000 $(PARTITION_TABLE) 0x10000 $(1).bin
 endef
