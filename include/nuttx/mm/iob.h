@@ -441,6 +441,18 @@ void iob_free_queue(FAR struct iob_queue_s *qhead,
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
+ * Name: iob_get_queue_count
+ *
+ * Description:
+ *   Queue helper for get the iob entry count.
+ *
+ ****************************************************************************/
+
+#if CONFIG_IOB_NCHAINS > 0
+int iob_get_queue_count(FAR struct iob_queue_s *queue);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+
+/****************************************************************************
  * Name: iob_copyin
  *
  * Description:
