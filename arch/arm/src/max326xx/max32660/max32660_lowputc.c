@@ -216,20 +216,20 @@ static void max326_setbaud(uintptr_t base,
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: max326_lowsetup
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level initialization
- *   including setup of the console UART.  This UART initialization is done
- *   early so that the serial console is available for debugging very early in
- *   the boot sequence.
+ *   Called at the very beginning of _start.
+ *   Performs low level initialization including setup of the console UART.
+ *   This UART initialization is done early so that the serial console
+ *   is available for debugging very early in the boot sequence.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void max326_lowsetup(void)
 {
@@ -260,7 +260,7 @@ void max326_lowsetup(void)
 
   max326_uart1_enableclk();
 
-   /* Configure UART1 pins */
+  /* Configure UART1 pins */
 
   max326_gpio_config(GPIO_UART1_RX);
   max326_gpio_config(GPIO_UART1_TX);
@@ -304,8 +304,9 @@ void max326_uart_configure(uintptr_t base,
 
   max326_setbaud(CONSOLE_BASE, config);
 
-  /* Configure RX and TX FIFOs */
-  /* Flush FIFOs */
+  /* Configure RX and TX FIFOs
+   * Flush FIFOs
+   */
 
   ctrl0  = getreg32(base + MAX326_UART_CTRL0_OFFSET);
   ctrl0 |= (UART_CTRL0_TXFLUSH | UART_CTRL0_RXFLUSH);

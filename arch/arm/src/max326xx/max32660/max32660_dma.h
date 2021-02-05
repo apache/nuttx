@@ -125,8 +125,8 @@ DMA_HANDLE max326_dma_channel(void);
  *
  * Description:
  *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until max326_dma_channel() is called again to re-gain
- *   a valid handle.
+ *   NEVER be used again until max326_dma_channel() is called again to
+ *   re-gain a valid handle.
  *
  * Returned Value:
  *   None

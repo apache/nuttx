@@ -44,7 +44,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Bit-encoded input to max326_gpio_config() ******************************************/
+/* Bit-encoded input to max326_gpio_config() ****************************************/
 
 /* 16-Bit Encoding: FFFF WRRV HSDD NNNN
  *

@@ -63,8 +63,9 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure describes state of a DMA channel */
-/* TODO:  Additional reload values for chains > 2 could be held here */
+/* This structure describes state of a DMA channel
+ * TODO:  Additional reload values for chains > 2 could be held here
+ */
 
 struct max326_dmach_s
 {
@@ -192,8 +193,8 @@ static int max326_dmach_interrupt(int irq, FAR void *context, FAR void *arg)
 
   if ((stat & DMACH_STAT_CHST) != 0)
     {
-      /* We must be on the buffer of a chained DMA */
-      /* TODO:  Add software logic to manage more than two DMA buffers in
+      /* We must be on the buffer of a chained DMA
+       * TODO:  Add software logic to manage more than two DMA buffers in
        * the chain.
        */
 
@@ -245,7 +246,9 @@ void weak_function arm_dma_initialize(void)
     {
       struct max326_dmach_s *dmach = &g_max326_dmach[i];
 
-      /* Initialize the state structure (assuming that it is already zeroed) */
+      /* Initialize the state structure
+       * (assuming that it is already zeroed)
+       */
 
       dmach->chno = i;
 
@@ -303,8 +306,8 @@ DMA_HANDLE max326_dma_channel(void)
  *
  * Description:
  *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until max326_dma_channel() is called again to re-gain
- *   a valid handle.
+ *   NEVER be used again until max326_dma_channel() is called again
+ *   to re-gain a valid handle.
  *
  * Returned Value:
  *   None
