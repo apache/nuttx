@@ -124,7 +124,7 @@ static uint32_t max326_sysclk_frequency(void)
   /* The divider is in the GCR_CLKCTRL:PSC setting:
    *
    * Fsysclk = Fsysclk / (2^psc)
-  */
+   */
 
   regval = getreg32(MAX326_GCR_CLKCTRL);
   psc    = (regval & GCR_CLKCTRL_PSC_MASK) >> GCR_CLKCTRL_PSC_SHIFT;
@@ -143,7 +143,7 @@ static void max326_enable_hfio(FAR const struct clock_setup_s *clksetup)
 {
   uint32_t regval;
 
- /* Check if the HFIO is needed. */
+  /* Check if the HFIO is needed. */
 
   if (clksetup->hfio)
     {
@@ -383,7 +383,7 @@ static void max326_set_ovr(FAR const struct clock_setup_s *clksetup)
           max326_select_lirc8k();
         }
 
-     /* Wait for SYSOSC to become ready */
+      /* Wait for SYSOSC to become ready */
 
       while ((getreg32(MAX326_GCR_CLKCTRL) & GCR_CLKCTRL_CLKRDY) == 0)
         {
@@ -439,6 +439,7 @@ static void max326_set_clksrc(FAR const struct clock_setup_s *clksetup)
       switch (clksetup->clksrc)
         {
           case CLKSRC_HFIO:   /* High frequency internal oscillator */
+
             /* Select the High-Frequency Internal Oscillator (HFIO) as the
              * SYSOSC clock source.
              */
@@ -448,6 +449,7 @@ static void max326_set_clksrc(FAR const struct clock_setup_s *clksetup)
             break;
 
           case CLKSRC_8KHZ:   /* 8kHz Internal Ultra-Low Power Nano-Ring Oscillator */
+
             /* Select the 8kHz Internal Ultra-Low Power Nano-Ring Oscillator
              * as the SYSOSC clock source.
              */
@@ -597,7 +599,7 @@ static void max326_periph_reset(void)
  *   clocking using the settings in board.h.  This function also performs
  *   other low-level chip as necessary.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void max326_clockconfig(FAR const struct clock_setup_s *clksetup)
 {
@@ -685,7 +687,7 @@ void max326_clockconfig(FAR const struct clock_setup_s *clksetup)
  * Description:
  *   Return the High-Frequency Internal Oscillator (HFIO) frequency.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint32_t max326_hfio_frequency(void)
 {
@@ -715,7 +717,7 @@ uint32_t max326_hfio_frequency(void)
  * Description:
  *   Return the current CPU frequency.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint32_t max326_cpu_frequency(void)
 {
@@ -728,7 +730,7 @@ uint32_t max326_cpu_frequency(void)
  * Description:
  *   Return the current peripheral clock frequency.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint32_t max326_pclk_frequency(void)
 {
