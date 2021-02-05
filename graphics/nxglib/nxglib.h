@@ -457,7 +457,7 @@ void pwfb_copyrectangle_32bpp(FAR struct nxbe_window_s *bwnd,
  * Name: nxgl_cursor_draw_*bpp
  *
  * Description:
- *   Draw the cursor image into the specified position in the graphics memory.
+ *  Draw the cursor image into the specified position in the graphics memory.
  *
  ****************************************************************************/
 
@@ -506,8 +506,8 @@ void nxglib_cursor_erase_32bpp(FAR struct nxbe_state_s *be,
  * Name: nxgl_cursor_backup_*bpp
  *
  * Description:
- *   Save the background image for subsequent use to erase the cursor from the
- *   device graphics memory.
+ *  Save the background image for subsequent use to erase the cursor from the
+ *  device graphics memory.
  *
  ****************************************************************************/
 

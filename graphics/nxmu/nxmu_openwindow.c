@@ -71,7 +71,8 @@
  *
  ****************************************************************************/
 
-void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
+void nxmu_openwindow(FAR struct nxbe_state_s *be,
+                     FAR struct nxbe_window_s *wnd)
 {
 #ifdef CONFIG_NX_RAMBACKED
   nxgl_coord_t width;

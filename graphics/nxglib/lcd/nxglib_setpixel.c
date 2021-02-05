@@ -70,9 +70,10 @@
  ****************************************************************************/
 
 void NXGL_FUNCNAME(nxgl_setpixel, NXGLIB_SUFFIX)
-  (FAR struct lcd_planeinfo_s *pinfo,
-   FAR const struct nxgl_point_s *pos,
-   NXGL_PIXEL_T color)
+(
+  FAR struct lcd_planeinfo_s *pinfo,
+  FAR const struct nxgl_point_s *pos,
+  NXGL_PIXEL_T color)
 {
 #if NXGLIB_BITSPERPIXEL < 8
   uint8_t shift;
@@ -124,11 +125,14 @@ void NXGL_FUNCNAME(nxgl_setpixel, NXGLIB_SUFFIX)
 
   /* Handle masking of the fractional byte */
 
-   pixel = (pixel & ~mask) | (color & mask);
+  pixel = (pixel & ~mask) | (color & mask);
 
   /* Write the modified byte back to graphics memory */
 
-  pinfo->putrun(pos->y, pos->x, (FAR uint8_t *)&pixel, 8 / NXGLIB_BITSPERPIXEL);
+  pinfo->putrun(pos->y,
+                pos->x,
+                (FAR uint8_t *)&pixel,
+                8 / NXGLIB_BITSPERPIXEL);
 #else
   /* Draw a single pixel at this position raster line at this row */
 

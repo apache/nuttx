@@ -60,9 +60,12 @@
  ****************************************************************************/
 
 void NXGL_FUNCNAME(pwfb_copyrectangle, NXGLIB_SUFFIX)
-(FAR struct nxbe_window_s *bwnd, FAR const struct nxgl_rect_s *dest,
- FAR const void *src, FAR const struct nxgl_point_s *origin,
- unsigned int srcstride)
+(
+  FAR struct nxbe_window_s *bwnd,
+  FAR const struct nxgl_rect_s *dest,
+  FAR const void *src,
+  FAR const struct nxgl_point_s *origin,
+  unsigned int srcstride)
 {
   FAR const uint8_t *sline;
   FAR uint8_t *dline;
@@ -99,14 +102,14 @@ void NXGL_FUNCNAME(pwfb_copyrectangle, NXGLIB_SUFFIX)
    */
 
   leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x)));
-  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt2.x-1)));
+  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt2.x - 1)));
 # else
   /* Get the mask for pixels that are ordered so that they pack from the
    * LS byte up.
    */
 
   leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt1.x)));
-  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x-1)));
+  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x - 1)));
 # endif
 #endif
 
@@ -121,14 +124,14 @@ void NXGL_FUNCNAME(pwfb_copyrectangle, NXGLIB_SUFFIX)
   while (rows--)
     {
 #if NXGLIB_BITSPERPIXEL < 8
-     /* Handle masking of the fractional initial byte */
+      /* Handle masking of the fractional initial byte */
 
-     mask  = leadmask;
-     sptr  = sline;
-     dptr  = dline;
-     lnlen = width;
+      mask  = leadmask;
+      sptr  = sline;
+      dptr  = dline;
+      lnlen = width;
 
-     if (lnlen > 1 && mask)
+      if (lnlen > 1 && mask)
         {
           dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
           mask = 0xff;
@@ -142,7 +145,8 @@ void NXGL_FUNCNAME(pwfb_copyrectangle, NXGLIB_SUFFIX)
       mask &= tailmask;
       if (lnlen > 0 && mask)
         {
-          dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
+          dptr[lnlen - 1] = (dptr[lnlen - 1] & ~mask) |
+                            (sptr[lnlen - 1] & mask);
           lnlen--;    /* REVISIT:  Is this correct? */
         }
 

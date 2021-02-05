@@ -64,7 +64,6 @@
 #  undef CONFIG_NX_ANTIALIASING
 #endif
 
-
 /* Set up bit blit macros for this BPP */
 
 #if NXGLIB_BITSPERPIXEL == 1
@@ -239,7 +238,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN

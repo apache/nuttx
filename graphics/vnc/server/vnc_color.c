@@ -78,7 +78,7 @@ uint8_t vnc_convert_rgb8_222(lfb_color_t rgb)
 
   return (uint8_t)(((rgb >> 2) & 0x30)  |
                    ((rgb >> 1) & 0x0c)  |
-                   ( rgb       & 0x03));
+                    (rgb       & 0x03));
 }
 
 uint8_t vnc_convert_rgb8_332(lfb_color_t rgb)
@@ -206,7 +206,7 @@ uint8_t vnc_convert_rgb8_222(lfb_color_t rgb)
 
   return (uint8_t)(((rgb >> 18) & 0x00000030)  |
                    ((rgb >> 12) & 0x0000000c)  |
-                    (rgb >> 6)  & 0x00000003));
+                   ((rgb >> 6)  & 0x00000003));
 }
 
 uint8_t vnc_convert_rgb8_332(lfb_color_t rgb)
@@ -220,7 +220,7 @@ uint8_t vnc_convert_rgb8_332(lfb_color_t rgb)
 
   return (uint8_t)(((rgb >> 16) & 0x00000070)  |
                    ((rgb >> 11) & 0x0000001c)  |
-                    (rgb >> 6)  & 0x00000003));
+                   ((rgb >> 6)  & 0x00000003));
 }
 
 uint16_t vnc_convert_rgb16_555(lfb_color_t rgb)
@@ -289,26 +289,33 @@ uint32_t vnc_convert_rgb32_888(lfb_color_t rgb)
  *
  ****************************************************************************/
 
-int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
-               unsigned int maxcolors, FAR lfb_color_t *colors)
+int vnc_colors(FAR struct vnc_session_s *session,
+               FAR struct nxgl_rect_s *rect,
+               unsigned int maxcolors,
+               FAR lfb_color_t *colors)
 {
   FAR const lfb_color_t *rowstart;
   FAR const lfb_color_t *pixptr;
   lfb_color_t pixel;
-  unsigned int counts[8] = {0, 0, 0, 0, 0, 0, 0, 0};
   nxgl_coord_t x;
   nxgl_coord_t y;
   int ncolors = 0;
   int pixndx;
   int maxndx;
   int cmpndx;
+  unsigned int counts[8] =
+  {
+    0, 0, 0, 0, 0, 0, 0, 0
+  };
 
-  DEBUGASSERT(session != NULL && rect != NULL && maxcolors <= 8 && colors != NULL);
+  DEBUGASSERT(session != NULL && rect != NULL &&
+              maxcolors <= 8 && colors != NULL);
 
   /* Pointer to the first pixel in the first row in the local framebuffer */
 
   rowstart = (FAR lfb_color_t *)
-    (session->fb + RFB_STRIDE * rect->pt1.y + RFB_BYTESPERPIXEL * rect->pt1.x);
+    (session->fb + RFB_STRIDE * rect->pt1.y +
+     RFB_BYTESPERPIXEL * rect->pt1.x);
 
   /* Loop for each row in the rectangle */
 
@@ -341,7 +348,7 @@ int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
               counts[pixndx]++;
             }
 
-           /* Do we have space for another color? */
+          /* Do we have space for another color? */
 
           else if (ncolors >= maxcolors)
             {
@@ -395,6 +402,7 @@ int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
       if (maxndx != pixndx)
         {
           /* Otherwise swap color N and color M */
+
           /* Remember color N */
 
           lfb_color_t tmpcolor = colors[pixndx];

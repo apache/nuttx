@@ -232,8 +232,8 @@ static void nxbe_realloc(FAR struct nxbe_window_s *wnd,
           nxmu_redrawreq(wnd, &bounds);
         }
 
-      /* If the window became taller, then send a message requesting an update
-       * of the new territory at the bottom.
+      /* If the window became taller, then send a message requesting an
+       * update of the new territory at the bottom.
        */
 
       if (oldheight < newheight)

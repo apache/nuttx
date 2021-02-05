@@ -77,7 +77,9 @@ int nxterm_semwait(FAR struct nxterm_state_s *priv)
   me = getpid();
   if (priv->holder != me)
     {
-      /* No.. then wait until the thread that does hold it is finished with it */
+      /* No..
+       * then wait until the thread that does hold it is finished with it
+       */
 
       ret = nxsem_wait(&priv->exclsem);
       if (ret == OK)

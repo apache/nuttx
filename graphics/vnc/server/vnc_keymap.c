@@ -154,19 +154,17 @@ static const struct vnc_keymap_s g_asciimap[] =
   {ASCII_7,          XK_KP_7},
   {ASCII_8,          XK_KP_8},
   {ASCII_9,          XK_KP_9},
-
   {ASCII_ASTERISK,   XK_KP_Multiply},
   {ASCII_PLUS,       XK_KP_Add},
   {ASCII_COMMA,      XK_KP_Separator},
   {ASCII_HYPHEN,     XK_KP_Subtract},
   {ASCII_PERIOD,     XK_KP_Decimal},
   {ASCII_DIVIDE,     XK_KP_Divide},
-
   {ASCII_SPACE,      XK_KP_Space},
   {ASCII_TAB,        XK_KP_Tab},
-  {ASCII_CR,         XK_KP_Enter}
+  {ASCII_CR,         XK_KP_Enter},
 #ifdef CONFIG_VNCSERVER_KBDENCODE
-  , {ASCII_DEL,      XK_KP_Delete}
+  {ASCII_DEL,      XK_KP_Delete},
 #endif
 };
 
@@ -198,7 +196,6 @@ static const struct vnc_keymap_s g_cursor[] =
   {KEYCODE_PAGEDOWN, XK_KP_Page_Down},
   {KEYCODE_INSERT,   XK_Insert},
   {KEYCODE_INSERT,   XK_KP_Insert},
-
   {KEYCODE_SELECT,   XK_Select},
   {KEYCODE_EXECUTE,  XK_Execute},
   {KEYCODE_HELP,     XK_Help},
@@ -209,7 +206,6 @@ static const struct vnc_keymap_s g_cursor[] =
   {KEYCODE_CLEAR,    XK_Clear},
   {MOD_SCROLLLOCK,   XK_Scroll_Lock},
   {MOD_NUMLOCK,      XK_Num_Lock},
-
   {KEYCODE_F1,       XK_KP_F1},
   {KEYCODE_F1,       XK_F1},
   {KEYCODE_F2,       XK_KP_F2},
@@ -508,7 +504,8 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
     }
 #endif
 
-  /* If no external keyboard input handler has been provided, then we have to drop the keyboard input.
+  /* If no external keyboard input handler has been provided,
+   * then we have to drop the keyboard input.
    */
 
   if (session->kbdout == NULL)
@@ -633,7 +630,10 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
  * Name: vnc_kbdout
  *
  * Description:
- *   This is the default keyboard callout function.  This is simply wrappers around nx_kdbout(), respectively.  When configured using vnc_fbinitialize(), the 'arg' must be the correct NXHANDLE value.
+ *   This is the default keyboard callout function.
+ *   This is simply wrappers around nx_kdbout(), respectively.
+ *   When configured using vnc_fbinitialize(), the 'arg' must be the correct
+ *   NXHANDLE value.
  *
  * Input Parameters:
  *   arg - The NXHANDLE from the NX graphics subsystem

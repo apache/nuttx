@@ -77,10 +77,10 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
   int ret;
   int i;
 
-  /* Move each row, one at a time.  They could all be moved at once (by calling
-   * nxterm_redraw), but the since the region is cleared, then re-written, the
-   * effect would not be good.  Below the region is also cleared and re-written,
-   * however, in much smaller chunks.
+  /* Move each row, one at a time.  They could all be moved at once (by
+   * calling nxterm_redraw), but the since the region is cleared, then
+   * re-written, the effect would not be good.  Below the region is also
+   * cleared and re-written, however, in much smaller chunks.
    */
 
   rect.pt1.x = 0;
@@ -204,8 +204,9 @@ void nxterm_scroll(FAR struct nxterm_state_s *priv, int scrollheight)
                      sizeof(struct nxterm_bitmap_s));
             }
 
-          /* Decrement the number of cached characters ('i' is not incremented
-           * in this case because it already points to the next character)
+          /* Decrement the number of cached characters ('i' is not
+           * incremented in this case because it already points to the next
+           * character)
            */
 
           priv->nchars--;

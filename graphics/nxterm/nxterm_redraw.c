@@ -73,7 +73,9 @@
  *
  ****************************************************************************/
 
-void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect, bool more)
+void nxterm_redraw(NXTERM handle,
+                   FAR const struct nxgl_rect_s *rect,
+                   bool more)
 {
   FAR struct nxterm_state_s *priv;
   int ret;

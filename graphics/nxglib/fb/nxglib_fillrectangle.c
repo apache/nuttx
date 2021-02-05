@@ -67,9 +67,10 @@
  ****************************************************************************/
 
 void NXGL_FUNCNAME(nxgl_fillrectangle, NXGLIB_SUFFIX)
-  (FAR struct fb_planeinfo_s *pinfo,
-   FAR const struct nxgl_rect_s *rect,
-   NXGL_PIXEL_T color)
+(
+  FAR struct fb_planeinfo_s *pinfo,
+  FAR const struct nxgl_rect_s *rect,
+  NXGL_PIXEL_T color)
 {
   FAR uint8_t *line;
   unsigned int width;
@@ -106,14 +107,14 @@ void NXGL_FUNCNAME(nxgl_fillrectangle, NXGLIB_SUFFIX)
    */
 
   leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x)));
-  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt2.x-1)));
+  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt2.x - 1)));
 # else
   /* Get the mask for pixels that are ordered so that they pack from the
    * LS byte up.
    */
 
   leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt1.x)));
-  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x-1)));
+  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x - 1)));
 # endif
 #endif
 
@@ -122,13 +123,13 @@ void NXGL_FUNCNAME(nxgl_fillrectangle, NXGLIB_SUFFIX)
   while (rows-- > 0)
     {
 #if NXGLIB_BITSPERPIXEL < 8
-     /* Handle masking of the fractional initial byte */
+      /* Handle masking of the fractional initial byte */
 
-     mask  = leadmask;
-     dest  = line;
-     lnlen = width;
+      mask  = leadmask;
+      dest  = line;
+      lnlen = width;
 
-     if (lnlen > 1 && mask)
+      if (lnlen > 1 && mask)
         {
           dest[0] = (dest[0] & ~mask) | (mpixel & mask);
           mask = 0xff;
@@ -141,8 +142,8 @@ void NXGL_FUNCNAME(nxgl_fillrectangle, NXGLIB_SUFFIX)
       mask &= tailmask;
       if (lnlen > 0 && mask)
         {
-          dest[lnlen-1] = (dest[lnlen-1] & ~mask) | (mpixel & mask);
-          lnlen--;
+           dest[lnlen - 1] = (dest[lnlen - 1] & ~mask) | (mpixel & mask);
+           lnlen--;
         }
 
       /* Handle all of the unmasked bytes in-between */

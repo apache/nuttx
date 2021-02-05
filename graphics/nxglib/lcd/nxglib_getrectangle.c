@@ -60,8 +60,10 @@
  ****************************************************************************/
 
 void NXGL_FUNCNAME(nxgl_getrectangle, NXGLIB_SUFFIX)
-(FAR struct lcd_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect,
- FAR void *dest, unsigned int deststride)
+(
+  FAR struct lcd_planeinfo_s *pinfo,
+  FAR const struct nxgl_rect_s *rect,
+  FAR void *dest, unsigned int deststride)
 {
   FAR uint8_t *dline;
   unsigned int ncols;

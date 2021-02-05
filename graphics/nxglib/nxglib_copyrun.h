@@ -45,7 +45,7 @@
 #include <string.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -215,9 +215,9 @@ nxgl_copyrun_2bpp(FAR const uint8_t *src, FAR uint8_t *dest,
        outdata |= (indata >> (8 - shift));
        nextdata = (indata << shift);
 #else
-      /* If CONFIG_NX_PACKEDMSFIRST is NOT defined, then bits 0-(2*remainder-1)
-       * are carried over from that last pass through the loop.  For example
-       * if remainder == 1:
+      /* If CONFIG_NX_PACKEDMSFIRST is NOT defined, then bits
+       * 0-(2*remainder-1) are carried over from that last pass through the
+       * loop.  For example if remainder == 1:
        *
        *   nextdata = xxAA AAAA  - dest     = BBAA AAAA
        *   src      = CCCC CCBB  - nextdata = xxCC CCCC

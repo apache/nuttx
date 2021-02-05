@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Make sure that this file is used in the proper context */
 
 #ifndef NXGLIB_SUFFIX
@@ -70,7 +71,8 @@
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_filltrapezoid, NXGLIB_SUFFIX)(
+void NXGL_FUNCNAME(nxgl_filltrapezoid, NXGLIB_SUFFIX)
+(
   FAR struct fb_planeinfo_s *pinfo,
   FAR const struct nxgl_trapezoid_s *trap,
   FAR const struct nxgl_rect_s *bounds,
@@ -202,9 +204,9 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid, NXGLIB_SUFFIX)(
 
       if (x1 <= x2 && ix2 >= bounds->pt1.x && ix1 <= bounds->pt2.x)
         {
-          /* Get a clipped copies of the starting and ending X positions.  This
-           * clipped truncates "down" and gives the quantized pixel holding the
-           * fractional X position
+          /* Get a clipped copies of the starting and ending X positions.
+           * This clipped truncates "down" and gives the quantized pixel
+           * holding the fractional X position
            */
 
           ix1 = ngl_clipl(ix1, bounds->pt1.x);
@@ -242,7 +244,7 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid, NXGLIB_SUFFIX)(
 #endif
           if (lnlen > 0 && mask)
             {
-              dest[lnlen-1] = (dest[lnlen-1] & ~mask) | (mpixel & mask);
+              dest[lnlen - 1] = (dest[lnlen - 1] & ~mask) | (mpixel & mask);
               lnlen--;
             }
 
@@ -274,12 +276,12 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid, NXGLIB_SUFFIX)(
 
               if (width > 1)
                 {
-                  NXGL_MEMSET(dest, (NXGL_PIXEL_T)color, width-1);
+                  NXGL_MEMSET(dest, (NXGL_PIXEL_T)color, width - 1);
                 }
 
               /* And blend the final pixel */
 
-              dest += NXGL_SCALEX(width-1);
+              dest += NXGL_SCALEX(width - 1);
               frac  = b16frac(x2);
               NXGL_BLEND(dest, (NXGL_PIXEL_T)color, frac);
             }

@@ -231,7 +231,8 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
            * rectangle.
            */
 
-          rre           = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
+          rre = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
+
           rre->msgtype  = RFB_FBUPDATE_MSG;
           rre->padding  = 0;
           rfb_putbe16(rre->nrect,          1);

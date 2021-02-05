@@ -59,7 +59,8 @@
  *
  ****************************************************************************/
 
-void nxbe_redrawbelow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd,
+void nxbe_redrawbelow(FAR struct nxbe_state_s *be,
+                      FAR struct nxbe_window_s *wnd,
                       FAR const struct nxgl_rect_s *rect)
 {
   FAR struct nxbe_window_s *currwnd;

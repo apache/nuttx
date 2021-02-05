@@ -288,7 +288,7 @@ static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
 
                 for (i = 1; i < priv->nseq; i++)
                   {
-                    priv->seq[i-1] = priv->seq[i];
+                    priv->seq[i - 1] = priv->seq[i];
                   }
 
                 priv->nseq--;
@@ -439,7 +439,8 @@ int nxterm_ioctl_tap(int cmd, uintptr_t arg)
       /* CMD:           NXTERMIOC_NXTERM_RESIZE
        * DESCRIPTION:   Inform NxTerm keyboard the the size of the window has
        *                changed
-       * ARG:           A reference readable instance of struct nxtermioc_resize_s
+       * ARG:           A reference readable instance of struct
+       *                nxtermioc_resize_s
        * CONFIGURATION: CONFIG_NXTERM
        */
 

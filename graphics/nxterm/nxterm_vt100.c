@@ -151,6 +151,7 @@ nxterm_vt100part(FAR struct nxterm_state_s *priv, int seqsize)
             }
         }
     }
+
   return NULL;
 }
 
@@ -170,8 +171,9 @@ nxterm_vt100part(FAR struct nxterm_state_s *priv, int seqsize)
  *
  ****************************************************************************/
 
-static enum nxterm_vt100state_e nxterm_vt100seq(FAR struct nxterm_state_s *priv,
-                                              int seqsize)
+static enum nxterm_vt100state_e nxterm_vt100seq(
+                                             FAR struct nxterm_state_s *priv,
+                                             int seqsize)
 {
   FAR const struct vt100_sequence_s *seq;
   enum nxterm_vt100state_e ret;
@@ -233,7 +235,8 @@ static enum nxterm_vt100state_e nxterm_vt100seq(FAR struct nxterm_state_s *priv,
  *
  ****************************************************************************/
 
-enum nxterm_vt100state_e nxterm_vt100(FAR struct nxterm_state_s *priv, char ch)
+enum nxterm_vt100state_e nxterm_vt100(FAR struct nxterm_state_s *priv,
+                                      char ch)
 {
   enum nxterm_vt100state_e ret;
   int seqsize;
@@ -281,5 +284,6 @@ enum nxterm_vt100state_e nxterm_vt100(FAR struct nxterm_state_s *priv, char ch)
 
       priv->nseq = seqsize;
     }
+
   return ret;
 }
