@@ -201,8 +201,8 @@ int vnc_receiver(FAR struct vnc_session_s *session)
               /* Read the rest of the SetPixelFormat message */
 
               ret = vnc_read_remainder(session,
-                                       sizeof(struct rfb_setpixelformat_s) - 1,
-                                       1);
+                                     sizeof(struct rfb_setpixelformat_s) - 1,
+                                     1);
               if (ret < 0)
                 {
                   gerr("ERROR: Failed to read SetPixelFormat message: %d\n",
@@ -217,7 +217,10 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   if (ret < 0)
                     {
                       /* We do not support this pixel format */
-                      /* REVISIT:  We are going to be putting garbage on the RFB */
+
+                      /* REVISIT:
+                       * We are going to be putting garbage on the RFB
+                       */
 
                       gerr("ERROR: PixelFormat not supported\n");
                     }
@@ -248,7 +251,9 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                 {
                   /* Read the following encodings */
 
-                  encodings  = (FAR struct rfb_setencodings_s *)session->inbuf;
+                  encodings = (FAR struct rfb_setencodings_s *)
+                               session->inbuf;
+
                   nencodings = rfb_getbe16(encodings->nencodings);
 
                   ret = vnc_read_remainder(session,
@@ -356,6 +361,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                        ret);
                 }
 #ifdef CONFIG_NX_XYINPUT
+
               /* REVISIT:  How will be get the NX handle? */
 
               else if (session->mouseout != NULL)

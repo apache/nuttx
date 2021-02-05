@@ -67,9 +67,10 @@
  *
  ****************************************************************************/
 
-static inline void _nxbe_cursor_backupdraw_dev(FAR struct nxbe_state_s *be,
-                                               FAR const struct nxgl_rect_s *rect,
-                                               int plane)
+static inline void _nxbe_cursor_backupdraw_dev(
+                            FAR struct nxbe_state_s *be,
+                            FAR const struct nxgl_rect_s *rect,
+                            int plane)
 {
   /* Save the modified cursor background region. */
 

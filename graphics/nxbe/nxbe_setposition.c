@@ -69,7 +69,10 @@ void nxbe_setposition(FAR struct nxbe_window_s *wnd,
 
   /* Back out the old window origin position from the bounding box */
 
-  nxgl_rectoffset(&rect, &wnd->bounds, -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
+  nxgl_rectoffset(&rect,
+                  &wnd->bounds,
+                  -wnd->bounds.pt1.x,
+                  -wnd->bounds.pt1.y);
 
   /* Add the new window origin into the bounding box */
 

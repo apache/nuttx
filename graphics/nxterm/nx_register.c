@@ -182,7 +182,9 @@ static int nxterm_bitmap(FAR struct nxterm_state_s *priv,
  *
  ****************************************************************************/
 
-NXTERM nx_register(NXWINDOW hwnd, FAR struct nxterm_window_s *wndo, int minor)
+NXTERM nx_register(NXWINDOW hwnd,
+                   FAR struct nxterm_window_s *wndo,
+                   int minor)
 {
   return nxterm_register((NXTERM)hwnd, wndo, &g_nxops, minor);
 }

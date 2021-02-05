@@ -157,7 +157,8 @@ static int nxtool_bitmap(FAR struct nxterm_state_s *priv,
                          FAR const struct nxgl_point_s *origin,
                          unsigned int stride)
 {
-  return nxtk_bitmaptoolbar((NXTKWINDOW)priv->handle, dest, src, origin, stride);
+  return nxtk_bitmaptoolbar((NXTKWINDOW)priv->handle,
+                            dest, src, origin, stride);
 }
 
 /****************************************************************************
@@ -184,7 +185,9 @@ static int nxtool_bitmap(FAR struct nxterm_state_s *priv,
  *
  ****************************************************************************/
 
-NXTERM nxtool_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo, int minor)
+NXTERM nxtool_register(NXTKWINDOW hfwnd,
+                       FAR struct nxterm_window_s *wndo,
+                       int minor)
 {
   return nxterm_register((NXTERM)hfwnd, wndo, &g_nxtoolops, minor);
 }

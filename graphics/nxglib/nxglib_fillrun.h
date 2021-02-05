@@ -57,11 +57,11 @@
 #endif
 
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
 #if NXGLIB_BITSPERPIXEL == 2
@@ -72,7 +72,7 @@ static uint8_t g_wide_2bpp[4] =
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -145,16 +145,21 @@ static inline void nxgl_fillrun_4bpp(FAR uint8_t *run, nxgl_mxpixel_t color,
 static inline void nxgl_fillrun_8bpp(FAR uint8_t *run, nxgl_mxpixel_t color,
                                      size_t npixels)
 {
-  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+  /* Fill the run with the color (it is okay to run a fractional byte overy
+   * the end
+   */
 
   memset(run, color, npixels);
 }
 
 #elif NXGLIB_BITSPERPIXEL == 16
-static inline void nxgl_fillrun_16bpp(FAR uint16_t *run, nxgl_mxpixel_t color,
+static inline void nxgl_fillrun_16bpp(FAR uint16_t *run,
+                                      nxgl_mxpixel_t color,
                                       size_t npixels)
 {
-  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+  /* Fill the run with the color (it is okay to run a fractional byte overy
+   * the end
+   */
 
   while (npixels-- > 0)
     {
@@ -163,9 +168,13 @@ static inline void nxgl_fillrun_16bpp(FAR uint16_t *run, nxgl_mxpixel_t color,
 }
 
 #elif NXGLIB_BITSPERPIXEL == 24
-static inline void nxgl_fillrun_24bpp(FAR uint32_t *run, nxgl_mxpixel_t color, size_t npixels)
+static inline void nxgl_fillrun_24bpp(FAR uint32_t *run,
+                                      nxgl_mxpixel_t color,
+                                      size_t npixels)
 {
-  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+  /* Fill the run with the color (it is okay to run a fractional byte overy
+   * the end
+   */
 
   while (npixels-- > 0)
     {
@@ -174,9 +183,13 @@ static inline void nxgl_fillrun_24bpp(FAR uint32_t *run, nxgl_mxpixel_t color, s
 }
 
 #elif NXGLIB_BITSPERPIXEL == 32
-static inline void nxgl_fillrun_32bpp(FAR uint32_t *run, nxgl_mxpixel_t color, size_t npixels)
+static inline void nxgl_fillrun_32bpp(FAR uint32_t *run,
+                                      nxgl_mxpixel_t color,
+                                      size_t npixels)
 {
-  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+  /* Fill the run with the color (it is okay to run a fractional byte overy
+   * the end
+   */
 
   while (npixels-- > 0)
     {

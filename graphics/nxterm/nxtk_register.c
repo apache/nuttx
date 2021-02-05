@@ -157,7 +157,8 @@ static int nxtkcon_bitmap(FAR struct nxterm_state_s *priv,
                         FAR const struct nxgl_point_s *origin,
                         unsigned int stride)
 {
-  return nxtk_bitmapwindow((NXTKWINDOW)priv->handle, dest, src, origin, stride);
+  return nxtk_bitmapwindow((NXTKWINDOW)priv->handle,
+                           dest, src, origin, stride);
 }
 
 /****************************************************************************
@@ -172,8 +173,9 @@ static int nxtkcon_bitmap(FAR struct nxterm_state_s *priv,
  *   registered at /dev/nxtkN where N is the provided minor number.
  *
  * Input Parameters:
- *   hfwnd - A handle that will be used to access the window.  The window must
- *     persist and this handle must be valid for the life of the NX console.
+ *   hfwnd - A handle that will be used to access the window.
+ *           The window must persist and this handle must be valid for the
+ *           life of the NX console.
  *   wndo - Describes the window and font to be used
  *   minor - The device minor number
  *

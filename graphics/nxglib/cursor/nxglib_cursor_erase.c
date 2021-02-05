@@ -71,7 +71,10 @@
  ****************************************************************************/
 
 void NXGL_FUNCNAME(nxglib_cursor_erase, NXGLIB_SUFFIX)
-(FAR struct nxbe_state_s *be, FAR const struct nxgl_rect_s *bounds, int planeno)
+(
+  FAR struct nxbe_state_s *be,
+  FAR const struct nxgl_rect_s *bounds,
+  int planeno)
 {
   struct nxgl_rect_s intersection;
   struct nxgl_point_s origin;
@@ -93,7 +96,9 @@ void NXGL_FUNCNAME(nxglib_cursor_erase, NXGLIB_SUFFIX)
 
   nxgl_rectintersect(&intersection, &be->cursor.bounds, &be->bkgd.bounds);
 
-  /* Check if there is anything in the modified region that we need to handle. */
+  /* Check if there is anything in the modified region that
+   * we need to handle.
+   */
 
   nxgl_rectintersect(&intersection, &intersection, bounds);
   if (!nxgl_nullrect(&intersection))
@@ -145,7 +150,7 @@ void NXGL_FUNCNAME(nxglib_cursor_erase, NXGLIB_SUFFIX)
 
           sline += sstride;
           dline += dstride;
-       }
+        }
     }
 }
 

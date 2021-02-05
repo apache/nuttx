@@ -171,7 +171,9 @@ FAR const struct nxterm_bitmap_s *
       glyph = nxf_cache_getglyph(priv->fcache, ch);
       if (!glyph)
         {
-          /* No, there is no font for this code.  Just mark this as a space. */
+          /* No, there is no font for this code.
+           * Just mark this as a space.
+           */
 
           bm->flags |= BMFLAGS_NOGLYPH;
 

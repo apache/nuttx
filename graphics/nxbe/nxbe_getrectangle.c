@@ -164,8 +164,10 @@ static inline void nxbe_getrectangle_pwfb(FAR struct nxbe_window_s *wnd,
  ****************************************************************************/
 
 void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
-                       FAR const struct nxgl_rect_s *rect, unsigned int plane,
-                       FAR uint8_t *dest, unsigned int deststride)
+                       FAR const struct nxgl_rect_s *rect,
+                       unsigned int plane,
+                       FAR uint8_t *dest,
+                       unsigned int deststride)
 {
   struct nxgl_rect_s remaining;
 
@@ -217,6 +219,7 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
 
               wnd->be->plane[0].cursor.erase(wnd->be, &remaining, 0);
             }
+
 #endif
           /* Get the rectangle from the graphics device memory.
            * NOTE: Since raw graphic memory is returned, the returned memory

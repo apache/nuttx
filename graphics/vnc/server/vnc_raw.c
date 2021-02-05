@@ -102,7 +102,7 @@ static size_t vnc_copy8(FAR struct vnc_session_s *session,
   update = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
   dest   = (FAR uint8_t *)update->rect[0].data;
 
-  /* Source rectangle start address (left/top)*/
+  /* Source rectangle start address (left/top) */
 
   srcleft = (FAR lfb_color_t *)
     (session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
@@ -162,7 +162,7 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
   update = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
   dest   = (FAR uint8_t *)update->rect[0].data;
 
-  /* Source rectangle start address (left/top)*/
+  /* Source rectangle start address (left/top) */
 
   srcleft = (FAR lfb_color_t *)
     (session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
@@ -234,7 +234,7 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
   update = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
   dest   = (FAR uint8_t *)update->rect[0].data;
 
-  /* Source rectangle start address (left/top)*/
+  /* Source rectangle start address (left/top) */
 
   srcleft = (FAR lfb_color_t *)
     (session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
@@ -454,7 +454,8 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
 
           /* Format the FramebufferUpdate message */
 
-          update          = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
+          update     = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
+
           update->msgtype = RFB_FBUPDATE_MSG;
           update->padding = 0;
           rfb_putbe16(update->nrect, 1);

@@ -55,9 +55,11 @@
  ****************************************************************************/
 
 #if NXGLIB_BITSPERPIXEL < 8
-static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *sline,
+static inline void nxgl_lowresmemcpy(FAR uint8_t *dline,
+                                     FAR const uint8_t *sline,
                                      unsigned int width,
-                                     uint8_t leadmask, uint8_t tailmask)
+                                     uint8_t leadmask,
+                                     uint8_t tailmask)
 {
   FAR const uint8_t *sptr;
   FAR uint8_t *dptr;
@@ -72,29 +74,29 @@ static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *slin
   lnlen = width;
 
   if (lnlen > 1 && mask)
-     {
-       dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
-       mask = 0xff;
-       dptr++;
-       sptr++;
-       lnlen--;
-     }
+    {
+      dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
+      mask = 0xff;
+      dptr++;
+      sptr++;
+      lnlen--;
+    }
 
-   /* Handle masking of the fractional final byte */
+  /* Handle masking of the fractional final byte */
 
-   mask &= tailmask;
-   if (lnlen > 0 && mask)
-     {
-       dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
-       lnlen--;
-     }
+  mask &= tailmask;
+  if (lnlen > 0 && mask)
+    {
+      dptr[lnlen - 1] = (dptr[lnlen - 1] & ~mask) | (sptr[lnlen - 1] & mask);
+      lnlen--;
+    }
 
-   /* Handle all of the unmasked bytes in-between */
+  /* Handle all of the unmasked bytes in-between */
 
-   if (lnlen > 0)
-     {
-       NXGL_MEMCPY(dptr, sptr, lnlen);
-     }
+  if (lnlen > 0)
+    {
+      NXGL_MEMCPY(dptr, sptr, lnlen);
+    }
 }
 #endif
 
@@ -112,8 +114,10 @@ static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *slin
  ****************************************************************************/
 
 void NXGL_FUNCNAME(nxgl_getrectangle, NXGLIB_SUFFIX)
-(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect,
- FAR void *dest, unsigned int deststride)
+(
+  FAR struct fb_planeinfo_s *pinfo,
+  FAR const struct nxgl_rect_s *rect,
+  FAR void *dest, unsigned int deststride)
 {
   FAR const uint8_t *sline;
   FAR uint8_t *dline;
@@ -145,14 +149,14 @@ void NXGL_FUNCNAME(nxgl_getrectangle, NXGLIB_SUFFIX)
    */
 
   leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x)));
-  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt2.x-1)));
+  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt2.x - 1)));
 # else
   /* Get the mask for pixels that are ordered so that they pack from the
    * LS byte up.
    */
 
   leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt1.x)));
-  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x-1)));
+  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x - 1)));
 # endif
 #endif
 

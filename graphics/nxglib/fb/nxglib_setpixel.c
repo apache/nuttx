@@ -69,9 +69,10 @@
  ****************************************************************************/
 
 void NXGL_FUNCNAME(nxgl_setpixel, NXGLIB_SUFFIX)
-  (FAR struct fb_planeinfo_s *pinfo,
-   FAR const struct nxgl_point_s *pos,
-   NXGL_PIXEL_T color)
+(
+  FAR struct fb_planeinfo_s *pinfo,
+  FAR const struct nxgl_point_s *pos,
+  NXGL_PIXEL_T color)
 {
   FAR uint8_t *dest;
 
@@ -134,7 +135,7 @@ void NXGL_FUNCNAME(nxgl_setpixel, NXGLIB_SUFFIX)
 
   /* Write the pixel (proper alignment assumed) */
 
-   pixel = (FAR NXGL_PIXEL_T *)dest;
+  pixel = (FAR NXGL_PIXEL_T *)dest;
   *pixel = color;
 #endif
 }

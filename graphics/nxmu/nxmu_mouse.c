@@ -229,7 +229,10 @@ int nxmu_mousein(FAR struct nxmu_state_s *nxmu,
               outmsg.buttons = g_mbutton;
               nxgl_vectsubtract(&outmsg.pos, &g_mpos, &g_mwnd->bounds.pt1);
 
-              return nxmu_sendclientwindow(g_mwnd, &outmsg, sizeof(struct nxclimsg_mousein_s));
+              return nxmu_sendclientwindow(
+                                g_mwnd,
+                                &outmsg,
+                                sizeof(struct nxclimsg_mousein_s));
             }
           else
             {
@@ -246,8 +249,9 @@ int nxmu_mousein(FAR struct nxmu_state_s *nxmu,
 
       for (wnd = nxmu->be.topwnd; wnd; wnd = wnd->below)
         {
-          /* The background window normally has no callback structure (unless
-           * a client has taken control of the background via nx_requestbkgd()).
+          /* The background window normally has no callback structure
+           * (unlessa client has taken control of the background via
+           * nx_requestbkgd()).
            */
 
           if (wnd->cb)

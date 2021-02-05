@@ -62,9 +62,12 @@
  ****************************************************************************/
 
 void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
-(FAR struct lcd_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *dest,
- FAR const void *src, FAR const struct nxgl_point_s *origin,
- unsigned int srcstride)
+(
+  FAR struct lcd_planeinfo_s *pinfo,
+  FAR const struct nxgl_rect_s *dest,
+  FAR const void *src,
+  FAR const struct nxgl_point_s *origin,
+  unsigned int srcstride)
 {
   FAR const uint8_t *sline;
   unsigned int ncols;
@@ -83,7 +86,8 @@ void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
   /* Set up to copy the image */
 
   xoffset = dest->pt1.x - origin->x;
-  sline = (FAR const uint8_t *)src + NXGL_SCALEX(xoffset) + (dest->pt1.y - origin->y) * srcstride;
+  sline = (FAR const uint8_t *)src + NXGL_SCALEX(xoffset) +
+           (dest->pt1.y - origin->y) * srcstride;
 #if NXGLIB_BITSPERPIXEL < 8
   remainder = NXGL_REMAINDERX(xoffset);
 #endif
@@ -93,27 +97,30 @@ void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
   for (row = dest->pt1.y; row <= dest->pt2.y; row++)
     {
 #if NXGLIB_BITSPERPIXEL < 8
-      /* if the source pixel is not aligned with a byte boundary, then we will
-       * need to copy the image data to the run buffer first.
+      /* if the source pixel is not aligned with a byte boundary, then we
+       * will need to copy the image data to the run buffer first.
        */
 
       if (remainder != 0)
         {
-          NXGL_FUNCNAME(nxgl_copyrun, NXGLIB_SUFFIX)(sline, pinfo->buffer, remainder, ncols);
+          NXGL_FUNCNAME(nxgl_copyrun, NXGLIB_SUFFIX)(sline,
+                                                     pinfo->buffer,
+                                                     remainder,
+                                                     ncols);
           pinfo->putrun(row, dest->pt1.x, pinfo->buffer, ncols);
         }
       else
 #endif
         {
-          /* The pixel data is byte aligned.  Copy the image data directly from
-           * the image memory.
+          /* The pixel data is byte aligned.
+           * Copy the image data directly from the image memory.
            */
 
           pinfo->putrun(row, dest->pt1.x, sline, ncols);
         }
 
-      /* Then adjust the source pointer to refer to the next line in the source
-       * image.
+      /* Then adjust the source pointer to refer to the next line in
+       * the source image.
        */
 
       sline += srcstride;

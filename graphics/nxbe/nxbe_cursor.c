@@ -134,7 +134,9 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
 #ifdef CONFIG_NX_SWCURSOR
       DEBUGASSERT(be->cursor.bkgd != NULL);
 
-      /* Handle the case where some or all of the cursor is off the display. */
+      /* Handle the case where some or all of the cursor is
+       * off the display.
+       */
 
       nxgl_rectintersect(&bounds, &be->cursor.bounds, &be->bkgd.bounds);
       if (!nxgl_nullrect(&bounds))
@@ -196,7 +198,9 @@ void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
 
   if (be->cursor.visible)
     {
-      /* Handle the case where some or all of the cursor is off the display. */
+      /* Handle the case where some or all of the cursor is
+       * off the display.
+       */
 
       nxgl_rectintersect(&bounds, &be->cursor.bounds, &be->bkgd.bounds);
       if (!nxgl_nullrect(&bounds))
@@ -344,7 +348,9 @@ void nxbe_cursor_setposition(FAR struct nxbe_state_s *be,
     {
       struct nxgl_rect_s bounds;
 
-      /* Handle the case where some or all of the cursor is off the display. */
+      /* Handle the case where some or all of the cursor is
+       * off the display.
+       */
 
       nxgl_rectintersect(&bounds, &be->cursor.bounds, &be->bkgd.bounds);
       if (!nxgl_nullrect(&bounds))

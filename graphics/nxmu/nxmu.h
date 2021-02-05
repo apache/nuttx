@@ -91,7 +91,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -177,8 +177,8 @@ void nxmu_requestbkgd(FAR struct nxmu_conn_s *conn,
  * Name: nxmu_releasebkgd
  *
  * Description:
- *   Release the background window previously acquired using nxmu_openbgwindow
- *   and return control of the background to NX.
+ *   Release the background window previously acquired using
+ *   nxmu_openbgwindow and return control of the background to NX.
  *
  * Input Parameters:
  *   nxmu - The NXMU state structure

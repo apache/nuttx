@@ -105,15 +105,15 @@ int nxbe_colormap(FAR NX_DRIVERTYPE *dev)
   ndx = 0;
   for (i = 0; i < 6; i++)
     {
-      rval = (i * (CONFIG_NX_NCOLORS-1) / 5) << 8;
+      rval = (i * (CONFIG_NX_NCOLORS - 1) / 5) << 8;
       for (j = 0; j < 6; j++)
         {
-          gval = (j * (CONFIG_NX_NCOLORS-1) / 5) << 8;
+          gval = (j * (CONFIG_NX_NCOLORS - 1) / 5) << 8;
           for (k = 0; k < 6; k++)
             {
               red[ndx]   = rval;
               green[ndx] = gval;
-              blue[ndx]  = k * (CONFIG_NX_NCOLORS-1) / 5;
+              blue[ndx]  = k * (CONFIG_NX_NCOLORS - 1) / 5;
               ndx++;
             }
         }

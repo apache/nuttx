@@ -70,7 +70,8 @@ static void nxbe_clipvisible(FAR struct nxbe_clipops_s *cops,
                              FAR struct nxbe_plane_s *plane,
                              FAR const struct nxgl_rect_s *rect)
 {
-  FAR struct nxbe_setvisibility_s *info = (FAR struct nxbe_setvisibility_s *)cops;
+  FAR struct nxbe_setvisibility_s *info =
+             (FAR struct nxbe_setvisibility_s *)cops;
   info->visible = true;
 }
 

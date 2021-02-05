@@ -87,7 +87,7 @@ void nxbe_show_window(FAR struct nxbe_window_s *wnd)
 
       be->topwnd->below = wnd;
 
-     /* Redraw this window and the other that are below us */
+      /* Redraw this window and the other that are below us */
 
       nxbe_redrawbelow(be, wnd, &wnd->bounds);
     }
