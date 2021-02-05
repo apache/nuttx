@@ -15,6 +15,12 @@ config NET_LOCAL
 
 if NET_LOCAL
 
+config NET_LOCAL_PATH_PREFIX
+	string "Path prefix to Unix domain sockets"
+	default "/var/socket"
+	---help---
+		The path prefix to where Unix domain sockets will exist in the VFS namespace.
+
 config NET_LOCAL_STREAM
 	bool "Unix domain stream sockets"
 	default y
