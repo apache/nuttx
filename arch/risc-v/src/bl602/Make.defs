@@ -38,6 +38,10 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += riscv_checkstack.c
 endif
 
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_ASRCS  += riscv_fpu.S
+endif
+
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
 CMN_CSRCS  += riscv_vfork.c
 endif
