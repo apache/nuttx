@@ -223,7 +223,7 @@ config BUILD_KERNEL
 		they can be loaded into memory for execution.
 
 		NOTE:  This build configuration requires that the platform support
-		a memory management unit (MPU) and address environments.  Support,
+		a memory management unit (MMU) and address environments.  Support,
 		however, may not be implemented on all platforms.
 
 endchoice # Build configuration
