@@ -30,7 +30,7 @@
 
 #include "sched/sched.h"
 
-#if defined(CONFIG_SMP) && defined (CONFIG_SPINLOCK_IRQ)
+#if defined(CONFIG_SMP)
 
 /****************************************************************************
  * Public Data
@@ -52,7 +52,7 @@ static volatile uint8_t g_irq_spin_count[CONFIG_SMP_NCPUS];
  * Name: spin_lock_irqsave
  *
  * Description:
- *   If SMP and SPINLOCK_IRQ are enabled:
+ *   If SMP is enabled:
  *     Disable local interrupts and take the global spinlock (g_irq_spin)
  *     if the call counter (g_irq_spin_count[cpu]) equals to 0. Then the
  *     counter on the CPU is increment to allow nested call.
@@ -61,7 +61,7 @@ static volatile uint8_t g_irq_spin_count[CONFIG_SMP_NCPUS];
  *     or internal data structure) in SMP mode. But do not use this API
  *     with kernel APIs which suspend a caller thread. (e.g. nxsem_wait)
  *
- *   If SMP and SPINLOCK_IRQ are not enabled:
+ *   If SMP is not enabled:
  *     This function is equivalent to enter_critical_section().
  *
  * Input Parameters:
@@ -93,13 +93,13 @@ irqstate_t spin_lock_irqsave(void)
  * Name: spin_unlock_irqrestore
  *
  * Description:
- *   If SMP and SPINLOCK_IRQ are enabled:
+ *   If SMP is enabled:
  *     Decrement the call counter (g_irq_spin_count[cpu]) and if it
  *     decrements to zero then release the spinlock (g_irq_spin) and
  *     restore the interrupt state as it was prior to the previous call to
  *     spin_lock_irqsave().
  *
- *   If SMP and SPINLOCK_IRQ are not enabled:
+ *   If SMP is not enabled:
  *     This function is equivalent to leave_critical_section().
  *
  * Input Parameters:
@@ -126,4 +126,4 @@ void spin_unlock_irqrestore(irqstate_t flags)
   up_irq_restore(flags);
 }
 
-#endif /* CONFIG_SMP && CONFIG_SPINLOCK_IRQ */
+#endif /* CONFIG_SMP */

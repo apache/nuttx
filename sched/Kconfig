@@ -240,13 +240,6 @@ config SPINLOCK
 		CONFIG_ARCH_HAVE_MULTICPU.  This permits the use of spinlocks in
 		other novel architectures.
 
-config SPINLOCK_IRQ
-	bool "Support Spinlocks with IRQ control"
-	default n
-	---help---
-		Enables support for spinlocks with IRQ control. This feature can be
-		used to protect data in SMP mode.
-
 config IRQCHAIN
 	bool "Enable multi handler sharing a IRQ"
 	default n
