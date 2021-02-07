@@ -200,6 +200,7 @@ size_t    wcstombs(FAR char *dst, FAR const wchar_t *src, size_t len);
 /* Memory Management */
 
 FAR void *malloc(size_t);
+FAR void *valloc(size_t);
 void      free(FAR void *);
 FAR void *realloc(FAR void *, size_t);
 FAR void *memalign(size_t, size_t);
