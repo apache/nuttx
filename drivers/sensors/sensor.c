@@ -273,6 +273,11 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
               return ret;
             }
         }
+      else if (!upper->enabled)
+        {
+          ret = -EAGAIN;
+          goto out;
+        }
 
         ret = lower->ops->fetch(lower, buffer, len);
     }
@@ -289,7 +294,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
           if (filep->f_oflags & O_NONBLOCK)
             {
               ret = -EAGAIN;
-              goto again;
+              goto out;
             }
           else
             {
@@ -324,7 +329,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
         }
     }
 
-again:
+out:
   nxsem_post(&upper->exclsem);
   return ret;
 }
