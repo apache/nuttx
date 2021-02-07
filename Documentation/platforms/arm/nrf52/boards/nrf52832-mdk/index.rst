@@ -2,24 +2,40 @@
 MakerDiary nRF52832-MDK
 =======================
 
-The nRF52832-MDK is a development board for the nRF52832 SoC from Nordic. It features 24 I/Os
-an on-board RGB led and a chip antenna. It also includes an embedded DAPlink debugger which
-allows to flash/debug and monitor UART from the USB port.
-
-More information about this board can be found at `MakerDiary wiki <https://wiki.makerdiary.co/nrf52832-mdk>`_.
+The `nRF52832-MDK <https://wiki.makerdiary.co/nrf52832-mdk>`_ is a development board for
+the nRF52832 SoC from Nordic. It features 24 I/Os an on-board RGB led and a chip antenna.
+It also includes an embedded DAPlink debugger which allows to flash/debug and monitor UART
+from the USB port.
 
 .. figure:: pinout.webp
    :align: center
 
    Pinout diagram
 
-.. tip:: Pins P0.19 and P0.20 correspond to UART RX/TX (from nRF52 perspective) which are connected
-   to the embedded debugger.
+Features
+========
 
-Resources
-=========
+  - nRF52832 MCU, 512K FLASH, 64K SRAM
+  - 32768 Hz crystal
+  - Embedded DAPlink debugger (debug/flash and monitor serial)
+  - Reset button
+  - Programming mode RGB LED indicator (CDC, MSD or DAP)
+  - Power indicator LED
+  - User RGB LED
+  - Inductor + capacitor for DC/DC mode
 
-The nRF52832 chip has 512K of FLASH and 64K of RAM.
+Pin Mapping
+===========
+
+===== ========== ==========
+Pin   Signal     Notes
+===== ========== ==========
+P0.24 Blue LED   Active LOW
+P0.23 Red LED    Active LOW
+P0.22 Green LED  Active LOW
+P0.20 UART TX
+P0.19 UART RX
+===== ========== ==========
 
 Configurations
 ==============
