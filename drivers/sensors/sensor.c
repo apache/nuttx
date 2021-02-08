@@ -195,7 +195,8 @@ static int sensor_open(FAR struct file *filep)
     {
       /* Initialize sensor buffer */
 
-      ret = circbuf_init(&upper->buffer, NULL, lower->buffer_size);
+      ret = circbuf_init(&upper->buffer, NULL, lower->buffer_number *
+                         upper->esize);
       if (ret < 0)
         {
           goto err;
@@ -314,11 +315,12 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
        * in buffer is less than the number of bytes origin.
        */
 
+      uint32_t buffer_size = lower->buffer_number * upper->esize;
       if (upper->latency == 0 &&
-          circbuf_size(&upper->buffer) > lower->buffer_size &&
-          circbuf_used(&upper->buffer) <= lower->buffer_size)
+          circbuf_size(&upper->buffer) > buffer_size &&
+          circbuf_used(&upper->buffer) <= buffer_size)
         {
-          ret = circbuf_resize(&upper->buffer, lower->buffer_size);
+          ret = circbuf_resize(&upper->buffer, buffer_size);
         }
     }
 
@@ -333,7 +335,6 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR unsigned int *val = (unsigned int *)(uintptr_t)arg;
-  size_t bytes;
   int ret;
 
   sninfo("cmd=%x arg=%08lx\n", cmd, arg);
@@ -400,11 +401,12 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 {
                   /* Adjust length of buffer in batch mode */
 
-                  bytes = ROUNDUP(ROUNDUP(*val, upper->interval) /
-                                  upper->interval * upper->esize +
-                                  lower->buffer_size, upper->esize);
+                  uint32_t buffer_size = (ROUNDUP(*val, upper->interval) /
+                                         upper->interval +
+                                         lower->buffer_number) *
+                                         upper->esize;
 
-                  ret = circbuf_resize(&upper->buffer, bytes);
+                  ret = circbuf_resize(&upper->buffer, buffer_size);
                 }
             }
         }
@@ -412,20 +414,16 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_GET_NEVENTBUF:
         {
-          *val = lower->buffer_size / upper->esize;
+          *val = lower->buffer_number;
         }
         break;
 
-      case SNIOC_SET_BUFFER_SIZE:
+      case SNIOC_SET_BUFFER_NUMBER:
         {
-          if (*val != 0)
+          if (arg != 0)
             {
-              lower->buffer_size = ROUNDUP(*val, upper->esize);
-              ret = circbuf_resize(&upper->buffer, lower->buffer_size);
-              if (ret >= 0)
-                {
-                  *val = lower->buffer_size;
-                }
+              lower->buffer_number = arg;
+              ret = circbuf_resize(&upper->buffer, arg * upper->esize);
             }
         }
         break;
@@ -680,13 +678,9 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
 
   if (!lower->ops->fetch)
     {
-      if (!lower->buffer_size)
+      if (!lower->buffer_number)
         {
-          lower->buffer_size = esize;
-        }
-      else
-        {
-          lower->buffer_size = ROUNDUP(lower->buffer_size, esize);
+          lower->buffer_number = 1;
         }
 
       lower->push_event = sensor_push_event;
@@ -694,7 +688,7 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   else
     {
       lower->notify_event = sensor_notify_event;
-      lower->buffer_size = 0;
+      lower->buffer_number = 0;
     }
 
   sninfo("Registering %s\n", path);
