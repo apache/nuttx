@@ -547,7 +547,7 @@ static void  wm8776_senddone(FAR struct i2s_dev_s *i2s,
    * against that possibility.
    */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   /* Add the completed buffer to the end of our doneq.  We do not yet
    * decrement the reference count.
@@ -565,7 +565,7 @@ static void  wm8776_senddone(FAR struct i2s_dev_s *i2s,
   /* REVISIT:  This can be overwritten */
 
   priv->result = result;
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   /* Now send a message to the worker thread, informing it that there are
    * buffers in the done queue that need to be cleaned up.
@@ -600,13 +600,13 @@ static void wm8776_returnbuffers(FAR struct wm8776_dev_s *priv)
    * use interrupt controls to protect against that possibility.
    */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   while (dq_peek(&priv->doneq) != NULL)
     {
       /* Take the next buffer from the queue of completed transfers */
 
       apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->doneq);
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
 
       audinfo("Returning: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
               apb, apb->curbyte, apb->nbytes, apb->flags);
@@ -641,10 +641,10 @@ static void wm8776_returnbuffers(FAR struct wm8776_dev_s *priv)
 #else
       priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
 #endif
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -697,9 +697,9 @@ static int wm8776_sendbuffer(FAR struct wm8776_dev_s *priv)
        * to avoid a possible race condition.
        */
 
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
       priv->inflight++;
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
 
       shift  = (priv->bpsamp == 8) ? 14 - 3 : 14 - 4;
       shift -= (priv->nchannels > 1) ? 1 : 0;

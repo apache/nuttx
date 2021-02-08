@@ -80,7 +80,7 @@ static bool _b_tick_started = false;
 
 static void k210_reload_mtimecmp(void)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = spin_lock_irqsave(NULL);
 
   uint64_t current;
   uint64_t next;
@@ -100,7 +100,7 @@ static void k210_reload_mtimecmp(void)
 
   putreg64(next, K210_CLINT_MTIMECMP);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

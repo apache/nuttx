@@ -567,7 +567,7 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 
   /* Make the following operations atomic */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   /* Enable TX interrupts */
 
@@ -584,7 +584,7 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 
   putreg32(ENET_TDAR, IMXRT_ENET_TDAR);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 

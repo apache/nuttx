@@ -454,18 +454,18 @@ void arm_lowputc(char ch)
        * atomic.
        */
 
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
       if ((getreg32(CONSOLE_BASE + MAX326_UART_STAT_OFFSET) &
            UART_STAT_TXFULL) == 0)
         {
           /* Send the character */
 
           putreg32((uint32_t)ch, CONSOLE_BASE + MAX326_UART_FIFO_OFFSET);
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NULL, flags);
           return;
         }
 
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
     }
 #endif
 }

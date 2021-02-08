@@ -476,14 +476,14 @@ void up_disable_irq(int irq)
       g_cpu_for_irq[irq] = -1;
 #endif
 
-      irqstate_t flags = spin_lock_irqsave();
+      irqstate_t flags = spin_lock_irqsave(NULL);
       irq -= CXD56_IRQ_EXTINT;
       bit  = 1 << (irq & 0x1f);
 
       regval  = getreg32(INTC_EN(irq));
       regval &= ~bit;
       putreg32(regval, INTC_EN(irq));
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
       putreg32(bit, NVIC_IRQ_CLEAR(irq));
     }
   else
@@ -531,14 +531,14 @@ void up_enable_irq(int irq)
         }
 #endif
 
-      irqstate_t flags = spin_lock_irqsave();
+      irqstate_t flags = spin_lock_irqsave(NULL);
       irq -= CXD56_IRQ_EXTINT;
       bit  = 1 << (irq & 0x1f);
 
       regval  = getreg32(INTC_EN(irq));
       regval |= bit;
       putreg32(regval, INTC_EN(irq));
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
       putreg32(bit, NVIC_IRQ_ENABLE(irq));
     }
   else

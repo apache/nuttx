@@ -534,9 +534,9 @@ _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
         {
           /* nxsig_addset() is not atomic (but neither is sigaction()) */
 
-          flags = spin_lock_irqsave();
+          flags = spin_lock_irqsave(NULL);
           nxsig_addset(&group->tg_sigdefault, signo);
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NULL, flags);
         }
     }
 
@@ -546,9 +546,9 @@ _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
        * atomic (but neither is sigaction()).
        */
 
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
       nxsig_delset(&group->tg_sigdefault, signo);
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
     }
 
   return handler;

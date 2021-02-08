@@ -159,7 +159,7 @@ int fe310_gpio_config(uint16_t gpiocfg)
 
   uint32_t pin  = fe310_gpio_getpin(gpiocfg);
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   /* Disable IOF for the pin to be used as GPIO */
 
@@ -194,7 +194,7 @@ int fe310_gpio_config(uint16_t gpiocfg)
         break;
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   return ret;
 }

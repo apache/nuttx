@@ -88,7 +88,7 @@ static void up_idlepm(void)
 
   if (newstate != oldstate)
     {
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
 
       /* Perform board-specific, state-dependent logic here */
 
@@ -110,7 +110,7 @@ static void up_idlepm(void)
           oldstate = newstate;
         }
 
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
 
       /* MCU-specific power management logic */
 

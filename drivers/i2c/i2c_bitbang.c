@@ -110,7 +110,7 @@ static int i2c_bitbang_transfer(FAR struct i2c_master_s *dev,
 
   /* Lock to enforce timings */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   for (i = 0; i < count; i++)
     {
@@ -239,7 +239,7 @@ out:
   i2c_bitbang_set_scl(priv, true, false);
   i2c_bitbang_set_sda(priv, true);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   return ret;
 }

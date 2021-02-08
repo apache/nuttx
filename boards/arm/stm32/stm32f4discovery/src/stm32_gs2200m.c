@@ -103,7 +103,7 @@ static int gs2200m_irq_attach(xcpt_t handler, FAR void *arg)
 
 static void gs2200m_irq_enable(void)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = spin_lock_irqsave(NULL);
   uint32_t dready = 0;
 
   wlinfo("== ec:%" PRId32 " called=%" PRId32 " \n",
@@ -123,7 +123,7 @@ static void gs2200m_irq_enable(void)
 
   _enable_count++;
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   if (dready)
     {
@@ -140,7 +140,7 @@ static void gs2200m_irq_enable(void)
 
 static void gs2200m_irq_disable(void)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = spin_lock_irqsave(NULL);
 
   wlinfo("== ec:%" PRId32 " called=%" PRId32 " \n",
          _enable_count, _n_called++);
@@ -153,7 +153,7 @@ static void gs2200m_irq_disable(void)
                          false, NULL, NULL);
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -162,7 +162,7 @@ static void gs2200m_irq_disable(void)
 
 static uint32_t gs2200m_dready(int *ec)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = spin_lock_irqsave(NULL);
 
   uint32_t r = stm32_gpioread(GPIO_GS2200M_INT);
 
@@ -173,7 +173,7 @@ static uint32_t gs2200m_dready(int *ec)
       *ec = _enable_count;
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return r;
 }
 

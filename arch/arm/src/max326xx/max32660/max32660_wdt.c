@@ -375,7 +375,7 @@ static int max326_start(FAR struct watchdog_lowerhalf_s *lower)
 
   /* Perform the reset sequence */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   max326_wdog_reset(priv);
 
   /* Enable reset or interrupt */
@@ -388,7 +388,7 @@ static int max326_start(FAR struct watchdog_lowerhalf_s *lower)
   ctrl |= WDT0_CTRL_WDTEN;
   putreg32(ctrl, MAX326_WDT0_CTRL);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 
@@ -420,14 +420,14 @@ static int max326_stop(FAR struct watchdog_lowerhalf_s *lower)
 
   /* Disable the watchdog timer, reset, and interrupts */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   ctrl  = getreg32(MAX326_WDT0_CTRL);
   ctrl &= ~(WDT0_CTRL_WDTEN | WDT0_CTRL_INTEN | WDT0_CTRL_RSTEN);
 
   up_disable_irq(MAX326_IRQ_WDT0);
   irq_detach(MAX326_IRQ_WDT0);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 
@@ -458,9 +458,9 @@ static int max326_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 
   /* Reset WDT timer */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   max326_wdog_reset(priv);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   return OK;
 }
@@ -552,7 +552,7 @@ static int max326_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Reset WDT timer */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   max326_wdog_reset(priv);
 
   /* Convert the timeout value in milliseconds to time exponent used by the
@@ -574,7 +574,7 @@ static int max326_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   ctrl |= (WDT0_CTRL_INTPERIOD(exp) | WDT0_CTRL_RSTPERIOD(exp));
   putreg32(ctrl, MAX326_WDT0_CTRL);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 
@@ -607,7 +607,7 @@ static xcpt_t max326_capture(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Get the old handler */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   oldhandler = priv->handler;
 
   /* Save the new handler */
@@ -628,7 +628,7 @@ static xcpt_t max326_capture(FAR struct watchdog_lowerhalf_s *lower,
       max326_int_enable(priv);
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return oldhandler;
 }
 

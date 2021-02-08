@@ -82,14 +82,14 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo)
   irqstate_t flags;
 
   DEBUGASSERT(bininfo != NULL);
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   /* Get the TCB associated with the PID */
 
   tcb = nxsched_get_tcb(pid);
   if (tcb == NULL)
     {
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
       return -ESRCH;
     }
 
@@ -102,7 +102,7 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo)
 
   group->tg_bininfo = bininfo;
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 

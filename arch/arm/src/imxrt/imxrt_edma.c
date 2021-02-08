@@ -268,10 +268,10 @@ static void imxrt_tcd_free(struct imxrt_edmatcd_s *tcd)
    * a TCD.
    */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   sq_addlast((sq_entry_t *)tcd, &g_tcd_free);
   imxrt_givedsem();
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 #endif
 
@@ -1224,7 +1224,7 @@ int imxrt_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
 
   /* Save the callback info.  This will be invoked when the DMA completes */
 
-  flags           = spin_lock_irqsave();
+  flags           = spin_lock_irqsave(NULL);
   dmach->callback = callback;
   dmach->arg      = arg;
   dmach->state    = IMXRT_DMA_ACTIVE;
@@ -1248,7 +1248,7 @@ int imxrt_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
       putreg8(regval8, IMXRT_EDMA_SERQ_OFFSET);
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 
@@ -1276,9 +1276,9 @@ void imxrt_dmach_stop(DMACH_HANDLE handle)
   dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL);
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   imxrt_dmaterminate(dmach, -EINTR);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -1375,7 +1375,7 @@ void imxrt_dmasample(DMACH_HANDLE handle, struct imxrt_dmaregs_s *regs)
 
   /* eDMA Global Registers */
 
-  flags          = spin_lock_irqsave();
+  flags          = spin_lock_irqsave(NULL);
 
   regs->cr       = getreg32(IMXRT_EDMA_CR);   /* Control */
   regs->es       = getreg32(IMXRT_EDMA_ES);   /* Error Status */
@@ -1410,7 +1410,7 @@ void imxrt_dmasample(DMACH_HANDLE handle, struct imxrt_dmaregs_s *regs)
   regaddr        = IMXRT_DMAMUX_CHCFG(chan);
   regs->dmamux   = getreg32(regaddr);         /* Channel configuration */
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 #endif /* CONFIG_DEBUG_DMA */
 

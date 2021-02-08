@@ -131,7 +131,7 @@ void mod_stby_regs(uint32_t enabits, uint32_t disbits)
 void up_enable_clk(enum clock_e clk)
 {
   irqstate_t flags;
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   DEBUGASSERT(clk < LC823450_CLOCK_NUM);
 
@@ -141,7 +141,7 @@ void up_enable_clk(enum clock_e clk)
                   0, lc823450_clocks[clk].regmask);
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -151,7 +151,7 @@ void up_enable_clk(enum clock_e clk)
 void up_disable_clk(enum clock_e clk)
 {
   irqstate_t flags;
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   DEBUGASSERT(clk < LC823450_CLOCK_NUM);
 
@@ -168,7 +168,7 @@ void up_disable_clk(enum clock_e clk)
       lc823450_clocks[clk].count = 0;
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

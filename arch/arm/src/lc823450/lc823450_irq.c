@@ -669,7 +669,7 @@ void up_enable_irq(int irq)
        * set the bit in the System Handler Control and State Register.
        */
 
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
 
       if (irq >= LC823450_IRQ_NIRQS)
         {
@@ -692,7 +692,7 @@ void up_enable_irq(int irq)
           putreg32(regval, regaddr);
         }
 
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
     }
 
   /* lc823450_dumpnvic("enable", irq); */
@@ -817,7 +817,7 @@ int lc823450_irq_srctype(int irq, enum lc823450_srctype_e srctype)
   port = (irq & 0x70) >> 4;
   gpio = irq & 0xf;
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   regaddr = INTC_REG(EXTINTCND_BASE, port);
   regval = getreg32(regaddr);
@@ -827,7 +827,7 @@ int lc823450_irq_srctype(int irq, enum lc823450_srctype_e srctype)
 
   putreg32(regval, regaddr);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   return OK;
 }
