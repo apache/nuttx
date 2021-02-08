@@ -1328,6 +1328,7 @@ static int IRAM_ATTR esp32_mmap(FAR struct esp32_spiflash_s *priv,
   int flash_page;
   int page_cnt;
   struct spiflash_cachestate_s state;
+  bool flush = false;
 
   esp32_spiflash_opstart(&state);
 
@@ -1363,7 +1364,7 @@ static int IRAM_ATTR esp32_mmap(FAR struct esp32_spiflash_s *priv,
       req->ptr = (void *)(VADDR0_START_ADDR +
                           start_page * SPI_FLASH_MMU_PAGE_SIZE +
                           MMU_ADDR2OFF(req->src_addr));
-
+      flush = true;
       ret = 0;
     }
   else
@@ -1371,10 +1372,17 @@ static int IRAM_ATTR esp32_mmap(FAR struct esp32_spiflash_s *priv,
       ret = -ENOBUFS;
     }
 
-  Cache_Flush(0);
-#ifdef CONFIG_SMP
-  Cache_Flush(1);
+  if (flush)
+    {
+#ifdef CONFIG_ESP32_SPIRAM
+      esp_spiram_writeback_cache();
 #endif
+      Cache_Flush(0);
+#ifdef CONFIG_SMP
+      Cache_Flush(1);
+#endif
+    }
+
   esp32_spiflash_opdone(&state);
 
   return ret;
