@@ -33,6 +33,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/sensors/fakesensor.h>
 #include <nuttx/sensors/sensor.h>
 
@@ -47,6 +48,7 @@ struct fakesensor_s
   unsigned int interval;
   int raw_start;
   FAR const char *file_path;
+  sem_t run;
 };
 
 /****************************************************************************
@@ -111,6 +113,7 @@ static int fakesensor_read_csv_header(struct fakesensor_s *sensor)
   sensor->raw_start =
       fakesensor_read_csv_line(&sensor->data, buffer, sizeof(buffer), 0);
   sscanf(buffer, "interval:%d\n", &sensor->interval);
+  sensor->interval *= 1000;
 
   /*  Skip the CSV header */
 
@@ -121,8 +124,8 @@ static int fakesensor_read_csv_header(struct fakesensor_s *sensor)
 
 static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower, bool sw)
 {
-  struct fakesensor_s *sensor =
-      (FAR struct fakesensor_s *)lower;
+  FAR struct fakesensor_s *sensor = container_of(lower,
+                                                 struct fakesensor_s, lower);
   int ret;
 
   if (sw)
@@ -135,6 +138,10 @@ static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower, bool sw)
         }
 
       fakesensor_read_csv_header(sensor);
+
+      /* Wake up the thread */
+
+      sem_post(&sensor->run);
     }
   else
     {
@@ -153,7 +160,7 @@ static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                    FAR unsigned int *period_us)
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
-                                  struct fakesensor_s, lower);
+                                                 struct fakesensor_s, lower);
   sensor->interval = *period_us;
   return OK;
 }
@@ -161,8 +168,8 @@ static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
 static int fakesensor_fetch(FAR struct sensor_lowerhalf_s *lower,
                             FAR char *buffer, size_t buflen)
 {
-  struct fakesensor_s *sensor =
-          (FAR struct fakesensor_s *)lower;
+  FAR struct fakesensor_s *sensor = container_of(lower,
+                                                 struct fakesensor_s, lower);
 
   if (lower->type == SENSOR_TYPE_ACCELEROMETER)
     {
@@ -218,11 +225,17 @@ static int fakesensor_thread(int argc, char** argv)
           /* Notify upper */
 
           sensor->lower.notify_event(sensor->lower.priv);
+
+          /* Sleeping thread for interval */
+
+          usleep(sensor->interval);
         }
+      else
+        {
+          /* Waiting to be woken up */
 
-      /* Sleeping thread */
-
-      usleep(1000000 / sensor->interval);
+          sem_wait(&sensor->run);
+        }
     }
 }
 
@@ -240,7 +253,7 @@ static int fakesensor_thread(int argc, char** argv)
  * Input Parameters:
  *   type      - The type of sensor and Defined in <nuttx/sensors/sensor.h>
  *   file_name - The name of csv name and the file structure is as follows:
- *               First row : set interval
+ *               First row : set interval, unit millisecond
  *               Second row: csv file header
  *               third row : data
  *               (Each line should not exceed 50 characters)
@@ -272,6 +285,9 @@ int fakesensor_init(int type, FAR const char *file_name, int devno)
   sensor->lower.ops = &g_fakesensor_ops;
   sensor->interval = 1;
   sensor->file_path = file_name;
+
+  nxsem_init(&sensor->run, 0, 0);
+  nxsem_set_protocol(&sensor->run, SEM_PRIO_NONE);
 
   /* Create thread for sensor */
 
