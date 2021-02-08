@@ -120,7 +120,9 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 
   for (lndx = 0; lndx < len; lndx += IOB_NITEMS, offset += IOB_NITEMS)
     {
-      /* Copy IOB_NITEMS-bytes into our local buffer from the current offset */
+      /* Copy IOB_NITEMS-bytes into our local buffer from the current
+       * offset
+       */
 
       nbytes = iob_copyout(data, head, IOB_NITEMS, offset);
 

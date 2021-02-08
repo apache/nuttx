@@ -614,7 +614,9 @@ void gran_info(GRAN_HANDLE handle, FAR struct graninfo_s *info)
         }
     }
 
-  /* Check if the last, unterminated sequence of free granules was the longest */
+  /* Check if the last, unterminated sequence of free granules was
+   * the longest
+   */
 
   if (mxfree > info->mxfree)
     {

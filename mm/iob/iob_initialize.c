@@ -118,7 +118,9 @@ void iob_initialize(void)
 
       nxsem_init(&g_iob_sem, 0, CONFIG_IOB_NBUFFERS);
 #if CONFIG_IOB_THROTTLE > 0
-      nxsem_init(&g_throttle_sem, 0, CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE);
+      nxsem_init(&g_throttle_sem,
+                 0,
+                 CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE);
 #endif
 
 #if CONFIG_IOB_NCHAINS > 0
@@ -128,7 +130,9 @@ void iob_initialize(void)
         {
           FAR struct iob_qentry_s *iobq = &g_iob_qpool[i];
 
-          /* Add the pre-allocate buffer container to the head of the free list */
+          /* Add the pre-allocate buffer container to the head of the free
+           * list
+           */
 
           iobq->qe_flink  = g_iob_freeqlist;
           g_iob_freeqlist = iobq;

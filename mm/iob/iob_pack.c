@@ -99,7 +99,9 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob,
 
           if (ncopy > 0)
             {
-              /* Copy the data from the next into the current I/O buffer iob */
+              /* Copy the data from the next into
+               * the current I/O buffer iob
+               */
 
               memcpy(&iob->io_data[iob->io_len],
                      &next->io_data[next->io_offset],

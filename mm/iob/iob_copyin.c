@@ -65,7 +65,9 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
   iobinfo("iob=%p len=%u offset=%u\n", iob, len, offset);
   DEBUGASSERT(iob && src);
 
-  /* The offset must applied to data that is already in the I/O buffer chain */
+  /* The offset must applied to data that is already in the I/O buffer
+   * chain
+   */
 
   if (offset > iob->io_pktlen)
     {
@@ -218,7 +220,8 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
                unsigned int len, unsigned int offset, bool throttled,
                enum iob_user_e consumerid)
 {
-  return iob_copyin_internal(iob, src, len, offset, throttled, true, consumerid);
+  return iob_copyin_internal(iob, src, len, offset,
+                             throttled, true, consumerid);
 }
 
 /****************************************************************************
