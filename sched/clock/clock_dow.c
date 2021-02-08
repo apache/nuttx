@@ -68,5 +68,6 @@ static const uint8_t g_lookup[12] =
 int clock_dow(int year, int month, int day)
 {
   day += month < 2 ? year-- : year - 2;
-  return ((int)g_lookup[month] + day + 4 + year / 4 - year / 100 + year / 400) % 7;
+  return ((int)g_lookup[month] + day + 4 + year / 4 -
+           year / 100 + year / 400) % 7;
 }

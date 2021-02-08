@@ -35,7 +35,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* If CONFIG_SYSTEM_TIME64 is selected and the CPU supports long long types,
  * then a 64-bit system time will be used.
  */

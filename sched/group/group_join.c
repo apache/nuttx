@@ -128,7 +128,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
  * Name: group_bind
  *
  * Description:
- *   A thread joins the group when it is created.  This is a two step process,
+ *   A thread joins the group when it is created. This is a two step process,
  *   first, the group must bound to the new threads TCB.  group_bind() does
  *   this (at the return from group_join, things are a little unstable:  The
  *   group has been bound, but tg_nmembers has not yet been incremented).
@@ -165,7 +165,7 @@ int group_bind(FAR struct pthread_tcb_s *tcb)
  * Name: group_join
  *
  * Description:
- *   A thread joins the group when it is created.  This is a two step process,
+ *   A thread joins the group when it is created. This is a two step process,
  *   first, the group must bound to the new threads TCB.  group_bind() does
  *   this (at the return from group_join, things are a little unstable:  The
  *   group has been bound, but tg_nmembers has not yet been incremented).

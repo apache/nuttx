@@ -60,7 +60,9 @@
  *
  ****************************************************************************/
 
-int env_foreach(FAR struct task_group_s *group, env_foreach_t cb, FAR void *arg)
+int env_foreach(FAR struct task_group_s *group,
+                env_foreach_t cb,
+                FAR void *arg)
 {
   FAR char *ptr;
   FAR char *end;

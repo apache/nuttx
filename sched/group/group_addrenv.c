@@ -59,9 +59,9 @@ grpid_t g_grpid_current;
  *   the head of the ready to run list.
  *
  *   This function is called from platform-specific code after any context
- *   switch (i.e., after any change in the thread at the head of the ready-to-
- *   run list).  This function will change the address environment if the
- *   new thread is part of a different task group.
+ *   switch (i.e., after any change in the thread at the head of the
+ *   ready-to-run list).  This function will change the address environment
+ *   if the new thread is part of a different task group.
  *
  * Input Parameters:
  *   tcb - The TCB of thread that needs an address environment.  This should

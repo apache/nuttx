@@ -79,14 +79,16 @@ int clock_timespec_compare(FAR const struct timespec *a,
  *
  ****************************************************************************/
 
-int clock_abstime2ticks(clockid_t clockid, FAR const struct timespec *abstime,
+int clock_abstime2ticks(clockid_t clockid,
+                        FAR const struct timespec *abstime,
                         FAR sclock_t *ticks)
 {
   struct timespec currtime;
   struct timespec reltime;
   int             ret;
 
-  /* Convert the timespec to clock ticks.  NOTE: Here we use internal knowledge
+  /* Convert the timespec to clock ticks.
+   * NOTE: Here we use internal knowledge
    * that CLOCK_REALTIME is defined to be zero!
    */
 

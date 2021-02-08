@@ -41,7 +41,8 @@
  * Name: putenv
  *
  * Description:
- *   The putenv() function adds or changes the value of environment variables.
+ *   The putenv() function adds or changes the value of environment
+ *   variables.
  *   The argument string is of the form name=value. If name does not already
  *   exist in  the  environment, then string is added to the environment. If
  *   name does exist, then the value of name in the environment is changed to
