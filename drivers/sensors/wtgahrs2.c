@@ -479,7 +479,7 @@ int wtgahrs2_initialize(FAR const char *path, int devno)
   tmp = &rtdata->dev[WTGAHRS2_ACCEL_IDX];
   tmp->lower.ops = &g_wtgahrs2_ops;
   tmp->lower.type = SENSOR_TYPE_ACCELEROMETER;
-  tmp->lower.buffer_size = sizeof(struct sensor_event_accel);
+  tmp->lower.buffer_number = 1;
   ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
     {
@@ -491,7 +491,7 @@ int wtgahrs2_initialize(FAR const char *path, int devno)
   tmp = &rtdata->dev[WTGAHRS2_GYRO_IDX];
   tmp->lower.ops = &g_wtgahrs2_ops;
   tmp->lower.type = SENSOR_TYPE_GYROSCOPE;
-  tmp->lower.buffer_size = sizeof(struct sensor_event_gyro);
+  tmp->lower.buffer_number = 1;
   ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
     {
@@ -503,7 +503,7 @@ int wtgahrs2_initialize(FAR const char *path, int devno)
   tmp = &rtdata->dev[WTGAHRS2_MAG_IDX];
   tmp->lower.ops = &g_wtgahrs2_ops;
   tmp->lower.type = SENSOR_TYPE_MAGNETIC_FIELD;
-  tmp->lower.buffer_size = sizeof(struct sensor_event_mag);
+  tmp->lower.buffer_number = 1;
   ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
     {
@@ -515,7 +515,7 @@ int wtgahrs2_initialize(FAR const char *path, int devno)
   tmp = &rtdata->dev[WTGAHRS2_BARO_IDX];
   tmp->lower.ops = &g_wtgahrs2_ops;
   tmp->lower.type = SENSOR_TYPE_BAROMETER;
-  tmp->lower.buffer_size = sizeof(struct sensor_event_baro);
+  tmp->lower.buffer_number = 1;
   ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
     {
@@ -527,7 +527,7 @@ int wtgahrs2_initialize(FAR const char *path, int devno)
   tmp = &rtdata->dev[WTGAHRS2_GPS_IDX];
   tmp->lower.ops = &g_wtgahrs2_ops;
   tmp->lower.type = SENSOR_TYPE_GPS;
-  tmp->lower.buffer_size = sizeof(struct sensor_event_gps);
+  tmp->lower.buffer_number = 1;
   ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
     {
