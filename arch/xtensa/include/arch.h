@@ -94,11 +94,107 @@ extern "C"
 #ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
 struct mallinfo; /* Forward reference, see malloc.h */
 
-void      xtensa_imm_initialize(void);
+/****************************************************************************
+ * Name: xtensa_imm_initialize
+ *
+ * Description:
+ *   Initialize the internal heap.
+ *
+ ****************************************************************************/
+
+void xtensa_imm_initialize(void);
+
+/****************************************************************************
+ * Name: xtensa_imm_malloc
+ *
+ * Description:
+ *   Allocate memory from the internal heap.
+ *
+ ****************************************************************************/
+
 FAR void *xtensa_imm_malloc(size_t size);
+
+/****************************************************************************
+ * Name: xtensa_imm_calloc
+ *
+ * Description:
+ *   Calculates the size of the allocation and
+ *   allocate memory the internal heap.
+ *
+ ****************************************************************************/
+
+FAR void *xtensa_imm_calloc(size_t n, size_t elem_size);
+
+/****************************************************************************
+ * Name: xtensa_imm_realloc
+ *
+ * Description:
+ *   Reallocate memory from the internal heap.
+ *
+ ****************************************************************************/
+
+FAR void *xtensa_imm_realloc(void *ptr, size_t size);
+
+/****************************************************************************
+ * Name: xtensa_imm_zalloc
+ *
+ * Description:
+ *   Allocate and zero memory from the internal heap.
+ *
+ ****************************************************************************/
+
+FAR void *xtensa_imm_zalloc(size_t size);
+
+/****************************************************************************
+ * Name: xtensa_imm_free
+ *
+ * Description:
+ *   Free memory from the internal heap.
+ *
+ ****************************************************************************/
+
 void      xtensa_imm_free(FAR void *mem);
+
+/****************************************************************************
+ * Name: xtensa_imm_memalign
+ *
+ * Description:
+ *   memalign requests more than enough space from malloc, finds a region
+ *   within that chunk that meets the alignment request and then frees any
+ *   leading or trailing space.
+ *
+ *   The alignment argument must be a power of two (not checked).  8-byte
+ *   alignment is guaranteed by normal malloc calls.
+ *
+ ****************************************************************************/
+
 FAR void *xtensa_imm_memalign(size_t alignment, size_t size);
+
+/****************************************************************************
+ * Name: xtensa_imm_heapmember
+ *
+ * Description:
+ *   Check if an address lies in the internal heap.
+ *
+ * Parameters:
+ *   mem - The address to check
+ *
+ * Return Value:
+ *   true if the address is a member of the internal heap.  false if not
+ *
+ ****************************************************************************/
+
 bool      xtensa_imm_heapmember(FAR void *mem);
+
+/****************************************************************************
+ * Name: xtensa_imm_mallinfo
+ *
+ * Description:
+ *   mallinfo returns a copy of updated current heap information for the
+ *   user heap.
+ *
+ ****************************************************************************/
+
 int       xtensa_imm_mallinfo(FAR struct mallinfo *info);
 #endif
 

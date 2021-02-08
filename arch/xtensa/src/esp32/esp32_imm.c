@@ -84,6 +84,46 @@ FAR void *xtensa_imm_malloc(size_t size)
 }
 
 /****************************************************************************
+ * Name: xtensa_imm_calloc
+ *
+ * Description:
+ *   Calculates the size of the allocation and
+ *   allocate memory the internal heap.
+ *
+ ****************************************************************************/
+
+FAR void *xtensa_imm_calloc(size_t n, size_t elem_size)
+{
+  return mm_calloc(&g_iheap, n, elem_size);
+}
+
+/****************************************************************************
+ * Name: xtensa_imm_realloc
+ *
+ * Description:
+ *   Reallocate memory from the internal heap.
+ *
+ ****************************************************************************/
+
+FAR void *xtensa_imm_realloc(void *ptr, size_t size)
+{
+  return mm_realloc(&g_iheap, ptr, size);
+}
+
+/****************************************************************************
+ * Name: xtensa_imm_zalloc
+ *
+ * Description:
+ *   Allocate and zero memory from the internal heap.
+ *
+ ****************************************************************************/
+
+FAR void *xtensa_imm_zalloc(size_t size)
+{
+  return mm_zalloc(&g_iheap, size);
+}
+
+/****************************************************************************
  * Name: xtensa_imm_free
  *
  * Description:
