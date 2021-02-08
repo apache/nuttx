@@ -45,11 +45,13 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
+#include <nuttx/arch.h>
 
 #include "xtensa.h"
 #include "xtensa_attr.h"
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_emac.h"
+#include "hardware/esp32_soc.h"
 #include "esp32_cpuint.h"
 #include "esp32_wifi_adapter.h"
 #include "esp32_rt_timer.h"
@@ -1860,7 +1862,16 @@ static void *esp_malloc(uint32_t size)
 
 static void esp_free(void *ptr)
 {
-  kmm_free(ptr);
+#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+  if (xtensa_imm_heapmember(ptr))
+    {
+      xtensa_imm_free(ptr);
+    }
+  else
+#endif
+    {
+      kmm_free(ptr);
+    }
 }
 
 /****************************************************************************
@@ -3427,7 +3438,18 @@ uint32_t esp_log_timestamp(void)
 
 static void *esp_malloc_internal(size_t size)
 {
-  return kmm_malloc(size);
+#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+  return xtensa_imm_malloc(size);
+#else
+  void *ptr = kmm_malloc(size);
+  if (esp32_ptr_extram(ptr))
+    {
+      kmm_free(ptr);
+      return NULL;
+    }
+
+  return ptr;
+#endif
 }
 
 /****************************************************************************
@@ -3447,7 +3469,17 @@ static void *esp_malloc_internal(size_t size)
 
 static void *esp_realloc_internal(void *ptr, size_t size)
 {
+#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+  return xtensa_imm_realloc(ptr, size);
+#else
+  if (size == 0 || esp32_ptr_extram(ptr))
+    {
+      esp_free(ptr);
+      return NULL;
+    }
+
   return kmm_realloc(ptr, size);
+#endif
 }
 
 /****************************************************************************
@@ -3467,7 +3499,18 @@ static void *esp_realloc_internal(void *ptr, size_t size)
 
 static void *esp_calloc_internal(size_t n, size_t size)
 {
-  return kmm_calloc(n, size);
+#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+  return  xtensa_imm_calloc(n, size);
+#else
+  void *ptr = kmm_calloc(n, size);
+  if (esp32_ptr_extram(ptr))
+    {
+      kmm_free(ptr);
+      return NULL;
+    }
+
+  return ptr;
+#endif
 }
 
 /****************************************************************************
@@ -3486,7 +3529,18 @@ static void *esp_calloc_internal(size_t n, size_t size)
 
 static void *esp_zalloc_internal(size_t size)
 {
-  return kmm_zalloc(size);
+#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+  return xtensa_imm_zalloc(size);
+#else
+  void *ptr = kmm_zalloc(size);
+  if (esp32_ptr_extram(ptr))
+    {
+      kmm_free(ptr);
+      return NULL;
+    }
+
+  return ptr;
+#endif
 }
 
 /****************************************************************************
