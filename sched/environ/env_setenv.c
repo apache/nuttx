@@ -96,7 +96,9 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
         }
       else
         {
-          /* Otherwise, it is a request to remove a variable without altering it? */
+          /* Otherwise, it is a request to remove a variable without
+           * altering it?
+           */
 
           return OK;
         }
@@ -131,8 +133,8 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
       env_removevar(group, pvar);
     }
 
-  /* Get the size of the new name=value string.  The +2 is for the '=' and for
-   * null terminator
+  /* Get the size of the new name=value string.
+   * The +2 is for the '=' and for null terminator
    */
 
   varlen = strlen(name) + strlen(value) + 2;

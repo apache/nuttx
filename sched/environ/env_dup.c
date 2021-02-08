@@ -45,8 +45,8 @@
  *
  * Description:
  *   Copy the internal environment structure of a task.  This is the action
- *   that is performed when a new task is created: The new task has a private,
- *   exact duplicate of the parent task's environment.
+ *   that is performed when a new task is created: The new task has a
+ *   private, exact duplicate of the parent task's environment.
  *
  * Input Parameters:
  *   group - The child task group to receive the newly allocated copy of the

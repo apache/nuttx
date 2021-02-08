@@ -204,8 +204,9 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
       /* This is either a non-recursive mutex or is the outermost unlock of
        * a recursive mutex.
        *
-       * In the case where the calling thread is NOT the holder of the thread,
-       * the behavior is undefined per POSIX.  Here we do the same as GLIBC:
+       * In the case where the calling thread is NOT the holder of the
+       * thread, the behavior is undefined per POSIX.
+       * Here we do the same as GLIBC:
        * We allow the other thread to release the mutex even though it does
        * not own it.
        */
