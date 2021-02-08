@@ -39,6 +39,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Bit definitions for the struct shm_region_s sr_flags field */
 
 #define SRFLAG_AVAILABLE 0        /* Available if no flag bits set */

@@ -54,8 +54,8 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   size_t mask = (size_t)(alignment - 1);
   size_t allocsize;
 
-  /* If this requested alinement's less than or equal to the natural alignment
-   * of malloc, then just let malloc do the work.
+  /* If this requested alinement's less than or equal to the natural
+   * alignment of malloc, then just let malloc do the work.
    */
 
   if (alignment <= MM_MIN_CHUNK)
@@ -114,8 +114,9 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
       next = (FAR struct mm_allocnode_s *)((FAR char *)node + node->size);
 
-      /* Make sure that there is space to convert the preceding mm_allocnode_s
-       * into an mm_freenode_s.  I think that this should always be true
+      /* Make sure that there is space to convert the preceding
+       * mm_allocnode_s into an mm_freenode_s.
+       * I think that this should always be true
        */
 
       DEBUGASSERT(alignedchunk >= rawchunk + 8);

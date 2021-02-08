@@ -93,7 +93,9 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
       DEBUGASSERT(ngranules <= 32);
       mask = 0xffffffff >> (32 - ngranules);
 
-      /* Now search the granule allocation table for that number of contiguous */
+      /* Now search the granule allocation table for that number
+       * of contiguous
+       */
 
       for (granidx = 0; granidx < priv->ngranules; granidx += 32)
         {

@@ -183,7 +183,7 @@ static FAR struct iob_s *iob_allocwait(bool throttled,
  * Name: iob_alloc
  *
  * Description:
- *   Allocate an I/O buffer by taking the buffer at the head of the free list.
+ *  Allocate an I/O buffer by taking the buffer at the head of the free list.
  *
  ****************************************************************************/
 
