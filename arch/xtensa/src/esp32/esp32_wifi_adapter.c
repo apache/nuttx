@@ -70,6 +70,10 @@
 #  define NVS_FILE_MODE 0777
 #endif
 
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
 #define WIFI_CONNECT_TIMEOUT  CONFIG_ESP32_WIFI_CONNECT_TIMEOUT
 
 #define TIMER_INITIALIZED_VAL (0x5aa5a55a)
@@ -1862,7 +1866,7 @@ static void *esp_malloc(uint32_t size)
 
 static void esp_free(void *ptr)
 {
-#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
   if (xtensa_imm_heapmember(ptr))
     {
       xtensa_imm_free(ptr);
@@ -3438,7 +3442,7 @@ uint32_t esp_log_timestamp(void)
 
 static void *esp_malloc_internal(size_t size)
 {
-#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
   return xtensa_imm_malloc(size);
 #else
   void *ptr = kmm_malloc(size);
@@ -3469,16 +3473,35 @@ static void *esp_malloc_internal(size_t size)
 
 static void *esp_realloc_internal(void *ptr, size_t size)
 {
-#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
   return xtensa_imm_realloc(ptr, size);
 #else
-  if (size == 0 || esp32_ptr_extram(ptr))
+  void *old_ptr = ptr;
+  void *new_ptr = NULL;
+  size_t old_size = 0;
+  if (size == 0)
     {
-      esp_free(ptr);
+      kmm_free(ptr);
       return NULL;
     }
 
-  return kmm_realloc(ptr, size);
+  new_ptr = kmm_malloc(size);
+  if (new_ptr != NULL)
+    {
+      if (esp32_ptr_extram(new_ptr))
+        {
+          kmm_free(new_ptr);
+          return NULL;
+        }
+
+      old_size = malloc_usable_size(old_ptr);
+      DEBUGASSERT(old_size > 0);
+      memcpy(new_ptr, old_ptr, MIN(old_size, size));
+      kmm_free(old_ptr);
+      return new_ptr;
+    }
+
+  return NULL;
 #endif
 }
 
@@ -3499,7 +3522,7 @@ static void *esp_realloc_internal(void *ptr, size_t size)
 
 static void *esp_calloc_internal(size_t n, size_t size)
 {
-#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
   return  xtensa_imm_calloc(n, size);
 #else
   void *ptr = kmm_calloc(n, size);
@@ -3529,7 +3552,7 @@ static void *esp_calloc_internal(size_t n, size_t size)
 
 static void *esp_zalloc_internal(size_t size)
 {
-#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
   return xtensa_imm_zalloc(size);
 #else
   void *ptr = kmm_zalloc(size);

@@ -63,7 +63,7 @@
  *
  * _sheap                                    eg. 3ffc 8c6c
  *     :
- *     : g_iheap (CONFIG_XTENSA_USE_SEPARATE_IMEM)
+ *     : g_iheap (CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
  *     :
  * _sheap + CONFIG_XTENSA_IMEM_REGION_SIZE   eg. 3ffd ebfc
  *     :
@@ -87,7 +87,9 @@
  * script as "_sheap".  Then end is defined here, as follows:
  */
 
+#ifndef HEAP_REGION1_END
 #define HEAP_REGION1_END    0x3ffdfff0
+#endif
 
 /* Region 2 of the heap is the area from the end of the ROM data to the end
  * of DRAM.  The linker script has already set "_eheap" as the end of DRAM,
@@ -102,10 +104,21 @@
 #  define HEAP_REGION2_START  0x3ffe7e40
 #endif
 
-#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
 #define	XTENSA_IMEM_REGION_SIZE	CONFIG_XTENSA_IMEM_REGION_SIZE
 #else
 #define	XTENSA_IMEM_REGION_SIZE	0
+#endif
+
+/* If CONFIG_XTENSA_IMEM_MAXIMIZE_HEAP_REGION is defined, it means
+ * using maximum separate heap for internal memory, but part of
+ * the available memory is reserved for the Region 1 heap.
+ */
+
+#ifdef CONFIG_XTENSA_IMEM_MAXIMIZE_HEAP_REGION
+#ifndef HEAP_REGION_OFFSET
+#define HEAP_REGION_OFFSET      0x2000
+#endif
 #endif
 
 /****************************************************************************
@@ -130,6 +143,10 @@
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
+#ifdef CONFIG_XTENSA_IMEM_MAXIMIZE_HEAP_REGION
+  *heap_size = (size_t)HEAP_REGION_OFFSET;
+  *heap_start = (FAR void *)(HEAP_REGION1_END - *heap_size);
+#else
   *heap_start = (FAR void *)&_sheap + XTENSA_IMEM_REGION_SIZE;
 
   /* If the following DEBUGASSERT fails,
@@ -138,6 +155,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   DEBUGASSERT(HEAP_REGION1_END > (uintptr_t)*heap_start);
   *heap_size = (size_t)(HEAP_REGION1_END - (uintptr_t)*heap_start);
+#endif
 }
 
 /****************************************************************************

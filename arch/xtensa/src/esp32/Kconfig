@@ -285,6 +285,7 @@ config ESP32_SPIRAM
 	bool "SPI RAM Support"
 	default n
 	select ARCH_HAVE_HEAP2
+	select XTENSA_IMEM_USE_SEPARATE_HEAP
 
 if ESP32_SPIRAM && SMP
 
