@@ -77,7 +77,7 @@ int tiva_configgpio(pinconfig_t pinconfig)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
 #ifdef CONFIG_TIVA_GPIO_IRQS
   /* Mask and clear any pending GPIO interrupt */
@@ -136,7 +136,7 @@ int tiva_configgpio(pinconfig_t pinconfig)
       putreg32(regval, TIVA_GPIO_DOE);
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 

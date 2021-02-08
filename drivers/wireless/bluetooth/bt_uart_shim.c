@@ -136,7 +136,7 @@ hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
 
   /* If the callback is NULL, then we are detaching */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   if (callback == NULL)
     {
       /* Disable Rx callbacks and detach the Rx callback */
@@ -153,7 +153,7 @@ hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
       state->callback = callback;
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -175,7 +175,7 @@ static void hciuart_rxenable(FAR const struct btuart_lowerhalf_s *lower,
   FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   FAR struct hciuart_state_s *s = &config->state;
 
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = spin_lock_irqsave(NULL);
   if (enable != s->enabled)
     {
       wlinfo(enable ? "Enable\n" : "Disable\n");
@@ -183,7 +183,7 @@ static void hciuart_rxenable(FAR const struct btuart_lowerhalf_s *lower,
 
   s->enabled = enable;
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

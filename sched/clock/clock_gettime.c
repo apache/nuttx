@@ -126,12 +126,12 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
            * was last set, this gives us the current time.
            */
 
-          flags = spin_lock_irqsave();
+          flags = spin_lock_irqsave(NULL);
 
           ts.tv_sec  += (uint32_t)g_basetime.tv_sec;
           ts.tv_nsec += (uint32_t)g_basetime.tv_nsec;
 
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NULL, flags);
 
           /* Handle carry to seconds. */
 

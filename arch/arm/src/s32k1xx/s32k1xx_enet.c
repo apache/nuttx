@@ -562,7 +562,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
   /* Make the following operations atomic */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   /* Enable TX interrupts */
 
@@ -579,7 +579,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
   putreg32(ENET_TDAR, S32K1XX_ENET_TDAR);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 

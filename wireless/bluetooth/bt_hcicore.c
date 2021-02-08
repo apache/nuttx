@@ -143,7 +143,7 @@ static void bt_enqueue_bufwork(FAR struct bt_bufferlist_s *list,
 {
   irqstate_t flags;
 
-  flags      = spin_lock_irqsave();
+  flags      = spin_lock_irqsave(NULL);
   buf->flink = list->head;
   if (list->head == NULL)
     {
@@ -151,7 +151,7 @@ static void bt_enqueue_bufwork(FAR struct bt_bufferlist_s *list,
     }
 
   list->head = buf;
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -176,7 +176,7 @@ static FAR struct bt_buf_s *
   FAR struct bt_buf_s *buf;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   buf   = list->tail;
   if (buf != NULL)
     {
@@ -205,7 +205,7 @@ static FAR struct bt_buf_s *
       buf->flink = NULL;
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return buf;
 }
 

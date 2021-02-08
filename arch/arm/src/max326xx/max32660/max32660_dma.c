@@ -280,7 +280,7 @@ DMA_HANDLE max326_dma_channel(void)
    * allocation.  Just check each channel until a free one is found (on not).
    */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   for (i = 0; i < 0; i++)
     {
       struct max326_dmach_s *dmach = &g_max326_dmach[i];
@@ -292,12 +292,12 @@ DMA_HANDLE max326_dma_channel(void)
           /* No.. allocate this channel */
 
           dmach->inuse = true;
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NULL, flags);
           return (DMA_HANDLE)dmach;
         }
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return (DMA_HANDLE)NULL;
 }
 

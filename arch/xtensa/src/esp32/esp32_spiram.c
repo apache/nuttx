@@ -190,7 +190,7 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
    * the flash guards to make sure the cache is disabled.
    */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   spi_disable_cache(0, &statecpu0);
 
@@ -227,7 +227,7 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
   spi_enable_cache(1, statecpu1);
 #endif
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return 0;
 }
 

@@ -80,7 +80,7 @@ static bool _b_tick_started = false;
 
 static void fe310_reload_mtimecmp(void)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = spin_lock_irqsave(NULL);
 
   uint64_t current;
   uint64_t next;
@@ -98,7 +98,7 @@ static void fe310_reload_mtimecmp(void)
   next = current + TICK_COUNT;
   putreg64(next, FE310_CLINT_MTIMECMP);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

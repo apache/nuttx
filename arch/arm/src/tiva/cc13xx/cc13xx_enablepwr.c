@@ -79,13 +79,13 @@ void cc13xx_periph_enablepwr(uint32_t peripheral)
 
   /* Remember that this peripheral needs power in this domain */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   g_domain_usage[dndx] |= (1 << pndx);
 
   /* Make sure that power is enabled in that domain */
 
   prcm_powerdomain_on(domain);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   /* Wait for the power domain to be ready.  REVISIT:  This really should be
    * in the critical section but this could take too long.
@@ -113,7 +113,7 @@ void cc13xx_periph_disablepwr(uint32_t peripheral)
 
   /* This peripheral no longer needs power in this domain */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   g_domain_usage[dndx] &= ~(1 << pndx);
 
   /* If there are no peripherals needing power in this domain, then turn off
@@ -126,5 +126,5 @@ void cc13xx_periph_disablepwr(uint32_t peripheral)
                            PRCM_DOMAIN_SERIAL : PRCM_DOMAIN_PERIPH);
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }

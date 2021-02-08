@@ -883,7 +883,7 @@ static inline void imxrt_disableuartint(struct imxrt_uart_s *priv,
   irqstate_t flags;
   uint32_t regval;
 
-  flags  = spin_lock_irqsave();
+  flags  = spin_lock_irqsave(NULL);
   regval = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
 
   /* Return the current Rx and Tx interrupt state */
@@ -895,7 +895,7 @@ static inline void imxrt_disableuartint(struct imxrt_uart_s *priv,
 
   regval &= ~LPUART_ALL_INTS;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -912,12 +912,12 @@ static inline void imxrt_restoreuartint(struct imxrt_uart_s *priv,
    * enabled/disabled.
    */
 
-  flags   = spin_lock_irqsave();
+  flags   = spin_lock_irqsave(NULL);
   regval  = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
   regval &= ~LPUART_ALL_INTS;
   regval |= ie;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -1313,7 +1313,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
              * implement TCSADRAIN / TCSAFLUSH
              */
 
-            flags  = spin_lock_irqsave();
+            flags  = spin_lock_irqsave(NULL);
             imxrt_disableuartint(priv, &ie);
             ret = imxrt_setup(dev);
 
@@ -1321,7 +1321,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 
             imxrt_restoreuartint(priv, ie);
             priv->ie = ie;
-            spin_unlock_irqrestore(flags);
+            spin_unlock_irqrestore(NULL, flags);
           }
       }
       break;
@@ -1334,7 +1334,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
         irqstate_t flags;
         struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
 
-        flags  = spin_lock_irqsave();
+        flags  = spin_lock_irqsave(NULL);
         regval   = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
 
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
@@ -1360,7 +1360,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
 
-        spin_unlock_irqrestore(flags);
+        spin_unlock_irqrestore(NULL, flags);
       }
       break;
 #endif
@@ -1374,7 +1374,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
         irqstate_t flags;
         struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
 
-        flags  = spin_lock_irqsave();
+        flags  = spin_lock_irqsave(NULL);
         ctrl   = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
         stat   = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
         regval = ctrl;
@@ -1410,7 +1410,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
         imxrt_serialout(priv, IMXRT_LPUART_STAT_OFFSET, stat);
         imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, ctrl);
 
-        spin_unlock_irqrestore(flags);
+        spin_unlock_irqrestore(NULL, flags);
       }
       break;
 #endif
@@ -1461,7 +1461,7 @@ static void imxrt_rxint(struct uart_dev_s *dev, bool enable)
 
   /* Enable interrupts for data available at Rx */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1477,7 +1477,7 @@ static void imxrt_rxint(struct uart_dev_s *dev, bool enable)
   regval &= ~LPUART_ALL_INTS;
   regval |= priv->ie;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -1529,7 +1529,7 @@ static void imxrt_txint(struct uart_dev_s *dev, bool enable)
 
   /* Enable interrupt for TX complete */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1545,7 +1545,7 @@ static void imxrt_txint(struct uart_dev_s *dev, bool enable)
   regval &= ~LPUART_ALL_INTS;
   regval |= priv->ie;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

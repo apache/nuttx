@@ -288,7 +288,7 @@ int nrf52_gpio_config(nrf52_pinset_t cfgset)
 
       pin = GPIO_PIN_DECODE(cfgset);
 
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
 
       /* First, configure the port as a generic input so that we have a
        * known starting point and consistent behavior during the re-
@@ -323,7 +323,7 @@ int nrf52_gpio_config(nrf52_pinset_t cfgset)
           ret = -EINVAL;
         }
 
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
     }
   else
     {

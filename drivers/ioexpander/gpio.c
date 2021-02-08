@@ -394,7 +394,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         if (arg && dev->gp_pintype >= GPIO_INTERRUPT_PIN)
           {
             pid = getpid();
-            flags = spin_lock_irqsave();
+            flags = spin_lock_irqsave(NULL);
             for (i = 0; i < CONFIG_DEV_GPIO_NSIGNALS; i++)
               {
                 FAR struct gpio_signal_s *signal = &dev->gp_signals[i];
@@ -409,7 +409,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   }
               }
 
-            spin_unlock_irqrestore(flags);
+            spin_unlock_irqrestore(NULL, flags);
 
             if (i == 0)
               {
@@ -444,7 +444,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         if (dev->gp_pintype >= GPIO_INTERRUPT_PIN)
           {
             pid = getpid();
-            flags = spin_lock_irqsave();
+            flags = spin_lock_irqsave(NULL);
             for (i = 0; i < CONFIG_DEV_GPIO_NSIGNALS; i++)
               {
                 if (pid == dev->gp_signals[i].gp_pid)
@@ -470,7 +470,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   }
                 }
 
-            spin_unlock_irqrestore(flags);
+            spin_unlock_irqrestore(NULL, flags);
 
             if (i == 0 && j == 0)
               {

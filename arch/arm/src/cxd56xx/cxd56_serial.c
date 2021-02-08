@@ -288,7 +288,7 @@ static inline void up_disableuartint(FAR struct up_dev_s *priv,
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   if (ier)
     {
       *ier = priv->ier & UART_INTR_ALL;
@@ -296,7 +296,7 @@ static inline void up_disableuartint(FAR struct up_dev_s *priv,
 
   priv->ier &= ~UART_INTR_ALL;
   up_serialout(priv, CXD56_UART_IMSC, priv->ier);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -307,10 +307,10 @@ static inline void up_restoreuartint(FAR struct up_dev_s *priv, uint32_t ier)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   priv->ier |= ier & UART_INTR_ALL;
   up_serialout(priv, CXD56_UART_IMSC, priv->ier);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -372,7 +372,7 @@ static void up_set_format(struct uart_dev_s *dev)
   uint32_t cr_en;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   /* Get the original state of control register */
 
@@ -438,7 +438,7 @@ static void up_set_format(struct uart_dev_s *dev)
 #endif
   up_serialout(priv, CXD56_UART_CR, cr | cr_en);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
@@ -759,7 +759,7 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          flags = spin_lock_irqsave();
+          flags = spin_lock_irqsave(NULL);
 
           termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
                               ((priv->parity == 1) ? PARODD : 0) |
@@ -793,7 +793,7 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 break;
             }
 
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NULL, flags);
         }
         break;
 
@@ -808,7 +808,7 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          flags = spin_lock_irqsave();
+          flags = spin_lock_irqsave(NULL);
 
           switch (termiosp->c_cflag & CSIZE)
             {
@@ -853,25 +853,25 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           up_set_format(dev);
 
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NLL, flags);
         }
         break;
 #endif
 
       case TIOCSBRK: /* BSD compatibility: Turn break on, unconditionally */
         {
-          irqstate_t flags = spin_lock_irqsave();
+          irqstate_t flags = spin_lock_irqsave(NULL);
           up_enablebreaks(priv, true);
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NULL, flags);
         }
         break;
 
       case TIOCCBRK: /* BSD compatibility: Turn break off, unconditionally */
         {
           irqstate_t flags;
-          flags = spin_lock_irqsave();
+          flags = spin_lock_irqsave(NULL);
           up_enablebreaks(priv, false);
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NULL, flags);
         }
         break;
 
@@ -922,7 +922,7 @@ static void up_rxint(FAR struct uart_dev_s *dev, bool enable)
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -935,7 +935,7 @@ static void up_rxint(FAR struct uart_dev_s *dev, bool enable)
     }
 
   up_serialout(priv, CXD56_UART_IMSC, priv->ier);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

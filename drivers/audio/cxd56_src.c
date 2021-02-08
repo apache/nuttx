@@ -115,18 +115,18 @@ static struct ap_buffer_s *cxd56_src_get_apb()
   struct ap_buffer_s *src_apb;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   if (dq_count(g_src.inq) == 0)
     {
       size_t bufsize = sizeof(struct ap_buffer_s) +
                               CONFIG_CXD56_AUDIO_BUFFER_SIZE;
 
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
 
       src_apb = kmm_zalloc(bufsize);
 
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
 
       if (!src_apb)
         {
@@ -148,7 +148,7 @@ static struct ap_buffer_s *cxd56_src_get_apb()
 
 errorout_with_lock:
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   return src_apb;
 }
@@ -186,9 +186,9 @@ static int cxd56_src_process(FAR struct ap_buffer_s *apb)
       src_apb->nbytes = apb->nbytes;
       src_apb->flags |= AUDIO_APB_SRC_FINAL;
 
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
       dq_put(g_src.outq, &src_apb->dq_entry);
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
 
       goto exit;
     }
@@ -290,9 +290,9 @@ static int cxd56_src_process(FAR struct ap_buffer_s *apb)
 
               /* Put in out queue to be DMA'd */
 
-              flags = spin_lock_irqsave();
+              flags = spin_lock_irqsave(NULL);
               dq_put(g_src.outq, &src_apb->dq_entry);
-              spin_unlock_irqrestore(flags);
+              spin_unlock_irqrestore(NULL, flags);
 
 #ifdef DUMP_DATA
               write(dump_file_post, src_apb->samp, src_apb->nbytes);
@@ -321,9 +321,9 @@ static int cxd56_src_process(FAR struct ap_buffer_s *apb)
 
           src_apb->nbytes += g_src.bytewidth * src_nframes * g_src.channels;
 
-          flags = spin_lock_irqsave();
+          flags = spin_lock_irqsave(NULL);
           dq_put_back(g_src.inq, &src_apb->dq_entry);
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NULL, flags);
 
           apb->curbyte += (float_in_left * g_src.bytewidth);
         }

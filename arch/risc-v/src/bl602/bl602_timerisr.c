@@ -84,7 +84,7 @@ static inline void bl602_clint_time_cmp_write(uint64_t v)
 
 static void bl602_reload_mtimecmp(void)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = spin_lock_irqsave(NULL);
 
   uint64_t current;
   uint64_t next;
@@ -103,7 +103,7 @@ static void bl602_reload_mtimecmp(void)
 
   bl602_clint_time_cmp_write(next);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

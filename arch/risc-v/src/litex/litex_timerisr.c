@@ -133,7 +133,7 @@ static inline void litex_clint_time_cmp_write(uint64_t v)
 
 static void litex_reload_mtimecmp(void)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = spin_lock_irqsave(NULL);
 
   uint64_t current;
   uint64_t next;
@@ -156,7 +156,7 @@ static void litex_reload_mtimecmp(void)
   csr_set(mie, MIE_MTIE);
   csr_clear(mip, MIP_MTIP);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

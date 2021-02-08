@@ -251,12 +251,12 @@ static int imxrt_wdog_stop(FAR struct watchdog_lowerhalf_s *lower)
 
 static int imxrt_wdog_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = spin_lock_irqsave(NULL);
 
   putreg16(WDOG_KEEP_ALIVE_KEY1, IMXRT_WDOG1_WSR);
   putreg16(WDOG_KEEP_ALIVE_KEY2, IMXRT_WDOG1_WSR);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   return OK;
 }
@@ -326,7 +326,7 @@ static int imxrt_wdog_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   priv->timeout = timeout;
 
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = spin_lock_irqsave(NULL);
 
   /* write timer value to WCR WT register */
 
@@ -340,7 +340,7 @@ static int imxrt_wdog_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   putreg16(WDOG_KEEP_ALIVE_KEY1, IMXRT_WDOG1_WSR);
   putreg16(WDOG_KEEP_ALIVE_KEY2, IMXRT_WDOG1_WSR);
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   return OK;
 }
