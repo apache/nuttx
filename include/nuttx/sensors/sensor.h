@@ -570,17 +570,16 @@ struct sensor_lowerhalf_s
 
   int type;
 
-  /* The size of the circular buffer used, in bytes units.
+  /* The number of events that the circular buffer can hold.
    * This sensor circular buffer is used to slove issue that application
-   * can't read sensor event in time. If this length of buffer is too large,
-   * the latency of sensor event will be too larage. If the length of buffer
+   * can't read sensor event in time. If this number of events is too large,
+   * the latency of sensor event will be too larage. If the number of events
    * is too small, the event will be overwrite before application read them.
    * So, it's recommended to set according to sensor odr. If odr is low, you
-   * can set to a length of sensor event. If odr is high, you can set to two
-   * or three length of sensor event.
+   * can set to one. If odr is high, you can set to two or three.
    */
 
-  uint32_t buffer_size;
+  uint32_t buffer_number;
 
   /* The uncalibrated use to describe whether the sensor event is
    * uncalibrated. True is uncalibrated data, false is calibrated data,
