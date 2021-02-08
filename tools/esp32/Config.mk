@@ -52,7 +52,7 @@ define POSTBUILD
 	$(Q) echo "MKIMAGE: ESP32 binary"
 	$(Q) if ! esptool.py version 1>/dev/null 2>&1; then \
 		echo ""; \
-		echo "esptool.py not found.  Please run: \"pip install esptool.py\""; \
+		echo "esptool.py not found.  Please run: \"pip install esptool\""; \
 		echo "Or run: \"make -C $(TOPDIR)/tools/esp32\" to install all IDF tools."; \
 		echo ""; \
 		echo "Run make again to create the nuttx.bin image."; \
