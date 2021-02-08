@@ -419,7 +419,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_GET_NEVENTBUF:
         {
-          *val = lower->buffer_number;
+          *val = lower->buffer_number + lower->batch_number;
         }
         break;
 
