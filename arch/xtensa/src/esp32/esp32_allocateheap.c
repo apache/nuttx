@@ -102,6 +102,12 @@
 #  define HEAP_REGION2_START  0x3ffe7e40
 #endif
 
+#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+#define	XTENSA_IMEM_REGION_SIZE	CONFIG_XTENSA_IMEM_REGION_SIZE
+#else
+#define	XTENSA_IMEM_REGION_SIZE	0
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -124,13 +130,14 @@
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
-#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
-  *heap_start = (FAR void *)&_sheap + CONFIG_XTENSA_IMEM_REGION_SIZE;
+  *heap_start = (FAR void *)&_sheap + XTENSA_IMEM_REGION_SIZE;
+
+  /* If the following DEBUGASSERT fails,
+   * probably you have too large CONFIG_XTENSA_IMEM_REGION_SIZE.
+   */
+
+  DEBUGASSERT(HEAP_REGION1_END > (uintptr_t)*heap_start);
   *heap_size = (size_t)(HEAP_REGION1_END - (uintptr_t)*heap_start);
-#else
-  *heap_start = (FAR void *)&_sheap;
-  *heap_size = (size_t)(HEAP_REGION1_END - (uintptr_t)&_sheap);
-#endif
 }
 
 /****************************************************************************
