@@ -2302,12 +2302,6 @@ Below is a guide to the available README files in the NuttX source tree:
      |   |       `- us7032evb1/
      |   |           `- README.txt
      |   |- risc-v/
-     |   |   |- gap8/
-     |   |   |   `- gapuino/
-     |   |   |       `- README.txt
-     |   |   `-nr5m100/
-     |   |       `- nr5m100-nexys4/
-     |   |           `- README.txt
      |   |- sim/
      |   |   `- sim/
      |   |       `- sim/

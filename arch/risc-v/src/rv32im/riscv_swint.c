@@ -36,6 +36,7 @@
 #include <arch/irq.h>
 
 #include "signal/signal.h"
+#include "svcall.h"
 #include "riscv_internal.h"
 
 /****************************************************************************

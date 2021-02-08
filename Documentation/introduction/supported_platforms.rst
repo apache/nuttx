@@ -68,8 +68,6 @@ from board-to-board. Follow the links for the details:
      -
        - :ref:`introduction/detailed_support:RISC-V` (2)
 
-         - :ref:`introduction/detailed_support:NEXT RISC-V NR5Mxx` (1)
-         - :ref:`introduction/detailed_support:GreenWaves GAP8` (1)
          - :ref:`introduction/detailed_support:LiteX on Arty A7` (1)
 
        - Xtensa LX6:
@@ -106,10 +104,6 @@ MCU. Follow the links for the details:
        - Espressif
 
          - :ref:`introduction/detailed_support:Xtensa LX6 ESP32` (Dual Xtensa LX6)
-
-       - GreenWaves
-
-         - :ref:`introduction/detailed_support:Greenwaves GAP8` (RISC-V RV32IM)
 
        - Host PC based simulations
 
