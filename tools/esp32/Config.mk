@@ -22,12 +22,13 @@
 # and assemble source files and to insert the resulting object files into an
 # archive.  These replace the default definitions at tools/Config.mk
 
-ifdef BLOBDIR
-	BOOTLOADER=${BLOBDIR}/esp32core/bootloader.bin
-	PARTITION_TABLE=${BLOBDIR}/esp32core/partition-table.bin
-else
-	BOOTLOADER=$(IDF_PATH)/hello_world/build/bootloader/bootloader.bin
-	PARTITION_TABLE=$(IDF_PATH)/hello_world/build/partition_table/partition-table.bin
+ifdef ESPTOOL_BINDIR
+	BL_OFFSET=0x1000
+	PT_OFFSET=0x8000
+	BOOTLOADER=$(ESPTOOL_BINDIR)/bootloader.bin
+	PARTITION_TABLE=$(ESPTOOL_BINDIR)/partition-table.bin
+	FLASH_BL=$(BL_OFFSET) $(BOOTLOADER)
+	FLASH_PT=$(PT_OFFSET) $(PARTITION_TABLE)
 endif
 
 ifeq ($(CONFIG_ESP32_FLASH_2M),y)
@@ -76,8 +77,8 @@ ESPTOOL_BAUD ?= 921600
 define DOWNLOAD
 	$(Q) if [ -z $(ESPTOOL_PORT) ]; then \
 		echo "DOWNLOAD error: Missing serial port device argument."; \
-		echo "USAGE: make download ESPTOOL_PORT=<port> [ ESPTOOL_BAUD=<baud> ]"; \
+		echo "USAGE: make download ESPTOOL_PORT=<port> [ ESPTOOL_BAUD=<baud> ] [ ESPTOOL_BINDIR=<dir> ]"; \
 		exit 1; \
 	fi
-	esptool.py --chip esp32 --port $(ESPTOOL_PORT) --baud $(ESPTOOL_BAUD) write_flash 0x1000 $(BOOTLOADER) 0x8000 $(PARTITION_TABLE) 0x10000 $(1).bin
+	esptool.py --chip esp32 --port $(ESPTOOL_PORT) --baud $(ESPTOOL_BAUD) write_flash $(FLASH_BL) $(FLASH_PT) 0x10000 $(1).bin
 endef
