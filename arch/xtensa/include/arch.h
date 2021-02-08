@@ -91,7 +91,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
+#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
 struct mallinfo; /* Forward reference, see malloc.h */
 
 /****************************************************************************
@@ -112,7 +112,7 @@ void xtensa_imm_initialize(void);
  *
  ****************************************************************************/
 
-FAR void *xtensa_imm_malloc(size_t size);
+void *xtensa_imm_malloc(size_t size);
 
 /****************************************************************************
  * Name: xtensa_imm_calloc
@@ -123,7 +123,7 @@ FAR void *xtensa_imm_malloc(size_t size);
  *
  ****************************************************************************/
 
-FAR void *xtensa_imm_calloc(size_t n, size_t elem_size);
+void *xtensa_imm_calloc(size_t n, size_t elem_size);
 
 /****************************************************************************
  * Name: xtensa_imm_realloc
@@ -133,7 +133,7 @@ FAR void *xtensa_imm_calloc(size_t n, size_t elem_size);
  *
  ****************************************************************************/
 
-FAR void *xtensa_imm_realloc(void *ptr, size_t size);
+void *xtensa_imm_realloc(void *ptr, size_t size);
 
 /****************************************************************************
  * Name: xtensa_imm_zalloc
@@ -143,7 +143,7 @@ FAR void *xtensa_imm_realloc(void *ptr, size_t size);
  *
  ****************************************************************************/
 
-FAR void *xtensa_imm_zalloc(size_t size);
+void *xtensa_imm_zalloc(size_t size);
 
 /****************************************************************************
  * Name: xtensa_imm_free
@@ -153,7 +153,7 @@ FAR void *xtensa_imm_zalloc(size_t size);
  *
  ****************************************************************************/
 
-void      xtensa_imm_free(FAR void *mem);
+void xtensa_imm_free(FAR void *mem);
 
 /****************************************************************************
  * Name: xtensa_imm_memalign
@@ -163,12 +163,12 @@ void      xtensa_imm_free(FAR void *mem);
  *   within that chunk that meets the alignment request and then frees any
  *   leading or trailing space.
  *
- *   The alignment argument must be a power of two (not checked).  8-byte
+ *   The alignment argument must be a power of two (not checked). 8-byte
  *   alignment is guaranteed by normal malloc calls.
  *
  ****************************************************************************/
 
-FAR void *xtensa_imm_memalign(size_t alignment, size_t size);
+void *xtensa_imm_memalign(size_t alignment, size_t size);
 
 /****************************************************************************
  * Name: xtensa_imm_heapmember
@@ -180,11 +180,11 @@ FAR void *xtensa_imm_memalign(size_t alignment, size_t size);
  *   mem - The address to check
  *
  * Return Value:
- *   true if the address is a member of the internal heap.  false if not
+ *   true if the address is a member of the internal heap. false if not
  *
  ****************************************************************************/
 
-bool      xtensa_imm_heapmember(FAR void *mem);
+bool xtensa_imm_heapmember(FAR void *mem);
 
 /****************************************************************************
  * Name: xtensa_imm_mallinfo
@@ -195,7 +195,7 @@ bool      xtensa_imm_heapmember(FAR void *mem);
  *
  ****************************************************************************/
 
-int       xtensa_imm_mallinfo(FAR struct mallinfo *info);
+int xtensa_imm_mallinfo(FAR struct mallinfo *info);
 #endif
 
 #undef EXTERN
