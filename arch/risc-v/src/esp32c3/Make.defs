@@ -51,4 +51,5 @@ endif
 
 CHIP_CSRCS  = esp32c3_allocateheap.c esp32c3_start.c esp32c3_idle.c
 CHIP_CSRCS += esp32c3_irq.c esp32c3_timerisr.c
+CHIP_CSRCS += esp32c3_clockconfig.c
 CHIP_CSRCS += esp32c3_serial.c esp32c3_lowputc.c

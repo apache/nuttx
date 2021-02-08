@@ -73,6 +73,35 @@ config ESP32C3_ESP32C3XXX
 	default n
 	select ESP32C3_SINGLE_CPU
 
+choice ESP32C3_CPU_FREQ
+	prompt "CPU frequency"
+	default ESP32C3_CPU_FREQ_160
+	help
+		CPU frequency to be set on application startup.
+
+config ESP32C3_CPU_FREQ_40
+	bool "40 MHz"
+	help
+		Set the CPU to 40 MHz.  This frequency is obtained from the XTAL.
+
+config ESP32C3_CPU_FREQ_80
+	bool "80 MHz"
+	help
+		Set the CPU to 80 MHz.  This frequency is obtained from the 480 MHz PLL.
+
+config ESP32C3_CPU_FREQ_160
+	bool "160 MHz"
+	help
+		Set the CPU to 160 MHz.  This frequency is obtained from the 480 MHz PLL.
+
+endchoice # CPU frequency
+
+config ESP32C3_CPU_FREQ_MHZ
+	int
+	default 40 if ESP32C3_CPU_FREQ_40
+	default 80 if ESP32C3_CPU_FREQ_80
+	default 160 if ESP32C3_CPU_FREQ_160
+
 menu "ESP32-C3 Peripheral Support"
 
 config ESP32C3_UART0
