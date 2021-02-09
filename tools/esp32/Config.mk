@@ -57,14 +57,13 @@ define POSTBUILD
 		echo ""; \
 		echo "Run make again to create the nuttx.bin image."; \
 		exit 1; \
-	else \
-		if [ -z $(FLASH_SIZE) ]; then \
-			echo "Missing Flash memory size configuration for the ESP32 chip."; \
-			exit 1; \
-		fi; \
-		esptool.py --chip esp32 elf2image --flash_mode dio --flash_size $(FLASH_SIZE) -o nuttx.bin nuttx; \
-		echo "Generated: nuttx.bin (ESP32 compatible)"; \
 	fi
+	$(Q) if [ -z $(FLASH_SIZE) ]; then \
+		echo "Missing Flash memory size configuration for the ESP32 chip."; \
+		exit 1; \
+	fi
+	esptool.py --chip esp32 elf2image --flash_mode dio --flash_size $(FLASH_SIZE) -o nuttx.bin nuttx
+	$(Q) echo "Generated: nuttx.bin (ESP32 compatible)"
 	$(Q) $(MK_QEMU_IMG)
 endef
 
