@@ -42,6 +42,7 @@
 #include "bl602_spi.h"
 #include "hardware/bl602_glb.h"
 #include "hardware/bl602_spi.h"
+#include "hardware/bl602_hbn.h"
 #include "riscv_arch.h"
 
 /****************************************************************************
@@ -49,7 +50,6 @@
  ****************************************************************************/
 
 #define SPI_FREQ_DEFAULT 400000
-#define BASIC_CLK        4000000
 
 /****************************************************************************
  * Private Types
@@ -462,8 +462,11 @@ static uint32_t bl602_spi_setfrequency(FAR struct spi_dev_s *dev,
   FAR struct bl602_spi_priv_s *priv = (FAR struct bl602_spi_priv_s *)dev;
   struct spi_clock_cfg_s clockcfg;
   size_t count;
-  uint32_t clk_div;
   uint8_t ticks;
+  uint8_t bclk_div;
+  uint32_t clk_div;
+  uint32_t sys_clock;
+  uint32_t spi_basic_clk;
 
   if (priv->frequency == frequency)
     {
@@ -472,11 +475,16 @@ static uint32_t bl602_spi_setfrequency(FAR struct spi_dev_s *dev,
       return priv->actual;
     }
 
-  ticks = BASIC_CLK / frequency;
+  bclk_div = bl602_glb_get_bclk_div();
+  sys_clock = getreg32(BL602_HBN_RSV2);
+  spi_basic_clk = sys_clock / (bclk_div + 1) / 2;
+  ticks = spi_basic_clk / frequency;
 
   if (bl602_prescale_and_count_cal(8, 0xff, ticks, &clk_div, &count) != 0)
     {
-      spiinfo("--------spi div clk error!!!!--------\r\n");
+      spierr("SPI div clk error\n");
+      DEBUGPANIC();
+
       return -1;
     }
 
@@ -492,7 +500,7 @@ static uint32_t bl602_spi_setfrequency(FAR struct spi_dev_s *dev,
 
   priv->frequency = frequency;
 
-  spiinfo("frequency=%lu, actual=%lu\r\n", priv->frequency, priv->actual);
+  spiinfo("frequency=%lu, actual=%lu\n", priv->frequency, priv->actual);
 
   return priv->actual;
 }
@@ -519,7 +527,9 @@ static uint32_t bl602_spi_setfrequency(FAR struct spi_dev_s *dev,
 static int bl602_spi_setdelay(FAR struct spi_dev_s *dev, uint32_t startdelay,
                                 uint32_t stopdelay, uint32_t csdelay)
 {
-  spiinfo("not support\r\n");
+  spierr("SPI CS delay control not supported\n");
+  DEBUGPANIC();
+
   return -1;
 }
 #endif
@@ -558,13 +568,13 @@ bl602_spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-          modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_SCLK_POL, 0);
-          modifyreg32(BL602_SPI_CFG, 0, SPI_CFG_CR_SCLK_PH);
+          modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_SCLK_POL,
+                      SPI_CFG_CR_SCLK_PH);
           break;
 
         case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_SCLK_PH, 0);
-          modifyreg32(BL602_SPI_CFG, 0, SPI_CFG_CR_SCLK_POL);
+          modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_SCLK_PH,
+                      SPI_CFG_CR_SCLK_POL);
           break;
 
         case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
@@ -681,7 +691,9 @@ static uint8_t bl602_spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
 static int bl602_spi_cmddata(FAR struct spi_dev_s *dev,
                               uint32_t devid, bool cmd)
 {
-  spiinfo("not support\r\n");
+  spierr("SPI cmddata not supported\n");
+  DEBUGPANIC();
+
   return -1;
 }
 #endif
@@ -708,7 +720,9 @@ static int bl602_spi_hwfeatures(FAR struct spi_dev_s *dev,
 {
   /* Other H/W features are not supported */
 
-  spiinfo("not support\r\n");
+  spierr("SPI hardware specific feature not supported\n");
+  DEBUGPANIC();
+
   return -1;
 }
 #endif
@@ -738,7 +752,8 @@ static void bl602_spi_dma_exchange(FAR struct bl602_spi_priv_s *priv,
                                    FAR const void *txbuffer,
                                    FAR void *rxbuffer, uint32_t nwords)
 {
-  spiinfo("dma is not support now\r\n");
+  spierr("SPI dma not supported\n");
+  DEBUGPANIC();
 }
 
 /****************************************************************************
@@ -873,8 +888,7 @@ static void bl602_spi_poll_exchange(FAR struct bl602_spi_priv_s *priv,
 
   /* spi enable master */
 
-  modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_S_EN, 0);
-  modifyreg32(BL602_SPI_CFG, 0, SPI_CFG_CR_M_EN);
+  modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_S_EN, SPI_CFG_CR_M_EN);
 
   /* spi fifo clear  */
 
@@ -1026,7 +1040,9 @@ static void bl602_spi_recvblock(FAR struct spi_dev_s *dev,
 #ifdef CONFIG_SPI_TRIGGER
 static int bl602_spi_trigger(FAR struct spi_dev_s *dev)
 {
-  spiinfo("not support\r\n");
+  spierr("SPI trigger not supported\n");
+  DEBUGPANIC();
+
   return -ENOSYS;
 }
 #endif
@@ -1096,10 +1112,9 @@ static void bl602_spi_init(FAR struct spi_dev_s *dev)
    * cr_spi_bit_inv 0
    */
 
-  modifyreg32(BL602_SPI_CFG, 0, SPI_CFG_CR_DEG_EN);
-  modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_M_CONT_EN, 0);
-  modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_BYTE_INV, 0);
-  modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_BIT_INV, 0);
+  modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_M_CONT_EN
+              | SPI_CFG_CR_BYTE_INV | SPI_CFG_CR_BIT_INV,
+              SPI_CFG_CR_DEG_EN);
 
   /* disable rx ignore */
 
@@ -1111,7 +1126,7 @@ static void bl602_spi_init(FAR struct spi_dev_s *dev)
 
   /* spi fifo clear */
 
-  modifyreg32(BL602_SPI_CFG, SPI_FIFO_CFG_0_RX_CLR
+  modifyreg32(BL602_SPI_FIFO_CFG_0, SPI_FIFO_CFG_0_RX_CLR
               | SPI_FIFO_CFG_0_TX_CLR, 0);
 }
 
@@ -1177,7 +1192,7 @@ FAR struct spi_dev_s *bl602_spibus_initialize(int port)
 
   flags = enter_critical_section();
 
-  if ((volatile int)priv->refs != 0)
+  if (priv->refs != 0)
     {
       leave_critical_section(flags);
 
