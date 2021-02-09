@@ -30,7 +30,11 @@
 #include <sys/types.h>
 #include <stdint.h>
 
-#ifdef CONFIG_SPINLOCK
+#ifndef CONFIG_SPINLOCK
+typedef struct
+{
+} spinlock_t;
+#else
 
 /* The architecture specific spinlock.h header file must also provide the
  * following:
