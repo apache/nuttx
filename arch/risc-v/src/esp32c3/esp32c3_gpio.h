@@ -34,6 +34,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define MATRIX_DETACH_OUT_SIG     0x100  /* Detach an OUTPUT signal */
+#define MATRIX_DETACH_IN_LOW_PIN  0x30   /* Detach non-inverted INPUT signal */
+#define MATRIX_DETACH_IN_LOW_HIGH 0x38   /* Detach inverted INPUT signal */
+
 /* Bit-encoded input to esp32c3_configgpio() ********************************/
 
 /* Encoded pin attributes used with esp32c3_configgpio()
@@ -149,8 +153,8 @@ bool esp32c3_gpioread(int pin);
  * Description:
  *   Set gpio input to a signal
  *   NOTE: one gpio can input to several signals
- *   If gpio == 0x30, cancel input to the signal, input 0 to signal
- *   If gpio == 0x38, cancel input to the signal, input 1 to signal
+ *   If signal_idx == 0x30, cancel input to the signal, input 0 to signal
+ *   If signal_idx == 0x38, cancel input to the signal, input 1 to signal
  *
  ****************************************************************************/
 

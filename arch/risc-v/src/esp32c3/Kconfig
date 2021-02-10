@@ -225,4 +225,33 @@ config ESP32C3_RWDT
 
 endmenu
 
+menu "UART configuration"
+	depends on ESP32C3_UART
+
+if ESP32C3_UART0
+
+config ESP32C3_UART0_TXPIN
+	int "UART0 TX Pin"
+	default 21
+
+config ESP32C3_UART0_RXPIN
+	int "UART0 RX Pin"
+	default 20
+
+endif # ESP32C3_UART0
+
+if ESP32C3_UART1
+
+config ESP32C3_UART1_TXPIN
+	int "UART1 TX Pin"
+	default 18
+
+config ESP32C3_UART1_RXPIN
+	int "UART1 RX Pin"
+	default 19
+
+endif # ESP32C3_UART1
+
+endmenu
+
 endif # ARCH_CHIP_ESP32C3
