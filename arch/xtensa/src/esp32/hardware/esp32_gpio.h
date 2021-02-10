@@ -37,6 +37,8 @@
  * Pre-preprocessor Definitions
  ****************************************************************************/
 
+#define GPIO_PIN_COUNT          39
+
 #define GPIO_BT_SELECT_REG          (DR_REG_GPIO_BASE + 0x0000)
 
 /* GPIO_BT_SEL : R/W ;bitpos:[31:0] ;default: x ; */

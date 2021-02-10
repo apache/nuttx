@@ -40,6 +40,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define MATRIX_DETACH_OUT_SIG     0x100  /* Detach an OUTPUT signal */
+#define MATRIX_DETACH_IN_LOW_PIN  0x30   /* Detach non-inverted INPUT signal */
+#define MATRIX_DETACH_IN_LOW_HIGH 0x38   /* Detach inverted INPUT signal */
+
 /* Bit-encoded input to esp32_configgpio() **********************************/
 
 /* Encoded pin attributes used with esp32_configgpio()
@@ -200,6 +204,33 @@ void esp32_gpioirqdisable(int irq);
 #else
 #  define esp32_gpioirqdisable(irq)
 #endif
+
+/****************************************************************************
+ * Name: esp32_gpio_matrix_in
+ *
+ * Description:
+ *   Set gpio input to a signal
+ *   NOTE: one gpio can input to several signals
+ *   If gpio == 0x30, cancel input to the signal, input 0 to signal
+ *   If gpio == 0x38, cancel input to the signal, input 1 to signal,
+ *   for I2C pad
+ *
+ ****************************************************************************/
+
+void esp32_gpio_matrix_in(uint32_t gpio, uint32_t signal_idx, bool inv);
+
+/****************************************************************************
+ * Name: esp32_gpio_matrix_out
+ *
+ * Description:
+ *   Set signal output to gpio
+ *   NOTE: one signal can output to several gpios
+ *   If signal_idx == 0x100, cancel output put to the gpio
+ *
+ ****************************************************************************/
+
+void esp32_gpio_matrix_out(uint32_t gpio, uint32_t signal_idx, bool out_inv,
+                           bool oen_inv);
 
 #ifdef __cplusplus
 }

@@ -40,8 +40,6 @@
 #include "hardware/esp32_rtccntl.h"
 #include "hardware/esp32_gpio_sigmap.h"
 
-#include "rom/esp32_gpio.h"
-#include "rom/esp32_gpio.h"
 #include "rom/esp32_efuse.h"
 #include "rom/esp32_spiflash.h"
 #include "hardware/efuse_reg.h"
@@ -935,12 +933,12 @@ psram_2t_mode_enable(psram_spi_num_t spi_num)
    */
 
   GPIO_OUTPUT_SET(CONFIG_D0WD_PSRAM_CS_IO, 1);
-  gpio_matrix_out(CONFIG_D0WD_PSRAM_CS_IO, SIG_GPIO_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_out(CONFIG_D0WD_PSRAM_CS_IO, SIG_GPIO_OUT_IDX, 0, 0);
 
-  gpio_matrix_out(PSRAM_SPID_SD1_IO, SPIQ_OUT_IDX, 0, 0);
-  gpio_matrix_in(PSRAM_SPID_SD1_IO, SPIQ_IN_IDX, 0);
-  gpio_matrix_out(PSRAM_SPIQ_SD0_IO, SPID_OUT_IDX, 0, 0);
-  gpio_matrix_in(PSRAM_SPIQ_SD0_IO, SPID_IN_IDX, 0);
+  esp32_gpio_matrix_out(PSRAM_SPID_SD1_IO, SPIQ_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_in(PSRAM_SPID_SD1_IO, SPIQ_IN_IDX, 0);
+  esp32_gpio_matrix_out(PSRAM_SPIQ_SD0_IO, SPID_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_in(PSRAM_SPIQ_SD0_IO, SPID_IN_IDX, 0);
 
   uint32_t w_data_2t[4] =
                           {
@@ -957,12 +955,12 @@ psram_2t_mode_enable(psram_spi_num_t spi_num)
   psram_cmd_recv_start(spi_num, NULL, 0, PSRAM_CMD_SPI);
   psram_cmd_end(spi_num);
 
-  gpio_matrix_out(PSRAM_SPIQ_SD0_IO, SPIQ_OUT_IDX, 0, 0);
-  gpio_matrix_in(PSRAM_SPIQ_SD0_IO, SPIQ_IN_IDX, 0);
-  gpio_matrix_out(PSRAM_SPID_SD1_IO, SPID_OUT_IDX, 0, 0);
-  gpio_matrix_in(PSRAM_SPID_SD1_IO, SPID_IN_IDX, 0);
+  esp32_gpio_matrix_out(PSRAM_SPIQ_SD0_IO, SPIQ_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_in(PSRAM_SPIQ_SD0_IO, SPIQ_IN_IDX, 0);
+  esp32_gpio_matrix_out(PSRAM_SPID_SD1_IO, SPID_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_in(PSRAM_SPID_SD1_IO, SPID_IN_IDX, 0);
 
-  gpio_matrix_out(CONFIG_D0WD_PSRAM_CS_IO, SPICS1_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_out(CONFIG_D0WD_PSRAM_CS_IO, SPICS1_OUT_IDX, 0, 0);
 
   /* setp4: send cmd 0x5f
    *        send one more bit clock after send cmd
@@ -1194,16 +1192,16 @@ static void IRAM_ATTR psram_gpio_config(psram_io_t *psram_io,
    * version.
    */
 
-  gpio_matrix_out(psram_io->flash_cs_io, SPICS0_OUT_IDX, 0, 0);
-  gpio_matrix_out(psram_io->psram_cs_io, SPICS1_OUT_IDX, 0, 0);
-  gpio_matrix_out(psram_io->psram_spiq_sd0_io, SPIQ_OUT_IDX, 0, 0);
-  gpio_matrix_in(psram_io->psram_spiq_sd0_io, SPIQ_IN_IDX, 0);
-  gpio_matrix_out(psram_io->psram_spid_sd1_io, SPID_OUT_IDX, 0, 0);
-  gpio_matrix_in(psram_io->psram_spid_sd1_io, SPID_IN_IDX, 0);
-  gpio_matrix_out(psram_io->psram_spiwp_sd3_io, SPIWP_OUT_IDX, 0, 0);
-  gpio_matrix_in(psram_io->psram_spiwp_sd3_io, SPIWP_IN_IDX, 0);
-  gpio_matrix_out(psram_io->psram_spihd_sd2_io, SPIHD_OUT_IDX, 0, 0);
-  gpio_matrix_in(psram_io->psram_spihd_sd2_io, SPIHD_IN_IDX, 0);
+  esp32_gpio_matrix_out(psram_io->flash_cs_io, SPICS0_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_out(psram_io->psram_cs_io, SPICS1_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_out(psram_io->psram_spiq_sd0_io, SPIQ_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_in(psram_io->psram_spiq_sd0_io, SPIQ_IN_IDX, 0);
+  esp32_gpio_matrix_out(psram_io->psram_spid_sd1_io, SPID_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_in(psram_io->psram_spid_sd1_io, SPID_IN_IDX, 0);
+  esp32_gpio_matrix_out(psram_io->psram_spiwp_sd3_io, SPIWP_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_in(psram_io->psram_spiwp_sd3_io, SPIWP_IN_IDX, 0);
+  esp32_gpio_matrix_out(psram_io->psram_spihd_sd2_io, SPIHD_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_in(psram_io->psram_spihd_sd2_io, SPIHD_IN_IDX, 0);
 
   /* select pin function gpio */
 
@@ -1419,7 +1417,7 @@ psram_enable(int mode, int vaddrmode)   /* psram init */
   switch (mode)
     {
       case PSRAM_CACHE_F80M_S80M:
-        gpio_matrix_out(psram_io.psram_clk_io, SPICLK_OUT_IDX, 0, 0);
+        esp32_gpio_matrix_out(psram_io.psram_clk_io, SPICLK_OUT_IDX, 0, 0);
         break;
       case PSRAM_CACHE_F80M_S40M:
       case PSRAM_CACHE_F40M_S40M:
@@ -1438,16 +1436,22 @@ psram_enable(int mode, int vaddrmode)   /* psram init */
              */
 
             minfo("clk_mode == PSRAM_CLK_MODE_DCLK\n");
-            gpio_matrix_out(PSRAM_INTERNAL_IO_28,  SPICLK_OUT_IDX, 0, 0);
-            gpio_matrix_in(PSRAM_INTERNAL_IO_28,   SIG_IN_FUNC224_IDX, 0);
-            gpio_matrix_out(PSRAM_INTERNAL_IO_29,  SIG_IN_FUNC224_IDX, 0, 0);
-            gpio_matrix_in(PSRAM_INTERNAL_IO_29,   SIG_IN_FUNC225_IDX, 0);
-            gpio_matrix_out(psram_io.psram_clk_io, SIG_IN_FUNC225_IDX, 0, 0);
+            esp32_gpio_matrix_out(PSRAM_INTERNAL_IO_28,
+                                  SPICLK_OUT_IDX, 0, 0);
+            esp32_gpio_matrix_in(PSRAM_INTERNAL_IO_28,
+                                 SIG_IN_FUNC224_IDX, 0);
+            esp32_gpio_matrix_out(PSRAM_INTERNAL_IO_29,
+                                  SIG_IN_FUNC224_IDX, 0, 0);
+            esp32_gpio_matrix_in(PSRAM_INTERNAL_IO_29,
+                                 SIG_IN_FUNC225_IDX, 0);
+            esp32_gpio_matrix_out(psram_io.psram_clk_io,
+                                  SIG_IN_FUNC225_IDX, 0, 0);
           }
         else
           {
             minfo("clk_io == OUT_IDX\n");
-            gpio_matrix_out(psram_io.psram_clk_io, SPICLK_OUT_IDX, 0, 0);
+            esp32_gpio_matrix_out(psram_io.psram_clk_io,
+                                  SPICLK_OUT_IDX, 0, 0);
           }
         break;
     }
@@ -1489,7 +1493,8 @@ psram_enable(int mode, int vaddrmode)   /* psram init */
            * ourselves
            */
 
-          gpio_matrix_out(psram_io.psram_clk_io, PSRAM_CLK_SIGNAL, 0, 0);
+          esp32_gpio_matrix_out(psram_io.psram_clk_io,
+                                PSRAM_CLK_SIGNAL, 0, 0);
 
           /* use spi3 clock,but use spi1 data/cs wires
            * We get a solid 80MHz clock from SPI3 by setting it up, starting
@@ -1519,9 +1524,9 @@ psram_enable(int mode, int vaddrmode)   /* psram init */
        */
 
       s_clk_mode = PSRAM_CLK_MODE_NORM;
-      gpio_matrix_out(PSRAM_INTERNAL_IO_28, SIG_GPIO_OUT_IDX, 0, 0);
-      gpio_matrix_out(PSRAM_INTERNAL_IO_29, SIG_GPIO_OUT_IDX, 0, 0);
-      gpio_matrix_out(psram_io.psram_clk_io, SPICLK_OUT_IDX, 0, 0);
+      esp32_gpio_matrix_out(PSRAM_INTERNAL_IO_28, SIG_GPIO_OUT_IDX, 0, 0);
+      esp32_gpio_matrix_out(PSRAM_INTERNAL_IO_29, SIG_GPIO_OUT_IDX, 0, 0);
+      esp32_gpio_matrix_out(psram_io.psram_clk_io, SPICLK_OUT_IDX, 0, 0);
     }
 
   /* Update cs timing according to psram driving method. */
