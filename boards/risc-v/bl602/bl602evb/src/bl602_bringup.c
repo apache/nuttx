@@ -45,6 +45,17 @@
 #include <bl602_spiflash.h>
 #endif
 
+#ifdef CONFIG_FS_ROMFS
+#include <nuttx/drivers/ramdisk.h>
+
+#define BL602_XIP_START_ADDR    (0x23000000)
+#define BL602_XIP_OFFSET        (*(volatile uint32_t *)0x4000B434)
+#define BL602_ROMFS_FLASH_ADDR  (0x1C0000)
+#define BL602_ROMFS_XIP_ADDR    (BL602_XIP_START_ADDR \
+                                 + BL602_ROMFS_FLASH_ADDR \
+                                 - BL602_XIP_OFFSET)
+#endif /* CONFIG_FS_ROMFS */
+
 #include "chip.h"
 
 /****************************************************************************
@@ -200,6 +211,32 @@ int bl602_bringup(void)
 
 #endif /* CONFIG_FS_LITTLEFS */
 #endif /* CONFIG_BL602_SPIFLASH */
+
+#ifdef CONFIG_FS_ROMFS
+  /* Create a ROM disk for the /sbin filesystem */
+
+  ret = romdisk_register(0, BL602_ROMFS_XIP_ADDR,
+                         512,
+                         512);
+  if (ret < 0)
+    {
+      _err("ERROR: romdisk_register failed: %d\n", -ret);
+    }
+  else
+    {
+      /* Mount the file system */
+
+      ret = mount("/dev/ram0",
+                  "/sbin",
+                  "romfs", MS_RDONLY, NULL);
+      if (ret < 0)
+        {
+          _err("ERROR: mount(%s,%s,romfs) failed: %d\n",
+               "dev/ram0",
+               "/sbin", errno);
+        }
+    }
+#endif /* CONFIG_FS_ROMFS */
 
   return ret;
 }

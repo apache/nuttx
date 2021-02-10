@@ -19,11 +19,13 @@
 ############################################################################
 
 ifeq ($(CONFIG_RISCV_MEMCPY),y)
-
 ASRCS += arch_memcpy.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
+CSRCS += arch_elf.c
+endif
 
 DEPPATH += --dep-path machine/risc-v/rv32
 VPATH += :machine/risc-v/rv32
-
-endif
 
