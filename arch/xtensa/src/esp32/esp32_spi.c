@@ -56,7 +56,6 @@
 #include "hardware/esp32_spi.h"
 #include "hardware/esp32_soc.h"
 #include "hardware/esp32_pinmap.h"
-#include "rom/esp32_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1289,39 +1288,39 @@ static void esp32_spi_init(FAR struct spi_dev_s *dev)
 
 #ifdef CONFIG_ESP32_SPI_SWCS
   esp32_configgpio(config->cs_pin, OUTPUT);
-  gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp32_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
 #endif
 
   if (esp32_spi_iomux(priv))
     {
 #ifndef CONFIG_ESP32_SPI_SWCS
       esp32_configgpio(config->cs_pin, OUTPUT_FUNCTION_2);
-      gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
+      esp32_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
 #endif
       esp32_configgpio(config->mosi_pin, OUTPUT_FUNCTION_2);
-      gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
+      esp32_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
 
       esp32_configgpio(config->miso_pin, INPUT_FUNCTION_2 | PULLUP);
-      gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
+      esp32_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
 
       esp32_configgpio(config->clk_pin, OUTPUT_FUNCTION_2);
-      gpio_matrix_out(config->clk_pin, SIG_GPIO_OUT_IDX, 0, 0);
+      esp32_gpio_matrix_out(config->clk_pin, SIG_GPIO_OUT_IDX, 0, 0);
     }
   else
     {
 #ifndef CONFIG_ESP32_SPI_SWCS
       esp32_configgpio(config->cs_pin, OUTPUT_FUNCTION_3);
-      gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
+      esp32_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
 #endif
 
       esp32_configgpio(config->mosi_pin, OUTPUT_FUNCTION_3);
-      gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
+      esp32_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
 
       esp32_configgpio(config->miso_pin, INPUT_FUNCTION_3 | PULLUP);
-      gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
+      esp32_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
 
       esp32_configgpio(config->clk_pin, OUTPUT_FUNCTION_3);
-      gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
+      esp32_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
     }
 
   modifyreg32(DPORT_PERIP_CLK_EN_REG, 0, config->clk_bit);

@@ -436,3 +436,77 @@ void esp32_gpioirqdisable(int irq)
   up_enable_irq(g_gpio_cpuint);
 }
 #endif
+
+/****************************************************************************
+ * Name: esp32_gpio_matrix_in
+ *
+ * Description:
+ *   Set gpio input to a signal
+ *   NOTE: one gpio can input to several signals
+ *   If gpio == 0x30, cancel input to the signal, input 0 to signal
+ *   If gpio == 0x38, cancel input to the signal, input 1 to signal,
+ *   for I2C pad
+ *
+ ****************************************************************************/
+
+void esp32_gpio_matrix_in(uint32_t gpio, uint32_t signal_idx, bool inv)
+{
+  uint32_t regaddr = GPIO_FUNC0_IN_SEL_CFG_REG + (signal_idx * 4);
+  uint32_t regval = (gpio << GPIO_FUNC0_IN_SEL_S);
+
+  if (inv)
+    {
+      regval |= GPIO_FUNC0_IN_INV_SEL;
+    }
+
+  if (gpio != 0x34)
+    {
+      regval |= GPIO_SIG0_IN_SEL;
+    }
+
+  putreg32(regval, regaddr);
+}
+
+/****************************************************************************
+ * Name: esp32_gpio_matrix_out
+ *
+ * Description:
+ *   Set signal output to gpio
+ *   NOTE: one signal can output to several gpios
+ *   If signal_idx == 0x100, cancel output put to the gpio
+ *
+ ****************************************************************************/
+
+void esp32_gpio_matrix_out(uint32_t gpio, uint32_t signal_idx, bool out_inv,
+                           bool oen_inv)
+{
+  uint32_t regaddr = GPIO_FUNC0_OUT_SEL_CFG_REG + (gpio * 4);
+  uint32_t regval = signal_idx << GPIO_FUNC0_OUT_SEL_S;
+
+  if (gpio >= GPIO_PIN_COUNT)
+    {
+      return;
+    }
+
+  if (gpio < 32)
+    {
+      putreg32((1ul << gpio), GPIO_ENABLE_W1TS_REG);
+    }
+  else
+    {
+      putreg32((1ul << (gpio - 32)), GPIO_ENABLE1_W1TS_REG);
+    }
+
+  if (out_inv)
+    {
+      regval |= GPIO_FUNC0_OUT_INV_SEL;
+    }
+
+  if (oen_inv)
+    {
+      regval |= GPIO_FUNC0_OEN_INV_SEL;
+    }
+
+  putreg32(regval, regaddr);
+}
+

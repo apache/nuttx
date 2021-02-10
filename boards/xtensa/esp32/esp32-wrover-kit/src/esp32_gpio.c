@@ -37,7 +37,6 @@
 
 #include "esp32-wrover-kit.h"
 #include "esp32_gpio.h"
-#include "rom/esp32_gpio.h"
 #include "hardware/esp32_gpio_sigmap.h"
 
 #if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
@@ -290,7 +289,7 @@ int esp32_gpio_init(void)
 
       /* Configure the pins that will be used as output */
 
-      gpio_matrix_out(g_gpiooutputs[i], SIG_GPIO_OUT_IDX, 0, 0);
+      esp32_gpio_matrix_out(g_gpiooutputs[i], SIG_GPIO_OUT_IDX, 0, 0);
       esp32_configgpio(g_gpiooutputs[i], OUTPUT_FUNCTION_3);
       esp32_gpiowrite(g_gpiooutputs[i], 0);
 
