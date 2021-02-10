@@ -212,6 +212,7 @@ int board_app_initialize(uintptr_t arg)
 
 #ifdef CONFIG_STM32L4_I2C3
   /* Get the I2C lower half instance */
+
   i2c3 = stm32l4_i2cbus_initialize(3);
   if (i2c3 == NULL)
     {
