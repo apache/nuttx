@@ -71,7 +71,7 @@
  ****************************************************************************/
 
 #undef HAVE_I2C_DRIVER
-#if defined(CONFIG_STM32L4_I2C1) && defined(CONFIG_I2C_DRIVER)
+#if (defined(CONFIG_STM32L4_I2C1) || defined(CONFIG_STM32L4_I2C3)) && defined(CONFIG_I2C_DRIVER)
 #  define HAVE_I2C_DRIVER 1
 #endif
 
@@ -190,11 +190,11 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef HAVE_I2C_DRIVER
+#ifdef CONFIG_STM32L4_I2C1
   /* Get the I2C lower half instance */
 
-  i2c = stm32l4_i2cbus_initialize(1);
-  if (i2c == NULL)
+  i2c1 = stm32l4_i2cbus_initialize(1);
+  if (i2c1 == NULL)
     {
       i2cerr("ERROR: Initialize I2C1: %d\n", ret);
     }
@@ -202,10 +202,29 @@ int board_app_initialize(uintptr_t arg)
     {
       /* Register the I2C character driver */
 
-      ret = i2c_register(i2c, 1);
+      ret = i2c_register(i2c1, 1);
       if (ret < 0)
         {
           i2cerr("ERROR: Failed to register I2C1 device: %d\n", ret);
+        }
+    }
+#endif
+
+#ifdef CONFIG_STM32L4_I2C3
+  /* Get the I2C lower half instance */
+  i2c3 = stm32l4_i2cbus_initialize(3);
+  if (i2c3 == NULL)
+    {
+      i2cerr("ERROR: Initialize I2C3: %d\n", ret);
+    }
+  else
+    {
+      /* Register the I2C character driver */
+
+      ret = i2c_register(i2c3, 3);
+      if (ret < 0)
+        {
+          i2cerr("ERROR: Failed to register I2C3 device: %d\n", ret);
         }
     }
 #endif
