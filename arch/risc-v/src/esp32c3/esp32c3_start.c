@@ -32,13 +32,14 @@
 #include "chip.h"
 #include "esp32c3.h"
 #include "esp32c3_irq.h"
+#include "esp32c3_lowputc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) ets_printf("%c", c)
+#  define showprogress(c) up_lowputc(c)
 #else
 #  define showprogress(c)
 #endif
@@ -65,6 +66,10 @@ void __esp32c3_start(void)
 {
   uint32_t *dest;
 
+  /* Configure the UART so we can get debug output */
+
+  esp32c3_lowsetup();
+
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
@@ -81,8 +86,6 @@ void __esp32c3_start(void)
   /* Call nx_start() */
 
   nx_start();
-
-  /* Shouldn't get here */
 
   for (; ; );
 }

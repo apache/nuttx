@@ -75,6 +75,16 @@ config ESP32C3_ESP32C3XXX
 
 menu "ESP32-C3 Peripheral Support"
 
+config ESP32C3_UART0
+	bool "UART0"
+	default y
+	select UART0_SERIALDRIVER
+
+config ESP32C3_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+
 endmenu
 
 endif # ARCH_CHIP_ESP32C3
