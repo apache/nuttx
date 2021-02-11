@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/esp32c3_rom.h
+ * arch/risc-v/src/esp32c3/esp32c3_config.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,19 +18,46 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_ROM_H
-#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_ROM_H
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_CONFIG_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_CONFIG_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <stdint.h>
+#include <nuttx/config.h>
+#include <arch/chip/chip.h>
+#include <arch/board/board.h>
 
 /****************************************************************************
- * Name: ets_printf
+ * Pre-processor Definitions
  ****************************************************************************/
 
-int ets_printf(const char *fmt, ...);
+/* UARTs ********************************************************************/
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_ROM_H */
+/* Are any UARTs enabled? */
+
+#undef HAVE_UART_DEVICE
+#if defined(CONFIG_ESP32C3_UART0) || defined(CONFIG_ESP32C3_UART1)
+#  define HAVE_UART_DEVICE 1 /* Flag to indicate a UART has been selected */
+#endif
+
+/* Serial Console ***********************************************************/
+
+/* Is there a serial console?  There should be no more than one defined.  It
+ * could be on any UARTn. n E {0,1}
+ */
+
+#undef HAVE_SERIAL_CONSOLE
+#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_ESP32C3_UART0)
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_ESP32C3_UART1)
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#else
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#endif
+
+#endif /* __ARCH_XTENSA_SRC_ESP32C3_ESP32C3_CONFIG_H */

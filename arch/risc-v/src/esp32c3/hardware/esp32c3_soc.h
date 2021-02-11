@@ -73,6 +73,8 @@
 #define DR_REG_APB_SARADC_BASE                  0x60040000
 #define DR_REG_AES_XTS_BASE                     0x600CC000
 
+/* Registers Operation */
+
 #define REG_UHCI_BASE(i)      (DR_REG_UHCI0_BASE - (i) * 0x8000)
 #define REG_UART_BASE( i )    (DR_REG_UART_BASE + (i) * 0x10000 + \
                                ( (i) > 1 ? 0xe000 : 0 ) )
