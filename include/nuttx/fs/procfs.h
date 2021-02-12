@@ -140,6 +140,17 @@ struct procfs_dir_priv_s
   FAR const struct procfs_entry_s *procfsentry; /* Pointer to procfs handler entry */
 };
 
+/* An entry for procfs_register_meminfo */
+
+struct procfs_meminfo_entry_s
+{
+  FAR const char *name;
+  CODE void (*mallinfo)(FAR void *user_data, FAR struct mallinfo *);
+  FAR void *user_data;
+
+  struct procfs_meminfo_entry_s *next;
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -219,6 +230,19 @@ size_t procfs_memcpy(FAR const char *src, size_t srclen,
 #ifdef CONFIG_FS_PROCFS_REGISTER
 int procfs_register(FAR const struct procfs_entry_s *entry);
 #endif
+
+/****************************************************************************
+ * Name: procfs_register_meminfo
+ *
+ * Description:
+ *   Add a new meminfo entry to the procfs file system.
+ *
+ * Input Parameters:
+ *   entry - Describes the entry to be registered.
+ *
+ ****************************************************************************/
+
+void procfs_register_meminfo(FAR struct procfs_meminfo_entry_s *entry);
 
 #undef EXTERN
 #ifdef __cplusplus

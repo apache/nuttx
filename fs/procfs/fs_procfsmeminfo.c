@@ -122,6 +122,8 @@ const struct procfs_operations meminfo_operations =
   meminfo_stat    /* stat */
 };
 
+FAR struct procfs_meminfo_entry_s *g_procfs_meminfo = NULL;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -290,6 +292,33 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
   totalsize = copysize;
 
   /* Followed by information about the memory resources */
+
+  FAR const struct procfs_meminfo_entry_s *entry;
+
+  for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
+    {
+      if (totalsize < buflen)
+        {
+          struct mallinfo minfo;
+
+          buffer    += copysize;
+          buflen    -= copysize;
+
+          /* Show heap information */
+
+          entry->mallinfo(entry->user_data, &minfo);
+          linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
+                                "%4s:  %11lu%11lu%11lu%11lu\n",
+                                entry->name,
+                                (unsigned long)minfo.arena,
+                                (unsigned long)minfo.uordblks,
+                                (unsigned long)minfo.fordblks,
+                                (unsigned long)minfo.mxordblk);
+          copysize   = procfs_memcpy(procfile->line, linesize, buffer,
+                                     buflen, &offset);
+          totalsize += copysize;
+        }
+    }
 
 #ifdef CONFIG_MM_KERNEL_HEAP
   if (totalsize < buflen)
@@ -461,5 +490,22 @@ static int meminfo_stat(FAR const char *relpath, FAR struct stat *buf)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: procfs_register_meminfo
+ *
+ * Description:
+ *   Add a new meminfo entry to the procfs file system.
+ *
+ * Input Parameters:
+ *   entry - Describes the entry to be registered.
+ *
+ ****************************************************************************/
+
+void procfs_register_meminfo(FAR struct procfs_meminfo_entry_s *entry)
+{
+  entry->next = g_procfs_meminfo;
+  g_procfs_meminfo = entry;
+}
 
 #endif /* !CONFIG_FS_PROCFS_EXCLUDE_MEMINFO */
