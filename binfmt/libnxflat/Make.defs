@@ -22,13 +22,13 @@ ifeq ($(CONFIG_NXFLAT),y)
 
 # NXFLAT application interfaces
 
-BINFMT_CSRCS += nxflat.c
+CSRCS += nxflat.c
 
 # NXFLAT library
 
-BINFMT_CSRCS += libnxflat_init.c libnxflat_uninit.c libnxflat_addrenv.c
-BINFMT_CSRCS += libnxflat_load.c libnxflat_unload.c libnxflat_verify.c
-BINFMT_CSRCS += libnxflat_read.c libnxflat_bind.c
+CSRCS += libnxflat_init.c libnxflat_uninit.c libnxflat_addrenv.c
+CSRCS += libnxflat_load.c libnxflat_unload.c libnxflat_verify.c
+CSRCS += libnxflat_read.c libnxflat_bind.c
 
 # Hook the libnxflat subdirectory into the build
 
