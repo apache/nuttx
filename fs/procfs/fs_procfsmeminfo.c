@@ -319,29 +319,6 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
         }
     }
 
-#ifdef CONFIG_MM_KERNEL_HEAP
-  if (totalsize < buflen)
-    {
-      struct mallinfo mem;
-
-      buffer    += copysize;
-      buflen    -= copysize;
-
-      /* Show kernel heap information */
-
-      mem        = kmm_mallinfo();
-      linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
-                            "Kmem:  %11lu%11lu%11lu%11lu\n",
-                            (unsigned long)mem.arena,
-                            (unsigned long)mem.uordblks,
-                            (unsigned long)mem.fordblks,
-                            (unsigned long)mem.mxordblk);
-      copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
-                                 &offset);
-      totalsize += copysize;
-    }
-#endif
-
 #ifdef CONFIG_MM_PGALLOC
   if (totalsize < buflen)
     {
