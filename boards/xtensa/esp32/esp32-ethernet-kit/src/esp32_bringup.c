@@ -40,8 +40,6 @@
 #include <sys/errno.h>
 #include <nuttx/himem/himem.h>
 
-#include "esp32_procfs_imm.h"
-
 #include "esp32_wlan.h"
 #include "esp32_spiflash.h"
 #include "esp32_partition.h"
@@ -117,21 +115,6 @@ static int esp32_init_wifi_storage(void)
 int esp32_bringup(void)
 {
   int ret;
-
-#ifdef CONFIG_XTENSA_IMEM_PROCFS
-  /* Register the internal memory procfs entry.
-   * This must be done before the procfs is mounted.
-   */
-
-  ret = imm_procfs_register();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to register internal memory to PROCFS: %d\n",
-             ret);
-    }
-
-#endif
 
 #if defined(CONFIG_ESP32_SPIRAM) && \
     defined(CONFIG_ESP32_SPIRAM_BANKSWITCH_ENABLE)

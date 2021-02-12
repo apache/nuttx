@@ -133,11 +133,6 @@ config XTENSA_IMEM_REGION_SIZE
 	depends on XTENSA_USE_SEPARATE_IMEM
 	default 0x18000
 
-config XTENSA_IMEM_PROCFS
-	bool "Internal memory PROCFS support"
-	default n
-	depends on XTENSA_USE_SEPARATE_IMEM && !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
-
 source arch/xtensa/src/lx6/Kconfig
 if ARCH_CHIP_ESP32
 source arch/xtensa/src/esp32/Kconfig
