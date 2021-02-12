@@ -860,7 +860,8 @@ static void stm32_stdclockconfig(void)
 
       /* Wait until the PLL source is used as the system clock source */
 
-      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL)
+      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
+             RCC_CFGR_SWS_PLL)
         {
         }
 

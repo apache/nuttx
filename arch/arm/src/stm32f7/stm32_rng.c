@@ -211,9 +211,10 @@ static int stm32_rnginterrupt(int irq, void *context, FAR void *arg)
   /* As required by the FIPS PUB (Federal Information Processing Standard
    * Publication) 140-2, the first random number generated after setting the
    * RNGEN bit should not be used, but saved for comparison with the next
-   * generated random number. Each subsequent generated random number has to be
-   * compared with the previously generated number. The test fails if any two
-   * compared numbers are equal (continuous random number generator test).
+   * generated random number. Each subsequent generated random number has to
+   * be compared with the previously generated number. The test fails if any
+   * two compared numbers are equal (continuous random number generator
+   * test).
    */
 
   if (g_rngdev.rd_first)
