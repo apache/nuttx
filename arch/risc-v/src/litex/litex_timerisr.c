@@ -61,54 +61,24 @@ static bool _b_tick_started = false;
 
 static inline uint64_t litex_clint_time_read(void)
 {
-  uint64_t r = getreg8(LITEX_CLINT_MTIME);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x04);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x08);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x0c);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x10);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x14);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x18);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x1c);
+  uint64_t r = getreg32(LITEX_CLINT_MTIME);
+  r <<= 32;
+  r |= getreg32(LITEX_CLINT_MTIME + 0x04);
   return r;
 }
 
 static inline uint64_t litex_clint_time_cmp_read(void)
 {
-  uint64_t r = getreg8(LITEX_CLINT_MTIMECMP);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x04);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x08);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x0c);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x10);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x14);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x18);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x1c);
+  uint64_t r = getreg32(LITEX_CLINT_MTIMECMP);
+  r <<= 32;
+  r |= getreg32(LITEX_CLINT_MTIMECMP + 0x04);
   return r;
 }
 
 static inline void litex_clint_time_cmp_write(uint64_t v)
 {
-  putreg8(v >> 56, LITEX_CLINT_MTIMECMP);
-  putreg8(v >> 48, LITEX_CLINT_MTIMECMP + 0x04);
-  putreg8(v >> 40, LITEX_CLINT_MTIMECMP + 0x08);
-  putreg8(v >> 32, LITEX_CLINT_MTIMECMP + 0x0c);
-  putreg8(v >> 24, LITEX_CLINT_MTIMECMP + 0x10);
-  putreg8(v >> 16, LITEX_CLINT_MTIMECMP + 0x14);
-  putreg8(v >> 8, LITEX_CLINT_MTIMECMP + 0x18);
-  putreg8(v, LITEX_CLINT_MTIMECMP + 0x1c);
+  putreg32(v >> 32, LITEX_CLINT_MTIMECMP);
+  putreg32(v, LITEX_CLINT_MTIMECMP + 0x04);
 }
 
 /* helper function to set/clear csr */
@@ -141,7 +111,7 @@ static void litex_reload_mtimecmp(void)
   if (!_b_tick_started)
     {
       _b_tick_started = true;
-      putreg8(1, LITEX_CLINT_LATCH);
+      putreg32(1, LITEX_CLINT_LATCH);
       current = litex_clint_time_read();
     }
   else
@@ -152,7 +122,7 @@ static void litex_reload_mtimecmp(void)
   next = current + TICK_COUNT;
 
   litex_clint_time_cmp_write(next);
-  putreg8(1, LITEX_CLINT_LATCH);
+  putreg32(1, LITEX_CLINT_LATCH);
   csr_set(mie, MIE_MTIE);
   csr_clear(mip, MIP_MTIP);
 
