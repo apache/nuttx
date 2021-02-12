@@ -495,7 +495,8 @@ define CLEAN
 endef
 else
 define CLEAN
-	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(OBJS) $(BIN)
+	$(call DELFILE, *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(OBJS) $(BIN))
+	$(call DELFILE, $(wildcard $(foreach obj, $(OBJS), $(addsuffix /$(obj), $(subst :, ,$(VPATH))))))
 endef
 endif
 
