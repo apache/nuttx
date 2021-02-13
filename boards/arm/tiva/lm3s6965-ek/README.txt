@@ -414,6 +414,31 @@ Where <subdir> is one of the following:
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
        CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
 
+  qemu-flat:
+    An example config with FLAT memory model to run on qemu.
+
+        ./tools/configure.sh lm3s6965-ek:qemu-flat
+        make
+        qemu-system-arm -semihosting \
+        -M lm3s6965evb \
+        -device loader,file=nuttx.bin,addr=0x00000000 \
+        -netdev user,id=user0 \
+        -nic user,id=user0 \
+        -serial mon:stdio -nographic
+
+  qemu-protected:
+    An example config with PROTECTED memory model to run on qemu.
+
+        ./tools/configure.sh lm3s6965-ek:qemu-protected
+        make
+        qemu-system-arm -semihosting \
+        -M lm3s6965evb \
+        -device loader,file=nuttx.bin,addr=0x00000000 \
+        -device loader,file=nuttx_user.bin,addr=0x00020000 \
+        -netdev user,id=user0 \
+        -nic user,id=user0 \
+        -serial mon:stdio -nographic
+
   tcpecho:
     This configuration builds the simple TCP echo example based on W.Richard
     Steven UNIX Programming book to ensure correct usage of the socket API.
