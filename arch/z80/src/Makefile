@@ -38,10 +38,14 @@
 include $(TOPDIR)/Make.defs
 -include chip/Make.defs
 
-# Compiler-Dependent Make:  SDCC or ZiLOG ZDS-II
+# Compiler-Dependent Make:  SDCC, Clang, or ZiLOG ZDS-II
 
 COMPILER = ${shell basename "$(CC)"}
-ifeq ($(COMPILER),sdcc)
+ifeq ($(patsubst %-clang,clang,$(COMPILER)),clang)
+
+    include Makefile.clang
+
+else ifeq ($(COMPILER),sdcc)
 
   # Check for SDCC native windows build
 

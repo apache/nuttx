@@ -218,23 +218,23 @@
 /* Byte offsets */
 
 #  define XCPT_I_OFFSET  (3*XCPT_I)      /* Offset 0: Saved 24-bit interrupt vector register */
-#    define XCPT_IF_OFFSET (2*XCPT_I+1)  /* Offset 1: Saved flags. P set if interrupts enabled */
-#    define XCPT_IA_OFFSET (2*XCPT_I+2)  /* Offset 2: Saved lower 8-bits of interrupt vector register */
+#    define XCPT_IF_OFFSET (3*XCPT_I+0)  /* Offset 0: Saved flags. P set if interrupts enabled */
+#    define XCPT_IA_OFFSET (3*XCPT_I+1)  /* Offset 1: Saved lower 8-bits of interrupt vector register */
 #  define XCPT_BC_OFFSET   (3*XCPT_BC)   /* Offset 3: Saved 24-bit BC register */
-#    define XCPT_C_OFFSET  (3*XCPT_BC+1) /* Offset 4: Saved 8-bit C register */
-#    define XCPT_B_OFFSET  (3*XCPT_BC+2) /* Offset 5: Saved 8-bit D register */
+#    define XCPT_C_OFFSET  (3*XCPT_BC+0) /* Offset 3: Saved 8-bit C register */
+#    define XCPT_B_OFFSET  (3*XCPT_BC+1) /* Offset 4: Saved 8-bit B register */
 #  define XCPT_DE_OFFSET   (3*XCPT_DE)   /* Offset 6: Saved 24-bit DE register */
-#    define XCPT_E_OFFSET  (3*XCPT_DE+1) /* Offset 7: Saved 8-bit E register */
-#    define XCPT_D_OFFSET  (3*XCPT_DE+2) /* Offset 8: Saved 8-bit D register */
+#    define XCPT_E_OFFSET  (3*XCPT_DE+0) /* Offset 6: Saved 8-bit E register */
+#    define XCPT_D_OFFSET  (3*XCPT_DE+1) /* Offset 7: Saved 8-bit D register */
 #  define XCPT_IX_OFFSET   (3*XCPT_IX)   /* Offset 9: Saved 24-bit IX register */
 #  define XCPT_IY_OFFSET   (3*XCPT_IY)   /* Offset 12: Saved 24-bit IY register */
 #  define XCPT_SP_OFFSET   (3*XCPT_SP)   /* Offset 15: Saved 24-bit SP at time of interrupt */
 #  define XCPT_HL_OFFSET   (3*XCPT_HL)   /* Offset 18: Saved 24-bit HL register */
-#    define XCPT_L_OFFSET  (3*XCPT_HL+1) /* Offset 19: Saved 8-bit L register */
-#    define XCPT_H_OFFSET  (3*XCPT_HL+2) /* Offset 20: Saved 8-bit H register */
+#    define XCPT_L_OFFSET  (3*XCPT_HL+0) /* Offset 18: Saved 8-bit L register */
+#    define XCPT_H_OFFSET  (3*XCPT_HL+1) /* Offset 19: Saved 8-bit H register */
 #  define XCPT_AF_OFFSET   (3*XCPT_AF)   /* Offset 21: Saved AF register */
-#    define XCPT_F_OFFSET  (3*XCPT_AF+1) /* Offset 22: Saved AF register */
-#    define XCPT_A_OFFSET  (3*XCPT_AF+2) /* Offset 23: Saved 8-bit A register */
+#    define XCPT_F_OFFSET  (3*XCPT_AF+0) /* Offset 21: Saved AF register */
+#    define XCPT_A_OFFSET  (3*XCPT_AF+1) /* Offset 22: Saved 8-bit A register */
 #  define XCPT_PC_OFFSET   (3*XCPT_PC)   /* Offset 24: Offset to 24-bit PC at time of interrupt */
 #  define XCPTCONTEXT_SIZE (3*XCPTCONTEXT_REGS)
 #endif

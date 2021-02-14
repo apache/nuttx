@@ -36,6 +36,9 @@ CHIP_ASRCS += ez80_saveusercontext.asm ez80_restorecontext.asm
 ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
 HEAD_ASRC = ez80_reset.asm
 CHIP_ASRCS += ez80f91_init.asm ez80f91_handlers.asm
+ifeq ($(CONFIG_EZ80_TOOLCHAIN_CLANG),y)
+chip/ez80f91_handlers.asm_AFLAGS := -include clang_handlers.inc
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_CHIP_EZ80F92),y)
@@ -83,4 +86,8 @@ ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
 ifeq ($(CONFIG_EZ80_EMAC),y)
 CHIP_CSRCS += ez80_emac.c
 endif
+endif
+
+ifeq ($(CONFIG_EZ80_TOOLCHAIN_CLANG),y)
+AFLAGS += -Ichip
 endif

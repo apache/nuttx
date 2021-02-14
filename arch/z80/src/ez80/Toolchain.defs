@@ -18,6 +18,69 @@
 #
 ############################################################################
 
+# CPU Identification
+
+ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
+  ARCHCPU    = eZ80F91
+  ARCHCPUDEF = _EZ80F91
+  ARCHFAMILY = _EZ80ACCLAIM
+else ifeq ($(CONFIG_ARCH_CHIP_EZ80F92),y)
+  ARCHCPU    = eZ80F92
+  ARCHCPUDEF = _EZ80F92
+  ARCHFAMILY = _EZ80ACCLAIM
+endif
+
+ifeq ($(CONFIG_EZ80_TOOLCHAIN_CLANG),y)
+
+# Optimization level
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHASMOPTIMIZATION =
+  ARCHOPTIMIZATION = -g
+else
+  ARCHASMOPTIMIZATION =
+  ARCHOPTIMIZATION =
+endif
+
+ifeq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -O0
+else
+  ARCHOPTIMIZATION += -Oz
+endif
+
+ARCHSTDINCLUDES = -I/Users/bje/Projects/ezpz/stdlib/include
+
+ARCHCPUFLAGS = -nostdinc -Dinterrupt="__attribute__((__interrupt__))"
+ARCHLIST = 
+ARCHWARNINGS = -Wall -Wextra -Wno-incompatible-library-redeclaration
+ARCHWARNINGS += -Wno-main-return-type -Wno-unused-parameter
+ARCHDEFINES = -D$(ARCHCPUDEF) -D"$(ARCHFAMILY)"
+ARCHINCLUDES = $(ARCHSTDINCLUDES)
+
+ARCHASMCPUFLAGS = -xassembler-with-cpp
+ARCHASMINCLUDES = -include chip/clang-compat.asm
+ARCHASMLIST =
+ARCHASMWARNINGS = -W
+
+# Tool names/paths.
+
+CROSSDEV = ez80-none-elf-
+CC = $(CROSSDEV)clang
+CPP = $(CC) -E -P -x c
+LD = $(CROSSDEV)ld
+AS = $(CROSSDEV)as
+AR = $(CROSSDEV)ar -r
+OBJCOPY= $(CROSSDEV)objcopy
+
+# File extensions
+
+ASMEXT = .asm
+OBJEXT = .o
+LIBEXT = .a
+EXEEXT = .bin
+
+else
+
 # These are the default directories where the ZDS-II toolchain is installed.
 # NOTE that short 8.3 path names are used in order to avoid spaces.  On my
 # machine I have:
@@ -76,18 +139,6 @@ else
   EZDSZILOGINCDIR := ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
 endif
 
-# CPU Identification
-
-ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
-  ARCHCPU    = eZ80F91
-  ARCHCPUDEF = _EZ80F91
-  ARCHFAMILY = _EZ80ACCLAIM!
-else ifeq ($(CONFIG_ARCH_CHIP_EZ80F92),y)
-  ARCHCPU    = eZ80F92
-  ARCHCPUDEF = _EZ80F92
-  ARCHFAMILY = _EZ80ACCLAIM!
-endif
-
 # Optimization level
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
@@ -119,3 +170,5 @@ ASMEXT = .asm
 OBJEXT = .obj
 LIBEXT = .lib
 EXEEXT = .lod
+
+endif

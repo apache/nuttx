@@ -252,6 +252,25 @@
 #   define CONFIG_PTR_IS_NOT_INT 1
 # endif
 
+#elif defined(_EZ80ACCLAIM)
+
+/* No I-space access qualifiers */
+
+#  define IOBJ
+#  define IPTR
+
+/* Select the large, 24-bit addressing model */
+
+#  undef  CONFIG_SMALL_MEMORY
+
+/* int is 24-bits, long is 32-bits */
+
+#  define CONFIG_LONG_IS_NOT_INT 1
+
+/* pointers are 24-bits too */
+
+#  undef  CONFIG_PTR_IS_NOT_INT
+
 #else
 
 /* No I-space access qualifiers */
