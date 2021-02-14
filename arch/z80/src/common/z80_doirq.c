@@ -47,6 +47,8 @@ FAR chipreg_t *z80_doirq(uint8_t irq, FAR chipreg_t *regs)
 {
   board_autoled_on(LED_INIRQ);
 
+  DECL_SAVESTATE();
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
 
   IRQ_ENTER(regs);
@@ -61,7 +63,6 @@ FAR chipreg_t *z80_doirq(uint8_t irq, FAR chipreg_t *regs)
 
   if (irq < NR_IRQS)
     {
-      DECL_SAVESTATE();
 
       /* Indicate that we have entered IRQ processing logic */
 

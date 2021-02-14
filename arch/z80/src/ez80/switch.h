@@ -139,10 +139,6 @@ int ez80_saveusercontext(FAR chipreg_t *regs);
 
 void ez80_restorecontext(FAR chipreg_t *regs);
 
-/* Defined in ez80_sigsetup.c */
-
-void ez80_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver, chipreg_t *regs);
-
 /* Defined in ez80_registerdump.c */
 
 void ez80_registerdump(void);
