@@ -63,7 +63,7 @@ $(BINFMT_COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 $(BIN): $(BINFMT_OBJS)
-	$(call ARCHIVE, $@, $(BINFMT_OBJS))
+	$(call ARCHIVE, $@, $^)
 
 makedepfile: $(BINFMT_CSRCS:.c=.ddc) $(BINFMT_ASRCS:.S=.dds)
 	$(call CATFILE, Make.dep, $^)
