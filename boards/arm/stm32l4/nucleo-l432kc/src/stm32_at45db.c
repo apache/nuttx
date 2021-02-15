@@ -39,8 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
@@ -48,6 +46,7 @@
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
 
 #include "stm32l4_spi.h"
@@ -121,10 +120,10 @@ int stm32_at45dbinitialize(int minor)
       /* Mount the file system at /mnt/at45db */
 
       finfo("Mount the NXFFS file system at /dev/at45db\n");
-      ret = mount(NULL, "/mnt/at45db", "nxffs", 0, NULL);
+      ret = nx_mount(NULL, "/mnt/at45db", "nxffs", 0, NULL);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          ferr("ERROR: Failed to mount the NXFFS volume: %d\n", ret);
           return ret;
         }
 #endif

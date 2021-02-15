@@ -55,6 +55,6 @@ void nxterm_clear(FAR struct nxterm_state_s *priv)
   ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
   if (ret < 0)
     {
-      gerr("ERROR: Fill failed: %d\n", errno);
+      gerr("ERROR: Fill failed: %d\n", get_errno());
     }
 }

@@ -122,7 +122,7 @@ int execv(FAR const char *path, FAR char * const argv[])
   ret = exec(path, (FAR char * const *)argv, symtab, nsymbols);
   if (ret < 0)
     {
-      serr("ERROR: exec failed: %d\n", errno);
+      serr("ERROR: exec failed: %d\n", get_errno());
       return ERROR;
     }
 

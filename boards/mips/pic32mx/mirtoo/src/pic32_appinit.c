@@ -39,14 +39,13 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
 #include <syslog.h>
 
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 
 #ifdef CONFIG_PIC32MX_SPI2
 #  include <nuttx/spi/spi.h>
@@ -160,10 +159,10 @@ int board_app_initialize(uintptr_t arg)
 
   /* Mount the file system at /mnt/sst25 */
 
-  ret = mount(NULL, "/mnt/sst25", "nxffs", 0, NULL);
+  ret = nx_mount(NULL, "/mnt/sst25", "nxffs", 0, NULL);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+      ferr("ERROR: Failed to mount the NXFFS volume: %d\n", ret);
       return ret;
     }
 #endif

@@ -48,6 +48,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/kthread.h>
 #include <nuttx/usb/usbdev.h>
@@ -288,15 +289,11 @@ static void usb_msc_connect(FAR void *arg)
 
   /* Mount */
 
-  ret = mount((FAR const char *)blkdev, (FAR const char *)mntpnt,
+  ret = nx_mount((FAR const char *)blkdev, (FAR const char *)mntpnt,
       CONFIG_FRDMK28F_USB_AUTOMOUNT_FSTYPE, 0, NULL);
   if (ret < 0)
     {
-      int errcode = get_errno();
-      DEBUGASSERT(errcode > 0);
-
-      ferr("ERROR: Mount failed: %d\n", errcode);
-      UNUSED(errcode);
+      ferr("ERROR: Mount failed: %d\n", ret);
     }
 }
 
@@ -364,18 +361,15 @@ static void usb_msc_disconnect(FAR void *arg)
 
   /* Unmount */
 
-  ret = umount2((FAR const char *)mntpnt, MNT_FORCE);
+  ret = nx_umount2((FAR const char *)mntpnt, MNT_FORCE);
   if (ret < 0)
     {
-      int errcode = get_errno();
-      DEBUGASSERT(errcode > 0);
-
       /* We expect the error to be EBUSY meaning that the volume could
        * not be unmounted because there are currently reference via open
        * files or directories.
        */
 
-      if (errcode == EBUSY)
+      if (ret == -EBUSY)
         {
           finfo("WARNING: Volume is busy, try again later\n");
 

@@ -1106,7 +1106,7 @@ static int i2s_rxdma_setup(struct stm32_i2s_s *priv)
 
       if (ret < 0)
         {
-          i2serr("ERROR: wd_start failed: %d\n", errno);
+          i2serr("ERROR: wd_start failed: %d\n", ret);
         }
     }
 
@@ -1505,7 +1505,7 @@ static int i2s_txdma_setup(struct stm32_i2s_s *priv)
 
       if (ret < 0)
         {
-          i2serr("ERROR: wd_start failed: %d\n", errno);
+          i2serr("ERROR: wd_start failed: %d\n", ret);
         }
     }
 

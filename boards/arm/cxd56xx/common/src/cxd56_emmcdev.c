@@ -27,8 +27,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <debug.h>
-#include <sys/mount.h>
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 #include <arch/board/board.h>
 #include "cxd56_emmc.h"
 
@@ -76,10 +76,10 @@ int board_emmc_initialize(void)
 
   /* Mount the eMMC deivce */
 
-  ret = mount("/dev/emmc0", "/mnt/emmc", "vfat", 0, NULL);
+  ret = nx_mount("/dev/emmc0", "/mnt/emmc", "vfat", 0, NULL);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to mount the eMMC. %d\n", errno);
+      ferr("ERROR: Failed to mount the eMMC. %d\n", ret);
     }
 
   return ret;

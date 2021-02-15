@@ -26,7 +26,8 @@
 
 #include <debug.h>
 #include <stddef.h>
-#include <sys/mount.h>
+
+#include <nuttx/fs/fs.h>
 
 #include "rp2040_pico.h"
 
@@ -45,7 +46,7 @@ int rp2040_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);

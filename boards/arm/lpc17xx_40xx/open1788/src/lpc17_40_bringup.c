@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <syslog.h>
@@ -49,6 +48,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kthread.h>
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/video/fb.h>
@@ -389,7 +389,7 @@ int open1788_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system at the default location, /proc */
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs: %d\n", ret);

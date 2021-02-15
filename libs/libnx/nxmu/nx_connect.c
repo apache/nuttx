@@ -175,7 +175,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
   ret = nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_s));
   if (ret < 0)
     {
-      gerr("ERROR: nxmu_sendserver failed: %d\n", errno);
+      gerr("ERROR: nxmu_sendserver failed: %d\n", get_errno());
       goto errout_with_wmq;
     }
 
@@ -191,7 +191,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
       ret = nx_eventhandler((NXHANDLE)conn);
       if (ret < 0)
         {
-          gerr("ERROR: nx_message failed: %d\n", errno);
+          gerr("ERROR: nx_message failed: %d\n", get_errno());
           goto errout_with_wmq;
         }
 

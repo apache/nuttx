@@ -25,14 +25,13 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <sys/mount.h>
 #include <sys/types.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 #include <arch/board/board.h>
 
 #ifdef CONFIG_RNDIS
@@ -325,10 +324,10 @@ int cxd56_bringup(void)
     }
 #endif
 
-  ret = mount(NULL, CXD56_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  ret = nx_mount(NULL, CXD56_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      _err("ERROR: Failed to mount the procfs: %d\n", errno);
+      _err("ERROR: Failed to mount the procfs: %d\n", ret);
     }
 #endif
 
@@ -360,7 +359,7 @@ int cxd56_bringup(void)
   ret = board_flash_initialize();
   if (ret < 0)
     {
-      _err("ERROR: Failed to initialize SPI-Flash. %d\n", errno);
+      _err("ERROR: Failed to initialize SPI-Flash. %d\n", ret);
     }
 #endif
 
@@ -376,13 +375,13 @@ int cxd56_bringup(void)
   ret = board_isx012_initialize(IMAGER_I2C);
   if (ret < 0)
     {
-      _err("ERROR: Failed to initialize ISX012 board. %d\n", errno);
+      _err("ERROR: Failed to initialize ISX012 board. %d\n", ret);
     }
 
   devops  = isx012_initialize();
   if (devops == NULL)
     {
-      _err("ERROR: Failed to populate ISX012 devops. %d\n", errno);
+      _err("ERROR: Failed to populate ISX012 devops. %d\n", ret);
       ret = ERROR;
     }
 #endif /* CONFIG_VIDEO_ISX012 */

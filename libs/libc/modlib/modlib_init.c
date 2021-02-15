@@ -79,10 +79,10 @@ static inline int modlib_filelen(FAR struct mod_loadinfo_s *loadinfo,
 
   /* Get the file stats */
 
-  ret = stat(filename, &buf);
+  ret = _NX_STAT(filename, &buf);
   if (ret < 0)
     {
-      int errval = get_errno();
+      int errval = _NX_GETERRNO(ret);
       berr("ERROR: Failed to stat file: %d\n", errval);
       return -errval;
     }

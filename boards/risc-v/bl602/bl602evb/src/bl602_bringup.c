@@ -33,6 +33,7 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/input/buttons.h>
 #include <bl602_tim_lowerhalf.h>
 #include <bl602_oneshot_lowerhalf.h>
@@ -88,7 +89,7 @@ int bl602_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_DEBUG,
@@ -210,7 +211,7 @@ int bl602_bringup(void)
   /* Mount the SPIFFS file system */
 
 #ifdef CONFIG_FS_LITTLEFS
-  ret = mount(path, "/mnt/lfs", "littlefs", 0, "autoformat");
+  ret = nx_mount(path, "/mnt/lfs", "littlefs", 0, "autoformat");
   if (ret < 0)
     {
       syslog(LOG_DEBUG,
@@ -235,14 +236,14 @@ int bl602_bringup(void)
     {
       /* Mount the file system */
 
-      ret = mount("/dev/ram0",
+      ret = nx_mount("/dev/ram0",
                   "/sbin",
                   "romfs", MS_RDONLY, NULL);
       if (ret < 0)
         {
-          _err("ERROR: mount(%s,%s,romfs) failed: %d\n",
+          _err("ERROR: nx_mount(%s,%s,romfs) failed: %d\n",
                "dev/ram0",
-               "/sbin", errno);
+               "/sbin", ret);
         }
     }
 #endif /* CONFIG_FS_ROMFS */

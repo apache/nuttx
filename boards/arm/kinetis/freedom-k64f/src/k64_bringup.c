@@ -40,10 +40,11 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/mount.h>
 #include <syslog.h>
 #include <errno.h>
 #include <debug.h>
+
+#include <nuttx/fs/fs.h>
 
 #ifdef HAVE_RTC_DRIVER
 #  include <nuttx/timers/rtc.h>
@@ -78,12 +79,11 @@ int k64_bringup(void)
 
   syslog(LOG_INFO, "Mounting procfs to /proc\n");
 
-  ret = mount(NULL, PROCFS_MOUNTPOUNT, "procfs", 0, NULL);
+  ret = nx_mount(NULL, PROCFS_MOUNTPOUNT, "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
-             ret, errno);
+             "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
       return ret;
     }
 #endif
@@ -108,15 +108,15 @@ int k64_bringup(void)
     {
       /* Mount the volume on HSMCI0 */
 
-      ret = mount(CONFIG_FRDMK64F_SDHC_MOUNT_BLKDEV,
-                  CONFIG_FRDMK64F_SDHC_MOUNT_MOUNTPOINT,
-                  CONFIG_FRDMK64F_SDHC_MOUNT_FSTYPE,
-                  0, NULL);
+      ret = nx_mount(CONFIG_FRDMK64F_SDHC_MOUNT_BLKDEV,
+                     CONFIG_FRDMK64F_SDHC_MOUNT_MOUNTPOINT,
+                     CONFIG_FRDMK64F_SDHC_MOUNT_FSTYPE,
+                     0, NULL);
 
       if (ret < 0)
         {
           syslog(LOG_ERR, "ERROR: Failed to mount %s: %d\n",
-                 CONFIG_FRDMK64F_SDHC_MOUNT_MOUNTPOINT, errno);
+                 CONFIG_FRDMK64F_SDHC_MOUNT_MOUNTPOINT, ret);
         }
     }
 

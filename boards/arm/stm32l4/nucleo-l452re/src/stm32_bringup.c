@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
 #include <sys/types.h>
 #include <debug.h>
 
@@ -47,6 +46,7 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/leds/userled.h>
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 
 #include "stm32l4_i2c.h"
 #include "nucleo-l452re.h"
@@ -90,7 +90,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       ferr("ERROR: Failed to mount procfs at /proc: %d\n", ret);

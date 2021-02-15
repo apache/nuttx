@@ -28,7 +28,7 @@
 #include <syslog.h>
 
 #ifdef CONFIG_FS_PROCFS
-#include <sys/mount.h>
+#include <nuttx/fs/fs.h>
 #endif
 
 #ifdef CONFIG_NRF52_WDT
@@ -66,7 +66,7 @@ int nrf52_bringup(void)
   int ret;
 
 #ifdef CONFIG_FS_PROCFS
-  mount(NULL, "/proc", "procfs", 0, NULL);
+  nx_mount(NULL, "/proc", "procfs", 0, NULL);
 #endif
 
 #ifdef CONFIG_NRF52_WDT

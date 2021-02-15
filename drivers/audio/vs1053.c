@@ -1536,7 +1536,7 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
       (pthread_addr_t) dev);
   if (ret != OK)
     {
-      auderr("ERROR: Can't create worker thread, errno=%d\n", errno);
+      auderr("ERROR: Can't create worker thread, ret=%d\n", ret);
     }
   else
     {

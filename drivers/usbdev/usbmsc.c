@@ -1693,7 +1693,7 @@ int usbmsc_exportluns(FAR void *handle)
   if (priv->thpid <= 0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_THREADCREATE),
-               (uint16_t)errno);
+               (uint16_t)priv->thpid);
       goto errout_with_lock;
     }
 

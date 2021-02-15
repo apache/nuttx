@@ -27,7 +27,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/mount.h>
 #include <syslog.h>
 #include <errno.h>
 #include <debug.h>
@@ -35,6 +34,7 @@
 #include <nuttx/kthread.h>
 
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/usb/usbhost.h>
 
 #include "rx65n_usbhost.h"
@@ -370,12 +370,11 @@ int rx65n_bringup(void)
 
   /* Mount the procfs file system */
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
-             ret, errno);
+             "ERROR: Failed to mount the PROC filesystem: %d\n", ret);
     }
 
 #endif

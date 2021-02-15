@@ -376,11 +376,11 @@ int stm32_bbsram_int(void)
           syslog(LOG_INFO, "Fault Logged on %s - Valid\n", buf);
         }
 
-      rv = unlink(HARDFAULT_PATH);
+      rv = nx_unlink(HARDFAULT_PATH);
       if (rv < 0)
         {
-          syslog(LOG_INFO, "stm32 bbsram: Failed to unlink Fault Log file "
-                 "[%s] (%d)\n", HARDFAULT_PATH, rv);
+          syslog(LOG_INFO, "stm32 bbsram: Failed to unlink Fault Log file"
+                 " [%s] (%d)\n", HARDFAULT_PATH, rv);
         }
     }
 #endif /* CONFIG_STM32F7_SAVE_CRASHDUMP */

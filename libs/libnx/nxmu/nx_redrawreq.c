@@ -86,6 +86,6 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect)
   ret = nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_redrawreq_s));
   if (ret < 0)
     {
-      gerr("ERROR: nxmu_sendwindow failed: %d\n", errno);
+      gerr("ERROR: nxmu_sendwindow failed: %d\n", get_errno());
     }
 }

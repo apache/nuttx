@@ -39,8 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>

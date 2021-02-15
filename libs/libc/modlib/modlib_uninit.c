@@ -60,7 +60,7 @@ int modlib_uninitialize(struct mod_loadinfo_s *loadinfo)
 
   if (loadinfo->filfd >= 0)
     {
-      close(loadinfo->filfd);
+      _NX_CLOSE(loadinfo->filfd);
     }
 
   return OK;

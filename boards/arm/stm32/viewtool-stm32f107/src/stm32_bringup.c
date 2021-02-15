@@ -40,12 +40,12 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/mount.h>
 #include <syslog.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 
 #ifdef CONFIG_RTC_DRIVER
 #  include <nuttx/timers/rtc.h>
@@ -154,7 +154,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
       serr("ERROR: Failed to mount procfs at %s: %d\n",

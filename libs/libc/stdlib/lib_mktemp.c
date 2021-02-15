@@ -240,7 +240,7 @@ FAR char *mktemp(FAR char *path_template)
       /* Attempt to stat the candidate file */
 
       ret = stat(path_template, &buf);
-      if (ret < 0 && errno == ENOENT)
+      if (ret < 0 && get_errno() == ENOENT)
         {
           /* We have it... Clear the errno and return the template */
 

@@ -24,8 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -135,7 +133,7 @@ void esp32_spiflash_encrypt_test(void)
                   (unsigned long)(uintptr_t)&geo);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to get GEO errno =%d\n", ret);
+      ferr("ERROR: Failed to get GEO ret = %d\n", ret);
       DEBUGASSERT(0);
     }
 
@@ -167,14 +165,14 @@ void esp32_spiflash_encrypt_test(void)
   ret = MTD_ERASE(enc_mtd, erase_block, erase_nblocks);
   if (ret != erase_nblocks)
     {
-      ferr("ERROR: Failed to erase block errno=%d\n", ret);
+      ferr("ERROR: Failed to erase block ret=%d\n", ret);
       DEBUGASSERT(0);
     }
 
   ret = MTD_BWRITE(enc_mtd, rw_block, rw_nblocks, wbuf);
   if (ret != rw_nblocks)
     {
-      ferr("ERROR: Failed to encrypt write errno=%d\n", ret);
+      ferr("ERROR: Failed to encrypt write ret=%d\n", ret);
       DEBUGASSERT(0);
     }
 
@@ -182,7 +180,7 @@ void esp32_spiflash_encrypt_test(void)
   ret = MTD_BREAD(enc_mtd, rw_block, rw_nblocks, rbuf);
   if (ret != rw_nblocks)
     {
-      ferr("ERROR: Failed to decrypt read errno=%d\n", ret);
+      ferr("ERROR: Failed to decrypt read ret=%d\n", ret);
       DEBUGASSERT(0);
     }
 
@@ -196,7 +194,7 @@ void esp32_spiflash_encrypt_test(void)
   ret = MTD_BREAD(mtd, rw_block, rw_nblocks, rbuf);
   if (ret != rw_nblocks)
     {
-      ferr("ERROR: Failed to read errno=%d\n", ret);
+      ferr("ERROR: Failed to read ret=%d\n", ret);
       DEBUGASSERT(0);
     }
 
@@ -214,14 +212,14 @@ void esp32_spiflash_encrypt_test(void)
   ret = MTD_ERASE(enc_mtd, erase_block, erase_nblocks);
   if (ret != erase_nblocks)
     {
-      ferr("ERROR: Failed to erase errno=%d\n", ret);
+      ferr("ERROR: Failed to erase ret=%d\n", ret);
       DEBUGASSERT(0);
     }
 
   ret = MTD_BWRITE(mtd, rw_block, rw_nblocks, wbuf);
   if (ret != rw_nblocks)
     {
-      ferr("ERROR: Failed to write errno=%d\n", ret);
+      ferr("ERROR: Failed to write ret=%d\n", ret);
       DEBUGASSERT(0);
     }
 
@@ -229,7 +227,7 @@ void esp32_spiflash_encrypt_test(void)
   ret = MTD_BREAD(enc_mtd, rw_block, rw_nblocks, rbuf);
   if (ret != rw_nblocks)
     {
-      ferr("ERROR: Failed to decrypt read errno=%d\n", ret);
+      ferr("ERROR: Failed to decrypt read ret=%d\n", ret);
       DEBUGASSERT(0);
     }
 
@@ -243,7 +241,7 @@ void esp32_spiflash_encrypt_test(void)
   ret = MTD_BREAD(mtd, rw_block, rw_nblocks, rbuf);
   if (ret != rw_nblocks)
     {
-      ferr("ERROR: Failed to read errno=%d\n", ret);
+      ferr("ERROR: Failed to read ret=%d\n", ret);
       DEBUGASSERT(0);
     }
 

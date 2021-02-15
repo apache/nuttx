@@ -84,7 +84,7 @@ static void aio_write_worker(FAR void *arg)
   if (aiocbp->aio_fildes < CONFIG_NFILE_DESCRIPTORS)
 #endif
     {
-      /* Call fcntl(F_GETFL) to get the file open mode. */
+      /* Call file_fcntl(F_GETFL) to get the file open mode. */
 
       oflags = file_fcntl(aioc->u.aioc_filep, F_GETFL);
       if (oflags < 0)

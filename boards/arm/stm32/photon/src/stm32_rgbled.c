@@ -110,8 +110,8 @@ int stm32_rgbled_setup(void)
   struct pwm_lowerhalf_s    *ledr;
   struct pwm_lowerhalf_s    *ledg;
   struct pwm_lowerhalf_s    *ledb;
+  struct file file;
   int ret;
-  int fd;
 
   /* Have we already initialized? */
 
@@ -165,17 +165,17 @@ int stm32_rgbled_setup(void)
           return ret;
         }
 
-      fd = nx_open("/dev/rgbled0", O_WRONLY);
-      if (fd < 0)
+      ret = file_open(&file, "/dev/rgbled0", O_WRONLY);
+      if (ret < 0)
         {
-          lederr("ERROR: open failed: %d\n", fd);
+          lederr("ERROR: open failed: %d\n", ret);
           return ret;
         }
 
       /* Initialize led off */
 
-      nx_write(fd, "#000000", 8);
-      nx_close(fd);
+      file_write(&file, "#000000", 8);
+      file_close(&file);
 
       /* Now we are initialized */
 

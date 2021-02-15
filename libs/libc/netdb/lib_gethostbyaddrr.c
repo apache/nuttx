@@ -267,7 +267,7 @@ int lib_hostfile_lookup(FAR const void *addr, socklen_t len, int type,
   stream = fopen(CONFIG_NETDB_HOSTCONF_PATH, "r");
   if (stream == NULL)
     {
-      int errcode = -errno;
+      int errcode = -get_errno();
 
       nerr("ERROR:  Failed to open the hosts file %s: %d\n",
            CONFIG_NETDB_HOSTCONF_PATH, errcode);

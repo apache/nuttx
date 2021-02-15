@@ -163,7 +163,7 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
     {
       if (!inet_ntop(addr->sa_family, saddr, host, hostlen))
         {
-          switch (errno)
+          switch (get_errno())
             {
               case ENOSPC:
                 return EAI_OVERFLOW;

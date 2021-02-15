@@ -90,7 +90,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
      if (ret < 0)
        {
-         _NX_SETERRNO((int)-ret);
+         _NX_SETERRNO(ret);
          ret = ERROR;
        }
 #endif

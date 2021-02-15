@@ -296,7 +296,7 @@ static int dns_send_query(int sd, FAR const char *name,
   ret = connect(sd, &uaddr->addr, addrlen);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       nerr("ERROR: connect failed: %d\n", ret);
       return ret;
     }
@@ -304,7 +304,7 @@ static int dns_send_query(int sd, FAR const char *name,
   ret = send(sd, buffer, dest - buffer, 0);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       nerr("ERROR: sendto failed: %d\n", ret);
       return ret;
     }
@@ -349,7 +349,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
   ret = recv(sd, buffer, RECV_BUFFER_SIZE, 0);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       nerr("ERROR: recv failed: %d\n", ret);
       return ret;
     }
