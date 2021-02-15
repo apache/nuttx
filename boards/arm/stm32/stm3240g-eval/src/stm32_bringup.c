@@ -96,8 +96,8 @@
 #define HAVE_USBHOST    1
 #define HAVE_RTC_DRIVER 1
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
- * is not enabled.
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO
+ * support is not enabled.
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO)
@@ -287,7 +287,7 @@ int stm32_bringup(void)
       if (!mtd)
         {
           syslog(LOG_ERR,
-                 "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
+                 "ERROR: Failed to bind SPI port 0 to SPI FLASH driver\n");
         }
     }
 
@@ -296,6 +296,7 @@ int stm32_bringup(void)
 
 #ifdef HAVE_MMCSD
   /* Mount the SDIO-based MMC/SD block driver */
+
   /* First, get an instance of the SDIO interface */
 
   sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);

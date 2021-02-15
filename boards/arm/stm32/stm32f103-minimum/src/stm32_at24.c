@@ -103,9 +103,10 @@ int stm32_at24_automount(int minor)
         }
 
 #if defined(CONFIG_STM32F103MINIMUM_AT24_FTL)
-      /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+      /* And use the FTL layer to wrap the MTD driver as a block driver */
 
-      finfo("Initialize the FTL layer to create /dev/mtdblock%d\n", AT24_MINOR);
+      finfo("Initialize the FTL layer to create /dev/mtdblock%d\n",
+            AT24_MINOR);
       ret = ftl_initialize(AT24_MINOR, mtd);
       if (ret < 0)
         {
@@ -134,6 +135,7 @@ int stm32_at24_automount(int minor)
           return ret;
         }
 #endif
+
       /* Now we are initialized */
 
       initialized = true;

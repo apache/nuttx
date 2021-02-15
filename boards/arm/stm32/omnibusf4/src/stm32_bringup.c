@@ -234,7 +234,6 @@ int stm32_bringup(void)
     }
 #endif
 
-
 #ifdef CONFIG_USERLED
   /* Register the LED driver */
 

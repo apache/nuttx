@@ -96,7 +96,7 @@ static int nsh_spifi_initialize(void)
     }
 
 #ifndef CONFIG_SPFI_NXFFS
-  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+  /* And use the FTL layer to wrap the MTD driver as a block driver */
 
   ret = ftl_initialize(CONFIG_SPIFI_DEVNO, mtd);
   if (ret < 0)

@@ -60,6 +60,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* Can't support the W25 device if it SPI1 or W25 support is not enabled */
 
 #define HAVE_W25  1
@@ -120,7 +121,7 @@ int stm32_w25initialize(int minor)
     }
 
 #ifndef CONFIG_FS_NXFFS
-  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+  /* And use the FTL layer to wrap the MTD driver as a block driver */
 
   ret = ftl_initialize(minor, mtd);
   if (ret < 0)
@@ -149,5 +150,6 @@ int stm32_w25initialize(int minor)
     }
 #endif
 #endif
+
   return OK;
 }

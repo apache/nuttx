@@ -68,7 +68,6 @@
 
 void perror(FAR const char *s)
 {
-
   /* If strerror() is not enabled, then just print the error number */
 
 #ifdef CONFIG_LIBC_STRERROR

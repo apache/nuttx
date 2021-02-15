@@ -35,8 +35,8 @@
 
 /* AT24 Serial EEPROM
  *
- * A AT24C512 Serial EEPPROM was used for tested I2C.  There are other I2C/TWI
- * devices on-board, but the serial EEPROM is the simplest test.
+ * A AT24C512 Serial EEPPROM was used for tested I2C.  There are other
+ * I2C/TWI devices on-board, but the serial EEPROM is the simplest test.
  *
  * There is, however, no AT24 EEPROM on board the SAMA5D3x-EK:  The Serial
  * EEPROM was mounted on an external adaptor board and connected to the
@@ -121,7 +121,7 @@ int sam_at24_automount(int minor)
         }
 
 #if defined(CONFIG_SAMA5D3xEK_AT24_FTL)
-      /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+      /* And use the FTL layer to wrap the MTD driver as a block driver */
 
       finfo("Initialize the FTL layer to create /dev/mtdblock%d\n",
             AT24_MINOR);
@@ -153,6 +153,7 @@ int sam_at24_automount(int minor)
           return ret;
         }
 #endif
+
       /* Now we are initializeed */
 
       initialized = true;
