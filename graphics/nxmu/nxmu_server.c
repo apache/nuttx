@@ -210,7 +210,7 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
   if (nxmu->conn.swrmq < 0)
     {
       gerr("ERROR: nxmq_open(%s) failed: %d\n", mqname, nxmu->conn.swrmq);
-      mq_close(nxmu->conn.crdmq);
+      nxmq_close(nxmu->conn.crdmq);
       return nxmu->conn.swrmq;
     }
 
