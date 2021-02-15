@@ -239,7 +239,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   int ret;
 
   binfo("loadinfo: %p\n", loadinfo);
-  DEBUGASSERT(loadinfo && loadinfo->filfd >= 0);
+  DEBUGASSERT(loadinfo && loadinfo->file.f_inode);
 
   /* Load section headers into memory */
 
