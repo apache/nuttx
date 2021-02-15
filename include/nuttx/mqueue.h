@@ -67,9 +67,6 @@
 #  define _MQ_TIMEDSEND(d,m,l,p,t)    nxmq_timedsend(d,m,l,p,t)
 #  define _MQ_RECEIVE(d,m,l,p)        nxmq_receive(d,m,l,p)
 #  define _MQ_TIMEDRECEIVE(d,m,l,p,t) nxmq_timedreceive(d,m,l,p,t)
-#  define _MQ_GETERRNO(r)             (-(r))
-#  define _MQ_SETERRNO(r)             set_errno(-(r))
-#  define _MQ_GETERRVAL(r)            (r)
 #else
 #  define _MQ_OPEN                    mq_open
 #  define _MQ_CLOSE(d)                mq_close(d)
@@ -78,9 +75,6 @@
 #  define _MQ_TIMEDSEND(d,m,l,p,t)    mq_timedsend(d,m,l,p,t)
 #  define _MQ_RECEIVE(d,m,l,p)        mq_receive(d,m,l,p)
 #  define _MQ_TIMEDRECEIVE(d,m,l,p,t) mq_timedreceive(d,m,l,p,t)
-#  define _MQ_GETERRNO(r)             errno
-#  define _MQ_SETERRNO(r)
-#  define _MQ_GETERRVAL(r)            (-errno)
 #endif
 
 /****************************************************************************
