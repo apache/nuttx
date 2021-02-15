@@ -1232,7 +1232,7 @@ int nx_fcntl(int fd, int cmd, ...);
  *
  * Description:
  *   Low-level poll operation based on struct file.  This is used both to (1)
- *   support detached file, and also (2) by fs_poll() to perform all
+ *   support detached file, and also (2) by poll_fdsetup() to perform all
  *   normal operations on file descriptors.
  *
  * Input Parameters:
@@ -1247,26 +1247,6 @@ int nx_fcntl(int fd, int cmd, ...);
  ****************************************************************************/
 
 int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
-
-/****************************************************************************
- * Name: fs_poll
- *
- * Description:
- *   The standard poll() operation redirects operations on file descriptors
- *   to this function.
- *
- * Input Parameters:
- *   fd    - The file descriptor of interest
- *   fds   - The structure describing the events to be monitored, OR NULL if
- *           this is a request to stop monitoring events.
- *   setup - true: Setup up the poll; false: Teardown the poll
- *
- * Returned Value:
- *  0: Success; Negated errno on failure
- *
- ****************************************************************************/
-
-int fs_poll(int fd, FAR struct pollfd *fds, bool setup);
 
 /****************************************************************************
  * Name: nx_poll

@@ -88,8 +88,25 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
           return -EBADF;
         }
     }
+  else
+    {
+      FAR struct file *filep;
+      int ret;
 
-  return fs_poll(fd, fds, setup);
+      /* Get the file pointer corresponding to this file descriptor */
+
+      ret = fs_getfilep(fd, &filep);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      DEBUGASSERT(filep != NULL);
+
+      /* Let file_poll() do the rest */
+
+      return file_poll(filep, fds, setup);
+    }
 }
 
 /****************************************************************************
@@ -283,7 +300,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
  *
  * Description:
  *   Low-level poll operation based on struct file.  This is used both to (1)
- *   support detached file, and also (2) by fs_poll() to perform all
+ *   support detached file, and also (2) by poll_fdsetup() to perform all
  *   normal operations on file descriptors.
  *
  * Input Parameters:
@@ -341,45 +358,6 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
     }
 
   return ret;
-}
-
-/****************************************************************************
- * Name: fs_poll
- *
- * Description:
- *   The standard poll() operation redirects operations on file descriptors
- *   to this function.
- *
- * Input Parameters:
- *   fd    - The file descriptor of interest
- *   fds   - The structure describing the events to be monitored, OR NULL if
- *           this is a request to stop monitoring events.
- *   setup - true: Setup up the poll; false: Teardown the poll
- *
- * Returned Value:
- *  Zero (OK) is returned on success; a negated errno value is returned on
- *  any failure.
- *
- ****************************************************************************/
-
-int fs_poll(int fd, FAR struct pollfd *fds, bool setup)
-{
-  FAR struct file *filep;
-  int ret;
-
-  /* Get the file pointer corresponding to this file descriptor */
-
-  ret = fs_getfilep(fd, &filep);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  DEBUGASSERT(filep != NULL);
-
-  /* Let file_poll() do the rest */
-
-  return file_poll(filep, fds, setup);
 }
 
 /****************************************************************************
