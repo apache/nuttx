@@ -117,9 +117,7 @@ int tm4c_at24_automount(int minor)
         }
 
 #if defined(CONFIG_TM4C123G_LAUNCHPAD_AT24_FTL)
-      /* And finally,
-       * use the FTL layer to wrap the MTD driver as a block driver
-       */
+      /* And use the FTL layer to wrap the MTD driver as a block driver */
 
       ret = ftl_initialize(AT24_MINOR, mtd);
       if (ret < 0)
@@ -149,6 +147,7 @@ int tm4c_at24_automount(int minor)
           return ret;
         }
 #endif
+
       /* Now we are initialized */
 
       initialized = true;

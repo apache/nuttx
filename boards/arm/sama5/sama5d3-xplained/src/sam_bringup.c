@@ -205,7 +205,7 @@ int sam_bringup(void)
 #ifdef CONFIG_SAMA5D4EK_HSMCI1_MOUNT
   else
     {
-      /* REVISIT:  A delay seems to be required here or the mount will fail. */
+      /* REVISIT: A delay seems to be required here or the mount will fail */
 
       /* Mount the volume on HSMCI1 */
 

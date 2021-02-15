@@ -289,7 +289,8 @@ static int pwd_foreach(pwd_foreach_match_t match, uintptr_t arg,
 int pwd_findby_name(FAR const char *uname, FAR struct passwd *entry,
                     FAR char *buffer, size_t buflen)
 {
-  return pwd_foreach(pwd_match_name, (uintptr_t)uname, entry, buffer, buflen);
+  return pwd_foreach(pwd_match_name, (uintptr_t)uname,
+                     entry, buffer, buflen);
 }
 
 /****************************************************************************

@@ -64,9 +64,9 @@
 
 #include "stm32l4r9ai-disco.h"
 
-/* Conditional logic in stm32l4r9ai-disco.h will determine if certain features
- * are supported.  Tests for these features need to be made after including
- * stm32l4r9ai-disco.
+/* Conditional logic in stm32l4r9ai-disco.h will determine if certain
+ * features are supported.  Tests for these features need to be made
+ * after includingstm32l4r9ai-disco.
  */
 
 #ifdef HAVE_RTC_DRIVER
@@ -80,10 +80,10 @@
 
 #ifdef CONFIG_I2C
 #  ifdef CONFIG_STM32L4_I2C1
-static struct i2c_master_s* g_i2c1;
+static struct i2c_master_s *g_i2c1;
 #  endif
 #  ifdef CONFIG_STM32L4_I2C3
-static struct i2c_master_s* g_i2c3;
+static struct i2c_master_s *g_i2c3;
 #  endif
 #endif
 

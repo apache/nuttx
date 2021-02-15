@@ -61,7 +61,7 @@
 
 /* Configuration ************************************************************/
 
-/* Can't support the SST25 device if it SPI2 or SST25 support is not enabled */
+/* Can't support the SST25 device if it SPI2/SST25 support is not enabled */
 
 #define HAVE_SST25  1
 #if !defined(CONFIG_PIC32MX_SPI2) || !defined(CONFIG_MTD_SST25)
@@ -139,7 +139,7 @@ int board_app_initialize(uintptr_t arg)
     }
 
 #ifndef CONFIG_FS_NXFFS
-  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+  /* And use the FTL layer to wrap the MTD driver as a block driver */
 
   ret = ftl_initialize(CONFIG_NSH_MMCSDMINOR, mtd);
   if (ret < 0)
@@ -167,5 +167,6 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 #endif
+
   return OK;
 }

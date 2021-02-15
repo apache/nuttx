@@ -138,7 +138,8 @@ int stm32_bringup(void)
   ret = stm32_mrf24j40_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_mrf24j40_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_mrf24j40_initialize() failed: %d\n",
+             ret);
     }
 #endif
 
@@ -159,7 +160,8 @@ int stm32_bringup(void)
   ret = stm32_automount_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_automount_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_automount_initialize() failed: %d\n",
+             ret);
     }
 #endif
 

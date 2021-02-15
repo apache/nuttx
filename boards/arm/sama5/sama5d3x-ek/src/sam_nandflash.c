@@ -187,7 +187,8 @@ int sam_nand_automount(int minor)
       mtd = sam_nand_initialize(HSMC_CS3);
       if (!mtd)
         {
-          ferr("ERROR: Failed to create the NAND driver on CS%d\n", HSMC_CS3);
+          ferr("ERROR: Failed to create the NAND driver on CS%d\n",
+               HSMC_CS3);
           return -ENODEV;
         }
 
@@ -220,6 +221,7 @@ int sam_nand_automount(int minor)
           return ret;
         }
 #endif
+
       /* Now we are initialized */
 
       initialized = true;

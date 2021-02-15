@@ -1133,8 +1133,8 @@ static int ili9340_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  *
  * Returned Value:
  *
- *  On success, this function returns a reference to the LCD driver object for
- *  the specified LCD driver. NULL is returned on any failure.
+ *  On success, this function returns a reference to the LCD driver object
+ *  for the specified LCD driver. NULL is returned on any failure.
  *
  ****************************************************************************/
 
@@ -1181,9 +1181,9 @@ FAR struct lcd_dev_s *ili9340_initialize(
  *
  * Description:
  *  This is a non-standard LCD interface.  Because of the various rotations,
- *  clearing the display in the normal way by writing a sequences of runs that
- *  covers the entire display can be very slow. Here the display is cleared by
- *  simply setting all GRAM memory to the specified color.
+ *  clearing the display in the normal way by writing a sequences of runs
+ *  that covers the entire display can be very slow. Here the display is
+ *  cleared by simply setting all GRAM memory to the specified color.
  *
  * Parameter:
  *  dev   - A reference to the lcd driver structure

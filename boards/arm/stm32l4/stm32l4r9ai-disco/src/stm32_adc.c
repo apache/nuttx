@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32l4/stm32l4r9ai-disco/src/stm32_adc.c
  *
  *   Copyright (C) 2017-2018 Haltian Ltd. All rights reserved.
@@ -61,9 +61,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* STM32 chip specific calibration values *******************************************/
+/* STM32 chip specific calibration values ***********************************/
 
-/* Voltage used for calibration of internal analog reference voltage (Vrefint) */
+/* Voltage used for calibration of internal analog reference voltage */
 
 #if defined(CONFIG_ARCH_CHIP_STM32F7) \
  || defined(CONFIG_ARCH_CHIP_STM32F4) \
@@ -74,7 +74,7 @@
 #endif
 
 /* Internal reference voltage calibration value locations. Taken from
- * https://github.com/micropython/micropython/commit/87215a0f0480dd0324a1b9c1d3fc3a5c2806249d
+ * https://github.com/micropython/micropython/commit/87215a0f0480dd0324a1b9c1
  *
  * F0 value from DM00115237 Rev 4 p. 19. for STM32F091xB and STM32F091xC
  *
@@ -110,7 +110,7 @@
 #  define STM32_TSENSE_TSCAL2 (*(int16_t *)((uint32_t)0x1fff75ca))
 #endif
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
 /* These are internal to STM32L4 */
 
@@ -146,9 +146,9 @@ static const uint8_t g_chanlist[ADC1_NCHANNELS] =
 
 static const uint32_t g_pinlist[ADC1_NCHANNELS] =
 {
-  0xffffffffU,
-  0xffffffffU,
-  0xffffffffU,
+  0xffffffffu,
+  0xffffffffu,
+  0xffffffffu,
   GPIO_MEASURE_ADC,
 };
 
@@ -164,9 +164,10 @@ static const uint32_t g_pinlist[ADC1_NCHANNELS] =
  *
  ****************************************************************************/
 
-int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *vext)
+int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat,
+                                 uint32_t *vext)
 {
-  struct adc_msg_s sample[ADC1_NCHANNELS] = { 0 };
+  struct adc_msg_s sample[ADC1_NCHANNELS];
   FAR struct file filestruct;
   ssize_t nbytes;
   int nsamples;
@@ -223,7 +224,7 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
       for (i = 0; i < nsamples ; i++)
         {
           ainfo("%d: channel: %d value: %d\n",
-                i+1, sample[i].am_channel, sample[i].am_data);
+                i + 1, sample[i].am_channel, sample[i].am_data);
 
           /* Add the raw value to entropy pool. */
 
@@ -232,9 +233,11 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
           switch (sample[i].am_channel)
             {
               case ADC1_INTERNAL_VREFINT_CHANNEL:
-                /* Calculate corrected Vrefint with factory calibration value. */
 
-                *vrefint = STM32_VREFINT_MVOLTS * STM32_VREFINT_CAL / sample[i].am_data;
+                /* Calculate corrected Vrefint with factory value. */
+
+                *vrefint = STM32_VREFINT_MVOLTS * STM32_VREFINT_CAL /
+                           sample[i].am_data;
                 ainfo("VREFINT: %d -> %u mV\n", sample[i].am_data, *vrefint);
                 break;
 
@@ -243,8 +246,9 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
                  * so it does not matter much if we use integer type here.
                  */
 
-                tsense = (110 - 30) * (sample[i].am_data - STM32_TSENSE_TSCAL1)
-                                    / (STM32_TSENSE_TSCAL2 - STM32_TSENSE_TSCAL1) + 30;
+                tsense = 30 + (110 - 30) *
+                         (sample[i].am_data - STM32_TSENSE_TSCAL1) /
+                         (STM32_TSENSE_TSCAL2 - STM32_TSENSE_TSCAL1);
                 ainfo("TSENSE: %d -> %d °C\n", sample[i].am_data, tsense);
                 UNUSED(tsense);
                 break;
@@ -260,7 +264,8 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
                 break;
 
               default:
-                aerr("ERROR: ADC got value from unknown channel %d\n", sample[i].am_channel);
+                aerr("ERROR: ADC got value from unknown channel %d\n",
+                     sample[i].am_channel);
                 break;
             }
         }
@@ -283,19 +288,20 @@ int stm32l4_adc_setup(void)
   if (!initialized)
     {
 #ifdef CONFIG_STM32L4_ADC1
-      int ret, i;
+      int ret;
+      int i;
 
       /* Configure the pins as analog inputs for the selected channels */
 
       for (i = 0; i < ADC1_NCHANNELS; i++)
         {
-          if (g_pinlist[i] != 0xffffffffU)
+          if (g_pinlist[i] != 0xffffffffu)
             {
               stm32l4_configgpio(g_pinlist[i]);
             }
         }
 
-      /* Call stm32l4_adc_initialize() to get an instance of the ADC interface */
+      /* Call stm32l4_adc_initialize() to get an instance of the ADC */
 
       g_adc = stm32l4_adc_initialize(1, g_chanlist, ADC1_NCHANNELS);
       if (g_adc == NULL)
@@ -313,6 +319,7 @@ int stm32l4_adc_setup(void)
           return ret;
         }
 #endif
+
       initialized = true;
     }
 

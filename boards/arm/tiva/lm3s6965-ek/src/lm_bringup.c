@@ -108,7 +108,8 @@ int lm_bringup(void)
       return -ENODEV;
     }
 
-  mcinfo("Successfully initialized SPI port %d\n", CONFIG_NSH_MMCSDSPIPORTNO);
+  mcinfo("Successfully initialized SPI port %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO);
 
   /* Bind the SPI port to the slot */
 

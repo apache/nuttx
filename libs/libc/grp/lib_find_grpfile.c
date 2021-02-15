@@ -312,7 +312,8 @@ static int grp_foreach(grp_foreach_match_t match, uintptr_t arg,
 int grp_findby_name(FAR const char *gname, FAR struct group *entry,
                     FAR char *buffer, size_t buflen)
 {
-  return grp_foreach(grp_match_name, (uintptr_t)gname, entry, buffer, buflen);
+  return grp_foreach(grp_match_name, (uintptr_t)gname,
+                     entry, buffer, buflen);
 }
 
 /****************************************************************************

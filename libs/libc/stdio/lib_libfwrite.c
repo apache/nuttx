@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_libfwrite.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2014, 2017 Gregory Nutt. All rights
+ *   reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,18 +86,18 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
   /* If there is no I/O buffer, then output data immediately */
 
   if (stream->fs_bufstart == NULL)
-   {
-     ret = _NX_WRITE(stream->fs_fd, ptr, count);
+    {
+      ret = _NX_WRITE(stream->fs_fd, ptr, count);
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-     if (ret < 0)
-       {
-         _NX_SETERRNO(ret);
-         ret = ERROR;
-       }
+      if (ret < 0)
+        {
+          _NX_SETERRNO(ret);
+          ret = ERROR;
+        }
 #endif
 
-     goto errout;
-   }
+      goto errout;
+    }
 
   /* Get exclusive access to the stream */
 

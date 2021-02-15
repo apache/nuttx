@@ -77,7 +77,7 @@
 #endif
 
 /* Internal reference voltage calibration value locations. Taken from
- * https://github.com/micropython/micropython/commit/87215a0f0480dd0324a1b9c1d3fc3a5c2806249d
+ * https://github.com/micropython/micropython/commit/87215a0f0480dd0324a1b9c1
  *
  * F0 value from DM00115237 Rev 4 p. 19. for STM32F091xB and STM32F091xC
  *

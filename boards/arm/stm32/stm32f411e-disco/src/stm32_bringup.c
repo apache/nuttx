@@ -74,8 +74,8 @@ int stm32_bringup(void)
   int ret = OK;
 
 #if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts
+   * a thread will monitor for USB connection and disconnection events.
    */
 
   ret = stm32_usbhost_initialize();

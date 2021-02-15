@@ -173,8 +173,8 @@ int at25_main(int argc, char *argv)
   fflush(stdout);
 
   ret = hex2bin(&rawinstream.public, &memoutstream.public,
-                (uint32_t)SAM_ISRAM_VSECTION,
-                (uint32_t)(SAM_ISRAM_VSECTION + CONFIG_SAMA5D4EK_AT25_PROGSIZE),
+                SAM_ISRAM_VSECTION,
+                SAM_ISRAM_VSECTION + CONFIG_SAMA5D4EK_AT25_PROGSIZE,
                 0);
   if (ret < 0)
     {
