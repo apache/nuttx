@@ -63,7 +63,6 @@ FAR chipreg_t *z80_doirq(uint8_t irq, FAR chipreg_t *regs)
 
   if (irq < NR_IRQS)
     {
-
       /* Indicate that we have entered IRQ processing logic */
 
       IRQ_ENTER(irq, regs);
