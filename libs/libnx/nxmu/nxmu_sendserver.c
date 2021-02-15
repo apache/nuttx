@@ -86,7 +86,9 @@ int nxmu_sendserver(FAR struct nxmu_conn_s *conn, FAR const void *msg,
   ret = _MQ_SEND(conn->cwrmq, msg, msglen, NX_SVRMSG_PRIO);
   if (ret < 0)
     {
-      gerr("ERROR: _MQ_SEND failed: %d\n", _MQ_GETERRNO(ret));
+      _NX_SETERRNO(ret);
+      gerr("ERROR: _MQ_SEND failed: %d\n", _NX_GETERRNO(ret));
+      ret = ERROR;
     }
 
   return ret;

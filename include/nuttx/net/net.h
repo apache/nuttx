@@ -71,14 +71,10 @@
 #  define _NX_SEND(s,b,l,f)         nx_send(s,b,l,f)
 #  define _NX_RECV(s,b,l,f)         nx_recv(s,b,l,f)
 #  define _NX_RECVFROM(s,b,l,f,a,n) nx_recvfrom(s,b,l,f,a,n)
-#  define _NX_GETERRNO(r)           (-(r))
-#  define _NX_GETERRVAL(r)          (r)
 #else
 #  define _NX_SEND(s,b,l,f)         send(s,b,l,f)
 #  define _NX_RECV(s,b,l,f)         recv(s,b,l,f)
 #  define _NX_RECVFROM(s,b,l,f,a,n) recvfrom(s,b,l,f,a,n)
-#  define _NX_GETERRNO(r)           errno
-#  define _NX_GETERRVAL(r)          (-errno)
 #endif
 
 /* Socket descriptors are the index into the TCB sockets list, offset by the
