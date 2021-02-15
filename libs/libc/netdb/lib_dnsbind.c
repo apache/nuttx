@@ -96,7 +96,7 @@ int dns_bind(void)
   sd = socket(PF_INET, SOCK_DGRAM, 0);
   if (sd < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       nerr("ERROR: socket() failed: %d\n", ret);
       return ret;
     }
@@ -109,7 +109,7 @@ int dns_bind(void)
   ret = setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
   if (ret < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       nerr("ERROR: setsockopt() failed: %d\n", ret);
       close(sd);
       return ret;

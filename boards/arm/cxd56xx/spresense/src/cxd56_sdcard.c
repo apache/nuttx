@@ -24,7 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <stdint.h>
@@ -34,6 +33,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/sdio.h>
 #include <nuttx/wqueue.h>
@@ -148,7 +148,7 @@ static void board_sdcard_enable(FAR void *arg)
         {
           if (S_ISBLK(stat_sdio.st_mode))
             {
-              ret = mount("/dev/mmcsd0", "/mnt/sd0", "vfat", 0, NULL);
+              ret = nx_mount("/dev/mmcsd0", "/mnt/sd0", "vfat", 0, NULL);
               if (ret == 0)
                 {
                   finfo(
@@ -156,7 +156,7 @@ static void board_sdcard_enable(FAR void *arg)
                 }
               else
                 {
-                  _err("ERROR: Failed to mount the SDCARD. %d\n", errno);
+                  _err("ERROR: Failed to mount the SDCARD. %d\n", ret);
                   cxd56_sdio_resetstatus(g_sdhci.sdhci);
                   goto release_frequency_lock;
                 }
@@ -189,10 +189,10 @@ static void board_sdcard_disable(FAR void *arg)
     {
       /* un-mount */
 
-      ret = umount("/mnt/sd0");
+      ret = nx_umount2("/mnt/sd0", 0);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to unmount the SD Card: %d\n", errno);
+          ferr("ERROR: Failed to unmount the SD Card: %d\n", ret);
         }
 
       /* Report the new state to the SDIO driver */

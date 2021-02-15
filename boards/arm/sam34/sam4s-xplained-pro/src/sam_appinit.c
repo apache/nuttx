@@ -40,8 +40,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
@@ -50,6 +48,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 
 #ifdef CONFIG_CDCACM
 #  include <nuttx/usb/cdcacm.h>
@@ -108,8 +107,7 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to create the CDC/ACM serial device: %d (%d)\n",
-             ret, errno);
+             "ERROR: Failed to create the CDC/ACM serial device: %d\n", ret);
       return ret;
     }
 #endif
@@ -118,9 +116,7 @@ int board_app_initialize(uintptr_t arg)
   ret = sam_nand_automount(SAM_SMC_CS0);
   if (ret < 0)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize the NAND: %d (%d)\n",
-             ret, errno);
+      syslog(LOG_ERR, "ERROR: Failed to initialize the NAND: %d\n", ret);
       return ret;
     }
 #endif
@@ -133,9 +129,7 @@ int board_app_initialize(uintptr_t arg)
   ret = sam_hsmci_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR,
-             "ERROR: sam_hsmci_initialize() failed: %d (%d)\n",
-             ret, errno);
+      syslog(LOG_ERR, "ERROR: sam_hsmci_initialize() failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -145,12 +139,11 @@ int board_app_initialize(uintptr_t arg)
 
   syslog(LOG_INFO, "Mounting procfs to /proc\n");
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
-             ret, errno);
+             "ERROR: Failed to mount the PROC filesystem: %d\n", ret);
       return ret;
     }
 #endif
@@ -158,12 +151,11 @@ int board_app_initialize(uintptr_t arg)
 #if HAVE_HSMCI
   syslog(LOG_INFO, "Mounting /dev/mmcsd0 to /fat\n");
 
-  ret = mount("/dev/mmcsd0", "/fat", "vfat", 0, NULL);
+  ret = nx_mount("/dev/mmcsd0", "/fat", "vfat", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to mount the FAT filesystem: %d (%d)\n",
-             ret, errno);
+             "ERROR: Failed to mount the FAT filesystem: %d\n", ret);
       return ret;
     }
 #endif
@@ -174,8 +166,7 @@ int board_app_initialize(uintptr_t arg)
   ret = sam_sdinitialize(0, 0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot: %d\n",
-             ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot: %d\n", ret);
       return ret;
     }
 #endif
@@ -187,8 +178,7 @@ int board_app_initialize(uintptr_t arg)
   ret = usbmonitor_start();
   if (ret != OK)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to start USB monitor: %d (%d)\n", ret, errno);
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
       return ret;
     }
 #endif

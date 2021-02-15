@@ -174,14 +174,11 @@ static int local_create_fifo(FAR const char *path)
 
   if (!local_fifo_exists(path))
     {
-      ret = mkfifo(path, 0644);
+      ret = nx_mkfifo(path, 0644, CONFIG_DEV_FIFO_SIZE);
       if (ret < 0)
         {
-          int errcode = get_errno();
-          DEBUGASSERT(errcode > 0);
-
-          nerr("ERROR: Failed to create FIFO %s: %d\n", path, errcode);
-          return -errcode;
+          nerr("ERROR: Failed to create FIFO %s: %d\n", path, ret);
+          return ret;
         }
     }
 
@@ -215,14 +212,11 @@ static int local_release_fifo(FAR const char *path)
        * by the device instance will also be freed.
        */
 
-      ret = unlink(path);
+      ret = nx_unlink(path);
       if (ret < 0)
         {
-          int errcode = get_errno();
-          DEBUGASSERT(errcode > 0);
-
-          nerr("ERROR: Failed to unlink FIFO %s: %d\n", path, errcode);
-          return -errcode;
+          nerr("ERROR: Failed to unlink FIFO %s: %d\n", path, ret);
+          return ret;
         }
     }
 

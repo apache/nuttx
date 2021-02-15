@@ -97,8 +97,8 @@ static struct cxd56_srcdata_s g_src;
 #ifdef DUMP_DATA
 static char *dump_name_pre  = "/mnt/sd0/dump/nx_player_dump_pre.pcm";
 static char *dump_name_post = "/mnt/sd0/dump/nx_player_dump_post.pcm";
-int dump_file_pre = -1;
-int dump_file_post = -1;
+static struct file dump_file_pre;
+static struct file dump_file_post;
 #endif
 
 /****************************************************************************
@@ -166,7 +166,7 @@ static int cxd56_src_process(FAR struct ap_buffer_s *apb)
   /* audinfo("SRC: Process (size = %d)\n", apb->nbytes); */
 
 #ifdef DUMP_DATA
-  write(dump_file_pre,
+  file_write(&dump_file_pre,
         (char *) (apb->samp + apb->curbyte),
         apb->nbytes - apb->curbyte);
 #endif
@@ -295,7 +295,7 @@ static int cxd56_src_process(FAR struct ap_buffer_s *apb)
               spin_unlock_irqrestore(NULL, flags);
 
 #ifdef DUMP_DATA
-              write(dump_file_post, src_apb->samp, src_apb->nbytes);
+              file_write(&dump_file_post, src_apb->samp, src_apb->nbytes);
 #endif
 
               /* Fetch the next APB to fill up */
@@ -446,10 +446,10 @@ int cxd56_src_init(FAR struct cxd56_dev_s *dev,
     }
 
 #ifdef DUMP_DATA
-  unlink(dump_name_pre);
-  unlink(dump_name_post);
-  dump_file_pre = open(dump_name_pre, O_WRONLY | O_CREAT | O_APPEND);
-  dump_file_post = open(dump_name_post, O_WRONLY | O_CREAT | O_APPEND);
+  nx_unlink(dump_name_pre);
+  nx_unlink(dump_name_post);
+  file_open(&dump_file_pre, dump_name_pre, O_WRONLY | O_CREAT | O_APPEND);
+  file_open(&dump_file_post, dump_name_post, O_WRONLY | O_CREAT | O_APPEND);
 #endif
 
   /* Join any old worker threads to prevent memory leaks */
@@ -523,11 +523,11 @@ int cxd56_src_deinit(void)
   src_delete(g_src.src_state);
 
 #ifdef DUMP_DATA
-  if (dump_file_pre)
-    close(dump_file_pre);
+  if (dump_file_pre.f_inode)
+    file_close(&dump_file_pre);
 
-  if (dump_file_post)
-    close(dump_file_post);
+  if (dump_file_post.f_inode)
+    file_close(&dump_file_post);
 #endif
 
   return OK;

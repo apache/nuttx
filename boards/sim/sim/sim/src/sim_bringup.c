@@ -26,13 +26,13 @@
 #include <nuttx/compiler.h>
 
 #include <sys/types.h>
-#include <sys/mount.h>
 #include <debug.h>
 
 #include <nuttx/board.h>
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/timers/oneshot.h>
@@ -86,7 +86,7 @@ int sim_bringup(void)
 #ifdef CONFIG_FS_BINFS
   /* Mount the binfs file system */
 
-  ret = mount(NULL, "/bin", "binfs", 0, NULL);
+  ret = nx_mount(NULL, "/bin", "binfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount binfs at /bin: %d\n", ret);
@@ -96,7 +96,7 @@ int sim_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, SIM_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  ret = nx_mount(NULL, SIM_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
@@ -107,7 +107,7 @@ int sim_bringup(void)
 #ifdef CONFIG_FS_TMPFS
   /* Mount the tmpfs file system */
 
-  ret = mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
@@ -176,7 +176,7 @@ int sim_bringup(void)
 
           /* Mount the SPIFFS file system */
 
-          ret = mount("/dev/rammtd", "/mnt/spiffs", "spiffs", 0, NULL);
+          ret = nx_mount("/dev/rammtd", "/mnt/spiffs", "spiffs", 0, NULL);
           if (ret < 0)
             {
               syslog(LOG_ERR,
@@ -198,8 +198,8 @@ int sim_bringup(void)
 
           /* Mount the LittleFS file system */
 
-          ret = mount("/dev/rammtd", "/mnt/lfs", "littlefs", 0,
-                      "forceformat");
+          ret = nx_mount("/dev/rammtd", "/mnt/lfs", "littlefs", 0,
+                         "forceformat");
           if (ret < 0)
             {
               syslog(LOG_ERR,

@@ -182,7 +182,7 @@
 struct pg_source_s
 {
   bool initialized;  /* TRUE: we are initialized */
-  int  fd;           /* File descriptor of the nuttx.bin file */
+  struct file file;  /* File descriptor of the nuttx.bin file */
 };
 #endif
 
@@ -272,16 +272,16 @@ static inline void lpc31_initsrc(void)
       /* Now mount the file system */
 
       snprintf(devname, 16, "/dev/mmcsd%d", CONFIG_EA3152_PAGING_MINOR);
-      ret = mount(devname, CONFIG_EA3152_PAGING_MOUNTPT, "vfat", MS_RDONLY,
-                  NULL);
+      ret = nx_mount(devname, CONFIG_EA3152_PAGING_MOUNTPT, "vfat",
+                     MS_RDONLY, NULL);
       DEBUGASSERT(ret == OK);
 
 #endif /* CONFIG_EA3152_PAGING_SDSLOT */
 
       /* Open the selected path for read-only access */
 
-      g_pgsrc.fd = nx_open(CONFIG_PAGING_BINPATH, O_RDONLY);
-      DEBUGASSERT(g_pgsrc.fd >= 0);
+      file_open(&g_pgsrc.file, CONFIG_PAGING_BINPATH, O_RDONLY);
+      DEBUGASSERT(g_pgsrc.file.f_inode != NULL);
 
       /* Then we are initialized */
 
@@ -444,12 +444,12 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 
   /* Seek to that position */
 
-  pos = nx_seek(g_pgsrc.fd, offset, SEEK_SET);
+  pos = file_seek(&g_pgsrc.file, offset, SEEK_SET);
   DEBUGASSERT(pos != (off_t)-1);
 
   /* And read the page data from that offset */
 
-  nbytes = nx_read(g_pgsrc.fd, vpage, PAGESIZE);
+  nbytes = file_read(&g_pgsrc.file, vpage, PAGESIZE);
   DEBUGASSERT(nbytes == PAGESIZE);
   return OK;
 

@@ -24,13 +24,14 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <debug.h>
 #include <errno.h>
 
 #include "freedom-k28f.h"
+
+#include <nuttx/fs/fs.h>
 
 #ifdef CONFIG_PL2303
 #  include <nuttx/usb/pl2303.h>
@@ -66,7 +67,7 @@ int k28_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
@@ -103,15 +104,15 @@ int k28_bringup(void)
     {
       /* Mount the volume on HSMCI0 */
 
-      ret = mount(CONFIG_FRDMK28F_SDHC_MOUNT_BLKDEV,
-                  CONFIG_FRDMK28F_SDHC_MOUNT_MOUNTPOINT,
-                  CONFIG_FRDMK28F_SDHC_MOUNT_FSTYPE,
-                  0, NULL);
+      ret = nx_mount(CONFIG_FRDMK28F_SDHC_MOUNT_BLKDEV,
+                     CONFIG_FRDMK28F_SDHC_MOUNT_MOUNTPOINT,
+                     CONFIG_FRDMK28F_SDHC_MOUNT_FSTYPE,
+                     0, NULL);
 
       if (ret < 0)
         {
           syslog(LOG_ERR, "ERROR: Failed to mount %s: %d\n",
-                 CONFIG_FRDMK28F_SDHC_MOUNT_MOUNTPOINT, errno);
+                 CONFIG_FRDMK28F_SDHC_MOUNT_MOUNTPOINT, ret);
         }
     }
 

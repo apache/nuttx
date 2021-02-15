@@ -193,9 +193,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
 
       return rammap(fd, length, offset);
 #else
-      /* Error out.  The errno value was already set by ioctl() */
-
-      ferr("ERROR: ioctl(FIOC_MMAP) failed: %d\n", ret);
+      ferr("ERROR: nx_ioctl(FIOC_MMAP) failed: %d\n", ret);
       goto errout;
 #endif
     }

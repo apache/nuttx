@@ -88,7 +88,7 @@ void nxterm_redraw(NXTERM handle,
   ret = priv->ops->fill(priv, rect, priv->wndo.wcolor);
   if (ret < 0)
     {
-      gerr("ERROR: fill failed: %d\n", errno);
+      gerr("ERROR: fill failed: %d\n", get_errno());
     }
 
   /* Then redraw each character on the display (Only the characters within

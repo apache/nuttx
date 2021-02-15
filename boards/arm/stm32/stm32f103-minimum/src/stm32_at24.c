@@ -39,8 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
@@ -48,6 +46,7 @@
 
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
 
 #include "stm32_i2c.h"
@@ -128,10 +127,10 @@ int stm32_at24_automount(int minor)
       /* Mount the file system at /mnt/at24 */
 
       finfo("Mount the NXFFS file system at /dev/at24\n");
-      ret = mount(NULL, "/mnt/at24", "nxffs", 0, NULL);
+      ret = nx_mount(NULL, "/mnt/at24", "nxffs", 0, NULL);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          ferr("ERROR: Failed to mount the NXFFS volume: %d\n", ret);
           return ret;
         }
 #endif

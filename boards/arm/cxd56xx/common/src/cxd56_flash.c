@@ -27,8 +27,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <debug.h>
-#include <sys/mount.h>
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 #include <arch/board/board.h>
 #include <nuttx/mtd/mtd.h>
 
@@ -89,10 +89,10 @@ int board_flash_initialize(void)
       return ret;
     }
 
-  ret = mount("/dev/smart0d1", "/mnt/spif", "smartfs", 0, NULL);
+  ret = nx_mount("/dev/smart0d1", "/mnt/spif", "smartfs", 0, NULL);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to mount the SmartFS volume: %d\n", errno);
+      ferr("ERROR: Failed to mount the SmartFS volume: %d\n", ret);
       return ret;
     }
 
@@ -106,10 +106,10 @@ int board_flash_initialize(void)
       return ret;
     }
 
-  ret = mount(NULL, "/mnt/spif", "nxffs", 0, NULL);
+  ret = nx_mount(NULL, "/mnt/spif", "nxffs", 0, NULL);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+      ferr("ERROR: Failed to mount the NXFFS volume: %d\n", ret);
       return ret;
     }
 #endif

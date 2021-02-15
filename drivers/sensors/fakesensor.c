@@ -141,7 +141,7 @@ static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower, bool sw)
 
       /* Wake up the thread */
 
-      sem_post(&sensor->run);
+      nxsem_post(&sensor->run);
     }
   else
     {
@@ -234,7 +234,7 @@ static int fakesensor_thread(int argc, char** argv)
         {
           /* Waiting to be woken up */
 
-          sem_wait(&sensor->run);
+          nxsem_wait(&sensor->run);
         }
     }
 }

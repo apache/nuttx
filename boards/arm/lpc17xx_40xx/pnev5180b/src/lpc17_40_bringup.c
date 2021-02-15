@@ -42,9 +42,9 @@
 #include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
-#include <sys/mount.h>
 
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/binfmt/elf.h>
 #include <nuttx/binfmt/nxflat.h>
@@ -120,21 +120,20 @@ int pnev5180b_bringup(void)
   int ret = OK;
 
 #ifdef CONFIG_FS_PROCFS
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
-             ret, errno);
+      syslog(LOG_ERR, "ERROR: Failed to mount the PROC filesystem: %d\n",
+             ret);
       goto done;
     }
 #endif
 
 #ifdef CONFIG_FS_BINFS
-  ret = mount(NULL, "/bin", "binfs", 0, NULL);
+  ret = nx_mount(NULL, "/bin", "binfs", 0, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount the BIN filesystem: %d (%d)\n",
-             ret, errno);
+      syslog(LOG_ERR, "ERROR: Failed to mount the BIN filesystem: %d\n", ret);
       goto done;
     }
 #endif

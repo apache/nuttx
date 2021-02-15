@@ -459,7 +459,7 @@ pid_t nxtask_start_vfork(FAR struct task_tcb_s *child)
   ret = waitpid(pid, &rc, 0);
   if (ret < 0)
     {
-      serr("ERROR: waitpid failed: %d\n", errno);
+      serr("ERROR: waitpid failed: %d\n", get_errno());
     }
 #else
   waitpid(pid, &rc, 0);

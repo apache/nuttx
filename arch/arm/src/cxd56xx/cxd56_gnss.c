@@ -891,7 +891,7 @@ static int cxd56_gnss_save_backup_data(FAR struct file *filep,
                                        unsigned long    arg)
 {
   FAR char *buf;
-  int       fd;
+  struct file file;
   int       n = 0;
   int32_t   offset = 0;
 
@@ -901,30 +901,30 @@ static int cxd56_gnss_save_backup_data(FAR struct file *filep,
       return -ENOMEM;
     }
 
-  fd = nx_open(CONFIG_CXD56_GNSS_BACKUP_FILENAME,
-               O_WRONLY | O_CREAT | O_TRUNC);
-  if (fd < 0)
+  n = file_open(&file, CONFIG_CXD56_GNSS_BACKUP_FILENAME,
+                O_WRONLY | O_CREAT | O_TRUNC);
+  if (n < 0)
     {
       kmm_free(buf);
-      return fd;
+      return n;
     }
 
   do
     {
       n = fw_gd_readbuffer(CXD56_CPU1_DATA_TYPE_BACKUP, offset, buf,
-                        CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
+                           CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
       if (n <= 0)
         {
           break;
         }
 
-      n = nx_write(fd, buf, n);
+      n = file_write(&file, buf, n);
       offset += n;
     }
   while (n == CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
 
   kmm_free(buf);
-  nx_close(fd);
+  file_close(&file);
 
   return n < 0 ? n : 0;
 }
@@ -948,7 +948,7 @@ static int cxd56_gnss_save_backup_data(FAR struct file *filep,
 static int cxd56_gnss_erase_backup_data(FAR struct file *filep,
                                         unsigned long    arg)
 {
-  return unlink(CONFIG_CXD56_GNSS_BACKUP_FILENAME);
+  return nx_unlink(CONFIG_CXD56_GNSS_BACKUP_FILENAME);
 }
 
 /****************************************************************************
@@ -2208,7 +2208,7 @@ cxd56_gnss_read_cep_file(FAR struct file *fp, int32_t offset,
 static void cxd56_gnss_read_backup_file(FAR int *retval)
 {
   FAR char *  buf;
-  int         fd;
+  struct file file;
   int32_t     offset = 0;
   size_t      n;
   int         ret = 0;
@@ -2220,17 +2220,16 @@ static void cxd56_gnss_read_backup_file(FAR int *retval)
       goto _err;
     }
 
-  fd = nx_open(CONFIG_CXD56_GNSS_BACKUP_FILENAME, O_RDONLY);
-  if (fd < 0)
+  ret = file_open(&file, CONFIG_CXD56_GNSS_BACKUP_FILENAME, O_RDONLY);
+  if (ret < 0)
     {
       kmm_free(buf);
-      ret = fd;
       goto _err;
     }
 
   do
     {
-      n = nx_read(fd, buf, CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
+      n = file_read(&file, buf, CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
       if (n <= 0)
         {
           ret = n;
@@ -2247,7 +2246,7 @@ static void cxd56_gnss_read_backup_file(FAR int *retval)
     }
   while (n > 0);
 
-  nx_close(fd);
+  file_close(&file);
   kmm_free(buf);
 
   /* Notify the termination of backup sequence by write zero length data */

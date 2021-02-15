@@ -218,15 +218,11 @@ static void automount_mount(FAR struct automounter_state_s *priv)
 
        /* Mount the file system */
 
-      ret = mount(lower->blockdev, lower->mountpoint, lower->fstype,
-                  0, NULL);
+      ret = nx_mount(lower->blockdev, lower->mountpoint, lower->fstype,
+                     0, NULL);
       if (ret < 0)
         {
-          int errcode = get_errno();
-          DEBUGASSERT(errcode > 0);
-
-          ferr("ERROR: Mount failed: %d\n", errcode);
-          UNUSED(errcode);
+          ferr("ERROR: Mount failed: %d\n", ret);
           return;
         }
 
@@ -276,18 +272,15 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
 
       /* Un-mount the volume */
 
-      ret = umount2(lower->mountpoint, MNT_FORCE);
+      ret = nx_umount2(lower->mountpoint, MNT_FORCE);
       if (ret < 0)
         {
-          int errcode = get_errno();
-          DEBUGASSERT(errcode > 0);
-
           /* We expect the error to be EBUSY meaning that the volume could
            * not be unmounted because there are currently reference via open
            * files or directories.
            */
 
-          if (errcode == EBUSY)
+          if (ret == -EBUSY)
             {
               finfo("WARNING: Volume is busy, try again later\n");
 
@@ -306,8 +299,8 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
 
           else
             {
-              ferr("ERROR: umount2 failed: %d\n", errcode);
-              return -errcode;
+              ferr("ERROR: umount2 failed: %d\n", ret);
+              return ret;
             }
         }
 

@@ -167,7 +167,7 @@ static inline int userfs_open_dispatch(FAR struct userfs_info_s *info,
                      sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       ferr("ERROR: Send open response failed: %d\n", ret);
       return ret;
     }
@@ -865,7 +865,7 @@ static inline int userfs_destroy_dispatch(FAR struct userfs_info_s *info,
                      sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
-      int ret = -errno;
+      int ret = -get_errno();
       ferr("ERROR: sendto failed: %d\n", ret);
       return ret;
     }

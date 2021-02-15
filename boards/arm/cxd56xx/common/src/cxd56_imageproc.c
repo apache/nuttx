@@ -208,7 +208,7 @@ static sem_t g_rotexc;
 static sem_t g_geexc;
 static sem_t g_abexc;
 
-static int g_gfd = -1;
+static struct file g_gfile;
 static char g_gcmdbuf[256] __attribute__ ((aligned(16)));
 
 /****************************************************************************
@@ -534,7 +534,7 @@ void imageproc_initialize(void)
 
   cxd56_ge2dinitialize(GEDEVNAME);
 
-  g_gfd = open(GEDEVNAME, O_RDWR);
+  file_open(&g_gfile, GEDEVNAME, O_RDWR);
 
   putreg32(1, ROT_INTR_CLEAR);
   putreg32(0, ROT_INTR_ENABLE);
@@ -549,10 +549,9 @@ void imageproc_finalize(void)
   up_disable_irq(CXD56_IRQ_ROT);
   irq_detach(CXD56_IRQ_ROT);
 
-  if (g_gfd > 0)
+  if (g_gfile.f_inode)
     {
-      close(g_gfd);
-      g_gfd = -1;
+      file_close(&g_gfile);
     }
 
   cxd56_ge2duninitialize(GEDEVNAME);
@@ -605,7 +604,7 @@ int imageproc_resize(uint8_t * ibuf,
   size_t len;
   int ret;
 
-  if (g_gfd <= 0)
+  if (g_gfile.f_inode == NULL)
     {
       return -ENODEV;
     }
@@ -663,7 +662,7 @@ int imageproc_resize(uint8_t * ibuf,
   /* Process resize */
 
   len = (uintptr_t) cmd - (uintptr_t) g_gcmdbuf;
-  ret = write(g_gfd, g_gcmdbuf, len);
+  ret = file_write(&g_gfile, g_gcmdbuf, len);
   if (ret < 0)
     {
       ip_semgive(&g_geexc);
@@ -691,7 +690,7 @@ int imageproc_clip_and_resize(uint8_t * ibuf,
   uint16_t clip_width = 0;
   uint16_t clip_height = 0;
 
-  if (g_gfd <= 0)
+  if (g_gfile.f_inode == NULL)
     {
       return -ENODEV;
     }
@@ -782,7 +781,7 @@ int imageproc_clip_and_resize(uint8_t * ibuf,
   /* Process resize */
 
   len = (uintptr_t) cmd - (uintptr_t) g_gcmdbuf;
-  ret = write(g_gfd, g_gcmdbuf, len);
+  ret = file_write(&g_gfile, g_gcmdbuf, len);
   if (ret < 0)
     {
       ip_semgive(&g_geexc);
@@ -973,7 +972,7 @@ int imageproc_alpha_blend(imageproc_imginfo_t *dst,
   /* Process alpha blending */
 
   len = (uintptr_t)cmd - (uintptr_t)g_gcmdbuf;
-  ret = write(g_gfd, g_gcmdbuf, len);
+  ret = file_write(&g_gfile, g_gcmdbuf, len);
   if (ret < 0)
     {
       ip_semgive(&g_abexc);

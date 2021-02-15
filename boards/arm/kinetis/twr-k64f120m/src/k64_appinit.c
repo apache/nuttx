@@ -43,9 +43,9 @@
 #include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
-#include <sys/mount.h>
 
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 
 #ifdef CONFIG_KINETIS_SDHC
 #  include <nuttx/sdio.h>
@@ -93,12 +93,11 @@ int board_app_initialize(uintptr_t arg)
 
   syslog(LOG_INFO, "Mounting procfs to /proc\n");
 
-  ret = mount(NULL, PROCFS_MOUNTPOUNT, "procfs", 0, NULL);
+  ret = nx_mount(NULL, PROCFS_MOUNTPOUNT, "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
-             ret, errno);
+             "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
       return ret;
     }
 #endif

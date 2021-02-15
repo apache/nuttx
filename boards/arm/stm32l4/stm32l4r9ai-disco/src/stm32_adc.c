@@ -191,7 +191,7 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
     {
       if (nbytes != -EINTR)
         {
-          aerr("ERROR: nx_read() failed: %d\n", nbytes);
+          aerr("ERROR: file_read() failed: %d\n", nbytes);
           ret = (int)nbytes;
           goto out_close;
         }

@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <debug.h>
@@ -50,6 +49,8 @@
 #if defined(CONFIG_SAMD5E5_WDT) && defined(CONFIG_WATCHDOG)
   #include "sam_wdt.h"
 #endif
+
+#include <nuttx/fs/fs.h>
 
 #ifdef CONFIG_SAMD5E5_SERCOM5_ISI2C
   #include <nuttx/i2c/i2c_master.h>
@@ -100,7 +101,7 @@ int sam_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  ret = nx_mount(NULL, PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
@@ -154,7 +155,7 @@ int sam_bringup(void)
 
   /* Mount the file system at /mnt/nvm */
 
-  ret = mount("/dev/smart0", "/mnt/nvm", "smartfs", 0, NULL);
+  ret = nx_mount("/dev/smart0", "/mnt/nvm", "smartfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount the SmartFS volume: %d\n",

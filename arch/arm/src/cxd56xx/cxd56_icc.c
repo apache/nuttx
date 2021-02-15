@@ -151,7 +151,7 @@ static int icc_semtake(sem_t *semid)
 
 static int icc_semtrytake(sem_t *semid)
 {
-  return sem_trywait(semid);
+  return nxsem_trywait(semid);
 }
 
 static void icc_semgive(sem_t *semid)
@@ -312,7 +312,6 @@ static int icc_recv(FAR struct iccdev_s *priv, FAR iccmsg_t *msg, int32_t ms)
       ret = icc_semtrytake(&priv->rxwait);
       if (ret < 0)
         {
-          ret = -get_errno();
           return ret;
         }
     }

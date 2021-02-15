@@ -275,7 +275,7 @@ static ssize_t loop_write(FAR struct inode *inode,
                                  nsectors * dev->sectsize);
       if (nbyteswritten < 0 && nbyteswritten != -EINTR)
         {
-          ferr("ERROR: nx_write failed: %zd\n", nbyteswritten);
+          ferr("ERROR: file_write failed: %zd\n", nbyteswritten);
           return nbyteswritten;
         }
     }

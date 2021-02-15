@@ -39,12 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/kthread.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
@@ -392,7 +392,7 @@ int lpc17_40_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);

@@ -220,7 +220,7 @@ static int ptmx_open(FAR struct file *filep)
    */
 
   ret = nx_unlink(devname);
-  DEBUGASSERT(ret >= 0);  /* unlink() should never fail */
+  DEBUGASSERT(ret >= 0);  /* nx_unlink() should never fail */
 
   nxsem_post(&g_ptmx.px_exclsem);
   return OK;

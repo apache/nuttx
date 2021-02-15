@@ -39,8 +39,8 @@
 
 #include <nuttx/config.h>
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 
-#include <sys/mount.h>
 #include <stdio.h>
 
 #include "up_internal.h"
@@ -82,7 +82,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the proc filesystem */
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);

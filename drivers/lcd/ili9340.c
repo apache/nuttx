@@ -1170,8 +1170,6 @@ FAR struct lcd_dev_s *ili9340_initialize(
             {
               return &priv->dev;
             }
-
-          errno = EINVAL;
         }
     }
 

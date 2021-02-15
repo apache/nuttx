@@ -170,7 +170,7 @@ FAR void *rammap(int fd, size_t length, off_t offset)
             {
               /* All other read errors are bad. */
 
-              ferr("ERROR: Read failed: offset=%d errno=%d\n",
+              ferr("ERROR: Read failed: offset=%d ret=%d\n",
                    (int)offset, (int)nread);
 
               ret = nread;

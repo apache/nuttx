@@ -103,8 +103,8 @@ int bchdev_unregister(FAR const char *chardev)
 
   if (ret < 0)
     {
-      _err("ERROR: ioctl failed: %d\n", errno);
-      return -errno;
+      _err("ERROR: ioctl failed: %d\n", ret);
+      return ret;
     }
 
   /* Lock out context switches.  If there are no other references

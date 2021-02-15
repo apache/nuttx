@@ -42,11 +42,11 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/mount.h>
 #include <debug.h>
 #include <syslog.h>
 
 #include "nucleo-144.h"
+#include <nuttx/fs/fs.h>
 #include <nuttx/leds/userled.h>
 
 #include "stm32l4_i2c.h"
@@ -104,7 +104,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",

@@ -111,7 +111,7 @@ static FAR void *sim_listener(FAR void *arg)
            * the server.
            */
 
-          fwarn("WARNING: Lost server connection: %d\n", errno);
+          fwarn("WARNING: Lost server connection: %d\n", ret);
           break;
         }
 
@@ -171,7 +171,7 @@ int sim_tsc_setup(int minor)
   ret = boardctl(BOARDIOC_NX_START, 0);
   if (ret < 0)
     {
-      gerr("ERROR: Failed to start the NX server: %d\n", errno);
+      gerr("ERROR: Failed to start the NX server: %d\n", ret);
       return ret;
     }
 
@@ -226,7 +226,7 @@ int sim_tsc_setup(int minor)
     }
   else
     {
-      gerr("ERROR: nx_connect failed: %d\n", errno);
+      gerr("ERROR: nx_connect failed: %d\n", ret);
       return ERROR;
     }
 

@@ -79,7 +79,7 @@ int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf, size_t *len)
           if (nread != -EINTR)
             {
               ret = (int)nread;
-              nerr("ERROR: nx_read() failed: %d\n", ret);
+              nerr("ERROR: file_read() failed: %d\n", ret);
               goto errout;
             }
 
