@@ -32,6 +32,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_AUDIO
 
@@ -298,6 +299,7 @@ struct cxd56_dev_s
 #endif
   bool                    reserved;         /* True: Device is reserved */
   volatile int            result;           /* The result of the last transfer */
+  spinlock_t              lock;             /* Spinlock for SMP */
 };
 
 /****************************************************************************
