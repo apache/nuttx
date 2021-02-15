@@ -65,6 +65,7 @@ static struct rname_code_s _rname_table[] =
   {"PCREL_HI20", R_RISCV_PCREL_HI20},
   {"HI20", R_RISCV_HI20},
   {"LO12_I", R_RISCV_LO12_I},
+  {"LO12_S", R_RISCV_LO12_S},
   {"CALL", R_RISCV_CALL},
   {"CALL_PLT", R_RISCV_CALL_PLT},
   {"BRANCH", R_RISCV_BRANCH},
@@ -421,6 +422,34 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
           insn = (insn & 0x000fffff) | (imm_lo << 20);
 
           _set_val((uint16_t *)addr, insn);
+        }
+        break;
+
+      case R_RISCV_LO12_S:
+        {
+          binfo("%s at %08lx [%08x] to sym=%p st_value=%08lx\n",
+                _get_rname(relotype),
+                (long)addr, _get_val((uint16_t *)addr),
+                sym, (long)sym->st_value);
+
+          /* SW : S-type.
+           * not merge with R_RISCV_HI20 since the compiler
+           * may not generates these two instructions continuously.
+           */
+
+          offset = (long)sym->st_value;
+
+          long imm_hi;
+          long imm_lo;
+          _calc_imm(offset, &imm_hi, &imm_lo);
+
+          uint32_t val =
+              (((int32_t)imm_lo >> 5) << 25) +
+              (((int32_t)imm_lo & 0x1f) << 7);
+
+          binfo("imm_lo=%ld (%lx), val=%x \n", imm_lo, imm_lo, val);
+
+          _add_val((uint16_t *)addr, val);
         }
         break;
 
