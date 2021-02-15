@@ -60,13 +60,14 @@
  *   memory has been configured and mapped but before any devices have been
  *   initialized.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void kinetis_boardinitialize(void)
 {
 #if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2)
-   * the weak function k64_spidev_initialize() has been brought into the link.
+   * the weak function k64_spidev_initialize() has been brought into the
+   * link.
    */
 
   if (k64_spidev_initialize)
@@ -75,7 +76,7 @@ void kinetis_boardinitialize(void)
     }
 #endif
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_KINETIS_USB)
+#if defined(CONFIG_USBDEV) && defined(CONFIG_KINETIS_USBOTG)
   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
    * disabled, and 3) the weak function k64_usbinitialize() has been brought
    * into the build.
@@ -100,10 +101,11 @@ void kinetis_boardinitialize(void)
  * Description:
  *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
- *   called immediately after up_intitialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_intitialize() is called and just before
+ *   the initial application is started.  This additional initialization
+ *   phase may be used, for example, to initialize board-specific device
+ *   drivers.
  *
  ****************************************************************************/
 

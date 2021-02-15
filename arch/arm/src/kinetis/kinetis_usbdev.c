@@ -3317,7 +3317,7 @@ static int khci_epconfigure(struct usbdev_ep_s *ep, const struct usb_epdesc_s *d
   if (!ep || !desc)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_INVALIDPARMS), 0);
-      uerr("ERROR: ep=%p desc=%p\n");
+      uerr("ERROR: ep=%p desc=%p\n", ep, desc);
       return -EINVAL;
     }
 #endif

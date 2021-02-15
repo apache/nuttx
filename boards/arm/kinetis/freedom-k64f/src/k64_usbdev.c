@@ -60,31 +60,31 @@
  *
  * Description:
  *   Called to setup USB-related GPIO pins for the FREEDOM-K64F board.
+ *   There is not really anything that needs to be done here for this
+ *   board as it has dedicated USB pins.
  *
  ****************************************************************************/
 
 void k64_usbinitialize(void)
 {
-# warning "Missing logic"
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name:  kinetis_usbpullup
  *
  * Description:
  *   If USB is supported and the board supports a pullup via GPIO (for USB
  *   software connect and disconnect), then the board software must provide
  *   kinetis_usbpullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined
- *   to be NULL.
+ *   See include/nuttx/usb/usbdev.h for additional description of this
+ *   method. Alternatively, if no pull-up GPIO the following EXTERN can be
+ *   redefined to be NULL.
  *
  ****************************************************************************/
 
 int kinetis_usbpullup(FAR struct usbdev_s *dev, bool enable)
 {
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
-# warning "Missing logic"
   return OK;
 }
 
@@ -103,5 +103,4 @@ int kinetis_usbpullup(FAR struct usbdev_s *dev, bool enable)
 void kinetis_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
   uinfo("resume: %d\n", resume);
-#warning "Missing logic"
 }
