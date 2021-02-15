@@ -132,13 +132,12 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
    * memory resides as long as it is fully initialized and ready to execute.
    */
 
-  loadinfo->ispace = (uint32_t)mmap(NULL, loadinfo->isize, PROT_READ,
-                                    MAP_SHARED | MAP_FILE, loadinfo->filfd,
-                                    0);
-  if (loadinfo->ispace == (uint32_t)MAP_FAILED)
+  ret = file_mmap(&loadinfo->file, NULL, loadinfo->isize, PROT_READ,
+                  MAP_SHARED | MAP_FILE, 0, (FAR void **)&loadinfo->ispace);
+  if (ret < 0)
     {
-      berr("Failed to map NXFLAT ISpace: %d\n", errno);
-      return -errno;
+      berr("Failed to map NXFLAT ISpace: %d\n", ret);
+      return ret;
     }
 
   binfo("Mapped ISpace (%" PRId32 " bytes) at %08x\n",

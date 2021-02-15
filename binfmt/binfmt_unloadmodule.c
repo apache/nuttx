@@ -156,7 +156,7 @@ int unload_module(FAR struct binary_s *binp)
         {
           binfo("Unmapping address space: %p\n", binp->mapped);
 
-          munmap(binp->mapped, binp->mapsize);
+          file_munmap(binp->mapped, binp->mapsize);
         }
 
       /* Free allocated address spaces */

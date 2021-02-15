@@ -78,7 +78,7 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
                               int nexports)
 {
   FAR const struct builtin_s *builtin;
-  int fd;
+  struct file file;
   int index;
   int ret;
 
@@ -86,22 +86,23 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
 
   /* Open the binary file for reading (only) */
 
-  fd = nx_open(filename, O_RDONLY);
-  if (fd < 0)
+  ret = file_open(&file, filename, O_RDONLY);
+  if (ret < 0)
     {
-      berr("ERROR: Failed to open binary %s: %d\n", filename, fd);
-      return fd;
+      berr("ERROR: Failed to open binary %s: %d\n", filename, ret);
+      return ret;
     }
 
   /* If this file is a BINFS file system, then we can recover the name of
    * the file using the FIOC_FILENAME ioctl() call.
    */
 
-  ret = nx_ioctl(fd, FIOC_FILENAME, (unsigned long)((uintptr_t)&filename));
+  ret = file_ioctl(&file, FIOC_FILENAME,
+                   (unsigned long)((uintptr_t)&filename));
   if (ret < 0)
     {
       berr("ERROR: FIOC_FILENAME ioctl failed: %d\n", ret);
-      nx_close(fd);
+      file_close(&file);
       return ret;
     }
 
@@ -113,7 +114,7 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
   if (index < 0)
     {
       berr("ERROR: %s is not a builtin application\n", filename);
-      nx_close(fd);
+      file_close(&file);
       return index;
     }
 
@@ -125,7 +126,7 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
   binp->entrypt   = builtin->main;
   binp->stacksize = builtin->stacksize;
   binp->priority  = builtin->priority;
-  nx_close(fd);
+  file_close(&file);
   return OK;
 }
 

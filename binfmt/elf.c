@@ -114,7 +114,6 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
   binfo("  dtors:        %08lx\n", (long)loadinfo->dtors);
   binfo("  ndtors:       %d\n",    loadinfo->ndtors);
 #endif
-  binfo("  filfd:        %d\n",    loadinfo->filfd);
   binfo("  symtabidx:    %d\n",    loadinfo->symtabidx);
   binfo("  strtabidx:    %d\n",    loadinfo->strtabidx);
 
