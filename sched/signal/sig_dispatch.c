@@ -345,7 +345,8 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
       flags = enter_critical_section();
       if (stcb->task_state == TSTATE_WAIT_SIG &&
-          nxsig_ismember(&stcb->sigwaitmask, info->si_signo))
+          (masked == 0 ||
+           nxsig_ismember(&stcb->sigwaitmask, info->si_signo)))
         {
           memcpy(&stcb->sigunbinfo, info, sizeof(siginfo_t));
           stcb->sigwaitmask = NULL_SIGNAL_SET;
