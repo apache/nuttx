@@ -80,8 +80,8 @@ static inline void nx_disconnected(FAR struct nxmu_conn_s *conn)
 {
   /* Close the server and client MQs */
 
-  mq_close(conn->cwrmq);
-  mq_close(conn->crdmq);
+  _MQ_CLOSE(conn->cwrmq);
+  _MQ_CLOSE(conn->crdmq);
 
   /* And free the client structure */
 

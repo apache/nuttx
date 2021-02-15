@@ -60,6 +60,9 @@
  */
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+#  define _MQ_OPEN                    nxmq_open
+#  define _MQ_CLOSE(d)                nxmq_close(d)
+#  define _MQ_UNLINK(n)               nxmq_unlink(n)
 #  define _MQ_SEND(d,m,l,p)           nxmq_send(d,m,l,p)
 #  define _MQ_TIMEDSEND(d,m,l,p,t)    nxmq_timedsend(d,m,l,p,t)
 #  define _MQ_RECEIVE(d,m,l,p)        nxmq_receive(d,m,l,p)
@@ -68,6 +71,9 @@
 #  define _MQ_SETERRNO(r)             set_errno(-(r))
 #  define _MQ_GETERRVAL(r)            (r)
 #else
+#  define _MQ_OPEN                    mq_open
+#  define _MQ_CLOSE(d)                mq_close(d)
+#  define _MQ_UNLINK(n)               mq_unlink(n)
 #  define _MQ_SEND(d,m,l,p)           mq_send(d,m,l,p)
 #  define _MQ_TIMEDSEND(d,m,l,p,t)    mq_timedsend(d,m,l,p,t)
 #  define _MQ_RECEIVE(d,m,l,p)        mq_receive(d,m,l,p)

@@ -40,10 +40,10 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/mqueue.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxmu.h>
 
@@ -90,6 +90,6 @@ void nx_disconnect(NXHANDLE handle)
     {
       snprintf(climqname, sizeof(climqname),
                NX_CLIENT_MQNAMEFMT, conn->cid);
-      mq_unlink(climqname);
+      _MQ_UNLINK(climqname);
     }
 }
