@@ -1275,7 +1275,7 @@ static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
 
   /* Trigger new DMA job */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&dev->lock);
 
   if (err_code == CXD56_AUDIO_ECODE_DMA_TRANS)
     {
@@ -1286,10 +1286,10 @@ static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
         {
           msg.msg_id = AUDIO_MSG_STOP;
           msg.u.data = 0;
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&dev->lock, flags);
           ret = file_mq_send(&dev->mq, (FAR const char *)&msg,
                              sizeof(msg), CONFIG_CXD56_MSG_PRIO);
-          flags = spin_lock_irqsave(NULL);
+          flags = spin_lock_irqsave(&dev->lock);
           if (ret != OK)
             {
               auderr("ERROR: file_mq_send to stop failed (%d)\n", ret);
@@ -1310,9 +1310,9 @@ static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
           struct ap_buffer_s *apb;
 
           apb = dq_get(&dev->up_runq);
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&dev->lock, flags);
           dev->dev.upper(dev->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
-          flags = spin_lock_irqsave(NULL);
+          flags = spin_lock_irqsave(&dev->lock);
 
           /* End of data? */
 
@@ -1320,10 +1320,10 @@ static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
             {
               msg.msg_id = AUDIO_MSG_STOP;
               msg.u.data = 0;
-              spin_unlock_irqrestore(NULL, flags);
+              spin_unlock_irqrestore(&dev->lock, flags);
               ret = file_mq_send(&dev->mq, (FAR const char *)&msg,
                                  sizeof(msg), CONFIG_CXD56_MSG_PRIO);
-              flags = spin_lock_irqsave(NULL);
+              flags = spin_lock_irqsave(&dev->lock);
               if (ret != OK)
                 {
                   auderr("ERROR: file_mq_send to stop failed (%d)\n", ret);
@@ -1340,17 +1340,17 @@ static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
 
       msg.msg_id = AUDIO_MSG_DATA_REQUEST;
       msg.u.data = 0;
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&dev->lock, flags);
       ret = file_mq_send(&dev->mq, (FAR const char *) &msg,
                          sizeof(msg), CONFIG_CXD56_MSG_PRIO);
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&dev->lock);
       if (ret != OK)
         {
           auderr("ERROR: file_mq_send to request failed (%d)\n", ret);
         }
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&dev->lock, flags);
 }
 
 #else
@@ -1365,19 +1365,19 @@ static void _process_audio(cxd56_dmahandle_t hdl, uint16_t err_code)
 
   /* Trigger new DMA job */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&dev->lock);
 
   if (dq_count(&dev->up_runq) > 0)
     {
       FAR struct ap_buffer_s *apb;
 
       apb = (struct ap_buffer_s *) dq_get(&dev->up_runq);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&dev->lock, flags);
       dev->dev.upper(dev->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&dev->lock);
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&dev->lock, flags);
 
   if (err_code == CXD56_AUDIO_ECODE_DMA_TRANS)
     {
@@ -3177,7 +3177,7 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
   uint32_t size;
   int ret = OK;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&dev->lock);
 #ifdef CONFIG_AUDIO_CXD56_SRC
   FAR struct ap_buffer_s *src_apb;
 
@@ -3190,9 +3190,9 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
 
       audwarn("Underrun \n");
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&dev->lock, flags);
       ret = cxd56_stop_dma(dev);
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&dev->lock);
       audwarn("STOP DMA due to underrun \n");
       if (ret != CXD56_AUDIO_ECODE_OK)
         {
@@ -3259,9 +3259,9 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
             {
               /* Turn on amplifier */
 
-              spin_unlock_irqrestore(NULL, flags);
+              spin_unlock_irqrestore(&dev->lock, flags);
               board_external_amp_mute_control(false);
-              flags = spin_lock_irqsave(NULL);
+              flags = spin_lock_irqsave(&dev->lock);
 
               /* Mask interrupts */
 
@@ -3377,10 +3377,10 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
               msg.msg_id = AUDIO_MSG_STOP;
               msg.u.data = 0;
 
-              spin_unlock_irqrestore(NULL, flags);
+              spin_unlock_irqrestore(&dev->lock, flags);
               ret = file_mq_send(&dev->mq, (FAR const char *)&msg,
                                  sizeof(msg), CONFIG_CXD56_MSG_PRIO);
-              flags = spin_lock_irqsave(NULL);
+              flags = spin_lock_irqsave(&dev->lock);
 
               if (ret != OK)
                 {
@@ -3393,7 +3393,7 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
     }
 
 exit:
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&dev->lock, flags);
 
   return ret;
 }
@@ -3422,12 +3422,12 @@ static int cxd56_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
   else
     {
 #endif
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&priv->lock);
 
       apb->dq_entry.flink = NULL;
       dq_put(&priv->up_pendq, &apb->dq_entry);
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
 
       if (priv->mq.f_inode != NULL)
         {
