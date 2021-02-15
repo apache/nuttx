@@ -76,7 +76,7 @@ FAR FILE *fdopen(int fd, FAR const char *mode)
       ret = fs_fdopen(fd, oflags, NULL, &filep);
       if (ret < 0)
         {
-          _NX_SETERRNO(ret);
+          set_errno(-ret);
         }
     }
 
@@ -122,7 +122,7 @@ FAR FILE *fopen(FAR const char *path, FAR const char *mode)
 
           close(fd);
 
-          _NX_SETERRNO(ret);
+          set_errno(-ret);
           filep = NULL;
         }
     }
