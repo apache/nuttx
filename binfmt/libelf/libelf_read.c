@@ -108,7 +108,7 @@ int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
     {
       /* Seek to the next read position */
 
-      rpos = nx_seek(loadinfo->filfd, offset, SEEK_SET);
+      rpos = file_seek(&loadinfo->file, offset, SEEK_SET);
       if (rpos != offset)
         {
           berr("Failed to seek to position %lu: %d\n",
@@ -118,7 +118,7 @@ int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
 
       /* Read the file data at offset into the user buffer */
 
-      nbytes = nx_read(loadinfo->filfd, buffer, readsize);
+      nbytes = file_read(&loadinfo->file, buffer, readsize);
       if (nbytes < 0)
         {
           /* EINTR just means that we received a signal */

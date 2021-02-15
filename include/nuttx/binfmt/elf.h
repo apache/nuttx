@@ -132,7 +132,7 @@ struct elf_loadinfo_s
   uint16_t           symtabidx;  /* Symbol table section index */
   uint16_t           strtabidx;  /* String table section index */
   uint16_t           buflen;     /* size of iobuffer[] */
-  int                filfd;      /* Descriptor for the file being loaded */
+  struct file        file;       /* Descriptor for the file being loaded */
 };
 
 /****************************************************************************

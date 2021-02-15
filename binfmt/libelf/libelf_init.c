@@ -134,7 +134,6 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
   /* Clear the load info structure */
 
   memset(loadinfo, 0, sizeof(struct elf_loadinfo_s));
-  loadinfo->filfd = -1;
 
   /* Get the length of the file. */
 
@@ -147,10 +146,9 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
 
   /* Open the binary file for reading (only) */
 
-  loadinfo->filfd = nx_open(filename, O_RDONLY);
-  if (loadinfo->filfd < 0)
+  ret = file_open(&loadinfo->file, filename, O_RDONLY);
+  if (ret < 0)
     {
-      ret = loadinfo->filfd;
       berr("Failed to open ELF binary %s: %d\n", filename, ret);
       return ret;
     }
