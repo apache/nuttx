@@ -483,28 +483,26 @@ static int wlan_rx_done(void *buffer, uint16_t len, void *eb)
   struct wlan_rxbuf *rxbuf;
   irqstate_t flags;
   FAR struct wlan_priv_s *priv = &g_wlan_priv;
+  int ret = 0;
 
   if (!priv->ifup)
     {
-      return 0;
+      goto out;
     }
 
   if (len > WLAN_BUF_SIZE)
     {
       nwarn("ERROR: Wlan receive %d larger than %d\n",
              len, WLAN_BUF_SIZE);
-      return -EINVAL;
+      ret = -EINVAL;
+      goto out;
     }
 
   rxbuf = wlan_alloc_buffer(priv);
   if (!rxbuf)
     {
-      if (eb)
-        {
-          esp_wifi_free_eb(eb);
-        }
-
-      return -ENOBUFS;
+      ret = -ENOBUFS;
+      goto out;
     }
 
   memcpy(rxbuf->buffer, buffer, len);
@@ -525,6 +523,14 @@ static int wlan_rx_done(void *buffer, uint16_t len, void *eb)
     }
 
   return 0;
+
+out:
+  if (eb)
+    {
+      esp_wifi_free_eb(eb);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
