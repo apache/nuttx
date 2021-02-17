@@ -89,8 +89,8 @@
  * into that region.
  */
 
-extern uintptr_t __RAM_ADDR_U_INIT_PARAM;
-#define ETH_RAMADDR ((uintptr_t)&__RAM_ADDR_U_INIT_PARAM << 16) + 0x00c000
+extern uintptr_t _RAM_ADDR_U_INIT_PARAM;
+#define ETH_RAMADDR ((uintptr_t)&_RAM_ADDR_U_INIT_PARAM << 16) + 0x00c000
 
 #if CONFIG_NET_ETH_PKTSIZE > 1518
 #  error "MAXF size too big for this device"
@@ -930,7 +930,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
   ninfo("  MII_ADVERTISE: %04x\n", ez80emac_miiread(priv, MII_ADVERTISE));
   ninfo("  MII_LPA:       %04x\n", ez80emac_miiread(priv, MII_LPA));
   ninfo("  MII_EXPANSION: %04x\n", ez80emac_miiread(priv, MII_EXPANSION));
-  ninfo("EMAC CFG1:         %02x\n", inp(EZ80_EMAC_CFG11));
+  ninfo("EMAC CFG1:         %02x\n", inp(EZ80_EMAC_CFG1));
   return OK;
 }
 #endif
