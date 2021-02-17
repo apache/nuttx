@@ -29,5 +29,9 @@
 
 #define BOARD_XTAL_FREQUENCY  40000000
 
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOOUT    2 /* Amount of GPIO Output pins */
+
 #endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_INCLUDE_BOARD_H */
 

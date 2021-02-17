@@ -21,4 +21,18 @@
 #ifndef __ARCH_RISCV_INCLUDE_ESP32C3_CHIP_H
 #define __ARCH_RISCV_INCLUDE_ESP32C3_CHIP_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Characterize each supported ESP32 part */
+
+#define ESP32C3_NGPIOS 22 /* GPIO0-21 */
+
 #endif /* __ARCH_RISCV_INCLUDE_ESP32C3_CHIP_H */

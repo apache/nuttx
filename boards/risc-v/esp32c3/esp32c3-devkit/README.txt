@@ -77,6 +77,17 @@ Configurations
 
   Basic configuration to run the NuttShell (nsh).
 
+  gpio
+  ____
+
+  This is a test for the GPIO driver.  It uses GPIO1 and GPIO2 as outputs.
+  At the nsh, we can turn the outputs on and off with the following:
+    nsh> gpio -o 1 /dev/gpout0
+    nsh> gpio -o 1 /dev/gpout1
+
+    nsh> gpio -o 0 /dev/gpout0
+    nsh> gpio -o 0 /dev/gpout1
+
 Building and flashing
 =====================
 
