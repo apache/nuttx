@@ -103,12 +103,13 @@ struct cxd56_emmc_state_s
 static int       cxd56_emmc_open(FAR struct inode *inode);
 static int       cxd56_emmc_close(FAR struct inode *inode);
 static ssize_t   cxd56_emmc_read(FAR struct inode *inode,
-                                 unsigned char *buffer, size_t start_sector,
+                                 unsigned char *buffer,
+                                 blkcnt_t start_sector,
                                  unsigned int nsectors);
 #if !defined(CONFIG_MMCSD_READONLY)
 static ssize_t   cxd56_emmc_write(FAR struct inode *inode,
                                   const unsigned char *buffer,
-                                  size_t start_sector,
+                                  blkcnt_t start_sector,
                                   unsigned int nsectors);
 #endif
 static int       cxd56_emmc_geometry(FAR struct inode *inode,
@@ -348,7 +349,7 @@ static int emmc_checkresponse(void)
 
   if (resp & R1STATUS_ALL_ERR)
     {
-      ferr("Response error %08x\n", resp);
+      ferr("Response error %08" PRIx32 "\n", resp);
       return -EIO;
     }
 
@@ -734,7 +735,7 @@ static int cxd56_emmc_readsectors(FAR struct cxd56_emmc_state_s *priv,
   if (idsts &
       (EMMC_IDSTS_FBE | EMMC_IDSTS_DU | EMMC_IDSTS_CES | EMMC_IDSTS_AIS))
     {
-      ferr("DMA status failed. %08x\n", idsts);
+      ferr("DMA status failed. %08" PRIx32 "\n", idsts);
       ret = -EIO;
     }
 
@@ -747,7 +748,7 @@ finish:
 
 #if !defined(CONFIG_MMCSD_READONLY)
 static int cxd56_emmc_writesectors(FAR struct cxd56_emmc_state_s *priv,
-                                   const void *buf, size_t start_sector,
+                                   const void *buf, blkcnt_t start_sector,
                                    unsigned int nsectors)
 {
   struct emmc_dma_desc_s *descs;
@@ -797,7 +798,7 @@ static int cxd56_emmc_writesectors(FAR struct cxd56_emmc_state_s *priv,
   if (idsts &
       (EMMC_IDSTS_FBE | EMMC_IDSTS_DU | EMMC_IDSTS_CES | EMMC_IDSTS_AIS))
     {
-      ferr("DMA status error. %08x\n", idsts);
+      ferr("DMA status error. %08" PRIx32 "\n", idsts);
       ret = -EIO;
     }
 
@@ -866,7 +867,7 @@ static int cxd56_emmc_close(FAR struct inode *inode)
 }
 
 static ssize_t cxd56_emmc_read(FAR struct inode *inode,
-                               unsigned char *buffer, size_t start_sector,
+                               unsigned char *buffer, blkcnt_t start_sector,
                                unsigned int nsectors)
 {
   FAR struct cxd56_emmc_state_s *priv;
@@ -875,7 +876,7 @@ static ssize_t cxd56_emmc_read(FAR struct inode *inode,
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct cxd56_emmc_state_s *)inode->i_private;
 
-  finfo("Read sector %d (%d sectors) to %p\n",
+  finfo("Read sector %" PRIu32 " (%u sectors) to %p\n",
         start_sector, nsectors, buffer);
 
   ret = cxd56_emmc_readsectors(priv, buffer, start_sector, nsectors);
@@ -891,7 +892,7 @@ static ssize_t cxd56_emmc_read(FAR struct inode *inode,
 #if !defined(CONFIG_MMCSD_READONLY)
 static ssize_t cxd56_emmc_write(FAR struct inode *inode,
                                 const unsigned char *buffer,
-                                size_t start_sector,
+                                blkcnt_t start_sector,
                                 unsigned int nsectors)
 {
   FAR struct cxd56_emmc_state_s *priv;
@@ -900,7 +901,7 @@ static ssize_t cxd56_emmc_write(FAR struct inode *inode,
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct cxd56_emmc_state_s *)inode->i_private;
 
-  finfo("Write %p to sector %d (%d sectors)\n", buffer,
+  finfo("Write %p to sector %" PRIu32 " (%u sectors)\n", buffer,
         start_sector, nsectors);
 
   ret = cxd56_emmc_writesectors(priv, buffer, start_sector, nsectors);
