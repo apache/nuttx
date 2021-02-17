@@ -39,8 +39,8 @@ struct partition_state_s
 {
   FAR struct mtd_dev_s *mtd;
   FAR struct inode *blk;
-  size_t nblocks;
-  size_t blocksize;
+  blkcnt_t nblocks;
+  blksize_t blocksize;
   size_t erasesize;
 };
 

@@ -61,9 +61,9 @@ struct mmcl_dev_s
 static int     mmcl_open(FAR struct inode *inode);
 static int     mmcl_close(FAR struct inode *inode);
 static ssize_t mmcl_read(FAR struct inode *inode, unsigned char *buffer,
-                         size_t start_sector, unsigned int nsectors);
+                         blkcnt_t start_sector, unsigned int nsectors);
 static ssize_t mmcl_write(FAR struct inode *inode,
-                          const unsigned char *buffer, size_t start_sector,
+                          const unsigned char *buffer, blkcnt_t start_sector,
                           unsigned int nsectors);
 static int     mmcl_geometry(FAR struct inode *inode,
                              struct geometry *geometry);
@@ -122,12 +122,12 @@ static int mmcl_close(FAR struct inode *inode)
  ****************************************************************************/
 
 static ssize_t mmcl_read(FAR struct inode *inode, unsigned char *buffer,
-  size_t start_sector, unsigned int nsectors)
+  blkcnt_t start_sector, unsigned int nsectors)
 {
   ssize_t nread;
   struct mmcl_dev_s *dev;
 
-  finfo("sector: %d nsectors: %d\n", start_sector, nsectors);
+  finfo("sector: %" PRIu32 " nsectors: %u\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct mmcl_dev_s *)inode->i_private;
@@ -135,7 +135,7 @@ static ssize_t mmcl_read(FAR struct inode *inode, unsigned char *buffer,
   nread = MTD_BREAD(dev->mtd, start_sector, nsectors, buffer);
   if (nread != nsectors)
     {
-      finfo("Read %d blocks starting at block %d failed: %d\n",
+      finfo("Read %u blocks starting at block %" PRIu32 " failed: %d\n",
             nsectors, start_sector, nread);
       return -EIO;
     }
@@ -151,13 +151,13 @@ static ssize_t mmcl_read(FAR struct inode *inode, unsigned char *buffer,
  ****************************************************************************/
 
 static ssize_t mmcl_write(FAR struct inode *inode,
-                          const unsigned char *buffer, size_t start_sector,
+                          const unsigned char *buffer, blkcnt_t start_sector,
                           unsigned int nsectors)
 {
   ssize_t nwrite;
   struct mmcl_dev_s *dev;
 
-  finfo("sector: %d nsectors: %d\n", start_sector, nsectors);
+  finfo("sector: %" PRIu32 " nsectors: %u\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct mmcl_dev_s *)inode->i_private;
@@ -165,7 +165,7 @@ static ssize_t mmcl_write(FAR struct inode *inode,
   nwrite = MTD_BWRITE(dev->mtd, start_sector, nsectors, buffer);
   if (nwrite != nsectors)
     {
-      finfo("Write %d blocks starting at block %d failed: %d\n",
+      finfo("Write %u blocks starting at block %" PRIu32 " failed: %d\n",
             nsectors, start_sector, nwrite);
       return -EIO;
     }
@@ -199,7 +199,7 @@ static int mmcl_geometry(FAR struct inode *inode, struct geometry *geometry)
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
 
-      finfo("nsectors: %d sectorsize: %d\n",
+      finfo("nsectors: %" PRIu32 " sectorsize: %" PRIi16 "\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;

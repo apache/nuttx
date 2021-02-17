@@ -181,10 +181,10 @@ static int      mmcsd_xmitblock(FAR struct mmcsd_slot_s *slot,
 static int       mmcsd_open(FAR struct inode *inode);
 static int       mmcsd_close(FAR struct inode *inode);
 static ssize_t   mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
-                   size_t start_sector, unsigned int nsectors);
+                   blkcnt_t start_sector, unsigned int nsectors);
 #if !defined(CONFIG_MMCSD_READONLY)
 static ssize_t   mmcsd_write(FAR struct inode *inode,
-                   const unsigned char *buffer, size_t start_sector,
+                   const unsigned char *buffer, blkcnt_t start_sector,
                    unsigned int nsectors);
 #endif
 static int       mmcsd_geometry(FAR struct inode *inode,
@@ -1156,7 +1156,7 @@ static int mmcsd_close(FAR struct inode *inode)
  ****************************************************************************/
 
 static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
-                          size_t start_sector, unsigned int nsectors)
+                          blkcnt_t start_sector, unsigned int nsectors)
 {
   FAR struct mmcsd_slot_s *slot;
   FAR struct spi_dev_s *spi;
@@ -1166,7 +1166,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   int    i;
   int ret;
 
-  finfo("start_sector=%d nsectors=%d\n", start_sector, nsectors);
+  finfo("start_sector=%" PRIu32 " nsectors=%u\n", start_sector, nsectors);
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!buffer)
@@ -1317,7 +1317,7 @@ errout_with_eio:
 #if !defined(CONFIG_MMCSD_READONLY)
 static ssize_t mmcsd_write(FAR struct inode *inode,
                            FAR const unsigned char *buffer,
-                           size_t start_sector, unsigned int nsectors)
+                           blkcnt_t start_sector, unsigned int nsectors)
 {
   FAR struct mmcsd_slot_s *slot;
   FAR struct spi_dev_s *spi;
@@ -1327,7 +1327,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
   int i;
   int ret;
 
-  finfo("start_sector=%d nsectors=%d\n", start_sector, nsectors);
+  finfo("start_sector=%" PRIu32 " nsectors=%u\n", start_sector, nsectors);
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!buffer)
@@ -1593,8 +1593,8 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   finfo("geo_available:     %d\n", geometry->geo_available);
   finfo("geo_mediachanged:  %d\n", geometry->geo_mediachanged);
   finfo("geo_writeenabled:  %d\n", geometry->geo_writeenabled);
-  finfo("geo_nsectors:      %d\n", geometry->geo_nsectors);
-  finfo("geo_sectorsize:    %d\n", geometry->geo_sectorsize);
+  finfo("geo_nsectors:      %" PRIu32 "\n", geometry->geo_nsectors);
+  finfo("geo_sectorsize:    %" PRIi16 "\n", geometry->geo_sectorsize);
 
   return OK;
 }

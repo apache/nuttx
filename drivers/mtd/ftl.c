@@ -84,11 +84,11 @@ static int     ftl_close(FAR struct inode *inode);
 static ssize_t ftl_reload(FAR void *priv, FAR uint8_t *buffer,
                  off_t startblock, size_t nblocks);
 static ssize_t ftl_read(FAR struct inode *inode, FAR unsigned char *buffer,
-                 size_t start_sector, unsigned int nsectors);
+                 blkcnt_t start_sector, unsigned int nsectors);
 static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
                  off_t startblock, size_t nblocks);
 static ssize_t ftl_write(FAR struct inode *inode,
-                 FAR const unsigned char *buffer, size_t start_sector,
+                 FAR const unsigned char *buffer, blkcnt_t start_sector,
                  unsigned int nsectors);
 static int     ftl_geometry(FAR struct inode *inode,
                  FAR struct geometry *geometry);
@@ -204,11 +204,11 @@ static ssize_t ftl_reload(FAR void *priv, FAR uint8_t *buffer,
  ****************************************************************************/
 
 static ssize_t ftl_read(FAR struct inode *inode, unsigned char *buffer,
-                        size_t start_sector, unsigned int nsectors)
+                        blkcnt_t start_sector, unsigned int nsectors)
 {
   FAR struct ftl_struct_s *dev;
 
-  finfo("sector: %zu nsectors: %d\n", start_sector, nsectors);
+  finfo("sector: %" PRIu32 " nsectors: %u\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
 
@@ -438,11 +438,11 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
 
 static ssize_t ftl_write(FAR struct inode *inode,
                          FAR const unsigned char *buffer,
-                         size_t start_sector, unsigned int nsectors)
+                         blkcnt_t start_sector, unsigned int nsectors)
 {
   struct ftl_struct_s *dev;
 
-  finfo("sector: %zu nsectors: %d\n", start_sector, nsectors);
+  finfo("sector: %" PRIu32 " nsectors: %u\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct ftl_struct_s *)inode->i_private;
@@ -479,7 +479,7 @@ static int ftl_geometry(FAR struct inode *inode,
 
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
-      finfo("nsectors: %zu sectorsize: %zu\n",
+      finfo("nsectors: %" PRIu32 " sectorsize: %u\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;

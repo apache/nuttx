@@ -85,9 +85,9 @@ static int     eeed_close(FAR struct inode *inode);
 #endif
 
 static ssize_t eeed_read(FAR struct inode *inode, FAR unsigned char *buffer,
-                 size_t start_sector, unsigned int nsectors);
+                 blkcnt_t start_sector, unsigned int nsectors);
 static ssize_t eeed_write(FAR struct inode *inode,
-                 FAR const unsigned char *buffer, size_t start_sector,
+                 FAR const unsigned char *buffer, blkcnt_t start_sector,
                  unsigned int nsectors);
 
 static int     eeed_geometry(FAR struct inode *inode,
@@ -215,15 +215,15 @@ static int eeed_close(FAR struct inode *inode)
  ******************************************************************************/
 
 static ssize_t eeed_read(FAR struct inode *inode, unsigned char *buffer,
-                       size_t start_sector, unsigned int nsectors)
+                       blkcnt_t start_sector, unsigned int nsectors)
 {
   FAR struct eeed_struct_s *dev;
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct eeed_struct_s *)inode->i_private;
 
-  finfo("sector: %d nsectors: %d sectorsize: %d\n",
-        start_sector, dev->eeed_sectsize, nsectors);
+  finfo("sector: %" PRIu32 " nsectors: %u sectorsize: %d\n",
+        start_sector, nsectors, dev->eeed_sectsize);
 
   if (start_sector < dev->eeed_nsectors &&
       start_sector + nsectors <= dev->eeed_nsectors)
@@ -251,15 +251,15 @@ static ssize_t eeed_read(FAR struct inode *inode, unsigned char *buffer,
  ******************************************************************************/
 
 static ssize_t eeed_write(FAR struct inode *inode, const unsigned char *buffer,
-                        size_t start_sector, unsigned int nsectors)
+                        blkcnt_t start_sector, unsigned int nsectors)
 {
   struct eeed_struct_s *dev;
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct eeed_struct_s *)inode->i_private;
 
-  finfo("sector: %d nsectors: %d sectorsize: %d\n",
-        start_sector, dev->eeed_sectsize, nsectors);
+  finfo("sector: %" PRIu32 " nsectors: %u sectorsize: %d\n",
+        start_sector, nsectors, dev->eeed_sectsize);
 
   if (start_sector < dev->eeed_nsectors &&
            start_sector + nsectors <= dev->eeed_nsectors)
@@ -312,7 +312,7 @@ static int eeed_geometry(FAR struct inode *inode, struct geometry *geometry)
 
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
-      finfo("nsectors: %d sectorsize: %d\n",
+      finfo("nsectors: %" PRIu32 " sectorsize: %" PRIu16 "\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;
