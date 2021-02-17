@@ -30,6 +30,10 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += esp32c3_appinit.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += esp32c3_gpio.c
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32c3.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32c3_out.ld
 

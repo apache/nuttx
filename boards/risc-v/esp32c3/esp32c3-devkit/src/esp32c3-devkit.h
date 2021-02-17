@@ -63,5 +63,14 @@
 
 int esp32c3_bringup(void);
 
+/****************************************************************************
+ * Name: esp32c3_gpio_init
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int esp32c3_gpio_init(void);
+#endif
+
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_SRC_ESP32C3_DEVKIT_H */
