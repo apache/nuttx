@@ -105,7 +105,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   /* Reset the initial stack pointer */
 
-  tcb->xcp.regs[REG_RSP] = (chipreg_t)tcb->adj_stack_ptr;
+  tcb->xcp.regs[XCPT_SP] = (chipreg_t)tcb->adj_stack_ptr;
 
   /* And return a pointer to the allocated memory */
 
