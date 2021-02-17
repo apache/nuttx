@@ -347,7 +347,7 @@ static int nrf52_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   if (timeout < 1 || timeout > WDT_MAXTIMEOUT)
     {
-      wderr("ERROR: Cannot represent timeout=%" PRId32 " > %d\n",
+      wderr("ERROR: Cannot represent timeout=%" PRId32 " > %" PRId32 "\n",
             timeout, WDT_MAXTIMEOUT);
       return -ERANGE;
     }

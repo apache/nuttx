@@ -42,27 +42,27 @@
 /* Limits of exact-width integer types */
 
 #define INT8_MIN            (-INT8_MAX - 1)
-#define INT8_MAX            127
-#define UINT8_MAX           255
+#define INT8_MAX            INT8_C(127)
+#define UINT8_MAX           UINT8_C(255)
 
 #define INT16_MIN           (-INT16_MAX - 1)
-#define INT16_MAX           32767
-#define UINT16_MAX          65535u
+#define INT16_MAX           INT16_C(32767)
+#define UINT16_MAX          UINT16_C(65535)
 
 #ifdef __INT24_DEFINED
 #  define INT24_MIN         (-INT24_MAX - 1)
-#  define INT24_MAX         8388607
-#  define UINT24_MAX        16777215u
+#  define INT24_MAX         INT24_C(8388607)
+#  define UINT24_MAX        UINT24_C(16777215)
 #endif
 
 #define INT32_MIN           (-INT32_MAX - 1)
-#define INT32_MAX           2147483647
-#define UINT32_MAX          4294967295u
+#define INT32_MAX           INT32_C(2147483647)
+#define UINT32_MAX          UINT32_C(4294967295)
 
 #ifdef __INT64_DEFINED
-#  define INT64_MIN         (-INT64_MAX - 1ll)
-#  define INT64_MAX         9223372036854775807ll
-#  define UINT64_MAX        18446744073709551615ull
+#  define INT64_MIN         (-INT64_MAX - 1)
+#  define INT64_MAX         INT64_C(9223372036854775807)
+#  define UINT64_MAX        UINT64_C(18446744073709551615)
 #endif
 
 /* Limits of minimum-width integer types */
