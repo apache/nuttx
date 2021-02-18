@@ -45,6 +45,10 @@ ifeq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += kmm_sbrk.c
 endif
 
+ifeq ($(CONFIG_DEBUG_MM),y)
+CSRCS += kmm_checkcorruption.c
+endif
+
 # Add the kernel heap directory to the build
 
 DEPPATH += --dep-path kmm_heap

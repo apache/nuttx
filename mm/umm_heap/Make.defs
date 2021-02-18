@@ -44,6 +44,10 @@ ifeq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += umm_sbrk.c
 endif
 
+ifeq ($(CONFIG_DEBUG_MM),y)
+CSRCS += umm_checkcorruption.c
+endif
+
 # Add the user heap directory to the build
 
 DEPPATH += --dep-path umm_heap
