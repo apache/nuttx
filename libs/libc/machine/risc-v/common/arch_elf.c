@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/risc-v/rv64/arch_elf.c
+ * libs/libc/machine/risc-v/common/arch_elf.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -42,6 +42,18 @@
 
 #define RVI_OPCODE_MASK 0x7F
 
+/* ELF32 and ELF64 definitions */
+
+#ifdef CONFIG_LIBC_ARCH_ELF_64BIT
+#  define ARCH_ELF_TYP_STR    "64"
+#  define ARCH_ELF_CLASS      ELFCLASS64
+#  define ARCH_ELF_RELTYPE    ELF64_R_TYPE
+#else /* !CONFIG_LIBC_ARCH_ELF_64BIT */
+#  define ARCH_ELF_TYP_STR    "32"
+#  define ARCH_ELF_CLASS      ELFCLASS32
+#  define ARCH_ELF_RELTYPE    ELF32_R_TYPE
+#endif /* CONFIG_LIBC_ARCH_ELF_64BIT */
+
 /****************************************************************************
  * Private Data Types
  ****************************************************************************/
@@ -59,6 +71,7 @@ struct rname_code_s
 static struct rname_code_s _rname_table[] =
 {
   {"RELAX", R_RISCV_RELAX},
+  {"RISCV_32", R_RISCV_32},
   {"RISCV_64", R_RISCV_64},
   {"PCREL_LO12_I", R_RISCV_PCREL_LO12_I},
   {"PCREL_LO12_S", R_RISCV_PCREL_LO12_S},
@@ -133,7 +146,7 @@ static void _add_val(uint16_t *addr, uint32_t val)
  *   Given offset and obtain imm_hi (20bit) and imm_lo (12bit)
  *
  * Input Parameters:
- *   offset - signed 64bit
+ *   offset - signed 32bit
  *   imm_hi - signed 20bit
  *   imm_lo - signed 12bit
  *
@@ -188,7 +201,7 @@ static void _calc_imm(long offset, long *imm_hi, long *imm_lo)
  *
  ****************************************************************************/
 
-bool up_checkarch(FAR const Elf64_Ehdr *ehdr)
+bool up_checkarch(FAR const Elf_Ehdr *ehdr)
 {
   /* Make sure it's an RISCV executable */
 
@@ -198,11 +211,12 @@ bool up_checkarch(FAR const Elf64_Ehdr *ehdr)
       return false;
     }
 
-  /* Make sure that 64-bit objects are supported */
+  /* Make sure that current objects are supported */
 
-  if (ehdr->e_ident[EI_CLASS] != ELFCLASS64)
+  if (ehdr->e_ident[EI_CLASS] != ARCH_ELF_CLASS)
     {
-      berr("ERROR: Need 64-bit objects: e_ident[EI_CLASS]=%02x\n",
+      berr("ERROR: Need " ARCH_ELF_TYP_STR "-bit "
+           "objects: e_ident[EI_CLASS]=%02x\n",
            ehdr->e_ident[EI_CLASS]);
       return false;
     }
@@ -224,7 +238,7 @@ bool up_checkarch(FAR const Elf64_Ehdr *ehdr)
 
   if ((ehdr->e_entry & 1) != 0)
     {
-      berr("ERROR: Entry point is not properly aligned: %08" PRIx64 "\n",
+      berr("ERROR: Entry point is not properly aligned: %08lx\n",
            ehdr->e_entry);
     }
 
@@ -255,14 +269,14 @@ bool up_checkarch(FAR const Elf64_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(FAR const Elf64_Rel *rel, FAR const Elf64_Sym *sym,
+int up_relocate(FAR const Elf_Rel *rel, FAR const Elf_Sym *sym,
                 uintptr_t addr)
 {
   berr("Not implemented\n");
   return -ENOSYS;
 }
 
-int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
+int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
                    uintptr_t addr)
 {
   long offset;
@@ -270,7 +284,7 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
 
   /* All relocations depend upon having valid symbol information */
 
-  relotype = ELF64_R_TYPE(rel->r_info);
+  relotype = ARCH_ELF_RELTYPE(rel->r_info);
 
   if (relotype == R_RISCV_RELAX)
     {
@@ -292,10 +306,11 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
 
   switch (relotype)
     {
+      case R_RISCV_32:
       case R_RISCV_64:
         {
           binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
-                "to sym=%p st_value=%08" PRIx64 "\n",
+                "to sym=%p st_value=%08lx\n",
                 _get_rname(relotype),
                 addr, _get_val((uint16_t *)addr),
                 sym, sym->st_value);
@@ -309,7 +324,7 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
       case R_RISCV_PCREL_LO12_S:
         {
           binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
-                "to sym=%p st_value=%08" PRIx64 "\n",
+                "to sym=%p st_value=%08lx\n",
                 _get_rname(relotype),
                 addr, _get_val((uint16_t *)addr),
                 sym, sym->st_value);
@@ -323,7 +338,7 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
       case R_RISCV_CALL_PLT:
         {
           binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
-                "to sym=%p st_value=%08" PRIx64 "\n",
+                "to sym=%p st_value=%08lx\n",
                 _get_rname(relotype),
                 addr, _get_val((uint16_t *)addr),
                 sym, sym->st_value);
@@ -347,7 +362,8 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
                 (((int32_t)imm_lo >> 5) << 25) +
                 (((int32_t)imm_lo & 0x1f) << 7);
 
-              binfo("imm_lo=%ld (%lx), val=%x \n", imm_lo, imm_lo, val);
+              binfo("imm_lo=%ld (%lx), val=%" PRIx32 "\n",
+                    imm_lo, imm_lo, val);
 
               _add_val((uint16_t *)(addr + 4), val);
             }
@@ -362,10 +378,11 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
 
       case R_RISCV_BRANCH:
         {
-          binfo("%s at %08lx [%08x] to sym=%p st_value=%08lx\n",
+          binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
+                "to sym=%p st_value=%08lx\n",
                 _get_rname(relotype),
-                (long)addr, _get_val((uint16_t *)addr),
-                sym, (long)sym->st_value);
+                addr, _get_val((uint16_t *)addr),
+                sym, sym->st_value);
 
           /* P.23 Conditinal Branches : B type (imm=12bit) */
 
@@ -376,17 +393,19 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
 
           ASSERT(offset && val);
 
-          binfo("offset for Bx=%ld (0x%lx) (val=0x%08x) already set! \n",
+          binfo("offset for Bx=%ld (0x%lx) (val=0x%08" PRIx32 ") "
+                "already set! \n",
                 offset, offset, val);
         }
         break;
 
       case R_RISCV_HI20:
         {
-          binfo("%s at %08lx [%08x] to sym=%p st_value=%08lx\n",
+          binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
+                "to sym=%p st_value=%08lx\n",
                 _get_rname(relotype),
-                (long)addr, _get_val((uint16_t *)addr),
-                sym, (long)sym->st_value);
+                addr, _get_val((uint16_t *)addr),
+                sym, sym->st_value);
 
           /* P.19 LUI */
 
@@ -406,10 +425,11 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
 
       case R_RISCV_LO12_I:
         {
-          binfo("%s at %08lx [%08x] to sym=%p st_value=%08lx\n",
+          binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
+                "to sym=%p st_value=%08lx\n",
                 _get_rname(relotype),
-                (long)addr, _get_val((uint16_t *)addr),
-                sym, (long)sym->st_value);
+                addr, _get_val((uint16_t *)addr),
+                sym, sym->st_value);
 
           /* ADDI, FLW, LD, ... : I-type */
 
@@ -427,10 +447,11 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
 
       case R_RISCV_LO12_S:
         {
-          binfo("%s at %08lx [%08x] to sym=%p st_value=%08lx\n",
+          binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
+                "to sym=%p st_value=%08lx\n",
                 _get_rname(relotype),
-                (long)addr, _get_val((uint16_t *)addr),
-                sym, (long)sym->st_value);
+                addr, _get_val((uint16_t *)addr),
+                sym, sym->st_value);
 
           /* SW : S-type.
            * not merge with R_RISCV_HI20 since the compiler
@@ -447,7 +468,7 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
               (((int32_t)imm_lo >> 5) << 25) +
               (((int32_t)imm_lo & 0x1f) << 7);
 
-          binfo("imm_lo=%ld (%lx), val=%x \n", imm_lo, imm_lo, val);
+          binfo("imm_lo=%ld (%lx), val=%" PRIx32 "\n", imm_lo, imm_lo, val);
 
           _add_val((uint16_t *)addr, val);
         }
@@ -455,10 +476,11 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
 
       case R_RISCV_RVC_JUMP:
         {
-          binfo("%s at %08lx [%04x] to sym=%p st_value=%08lx\n",
+          binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
+                "to sym=%p st_value=%08lx\n",
                 _get_rname(relotype),
-                (long)addr, _get_val((uint16_t *)addr),
-                sym, (long)sym->st_value);
+                addr, _get_val((uint16_t *)addr),
+                sym, sym->st_value);
 
           /* P.111 Table 16.6 : Instruction listings for RVC */
 
@@ -478,10 +500,11 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
 
       case R_RISCV_RVC_BRANCH:
         {
-          binfo("%s at %08lx [%04x] to sym=%p st_value=%08lx\n",
+          binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
+                "to sym=%p st_value=%08lx\n",
                 _get_rname(relotype),
-                (long)addr, _get_val((uint16_t *)addr),
-                sym, (long)sym->st_value);
+                addr, _get_val((uint16_t *)addr),
+                sym, sym->st_value);
 
           /* P.111 Table 16.6 : Instruction listings for RVC */
 
@@ -500,8 +523,8 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
         break;
 
       default:
-        berr("ERROR: Unsupported relocation: %" PRId64 "\n",
-             ELF64_R_TYPE(rel->r_info));
+        berr("ERROR: Unsupported relocation: %ld\n",
+             ARCH_ELF_RELTYPE(rel->r_info));
         ASSERT(false);
         return -EINVAL;
     }
