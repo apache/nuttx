@@ -76,6 +76,15 @@
 #  define OUTPUT_FUNCTION_3 (OUTPUT_FUNCTION | FUNCTION_3)
 #  define OUTPUT_FUNCTION_4 (OUTPUT_FUNCTION | FUNCTION_4)
 
+/* Interrupt type used with esp32c3_gpioirqenable() */
+
+#define DISABLED          0x00
+#define RISING            0x01
+#define FALLING           0x02
+#define CHANGE            0x03
+#define ONLOW             0x04
+#define ONHIGH            0x05
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -85,6 +94,7 @@
 /* Must be big enough to hold the above encodings */
 
 typedef uint16_t gpio_pinattr_t;
+typedef uint8_t gpio_intrtype_t;
 
 /****************************************************************************
  * Public Data
@@ -158,6 +168,50 @@ void esp32c3_gpio_matrix_in(uint32_t gpio, uint32_t signal_idx, bool inv);
 
 void esp32c3_gpio_matrix_out(uint32_t gpio, uint32_t signal_idx,
                              bool out_inv, bool oen_inv);
+
+/****************************************************************************
+ * Name: esp32c3_gpioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_GPIO_IRQ
+void esp32c3_gpioirqinitialize(void);
+#else
+#  define esp32c3_gpioirqinitialize()
+#endif
+
+
+/****************************************************************************
+ * Name: esp32c3_gpioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for specified GPIO IRQ
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_GPIO_IRQ
+void esp32c3_gpioirqenable(int irq, gpio_intrtype_t intrtype);
+#else
+#  define esp32c3_gpioirqenable(irq,intrtype)
+#endif
+
+/****************************************************************************
+ * Name: esp32c3_gpioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for specified GPIO IRQ
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_GPIO_IRQ
+void esp32c3_gpioirqdisable(int irq);
+#else
+#  define esp32c3_gpioirqdisable(irq)
+#endif
 
 #ifdef __cplusplus
 }

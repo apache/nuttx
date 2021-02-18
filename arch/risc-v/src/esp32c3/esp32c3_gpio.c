@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc/src/esp32c3/esp32c3_gpio.c
+ * arch/risc-v/src/esp32c3/esp32c3_gpio.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,10 +35,74 @@
 #include <arch/esp32c3/chip.h>
 
 #include "riscv_arch.h"
+#include "esp32c3_irq.h"
 #include "hardware/esp32c3_iomux.h"
 #include "hardware/esp32c3_gpio.h"
 
 #include "esp32c3_gpio.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_GPIO_IRQ
+static int g_gpio_cpuint;
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: gpio_dispatch
+ *
+ * Description:
+ *   Second level dispatch for GPIO interrupt handling.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_GPIO_IRQ
+static void gpio_dispatch(int irq, uint32_t status, uint32_t *regs)
+{
+  int i;
+  int ndx = 0;
+
+  /* Check set bits in the status register */
+
+  while ((i = __builtin_ffs(status)))
+    {
+      ndx += i;
+      irq_dispatch(irq + ndx - 1, regs);
+      status >>= i;
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: gpio_interrupt
+ *
+ * Description:
+ *   GPIO interrupt handler.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_GPIO_IRQ
+static int gpio_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  uint32_t status;
+
+  /* Read and clear the lower GPIO interrupt status */
+
+  status = getreg32(GPIO_STATUS_REG);
+  putreg32(status, GPIO_STATUS_W1TC_REG);
+
+  /* Dispatch pending interrupts in the lower GPIO status register */
+
+  gpio_dispatch(ESP32C3_FIRST_GPIOIRQ, status, (uint32_t *)context);
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -229,4 +293,119 @@ void esp32c3_gpio_matrix_out(uint32_t gpio, uint32_t signal_idx,
 
   putreg32(regval, regaddr);
 }
+
+/****************************************************************************
+ * Name: esp32c3_gpioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_GPIO_IRQ
+void esp32c3_gpioirqinitialize(void)
+{
+  int ret;
+
+  /* Allocate a level-sensitive, priority 1 CPU interrupt */
+
+  g_gpio_cpuint = esp32c3_request_irq(ESP32C3_PERIPH_GPIO, 1,
+                                      ESP32C3_INT_LEVEL);
+  DEBUGASSERT(g_gpio_cpuint > 0);
+
+  up_disable_irq(g_gpio_cpuint);
+
+  /* Attach and enable the IRQ */
+
+  ret = irq_attach(ESP32C3_IRQ_GPIO, gpio_interrupt, NULL);
+  if (ret == OK)
+    {
+      up_enable_irq(g_gpio_cpuint);
+    }
+  else
+    {
+      gpioerr("ERROR: GPIO interrupt not attached!\n");
+    }
+
+  gpioinfo("GPIO interrupt (%d) attached.\n", g_gpio_cpuint);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32c3_gpioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for specified GPIO IRQ
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_GPIO_IRQ
+void esp32c3_gpioirqenable(int irq, gpio_intrtype_t intrtype)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+  int pin;
+
+  DEBUGASSERT(irq >= ESP32C3_FIRST_GPIOIRQ && irq <= ESP32C3_LAST_GPIOIRQ);
+
+  /* Convert the IRQ number to a pin number */
+
+  pin = ESP32C3_IRQ2PIN(irq);
+
+  /* Disable the GPIO interrupt during the configuration. */
+
+  up_disable_irq(g_gpio_cpuint);
+
+  /* Get the address of the GPIO PIN register for this pin */
+
+  regaddr = GPIO_REG(pin);
+  regval  = getreg32(regaddr);
+  regval &= ~(GPIO_PIN_INT_ENA_M | GPIO_PIN_INT_TYPE_M);
+
+  /* Set the pin ENA field. */
+
+  regval |= (1 << GPIO_PIN0_INT_ENA_S);
+  regval |= (intrtype << GPIO_PIN_INT_TYPE_S);
+  putreg32(regval, regaddr);
+
+  /* Configuration done.  Re-enable the GPIO interrupt. */
+
+  up_enable_irq(g_gpio_cpuint);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32c3_gpioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for specified GPIO IRQ
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_GPIO_IRQ
+void esp32c3_gpioirqdisable(int irq)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+  int pin;
+
+  DEBUGASSERT(irq >= ESP32C3_FIRST_GPIOIRQ && irq <= ESP32C3_LAST_GPIOIRQ);
+
+  /* Convert the IRQ number to a pin number */
+
+  pin = ESP32C3_IRQ2PIN(irq);
+
+  /* Get the address of the GPIO PIN register for this pin */
+
+  up_disable_irq(g_gpio_cpuint);
+
+  regaddr = GPIO_REG(pin);
+  regval  = getreg32(regaddr);
+  regval &= ~(GPIO_PIN_INT_ENA_M | GPIO_PIN_INT_TYPE_M);
+  putreg32(regval, regaddr);
+
+  up_enable_irq(g_gpio_cpuint);
+}
+#endif
 

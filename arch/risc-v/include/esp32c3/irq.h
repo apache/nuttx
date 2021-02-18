@@ -132,6 +132,7 @@
 /* ecall is dispatched like normal interrupts.  It occupies an IRQ number. */
 
 #define ESP32C3_IRQ_ECALL_M          0
+#define RISCV_NIRQ_INTERRUPTS        1  /* Number of RISC-V dispatched interrupts. */
 #define ESP32C3_IRQ_FIRSTPERIPH      1  /* First peripheral IRQ number */
 
 /* Peripheral IRQs */
@@ -201,9 +202,24 @@
 
 #define ESP32C3_NIRQ_PERIPH             ESP32C3_NPERIPHERALS
 
-/* Total number of IRQs: Number of peripheral IRQs + 1 for ecall. */
+/* Second level GPIO interrupts.  GPIO interrupts are decoded and dispatched
+ * as a second level of decoding:  The first level dispatches to the GPIO
+ * interrupt handler.  The second to the decoded GPIO interrupt handler.
+ */
 
-#define NR_IRQS                         (ESP32C3_NIRQ_PERIPH + 1)
+#ifdef CONFIG_ESP32C3_GPIO_IRQ
+#  define ESP32C3_NIRQ_GPIO           22
+#  define ESP32C3_FIRST_GPIOIRQ       (RISCV_NIRQ_INTERRUPTS + ESP32C3_NIRQ_PERIPH)
+#  define ESP32C3_LAST_GPIOIRQ        (ESP32C3_FIRST_GPIOIRQ + ESP32C3_NIRQ_GPIO - 1)
+#  define ESP32C3_PIN2IRQ(p)          ((p) + ESP32C3_FIRST_GPIOIRQ)
+#  define ESP32C3_IRQ2PIN(i)          ((i) - ESP32C3_FIRST_GPIOIRQ)
+#else
+#  define ESP32C3_NIRQ_GPIO           0
+#endif
+
+/* Total number of IRQs: ecall + Number of peripheral IRQs + GPIOs IRQs. */
+
+#define NR_IRQS  (RISCV_NIRQ_INTERRUPTS + ESP32C3_NIRQ_PERIPH + ESP32C3_NIRQ_GPIO)
 
 /****************************************************************************
  * Inline functions

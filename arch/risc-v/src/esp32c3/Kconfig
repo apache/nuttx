@@ -104,6 +104,11 @@ config ESP32C3_CPU_FREQ_MHZ
 
 menu "ESP32-C3 Peripheral Support"
 
+config ESP32C3_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
 config ESP32C3_UART0
 	bool "UART0"
 	default y

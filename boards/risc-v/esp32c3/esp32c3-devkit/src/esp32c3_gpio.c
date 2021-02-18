@@ -30,6 +30,9 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
+#include <arch/irq.h>
+
 #include <nuttx/ioexpander/gpio.h>
 
 #include <arch/board/board.h>
@@ -37,6 +40,8 @@
 #include "esp32c3-devkit.h"
 #include "esp32c3_gpio.h"
 #include "hardware/esp32c3_gpio_sigmap.h"
+
+#if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -47,7 +52,15 @@
 #define GPIO_OUT1  1
 #define GPIO_OUT2  2
 
-#if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
+#if !defined(CONFIG_ESP32C3_GPIO_IRQ) && BOARD_NGPIOINT > 0
+#  error "NGPIOINT is > 0 and GPIO interrupts aren't enabled"
+#endif
+
+/* Interrupt pins.  GPIO9 is used as an example, any other inputs could be
+ * used.
+ */
+
+#define GPIO_IRQPIN  9
 
 /****************************************************************************
  * Private Types
@@ -59,6 +72,12 @@ struct esp32c3gpio_dev_s
   uint8_t id;
 };
 
+struct esp32c3gpint_dev_s
+{
+  struct esp32c3gpio_dev_s esp32c3gpio;
+  pin_interrupt_t callback;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -66,6 +85,13 @@ struct esp32c3gpio_dev_s
 #if BOARD_NGPIOOUT > 0
 static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value);
 static int gpout_write(FAR struct gpio_dev_s *dev, bool value);
+#endif
+
+#if BOARD_NGPIOINT > 0
+static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value);
+static int gpint_attach(FAR struct gpio_dev_s *dev,
+                        pin_interrupt_t callback);
+static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable);
 #endif
 
 /****************************************************************************
@@ -89,6 +115,25 @@ static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
 };
 
 static struct esp32c3gpio_dev_s g_gpout[BOARD_NGPIOOUT];
+#endif
+
+#if BOARD_NGPIOINT > 0
+static const struct gpio_operations_s gpint_ops =
+{
+  .go_read   = gpint_read,
+  .go_write  = NULL,
+  .go_attach = gpint_attach,
+  .go_enable = gpint_enable,
+};
+
+/* This array maps the GPIO pins used as INTERRUPT INPUTS */
+
+static const uint32_t g_gpiointinputs[BOARD_NGPIOINT] =
+{
+  GPIO_IRQPIN,
+};
+
+static struct esp32c3gpint_dev_s g_gpint[BOARD_NGPIOINT];
 #endif
 
 /****************************************************************************
@@ -132,6 +177,103 @@ static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
 #endif
 
 /****************************************************************************
+ * Name: esp32c3gpio_interrupt
+ ****************************************************************************/
+
+#if BOARD_NGPIOINT > 0
+static int esp32c3gpio_interrupt(int irq, void *context, void *arg)
+{
+  FAR struct esp32c3gpint_dev_s *esp32c3gpint =
+    (FAR struct esp32c3gpint_dev_s *)arg;
+
+  DEBUGASSERT(esp32c3gpint != NULL && esp32c3gpint->callback != NULL);
+  gpioinfo("Interrupt! callback=%p\n", esp32c3gpint->callback);
+
+  esp32c3gpint->callback(&esp32c3gpint->esp32c3gpio.gpio,
+                         esp32c3gpint->esp32c3gpio.id);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpint_read
+ ****************************************************************************/
+
+static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+{
+  FAR struct esp32c3gpint_dev_s *esp32c3gpint =
+    (FAR struct esp32c3gpint_dev_s *)dev;
+
+  DEBUGASSERT(esp32c3gpint != NULL && value != NULL);
+  DEBUGASSERT(esp32c3gpint->esp32c3gpio.id < BOARD_NGPIOINT);
+  gpioinfo("Reading int pin...\n");
+
+  *value = esp32c3_gpioread(g_gpiointinputs[esp32c3gpint->esp32c3gpio.id]);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpint_attach
+ ****************************************************************************/
+
+static int gpint_attach(FAR struct gpio_dev_s *dev,
+                        pin_interrupt_t callback)
+{
+  FAR struct esp32c3gpint_dev_s *esp32c3gpint =
+    (FAR struct esp32c3gpint_dev_s *)dev;
+  int irq = ESP32C3_PIN2IRQ(g_gpiointinputs[esp32c3gpint->esp32c3gpio.id]);
+  int ret;
+
+  gpioinfo("Attaching the callback\n");
+
+  /* Make sure the interrupt is disabled */
+
+  esp32c3_gpioirqdisable(irq);
+  ret = irq_attach(irq,
+                   esp32c3gpio_interrupt,
+                   &g_gpint[esp32c3gpint->esp32c3gpio.id]);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: gpint_attach() failed: %d\n", ret);
+      return ret;
+    }
+
+  gpioinfo("Attach %p\n", callback);
+  esp32c3gpint->callback = callback;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpint_enable
+ ****************************************************************************/
+
+static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
+{
+  FAR struct esp32c3gpint_dev_s *esp32c3gpint =
+    (FAR struct esp32c3gpint_dev_s *)dev;
+  int irq = ESP32C3_PIN2IRQ(g_gpiointinputs[esp32c3gpint->esp32c3gpio.id]);
+
+  if (enable)
+    {
+      if (esp32c3gpint->callback != NULL)
+        {
+          gpioinfo("Enabling the interrupt\n");
+
+          /* Configure the interrupt for rising edge */
+
+          esp32c3_gpioirqenable(irq, RISING);
+        }
+    }
+  else
+    {
+      gpioinfo("Disable the interrupt\n");
+      esp32c3_gpioirqdisable(irq);
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -159,6 +301,24 @@ int esp32c3_gpio_init(void)
       esp32c3_gpio_matrix_out(g_gpiooutputs[i], SIG_GPIO_OUT_IDX, 0, 0);
       esp32c3_configgpio(g_gpiooutputs[i], OUTPUT_FUNCTION_1);
       esp32c3_gpiowrite(g_gpiooutputs[i], 0);
+
+      pincount++;
+    }
+#endif
+
+#if BOARD_NGPIOINT > 0
+  for (i = 0; i < BOARD_NGPIOINT; i++)
+    {
+      /* Setup and register the GPIO pin */
+
+      g_gpint[i].esp32c3gpio.gpio.gp_pintype = GPIO_INTERRUPT_PIN;
+      g_gpint[i].esp32c3gpio.gpio.gp_ops     = &gpint_ops;
+      g_gpint[i].esp32c3gpio.id              = i;
+      gpio_pin_register(&g_gpint[i].esp32c3gpio.gpio, pincount);
+
+      /* Configure the pins that will be used as interrupt input */
+
+      esp32c3_configgpio(g_gpiointinputs[i], INPUT_FUNCTION_1 | PULLDOWN);
 
       pincount++;
     }
