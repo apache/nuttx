@@ -18,6 +18,12 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
+CSRCS += arch_elf.c
+DEPPATH += --dep-path machine/risc-v/common
+VPATH += :machine/risc-v/common
+endif
+
 ifeq ($(CONFIG_ARCH_RV64GC),y)
 include $(TOPDIR)/libs/libc/machine/risc-v/rv64/Make.defs
 endif
