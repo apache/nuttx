@@ -487,6 +487,31 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info);
 struct mallinfo kmm_mallinfo(void);
 #endif
 
+#ifdef CONFIG_DEBUG_MM
+/* Functions contained in mm_checkcorruption.c ******************************/
+
+void mm_checkcorruption(FAR struct mm_heap_s *heap);
+
+/* Functions contained in umm_checkcorruption.c *****************************/
+
+FAR void umm_checkcorruption(void);
+
+/* Functions contained in kmm_checkcorruption.c *****************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+FAR void kmm_checkcorruption(void);
+#else
+#define kmm_checkcorruption()  umm_checkcorruption()
+#endif
+
+#else /* CONFIG_DEBUG_MM */
+
+#define mm_checkcorruption(h)
+#define umm_checkcorruption()
+#define kmm_checkcorruption()
+
+#endif /* CONFIG_DEBUG_MM */
+
 /* Functions contained in mm_shrinkchunk.c **********************************/
 
 void mm_shrinkchunk(FAR struct mm_heap_s *heap,

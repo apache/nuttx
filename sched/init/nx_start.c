@@ -812,6 +812,17 @@ void nx_start(void)
   sinfo("CPU0: Beginning Idle Loop\n");
   for (; ; )
     {
+      /* Check heap & stack in idle thread */
+
+      kmm_checkcorruption();
+
+#if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_DEBUG_MM)
+      for (i = 0; i < CONFIG_MAX_TASKS && g_pidhash[i].tcb; i++)
+        {
+          assert(up_check_tcbstack_remain(g_pidhash[i].tcb) > 0);
+        }
+#endif
+
       /* Perform any processor-specific idle state operations */
 
       up_idle();
