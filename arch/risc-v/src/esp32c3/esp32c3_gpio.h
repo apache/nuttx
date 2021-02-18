@@ -184,7 +184,6 @@ void esp32c3_gpioirqinitialize(void);
 #  define esp32c3_gpioirqinitialize()
 #endif
 
-
 /****************************************************************************
  * Name: esp32c3_gpioirqenable
  *

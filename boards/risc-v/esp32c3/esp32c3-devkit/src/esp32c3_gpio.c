@@ -111,7 +111,7 @@ static const struct gpio_operations_s gpout_ops =
 
 static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
 {
- GPIO_OUT1, GPIO_OUT2
+  GPIO_OUT1, GPIO_OUT2
 };
 
 static struct esp32c3gpio_dev_s g_gpout[BOARD_NGPIOOUT];
