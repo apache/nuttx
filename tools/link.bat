@@ -2,35 +2,20 @@
 
 rem tools/link.bat
 rem
-rem   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
-rem   Author: Gregory Nutt <gnutt@nuttx.org>
+rem Licensed to the Apache Software Foundation (ASF) under one or more
+rem contributor license agreements.  See the NOTICE file distributed with
+rem this work for additional information regarding copyright ownership.  The
+rem ASF licenses this file to you under the Apache License, Version 2.0 (the
+rem "License"); you may not use this file except in compliance with the
+rem License.  You may obtain a copy of the License at
 rem
-rem Redistribution and use in source and binary forms, with or without
-rem modification, are permitted provided that the following conditions
-rem are met:
+rem   http://www.apache.org/licenses/LICENSE-2.0
 rem
-rem 1. Redistributions of source code must retain the above copyright
-rem    notice, this list of conditions and the following disclaimer.
-rem 2. Redistributions in binary form must reproduce the above copyright
-rem    notice, this list of conditions and the following disclaimer in
-rem    the documentation and/or other materials provided with the
-rem    distribution.
-rem 3. Neither the name NuttX nor the names of its contributors may be
-rem    used to endorse or promote products derived from this software
-rem    without specific prior written permission.
-rem
-rem THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-rem "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-rem LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-rem FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-rem COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-rem INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-rem BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-rem OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-rem AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-rem LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-rem ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-rem POSSIBILITY OF SUCH DAMAGE.
+rem Unless required by applicable law or agreed to in writing, software
+rem distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+rem WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+rem License for the specific language governing permissions and limitations
+rem under the License.
 rem
 
 set usemklink=
