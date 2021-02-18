@@ -269,10 +269,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
 
-      board_autoled_on(LED_STACKCREATED);
-      return OK;
-    }
-
 #ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a
        * recognizable value that we can use later to test for high
@@ -283,6 +279,10 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
                      sizeof(struct tls_info_s),
                      tcb->adj_stack_size - sizeof(struct tls_info_s));
 #endif
+
+      board_autoled_on(LED_STACKCREATED);
+      return OK;
+    }
 
   return ERROR;
 }
@@ -298,17 +298,26 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 #ifdef CONFIG_STACK_COLORATION
 void up_stack_color(FAR void *stackbase, size_t nbytes)
 {
-  /* Take extra care that we do not write outsize the stack boundaries */
+  uintptr_t start;
+  uintptr_t end;
+  size_t nwords;
+  FAR uint32_t *ptr;
 
-  uint32_t *stkptr = (uint32_t *)(((uintptr_t)stackbase + 15) & ~15);
-  uintptr_t stkend = (((uintptr_t)stackbase + nbytes) & ~15);
-  size_t    nwords = (stkend - (uintptr_t)stackbase) >> 2;
+  /* Take extra care that we do not write outside the stack boundaries */
+
+  start = STACK_ALIGN_UP((uintptr_t)stackbase);
+  end   = STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes);
+
+  /* Get the adjusted size based on the top and bottom of the stack */
+
+  nwords = (end - start) >> 2;
+  ptr  = (FAR uint32_t *)start;
 
   /* Set the entire stack to the coloration value */
 
   while (nwords-- > 0)
     {
-      *stkptr++ = STACK_COLOR;
+      *ptr++ = STACK_COLOR;
     }
 }
 #endif
