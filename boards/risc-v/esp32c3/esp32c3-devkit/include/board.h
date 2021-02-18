@@ -32,6 +32,7 @@
 /* GPIO pins used by the GPIO Subsystem */
 
 #define BOARD_NGPIOOUT    2 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
 
 #endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_INCLUDE_BOARD_H */
 

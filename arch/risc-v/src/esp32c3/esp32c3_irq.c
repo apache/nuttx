@@ -40,6 +40,7 @@
 
 #include "esp32c3.h"
 #include "esp32c3_attr.h"
+#include "esp32c3_gpio.h"
 
 #include "esp32c3_irq.h"
 
@@ -95,6 +96,12 @@ void up_irqinitialize(void)
   /* Attach the ECALL interrupt. */
 
   irq_attach(ESP32C3_IRQ_ECALL_M, up_swint, NULL);
+
+#ifdef CONFIG_ESP32C3_GPIO_IRQ
+  /* Initialize GPIO interrupt support */
+
+  esp32c3_gpioirqinitialize();
+#endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
