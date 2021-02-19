@@ -28,6 +28,10 @@ CSRCS = esp32c3_boot.c esp32c3_bringup.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += esp32c3_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += esp32c3_reset.c
+endif
+
 endif
 
 ifeq ($(CONFIG_DEV_GPIO),y)
