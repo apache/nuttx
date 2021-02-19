@@ -43,7 +43,7 @@
 
 #define NULL_SIGNAL_SET ((sigset_t)0x00000000)
 #define ALL_SIGNAL_SET  ((sigset_t)0xffffffff)
-#define MIN_SIGNO       0
+#define MIN_SIGNO       1
 #define MAX_SIGNO       31
 #define GOOD_SIGNO(s)   ((((unsigned)(s)) <= MAX_SIGNO))
 #define SIGNO2SET(s)    ((sigset_t)1 << (s))
