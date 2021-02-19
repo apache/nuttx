@@ -217,6 +217,9 @@ ifeq ($(BOARDMAKE),y)
 endif
 	$(call DELFILE, $(KBIN))
 	$(call DELFILE, $(BIN))
+ifneq ($(EXTRADELFILE),)
+	$(call DELFILE, $(EXTRADELFILE))
+endif
 	$(call CLEAN)
 
 distclean: clean
