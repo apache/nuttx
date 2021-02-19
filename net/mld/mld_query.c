@@ -106,7 +106,7 @@ static inline void mld_check_v1compat(FAR struct net_driver_s *dev,
        */
 
       mld_start_v1timer(dev,
-                        MSEC2TICK(MLD_V1PRESENT_MSEC((clock_t)MLD_QUERY_MSEC)));
+                    MSEC2TICK(MLD_V1PRESENT_MSEC((clock_t)MLD_QUERY_MSEC)));
     }
 }
 
@@ -124,7 +124,9 @@ static clock_t mld_mrc2mrd(uint16_t mrc)
 {
   uint32_t mrd;  /* Units of milliseconds */
 
-  /* If bit 15 is not set (i.e., mrc < 32768), then no conversion is required. */
+  /* If bit 15 is not set (i.e., mrc < 32768),
+   * then no conversion is required.
+   */
 
   if (mrc < 32768)
     {

@@ -108,7 +108,8 @@ EXTERN uint32_t g_devfreed;
 /* Callback from netdev_foreach() */
 
 struct net_driver_s; /* Forward reference */
-typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev, FAR void *arg);
+typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev,
+                                 FAR void *arg);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -224,7 +225,8 @@ FAR struct net_driver_s *netdev_findby_lipv4addr(in_addr_t lipaddr);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-FAR struct net_driver_s *netdev_findby_lipv6addr(const net_ipv6addr_t lipaddr);
+FAR struct net_driver_s *netdev_findby_lipv6addr(
+                                         const net_ipv6addr_t lipaddr);
 #endif
 
 /****************************************************************************
@@ -267,8 +269,9 @@ FAR struct net_driver_s *netdev_findby_ripv4addr(in_addr_t lipaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-FAR struct net_driver_s *netdev_findby_ripv6addr(const net_ipv6addr_t lipaddr,
-                                                 const net_ipv6addr_t ripaddr);
+FAR struct net_driver_s *netdev_findby_ripv6addr(
+                                const net_ipv6addr_t lipaddr,
+                                const net_ipv6addr_t ripaddr);
 #endif
 
 /****************************************************************************

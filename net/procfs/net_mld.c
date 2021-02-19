@@ -85,9 +85,12 @@ static int netprocfs_joinleave(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_queries_sent(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_reports_sent(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_done_sent(FAR struct netprocfs_file_s *netfile);
-static int netprocfs_queries_received_1(FAR struct netprocfs_file_s *netfile);
-static int netprocfs_queries_received_2(FAR struct netprocfs_file_s *netfile);
-static int netprocfs_reports_received(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_queries_received_1(
+                  FAR struct netprocfs_file_s *netfile);
+static int netprocfs_queries_received_2(
+                  FAR struct netprocfs_file_s *netfile);
+static int netprocfs_reports_received(
+                  FAR struct netprocfs_file_s *netfile);
 static int netprocfs_done_received(FAR struct netprocfs_file_s *netfile);
 
 /****************************************************************************
@@ -261,7 +264,8 @@ static int netprocfs_done_received(FAR struct netprocfs_file_s *netfile)
 ssize_t netprocfs_read_mldstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen)
 {
-  return netprocfs_read_linegen(priv, buffer, buflen, g_mld_linegen, NSTAT_LINES);
+  return netprocfs_read_linegen(priv, buffer, buflen,
+                                g_mld_linegen, NSTAT_LINES);
 }
 
 #endif /* CONFIG_NET_ICMPv6 || CONFIG_NET_MLD */

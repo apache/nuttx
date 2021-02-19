@@ -92,7 +92,8 @@ unsigned int neighbor_snapshot(FAR struct neighbor_entry_s *snapshot,
 
       if (!net_ipv6addr_cmp(neighbor->ne_ipaddr, g_ipv6_unspecaddr))
         {
-          memcpy(&snapshot[ncopied], neighbor, sizeof(struct neighbor_entry_s));
+          memcpy(&snapshot[ncopied], neighbor,
+                 sizeof(struct neighbor_entry_s));
           ncopied++;
         }
     }

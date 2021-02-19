@@ -140,8 +140,8 @@ static int bluetooth_queue_frame(FAR struct bluetooth_conn_s *conn,
     }
 
 #if CONFIG_NET_BLUETOOTH_BACKLOG > 0
-  /* If incrementing the count would exceed the maximum bc_backlog value, then
-   * delete the oldest frame from the head of the RX queue.
+  /* If incrementing the count would exceed the maximum bc_backlog value,
+   * then delete the oldest frame from the head of the RX queue.
    */
 
   if (conn->bc_backlog >= CONFIG_NET_BLUETOOTH_BACKLOG)

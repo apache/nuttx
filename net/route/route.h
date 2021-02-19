@@ -62,7 +62,9 @@ struct net_route_ipv4_s
   in_addr_t router;          /* Route packets via this router */
 };
 
-/* Type of the call out function pointer provided to net_foreachroute_ipv4() */
+/* Type of the call out function pointer provided to
+ * net_foreachroute_ipv4()
+ */
 
 typedef int (*route_handler_ipv4_t)(FAR struct net_route_ipv4_s *route,
                                FAR void *arg);
@@ -76,7 +78,9 @@ struct net_route_ipv6_s
   net_ipv6addr_t router;     /* Route packets via this router */
 };
 
-/* Type of the call out function pointer provided to net_foreachroute_ipv6() */
+/* Type of the call out function pointer provided to
+ * net_foreachroute_ipv6()
+ */
 
 typedef int (*route_handler_ipv6_t)(FAR struct net_route_ipv6_s *route,
                                     FAR void *arg);

@@ -609,9 +609,9 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 #if defined(CONFIG_NET_6LOWPAN) /* REVISIT:  Currently only support for 6LoWPAN */
     {
       /* Single network device.  The use case here is where an endpoint acts
-       * as a hub in a star configuration.  This is typical for a wireless star
-       * configuration where not all endpoints are accessible from all other
-       * endpoints, but seems less useful for a wired network.
+       * as a hub in a star configuration.  This is typical for a wireless
+       * star configuration where not all endpoints are accessible from all
+       * other endpoints, but seems less useful for a wired network.
        */
 
       /* Perform any necessary packet conversions.  If the packet was handled
@@ -629,9 +629,11 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
       else if (ret == PACKET_NOT_FORWARDED)
         {
 #ifdef CONFIG_NET_ETHERNET
-          /* REVISIT:  For Ethernet we may have to fix up the Ethernet header:
+          /* REVISIT:
+           *  For Ethernet we may have to fix up the Ethernet header:
            * - source MAC, the MAC of the current device.
-           * - dest MAC, the MAC associated with the destination IPv6 address.
+           * - dest MAC, the MAC associated with the destination IPv6
+           *   address.
            *   This  will involve ICMPv6 and Neighbor Discovery.
            */
 
@@ -653,7 +655,8 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 
 #else /* CONFIG_NET_6LOWPAN */
     {
-      nwarn("WARNING: Packet forwarding not supported in this configuration\n");
+      nwarn(
+         "WARNING: Packet forwarding not supported in this configuration\n");
       ret = -ENOSYS;
       goto drop;
     }

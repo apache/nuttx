@@ -100,7 +100,8 @@ int local_release(FAR struct local_conn_s *conn)
 
       /* Are there still clients waiting for a connection to the server? */
 
-      for (client = (FAR struct local_conn_s *)conn->u.server.lc_waiters.head;
+      for (client =
+          (FAR struct local_conn_s *)conn->u.server.lc_waiters.head;
            client;
            client = (FAR struct local_conn_s *)dq_next(&client->lc_node))
         {

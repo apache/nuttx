@@ -86,7 +86,8 @@
  * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr', Return: returned size
+ *            of 'addr'
  *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:
@@ -197,7 +198,8 @@ errout_with_lock:
  * Input Parameters:
  *   sockfd   The listening socket descriptor
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr',
+ *            Return: returned size of 'addr'
  *
  * Returned Value:
  *  Returns -1 on error. If it succeeds, it returns a non-negative integer
@@ -252,8 +254,8 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   if (psock == NULL || psock->s_crefs <= 0)
     {
       /* It is not a valid socket description.  Distinguish between the cases
-       * where sockfd is a just valid and when it is a valid file descriptor used
-       * in the wrong context.
+       * where sockfd is a just valid and when it is a valid file descriptor
+       * used in the wrong context.
        */
 
       if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)

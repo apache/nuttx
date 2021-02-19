@@ -205,14 +205,15 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
 
   net_ipv6addr_hdrcopy(ipv6->srcipaddr, dev->d_ipv6addr);
 
-  /* Select the IPv6 destination address.  This varies with the type of message
-   * being sent:
+  /* Select the IPv6 destination address.
+   * This varies with the type of message being sent:
    *
    *   MESSAGE                 DESTINATION ADDRESS
    *   General Query Message:  The link-local, all nodes multicast address.
    *   MAS Query Messages:     The group multicast address.
    *   V1 Report Message:      The group multicast address.
-   *   V2 Report Message:      The link-local, all MLDv2 router multicast address.
+   *   V2 Report Message:      The link-local, all MLDv2 router multicast
+   *                           address.
    *   Done Message:           The link-local, all routers multicast address.
    */
 

@@ -72,7 +72,9 @@ int mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgtype)
   DEBUGASSERT(group != NULL && !IS_MLD_SCHEDMSG(group->flags));
   DEBUGASSERT(group->ifindex > 0);
 
-  /* Get the device instance associated with the interface index of the group */
+  /* Get the device instance associated with the interface index
+   * of the group
+   */
 
   dev = netdev_findbyindex(group->ifindex);
   if (dev == NULL)

@@ -61,24 +61,24 @@
 
 /* Line generating functions */
 
-static int     netprocfs_header(FAR struct netprocfs_file_s *netfile);
-static int     netprocfs_received(FAR struct netprocfs_file_s *netfile);
-static int     netprocfs_dropped(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_header(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_received(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_dropped(FAR struct netprocfs_file_s *netfile);
 #ifdef CONFIG_NET_IPv4
-static int     netprocfs_ipv4_dropped(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_ipv4_dropped(FAR struct netprocfs_file_s *netfile);
 #endif /* CONFIG_NET_IPv4 */
 #ifdef CONFIG_NET_IPv6
-static int     netprocfs_ipv6_dropped(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_ipv6_dropped(FAR struct netprocfs_file_s *netfile);
 #endif /* CONFIG_NET_IPv4 */
-static int     netprocfs_checksum(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_checksum(FAR struct netprocfs_file_s *netfile);
 #ifdef CONFIG_NET_TCP
-static int     netprocfs_tcp_dropped_1(FAR struct netprocfs_file_s *netfile);
-static int     netprocfs_tcp_dropped_2(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_tcp_dropped_1(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_tcp_dropped_2(FAR struct netprocfs_file_s *netfile);
 #endif /* CONFIG_NET_TCP */
-static int     netprocfs_prototype(FAR struct netprocfs_file_s *netfile);
-static int     netprocfs_sent(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_prototype(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_sent(FAR struct netprocfs_file_s *netfile);
 #ifdef CONFIG_NET_TCP
-static int     netprocfs_retransmissions(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_retransmissions(FAR struct netprocfs_file_s *netfile);
 #endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
@@ -461,7 +461,8 @@ static int netprocfs_retransmissions(FAR struct netprocfs_file_s *netfile)
 ssize_t netprocfs_read_netstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen)
 {
-  return netprocfs_read_linegen(priv, buffer, buflen, g_stat_linegen, NSTAT_LINES);
+  return netprocfs_read_linegen(priv, buffer, buflen,
+                                g_stat_linegen, NSTAT_LINES);
 }
 
 #else

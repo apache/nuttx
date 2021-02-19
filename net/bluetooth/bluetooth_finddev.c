@@ -80,7 +80,8 @@ struct bluetooth_finddev_s
  *
  ****************************************************************************/
 
-static int bluetooth_dev_callback(FAR struct net_driver_s *dev, FAR void *arg)
+static int bluetooth_dev_callback(FAR struct net_driver_s *dev,
+                                  FAR void *arg)
 {
   FAR struct bluetooth_finddev_s *match =
     (FAR struct bluetooth_finddev_s *)arg;

@@ -160,7 +160,8 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
        * not free any I/O buffers.
        */
 
-      nerr("ERROR: Failed to source address to the I/O buffer chain: %d\n", ret);
+      nerr("ERROR: Failed to source address to the I/O buffer chain: %d\n",
+           ret);
       goto drop_with_chain;
     }
 
@@ -275,8 +276,9 @@ void icmp_input(FAR struct net_driver_s *dev)
       /* The slow way... sum over the ICMP message */
 
       icmp->icmpchksum = 0;
-      icmp->icmpchksum = ~icmp_chksum(dev, (((uint16_t)ipv4->len[0] << 8) |
-                                             (uint16_t)ipv4->len[1]) - iphdrlen);
+      icmp->icmpchksum = ~icmp_chksum(dev,
+                                     (((uint16_t)ipv4->len[0] << 8) |
+                                       (uint16_t)ipv4->len[1]) - iphdrlen);
       if (icmp->icmpchksum == 0)
         {
           icmp->icmpchksum = 0xffff;

@@ -120,10 +120,10 @@ int udp_setsockopt(FAR struct socket *psock, int option,
        * but this option only makes sense for UDP sockets trying to broadcast
        * while their local address is not set, eg, with DHCP requests.
        * The problem is that we are not able to determine the interface to be
-       * used for sending packets when multiple interfaces do not have a local
-       * address yet. This option can be used to "force" the interface used to
-       * send the UDP traffic in this connection. Note that it does NOT only
-       * apply to broadcast packets.
+       * used for sending packets when multiple interfaces do not have a
+       * local address yet. This option can be used to "force" the interface
+       * used to send the UDP traffic in this connection. Note that it does
+       * NOT only apply to broadcast packets.
        */
 
       case UDP_BINDTODEVICE:  /* Bind socket to a specific network device */

@@ -83,8 +83,8 @@ void sixlowpan_initialize(void);
  * Name: psock_6lowpan_tcp_send
  *
  * Description:
- *   psock_6lowpan_tcp_send() call may be used only when the TCP socket is in a
- *   connected state (so that the intended recipient is known).
+ *   psock_6lowpan_tcp_send() call may be used only when the TCP socket is in
+ *   a connected state (so that the intended recipient is known).
  *
  * Input Parameters:
  *   psock - An instance of the internal socket structure.

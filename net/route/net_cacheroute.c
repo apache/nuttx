@@ -427,7 +427,9 @@ static void net_reset_ipv4_cache(void)
   cacheroute_init(&g_ipv4_cache);
   cacheroute_init(&g_free_ipv4cache);
 
-  /* Add all of the pre-allocated routing table cache entries to a free list */
+  /* Add all of the pre-allocated routing table cache entries to
+   * a free list
+   */
 
   for (i = 0; i < CONFIG_ROUTE_MAX_IPv4_CACHEROUTES; i++)
     {

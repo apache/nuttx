@@ -193,11 +193,11 @@ void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr);
  *   address.  This function first checks if the IPv4 address is already in
  *   the ARP table.  If so, then it returns success immediately.
  *
- *   If the requested IPv4 address in not in the ARP table, then this function
- *   will send an ARP request, delay, then check if the IP address is now in
- *   the ARP table.  It will repeat this sequence until either (1) the IP
- *   address mapping is now in the ARP table, or (2) a configurable number
- *   of timeouts occur without receiving the ARP replay.
+ *   If the requested IPv4 address in not in the ARP table, then this
+ *   function will send an ARP request, delay, then check if the IP address
+ *   is now in the ARP table.  It will repeat this sequence until either (1)
+ *   the IP address mapping is now in the ARP table, or (2) a configurable
+ *   number of timeouts occur without receiving the ARP replay.
  *
  * Input Parameters:
  *   ipaddr   The IP address to be queried.

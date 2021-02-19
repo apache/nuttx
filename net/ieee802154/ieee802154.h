@@ -289,7 +289,8 @@ FAR struct ieee802154_conn_s *
  * Name: ieee802154_callback
  *
  * Description:
- *   Inform the application holding the IEEE 802.15.4 socket of a change in state.
+ *   Inform the application holding the IEEE 802.15.4 socket of a change in
+ *   state.
  *
  * Returned Value:
  *   OK if IEEE 802.15.4 has been processed, otherwise ERROR.
@@ -308,9 +309,9 @@ uint16_t ieee802154_callback(FAR struct radio_driver_s *radio,
  *
  * Description:
  *   Implements the socket recvfrom interface for the case of the AF_INET
- *   and AF_INET6 address families.  ieee802154_recvfrom() receives messages from
- *   a socket, and may be used to receive data on a socket whether or not it
- *   is connection-oriented.
+ *   and AF_INET6 address families.  ieee802154_recvfrom() receives messages
+ *   from a socket, and may be used to receive data on a socket whether or
+ *   not it is connection-oriented.
  *
  *   If 'from' is not NULL, and the underlying protocol provides the source
  *   address, this source address is filled in.  The argument 'fromlen' is
@@ -407,7 +408,8 @@ void ieee802154_poll(FAR struct net_driver_s *dev,
 ssize_t psock_ieee802154_sendto(FAR struct socket *psock,
                                 FAR const void *buf,
                                 size_t len, int flags,
-                                FAR const struct sockaddr *to, socklen_t tolen);
+                                FAR const struct sockaddr *to,
+                                socklen_t tolen);
 
 /****************************************************************************
  * Name: ieee802154_container_initialize
@@ -445,8 +447,8 @@ void ieee802154_container_initialize(void);
  *   None
  *
  * Returned Value:
- *   A reference to the allocated container structure.  All user fields in this
- *   structure have been zeroed.  On a failure to allocate, NULL is
+ *   A reference to the allocated container structure.  All user fields in
+ *   this structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
  *
  * Assumptions:

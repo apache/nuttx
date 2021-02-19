@@ -129,7 +129,8 @@ FAR struct net_driver_s *netdev_findby_lipv4addr(in_addr_t lipaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-FAR struct net_driver_s *netdev_findby_lipv6addr(const net_ipv6addr_t lipaddr)
+FAR struct net_driver_s *netdev_findby_lipv6addr(
+                                      const net_ipv6addr_t lipaddr)
 {
   FAR struct net_driver_s *dev;
 
@@ -270,8 +271,9 @@ FAR struct net_driver_s *netdev_findby_ripv4addr(in_addr_t lipaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-FAR struct net_driver_s *netdev_findby_ripv6addr(const net_ipv6addr_t lipaddr,
-                                                 const net_ipv6addr_t ripaddr)
+FAR struct net_driver_s *netdev_findby_ripv6addr(
+                                 const net_ipv6addr_t lipaddr,
+                                 const net_ipv6addr_t ripaddr)
 {
   struct net_driver_s *dev;
 #ifdef CONFIG_NET_ROUTE

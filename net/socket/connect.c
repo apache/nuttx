@@ -149,7 +149,8 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
   /* Let the address family's connect() method handle the operation */
 
-  DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_connect != NULL);
+  DEBUGASSERT(psock->s_sockif != NULL &&
+              psock->s_sockif->si_connect != NULL);
   ret = psock->s_sockif->si_connect(psock, addr, addrlen);
   if (ret < 0)
     {
@@ -172,9 +173,9 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
  * Name: connect
  *
  * Description:
- *   connect() connects the socket referred to by the file descriptor 'sockfd'
- *   to the address specified by 'addr'. The addrlen argument specifies
- *   the size of 'addr'.  The format of the address in 'addr' is
+ *   connect() connects the socket referred to by the file descriptor
+ *   'sockfd' to the address specified by 'addr'. The addrlen argument
+ *   specifies the size of 'addr'.  The format of the address in 'addr' is
  *   determined by the address space of the socket 'sockfd'.
  *
  *   If the socket 'sockfd' is of type SOCK_DGRAM then 'addr' is the address
