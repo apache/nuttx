@@ -26,6 +26,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 #include <pthread.h>
 #include <sched.h>
@@ -58,16 +59,6 @@
 const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#if CONFIG_TASK_NAME_SIZE > 0
-/* This is the name for name-less pthreads */
-
-static const char g_pthreadname[] = "<pthread>";
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -98,8 +89,8 @@ static inline void pthread_argsetup(FAR struct pthread_tcb_s *tcb,
 #if CONFIG_TASK_NAME_SIZE > 0
   /* Copy the pthread name into the TCB */
 
-  strncpy(tcb->cmn.name, g_pthreadname, CONFIG_TASK_NAME_SIZE);
-  tcb->cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
+  snprintf(tcb->cmn.name, CONFIG_TASK_NAME_SIZE,
+           "pt-%p", tcb->cmn.entry.pthread);
 #endif /* CONFIG_TASK_NAME_SIZE */
 
   /* For pthreads, args are strictly pass-by-value; that actual
