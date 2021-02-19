@@ -1,0 +1,74 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "RP2040 Configuration Options"
+
+config RP2040_UART0
+	bool "UART0"
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+if RP2040_UART0
+
+config RP2040_UART0_BAUD
+	int "RP2040 UART0 BAUD"
+	default 115200
+
+config RP2040_UART0_PARITY
+	int "RP2040 UART0 parity"
+	default 0
+	range 0 2
+	---help---
+		RP2040 UART0 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config RP2040_UART0_BITS
+	int "RP2040 UART0 number of bits"
+	default 8
+	range 5 8
+	---help---
+		RP2040 UART0 number of bits.  Default: 8
+
+config RP2040_UART0_2STOP
+	int "RP2040 UART0 two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+endif
+
+config RP2040_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+if RP2040_UART1
+
+config RP2040_UART1_BAUD
+	int "RP2040 UART1 BAUD"
+	default 115200
+
+config RP2040_UART1_PARITY
+	int "RP2040 UART1 parity"
+	default 0
+	range 0 2
+	---help---
+		RP2040 UART1 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config RP2040_UART1_BITS
+	int "RP2040 UART1 number of bits"
+	default 8
+	range 5 8
+	---help---
+		RP2040 UART1 number of bits.  Default: 8
+
+config RP2040_UART1_2STOP
+	int "RP2040 UART1 two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+endif

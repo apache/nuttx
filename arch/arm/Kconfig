@@ -225,6 +225,13 @@ config ARCH_CHIP_NUC1XX
 	---help---
 		Nuvoton NUC100/120 architectures (ARM Cortex-M0).
 
+config ARCH_CHIP_RP2040
+	bool "Raspberry Pi RP2040"
+	select ARCH_CORTEXM0
+	select ARCH_HAVE_RAMVECTORS
+	---help---
+		Raspberry Pi RP2040 architectures (ARM Cortex-M0+).
+
 config ARCH_CHIP_S32K1XX
 	bool "NXP S32K1XX"
 	select ARCH_HAVE_MPU
@@ -746,6 +753,7 @@ config ARCH_CHIP
 	default "moxart"	if ARCH_CHIP_MOXART
 	default "nrf52"		if ARCH_CHIP_NRF52
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
+	default "rp2040"	if ARCH_CHIP_RP2040
 	default "s32k1xx"	if ARCH_CHIP_S32K1XX
 	default "sama5"		if ARCH_CHIP_SAMA5
 	default "samd2l2"	if ARCH_CHIP_SAMD2X || ARCH_CHIP_SAML2X
@@ -981,6 +989,9 @@ source arch/arm/src/nrf52/Kconfig
 endif
 if ARCH_CHIP_NUC1XX
 source arch/arm/src/nuc1xx/Kconfig
+endif
+if ARCH_CHIP_RP2040
+source arch/arm/src/rp2040/Kconfig
 endif
 if ARCH_CHIP_SAMA5
 source arch/arm/src/sama5/Kconfig
