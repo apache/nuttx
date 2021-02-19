@@ -689,7 +689,7 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
     {
       FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)tcb;
 
-      linesize   = snprintf(procfile->line, STATUS_LINELEN, " 0x%p\n",
+      linesize   = snprintf(procfile->line, STATUS_LINELEN, " %p\n",
                             ptcb->arg);
       copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                                  remaining, &offset);
