@@ -112,10 +112,10 @@ int psock_listen(FAR struct socket *psock, int backlog)
  *
  * Description:
  *   To accept connections, a socket is first created with socket(), a
- *   willingness to accept incoming connections and a queue limit for incoming
- *   connections are specified with listen(), and then the connections are
- *   accepted with accept(). The listen() call applies only to sockets of
- *   type SOCK_STREAM or SOCK_SEQPACKET.
+ *   willingness to accept incoming connections and a queue limit for
+ *   incoming connections are specified with listen(), and then the
+ *   connections are accepted with accept(). The listen() call applies only
+ *   to sockets of type SOCK_STREAM or SOCK_SEQPACKET.
  *
  * Input Parameters:
  *   sockfd   Socket descriptor of the bound socket

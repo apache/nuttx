@@ -101,7 +101,8 @@ struct route_match_ipv6_s
 #ifdef CONFIG_ROUTE_IPv4_FILEROUTE
 static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 {
-  FAR struct route_match_ipv4_s *match = (FAR struct route_match_ipv4_s *)arg;
+  FAR struct route_match_ipv4_s *match =
+                    (FAR struct route_match_ipv4_s *)arg;
 
   /* To match, the masked target address must be the same, and the masks
    * must be the same.
@@ -132,7 +133,8 @@ static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 #ifdef CONFIG_ROUTE_IPv6_FILEROUTE
 static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
 {
-  FAR struct route_match_ipv6_s *match = (FAR struct route_match_ipv6_s *)arg;
+  FAR struct route_match_ipv6_s *match =
+                    (FAR struct route_match_ipv6_s *)arg;
 
   /* To match, the masked target address must be the same, and the masks
    * must be the same.
@@ -230,7 +232,9 @@ int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
   net_ipv4addr_copy(match.netmask, netmask);
   match.index = 0;
 
-  /* Then find the index into the routing table where the match can be found */
+  /* Then find the index into the routing table where the match can be
+   * found
+   */
 
   ret = net_foreachroute_ipv4(net_match_ipv4, &match);
   if (ret < 0)
@@ -378,7 +382,9 @@ int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask)
   net_ipv6addr_copy(match.netmask, netmask);
   match.index = 0;
 
-  /* Then find the index into the routing table where the match can be found */
+  /* Then find the index into the routing table where the match can be
+   * found
+   */
 
   ret = net_foreachroute_ipv6(net_match_ipv6, &match);
   if (ret < 0)

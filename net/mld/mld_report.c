@@ -62,7 +62,8 @@
  *
  ****************************************************************************/
 
-int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
+int mld_report(FAR struct net_driver_s *dev,
+               FAR const net_ipv6addr_t grpaddr)
 {
   FAR struct mld_group_s *group;
 

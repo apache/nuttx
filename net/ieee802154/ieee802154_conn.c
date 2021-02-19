@@ -208,7 +208,8 @@ FAR struct ieee802154_conn_s *
 
   DEBUGASSERT(meta != NULL);
 
-  for (conn  = (FAR struct ieee802154_conn_s *)g_active_ieee802154_connections.head;
+  for (conn  = (FAR struct ieee802154_conn_s *)
+       g_active_ieee802154_connections.head;
        conn != NULL;
        conn = (FAR struct ieee802154_conn_s *)conn->node.flink)
     {

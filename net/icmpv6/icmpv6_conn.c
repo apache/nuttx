@@ -122,7 +122,8 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
   ret = net_lockedwait(&g_free_sem);
   if (ret >= 0)
     {
-      conn = (FAR struct icmpv6_conn_s *)dq_remfirst(&g_free_icmpv6_connections);
+      conn = (FAR struct icmpv6_conn_s *)
+             dq_remfirst(&g_free_icmpv6_connections);
       if (conn != NULL)
         {
           /* Clear the connection structure */
@@ -232,8 +233,8 @@ FAR struct icmpv6_conn_s *icmpv6_nextconn(FAR struct icmpv6_conn_s *conn)
  * Name: icmpv6_findconn
  *
  * Description:
- *   Find an ICMPv6 connection structure that is expecting a ICMPv6 ECHO response
- *   with this ID from this device
+ *   Find an ICMPv6 connection structure that is expecting a ICMPv6 ECHO
+ *  response with this ID from this device
  *
  * Assumptions:
  *   This function is called from network logic at with the network locked.
@@ -245,7 +246,8 @@ FAR struct icmpv6_conn_s *icmpv6_findconn(FAR struct net_driver_s *dev,
 {
   FAR struct icmpv6_conn_s *conn;
 
-  for (conn = icmpv6_nextconn(NULL); conn != NULL; conn = icmpv6_nextconn(conn))
+  for (conn = icmpv6_nextconn(NULL); conn != NULL;
+       conn = icmpv6_nextconn(conn))
     {
       if (conn->id == id && conn->dev == dev && conn->nreqs > 0)
         {

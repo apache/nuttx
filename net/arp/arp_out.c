@@ -171,14 +171,17 @@ void arp_out(FAR struct net_driver_s *dev)
 
   if (net_ipv4addr_hdrcmp(pip->eh_destipaddr, g_broadcast_ipaddr))
     {
-      memcpy(peth->dest, g_broadcast_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
+      memcpy(peth->dest,
+             g_broadcast_ethaddr.ether_addr_octet,
+             ETHER_ADDR_LEN);
       goto finish_header;
     }
 
 #ifdef CONFIG_NET_IGMP
   /* Check if the destination address is a multicast address
    *
-   * - IPv4: multicast addresses lie in the class D group -- The address range
+   * - IPv4:
+   *   multicast addresses lie in the class D group -- The address range
    *   224.0.0.0 to 239.255.255.255 (224.0.0.0/4)
    *
    * - IPv6 multicast addresses are have the high-order octet of the
@@ -240,7 +243,9 @@ void arp_out(FAR struct net_driver_s *dev)
     {
       /* Yes.. then we won't need to know the destination MAC address */
 
-      memcpy(peth->dest, g_broadcast_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
+      memcpy(peth->dest,
+             g_broadcast_ethaddr.ether_addr_octet,
+             ETHER_ADDR_LEN);
       goto finish_header;
     }
   else

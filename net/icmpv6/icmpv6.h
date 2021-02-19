@@ -217,7 +217,8 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen);
  *
  * Returned Value:
  *   Zero (OK) is returned on success and the IP address mapping can now be
- *   found in the Neighbor Table.  On error a negated errno value is returned:
+ *   found in the Neighbor Table.
+ *   On error a negated errno value is returned:
  *
  *     -ETIMEDOUT:    The number or retry counts has been exceed.
  *     -EHOSTUNREACH: Could not find a route to the host
@@ -350,8 +351,8 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev);
  *   is sent so that there is no race condition when icmpv6_wait() is called.
  *
  * Assumptions:
- *   This function is called from icmpv6_neighbor() and executes in the normal
- *   tasking environment.
+ *   This function is called from icmpv6_neighbor() and executes in the
+ *   normal tasking environment.
  *
  ****************************************************************************/
 
@@ -521,8 +522,10 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
-                    const net_ipv6addr_t prefix, unsigned int preflen);
+void icmpv6_rnotify(FAR struct net_driver_s *dev,
+                    const net_ipv6addr_t draddr,
+                    const net_ipv6addr_t prefix,
+                    unsigned int preflen);
 #else
 #  define icmpv6_rnotify(d,p,l)
 #endif
@@ -602,8 +605,8 @@ FAR struct icmpv6_conn_s *icmpv6_nextconn(FAR struct icmpv6_conn_s *conn);
  * Name: icmpv6_findconn
  *
  * Description:
- *   Find an ICMPv6 connection structure that is expecting a ICMPv6 ECHO response
- *   with this ID from this device
+ *   Find an ICMPv6 connection structure that is expecting a ICMPv6 ECHO
+ *   response with this ID from this device
  *
  * Assumptions:
  *   This function is called from network logic at with the network locked.
@@ -641,8 +644,12 @@ FAR struct icmpv6_conn_s *icmpv6_findconn(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
-ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
-                      int flags, FAR const struct sockaddr *to, socklen_t tolen);
+ssize_t icmpv6_sendto(FAR struct socket *psock,
+                      FAR const void *buf,
+                      size_t len,
+                      int flags,
+                      FAR const struct sockaddr *to,
+                      socklen_t tolen);
 #endif
 
 /****************************************************************************
@@ -725,13 +732,13 @@ int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
  * Name: icmpv6_linkipaddr
  *
  * Description:
- *   Generate the device link scope ipv6 address as below:
- *    128  112  96   80    64   48   32   16
- *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxff fexx xxxx 6-byte normal address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *  Generate the device link scope ipv6 address as below:
+ *  128  112  96   80    64   48   32   16
+ *  ---- ---- ---- ----  ---- ---- ---- ----
+ * fe80 0000 0000 0000 0000 00ff fe00 xx00 1-byte short addr IEEE 48-bit MAC
+ * fe80 0000 0000 0000 0000 00ff fe00 xxxx 2-byte short addr IEEE 48-bit MAC
+ * fe80 0000 0000 0000 xxxx xxff fexx xxxx 6-byte normal addr IEEE 48-bit MAC
+ * fe80 0000 0000 0000 xxxx xxxx xxxx xxxx 8-byte extended addr IEEE EUI-64
  *
  * Input Parameters:
  *   dev    - The device driver structure containing the link layer address

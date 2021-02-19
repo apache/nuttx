@@ -79,7 +79,8 @@ struct ieee802154_finddev_s
  *
  ****************************************************************************/
 
-static int ieee802154_dev_callback(FAR struct net_driver_s *dev, FAR void *arg)
+static int ieee802154_dev_callback(FAR struct net_driver_s *dev,
+                                   FAR void *arg)
 {
   FAR struct ieee802154_finddev_s *match =
     (FAR struct ieee802154_finddev_s *)arg;

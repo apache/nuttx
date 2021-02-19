@@ -81,8 +81,10 @@
  *
  ****************************************************************************/
 
-ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
-                           size_t len, int flags, FAR const struct sockaddr *to,
+ssize_t psock_local_sendto(FAR struct socket *psock,
+                           FAR const void *buf,
+                           size_t len, int flags,
+                           FAR const struct sockaddr *to,
                            socklen_t tolen)
 {
   FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
@@ -118,7 +120,9 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (tolen < sizeof(sa_family_t) + 2)
     {
-      /* EFAULT - An invalid user space address was specified for a parameter */
+      /* EFAULT
+       * - An invalid user space address was specified for a parameter
+       */
 
       return -EFAULT;
     }

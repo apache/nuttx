@@ -170,8 +170,8 @@ int udp_writebuffer_notifier_setup(worker_t worker,
  *
  * Description:
  *   Eliminate a UDP read-ahead notification previously setup by
- *   udp_readahead_notifier_setup().  This function should only be called if the
- *   notification should be aborted prior to the notification.  The
+ *   udp_readahead_notifier_setup().  This function should only be called if
+ *   the notification should be aborted prior to the notification.  The
  *   notification will automatically be torn down after the notification.
  *
  * Input Parameters:
@@ -201,7 +201,8 @@ int udp_notifier_teardown(int key)
  *   When read-ahead data becomes available, *all* of the workers waiting
  *   for read-ahead data will be executed.  If there are multiple workers
  *   waiting for read-ahead data then only the first to execute will get the
- *   data.  Others will need to call udp_readahead_notifier_setup() once again.
+ *   data.
+ *   Others will need to call udp_readahead_notifier_setup() once again.
  *
  * Input Parameters:
  *   conn  - The UDP connection where read-ahead data was just buffered.

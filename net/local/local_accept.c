@@ -95,7 +95,8 @@ static int local_waitlisten(FAR struct local_conn_s *server)
  * Input Parameters:
  *   psock    The listening Unix domain socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr',
+ *            Return: returned size of 'addr'
  *   newconn  The new, accepted  Unix domain connection structure
  *
  * Returned Value:
@@ -190,8 +191,8 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                                          _SS_ISNONBLOCK(psock->s_flags));
               if (ret < 0)
                 {
-                   nerr("ERROR: Failed to open write-only FIFOs for %s: %d\n",
-                        conn->lc_path, ret);
+                  nerr("ERROR: Failed to open write-only FIFOs for %s: %d\n",
+                     conn->lc_path, ret);
                 }
             }
 

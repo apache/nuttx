@@ -96,7 +96,8 @@ struct route_match_ipv6_s
 #ifdef CONFIG_ROUTE_IPv4_RAMROUTE
 static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 {
-  FAR struct route_match_ipv4_s *match = (FAR struct route_match_ipv4_s *)arg;
+  FAR struct route_match_ipv4_s *match =
+                    (FAR struct route_match_ipv4_s *)arg;
 
   /* To match, the masked target address must be the same, and the masks
    * must be the same.
@@ -114,8 +115,9 @@ static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 
       if (match->prev)
         {
-          ramroute_ipv4_remafter((FAR struct net_route_ipv4_entry_s *)match->prev,
-                                 &g_ipv4_routes);
+          ramroute_ipv4_remafter(
+                         (FAR struct net_route_ipv4_entry_s *)match->prev,
+                         &g_ipv4_routes);
         }
       else
         {
@@ -139,9 +141,11 @@ static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 #endif
 
 #ifdef CONFIG_ROUTE_IPv6_RAMROUTE
-static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
+static int net_match_ipv6(
+               FAR struct net_route_ipv6_s *route, FAR void *arg)
 {
-  FAR struct route_match_ipv6_s *match = (FAR struct route_match_ipv6_s *)arg;
+  FAR struct route_match_ipv6_s *match =
+                     (FAR struct route_match_ipv6_s *)arg;
 
   /* To match, the masked target address must be the same, and the masks
    * must be the same.
@@ -167,8 +171,9 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
 
       if (match->prev)
         {
-          ramroute_ipv6_remafter((FAR struct net_route_ipv6_entry_s *)match->prev,
-                                 &g_ipv6_routes);
+          ramroute_ipv6_remafter(
+                     (FAR struct net_route_ipv6_entry_s *)match->prev,
+                     &g_ipv6_routes);
         }
       else
         {

@@ -124,7 +124,8 @@ int net_fstat(int sockfd, FAR struct stat *buf)
 #if defined(NET_TCP_HAVE_STACK)
        case SOCK_STREAM:
          {
-           FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
+           FAR struct tcp_conn_s *conn =
+                       (FAR struct tcp_conn_s *)psock->s_conn;
 
            /* For TCP, the MSS is a dynamic value that maintained in the
             * connection structure.
@@ -138,7 +139,8 @@ int net_fstat(int sockfd, FAR struct stat *buf)
 #if defined(NET_UDP_HAVE_STACK)
        case SOCK_DGRAM:
          {
-           FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)psock->s_conn;
+           FAR struct udp_conn_s *conn =
+                                   (FAR struct udp_conn_s *)psock->s_conn;
            FAR struct net_driver_s *dev;
            uint16_t iplen;
 
@@ -146,8 +148,8 @@ int net_fstat(int sockfd, FAR struct stat *buf)
             *
             *   MSS = MTU - LL_HDRLEN - UDP_HDRLEN - IP_HDRLEN
             *
-            * We need to have the device that services the connection in order
-            * to get the MTU and LL_HDRLEN:
+            * We need to have the device that services the connection in
+            * order to get the MTU and LL_HDRLEN:
             */
 
            dev = udp_find_raddr_device(conn);

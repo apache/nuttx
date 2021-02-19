@@ -136,9 +136,9 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
   tcp_backlogdestroy(conn);
 
   /* Now install the backlog tear-off in the connection.  NOTE that bls may
-   * actually be NULL if nblg is <= 0;  In that case, we are disabling backlog
-   * support.  Since the network is locked, destroying the old backlog and
-   * replace it with the new is an atomic operation
+   * actually be NULL if nblg is <= 0;  In that case, we are disabling
+   * backlog support.  Since the network is locked, destroying the old
+   * backlog and replace it with the new is an atomic operation
    */
 
   conn->backlog = bls;
@@ -193,7 +193,9 @@ int tcp_backlogdestroy(FAR struct tcp_conn_s *conn)
           blconn = blc->bc_conn;
           if (blconn)
             {
-              /* REVISIT -- such connections really need to be gracefully closed */
+              /* REVISIT
+               * -- such connections really need to be gracefully closed
+               */
 
               blconn->blparent = NULL;
               blconn->backlog  = NULL;
@@ -223,7 +225,8 @@ int tcp_backlogdestroy(FAR struct tcp_conn_s *conn)
  *
  ****************************************************************************/
 
-int tcp_backlogadd(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
+int tcp_backlogadd(FAR struct tcp_conn_s *conn,
+                   FAR struct tcp_conn_s *blconn)
 {
   FAR struct tcp_backlog_s     *bls;
   FAR struct tcp_blcontainer_s *blc;
@@ -367,7 +370,8 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
       for (blc = (FAR struct tcp_blcontainer_s *)sq_peek(&bls->bl_pending),
            prev = NULL;
            blc;
-           prev = blc, blc = (FAR struct tcp_blcontainer_s *)sq_next(&blc->bc_node))
+           prev = blc,
+            blc = (FAR struct tcp_blcontainer_s *)sq_next(&blc->bc_node))
         {
           if (blc->bc_conn == blconn)
             {

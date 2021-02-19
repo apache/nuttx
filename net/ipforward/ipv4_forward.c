@@ -476,9 +476,9 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
   else
     {
       /* Single network device.  The use case here is where an endpoint acts
-       * as a hub in a star configuration.  This is typical for a wireless star
-       * configuration where not all endpoints are accessible from all other
-       * endpoints, but seems less useful for a wired network.
+       * as a hub in a star configuration.  This is typical for a wireless
+       * star configuration where not all endpoints are accessible from all
+       * other endpoints, but seems less useful for a wired network.
        */
 
 #ifdef CONFIG_NET_ETHERNET

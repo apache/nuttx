@@ -125,7 +125,8 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
   adv            = ICMPv6ADVERTISE;
   adv->type      = ICMPv6_NEIGHBOR_ADVERTISE;  /* Message type */
   adv->code      = 0;                          /* Message qualifier */
-  adv->flags[0]  = ICMPv6_NADV_FLAG_S | ICMPv6_NADV_FLAG_O; /* Solicited+Override flags. */
+  adv->flags[0]  = ICMPv6_NADV_FLAG_S |
+                   ICMPv6_NADV_FLAG_O; /* Solicited+Override flags. */
   adv->flags[1]  = 0;
   adv->flags[2]  = 0;
   adv->flags[3]  = 0;
