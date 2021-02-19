@@ -51,7 +51,7 @@
  * Public Data
  ****************************************************************************/
 
-char line[LINESIZE+1];
+char line[LINESIZE + 1];
 
 /****************************************************************************
  * Private Data
@@ -85,14 +85,15 @@ static char *find_value_end(char *ptr)
     {
       if (*ptr == '"')
         {
-           do ptr++; while (*ptr && *ptr != '"');
-           if (*ptr) ptr++;
+          do ptr++; while (*ptr && *ptr != '"');
+          if (*ptr) ptr++;
         }
       else
         {
-           do ptr++; while (*ptr && !isspace((int)*ptr) && *ptr != '"');
+          do ptr++; while (*ptr && !isspace((int)*ptr) && *ptr != '"');
         }
     }
+
   return ptr;
 }
 
@@ -102,7 +103,7 @@ static char *read_line(FILE *stream)
 {
   char *ptr;
 
-  for (;;)
+  for (; ; )
     {
       line[LINESIZE] = '\0';
       if (!fgets(line, LINESIZE, stream))
@@ -239,7 +240,8 @@ void parse_file(FILE *stream, struct variable_s **list)
                * variable name and the value.
                */
 
-              curr = (struct variable_s *)malloc(sizeof(struct variable_s) + varlen + vallen - 1);
+              curr = (struct variable_s *)malloc(sizeof(struct variable_s) +
+                                          varlen + vallen - 1);
               if (curr)
                 {
                   /* Add the variable to the list */
@@ -279,7 +281,8 @@ void parse_file(FILE *stream, struct variable_s **list)
   while (ptr);
 }
 
-struct variable_s *find_variable(const char *varname, struct variable_s *list)
+struct variable_s *find_variable(const char *varname,
+                                 struct variable_s *list)
 {
   while (list)
     {

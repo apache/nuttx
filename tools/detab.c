@@ -80,7 +80,8 @@ int main(int argc, char **argv, char **envp)
       if (strcmp(argv[1], "-4") != 0)
         {
           fprintf(stderr, "ERROR:  Unrecognized option\n");
-          fprintf(stderr, "Usage:  %s [-4] <source-file> <out-file>\n", argv[0]);
+          fprintf(stderr, "Usage:  %s [-4] <source-file> <out-file>\n",
+                  argv[0]);
           return 1;
         }
 

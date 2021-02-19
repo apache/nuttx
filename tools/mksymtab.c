@@ -71,16 +71,29 @@ static int nhdrfiles;
 
 static void show_usage(const char *progname)
 {
-  fprintf(stderr, "USAGE: %s [-d] <cvs-file> <symtab-file> [<symtab-name> [<nsymbols-name>]]\n\n",
-          progname);
-  fprintf(stderr, "Where:\n\n");
-  fprintf(stderr, "  <cvs-file>      : The path to the input CSV file (required)\n");
-  fprintf(stderr, "  <symtab-file>   : The path to the output symbol table file (required)\n");
-  fprintf(stderr, "  <symtab-name>   : Optional name for the symbol table variable\n");
-  fprintf(stderr, "                    Default: \"%s\"\n", SYMTAB_NAME);
-  fprintf(stderr, "  <nsymbols-name> : Optional name for the symbol table variable\n");
-  fprintf(stderr, "                    Default: \"%s\"\n", NSYMBOLS_NAME);
-  fprintf(stderr, "  -d              : Enable debug output\n");
+  fprintf(stderr,
+    "USAGE:\n");
+  fprintf(stderr,
+    "%s [-d] <cvs-file> <symtab-file> [<symtab-name> [<nsymbols-name>]]\n\n",
+    progname);
+  fprintf(stderr,
+    "Where:\n\n");
+  fprintf(stderr,
+    " <cvs-file>      : The path to the input CSV file (required)\n");
+  fprintf(stderr,
+    " <symtab-file>   : The path to the output symbol table file\n");
+  fprintf(stderr,
+    "(required)\n");
+  fprintf(stderr,
+    " <symtab-name>   : Optional name for the symbol table variable\n");
+  fprintf(stderr,
+    "                   Default: \"%s\"\n", SYMTAB_NAME);
+  fprintf(stderr,
+    " <nsymbols-name> : Optional name for the symbol table variable\n");
+  fprintf(stderr,
+    "                   Default: \"%s\"\n", NSYMBOLS_NAME);
+  fprintf(stderr,
+    "  -d              : Enable debug output\n");
   exit(EXIT_FAILURE);
 }
 
@@ -107,7 +120,8 @@ static void add_hdrfile(const char *hdrfile)
         {
           if (nhdrfiles > MAX_HEADER_FILES)
             {
-              fprintf(stderr, "ERROR:  Too man header files.  Increase MAX_HEADER_FILES\n");
+              fprintf(stderr,
+                "ERROR:  Too man header files. Increase MAX_HEADER_FILES\n");
               exit(EXIT_FAILURE);
             }
 
@@ -242,7 +256,8 @@ int main(int argc, char **argv, char **envp)
 
   /* Output up-front file boilerplate */
 
-  fprintf(outstream, "/* %s: Auto-generated symbol table.  Do not edit */\n\n", sympath);
+  fprintf(outstream,
+     "/* %s: Auto-generated symbol table.  Do not edit */\n\n", sympath);
   fprintf(outstream, "#include <nuttx/config.h>\n");
   fprintf(outstream, "#include <nuttx/compiler.h>\n");
   fprintf(outstream, "#include <nuttx/symtab.h>\n\n");
@@ -302,7 +317,8 @@ int main(int argc, char **argv, char **envp)
     }
 
   fprintf(outstream, "%s};\n\n", finalterm);
-  fprintf(outstream, "#define NSYMBOLS (sizeof(%s) / sizeof (struct symtab_s))\n", symtab);
+  fprintf(outstream,
+    "#define NSYMBOLS (sizeof(%s) / sizeof (struct symtab_s))\n", symtab);
   fprintf(outstream, "int %s = NSYMBOLS;\n", nsymbols);
 
   /* Close the CSV and symbol table files and exit */
