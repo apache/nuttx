@@ -1296,6 +1296,12 @@ config ARCH_BOARD_INTEL64_QEMU
 		Port of NuttX to QEMU in intel64 mode.  This port will also run on real
 		generic Intel64 hardware.
 
+config ARCH_BOARD_RASPBERRYPI_PICO
+	bool "Raspberry Pi Pico board"
+	depends on ARCH_CHIP_RP2040
+	---help---
+		This is a port to the Raspberry Pi Pico board.
+
 config ARCH_BOARD_RX65N
 	bool "RX65N renesas board"
 	depends on ARCH_CHIP_R5F565NEDDFC
@@ -2329,6 +2335,7 @@ config ARCH_BOARD
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
 	default "intel64-qemu"             if ARCH_BOARD_INTEL64_QEMU
+	default "raspberrypi-pico"         if ARCH_BOARD_RASPBERRYPI_PICO
 	default "rx65n"                    if ARCH_BOARD_RX65N
 	default "rx65n-rsk1mb"             if ARCH_BOARD_RX65N_RSK1MB
 	default "rx65n-rsk2mb"             if ARCH_BOARD_RX65N_RSK2MB
@@ -2636,6 +2643,9 @@ source "boards/arm/nrf52/nrf52840-dk/Kconfig"
 endif
 if ARCH_BOARD_NUTINY_NUC120
 source "boards/arm/nuc1xx/nutiny-nuc120/Kconfig"
+endif
+if ARCH_BOARD_RASPBERRYPI_PICO
+source "boards/arm/rp2040/raspberrypi-pico/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_DUE
 source "boards/arm/sam34/arduino-due/Kconfig"
