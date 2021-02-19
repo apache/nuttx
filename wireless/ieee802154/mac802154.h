@@ -58,6 +58,14 @@
  * Public Data Types
  ****************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /* Callback operations to notify the next highest layer of various
  * asynchronous events, usually triggered by some previous request or
  * response invoked by the upper layer.
@@ -68,15 +76,16 @@ struct mac802154_maccb_s
   FAR struct mac802154_maccb_s *flink;  /* Implements a singly linked list */
   uint8_t prio;                         /* RX frame callback priority */
 
-  /* Callback for various MLME or MCPS service events.  Return value represents
-   * whether the callback accepts the primitive. >= 0 means the callback has
-   * accepted the primitive and is responsible for calling
-   * ieee802154_primitive_free(). In the case of DATA.indication primitive, only
-   * one callback can accept the frame. The callbacks are stored in order of
-   * receiver priority defined by the 'prio' field above. All other
-   * notifications are offered to all callbacks and all can accept and free
-   * separately since the primitive will not be freed until the nclients count
-   * reaches 0. */
+  /* Callback for various MLME or MCPS service events.
+   * Return value represents whether the callback accepts the primitive.
+   * >= 0 means the callback has accepted the primitive and is responsible
+   * for calling ieee802154_primitive_free(). In the case of DATA.indication
+   * primitive, only one callback can accept the frame. The callbacks are
+   * stored in order of receiver priority defined by the 'prio' field above.
+   * All other notifications are offered to all callbacks and all can accept
+   * and free separately since the primitive will not be freed until the
+   * nclients count reaches 0.
+   */
 
   CODE int (*notify)(FAR struct mac802154_maccb_s *maccb,
                      FAR struct ieee802154_primitive_s *primitive);
@@ -88,7 +97,7 @@ struct mac802154_maccb_s
 
 struct iob_s;  /* Forward reference */
 
- /****************************************************************************
+/****************************************************************************
  * Name: mac802154_bind
  *
  * Description:
@@ -223,13 +232,13 @@ int mac802154_req_gts(MACHANDLE mac, FAR struct ieee802154_gts_req_s *req);
  *
  *   NOTE: The standard specifies that confirmation should be provided via
  *   via the asynchronous MLME-RESET.confirm primitive.  However, in our
- *   implementation we synchronously return the value immediately. Therefore,
- *   we merge the functionality of the MLME-RESET.request and MLME-RESET.confirm
- *   primitives together.
+ *   implementation we synchronously return the value immediately.
+ *   Therefore, we merge the functionality of the MLME-RESET.request and
+ *   MLME-RESET.confirm primitives together.
  *
  * Input Parameters:
- *   mac          - Handle to the MAC layer instance
- *   reset_attr   - Whether or not to reset the MAC PIB attributes to defaults
+ *   mac         - Handle to the MAC layer instance
+ *   reset_attr  - Whether or not to reset the MAC PIB attributes to defaults
  *
  ****************************************************************************/
 
@@ -275,8 +284,8 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req);
  *
  *   NOTE: The standard specifies that the attribute value should be returned
  *   via the asynchronous MLME-GET.confirm primitive.  However, in our
- *   implementation, we synchronously return the value immediately.Therefore, we
- *   merge the functionality of the MLME-GET.request and MLME-GET.confirm
+ *   implementation, we synchronously return the value immediately.Therefore,
+ *   we merge the functionality of the MLME-GET.request and MLME-GET.confirm
  *   primitives together.
  *
  ****************************************************************************/
@@ -292,10 +301,11 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e ,
  *   indicated MAC PIB attribute.
  *
  *   NOTE: The standard specifies that confirmation should be indicated via
- *   the asynchronous MLME-SET.confirm primitive.  However, in our implementation
- *   we synchronously return the status from the request. Therefore, we do merge
- *   the functionality of the MLME-SET.request and MLME-SET.confirm primitives
- *   together.
+ *   the asynchronous MLME-SET.confirm primitive.
+ *   However, in our implementation we synchronously return the status from
+ *   the request.
+ *   Therefore, we do merge the functionality of the MLME-SET.request and
+ *   MLME-SET.confirm primitives together.
  *
  ****************************************************************************/
 
@@ -312,7 +322,8 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e ,
  *
  ****************************************************************************/
 
-int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req);
+int mac802154_req_start(MACHANDLE mac,
+                        FAR struct ieee802154_start_req_s *req);
 
 /****************************************************************************
  * Name: mac802154_req_sync
