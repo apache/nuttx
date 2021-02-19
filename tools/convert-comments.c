@@ -52,8 +52,8 @@
  * Private Data
  ****************************************************************************/
 
-static char g_lineA[LINESIZE + 3];
-static char g_lineB[LINESIZE + 3];
+static char g_linea[LINESIZE + 3];
+static char g_lineb[LINESIZE + 3];
 static char g_iobuffer[LINESIZE];
 
 /****************************************************************************
@@ -108,8 +108,8 @@ int main(int argc, char **argv)
 
   /* Prime the pump */
 
-  g_line0    = g_lineA;
-  g_line1    = g_lineB;
+  g_line0    = g_linea;
+  g_line1    = g_lineb;
   wasblank   = true;
   wascomment = false;
   lastindent = 0;
@@ -214,13 +214,17 @@ int main(int argc, char **argv)
             }
           else
             {
-              /* Check for a C++ style comment at this indentation in line n + 1 */
+              /* Check for a C++ style comment
+               * at this indentation in line n + 1
+               */
 
               willbeblank   = false;
               willbecomment = strncmp(ptr, "//", 2) == 0;
             }
 
-          /* Check for a C++ style comment at this indentation in line n + 1 */
+          /* Check for a C++ style comment
+           * at this indentation in line n + 1
+           */
 
           willbecomment = strncmp(ptr, "//", 2) == 0;
         }
@@ -231,8 +235,8 @@ int main(int argc, char **argv)
           nextindent    = 0;
         }
 
-      /* If current line is not a comment line, then check for a C++ style comment at the
-       * end of the line.
+      /* If current line is not a comment line, then check for a C++ style
+       * comment at the end of the line.
        */
 
       if (!iscomment)
@@ -253,7 +257,8 @@ int main(int argc, char **argv)
             }
         }
 
-      printf("*****************************************************************************\n");
+      printf("***************************************
+              **************************************\n");
       printf("* %5lu. %s\n", lineno, g_line0);
       printf("*  indent: last=%u curr=%u next=%u\n",
               lastindent, indent, nextindent);
@@ -261,7 +266,8 @@ int main(int argc, char **argv)
               wascomment, iscomment, willbecomment);
       printf("*   blank: last=%u curr=%u next=%u\n",
               wasblank, isblank, willbeblank);
-      printf("*****************************************************************************\n");
+      printf("***************************************
+              **************************************\n");
 
       /* Does line n start with a comment */
 
@@ -367,8 +373,8 @@ int main(int argc, char **argv)
         }
       else if (wascomment)
         {
-          /* Line n is not a comment, but line n - 1 was.  Output a closing on a
-           * newline at the same indentation.
+          /* Line n is not a comment, but line n - 1 was.
+           * Output a closing on a newline at the same indentation.
            */
 
           memset(g_iobuffer, ' ', LINESIZE);

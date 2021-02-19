@@ -53,10 +53,10 @@
  * Public Data
  ****************************************************************************/
 
-extern char line[LINESIZE+1];
+extern char line[LINESIZE + 1];
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 void generate_definitions(FILE *stream);

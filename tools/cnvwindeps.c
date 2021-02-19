@@ -117,7 +117,8 @@ static bool dequote_path(const char *winpath)
 
   while (*src && len < MAX_PATH)
     {
-      if (src[0] != '\\' || (src[1] != ' ' && src[1] != '(' && src[1] != ')'))
+      if (src[0] != '\\' || (src[1] != ' ' &&
+          src[1] != '(' && src[1] != ')'))
         {
           *dest++ = *src;
           len++;
@@ -148,7 +149,8 @@ static bool convert_path(const char *winpath)
 
   quoted = dequote_path(winpath);
 
-  size = cygwin_conv_path(CCP_WIN_A_TO_POSIX | CCP_RELATIVE, g_dequoted, NULL, 0);
+  size = cygwin_conv_path(CCP_WIN_A_TO_POSIX | CCP_RELATIVE,
+                          g_dequoted, NULL, 0);
   if (size > MAX_PATH)
     {
       fprintf(stderr, "%lu: POSIX path too long: %lu\n",
@@ -156,7 +158,8 @@ static bool convert_path(const char *winpath)
       exit(EXIT_FAILURE);
     }
 
-  ret = cygwin_conv_path(CCP_WIN_A_TO_POSIX | CCP_RELATIVE, g_dequoted, g_posix, MAX_PATH);
+  ret = cygwin_conv_path(CCP_WIN_A_TO_POSIX | CCP_RELATIVE,
+                         g_dequoted, g_posix, MAX_PATH);
   if (ret < 0)
     {
       fprintf(stderr, "%lu: cygwin_conv_path '%s' failed: %s\n",
@@ -245,7 +248,7 @@ int main(int argc, char **argv, char **envp)
                     {
                       printf("%s:", g_posix);
                     }
-               }
+                }
 
               begin = false;
             }

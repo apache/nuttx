@@ -137,12 +137,12 @@ static char *find_value_end(char *ptr)
     {
       if (*ptr == '"')
         {
-           do ptr++; while (*ptr && *ptr != '"');
-           if (*ptr) ptr++;
+          do ptr++; while (*ptr && *ptr != '"');
+          if (*ptr) ptr++;
         }
       else
         {
-           do ptr++; while (*ptr && !isspace((int)*ptr) && *ptr != '"');
+          do ptr++; while (*ptr && !isspace((int)*ptr) && *ptr != '"');
         }
     }
 
@@ -484,7 +484,7 @@ static int enum_architectures(const char *dirpath, struct dirent *entry,
               if (g_narch >= MAX_ARCHITECTURES)
                 {
                   fprintf(stderr,
-                          "ERROR: Too many architecture directories found\n");
+                         "ERROR: Too many architecture directories found\n");
                   exit(EXIT_FAILURE);
                 }
 
@@ -697,25 +697,25 @@ char *list_select(char **list, unsigned nitems)
 
       printf("Enter [1");
       if (nitems > 1)
-      {
-         printf("-%c", nitems >= 9 ? '9' : '0' + nitems);
-         if (nitems > 9)
-           {
-             printf(",a");
-             if (nitems > 10)
-               {
-                 printf("-%c", 'a' + nitems - 10);
-                 if (nitems > 35)
-                   {
-                     printf(",A");
-                     if (nitems > 36)
-                       {
-                         printf("-%c", 'A' + nitems - 36);
-                       }
-                   }
-               }
-           }
-      }
+        {
+          printf("-%c", nitems >= 9 ? '9' : '0' + nitems);
+          if (nitems > 9)
+            {
+              printf(",a");
+              if (nitems > 10)
+                {
+                  printf("-%c", 'a' + nitems - 10);
+                  if (nitems > 35)
+                    {
+                      printf(",A");
+                      if (nitems > 36)
+                        {
+                          printf("-%c", 'A' + nitems - 36);
+                        }
+                    }
+                }
+            }
+        }
 
       printf("]: ");
 
