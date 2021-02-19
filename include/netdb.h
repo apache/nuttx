@@ -174,6 +174,35 @@
 #define NO_RECOVERY    3
 #define TRY_AGAIN      4
 
+/* NI_MAXHOST is the max of
+ *
+ *    CONFIG_NETDB_DNSCLIENT_NAMESIZE + 1
+ *    INET6_ADDRSTRLEN
+ *    INET_ADDRSTRLEN
+ *
+ * Note: INETxxx_ADDRSTRLEN already includes the terminating NUL.
+ * Note: INET6_ADDRSTRLEN > INET_ADDRSTRLEN is assumed.
+ */
+
+#if defined(CONFIG_NET_IPv6)
+#define	_INET_ADDRSTRLEN	INET6_ADDRSTRLEN
+#else
+#define	_INET_ADDRSTRLEN	INET_ADDRSTRLEN
+#endif
+
+#if defined(CONFIG_NETDB_DNSCLIENT) && \
+    (CONFIG_NETDB_DNSCLIENT_NAMESIZE + 1) > _INET_ADDRSTRLEN
+#define	NI_MAXHOST	(CONFIG_NETDB_DNSCLIENT_NAMESIZE + 1)
+#else
+#define	NI_MAXHOST	_INET_ADDRSTRLEN
+#endif
+
+/* Right now, g_services_db[] only has "ntp".
+ * 16 should be large enough.
+ */
+
+#define	NI_MAXSERV	16
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
