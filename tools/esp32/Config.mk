@@ -42,7 +42,7 @@ else ifeq ($(CONFIG_ESP32_FLASH_16M),y)
 endif
 
 ifeq ($(CONFIG_ESP32_QEMU_IMAGE),y)
-	MK_QEMU_IMG=$(TOPDIR)/tools/esp32/mk_qemu_img.sh $(BOOTLOADER) $(PARTITION_TABLE)
+	MK_QEMU_IMG=$(TOPDIR)/tools/esp32/mk_qemu_img.sh -b $(BOOTLOADER) -p $(PARTITION_TABLE)
 else
 	MK_QEMU_IMG=
 endif

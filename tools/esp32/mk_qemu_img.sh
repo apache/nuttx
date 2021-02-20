@@ -20,35 +20,78 @@
 ############################################################################
 
 SCRIPT_NAME=$(basename "${0}")
-USAGE="USAGE: ${SCRIPT_NAME} <bootloader_img> <partition_table_img>"
+
+BOOTLOADER_IMG=""
+PARTITION_IMG=""
+NUTTX_IMG="nuttx.bin"
+FLASH_IMG="esp32_qemu_img.bin"
+
+usage() {
+  echo ""
+  echo "USAGE: ${SCRIPT_NAME} [-h] -b <bootloader> -p <partition_table> [-n <nuttx>] [-i <image_name>]"
+  echo ""
+  echo "Where:"
+  echo "  -b <bootloader> path to the bootloader image"
+  echo "  -p <partition_table> path to the partition table image"
+  echo "  -n <nuttx> path to the nuttx image (default nuttx.bin)"
+  echo "  -i <image_name> name of the resulting image (default esp32_qemu_img.bin)"
+  echo "  -h will show this help and terminate"
+}
+
+while [ ! -z "$1" ]; do
+  case "$1" in
+  -b )
+    shift
+    BOOTLOADER_IMG=$1
+    ;;
+  -p )
+    shift
+    PARTITION_IMG=$1
+    ;;
+  -n )
+    shift
+    NUTTX_IMG=$1
+    ;;
+  -i )
+    shift
+    FLASH_IMG=$1
+    ;;
+  -h )
+    usage
+    exit 0
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+  esac
+  shift
+done
 
 # Make sure we have the required argument(s)
 
-if [ -z "${1}" ] || [ -z "${2}" ] ; then
-  printf "%s requires the bootloader and partition table binary images.\n " "${SCRIPT_NAME}"
-  printf "%s\n " "${USAGE}"
+if [ -z "${BOOTLOADER_IMG}" ] || [ -z "${PARTITION_IMG}" ] ; then
+  echo "Missing bootloader and partition table binary images."
+  usage
   exit 1
 fi
 
-BOOTLOADER=${1}
-PARTITION_TABLE=${2}
+printf "Generating %s...\n" "${FLASH_IMG}"
+printf "\tBootloader: %s\n" "${BOOTLOADER_IMG}"
+printf "\tPartition Table: %s\n" "${PARTITION_IMG}"
 
-printf "Generating esp32_qemu_image.bin...\n"
-printf "\tBootloader: %s\n" "${BOOTLOADER}"
-printf "\tPartition Table: %s\n" "${PARTITION_TABLE}"
-
-dd if=/dev/zero bs=1024 count=4096 of=esp32_qemu_image.bin && \
-dd if="${BOOTLOADER}" bs=1 seek="$(printf '%d' 0x1000)" of=esp32_qemu_image.bin conv=notrunc && \
-dd if="${PARTITION_TABLE}" bs=1 seek="$(printf '%d' 0x8000)" of=esp32_qemu_image.bin conv=notrunc && \
-dd if=nuttx.bin bs=1 seek="$(printf '%d' 0x10000)" of=esp32_qemu_image.bin conv=notrunc
+dd if=/dev/zero bs=1024 count=4096 of=${FLASH_IMG} && \
+dd if="${BOOTLOADER_IMG}" bs=1 seek="$(printf '%d' 0x1000)" of=${FLASH_IMG} conv=notrunc && \
+dd if="${PARTITION_IMG}" bs=1 seek="$(printf '%d' 0x8000)" of=${FLASH_IMG} conv=notrunc && \
+dd if=$NUTTX_IMG bs=1 seek="$(printf '%d' 0x10000)" of=${FLASH_IMG} conv=notrunc
 
 if [ ${?} -ne 0 ]; then
-  printf "Failed to generate esp32_qemu_image.bin.\n"
+  printf "Failed to generate ${FLASH_IMG}.\n"
   exit 1
 fi
 
-printf "Generated esp32_qemu_image.bin successfully!\n"
-printf "You can use QEMU for executing it with the following command line:\n"
-printf "\tqemu-system-xtensa -nographic -machine esp32 -drive file=esp32_qemu_image.bin,if=mtd,format=raw\n"
+printf "Generated ${FLASH_IMG} successfully!\n"
+printf "You can run it with QEMU using:\n"
+printf "\tqemu-system-xtensa -nographic -machine esp32 -drive file=${FLASH_IMG},if=mtd,format=raw\n"
 
-echo "esp32_qemu_image.bin" >> nuttx.manifest
+echo "${FLASH_IMG}" >> nuttx.manifest
