@@ -67,3 +67,17 @@ Espressif has an offcial Ethernet development board:
 
   https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-ethernet-kit.html
 
+Using QEMU:
+==========
+
+First follow the instructions at https://github.com/espressif/qemu/wiki to build QEMU.
+Enable the ESP32_QEMU_IMAGE config found in "Board Selection -> ESP32 binary image for QEMU".
+Download the bootloader and the partition table from https://github.com/espressif/esp-nuttx-bootloader/releases
+and place them in a directory, say ../esp-bins.
+Build and generate the QEMU image: `make ESPTOOL_BINDIR=../esp-bins`
+A new image "esp32_qemu_image.bin" will be created.  It can be run as:
+
+ ~/PATH_TO_QEMU/qemu/build/xtensa-softmmu/qemu-system-xtensa -nographic \
+    -machine esp32 \
+    -drive file=esp32_qemu_image.bin,if=mtd,format=raw
+ 
