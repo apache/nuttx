@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdlib/lib_stackchk.c
+ * libs/libc/assert/lib_stackchk.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
