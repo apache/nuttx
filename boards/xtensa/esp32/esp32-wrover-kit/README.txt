@@ -77,3 +77,18 @@ Configurations
     nsh> gpio -w 14 /dev/gpint3
   The pin is configured to as a rising edge interrupt, so after issuing the
   above command, connect it to 3.3V.
+
+Using QEMU:
+==========
+
+First follow the instructions at https://github.com/espressif/qemu/wiki to build QEMU.
+Enable the ESP32_QEMU_IMAGE config found in "Board Selection -> ESP32 binary image for QEMU".
+Download the bootloader and the partition table from https://github.com/espressif/esp-nuttx-bootloader/releases
+and place them in a directory, say ../esp-bins.
+Build and generate the QEMU image: `make ESPTOOL_BINDIR=../esp-bins`
+A new image "esp32_qemu_image.bin" will be created.  It can be run as:
+
+ ~/PATH_TO_QEMU/qemu/build/xtensa-softmmu/qemu-system-xtensa -nographic \
+    -machine esp32 \
+    -drive file=esp32_qemu_image.bin,if=mtd,format=raw
+ 
