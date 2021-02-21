@@ -56,6 +56,10 @@
 #  include "esp32_board_wdt.h"
 #endif
 
+#ifdef CONFIG_ESP32_I2C
+#  include "esp32_board_i2c.h"
+#endif
+
 #include "esp32-wrover-kit.h"
 
 /****************************************************************************
@@ -231,6 +235,30 @@ int esp32_bringup(void)
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
       return ret;
     }
+#endif
+
+#ifdef CONFIG_I2C_DRIVER
+
+#ifdef CONFIG_ESP32_I2C0
+  ret = esp32_i2c_register(0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2C Driver for I2C0: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32_I2C1
+  ret = esp32_i2c_register(1);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2C Driver for I2C1: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
