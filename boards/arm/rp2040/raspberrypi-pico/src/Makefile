@@ -24,4 +24,8 @@ CSRCS = rp2040_boardinitialize.c
 CSRCS += rp2040_appinit.c
 CSRCS += rp2040_bringup.c
 
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += rp2040_reset.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
