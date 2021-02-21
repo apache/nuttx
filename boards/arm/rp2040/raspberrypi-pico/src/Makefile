@@ -22,5 +22,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = rp2040_boardinitialize.c
 CSRCS += rp2040_appinit.c
+CSRCS += rp2040_bringup.c
 
 include $(TOPDIR)/boards/Board.mk

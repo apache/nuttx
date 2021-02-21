@@ -25,6 +25,8 @@
 #include <nuttx/config.h>
 #include <nuttx/board.h>
 
+#include "rp2040_pico.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -64,5 +66,13 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  /* Board initialization already performed by board_late_initialize() */
+
   return OK;
+#else
+  /* Perform board-specific initialization */
+
+  return rp2040_bringup();
+#endif
 }
