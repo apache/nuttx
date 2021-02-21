@@ -395,10 +395,6 @@ static inline void pic32mz_adcdisable(void)
   putreg32(0xffffffff, PIC32MZ_IOPORTJ_K1BASE +
                        PIC32MZ_IOPORT_ANSELCLR_OFFSET);
 #endif
-#if CHIP_NPORTS > 9
-  putreg32(0xffffffff, PIC32MZ_IOPORTK_K1BASE +
-                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
-#endif
 }
 
 /****************************************************************************
