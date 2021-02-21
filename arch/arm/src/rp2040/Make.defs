@@ -61,8 +61,4 @@ CHIP_CSRCS += rp2040_pll.c
 
 ifneq ($(PICO_SDK_PATH),)
 include chip/boot2/Make.defs
-else
-ifeq ($(CONFIG_RP2040_FLASH_BOOT),y)
-$(error $$(PICO_SDK_PATH) must be specified for flash boot)
-endif
 endif
