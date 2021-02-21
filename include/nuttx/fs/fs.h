@@ -87,7 +87,7 @@
 #  define _NX_IOCTL(f,r,a)     ioctl(f,r,a)
 #  define _NX_STAT(p,s)        stat(p,s)
 #  define _NX_GETERRNO(r)      errno
-#  define _NX_SETERRNO(r)
+#  define _NX_SETERRNO(r)      ((void)(r))
 #  define _NX_GETERRVAL(r)     (-errno)
 #endif
 
