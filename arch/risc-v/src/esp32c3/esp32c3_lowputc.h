@@ -18,6 +18,9 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_LOWPUTC_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_LOWPUTC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -205,3 +208,5 @@ bool esp32c3_lowputc_is_tx_fifo_full(const struct esp32c3_uart_s *
  ****************************************************************************/
 
 void esp32c3_lowsetup(void);
+
+#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_LOWPUTC_H */
