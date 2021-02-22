@@ -34,6 +34,10 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += esp32c3_gpio.c
 endif
 
+ifeq ($(CONFIG_WATCHDOG),y)
+CSRCS += esp32c3_wdt.c
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32c3.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32c3_out.ld
 
