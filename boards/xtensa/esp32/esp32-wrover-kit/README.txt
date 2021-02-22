@@ -92,3 +92,11 @@ A new image "esp32_qemu_image.bin" will be created.  It can be run as:
     -machine esp32 \
     -drive file=esp32_qemu_image.bin,if=mtd,format=raw
  
+External devices:
+=================
+
+  BMP180
+  ------
+
+  When using BMP180 (enabling CONFIG_SENSORS_BMP180), it's expected this device is wired to I2C0 bus.
+  The current bring-up routines doesn't allow BMP180 device to be used in I2C1 bus.
