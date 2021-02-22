@@ -38,23 +38,23 @@ usage() {
   echo "  -h will show this help and terminate"
 }
 
-while [ ! -z "$1" ]; do
-  case "$1" in
+while [ -n "${1}" ]; do
+  case "${1}" in
   -b )
     shift
-    BOOTLOADER_IMG=$1
+    BOOTLOADER_IMG=${1}
     ;;
   -p )
     shift
-    PARTITION_IMG=$1
+    PARTITION_IMG=${1}
     ;;
   -n )
     shift
-    NUTTX_IMG=$1
+    NUTTX_IMG=${1}
     ;;
   -i )
     shift
-    FLASH_IMG=$1
+    FLASH_IMG=${1}
     ;;
   -h )
     usage
@@ -80,18 +80,18 @@ printf "Generating %s...\n" "${FLASH_IMG}"
 printf "\tBootloader: %s\n" "${BOOTLOADER_IMG}"
 printf "\tPartition Table: %s\n" "${PARTITION_IMG}"
 
-dd if=/dev/zero bs=1024 count=4096 of=${FLASH_IMG} && \
-dd if="${BOOTLOADER_IMG}" bs=1 seek="$(printf '%d' 0x1000)" of=${FLASH_IMG} conv=notrunc && \
-dd if="${PARTITION_IMG}" bs=1 seek="$(printf '%d' 0x8000)" of=${FLASH_IMG} conv=notrunc && \
-dd if=$NUTTX_IMG bs=1 seek="$(printf '%d' 0x10000)" of=${FLASH_IMG} conv=notrunc
+dd if=/dev/zero bs=1024 count=4096 of="${FLASH_IMG}" && \
+dd if="${BOOTLOADER_IMG}" bs=1 seek="$(printf '%d' 0x1000)" of="${FLASH_IMG}" conv=notrunc && \
+dd if="${PARTITION_IMG}" bs=1 seek="$(printf '%d' 0x8000)" of="${FLASH_IMG}" conv=notrunc && \
+dd if="${NUTTX_IMG}" bs=1 seek="$(printf '%d' 0x10000)" of="${FLASH_IMG}" conv=notrunc
 
 if [ ${?} -ne 0 ]; then
-  printf "Failed to generate ${FLASH_IMG}.\n"
+  printf "Failed to generate %s.\n" "${FLASH_IMG}"
   exit 1
 fi
 
-printf "Generated ${FLASH_IMG} successfully!\n"
+printf "Generated %s successfully!\n" "${FLASH_IMG}"
 printf "You can run it with QEMU using:\n"
-printf "\tqemu-system-xtensa -nographic -machine esp32 -drive file=${FLASH_IMG},if=mtd,format=raw\n"
+printf "\tqemu-system-xtensa -nographic -machine esp32 -drive file=%s,if=mtd,format=raw\n" "${FLASH_IMG}"
 
 echo "${FLASH_IMG}" >> nuttx.manifest
