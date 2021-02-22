@@ -52,6 +52,8 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 
+#include "inode/inode.h"
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -70,8 +72,9 @@ struct epoll_head
  * Private Function Prototypes
  ****************************************************************************/
 
-static int epoll_poll(FAR struct file *filep,
-                      FAR struct pollfd *fds, bool setup);
+static int epoll_do_close(FAR struct file *filep);
+static int epoll_do_poll(FAR struct file *filep,
+                         FAR struct pollfd *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -79,17 +82,92 @@ static int epoll_poll(FAR struct file *filep,
 
 static const struct file_operations g_epoll_ops =
 {
-  .poll = epoll_poll
+  .close = epoll_do_close,
+  .poll  = epoll_do_poll
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int epoll_poll(FAR struct file *filep,
-                      FAR struct pollfd *fds, bool setup)
+static FAR struct epoll_head *epoll_head_from_fd(int fd)
+{
+  FAR struct file *filep;
+  int ret;
+
+  /* Get file pointer by file descriptor */
+
+  ret = fs_getfilep(fd, &filep);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return NULL;
+    }
+
+  /* Check fd come from us */
+
+  if (filep->f_inode->u.i_ops != &g_epoll_ops)
+    {
+      set_errno(EBADF);
+      return NULL;
+    }
+
+  return (FAR struct epoll_head *)filep->f_inode->i_private;
+}
+
+static int epoll_do_close(FAR struct file *filep)
+{
+  FAR struct epoll_head *eph = filep->f_inode->i_private;
+
+  kmm_free(eph);
+  return OK;
+}
+
+static int epoll_do_poll(FAR struct file *filep,
+                         FAR struct pollfd *fds, bool setup)
 {
   return OK;
+}
+
+static int epoll_do_create(int size, int flags)
+{
+  FAR struct epoll_head *eph;
+  int reserve = size + 1;
+  int fd;
+
+  eph = (FAR struct epoll_head *)
+        kmm_zalloc(sizeof(struct epoll_head) +
+                   sizeof(epoll_data_t) * reserve +
+                   sizeof(struct pollfd) * reserve);
+  if (eph == NULL)
+    {
+      set_errno(ENOMEM);
+      return -1;
+    }
+
+  eph->size = size;
+  eph->data = (FAR epoll_data_t *)(eph + 1);
+  eph->poll = (FAR struct pollfd *)(eph->data + reserve);
+
+  INODE_SET_DRIVER(&eph->in);
+  eph->in.u.i_ops = &g_epoll_ops;
+  eph->fp.f_inode = &eph->in;
+  eph->in.i_private = eph;
+
+  eph->poll[0].ptr = &eph->fp;
+  eph->poll[0].events = POLLIN | POLLFILE;
+
+  /* Alloc the file descriptor */
+
+  fd = files_allocate(&eph->in, flags, 0, eph, 0);
+  if (fd < 0)
+    {
+      kmm_free(eph);
+      set_errno(-fd);
+      return -1;
+    }
+
+  return fd;
 }
 
 /****************************************************************************
@@ -109,31 +187,7 @@ static int epoll_poll(FAR struct file *filep,
 
 int epoll_create(int size)
 {
-  FAR struct epoll_head *eph;
-  int reserve = size + 1;
-
-  eph = (FAR struct epoll_head *)
-        kmm_zalloc(sizeof(struct epoll_head) +
-                   sizeof(epoll_data_t) * reserve +
-                   sizeof(struct pollfd) * reserve);
-
-  eph->size = size;
-  eph->data = (FAR epoll_data_t *)(eph + 1);
-  eph->poll = (FAR struct pollfd *)(eph->data + reserve);
-
-  INODE_SET_DRIVER(&eph->in);
-  eph->in.u.i_ops = &g_epoll_ops;
-  eph->fp.f_inode = &eph->in;
-  eph->in.i_private = eph;
-
-  eph->poll[0].ptr = &eph->fp;
-  eph->poll[0].events = POLLIN | POLLFILE;
-
-  /* REVISIT: This will not work on machines where:
-   * sizeof(struct epoll_head *) > sizeof(int)
-   */
-
-  return (int)((intptr_t)eph);
+  return epoll_do_create(size, 0);
 }
 
 /****************************************************************************
@@ -149,17 +203,7 @@ int epoll_create(int size)
 
 int epoll_create1(int flags)
 {
-  /* For current implementation, Close-on-exec is a default behavior,
-   * the handle of epoll(2) is not a real file handle.
-   */
-
-  if (flags != EPOLL_CLOEXEC)
-    {
-      set_errno(EINVAL);
-      return -1;
-    }
-
-  return epoll_create(CONFIG_FS_NEPOLL_DESCRIPTORS);
+  return epoll_do_create(CONFIG_FS_NEPOLL_DESCRIPTORS, flags);
 }
 
 /****************************************************************************
@@ -175,13 +219,7 @@ int epoll_create1(int flags)
 
 void epoll_close(int epfd)
 {
-  /* REVISIT: This will not work on machines where:
-   * sizeof(struct epoll_head *) > sizeof(int)
-   */
-
-  FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
-
-  kmm_free(eph);
+  close(epfd);
 }
 
 /****************************************************************************
@@ -197,12 +235,14 @@ void epoll_close(int epfd)
 
 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
 {
-  /* REVISIT: This will not work on machines where:
-   * sizeof(struct epoll_head *) > sizeof(int)
-   */
-
-  FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
+  FAR struct epoll_head *eph;
   int i;
+
+  eph = epoll_head_from_fd(epfd);
+  if (eph == NULL)
+    {
+      return -1;
+    }
 
   switch (op)
     {
@@ -288,17 +328,19 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
 int epoll_pwait(int epfd, FAR struct epoll_event *evs,
                 int maxevents, int timeout, FAR const sigset_t *sigmask)
 {
-  /* REVISIT: This will not work on machines where:
-   * sizeof(struct epoll_head *) > sizeof(int)
-   */
-
-  FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
+  FAR struct epoll_head *eph;
   struct timespec expire;
   struct timespec curr;
   struct timespec diff;
   int counter;
   int rc;
   int i;
+
+  eph = epoll_head_from_fd(epfd);
+  if (eph == NULL)
+    {
+      return -1;
+    }
 
   if (timeout >= 0)
     {
