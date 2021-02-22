@@ -337,7 +337,12 @@ int arp_send(in_addr_t ipaddr)
 
       do
         {
-          net_lockedwait(&state.snd_sem);
+          ret = net_timedwait_uninterruptible(&state.snd_sem,
+                                              CONFIG_ARP_SEND_DELAYMSEC);
+          if (ret == -ETIMEDOUT)
+            {
+              goto timeout;
+            }
         }
       while (!state.snd_sent);
 
@@ -367,6 +372,7 @@ int arp_send(in_addr_t ipaddr)
           break;
         }
 
+timeout:
       /* Increment the retry count */
 
       state.snd_retries++;
