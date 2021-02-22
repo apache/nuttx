@@ -104,6 +104,10 @@ config ESP32C3_CPU_FREQ_MHZ
 
 menu "ESP32-C3 Peripheral Support"
 
+config ESP32C3_UART
+	bool
+	default n
+
 config ESP32C3_WDT
 	bool
 	default n
@@ -116,11 +120,13 @@ config ESP32C3_GPIO_IRQ
 config ESP32C3_UART0
 	bool "UART0"
 	default y
+	select ESP32C3_UART
 	select UART0_SERIALDRIVER
 
 config ESP32C3_UART1
 	bool "UART1"
 	default n
+	select ESP32C3_UART
 	select UART1_SERIALDRIVER
 
 config ESP32C3_MWDT0
