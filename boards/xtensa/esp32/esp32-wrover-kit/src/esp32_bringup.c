@@ -60,6 +60,10 @@
 #  include "esp32_board_i2c.h"
 #endif
 
+#ifdef CONFIG_SENSORS_BMP180
+#  include "esp32_bmp180.h"
+#endif
+
 #include "esp32-wrover-kit.h"
 
 /****************************************************************************
@@ -259,6 +263,19 @@ int esp32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_BMP180
+  /* Try to register BMP180 device in I2C0 */
+
+  ret = board_bmp180_initialize(0, 0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize BMP180"
+                       "Driver for I2C0: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
@@ -269,3 +286,4 @@ int esp32_bringup(void)
   UNUSED(ret);
   return OK;
 }
+
