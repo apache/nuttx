@@ -55,25 +55,9 @@ _vector_table:
 
   j    _exception_handler
 
-  /* 29 identical entries, all pointing to the interrupt handler */
+  /* 31 identical entries, all pointing to the interrupt handler */
 
-  .rept (29)
+  .rept (31)
   j    _interrupt_handler
   .endr
 
-  /* Call panic handler for ESP32C3_CPU_INT_T1_WDT interrupt (soc-level panic)*/
-
-  j    _panic_handler
-
-  /* Call panic handler for ESP32C3_CPU_INT_CACHEERR interrupt (soc-level panic)*/
-
-  j    _panic_handler
-
-/****************************************************************************
- * Name: _panic_handler
- ****************************************************************************/
-
-  .type     _panic_handler, @function
-
-_panic_handler:
-  j    _panic_handler
