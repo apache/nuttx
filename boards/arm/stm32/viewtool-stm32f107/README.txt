@@ -370,7 +370,6 @@ ViewTool DP83848 Ethernet Module
       CONFIG_NSH_NOMAC=y
 
     Networking (recommended/typical)
-      CONFIG_NSOCKET_DESCRIPTORS=10          : Socket-related
       CONFIG_NET_SOCKOPTS=y
 
       CONFIG_NET_ETH_PKTSIZE=650             : Maximum packet size
