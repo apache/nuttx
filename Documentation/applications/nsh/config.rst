@@ -420,7 +420,6 @@ configuration settings that apply:
 Configuration                           Description
 ======================================  ================================
 ``CONFIG_NET=y``                        Of course, networking must be enabled.
-``CONFIG_NSOCKET_DESCRIPTORS``          And, of course, you must allocate some socket descriptors.
 ``CONFIG_NET_TCP=y``                    TCP/IP support is required for telnet (as well as various other
                                         TCP-related configuration settings).
 ``CONFIG_NSH_IOBUFFER_SIZE``            Determines the size of the I/O buffer to use for sending/ receiving
@@ -443,7 +442,6 @@ required. These include:
 Configuration                                  Description
 ============================================== ============================================================
 ``CONFIG_NET=y``                               Of course, networking must be enabled.
-``CONFIG_NSOCKET_DESCRIPTORS``                 And, of course, you must allocate some socket descriptors.
 ``CONFIG_NET_UDP=y``                           UDP support is required for DHCP (as well as various other
                                                UDP-related configuration settings).
 ``CONFIG_NET_BROADCAST=y``                     UDP broadcast support is needed.
