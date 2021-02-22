@@ -85,6 +85,18 @@ int esp32c3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_WATCHDOG
+  /* Configure watchdog timer */
+
+  ret = board_wdt_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize watchdog drivers: %d\n",
+             ret);
+    }
+#endif
+
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.

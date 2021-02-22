@@ -25,9 +25,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
 #include <nuttx/compiler.h>
-#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,6 +67,22 @@ int esp32c3_bringup(void);
 
 #ifdef CONFIG_DEV_GPIO
 int esp32c3_gpio_init(void);
+#endif
+
+/****************************************************************************
+ * Name: board_wdt_init
+ *
+ * Description:
+ *   Configure the timer driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WATCHDOG
+int board_wdt_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

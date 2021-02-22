@@ -104,6 +104,10 @@ config ESP32C3_CPU_FREQ_MHZ
 
 menu "ESP32-C3 Peripheral Support"
 
+config ESP32C3_WDT
+	bool
+	default n
+
 config ESP32C3_GPIO_IRQ
 	bool "GPIO pin interrupts"
 	---help---
@@ -118,6 +122,33 @@ config ESP32C3_UART1
 	bool "UART1"
 	default n
 	select UART1_SERIALDRIVER
+
+config ESP32C3_MWDT0
+	bool "Main System Watchdog Timer (Group 0)"
+	default n
+	select ESP32C3_WDT
+	---help---
+		Includes MWDT0. This watchdog timer is part of the Group 0
+		timer submodule.
+
+config ESP32C3_MWDT1
+	bool "Main System Watchdog Timer (Group 1)"
+	default n
+	select ESP32C3_WDT
+	---help---
+		Includes MWDT1. This watchdog timer is part of the Group 0
+		timer submodule.
+
+config ESP32C3_RWDT
+	bool "RTC Watchdog Timer"
+	default n
+	select ESP32C3_WDT
+	---help---
+		Includes RWDT. This watchdog timer is from the RTC module.
+		When it is selected, if the developer sets it to reset on expiration
+		it will reset Main System and the RTC module. If you don't want
+		to have the RTC module reset, please, use the Timers' Module WDTs.
+		They will only reset Main System.
 
 endmenu
 

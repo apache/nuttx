@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_boot.c
+ * arch/riscv/src/esp32c3/esp32c3_wdt_lowerhalf.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,61 +18,41 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WDT_LOWERHALF_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WDT_LOWERHALF_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include "esp32c3_wdt.h"
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32c3_board_initialize
+ * Name: esp32c3_wdt_initialize
  *
  * Description:
- *   All ESP32C3 architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
+ *   Initialize the watchdog timer.  The watchdog timer is initialized
+ *   and registered as 'devpath'.
+ *
+ * Input Parameters:
+ *   devpath                 - The full path to the watchdog.  This should
+ *                             be of the form /dev/watchdogX
+ *   wdt                     - WDT instance to be initialized.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
-void esp32c3_board_initialize(void)
-{
-  /* Configure on-board LEDs if LED support has been selected. */
+int esp32c3_wdt_initialize(const char *devpath, enum esp32c3_wdt_inst_e wdt);
 
-#ifdef CONFIG_ARCH_LEDS
-  board_autoled_initialize();
-#endif
-}
-
-/****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will
- *   be called immediately after up_initialize() is called and just before
- *   the initial application is started.  This additional initialization
- *   phase may be used, for example, to initialize board-specific device
- *   drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
-  /* Perform board-specific initialization */
-
-  esp32c3_bringup();
-}
-#endif
+#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WDT_LOWERHALF_H */

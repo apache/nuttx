@@ -96,6 +96,33 @@ Configurations
   The pin is configured as a rising edge interrupt, so after issuing the
   above command, connect it to 3.3V.
 
+  watchdog
+  --------
+
+  This configuration tests the watchdog timers. It includes the 2 MWDTS,
+  adds driver support, registers the WDTs as devices and includes the watchdog
+  example application.
+
+  To test it, just run the following command:
+
+  `nsh> wdog -i /dev/watchdogX`
+
+  Where X ix the watchdog instance.
+
+  watcher
+  -------
+
+  This configuration tests the watchdog timers in the capture mode.
+  It includes the 2 MWDTS, adds driver support, registers the WDTs as devices
+  and includes the watcher and watched example applications.
+
+  To test it, just run the following command:
+
+  ```
+  nsh> watcher
+  nsh> watched
+  ```
+
 Building and flashing
 =====================
 
