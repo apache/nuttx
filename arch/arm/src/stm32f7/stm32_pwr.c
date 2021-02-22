@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/stm32_pwr.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -34,11 +34,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -52,15 +52,15 @@
 
 #if defined(CONFIG_STM32F7_PWR)
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint16_t g_bkp_writable_counter = 0;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t stm32_pwr_getreg(uint8_t offset)
 {
@@ -72,22 +72,25 @@ static inline void stm32_pwr_putreg(uint8_t offset, uint16_t value)
   putreg32((uint32_t)value, STM32_PWR_BASE + (uint32_t)offset);
 }
 
-static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint16_t setbits)
+static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits,
+                                       uint16_t setbits)
 {
-  modifyreg32(STM32_PWR_BASE + (uint32_t)offset, (uint32_t)clearbits, (uint32_t)setbits);
+  modifyreg32(STM32_PWR_BASE + (uint32_t)offset,
+              (uint32_t)clearbits,
+              (uint32_t)setbits);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_initbkp
  *
  * Description:
- *   Insures the referenced count access to the backup domain (RTC registers,
- *   RTC backup data registers and backup SRAM is consistent with the HW state
- *   without relying on a variable.
+ *   Insures the referenced count access to the backup domain (RTC
+ *   registers, RTC backup data registers and backup SRAM is consistent with
+ *   the HW state without relying on a variable.
  *
  *   NOTE: This function should only be called by SoC Start up code.
  *
@@ -97,7 +100,7 @@ static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint1
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_initbkp(bool writable)
 {
@@ -115,16 +118,17 @@ void stm32_pwr_initbkp(bool writable)
   stm32_pwr_enablebkp(writable);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_enablebkp
  *
  * Description:
- *   Enables access to the backup domain (RTC registers, RTC backup data registers
- *   and backup SRAM).
+ *   Enables access to the backup domain (RTC registers, RTC backup data
+ *   registers and backup SRAM).
  *
- *   NOTE: Reference counting is used in order to supported nested calls to this
- *   function.  As a consequence, every call to stm32_pwr_enablebkp(true) must
- *   be followed by a matching call to stm32_pwr_enablebkp(false).
+ *   NOTE: Reference counting is used in order to supported nested calls to
+ *   this function.  As a consequence, every call to
+ *   stm32_pwr_enablebkp(true) must be followed by a matching call to
+ *   stm32_pwr_enablebkp(false).
  *
  * Input Parameters:
  *   writable - True: enable ability to write to backup domain registers
@@ -132,7 +136,7 @@ void stm32_pwr_initbkp(bool writable)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_enablebkp(bool writable)
 {
@@ -157,6 +161,7 @@ void stm32_pwr_enablebkp(bool writable)
     {
       g_bkp_writable_counter--;
     }
+
   /* Enable or disable the ability to write */
 
   if (waswritable && g_bkp_writable_counter == 0)
@@ -174,7 +179,7 @@ void stm32_pwr_enablebkp(bool writable)
       stm32_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
 
       wait = true;
-	}
+    }
 
   leave_critical_section(flags);
 
@@ -186,16 +191,17 @@ void stm32_pwr_enablebkp(bool writable)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_enablebreg
  *
  * Description:
- *   Enables the Backup regulator, the Backup regulator (used to maintain backup
- *   SRAM content in Standby and VBAT modes) is enabled. If BRE is reset, the backup
- *   regulator is switched off. The backup SRAM can still be used but its content will
- *   be lost in the Standby and VBAT modes. Once set, the application must wait that
- *   the Backup Regulator Ready flag (BRR) is set to indicate that the data written
- *   into the RAM will be maintained in the Standby and VBAT modes.
+ *   Enables the Backup regulator, the Backup regulator (used to maintain
+ *   backup SRAM content in Standby and VBAT modes) is enabled. If BRE is
+ *   reset, the backup regulator is switched off. The backup SRAM can still
+ *   be used but its content will be lost in the Standby and VBAT modes.
+ *   Once set, the application must wait until the Backup Regulator Ready
+ *   flag (BRR) is set to indicate that the data written into the RAM will
+ *   be maintained in the Standby and VBAT modes.
  *
  * Input Parameters:
  *   region - state to set it to
@@ -203,7 +209,7 @@ void stm32_pwr_enablebkp(bool writable)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_enablebreg(bool region)
 {
@@ -220,33 +226,35 @@ void stm32_pwr_enablebreg(bool region)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_setvos
  *
  * Description:
  *   Set voltage scaling.
  *
  * Input Parameters:
- *   vos - Properly aligned voltage scaling select bits for the PWR_CR register.
+ *   vos - Properly aligned voltage scaling select bits for the PWR_CR
+ *   register.
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
- *   At present, this function is called only from initialization logic.  If used
- *   for any other purpose that protection to assure that its operation is atomic
- *   will be required.
+ *   At present, this function is called only from initialization logic.  If
+ *   used for any other purpose that protection to assure that its operation
+ *   is atomic will be required.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_setvos(uint16_t vos)
 {
   uint16_t regval;
 
-  /* The following sequence is required to program the voltage regulator ranges:
+  /* The following sequence is required to program the voltage regulator
+   * ranges:
    * 1. Check VDD to identify which ranges are allowed...
-   * 2. Configure the voltage scaling range by setting the VOS bits in the PWR_CR1
-   *    register.
+   * 2. Configure the voltage scaling range by setting the VOS bits in the
+   *    PWR_CR1 register.
    */
 
   regval  = stm32_pwr_getreg(STM32_PWR_CR1_OFFSET);
@@ -255,7 +263,7 @@ void stm32_pwr_setvos(uint16_t vos)
   stm32_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_setpvd
  *
  * Description:
@@ -268,11 +276,11 @@ void stm32_pwr_setvos(uint16_t vos)
  *   None
  *
  * Assumptions:
- *   At present, this function is called only from initialization logic.  If used
- *   for any other purpose that protection to assure that its operation is atomic
- *   will be required.
+ *   At present, this function is called only from initialization logic.  If
+ *   used for any other purpose that protection to assure that its operation
+ *   is atomic will be required.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_setpvd(uint16_t pls)
 {
@@ -289,13 +297,13 @@ void stm32_pwr_setpvd(uint16_t pls)
   stm32_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_enablepvd
  *
  * Description:
  *   Enable the Programmable Voltage Detector
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_enablepvd(void)
 {
@@ -304,13 +312,13 @@ void stm32_pwr_enablepvd(void)
   stm32_pwr_modifyreg(STM32_PWR_CR1_OFFSET, 0, PWR_CR1_PVDE);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_disablepvd
  *
  * Description:
  *   Disable the Programmable Voltage Detector
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_disablepvd(void)
 {
