@@ -352,7 +352,7 @@ static int esp32c3_attach(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: esp32_detach
+ * Name: esp32c3_detach
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is

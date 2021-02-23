@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32_HARDWARE_ESP32_GPIO_SIGMAP_H
-#define __ARCH_RISCV_SRC_ESP32_HARDWARE_ESP32_GPIO_SIGMAP_H
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_GPIO_SIGMAP_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_GPIO_SIGMAP_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -193,4 +193,4 @@
 #define SIG_GPIO_OUT_IDX              128
 #define GPIO_MAP_DATE_IDX             0x2006130
 
-#endif  /* __ARCH_RISCV_SRC_ESP32_HARDWARE_ESP32_GPIO_SIGMAP_H */
+#endif  /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_GPIO_SIGMAP_H */

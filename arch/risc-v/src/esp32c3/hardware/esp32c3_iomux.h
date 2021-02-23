@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32_HARDWARE_ESP32_IOMUX_H
-#define __ARCH_RISCV_SRC_ESP32_HARDWARE_ESP32_IOMUX_H
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_IOMUX_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_IOMUX_H
 
 /****************************************************************************
  * Included Files
@@ -307,4 +307,4 @@
 #define IO_MUX_DATE_S 0
 #define IO_MUX_DATE_VERSION 0x2006050
 
-#endif
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_IOMUX_H */
