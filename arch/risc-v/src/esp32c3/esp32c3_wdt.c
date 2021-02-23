@@ -678,7 +678,7 @@ static int32_t esp32c3_wdt_setisr(struct esp32c3_wdt_dev_s *dev,
     {
       if (wdt->cpuint != -ENOMEM)
         {
-          /* Disable the provided CPU Interrupt to configure it. */
+          /* Disable the provided CPU interrupt to configure it. */
 
           up_disable_irq(wdt->cpuint);
         }
@@ -695,12 +695,18 @@ static int32_t esp32c3_wdt_setisr(struct esp32c3_wdt_dev_s *dev,
       /* Attach and enable the IRQ. */
 
       ret = irq_attach(wdt->irq, handler, arg);
-      if (ret == OK)
+      if (ret != OK)
         {
-          /* Enable the CPU Interrupt that is linked to the WDT. */
+          /* Failed to attach IRQ, so CPU interrupt must be freed. */
 
-          up_enable_irq(wdt->cpuint);
+          esp32c3_free_cpuint(wdt->periph);
+          wdt->cpuint = -ENOMEM;
+          return ret;
         }
+
+      /* Enable the CPU interrupt that is linked to the WDT. */
+
+      up_enable_irq(wdt->cpuint);
     }
 
   return ret;
