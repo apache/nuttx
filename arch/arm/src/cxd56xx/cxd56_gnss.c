@@ -890,10 +890,10 @@ static int cxd56_gnss_set_ephemeris(FAR struct file *filep,
 static int cxd56_gnss_save_backup_data(FAR struct file *filep,
                                        unsigned long    arg)
 {
-  FAR char *buf;
+  FAR char   *buf;
   struct file file;
-  int       n = 0;
-  int32_t   offset = 0;
+  int         n = 0;
+  int32_t     offset = 0;
 
   buf = (char *)kmm_malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
   if (buf == NULL)
@@ -2207,7 +2207,7 @@ cxd56_gnss_read_cep_file(FAR struct file *fp, int32_t offset,
 
 static void cxd56_gnss_read_backup_file(FAR int *retval)
 {
-  FAR char *  buf;
+  FAR char   *buf;
   struct file file;
   int32_t     offset = 0;
   size_t      n;
