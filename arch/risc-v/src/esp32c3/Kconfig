@@ -157,6 +157,10 @@ config ESP32C3_UART
 	bool
 	default n
 
+config ESP32C3_I2C
+	bool
+	default n
+
 config ESP32C3_TIMER
 	bool
 	default n
@@ -181,6 +185,11 @@ config ESP32C3_UART1
 	default n
 	select ESP32C3_UART
 	select UART1_SERIALDRIVER
+
+config ESP32C3_I2C0
+	bool "I2C 0"
+	default n
+	select ESP32C3_I2C
 
 config ESP32C3_TIMER0
 	bool "54-bit Timer 0 (Group 0 Timer 0)"
@@ -223,7 +232,26 @@ config ESP32C3_RWDT
 		to have the RTC module reset, please, use the Timers' Module WDTs.
 		They will only reset Main System.
 
-endmenu
+endmenu # ESP32-C3 Peripheral Support
+
+menu "I2C Configuration"
+	depends on ESP32C3_I2C
+
+if ESP32C3_I2C0
+
+config ESP32C3_I2C0_SCLPIN
+	int "I2C0 SCL Pin"
+	default 6
+	range 0 21
+
+config ESP32C3_I2C0_SDAPIN
+	int "I2C0 SDA Pin"
+	default 5
+	range 0 21
+
+endif # ESP32C3_I2C0
+
+endmenu # I2C configuration
 
 menu "UART configuration"
 	depends on ESP32C3_UART
