@@ -2358,7 +2358,7 @@ The new features (some still incomplete) include:
     to LCD GRAM memory.
 
   * I2C tool. Extended to support to include a verify command and
-    repititions and auto-address increment for most commands.
+    repetitions and auto-address increment for most commands.
 
   * USB terminal example.  Line oriented serial bridge connects a host
     USB serial terminal to a host UART serial terminal.

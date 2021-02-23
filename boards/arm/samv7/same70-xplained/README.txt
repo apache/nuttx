@@ -1579,12 +1579,12 @@ Configuration sub-directories
          Where <cmd> is one of:
 
            Show help     : ?
-           List buses   : bus
+           List buses    : bus
            List devices  : dev [OPTIONS] <first> <last>
-           Read register : get [OPTIONS] [<repititions>]
+           Read register : get [OPTIONS] [<repetitions>]
            Show help     : help
-           Write register: set [OPTIONS] <value> [<repititions>]
-           Verify access : verf [OPTIONS] [<value>] [<repititions>]
+           Write register: set [OPTIONS] <value> [<repetitions>]
+           Verify access : verf [OPTIONS] [<value>] [<repetitions>]
 
          Where common "sticky" OPTIONS include:
            [-a addr] is the I2C device address (hex).  Default: 03 Current: 03
@@ -1592,7 +1592,7 @@ Configuration sub-directories
            [-r regaddr] is the I2C device register address (hex).  Default: 00 Current: 00
            [-w width] is the data width (8 or 16 decimal).  Default: 8 Current: 8
            [-s|n], send/don't send start between command and data.  Default: -n Current: -n
-           [-i|j], Auto increment|don't increment regaddr on repititions.  Default: NO Current: NO
+           [-i|j], Auto increment|don't increment regaddr on repetitions.  Default: NO Current: NO
            [-f freq] I2C frequency.  Default: 400000 Current: 400000
 
          NOTES:
