@@ -60,5 +60,6 @@ int nx_closewindow(NXWINDOW hwnd)
   outmsg.msgid = NX_SVRMSG_CLOSEWINDOW;
   outmsg.wnd   = wnd;
 
-  return nxmu_sendserver(wnd->conn, &outmsg, sizeof(struct nxsvrmsg_closewindow_s));
+  return nxmu_sendserver(wnd->conn, &outmsg,
+                         sizeof(struct nxsvrmsg_closewindow_s));
 }

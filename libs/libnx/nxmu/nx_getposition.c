@@ -67,14 +67,15 @@ int nx_getposition(NXWINDOW hwnd)
   /* Request the size/position info.
    *
    * It is tempting to just take the positional information from the window
-   * structure that we have in our hands now.  However, we need to run this through
-   * the server to keep things serialized.  There might, for example, be a pending
-   * size/position change and, in that case, this function would return the
-   * wrong info.
+   * structure that we have in our hands now.  However, we need to run this
+   * through the server to keep things serialized.  There might, for example,
+   * be a pending size/position change and, in that case, this function would
+   * return the wrong info.
    */
 
   outmsg.msgid = NX_SVRMSG_GETPOSITION;
   outmsg.wnd   = wnd;
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_getposition_s));
+  return nxmu_sendwindow(wnd, &outmsg,
+                         sizeof(struct nxsvrmsg_getposition_s));
 }

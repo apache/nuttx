@@ -93,10 +93,11 @@
 #define NXFONT_METRICS_39 {1, 1, 4, 0, 0, 0}
 #define NXFONT_BITMAP_39 {0x80, 0x80, 0x80, 0x80}
 
-/* 0028 (40) Empty*/
+/* 0028 (40) Empty */
 #define NXFONT_METRICS_40 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_40 {0x00}
-/* 0029 (41) Empty*/
+
+/* 0029 (41) Empty */
 #define NXFONT_METRICS_41 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_41 {0x00}
 
@@ -104,7 +105,7 @@
 #define NXFONT_METRICS_42 {1, 5, 5, 0, 0, 0}
 #define NXFONT_BITMAP_42 {0x70, 0x88, 0x88, 0x88, 0x70}
 
-/* 002B (43) Empty*/
+/* 002B (43) Empty */
 #define NXFONT_METRICS_43 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_43 {0x00}
 
@@ -112,7 +113,7 @@
 #define NXFONT_METRICS_44 {1, 1, 4, 0, 5, 0}
 #define NXFONT_BITMAP_44 {0x80, 0x80, 0x80, 0x80}
 
-/* 002D (45) Empty*/
+/* 002D (45) Empty */
 #define NXFONT_METRICS_45 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_45 {0x00}
 
@@ -120,7 +121,7 @@
 #define NXFONT_METRICS_46 {1, 5, 5, 0, 0, 0}
 #define NXFONT_BITMAP_46 {0x70, 0x88, 0x88, 0x88, 0x70}
 
-/* 002F (47) Empty*/
+/* 002F (47) Empty */
 #define NXFONT_METRICS_47 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_47 {0x00}
 
@@ -164,15 +165,15 @@
 #define NXFONT_METRICS_57 {1, 5, 9, 0, 0, 0}
 #define NXFONT_BITMAP_57 {0x70, 0x88, 0x88, 0x88, 0x70, 0x8, 0x8, 0x8, 0x8}
 
-/* 003A (58) Empty*/
+/* 003A (58) Empty */
 #define NXFONT_METRICS_58 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_58 {0x00}
 
-/* 003B (59) Empty*/
+/* 003B (59) Empty */
 #define NXFONT_METRICS_59 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_59 {0x00}
 
-/* 003C (60) Empty*/
+/* 003C (60) Empty */
 #define NXFONT_METRICS_60 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_60 {0x00}
 
@@ -180,7 +181,7 @@
 #define NXFONT_METRICS_61 {1, 5, 5, 0, 4, 0}
 #define NXFONT_BITMAP_61 {0xf8, 0x0, 0x0, 0x0, 0xf8}
 
-/* 003E (62) Empty*/
+/* 003E (62) Empty */
 #define NXFONT_METRICS_62 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_62 {0x00}
 
@@ -296,19 +297,19 @@
 #define NXFONT_METRICS_90 {1, 5, 9, 0, 0, 0}
 #define NXFONT_BITMAP_90 {0xf0, 0x8, 0x8, 0x8, 0x70, 0x80, 0x80, 0x80, 0x78}
 
-/* 005B (91) Empty*/
+/* 005B (91) Empty */
 #define NXFONT_METRICS_91 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_91 {0x00}
 
-/* 005C (92) Empty*/
+/* 005C (92) Empty */
 #define NXFONT_METRICS_92 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_92 {0x00}
 
-/* 005D (93) Empty*/
+/* 005D (93) Empty */
 #define NXFONT_METRICS_93 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_93 {0x00}
 
-/* 005E (94) Empty*/
+/* 005E (94) Empty */
 #define NXFONT_METRICS_94 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_94 {0x00}
 
@@ -316,7 +317,7 @@
 #define NXFONT_METRICS_95 {1, 3, 1, 0, 8, 0}
 #define NXFONT_BITMAP_95 {0xe0}
 
-/* 0060 (96) Empty*/
+/* 0060 (96) Empty */
 #define NXFONT_METRICS_96 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_96 {0x00}
 
@@ -448,7 +449,7 @@
 #define NXFONT_METRICS_197 {1, 5, 9, 0, 0, 0}
 #define NXFONT_BITMAP_197 {0x70, 0x88, 0x88, 0x88, 0x70, 0x88, 0x88, 0x88, 0x88}
 
-/* 00C6 (198) Empty*/
+/* 00C6 (198) Empty */
 #define NXFONT_METRICS_198 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_198 {0x00}
 
@@ -488,7 +489,7 @@
 #define NXFONT_METRICS_207 {1, 1, 9, 0, 0, 0}
 #define NXFONT_BITMAP_207 {0x80, 0x80, 0x80, 0x80, 0x0, 0x80, 0x80, 0x80, 0x80}
 
-/* 00D0 (208) Empty*/
+/* 00D0 (208) Empty */
 #define NXFONT_METRICS_208 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_208 {0x00}
 
@@ -516,7 +517,7 @@
 #define NXFONT_METRICS_214 {1, 5, 9, 0, 0, 0}
 #define NXFONT_BITMAP_214 {0x70, 0x88, 0x88, 0x88, 0x0, 0x88, 0x88, 0x88, 0x70}
 
-/* 00D7 (215) Empty*/
+/* 00D7 (215) Empty */
 #define NXFONT_METRICS_215 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_215 {0x00}
 
@@ -540,15 +541,15 @@
 #define NXFONT_METRICS_220 {1, 5, 9, 0, 0, 0}
 #define NXFONT_BITMAP_220 {0x88, 0x88, 0x88, 0x88, 0x0, 0x88, 0x88, 0x88, 0x70}
 
-/* 00DD (221) Empty*/
+/* 00DD (221) Empty */
 #define NXFONT_METRICS_221 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_221 {0x00}
 
-/* 00DE (222) Empty*/
+/* 00DE (222) Empty */
 #define NXFONT_METRICS_222 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_222 {0x00}
 
-/* 00DF (223) Empty*/
+/* 00DF (223) Empty */
 #define NXFONT_METRICS_223 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_223 {0x00}
 
@@ -576,7 +577,7 @@
 #define NXFONT_METRICS_229 {1, 5, 9, 0, 0, 0}
 #define NXFONT_BITMAP_229 {0x70, 0x88, 0x88, 0x88, 0x70, 0x88, 0x88, 0x88, 0x88}
 
-/* 00E6 (230) Empty*/
+/* 00E6 (230) Empty */
 #define NXFONT_METRICS_230 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_230 {0x00}
 
@@ -616,7 +617,7 @@
 #define NXFONT_METRICS_239 {1, 1, 9, 0, 0, 0}
 #define NXFONT_BITMAP_239 {0x80, 0x80, 0x80, 0x80, 0x0, 0x80, 0x80, 0x80, 0x80}
 
-/* 00F0 (240) Empty*/
+/* 00F0 (240) Empty */
 #define NXFONT_METRICS_240 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_240 {0x00}
 
@@ -644,7 +645,7 @@
 #define NXFONT_METRICS_246 {1, 5, 5, 0, 4, 0}
 #define NXFONT_BITMAP_246 {0x70, 0x88, 0x88, 0x88, 0x70}
 
-/* 00F7 (247) Empty*/
+/* 00F7 (247) Empty */
 #define NXFONT_METRICS_247 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_247 {0x00}
 
@@ -668,11 +669,11 @@
 #define NXFONT_METRICS_252 {1, 5, 5, 0, 4, 0}
 #define NXFONT_BITMAP_252 {0x88, 0x88, 0x88, 0x88, 0x70}
 
-/* 00FD (253) Empty*/
+/* 00FD (253) Empty */
 #define NXFONT_METRICS_253 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_253 {0x00}
 
-/* 00FE (254) Empty*/
+/* 00FE (254) Empty */
 #define NXFONT_METRICS_254 {1, 4, 1, 0, 8, 0}
 #define NXFONT_BITMAP_254 {0x00}
 
@@ -698,7 +699,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN

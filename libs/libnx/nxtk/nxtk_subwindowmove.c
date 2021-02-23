@@ -45,7 +45,8 @@
  *
  * Input Parameters:
  *   fwnd       - The framed window within which the move is to be done.
- *                This must have been previously created by nxtk_openwindow().
+ *                This must have been previously created by
+ *                nxtk_openwindow().
  *   destrect   - The loccation to receive the clipped rectangle relative
  *                to containing window
  *   destoffset - The location to received the clipped offset.
@@ -76,7 +77,9 @@ void nxtk_subwindowmove(FAR struct nxtk_framedwindow_s *fwnd,
 
   nxgl_rectintersect(&abssrc, &abssrc, &fwnd->fwrect);
 
-  /* Clip the source rectangle so that destination area is within the window. */
+  /* Clip the source rectangle so that destination area is within the
+   * window.
+   */
 
   destoffset->x = srcoffset->x;
   if (destoffset->x < 0)
@@ -103,7 +106,6 @@ void nxtk_subwindowmove(FAR struct nxtk_framedwindow_s *fwnd,
     {
        abssrc.pt2.y = bounds->pt2.y - destoffset->y;
     }
-
 
   /* Then move the rectangle so that is relative to the containing window,
    * not the client subwindow

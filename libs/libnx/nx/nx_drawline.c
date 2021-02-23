@@ -116,7 +116,9 @@ int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
         return ERROR;
     }
 
-  /* Draw circular caps at each end of the line to support better line joins */
+  /* Draw circular caps at each end of the line to support better line
+   * joins
+   */
 
   if (caps != NX_LINECAP_NONE && width >= 3)
     {

@@ -40,10 +40,10 @@
  *   to the window and then (2) block any further window messaging.
  *
  *   The 'blocked' callback is the response from nx_block (or nxtk_block).
- *   Those blocking interfaces are used to assure that no further messages are
- *   are directed to the window. Receipt of the blocked callback signifies
- *   that (1) there are no further pending callbacks and (2) that the
- *   window is now 'defunct' and will receive no further callbacks.
+ *   Those blocking interfaces are used to assure that no further messages
+ *   are are directed to the window. Receipt of the blocked callback
+ *   signifies that (1) there are no further pending callbacks and (2) that
+ *   the window is now 'defunct' and will receive no further callbacks.
  *
  *   This callback supports coordinated destruction of a window in multi-
  *   user mode.  In multi-use mode, the client window logic must stay

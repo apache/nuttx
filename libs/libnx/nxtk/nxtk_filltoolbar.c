@@ -41,7 +41,8 @@
  * Name: nxtk_filltoolbar
  *
  * Description:
- *  Fill the specified rectangle in the client window with the specified color
+ *  Fill the specified rectangle in the client window with the specified
+ *  color
  *
  * Input Parameters:
  *   hfwnd - The handle returned by nxtk_openwindow
@@ -56,7 +57,8 @@
 int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                      nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
+  FAR struct nxtk_framedwindow_s *fwnd =
+                              (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_rect_s fillrect;
 
 #ifdef CONFIG_DEBUG_FEATURES

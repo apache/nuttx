@@ -34,7 +34,7 @@
  * Name: nxgl_rectintersect
  *
  * Description:
- *   Return the rectangle representing the intersection of the two rectangles.
+ *  Return the rectangle representing the intersection of the two rectangles.
  *
  ****************************************************************************/
 

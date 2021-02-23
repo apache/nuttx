@@ -105,9 +105,12 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
   /* Forward the fill command to the server */
 
-  ret = nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_getrectangle_s));
+  ret = nxmu_sendwindow(wnd, &outmsg,
+                        sizeof(struct nxsvrmsg_getrectangle_s));
 
-  /* Wait that the command is completed, so that caller can release the buffer. */
+  /* Wait that the command is completed, so that caller can release the
+   * buffer.
+   */
 
   if (ret == OK)
     {

@@ -130,8 +130,9 @@ void nxtk_subwindowclip(FAR struct nxtk_framedwindow_s *fwnd,
  * Name: nxtk_containerclip
  *
  * Description:
- *   We are given a 'src' rectangle in containing window, relative coordinates
- *   (i.e., (0,0) is the top left corner of the outer, containing window).
+ *   We are given a 'src' rectangle in containing window, relative
+ *   coordinates (i.e., (0,0) is the top left corner of the outer,
+ *   containing window).
  *   This function will (1) clip that src rectangle so that it lies within
  *   the sub-window bounds, and then (2) move the rectangle to that it is
  *   relative to the sub-window (i.e., (0,0) is the top left corner of the
@@ -161,7 +162,8 @@ void nxtk_containerclip(FAR struct nxtk_framedwindow_s *fwnd,
  *
  * Input Parameters:
  *   fwnd       - The framed window within which the move is to be done.
- *                This must have been previously created by nxtk_openwindow().
+ *                This must have been previously created by
+ *                nxtk_openwindow().
  *   destrect   - The location to receive the clipped rectangle relative
  *                to containing window
  *   destoffset - The location to received the clipped offset.

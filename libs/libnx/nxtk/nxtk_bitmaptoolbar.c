@@ -50,8 +50,8 @@
  *            will receive the bit map.
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
- *            Both dest and origin are in sub-window coordinates, however, the
- *            origin may lie outside of the sub-window display.
+ *            Both dest and origin are in sub-window coordinates, however,
+ *            the origin may lie outside of the sub-window display.
  *   stride - The width of the full source image in pixels.
  *
  * Returned Value:
@@ -61,9 +61,11 @@
 
 int nxtk_bitmaptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
                        FAR const void *src[CONFIG_NX_NPLANES],
-                       FAR const struct nxgl_point_s *origin, unsigned int stride)
+                       FAR const struct nxgl_point_s *origin,
+                       unsigned int stride)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
+  FAR struct nxtk_framedwindow_s *fwnd =
+                     (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_point_s wndorigin;
   struct nxgl_rect_s clipdest;
 
@@ -90,8 +92,8 @@ int nxtk_bitmaptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
 
   nxgl_vectoradd(&wndorigin, origin, &fwnd->tbrect.pt1);
 
-  /* Then move the origin so that is relative to the containing window, not the
-   * client subwindow
+  /* Then move the origin so that is relative to the containing window, not
+   * the client subwindow
    */
 
   nxgl_vectsubtract(&wndorigin, &wndorigin, &fwnd->wnd.bounds.pt1);

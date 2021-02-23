@@ -84,7 +84,7 @@ void nxtk_setsubwindows(FAR struct nxtk_framedwindow_s *fwnd)
 
       if (fullheight > 2 * CONFIG_NXTK_BORDERWIDTH)
         {
-           /* Yes.. get the height of the toolbar */
+          /* Yes.. get the height of the toolbar */
 
           tbheight  = fwnd->tbheight;
           if (tbheight >= fullheight - bdrheight)

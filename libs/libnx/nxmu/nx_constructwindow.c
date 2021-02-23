@@ -42,16 +42,17 @@
  * Name: nx_constructwindow
  *
  * Description:
- *   This function is the same a nx_openwindow EXCEPT that the client provides
- *   the window structure instance.  nx_constructwindow will initialize the
- *   the pre-allocated window structure for use by NX.  This function is
- *   provided in addition to nx_openwindow in order to support a kind of
- *   inheritance:  The caller's window structure may include extensions that
- *   are not visible to NX.
+ *   This function is the same a nx_openwindow EXCEPT that the client
+ *   provides the window structure instance.  nx_constructwindow will
+ *   initialize the the pre-allocated window structure for use by NX.
+ *   This function is provided in addition to nx_openwindow in order
+ *   to support a kind of inheritance:  The caller's window structure
+ *   may include extensions that are not visible to NX.
  *
- *   NOTE:  hwnd must have been allocated using a user-space allocator that
- *   permits user access to the window.  Once provided to nx_constructwindow()
- *   that memory is owned and managed by NX.  On certain error conditions or
+ *   NOTE:
+ *   hwnd must have been allocated using a user-space allocator that permits
+ *   user access to the window.  Once provided to nx_constructwindow() that
+ *   memory is owned and managed by NX.  On certain error conditions or
  *   when the window is closed, NX will free the window.
  *
  * Input Parameters:
@@ -112,5 +113,6 @@ int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd, uint8_t flags,
   outmsg.msgid = NX_SVRMSG_OPENWINDOW;
   outmsg.wnd   = wnd;
 
-  return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_openwindow_s));
+  return nxmu_sendserver(conn, &outmsg,
+                         sizeof(struct nxsvrmsg_openwindow_s));
 }

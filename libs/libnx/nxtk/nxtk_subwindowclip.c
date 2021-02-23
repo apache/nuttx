@@ -74,9 +74,11 @@ void nxtk_subwindowclip(FAR struct nxtk_framedwindow_s *fwnd,
 
   nxgl_rectintersect(&tmp, &tmp, bounds);
 
-  /* Then move the rectangle so that is relative to the containing window, not the
-   * client subwindow
+  /* Then move the rectangle so that is relative to the containing window,
+   * not the client subwindow
    */
 
-  nxgl_rectoffset(dest, &tmp, -fwnd->wnd.bounds.pt1.x, -fwnd->wnd.bounds.pt1.y);
+  nxgl_rectoffset(dest, &tmp,
+                  -fwnd->wnd.bounds.pt1.x,
+                  -fwnd->wnd.bounds.pt1.y);
 }

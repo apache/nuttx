@@ -56,11 +56,14 @@
 
 int nxtk_setposition(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *pos)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
+  FAR struct nxtk_framedwindow_s *fwnd =
+                             (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_point_s offset;
   struct nxgl_point_s newpos;
 
-  /* Calculate the offset that is requested and add that to the window origin. */
+  /* Calculate the offset that is requested and add that to the window
+   * origin.
+   */
 
   nxgl_vectsubtract(&offset, pos, &fwnd->fwrect.pt1);
   nxgl_vectoradd(&newpos, &offset, &fwnd->wnd.bounds.pt1);

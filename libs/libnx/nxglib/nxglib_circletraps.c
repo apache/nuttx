@@ -33,6 +33,7 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
 /* Trigonometry */
 
 #define SIN_0p0        0         /* sin(0) = 0 */
@@ -64,7 +65,8 @@
  *
  ****************************************************************************/
 
-void nxgl_circletraps(FAR const struct nxgl_point_s *center, nxgl_coord_t radius,
+void nxgl_circletraps(FAR const struct nxgl_point_s *center,
+                      nxgl_coord_t radius,
                       FAR struct nxgl_trapezoid_s *circle)
 {
   nxgl_coord_t xoffs;

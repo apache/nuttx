@@ -56,8 +56,8 @@ int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch)
   int ret;
   int i;
 
-  /* Allocate a bigger message to account for the variable amount of character
-   * data.
+  /* Allocate a bigger message to account for the variable amount of
+   * character data.
    */
 
   size = sizeof(struct nxsvrmsg_kbdin_s) + nch - 1;

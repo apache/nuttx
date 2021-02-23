@@ -42,12 +42,15 @@
  *
  * Description:
  *   Used by a thread or interrupt handler that manages some kind of pointing
- *   hardware to report new positional data to the NX server.  That positional
+ *   hardware to report new positional data to the NX server. That positional
  *   data will be routed by the NX server to the appropriate window client.
  *
  ****************************************************************************/
 
-int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons)
+int nx_mousein(NXHANDLE handle,
+               nxgl_coord_t x,
+               nxgl_coord_t y,
+               uint8_t buttons)
 {
   FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
   struct nxsvrmsg_mousein_s outmsg;

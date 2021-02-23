@@ -42,7 +42,8 @@
  *
  * Description:
  *  Set a single pixel in the window to the specified color.  This is simply
- *  a degenerate case of nx_fill(), but may be optimized in some architectures.
+ *  a degenerate case of nx_fill(), but may be optimized in some
+ *  architectures.
  *
  * Input Parameters:
  *   wnd  - The window structure reference

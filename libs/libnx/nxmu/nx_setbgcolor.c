@@ -70,5 +70,6 @@ int nx_setbgcolor(NXHANDLE handle,
 
   /* Forward the fill command to the server */
 
-  return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_setbgcolor_s));
+  return nxmu_sendserver(conn, &outmsg,
+                         sizeof(struct nxsvrmsg_setbgcolor_s));
 }

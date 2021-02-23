@@ -43,10 +43,10 @@
  *   to the window and then (2) block any further window messaging.
  *
  *   The 'blocked' callback is the response from nx_block (or nxtk_block).
- *   Those blocking interfaces are used to assure that no further messages are
- *   are directed to the window. Receipt of the blocked callback signifies
- *   that (1) there are no further pending callbacks and (2) that the
- *   window is now 'defunct' and will receive no further callbacks.
+ *   Those blocking interfaces are used to assure that no further messages
+ *   are are directed to the window. Receipt of the blocked callback
+ *   signifies that (1) there are no further pending callbacks and (2) that
+ *   the window is now 'defunct' and will receive no further callbacks.
  *
  *   This callback supports coordinated destruction of a window in multi-
  *   user mode.  In multi-use mode, the client window logic must stay
@@ -82,16 +82,18 @@ int nx_block(NXWINDOW hwnd, FAR void *arg)
 
   if (!NXBE_ISBLOCKED(wnd))
     {
-      /* Mark the window as blocked.  This will stop all messages to the window
-       * (EXCEPT the NX_SVRMSG_BLOCKED).  Blocking the messages before sending the
-       * blocked message is awkward but assures that no other messages sneak into
+      /* Mark the window as blocked.  This will stop all messages to the
+       * window (EXCEPT the NX_SVRMSG_BLOCKED).
+       * Blocking the messages before sending the blocked message
+       * is awkward but assures that no other messages sneak into
        * the message queue before we can set the blocked state.
        */
 
       NXBE_SETBLOCKED(wnd);
 
-      /* Send the message indicating that the window is blocked (and because of
-       * queue also that there are no additional queue messages for the window)
+      /* Send the message indicating that the window is blocked
+       * (and because of queue also that there are no additional queue
+       * messages for the window)
        */
 
       outmsg.msgid = NX_SVRMSG_BLOCKED;
@@ -102,7 +104,8 @@ int nx_block(NXWINDOW hwnd, FAR void *arg)
        * that it will not be blocked.
        */
 
-      ret = nxmu_sendserver(wnd->conn, &outmsg, sizeof(struct nxsvrmsg_blocked_s));
+      ret = nxmu_sendserver(wnd->conn, &outmsg,
+                            sizeof(struct nxsvrmsg_blocked_s));
     }
 
   return ret;

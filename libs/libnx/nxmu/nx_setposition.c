@@ -70,5 +70,6 @@ int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos)
   outmsg.pos.x = pos->x;
   outmsg.pos.y = pos->y;
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setposition_s));
+  return nxmu_sendwindow(wnd, &outmsg,
+                         sizeof(struct nxsvrmsg_setposition_s));
 }

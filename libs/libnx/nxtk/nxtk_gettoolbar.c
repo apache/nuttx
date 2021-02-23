@@ -62,7 +62,8 @@ int nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                      unsigned int plane, FAR uint8_t *dest,
                      unsigned int deststride)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
+  FAR struct nxtk_framedwindow_s *fwnd =
+                             (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_rect_s getrect;
 
 #ifdef CONFIG_DEBUG_FEATURES
