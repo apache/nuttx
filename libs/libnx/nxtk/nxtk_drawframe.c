@@ -172,7 +172,7 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
 #endif
 #endif
 
-  /* Draw left and right outer edges *****************************************/
+  /* Draw left and right outer edges ****************************************/
 
   /* Draw the shiny left out edge */
 
@@ -192,7 +192,7 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
   nxtk_drawframeside(fwnd, &frame, bounds, g_bordercolor2);
 #endif
 
-  /* Draw left and right central regions *************************************/
+  /* Draw left and right central regions ************************************/
 
 #if CONFIG_NXTK_BORDERWIDTH > 2
   frame.pt1.x = 1;
@@ -217,7 +217,8 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
   nxtk_drawframeside(fwnd, &frame, bounds, g_bordercolor1);
 #endif
 
-  /* Draw left and right inner sides *****************************************/
+  /* Draw left and right inner sides ****************************************/
+
   /* This segment stops at the bottom of the toolbar.  If there is a
    * tool bar, then we have to continue this to the top of the display
    * using g_bordercolor1 (see below)
@@ -248,8 +249,8 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
 #endif
 #endif
 
-  /* Fix up the little line-seqments at the top inner edges that need to match
-   * the color of the toolbar.
+  /* Fix up the little line-seqments at the top inner edges that need to
+   * match the color of the toolbar.
    */
 
 #if CONFIG_NXTK_BORDERWIDTH > 1

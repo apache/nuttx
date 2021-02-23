@@ -60,7 +60,8 @@
 int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                      FAR const struct nxgl_point_s *offset)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
+  FAR struct nxtk_framedwindow_s *fwnd =
+                             (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_rect_s srcrect;
   struct nxgl_point_s clipoffset;
 
@@ -76,7 +77,8 @@ int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
    * toolbar sub-window
    */
 
-  nxtk_subwindowmove(fwnd, &srcrect, &clipoffset, rect, offset, &fwnd->tbrect);
+  nxtk_subwindowmove(fwnd, &srcrect, &clipoffset,
+                     rect, offset, &fwnd->tbrect);
 
   /* Then move it within the toolbar window */
 

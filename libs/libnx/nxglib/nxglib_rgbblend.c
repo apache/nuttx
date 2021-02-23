@@ -39,7 +39,8 @@
  *   component1.
  *
  *   The frac1 value could be though as related to the 1/alpha value for
- *   component1.  However, the background, component2, is always treated as though
+ *   component1.
+ *   However, the background, component2, is always treated as though
  *   alpha == 1.
  *
  *   This algorithm is used to handle endpoints as part of the
@@ -76,7 +77,9 @@ static uint8_t nxglib_blend_component(uint8_t component1, uint8_t component2,
             (uint32_t)((ub16_t)component2 * (b8ONE - frac1)) +
             (uint32_t)b8HALF;
 
-  /* Now we can snap it down to 16-bits and check for the overflow condition. */
+  /* Now we can snap it down to 16-bits and check for the overflow
+   * condition.
+   */
 
   blend = ub8toi(blendb8);
   if (blend > 255)
@@ -166,7 +169,7 @@ uint32_t nxglib_rgb24_blend(uint32_t color1, uint32_t color2, ub16_t frac1)
 
   /* Recombine and return the blended value */
 
-  return RGBTO24(r,g,b);
+  return RGBTO24(r, g, b);
 }
 
 #endif
@@ -212,7 +215,7 @@ uint16_t nxglib_rgb565_blend(uint16_t color1, uint16_t color2, ub16_t frac1)
 
   /* Recombine and return the blended value */
 
-  return RGBTO24(r,g,b);
+  return RGBTO24(r, g, b);
 }
 
 #endif

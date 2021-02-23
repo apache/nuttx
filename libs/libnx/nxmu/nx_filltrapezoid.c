@@ -41,7 +41,8 @@
  * Name: nx_filltrapezoid
  *
  * Description:
- *  Fill the specified trapezoidal region in the window with the specified color
+ *  Fill the specified trapezoidal region in the window with the specified
+ *  color
  *
  * Input Parameters:
  *   hwnd  - The window handle
@@ -77,7 +78,9 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
   outmsg.msgid = NX_SVRMSG_FILLTRAP;
   outmsg.wnd   = wnd;
 
-  /* If no clipping window was provided, then use the size of the entire window */
+  /* If no clipping window was provided, then use the size of the entire
+   * window
+   */
 
   if (clip != NULL)
     {
@@ -112,5 +115,6 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
 
   /* Forward the trapezoid fill command to the server */
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_filltrapezoid_s));
+  return nxmu_sendwindow(wnd, &outmsg,
+                         sizeof(struct nxsvrmsg_filltrapezoid_s));
 }

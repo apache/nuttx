@@ -66,5 +66,6 @@ int nx_releasebkgd(NXWINDOW hwnd)
   /* Request access to the background window from the server */
 
   outmsg.msgid = NX_SVRMSG_RELEASEBKGD;
-  return nxmu_sendserver(wnd->conn, &outmsg, sizeof(struct nxsvrmsg_releasebkgd_s));
+  return nxmu_sendserver(wnd->conn, &outmsg,
+                         sizeof(struct nxsvrmsg_releasebkgd_s));
 }

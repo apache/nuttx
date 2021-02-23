@@ -229,13 +229,13 @@ extern const struct nx_fontpackage_s g_tom_thumb_4x6_package;
 
 static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 {
-/* MONO */
+  /* MONO */
 
 #ifdef CONFIG_NXFONT_MONO5X8
   &g_mono5x8_package,
 #endif
 
-/* SANS */
+  /* SANS */
 
 #ifdef CONFIG_NXFONT_SANS17X22
   &g_sans17x22_package,
@@ -261,7 +261,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_sans39x48_package,
 #endif
 
-/* SANS-BOLD */
+  /* SANS-BOLD */
 
 #ifdef CONFIG_NXFONT_SANS17X23B
   &g_sans17x23b_package,
@@ -283,7 +283,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_sans40x49b_package,
 #endif
 
-/* SERIF */
+  /* SERIF */
 
 #ifdef CONFIG_NXFONT_SERIF22X29
   &g_serif22x29_package,
@@ -297,7 +297,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_serif38x48_package,
 #endif
 
-/* SERIF-BOLD */
+  /* SERIF-BOLD */
 
 #ifdef CONFIG_NXFONT_SERIF22X28B
   &g_serif22x28b_package,
@@ -311,7 +311,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_serif38x49b_package,
 #endif
 
-/* Pixel fonts */
+  /* Pixel fonts */
 
 #ifdef CONFIG_NXFONT_PIXEL_UNICODE
   &g_pixel_unicode_package,
@@ -321,7 +321,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_pixel_lcd_machine_package,
 #endif
 
-/* X11 misc fixed fonts */
+  /* X11 misc fixed fonts */
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_4X6
   &g_x11_misc_fixed_4x6_package,
@@ -411,7 +411,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_x11_misc_fixed_10x20_package,
 #endif
 
-/* Tom Thumb mono-space 4x6 font */
+  /* Tom Thumb mono-space 4x6 font */
 
 #ifdef CONFIG_NXFONT_TOM_THUMB_4X6
   &g_tom_thumb_4x6_package,
@@ -513,9 +513,9 @@ NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid)
   /* Handle the default font package */
 
   if (fontid == FONTID_DEFAULT)
-   {
-     fontid = NXFONT_DEFAULT;
-   }
+    {
+      fontid = NXFONT_DEFAULT;
+    }
 
   /* Then search for the font package with this ID */
 

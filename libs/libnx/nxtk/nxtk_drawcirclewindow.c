@@ -77,7 +77,8 @@
  *
  ****************************************************************************/
 
-int nxtk_drawcirclewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *center,
+int nxtk_drawcirclewindow(NXTKWINDOW hfwnd,
+                          FAR const struct nxgl_point_s *center,
                           nxgl_coord_t radius, nxgl_coord_t width,
                           nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
@@ -98,10 +99,14 @@ int nxtk_drawcirclewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *cente
 
       vector.pt1.x = pts[i].x;
       vector.pt1.y = pts[i].y;
-      vector.pt2.x = pts[i+1].x;
-      vector.pt2.y = pts[i+1].y;
+      vector.pt2.x = pts[i + 1].x;
+      vector.pt2.y = pts[i + 1].y;
 
-      ret = nxtk_drawlinewindow(hfwnd, &vector, width, color, NX_LINECAP_PT1);
+      ret = nxtk_drawlinewindow(hfwnd,
+                                &vector,
+                                width,
+                                color,
+                                NX_LINECAP_PT1);
       if (ret != OK)
         {
           return ret;

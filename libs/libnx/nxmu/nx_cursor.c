@@ -201,7 +201,8 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos)
 
 int nxcursor_get_position(NXHANDLE hnd, FAR struct nxgl_point_s *pos)
 {
-  /* REVISIT:  The cursor position is not accessible from here.  It is in hnd,
+  /* REVISIT:
+   * The cursor position is not accessible from here.  It is in hnd,
    * be we don't have the definitions exposed to get it.
    */
 

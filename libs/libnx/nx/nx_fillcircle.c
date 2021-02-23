@@ -58,8 +58,10 @@
  *
  ****************************************************************************/
 
-int nx_fillcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
-                  nxgl_coord_t radius, nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+int nx_fillcircle(NXWINDOW hwnd,
+                  FAR const struct nxgl_point_s *center,
+                  nxgl_coord_t radius,
+                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   FAR struct nxgl_trapezoid_s traps[NCIRCLE_TRAPS];
   int i;

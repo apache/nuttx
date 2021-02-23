@@ -660,7 +660,7 @@
 #define NXFONT_METRICS_216 {1, 7, 9, 1, 5, 0}
 #define NXFONT_BITMAP_216  {0x3a, 0x44, 0x8a, 0x8a, 0x92, 0xa2, 0xa2, 0x44, 0xb8}
 
-/*'U' grave (217) */
+/* 'U' grave (217) */
 #define NXFONT_METRICS_217 {1, 6, 12, 1, 2, 0}
 #define NXFONT_BITMAP_217  {0x60, 0x10, 0x00, 0x84, 0x84, 0x84, 0x84, 0x84, 0x84, 0x84, 0x48, 0x30}
 
@@ -827,13 +827,14 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN

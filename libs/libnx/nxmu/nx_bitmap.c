@@ -45,8 +45,8 @@
  *
  * Input Parameters:
  *   hwnd   - The window that will receive the bitmap image
- *   dest   - Describes the rectangular region on the display that will receive the
- *            the bit map.
+ *   dest   - Describes the rectangular region on the display that will
+ *            receive the the bit map.
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -91,7 +91,6 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
   outmsg.origin.y   = origin->y;
   nxgl_rectcopy(&outmsg.dest, dest);
 
-
   /* Create a semaphore for tracking command completion */
 
   outmsg.sem_done = &sem_done;
@@ -113,7 +112,9 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
 
   ret = nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_bitmap_s));
 
-  /* Wait that the command is completed, so that caller can release the buffer. */
+  /* Wait that the command is completed, so that caller can release the
+   * buffer.
+   */
 
   if (ret == OK)
     {

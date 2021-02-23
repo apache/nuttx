@@ -63,5 +63,6 @@ int nx_setvisibility(NXWINDOW hwnd, bool hide)
   outmsg.wnd   = wnd;
   outmsg.hide  = hide;
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setvisibility_s));
+  return nxmu_sendwindow(wnd, &outmsg,
+                         sizeof(struct nxsvrmsg_setvisibility_s));
 }

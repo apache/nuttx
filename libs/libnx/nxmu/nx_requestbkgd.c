@@ -95,5 +95,6 @@ int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb,
   outmsg.cb    = cb;
   outmsg.arg   = arg;
 
-  return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_requestbkgd_s));
+  return nxmu_sendserver(conn, &outmsg,
+                         sizeof(struct nxsvrmsg_requestbkgd_s));
 }

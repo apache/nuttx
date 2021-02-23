@@ -39,7 +39,8 @@
  *
  ****************************************************************************/
 
-void nxgl_runcopy(FAR struct nxgl_run_s *dest, FAR const struct nxgl_run_s *src)
+void nxgl_runcopy(FAR struct nxgl_run_s *dest,
+                  FAR const struct nxgl_run_s *src)
 {
   dest->x1 = src->x1;
   dest->x2 = src->x2;

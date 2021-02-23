@@ -41,8 +41,9 @@
  * Name: nxtk_containerclip
  *
  * Description:
- *   We are given a 'src' rectangle in containing window, relative coordinates
- *   (i.e., (0,0) is the top left corner of the outer, containing window).
+ *   We are given a 'src' rectangle in containing window, relative
+ *   coordinates (i.e., (0,0) is the top left corner of the outer, containing
+ *   window).
  *   This function will (1) clip that src rectangle so that it lies within
  *   the sub-window bounds, and then (2) move the rectangle to that it is
  *   relative to the sub-window (i.e., (0,0) is the top left corner of the

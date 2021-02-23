@@ -34,7 +34,8 @@
  * Name: nxgl_vectsubtract
  *
  * Description:
- *   Add subtract vector v2 from vector v1 and return the result in vector dest
+ *   Add subtract vector v2 from vector v1 and return the result in vector
+ *   dest
  *
  ****************************************************************************/
 

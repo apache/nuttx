@@ -75,7 +75,8 @@ NXWINDOW nx_openwindow(NXHANDLE handle, uint8_t flags,
 
   /* Pre-allocate the window structure */
 
-  wnd = (FAR struct nxbe_window_s *)lib_uzalloc(sizeof(struct nxbe_window_s));
+  wnd = (FAR struct nxbe_window_s *)
+        lib_uzalloc(sizeof(struct nxbe_window_s));
   if (!wnd)
     {
       set_errno(ENOMEM);

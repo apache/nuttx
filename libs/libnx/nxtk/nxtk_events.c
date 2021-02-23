@@ -97,9 +97,10 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   DEBUGASSERT(fwnd->fwcb != NULL);
   if (fwnd->fwcb->redraw)
     {
-      /* Clip the redraw rectangle so that it lies within the client sub-window
-       * bounds and move the rectangle to that it is relative to the client
-       * sub-window (i.e., (0,0) is the top left corner of the client sub-window).
+      /* Clip the redraw rectangle so that it lies within the client
+       * sub-window bounds and move the rectangle to that it is relative to
+       * the client sub-window
+       * (i.e., (0,0) is the top left corner of the client sub-window).
        */
 
       nxtk_containerclip(fwnd, &intersection, rect, &fwnd->fwrect);
@@ -110,7 +111,8 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
       if (!nxgl_nullrect(&intersection))
         {
-          fwnd->fwcb->redraw((NXTKWINDOW)fwnd, &intersection, false, fwnd->fwarg);
+          fwnd->fwcb->redraw((NXTKWINDOW)fwnd,
+              &intersection, false, fwnd->fwarg);
         }
     }
 
@@ -120,9 +122,10 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
   if (fwnd->tbcb && fwnd->tbcb->redraw)
     {
-      /* Clip the redraw rectangle so that it lies within the toolbar sub-window
-       * bounds and move the rectangle to that it is relative to the toolbar
-       * sub-window (i.e., (0,0) is the top left corner of the client sub-window).
+      /* Clip the redraw rectangle so that it lies within the toolbar
+       * sub-window bounds and move the rectangle to that it is relative to
+       * the toolbar sub-window
+       * (i.e., (0,0) is the top left corner of the client sub-window).
        */
 
       nxtk_containerclip(fwnd, &intersection, rect, &fwnd->tbrect);
@@ -133,7 +136,8 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
       if (!nxgl_nullrect(&intersection))
         {
-          fwnd->tbcb->redraw((NXTKWINDOW)fwnd, &intersection, false, fwnd->tbarg);
+          fwnd->tbcb->redraw((NXTKWINDOW)fwnd,
+               &intersection, false, fwnd->tbarg);
         }
     }
 
@@ -151,7 +155,8 @@ static void nxtk_position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
                            FAR const struct nxgl_rect_s *bounds,
                            FAR void *arg)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
+  FAR struct nxtk_framedwindow_s *fwnd =
+                          (FAR struct nxtk_framedwindow_s *)hwnd;
   struct nxgl_size_s subwindowsize;
 
   ginfo("hwnd=%p size=(%d,%d) pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
@@ -189,16 +194,18 @@ static void nxtk_position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
 static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
                          uint8_t buttons, FAR void *arg)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
+  FAR struct nxtk_framedwindow_s *fwnd =
+                               (FAR struct nxtk_framedwindow_s *)hwnd;
   struct nxgl_point_s abspos;
   struct nxgl_point_s relpos;
 
-  /* Raise the window to the top if any mouse button was pressed or if auto-raise
-   * is configured.  Do this before reporting the mouse event (because processing
-   * of the mouse event could change the ordering again).
+  /* Raise the window to the top if any mouse button was pressed or if
+   * auto-raise is configured.  Do this before reporting the mouse event
+   * (because processing of the mouse event could change the ordering again).
    */
 
-  /* REVISIT:  This does not work correctly.  In a scenario where (1) there are
+  /* REVISIT:
+   * This does not work correctly.  In a scenario where (1) there are
    * multiple queued touchscreen events and (2) the result of the first input
    * was to switch windows, then this autoraise implementation will cause the
    * window to revert to the previous window.  Not good behavior.
@@ -298,7 +305,8 @@ static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
 static void nxtk_kbdin(NXWINDOW hwnd, uint8_t nch, const uint8_t *ch,
                        FAR void *arg)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
+  FAR struct nxtk_framedwindow_s *fwnd =
+                              (FAR struct nxtk_framedwindow_s *)hwnd;
 
   /* Only the client window gets keyboard input */
 
@@ -316,7 +324,8 @@ static void nxtk_kbdin(NXWINDOW hwnd, uint8_t nch, const uint8_t *ch,
 static void nxtk_event(NXWINDOW hwnd, enum nx_event_e event,
                        FAR void *arg1, FAR void *arg2)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
+  FAR struct nxtk_framedwindow_s *fwnd =
+                             (FAR struct nxtk_framedwindow_s *)hwnd;
 
   /* Forward the event to the window client */
 
