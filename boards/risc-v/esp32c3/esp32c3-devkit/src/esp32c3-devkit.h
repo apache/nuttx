@@ -86,6 +86,21 @@ int board_wdt_init(void);
 #endif
 
 /****************************************************************************
+ * Name: board_i2c_init
+ *
+ * Description:
+ *   Configure the I2C driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_I2C_DRIVER
+int board_i2c_init(void);
+#endif
+
+/****************************************************************************
  * Name: board_tim_init
  *
  * Description:
