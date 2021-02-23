@@ -157,7 +157,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 
   ninfo("buflen %lu\n", (unsigned long)buflen);
 
-  DEBUGASSERT(psock != NULL && psock->s_crefs > 0 && to != NULL);
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && to != NULL);
   DEBUGASSERT(psock->s_type == SOCK_DGRAM);
 
   sixlowpan_dumpbuffer("Outgoing UDP payload", buf, buflen);
@@ -169,7 +169,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 
   /* Make sure that this is a datagram valid socket */
 
-  if (psock->s_crefs <= 0 || psock->s_type != SOCK_DGRAM)
+  if (psock->s_conn == NULL || psock->s_type != SOCK_DGRAM)
     {
       nerr("ERROR: Invalid socket\n");
       return (ssize_t)-EBADF;
@@ -334,14 +334,14 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
 
   ninfo("buflen %lu\n", (unsigned long)buflen);
 
-  DEBUGASSERT(psock != NULL && psock->s_crefs > 0);
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
   DEBUGASSERT(psock->s_type == SOCK_DGRAM);
 
   sixlowpan_dumpbuffer("Outgoing UDP payload", buf, buflen);
 
   /* Make sure that this is a valid socket */
 
-  if (psock != NULL || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_conn == NULL)
     {
       nerr("ERROR: Invalid socket\n");
       return (ssize_t)-EBADF;
@@ -359,7 +359,6 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
   /* Get the underlying UDP "connection" structure */
 
   conn = (FAR struct udp_conn_s *)psock->s_conn;
-  DEBUGASSERT(conn != NULL);
 
   /* Ignore if not IPv6 domain */
 

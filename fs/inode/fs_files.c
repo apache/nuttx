@@ -32,6 +32,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/semaphore.h>
 
 #include "inode/inode.h"
@@ -163,9 +164,15 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
 }
 
 /****************************************************************************
- * Name: files_dup2
+ * Name: nx_dup2
  *
  * Description:
+ *   nx_dup2() is similar to the standard 'dup2' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_dup2() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
  *   Clone a file descriptor to a specific descriptor number.
  *
  * Returned Value:
@@ -174,7 +181,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
  *
  ****************************************************************************/
 
-int files_dup2(int fd1, int fd2)
+int nx_dup2(int fd1, int fd2)
 {
   FAR struct filelist *list;
   int ret;
@@ -211,10 +218,43 @@ int files_dup2(int fd1, int fd2)
 }
 
 /****************************************************************************
- * Name: files_close
+ * Name: dup2
  *
  * Description:
+ *   Clone a file descriptor or socket descriptor to a specific descriptor
+ *   number
+ *
+ ****************************************************************************/
+
+int dup2(int fd1, int fd2)
+{
+  int ret;
+
+  ret = nx_dup2(fd1, fd2);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nx_close
+ *
+ * Description:
+ *   nx_close() is similar to the standard 'close' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_close() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
  *   Close an inode (if open)
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   on any failure.
  *
  * Assumptions:
  *   Caller holds the list semaphore because the file descriptor will be
@@ -222,7 +262,7 @@ int files_dup2(int fd1, int fd2)
  *
  ****************************************************************************/
 
-int files_close(int fd)
+int nx_close(int fd)
 {
   FAR struct filelist *list;
   int                  ret;
@@ -255,31 +295,43 @@ int files_close(int fd)
 }
 
 /****************************************************************************
- * Name: files_release
+ * Name: close
+ *
+ * Description:
+ *   close() closes a file descriptor, so that it no longer refers to any
+ *   file and may be reused. Any record locks (see fcntl(2)) held on the file
+ *   it was associated with, and owned by the process, are removed
+ *   (regardless of the file descriptor that was used to obtain the lock).
+ *
+ *   If fd is the last copy of a particular file descriptor the resources
+ *   associated with it are freed; if the descriptor was the last reference
+ *   to a file which has been removed using unlink(2) the file is deleted.
+ *
+ * Input Parameters:
+ *   fd   file descriptor to close
+ *
+ * Returned Value:
+ *   0 on success; -1 on error with errno set appropriately.
  *
  * Assumptions:
- *   Similar to files_close().  Called only from open() logic on error
- *   conditions.
  *
  ****************************************************************************/
 
-void files_release(int fd)
+int close(int fd)
 {
-  FAR struct filelist *list;
   int ret;
 
-  list = nxsched_get_files();
-  DEBUGASSERT(list != NULL);
+  /* close() is a cancellation point */
 
-  if (fd >= 0 && fd < CONFIG_NFILE_DESCRIPTORS)
+  enter_cancellation_point();
+
+  ret = nx_close(fd);
+  if (ret < 0)
     {
-      ret = _files_semtake(list);
-      if (ret >= 0)
-        {
-          list->fl_files[fd].f_oflags  = 0;
-          list->fl_files[fd].f_pos     = 0;
-          list->fl_files[fd].f_inode = NULL;
-          _files_semgive(list);
-        }
+      set_errno(-ret);
+      ret = ERROR;
     }
+
+  leave_cancellation_point();
+  return ret;
 }

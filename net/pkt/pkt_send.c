@@ -162,7 +162,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (!psock || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_conn == NULL)
     {
       return -EBADF;
     }
@@ -177,7 +177,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
   /* Perform the send operation */
 
-  /* Initialize the state structure.  This is done with the network locked
+  /* Initialize the state structure. This is done with the network locked
    * because we don't want anything to happen until we are ready.
    */
 

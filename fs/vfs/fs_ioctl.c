@@ -30,12 +30,6 @@
 #include <fcntl.h>
 #include <assert.h>
 
-#include <net/if.h>
-
-#ifdef CONFIG_NET
-# include <nuttx/net/net.h>
-#endif
-
 #include "inode/inode.h"
 
 /****************************************************************************
@@ -82,39 +76,19 @@ static int nx_vioctl(int fd, int req, va_list ap)
   FAR int *arg;
   int ret;
 
-  /* Did we get a valid file descriptor? */
+  /* Get the file structure corresponding to the file descriptor. */
 
-  if (fd >= CONFIG_NFILE_DESCRIPTORS)
+  ret = fs_getfilep(fd, &filep);
+  if (ret < 0)
     {
-      /* Perform the socket ioctl */
-
-#ifdef CONFIG_NET
-      if (fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          ret = netdev_vioctl(fd, req, ap);
-        }
-      else
-#endif
-        {
-          return -EBADF;
-        }
+      return ret;
     }
-  else
-    {
-      /* Get the file structure corresponding to the file descriptor. */
 
-      ret = fs_getfilep(fd, &filep);
-      if (ret < 0)
-        {
-          return ret;
-        }
+  DEBUGASSERT(filep != NULL);
 
-      DEBUGASSERT(filep != NULL);
+  /* Perform the file ioctl. */
 
-      /* Perform the file ioctl. */
-
-      ret = file_vioctl(filep, req, ap);
-    }
+  ret = file_vioctl(filep, req, ap);
 
   /* Check for File system IOCTL commands that can be implemented via
    * fcntl()

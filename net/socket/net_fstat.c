@@ -41,13 +41,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_fstat
+ * Name: psock_fstat
  *
  * Description:
  *   Performs fstat operations on socket
  *
  * Input Parameters:
- *   sockfd - Socket descriptor of the socket to operate on
+ *   psock  - The pointer of the socket to operate on
  *   buf    - Caller-provided location in which to return the fstat data
  *
  * Returned Value:
@@ -56,14 +56,10 @@
  *
  ****************************************************************************/
 
-int net_fstat(int sockfd, FAR struct stat *buf)
+int psock_fstat(FAR struct socket *psock, FAR struct stat *buf)
 {
-  FAR struct socket *psock;
   int ret = OK;
 
-  /* Get the underlying socket structure */
-
-  psock = sockfd_socket(sockfd);
   if (psock == NULL)
     {
       /* sockfd does not refer to a valid, open socket */

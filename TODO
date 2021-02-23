@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 26, 2020)
+NuttX TODO List (Last updated February 24, 2021)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -24,7 +24,7 @@ nuttx/:
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (2)  Other drivers (drivers/)
   (9)  Libraries (libs/libc/, libs/libm/)
- (12)  File system/Generic drivers (fs/, drivers/)
+ (11)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
   (2)  Linux/Cygwin simulation (arch/sim)
@@ -1898,30 +1898,6 @@ o File system / Generic drivers (fs/, drivers/)
                POLLHUP event when the driver is closed.
   Status:      Open
   Priority:    Medium-Low
-
-  Title:       UNIFIED DESCRIPTOR REPRESENTATION
-  Description: There are two separate ranges of descriptors for file and
-               socket descriptors: if a descriptor is in one range then it is
-               recognized as a file descriptor; if it is in another range
-               then it is recognized as a socket descriptor.  These separate
-               descriptor ranges can cause problems, for example, they make
-               dup'ing descriptors with dup2() problematic.  The two groups
-               of descriptors are really indices into two separate tables:
-               On an array of file structures and the other an array of
-               socket structures.  There really should be one array that
-               is a union of file and socket descriptors.  Then socket and
-               file descriptors could lie in the same range.
-
-               Another example of how the current implementation limits
-               functionality:  I recently started to implement of the FILEMAX
-               (using pctl() instead sysctl()).  My objective was to be able
-               to control the number of available file descriptors on a task-
-               by-task basis.  The complexity due to the partitioning of
-               descriptor space into a range for file descriptors and a range
-               for socket descriptors made this feature nearly impossible to
-               implement.
-  Status:      Open
-  Priority:    Low
 
   Title:       DUPLICATE FAT FILE NAMES
   Description: "The NSH and POSIX API interpretations about sensitivity or

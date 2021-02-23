@@ -124,55 +124,6 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sockfd_allocate
- *
- * Description:
- *   Allocate a socket descriptor
- *
- * Input Parameters:
- *   Lowest socket descriptor index to be used.
- *
- * Returned Value:
- *   On success, a socket descriptor >= minsd is returned.  A negated errno
- *   value is returned on failure.
- *
- ****************************************************************************/
-
-int sockfd_allocate(int minsd);
-
-/****************************************************************************
- * Name: psock_release
- *
- * Description:
- *   Free a socket.
- *
- * Input Parameters:
- *   psock - A reference to the socket instance to be freed.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void psock_release(FAR struct socket *psock);
-
-/****************************************************************************
- * Name: sockfd_release
- *
- * Description:
- *   Free the socket by its socket descriptor.
- *
- * Input Parameters:
- *   sockfd - Socket descriptor identifies the socket to be released.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void sockfd_release(int sockfd);
-
-/****************************************************************************
  * Name: net_sockif
  *
  * Description:
@@ -212,6 +163,11 @@ net_sockif(sa_family_t family, int type, int protocol);
 
 #ifdef CONFIG_NET_SOCKOPTS
 int net_timeo(clock_t start_time, socktimeo_t timeo);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* CONFIG_NET */
