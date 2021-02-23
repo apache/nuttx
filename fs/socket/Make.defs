@@ -1,5 +1,5 @@
 ############################################################################
-# net/socket/Make.defs
+# fs/socket/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,44 +18,14 @@
 #
 ############################################################################
 
-# Include socket source files
+# Include socket support
 
-SOCK_CSRCS += bind.c connect.c getsockname.c getpeername.c
-SOCK_CSRCS += recv.c recvfrom.c send.c sendto.c
-SOCK_CSRCS += socket.c net_close.c
-SOCK_CSRCS += net_dup2.c net_sockif.c net_poll.c net_vfcntl.c
-SOCK_CSRCS += net_fstat.c
+ifeq ($(CONFIG_NET),y)
 
-# TCP/IP support
-
-ifeq ($(CONFIG_NET_TCP),y)
-SOCK_CSRCS += listen.c accept.c
-
-# Local Unix domain support
-
-else ifeq ($(CONFIG_NET_LOCAL_STREAM),y)
-SOCK_CSRCS += listen.c accept.c
-endif
-
-# Socket options
-
-ifeq ($(CONFIG_NET_SOCKOPTS),y)
-SOCK_CSRCS += setsockopt.c getsockopt.c net_timeo.c
-endif
-
-# Support for sendfile()
-
-ifeq ($(CONFIG_NET_SENDFILE),y)
-SOCK_CSRCS += net_sendfile.c
-endif
+CSRCS += socket.c
 
 # Include socket build support
 
 DEPPATH += --dep-path socket
 VPATH += :socket
-
-# Support for control messages (CMSG)
-ifeq ($(CONFIG_NET_CMSG),y)
-SOCK_CSRCS += recvmsg.c
-SOCK_CSRCS += sendmsg.c
 endif

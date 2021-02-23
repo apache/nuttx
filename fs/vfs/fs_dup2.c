@@ -101,6 +101,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
         {
           /* (Re-)open the pseudo file or device driver */
 
+          temp.f_priv = filep1->f_priv;
           ret = inode->u.i_ops->open(&temp);
         }
 
@@ -124,79 +125,4 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 
   memcpy(filep2, &temp, sizeof(temp));
   return OK;
-}
-
-/****************************************************************************
- * Name: nx_dup2
- *
- * Description:
- *   nx_dup2() is similar to the standard 'dup2' interface except that is
- *   not a cancellation point and it does not modify the errno variable.
- *
- *   nx_dup2() is an internal NuttX interface and should not be called from
- *   applications.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is return on
- *   any failure.
- *
- ****************************************************************************/
-
-int nx_dup2(int fd1, int fd2)
-{
-  /* Check the range of the descriptor to see if we got a file or a socket
-   * descriptor.
-   */
-
-  if (fd1 >= CONFIG_NFILE_DESCRIPTORS)
-    {
-      /* Not a valid file descriptor.
-       * Did we get a valid socket descriptor?
-       */
-
-#ifdef CONFIG_NET
-      if (fd1 < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          /* Yes.. dup the socket descriptor. */
-
-          return net_dup2(fd1, fd2);
-        }
-      else
-#endif
-        {
-          /* No.. then it is a bad descriptor number */
-
-          return -EBADF;
-        }
-    }
-  else
-    {
-      /* Its a valid file descriptor.. dup the file descriptor.
-       */
-
-      return files_dup2(fd1, fd2);
-    }
-}
-
-/****************************************************************************
- * Name: dup2
- *
- * Description:
- *   Clone a file descriptor or socket descriptor to a specific descriptor
- *   number
- *
- ****************************************************************************/
-
-int dup2(int fd1, int fd2)
-{
-  int ret;
-
-  ret = nx_dup2(fd1, fd2);
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      ret = ERROR;
-    }
-
-  return ret;
 }

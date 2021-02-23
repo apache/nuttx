@@ -1226,7 +1226,7 @@ static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
    */
 
   psock = &priv->td_psock;
-  if (!psock || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_conn == NULL)
     {
       return -EBADF;
     }

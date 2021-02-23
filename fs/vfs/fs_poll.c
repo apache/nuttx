@@ -71,42 +71,22 @@ static int poll_semtake(FAR sem_t *sem)
 
 static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
 {
-  /* Check for a valid file descriptor */
+  FAR struct file *filep;
+  int ret;
 
-  if (fd >= CONFIG_NFILE_DESCRIPTORS)
+  /* Get the file pointer corresponding to this file descriptor */
+
+  ret = fs_getfilep(fd, &filep);
+  if (ret < 0)
     {
-      /* Perform the socket ioctl */
-
-#ifdef CONFIG_NET
-      if (fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          return net_poll(fd, fds, setup);
-        }
-      else
-#endif
-        {
-          return -EBADF;
-        }
+      return ret;
     }
-  else
-    {
-      FAR struct file *filep;
-      int ret;
 
-      /* Get the file pointer corresponding to this file descriptor */
+  DEBUGASSERT(filep != NULL);
 
-      ret = fs_getfilep(fd, &filep);
-      if (ret < 0)
-        {
-          return ret;
-        }
+  /* Let file_poll() do the rest */
 
-      DEBUGASSERT(filep != NULL);
-
-      /* Let file_poll() do the rest */
-
-      return file_poll(filep, fds, setup);
-    }
+  return file_poll(filep, fds, setup);
 }
 
 /****************************************************************************
@@ -328,7 +308,7 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
        * If not, return -ENOSYS
        */
 
-      if (INODE_IS_DRIVER(inode) &&
+      if ((INODE_IS_DRIVER(inode) || INODE_IS_SOCKET(inode)) &&
           inode->u.i_ops != NULL && inode->u.i_ops->poll != NULL)
         {
           /* Yes, it does... Setup the poll */

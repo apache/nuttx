@@ -379,45 +379,6 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg);
 int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
                    FAR void *priv, int minfd);
 
-/****************************************************************************
- * Name: files_dup2
- *
- * Description:
- *   Clone a file descriptor to a specific descriptor number.
- *
- * Returned Value:
- *   fd2 is returned on success; a negated errno value is return on
- *   any failure.
- *
- ****************************************************************************/
-
-int files_dup2(int fd1, int fd2);
-
-/****************************************************************************
- * Name: files_close
- *
- * Description:
- *   Close an inode (if open)
- *
- * Assumptions:
- *   Caller holds the list semaphore because the file descriptor will be
- *   freed.
- *
- ****************************************************************************/
-
-int files_close(int fd);
-
-/****************************************************************************
- * Name: files_release
- *
- * Assumptions:
- *   Similar to files_close().  Called only from open() logic on error
- *   conditions.
- *
- ****************************************************************************/
-
-void files_release(int fd);
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
