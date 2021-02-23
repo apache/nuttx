@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_GPIO_H
-#define __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_GPIO_H
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_GPIO_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_GPIO_H
 
 /****************************************************************************
  * Included Files
@@ -5311,4 +5311,4 @@
 #define GPIO_DATE_V  0xfffffff
 #define GPIO_DATE_S  0
 
-#endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_GPIO_H */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_GPIO_H */
