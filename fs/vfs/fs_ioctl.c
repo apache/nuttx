@@ -46,12 +46,6 @@
 #include <fcntl.h>
 #include <assert.h>
 
-#include <net/if.h>
-
-#ifdef CONFIG_NET
-# include <nuttx/net/net.h>
-#endif
-
 #include "inode/inode.h"
 
 /****************************************************************************
@@ -102,18 +96,7 @@ static int nx_vioctl(int fd, int req, va_list ap)
 
   if (fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-      /* Perform the socket ioctl */
-
-#ifdef CONFIG_NET
-      if (fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          ret = netdev_vioctl(fd, req, ap);
-        }
-      else
-#endif
-        {
-          return -EBADF;
-        }
+      return -EBADF;
     }
   else
     {

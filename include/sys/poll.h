@@ -93,8 +93,7 @@
 
 #define POLLFD       (0x00)
 #define POLLFILE     (0x40)
-#define POLLSOCK     (0x80)
-#define POLLMASK     (0xC0)
+#define POLLMASK     (0x40)
 
 /****************************************************************************
  * Public Type Definitions

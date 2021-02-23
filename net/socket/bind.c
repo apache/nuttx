@@ -95,7 +95,7 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 
   /* Verify that the psock corresponds to valid, allocated socket */
 
-  if (!psock || psock->s_crefs <= 0)
+  if (!psock || psock->s_conn == NULL)
     {
       return -ENOTSOCK;
     }

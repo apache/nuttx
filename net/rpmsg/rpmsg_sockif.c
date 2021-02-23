@@ -732,7 +732,6 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
           newsock->s_sockif = psock->s_sockif;
           newsock->s_type   = SOCK_STREAM;
           newsock->s_conn   = conn;
-          newsock->s_crefs  = 1;
 
           rpmsg_socket_getaddr(conn, addr, addrlen);
 

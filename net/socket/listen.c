@@ -148,7 +148,7 @@ int listen(int sockfd, int backlog)
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (psock == NULL || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_conn == NULL)
     {
       /* It is not a valid socket description.  Distinguish between the
        * cases where sockfd is a just invalid and when it is a valid file

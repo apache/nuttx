@@ -46,10 +46,6 @@
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 
-#ifdef CONFIG_NET
-# include <nuttx/net/net.h>
-#endif
-
 #include "inode/inode.h"
 
 /****************************************************************************
@@ -130,18 +126,7 @@ int nx_close(int fd)
 
   if (fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-      /* Close a socket descriptor */
-
-#ifdef CONFIG_NET
-      if (fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          return net_close(fd);
-        }
-      else
-#endif
-        {
-          return -EBADF;
-        }
+      return -EBADF;
     }
 
   /* Close the driver or mountpoint.  NOTES: (1) there is no

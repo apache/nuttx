@@ -108,35 +108,35 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
    * descriptor?  Check the source file:  Is it a normal file?
    */
 
-  if ((unsigned int)outfd >= CONFIG_NFILE_DESCRIPTORS &&
-      (unsigned int)infd < CONFIG_NFILE_DESCRIPTORS)
-    {
-      FAR struct file *filep;
-      int ret;
+  FAR struct socket *psock;
 
+  psock = sockfd_socket(outfd);
+  if (psock != NULL)
+    {
       /* This appears to be a file-to-socket transfer.  Get the file
        * structure.
        */
 
-      ret = fs_getfilep(infd, &filep);
+      FAR struct file *infilep;
+      int ret = fs_getfilep(infd, &infilep);
       if (ret < 0)
         {
           set_errno(-ret);
           return ERROR;
         }
 
-      DEBUGASSERT(filep != NULL);
+      DEBUGASSERT(infilep != NULL);
 
-      /* Then let net_sendfile do the work. */
+      /* Then let psock_sendfile do the work. */
 
-      ret = net_sendfile(outfd, filep, offset, count);
+      ret = psock_sendfile(psock, infilep, offset, count);
       if (ret >= 0 || get_errno() != ENOSYS)
         {
           return ret;
         }
 
       /* Fall back to the slow path if errno equals ENOSYS,
-       * because net_sendfile fail to optimize this transfer.
+       * because psock_sendfile fail to optimize this transfer.
        */
     }
 #endif

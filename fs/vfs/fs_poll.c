@@ -49,7 +49,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/net/net.h>
 
 #include <arch/irq.h>
 
@@ -90,18 +89,7 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
 
   if (fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-      /* Perform the socket ioctl */
-
-#ifdef CONFIG_NET
-      if (fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          return net_poll(fd, fds, setup);
-        }
-      else
-#endif
-        {
-          return -EBADF;
-        }
+      return -EBADF;
     }
 
   return fs_poll(fd, fds, setup);
@@ -164,15 +152,6 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
             }
           break;
 
-#ifdef CONFIG_NET
-        case POLLSOCK:
-          if (fds[i].ptr != NULL)
-            {
-              ret = psock_poll(fds[i].ptr, &fds[i], true);
-            }
-          break;
-#endif
-
         default:
           ret = -EINVAL;
           break;
@@ -197,12 +176,6 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
                 case POLLFILE:
                   file_poll(fds[j].ptr, &fds[j], false);
                   break;
-
-#ifdef CONFIG_NET
-                case POLLSOCK:
-                  psock_poll(fds[j].ptr, &fds[j], false);
-                  break;
-#endif
 
                 default:
                   break;
@@ -254,15 +227,6 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
               status = file_poll(fds[i].ptr, &fds[i], false);
             }
           break;
-
-#ifdef CONFIG_NET
-        case POLLSOCK:
-            if (fds[i].ptr != NULL)
-            {
-              status = psock_poll(fds[i].ptr, &fds[i], false);
-            }
-          break;
-#endif
 
         default:
           status = -EINVAL;
@@ -326,7 +290,8 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
        * If not, return -ENOSYS
        */
 
-      if ((INODE_IS_DRIVER(inode) || INODE_IS_MQUEUE(inode)) &&
+      if ((INODE_IS_DRIVER(inode) || INODE_IS_MQUEUE(inode) ||
+          INODE_IS_SOCKET(inode)) &&
           inode->u.i_ops != NULL && inode->u.i_ops->poll != NULL)
         {
           /* Yes, it does... Setup the poll */
