@@ -37,6 +37,7 @@
 #include "rp2040_config.h"
 #include "rp2040_clock.h"
 #include "rp2040_uart.h"
+#include "hardware/rp2040_sio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -87,6 +88,15 @@ void __start(void)
   const uint32_t *src;
 #endif
   uint32_t *dest;
+  int i;
+
+  if (up_cpu_index() != 0)
+    {
+      while (1)
+        {
+          __asm__ volatile ("wfe");
+        }
+    }
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
@@ -97,10 +107,20 @@ void __start(void)
       *dest++ = 0;
     }
 
-  /* Configure the uart so that we can get debug output as soon as possible */
+  /* Set up clock */
 
   rp2040_clockconfig();
   rp2040_boardearlyinitialize();
+
+  /* Initialize all spinlock states */
+
+  for (i = 0; i < 32; i++)
+    {
+      putreg32(0, RP2040_SIO_SPINLOCK(i));
+    }
+
+  /* Configure the uart so that we can get debug output as soon as possible */
+
   rp2040_lowsetup();
   showprogress('A');
 
