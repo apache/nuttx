@@ -101,33 +101,33 @@
 #elif NXFONTS_FONTID == 27
 #  include "nxfonts_x11-misc-fixed-6x13.h"
 #elif NXFONTS_FONTID == 28
-#  include "nxfonts_x11-misc-fixed-6x13B.h"
+#  include "nxfonts_x11-misc-fixed-6x13b.h"
 #elif NXFONTS_FONTID == 29
-#  include "nxfonts_x11-misc-fixed-6x13O.h"
+#  include "nxfonts_x11-misc-fixed-6x13o.h"
 #elif NXFONTS_FONTID == 30
 #  include "nxfonts_x11-misc-fixed-7x13.h"
 #elif NXFONTS_FONTID == 31
-#  include "nxfonts_x11-misc-fixed-7x13B.h"
+#  include "nxfonts_x11-misc-fixed-7x13b.h"
 #elif NXFONTS_FONTID == 32
-#  include "nxfonts_x11-misc-fixed-7x13O.h"
+#  include "nxfonts_x11-misc-fixed-7x13o.h"
 #elif NXFONTS_FONTID == 33
 #  include "nxfonts_x11-misc-fixed-7x14.h"
 #elif NXFONTS_FONTID == 34
-#  include "nxfonts_x11-misc-fixed-7x14B.h"
+#  include "nxfonts_x11-misc-fixed-7x14b.h"
 #elif NXFONTS_FONTID == 35
 #  include "nxfonts_x11-misc-fixed-8x13.h"
 #elif NXFONTS_FONTID == 36
-#  include "nxfonts_x11-misc-fixed-8x13B.h"
+#  include "nxfonts_x11-misc-fixed-8x13b.h"
 #elif NXFONTS_FONTID == 37
-#  include "nxfonts_x11-misc-fixed-8x13O.h"
+#  include "nxfonts_x11-misc-fixed-8x13o.h"
 #elif NXFONTS_FONTID == 38
 #  include "nxfonts_x11-misc-fixed-9x15.h"
 #elif NXFONTS_FONTID == 39
-#  include "nxfonts_x11-misc-fixed-9x15B.h"
+#  include "nxfonts_x11-misc-fixed-9x15b.h"
 #elif NXFONTS_FONTID == 40
 #  include "nxfonts_x11-misc-fixed-9x18.h"
 #elif NXFONTS_FONTID == 41
-#  include "nxfonts_x11-misc-fixed-9x18B.h"
+#  include "nxfonts_x11-misc-fixed-9x18b.h"
 #elif NXFONTS_FONTID == 42
 #  include "nxfonts_x11-misc-fixed-10x20.h"
 #elif NXFONTS_FONTID == 43
