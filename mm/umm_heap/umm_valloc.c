@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdlib/lib_aligned_alloc.c
+ * mm/umm_heap/umm_valloc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,13 +22,30 @@
  * Included Files
  ****************************************************************************/
 
-#include <libc.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-FAR void *aligned_alloc(size_t align, size_t size)
+/****************************************************************************
+ * Name: valloc
+ *
+ * Description:
+ *   valloc has the same effect as malloc(), except that the allocated
+ *   memory is aligned to a page boundary.
+ *
+ * Input Parameters:
+ *   size - Specifies the size (in bytes) of the allocated block of memory.
+ *   If size is zero, a unique pointer to the heap is returned.
+ *
+ * Returned Value:
+ *   The address of the allocated memory (NULL on failure to allocate)
+ *
+ ****************************************************************************/
+
+FAR void *valloc(size_t size)
 {
-  return lib_memalign(align, size);
+  return memalign(sysconf(_SC_PAGESIZE), size);
 }
