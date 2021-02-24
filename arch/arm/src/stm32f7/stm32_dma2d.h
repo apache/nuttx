@@ -85,9 +85,8 @@ struct dma2d_layer_s
   /* Name: fillcolor
    *
    * Description:
-   *   Fill a specific memory region with a color.
-   *   The caller must ensure that the memory region (area) is within the entire
-   *   overlay.
+   *   Fill a specific memory region with a color. The caller must ensure
+   *   that the memory region (area) is within the entire overlay.
    *
    * Parameter:
    *   oinfo  - Reference to overlay information
@@ -106,9 +105,9 @@ struct dma2d_layer_s
    *
    * Description:
    *   Copies memory from a source overlay (defined by sarea) to destination
-   *   overlay position (defined by destxpos and destypos) without pixelformat
-   *   conversion. The caller must ensure that the memory region (area) is
-   *   within the entire overlay.
+   *   overlay position (defined by destxpos and destypos) without
+   *   pixelformat conversion. The caller must ensure that the memory region
+   *   (area) is within the entire overlay.
    *
    * Parameter:
    *   doverlay - Reference destination overlay
@@ -159,7 +158,7 @@ struct dma2d_layer_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************

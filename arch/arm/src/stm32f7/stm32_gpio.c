@@ -64,6 +64,7 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* Base addresses for each GPIO block */
 
 const uint32_t g_gpiobase[STM32F7_NGPIO] =
@@ -164,7 +165,10 @@ int stm32_configgpio(uint32_t cfgset)
         break;
 
       case GPIO_OUTPUT:     /* General purpose output mode */
-        stm32_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0); /* Set the initial output value */
+
+        /* Set the initial output value */
+
+        stm32_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0);
         pinmode = GPIO_MODER_OUTPUT;
         break;
 
@@ -294,18 +298,22 @@ int stm32_configgpio(uint32_t cfgset)
 
   putreg32(regval, base + STM32_GPIO_OTYPER_OFFSET);
 
-  /* Otherwise, it is an input pin.  Should it configured as an EXTI interrupt? */
+  /* Otherwise, it is an input pin.  Should it configured as an EXTI
+   * interrupt?
+   */
 
   if (pinmode != GPIO_MODER_OUTPUT && (cfgset & GPIO_EXTI) != 0)
     {
-      /* "In STM32 F1 the selection of the EXTI line source is performed through
-       *  the EXTIx bits in the AFIO_EXTICRx registers, while in F2 series this
-       *  selection is done through the EXTIx bits in the SYSCFG_EXTICRx registers.
+      /* "In STM32 F1 the selection of the EXTI line source is performed
+       *  through the EXTIx bits in the AFIO_EXTICRx registers, while in F2
+       *  series this selection is done through the EXTIx bits in the
+       *  SYSCFG_EXTICRx registers.
        *
-       * "Only the mapping of the EXTICRx registers has been changed, without any
-       *  changes to the meaning of the EXTIx bits. However, the range of EXTI
-       *  bits values has been extended to 0b1000 to support the two ports added
-       *  in F2, port H and I (in F1 series the maximum value is 0b0110)."
+       * "Only the mapping of the EXTICRx registers has been changed,
+       *  without any changes to the meaning of the EXTIx bits. However, the
+       *  range of EXTI bits values has been extended to 0b1000 to support
+       *  the two ports added in F2, port H and I (in F1 series the maximum
+       *  value is 0b0110)."
        */
 
       uint32_t regaddr;
@@ -330,14 +338,15 @@ int stm32_configgpio(uint32_t cfgset)
  * Name: stm32_unconfiggpio
  *
  * Description:
- *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set it
- *   into default HiZ state (and possibly mark it's unused) and unlock it whether
- *   it was previously selected as alternative function (GPIO_ALT|GPIO_CNF_AFPP|...).
+ *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set
+ *   it into default HiZ state (and possibly mark it's unused) and unlock it
+ *   whether it was previously selected as alternative function
+ *   (GPIO_ALT|GPIO_CNF_AFPP|...).
  *
- *   This is a safety function and prevents hardware from schocks, as unexpected
- *   write to the Timer Channel Output GPIO to fixed '1' or '0' while it should
- *   operate in PWM mode could produce excessive on-board currents and trigger
- *   over-current/alarm function.
+ *   This is a safety function and prevents hardware from schocks, as
+ *   unexpected write to the Timer Channel Output GPIO to fixed '1' or '0'
+ *   while it should operate in PWM mode could produce excessive on-board
+ *   currents and trigger over-current/alarm function.
  *
  * Returned Value:
  *  OK on success
@@ -425,6 +434,7 @@ bool stm32_gpioread(uint32_t pinset)
       pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
       return ((getreg32(base + STM32_GPIO_IDR_OFFSET) & (1 << pin)) != 0);
     }
+
   return 0;
 }
 
@@ -437,10 +447,11 @@ bool stm32_gpioread(uint32_t pinset)
  *   By default the I/O compensation cell is not used. However when the I/O
  *   output buffer speed is configured in 50 MHz or 100 MHz mode, it is
  *   recommended to use the compensation cell for slew rate control on I/O
- *   tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power supply.
+ *   tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power
+ *   supply.
  *
- *   The I/O compensation cell can be used only when the supply voltage ranges
- *   from 2.4 to 3.6 V.
+ *   The I/O compensation cell can be used only when the supply voltage
+ *   ranges from 2.4 to 3.6 V.
  *
  * Input Parameters:
  *   None

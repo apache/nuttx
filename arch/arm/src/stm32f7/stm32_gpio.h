@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/stm32_gpio.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_STM32_GPIO_H
 #define __ARCH_ARM_SRC_STM32F7_STM32_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -52,14 +52,14 @@
 #include "chip.h"
 #include "hardware/stm32_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-Processor Declarations
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Bit-encoded input to stm32_configgpio() */
 
-/* Each port bit of the general-purpose I/O (GPIO) ports can be individually configured
- * by software in several modes:
+/* Each port bit of the general-purpose I/O (GPIO) ports can be individually
+ * configured by software in several modes:
  *
  *  - Input floating
  *  - Input pull-up
@@ -162,7 +162,9 @@
 #define GPIO_OPENDRAIN                (1 << 9)                   /* Bit9: 1=Open-drain output */
 #define GPIO_PUSHPULL                 (0)                        /* Bit9: 0=Push-pull output */
 
-/* If the pin is a GPIO digital output, then this identifies the initial output value.
+/* If the pin is a GPIO digital output, then this identifies the initial
+ * output value.
+ *
  * If the pin is an input, this bit is overloaded to provide the qualifier to
  * distinguish input pull-up and -down:
  *
@@ -234,9 +236,9 @@
 #  define GPIO_PIN14                  (14 << GPIO_PIN_SHIFT)
 #  define GPIO_PIN15                  (15 << GPIO_PIN_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -253,11 +255,11 @@ extern "C"
 
 EXTERN const uint32_t g_gpiobase[STM32F7_NGPIO];
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_configgpio
  *
  * Description:
@@ -270,48 +272,49 @@ EXTERN const uint32_t g_gpiobase[STM32F7_NGPIO];
  *   OK on success
  *   ERROR on invalid port, or when pin is locked as ALT function.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_configgpio(uint32_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_unconfiggpio
  *
  * Description:
- *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set it
- *   into default HiZ state (and possibly mark it's unused) and unlock it whether
- *   it was previously selected as alternative function (GPIO_ALT|GPIO_CNF_AFPP|...).
+ *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set
+ *   it into default HiZ state (and possibly mark it's unused) and unlock it
+ *   whether it was previously selected as alternative function
+ *   (GPIO_ALT|GPIO_CNF_AFPP|...).
  *
- *   This is a safety function and prevents hardware from schocks, as unexpected
- *   write to the Timer Channel Output GPIO to fixed '1' or '0' while it should
- *   operate in PWM mode could produce excessive on-board currents and trigger
- *   over-current/alarm function.
+ *   This is a safety function and prevents hardware from schocks, as
+ *   unexpected write to the Timer Channel Output GPIO to fixed '1' or '0'
+ *   while it should operate in PWM mode could produce excessive on-board
+ *   currents and trigger over-current/alarm function.
  *
  * Returned Value:
  *  OK on success
  *  ERROR on invalid port
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_unconfiggpio(uint32_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_gpiowrite(uint32_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool stm32_gpioread(uint32_t pinset);
 
@@ -324,10 +327,11 @@ bool stm32_gpioread(uint32_t pinset);
  *   By default the I/O compensation cell is not used. However when the I/O
  *   output buffer speed is configured in 50 MHz or 100 MHz mode, it is
  *   recommended to use the compensation cell for slew rate control on I/O
- *   tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power supply.
+ *   tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power
+ *   supply.
  *
- *   The I/O compensation cell can be used only when the supply voltage ranges
- *   from 2.4 to 3.6 V.
+ *   The I/O compensation cell can be used only when the supply voltage
+ *   ranges from 2.4 to 3.6 V.
  *
  * Input Parameters:
  *   None
@@ -357,18 +361,18 @@ void stm32_iocompensation(void);
  *   Zero (OK) on success; a negated errno value on failure indicating the
  *   nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
                        bool event, xcpt_t func, void *arg);
 
-/************************************************************************************
+/****************************************************************************
  * Function:  stm32_dumpgpio
  *
  * Description:
  *   Dump all GPIO registers associated with the provided base address
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int stm32_dumpgpio(uint32_t pinset, const char *msg);
