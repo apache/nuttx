@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdlib/lib_aligned_alloc.c
+ * mm/umm_heap/umm_posix_memalign.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,13 +22,15 @@
  * Included Files
  ****************************************************************************/
 
-#include <libc.h>
+#include <stdlib.h>
+#include <errno.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-FAR void *aligned_alloc(size_t align, size_t size)
+int posix_memalign(FAR void **mem, size_t align, size_t size)
 {
-  return lib_memalign(align, size);
+  *mem = memalign(align, size);
+  return *mem ? OK : ENOMEM;
 }
