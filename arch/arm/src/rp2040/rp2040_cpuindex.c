@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rp2040/rp2040_irq.h
+ * arch/arm/src/rp2040/rp2040_cpuindex.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,57 +18,43 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RP2040_RP2040_IRQ_H
-#define __ARCH_ARM_SRC_RP2040_RP2040_IRQ_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdint.h>
+#include <nuttx/arch.h>
+
+#include "arm_arch.h"
+
+#include "hardware/rp2040_sio.h"
+
+#ifdef CONFIG_SMP
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* The size of one interrupt stack.  This is the configured value aligned
- * the 8-bytes as required by the ARM EABI.
- */
-
-#define INTSTACK_SIZE  (CONFIG_ARCH_INTERRUPTSTACK & ~7)
-
-/****************************************************************************
- * Public Types
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Name: up_cpu_index
+ *
+ * Description:
+ *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
+ *   corresponds to the currently executing CPU.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
+ *   corresponds to the currently executing CPU.
+ *
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+int up_cpu_index(void)
 {
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-EXTERN uintptr_t arm_intstack_base(void);
-EXTERN uintptr_t arm_intstack_alloc(void);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+  return getreg32(RP2040_SIO_CPUID);
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_RP2040_RP2040_IRQ_H */
+#endif /* CONFIG_SMP */

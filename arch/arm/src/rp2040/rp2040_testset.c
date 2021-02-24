@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rp2040/rp2040_irq.h
+ * arch/arm/src/rp2040/rp2040_testset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,57 +18,68 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RP2040_RP2040_IRQ_H
-#define __ARCH_ARM_SRC_RP2040_RP2040_IRQ_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
+
+#include "hardware/rp2040_sio.h"
+
+#include "arm_arch.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The size of one interrupt stack.  This is the configured value aligned
- * the 8-bytes as required by the ARM EABI.
- */
-
-#define INTSTACK_SIZE  (CONFIG_ARCH_INTERRUPTSTACK & ~7)
+#define RP2040_TESTSET_SPINLOCK     0   /* Spinlock used for test and set */
 
 /****************************************************************************
- * Public Types
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Name: up_testset
+ *
+ * Description:
+ *   Perform and atomic test and set operation on the provided spinlock.
+ *   This function must be provided via the architecture-specific logic.
+ *
+ * Input Parameters:
+ *   lock - The address of spinlock object.
+ *
+ * Returned Value:
+ *   The spinlock is always locked upon return.  The value of previous value
+ *   of the spinlock variable is returned, either SP_LOCKED if the spinlock
+ *   as previously locked (meaning that the test-and-set operation failed to
+ *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
+ *   (meaning that we successfully obtained the lock)
+ *
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+spinlock_t up_testset(volatile FAR spinlock_t *lock)
 {
-#else
-#define EXTERN extern
-#endif
+  spinlock_t ret;
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+  /* Lock hardware spinlock */
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-EXTERN uintptr_t arm_intstack_base(void);
-EXTERN uintptr_t arm_intstack_alloc(void);
-#endif
+  while (getreg32(RP2040_SIO_SPINLOCK(RP2040_TESTSET_SPINLOCK)) == 0)
+    ;
 
-#undef EXTERN
-#if defined(__cplusplus)
+  ret = *lock;
+
+  if (ret == SP_UNLOCKED)
+    {
+      *lock = SP_LOCKED;
+      SP_DMB();
+    }
+
+  /* Unlock hardware spinlock */
+
+  putreg32(0, RP2040_SIO_SPINLOCK(RP2040_TESTSET_SPINLOCK));
+
+  return ret;
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_RP2040_RP2040_IRQ_H */
