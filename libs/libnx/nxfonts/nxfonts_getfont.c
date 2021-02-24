@@ -179,11 +179,11 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13B
-extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13B_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13b_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13O
-extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13O_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13o_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13
@@ -191,11 +191,11 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13B
-extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13B_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13b_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13O
-extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13O_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13o_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X14
@@ -203,7 +203,7 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_7x14_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X14B
-extern const struct nx_fontpackage_s g_x11_misc_fixed_7x14B_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_7x14b_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13
@@ -211,11 +211,11 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13B
-extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13B_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13b_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13O
-extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13O_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13o_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X15
@@ -223,7 +223,7 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_9x15_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X15B
-extern const struct nx_fontpackage_s g_x11_misc_fixed_9x15B_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_9x15b_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X18
@@ -231,7 +231,7 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_9x18_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X18B
-extern const struct nx_fontpackage_s g_x11_misc_fixed_9x18B_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_9x18b_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_10X20
@@ -367,11 +367,11 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13B
-  &g_x11_misc_fixed_6x13B_package,
+  &g_x11_misc_fixed_6x13b_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13O
-  &g_x11_misc_fixed_6x13O_package,
+  &g_x11_misc_fixed_6x13o_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13
@@ -379,11 +379,11 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13B
-  &g_x11_misc_fixed_7x13B_package,
+  &g_x11_misc_fixed_7x13b_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13O
-  &g_x11_misc_fixed_7x13O_package,
+  &g_x11_misc_fixed_7x13o_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X14
@@ -391,7 +391,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X14B
-  &g_x11_misc_fixed_7x14B_package,
+  &g_x11_misc_fixed_7x14b_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13
@@ -399,11 +399,11 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13B
-  &g_x11_misc_fixed_8x13B_package,
+  &g_x11_misc_fixed_8x13b_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13O
-  &g_x11_misc_fixed_8x13O_package,
+  &g_x11_misc_fixed_8x13o_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X15
@@ -411,7 +411,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X15B
-  &g_x11_misc_fixed_9x15B_package,
+  &g_x11_misc_fixed_9x15b_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X18
@@ -419,7 +419,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X18B
-  &g_x11_misc_fixed_9x18B_package,
+  &g_x11_misc_fixed_9x18b_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_10X20

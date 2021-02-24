@@ -223,12 +223,12 @@ endif
 
 ifeq ($(NXFONTS_FONTID),28)
 NXFONTS_PREFIX := g_x11_misc_fixed_6x13B_
-GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x13B.c
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x13b.c
 endif
 
 ifeq ($(NXFONTS_FONTID),29)
 NXFONTS_PREFIX := g_x11_misc_fixed_6x13O_
-GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x13O.c
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x13o.c
 endif
 
 ifeq ($(NXFONTS_FONTID),30)
@@ -238,12 +238,12 @@ endif
 
 ifeq ($(NXFONTS_FONTID),31)
 NXFONTS_PREFIX := g_x11_misc_fixed_7x13B_
-GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x13B.c
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x13b.c
 endif
 
 ifeq ($(NXFONTS_FONTID),32)
 NXFONTS_PREFIX := g_x11_misc_fixed_7x13O_
-GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x13O.c
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x13o.c
 endif
 
 ifeq ($(NXFONTS_FONTID),33)
@@ -253,7 +253,7 @@ endif
 
 ifeq ($(NXFONTS_FONTID),34)
 NXFONTS_PREFIX := g_x11_misc_fixed_7x14B_
-GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x14B.c
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x14b.c
 endif
 
 ifeq ($(NXFONTS_FONTID),35)
@@ -263,12 +263,12 @@ endif
 
 ifeq ($(NXFONTS_FONTID),36)
 NXFONTS_PREFIX := g_x11_misc_fixed_8x13B_
-GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-8x13B.c
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-8x13b.c
 endif
 
 ifeq ($(NXFONTS_FONTID),37)
 NXFONTS_PREFIX := g_x11_misc_fixed_8x13O_
-GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-8x13O.c
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-8x13o.c
 endif
 
 ifeq ($(NXFONTS_FONTID),38)
@@ -278,7 +278,7 @@ endif
 
 ifeq ($(NXFONTS_FONTID),39)
 NXFONTS_PREFIX := g_x11_misc_fixed_9x15B_
-GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-9x15B.c
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-9x15b.c
 endif
 
 ifeq ($(NXFONTS_FONTID),40)
@@ -288,7 +288,7 @@ endif
 
 ifeq ($(NXFONTS_FONTID),41)
 NXFONTS_PREFIX := g_x11_misc_fixed_9x18B_
-GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-9x18B.c
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-9x18b.c
 endif
 
 ifeq ($(NXFONTS_FONTID),42)

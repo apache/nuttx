@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libnx/nxfonts/nxfonts_x11-misc-fixed-6x13O.h
+ * libs/libnx/nxfonts/nxfonts_x11-misc-fixed-6x13o.h
  *
  *   Copyright (C) 2014 Pierre-Noel Bouteville. All rights reserved.
  *   Author: Pierre-Noel Bouteville <pnb990@gmail.com>
