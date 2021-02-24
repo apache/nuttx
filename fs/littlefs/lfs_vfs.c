@@ -55,7 +55,7 @@ struct littlefs_mountpt_s
   FAR struct inode     *drv;
   struct mtd_geometry_s geo;
   struct lfs_config     cfg;
-  lfs_t                 lfs;
+  struct lfs            lfs;
 };
 
 /****************************************************************************
@@ -278,6 +278,12 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
           goto errout_with_file;
         }
     }
+
+  /* Sync here in case of O_TRUNC haven't actually done immediately,
+   * e.g. total 8M, fileA 6M, O_TRUNC re-wrting fileA 6M, meet error.
+   */
+
+  lfs_file_sync(&fs->lfs, priv);
 
   littlefs_semgive(fs);
 
