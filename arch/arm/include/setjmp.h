@@ -84,7 +84,20 @@ typedef struct setjmp_buf_s jmp_buf[1];
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 int setjmp(jmp_buf env);
 void longjmp(jmp_buf env, int val) noreturn_function;
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __ARCH_ARM_INCLUDE_SETJUMP_H */
