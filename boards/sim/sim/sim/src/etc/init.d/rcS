@@ -59,6 +59,7 @@ testrunner >/system/testing/testrunner.log &
 #ifdef CONFIG_KVDB
 
 kvdbd &
+usleep 10
 
 #endif /* CONFIG_KVDB */
 
