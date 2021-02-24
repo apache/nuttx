@@ -146,7 +146,7 @@
 #define MII_DP83848C_PHYCR           0x19      /* RW PHY Control Register */
 #define MII_DP83848C_10BTSCR         0x1a      /* RW 10Base-T Status/Control Register */
 #define MII_DP83848C_CDCTRL1         0x1b      /* RW CD Test Control Register and BIST Extensions Register */
-#define MII_DP83848C_EDCR            0x1e      /* RW Energy Detect Control Register */
+#define MII_DP83848C_EDCR            0x1d      /* RW Energy Detect Control Register */
 
 /* Texas Instruments DP83825I PHY Extended Registers. */
 
@@ -156,14 +156,14 @@
 #define MII_DP83825I_MISR2           0x13      /* RO MII Interrupt Status Register 2 */
 #define MII_DP83825I_FCSCR           0x14      /* RO False Carrier Sense Counter Register */
 #define MII_DP83825I_RECR            0x15      /* RO Receive Error Counter Register */
-#define MII_DP83825I_BICSR           0x16      /* RW BIST Control Register */
+#define MII_DP83825I_BISCR           0x16      /* RW BIST Control Register */
 #define MII_DP83825I_RCSR            0x17      /* RW RMII and Control and Status Register */
 #define MII_DP83825I_LEDCR           0x18      /* RW LED Direct Control Register */
 #define MII_DP83825I_PHYCR           0x19      /* RW PHY Control Register */
 #define MII_DP83825I_10BTSCR         0x1a      /* RW 10Base-T Status/Control Register */
 #define MII_DP83825I_BICSR1          0x1b      /* RW BIST Control Register 1 */
 #define MII_DP83825I_BICSR2          0x1c      /* RW BIST Control Register 2 */
-#define MII_DP83825I_LEDCR           0x1e      /* RW Energy Detect Control Register */
+#define MII_DP83825I_CDCR            0x1e      /* RW Cable Diagnostic Control Register */
 #define MII_DP83825I_PHYRCR          0x1f      /* RW PHY Reset Control Register */
 
 /* SMSC LAN8720 PHY Extended Registers */
