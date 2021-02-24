@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/stm32_ethernet.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_STM32_ETHERNET_H
 #define __ARCH_ARM_SRC_STM32F7_STM32_ETHERNET_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,9 +47,9 @@
 #if STM32F7_NETHERNET > 0
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -60,38 +60,40 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function: stm32_ethinitialize
  *
  * Description:
- *   Initialize the Ethernet driver for one interface.  If the STM32 chip supports
- *   multiple Ethernet controllers, then board specific logic must implement
- *   arm_netinitialize() and call this function to initialize the desired interfaces.
+ *   Initialize the Ethernet driver for one interface.  If the STM32 chip
+ *   supports multiple Ethernet controllers, then board specific logic must
+ *   implement arm_netinitialize() and call this function to initialize the
+ *   desired interfaces.
  *
  * Input Parameters:
- *   intf - In the case where there are multiple EMACs, this value identifies which
- *   EMAC is to be initialized.
+ *   intf - In the case where there are multiple EMACs, this value
+ *          identifies which EMAC is to be initialized.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
  * Assumptions:
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if STM32F7_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
 int stm32_ethinitialize(int intf);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function: stm32_phy_boardinitialize
  *
  * Description:
- *   Some boards require specialized initialization of the PHY before it can be used.
- *   This may include such things as configuring GPIOs, resetting the PHY, etc.  If
- *   CONFIG_STM32F7_PHYINIT is defined in the configuration then the board specific
- *   logic must provide stm32_phyinitialize();  The STM32 Ethernet driver will call
- *   this function one time before it first uses the PHY.
+ *   Some boards require specialized initialization of the PHY before it can
+ *   be used. This may include such things as configuring GPIOs, resetting
+ *   the PHY, etc.  If CONFIG_STM32F7_PHYINIT is defined in the
+ *   configuration then the board specific logic must provide
+ *   stm32_phyinitialize();  The STM32 Ethernet driver will call this
+ *   function one time before it first uses the PHY.
  *
  * Input Parameters:
  *   intf - Always zero for now.
@@ -101,7 +103,7 @@ int stm32_ethinitialize(int intf);
  *
  * Assumptions:
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32F7_PHYINIT
 int stm32_phy_boardinitialize(int intf);
