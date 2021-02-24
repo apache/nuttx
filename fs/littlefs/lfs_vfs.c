@@ -347,7 +347,6 @@ static ssize_t littlefs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct lfs_file *priv;
   FAR struct inode *inode;
   ssize_t ret;
-  int semret;
 
   /* Recover our private data from the struct file instance */
 
@@ -357,10 +356,10 @@ static ssize_t littlefs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Call LFS to perform the read */
 
-  semret = littlefs_semtake(fs);
-  if (semret < 0)
+  ret = littlefs_semtake(fs);
+  if (ret < 0)
     {
-      return (ssize_t)semret;
+      return ret;
     }
 
   ret = lfs_file_read(&fs->lfs, priv, buffer, buflen);
@@ -385,7 +384,6 @@ static ssize_t littlefs_write(FAR struct file *filep, const char *buffer,
   FAR struct lfs_file *priv;
   FAR struct inode *inode;
   ssize_t ret;
-  int semret;
 
   /* Recover our private data from the struct file instance */
 
@@ -395,10 +393,10 @@ static ssize_t littlefs_write(FAR struct file *filep, const char *buffer,
 
   /* Call LFS to perform the write */
 
-  semret = littlefs_semtake(fs);
-  if (semret < 0)
+  ret = littlefs_semtake(fs);
+  if (ret < 0)
     {
-      return semret;
+      return ret;
     }
 
   ret = lfs_file_write(&fs->lfs, priv, buffer, buflen);
@@ -422,7 +420,6 @@ static off_t littlefs_seek(FAR struct file *filep, off_t offset, int whence)
   FAR struct lfs_file *priv;
   FAR struct inode *inode;
   off_t ret;
-  int semret;
 
   /* Recover our private data from the struct file instance */
 
@@ -432,10 +429,10 @@ static off_t littlefs_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Call LFS to perform the seek */
 
-  semret = littlefs_semtake(fs);
-  if (semret < 0)
+  ret = littlefs_semtake(fs);
+  if (ret < 0)
     {
-      return (off_t)semret;
+      return ret;
     }
 
   ret = lfs_file_seek(&fs->lfs, priv, offset, whence);
