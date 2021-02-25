@@ -314,7 +314,7 @@ _xtensa_level1_handler:
 	call0	_xtensa_context_save			/* Save full register state */
 
   /* Save current SP before (possibly) overwriting it, it's the register save
-   * area. This value will be used later by dispatch_c_isr to retrive the
+   * area. This value will be used later by dispatch_c_isr to retrieve the
    * register save area.
    */
 

@@ -630,7 +630,7 @@ static int esp32_io_interrupt(int irq, void *context, FAR void *arg)
  * Description:
  *   Process SPI slave TX.
  *
- *   DMA mode    : Initliaze register to prepare for TX
+ *   DMA mode    : Initialize register to prepare for TX
  *   Non-DMA mode: Fill data to TX register
  *
  * Input Parameters:
@@ -678,7 +678,7 @@ static void esp32_spislv_tx(struct esp32_spislv_priv_s *priv)
  *   Process SPI slave RX. Process SPI slave device receive callback by
  *   calling SPI_SDEV_RECEIVE and prepare for next RX.
  *
- *   DMA mode : Initliaze register to prepare for RX
+ *   DMA mode : Initialize register to prepare for RX
  *
  * Input Parameters:
  *   priv   - Private SPI device structure

@@ -540,7 +540,7 @@ static int esp_int_adpt_cb(int irq, void *context, FAR void *arg)
  *   Delete thread self's semaphore
  *
  * Input Parameters:
- *   semphr - Semphore data pointer
+ *   semphr - Semaphore data pointer
  *
  * Returned Value:
  *   None
@@ -881,7 +881,7 @@ static void IRAM_ATTR esp_task_yield_from_isr(void)
  *   init - semaphore initialization value
  *
  * Returned Value:
- *   Semphore data pointer
+ *   Semaphore data pointer
  *
  ****************************************************************************/
 
@@ -917,7 +917,7 @@ static void *esp_semphr_create(uint32_t max, uint32_t init)
  *   Delete semaphore
  *
  * Input Parameters:
- *   semphr - Semphore data pointer
+ *   semphr - Semaphore data pointer
  *
  * Returned Value:
  *   None
@@ -939,7 +939,7 @@ static void esp_semphr_delete(void *semphr)
  *   Wait semaphore within a certain period of time
  *
  * Input Parameters:
- *   semphr - Semphore data pointer
+ *   semphr - Semaphore data pointer
  *   ticks  - Wait system ticks
  *
  * Returned Value:
@@ -992,7 +992,7 @@ static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
  *   Post semaphore
  *
  * Input Parameters:
- *   semphr - Semphore data pointer
+ *   semphr - Semaphore data pointer
  *
  * Returned Value:
  *   True if success or false if fail
@@ -1023,7 +1023,7 @@ static int32_t esp_semphr_give(void *semphr)
  *   None
  *
  * Returned Value:
- *   Semphore data pointer
+ *   Semaphore data pointer
  *
  ****************************************************************************/
 
@@ -1810,13 +1810,13 @@ static void *esp_task_get_current_task(void)
  * Name: esp_task_get_max_priority
  *
  * Description:
- *   Get OS task maxium priority
+ *   Get OS task maximum priority
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   Task maxium priority
+ *   Task maximum priority
  *
  ****************************************************************************/
 
@@ -2195,7 +2195,7 @@ static void wifi_apb80m_release(void)
  *   Update WiFi mac timer.
  *
  * Input Parameters:
- *   en_clock_stopped - Check if clock is stoppped
+ *   en_clock_stopped - Check if clock is stopped
  *   now              - time now
  *
  * Returned Value:
@@ -2251,7 +2251,7 @@ static void wifi_phy_disable(void)
 
       phy_close_rf();
 
-      /* Update WiFi MAC time before disalbe
+      /* Update WiFi MAC time before disabling it.
        * WiFi/BT common peripheral clock.
        */
 
@@ -4158,7 +4158,7 @@ int32_t esp_timer_stop(esp_timer_handle_t timer)
  * Name: esp_timer_delete
  *
  * Description:
- *   Delete timer and free recource
+ *   Delete timer and free resource
  *
  * Input Parameters:
  *   timer  - Timer handle pointer
@@ -4181,7 +4181,7 @@ int32_t esp_timer_delete(esp_timer_handle_t timer)
  * Name: __assert_func
  *
  * Description:
- *   Delete timer and free recource
+ *   Delete timer and free resource
  *
  * Input Parameters:
  *   file  - assert file
@@ -4220,7 +4220,7 @@ void __assert_func(const char *file, int line,
  *   ticks_to_wait   - Waiting system ticks
  *
  * Returned Value:
- *   Task maxium priority
+ *   Task maximum priority
  *
  ****************************************************************************/
 

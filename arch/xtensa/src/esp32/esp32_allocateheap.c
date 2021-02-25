@@ -83,7 +83,7 @@
  */
 
 /* Region 1 of the heap is the area from the end of the .data section to the
- * begining of the ROM data.  The start address is defined from the linker
+ * beginning of the ROM data.  The start address is defined from the linker
  * script as "_sheap".  Then end is defined here, as follows:
  */
 

@@ -134,7 +134,7 @@ config ESP32_SPIRAM_SPIWP_SD3_PIN
 	default 7
 	help
 	    This value is ignored unless flash mode is set to DIO or DOUT and
-	    the SPI flash pins have been overriden by setting the eFuses
+	    the SPI flash pins have been overridden by setting the eFuses
 	    SPI_PAD_CONFIG_xxx.
 
 	    When this is the case, the eFuse config only defines 3 of the 4

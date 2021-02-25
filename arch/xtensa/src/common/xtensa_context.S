@@ -542,7 +542,7 @@ xtensa_context_restore:
 	 *   a4,a5,a8,a9,a12,a13: preserved
 	 *   a6,a7,a10,a11,a14,a15 clobbered if they were part of window(s)
 	 *      to be spilled, otherwise they are the same as on entry
-	 *   loop registers: Perserved
+	 *   loop registers: Preserved
 	 *   SAR: clobbered
 	 *
 	 * We need to preserve only a2 for _xtensa_context_restore

@@ -71,7 +71,7 @@
 /* I2C_RX_LSB_FIRST : R/W ;bitpos:[7] ;default: 1'h0 ; */
 
 /* Description: This bit is used to control the storage mode for received
- * datas.
+ * data.
  * 1: receive data from most significant bit
  * 0: receive data from least significant bit
  */
@@ -128,7 +128,7 @@
 /* I2C_SCL_FORCE_OUT : R/W ;bitpos:[1] ;default: 1'b1 ; */
 
 /* Description:
- * 1: normally ouput scl clock
+ * 1: normally output scl clock
  * 0: exchange the function of scl_o and scl_oe (scl_o is the original
  * internal output scl signal scl_oe is the enable bit for the internal
  * output scl signal)
@@ -142,7 +142,7 @@
 /* I2C_SDA_FORCE_OUT : R/W ;bitpos:[0] ;default: 1'b1 ; */
 
 /* Description:
- * 1: normally ouput sda data
+ * 1: normally output sda data
  * 0: exchange the function of sda_o and sda_oe (sda_o is the original
  * internal output sda signal sda_oe is the enable bit for the internal
  * output sda signal)
@@ -429,7 +429,7 @@
 
 /* I2C_NONFIFO_EN : R/W ;bitpos:[10] ;default: 1'b0 ; */
 
-/* Description: Set this bit to enble apb nonfifo access. */
+/* Description: Set this bit to enable apb nonfifo access. */
 
 #define I2C_NONFIFO_EN          (BIT(10))
 #define I2C_NONFIFO_EN_M        (BIT(10))

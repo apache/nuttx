@@ -314,7 +314,7 @@
 #define EFUSE_RD_FLASH_CRYPT_CONFIG_S  28
 
 /* EFUSE_RD_DIG_VOL_L6: RO; bitpos:[27:24];
- * Descritpion: This field stores the difference between the digital
+ * Description: This field stores the difference between the digital
  * regulator voltage at level6 and 1.2 V. (RO)
  * BIT[27] is the sign bit, 0: + , 1: -
  * BIT[26:24] is the difference value, unit: 0.017V
@@ -748,7 +748,7 @@
 #define EFUSE_FLASH_CRYPT_CONFIG_S     28
 
 /* EFUSE_DIG_VOL_L6: R/W; bitpos:[27:24];
- * Descritpion: This field stores the difference between the digital
+ * Description: This field stores the difference between the digital
  * regulator voltage at level6 and 1.2 V. (R/W)
  * BIT[27] is the sign bit, 0: + , 1: -
  * BIT[26:24] is the difference value, unit: 0.017V

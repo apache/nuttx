@@ -39,7 +39,7 @@
 
 /* WDT defines */
 
-/* Offset relative to each wathdog timer instance memory base */
+/* Offset relative to each watchdog timer instance memory base */
 
 /* RWDT */
 #define RWDT_CONFIG0_OFFSET         0x008c

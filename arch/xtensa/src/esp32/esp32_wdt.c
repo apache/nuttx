@@ -416,10 +416,10 @@ static int esp32_wdt_stop(FAR struct esp32_wdt_dev_s *dev)
  *
  * Description:
  *   Enables write protection (WP) on registers against accidental writing.
- *   TRM recommends to change any WDT register thorugh this sequence:
+ *   TRM recommends to change any WDT register through this sequence:
  *   - Disable WP
  *   - Do the op
- *   - Reenable WP
+ *   - Re-enable WP
  *
  ****************************************************************************/
 
@@ -449,10 +449,10 @@ static int esp32_wdt_enablewp(FAR struct esp32_wdt_dev_s *dev)
  *
  * Description:
  *   Disables write protection (WP) on registers against accidental writing.
- *   TRM recommends to change any WDT register thorugh this sequence:
+ *   TRM recommends to change any WDT register through this sequence:
  *   - Disable WP
  *   - Do the op
- *   - Reenable WP
+ *   - Re-enable WP
  *
  ****************************************************************************/
 
