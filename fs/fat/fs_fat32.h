@@ -68,7 +68,7 @@
 
 /* The following fields are only valid for FAT12/16 */
 
-#define MBR16_DRVNUM        36 /*  1@36: Drive number for MSDOS bootstrap */
+#define MBR16_DRVNUM        36 /*  1@36: Drive number for MS-DOS bootstrap */
                                /*  1@37: Reserved (zero) */
 #define MBR16_BOOTSIG       38 /*  1@38: Extended boot signature: 0x29 if following valid */
 #define MBR16_VOLID         39 /*  4@39: Volume serial number */
@@ -87,7 +87,7 @@
 #define MBR32_FSINFO        48 /*  2@48: Sector number of fsinfo structure. Usually 1. */
 #define MBR32_BKBOOTSEC     50 /*  2@50: Sector number of boot record. Usually 6  */
                                /* 12@52: Reserved (zero) */
-#define MBR32_DRVNUM        64 /*  1@64: Drive number for MSDOS bootstrap */
+#define MBR32_DRVNUM        64 /*  1@64: Drive number for MS-DOS bootstrap */
                                /*  1@65: Reserved (zero) */
 #define MBR32_BOOTSIG       66 /*  1@66: Extended boot signature: 0x29 if following valid */
 #define MBR32_VOLID         67 /*  4@67: Volume serial number */
@@ -192,7 +192,7 @@
 
 /* The following fields are only valid for FAT12/16 */
 
-#define FBR16_DRVNUM        36 /*  1@36: Drive number for MSDOS bootstrap */
+#define FBR16_DRVNUM        36 /*  1@36: Drive number for MS-DOS bootstrap */
                                /*  1@37: Reserved (zero) */
 #define FBR16_BOOTSIG       38 /*  1@38: Extended boot signature: 0x29 if following valid */
 #define FBR16_VOLID         39 /*  4@39: Volume serial number */
@@ -201,7 +201,7 @@
 
 /* The following fields are only valid for FAT32 */
 
-#define FBR32_DRVNUM        64 /*  1@64: Drive number for MSDOS bootstrap */
+#define FBR32_DRVNUM        64 /*  1@64: Drive number for MS-DOS bootstrap */
 #define FBR32_BOOTSIG       65 /*  1@65: Extended boot signature: 0x29 if following valid */
 #define FBR32_VOLID         66 /*  4@66: Volume serial number */
 #define FBR32_VOLLAB        71 /* 11@71: Volume label */

@@ -27,7 +27,7 @@
 # NuttX developers are not happy with providing per-library dummy
 # objects either.
 #
-# The "has no symbols" warning can be supressed with
+# The "has no symbols" warning can be suppressed with
 # the -no_warning_for_no_symbols option if you are using
 # a recent enough version of ranlib/libtool.
 # (Unfortunately, ar doesn't have a way to pass the option to ranlib.)

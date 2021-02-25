@@ -261,7 +261,7 @@ int psock_local_connect(FAR struct socket *psock,
       conn = (FAR struct local_conn_s *)dq_next(&conn->lc_node))
     {
       /* Anything in the listener list should be a stream socket in the
-       * istening state
+       * listening state
        */
 
       DEBUGASSERT(conn->lc_state == LOCAL_STATE_LISTENING &&

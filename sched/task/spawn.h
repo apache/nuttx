@@ -137,7 +137,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr);
  *   file_actions - The attributes to use
  *
  * Returned Value:
- *   0 (OK) on successed; A negated errno value is returned on failure.
+ *   0 (OK) on success; A negated errno value is returned on failure.
  *
  ****************************************************************************/
 

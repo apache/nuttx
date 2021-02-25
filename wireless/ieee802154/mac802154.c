@@ -627,7 +627,7 @@ void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv)
           break;
         }
 
-      /* Get the next pending indirect transation */
+      /* Get the next pending indirect transaction */
 
       txdesc = (FAR struct ieee802154_txdesc_s *)
                  sq_next((FAR sq_entry_t *)txdesc);

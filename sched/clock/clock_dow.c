@@ -50,7 +50,7 @@ static const uint8_t g_lookup[12] =
  *
  * Description:
  *   Calculate the day of week (DOW) from they year month and day.  Based on
- *   an algorithm pubished in 1990 by Michael Keith and Tom Craver with some
+ *   an algorithm published in 1990 by Michael Keith and Tom Craver with some
  *   tweaks to handle months in the range 0-11.
  *
  * Input Parameters:

@@ -402,7 +402,8 @@ static bool pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data)
 
       if (priv->bpsamp != 8 && priv->bpsamp != 16)
         {
-          auderr("ERROR: %d bits per sample are not suported in this mode\n",
+          auderr("ERROR: %d bits per sample are not supported in this "
+                 "mode\n",
                  priv->bpsamp);
           return -EINVAL;
         }
@@ -1301,8 +1302,8 @@ static int pcm_release(FAR struct audio_lowerhalf_s *dev)
 
   DEBUGASSERT(priv);
 
-  /* Release the lower driver.. it is then available for use by other
-   * decoders (and we cannot use the lower driver wither unless we re-
+  /* Release the lower driver. It is then available for use by other
+   * decoders (and we cannot use the lower driver either unless we re-
    * reserve it).
    */
 

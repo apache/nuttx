@@ -913,7 +913,7 @@ config SCHED_INSTRUMENTATION_EXTERNAL
 	bool "System performance monitor endpoints are external"
 	default n
 	---help---
-		When this option is enabled, the board specific logic must implment all
+		When this option is enabled, the board specific logic must implement all
 		callbacks listed in SCHED_INSTRUMENTATION, SCHED_INSTRUMENTATION_CSECTION,
 		SCHED_INSTRUMENTATION_SPINLOCKS, SCHED_INSTRUMENTATION_SYSCALL and
 		SCHED_INSTRUMENTATION_IRQHANDLER. Otherwise the common code will implement
