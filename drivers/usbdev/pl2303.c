@@ -566,7 +566,7 @@ static uint16_t usbclass_fillrequest(FAR struct pl2303_dev_s *priv, uint8_t *req
  *
  * Description:
  *   This function obtains write requests, transfers the TX data into the request,
- *   and submits the requests to the USB controller.  This continues untils either
+ *   and submits the requests to the USB controller.  This continues until either
  *   (1) there are no further packets available, or (2) there is not further data
  *   to send.
  *

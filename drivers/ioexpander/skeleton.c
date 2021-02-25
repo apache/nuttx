@@ -762,7 +762,7 @@ static void skel_interrupt(FAR void *arg)
  * 1) A reference to an I2C or SPI interface used to interactive with the
  *    device, and
  * 2) A read-only configuration structure that provides things like:  I2C
- *    or SPI characteristics and callbacks to attache, enable, and disable
+ *    or SPI characteristics and callbacks to attach, enable, and disable
  *    interrupts.
  *
  ****************************************************************************/

@@ -192,7 +192,7 @@ static int usbmonitor_daemon(int argc, char **argv)
 /****************************************************************************
  * Name: usbmonitor_start
  *
- *   Start the USB monitor kernal daemon.
+ *   Start the USB monitor kernel daemon.
  *
  * Input Parameters:
  *   None

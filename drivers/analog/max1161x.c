@@ -111,7 +111,7 @@ struct max1161x_dev_s
 
   /* Current configuration of the ADC. There are two bytes holding
    * the complete configuration - the Setup Byte has Bit 7 always set,
-   * while the command byte has bit 7 alway reset
+   * while the command byte has bit 7 always reset
    */
 
   uint8_t                           setupbyte;

@@ -235,7 +235,7 @@ static ssize_t gpio_write(FAR struct file *filep, FAR const char *buffer,
       return -EACCES;
     }
 
-  /* Verfy that a buffer containing data was provided */
+  /* Verify that a buffer containing data was provided */
 
   DEBUGASSERT(buffer != NULL);
   if (buflen != 0)
@@ -333,7 +333,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       /* Command:     GPIOC_WRITE
        * Description: Set the value of an output GPIO
-       * Argument:    0=output a low value; 1=outut a high value
+       * Argument:    0=output a low value; 1=output a high value
        */
 
       case GPIOC_WRITE:

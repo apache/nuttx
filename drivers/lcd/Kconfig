@@ -573,7 +573,7 @@ if LCD_ST7735
 		bool "132x162 Display Resolution"
 		default n
 		---help---
-			Two resolutions are availabe, either the 132x162 or
+			Two resolutions are available, either the 132x162 or
 			the 128x160
 
 	config LCD_ST7735_BPP

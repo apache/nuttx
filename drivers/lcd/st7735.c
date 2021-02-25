@@ -331,7 +331,7 @@ static void st7735_display(FAR struct st7735_dev_s *dev, bool on)
  * Name: st7735_setarea
  *
  * Description:
- *   Set the rectangular area for an upcomming read or write from RAM.
+ *   Set the rectangular area for an upcoming read or write from RAM.
  *
  ****************************************************************************/
 

@@ -145,7 +145,7 @@
 #define MX25L_WRDI          0x04  /* Write Disable             0   0  0     */
 #define MX25L_RDSR          0x05  /* Read status register      0   0  >=1   */
 #define MX25L_RDCR          0x15  /* Read config register      0   0  >=1   */
-#define MX25L_WRSR          0x01  /* Write stat/conf registe   0   0  2     */
+#define MX25L_WRSR          0x01  /* Write stat/conf register  0   0  2     */
 #define MX25L_4PP           0x38  /* Quad page program         3/4 0  1-256 */
 #define MX25L_SE            0x20  /* 4Kb Sector erase          3/4 0  0     */
 #define MX25L_BE32          0x52  /* 32Kbit block Erase        3/4 0  0     */

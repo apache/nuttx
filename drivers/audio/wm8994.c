@@ -1990,9 +1990,9 @@ FAR struct audio_lowerhalf_s *
       wm8994_writereg(priv, WM8994_SWRST, 0);
       wm8994_dump_registers(&priv->dev, "After reset");
 
-      /* chip revison */
+      /* chip revision */
 
-      audinfo("wm8994 chip revison: %d\n",
+      audinfo("wm8994 chip revision: %d\n",
                 wm8994_readreg(priv, WM8994_CHIP_REV));
 
       /* Reset and reconfigure the WM8994 hardwaqre */

@@ -191,8 +191,8 @@
 #define CC1101_VCO_VC_DAC       (0x39 | 0xc0)   /* Current setting from PLL cal module */
 #define CC1101_TXBYTES          (0x3a | 0xc0)   /* Underflow and # of bytes in TXFIFO */
 #define CC1101_RXBYTES          (0x3b | 0xc0)   /* Overflow and # of bytes in RXFIFO */
-#define CC1101_RCCTRL1_STATUS   (0x3c | 0xc0)   /* Last RC oscilator calibration results */
-#define CC1101_RCCTRL0_STATUS   (0x3d | 0xc0)   /* Last RC oscilator calibration results */
+#define CC1101_RCCTRL1_STATUS   (0x3c | 0xc0)   /* Last RC oscillator calibration results */
+#define CC1101_RCCTRL0_STATUS   (0x3d | 0xc0)   /* Last RC oscillator calibration results */
 
 /* Multi byte memory locations */
 

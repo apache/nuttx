@@ -15,7 +15,7 @@ ADXL372 (Bob Feretich)
 
 The ADXL372 is a 200g tri-axis accelerometer that is capable of detecting
 and recording shock impact impact events. Recording trigger
-characteristics are programed into the sensor via multiple threshold and
+characteristics are programmed into the sensor via multiple threshold and
 duration registers.  The ADXL372 is a SPI only device that can transfer
 data at 10 MHz.  The data transfer performance of this part permits the
 sensor to be sampled "on demand" rather than periodically sampled by a
@@ -312,7 +312,7 @@ Its goal is to change the sequence of events detailed above to...
  5) NuttX restores the context for the driver's worker task and starts it
     running.
  6) The cluster driver's worker task starts the i/o to collect the sample.
-    There are two choices here. Programed I/O (PIO) or DMA. If PIO is
+    There are two choices here. Programmed I/O (PIO) or DMA. If PIO is
     fastest for a small sample size, but it will lock up the processor for
     the full duration of the transfer; it can only transfer from one
     sensor at a time; and the worker task should manually yield control
@@ -443,7 +443,7 @@ driver_suspend() and driver_resume(): Optional. Set to NULL if not
 
 Note that all drivers are encouraged to extend their entry-point vectors
 beyond this common segment. For example it may be beneficial for the
-worker task  to select between programed i/o and DMA data transfer
+worker task  to select between programmed i/o and DMA data transfer
 routines. Unregulated extensions to the Entry-Point Vector should be
 encouraged to maximize the benefits of a sensor's features.
 

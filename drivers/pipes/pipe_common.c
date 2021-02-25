@@ -644,7 +644,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
               return nwritten;
             }
 
-          /* There is more to be written.. wait for data to be removed fro
+          /* There is more to be written.. wait for data to be removed from
            * the pipe
            */
 
