@@ -90,7 +90,7 @@
  */
 
 extern uintptr_t _RAM_ADDR_U_INIT_PARAM;
-#define ETH_RAMADDR ((uintptr_t)&_RAM_ADDR_U_INIT_PARAM << 16) + 0x00c000
+#define ETH_RAMADDR (((uintptr_t)&_RAM_ADDR_U_INIT_PARAM << 16) + 0x00c000)
 
 #if CONFIG_NET_ETH_PKTSIZE > 1518
 #  error "MAXF size too big for this device"
@@ -182,7 +182,7 @@ extern uintptr_t _RAM_ADDR_U_INIT_PARAM;
 
 /* Misc. timing values and settings */
 
-#define EMAC_MXPOLLLOOPS        100000
+#define EMAC_MXPOLLLOOPS        1000
 #define EMAC_CRCPOLY2           0xedb88320;
 
 /* Default register settings */
@@ -200,7 +200,7 @@ extern uintptr_t _RAM_ADDR_U_INIT_PARAM;
  * board.h file.
  */
 
-#define EMAC_PTMR              ((CONFIG_EZ80_TXPOLLTIMERMS * (ez80_systemclock / 1000) >> 8))
+#define EMAC_PTMR              (CONFIG_EZ80_TXPOLLTIMERMS * (ez80_systemclock / 1000) >> 8)
 
   /* EMAC system interrupts :
    *
@@ -287,8 +287,7 @@ struct ez80mac_statistics_s
   uint32_t tx_timeouts;    /*   Number of Tx timeout errors */
   uint32_t sys_int;        /* Number of system interrupts received */
 };
-#  define _MKFIELD(a,b,c)        a->b##c
-#  define EMAC_STAT(priv,name)   _MKFIELD(priv,stat.,name)++
+#  define EMAC_STAT(priv,name)   priv->stat.name++
 #else
 #  define EMAC_STAT(priv,name)
 #endif
@@ -589,6 +588,8 @@ static bool ez80emac_miipoll(FAR struct ez80emac_driver_s *priv,
               return true;
             }
         }
+
+      up_mdelay(10);
     }
 
   return false;
@@ -789,6 +790,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
   uint16_t lpa;
   uint16_t mcr;
   uint8_t  regval;
+  int      i;
 
   /* Start auto-negotiation */
 
@@ -798,23 +800,22 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
            MII_MCR_ANENABLE | MII_MCR_ANRESTART | MII_MCR_FULLDPLX |
            MII_MCR_SPEED100);
 
-  /* Wait for auto-negotiation to start */
+  /* Wait for auto-negotiation to complete and a link to be established */
 
-  if (!ez80emac_miipoll(priv, MII_MCR, MII_MCR_ANRESTART, false))
+  for (i = 0; i < 50; i++)
     {
-      nerr("ERROR: Autonegotiation didn't start.\n");
-    }
+      regval = ez80emac_miiread(priv, MII_MSR);
+      if ((regval & (MII_MSR_ANEGCOMPLETE | MII_MSR_LINKSTATUS)) != 0)
+        {
+           break;
+        }
 
-  /* Wait for auto-negotiation to complete */
-
-  if (!ez80emac_miipoll(priv, MII_MSR, MII_MSR_ANEGCOMPLETE, true))
-    {
-      nerr("ERROR: Autonegotiation didn't complete.\n");
+      up_mdelay(50);
     }
 
   /* Wait link */
 
-  if (!ez80emac_miipoll(priv, MII_MSR, MII_MSR_LINKSTATUS, true))
+  if (!ez80emac_miipoll(priv, MII_MSR, MII_MSR_LINKSTATUS, false))
     {
       nwarn("WARNING: Link is down!\n");
       priv->blinkok = false;
@@ -922,7 +923,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
   mcr |= MII_MCR_ANENABLE;
   ez80emac_miiwrite(priv, MII_MCR, mcr);
 
-  ninfo("MII registers (FIAD=%lx)\n", CONFIG_EZ80_FIAD);
+  ninfo("MII registers (FIAD=%x)\n", CONFIG_EZ80_FIAD);
   ninfo("  MII_MCR:       %04x\n", ez80emac_miiread(priv, MII_MCR));
   ninfo("  MII_MSR:       %04x\n", ez80emac_miiread(priv, MII_MSR));
   ninfo("  MII_PHYID1:    %04x\n", ez80emac_miiread(priv, MII_PHYID1));
@@ -1038,7 +1039,6 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   uint8_t   *pdest;
   uint24_t   len;
   irqstate_t flags;
-  uint8_t    regval;
 
   /* Careful:  This function can be called from outside of the interrupt
    * handler and, therefore, may be suspended when debug output is generated!
@@ -1280,8 +1280,9 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
   FAR struct ez80emac_desc_s *rwp;
   uint8_t *psrc;
   uint8_t *pdest;
-  int    pktlen;
-  int    npackets;
+  int     pktlen;
+  int     npackets;
+  uint8_t pktgood;
 
   /* The RRP register points to where the next Receive packet is read from.
    * The read-only EMAC Receive Write Pointer (RWP) register reports the
@@ -1291,7 +1292,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
    */
 
   rwp = ez80emac_rwp();
-  ninfo("rxnext=%p {%06x, %u, %04x} rrp=%06x rwp=%06x blkslft=%02x\n",
+  ninfo("rxnext=%p {%06x, %u, %04x} rrp=%p rwp=%p blkslft=%02x%02x\n",
         rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
         ez80emac_rrp(), rwp,
         inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L));
@@ -1312,56 +1313,63 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
       DEBUGASSERT(rxdesc == ez80emac_rrp());
       EMAC_STAT(priv, rx_packets);
 
-      /* Skip over bad packers */
-
-      if ((rxdesc->stat & EMAC_RXDESC_OK) == 0)
+      if ((rxdesc->stat & EMAC_RXDESC_OK) != 0)
         {
+          /* We have a good packet. Check if the packet is a valid size
+           * for the network buffer configuration.
+           */
+
+          pktgood = 1;
+
+          if (rxdesc->pktsize > CONFIG_NET_ETH_PKTSIZE)
+            {
+              ninfo("Truncated oversize RX pkt: %d->%d\n",
+                    rxdesc->pktsize, CONFIG_NET_ETH_PKTSIZE);
+              pktlen = CONFIG_NET_ETH_PKTSIZE;
+            }
+          else
+            {
+              pktlen = rxdesc->pktsize;
+            }
+
+          /* Copy the data data from the hardware to priv->dev.d_buf */
+
+          psrc  = (FAR uint8_t *)priv->rxnext + SIZEOF_EMACSDESC;
+          pdest =  priv->dev.d_buf;
+
+          /* Check for wraparound */
+
+          if ((FAR uint8_t *)(psrc + pktlen) > (FAR uint8_t *)priv->rxendp1)
+            {
+              int nbytes = (int)((FAR uint8_t *)priv->rxendp1 -
+                                 (FAR uint8_t *)psrc);
+
+              ninfo("RX wraps after %d bytes\n", nbytes + SIZEOF_EMACSDESC);
+
+              memcpy(pdest, psrc, nbytes);
+              memcpy(&pdest[nbytes], priv->rxstart, pktlen - nbytes);
+            }
+          else
+            {
+              memcpy(pdest, psrc, pktlen);
+            }
+
+          /* Set the amount of data in priv->dev.d_len */
+
+          priv->dev.d_len = pktlen;
+        }
+      else
+        {
+          /* The packet is bad, but the Rx descriptor reclaim still needs
+           * to be done. Account for the bad packet here, where rxdesc is
+           * still valid.
+           */
+
           ninfo("Skipping bad RX pkt: %04x\n", rxdesc->stat);
           EMAC_STAT(priv, rx_errors);
           EMAC_STAT(priv, rx_nok);
-          continue;
+          pktgood = 0;
         }
-
-      /* We have a good packet. Check if the packet is a valid size
-       * for the network buffer configuration (I routinely see
-       */
-
-      if (rxdesc->pktsize > CONFIG_NET_ETH_PKTSIZE)
-        {
-          ninfo("Truncated oversize RX pkt: %d->%d\n",
-                rxdesc->pktsize, CONFIG_NET_ETH_PKTSIZE);
-          pktlen = CONFIG_NET_ETH_PKTSIZE;
-        }
-      else
-        {
-          pktlen = rxdesc->pktsize;
-        }
-
-      /* Copy the data data from the hardware to priv->dev.d_buf */
-
-      psrc  = (FAR uint8_t *)priv->rxnext + SIZEOF_EMACSDESC;
-      pdest =  priv->dev.d_buf;
-
-      /* Check for wraparound */
-
-      if ((FAR uint8_t *)(psrc + pktlen) > (FAR uint8_t *)priv->rxendp1)
-        {
-          int nbytes = (int)((FAR uint8_t *)priv->rxendp1 -
-                             (FAR uint8_t *)psrc);
-
-          ninfo("RX wraps after %d bytes\n", nbytes + SIZEOF_EMACSDESC);
-
-          memcpy(pdest, psrc, nbytes);
-          memcpy(&pdest[nbytes], priv->rxstart, pktlen - nbytes);
-        }
-      else
-        {
-          memcpy(pdest, psrc, pktlen);
-        }
-
-      /* Set the amount of data in priv->dev.d_len */
-
-      priv->dev.d_len = pktlen;
 
       /* Reclaim the Rx descriptor */
 
@@ -1386,10 +1394,17 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
       outp(EZ80_EMAC_RRP_L, (uint8_t)((uint24_t)rxdesc & 0xff));
       outp(EZ80_EMAC_RRP_H, (uint8_t)(((uint24_t)rxdesc >> 8) & 0xff));
 
-      ninfo("rxnext=%p {%06x, %u, %04x} rrp=%06x rwp=%06x blkslft=%02x\n",
+      ninfo("rxnext=%p {%06x, %u, %04x} rrp=%p rwp=%p blkslft=%02x%02x\n",
             rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
             ez80emac_rrp(), rwp,
             inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L));
+
+      /* That's as far as we go processing bad packets */
+
+      if (pktgood == 0)
+        {
+          continue;
+        }
 
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the tap */
@@ -1532,7 +1547,6 @@ static void ez80emac_txinterrupt_work(FAR void *arg)
 {
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
   FAR struct ez80emac_desc_s *txhead = priv->txhead;
-  uint8_t regval;
   uint8_t istat;
 
   /* Process pending Ethernet Tx interrupts */
@@ -1624,7 +1638,7 @@ static void ez80emac_txinterrupt_work(FAR void *arg)
 
   /* Re-enable Ethernet Tx interrupts */
 
-  up_enable_irq(EZ80_EMACRX_IRQ);
+  outp(EZ80_EMAC_IEN, EMAC_EIN_HANDLED); /* Enable all interrupts */
 }
 
 /****************************************************************************
@@ -1654,7 +1668,7 @@ static int ez80emac_txinterrupt(int irq, FAR void *context, FAR void *arg)
    * condition here.
    */
 
-  up_disable_irq(EZ80_EMACTX_IRQ);
+  outp(EZ80_EMAC_IEN, 0);        /* Disable all interrupts */
 
   /* Determine if a TX transfer just completed */
 
@@ -1726,7 +1740,7 @@ static void ez80emac_rxinterrupt_work(FAR void *arg)
 
   /* Re-enable Ethernet Rx interrupts */
 
-  up_enable_irq(EZ80_EMACRX_IRQ);
+  outp(EZ80_EMAC_IEN, EMAC_EIN_HANDLED); /* Enable all interrupts */
 }
 
 /****************************************************************************
@@ -1755,7 +1769,7 @@ static int ez80emac_rxinterrupt(int irq, FAR void *context, FAR void *arg)
    * condition here.
    */
 
-  up_disable_irq(EZ80_EMACRX_IRQ);
+  outp(EZ80_EMAC_IEN, 0);        /* Disable all interrupts */
 
   /* Schedule to perform the Rx interrupt processing on the worker thread. */
 
@@ -1783,7 +1797,6 @@ static int ez80emac_rxinterrupt(int irq, FAR void *context, FAR void *arg)
 static void ez80emac_sysinterrupt_work(FAR void *arg)
 {
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
-  uint8_t events;
   uint8_t istat;
 
   /* Process pending system interrupts */
@@ -1833,7 +1846,7 @@ static void ez80emac_sysinterrupt_work(FAR void *arg)
   if ((istat & EMAC_ISTAT_RXOVR) != 0)
     {
       nwarn("WARNING: Rx OVR rxnext=%p {%06x, %u, %04x} "
-            "rrp=%02x%02x rwp=%02x%02x blkslft=%02x istat=%02x\n",
+            "rrp=%02x%02x rwp=%02x%02x blkslft=%02x%02x istat=%02x\n",
            priv->rxnext, priv->rxnext->np, priv->rxnext->pktsize,
            priv->rxnext->stat,
            inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
@@ -1851,7 +1864,7 @@ static void ez80emac_sysinterrupt_work(FAR void *arg)
 
   /* Re-enable Ethernet system interrupts */
 
-  up_enable_irq(EZ80_EMACSYS_IRQ);
+  outp(EZ80_EMAC_IEN, EMAC_EIN_HANDLED); /* Enable all interrupts */
 }
 
 /****************************************************************************
@@ -1880,7 +1893,7 @@ static int ez80emac_sysinterrupt(int irq, FAR void *context, FAR void *arg)
    * condition here.
    */
 
-  up_disable_irq(EZ80_EMACSYS_IRQ);
+  outp(EZ80_EMAC_IEN, 0);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -1959,7 +1972,7 @@ static void ez80emac_txtimeout_expiry(wdparm_t arg)
    * condition with interrupt work that is already queued and in progress.
    */
 
-  up_disable_irq(EZ80_EMACTX_IRQ);
+  outp(EZ80_EMAC_IEN, 0);
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
@@ -2134,9 +2147,7 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
       /* Enable the Ethernet interrupts */
 
       priv->bifup = true;
-      up_enable_irq(EZ80_EMACRX_IRQ);
-      up_enable_irq(EZ80_EMACTX_IRQ);
-      up_enable_irq(EZ80_EMACSYS_IRQ);
+      outp(EZ80_EMAC_IEN, EMAC_EIN_HANDLED); /* Enable all interrupts */
       ret = OK;
     }
 
@@ -2169,9 +2180,7 @@ static int ez80emac_ifdown(struct net_driver_s *dev)
   /* Disable the Ethernet interrupt */
 
   flags = enter_critical_section();
-  up_disable_irq(EZ80_EMACRX_IRQ);
-  up_disable_irq(EZ80_EMACTX_IRQ);
-  up_disable_irq(EZ80_EMACSYS_IRQ);
+  outp(EZ80_EMAC_IEN, 0);        /* Disable all interrupts */
 
   /* Cancel the TX poll timer and TX timeout timers */
 
@@ -2473,11 +2482,19 @@ static int ez80_emacinitialize(void)
         inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
         inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
+  /* Select the fastest MDC clock divider.  The MDC clock derives
+   * from the SCLK divided by 4, 6, 8, 10, 14, 20, or 28.
+   *
+   * This needs to be done before trying to use the MII.
+   */
+
+  outp(EZ80_EMAC_MIIMGT, CONFIG_EZ80_MDCDIV);
+
   /* PHY reset */
 
   up_udelay(500);
   ez80emac_miiwrite(priv, MII_MCR, MII_MCR_RESET);
-  if (!ez80emac_miipoll(priv, MII_MCR, MII_MCR_RESET, false))
+  if (!ez80emac_miipoll(priv, MII_MCR, MII_MCR_RESET, true))
     {
       nerr("ERROR: PHY reset error.\n");
     }
@@ -2486,7 +2503,7 @@ static int ez80_emacinitialize(void)
 
   /* Set only the default late collision bytes in CFG2 */
 
-  outp(EZ80_EMAC_CFG3, EMAC_LCOL);
+  outp(EZ80_EMAC_CFG2, EMAC_LCOL);
 
   /* Set only the retry count in CFG3 */
 
@@ -2513,12 +2530,6 @@ static int ez80_emacinitialize(void)
   outp(EZ80_EMAC_MAXF_L, EMAC_MAXF & 0xff);
   outp(EZ80_EMAC_MAXF_H, EMAC_MAXF >> 8);
 
-  /* Select the fastest MDC clock divider.  The MDC clock derives
-   * from the SCLK divided by 4, 6, 8, 10, 14, 20, or 28.
-   */
-
-  outp(EZ80_EMAC_MIIMGT, CONFIG_EZ80_MDCDIV);
-
   /* Clear the new hash table */
 
   outp(EZ80_EMAC_HTBL_0, 0);
@@ -2533,7 +2544,7 @@ static int ez80_emacinitialize(void)
   /* PHY reset */
 
   ez80emac_miiwrite(priv, MII_MCR, MII_MCR_RESET);
-  if (!ez80emac_miipoll(priv, MII_MCR, MII_MCR_RESET, false))
+  if (!ez80emac_miipoll(priv, MII_MCR, MII_MCR_RESET, true))
     {
       nerr("ERROR: PHY reset error.\n");
       ret = -EIO;
@@ -2711,7 +2722,6 @@ int up_multicastfilter(FAR struct net_driver_s *dev, FAR uint8_t *mac,
 void up_netuninitialize(void)
 {
   FAR struct ez80emac_driver_s *priv = &g_emac;
-  int i;
 
   ez80emac_ifdown(&priv->dev);
 #if 0
