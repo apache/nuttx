@@ -138,8 +138,9 @@ Configuration sub-directories
   can-4.1:
 
     This is an nsh configuration (see above) for Teensy-4.x with added support of 
-    CAN driver. FlexCAN3 is chosen as default, the change can be made at System 
-    type peripheral selection.
+    CAN driver. All FlexCANs (CAN1, CAN2, CAN3) are chosen as default. FlexCAN3
+    is FD capable. Please note that device driver name if counted from zero.
+    That means for CAN1 -> can0, CAN2 -> can1 and CAN3 -> can2
 
     Bitrate and sample point can be also changed at System type peripheral selection,
     basic values are 1 MHz for bitrate and 0.80 for sample point. The FlexCAN driver
@@ -147,14 +148,11 @@ Configuration sub-directories
 
     The configuration also includes CAN utilities as candump and cansend.
 
-    CAN_FD supported but not enabled. For CAN_FD please select following:
-
-    CAN_FD = y
-    NET_CAN_CANFD = y
-    NET_CAN_SOCK_OPTS = y
-
     This configuration can be easily changed to work with Teensy 4.0 by
     selecting CONFIG_TEENSY_40=y.
+
+    This configuration runs over LPUART1 (pins 24 and 25 on Teensy). Communication
+    over USB console can be turn on, but it couses problems with FlexCAN.
 
   netnsh-4.1:
 
