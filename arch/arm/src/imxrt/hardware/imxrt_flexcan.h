@@ -122,11 +122,9 @@
 #define IMXRT_CAN_RXIMR62_OFFSET  0x0978            /* R62 Individual Mask Registers */
 #define IMXRT_CAN_RXIMR63_OFFSET  0x097c            /* R63 Individual Mask Registers */
 
-#ifdef CONFIG_IMXRT_FLEXCAN3
 #define IMXRT_CAN_FDCTRL_OFFSET   0x0c00            /* CAN FD Control Register */
 #define IMXRT_CAN_FDCBT_OFFSET    0x0c04            /* CAN FD Bit Timing Register */
 #define IMXRT_CAN_FDCRC_OFFSET    0x0c08            /* CAN FD CRC register */
-#endif /* CONFIG_IMXRT_FLEXCAN3 */
 
 /* Register Bit Definitions *************************************************/
 
@@ -143,20 +141,17 @@
 #  define CAN_MCR_IDAM_FMTD        (3 << CAN_MCR_IDAM_SHIFT) /* Format D: All frames rejected */
 
                                              /* Bit 10: Reserved */
-#ifdef CONFIG_IMXRT_FLEXCAN3
-#  define CAN_MCR_FDEN             (1 << 11) /* Bit 11: CAN FD Operation Enable */
-#endif                                       /* Bit 11: Reserved for FlexCAN1 and FlexCAN2 */
+#define CAN_MCR_FDEN               (1 << 11) /* Bit 11: CAN FD Operation Enable */
+                                             /* Bit 11: Reserved for FlexCAN1 and FlexCAN2 */
 #define CAN_MCR_AEN                (1 << 12) /* Bit 12: Abort Enable */
 #define CAN_MCR_LPRIOEN            (1 << 13) /* Bit 13: Local Priority Enable */
                                              /* Bit 14: Reserved */
-#ifdef CONFIG_IMXRT_FLEXCAN3
-#  define CAN_MCR_DMA              (1 << 15) /* Bit 15: DMA Enable */
-#endif                                       /* Bit 15: Reserved for FlexCAN1 and FlexCAN2 */
+#define CAN_MCR_DMA                (1 << 15) /* Bit 15: DMA Enable */
+                                             /* Bit 15: Reserved for FlexCAN1 and FlexCAN2 */
 #define CAN_MCR_IRMQ               (1 << 16) /* Bit 16: Individual Rx Masking and Queue Enable */
 #define CAN_MCR_SRXDIS             (1 << 17) /* Bit 17: Self Reception Disable */
-#ifdef CONFIG_IMXRT_FLEXCAN3
-#  define CAN_MCR_DOZE             (1 << 18) /* Bit 18: Doze Mode Enable */
-#endif                                       /* Bit 18: Reserved for FlexCAN1 and FlexCAN2 */
+#define CAN_MCR_DOZE               (1 << 18) /* Bit 18: Doze Mode Enable */
+                                             /* Bit 18: Reserved for FlexCAN1 and FlexCAN2 */
 #define CAN_MCR_WAKSRC             (1 << 19) /* Bit 19: Wake Up Source */
 #define CAN_MCR_LPMACK             (1 << 20) /* Bit 20: Low Power Mode Acknowledge */
 #define CAN_MCR_WRNEN              (1 << 21) /* Bit 21: Warning Interrupt Enable */
@@ -185,9 +180,8 @@
 #define CAN_CTRL1_RWRNMSK          (1 << 10) /* Bit 10: Rx Warning Interrupt Mask */
 #define CAN_CTRL1_TWRNMSK          (1 << 11) /* Bit 11: Tx Warning Interrupt Mask */
 #define CAN_CTRL1_LPB              (1 << 12) /* Bit 12: Loop Back Mode */
-#ifdef CONFIG_IMXRT_FLEXCAN3
-#  define CAN_CTRL1_CLKSRC         (1 << 13) /* Bit 13: CAN Engine Clock Source */
-#endif                                       /* Bit 13: Reserved for FlexCAN1 and FlexCAN2 */
+#define CAN_CTRL1_CLKSRC           (1 << 13) /* Bit 13: CAN Engine Clock Source */
+                                             /* Bit 13: Reserved for FlexCAN1 and FlexCAN2 */
 #define CAN_CTRL1_ERRMSK           (1 << 14) /* Bit 14: Error Mask */
 #define CAN_CTRL1_BOFFMSK          (1 << 15) /* Bit 15: Bus Off Mask */
 #define CAN_CTRL1_PSEG2_SHIFT      (16)      /* Bits 16-18: Phase Segment 2 */
@@ -227,12 +221,11 @@
 #define CAN_ECR_TXERRCNT_MASK      (0xff << CAN_ECR_TXERRCNT_SHIFT)
 #define CAN_ECR_RXERRCNT_SHIFT     (8)       /* Bits 8-15: Receive Error Counter */
 #define CAN_ECR_RXERRCNT_MASK      (0xff << CAN_ECR_RXERRCNT_SHIFT)
-#ifdef CONFIG_IMXRT_FLEXCAN3
-#  define CAN_ECR_TXERRCNTFAST_SHIFT (16)    /* Bits 16-23: Transmit Error Counter for fast bits */
-#  define CAN_ECR_TXERRCNTFAST_MASK  (0xff << CAN_ECR_TXERRCNTFAST_SHIFT)
-#  define CAN_ECR_RXERRCNTFAST_SHIFT (24)    /* Bits 24-31: Receive Error Counter for fast bits */
-#  define CAN_ECR_RXERRCNTFAST_MASK  (0xff << CAN_ECR_RXERRCNTFAST_SHIFT)
-#endif                                       /* Bits 16-31: Reserved for FlexCAN1 and FlexCAN2 */
+#define CAN_ECR_TXERRCNTFAST_SHIFT (16)      /* Bits 16-23: Transmit Error Counter for fast bits */
+#define CAN_ECR_TXERRCNTFAST_MASK  (0xff << CAN_ECR_TXERRCNTFAST_SHIFT)
+#define CAN_ECR_RXERRCNTFAST_SHIFT (24)      /* Bits 24-31: Receive Error Counter for fast bits */
+#define CAN_ECR_RXERRCNTFAST_MASK  (0xff << CAN_ECR_RXERRCNTFAST_SHIFT)
+                                             /* Bits 16-31: Reserved for FlexCAN1 and FlexCAN2 */
 
 /* Error and Status 1 Register */
 
@@ -261,7 +254,6 @@
 #define CAN_ESR1_RWRNINT           (1 << 16) /* Bit 16: Rx Warning Interrupt Flag */
 #define CAN_ESR1_TWRNINT           (1 << 17) /* Bit 17: Tx Warning Interrupt Flag */
 #define CAN_ESR1_SYNCH             (1 << 18) /* Bit 18: CAN Synchronization Status */
-#ifdef CONFIG_IMXRT_FLEXCAN3
 #define CAN_ESR1_BOFFDONEINT       (1 << 19) /* Bit 19: Bus Off Done Interrupt */
 #define CAN_ESR1_ERRINTFAST        (1 << 20) /* Bit 20: Error Iterrupt for Errors Detected in Data Phase of CAN FD frames */
 #define CAN_ESR1_ERROVR            (1 << 21) /* Bit 21: Error Overrun */
@@ -272,7 +264,7 @@
                                              /* Bit 29: Reserved */
 #define CAN_ESR1_BIT0ERRFAST       (1 << 30) /* Bit 30: Bit0 Error in the Data Phase of CAN FD frames */
 #define CAN_ESR1_BIT1ERRFAST       (1 << 31) /* Bit 31: Bit1 Error in the Data Phase of CAN FD frames */
-#endif                                       /* Bits 19-31: Reserved for FlexCAN1 and FlexCAN2 */
+                                             /* Bits 19-31: Reserved for FlexCAN1 and FlexCAN2 */
 
 /* Interrupt Masks 2 Register */
 
@@ -292,14 +284,13 @@
 
 /* Control 2 Register */
 
-#ifdef CONFIG_IMXRT_FLEXCAN3
                                              /* Bits 0-10: Reserved */
-#  define CAN_CTRL2_EDFLTDIS       (1 << 11) /* Bit 11: Edge Filter Disable */
-#  define CAN_CTRL2_ISOCANFDEN     (1 << 12) /* Bit 12: ISO CAN FD Enable */
+#define CAN_CTRL2_EDFLTDIS         (1 << 11) /* Bit 11: Edge Filter Disable */
+#define CAN_CTRL2_ISOCANFDEN       (1 << 12) /* Bit 12: ISO CAN FD Enable */
                                              /* Bit 13: Reserved */
-#  define CAN_CTRL2_PREXCEN        (1 << 14) /* Bit 14: Protocol Exception Enable */
-#  define CAN_CTRL2_TIMERSRC       (1 << 15) /* Bit 15: Timer Source */
-#endif                                       /* Bits 0-15: Reserved for FlexCAN1 and FlexCAN2 */
+#define CAN_CTRL2_PREXCEN          (1 << 14) /* Bit 14: Protocol Exception Enable */
+#define CAN_CTRL2_TIMERSRC         (1 << 15) /* Bit 15: Timer Source */
+                                             /* Bits 0-15: Reserved for FlexCAN1 and FlexCAN2 */
 #define CAN_CTRL2_EACEN            (1 << 16) /* Bit 16: Entire Frame Arbitration Field Comparison Enable (Rx) */
 #define CAN_CTRL2_RRS              (1 << 17) /* Bit 17: Remote Request Storing */
 #define CAN_CTRL2_MRP              (1 << 18) /* Bit 18: Mailboxes Reception Priority */
@@ -323,14 +314,11 @@
 #  define CAN_CTRL2_RFFN_112MB     (13 << CAN_CTRL2_RFFN_SHIFT)
 #  define CAN_CTRL2_RFFN_120MB     (14 << CAN_CTRL2_RFFN_SHIFT)
 #  define CAN_CTRL2_RFFN_128MB     (15 << CAN_CTRL2_RFFN_SHIFT)
-#ifdef CONFIG_IMXRT_FLEXCAN3
                                              /* Bits 28-29: Reserved */
-#  define CAN_CTRL2_BOFFDONEMSK    (1 << 30) /* Bit 30: Bus Off Done Interrupt Mask */
-#  define CAN_CTRL2_ERRMSKFAST     (1 << 31) /* Bit 31: Error Interrupt for Errors Detected in the Data Phase of CAN FD frames */
-#else
-#  define CAN_CTRL2_WRMFRZ         (1 << 28) /* Bit 28: Enable unrestricted write access to FlexCAN memory in Freeze mode */
+#define CAN_CTRL2_BOFFDONEMSK      (1 << 30) /* Bit 30: Bus Off Done Interrupt Mask */
+#define CAN_CTRL2_ERRMSKFAST       (1 << 31) /* Bit 31: Error Interrupt for Errors Detected in the Data Phase of CAN FD frames */
+#define CAN_CTRL2_WRMFRZ           (1 << 28) /* Bit 28: Enable unrestricted write access to FlexCAN memory in Freeze mode */
                                              /* Bits 29-31: Reserved */
-#endif
 
 /* Error and Status 2 Register */
 
@@ -364,8 +352,6 @@
 /* Rx Individual Mask Registers */
 
 #define CAN_RXIMR(n)               (1 << (n)) /* Bit n: Individual Mask Bits */
-
-#ifdef CONFIG_IMXRT_FLEXCAN3
 
 /* CAN Bit Timing register */
 
@@ -440,8 +426,6 @@
 #define CAN_FDCRC_FD_MBCRC_MASK    (0x7f << CAN_FDCRC_FD_MBCRC_SHIFT)
 #define CAN_FDCRC_FD_MBCRC(x)      (((uint32_t)(((uint32_t)(x)) << CAN_FDCRC_FD_MBCRC_SHIFT)) & CAN_FDCRC_FD_MBCRC_MASK)
                                             /* Bit 31: Reserved */
-
-#endif /* CONFIG_IMXRT_FLEXCAN3 */
 
 /* CAN MB TX codes */
 #define CAN_TXMB_INACTIVE          0x8        /* MB is not active. */

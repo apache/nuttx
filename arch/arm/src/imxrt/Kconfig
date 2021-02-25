@@ -450,6 +450,26 @@ config IMXRT_FLEXCAN3
 	select NET_CAN_HAVE_TX_DEADLINE
 	select NET_CAN_HAVE_CANFD
 
+if IMXRT_FLEXCAN1 || IMXRT_FLEXCAN2 || IMXRT_FLEXCAN3
+
+config IMXRT_FLEXCAN_TXMB
+	int "Number of TX message buffers"
+	default 3
+	---help---
+	This defines number of TX messages buffers. Please note that
+	maximum number of all message buffers is 13 (one MB has to
+	be reserved for chip errata ERR005829).
+
+config IMXRT_FLEXCAN_RXMB
+	int "Number of RX message buffers"
+	default 10
+	---help---
+	This defines number of RX messages buffers. Please note that
+	maximum number of all message buffers is 13 (one MB has to
+	be reserved for chip errata ERR005829).
+
+endif
+
 endmenu # FLEXCAN Peripherals
 
 menu "FLEXCAN1 Configuration"
@@ -457,12 +477,10 @@ menu "FLEXCAN1 Configuration"
 
 config FLEXCAN1_BITRATE
 	int "CAN bitrate"
-	depends on !NET_CAN_CANFD
 	default 1000000
 
 config FLEXCAN1_SAMPLEP
 	int "CAN sample point"
-	depends on !NET_CAN_CANFD
 	default 80
 
 endmenu # IMXRT_FLEXCAN1
@@ -472,12 +490,10 @@ menu "FLEXCAN2 Configuration"
 
 config FLEXCAN2_BITRATE
 	int "CAN bitrate"
-	depends on !NET_CAN_CANFD
 	default 1000000
 
 config FLEXCAN2_SAMPLEP
 	int "CAN sample point"
-	depends on !NET_CAN_CANFD
 	default 80
 
 endmenu # IMXRT_FLEXCAN2
