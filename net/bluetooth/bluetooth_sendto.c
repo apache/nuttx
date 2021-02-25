@@ -243,12 +243,13 @@ ssize_t psock_bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (psock == NULL || psock->s_conn == NULL)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       return -EBADF;
     }
 
   conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
 
   /* Verify that the address is large enough to be a valid PF_BLUETOOTH
    * address.

@@ -821,7 +821,7 @@ int psock_udp_cansend(FAR struct socket *psock)
 {
   /* Verify that we received a valid socket */
 
-  if (!psock || !psock->s_conn)
+  if (!psock || psock->s_crefs <= 0)
     {
       nerr("ERROR: Invalid socket\n");
       return -EBADF;

@@ -135,7 +135,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
   /* Verify that the psock corresponds to valid, allocated socket */
 
-  if (psock == NULL || psock->s_conn == NULL)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       return -EBADF;
     }

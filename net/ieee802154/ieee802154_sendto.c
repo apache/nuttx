@@ -431,12 +431,13 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock,
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (psock == NULL || psock->s_conn == NULL)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       return -EBADF;
     }
 
   conn = (FAR struct ieee802154_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
 
   /* Verify that the address is large enough to be a valid PF_IEEE802154
    * address.

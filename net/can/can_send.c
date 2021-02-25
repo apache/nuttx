@@ -184,14 +184,14 @@ ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
   struct send_s state;
   int ret = OK;
 
+  conn = (FAR struct can_conn_s *)psock->s_conn;
+
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (!psock || !psock->s_conn)
+  if (!psock || psock->s_crefs <= 0)
     {
       return -EBADF;
     }
-
-  conn = (FAR struct can_conn_s *)psock->s_conn;
 
   /* Get the device driver that will service this transfer */
 
@@ -316,14 +316,14 @@ ssize_t psock_can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg)
   struct send_s state;
   int ret = OK;
 
+  conn = (FAR struct can_conn_s *)psock->s_conn;
+
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (!psock || !psock->s_conn)
+  if (!psock || psock->s_crefs <= 0)
     {
       return -EBADF;
     }
-
-  conn = (FAR struct can_conn_s *)psock->s_conn;
 
   /* Get the device driver that will service this transfer */
 

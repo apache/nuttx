@@ -143,7 +143,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Verify that the psock corresponds to valid, allocated socket */
 
-  if (psock == NULL || psock->s_conn == NULL)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       nerr("ERROR: Invalid socket\n");
       return -EBADF;

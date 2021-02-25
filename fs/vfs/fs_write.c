@@ -47,7 +47,12 @@
 #include <errno.h>
 #include <assert.h>
 
+#ifdef CONFIG_NET_TCP
+# include <sys/socket.h>
+#endif
+
 #include <nuttx/cancelpt.h>
+#include <nuttx/net/net.h>
 
 #include "inode/inode.h"
 
@@ -66,6 +71,7 @@
  *
  *  - It does not modify the errno variable,
  *  - It is not a cancellation point, and
+ *  - It does not handle socket descriptors.
  *
  * Input Parameters:
  *   filep  - Instance of struct file to use with the write
@@ -118,7 +124,7 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf,
  *  - It is not a cancellation point.
  *
  * Input Parameters:
- *   fd     - file descriptor to write to
+ *   fd     - file descriptor (or socket descriptor) to write to
  *   buf    - Data to write
  *   nbytes - Length of data to write
  *
@@ -144,7 +150,15 @@ ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes)
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_CAN)
+      /* Write to a socket descriptor is equivalent to
+       * send with flags == 0.
+       */
+
+      ret = nx_send(fd, buf, nbytes, 0);
+#else
       ret = -EBADF;
+#endif
     }
   else
     {
@@ -175,7 +189,7 @@ ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes)
  *  descriptor fd from the buffer starting at buf.
  *
  * Input Parameters:
- *   fd     - file descriptor to write to
+ *   fd     - file descriptor (or socket descriptor) to write to
  *   buf    - Data to write
  *   nbytes - Length of data to write
  *

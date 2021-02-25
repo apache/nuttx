@@ -42,7 +42,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include <unistd.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -250,7 +249,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (psock == NULL || psock->s_conn == NULL)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       /* It is not a valid socket description.  Distinguish between the cases
        * where sockfd is a just valid and when it is a valid file descriptor used
@@ -273,11 +272,18 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
    * cannot fail later)
    */
 
-  newfd = sockfd_allocate(&newsock);
+  newfd = sockfd_allocate(0);
   if (newfd < 0)
     {
       errcode = ENFILE;
       goto errout;
+    }
+
+  newsock = sockfd_socket(newfd);
+  if (newsock == NULL)
+    {
+      errcode = ENFILE;
+      goto errout_with_socket;
     }
 
   ret = psock_accept(psock, addr, addrlen, newsock);
@@ -291,7 +297,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   return newfd;
 
 errout_with_socket:
-  close(newfd);
+  sockfd_release(newfd);
 
 errout:
   leave_cancellation_point();

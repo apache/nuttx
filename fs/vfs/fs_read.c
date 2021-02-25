@@ -41,12 +41,14 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
 
 #include <nuttx/cancelpt.h>
+#include <nuttx/net/net.h>
 
 #include "inode/inode.h"
 
@@ -63,6 +65,7 @@
  *
  *    - It does not modify the errno variable,
  *    - It is not a cancellation point,
+ *    - It does not handle socket descriptors, and
  *    - It accepts a file structure instance instead of file descriptor.
  *
  * Input Parameters:
@@ -139,7 +142,17 @@ ssize_t nx_read(int fd, FAR void *buf, size_t nbytes)
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
+#ifdef CONFIG_NET
+      /* No.. If networking is enabled, read() is the same as recv() with
+       * the flags parameter set to zero.
+       */
+
+      return nx_recv(fd, buf, nbytes, 0);
+#else
+      /* No networking... it is a bad descriptor in any event */
+
       return -EBADF;
+#endif
     }
   else
     {

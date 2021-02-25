@@ -50,7 +50,6 @@ include mmap/Make.defs
 include semaphore/Make.defs
 include mqueue/Make.defs
 include shm/Make.defs
-include socket/Make.defs
 
 # Additional files required is mount-able file systems are supported
 

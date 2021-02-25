@@ -594,6 +594,12 @@ struct task_group_s
 #endif
 #endif
 
+#ifdef CONFIG_NET
+  /* Sockets ********************************************************************/
+
+  struct socketlist tg_socketlist;  /* Maps socket descriptor to socket         */
+#endif
+
 #ifdef CONFIG_ARCH_ADDRENV
   /* Address Environment ********************************************************/
 
@@ -903,6 +909,10 @@ FAR struct filelist *nxsched_get_files(void);
 #ifdef CONFIG_FILE_STREAM
 FAR struct streamlist *nxsched_get_streams(void);
 #endif /* CONFIG_FILE_STREAM */
+
+#ifdef CONFIG_NET
+FAR struct socketlist *nxsched_get_sockets(void);
+#endif
 
 /********************************************************************************
  * Name: nxtask_init

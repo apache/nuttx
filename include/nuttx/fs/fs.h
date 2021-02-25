@@ -114,7 +114,6 @@
 #define   FSNODEFLAG_TYPE_SHM       0x00000006 /*   Shared memory region   */
 #define   FSNODEFLAG_TYPE_MTD       0x00000007 /*   Named MTD driver       */
 #define   FSNODEFLAG_TYPE_SOFTLINK  0x00000008 /*   Soft link              */
-#define   FSNODEFLAG_TYPE_SOCKET    0x00000009 /*   Socket                 */
 #define FSNODEFLAG_DELETED          0x00000010 /* Unlinked                 */
 
 #define INODE_IS_TYPE(i,t) \
@@ -129,7 +128,6 @@
 #define INODE_IS_SHM(i)       INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SHM)
 #define INODE_IS_MTD(i)       INODE_IS_TYPE(i,FSNODEFLAG_TYPE_MTD)
 #define INODE_IS_SOFTLINK(i)  INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
-#define INODE_IS_SOCKET(i)    INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SOCKET)
 
 #define INODE_GET_TYPE(i)     ((i)->i_flags & FSNODEFLAG_TYPE_MASK)
 #define INODE_SET_TYPE(i,t) \
@@ -147,7 +145,6 @@
 #define INODE_SET_SHM(i)      INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SHM)
 #define INODE_SET_MTD(i)      INODE_SET_TYPE(i,FSNODEFLAG_TYPE_MTD)
 #define INODE_SET_SOFTLINK(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
-#define INODE_SET_SOCKET(i)   INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SOCKET)
 
 /* Mountpoint fd_flags values */
 

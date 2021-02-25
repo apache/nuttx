@@ -983,7 +983,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   bool       nonblock;
   int        ret = OK;
 
-  if (psock == NULL || psock->s_conn == NULL)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       nerr("ERROR: Invalid socket\n");
       ret = -EBADF;
@@ -1000,6 +1000,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   /* Make sure that we have the IP address mapping */
 
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn);
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
@@ -1223,7 +1224,7 @@ int psock_tcp_cansend(FAR struct socket *psock)
 {
   /* Verify that we received a valid socket */
 
-  if (!psock || !psock->s_conn)
+  if (!psock || psock->s_crefs <= 0)
     {
       nerr("ERROR: Invalid socket\n");
       return -EBADF;

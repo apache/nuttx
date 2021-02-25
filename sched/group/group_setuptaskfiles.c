@@ -114,6 +114,65 @@ static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
 #endif /* !CONFIG_FDCLONE_DISABLE */
 
 /****************************************************************************
+ * Name: sched_dupsockets
+ *
+ * Description:
+ *   Duplicate the parent task's socket descriptors.
+ *
+ * Input Parameters:
+ *   tcb - tcb of the new task.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET) && !defined(CONFIG_SDCLONE_DISABLE)
+static inline void sched_dupsockets(FAR struct task_tcb_s *tcb)
+{
+  /* The parent task is the one at the head of the ready-to-run list */
+
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct socket *parent;
+  FAR struct socket *child;
+  int i;
+
+  /* Duplicate the socket descriptors of all sockets opened by the parent
+   * task.
+   */
+
+  DEBUGASSERT(tcb && tcb->cmn.group && rtcb->group);
+
+  /* Get pointers to the parent and child task socket lists */
+
+  parent = rtcb->group->tg_socketlist.sl_sockets;
+  child  = tcb->cmn.group->tg_socketlist.sl_sockets;
+
+  /* Check each socket in the parent socket list */
+
+  for (i = 0; i < CONFIG_NSOCKET_DESCRIPTORS; i++)
+    {
+      /* Check if this parent socket is valid.  Valid means both (1)
+       * allocated and (2) successfully initialized.  A complexity in SMP
+       * mode is that a socket my be allocated, but not yet initialized when
+       * the socket is cloned by another pthread.
+       *
+       * Sockets with the close-on-exec flag set should not be cloned either.
+       */
+
+      if (_PS_VALID(&parent[i]) && !_SS_ISCLOEXEC(parent[i].s_flags))
+        {
+          /* Yes... duplicate it for the child */
+
+          psock_dup2(&parent[i], &child[i]);
+        }
+    }
+}
+#else /* CONFIG_NET && !CONFIG_SDCLONE_DISABLE */
+#  define sched_dupsockets(tcb)
+#endif /* CONFIG_NET && !CONFIG_SDCLONE_DISABLE */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -149,9 +208,19 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
 
   files_initlist(&group->tg_filelist);
 
+#ifdef CONFIG_NET
+  /* Allocate socket descriptors for the TCB */
+
+  net_initlist(&group->tg_socketlist);
+#endif
+
   /* Duplicate the parent task's file descriptors */
 
   sched_dupfiles(tcb);
+
+  /* Duplicate the parent task's socket descriptors */
+
+  sched_dupsockets(tcb);
 
   /* Allocate file/socket streams for the new TCB */
 

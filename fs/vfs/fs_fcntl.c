@@ -236,6 +236,7 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 static int nx_vfcntl(int fd, int cmd, va_list ap)
 {
   FAR struct file *filep;
+  int ret;
 
   /* Did we get a valid file descriptor? */
 
@@ -243,34 +244,41 @@ static int nx_vfcntl(int fd, int cmd, va_list ap)
     {
       /* Get the file structure corresponding to the file descriptor. */
 
-      if (fs_getfilep(fd, &filep) >= 0)
+      ret = fs_getfilep(fd, &filep);
+      if (ret >= 0)
         {
           DEBUGASSERT(filep != NULL);
 
-          /* check for operations on a socket descriptor */
-
-#ifdef CONFIG_NET
-          if (INODE_IS_SOCKET(filep->f_inode) &&
-              cmd != F_DUPFD && cmd != F_GETFD && cmd != F_SETFD)
-            {
-              /* Yes.. defer socket descriptor operations to psock_vfcntl(). The
-               * errno is not set on failures.
-               */
-
-              return psock_vfcntl(sockfd_socket(fd), cmd, ap);
-            }
-#endif
           /* Let file_vfcntl() do the real work.  The errno is not set on
            * failures.
            */
 
-          return file_vfcntl(filep, cmd, ap);
+          ret = file_vfcntl(filep, cmd, ap);
+        }
+    }
+  else
+    {
+      /* No... check for operations on a socket descriptor */
+
+#ifdef CONFIG_NET
+      if (fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
+        {
+          /* Yes.. defer socket descriptor operations to net_vfcntl(). The
+           * errno is not set on failures.
+           */
+
+          ret = net_vfcntl(fd, cmd, ap);
+        }
+      else
+#endif
+        {
+          /* No.. this descriptor number is out of range */
+
+          ret = -EBADF;
         }
     }
 
-  /* No.. this descriptor number is out of range */
-
-  return -EBADF;
+  return ret;
 }
 
 /****************************************************************************

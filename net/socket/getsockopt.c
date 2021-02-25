@@ -339,7 +339,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (psock == NULL || psock->s_conn == NULL)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       return -EBADF;
     }

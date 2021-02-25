@@ -33,6 +33,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/net/net.h>
 
 #include "inode/inode.h"
 
@@ -145,8 +146,18 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
+      /* No.. If networking is enabled then this might be a socket
+       * descriptor.
+       */
+
+#ifdef CONFIG_NET
+      ret = net_checksd(fd, oflags);
+#else
+      /* No networking... it is just a bad descriptor */
+
       ret = -EBADF;
       goto errout;
+#endif
     }
 
   /* The descriptor is in a valid range to file descriptor... perform some

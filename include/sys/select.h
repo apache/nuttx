@@ -52,7 +52,11 @@
 
 /* Get the total number of descriptors that we will have to support */
 
-#define FD_SETSIZE CONFIG_NFILE_DESCRIPTORS
+#ifdef CONFIG_NSOCKET_DESCRIPTORS
+#  define FD_SETSIZE (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS)
+#else
+#  define FD_SETSIZE CONFIG_NFILE_DESCRIPTORS
+#endif
 
 /* We will use a 32-bit bitsets to represent the set of descriptors.  How
  * many uint32_t's do we need to span all descriptors?

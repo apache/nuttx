@@ -117,7 +117,6 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
         {
           /* (Re-)open the pseudo file or device driver */
 
-          temp.f_priv = filep1->f_priv;
           ret = inode->u.i_ops->open(&temp);
         }
 
@@ -167,7 +166,24 @@ int nx_dup2(int fd1, int fd2)
 
   if (fd1 >= CONFIG_NFILE_DESCRIPTORS)
     {
-      return -EBADF;
+      /* Not a valid file descriptor.
+       * Did we get a valid socket descriptor?
+       */
+
+#ifdef CONFIG_NET
+      if (fd1 < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
+        {
+          /* Yes.. dup the socket descriptor. */
+
+          return net_dup2(fd1, fd2);
+        }
+      else
+#endif
+        {
+          /* No.. then it is a bad descriptor number */
+
+          return -EBADF;
+        }
     }
   else
     {

@@ -65,7 +65,7 @@ int psock_close(FAR struct socket *psock)
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (psock == NULL)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       return -EBADF;
     }
@@ -78,7 +78,7 @@ int psock_close(FAR struct socket *psock)
    * waiting in accept.
    */
 
-  if (psock->s_conn != NULL)
+  if (psock->s_crefs <= 1 && psock->s_conn != NULL)
     {
       /* Assume that the socket close operation will be successful.  Save
        * the current flags and mark the socket uninitialized.  This avoids
@@ -109,11 +109,34 @@ int psock_close(FAR struct socket *psock)
         }
     }
 
-  /* The socket will not persist... reset it */
+  /* Then release our reference on the socket structure containing the
+   * connection.
+   */
 
-  memset(psock, 0, sizeof(*psock));
-
+  psock_release(psock);
   return OK;
+}
+
+/****************************************************************************
+ * Name: net_close
+ *
+ * Description:
+ *   Performs the close operation on socket descriptors
+ *
+ * Input Parameters:
+ *   sockfd   Socket descriptor of socket
+ *
+ * Returned Value:
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int net_close(int sockfd)
+{
+  return psock_close(sockfd_socket(sockfd));
 }
 
 #endif /* CONFIG_NET */

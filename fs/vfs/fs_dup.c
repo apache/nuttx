@@ -134,7 +134,24 @@ int nx_dup(int fd)
     }
   else
     {
-      return -EBADF;
+      /* Not a valid file descriptor.
+       * Did we get a valid socket descriptor?
+       */
+
+#ifdef CONFIG_NET
+      if (fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
+        {
+          /* Yes.. dup the socket descriptor. */
+
+          return net_dup(fd, CONFIG_NFILE_DESCRIPTORS);
+        }
+      else
+#endif
+        {
+          /* No.. then it is a bad descriptor number */
+
+          return -EBADF;
+        }
     }
 }
 

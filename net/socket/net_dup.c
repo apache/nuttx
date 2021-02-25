@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/udp/udp_txdrain.c
+ * net/socket/net_dup.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,105 +39,111 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <sys/socket.h>
 #include <sched.h>
-#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
-#include <nuttx/semaphore.h>
-
-#include "udp/udp.h"
-
-#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_NET_UDP_NOTIFIER)
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: txdrain_worker
- *
- * Description:
- *   Called with the write buffers have all been sent.
- *
- * Input Parameters:
- *   arg     - The notifier entry.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static void txdrain_worker(FAR void *arg)
-{
-  FAR sem_t *waitsem = (FAR sem_t *)arg;
-
-  DEBUGASSERT(waitsem != NULL);
-
-  /* Then just post the semaphore, waking up tcp_txdrain() */
-
-  nxsem_post(waitsem);
-}
+#include "socket/socket.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: udp_txdrain
+ * Name: psock_dup
  *
  * Description:
- *   Wait for all write buffers to be sent (or for a timeout to occur).
- *
- * Input Parameters:
- *   psock   - An instance of the internal socket structure.
- *   timeout - The relative time when the timeout will occur
+ *   Clone a socket descriptor to an arbitrary descriptor number.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on any failure.
+ *   On success, returns the number of new socket.  On any error,
+ *   a negated errno value is returned.
  *
  ****************************************************************************/
 
-int udp_txdrain(FAR struct socket *psock, unsigned int timeout)
+int psock_dup(FAR struct socket *psock, int minsd)
 {
-  FAR struct udp_conn_s *conn;
-  sem_t waitsem;
+  FAR struct socket *psock2;
+  int sockfd2;
   int ret;
 
-  DEBUGASSERT(psock != NULL && psock->s_crefs > 0 && psock->s_conn != NULL);
-  DEBUGASSERT(psock->s_type == SOCK_DGRAM);
+  /* Make sure that the minimum socket descriptor is within the legal range.
+   * The minimum value we receive is relative to file descriptor 0;  we need
+   * map it relative of the first socket descriptor.
+   */
 
-  conn = (FAR struct udp_conn_s *)psock->s_conn;
-
-  /* Initialize the wait semaphore */
-
-  nxsem_init(&waitsem, 0, 0);
-  nxsem_set_protocol(&waitsem, SEM_PRIO_NONE);
-
-  /* The following needs to be done with the network stable */
-
-  net_lock();
-  ret = udp_writebuffer_notifier_setup(txdrain_worker, conn, &waitsem);
-  if (ret > 0)
+  if (minsd >= CONFIG_NFILE_DESCRIPTORS)
     {
-      int key = ret;
-
-      /* There is pending write data.. wait for it to drain. */
-
-      ret = net_timedwait_uninterruptible(&waitsem, timeout);
-
-      /* Tear down the notifier (in case we timed out or were canceled) */
-
-      if (ret < 0)
-        {
-          udp_notifier_teardown(key);
-        }
+      minsd -= CONFIG_NFILE_DESCRIPTORS;
+    }
+  else
+    {
+      minsd = 0;
     }
 
-  net_unlock();
-  nxsem_destroy(&waitsem);
+  /* Lock the scheduler throughout the following */
+
+  sched_lock();
+
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (!psock || psock->s_crefs <= 0)
+    {
+      ret = -EBADF;
+      goto errout;
+    }
+
+  /* Allocate a new socket descriptor */
+
+  sockfd2 = sockfd_allocate(minsd);
+  if (sockfd2 < 0)
+    {
+      ret = -ENFILE;
+      goto errout;
+    }
+
+  /* Get the socket structure underlying the new descriptor */
+
+  psock2 = sockfd_socket(sockfd2);
+  if (!psock2)
+    {
+      ret = -ENOSYS; /* Should not happen */
+      goto errout_with_sockfd;
+    }
+
+  /* Duplicate the socket state */
+
+  ret = psock_dup2(psock, psock2);
+  if (ret < 0)
+    {
+      goto errout_with_sockfd;
+    }
+
+  sched_unlock();
+  return sockfd2;
+
+errout_with_sockfd:
+  sockfd_release(sockfd2);
+
+errout:
+  sched_unlock();
   return ret;
 }
 
-#endif /* CONFIG_NET_UDP_WRITE_BUFFERS && CONFIG_NET_UDP_NOTIFIER */
+/****************************************************************************
+ * Name: net_dup
+ *
+ * Description:
+ *   Clone a socket descriptor to an arbitrary descriptor number.
+ *
+ * Returned Value:
+ *   On success, returns the number of new socket.  On any error,
+ *   a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int net_dup(int sockfd, int minsd)
+{
+  return psock_dup(sockfd_socket(sockfd), minsd);
+}

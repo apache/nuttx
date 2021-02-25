@@ -177,7 +177,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (!psock || !psock->s_conn)
+  if (!psock || psock->s_crefs <= 0)
     {
       return -EBADF;
     }
