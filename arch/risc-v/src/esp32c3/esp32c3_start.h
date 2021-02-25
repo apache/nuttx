@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/esp32c3_start.c
+ * arch/risc-v/src/esp32c3/esp32c3_start.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,79 +22,33 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_START_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_START_H
 
-#include <nuttx/arch.h>
-#include <nuttx/init.h>
-
-#include <arch/board/board.h>
-
-#include "esp32c3.h"
-#include "esp32c3_clockconfig.h"
-#include "esp32c3_irq.h"
-#include "esp32c3_lowputc.h"
-#include "esp32c3_start.h"
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
-
 /****************************************************************************
- * Public Data
+ * Name: esp32c3_board_initialize
+ *
+ * Description:
+ *   All ESP32 architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization -- after all memory
+ *   has been configured but before any devices have been initialized.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-/* Address of the IDLE thread */
+void esp32c3_board_initialize(void);
 
-uint8_t g_idlestack[ESP32C3_IDLESTACK_SIZE]
-  __attribute__((aligned(16), section(".noinit")));
-uint32_t g_idle_topstack = ESP32C3_IDLESTACK_TOP;
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: __esp32c3_start
- ****************************************************************************/
-
-void __esp32c3_start(void)
-{
-  uint32_t *dest;
-
-  /* Set CPU frequency */
-
-  esp32c3_clockconfig();
-
-  /* Configure the UART so we can get debug output */
-
-  esp32c3_lowsetup();
-
-  showprogress('A');
-
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (dest = &_sbss; dest < &_ebss; dest++)
-    {
-      *dest = 0;
-    }
-
-  showprogress('B');
-
-  /* Initialize onboard resources */
-
-  esp32c3_board_initialize();
-
-  /* Bring up NuttX */
-
-  nx_start();
-
-  for (; ; );
-}
+#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_START_H */
