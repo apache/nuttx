@@ -31,7 +31,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Offset relative to each wathdog timer instance memory base */
+/* Offset relative to each watchdog timer instance memory base */
 
 #define RWDT_CONFIG0_OFFSET         0x0090
 
@@ -833,7 +833,7 @@
 
 /* RTC_CNTL_GLITCH_DET_INT_ENA : R/W ;bitpos:[19] ;default: 1'b0 ; */
 
-/* Description: enbale gitch det interrupt */
+/* Description: enable gitch det interrupt */
 
 #define RTC_CNTL_GLITCH_DET_INT_ENA  (BIT(19))
 #define RTC_CNTL_GLITCH_DET_INT_ENA_M  (BIT(19))
@@ -3030,7 +3030,7 @@
 
 /* RTC_CNTL_XTAL32K_RETURN_WAIT : R/W ;bitpos:[3:0] ;default: 4'h0 ; */
 
-/* Description: cycles to wait to return noral xtal 32k */
+/* Description: cycles to wait to return normal xtal 32k */
 
 #define RTC_CNTL_XTAL32K_RETURN_WAIT  0x0000000F
 #define RTC_CNTL_XTAL32K_RETURN_WAIT_M  ((RTC_CNTL_XTAL32K_RETURN_WAIT_V)<<(RTC_CNTL_XTAL32K_RETURN_WAIT_S))
@@ -3099,7 +3099,7 @@
 
 /* RTC_CNTL_GLITCH_DET_INT_ENA_W1TS : WO ;bitpos:[19] ;default: 1'b0 ; */
 
-/* Description: enbale gitch det interrupt */
+/* Description: enable gitch det interrupt */
 
 #define RTC_CNTL_GLITCH_DET_INT_ENA_W1TS  (BIT(19))
 #define RTC_CNTL_GLITCH_DET_INT_ENA_W1TS_M  (BIT(19))
@@ -3180,7 +3180,7 @@
 
 /* RTC_CNTL_GLITCH_DET_INT_ENA_W1TC : WO ;bitpos:[19] ;default: 1'b0 ; */
 
-/* Description: enbale gitch det interrupt */
+/* Description: enable gitch det interrupt */
 
 #define RTC_CNTL_GLITCH_DET_INT_ENA_W1TC  (BIT(19))
 #define RTC_CNTL_GLITCH_DET_INT_ENA_W1TC_M  (BIT(19))

@@ -233,7 +233,7 @@
 #define UART_RXFIFO_TOUT_INT_RAW_S  8
 
 /* UART_SW_XON_INT_RAW : R/WTC/SS; bitpos: [9]; default: 0;
- * This interrupt raw bit turns to high level when receiver recevies Xon
+ * This interrupt raw bit turns to high level when receiver receives Xon
  * char when uart_sw_flow_con_en is set to
  * 1.
  */
@@ -1118,7 +1118,7 @@
 #define UART_SW_DTR_S  7
 
 /* UART_TXD_BRK : R/W; bitpos: [8]; default: 0;
- * Set this bit to enbale transmitter to  send NULL when the process of
+ * Set this bit to enable transmitter to  send NULL when the process of
  * sending data is
  * done.
  */
@@ -1391,7 +1391,7 @@
 #define UART_RX_FLOW_EN_S  20
 
 /* UART_RX_TOUT_EN : R/W; bitpos: [21]; default: 0;
- * This is the enble bit for uart receiver's timeout
+ * This is the enable bit for uart receiver's timeout
  * function.
  */
 
@@ -1975,7 +1975,7 @@
 #define UART_HIGHPULSE_REG(i) (REG_UART_BASE(i) + 0x2c)
 
 /* UART_HIGHPULSE_MIN_CNT : RO; bitpos: [12:0]; default: 4095;
- * This register stores  the value of the maxinum duration time for the
+ * This register stores  the value of the maximum duration time for the
  * high level pulse. It is used in baud rate-detect
  * process.
  */
