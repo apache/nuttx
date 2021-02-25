@@ -157,9 +157,9 @@ int nxtask_exit(void)
 #ifdef CONFIG_SMP
   /* NOTE:
    * During nxtask_terminate(), enter_critical_section() will be called
-   * to deallocate tcb. However, this would aquire g_cpu_irqlock if
+   * to deallocate tcb. However, this would acquire g_cpu_irqlock if
    * rtcb->irqcount = 0, event though we are in critical section.
-   * To prevent from aquiring, increment rtcb->irqcount here.
+   * To prevent from acquiring, increment rtcb->irqcount here.
    */
 
   rtcb->irqcount++;

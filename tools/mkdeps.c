@@ -265,8 +265,8 @@ static void show_usage(const char *progname, const char *msg, int exitcode)
   fprintf(stderr, "  --obj-suffix <suffix>\n");
   fprintf(stderr, "    If an object path is provided, then the extension\n");
   fprintf(stderr, "    will be assumed to be .o.  This\n");
-  fprintf(stderr, "    default suffix can be overriden with this command\n");
-  fprintf(stderr, "    line option.\n");
+  fprintf(stderr, "    default suffix can be overridden with this\n");
+  fprintf(stderr, "    command line option.\n");
   fprintf(stderr, "  --winnative\n");
   fprintf(stderr, "    By default, a POSIX-style environment is assumed\n");
   fprintf(stderr, "    (e.g., Linux, Cygwin, etc.)  This option is\n");
@@ -434,12 +434,12 @@ static void parse_args(int argc, char **argv)
           /* This condition means "perform shquote for
            * g_cflags, but not g_cc or g_files".
            *
-           * It isn't safe to escape g_cc becuase, for some reasons,
+           * It isn't safe to escape g_cc because, for some reasons,
            * Makefile passes it as a single argument like:
            *
            *    $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS)
            *
-           * It isn't safe to escape g_files becuase
+           * It isn't safe to escape g_files because
            * do_dependency() uses them as bare filenames as well.
            * (In addition to passing them to system().)
            */

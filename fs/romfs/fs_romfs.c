@@ -196,7 +196,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* The full path exists -- but is the final component a file
    * or a directory?  Or some other Unix file type that is not
-   * appropriate in this contex.
+   * appropriate in this context.
    *
    * REVISIT: This logic should follow hard/soft link file
    * types.  At present, it returns the ENXIO.

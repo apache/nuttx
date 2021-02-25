@@ -61,7 +61,7 @@ def header_authors(header):
     results = list(filter(lambda s: s != '', results)) # remove empty strings
     return results
 
-# Search for an author name in Apache's commiters/non-commiters
+# Search for an author name in Apache's committers/non-committers
 # database. It will return (apacheID,name) if there's a match or
 # None if not. apacheID might be None if there's no Apache ID
 # for author
@@ -162,7 +162,7 @@ def analyze(j):
 
         file_contents = get_file(commit['blob'])
 
-        # skip inaccesible blobs (probably lived in a submodule)
+        # skip inaccessible blobs (probably lived in a submodule)
 
 
         if (not file_contents):

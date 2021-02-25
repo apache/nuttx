@@ -27,9 +27,9 @@ def parse_args():
         This file can get the call stack when you get the log with the
         register values from R0 to R15, together with the stack dump.\n
         Then you will get a file with name callstack.cmm, run this file
-        in Trace32, load the symbol accoring to the indication, the call
+        in Trace32, load the symbol according to the indication, the call
         stack will pop up.\n
-        Trace32 software is avaliable at: https://www.lauterbach.com
+        Trace32 software is available at: https://www.lauterbach.com
         """)
 
     parser.add_argument("-f", "--filename", action = "store",

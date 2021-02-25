@@ -1749,7 +1749,7 @@ int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
     {
       /* We manage the refcount the same for supplied and created
        * buffers so increment the supplied count so we can manage
-       * it as-if we crated it.
+       * it as-if we created it.
        */
 
       bt_buf_addref(buf);

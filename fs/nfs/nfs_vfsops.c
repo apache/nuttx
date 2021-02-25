@@ -1917,7 +1917,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   nmp->nm_fhsize      = nmp->nm_rpcclnt->rc_fhsize;
   nmp->nm_fh          = &nmp->nm_rpcclnt->rc_fh;
 
-  /* Get the file sytem info */
+  /* Get the file system info */
 
   ret = nfs_fsinfo(nmp);
   if (ret)

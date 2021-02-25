@@ -117,7 +117,7 @@ config ROUTE_FILEDIR
 	---help---
 		Provides the full path to location in the file system where routing
 		table will be accessed.  This is a string and should not include
-		any traling '/'.
+		any trailing '/'.
 
 config ROUTE_IPv6_CACHEROUTE
 	bool "In-memory IPv6 cache"

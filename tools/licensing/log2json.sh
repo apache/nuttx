@@ -63,7 +63,7 @@ getblobs "$1" > $out2
 
 if [ "$(jq '. | length' $out1)" != "$(jq '. | length' $out2)" ]; then
 	# TODO: handle this case, we get more than one blob when the file is moved
-	# to/from submodule and it difficults parsing. Also, the blob we get
+	# to/from submodule and it difficulties parsing. Also, the blob we get
 	# for when they file is in the submodule is not usable since it is possibly
 	# from the pointed repo.
 	echo "Log and blob list differ in size, probably a file which lived in a submodule"

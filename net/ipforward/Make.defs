@@ -36,7 +36,7 @@ ifeq ($(CONFIG_NET_STATISTICS),y)
 NET_CSRCS += ipfwd_dropstats.c
 endif
 
-# Include IP forwaring build support
+# Include IP forwarding build support
 
 DEPPATH += --dep-path ipforward
 VPATH += :ipforward

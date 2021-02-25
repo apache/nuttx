@@ -72,7 +72,7 @@ void pthread_initialize(void)
  *
  * Input Parameters:
  *  sem  - The semaphore to lock or unlock
- *  intr - false: ignore EINTR errors when locking; true tread EINTR as
+ *  intr - false: ignore EINTR errors when locking; true treat EINTR as
  *         other errors by returning the errno value
  *
  * Returned Value:
