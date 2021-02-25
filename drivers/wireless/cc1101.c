@@ -46,7 +46,8 @@
  *     ISM Region 2 (Complete America)
  *
  * Todo:
- *   - Extend max packet length up to 255 bytes or rather infinite < 4096 bytes
+ *   - Extend max packet length up to 255 bytes or rather
+ *     infinite < 4096 bytes
  *   - Power up/down modes
  *   - Sequencing between states or add protection for correct termination of
  *     various different state (so that CC1101 does not block in case of
@@ -83,7 +84,8 @@
  * how RSSI and LQI work:
  *
  *  1. A weak signal in the presence of noise may give low RSSI and low LQI.
- *  2. A weak signal in "total" absence of noise may give low RSSI and high LQI.
+ *  2. A weak signal in "total" absence of noise may give low RSSI and high
+ *     LQI.
  *  3. Strong noise (usually coming from an interferer) may give high RSSI
  *     and low LQI.
  *  4. A strong signal without much noise may give high RSSI and high LQI.
@@ -299,7 +301,8 @@ static int cc1101_file_open(FAR struct file *filep);
 static int cc1101_file_close(FAR struct file *filep);
 static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
                                 size_t buflen);
-static ssize_t cc1101_file_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t cc1101_file_write(FAR struct file *filep,
+                                 FAR const char *buffer,
                                  size_t buflen);
 static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup);
@@ -1130,7 +1133,8 @@ int cc1101_powerdown(FAR struct cc1101_dev_s *dev)
  *
  ****************************************************************************/
 
-int cc1101_setgdo(FAR struct cc1101_dev_s *dev, uint8_t pin, uint8_t function)
+int cc1101_setgdo(FAR struct cc1101_dev_s *dev, uint8_t pin,
+                  uint8_t function)
 {
   DEBUGASSERT(dev);
   DEBUGASSERT(pin <= CC1101_IOCFG0);
@@ -1174,30 +1178,36 @@ int cc1101_setgdo(FAR struct cc1101_dev_s *dev, uint8_t pin, uint8_t function)
 int cc1101_setrf(FAR struct cc1101_dev_s *dev,
                  FAR const struct c1101_rfsettings_s *settings)
 {
+  int ret;
+
   DEBUGASSERT(dev);
   DEBUGASSERT(settings);
 
-  if (cc1101_access(
-          dev, CC1101_FSCTRL1, (FAR uint8_t *)&settings->FSCTRL1, -11) < 0)
+  ret = cc1101_access(dev, CC1101_FSCTRL1,
+                      (FAR uint8_t *)&settings->FSCTRL1, -11);
+  if (ret < 0)
     {
       return -EIO;
     }
 
-  if (cc1101_access(dev, CC1101_FOCCFG, (FAR uint8_t *)&settings->FOCCFG, -5) <
-      0)
+  ret = cc1101_access(dev, CC1101_FOCCFG,
+                      (FAR uint8_t *)&settings->FOCCFG, -5);
+  if (ret < 0)
     {
       return -EIO;
     }
 
-  if (cc1101_access(dev, CC1101_FREND1, (FAR uint8_t *)&settings->FREND1, -6) <
-      0)
+  ret = cc1101_access(dev, CC1101_FREND1,
+                      (FAR uint8_t *)&settings->FREND1, -6);
+  if (ret < 0)
     {
       return -EIO;
     }
 
   /* Load Power Table */
 
-  if (cc1101_access(dev, CC1101_PATABLE, (FAR uint8_t *)settings->PA, -8) < 0)
+  ret = cc1101_access(dev, CC1101_PATABLE, (FAR uint8_t *)settings->PA, -8);
+  if (ret < 0)
     {
       return -EIO;
     }
@@ -1351,7 +1361,8 @@ int cc1101_read(FAR struct cc1101_dev_s *dev, FAR uint8_t *buf, size_t size)
 
   nbytes += 2; /* RSSI and LQI */
   buf[0] = nbytes;
-  cc1101_access(dev, CC1101_RXFIFO, buf + 1, (nbytes > size) ? size : nbytes);
+  cc1101_access(dev, CC1101_RXFIFO, buf + 1,
+                (nbytes > size) ? size : nbytes);
 
   /* Flush remaining bytes, if there is no room to receive or if there is a
    * BAD CRC
