@@ -214,7 +214,7 @@ SECTIONS
   } >rtc_iram_seg
 
   /* This section is required to skip rtc.text area because the text and
-   * data segements reflect the same address space on different buses.
+   * data segments reflect the same address space on different buses.
    */
 
   .rtc.dummy :

@@ -417,7 +417,7 @@ int bl602_timer_initialize(FAR const char *devpath, int timer)
                                  slelect */
 
   timstr.count_mode     = TIMER_COUNT_PRELOAD; /* Timer count mode */
-  timstr.clock_division = TIMER_CLK_DIV;       /* Timer clock divison value */
+  timstr.clock_division = TIMER_CLK_DIV;       /* Timer clock division value */
   timstr.match_val0     = TIMER_MAX_VALUE;     /* Timer match 0 value 0 */
   timstr.match_val1     = TIMER_MAX_VALUE;     /* Timer match 1 value 0 */
   timstr.match_val2     = TIMER_MAX_VALUE;     /* Timer match 2 value 0 */

@@ -44,7 +44,7 @@
  * licensed RTL code from the OpenMSP430 project on opencores.org.
  */
 
-/* TimerA offet definitions */
+/* TimerA offset definitions */
 
 #define NR5_TIMERA_TACTL_OFFSET           0x00
 #define NR5_TIMERA_TAR_OFFSET             0x04

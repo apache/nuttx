@@ -130,7 +130,7 @@ extern "C"
  *   cmp_no    - TIMER comparator ID type.
  *
  * Returned Value:
- *   Match comapre register value
+ *   Match compare register value
  *
  ****************************************************************************/
 
@@ -145,7 +145,7 @@ uint32_t bl602_timer_getcompvalue(uint8_t timer_ch, uint8_t cmp_no);
  * Input Parameters:
  *   timer_ch - TIMER channel type.
  *   cmp_no   - TIMER comparator ID type.
- *   val     - TIMER match comapre register value.
+ *   val     - TIMER match compare register value.
  *
  * Returned Value:
  *   None
@@ -330,7 +330,7 @@ void bl602_timer_disable(uint8_t timer_ch);
  * Input Parameters:
  *   timer_ch - TIMER channel type.
  *   int_type - TIMER interrupt type.
- *   int_mask - TIMER interrupt mask value:1:disbale interrupt.0:enable
+ *   int_mask - TIMER interrupt mask value:1:disable interrupt.0:enable
  *              interrupt.
  *
  * Returned Value:
@@ -368,7 +368,7 @@ void bl602_wdt_set_clock(uint8_t clk_src, uint8_t div);
  *   None.
  *
  * Returned Value:
- *   Watchdog match comapre register value.
+ *   Watchdog match compare register value.
  *
  ****************************************************************************/
 

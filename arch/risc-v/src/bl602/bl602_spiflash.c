@@ -246,7 +246,7 @@ static ssize_t bl602_bread(FAR struct mtd_dev_s *dev, off_t startblock,
  *   buffer     - data buffer pointer
  *
  * Returned Value:
- *   Writen block number if success or a negative value if fail.
+ *   Written block number if success or a negative value if fail.
  *
  ****************************************************************************/
 

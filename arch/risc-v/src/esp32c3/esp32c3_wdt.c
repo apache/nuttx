@@ -432,7 +432,7 @@ static void esp32c3_wdt_stop(struct esp32c3_wdt_dev_s *dev)
  *   TRM recommends to change any WDT register through this sequence:
  *   - Disable WP
  *   - Do the op
- *   - Reenable WP
+ *   - Re-enable WP
  *
  * Parameters:
  *   dev           - Pointer to the driver state structure.
@@ -461,7 +461,7 @@ static void esp32c3_wdt_enablewp(struct esp32c3_wdt_dev_s *dev)
  *   TRM recommends to change any WDT register through this sequence:
  *   - Disable WP
  *   - Do the op
- *   - Reenable WP
+ *   - Re-enable WP
  *
  * Parameters:
  *   dev           - Pointer to the driver state structure.

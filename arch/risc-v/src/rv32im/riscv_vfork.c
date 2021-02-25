@@ -199,7 +199,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
   sinfo("stacksize:%d stackutil:%d\n", stacksize, stackutil);
 
-  /* Make some feeble effort to perserve the stack contents.  This is
+  /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
    * content that will not work in the child context.  However, if the
    * user follows all of the caveats of vfork() usage, even this feeble
