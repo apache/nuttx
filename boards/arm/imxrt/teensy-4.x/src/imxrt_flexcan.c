@@ -50,31 +50,34 @@
 int imxrt_can_setup(void)
 {
   int ret;
-#ifdef CONFIG_IMXRT_FLEXCAN3
+#ifdef CONFIG_IMXRT_FLEXCAN1
   /* Call arm_caninitialize() to get an instance of the CAN interface */
 
-  ret = imxrt_caninitialize(3);
+  ret = imxrt_caninitialize(1);
   if (ret < 0)
     {
       canerr("ERROR: Failed to get CAN interface\n");
       return -ENODEV;
     }
-#elif CONFIG_IMXRT_FLEXCAN2
+
+#endif
+#ifdef CONFIG_IMXRT_FLEXCAN2
   ret = imxrt_caninitialize(2);
   if (ret < 0)
     {
       canerr("ERROR: Failed to get CAN interface\n");
       return -ENODEV;
     }
-#elif CONFIG_IMXRT_FLEXCAN1
-    ret = imxrt_caninitialize(1);
+
+#endif
+#ifdef CONFIG_IMXRT_FLEXCAN3
+  ret = imxrt_caninitialize(3);
   if (ret < 0)
     {
       canerr("ERROR: Failed to get CAN interface\n");
       return -ENODEV;
     }
-#else
-  return -ENODEV;
+
 #endif
   UNUSED(ret);
   return OK;
