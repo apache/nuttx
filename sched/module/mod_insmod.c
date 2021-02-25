@@ -185,7 +185,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
   if (ret != 0)
     {
       berr("ERROR: Failed to initialize to load module: %d\n", ret);
-      goto errout_with_lock;
+      goto errout_with_loadinfo;
     }
 
   /* Allocate a module registry entry to hold the module data */
