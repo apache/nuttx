@@ -39,6 +39,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/signal.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/can.h>
 
@@ -78,12 +79,12 @@
 #define FLAGEFF                     (1 << 31) /* Extended frame format */
 #define FLAGRTR                     (1 << 30) /* Remote transmission request */
 
-#define RXMBCOUNT                   10
-#define TXMBCOUNT                   4
+#define RXMBCOUNT                   CONFIG_IMXRT_FLEXCAN_RXMB
+#define TXMBCOUNT                   (CONFIG_IMXRT_FLEXCAN_TXMB + 1)
 #define TOTALMBCOUNT                RXMBCOUNT + TXMBCOUNT
 
 #define IFLAG1_RX                   ((1 << RXMBCOUNT)-1)
-#define IFLAG1_TX                   (((1 << TXMBCOUNT)-1) << RXMBCOUNT)
+#define IFLAG1_TX                   (((1 << TXMBCOUNT)-2) << RXMBCOUNT)
 
 #define CAN_FIFO_NE                 (1 << 5)
 #define CAN_FIFO_OV                 (1 << 6)
@@ -125,10 +126,22 @@
 #define TX_TIMEOUT_WQ
 #endif
 
+#if (CONFIG_IMXRT_FLEXCAN_RXMB + CONFIG_IMXRT_FLEXCAN_TXMB) > 13
+# error Only 13 MB are allowed to be used
+#endif
+
 /* Interrupt flags for RX fifo */
 #define IFLAG1_RXFIFO               (CAN_FIFO_NE | CAN_FIFO_WARN | CAN_FIFO_OV)
 
 static int peak_tx_mailbox_index_ = 0;
+
+static uint8_t mb_address[] =
+                              {
+                               0x10, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c,
+                               0x1e, 0x20, 0x22, 0x24, 0x26, 0x28, 0x2a,
+                               0x10, 0x19, 0x22, 0x2b, 0x34, 0x3d, 0x46,
+                               0x50, 0x59, 0x62, 0x6b, 0x74, 0x7d, 0x86
+                              };
 
 /****************************************************************************
  * Private Types
@@ -185,11 +198,7 @@ struct mb_s
 {
   union cs_e cs;
   union id_e id;
-#ifdef CONFIG_NET_CAN_CANFD
-  union data_e data[16];
-#else
-  union data_e data[2];
-#endif
+  union data_e data[];
 };
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
@@ -260,30 +269,24 @@ struct imxrt_driver_s
 {
   uint32_t base;                /* FLEXCAN base address */
   bool bifup;                   /* true:ifup false:ifdown */
+  bool canfd_capable;
+  int mb_address_offset;
 #ifdef TX_TIMEOUT_WQ
   WDOG_ID txtimeout[TXMBCOUNT]; /* TX timeout timer */
 #endif
-  struct work_s irqwork;        /* For deferring interrupt work to the wq */
-  struct work_s pollwork;       /* For deferring poll work to the work wq */
-#ifdef CONFIG_NET_CAN_CANFD
-  struct canfd_frame *txdesc;   /* A pointer to the list of TX descriptor */
-  struct canfd_frame *rxdesc;   /* A pointer to the list of RX descriptors */
-#else
-  struct can_frame *txdesc;     /* A pointer to the list of TX descriptor */
-  struct can_frame *rxdesc;     /* A pointer to the list of RX descriptors */
-#endif
+  struct work_s irqwork;            /* For deferring interrupt work to the wq */
+  struct work_s pollwork;           /* For deferring poll work to the work wq */
+  struct canfd_frame *txdesc_fd;    /* A pointer to the list of TX descriptor for FD frames */
+  struct canfd_frame *rxdesc_fd;    /* A pointer to the list of RX descriptors for FD frames */
+  struct can_frame *txdesc;         /* A pointer to the list of TX descriptor */
+  struct can_frame *rxdesc;         /* A pointer to the list of RX descriptors */
 
   /* This holds the information visible to the NuttX network */
 
   struct net_driver_s dev;      /* Interface understood by the network */
 
-  struct mb_s *rx;
-  struct mb_s *tx;
-
   struct flexcan_timeseg arbi_timing; /* Timing for arbitration phase */
-#ifdef CONFIG_NET_CAN_CANFD
   struct flexcan_timeseg data_timing; /* Timing for data phase */
-#endif
 
   const struct flexcan_config_s *config;
 
@@ -476,6 +479,8 @@ static uint32_t imxrt_waitmcr_change(uint32_t base,
 static uint32_t imxrt_waitesr2_change(uint32_t base,
                                        uint32_t mask,
                                        uint32_t target_state);
+static struct mb_s *flexcan_get_mb(FAR struct imxrt_driver_s *priv,
+                                    uint32_t mbi);
 
 /* Interrupt handling */
 
@@ -532,11 +537,13 @@ static void imxrt_reset(struct imxrt_driver_s *priv);
 
 static bool imxrt_txringfull(FAR struct imxrt_driver_s *priv)
 {
-  uint32_t mbi = 0;
+  uint32_t mbi = RXMBCOUNT;
+  struct mb_s *mb;
 
   while (mbi < TXMBCOUNT)
     {
-      if (priv->tx[mbi].cs.code != CAN_TXMB_DATAORREMOTE)
+      mb = flexcan_get_mb(priv, mbi);
+      if (mb->cs.code != CAN_TXMB_DATAORREMOTE)
         {
           return 0;
         }
@@ -588,14 +595,14 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
     {
       mbi  = ((getreg32(priv->base + IMXRT_CAN_ESR2_OFFSET) &
         CAN_ESR2_LPTM_MASK) >> CAN_ESR2_LPTM_SHIFT);
-      mbi -= RXMBCOUNT;
     }
 
-  mb_bit = 1 << (RXMBCOUNT + mbi);
+  mb_bit = 1 << mbi;
 
-  while (mbi < TXMBCOUNT)
+  while (mbi < TOTALMBCOUNT)
     {
-      if (priv->tx[mbi].cs.code != CAN_TXMB_DATAORREMOTE)
+      struct mb_s *mb = flexcan_get_mb(priv, mbi);
+      if (mb->cs.code != CAN_TXMB_DATAORREMOTE)
         {
           putreg32(mb_bit, priv->base + IMXRT_CAN_IFLAG1_OFFSET);
           break;
@@ -605,7 +612,7 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
       mbi++;
     }
 
-  if (mbi == TXMBCOUNT)
+  if (mbi == TOTALMBCOUNT)
     {
       nwarn("No TX MB available mbi %" PRIi32 "\r\n", mbi);
       NETDEV_TXERRORS(&priv->dev);
@@ -655,7 +662,7 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 
   union cs_e cs;
   cs.code = CAN_TXMB_DATAORREMOTE;
-  struct mb_s *mb = &priv->tx[mbi];
+  struct mb_s *mb = flexcan_get_mb(priv, mbi);
   mb->cs.code = CAN_TXMB_INACTIVE;
 
   if (priv->dev.d_len == sizeof(struct can_frame))
@@ -709,6 +716,16 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 #endif
 
   mb->cs = cs; /* Go. */
+
+  /* Errata ER005829 step 8: Write twice into the first TX MB
+   * Errata mentions writng 0x8 value, but this one couses
+   * the ESR2_LPTM register to choose the reserved MB for
+   * transmiting the package, hence we write 0x3
+   */
+
+  struct mb_s *buffer = flexcan_get_mb(priv, RXMBCOUNT);
+  buffer->cs.code = 0x3;
+  buffer->cs.code = 0x3;
 
   regval = getreg32(priv->base + IMXRT_CAN_IMASK1_OFFSET);
   regval |= mb_bit;
@@ -779,15 +796,12 @@ static int imxrt_txpoll(struct net_driver_s *dev)
            * not, return a non-zero value to terminate the poll.
            */
 
-          if ((getreg32(priv->base + IMXRT_CAN_ESR2_OFFSET) &
+          if (!((getreg32(priv->base + IMXRT_CAN_ESR2_OFFSET) &
               (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
-              (CAN_ESR2_IMB | CAN_ESR2_VPS))
-            {
-              if (!imxrt_txringfull(priv))
+              (CAN_ESR2_IMB | CAN_ESR2_VPS)) || (imxrt_txringfull(priv)))
                 {
                   return -EBUSY;
                 }
-            }
         }
     }
 
@@ -818,23 +832,40 @@ static int imxrt_txpoll(struct net_driver_s *dev)
 static void imxrt_receive(FAR struct imxrt_driver_s *priv,
                             uint32_t flags)
 {
-  uint32_t mb_index;
+  uint32_t mbi;
+  uint32_t mbj;
   struct mb_s *rf;
-#ifdef CONFIG_NET_CAN_CANFD
+# ifdef CONFIG_NET_CAN_CANFD
   uint32_t *frame_data_word;
   uint32_t i;
-#endif
+# endif
+  uint32_t f;
 
-  while ((mb_index = arm_lsb(flags)) != 32)
+  while ((f = flags) != 0)
     {
-      rf = &priv->rx[mb_index];
+      mbj = mbi = arm_lsb(f);
+      rf = flexcan_get_mb(priv, mbi);
+      uint32_t t = rf->cs.time_stamp;
+      while ((f &= ~(1 << mbj)) != 0)
+        {
+          mbj = arm_lsb(f);
+          struct mb_s *rf_next = flexcan_get_mb(priv, mbj);
+          uint16_t t_next = rf_next->cs.time_stamp;
+          if ((int16_t)(t - t_next) > 0)
+            {
+              t = t_next;
+              mbi = mbj;
+            }
+        }
+
+      rf = flexcan_get_mb(priv, mbi);
 
       /* Read the frame contents */
 
 #ifdef CONFIG_NET_CAN_CANFD
       if (rf->cs.edl) /* CAN FD frame */
         {
-        struct canfd_frame *frame = (struct canfd_frame *)priv->rxdesc;
+        struct canfd_frame *frame = (struct canfd_frame *)priv->rxdesc_fd;
 
           if (rf->cs.ide)
             {
@@ -862,7 +893,7 @@ static void imxrt_receive(FAR struct imxrt_driver_s *priv,
 
           /* Clear MB interrupt flag */
 
-          putreg32(1 << mb_index,
+          putreg32(1 << mbi,
                    priv->base + IMXRT_CAN_IFLAG1_OFFSET);
 
           /* Copy the buffer pointer to priv->dev..  Set amount of data
@@ -899,7 +930,7 @@ static void imxrt_receive(FAR struct imxrt_driver_s *priv,
 
           /* Clear MB interrupt flag */
 
-          putreg32(1 << mb_index,
+          putreg32(1 << mbi,
                    priv->base + IMXRT_CAN_IFLAG1_OFFSET);
 
           /* Copy the buffer pointer to priv->dev..  Set amount of data
@@ -923,9 +954,16 @@ static void imxrt_receive(FAR struct imxrt_driver_s *priv,
        * queue is not full.
        */
 
-      priv->dev.d_buf = (uint8_t *)priv->txdesc;
+      if (priv->canfd_capable)
+        {
+          priv->dev.d_buf = (uint8_t *)priv->txdesc_fd;
+        }
+      else
+        {
+          priv->dev.d_buf = (uint8_t *)priv->txdesc;
+        }
 
-      flags &= ~(1 << mb_index);
+      flags &= ~(1 << mbi);
 
       /* Reread interrupt flags and process them in this loop */
 
@@ -1241,6 +1279,13 @@ static uint32_t imxrt_waitesr2_change(uint32_t base, uint32_t mask,
   return false;
 }
 
+static struct mb_s *flexcan_get_mb(FAR struct imxrt_driver_s *priv,
+                                    uint32_t mbi)
+{
+  return (struct mb_s *)(priv->base +
+                        (mb_address[priv->mb_address_offset + mbi] << 3));
+}
+
 /****************************************************************************
  * Function: imxrt_ifup
  *
@@ -1270,16 +1315,18 @@ static int imxrt_ifup(struct net_driver_s *dev)
     }
 
   priv->bifup = true;
-
-#ifdef CONFIG_NET_CAN_CANFD
-  priv->txdesc = (struct canfd_frame *)&g_tx_pool;
-  priv->rxdesc = (struct canfd_frame *)&g_rx_pool;
-#else
   priv->txdesc = (struct can_frame *)&g_tx_pool;
   priv->rxdesc = (struct can_frame *)&g_rx_pool;
-#endif
-
-  priv->dev.d_buf = (uint8_t *)priv->txdesc;
+  if (priv->canfd_capable)
+    {
+      priv->txdesc_fd = (struct canfd_frame *)&g_tx_pool;
+      priv->rxdesc_fd = (struct canfd_frame *)&g_rx_pool;
+      priv->dev.d_buf = (uint8_t *)priv->txdesc_fd;
+    }
+  else
+    {
+      priv->dev.d_buf = (uint8_t *)priv->txdesc;
+    }
 
   /* Set interrupts */
 
@@ -1434,13 +1481,17 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd,
               (struct can_ioctl_data_s *)((uintptr_t)arg);
           req->arbi_bitrate = priv->arbi_timing.bitrate / 1000; /* kbit/s */
           req->arbi_samplep = priv->arbi_timing.samplep;
-#ifdef CONFIG_NET_CAN_CANFD
-          req->data_bitrate = priv->data_timing.bitrate / 1000; /* kbit/s */
-          req->data_samplep = priv->data_timing.samplep;
-#else
-          req->data_bitrate = 0;
-          req->data_samplep = 0;
-#endif
+          if (priv->canfd_capable)
+            {
+              req->data_bitrate = priv->data_timing.bitrate / 1000; /* kbit/s */
+              req->data_samplep = priv->data_timing.samplep;
+            }
+          else
+            {
+              req->data_bitrate = 0;
+              req->data_samplep = 0;
+            }
+
           ret = OK;
         }
         break;
@@ -1463,29 +1514,32 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd,
               ret = -EINVAL;
             }
 
-#ifdef CONFIG_NET_CAN_CANFD
-          struct flexcan_timeseg data_timing;
-          data_timing.bitrate = req->data_bitrate * 1000;
-          data_timing.samplep = req->data_samplep;
+          if (priv->canfd_capable)
+          {
+            struct flexcan_timeseg data_timing;
+            data_timing.bitrate = req->data_bitrate * 1000;
+            data_timing.samplep = req->data_samplep;
 
-          if (ret == OK && imxrt_bitratetotimeseg(&data_timing, 10, 1))
-            {
-              ret = OK;
-            }
-          else
-            {
-              ret = -EINVAL;
-            }
-#endif
+            if (ret == OK && imxrt_bitratetotimeseg(&data_timing, 10, 1))
+              {
+                ret = OK;
+              }
+            else
+              {
+                ret = -EINVAL;
+              }
+          }
 
           if (ret == OK)
             {
               /* Reset CAN controller and start with new timings */
 
               priv->arbi_timing = arbi_timing;
-#ifdef CONFIG_NET_CAN_CANFD
-              priv->data_timing = data_timing;
-#endif
+              if (priv->canfd_capable)
+              {
+                priv->data_timing = data_timing;
+              }
+
               imxrt_ifup(dev);
             }
         }
@@ -1546,69 +1600,82 @@ static int imxrt_initialize(struct imxrt_driver_s *priv)
       return -1;
     }
 
-#ifndef CONFIG_NET_CAN_CANFD
-  regval  = getreg32(priv->base + IMXRT_CAN_CTRL1_OFFSET);
-  regval &= ~(CAN_CTRL1_PRESDIV_MASK | CAN_CTRL1_PROPSEG_MASK |
-              CAN_CTRL1_PSEG1_MASK | CAN_CTRL1_PSEG2_MASK |
-              CAN_CTRL1_RJW_MASK);
-  regval |= CAN_CTRL1_PRESDIV(priv->arbi_timing.presdiv) | /* Prescaler divisor factor */
-            CAN_CTRL1_PROPSEG(priv->arbi_timing.propseg) | /* Propagation segment */
-            CAN_CTRL1_PSEG1(priv->arbi_timing.pseg1) |     /* Phase buffer segment 1 */
-            CAN_CTRL1_PSEG2(priv->arbi_timing.pseg2) |     /* Phase buffer segment 2 */
-            CAN_CTRL1_RJW(1);                              /* Resynchronization jump width */
-  putreg32(regval, priv->base + IMXRT_CAN_CTRL1_OFFSET);
-
-#else
-  regval  = getreg32(priv->base + IMXRT_CAN_CBT_OFFSET);
-  regval &= ~(CAN_CBT_EPRESDIV_MASK | CAN_CBT_EPROPSEG_MASK |
-              CAN_CBT_EPSEG1_MASK | CAN_CBT_EPSEG2_MASK |
-              CAN_CBT_ERJW_MASK);
-  regval |= CAN_CBT_BTF |                                 /* Enable extended bit timing
-                                                           * configurations for CAN-FD for setting up
-                                                           * separately nominal and data phase */
-            CAN_CBT_EPRESDIV(priv->arbi_timing.presdiv) | /* Prescaler divisor factor */
-            CAN_CBT_EPROPSEG(priv->arbi_timing.propseg) | /* Propagation segment */
-            CAN_CBT_EPSEG1(priv->arbi_timing.pseg1) |     /* Phase buffer segment 1 */
-            CAN_CBT_EPSEG2(priv->arbi_timing.pseg2) |     /* Phase buffer segment 2 */
-            CAN_CBT_ERJW(1);                              /* Resynchronization jump width */
-  putreg32(regval, priv->base + IMXRT_CAN_CBT_OFFSET);
-
-  /* Enable CAN FD feature */
-
-  regval  = getreg32(priv->base + IMXRT_CAN_MCR_OFFSET);
-  regval |= CAN_MCR_FDEN;
-  putreg32(regval, priv->base + IMXRT_CAN_MCR_OFFSET);
-
-  regval  = getreg32(priv->base + IMXRT_CAN_FDCBT_OFFSET);
-  regval &= ~(CAN_FDCBT_FPRESDIV_MASK | CAN_FDCBT_FPROPSEG_MASK |
-              CAN_FDCBT_FPSEG1_MASK | CAN_FDCBT_FPSEG2_MASK |
-              CAN_FDCBT_FRJW_MASK);
-  regval |= CAN_FDCBT_FPRESDIV(priv->data_timing.presdiv) |  /* Prescaler divisor factor of 1 */
-            CAN_FDCBT_FPROPSEG(priv->data_timing.propseg) |  /* Propagation
-                                                              * segment (only register that doesn't add 1) */
-            CAN_FDCBT_FPSEG1(priv->data_timing.pseg1) |      /* Phase buffer segment 1 */
-            CAN_FDCBT_FPSEG2(priv->data_timing.pseg2) |      /* Phase buffer segment 2 */
-            CAN_FDCBT_FRJW(priv->data_timing.pseg2);         /* Resynchorinzation jump width same as PSEG2 */
-  putreg32(regval, priv->base + IMXRT_CAN_FDCBT_OFFSET);
-
-  /* Additional CAN-FD configurations */
-
-  regval  = getreg32(priv->base + IMXRT_CAN_FDCTRL_OFFSET);
-
-  regval |= CAN_FDCTRL_FDRATE |     /* Enable bit rate switch in data phase of frame */
-            CAN_FDCTRL_TDCEN |      /* Enable transceiver delay compensation */
-            CAN_FDCTRL_TDCOFF(5) |  /* Setup 5 cycles for data phase sampling delay */
-            CAN_FDCTRL_MSBSR0(3);   /* Setup 64 bytes per message buffer (7 MB's) */
-  putreg32(regval, priv->base + IMXRT_CAN_FDCTRL_OFFSET);
-
-  regval  = getreg32(priv->base + IMXRT_CAN_CTRL2_OFFSET);
-  regval |= CAN_CTRL2_ISOCANFDEN;
-  putreg32(regval, priv->base + IMXRT_CAN_CTRL2_OFFSET);
-#endif
-
-  for (i = TXMBCOUNT; i < TOTALMBCOUNT; i++)
+  if (!priv->canfd_capable)
     {
-      priv->rx[i].id.w = 0x0;
+      regval  = getreg32(priv->base + IMXRT_CAN_CTRL1_OFFSET);
+      regval &= ~(CAN_CTRL1_PRESDIV_MASK | CAN_CTRL1_PROPSEG_MASK |
+                  CAN_CTRL1_PSEG1_MASK | CAN_CTRL1_PSEG2_MASK |
+                 CAN_CTRL1_RJW_MASK);
+      regval |= CAN_CTRL1_PRESDIV(priv->arbi_timing.presdiv) | /* Prescaler divisor factor */
+                CAN_CTRL1_PROPSEG(priv->arbi_timing.propseg) | /* Propagation segment */
+                CAN_CTRL1_PSEG1(priv->arbi_timing.pseg1) |     /* Phase buffer segment 1 */
+                CAN_CTRL1_PSEG2(priv->arbi_timing.pseg2) |     /* Phase buffer segment 2 */
+                CAN_CTRL1_RJW(1);                              /* Resynchronization jump width */
+      putreg32(regval, priv->base + IMXRT_CAN_CTRL1_OFFSET);
+    }
+  else
+    {
+      regval  = getreg32(priv->base + IMXRT_CAN_CBT_OFFSET);
+      regval &= ~(CAN_CBT_EPRESDIV_MASK | CAN_CBT_EPROPSEG_MASK |
+                  CAN_CBT_EPSEG1_MASK | CAN_CBT_EPSEG2_MASK |
+                  CAN_CBT_ERJW_MASK);
+      regval |= CAN_CBT_BTF |                                 /* Enable extended bit timing
+                                                               * configurations for CAN-FD for setting up
+                                                               * separately nominal and data phase */
+                CAN_CBT_EPRESDIV(priv->arbi_timing.presdiv) | /* Prescaler divisor factor */
+                CAN_CBT_EPROPSEG(priv->arbi_timing.propseg) | /* Propagation segment */
+                CAN_CBT_EPSEG1(priv->arbi_timing.pseg1) |     /* Phase buffer segment 1 */
+                CAN_CBT_EPSEG2(priv->arbi_timing.pseg2) |     /* Phase buffer segment 2 */
+                CAN_CBT_ERJW(1);                              /* Resynchronization jump width */
+      putreg32(regval, priv->base + IMXRT_CAN_CBT_OFFSET);
+
+      /* Enable CAN FD feature */
+
+      regval  = getreg32(priv->base + IMXRT_CAN_MCR_OFFSET);
+      regval |= CAN_MCR_FDEN;
+      putreg32(regval, priv->base + IMXRT_CAN_MCR_OFFSET);
+
+      regval  = getreg32(priv->base + IMXRT_CAN_FDCBT_OFFSET);
+      regval &= ~(CAN_FDCBT_FPRESDIV_MASK | CAN_FDCBT_FPROPSEG_MASK |
+                  CAN_FDCBT_FPSEG1_MASK | CAN_FDCBT_FPSEG2_MASK |
+                 CAN_FDCBT_FRJW_MASK);
+      regval |= CAN_FDCBT_FPRESDIV(priv->data_timing.presdiv) |  /* Prescaler divisor factor of 1 */
+                CAN_FDCBT_FPROPSEG(priv->data_timing.propseg) |  /* Propagation
+                                                                  * segment (only register that doesn't add 1) */
+                CAN_FDCBT_FPSEG1(priv->data_timing.pseg1) |      /* Phase buffer segment 1 */
+                CAN_FDCBT_FPSEG2(priv->data_timing.pseg2) |      /* Phase buffer segment 2 */
+                CAN_FDCBT_FRJW(priv->data_timing.pseg2);         /* Resynchorinzation jump width same as PSEG2 */
+      putreg32(regval, priv->base + IMXRT_CAN_FDCBT_OFFSET);
+
+      /* Additional CAN-FD configurations */
+
+      regval  = getreg32(priv->base + IMXRT_CAN_FDCTRL_OFFSET);
+
+      regval |= CAN_FDCTRL_FDRATE |     /* Enable bit rate switch in data phase of frame */
+                CAN_FDCTRL_TDCEN |      /* Enable transceiver delay compensation */
+                CAN_FDCTRL_TDCOFF(5) |  /* Setup 5 cycles for data phase sampling delay */
+                CAN_FDCTRL_MSBSR0(3) |  /* Setup 64 bytes per MB 0-6 */
+                CAN_FDCTRL_MSBSR1(3);   /* Setup 64 bytes per MB 7-13 */
+      putreg32(regval, priv->base + IMXRT_CAN_FDCTRL_OFFSET);
+
+      regval  = getreg32(priv->base + IMXRT_CAN_CTRL2_OFFSET);
+      regval |= CAN_CTRL2_ISOCANFDEN;
+      putreg32(regval, priv->base + IMXRT_CAN_CTRL2_OFFSET);
+    }
+
+  /*  Errata ER005829 step 7: Reserve first TX MB
+   *  Errata mentions writng 0x8 value, but this one couses
+   *  the ESR2_LPTM register to choose the reserved MB for
+   *  transmiting the package, hence we write 0x3
+   */
+
+      struct mb_s *buffer = flexcan_get_mb(priv, RXMBCOUNT);
+      buffer->cs.code = 0x3;
+
+  for (i = RXMBCOUNT + 1; i < TOTALMBCOUNT; i++)
+    {
+      struct mb_s *rx = flexcan_get_mb(priv, i);
+      rx->id.w = 0x0;
 
       /* FIXME sometimes we get a hard fault here */
     }
@@ -1622,14 +1689,15 @@ static int imxrt_initialize(struct imxrt_driver_s *priv)
 
   for (i = 0; i < RXMBCOUNT; i++)
     {
-      ninfo("Set MB%" PRIi32 " to receive %p\r\n", i, &priv->rx[i]);
-      priv->rx[i].cs.edl = 0x1;
-      priv->rx[i].cs.brs = 0x1;
-      priv->rx[i].cs.esi = 0x0;
-      priv->rx[i].cs.code = 4;
-      priv->rx[i].cs.srr = 0x0;
-      priv->rx[i].cs.ide = 0x1;
-      priv->rx[i].cs.rtr = 0x0;
+      struct mb_s *rx = flexcan_get_mb(priv, i);
+      ninfo("Set MB%" PRIi32 " to receive %p\r\n", i, rx);
+      rx->cs.edl = 0x1;
+      rx->cs.brs = 0x1;
+      rx->cs.esi = 0x0;
+      rx->cs.code = 4;
+      rx->cs.srr = 0x0;
+      rx->cs.ide = 0x1;
+      rx->cs.rtr = 0x0;
     }
 
   putreg32(IFLAG1_RX, priv->base + IMXRT_CAN_IFLAG1_OFFSET);
@@ -1686,12 +1754,13 @@ static void imxrt_reset(struct imxrt_driver_s *priv)
 
   for (i = 0; i < TOTALMBCOUNT; i++)
     {
-      ninfo("MB %" PRIi32 " %p\r\n", i, &priv->rx[i]);
-      ninfo("MB %" PRIi32 " %p\r\n", i, &priv->rx[i].id.w);
-      priv->rx[i].cs.cs = 0x0;
-      priv->rx[i].id.w = 0x0;
-      priv->rx[i].data[0].w00 = 0x0;
-      priv->rx[i].data[1].w00 = 0x0;
+      struct mb_s *rx = flexcan_get_mb(priv, i);
+      ninfo("MB %" PRIi32 " %p\r\n", i, rx);
+      ninfo("MB %" PRIi32 " %p\r\n", i, &rx->id.w);
+      rx->cs.cs = 0x0;
+      rx->id.w = 0x0;
+      rx->data[0].w00 = 0x0;
+      rx->data[1].w00 = 0x0;
     }
 
   regval  = getreg32(priv->base + IMXRT_CAN_MCR_OFFSET);
@@ -1756,18 +1825,13 @@ int imxrt_caninitialize(int intf)
       memset(priv, 0, sizeof(struct imxrt_driver_s));
       priv->base         = IMXRT_CAN1_BASE;
       priv->config       = &imxrt_flexcan1_config;
+      priv->canfd_capable = false;
+      priv->mb_address_offset = 0;
 
       /* Default bitrate configuration */
 
-#  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN1_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN1_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN1_DATA_SAMPLEP;
-#  else
       priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_BITRATE;
       priv->arbi_timing.samplep = CONFIG_FLEXCAN1_SAMPLEP;
-#  endif
       break;
 #endif
 
@@ -1779,18 +1843,13 @@ int imxrt_caninitialize(int intf)
       memset(priv, 0, sizeof(struct imxrt_driver_s));
       priv->base   = IMXRT_CAN2_BASE;
       priv->config = &imxrt_flexcan2_config;
+      priv->canfd_capable = false;
+      priv->mb_address_offset = 0;
 
       /* Default bitrate configuration */
 
-#  ifdef CONFIG_NET_CAN_CANFD
-      priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_ARBI_BITRATE;
-      priv->arbi_timing.samplep = CONFIG_FLEXCAN2_ARBI_SAMPLEP;
-      priv->data_timing.bitrate = CONFIG_FLEXCAN2_DATA_BITRATE;
-      priv->data_timing.samplep = CONFIG_FLEXCAN2_DATA_SAMPLEP;
-#  else
       priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_BITRATE;
       priv->arbi_timing.samplep = CONFIG_FLEXCAN2_SAMPLEP;
-#  endif
       break;
 #endif
 
@@ -1802,6 +1861,13 @@ int imxrt_caninitialize(int intf)
       memset(priv, 0, sizeof(struct imxrt_driver_s));
       priv->base   = IMXRT_CAN3_BASE;
       priv->config = &imxrt_flexcan3_config;
+#  ifdef CONFIG_NET_CAN_CANFD
+      priv->canfd_capable = true;
+      priv->mb_address_offset = 14;
+#  else
+      priv->canfd_capable = false;
+      priv->mb_address_offset = 0;
+#  endif
 
       /* Default bitrate configuration */
 
@@ -1828,14 +1894,15 @@ int imxrt_caninitialize(int intf)
       return -1;
     }
 
-#ifdef CONFIG_NET_CAN_CANFD
-  if (!imxrt_bitratetotimeseg(&priv->data_timing, 1, 1))
+  if (priv->canfd_capable)
     {
-      nerr("ERROR: Invalid CAN data phase timings please try another "
-           "sample point or refer to the reference manual\n");
-      return -1;
+      if (!imxrt_bitratetotimeseg(&priv->data_timing, 1, 1))
+        {
+          nerr("ERROR: Invalid CAN data phase timings please try another "
+               "sample point or refer to the reference manual\n");
+          return -1;
+        }
     }
-#endif
 
   imxrt_config_gpio(priv->config->tx_pin);
   imxrt_config_gpio(priv->config->rx_pin);
@@ -1865,9 +1932,6 @@ int imxrt_caninitialize(int intf)
     }
 
 #endif
-  priv->rx            = (struct mb_s *)(priv->base + IMXRT_CAN_MB_OFFSET);
-  priv->tx            = (struct mb_s *)(priv->base + IMXRT_CAN_MB_OFFSET +
-                          (sizeof(struct mb_s) * RXMBCOUNT));
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling imxrt_ifdown().
