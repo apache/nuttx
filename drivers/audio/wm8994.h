@@ -55,12 +55,12 @@
 #define WM8994_SWRST                                    0x00                                  /* SW Reset and ID */
 #define WM8994_ID                                       0x00                                  /* SW Reset and ID */
 
-#define WM8994_PM1                                      0x01                                  /* Power Mangement */
-#define WM8994_PM2                                      0x02                                  /* Power Mangement */
-#define WM8994_PM3                                      0x03                                  /* Power Mangement */
-#define WM8994_PM4                                      0x04                                  /* Power Mangement */
-#define WM8994_PM5                                      0x05                                  /* Power Mangement */
-#define WM8994_PM6                                      0x06                                  /* Power Mangement */
+#define WM8994_PM1                                      0x01                                  /* Power Management */
+#define WM8994_PM2                                      0x02                                  /* Power Management */
+#define WM8994_PM3                                      0x03                                  /* Power Management */
+#define WM8994_PM4                                      0x04                                  /* Power Management */
+#define WM8994_PM5                                      0x05                                  /* Power Management */
+#define WM8994_PM6                                      0x06                                  /* Power Management */
 
 #define WM8994_INPUT_MIXER1                             0x15                                  /* Input Mixer (1) */
 
@@ -361,7 +361,7 @@
  */
 
 #define WM8994_BIAS_ENA                           (1 << 0)                                    /* Bit 0: Enables the Normal bias current generator (for all analogue functions */
-#define   WM8994_BIAS_ENA_DISABLE                 (0)                                         /* Diabled */
+#define   WM8994_BIAS_ENA_DISABLE                 (0)                                         /* Disabled */
 #define   WM8994_BIAS_ENA_ENABLE                  WM8994_BIAS_ENA                             /* Enabled */
 #define WM8994_VMID_SEL_SHITF                     (1)                                         /* Bits 1-2: VMID Divider Enable and Select */
 #define   WM8994_VMID_SEL_DISABLE                 (0 << WM8994_VMID_SEL_SHIFT)                /* VMID disabled (for OFF mode) */
@@ -564,7 +564,7 @@
 #define   WM8994_IN1L_VOL_DEFAULT                (11 << 0)                                    /* -16.5dB to +30dB in 1.5dB steps */
 #define   WM8994_IN1L_VOL_MAX                    (31 << 0)                                    /* +30dB */
                                                                                               /* Bit 5: Reserved */
-#define WM8994_IN1L_ZC                           (1 << 6)                                     /* Bit 6: IN1L PGA Zero Cross Dectector */ 
+#define WM8994_IN1L_ZC                           (1 << 6)                                     /* Bit 6: IN1L PGA Zero Cross Detector */ 
 #define   WM8994_IN1L_ZC_NO                      (0)                                          /* Change gain immediately */
 #define   WM8994_IN1L_ZC_YES                     (WM8994_IN1L_ZC)                             /* Change gain on zero cross only */
 #define WM8994_IN1L_MUTE                         (1 << 7)                                     /* Bit 7: IN1L PGA Mute */
@@ -582,7 +582,7 @@
 #define   WM8994_IN2L_VOL_DEFAULT                (11 << WM8994_IN2L_VOL_SHIFT)                /* -16.5dB to +30dB in 1.5dB steps */
 #define   WM8994_IN2L_VOL_MAX                    (31 << WM8994_IN2L_VOL_SHIFT)                /* +30dB */
                                                                                               /* Bit 5: Reserved */
-#define WM8994_IN2L_ZC                           (1 << 6)                                     /* Bit 6: IN2L PGA Zero Cross Dectector */ 
+#define WM8994_IN2L_ZC                           (1 << 6)                                     /* Bit 6: IN2L PGA Zero Cross Detector */ 
 #define   WM8994_IN2L_ZC_NO                      (0)                                          /* Change gain immediately */
 #define   WM8994_IN2L_ZC_YES                     (WM8994_IN2L_ZC)                             /* Change gain on zero cross only */
 #define WM8994_IN2L_MUTE                         (1 << 7)                                     /* Bit 7: IN2L PGA Mute */
@@ -600,7 +600,7 @@
 #define   WM8994_IN1R_VOL_DEFAULT                (11 << WM8994_IN1R_VOL_SHIFT)                /* -16.5dB to +30dB in 1.5dB steps */
 #define   WM8994_IN1R_VOL_MAX                    (31 << WM8994_IN1R_VOL_SHIFT)                /* +30dB */
                                                                                               /* Bit 5: Reserved */
-#define WM8994_IN1R_ZC_SHIFT                     (6)                                          /* Bit 6: IN1R PGA Zero Cross Dectector */ 
+#define WM8994_IN1R_ZC_SHIFT                     (6)                                          /* Bit 6: IN1R PGA Zero Cross Detector */ 
 #define   WM8994_IN1R_ZC_NO                      (0)                                          /* Change gain immediately */
 #define   WM8994_IN1R_ZC_YES                     (1 << WM8994_IN1R_ZC_SHIFT)                  /* Change gain on zero cross only */
 #define WM8994_IN1R_MUTE_SHIFT                   (7)                                          /* Bit 7: IN1R PGA Mute */
@@ -619,7 +619,7 @@
 #define   WM8994_IN2R_VOL_DEFAULT                (11 << WM8994_IN2R_VOL_SHIFT)                /* -16.5dB to +30dB in 1.5dB steps */
 #define   WM8994_IN2R_VOL_MAX                    (31 << WM8994_IN2R_VOL_SHIFT)                /* +30dB */
                                                                                               /* Bit 5: Reserved */
-#define WM8994_IN2R_ZC_SHIFT                     (6)                                          /* Bit 6: IN2R PGA Zero Cross Dectector */ 
+#define WM8994_IN2R_ZC_SHIFT                     (6)                                          /* Bit 6: IN2R PGA Zero Cross Detector */ 
 #define   WM8994_IN2R_ZC_NO                      (0)                                          /* Change gain immediately */
 #define   WM8994_IN2R_ZC_YES                     (1 << WM8994_IN2R_ZC_SHIFT)                  /* Change gain on zero cross only */
 #define WM8994_IN2R_MUTE_SHIFT                         (7)                                    /* Bit 7: IN2R PGA Mute */

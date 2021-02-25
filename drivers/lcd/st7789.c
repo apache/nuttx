@@ -322,7 +322,7 @@ static void st7789_display(FAR struct st7789_dev_s *dev, bool on)
  * Name: st7789_setarea
  *
  * Description:
- *   Set the rectangular area for an upcomming read or write from RAM.
+ *   Set the rectangular area for an upcoming read or write from RAM.
  *
  ****************************************************************************/
 

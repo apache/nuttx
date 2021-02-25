@@ -136,7 +136,7 @@ static const struct file_operations i2schar_fops =
  *
  *   Also, the test buffer is simply freed.  This will work if this driver
  *   has the sole reference to buffer; in that case the buffer will be freed.
- *   Otherwise -- memory leak!  A more efficient design would recyle the
+ *   Otherwise -- memory leak!  A more efficient design would recycle the
  *   audio buffers.
  *
  ****************************************************************************/
@@ -173,7 +173,7 @@ static void i2schar_rxcallback(FAR struct i2s_dev_s *dev,
  *
  *   NOTE: The test buffer is simply freed.  This will work if this driver
  *   has the sole reference to buffer; in that case the buffer will be freed.
- *   Otherwise -- memory leak!  A more efficient design would recyle the
+ *   Otherwise -- memory leak!  A more efficient design would recycle the
  *   audio buffers.
  *
  ****************************************************************************/

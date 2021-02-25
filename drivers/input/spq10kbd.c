@@ -1008,7 +1008,7 @@ int spq10kbd_register(FAR struct i2c_master_s *i2c,
   priv->config    = config;  /* Save the board configuration */
   priv->tailndx   = 0;       /* Reset keypress buffer state */
   priv->headndx   = 0;
-  priv->crefs     = 0;       /* Reset referece count to 0 */
+  priv->crefs     = 0;       /* Reset reference count to 0 */
   priv->waiting   = false;
 
 #ifdef CONFIG_SPQ10KBD_DJOY

@@ -348,7 +348,7 @@ static int dht_parse_data(FAR struct dhtxx_dev_s *priv,
       data->temp = priv->raw_data[2];
 
       /* if data is not within sensor's measurement range,
-       * an error must have accured.
+       * an error must have occurred.
        */
 
       if (!dht_check_data(data, DHT11_MIN_HUM, DHT11_MAX_HUM,

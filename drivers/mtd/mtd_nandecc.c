@@ -115,7 +115,7 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
   sparesize = nandmodel_getsparesize(model);
 
   /* Store code in spare buffer, either the buffer provided by the caller or
-   * the scatch buffer in the raw NAND structure.
+   * the scratch buffer in the raw NAND structure.
    */
 
   if (!spare)
@@ -224,7 +224,7 @@ int nandecc_writepage(FAR struct nand_dev_s *nand, off_t block,
     }
 
   /* Store code in spare buffer, either the buffer provided by the caller or
-   * the scatch buffer in the raw NAND structure.
+   * the scratch buffer in the raw NAND structure.
    */
 
   if (!spare)

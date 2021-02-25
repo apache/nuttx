@@ -152,7 +152,7 @@ ifeq ($(CONFIG_I2C_MAX1704X),y)
 CSRCS += max1704x.c
 endif
 
-# Add the bq27426 I2C-based battery guage driver
+# Add the bq27426 I2C-based battery gauge driver
 
 ifeq ($(CONFIG_BQ27426),y)
 CSRCS += bq27426.c
@@ -186,7 +186,7 @@ endif
 
 endif
 
-# Include battery suport in the build
+# Include battery support in the build
 
 POWER_DEPPATH := --dep-path power
 POWER_VPATH := :power

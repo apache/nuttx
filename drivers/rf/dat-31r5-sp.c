@@ -168,7 +168,7 @@ static int dat31r5sp_close(FAR struct file *filep)
  * Name: dat31r5sp_write
  *
  * Description:
- *   Write is not permited, only IOCTLs.
+ *   Write is not permitted, only IOCTLs.
  ****************************************************************************/
 
 static ssize_t dat31r5sp_write(FAR struct file *filep,

@@ -446,7 +446,7 @@ int wtgahrs2_initialize(FAR const char *path, int devno)
 
   if (!path)
     {
-      snerr("Invaild path for serial interface\n");
+      snerr("Invalid path for serial interface\n");
       return -EINVAL;
     }
 

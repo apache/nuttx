@@ -1669,7 +1669,7 @@ static inline int usbhost_devinit(FAR struct usbhost_cdcmbim_s *priv)
 
   /* Check if we successfully initialized. We now have to be concerned
    * about asynchronous modification of crefs because the character
-   * driver has been registerd.
+   * driver has been registered.
    */
 
   if (ret >= 0)

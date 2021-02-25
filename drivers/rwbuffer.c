@@ -311,7 +311,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
           nblocks = 0;
         }
 
-      /* 4. We upate a portion at the end of the write buffer */
+      /* 4. We update a portion at the end of the write buffer */
 
       else if (wrbend >= startblock && wrbend <= newend)
         {

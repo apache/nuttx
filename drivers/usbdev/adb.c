@@ -1294,7 +1294,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
         }
     }
 #else
-  /* Composite should send only one resquest for USB_REQ_SETCONFIGURATION.
+  /* Composite should send only one request for USB_REQ_SETCONFIGURATION.
    * Hence ADB driver cannot submit to ep0; composite has to handle it.
    */
 
