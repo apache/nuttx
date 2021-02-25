@@ -188,6 +188,7 @@ void up_ack_irq(int irq);
 void up_copystate(uint64_t *dest, uint64_t *src);
 #else
 void up_copystate(uint32_t *dest, uint32_t *src);
+void up_copyfullstate(uint32_t *dest, uint32_t *src);
 #endif
 
 void up_sigdeliver(void);
