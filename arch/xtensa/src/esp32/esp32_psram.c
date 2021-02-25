@@ -243,8 +243,8 @@ typedef struct
   uint16_t addr_bit_len;       /* Address byte length */
   uint32_t *tx_data;           /* Point to send data buffer */
   uint16_t tx_data_bit_len;    /* Send data byte length. */
-  uint32_t *rx_data;           /* Point to recevie data buffer */
-  uint16_t rx_data_bit_len;    /* Recevie Data byte length. */
+  uint32_t *rx_data;           /* Point to receive data buffer */
+  uint16_t rx_data_bit_len;    /* Receive Data byte length. */
   uint32_t dummy_bit_len;
 } psram_cmd_t;
 
@@ -929,7 +929,7 @@ psram_2t_mode_enable(psram_spi_num_t spi_num)
 
   /* setp3: keep cs as high level
    *        send 128 cycles clock
-   *        send 1 bit high levle in ninth clock from the back to PSRAM SIO1
+   *        send 1 bit high level in ninth clock from the back to PSRAM SIO1
    */
 
   GPIO_OUTPUT_SET(CONFIG_D0WD_PSRAM_CS_IO, 1);
@@ -1751,7 +1751,7 @@ psram_cache_init(int psram_cache_mode, int vaddrmode)
    * 0 -->32k,(accord with the settings in cache_sram_mmu_set)
    */
 
-  /* get into unknow exception if not comment */
+  /* get into unknown exception if not comment */
 
   regval  = getreg32(DPORT_PRO_CACHE_CTRL1_REG);
   regval &= ~(DPORT_PRO_CMMU_SRAM_PAGE_MODE <<

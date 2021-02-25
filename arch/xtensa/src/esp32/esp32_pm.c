@@ -583,7 +583,7 @@ static int IRAM_ATTR esp32_sleep_start(uint32_t pd_flags)
 
   if (esp32_configure_cpu_freq(cur_freq) != OK)
     {
-      pwrwarn("WARNING: Faile to restore CPU frequency"
+      pwrwarn("WARNING: Failed to restore CPU frequency"
               "Configure cpu frequency %d.\n", cur_freq);
     }
 

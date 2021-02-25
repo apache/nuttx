@@ -465,7 +465,7 @@ static void wlan_tx_done(uint8_t ifidx, uint8_t *data,
  * Function: wlan_rx_done
  *
  * Description:
- *   WiFi RX done callback function. If this is called, it means receiveing
+ *   WiFi RX done callback function. If this is called, it means receiving
  *   packet.
  *
  * Input Parameters:

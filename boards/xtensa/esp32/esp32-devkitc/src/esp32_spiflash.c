@@ -70,7 +70,7 @@ int esp32_spiflash_init(void)
           return ret;
         }
 
-      finfo("Erase successed, initializaing again\n");
+      finfo("Erase successful, initializing again\n");
       ret = smart_initialize(0, mtd, NULL);
       if (ret < 0)
         {

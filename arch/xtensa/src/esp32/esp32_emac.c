@@ -688,7 +688,7 @@ static void emac_start(void)
  * Name: emac_init_dma
  *
  * Description:
- *   Initailize DMA of EMAC
+ *   Initialize DMA of EMAC
  *
  * Input Parameters:
  *   priv - Reference to the driver state structure
@@ -738,7 +738,7 @@ static void emac_init_dma(struct esp32_emac_s *priv)
  * Name: emac_deinit_dma
  *
  * Description:
- *   Deinitailize DMA of EMAC by force to free RX & TX buffer
+ *   Deinitialize DMA of EMAC by force to free RX & TX buffer
  *
  * Input Parameters:
  *   priv - Reference to the driver state structure

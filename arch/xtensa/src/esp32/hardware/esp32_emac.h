@@ -108,7 +108,7 @@
 
 #define EMAC_EOCCR_OFFSET     (0x804)
 
-/* Clock resource selection and enbale */
+/* Clock resource selection and enable */
 
 #define EMAC_ECCR_OFFSET      (0x808)
 
@@ -364,8 +364,8 @@
 #define EMAC_RA_E             (BIT(31)) /* Receive all frame */
 #define EMAC_SAF_E            (BIT(9))  /* Src address filter */
 #define EMAC_SARF_E           (BIT(8))  /* Src address reverse filter */
-#define EMAC_PCF_S            (6)       /* Proccess control frame shift */
-#define EMAC_PCF_V            (0x3)     /* Proccess control frame max value */
+#define EMAC_PCF_S            (6)       /* Process control frame shift */
+#define EMAC_PCF_V            (0x3)     /* Process control frame max value */
 #define EMAC_BF_D             (BIT(5))  /* Disable pass broadcast frame */
 #define EMAC_PMF_E            (BIT(4))  /* Pass multicast frame */
 #define EMAC_DAIF_E           (BIT(3))  /* multicast and unicast reverse filter */
@@ -441,8 +441,8 @@
 #define EMAC_RXDMA_SRI        (BIT(31)) /* Stop RI interrupt */
 #define EMAC_RXDMA_RER        (BIT(15)) /* Receive end of ring */
 #define EMAC_RXDMA_RCH        (BIT(14)) /* Second address chained */
-#define EMAC_RXDMA_RBS_S      (0)       /* Receive bufer size shift */
-#define EMAC_RXDMA_RBS_V      (0x1fff)  /* Receive bufer size max value */
+#define EMAC_RXDMA_RBS_S      (0)       /* Receive buffer size shift */
+#define EMAC_RXDMA_RBS_V      (0x1fff)  /* Receive buffer size max value */
 
 /* TX DMA description TDES0 register ****************************************/
 

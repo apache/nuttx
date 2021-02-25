@@ -347,7 +347,7 @@ static int rt_timer_thread(int argc, FAR char *argv[])
               kmm_free(timer);
             }
 
-          /* Enter critical for next scaning list */
+          /* Enter critical for next scanning list */
 
           flags = enter_critical_section();
 

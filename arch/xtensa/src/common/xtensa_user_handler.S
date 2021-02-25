@@ -120,7 +120,7 @@
  ****************************************************************************/
 
 /* Insert some waypoints for jumping beyond the signed 8-bit range of
- * conditional branch instructions, so the conditional branchces to specific
+ * conditional branch instructions, so the conditional branches to specific
  * exception handlers are not taken in the mainline. Saves some cycles in the
  * mainline.
  */

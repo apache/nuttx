@@ -50,7 +50,8 @@
  *
  * It gets even worse when both A and B are written: theoretically, a write
  * to a 32-byte cache line in A can be entirely undone because of a write to
- * a different addres in B that happens to be in the same 32-byte cache line.
+ * a different address in B that happens to be in the same 32-byte cache
+ * line.
  *
  * Because of these reasons, we do not allow double mappings at all. This,
  * however, has other implications that make supporting ranges not really
@@ -735,7 +736,7 @@ static int himem_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* Allocate the maping range */
+      /* Allocate the mapping range */
 
       case HIMEMIOC_ALLOC_MAP_RANGE:
         {
@@ -755,7 +756,7 @@ static int himem_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* Free the maping range */
+      /* Free the mapping range */
 
       case HIMEMIOC_FREE_MAP_RANGE:
         {

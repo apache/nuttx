@@ -789,7 +789,7 @@ extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
 #define IROM0_PAGES_START           64
 #define IROM0_PAGES_END             256
 
-/* MMU invaild value */
+/* MMU invalid value */
 
 #define INVALID_MMU_VAL             0x100
 

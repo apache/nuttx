@@ -608,7 +608,7 @@ static int    esp32_wdt_handler(int irq, FAR void *context, FAR void *arg)
  *
  * Description:
  *   Initialize the WDT watchdog timer.  The watchdog timer is initialized
- *   and registerd as 'devpath'.
+ *   and registered as 'devpath'.
  *
  * Input Parameters:
  *   devpath                 - The full path to the watchdog.  This should

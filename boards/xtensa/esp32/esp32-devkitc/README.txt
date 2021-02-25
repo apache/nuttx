@@ -237,7 +237,7 @@ Ethernet
       ESP32 GPIO          PHY Chip GPIO
         IO5        <-->      Reset_N
 
-Espressif has an offcial Ethernet development board:
+Espressif has an official Ethernet development board:
 
   https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-ethernet-kit.html
 
@@ -250,7 +250,7 @@ causes failing to bring the ESP32 chip up.
 =============
 
   ESP32 has 4 generic timers of 64 bits (2 from Group 0 and 2 from Group 1). They're
-  acessible as character drivers, the configuration along with a guidance on how
+  accessible as character drivers, the configuration along with a guidance on how
   to run the example and the description of the application level interface can be found here:
 
   https://nuttx.apache.org/docs/latest/components/drivers/character/timer.html
@@ -259,7 +259,7 @@ Watchdog Timers
 ===============
 
   ESP32 has 3 WDTs. 2 MWDTS from the Timers Module and 1 RWDT from the RTC Module
-  (Currently not supported yet). They're acessible as character drivers,
+  (Currently not supported yet). They're accessible as character drivers,
   The configuration along with a guidance on how to run the example and the description
   of the application level interface can be found here:
 

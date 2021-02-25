@@ -1396,7 +1396,7 @@ static int IRAM_ATTR esp32_mmap(FAR struct esp32_spiflash_s *priv,
  *
  * Input Parameters:
  *   spi - ESP32 SPI Flash chip data
- *   req - SPI Flash mapping requesting paramters
+ *   req - SPI Flash mapping requesting parameters
  *
  * Returned Value:
  *   None.
@@ -1738,7 +1738,7 @@ static ssize_t esp32_bread_decrypt(FAR struct mtd_dev_s *dev,
  *   buffer - data buffer pointer
  *
  * Returned Value:
- *   Writen bytes if success or a negative value if fail.
+ *   Written bytes if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -1799,7 +1799,7 @@ error_with_buffer:
  *   buffer     - data buffer pointer
  *
  * Returned Value:
- *   Writen block number if success or a negative value if fail.
+ *   Written block number if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -1843,7 +1843,7 @@ static ssize_t esp32_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
  *   buffer     - data buffer pointer
  *
  * Returned Value:
- *   Writen block number if success or a negative value if fail.
+ *   Written block number if success or a negative value if fail.
  *
  ****************************************************************************/
 
