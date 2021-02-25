@@ -98,7 +98,7 @@
 /* Ioctl commands supported by the upper half CAN driver.
  *
  * CANIOC_RTR:
- *   Description:    Send the given message as a remote request. On sucessful
+ *   Description:    Send the given message as a remote request. On successful
  *                   return, the passed message structure is updated with
  *                   the contents of the received message; i.e. the message
  *                   ID and the standard/extended ID indication bit stay the

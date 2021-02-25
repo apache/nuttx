@@ -78,14 +78,14 @@ typedef struct efuse_desc_s efuse_desc_t;
 /* The efuse_param is used by the application to inform which field(s)
  * will be passed to the ioctl() operation.
  *   - 'efuse_desc_t *field[]': contains one or more field and it
- *     it termined by a NULL to indicate there is no more fields.
+ *     it terminated by a NULL to indicate there is no more fields.
  *     NOTE: normally the application don't need to create these fields
  *           they are mapped inside an arch efuse table and referenced
  *           in a header file inside include/nuttx/efuse/ directory.
  *   - size: how many bits the field(s) use
  *   - data: an application side allocated buffer where the read operation
  *           will store the efuse bits, so the number of allocated bytes
- *           need to be enough to store all bits. For write operaton, this
+ *           need to be enough to store all bits. For write operation, this
  *           pointer contains the bits to be written.
  *
  *  FINAL NOTE: The bit order is architecture dependent (tested only on

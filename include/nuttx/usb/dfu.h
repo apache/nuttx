@@ -44,7 +44,7 @@
 #include <nuttx/usb/usbdev.h>
 
 /****************************************************************************
- * Public Functions Defintions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN

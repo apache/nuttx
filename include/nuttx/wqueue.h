@@ -266,8 +266,8 @@ enum work_evtype_e
   WORK_UDP_WRITEBUFFER,    /* Notify that UDP write buffer is empty */
   WORK_NETLINK_RESPONSE,   /* Notify that Netlink response is available */
   WORK_CAN_READAHEAD,      /* Notify that CAN read-ahead data is available */
-  WORK_USB_MSC_CONNECT,    /* Notify that an USB MSC connect occured */
-  WORK_USB_MSC_DISCONNECT  /* Notify that an USB MSC connect occured */
+  WORK_USB_MSC_CONNECT,    /* Notify that an USB MSC connect occurred */
+  WORK_USB_MSC_DISCONNECT  /* Notify that an USB MSC connect occurred */
 };
 
 /* This structure describes one notification and is provided as input to

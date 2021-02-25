@@ -178,7 +178,7 @@ size_t circbuf_used(FAR struct circbuf_s *circ);
  * Name: circbuf_space
  *
  * Description:
- *   Return the remaing space of the circular buffer.
+ *   Return the remaining space of the circular buffer.
  *
  * Input Parameters:
  *   circ  - Address of the circular buffer to be used.

@@ -68,7 +68,7 @@
  * Public Types
  ****************************************************************************/
 
-/* Intel HEX data steams are normally in big endian order.  The following
+/* Intel HEX data streams are normally in big endian order.  The following
  * enumeration selects other ordering.
  */
 

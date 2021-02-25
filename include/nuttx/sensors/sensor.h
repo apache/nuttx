@@ -167,7 +167,7 @@
 
 /* CO2
  * A sensor of this type returns the content of CO2 in the air
- * This vaule is in units (ppm-part per million).
+ * This value is in units (ppm-part per million).
  */
 
 #define SENSOR_TYPE_CO2                             18
@@ -345,7 +345,7 @@ struct sensor_event_gps     /* Type: Gps */
 struct sensor_event_uv      /* Type: Ultraviolet Light */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  float uvi;                /* the vaule range is 0 - 15 */
+  float uvi;                /* the value range is 0 - 15 */
 };
 
 struct sensor_event_noise   /* Type: Noise Loudness */
