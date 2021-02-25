@@ -172,7 +172,7 @@ int battery_gauge_register(FAR const char *devpath,
  *
  *   CONFIG_BATTERY_GAUGE - Upper half battery fuel gauge driver support
  *   CONFIG_I2C - I2C support
- *   CONFIG_BQ27426 - And the driver must be explictly selected.
+ *   CONFIG_BQ27426 - And the driver must be explicitly selected.
  *
  * Input Parameters:
  *   i2c - An instance of the I2C interface to use to communicate with the

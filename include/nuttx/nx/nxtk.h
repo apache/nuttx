@@ -179,7 +179,7 @@ int nxtk_block(NXTKWINDOW hfwnd, FAR void *arg);
  * Name: nxtk_synch
  *
  * Description:
- *   This interface can be used to sychronize the window client with the
+ *   This interface can be used to synchronize the window client with the
  *   NX server.  It really just implements an 'echo':  A synch message is
  *   sent from the window client to the server which then responds
  *   immediately by sending the NXEVENT_SYNCHED back to the windows client.

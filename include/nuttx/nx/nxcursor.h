@@ -45,7 +45,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions Defintions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /* The current software cursor implementation is only available under the

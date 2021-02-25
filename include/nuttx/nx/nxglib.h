@@ -395,7 +395,7 @@ bool nxgl_colorcmp(const nxgl_mxpixel_t color1[CONFIG_NX_NPLANES],
  * Description:
  *   In the general case, a line with width can be represented as a
  *   parallelogram with a triangle at the top and bottom.  Triangles and
- *   parallelograms are both degenerate versions of a trapeziod.  This
+ *   parallelograms are both degenerate versions of a trapezoid.  This
  *   function breaks a wide line into triangles and trapezoids.  This
  *   function also detects other degenerate cases:
  *

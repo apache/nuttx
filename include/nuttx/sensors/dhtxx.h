@@ -68,7 +68,7 @@ struct dhtxx_config_s
 
 enum dhtxx_status_e
 {
-  /* Timeout accured waiting for data. */
+  /* Timeout occurred waiting for data. */
 
   DHTXX_TIMEOUT,
 

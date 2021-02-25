@@ -63,7 +63,7 @@
 #define MAP_EXECUTABLE  (1 << 7)        /* Bit 7:  Mark it as an executable */
 #define MAP_LOCKED      (1 << 8)        /* Bit 8:  Lock pages mapped into memory */
 #define MAP_NORESERVE   (1 << 9)        /* Bit 9:  Do not reserve swap space for this mapping */
-#define MAP_POPULATE    (1 << 10)       /* Bit 10: opulate (prefault) page tables */
+#define MAP_POPULATE    (1 << 10)       /* Bit 10: populate (prefault) page tables */
 #define MAP_NONBLOCK    (1 << 11)       /* Bit 11: Do not block on IO */
 
 /* Failure return */

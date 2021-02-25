@@ -1,6 +1,6 @@
 /****************************************************************************
  * include/nuttx/net/neighbor.h
- * Definitions for use with IPv6 Neighor Table
+ * Definitions for use with IPv6 Neighbor Table
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

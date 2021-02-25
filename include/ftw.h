@@ -136,7 +136,7 @@ extern "C"
  * Input Parameters:
  *   path    - The 'root' of the directory hierarchy to descend
  *   fn      - The callback function to be invoked as each object in the
- *             heirarchy is encountered.
+ *             hierarchy is encountered.
  *   fdlimit - The fdlimit argument specifies the maximum number of directory
  *             streams or file descriptors or both available for use by ftw()
  *             while traversing the tree.The maximum depth of the directories
@@ -172,7 +172,7 @@ int ftw(FAR const char *path, ftw_cb_t fn, int fdlimit);
  *
  *   path    - The 'root' of the directory hierarchy to descend
  *   fn      - The callback function to be invoked as each object in the
- *             heirarchy is encountered.
+ *             hierarchy is encountered.
  *   fdlimit - The fdlimit argument specifies the maximum number of directory
  *             streams or file descriptors or both available for use by
  *             nftw() while traversing the tree.The maximum depth of the

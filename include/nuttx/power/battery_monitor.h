@@ -154,7 +154,7 @@ struct battery_monitor_voltage_s
    * Cell voltages are stored in microvolts (uV)
    * Cell voltages in this array should be ordered according to the
    * physical layout of cells in the system.  Driver should rearrange
-   * voltage values as necssary to present the user with a contiguous
+   * voltage values as necessary to present the user with a contiguous
    * list of cell voltages in the expected order.
    */
 
@@ -284,7 +284,7 @@ struct battery_monitor_operations_s
 
   int (*soc)(struct battery_monitor_dev_s *dev, b16_t *value);
 
-  /* Get the battery pack Couloumb count value */
+  /* Get the battery pack Coulomb count value */
 
   int (*coulombs)(struct battery_monitor_dev_s *dev, int *value);
 
@@ -389,7 +389,7 @@ int battery_monitor_register(FAR const char *devpath,
  *
  *   CONFIG_BATTERY_MONITOR - Upper half battery monitor driver support
  *   CONFIG_I2C - I2C support
- *   CONFIG_I2C_BQ769X0 - And the driver must be explictly selected.
+ *   CONFIG_I2C_BQ769X0 - And the driver must be explicitly selected.
  *
  * Input Parameters:
  *   i2c       - An instance of the I2C interface to use to communicate with
