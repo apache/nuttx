@@ -61,6 +61,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_AUDIO_I2SCHAR_RXTIMEOUT
@@ -88,22 +89,25 @@ struct i2schar_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2S callback function */
 
-static void    i2schar_rxcallback(FAR struct i2s_dev_s *dev,
-                 FAR struct ap_buffer_s *apb, FAR void *arg, int result);
-static void    i2schar_txcallback(FAR struct i2s_dev_s *dev,
-                 FAR struct ap_buffer_s *apb, FAR void *arg,
-                 int result);
+static void i2schar_rxcallback(FAR struct i2s_dev_s *dev,
+                               FAR struct ap_buffer_s *apb,
+                               FAR void *arg,
+                               int result);
+static void i2schar_txcallback(FAR struct i2s_dev_s *dev,
+                               FAR struct ap_buffer_s *apb,
+                               FAR void *arg,
+                               int result);
 
 /* Character driver methods */
 
 static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                            size_t buflen);
 static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
-
-static int     i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+                             size_t buflen);
+static int i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -348,14 +352,13 @@ errout_with_reference:
   return ret;
 }
 
-
-/************************************************************************************
+/****************************************************************************
  * Name: i2char_ioctl
  *
  * Description:
  *   Perform I2S device ioctl if exists
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
@@ -420,7 +423,8 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
 
   /* Allocate a I2S character device structure */
 
-  priv = (FAR struct i2schar_dev_s *)kmm_zalloc(sizeof(struct i2schar_dev_s));
+  size_t dev_size = sizeof(struct i2schar_dev_s);
+  priv = (FAR struct i2schar_dev_s *)kmm_zalloc(dev_size);
   if (priv)
     {
       /* Initialize the I2S character device structure */
@@ -446,7 +450,6 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
 
       return OK;
     }
-
 
   return -ENOMEM;
 }
