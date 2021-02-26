@@ -125,6 +125,7 @@
 #define KINETIS_CAN0_RXIMR13       (KINETIS_CAN0_BASE+KINETIS_CAN_RXIMR13_OFFSET)
 #define KINETIS_CAN0_RXIMR14       (KINETIS_CAN0_BASE+KINETIS_CAN_RXIMR14_OFFSET)
 #define KINETIS_CAN0_RXIMR15       (KINETIS_CAN0_BASE+KINETIS_CAN_RXIMR15_OFFSET)
+#define KINETIS_CAN0_RXIMR_COUNT   16      /* Individual Mask Registers Count */
 
 /* Register Bit Definitions *************************************************************************/
 
@@ -178,6 +179,8 @@
 #define CAN_CTRL1_CLKSRC           (1 << 13) /* Bit 13: CAN Engine Clock Source */
 #define CAN_CTRL1_ERRMSK           (1 << 14) /* Bit 14: Error Mask */
 #define CAN_CTRL1_BOFFMSK          (1 << 15) /* Bit 15: Bus Off Mask */
+#define CAN_CTRL1_TIMINGMSK        (0xFFFF << 16)
+                                             /* Bits 16-31: Timing Mask */
 #define CAN_CTRL1_PSEG2_SHIFT      (16)      /* Bits 16-18: Phase Segment 2 */
 #define CAN_CTRL1_PSEG2_MASK       (7 << CAN_CTRL1_PSEG2_SHIFT)
 #define CAN_CTRL1_PSEG2(x)         (((uint32_t)(((uint32_t)(x)) << 16)) & 0x70000)

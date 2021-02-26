@@ -103,6 +103,7 @@
 #  define S32K1XX_CAN_RXIMR29_OFFSET  0x08f4  /* R29 Individual Mask Registers */
 #  define S32K1XX_CAN_RXIMR30_OFFSET  0x08f8  /* R30 Individual Mask Registers */
 #  define S32K1XX_CAN_RXIMR31_OFFSET  0x08fc  /* R31 Individual Mask Registers */
+#define S32K1XX_CAN_RXIMR_COUNT       32      /* Individual Mask Registers Count */
 
 #define S32K1XX_CAN_CTRL1_PN_OFFSET   0x0b00  /* Pretended Networking Control 1 register */
 #define S32K1XX_CAN_CTRL2_PN_OFFSET   0x0b04  /* Pretended Networking Control 2 register */
@@ -387,6 +388,7 @@
 #define CAN_CTRL1_CLKSRC              (1 << 13) /* Bit 13: CAN Engine Clock Source */
 #define CAN_CTRL1_ERRMSK              (1 << 14) /* Bit 14: Error Mask */
 #define CAN_CTRL1_BOFFMSK             (1 << 15) /* Bit 15: Bus Off Mask */
+#define CAN_CTRL1_TIMINGMSK           (0xFFFF << 16)
 #define CAN_CTRL1_PSEG2(x)            (((uint32_t)(((uint32_t)(x)) << 16)) & 0x70000)
 #define CAN_CTRL1_PSEG1(x)            (((uint32_t)(((uint32_t)(x)) << 19)) & 0x380000)
 #define CAN_CTRL1_RJW(x)              (((uint32_t)(((uint32_t)(x)) << 22)) & 0xC00000)
