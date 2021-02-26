@@ -85,5 +85,21 @@ int esp32c3_gpio_init(void);
 int board_wdt_init(void);
 #endif
 
+/****************************************************************************
+ * Name: board_tim_init
+ *
+ * Description:
+ *   Configure the timer driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIMER
+int board_tim_init(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_SRC_ESP32C3_DEVKIT_H */

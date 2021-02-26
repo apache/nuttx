@@ -157,6 +157,10 @@ config ESP32C3_UART
 	bool
 	default n
 
+config ESP32C3_TIMER
+	bool
+	default n
+
 config ESP32C3_WDT
 	bool
 	default n
@@ -177,6 +181,20 @@ config ESP32C3_UART1
 	default n
 	select ESP32C3_UART
 	select UART1_SERIALDRIVER
+
+config ESP32C3_TIMER0
+	bool "54-bit Timer 0 (Group 0 Timer 0)"
+	default n
+	select ESP32C3_TIMER
+	---help---
+		Enables Timer 0
+
+config ESP32C3_TIMER1
+	bool "54-bit Timer 0 (Group 1 Timer 0)"
+	default n
+	select ESP32C3_TIMER
+	---help---
+		Enables Timer 1
 
 config ESP32C3_MWDT0
 	bool "Main System Watchdog Timer (Group 0)"

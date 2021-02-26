@@ -65,3 +65,10 @@ ifeq ($(CONFIG_WATCHDOG),y)
 CHIP_CSRCS += esp32c3_wdt_lowerhalf.c
 endif
 endif
+
+ifeq ($(CONFIG_ESP32C3_TIMER),y)
+CHIP_CSRCS += esp32c3_tim.c
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += esp32c3_tim_lowerhalf.c
+endif
+endif

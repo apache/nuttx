@@ -69,6 +69,12 @@
 #define TIMG_WDT_RESET_LENGTH_1600_NS 6
 #define TIMG_WDT_RESET_LENGTH_3200_NS 7
 
+/* Maximum value in the high 22 bits from timer counters */
+
+#define LOW_32_MASK                0xffffffff
+#define LOW_22_MASK                0x3fffff
+#define SHIFT_32                   32
+
 #define TIMG_T0CONFIG_REG(i)          (REG_TIMG_BASE(i) + 0x0000)
 
 /* TIMG_T0_EN : R/W ;bitpos:[31] ;default: 1'h0 ; */
