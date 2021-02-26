@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_bringup.c
+ * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_timer.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,18 +24,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <syslog.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <sys/types.h>
-#include <syslog.h>
 #include <debug.h>
-#include <stdio.h>
 
-#include <nuttx/fs/fs.h>
+#include "esp32c3_tim_lowerhalf.h"
+#include "esp32c3_tim.h"
 
 #include "esp32c3-devkit.h"
 
@@ -48,82 +41,43 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_bringup
+ * Name: board_tim_init
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Configure the timer driver.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int esp32c3_bringup(void)
+int board_tim_init(void)
 {
-  int ret;
+  int ret = OK;
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
+#ifdef CONFIG_ESP32C3_TIMER0
+  ret = esp32c3_timer_initialize("/dev/timer0", ESP32C3_TIMER0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_FS_TMPFS
-  /* Mount the tmpfs file system */
-
-  ret = mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
-             CONFIG_LIBC_TMPDIR, ret);
-    }
-#endif
-
-#ifdef CONFIG_DEV_GPIO
-  ret = esp32c3_gpio_init();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
       return ret;
     }
-#endif
+#endif /* CONFIG_ESP32C3_TIMER0 */
 
-#ifdef CONFIG_WATCHDOG
-  /* Configure watchdog timer */
-
-  ret = board_wdt_init();
+#ifdef CONFIG_ESP32C3_TIMER1
+  ret = esp32c3_timer_initialize("/dev/timer1", ESP32C3_TIMER1);
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to initialize watchdog drivers: %d\n",
+             "ERROR: Failed to initialize timer driver: %d\n",
              ret);
+      return ret;
     }
-#endif
+#endif /* CONFIG_ESP32C3_TIMER1 */
 
-#ifdef CONFIG_TIMER
-  /* Configure timer timer */
-
-  ret = board_tim_init();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer drivers: %d\n",
-             ret);
-    }
-#endif
-
-  /* If we got here then perhaps not all initialization was successful, but
-   * at least enough succeeded to bring-up NSH with perhaps reduced
-   * capabilities.
-   */
-
-  UNUSED(ret);
-  return OK;
+  return ret;
 }
+
