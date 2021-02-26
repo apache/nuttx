@@ -49,7 +49,7 @@
 #include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -62,7 +62,7 @@
 
 void stm32_ltdcreset(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_ltdcinitialize
  *
  * Description:
@@ -75,7 +75,7 @@ void stm32_ltdcreset(void);
 
 int stm32_ltdcinitialize(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_ltdcuninitialize
  *
  * Description:
@@ -85,7 +85,7 @@ int stm32_ltdcinitialize(void);
 
 void stm32_ltdcuninitialize(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_ltdcgetvplane
  *
  * Description:
@@ -105,8 +105,8 @@ FAR struct fb_vtable_s *stm32_ltdcgetvplane(int vplane);
  * Name: stm32_lcd_backlight
  *
  * Description:
- *   If CONFIG_STM32F7_LCD_BACKLIGHT is defined, then the board-specific logic
- *   must provide this interface to turn the backlight on and off.
+ *   If CONFIG_STM32F7_LCD_BACKLIGHT is defined, then the board-specific
+ *   logic must provide this interface to turn the backlight on and off.
  *
  ****************************************************************************/
 

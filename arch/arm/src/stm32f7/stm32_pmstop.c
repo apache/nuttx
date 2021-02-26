@@ -58,8 +58,8 @@
  *
  * Input Parameters:
  *   lpds - true: To further reduce power consumption in Stop mode, put the
- *          internal voltage regulator in low-power under-drive mode using the
- *          LPDS and LPUDS bits of the Power control register (PWR_CR1).
+ *          internal voltage regulator in low-power under-drive mode using
+ *          the LPDS and LPUDS bits of the Power control register (PWR_CR1).
  *
  * Returned Value:
  *   None
@@ -71,9 +71,9 @@ void stm32_pmstop(bool lpds)
   uint32_t regval;
 
   /* Clear the Power Down Deep Sleep (PDDS), the Low Power Deep Sleep
-   * (LPDS), Under-Drive Enable in Stop Mode (UDEN), Flash Power Down in Stop
-   * Mode (FPDS), Main Regulator in Deepsleep Under-Drive Mode (MRUDS), and
-   * Low-power Regulator in Deepsleep Under-Drive Mode (LPUDS) bits in
+   * (LPDS), Under-Drive Enable in Stop Mode (UDEN), Flash Power Down in
+   * Stop Mode (FPDS), Main Regulator in Deepsleep Under-Drive Mode (MRUDS),
+   * and Low-power Regulator in Deepsleep Under-Drive Mode (LPUDS) bits in
    * the power control register.
    */
 
@@ -108,12 +108,14 @@ void stm32_pmstop(bool lpds)
   asm volatile ("wfi");
 #endif
 
-  /* Clear deep sleep bits, so that MCU does not go into deep sleep in idle. */
+  /* Clear deep sleep bits, so that MCU does not go into deep sleep in
+   * idle.
+   */
 
   /* Clear the Power Down Deep Sleep (PDDS), the Low Power Deep Sleep
-   * (LPDS) bits, Under-Drive Enable in Stop Mode (UDEN), Main Regulator in
-   * Deepsleep Under-Drive Mode (MRUDS), and Low-power Regulator in Deepsleep
-   * Under-Drive Mode (LPUDS) in the power control register.
+   * (LPDS) bits, Under-Drive Enable in Stop Mode (UDEN), Main Regulator
+   * in Deepsleep Under-Drive Mode (MRUDS), and Low-power Regulator in
+   * Deepsleep Under-Drive Mode (LPUDS) in the power control register.
    */
 
   regval  = getreg32(STM32_PWR_CR1);
