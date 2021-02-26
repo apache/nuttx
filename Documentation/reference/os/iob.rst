@@ -163,7 +163,7 @@ Public Function Prototypes
   - :c:func:`iob_tryadd_queue()`
   - :c:func:`iob_remove_queue()`
   - :c:func:`iob_peek_queue()`
-  - :c:func:`iob_free_queue()`
+  - :c:func:`iob_destroy_queue()`
   - :c:func:`iob_copyin()`
   - :c:func:`iob_trycopyin()`
   - :c:func:`iob_copyout()`
@@ -231,9 +231,9 @@ Public Function Prototypes
   :return: Returns a reference to the I/O buffer chain at
     the head of the queue.
 
-.. c:function:: void iob_free_queue(FAR struct iob_queue_s *qhead);
+.. c:function:: void iob_destroy_queue(FAR struct iob_queue_s *qhead);
 
-  Free an entire queue of I/O buffer chains.
+  Destroy all I/O buffer chains from the iob queue.
 
 .. c:function:: int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src, \
                   unsigned int len, unsigned int offset, bool throttled);

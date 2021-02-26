@@ -483,7 +483,7 @@ errout:
       conn->nreqs = 0;
       conn->dev   = NULL;
 
-      iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
+      iob_destroy_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
     }
 
   return ret;

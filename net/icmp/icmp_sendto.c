@@ -340,7 +340,7 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf,
       conn->nreqs = 0;
       conn->dev   = NULL;
 
-      iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
+      iob_destroy_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
     }
 
 #ifdef CONFIG_NET_ARP_SEND
@@ -448,7 +448,7 @@ errout:
   conn->nreqs = 0;
   conn->dev   = NULL;
 
-  iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
+  iob_destroy_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
   return ret;
 }
 

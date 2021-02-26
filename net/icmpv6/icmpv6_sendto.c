@@ -331,7 +331,7 @@ ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf,
       conn->nreqs = 0;
       conn->dev   = NULL;
 
-      iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMPv6);
+      iob_destroy_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMPv6);
     }
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
@@ -439,7 +439,7 @@ errout:
   conn->nreqs = 0;
   conn->dev   = NULL;
 
-  iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMPv6);
+  iob_destroy_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMPv6);
   return ret;
 }
 

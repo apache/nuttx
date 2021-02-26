@@ -428,16 +428,16 @@ FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq);
 #endif
 
 /****************************************************************************
- * Name: iob_free_queue
+ * Name: iob_destroy_queue
  *
  * Description:
- *   Free an entire queue of I/O buffer chains.
+ *   Destroy all I/O buffer chains from the iob queue.
  *
  ****************************************************************************/
 
 #if CONFIG_IOB_NCHAINS > 0
-void iob_free_queue(FAR struct iob_queue_s *qhead,
-                    enum iob_user_e producerid);
+void iob_destroy_queue(FAR struct iob_queue_s *qhead,
+                       enum iob_user_e producerid);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************

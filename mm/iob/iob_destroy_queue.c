@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/iob/iob_free_queue.c
+ * mm/iob/iob_destroy_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -60,15 +60,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_free_queue
+ * Name: iob_destroy_queue
  *
  * Description:
- *   Free an entire queue of I/O buffer chains.
+ *   Destroy all I/O buffer chains from the iob queue.
  *
  ****************************************************************************/
 
-void iob_free_queue(FAR struct iob_queue_s *qhead,
-                    enum iob_user_e producerid)
+void iob_destroy_queue(FAR struct iob_queue_s *qhead,
+                       enum iob_user_e producerid)
 {
   FAR struct iob_qentry_s *iobq;
   FAR struct iob_qentry_s *nextq;
