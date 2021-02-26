@@ -84,10 +84,8 @@ fi
 # Make sure we know what is going on
 
 if [ -z ${VERSION} ] ; then
-  echo "Missing versioning information"
-  echo $USAGE
-  echo $ADVICE
-  exit 1
+  echo "Missing versioning information. Using the dummy value. (0.0.0)"
+  VERSION="0.0.0"
 fi
 
 if [ -z ${OUTFILE} ] ; then
