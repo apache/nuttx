@@ -111,7 +111,9 @@
 #  undef CONFIG_STM32F7_TIM17_PWM
 #endif
 
-/* The basic timers (timer 6 and 7) are not capable of generating output pulses */
+/* The basic timers (timer 6 and 7) are not capable of generating output
+ * pulses
+ */
 
 #undef CONFIG_STM32F7_TIM6_PWM
 #undef CONFIG_STM32F7_TIM7_PWM
@@ -127,8 +129,16 @@
     defined(CONFIG_STM32F7_TIM15_PWM) || defined(CONFIG_STM32F7_TIM16_PWM) || \
     defined(CONFIG_STM32F7_TIM17_PWM)
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <arch/board/board.h>
 #include "hardware/stm32_tim.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM_MULTICHAN
 
@@ -1079,7 +1089,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************

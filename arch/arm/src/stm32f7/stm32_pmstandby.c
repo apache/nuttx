@@ -80,7 +80,9 @@ void stm32_pmstandby(void)
 
   modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_RMVF);
 
-  /* Set the Power Down Deep Sleep (PDDS) bit in the power control register. */
+  /* Set the Power Down Deep Sleep (PDDS) bit in the power control
+   * register.
+   */
 
   modifyreg32(STM32_PWR_CR1, 0, PWR_CR1_PDDS);
 
