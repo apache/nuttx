@@ -76,8 +76,8 @@
 #define FLAGEFF                     (1 << 31) /* Extended frame format */
 #define FLAGRTR                     (1 << 30) /* Remote transmission request */
 
-#define RXMBCOUNT                   5
-#define TXMBCOUNT                   2
+#define RXMBCOUNT                   11
+#define TXMBCOUNT                   5
 #define TOTALMBCOUNT                RXMBCOUNT + TXMBCOUNT
 
 #define IFLAG1_RX                   ((1 << RXMBCOUNT)-1)
@@ -506,12 +506,16 @@ static void kinetis_setfreeze(uint32_t base, uint32_t freeze);
 static uint32_t kinetis_waitmcr_change(uint32_t base,
                                        uint32_t mask,
                                        uint32_t target_state);
+static uint32_t kinetis_waitesr2_change(uint32_t base,
+                                       uint32_t mask,
+                                       uint32_t target_state);
 
 /* Interrupt handling */
 
 static void kinetis_receive(FAR struct kinetis_driver_s *priv,
                             uint32_t flags);
-static void kinetis_txdone(FAR void *arg);
+static void kinetis_txdone_work(FAR void *arg);
+static void kinetis_txdone(FAR struct kinetis_driver_s *priv);
 
 static int  kinetis_flexcan_interrupt(int irq, FAR void *context,
                                       FAR void *arg);
@@ -637,6 +641,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
   if (mbi == TXMBCOUNT)
     {
       nwarn("No TX MB available mbi %i\r\n", mbi);
+      NETDEV_TXERRORS(&priv->dev);
       return 0;       /* No transmission for you! */
     }
 
@@ -797,6 +802,8 @@ static int kinetis_txpoll(struct net_driver_s *dev)
     {
       if (!devif_loopback(&priv->dev))
         {
+          kinetis_txdone(priv);
+
           /* Send the packet */
 
           kinetis_transmit(priv);
@@ -805,9 +812,14 @@ static int kinetis_txpoll(struct net_driver_s *dev)
            * not, return a non-zero value to terminate the poll.
            */
 
-          if (kinetis_txringfull(priv))
+          if ((getreg32(priv->base + KINETIS_CAN_ESR2_OFFSET) &
+              (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
+              (CAN_ESR2_IMB | CAN_ESR2_VPS))
             {
-              return -EBUSY;
+              if (kinetis_txringfull(priv))
+                {
+                  return -EBUSY;
+                }
             }
         }
     }
@@ -962,7 +974,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv,
  * Function: kinetis_txdone
  *
  * Description:
- *   An interrupt was received indicating that the last TX packet(s) is done
+ *   Check transmit interrupt flags and clear them
  *
  * Input Parameters:
  *   priv  - Reference to the driver state structure
@@ -971,14 +983,12 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv,
  *   None
  *
  * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *   We are not in an interrupt context so that we can lock the network.
+ *   None
  *
  ****************************************************************************/
 
-static void kinetis_txdone(FAR void *arg)
+static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
 {
-  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
   uint32_t flags;
   uint32_t mbi;
   uint32_t mb_bit;
@@ -1009,13 +1019,38 @@ static void kinetis_txdone(FAR void *arg)
 
       mb_bit <<= 1;
     }
+}
+
+/****************************************************************************
+ * Function: kinetis_txdone_work
+ *
+ * Description:
+ *   An interrupt was received indicating that the last TX packet(s) is done
+ *
+ * Input Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
+ *   We are not in an interrupt context so that we can lock the network.
+ *
+ ****************************************************************************/
+
+static void kinetis_txdone_work(FAR void *arg)
+{
+  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
+
+  kinetis_txdone(priv);
 
   /* There should be space for a new TX in any event.  Poll the network for
    * new XMIT data
    */
 
   net_lock();
-  devif_poll(&priv->dev, kinetis_txpoll);
+  devif_timer(&priv->dev, 0, kinetis_txpoll);
   net_unlock();
 }
 
@@ -1071,7 +1106,7 @@ static int kinetis_flexcan_interrupt(int irq, FAR void *context,
           flags  = getreg32(priv->base + KINETIS_CAN_IMASK1_OFFSET);
           flags &= ~(IFLAG1_TX);
           putreg32(flags, priv->base + KINETIS_CAN_IMASK1_OFFSET);
-          work_queue(CANWORK, &priv->irqwork, kinetis_txdone, priv, 0);
+          work_queue(CANWORK, &priv->irqwork, kinetis_txdone_work, priv, 0);
         }
     }
 
@@ -1170,6 +1205,26 @@ static void kinetis_setenable(uint32_t base, uint32_t enable)
     }
 
   kinetis_waitmcr_change(base, CAN_MCR_LPMACK, 1);
+}
+
+static uint32_t kinetis_waitesr2_change(uint32_t base, uint32_t mask,
+                                       uint32_t target_state)
+{
+  const uint32_t timeout = 1000;
+  uint32_t wait_ack;
+
+  for (wait_ack = 0; wait_ack < timeout; wait_ack++)
+    {
+      uint32_t state = (getreg32(base + KINETIS_CAN_ESR2_OFFSET) & mask);
+      if (state == target_state)
+        {
+          return true;
+        }
+
+      up_udelay(10);
+    }
+
+  return false;
 }
 
 static void kinetis_setfreeze(uint32_t base, uint32_t freeze)
@@ -1331,7 +1386,9 @@ static void kinetis_txavail_work(FAR void *arg)
        * packet.
        */
 
-      if (!kinetis_txringfull(priv))
+      if (kinetis_waitesr2_change(priv->base,
+                             (CAN_ESR2_IMB | CAN_ESR2_VPS),
+                             (CAN_ESR2_IMB | CAN_ESR2_VPS)))
         {
           /* No, there is space for another transfer.  Poll the network for
            * new XMIT data.
@@ -1485,7 +1542,7 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd,
 #endif /* CONFIG_NETDEV_IOCTL */
 
 /****************************************************************************
- * Function: kinetis_initalize
+ * Function: kinetis_initialize
  *
  * Description:
  *   Initialize FLEXCAN device
@@ -1530,6 +1587,9 @@ static int kinetis_initialize(struct kinetis_driver_s *priv)
 
 #ifndef CONFIG_NET_CAN_CANFD
   regval  = getreg32(priv->base + KINETIS_CAN_CTRL1_OFFSET);
+
+  regval &= ~(CAN_CTRL1_TIMINGMSK); /* Reset timings */
+
   regval |= CAN_CTRL1_PRESDIV(priv->arbi_timing.presdiv) | /* Prescaler divisor factor */
             CAN_CTRL1_PROPSEG(priv->arbi_timing.propseg) | /* Propagation segment */
             CAN_CTRL1_PSEG1(priv->arbi_timing.pseg1) |     /* Phase buffer segment 1 */
@@ -1538,8 +1598,7 @@ static int kinetis_initialize(struct kinetis_driver_s *priv)
   putreg32(regval, priv->base + KINETIS_CAN_CTRL1_OFFSET);
 
 #else
-  regval  = getreg32(priv->base + KINETIS_CAN_CBT_OFFSET);
-            regval |= CAN_CBT_BTF |                       /* Enable extended bit timing
+  regval  = CAN_CBT_BTF |                                 /* Enable extended bit timing
                                                            * configurations for CAN-FD for setting up
                                                            * separately nominal and data phase */
             CAN_CBT_EPRESDIV(priv->arbi_timing.presdiv) | /* Prescaler divisor factor */
@@ -1555,8 +1614,7 @@ static int kinetis_initialize(struct kinetis_driver_s *priv)
   regval |= CAN_MCR_FDEN;
   putreg32(regval, priv->base + KINETIS_CAN_MCR_OFFSET);
 
-  regval  = getreg32(priv->base + KINETIS_CAN_FDCBT_OFFSET);
-  regval |= CAN_FDCBT_FPRESDIV(priv->data_timing.presdiv) |  /* Prescaler divisor factor of 1 */
+  regval  = CAN_FDCBT_FPRESDIV(priv->data_timing.presdiv) |  /* Prescaler divisor factor of 1 */
             CAN_FDCBT_FPROPSEG(priv->data_timing.propseg) |  /* Propagation
                                                               * segment (only register that doesn't add 1) */
             CAN_FDCBT_FPSEG1(priv->data_timing.pseg1) |      /* Phase buffer segment 1 */
@@ -1566,9 +1624,7 @@ static int kinetis_initialize(struct kinetis_driver_s *priv)
 
   /* Additional CAN-FD configurations */
 
-  regval  = getreg32(priv->base + KINETIS_CAN_FDCTRL_OFFSET);
-
-  regval |= CAN_FDCTRL_FDRATE |     /* Enable bit rate switch in data phase of frame */
+  regval  = CAN_FDCTRL_FDRATE |     /* Enable bit rate switch in data phase of frame */
             CAN_FDCTRL_TDCEN |      /* Enable transceiver delay compensation */
             CAN_FDCTRL_TDCOFF(5) |  /* Setup 5 cycles for data phase sampling delay */
             CAN_FDCTRL_MBDSR0(3);   /* Setup 64 bytes per message buffer (7 MB's) */
@@ -1588,7 +1644,7 @@ static int kinetis_initialize(struct kinetis_driver_s *priv)
 
   putreg32(0x0, priv->base + KINETIS_CAN_RXFGMASK_OFFSET);
 
-  for (i = 0; i < TOTALMBCOUNT; i++)
+  for (i = 0; i < KINETIS_CAN0_RXIMR_COUNT; i++)
     {
       putreg32(0, priv->base + KINETIS_CAN_RXIMR_OFFSET(i));
     }
@@ -1872,6 +1928,8 @@ int kinetis_caninitialize(int intf)
    */
 
   ninfo("callbacks done\r\n");
+
+  kinetis_initialize(priv);
 
   kinetis_ifdown(&priv->dev);
 
