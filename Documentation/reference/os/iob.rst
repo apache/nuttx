@@ -203,12 +203,12 @@ Public Function Prototypes
   Free an entire buffer chain, starting at the
   beginning of the I/O buffer chain
 
-.. c:function:: int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
+.. c:function:: int iob_add_queue(FAR struct iob_s *iob, FAR void *priv, FAR struct iob_queue_s *iobq)
 
   Add one I/O buffer chain to the end of a queue.
   May fail due to lack of resources.
 
-.. c:function:: void iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
+.. c:function:: void iob_tryadd_queue(FAR struct iob_s *iob, FAR void *priv, FAR struct iob_queue_s *iobq)
 
   Add one I/O buffer chain to the end of a queue
   without waiting for resources to become free.

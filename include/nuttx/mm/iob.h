@@ -140,6 +140,10 @@ struct iob_qentry_s
   /* Payload -- Head of the I/O buffer chain */
 
   FAR struct iob_s *qe_head;
+
+  /* Private data */
+
+  FAR void *qe_priv;
 };
 
 /* The I/O buffer queue head structure */
@@ -196,6 +200,7 @@ enum iob_user_e
 #endif
 #if defined(CONFIG_NET_TCP) && !defined(NET_TCP_NO_STACK)
   IOBUSER_NET_TCP_READAHEAD,
+  IOBUSER_NET_TCP_PENDINGAHEAD,
 #endif
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   IOBUSER_NET_TCP_WRITEBUFFER,
@@ -377,7 +382,8 @@ void iob_free_chain(FAR struct iob_s *iob, enum iob_user_e producerid);
  ****************************************************************************/
 
 #if CONFIG_IOB_NCHAINS > 0
-int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
+int iob_add_queue(FAR struct iob_s *iob, FAR void *priv,
+                  FAR struct iob_queue_s *iobq);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
@@ -390,7 +396,8 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
  ****************************************************************************/
 
 #if CONFIG_IOB_NCHAINS > 0
-int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
+int iob_tryadd_queue(FAR struct iob_s *iob, FAR void *priv,
+                     FAR struct iob_queue_s *iobq);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************

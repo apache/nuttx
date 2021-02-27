@@ -214,7 +214,15 @@ struct tcp_conn_s
    *               where the TCP/IP read-ahead data is retained.
    */
 
-  struct iob_queue_s readahead;   /* Read-ahead buffering */
+  struct iob_queue_s readahead;     /* Read-ahead buffering */
+
+  /* Pending-ahead buffering.
+   *
+   *   pendingahead - A singly linked list of type struct iob_qentry_s
+   *                  where the TCP/IP pending-ahead data is retained.
+   */
+
+  struct iob_queue_s pendingahead;  /* Pending-ahead buffering */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Write buffering
@@ -1120,6 +1128,8 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
  *   buffer - A pointer to the buffer to be copied to the read-ahead
  *     buffers
  *   buflen - The number of bytes to copy to the read-ahead buffer.
+ *   priv   - Private data.
+ *   producerid - id representing who is producing the IOB.
  *
  * Returned Value:
  *   The number of bytes actually buffered is returned.  This will be either
@@ -1133,7 +1143,8 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
-                         uint16_t nbytes);
+                         uint16_t nbytes, FAR void *priv,
+                         enum iob_user_e producerid);
 
 /****************************************************************************
  * Name: tcp_backlogcreate

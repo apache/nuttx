@@ -189,7 +189,7 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
    * without waiting).
    */
 
-  ret = iob_tryadd_queue(iob, &conn->readahead);
+  ret = iob_tryadd_queue(iob, NULL, &conn->readahead);
   if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);

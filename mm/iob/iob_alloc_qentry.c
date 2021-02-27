@@ -238,6 +238,7 @@ FAR struct iob_qentry_s *iob_tryalloc_qentry(void)
       /* Put the I/O buffer in a known state */
 
       iobq->qe_head = NULL; /* Nothing is contained */
+      iobq->qe_priv = NULL;
     }
 
   leave_critical_section(flags);

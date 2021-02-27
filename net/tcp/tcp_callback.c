@@ -99,7 +99,8 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
        * partial packets will not be buffered.
        */
 
-      recvlen = tcp_datahandler(conn, buffer, buflen);
+      recvlen = tcp_datahandler(conn, buffer, buflen, NULL,
+                                IOBUSER_NET_TCP_READAHEAD);
       if (recvlen < buflen)
         {
           /* There is no handler to receive new data and there are no free
@@ -238,27 +239,45 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
-                         uint16_t buflen)
+                         uint16_t buflen, FAR void *priv,
+                         enum iob_user_e producerid)
 {
+  FAR struct iob_queue_s *queue;
   FAR struct iob_s *iob;
   bool throttled = true;
   int ret;
+
+  /* Get the I/O buffer queue from iob producer id */
+
+  if (producerid == IOBUSER_NET_TCP_READAHEAD)
+    {
+      queue = &conn->readahead;
+    }
+  else if (producerid == IOBUSER_NET_TCP_PENDINGAHEAD)
+    {
+      queue = &conn->pendingahead;
+    }
+  else
+    {
+      nwarn("ERROR: Invalid iob produce id\n");
+      return 0;
+    }
 
   /* Try to allocate on I/O buffer to start the chain without waiting (and
    * throttling as necessary).  If we would have to wait, then drop the
    * packet.
    */
 
-  iob = iob_tryalloc(throttled, IOBUSER_NET_TCP_READAHEAD);
+  iob = iob_tryalloc(throttled, producerid);
   if (iob == NULL)
     {
 #if CONFIG_IOB_THROTTLE > 0
-      if (IOB_QEMPTY(&conn->readahead))
+      if (IOB_QEMPTY(queue))
         {
           /* Fallback out of the throttled entry */
 
           throttled = false;
-          iob = iob_tryalloc(throttled, IOBUSER_NET_TCP_READAHEAD);
+          iob = iob_tryalloc(throttled, producerid);
         }
 #endif
 
@@ -272,7 +291,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
   /* Copy the new appdata into the I/O buffer chain (without waiting) */
 
   ret = iob_trycopyin(iob, buffer, buflen, 0, throttled,
-                      IOBUSER_NET_TCP_READAHEAD);
+                      producerid);
   if (ret < 0)
     {
       /* On a failure, iob_copyin return a negated error value but does
@@ -280,7 +299,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
        */
 
       nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
-      iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
+      iob_free_chain(iob, producerid);
       return 0;
     }
 
@@ -288,11 +307,11 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
    * without waiting).
    */
 
-  ret = iob_tryadd_queue(iob, &conn->readahead);
+  ret = iob_tryadd_queue(iob, priv, queue);
   if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
-      iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
+      iob_free_chain(iob, producerid);
       return 0;
     }
 

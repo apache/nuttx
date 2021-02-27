@@ -144,6 +144,7 @@ static FAR const char *g_iob_user_names[] =
 #endif
 #if defined(CONFIG_NET_TCP) && !defined(NET_TCP_NO_STACK)
   "tcp_readahead",
+  "tcp_pendingahead",
 #endif
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   "tcp_writebuffer",

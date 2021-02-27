@@ -226,7 +226,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
 
   /* Add the new I/O buffer chain to the tail of the read-ahead queue */
 
-  ret = iob_tryadd_queue(iob, &conn->readahead);
+  ret = iob_tryadd_queue(iob, NULL, &conn->readahead);
   if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
