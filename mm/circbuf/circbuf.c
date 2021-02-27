@@ -103,7 +103,7 @@ int circbuf_init(FAR struct circbuf_s *circ, FAR void *base, size_t bytes)
 int circbuf_resize(FAR struct circbuf_s *circ, size_t bytes)
 {
   FAR void *tmp = NULL;
-  size_t len;
+  size_t len = 0;
 
   DEBUGASSERT(circ);
   DEBUGASSERT(!circ->external);
