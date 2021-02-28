@@ -536,6 +536,32 @@ USB Console support:
   and it will create a /dev/ttyACM0 device in the Linux. Use minicom with this
   device to get access to NuttX NSH console (press Enter three times to start)
 
+MCP2515 External Module
+=======================
+
+  You can use an external MCP2515 (tested with NiRen MCP2515_CAN module) to
+  get CAN Bus working on STM32F103C8 chip (remember the internal CAN cannot
+  work with USB at same time because they share the SRAM buffer).
+
+  You can connect the MCP2515 module in the STM32F103 Minimum board this way:
+  connect PA5 (SPI1 CLK) to SCK; PA7 (SPI1 MOSI) to SI; PA6 (SPI MISO) to SO;
+  PA4 to CS; B0 to INT. Also connect 5V to VCC and GND to GND.
+
+  Note: Although MCP2515 can work with 2.7V-5.5V it is more stable when using
+  it on BluePill board on 5V.
+
+  Testing: you will need at least 2 boards each one with a MCP2515 module
+  connected to it. Connect CAN High from the first module to the CAN High of
+  the second module, and the CAN Low from the first module to the CAN Low of
+  the second module.
+
+  You need to modify the "CAN example" application on menuconfig and create
+  two firmware versions: the first firmware will be Read-only and the second
+  one Write-only. Flash the first firmware in the first board and the second
+  firmware in the second board. Now you can start the both boards, run the
+  "can" command in the Write-only board and then run the "can" command in the
+  Read-only board. You should see the data coming.
+
 STM32F103 Minimum - specific Configuration Options
 ==================================================
 
