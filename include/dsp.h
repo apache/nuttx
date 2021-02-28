@@ -231,8 +231,6 @@ struct svm3_state_f32_s
   float       d_u;             /* Duty cycle for phase U */
   float       d_v;             /* Duty cycle for phase V */
   float       d_w;             /* Duty cycle for phase W */
-  float       d_max;           /* Duty cycle max */
-  float       d_min;           /* Duty cycle min */
 };
 
 /* Motor open-loop control data */
@@ -411,10 +409,10 @@ void phase_angle_update(FAR struct phase_angle_f32_s *angle, float val);
 
 /* 3-phase system space vector modulation */
 
-void svm3_init(FAR struct svm3_state_f32_s *s, float min, float max);
+void svm3_init(FAR struct svm3_state_f32_s *s);
 void svm3(FAR struct svm3_state_f32_s *s, FAR ab_frame_f32_t *ab);
 void svm3_current_correct(FAR struct svm3_state_f32_s *s,
-                          int32_t *c0, int32_t *c1, int32_t *c2);
+                          float *c0, float *c1, float *c2);
 
 /* Field Oriented control */
 
