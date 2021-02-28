@@ -210,20 +210,24 @@ void motor_angle_e_update(FAR struct motor_angle_f32_s *angle,
 
   /* Check if we crossed electrical angle boundaries */
 
-  if (dir == DIR_CW &&
-      angle_new - angle->angle_el.angle < -POLE_CNTR_THR)
+  if (dir == DIR_CW)
     {
       /* For CW direction - previous angle is greater than current angle */
 
-      angle->i += 1;
+      if (angle_new - angle->angle_el.angle < -POLE_CNTR_THR)
+        {
+          angle->i += 1;
+        }
     }
 
-  else if (dir == DIR_CCW &&
-           angle_new - angle->angle_el.angle > POLE_CNTR_THR)
+  else if (dir == DIR_CCW)
     {
       /* For CCW direction - previous angle is lower than current angle */
 
-      angle->i -= 1;
+      if (angle_new - angle->angle_el.angle > POLE_CNTR_THR)
+        {
+          angle->i -= 1;
+        }
     }
 
   /* Reset pole counter if needed */
