@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-void motor_openloop_init(FAR struct openloop_data_s *op, float max,
+void motor_openloop_init(FAR struct openloop_data_f32_s *op, float max,
                          float per)
 {
   DEBUGASSERT(op != NULL);
@@ -59,7 +59,7 @@ void motor_openloop_init(FAR struct openloop_data_s *op, float max,
 
   /* Reset openloop structure */
 
-  memset(op, 0, sizeof(struct openloop_data_s));
+  memset(op, 0, sizeof(struct openloop_data_f32_s));
 
   /* Initialize data */
 
@@ -83,7 +83,8 @@ void motor_openloop_init(FAR struct openloop_data_s *op, float max,
  *
  ****************************************************************************/
 
-void motor_openloop(FAR struct openloop_data_s *op, float speed, float dir)
+void motor_openloop(FAR struct openloop_data_f32_s *op, float speed,
+                    float dir)
 {
   DEBUGASSERT(op != NULL);
   DEBUGASSERT(speed >= 0.0f);
@@ -127,7 +128,7 @@ void motor_openloop(FAR struct openloop_data_s *op, float speed, float dir)
  *
  ****************************************************************************/
 
-float motor_openloop_angle_get(FAR struct openloop_data_s *op)
+float motor_openloop_angle_get(FAR struct openloop_data_f32_s *op)
 {
   DEBUGASSERT(op != NULL);
 
@@ -179,14 +180,14 @@ float motor_openloop_angle_get(FAR struct openloop_data_s *op)
  *
  ****************************************************************************/
 
-void motor_angle_init(FAR struct motor_angle_s *angle, uint8_t p)
+void motor_angle_init(FAR struct motor_angle_f32_s *angle, uint8_t p)
 {
   DEBUGASSERT(angle != NULL);
   DEBUGASSERT(p > 0);
 
   /* Reset structure */
 
-  memset(angle, 0, sizeof(struct motor_angle_s));
+  memset(angle, 0, sizeof(struct motor_angle_f32_s));
 
   /* Store pole pairs */
 
@@ -213,8 +214,8 @@ void motor_angle_init(FAR struct motor_angle_s *angle, uint8_t p)
  *
  ****************************************************************************/
 
-void motor_angle_e_update(FAR struct motor_angle_s *angle, float angle_new,
-                          float dir)
+void motor_angle_e_update(FAR struct motor_angle_f32_s *angle,
+                          float angle_new, float dir)
 {
   DEBUGASSERT(angle != NULL);
   DEBUGASSERT(angle_new >= 0.0f && angle_new <= MOTOR_ANGLE_E_MAX);
@@ -282,8 +283,8 @@ void motor_angle_e_update(FAR struct motor_angle_s *angle, float angle_new,
  *
  ****************************************************************************/
 
-void motor_angle_m_update(FAR struct motor_angle_s *angle, float angle_new,
-                          float dir)
+void motor_angle_m_update(FAR struct motor_angle_f32_s *angle,
+                          float angle_new, float dir)
 {
   DEBUGASSERT(angle != NULL);
   DEBUGASSERT(angle_new >= 0.0f && angle_new <= MOTOR_ANGLE_E_MAX);
@@ -322,7 +323,7 @@ void motor_angle_m_update(FAR struct motor_angle_s *angle, float angle_new,
  *
  ****************************************************************************/
 
-float motor_angle_m_get(FAR struct motor_angle_s *angle)
+float motor_angle_m_get(FAR struct motor_angle_f32_s *angle)
 {
   DEBUGASSERT(angle != NULL);
 
@@ -343,7 +344,7 @@ float motor_angle_m_get(FAR struct motor_angle_s *angle)
  *
  ****************************************************************************/
 
-float motor_angle_e_get(FAR struct motor_angle_s *angle)
+float motor_angle_e_get(FAR struct motor_angle_f32_s *angle)
 {
   DEBUGASSERT(angle != NULL);
 
@@ -368,8 +369,8 @@ float motor_angle_e_get(FAR struct motor_angle_s *angle)
  *
  ****************************************************************************/
 
-void motor_phy_params_init(FAR struct motor_phy_params_s *phy, uint8_t poles,
-                            float res, float ind)
+void motor_phy_params_init(FAR struct motor_phy_params_f32_s *phy,
+                           uint8_t poles, float res, float ind)
 {
   DEBUGASSERT(phy != NULL);
 
@@ -400,7 +401,7 @@ void motor_phy_params_init(FAR struct motor_phy_params_s *phy, uint8_t poles,
  *
  ****************************************************************************/
 
-void motor_phy_params_temp_set(FAR struct motor_phy_params_s *phy,
+void motor_phy_params_temp_set(FAR struct motor_phy_params_f32_s *phy,
                                float res_alpha, float res_temp_ref)
 {
   DEBUGASSERT(phy != NULL);

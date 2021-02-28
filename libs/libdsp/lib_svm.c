@@ -44,7 +44,7 @@
  *
  ****************************************************************************/
 
-static uint8_t svm3_sector_get(FAR abc_frame_t *ijk)
+static uint8_t svm3_sector_get(FAR abc_frame_f32_t *ijk)
 {
   uint8_t sector = 0;
   float i = ijk->a;
@@ -135,7 +135,8 @@ static uint8_t svm3_sector_get(FAR abc_frame_t *ijk)
  *
  ****************************************************************************/
 
-static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
+static void svm3_duty_calc(FAR struct svm3_state_f32_s *s,
+                           FAR abc_frame_f32_t *ijk)
 {
   float i = ijk->a;
   float j = ijk->b;
@@ -320,12 +321,12 @@ static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
  *
  ****************************************************************************/
 
-void svm3(FAR struct svm3_state_s *s, FAR ab_frame_t *v_ab)
+void svm3(FAR struct svm3_state_f32_s *s, FAR ab_frame_f32_t *v_ab)
 {
   DEBUGASSERT(s != NULL);
   DEBUGASSERT(v_ab != NULL);
 
-  abc_frame_t ijk;
+  abc_frame_f32_t ijk;
 
   /* Perform modified inverse Clarke-transformation (alpha,beta) -> (i,j,k)
    * to obtain auxiliary frame which will be used in further calculations.
@@ -359,8 +360,8 @@ void svm3(FAR struct svm3_state_s *s, FAR ab_frame_t *v_ab)
  *
  ****************************************************************************/
 
-void svm3_current_correct(FAR struct svm3_state_s *s,
-                              int32_t *c0, int32_t *c1, int32_t *c2)
+void svm3_current_correct(FAR struct svm3_state_f32_s *s,
+                          int32_t *c0, int32_t *c1, int32_t *c2)
 {
   /* Get best ADC samples according to SVM sector.
    *
@@ -432,12 +433,12 @@ void svm3_current_correct(FAR struct svm3_state_s *s,
  *
  ****************************************************************************/
 
-void svm3_init(FAR struct svm3_state_s *s, float min, float max)
+void svm3_init(FAR struct svm3_state_f32_s *s, float min, float max)
 {
   DEBUGASSERT(s != NULL);
   DEBUGASSERT(max > min);
 
-  memset(s, 0, sizeof(struct svm3_state_s));
+  memset(s, 0, sizeof(struct svm3_state_f32_s));
 
   s->d_max = max;
   s->d_min = min;

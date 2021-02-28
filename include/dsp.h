@@ -131,14 +131,14 @@
  * Besides angle value it also stores sine and cosine values for given angle.
  */
 
-struct phase_angle_s
+struct phase_angle_f32_s
 {
   float   angle;               /* Phase angle in radians <0, 2PI> */
   float   sin;                 /* Phase angle sine */
   float   cos;                 /* Phase angle cosine */
 };
 
-typedef struct phase_angle_s phase_angle_t;
+typedef struct phase_angle_f32_s phase_angle_f32_t;
 
 /* This structure stores motor angles and corresponding sin and cos values
  *
@@ -153,78 +153,78 @@ typedef struct phase_angle_s phase_angle_t;
  *  NOTE: pole_pairs = poles_total/2
  */
 
-struct motor_angle_s
+struct motor_angle_f32_s
 {
-  phase_angle_t angle_el;      /* Electrical angle */
-  float         anglem;        /* Mechanical angle in radians <0, 2PI> */
-  float         one_by_p;      /* Aux variable */
-  uint8_t       p;             /* Number of the motor pole pairs */
-  int8_t        i;             /* Pole counter */
+  phase_angle_f32_t angle_el;  /* Electrical angle */
+  float             anglem;    /* Mechanical angle in radians <0, 2PI> */
+  float             one_by_p;  /* Aux variable */
+  uint8_t           p;         /* Number of the motor pole pairs */
+  int8_t            i;         /* Pole counter */
 };
 
 /* Float number saturaton */
 
-struct float_sat_s
+struct float_sat_f32_s
 {
   float min;                    /* Lower limit */
   float max;                    /* Upper limit */
 };
 
-typedef struct float_sat_s float_sat_t;
+typedef struct float_sat_f32_s float_sat_f32_t;
 
 /* PI/PID controller state structure */
 
-struct pid_controller_s
+struct pid_controller_f32_s
 {
-  float       out;              /* Controller output */
-  float_sat_t sat;              /* Output saturation */
-  float       err;              /* Current error value */
-  float       err_prev;         /* Previous error value */
-  float       KP;               /* Proportional coefficient */
-  float       KI;               /* Integral coefficient */
-  float       KD;               /* Derivative coefficient */
-  float       part[3];          /* 0 - proporitonal part
+  float           out;          /* Controller output */
+  float_sat_f32_t sat;          /* Output saturation */
+  float           err;          /* Current error value */
+  float           err_prev;     /* Previous error value */
+  float           KP;           /* Proportional coefficient */
+  float           KI;           /* Integral coefficient */
+  float           KD;           /* Derivative coefficient */
+  float           part[3];      /* 0 - proporitonal part
                                  * 1 - integral part
                                  * 2 - derivative part
                                  */
 };
 
-typedef struct pid_controller_s pid_controller_t;
+typedef struct pid_controller_f32_s pid_controller_f32_t;
 
 /* This structure represents the ABC frame (3 phase vector) */
 
-struct abc_frame_s
+struct abc_frame_f32_s
 {
   float a;                     /* A component */
   float b;                     /* B component */
   float c;                     /* C component */
 };
 
-typedef struct abc_frame_s abc_frame_t;
+typedef struct abc_frame_f32_s abc_frame_f32_t;
 
 /* This structure represents the alpha-beta frame (2 phase vector) */
 
-struct ab_frame_s
+struct ab_frame_f32_s
 {
   float a;                     /* Alpha component */
   float b;                     /* Beta component */
 };
 
-typedef struct ab_frame_s ab_frame_t;
+typedef struct ab_frame_f32_s ab_frame_f32_t;
 
 /* This structure represent the direct-quadrature frame */
 
-struct dq_frame_s
+struct dq_frame_f32_s
 {
   float d;                     /* Driect component */
   float q;                     /* Quadrature component */
 };
 
-typedef struct dq_frame_s dq_frame_t;
+typedef struct dq_frame_f32_s dq_frame_f32_t;
 
 /* Space Vector Modulation data for 3-phase system */
 
-struct svm3_state_s
+struct svm3_state_f32_s
 {
   uint8_t     sector;          /* Current space vector sector */
   float       d_u;             /* Duty cycle for phase U */
@@ -236,7 +236,7 @@ struct svm3_state_s
 
 /* Motor open-loop control data */
 
-struct openloop_data_s
+struct openloop_data_f32_s
 {
   float max;           /* Open-loop max speed */
   float angle;         /* Open-loop current angle normalized to <0.0, 2PI> */
@@ -245,7 +245,7 @@ struct openloop_data_s
 
 /* Common motor observer structure */
 
-struct motor_observer_s
+struct motor_observer_f32_s
 {
   float angle;               /* Estimated observer angle */
   float speed;               /* Estimated observer speed */
@@ -267,7 +267,7 @@ struct motor_observer_s
 
 /* Speed observer division method data */
 
-struct motor_sobserver_div_s
+struct motor_sobserver_div_f32_s
 {
   float angle_diff;             /* Mechanical angle difference */
   float angle_acc;              /* Accumulated mechanical angle */
@@ -280,7 +280,7 @@ struct motor_sobserver_div_s
 
 /* Speed observer PLL method data */
 #if 0
-struct motor_sobserver_pll_s
+struct motor_sobserver_pll_f32_s
 {
   /* TODO */
 };
@@ -288,7 +288,7 @@ struct motor_sobserver_pll_s
 
 /* Motor Sliding Mode Observer private data */
 
-struct motor_observer_smo_s
+struct motor_observer_smo_f32_s
 {
   float k_slide;        /* Bang-bang controller gain */
   float err_max;        /* Linear mode threshold */
@@ -296,13 +296,13 @@ struct motor_observer_smo_s
   float G;              /* Current observer G gain (Ts/L) */
   float emf_lp_filter1; /* Adaptive first low pass EMF filter */
   float emf_lp_filter2; /* Adaptive second low pass EMF filter */
-  ab_frame_t emf;       /* Estimated back-EMF */
-  ab_frame_t emf_f;     /* Fitlered estimated back-EMF */
-  ab_frame_t z;         /* Correction factor */
-  ab_frame_t i_est;     /* Estimated idq current */
-  ab_frame_t v_err;     /* v_err = v_ab - emf */
-  ab_frame_t i_err;     /* i_err = i_est - i_dq */
-  ab_frame_t sign;      /* Bang-bang controller sign */
+  ab_frame_f32_t emf;   /* Estimated back-EMF */
+  ab_frame_f32_t emf_f; /* Fitlered estimated back-EMF */
+  ab_frame_f32_t z;     /* Correction factor */
+  ab_frame_f32_t i_est; /* Estimated idq current */
+  ab_frame_f32_t v_err; /* v_err = v_ab - emf */
+  ab_frame_f32_t i_err; /* i_err = i_est - i_dq */
+  ab_frame_f32_t sign;  /* Bang-bang controller sign */
 };
 
 /* Motor physical parameters.
@@ -310,7 +310,7 @@ struct motor_observer_smo_s
  * but probably can be used to describe different types of motors.
  */
 
-struct motor_phy_params_s
+struct motor_phy_params_f32_s
 {
   uint8_t p;                   /* Number of the motor pole pairs */
 
@@ -328,23 +328,24 @@ struct motor_phy_params_s
  * REVISIT:
  */
 
-struct foc_data_s
+struct foc_data_f32_s
 {
-  abc_frame_t      v_abc;    /* Voltage in ABC frame */
-  ab_frame_t       v_ab;     /* Voltage in alpha-beta frame */
-  dq_frame_t       v_dq;     /* Voltage in dq frame */
-  ab_frame_t       v_ab_mod; /* Modulation voltage normalized to
+  abc_frame_f32_t  v_abc;    /* Voltage in ABC frame */
+  ab_frame_f32_t   v_ab;     /* Voltage in alpha-beta frame */
+  dq_frame_f32_t   v_dq;     /* Voltage in dq frame */
+  ab_frame_f32_t   v_ab_mod; /* Modulation voltage normalized to
                               * magnitude (0.0, 1.0)
                               */
 
-  abc_frame_t      i_abc;    /* Current in ABC frame */
-  ab_frame_t       i_ab;     /* Current in apha-beta frame */
-  dq_frame_t       i_dq;     /* Current in dq frame */
-  dq_frame_t       i_dq_err; /* DQ current error */
+  abc_frame_f32_t  i_abc;    /* Current in ABC frame */
+  ab_frame_f32_t   i_ab;     /* Current in apha-beta frame */
+  dq_frame_f32_t   i_dq;     /* Current in dq frame */
+  dq_frame_f32_t   i_dq_err; /* DQ current error */
 
-  dq_frame_t       i_dq_ref; /* Current dq reference frame */
-  pid_controller_t id_pid;   /* Current d-axis component PI controller */
-  pid_controller_t iq_pid;   /* Current q-axis component PI controller */
+  dq_frame_f32_t   i_dq_ref; /* Current dq reference frame */
+
+  pid_controller_f32_t id_pid;   /* Current d-axis component PI controller */
+  pid_controller_f32_t iq_pid;   /* Current q-axis component PI controller */
 
   float vdq_mag_max;         /* Maximum dq voltage magnitude */
   float vab_mod_scale;       /* Voltage alpha-beta modulation scale */
@@ -376,95 +377,96 @@ void f_saturate(FAR float *val, float min, float max);
 float vector2d_mag(float x, float y);
 void vector2d_saturate(FAR float *x, FAR float *y, float max);
 
-void dq_saturate(FAR dq_frame_t *dq, float max);
-float dq_mag(FAR dq_frame_t *dq);
+void dq_saturate(FAR dq_frame_f32_t *dq, float max);
+float dq_mag(FAR dq_frame_f32_t *dq);
 
 /* PID controller functions */
 
-void pid_controller_init(FAR pid_controller_t *pid,
+void pid_controller_init(FAR pid_controller_f32_t *pid,
                          float KP, float KI, float KD);
-void pi_controller_init(FAR pid_controller_t *pid,
+void pi_controller_init(FAR pid_controller_f32_t *pid,
                         float KP, float KI);
-void pid_saturation_set(FAR pid_controller_t *pid, float min, float max);
-void pi_saturation_set(FAR pid_controller_t *pid, float min, float max);
-void pid_integral_reset(FAR pid_controller_t *pid);
-void pi_integral_reset(FAR pid_controller_t *pid);
-float pi_controller(FAR pid_controller_t *pid, float err);
-float pid_controller(FAR pid_controller_t *pid, float err);
+void pid_saturation_set(FAR pid_controller_f32_t *pid, float min, float max);
+void pi_saturation_set(FAR pid_controller_f32_t *pid, float min, float max);
+void pid_integral_reset(FAR pid_controller_f32_t *pid);
+void pi_integral_reset(FAR pid_controller_f32_t *pid);
+float pi_controller(FAR pid_controller_f32_t *pid, float err);
+float pid_controller(FAR pid_controller_f32_t *pid, float err);
 
 /* Transformation functions */
 
-void clarke_transform(FAR abc_frame_t *abc, FAR ab_frame_t *ab);
-void inv_clarke_transform(FAR ab_frame_t *ab, FAR abc_frame_t *abc);
-void park_transform(FAR phase_angle_t *angle, FAR ab_frame_t *ab,
-                    FAR dq_frame_t *dq);
-void inv_park_transform(FAR phase_angle_t *angle, FAR dq_frame_t *dq,
-                        FAR ab_frame_t *ab);
+void clarke_transform(FAR abc_frame_f32_t *abc, FAR ab_frame_f32_t *ab);
+void inv_clarke_transform(FAR ab_frame_f32_t *ab, FAR abc_frame_f32_t *abc);
+void park_transform(FAR phase_angle_f32_t *angle, FAR ab_frame_f32_t *ab,
+                    FAR dq_frame_f32_t *dq);
+void inv_park_transform(FAR phase_angle_f32_t *angle, FAR dq_frame_f32_t *dq,
+                        FAR ab_frame_f32_t *ab);
 
 /* Phase angle related functions */
 
 void angle_norm(FAR float *angle, float per, float bottom, float top);
 void angle_norm_2pi(FAR float *angle, float bottom, float top);
-void phase_angle_update(FAR struct phase_angle_s *angle, float val);
+void phase_angle_update(FAR struct phase_angle_f32_s *angle, float val);
 
 /* 3-phase system space vector modulation */
 
-void svm3_init(FAR struct svm3_state_s *s, float min, float max);
-void svm3(FAR struct svm3_state_s *s, FAR ab_frame_t *ab);
-void svm3_current_correct(FAR struct svm3_state_s *s,
+void svm3_init(FAR struct svm3_state_f32_s *s, float min, float max);
+void svm3(FAR struct svm3_state_f32_s *s, FAR ab_frame_f32_t *ab);
+void svm3_current_correct(FAR struct svm3_state_f32_s *s,
                           int32_t *c0, int32_t *c1, int32_t *c2);
 
 /* Field Oriented control */
 
-void foc_vbase_update(FAR struct foc_data_s *foc, float vbase);
-void foc_idq_ref_set(FAR struct foc_data_s *data, float d, float q);
+void foc_vbase_update(FAR struct foc_data_f32_s *foc, float vbase);
+void foc_idq_ref_set(FAR struct foc_data_f32_s *data, float d, float q);
 
-void foc_init(FAR struct foc_data_s *data,
+void foc_init(FAR struct foc_data_f32_s *data,
               float id_kp, float id_ki, float iq_kp, float iq_ki);
-void foc_process(FAR struct foc_data_s *foc,
-                 FAR abc_frame_t *i_abc,
-                 FAR phase_angle_t *angle);
+void foc_process(FAR struct foc_data_f32_s *foc,
+                 FAR abc_frame_f32_t *i_abc,
+                 FAR phase_angle_f32_t *angle);
 
 /* BLDC/PMSM motor observers */
 
-void motor_observer_init(FAR struct motor_observer_s *observer,
+void motor_observer_init(FAR struct motor_observer_f32_s *observer,
                          FAR void *ao, FAR void *so, float per);
-float motor_observer_speed_get(FAR struct motor_observer_s *o);
-float motor_observer_angle_get(FAR struct motor_observer_s *o);
+float motor_observer_speed_get(FAR struct motor_observer_f32_s *o);
+float motor_observer_angle_get(FAR struct motor_observer_f32_s *o);
 
-void motor_observer_smo_init(FAR struct motor_observer_smo_s *smo,
+void motor_observer_smo_init(FAR struct motor_observer_smo_f32_s *smo,
                              float kslide, float err_max);
-void motor_observer_smo(FAR struct motor_observer_s *o,
-                        FAR ab_frame_t *i_ab, FAR ab_frame_t *v_ab,
-                        FAR struct motor_phy_params_s *phy, float dir);
+void motor_observer_smo(FAR struct motor_observer_f32_s *o,
+                        FAR ab_frame_f32_t *i_ab, FAR ab_frame_f32_t *v_ab,
+                        FAR struct motor_phy_params_f32_s *phy, float dir);
 
-void motor_sobserver_div_init(FAR struct motor_sobserver_div_s *so,
+void motor_sobserver_div_init(FAR struct motor_sobserver_div_f32_s *so,
                               uint8_t samples, float filer, float per);
-void motor_sobserver_div(FAR struct motor_observer_s *o,
+void motor_sobserver_div(FAR struct motor_observer_f32_s *o,
                          float angle, float dir);
 
 /* Motor openloop control */
 
-void motor_openloop_init(FAR struct openloop_data_s *op,
+void motor_openloop_init(FAR struct openloop_data_f32_s *op,
                          float max, float per);
-void motor_openloop(FAR struct openloop_data_s *op, float speed, float dir);
-float motor_openloop_angle_get(FAR struct openloop_data_s *op);
+void motor_openloop(FAR struct openloop_data_f32_s *op, float speed,
+                    float dir);
+float motor_openloop_angle_get(FAR struct openloop_data_f32_s *op);
 
 /* Motor angle */
 
-void motor_angle_init(FAR struct motor_angle_s *angle, uint8_t p);
-void motor_angle_e_update(FAR struct motor_angle_s *angle,
+void motor_angle_init(FAR struct motor_angle_f32_s *angle, uint8_t p);
+void motor_angle_e_update(FAR struct motor_angle_f32_s *angle,
                           float angle_new, float dir);
-void motor_angle_m_update(FAR struct motor_angle_s *angle,
+void motor_angle_m_update(FAR struct motor_angle_f32_s *angle,
                           float angle_new, float dir);
-float motor_angle_m_get(FAR struct motor_angle_s *angle);
-float motor_angle_e_get(FAR struct motor_angle_s *angle);
+float motor_angle_m_get(FAR struct motor_angle_f32_s *angle);
+float motor_angle_e_get(FAR struct motor_angle_f32_s *angle);
 
 /* Motor physical parameters functions */
 
-void motor_phy_params_init(FAR struct motor_phy_params_s *phy, uint8_t poles,
-                            float res, float ind);
-void motor_phy_params_temp_set(FAR struct motor_phy_params_s *phy,
+void motor_phy_params_init(FAR struct motor_phy_params_f32_s *phy,
+                           uint8_t poles, float res, float ind);
+void motor_phy_params_temp_set(FAR struct motor_phy_params_f32_s *phy,
                                float res_alpha, float res_temp_ref);
 
 #undef EXTERN

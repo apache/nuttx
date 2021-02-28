@@ -51,7 +51,7 @@
  *
  ****************************************************************************/
 
-void motor_observer_init(FAR struct motor_observer_s *observer,
+void motor_observer_init(FAR struct motor_observer_f32_s *observer,
                          FAR void *ao, FAR void *so, float per)
 {
   DEBUGASSERT(observer != NULL);
@@ -61,7 +61,7 @@ void motor_observer_init(FAR struct motor_observer_s *observer,
 
   /* Reset observer data */
 
-  memset(observer, 0, sizeof(struct motor_observer_s));
+  memset(observer, 0, sizeof(struct motor_observer_f32_s));
 
   /* Set observer period */
 
@@ -92,9 +92,8 @@ void motor_observer_init(FAR struct motor_observer_s *observer,
  *
  ****************************************************************************/
 
-void motor_observer_smo_init(FAR struct motor_observer_smo_s *smo,
-                             float kslide,
-                             float err_max)
+void motor_observer_smo_init(FAR struct motor_observer_smo_f32_s *smo,
+                             float kslide, float err_max)
 {
   DEBUGASSERT(smo != NULL);
   DEBUGASSERT(kslide > 0.0f);
@@ -102,7 +101,7 @@ void motor_observer_smo_init(FAR struct motor_observer_smo_s *smo,
 
   /* Reset structure */
 
-  memset(smo, 0, sizeof(struct motor_observer_smo_s));
+  memset(smo, 0, sizeof(struct motor_observer_smo_f32_s));
 
   /* Initialize structure */
 
@@ -167,24 +166,24 @@ void motor_observer_smo_init(FAR struct motor_observer_smo_s *smo,
  *
  ****************************************************************************/
 
-void motor_observer_smo(FAR struct motor_observer_s *o, FAR ab_frame_t *i_ab,
-                        FAR ab_frame_t *v_ab,
-                        FAR struct motor_phy_params_s *phy, float dir)
+void motor_observer_smo(FAR struct motor_observer_f32_s *o,
+                        FAR ab_frame_f32_t *i_ab, FAR ab_frame_f32_t *v_ab,
+                        FAR struct motor_phy_params_f32_s *phy, float dir)
 {
   DEBUGASSERT(o != NULL);
   DEBUGASSERT(i_ab != NULL);
   DEBUGASSERT(v_ab != NULL);
   DEBUGASSERT(phy != NULL);
 
-  FAR struct motor_observer_smo_s *smo =
-    (FAR struct motor_observer_smo_s *)o->ao;
-  FAR ab_frame_t *emf    = &smo->emf;
-  FAR ab_frame_t *emf_f  = &smo->emf_f;
-  FAR ab_frame_t *z      = &smo->z;
-  FAR ab_frame_t *i_est  = &smo->i_est;
-  FAR ab_frame_t *v_err  = &smo->v_err;
-  FAR ab_frame_t *i_err  = &smo->i_err;
-  FAR ab_frame_t *sign   = &smo->sign;
+  FAR struct motor_observer_smo_f32_s *smo =
+    (FAR struct motor_observer_smo_f32_s *)o->ao;
+  FAR ab_frame_f32_t *emf    = &smo->emf;
+  FAR ab_frame_f32_t *emf_f  = &smo->emf_f;
+  FAR ab_frame_f32_t *z      = &smo->z;
+  FAR ab_frame_f32_t *i_est  = &smo->i_est;
+  FAR ab_frame_f32_t *v_err  = &smo->v_err;
+  FAR ab_frame_f32_t *i_err  = &smo->i_err;
+  FAR ab_frame_f32_t *sign   = &smo->sign;
   float i_err_a_abs  = 0.0f;
   float i_err_b_abs  = 0.0f;
   float angle        = 0.0f;
@@ -380,10 +379,8 @@ void motor_observer_smo(FAR struct motor_observer_s *o, FAR ab_frame_t *i_ab,
  *
  ****************************************************************************/
 
-void motor_sobserver_div_init(FAR struct motor_sobserver_div_s *so,
-                              uint8_t samples,
-                              float filter,
-                              float per)
+void motor_sobserver_div_init(FAR struct motor_sobserver_div_f32_s *so,
+                              uint8_t samples, float filter, float per)
 {
   DEBUGASSERT(so != NULL);
   DEBUGASSERT(samples > 0);
@@ -391,7 +388,7 @@ void motor_sobserver_div_init(FAR struct motor_sobserver_div_s *so,
 
   /* Reset observer data */
 
-  memset(so, 0, sizeof(struct motor_sobserver_div_s));
+  memset(so, 0, sizeof(struct motor_sobserver_div_f32_s));
 
   /* Store number of samples for DIV observer */
 
@@ -421,15 +418,15 @@ void motor_sobserver_div_init(FAR struct motor_sobserver_div_s *so,
  *
  ****************************************************************************/
 
-void motor_sobserver_div(FAR struct motor_observer_s *o,
-                          float angle, float dir)
+void motor_sobserver_div(FAR struct motor_observer_f32_s *o,
+                         float angle, float dir)
 {
   DEBUGASSERT(o != NULL);
   DEBUGASSERT(angle >= 0.0f && angle <= 2*M_PI_F);
   DEBUGASSERT(dir == DIR_CW || dir == DIR_CCW);
 
-  FAR struct motor_sobserver_div_s *so =
-    (FAR struct motor_sobserver_div_s *)o->so;
+  FAR struct motor_sobserver_div_f32_s *so =
+    (FAR struct motor_sobserver_div_f32_s *)o->so;
   volatile float omega = 0.0f;
 
   /* Get angle diff */
@@ -516,7 +513,7 @@ void motor_sobserver_div(FAR struct motor_observer_s *o,
  *
  ****************************************************************************/
 
-float motor_observer_speed_get(FAR struct motor_observer_s *o)
+float motor_observer_speed_get(FAR struct motor_observer_f32_s *o)
 {
   DEBUGASSERT(o != NULL);
 
@@ -537,7 +534,7 @@ float motor_observer_speed_get(FAR struct motor_observer_s *o)
  *
  ****************************************************************************/
 
-float motor_observer_angle_get(FAR struct motor_observer_s *o)
+float motor_observer_angle_get(FAR struct motor_observer_f32_s *o)
 {
   DEBUGASSERT(o != NULL);
 

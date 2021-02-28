@@ -45,11 +45,11 @@
  *
  ****************************************************************************/
 
-static void foc_current_control(FAR struct foc_data_s *foc)
+static void foc_current_control(FAR struct foc_data_f32_s *foc)
 {
-  FAR pid_controller_t *id_pid = &foc->id_pid;
-  FAR pid_controller_t *iq_pid = &foc->iq_pid;
-  FAR dq_frame_t       *v_dq  = &foc->v_dq;
+  FAR pid_controller_f32_t *id_pid = &foc->id_pid;
+  FAR pid_controller_f32_t *iq_pid = &foc->iq_pid;
+  FAR dq_frame_f32_t       *v_dq   = &foc->v_dq;
 
   /* Get dq current error */
 
@@ -88,7 +88,8 @@ static void foc_current_control(FAR struct foc_data_s *foc)
  *
  ****************************************************************************/
 
-static void foc_vab_mod_scale_set(FAR struct foc_data_s *foc, float scale)
+static void foc_vab_mod_scale_set(FAR struct foc_data_f32_s *foc,
+                                  float scale)
 {
   foc->vab_mod_scale = scale;
 }
@@ -108,7 +109,7 @@ static void foc_vab_mod_scale_set(FAR struct foc_data_s *foc, float scale)
  *
  ****************************************************************************/
 
-static void foc_vdq_mag_max_set(FAR struct foc_data_s *foc, float max)
+static void foc_vdq_mag_max_set(FAR struct foc_data_f32_s *foc, float max)
 {
   foc->vdq_mag_max = max;
 
@@ -140,12 +141,12 @@ static void foc_vdq_mag_max_set(FAR struct foc_data_s *foc, float max)
  *
  ****************************************************************************/
 
-void foc_init(FAR struct foc_data_s *foc,
+void foc_init(FAR struct foc_data_f32_s *foc,
               float id_kp, float id_ki, float iq_kp, float iq_ki)
 {
   /* Reset data */
 
-  memset(foc, 0, sizeof(struct foc_data_s));
+  memset(foc, 0, sizeof(struct foc_data_f32_s));
 
   /* Initialize PI current d component */
 
@@ -172,7 +173,7 @@ void foc_init(FAR struct foc_data_s *foc,
  *
  ****************************************************************************/
 
-void foc_idq_ref_set(FAR struct foc_data_s *foc, float d, float q)
+void foc_idq_ref_set(FAR struct foc_data_f32_s *foc, float d, float q)
 {
   foc->i_dq_ref.d = d;
   foc->i_dq_ref.q = q;
@@ -228,9 +229,9 @@ void foc_vbase_update(FAR struct foc_data_s *foc, float vbase)
  *
  ****************************************************************************/
 
-void foc_process(FAR struct foc_data_s *foc,
-                 FAR abc_frame_t *i_abc,
-                 FAR phase_angle_t *angle)
+void foc_process(FAR struct foc_data_f32_s *foc,
+                 FAR abc_frame_f32_t *i_abc,
+                 FAR phase_angle_f32_t *angle)
 {
   DEBUGASSERT(foc != NULL);
   DEBUGASSERT(i_abc != NULL);
