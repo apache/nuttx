@@ -42,7 +42,6 @@
  *
  * Input Parameters:
  *   op  - (in/out) pointer to the openloop data structure
- *   max - (in) maximum openloop speed
  *   per - (in) period of the open-loop control
  *
  * Returned Value:
@@ -50,11 +49,9 @@
  *
  ****************************************************************************/
 
-void motor_openloop_init(FAR struct openloop_data_f32_s *op, float max,
-                         float per)
+void motor_openloop_init(FAR struct openloop_data_f32_s *op, float per)
 {
   LIBDSP_DEBUGASSERT(op != NULL);
-  LIBDSP_DEBUGASSERT(max > 0.0f);
   LIBDSP_DEBUGASSERT(per > 0.0f);
 
   /* Reset openloop structure */
@@ -63,7 +60,6 @@ void motor_openloop_init(FAR struct openloop_data_f32_s *op, float max,
 
   /* Initialize data */
 
-  op->max = max;
   op->per = per;
 }
 
@@ -91,15 +87,6 @@ void motor_openloop(FAR struct openloop_data_f32_s *op, float speed,
   LIBDSP_DEBUGASSERT(dir == DIR_CW || dir == DIR_CCW);
 
   float phase_step = 0.0f;
-
-  /* REVISIT: what should we do if speed is greater than max open-loop speed?
-   *          Saturate speed or stop motor ?
-   */
-
-  if (speed > op->max)
-    {
-      speed = op->max;
-    }
 
   /* Get phase step */
 
