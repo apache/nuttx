@@ -177,17 +177,24 @@ typedef struct float_sat_f32_s float_sat_f32_t;
 
 struct pid_controller_f32_s
 {
-  float           out;          /* Controller output */
-  float_sat_f32_t sat;          /* Output saturation */
-  float           err;          /* Current error value */
-  float           err_prev;     /* Previous error value */
-  float           KP;           /* Proportional coefficient */
-  float           KI;           /* Integral coefficient */
-  float           KD;           /* Derivative coefficient */
-  float           part[3];      /* 0 - proporitonal part
-                                 * 1 - integral part
-                                 * 2 - derivative part
-                                 */
+  bool            aw_en;       /* Integral part decay if saturated */
+  bool            ireset_en;   /* Intergral part reset if saturated */
+  bool            pisat_en;    /* PI saturation enabled */
+  bool            pidsat_en;   /* PID saturation enabled */
+  bool            _res;        /* Reserved */
+  float           out;         /* Controller output */
+  float_sat_f32_t sat;         /* Output saturation */
+  float           err;         /* Current error value */
+  float           err_prev;    /* Previous error value */
+  float           KP;          /* Proportional coefficient */
+  float           KI;          /* Integral coefficient */
+  float           KD;          /* Derivative coefficient */
+  float           part[3];     /* 0 - proporitonal part
+                                * 1 - integral part
+                                * 2 - derivative part
+                                */
+  float           KC;          /* Integral anti-windup decay coefficient */
+  float           aw;          /* Integral anti-windup decay part */
 };
 
 typedef struct pid_controller_f32_s pid_controller_f32_t;
@@ -390,6 +397,9 @@ void pid_integral_reset(FAR pid_controller_f32_t *pid);
 void pi_integral_reset(FAR pid_controller_f32_t *pid);
 float pi_controller(FAR pid_controller_f32_t *pid, float err);
 float pid_controller(FAR pid_controller_f32_t *pid, float err);
+void pi_antiwindup_enable(FAR pid_controller_f32_t *pid, float KC,
+                          bool enable);
+void pi_ireset_enable(FAR pid_controller_f32_t *pid, bool enable);
 
 /* Transformation functions */
 
