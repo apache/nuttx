@@ -431,6 +431,10 @@ static int smps_start(FAR struct smps_dev_s *dev)
   /* Set PID controller saturation */
 
   pid_saturation_set(&priv->pid, 0.0, BOOST_VOLT_MAX);
+
+  /* Reset PI integral if saturated */
+
+  pi_ireset_enable(&priv->pid, true);
 #endif
 
   /* Get TIMA period value for given frequency */
