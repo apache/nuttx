@@ -46,14 +46,14 @@
  *
  ****************************************************************************/
 
-void pid_controller_init(FAR pid_controller_t *pid, float KP, float KI,
+void pid_controller_init(FAR pid_controller_f32_t *pid, float KP, float KI,
                          float KD)
 {
   DEBUGASSERT(pid != NULL);
 
   /* Reset controller data */
 
-  memset(pid, 0, sizeof(pid_controller_t));
+  memset(pid, 0, sizeof(pid_controller_f32_t));
 
   /* Copy controller parameters */
 
@@ -79,13 +79,13 @@ void pid_controller_init(FAR pid_controller_t *pid, float KP, float KI,
  *
  ****************************************************************************/
 
-void pi_controller_init(FAR pid_controller_t *pid, float KP, float KI)
+void pi_controller_init(FAR pid_controller_f32_t *pid, float KP, float KI)
 {
   DEBUGASSERT(pid != NULL);
 
   /* Reset controller data */
 
-  memset(pid, 0, sizeof(pid_controller_t));
+  memset(pid, 0, sizeof(pid_controller_f32_t));
 
   /* Copy controller parameters */
 
@@ -112,7 +112,7 @@ void pi_controller_init(FAR pid_controller_t *pid, float KP, float KI)
  *
  ****************************************************************************/
 
-void pid_saturation_set(FAR pid_controller_t *pid, float min, float max)
+void pid_saturation_set(FAR pid_controller_f32_t *pid, float min, float max)
 {
   DEBUGASSERT(pid != NULL);
   DEBUGASSERT(min < max);
@@ -136,7 +136,7 @@ void pid_saturation_set(FAR pid_controller_t *pid, float min, float max)
  *
  ****************************************************************************/
 
-void pi_saturation_set(FAR pid_controller_t *pid, float min, float max)
+void pi_saturation_set(FAR pid_controller_f32_t *pid, float min, float max)
 {
   DEBUGASSERT(pid != NULL);
   DEBUGASSERT(min < max);
@@ -148,7 +148,7 @@ void pi_saturation_set(FAR pid_controller_t *pid, float min, float max)
  * Name: pid_integral_reset
  ****************************************************************************/
 
-void pid_integral_reset(FAR pid_controller_t *pid)
+void pid_integral_reset(FAR pid_controller_f32_t *pid)
 {
   pid->part[1] = 0.0f;
 }
@@ -157,7 +157,7 @@ void pid_integral_reset(FAR pid_controller_t *pid)
  * Name: pi_integral_reset
  ****************************************************************************/
 
-void pi_integral_reset(FAR pid_controller_t *pid)
+void pi_integral_reset(FAR pid_controller_f32_t *pid)
 {
   pid_integral_reset(pid);
 }
@@ -177,7 +177,7 @@ void pi_integral_reset(FAR pid_controller_t *pid)
  *
  ****************************************************************************/
 
-float pi_controller(FAR pid_controller_t *pid, float err)
+float pi_controller(FAR pid_controller_f32_t *pid, float err)
 {
   DEBUGASSERT(pid != NULL);
 
@@ -252,7 +252,7 @@ float pi_controller(FAR pid_controller_t *pid, float err)
  *
  ****************************************************************************/
 
-float pid_controller(FAR pid_controller_t *pid, float err)
+float pid_controller(FAR pid_controller_f32_t *pid, float err)
 {
   DEBUGASSERT(pid != NULL);
 

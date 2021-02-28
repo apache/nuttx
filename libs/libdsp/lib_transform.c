@@ -50,8 +50,8 @@
  *
  ****************************************************************************/
 
-void clarke_transform(FAR abc_frame_t *abc,
-                      FAR ab_frame_t *ab)
+void clarke_transform(FAR abc_frame_f32_t *abc,
+                      FAR ab_frame_f32_t *ab)
 {
   DEBUGASSERT(abc != NULL);
   DEBUGASSERT(ab != NULL);
@@ -75,8 +75,8 @@ void clarke_transform(FAR abc_frame_t *abc,
  *
  ****************************************************************************/
 
-void inv_clarke_transform(FAR ab_frame_t *ab,
-                          FAR abc_frame_t *abc)
+void inv_clarke_transform(FAR ab_frame_f32_t *ab,
+                          FAR abc_frame_f32_t *abc)
 {
   DEBUGASSERT(ab != NULL);
   DEBUGASSERT(abc != NULL);
@@ -104,9 +104,9 @@ void inv_clarke_transform(FAR ab_frame_t *ab,
  *
  ****************************************************************************/
 
-void park_transform(FAR phase_angle_t *angle,
-                    FAR ab_frame_t *ab,
-                    FAR dq_frame_t *dq)
+void park_transform(FAR phase_angle_f32_t *angle,
+                    FAR ab_frame_f32_t *ab,
+                    FAR dq_frame_f32_t *dq)
 {
   DEBUGASSERT(angle != NULL);
   DEBUGASSERT(ab != NULL);
@@ -132,9 +132,9 @@ void park_transform(FAR phase_angle_t *angle,
  *
  ****************************************************************************/
 
-void inv_park_transform(FAR phase_angle_t *angle,
-                        FAR dq_frame_t *dq,
-                        FAR ab_frame_t *ab)
+void inv_park_transform(FAR phase_angle_f32_t *angle,
+                        FAR dq_frame_f32_t *dq,
+                        FAR ab_frame_f32_t *ab)
 {
   DEBUGASSERT(angle != NULL);
   DEBUGASSERT(dq != NULL);

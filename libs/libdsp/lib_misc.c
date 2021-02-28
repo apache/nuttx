@@ -138,7 +138,7 @@ void vector2d_saturate(FAR float *x, FAR float *y, float max)
  *
  ****************************************************************************/
 
-float dq_mag(FAR dq_frame_t *dq)
+float dq_mag(FAR dq_frame_f32_t *dq)
 {
   return vector2d_mag(dq->d, dq->q);
 }
@@ -158,7 +158,7 @@ float dq_mag(FAR dq_frame_t *dq)
  *
  ****************************************************************************/
 
-void dq_saturate(FAR dq_frame_t *dq, float max)
+void dq_saturate(FAR dq_frame_f32_t *dq, float max)
 {
   vector2d_saturate(&dq->d, &dq->q, max);
 }
@@ -433,7 +433,7 @@ void angle_norm_2pi(FAR float *angle, float bottom, float top)
  *
  ****************************************************************************/
 
-void phase_angle_update(FAR struct phase_angle_s *angle, float val)
+void phase_angle_update(FAR struct phase_angle_f32_s *angle, float val)
 {
   DEBUGASSERT(angle != NULL);
 
