@@ -233,9 +233,9 @@ void foc_process(FAR struct foc_data_f32_s *foc,
                  FAR abc_frame_f32_t *i_abc,
                  FAR phase_angle_f32_t *angle)
 {
-  DEBUGASSERT(foc != NULL);
-  DEBUGASSERT(i_abc != NULL);
-  DEBUGASSERT(angle != NULL);
+  LIBDSP_DEBUGASSERT(foc != NULL);
+  LIBDSP_DEBUGASSERT(i_abc != NULL);
+  LIBDSP_DEBUGASSERT(angle != NULL);
 
   /* Copy ABC current to foc data */
 

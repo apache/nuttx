@@ -44,9 +44,10 @@
 #  ifndef CONFIG_DEBUG_ASSERTIONS
 #    warning "Need CONFIG_DEBUG_ASSERTIONS to work properly"
 #  endif
+#  define LIBDSP_DEBUGASSERT(x) DEBUGASSERT(x)
 #else
-#  undef DEBUGASSERT
-#  define DEBUGASSERT(x)
+#  undef LIBDSP_DEBUGASSERT
+#  define LIBDSP_DEBUGASSERT(x)
 #endif
 
 #ifndef CONFIG_LIBDSP_PRECISION

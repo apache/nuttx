@@ -195,7 +195,7 @@ static void svm3_duty_calc(FAR struct svm3_state_f32_s *s,
         {
           /* We should not get here */
 
-          DEBUGASSERT(0);
+          LIBDSP_DEBUGASSERT(0);
           break;
         }
     }
@@ -260,7 +260,7 @@ static void svm3_duty_calc(FAR struct svm3_state_f32_s *s,
         {
           /* We should not get here */
 
-          DEBUGASSERT(0);
+          LIBDSP_DEBUGASSERT(0);
           break;
         }
     }
@@ -323,8 +323,8 @@ static void svm3_duty_calc(FAR struct svm3_state_f32_s *s,
 
 void svm3(FAR struct svm3_state_f32_s *s, FAR ab_frame_f32_t *v_ab)
 {
-  DEBUGASSERT(s != NULL);
-  DEBUGASSERT(v_ab != NULL);
+  LIBDSP_DEBUGASSERT(s != NULL);
+  LIBDSP_DEBUGASSERT(v_ab != NULL);
 
   abc_frame_f32_t ijk;
 
@@ -435,8 +435,8 @@ void svm3_current_correct(FAR struct svm3_state_f32_s *s,
 
 void svm3_init(FAR struct svm3_state_f32_s *s, float min, float max)
 {
-  DEBUGASSERT(s != NULL);
-  DEBUGASSERT(max > min);
+  LIBDSP_DEBUGASSERT(s != NULL);
+  LIBDSP_DEBUGASSERT(max > min);
 
   memset(s, 0, sizeof(struct svm3_state_f32_s));
 
