@@ -237,7 +237,6 @@ struct svm3_state_f32_s
 
 struct openloop_data_f32_s
 {
-  float max;           /* Open-loop max speed */
   float angle;         /* Open-loop current angle normalized to <0.0, 2PI> */
   float per;           /* Open-loop control execution period */
 };
@@ -445,8 +444,7 @@ void motor_sobserver_div(FAR struct motor_observer_f32_s *o,
 
 /* Motor openloop control */
 
-void motor_openloop_init(FAR struct openloop_data_f32_s *op,
-                         float max, float per);
+void motor_openloop_init(FAR struct openloop_data_f32_s *op, float per);
 void motor_openloop(FAR struct openloop_data_f32_s *op, float speed,
                     float dir);
 float motor_openloop_angle_get(FAR struct openloop_data_f32_s *op);
