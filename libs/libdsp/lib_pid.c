@@ -49,7 +49,7 @@
 void pid_controller_init(FAR pid_controller_f32_t *pid, float KP, float KI,
                          float KD)
 {
-  DEBUGASSERT(pid != NULL);
+  LIBDSP_DEBUGASSERT(pid != NULL);
 
   /* Reset controller data */
 
@@ -81,7 +81,7 @@ void pid_controller_init(FAR pid_controller_f32_t *pid, float KP, float KI,
 
 void pi_controller_init(FAR pid_controller_f32_t *pid, float KP, float KI)
 {
-  DEBUGASSERT(pid != NULL);
+  LIBDSP_DEBUGASSERT(pid != NULL);
 
   /* Reset controller data */
 
@@ -114,8 +114,8 @@ void pi_controller_init(FAR pid_controller_f32_t *pid, float KP, float KI)
 
 void pid_saturation_set(FAR pid_controller_f32_t *pid, float min, float max)
 {
-  DEBUGASSERT(pid != NULL);
-  DEBUGASSERT(min < max);
+  LIBDSP_DEBUGASSERT(pid != NULL);
+  LIBDSP_DEBUGASSERT(min < max);
 
   pid->sat.max = max;
   pid->sat.min = min;
@@ -138,8 +138,8 @@ void pid_saturation_set(FAR pid_controller_f32_t *pid, float min, float max)
 
 void pi_saturation_set(FAR pid_controller_f32_t *pid, float min, float max)
 {
-  DEBUGASSERT(pid != NULL);
-  DEBUGASSERT(min < max);
+  LIBDSP_DEBUGASSERT(pid != NULL);
+  LIBDSP_DEBUGASSERT(min < max);
 
   pid_saturation_set(pid, min, max);
 }
@@ -179,7 +179,7 @@ void pi_integral_reset(FAR pid_controller_f32_t *pid)
 
 float pi_controller(FAR pid_controller_f32_t *pid, float err)
 {
-  DEBUGASSERT(pid != NULL);
+  LIBDSP_DEBUGASSERT(pid != NULL);
 
   /* Store error in controller structure */
 
@@ -254,7 +254,7 @@ float pi_controller(FAR pid_controller_f32_t *pid, float err)
 
 float pid_controller(FAR pid_controller_f32_t *pid, float err)
 {
-  DEBUGASSERT(pid != NULL);
+  LIBDSP_DEBUGASSERT(pid != NULL);
 
   /* Get PI output */
 

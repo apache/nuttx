@@ -435,7 +435,7 @@ void angle_norm_2pi(FAR float *angle, float bottom, float top)
 
 void phase_angle_update(FAR struct phase_angle_f32_s *angle, float val)
 {
-  DEBUGASSERT(angle != NULL);
+  LIBDSP_DEBUGASSERT(angle != NULL);
 
   /* Normalize angle to <0.0, 2PI> */
 
