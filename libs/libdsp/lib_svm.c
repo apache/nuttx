@@ -312,9 +312,6 @@ static void svm3_duty_calc(FAR struct svm3_state_f32_s *s,
  * NOTE: v_ab vector magnitude must be in range <0.0, 1.0> to get correct
  *       SVM3 results.
  *
- * REVISIT: not sure how we should handle invalid data from user.
- *          For now we saturate output duty form SVM.
- *
  * REFERENCE:
  *   https://e2e.ti.com/group/motor/m/pdf_presentations/665547/download
  *     pages 32-34
@@ -344,11 +341,10 @@ void svm3(FAR struct svm3_state_f32_s *s, FAR ab_frame_f32_t *v_ab)
 
   svm3_duty_calc(s, &ijk);
 
-  /* Saturate output from SVM */
-
-  f_saturate(&s->d_u, s->d_min, s->d_max);
-  f_saturate(&s->d_v, s->d_min, s->d_max);
-  f_saturate(&s->d_w, s->d_min, s->d_max);
+  /* NOTE: we return not-saturated output. Duty-cycle saturation is
+   *       board-specific characteristic and we have not access to this
+   *       information here.
+   */
 }
 
 /****************************************************************************
@@ -361,7 +357,7 @@ void svm3(FAR struct svm3_state_f32_s *s, FAR ab_frame_f32_t *v_ab)
  ****************************************************************************/
 
 void svm3_current_correct(FAR struct svm3_state_f32_s *s,
-                          int32_t *c0, int32_t *c1, int32_t *c2)
+                          float *c0, float *c1, float *c2)
 {
   /* Get best ADC samples according to SVM sector.
    *
@@ -426,20 +422,15 @@ void svm3_current_correct(FAR struct svm3_state_f32_s *s,
  *
  * Input Parameters:
  *   s - (in/out) pointer to the SVM state data
- *   sat - (in)
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void svm3_init(FAR struct svm3_state_f32_s *s, float min, float max)
+void svm3_init(FAR struct svm3_state_f32_s *s)
 {
   LIBDSP_DEBUGASSERT(s != NULL);
-  LIBDSP_DEBUGASSERT(max > min);
 
   memset(s, 0, sizeof(struct svm3_state_f32_s));
-
-  s->d_max = max;
-  s->d_min = min;
 }
