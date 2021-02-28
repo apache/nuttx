@@ -29,9 +29,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: Clarke transform (abc frame -> ab frame)
+ * Name: clarke_transform
  *
  * Description:
+ *   Clarke transform (abc frame -> ab frame).
  *   Transform the abc frame to the alpha-beta frame.
  *
  *   i_alpha = k*(i_a - 0.5*i_b - 0.5*i_c)
@@ -61,9 +62,10 @@ void clarke_transform(FAR abc_frame_f32_t *abc,
 }
 
 /****************************************************************************
- * Name: Inverse Clarke transform (ab frame -> abc frame)
+ * Name: inv_clarke_transform
  *
  * Description:
+ *   Inverse Clarke transform (ab frame -> abc frame).
  *   Transform the alpha-beta frame to the abc frame.
  *
  * Input Parameters:
@@ -89,9 +91,10 @@ void inv_clarke_transform(FAR ab_frame_f32_t *ab,
 }
 
 /****************************************************************************
- * Name: Park transform (ab frame -> dq frame)
+ * Name: park_transform
  *
  * Description:
+ *   Park transform (ab frame -> dq frame).
  *   Transform the alpha-beta frame to the direct-quadrature frame.
  *
  * Input Parameters:
@@ -117,9 +120,10 @@ void park_transform(FAR phase_angle_f32_t *angle,
 }
 
 /****************************************************************************
- * Name: Inverse Park transform (dq frame -> ab frame)
+ * Name: inv_park_transform
  *
  * Description:
+ *   Inverse Park transform (dq frame -> ab frame).
  *   Transform direct-quadrature frame to alpha-beta frame.
  *
  * Input Parameters:
