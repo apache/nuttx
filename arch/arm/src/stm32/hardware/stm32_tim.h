@@ -162,12 +162,12 @@
 #define STM32_ATIM_DCR_OFFSET      0x0048  /* DMA control register (16-bit) */
 #define STM32_ATIM_DMAR_OFFSET     0x004c  /* DMA address for burst mode (16-bit) */
 
-/* *Note that many of the above registers are 32-bits wide on the F3 */
+/* Note that many of the above registers are 32-bits wide on the F3 */
 
 #ifdef HAVE_IP_TIMERS_V2
 #  define STM32_ATIM_CCMR3_OFFSET  0x0054  /* Capture/compare mode register 3 (32-bit) */
-#  define STM32_ATIM_CCR5_OFFSET   0x0058  /* Capture/compare register 4 (16-bit) */
-#  define STM32_ATIM_CCR6_OFFSET   0x005c  /* Capture/compare register 4 (32-bit) */
+#  define STM32_ATIM_CCR5_OFFSET   0x0058  /* Capture/compare register 5 (32-bit) */
+#  define STM32_ATIM_CCR6_OFFSET   0x005c  /* Capture/compare register 6 (32-bit) */
 #endif
 
 /* Register Addresses *******************************************************************************/
