@@ -40,13 +40,19 @@
  * a normal branch operation and instead, that the exception is complete.
  * Therefore, it starts the exception return sequence.
  *
- * Bits[4:0] of the EXC_RETURN value indicate the required return stack and eventual
+ * Bits[6:0] of the EXC_RETURN value indicate the required return stack and eventual
  * processor mode.  The remaining bits of the EXC_RETURN value should be set to 1.
  */
 
 /* EXC_RETURN_BASE: Bits that are always set in an EXC_RETURN value. */
 
-#define EXC_RETURN_BASE          0xffffffe1
+#define EXC_RETURN_BASE          0xffffff80
+
+/* EXC_RETURN_EXC_SECURE: Exception Secure.  The security domain the exception
+ * was taken to.  If this bit is clear non-secure, else secure.
+ */
+
+#define EXC_RETURN_EXC_SECURE    (1 << 0)
 
 /* EXC_RETURN_PROCESS_STACK: The exception saved (and will restore) the hardware
  * context using the process stack pointer (if not set, the context was saved
@@ -68,21 +74,40 @@
 
 #define EXC_RETURN_STD_CONTEXT   (1 << 4)
 
+/* EXC_RETURN_DEF_STACKING: Default callee register stacking (DCRS).  Indicates
+ * whether the default stacking rules apply, or whether the callee registers are
+ * already on the stack.  The possible values of this bit are: 0 - Stacking of
+ * the callee saved registers skipped.  1 - Default rules for stacking the
+ * callee registers followed.
+ */
+
+#define EXC_RETURN_DEF_STACKING  (1 << 5)
+
+/* EXC_RETURN_SECURE_STACK: Secure or Non-secure stack.  Indicates whether a
+ * Secure or Non-secure stack is used to restore stack frame on exception
+ * return.  The possible values of this bit are: 0 -  Non-secure stack used.
+ * 1 - Secure stack used.
+ */
+
+#define EXC_RETURN_SECURE_STACK  (1 << 6)
+
 /* EXC_RETURN_HANDLER: Return to handler mode. Exception return gets state from
  * the main stack. Execution uses MSP after return.
  */
 
-#define EXC_RETURN_HANDLER       0xfffffff1
+#define EXC_RETURN_HANDLER       (EXC_RETURN_BASE | EXC_RETURN_DEF_STACKING | \
+                                  EXC_RETURN_STD_CONTEXT)
 
 /* EXC_RETURN_PRIVTHR: Return to privileged thread mode. Exception return gets
  * state from the main stack. Execution uses MSP after return.
  */
 
 #if !defined(CONFIG_ARMV8M_LAZYFPU) && defined(CONFIG_ARCH_FPU)
-#  define EXC_RETURN_PRIVTHR     (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE)
+#  define EXC_RETURN_PRIVTHR     (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE | \
+                                  EXC_RETURN_DEF_STACKING)
 #else
 #  define EXC_RETURN_PRIVTHR     (EXC_RETURN_BASE | EXC_RETURN_STD_CONTEXT | \
-                                  EXC_RETURN_THREAD_MODE)
+                                  EXC_RETURN_THREAD_MODE | EXC_RETURN_DEF_STACKING)
 #endif
 
 /* EXC_RETURN_UNPRIVTHR: Return to unprivileged thread mode. Exception return gets
@@ -91,10 +116,11 @@
 
 #if !defined(CONFIG_ARMV8M_LAZYFPU) && defined(CONFIG_ARCH_FPU)
 #  define EXC_RETURN_UNPRIVTHR   (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE | \
-                                  EXC_RETURN_PROCESS_STACK)
+                                  EXC_RETURN_PROCESS_STACK | EXC_RETURN_DEF_STACKING)
 #else
 #  define EXC_RETURN_UNPRIVTHR   (EXC_RETURN_BASE | EXC_RETURN_STD_CONTEXT | \
-                                  EXC_RETURN_THREAD_MODE | EXC_RETURN_PROCESS_STACK)
+                                  EXC_RETURN_THREAD_MODE | EXC_RETURN_PROCESS_STACK | \
+                                  EXC_RETURN_DEF_STACKING)
 #endif
 
 /************************************************************************************
