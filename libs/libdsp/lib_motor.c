@@ -365,38 +365,10 @@ void motor_phy_params_init(FAR struct motor_phy_params_f32_s *phy,
 {
   LIBDSP_DEBUGASSERT(phy != NULL);
 
+  memset(phy, 0, sizeof(struct motor_phy_params_f32_s));
+
   phy->p          = poles;
-  phy->res_base   = res;
+  phy->res        = res;
   phy->ind        = ind;
-  phy->one_by_ind = 1.0f / ind;
-
-  /* Initialize with zeros */
-
-  phy->res          = 0.0f;
-  phy->res_alpha    = 0.0f;
-  phy->res_temp_ref = 0.0f;
-}
-
-/****************************************************************************
- * Name: motor_phy_params_temp_set
- * Description:
- *   Initialize motor physical temperature parameters
- *
- * Input Parameters:
- *   phy          - (in/out) pointer to the motor physical parameters
- *   res_alpha    - (in) temperature coefficient of the winding resistance
- *   res_temp_ref - (in) reference temperature for alpha
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void motor_phy_params_temp_set(FAR struct motor_phy_params_f32_s *phy,
-                               float res_alpha, float res_temp_ref)
-{
-  LIBDSP_DEBUGASSERT(phy != NULL);
-
-  phy->res_alpha    = res_alpha;
-  phy->res_temp_ref = res_temp_ref;
+  phy->one_by_ind = (1.0f / ind);
 }

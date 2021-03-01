@@ -324,9 +324,6 @@ struct motor_phy_params_f32_s
   float   res;                 /* Phase-to-neutral temperature compensated
                                 * resistance
                                 */
-  float   res_base;            /* Phase-to-neutral base resistance */
-  float   res_alpha;           /* Temperature coefficient of resistance */
-  float   res_temp_ref;        /* Reference temperature of alpha */
   float   ind;                 /* Average phase-to-neutral inductance */
   float   one_by_ind;          /* Inverse phase-to-neutral inductance */
 };
