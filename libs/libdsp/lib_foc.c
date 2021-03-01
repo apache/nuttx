@@ -32,24 +32,28 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: foc_current_control
+ * Name: foc_current_controler
  *
  * Description:
- *   This function implements FOC current control algorithm.
+ *   This function implements FOC current controler algorithm.
  *
  * Input Parameters:
- *   foc - (in/out) pointer to the FOC data
+ *   foc      - (in/out) pointer to the FOC data
+ *   v_dq_req - (in) pointer to the voltage DQ request frame
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void foc_current_control(FAR struct foc_data_f32_s *foc)
+static void foc_current_controler(FAR struct foc_data_f32_s *foc,
+                                  FAR dq_frame_f32_t *v_dq_req)
 {
   FAR pid_controller_f32_t *id_pid = &foc->id_pid;
   FAR pid_controller_f32_t *iq_pid = &foc->iq_pid;
-  FAR dq_frame_f32_t       *v_dq   = &foc->v_dq;
+
+  LIBDSP_DEBUGASSERT(foc != NULL);
+  LIBDSP_DEBUGASSERT(v_dq_req != NULL);
 
   /* Get dq current error */
 
@@ -60,18 +64,11 @@ static void foc_current_control(FAR struct foc_data_f32_s *foc)
 
   /* PI controller for d-current (flux loop) */
 
-  v_dq->d = pi_controller(id_pid, foc->i_dq_err.d);
+  v_dq_req->d = pi_controller(id_pid, foc->i_dq_err.d);
 
   /* PI controller for q-current (torque loop) */
 
-  v_dq->q = pi_controller(iq_pid, foc->i_dq_err.q);
-
-  /* Saturate voltage DQ vector.
-   * The maximum DQ voltage magnitude depends on the maximum possible
-   * phase voltage and the maximum supported duty cycle.
-   */
-
-  dq_saturate(v_dq, foc->vdq_mag_max);
+  v_dq_req->q = pi_controller(iq_pid, foc->i_dq_err.q);
 }
 
 /****************************************************************************
@@ -91,6 +88,8 @@ static void foc_current_control(FAR struct foc_data_f32_s *foc)
 static void foc_vab_mod_scale_set(FAR struct foc_data_f32_s *foc,
                                   float scale)
 {
+  LIBDSP_DEBUGASSERT(foc != NULL);
+
   foc->vab_mod_scale = scale;
 }
 
@@ -111,12 +110,64 @@ static void foc_vab_mod_scale_set(FAR struct foc_data_f32_s *foc,
 
 static void foc_vdq_mag_max_set(FAR struct foc_data_f32_s *foc, float max)
 {
+  LIBDSP_DEBUGASSERT(foc != NULL);
+
   foc->vdq_mag_max = max;
 
   /* Update regulators saturation */
 
   pi_saturation_set(&foc->id_pid, -foc->vdq_mag_max, foc->vdq_mag_max);
   pi_saturation_set(&foc->iq_pid, -foc->vdq_mag_max, foc->vdq_mag_max);
+}
+
+/****************************************************************************
+ * Name: foc_vdq_ref_set
+ *
+ * Description:
+ *   Set dq requested voltage vector
+ *
+ * Input Parameters:
+ *   foc     - (in/out) pointer to the FOC data
+ *   vdq_ref - (in) pointer to the requested idq voltage
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void foc_vdq_ref_set(FAR struct foc_data_f32_s *foc,
+                            FAR dq_frame_f32_t *vdq_ref)
+{
+  LIBDSP_DEBUGASSERT(foc != NULL);
+  LIBDSP_DEBUGASSERT(vdq_ref != NULL);
+
+  foc->v_dq.d = vdq_ref->d;
+  foc->v_dq.q = vdq_ref->q;
+}
+
+/****************************************************************************
+ * Name: foc_idq_ref_set
+ *
+ * Description:
+ *   Set dq reference current vector
+ *
+ * Input Parameters:
+ *   foc     - (in/out) pointer to the FOC data
+ *   idq_ref - (in) pointer to the reference idq current
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void foc_idq_ref_set(FAR struct foc_data_f32_s *foc,
+                            FAR dq_frame_f32_t *idq_ref)
+{
+  LIBDSP_DEBUGASSERT(foc != NULL);
+  LIBDSP_DEBUGASSERT(idq_ref != NULL);
+
+  foc->i_dq_ref.d = idq_ref->d;
+  foc->i_dq_ref.q = idq_ref->q;
 }
 
 /****************************************************************************
@@ -130,11 +181,8 @@ static void foc_vdq_mag_max_set(FAR struct foc_data_f32_s *foc, float max)
  *   Initialize FOC controller
  *
  * Input Parameters:
- *   foc   - (in/out) pointer to the FOC data
- *   id_kp - (in) KP for d current
- *   id_ki - (in) KI for d current
- *   iq_kp - (in) KP for q current
- *   iq_ki - (in) KI for q current
+ *   foc  - (in/out) pointer to the FOC data
+ *   init - (in) pointer to the FOC initialization data
  *
  * Returned Value:
  *   None
@@ -142,7 +190,7 @@ static void foc_vdq_mag_max_set(FAR struct foc_data_f32_s *foc, float max)
  ****************************************************************************/
 
 void foc_init(FAR struct foc_data_f32_s *foc,
-              float id_kp, float id_ki, float iq_kp, float iq_ki)
+              FAR struct foc_initdata_f32_s *init)
 {
   /* Reset data */
 
@@ -150,40 +198,28 @@ void foc_init(FAR struct foc_data_f32_s *foc,
 
   /* Initialize PI current d component */
 
-  pi_controller_init(&foc->id_pid, id_kp, id_ki);
+  pi_controller_init(&foc->id_pid, init->id_kp, init->id_ki);
 
   /* Initialize PI current q component */
 
-  pi_controller_init(&foc->iq_pid, iq_kp, iq_ki);
-}
+  pi_controller_init(&foc->iq_pid, init->iq_kp, init->iq_ki);
 
-/****************************************************************************
- * Name: foc_idq_ref_set
- *
- * Description:
- *   Set dq reference current vector
- *
- * Input Parameters:
- *   foc - (in/out) pointer to the FOC data
- *   d   - (in) reference d current
- *   q   - (in) reference q current
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+  /* Disable PI intergral part reset when saturated */
 
-void foc_idq_ref_set(FAR struct foc_data_f32_s *foc, float d, float q)
-{
-  foc->i_dq_ref.d = d;
-  foc->i_dq_ref.q = q;
+  pi_ireset_enable(&foc->iq_pid, false);
+  pi_ireset_enable(&foc->id_pid, false);
+
+  /* Enable PI anti-windup protection */
+
+  pi_antiwindup_enable(&foc->iq_pid, 0.99, true);
+  pi_antiwindup_enable(&foc->id_pid, 0.99, true);
 }
 
 /****************************************************************************
  * Name: foc_vbase_update
  *
  * Description:
- *  Update base voltage for FOC controller
+ *   Update base voltage for FOC controller
  *
  * Input Parameters:
  *   foc   - (in/out) pointer to the FOC data
@@ -194,48 +230,87 @@ void foc_idq_ref_set(FAR struct foc_data_f32_s *foc, float d, float q)
  *
  ****************************************************************************/
 
-void foc_vbase_update(FAR struct foc_data_s *foc, float vbase)
+void foc_vbase_update(FAR struct foc_data_f32_s *foc, float vbase)
 {
   float scale   = 0.0f;
   float mag_max = 0.0f;
 
-  /* Only if voltage is valid */
+  /* Prevent division by zero */
 
-  if (vbase >= 0.0f)
+  if (vbase < 1e-10f)
     {
-      scale = 1.0f / vbase;
-      mag_max = vbase;
+      vbase = 1e-10f;
     }
+
+  /* NOTE: this is base voltage for FOC, not bus voltage! */
+
+  scale = (1.0f / vbase);
+  mag_max = vbase;
+
+  /* Update */
 
   foc_vab_mod_scale_set(foc, scale);
   foc_vdq_mag_max_set(foc, mag_max);
 }
 
 /****************************************************************************
- * Name: foc_process
+ * Name: foc_angle_update
  *
  * Description:
- *   Process FOC (Field Oriented Control)
+ *   Update FOC data with new motor phase angle.
  *
  * Input Parameters:
  *   foc   - (in/out) pointer to the FOC data
- *   i_abc - (in) pointer to the ABC current frame
  *   angle - (in) pointer to the phase angle data
  *
  * Returned Value:
  *   None
  *
- * TODO: add some reference and a brief description of the FOC
+ ****************************************************************************/
+
+void foc_angle_update(FAR struct foc_data_f32_s *foc,
+                      FAR phase_angle_f32_t *angle)
+{
+  LIBDSP_DEBUGASSERT(foc != NULL);
+  LIBDSP_DEBUGASSERT(angle != NULL);
+
+  /* Copy angle to foc data */
+
+  foc->angle.angle = angle->angle;
+  foc->angle.sin   = angle->sin;
+  foc->angle.cos   = angle->cos;
+}
+
+/****************************************************************************
+ * Name: foc_iabc_update
+ *
+ * Description:
+ *   Update FOC data with new iabc frame.
+ *
+ *   To work properly this function requires some additional steps:
+ *     1. phase angle must be set with foc_angle_update()
+ *
+ * Input Parameters:
+ *   foc   - (in/out) pointer to the FOC data
+ *   i_abc - (in) pointer to the ABC current frame
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-void foc_process(FAR struct foc_data_f32_s *foc,
-                 FAR abc_frame_f32_t *i_abc,
-                 FAR phase_angle_f32_t *angle)
+void foc_iabc_update(FAR struct foc_data_f32_s *foc,
+                     FAR abc_frame_f32_t *i_abc)
 {
+  dq_frame_f32_t i_dq;
+
   LIBDSP_DEBUGASSERT(foc != NULL);
   LIBDSP_DEBUGASSERT(i_abc != NULL);
-  LIBDSP_DEBUGASSERT(angle != NULL);
+
+  /* Reset data */
+
+  i_dq.d = 0;
+  i_dq.q = 0;
 
   /* Copy ABC current to foc data */
 
@@ -249,15 +324,47 @@ void foc_process(FAR struct foc_data_f32_s *foc,
 
   /* Convert alpha-beta current to dq current */
 
-  park_transform(angle, &foc->i_ab, &foc->i_dq);
+  park_transform(&foc->angle, &foc->i_ab, &i_dq);
 
-  /* Run FOC current control (current dq -> voltage dq) */
+  /* Store dq current */
 
-  foc_current_control(foc);
+  foc->i_dq.d = i_dq.d;
+  foc->i_dq.q = i_dq.q;
+}
+
+/****************************************************************************
+ * Name: foc_voltage_control
+ *
+ * Description:
+ *   Process FOC voltage control.
+ *
+ * Input Parameters:
+ *   foc     - (in/out) pointer to the FOC data
+ *   vdq_ref - (in) voltage dq reference frame
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void foc_voltage_control(FAR struct foc_data_f32_s *foc,
+                         FAR dq_frame_f32_t *vdq_ref)
+{
+  LIBDSP_DEBUGASSERT(foc != NULL);
+
+  /* Update VDQ request */
+
+  foc_vdq_ref_set(foc, vdq_ref);
 
   /* Inverse Park transform (voltage dq -> voltage alpha-beta) */
 
-  inv_park_transform(angle, &foc->v_dq, &foc->v_ab);
+  inv_park_transform(&foc->angle, &foc->v_dq, &foc->v_ab);
+
+#ifdef CONFIG_LIBDSP_FOC_VABC
+  /* Inverse Clarke transform (voltage alpha-beta -> voltage abc) */
+
+  inv_clarke_transform(&foc->v_ab, &foc->v_abc);
+#endif
 
   /* Normalize the alpha-beta voltage to get the alpha-beta modulation
    * voltage
@@ -265,4 +372,92 @@ void foc_process(FAR struct foc_data_f32_s *foc,
 
   foc->v_ab_mod.a = foc->v_ab.a * foc->vab_mod_scale;
   foc->v_ab_mod.b = foc->v_ab.b * foc->vab_mod_scale;
+}
+
+/****************************************************************************
+ * Name: foc_current_control
+ *
+ * Description:
+ *   Process FOC current control.
+ *
+ * Input Parameters:
+ *   foc      - (in/out) pointer to the FOC data
+ *   idq_ref  - (in) current dq reference frame
+ *   vdq_comp - (in) voltage dq compensation frame
+ *   vdq_ref  - (out) voltage dq reference frame
+ *
+ * Returned Value:
+ *   None
+ *
+ * TODO: add some reference and a brief description of the FOC
+ *
+ ****************************************************************************/
+
+void foc_current_control(FAR struct foc_data_f32_s *foc,
+                         FAR dq_frame_f32_t *idq_ref,
+                         FAR dq_frame_f32_t *vdq_comp,
+                         FAR dq_frame_f32_t *vdq_ref)
+{
+  LIBDSP_DEBUGASSERT(foc != NULL);
+
+  /* Update IDQ reference */
+
+  foc_idq_ref_set(foc, idq_ref);
+
+  /* Run FOC current controler (current dq -> voltage dq) */
+
+  foc_current_controler(foc, vdq_ref);
+
+  /* DQ voltage compensation */
+
+  vdq_ref->d = vdq_ref->d - vdq_comp->d;
+  vdq_ref->q = vdq_ref->q - vdq_comp->q;
+}
+
+/****************************************************************************
+ * Name: foc_vabmod_get
+ *
+ * Description:
+ *   Get result from the FOC controler (foc_current_control or
+ *   foc_voltage_control)
+ *
+ * Input Parameters:
+ *   foc      - (in/out) pointer to the FOC data
+ *   v_ab_mod - (out) pointer to the voltage alpha-beta modulation frame
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void foc_vabmod_get(FAR struct foc_data_f32_s *foc,
+                    FAR ab_frame_f32_t *v_ab_mod)
+{
+  LIBDSP_DEBUGASSERT(foc != NULL);
+  LIBDSP_DEBUGASSERT(v_ab_mod != NULL);
+
+  v_ab_mod->a = foc->v_ab_mod.a;
+  v_ab_mod->b = foc->v_ab_mod.b;
+}
+
+/****************************************************************************
+ * Name: foc_vdq_mag_max_get
+ *
+ * Description:
+ *   Get maximum dq voltage vector magnitude
+ *
+ * Input Parameters:
+ *   foc - (in/out) pointer to the FOC data
+ *   max - (out) maximum dq voltage magnitude
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void foc_vdq_mag_max_get(FAR struct foc_data_f32_s *foc, FAR float *max)
+{
+  LIBDSP_DEBUGASSERT(foc != NULL);
+
+  *max = foc->vdq_mag_max;
 }

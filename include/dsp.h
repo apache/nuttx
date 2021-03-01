@@ -329,31 +329,43 @@ struct motor_phy_params_f32_s
   float   one_by_ind;          /* Inverse phase-to-neutral inductance */
 };
 
-/* Field oriented control (FOC) data
- * REVISIT:
- */
+/* FOC initialize data */
+
+struct foc_initdata_f32_s
+{
+  float id_kp;                  /* KP for d current */
+  float id_ki;                  /* KI for d current */
+  float iq_kp;                  /* KP for q current */
+  float iq_ki;                  /* KI for q current */
+};
+
+/* Field Oriented Control (FOC) data */
 
 struct foc_data_f32_s
 {
   abc_frame_f32_t  v_abc;    /* Voltage in ABC frame */
   ab_frame_f32_t   v_ab;     /* Voltage in alpha-beta frame */
-  dq_frame_f32_t   v_dq;     /* Voltage in dq frame */
+  dq_frame_f32_t   v_dq;     /* Requested voltage in dq frame */
   ab_frame_f32_t   v_ab_mod; /* Modulation voltage normalized to
                               * magnitude (0.0, 1.0)
                               */
 
   abc_frame_f32_t  i_abc;    /* Current in ABC frame */
-  ab_frame_f32_t   i_ab;     /* Current in apha-beta frame */
+  ab_frame_f32_t   i_ab;     /* Current in alpha-beta frame */
   dq_frame_f32_t   i_dq;     /* Current in dq frame */
   dq_frame_f32_t   i_dq_err; /* DQ current error */
 
-  dq_frame_f32_t   i_dq_ref; /* Current dq reference frame */
+  dq_frame_f32_t   i_dq_ref; /* Requested current for the FOC
+                              * current controler
+                              */
 
-  pid_controller_f32_t id_pid;   /* Current d-axis component PI controller */
-  pid_controller_f32_t iq_pid;   /* Current q-axis component PI controller */
+  pid_controller_f32_t id_pid; /* Current d-axis component PI controller */
+  pid_controller_f32_t iq_pid; /* Current q-axis component PI controller */
 
   float vdq_mag_max;         /* Maximum dq voltage magnitude */
   float vab_mod_scale;       /* Voltage alpha-beta modulation scale */
+
+  phase_angle_f32_t   angle; /* Phase angle */
 };
 
 /****************************************************************************
@@ -423,16 +435,24 @@ void svm3(FAR struct svm3_state_f32_s *s, FAR ab_frame_f32_t *ab);
 void svm3_current_correct(FAR struct svm3_state_f32_s *s,
                           float *c0, float *c1, float *c2);
 
-/* Field Oriented control */
+/* Field Oriented Control */
 
+void foc_init(FAR struct foc_data_f32_s *foc,
+              FAR struct foc_initdata_f32_s *init);
 void foc_vbase_update(FAR struct foc_data_f32_s *foc, float vbase);
-void foc_idq_ref_set(FAR struct foc_data_f32_s *data, float d, float q);
-
-void foc_init(FAR struct foc_data_f32_s *data,
-              float id_kp, float id_ki, float iq_kp, float iq_ki);
-void foc_process(FAR struct foc_data_f32_s *foc,
-                 FAR abc_frame_f32_t *i_abc,
-                 FAR phase_angle_f32_t *angle);
+void foc_angle_update(FAR struct foc_data_f32_s *foc,
+                      FAR phase_angle_f32_t *angle);
+void foc_iabc_update(FAR struct foc_data_f32_s *foc,
+                     FAR abc_frame_f32_t *i_abc);
+void foc_voltage_control(FAR struct foc_data_f32_s *foc,
+                         FAR dq_frame_f32_t *vdq_ref);
+void foc_current_control(FAR struct foc_data_f32_s *foc,
+                         FAR dq_frame_f32_t *idq_ref,
+                         FAR dq_frame_f32_t *vdq_comp,
+                         FAR dq_frame_f32_t *v_dq_ref);
+void foc_vabmod_get(FAR struct foc_data_f32_s *foc,
+                    FAR ab_frame_f32_t *v_ab_mod);
+void foc_vdq_mag_max_get(FAR struct foc_data_f32_s *foc, FAR float *max);
 
 /* BLDC/PMSM motor observers */
 
