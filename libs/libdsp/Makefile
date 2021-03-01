@@ -28,6 +28,7 @@ CSRCS += lib_observer.c
 CSRCS += lib_foc.c
 CSRCS += lib_misc.c
 CSRCS += lib_motor.c
+CSRCS += lib_pmsm_model.c
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
