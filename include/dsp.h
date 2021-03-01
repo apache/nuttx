@@ -252,11 +252,11 @@ struct openloop_data_f32_s
 
 struct motor_observer_f32_s
 {
-  float angle;               /* Estimated observer angle */
-  float speed;               /* Estimated observer speed */
-  float per;                 /* Observer execution period */
+  float angle;             /* Estimated observer angle */
+  float speed;             /* Estimated observer speed */
+  float per;               /* Observer execution period */
 
-  float angle_err;           /* Observer angle error.
+  float angle_err;         /* Observer angle error.
                               * This can be used to gradually eliminate
                               * error between openloop angle and observer
                               * angle
@@ -274,13 +274,13 @@ struct motor_observer_f32_s
 
 struct motor_sobserver_div_f32_s
 {
-  float angle_diff;             /* Mechanical angle difference */
-  float angle_acc;              /* Accumulated mechanical angle */
-  float angle_prev;             /* Previous mechanical angle */
-  float one_by_dt;              /* Frequency of observer execution */
-  float cntr;                   /* Sample counter */
-  float samples;                /* Number of samples for observer */
-  float filter;                 /* Low-pass filter for final omega */
+  float angle_diff;           /* Mechanical angle difference */
+  float angle_acc;            /* Accumulated mechanical angle */
+  float angle_prev;           /* Previous mechanical angle */
+  float one_by_dt;            /* Frequency of observer execution */
+  float cntr;                 /* Sample counter */
+  float samples;              /* Number of samples for observer */
+  float filter;               /* Low-pass filter for final omega */
 };
 
 /* Speed observer PLL method data */
@@ -297,6 +297,7 @@ struct motor_observer_smo_f32_s
 {
   float k_slide;        /* Bang-bang controller gain */
   float err_max;        /* Linear mode threshold */
+  float one_by_err_max; /* One by err_max */
   float F;              /* Current observer F gain (1-Ts*R/L) */
   float G;              /* Current observer G gain (Ts/L) */
   float emf_lp_filter1; /* Adaptive first low pass EMF filter */
