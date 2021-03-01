@@ -10416,12 +10416,12 @@ config STM32_DMA2D_REGDEBUG
 endmenu
 endif # STM32_DMA2D
 
-menu "QEncoder Driver"
+menu "STM32 QEncoder Driver"
 	depends on SENSORS_QENCODER
 	depends on STM32_TIM1 || STM32_TIM2 || STM32_TIM3 || STM32_TIM4 || STM32_TIM5 || STM32_TIM8
 
 config STM32_TIM1_QE
-	bool "TIM1"
+	bool "TIM1 QE"
 	default n
 	depends on STM32_TIM1
 	---help---
@@ -10430,7 +10430,7 @@ config STM32_TIM1_QE
 if STM32_TIM1_QE
 
 config STM32_TIM1_QEPSC
-	int "TIM1 pulse prescaler"
+	int "TIM1 QE pulse prescaler"
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -10439,7 +10439,7 @@ config STM32_TIM1_QEPSC
 endif
 
 config STM32_TIM2_QE
-	bool "TIM2"
+	bool "TIM2 QE"
 	default n
 	depends on STM32_TIM2
 	---help---
@@ -10448,7 +10448,7 @@ config STM32_TIM2_QE
 if STM32_TIM2_QE
 
 config STM32_TIM2_QEPSC
-	int "TIM2 pulse prescaler"
+	int "TIM2 QE pulse prescaler"
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -10457,7 +10457,7 @@ config STM32_TIM2_QEPSC
 endif
 
 config STM32_TIM3_QE
-	bool "TIM3"
+	bool "TIM3 QE"
 	default n
 	depends on STM32_TIM3
 	---help---
@@ -10466,7 +10466,7 @@ config STM32_TIM3_QE
 if STM32_TIM3_QE
 
 config STM32_TIM3_QEPSC
-	int "TIM3 pulse prescaler"
+	int "TIM3 QE pulse prescaler"
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -10475,7 +10475,7 @@ config STM32_TIM3_QEPSC
 endif
 
 config STM32_TIM4_QE
-	bool "TIM4"
+	bool "TIM4 QE"
 	default n
 	depends on STM32_TIM4
 	---help---
@@ -10484,7 +10484,7 @@ config STM32_TIM4_QE
 if STM32_TIM4_QE
 
 config STM32_TIM4_QEPSC
-	int "TIM4 pulse prescaler"
+	int "TIM4 QE pulse prescaler"
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -10493,7 +10493,7 @@ config STM32_TIM4_QEPSC
 endif
 
 config STM32_TIM5_QE
-	bool "TIM5"
+	bool "TIM5 QE"
 	default n
 	depends on STM32_TIM5
 	---help---
@@ -10502,7 +10502,7 @@ config STM32_TIM5_QE
 if STM32_TIM5_QE
 
 config STM32_TIM5_QEPSC
-	int "TIM5 pulse prescaler"
+	int "TIM5 QE pulse prescaler"
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -10511,7 +10511,7 @@ config STM32_TIM5_QEPSC
 endif
 
 config STM32_TIM8_QE
-	bool "TIM8"
+	bool "TIM8 QE"
 	default n
 	depends on STM32_TIM8
 	---help---
@@ -10520,7 +10520,7 @@ config STM32_TIM8_QE
 if STM32_TIM8_QE
 
 config STM32_TIM8_QEPSC
-	int "TIM8 pulse prescaler"
+	int "TIM8 QE pulse prescaler"
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
