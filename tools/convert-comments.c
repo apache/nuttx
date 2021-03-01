@@ -242,8 +242,8 @@ int main(int argc, char **argv)
             }
         }
 
-      printf("***************************************
-              **************************************\n");
+      printf("***************************************"
+              "**************************************\n");
       printf("* %5lu. %s\n", lineno, g_line0);
       printf("*  indent: last=%u curr=%u next=%u\n",
               lastindent, indent, nextindent);
@@ -251,8 +251,8 @@ int main(int argc, char **argv)
               wascomment, iscomment, willbecomment);
       printf("*   blank: last=%u curr=%u next=%u\n",
               wasblank, isblank, willbeblank);
-      printf("***************************************
-              **************************************\n");
+      printf("***************************************"
+              "**************************************\n");
 
       /* Does line n start with a comment */
 
