@@ -360,10 +360,7 @@ struct foc_data_f32_s
 struct motor_phy_params_f32_s
 {
   uint8_t p;                   /* Number of the motor pole pairs */
-
-  float   res;                 /* Phase-to-neutral temperature compensated
-                                * resistance
-                                */
+  float   res;                 /* Phase-to-neutral resistance */
   float   ind;                 /* Average phase-to-neutral inductance */
   float   one_by_ind;          /* Inverse phase-to-neutral inductance */
 };
