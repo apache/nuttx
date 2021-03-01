@@ -586,7 +586,6 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
   tcb->cpcount = 0;
 #endif
 
-#if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT)
   /* If exit function(s) were registered, call them now before we do any un-
    * initialization.
    *
@@ -604,13 +603,27 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
 
   if (!nonblocking)
     {
+#if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT)
       nxtask_atexit(tcb);
 
       /* Call any registered on_exit function(s) */
 
       nxtask_onexit(tcb, status);
-    }
 #endif
+
+      /* If this is the last thread in the group, then flush all streams
+       * (File descriptors will be closed when the TCB is deallocated).
+       *
+       * NOTES:
+       * 1. We cannot flush the buffered I/O if nonblocking is requested.
+       *    that might cause this logic to block.
+       * 2. This function will only be called with non-blocking == true
+       *    only when called through _exit(). _exit() behavior does not
+       *    require that the streams be flushed
+       */
+
+      nxtask_flushstreams(tcb);
+    }
 
   /* If the task was terminated by another task, it may be in an unknown
    * state.  Make some feeble effort to recover the state.
@@ -631,22 +644,6 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
   /* Wakeup any tasks waiting for this task to exit */
 
   nxtask_exitwakeup(tcb, status);
-
-  /* If this is the last thread in the group, then flush all streams (File
-   * descriptors will be closed when the TCB is deallocated).
-   *
-   * NOTES:
-   * 1. We cannot flush the buffered I/O if nonblocking is requested.
-   *    that might cause this logic to block.
-   * 2. This function will only be called with non-blocking == true
-   *    only when called through _exit(). _exit() behavior does not
-   *    require that the streams be flushed
-   */
-
-  if (!nonblocking)
-    {
-      nxtask_flushstreams(tcb);
-    }
 
   /* Leave the task group.  Perhaps discarding any un-reaped child
    * status (no zombies here!)
