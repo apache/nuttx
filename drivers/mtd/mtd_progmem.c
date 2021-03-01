@@ -49,7 +49,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 
-#ifdef CONFIG_ARCH_HAVE_PROGMEM
+#ifdef CONFIG_MTD_PROGMEM
 
 /****************************************************************************
  * Private Types
@@ -422,4 +422,4 @@ FAR struct mtd_dev_s *progmem_initialize(void)
   return (FAR struct mtd_dev_s *)priv;
 }
 
-#endif /* CONFIG_ARCH_HAVE_PROGMEM */
+#endif /* CONFIG_MTD_PROGMEM */

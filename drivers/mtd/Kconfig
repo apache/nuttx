@@ -130,6 +130,7 @@ endif # MTD_READAHEAD
 config MTD_PROGMEM
 	bool "Enable on-chip program FLASH MTD device"
 	default n
+	depends on ARCH_HAVE_PROGMEM
 	---help---
 		Enable to support an MTD device that supports the on-chip FLASH
 		using the interfaces defined in include/nuttx/progmem.  Those
