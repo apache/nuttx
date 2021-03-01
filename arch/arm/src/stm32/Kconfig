@@ -1678,7 +1678,6 @@ config STM32_STM32F412
 	select STM32_HAVE_SPI1
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
-	select STM32_HAVE_ADC1
 	select STM32_HAVE_OTGFS
 	select STM32_HAVE_I2SPLL
 
@@ -2324,6 +2323,10 @@ config STM32_HAVE_TIM20
 config STM32_HAVE_TSC
 	bool
 	default n
+
+config STM32_HAVE_ADC1
+	bool
+	default y
 
 config STM32_HAVE_ADC2
 	bool
