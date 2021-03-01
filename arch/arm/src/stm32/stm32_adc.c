@@ -2975,13 +2975,6 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 #  endif
 #endif
 
-  /* Enable the ADC interrupt */
-
-#ifndef CONFIG_STM32_ADC_NOIRQ
-  ainfo("Enable the ADC interrupt: irq=%d\n", priv->irq);
-  up_enable_irq(priv->irq);
-#endif
-
 #ifdef HAVE_ADC_CMN_DATA
   /* Increase instances counter */
 
@@ -2991,6 +2984,18 @@ static int adc_setup(FAR struct adc_dev_s *dev)
       return ret;
     }
 
+  if (priv->cmn->initialized == 0)
+#endif
+    {
+      /* Enable the ADC interrupt */
+
+#ifndef CONFIG_STM32_ADC_NOIRQ
+      ainfo("Enable the ADC interrupt: irq=%d\n", priv->irq);
+      up_enable_irq(priv->irq);
+#endif
+    }
+
+#ifdef HAVE_ADC_CMN_DATA
   priv->cmn->initialized += 1;
   adccmn_lock(priv, false);
 #endif
@@ -3041,13 +3046,6 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
   adc_enable_hsi(false);
 #endif
 
-#ifndef CONFIG_STM32_ADC_NOIRQ
-  /* Disable ADC interrupts and detach the ADC interrupt handler */
-
-  up_disable_irq(priv->irq);
-  irq_detach(priv->irq);
-#endif
-
 #ifdef HAVE_ADC_CMN_DATA
   if (adccmn_lock(priv, true) < 0)
     {
@@ -3057,6 +3055,13 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
   if (priv->cmn->initialized <= 1)
 #endif
     {
+#ifndef CONFIG_STM32_ADC_NOIRQ
+      /* Disable ADC interrupts and detach the ADC interrupt handler */
+
+      up_disable_irq(priv->irq);
+      irq_detach(priv->irq);
+#endif
+
       /* Disable and reset the ADC module.
        *
        * NOTE: The ADC block will be reset to its reset state only if all
@@ -3081,7 +3086,10 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
 #ifdef HAVE_ADC_CMN_DATA
   /* Decrease instances counter */
 
-  priv->cmn->initialized -= 1;
+  if (priv->cmn->initialized > 0)
+    {
+      priv->cmn->initialized -= 1;
+    }
 
   adccmn_lock(priv, false);
 #endif
