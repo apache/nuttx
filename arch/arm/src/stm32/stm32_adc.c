@@ -350,6 +350,23 @@
 #  undef ADC_HAVE_DMACFG
 #endif
 
+/* ADC scan mode support - only for ADCv1 */
+
+#ifdef CONFIG_STM32_HAVE_IP_ADC_V1
+#  define ADC_HAVE_SCAN 1
+#  ifndef CONFIG_STM32_ADC1_SCAN
+#    define CONFIG_STM32_ADC1_SCAN 0
+#  endif
+#  ifndef CONFIG_STM32_ADC2_SCAN
+#    define CONFIG_STM32_ADC2_SCAN 0
+#  endif
+#  ifndef CONFIG_STM32_ADC3_SCAN
+#    define CONFIG_STM32_ADC3_SCAN 0
+#  endif
+#else
+#  undef ADC_HAVE_SCAN
+#endif
+
 /* We have to support ADC callbacks if default ADC interrupts or
  * DMA transfer are enabled
  */
@@ -408,6 +425,9 @@ struct stm32_dev_s
   uint8_t dmacfg;            /* DMA channel configuration, only for ADC IPv2 */
 #  endif
   bool    hasdma;            /* True: This channel supports DMA */
+#endif
+#ifdef ADC_HAVE_SCAN
+  bool    scan;              /* True: Scan mode */
 #endif
 #ifdef CONFIG_STM32_ADC_CHANGE_SAMPLETIME
   /* Sample time selection. These bits must be written only when ADON=0.
@@ -769,6 +789,9 @@ static struct stm32_dev_s g_adcpriv1 =
 #  endif
   .hasdma      = true,
 #endif
+#ifdef ADC_HAVE_SCAN
+  .scan        = CONFIG_STM32_ADC1_SCAN,
+#endif
 };
 
 static struct adc_dev_s g_adcdev1 =
@@ -825,6 +848,9 @@ static struct stm32_dev_s g_adcpriv2 =
 #  endif
   .hasdma      = true,
 #endif
+#ifdef ADC_HAVE_SCAN
+  .scan        = CONFIG_STM32_ADC2_SCAN,
+#endif
 };
 
 static struct adc_dev_s g_adcdev2 =
@@ -880,6 +906,9 @@ static struct stm32_dev_s g_adcpriv3 =
   .dmacfg      = CONFIG_STM32_ADC3_DMA_CFG,
 #  endif
   .hasdma      = true,
+#endif
+#ifdef ADC_HAVE_SCAN
+  .scan        = CONFIG_STM32_ADC3_SCAN,
 #endif
 };
 
@@ -2401,8 +2430,8 @@ static void adc_mode_cfg(FAR struct stm32_dev_s *priv)
   setbits |= ADC_CR1_IND;
 #endif
 
-#ifdef ADC_HAVE_DMA
-  if (priv->hasdma)
+#ifdef ADC_HAVE_SCAN
+  if (priv->scan == true)
     {
       setbits |= ADC_CR1_SCAN;
     }
