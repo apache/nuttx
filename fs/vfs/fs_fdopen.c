@@ -33,7 +33,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
-#include <nuttx/net/net.h>
 
 #include "inode/inode.h"
 
@@ -115,7 +114,7 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
 {
   FAR struct streamlist *slist;
   FAR FILE              *stream;
-  int                    ret;
+  int                    ret = OK;
 
   /* Check input parameters */
 
@@ -137,34 +136,7 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
 
   DEBUGASSERT(tcb && tcb->group);
 
-  /* Verify that this is a valid file/socket descriptor and that the
-   * requested access can be support.
-   *
-   * Is this fd in the range of valid file descriptors?  Socket descriptors
-   * lie in a different range.
-   */
-
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-    {
-      /* No.. If networking is enabled then this might be a socket
-       * descriptor.
-       */
-
-#ifdef CONFIG_NET
-      ret = net_checksd(fd, oflags);
-#else
-      /* No networking... it is just a bad descriptor */
-
-      ret = -EBADF;
-      goto errout;
-#endif
-    }
-
-  /* The descriptor is in a valid range to file descriptor... perform some
-   * more checks.
-   */
-
-  else
+  if (fd >= 3)
     {
       ret = fs_checkfd(tcb, fd, oflags);
     }

@@ -42,11 +42,14 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <unistd.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <fcntl.h>
 
 #include <nuttx/cancelpt.h>
+#include <nuttx/fs/fs.h>
 #include <arch/irq.h>
 
 #include "socket/socket.h"
@@ -86,7 +89,8 @@
  * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr', Return: returned size
+ *            of 'addr'
  *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:
@@ -197,7 +201,8 @@ errout_with_lock:
  * Input Parameters:
  *   sockfd   The listening socket descriptor
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr',
+ *            Return: returned size of 'addr'
  *
  * Returned Value:
  *  Returns -1 on error. If it succeeds, it returns a non-negative integer
@@ -249,11 +254,11 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (psock == NULL || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_conn == NULL)
     {
       /* It is not a valid socket description.  Distinguish between the cases
-       * where sockfd is a just valid and when it is a valid file descriptor used
-       * in the wrong context.
+       * where sockfd is a just valid and when it is a valid file descriptor
+       * used in the wrong context.
        */
 
       if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)
@@ -272,18 +277,11 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
    * cannot fail later)
    */
 
-  newfd = sockfd_allocate(0);
+  newfd = sockfd_allocate(&newsock, O_RDWR);
   if (newfd < 0)
     {
       errcode = ENFILE;
       goto errout;
-    }
-
-  newsock = sockfd_socket(newfd);
-  if (newsock == NULL)
-    {
-      errcode = ENFILE;
-      goto errout_with_socket;
     }
 
   ret = psock_accept(psock, addr, addrlen, newsock);
@@ -297,7 +295,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   return newfd;
 
 errout_with_socket:
-  sockfd_release(newfd);
+  nx_close(newfd);
 
 errout:
   leave_cancellation_point();

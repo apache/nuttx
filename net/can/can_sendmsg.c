@@ -179,14 +179,14 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   struct send_s state;
   int ret = OK;
 
-  conn = (FAR struct can_conn_s *)psock->s_conn;
-
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (!psock || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_conn == NULL)
     {
       return -EBADF;
     }
+
+  conn = (FAR struct can_conn_s *)psock->s_conn;
 
   /* Only SOCK_RAW is supported */
 

@@ -76,18 +76,7 @@ int fstatfs(int fd, FAR struct statfs *buf)
 
   DEBUGASSERT(buf != NULL);
 
-  /* Did we get a valid file descriptor? */
-
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-    {
-      /* It is a bad, out-of-range descriptor */
-
-      ret = -EBADF;
-      goto errout;
-    }
-
-  /* The descriptor is in a valid range to file descriptor... do the
-   * read.  First, get the file structure.  Note that on failure,
+  /* First, get the file structure.  Note that on failure,
    * fs_getfilep() will set the errno variable.
    */
 

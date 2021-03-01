@@ -135,7 +135,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
   /* Verify that the psock corresponds to valid, allocated socket */
 
-  if (psock == NULL || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_conn == NULL)
     {
       return -EBADF;
     }
@@ -149,7 +149,8 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
   /* Let the address family's connect() method handle the operation */
 
-  DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_connect != NULL);
+  DEBUGASSERT(psock->s_sockif != NULL &&
+              psock->s_sockif->si_connect != NULL);
   ret = psock->s_sockif->si_connect(psock, addr, addrlen);
   if (ret < 0)
     {

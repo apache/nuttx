@@ -84,12 +84,6 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
 
   files_initlist(&group->tg_filelist);
 
-#ifdef CONFIG_NET
-  /* Allocate socket descriptors for the TCB */
-
-  net_initlist(&group->tg_socketlist);
-#endif
-
   /* Open stdin, dup to get stdout and stderr. This should always
    * be the first file opened and, hence, should always get file
    * descriptor 0.

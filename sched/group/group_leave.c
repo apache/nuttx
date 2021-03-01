@@ -157,12 +157,6 @@ static inline void group_release(FAR struct task_group_s *group)
   lib_stream_release(group);
 #endif /* CONFIG_FILE_STREAM */
 
-#ifdef CONFIG_NET
-  /* Free resource held by the socket list */
-
-  net_releaselist(&group->tg_socketlist);
-#endif
-
 #ifndef CONFIG_DISABLE_ENVIRON
   /* Release all shared environment variables */
 

@@ -233,30 +233,7 @@ int fstat(int fd, FAR struct stat *buf)
   FAR struct file *filep;
   int ret;
 
-  /* Did we get a valid file descriptor? */
-
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-    {
-#ifdef CONFIG_NET
-      /* Let the networking logic handle the fstat() */
-
-      ret = net_fstat(fd, buf);
-      if (ret < 0)
-        {
-          goto errout;
-        }
-
-      return OK;
-#else
-      /* No networking... it is just a bad descriptor */
-
-      ret = -EBADF;
-      goto errout;
-#endif
-    }
-
-  /* The descriptor is in a valid range for a file descriptor... do the
-   * fstat.  First, get the file structure.  Note that on failure,
+  /* First, get the file structure.  Note that on failure,
    * fs_getfilep() will set the errno variable.
    */
 
@@ -265,6 +242,21 @@ int fstat(int fd, FAR struct stat *buf)
     {
       goto errout;
     }
+
+#ifdef CONFIG_NET
+  if (INODE_IS_SOCKET(filep->f_inode))
+    {
+      /* Let the networking logic handle the fstat() */
+
+      ret = psock_fstat(sockfd_socket(fd), buf);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      return OK;
+    }
+#endif
 
   /* Perform the fstat operation */
 

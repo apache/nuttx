@@ -109,50 +109,22 @@ int file_dup(FAR struct file *filep, int minfd)
 
 int nx_dup(int fd)
 {
-  /* Check the range of the descriptor to see if we got a file or a socket
-   * descriptor.
-   */
+  FAR struct file *filep;
+  int ret;
 
-  if (fd < CONFIG_NFILE_DESCRIPTORS)
+  /* Get the file structure corresponding to the file descriptor. */
+
+  ret = fs_getfilep(fd, &filep);
+  if (ret < 0)
     {
-      FAR struct file *filep;
-      int ret;
-
-      /* Get the file structure corresponding to the file descriptor. */
-
-      ret = fs_getfilep(fd, &filep);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      DEBUGASSERT(filep != NULL);
-
-      /* Let file_dup() do the real work */
-
-      return file_dup(filep, 0);
+      return ret;
     }
-  else
-    {
-      /* Not a valid file descriptor.
-       * Did we get a valid socket descriptor?
-       */
 
-#ifdef CONFIG_NET
-      if (fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          /* Yes.. dup the socket descriptor. */
+  DEBUGASSERT(filep != NULL);
 
-          return net_dup(fd, CONFIG_NFILE_DESCRIPTORS);
-        }
-      else
-#endif
-        {
-          /* No.. then it is a bad descriptor number */
+  /* Let file_dup() do the real work */
 
-          return -EBADF;
-        }
-    }
+  return file_dup(filep, 0);
 }
 
 /****************************************************************************

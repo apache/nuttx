@@ -41,14 +41,12 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
 
 #include <nuttx/cancelpt.h>
-#include <nuttx/net/net.h>
 
 #include "inode/inode.h"
 
@@ -65,7 +63,6 @@
  *
  *    - It does not modify the errno variable,
  *    - It is not a cancellation point,
- *    - It does not handle socket descriptors, and
  *    - It accepts a file structure instance instead of file descriptor.
  *
  * Input Parameters:
@@ -107,7 +104,9 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
        * signature and position in the operations vtable.
        */
 
-      ret = (int)inode->u.i_ops->read(filep, (FAR char *)buf, (size_t)nbytes);
+      ret = (int)inode->u.i_ops->read(filep,
+                                     (FAR char *)buf,
+                                     (size_t)nbytes);
     }
 
   /* Return the number of bytes read (or possibly an error code) */
@@ -138,42 +137,22 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 
 ssize_t nx_read(int fd, FAR void *buf, size_t nbytes)
 {
-  /* Did we get a valid file descriptor? */
+  FAR struct file *filep;
+  ssize_t ret;
 
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
+  /* First, get the file structure.  Note that on failure,
+   * fs_getfilep() will return the errno.
+   */
+
+  ret = (ssize_t)fs_getfilep(fd, &filep);
+  if (ret < 0)
     {
-#ifdef CONFIG_NET
-      /* No.. If networking is enabled, read() is the same as recv() with
-       * the flags parameter set to zero.
-       */
-
-      return nx_recv(fd, buf, nbytes, 0);
-#else
-      /* No networking... it is a bad descriptor in any event */
-
-      return -EBADF;
-#endif
+      return ret;
     }
-  else
-    {
-      FAR struct file *filep;
-      ssize_t ret;
 
-      /* The descriptor is in a valid range to file descriptor... do the
-       * read.  First, get the file structure.  Note that on failure,
-       * fs_getfilep() will set the errno variable.
-       */
+  /* Then let file_read do all of the work. */
 
-      ret = (ssize_t)fs_getfilep(fd, &filep);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      /* Then let file_read do all of the work. */
-
-      return file_read(filep, buf, nbytes);
-    }
+  return file_read(filep, buf, nbytes);
 }
 
 /****************************************************************************

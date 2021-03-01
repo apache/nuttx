@@ -1662,7 +1662,7 @@ int psock_vioctl(FAR struct socket *psock, int cmd, va_list ap)
 
   /* Verify that the psock corresponds to valid, allocated socket */
 
-  if (psock == NULL || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_conn == NULL)
     {
       return -EBADF;
     }
@@ -1770,44 +1770,6 @@ int psock_ioctl(FAR struct socket *psock, int cmd, ...)
 
   va_end(ap);
   return ret;
-}
-
-/****************************************************************************
- * Name: netdev_vioctl
- *
- * Description:
- *   Perform network device specific operations.
- *
- * Input Parameters:
- *   sockfd   Socket descriptor of device
- *   cmd      The ioctl command
- *   ap       The argument of the ioctl cmd
- *
- * Returned Value:
- *   A non-negative value is returned on success; a negated errno value is
- *   returned on any failure to indicate the nature of the failure:
- *
- *   EBADF
- *     'sockfd' is not a valid socket descriptor.
- *   EFAULT
- *     'arg' references an inaccessible memory area.
- *   ENOTTY
- *     'cmd' not valid.
- *   EINVAL
- *     'arg' is not valid.
- *   ENOTTY
- *     'sockfd' is not associated with a network device.
- *   ENOTTY
- *      The specified request does not apply to the kind of object that the
- *      descriptor 'sockfd' references.
- *
- ****************************************************************************/
-
-int netdev_vioctl(int sockfd, int cmd, va_list ap)
-{
-  FAR struct socket *psock = sockfd_socket(sockfd);
-
-  return psock_vioctl(psock, cmd, ap);
 }
 
 /****************************************************************************
