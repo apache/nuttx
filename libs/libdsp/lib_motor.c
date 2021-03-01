@@ -372,3 +372,47 @@ void motor_phy_params_init(FAR struct motor_phy_params_f32_s *phy,
   phy->ind        = ind;
   phy->one_by_ind = (1.0f / ind);
 }
+
+/****************************************************************************
+ * Name: pmsm_phy_params_init
+ *
+ * Description:
+ *   Initialize PMSM physical parameters
+ *
+ * Input Parameters:
+ *   phy   - (in/out) pointer to the PMSM physical parameters
+ *   poles - (in) number of the motor pole pairs
+ *   res   - (in) average phase-to-neutral base motor resistance
+ *                    (without temperature compensation)
+ *   ind   - (in) average phase-to-neutral motor inductance
+ *   iner  - (in) rotor inertia (J)
+ *   flux  - (in) flux linkage
+ *   ind_d - (in) d-inductance
+ *   ind_q - (in) q-inductance
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void pmsm_phy_params_init(FAR struct pmsm_phy_params_f32_s *phy,
+                          uint8_t poles, float res, float ind,
+                          float iner, float flux,
+                          float ind_d, float ind_q)
+{
+  LIBDSP_DEBUGASSERT(phy != NULL);
+
+  /* Initialize motor phy */
+
+  motor_phy_params_init(&phy->motor, poles, res, ind);
+
+  /* Iniitalize PMSM specific data */
+
+  phy->iner        = iner;
+  phy->flux_link   = flux;
+  phy->ind_d       = ind_d;
+  phy->ind_q       = ind_q;
+  phy->one_by_iner = (1.0f / iner);
+  phy->one_by_indd = (1.0f / ind_d);
+  phy->one_by_indq = (1.0f / ind_q);
+}

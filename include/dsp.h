@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/compiler.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -312,22 +313,6 @@ struct motor_observer_smo_f32_s
   ab_frame_f32_t sign;  /* Bang-bang controller sign */
 };
 
-/* Motor physical parameters.
- * This data structure was designed to work with BLDC/PMSM motors,
- * but probably can be used to describe different types of motors.
- */
-
-struct motor_phy_params_f32_s
-{
-  uint8_t p;                   /* Number of the motor pole pairs */
-
-  float   res;                 /* Phase-to-neutral temperature compensated
-                                * resistance
-                                */
-  float   ind;                 /* Average phase-to-neutral inductance */
-  float   one_by_ind;          /* Inverse phase-to-neutral inductance */
-};
-
 /* FOC initialize data */
 
 struct foc_initdata_f32_s
@@ -365,6 +350,81 @@ struct foc_data_f32_s
   float vab_mod_scale;       /* Voltage alpha-beta modulation scale */
 
   phase_angle_f32_t   angle; /* Phase angle */
+};
+
+/* Motor physical parameters.
+ * This data structure was designed to work with BLDC/PMSM motors,
+ * but probably can be used to describe different types of motors.
+ */
+
+struct motor_phy_params_f32_s
+{
+  uint8_t p;                   /* Number of the motor pole pairs */
+
+  float   res;                 /* Phase-to-neutral temperature compensated
+                                * resistance
+                                */
+  float   ind;                 /* Average phase-to-neutral inductance */
+  float   one_by_ind;          /* Inverse phase-to-neutral inductance */
+};
+
+/* PMSM motor physcial parameters */
+
+struct pmsm_phy_params_f32_s
+{
+  struct motor_phy_params_f32_s motor;       /* Motor common PHY */
+  float                         iner;        /* Rotor inertia */
+  float                         flux_link;   /* Flux linkage */
+  float                         ind_d;       /* d-inductance */
+  float                         ind_q;       /* q-inductance */
+  float                         one_by_iner; /* One by intertia */
+  float                         one_by_indd; /* One by Ld */
+  float                         one_by_indq; /* One by Lq */
+};
+
+/* PMSM motor model state */
+
+struct pmsm_model_state_f32_s
+{
+  /* Motor model phase current */
+
+  abc_frame_f32_t i_abc;
+  ab_frame_f32_t  i_ab;
+  dq_frame_f32_t  i_dq;
+
+  /* Motor model phase voltage */
+
+  abc_frame_f32_t v_abc;
+  ab_frame_f32_t  v_ab;
+  dq_frame_f32_t  v_dq;
+
+  /* Motor model angle */
+
+  struct motor_angle_f32_s angle;
+
+  /* Angular speed */
+
+  float omega_e;
+  float omega_m;
+};
+
+/* PMSM motor model external conditions */
+
+struct pmsm_model_ext_f32_s
+{
+  float load;                /* Motor model load torque */
+};
+
+/* PMSM motor model */
+
+struct pmsm_model_f32_s
+{
+  struct pmsm_phy_params_f32_s  phy;    /* Motor model physical parameters */
+  struct pmsm_model_state_f32_s state;  /* Motor model state */
+  struct pmsm_model_ext_f32_s   ext;    /* Motor model external conditions */
+  float                         per;    /* Control period */
+  float                         id_int; /* Id integral part */
+  float                         iq_int; /* Iq integral part */
 };
 
 /****************************************************************************
@@ -488,12 +548,26 @@ void motor_angle_m_update(FAR struct motor_angle_f32_s *angle,
 float motor_angle_m_get(FAR struct motor_angle_f32_s *angle);
 float motor_angle_e_get(FAR struct motor_angle_f32_s *angle);
 
-/* Motor physical parameters functions */
+/* Motor physical parameters */
 
 void motor_phy_params_init(FAR struct motor_phy_params_f32_s *phy,
                            uint8_t poles, float res, float ind);
-void motor_phy_params_temp_set(FAR struct motor_phy_params_f32_s *phy,
-                               float res_alpha, float res_temp_ref);
+
+/* PMSM physical parameters functions */
+
+void pmsm_phy_params_init(FAR struct pmsm_phy_params_f32_s *phy,
+                          uint8_t poles, float res, float ind,
+                          float iner, float flux,
+                          float ind_d, float ind_q);
+
+/* PMSM motor model */
+
+int pmsm_model_initialize(FAR struct pmsm_model_f32_s *model,
+                          FAR struct pmsm_phy_params_f32_s *phy,
+                          float per);
+int pmsm_model_elec(FAR struct pmsm_model_f32_s *model,
+                    FAR ab_frame_f32_t *vab);
+int pmsm_model_mech(FAR struct pmsm_model_f32_s *model, float load);
 
 #undef EXTERN
 #if defined(__cplusplus)
