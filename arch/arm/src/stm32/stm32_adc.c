@@ -148,26 +148,6 @@
 
 /* ADC Channels/DMA *********************************************************/
 
-/* The maximum number of channels that can be sampled.  If DMA support is
- * not enabled, then only a single channel can be sampled.  Otherwise,
- * data overruns would occur.
- */
-
-#define ADC_MAX_CHANNELS_DMA   16
-#define ADC_MAX_CHANNELS_NODMA 1
-
-#ifdef ADC_HAVE_DMA
-#  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA
-#else
-#  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
-#    define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA /* Works without DMA should sampling frequency be reduced */
-#  elif defined(CONFIG_STM32_STM32L15XX)
-#    define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA /* Works without DMA as IO_START_CONV can switch channels on the fly */
-#  else
-#    define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
-#  endif
-#endif
-
 /* DMA values differs according to STM32 DMA IP core version */
 
 #if defined(HAVE_IP_DMA_V2)
@@ -210,7 +190,7 @@
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP8_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP9_SHIFT))
 #elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
-#  if defined(ADC_HAVE_DMA) || (ADC_MAX_SAMPLES == 1)
+#  if defined(ADC_HAVE_DMA) || (CONFIG_STM32_ADC_MAX_SAMPLES == 1)
 #    define ADC_SMPR_DEFAULT    ADC_SMPR_61p5
 #  else /* Slow down sampling frequency */
 #    define ADC_SMPR_DEFAULT    ADC_SMPR_601p5
@@ -466,12 +446,12 @@ struct stm32_dev_s
 
   /* DMA transfer buffer */
 
-  uint16_t r_dmabuffer[ADC_MAX_SAMPLES];
+  uint16_t r_dmabuffer[CONFIG_STM32_ADC_MAX_SAMPLES];
 #endif
 
   /* List of selected ADC channels to sample */
 
-  uint8_t  r_chanlist[ADC_MAX_SAMPLES];
+  uint8_t  r_chanlist[CONFIG_STM32_ADC_MAX_SAMPLES];
 
 #ifdef ADC_HAVE_INJECTED
   /* List of selected ADC injected channels to sample */
@@ -4760,7 +4740,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
 
   /* Configure regular channels */
 
-  DEBUGASSERT(cr_channels <= ADC_MAX_SAMPLES);
+  DEBUGASSERT(cr_channels <= CONFIG_STM32_ADC_MAX_SAMPLES);
 
   priv->cr_channels = cr_channels;
   memcpy(priv->r_chanlist, chanlist, cr_channels);

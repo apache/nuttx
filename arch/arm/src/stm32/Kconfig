@@ -8151,6 +8151,17 @@ config STM32_ADC5_RESOLUTION
 	---help---
 		ADC5 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
 
+config STM32_ADC_MAX_SAMPLES
+	int "The maximum number of channels that can be sampled"
+	default 16
+	---help---
+		The maximum number of samples which can be handled without
+		overrun depends on various factors. This is the user's
+		responsibility to correctly select this value.
+		Since the interfece to update the sampling time is available
+		for all supported devices, the user can change the default
+		vaules in the board initialization logic and avoid ADC overrun.
+
 config STM32_ADC_NO_STARTUP_CONV
 	bool "Do not start conversion when opening ADC device"
 	default n
