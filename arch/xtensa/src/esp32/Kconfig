@@ -111,6 +111,12 @@ config ESP32_FLASH_16M
 	bool
 	default n
 
+config ESP32_FLASH_DETECT
+	bool "Auto-detect FLASH size"
+	default y
+	help
+		Auto detect flash size when flashing.
+
 config ESP32_PSRAM_8M
 	bool
 	default n
@@ -129,6 +135,39 @@ config ESP32_ESP32DXWDXX
 	bool
 	default n
 	select ESP32_DUAL_CPU
+
+choice ESP32_FLASH_MODE
+	prompt "SPI FLASH mode"
+	default ESP32_FLASH_MODE_DIO
+	help
+		These options control how many I/O pins are used for communication with the attached SPI flash chip.
+		The option selected here is then used by esptool when flashing.
+
+	config ESP32_FLASH_MODE_DIO
+		bool "Dual IO (DIO)"
+	config ESP32_FLASH_MODE_DOUT
+		bool "Dual Output (DOUT)"
+	config ESP32_FLASH_MODE_QIO
+		bool "Quad IO (QIO)"
+	config ESP32_FLASH_MODE_QOUT
+		bool "Quad Output (QOUT)"
+endchoice # ESP32_FLASH_MODE
+
+choice ESP32_FLASH_FREQ
+	prompt "SPI FLASH frequency"
+	default ESP32_FLASH_FREQ_40M
+	help
+		SPI FLASH frequency
+		
+	config ESP32_FLASH_FREQ_80M
+		bool "80 MHz"
+	config ESP32_FLASH_FREQ_40M
+		bool "40 MHz"
+	config ESP32_FLASH_FREQ_26M
+		bool "26 MHz"
+	config ESP32_FLASH_FREQ_20M
+		bool "20 MHz"
+endchoice # ESP32_FLASH_FREQ
 
 choice ESP32_DEFAULT_CPU_FREQ
 	prompt "CPU frequency"
