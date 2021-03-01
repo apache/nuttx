@@ -56,6 +56,7 @@
 
 /* Phase rotation direction */
 
+#define DIR_NONE (0.0f)
 #define DIR_CW   (1.0f)
 #define DIR_CCW  (-1.0f)
 
