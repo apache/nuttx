@@ -377,6 +377,11 @@
 #  undef ADC_HAVE_CB
 #endif
 
+/* ADC software trigger configuration */
+
+#define ANIOC_TRIGGER_REGULAR  (1 << 0)
+#define ANIOC_TRIGGER_INJECTED (1 << 1)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -416,6 +421,7 @@ struct stm32_dev_s
   uint8_t intf;              /* ADC interface number */
   uint8_t initialized;       /* ADC interface initialization counter */
   uint8_t current;           /* Current ADC channel being converted */
+  uint8_t anioc_trg;         /* ANIOC_TRIGGER configuration */
 #ifdef HAVE_ADC_RESOLUTION
   uint8_t resolution;        /* ADC resolution (0-3) */
 #endif
@@ -766,6 +772,7 @@ static struct stm32_dev_s g_adcpriv1 =
 #endif
   .intf        = 1,
   .initialized = 0,
+  .anioc_trg   = CONFIG_STM32_ADC1_ANIOC_TRIGGER,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32_ADC1_RESOLUTION,
 #endif
@@ -825,6 +832,7 @@ static struct stm32_dev_s g_adcpriv2 =
 #endif
   .intf        = 2,
   .initialized = 0,
+  .anioc_trg   = CONFIG_STM32_ADC2_ANIOC_TRIGGER,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32_ADC2_RESOLUTION,
 #endif
@@ -884,6 +892,7 @@ static struct stm32_dev_s g_adcpriv3 =
 #endif
   .intf        = 3,
   .initialized = 0,
+  .anioc_trg   = CONFIG_STM32_ADC3_ANIOC_TRIGGER,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32_ADC3_RESOLUTION,
 #endif
@@ -936,6 +945,7 @@ static struct stm32_dev_s g_adcpriv4 =
 #endif
   .intf        = 4,
   .initialized = 0,
+  .anioc_trg   = CONFIG_STM32_ADC4_ANIOC_TRIGGER,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32_ADC4_RESOLUTION,
 #endif
@@ -3820,17 +3830,23 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
         {
           /* Start regular conversion if regular channels configured */
 
-          if (priv->cr_channels > 0)
+          if (priv->anioc_trg & ANIOC_TRIGGER_REGULAR)
             {
-              adc_reg_startconv(priv, true);
+              if (priv->cr_channels > 0)
+                {
+                  adc_reg_startconv(priv, true);
+                }
             }
 
 #ifdef ADC_HAVE_INJECTED
           /* Start injected conversion if injected channels configured */
 
-          if (priv->cj_channels > 0)
+          if (priv->anioc_trg & ANIOC_TRIGGER_INJECTED)
             {
-              adc_inj_startconv(priv, true);
+              if (priv->cj_channels > 0)
+                {
+                  adc_inj_startconv(priv, true);
+                }
             }
 #endif
 

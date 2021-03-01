@@ -8199,6 +8199,16 @@ config STM32_ADC1_DMA_CFG
 	---help---
 		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
 
+config STM32_ADC1_ANIOC_TRIGGER
+	int "ADC1 software trigger (ANIOC_TRIGGER) configuration"
+	depends on STM32_ADC1
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
 config STM32_ADC2_DMA
 	bool "ADC2 DMA"
 	depends on STM32_ADC2 && STM32_HAVE_ADC2_DMA
@@ -8221,6 +8231,16 @@ config STM32_ADC2_DMA_CFG
 	default 0
 	---help---
 		0 - ADC2 DMA in One Shot Mode, 1 - ADC2 DMA in Circular Mode
+
+config STM32_ADC2_ANIOC_TRIGGER
+	int "ADC2 software trigger (ANIOC_TRIGGER) configuration"
+	depends on STM32_ADC2
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
 
 config STM32_ADC3_DMA
 	bool "ADC3 DMA"
@@ -8245,6 +8265,16 @@ config STM32_ADC3_DMA_CFG
 	---help---
 		0 - ADC3 DMA in One Shot Mode, 1 - ADC3 DMA in Circular Mode
 
+config STM32_ADC3_ANIOC_TRIGGER
+	int "ADC3 software trigger (ANIOC_TRIGGER) configuration"
+	depends on STM32_ADC3
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
 config STM32_ADC4_DMA
 	bool "ADC4 DMA"
 	depends on STM32_ADC4 && STM32_HAVE_ADC4_DMA
@@ -8261,6 +8291,16 @@ config STM32_ADC4_DMA_CFG
 	default 0
 	---help---
 		0 - ADC4 DMA in One Shot Mode, 1 - ADC4 DMA in Circular Mode
+
+config STM32_ADC4_ANIOC_TRIGGER
+	int "ADC4 software trigger (ANIOC_TRIGGER) configuration"
+	depends on STM32_ADC4
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
 
 config STM32_ADC5_DMA
 	bool "ADC5 DMA"
