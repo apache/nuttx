@@ -47,10 +47,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 
-#ifdef CONFIG_SMP
-#  include <nuttx/irq.h>
-#endif
-
 #include "libc.h"
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
@@ -81,10 +77,6 @@ void lib_sem_initialize(FAR struct file_struct *stream)
 
 void lib_take_semaphore(FAR struct file_struct *stream)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags = enter_critical_section();
-#endif
-
   pid_t my_pid = getpid();
   int ret;
 
@@ -116,10 +108,6 @@ void lib_take_semaphore(FAR struct file_struct *stream)
       stream->fs_holder = my_pid;
       stream->fs_counts = 1;
     }
-
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
 }
 
 /****************************************************************************
@@ -128,10 +116,6 @@ void lib_take_semaphore(FAR struct file_struct *stream)
 
 void lib_give_semaphore(FAR struct file_struct *stream)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags = enter_critical_section();
-#endif
-
   /* I better be holding at least one reference to the semaphore */
 
   DEBUGASSERT(stream->fs_holder == getpid());
@@ -152,10 +136,6 @@ void lib_give_semaphore(FAR struct file_struct *stream)
       stream->fs_counts = 0;
       DEBUGVERIFY(_SEM_POST(&stream->fs_sem));
     }
-
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
 }
 
 #endif /* CONFIG_STDIO_DISABLE_BUFFERING */
