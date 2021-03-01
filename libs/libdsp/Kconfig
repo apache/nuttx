@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config LIBDSP
+menuconfig LIBDSP
 	bool "Digital Signal Processing Library"
 	default n
 	---help---
@@ -29,5 +29,8 @@ config LIBDSP_PRECISION
 		0 - the fastest calculation but the lowest precision
 		1 - a little better precision than above, but slowest
 		2 - the most accuracte but the slowest one, use standard math functions.
+
+config LIBDSP_FOC_VABC
+	bool "Libdsp FOC includes voltage abc frame"
 
 endif # LIBDSP
