@@ -174,6 +174,10 @@ ifeq ($(CONFIG_ARCH_ROMGETC),y)
   CSRCS += up_romgetc.c
 endif
 
+ifeq ($(CONFIG_SIM_MOTOR_FOC),y)
+CSRCS += up_foc.c
+endif
+
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)
   CSRCS += up_netdriver.c
   HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_PKTSIZE)
