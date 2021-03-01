@@ -8185,6 +8185,12 @@ config STM32_ADC1_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
+config STM32_ADC1_SCAN
+	bool "ADC1 scan mode"
+	depends on STM32_ADC1 && STM32_HAVE_IP_ADC_V1
+	default y if STM32_ADC1_DMA
+	default n
+
 config STM32_ADC1_DMA_CFG
 	int "ADC1 DMA configuration"
 	depends on STM32_ADC1_DMA && !STM32_HAVE_IP_ADC_V1_BASIC
@@ -8202,6 +8208,12 @@ config STM32_ADC2_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
+config STM32_ADC2_SCAN
+	bool "ADC2 scan mode"
+	depends on STM32_ADC2 && STM32_HAVE_IP_ADC_V1
+	default y if STM32_ADC2_DMA
+	default n
+
 config STM32_ADC2_DMA_CFG
 	int "ADC2 DMA configuration"
 	depends on STM32_ADC2_DMA && !STM32_HAVE_IP_ADC_V1_BASIC
@@ -8218,6 +8230,12 @@ config STM32_ADC3_DMA
 		If DMA is selected, then the ADC may be configured to support
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
+
+config STM32_ADC3_SCAN
+	bool "ADC3 scan mode"
+	depends on STM32_ADC3 && STM32_HAVE_IP_ADC_V1
+	default y if STM32_ADC3_DMA
+	default n
 
 config STM32_ADC3_DMA_CFG
 	int "ADC3 DMA configuration"
