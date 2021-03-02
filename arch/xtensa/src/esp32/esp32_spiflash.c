@@ -1419,6 +1419,9 @@ static void IRAM_ATTR esp32_ummap(FAR struct esp32_spiflash_s *priv,
 #endif
     }
 
+#ifdef CONFIG_ESP32_SPIRAM
+  esp_spiram_writeback_cache();
+#endif
   Cache_Flush(0);
 #ifdef CONFIG_SMP
   Cache_Flush(1);
