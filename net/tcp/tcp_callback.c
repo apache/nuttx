@@ -319,8 +319,10 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
   /* Provide notification(s) that additional TCP read-ahead data is
    * available.
    */
-
-  tcp_readahead_signal(conn);
+  if (queue == &conn->readahead)
+    {
+      tcp_readahead_signal(conn);
+    }
 #endif
 
   ninfo("Buffered %d bytes\n", buflen);

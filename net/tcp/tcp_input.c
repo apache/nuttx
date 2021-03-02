@@ -1150,6 +1150,15 @@ static void tcp_process_cache(FAR struct net_driver_s *dev, uint8_t domain,
 
           dev->d_len = iob->io_pktlen - NET_LL_HDRLEN(dev);
 
+          if (IFF_IS_IPv4(dev->d_flags))
+            {
+              tcp_ipv4_select(dev);
+            }
+          else
+            {
+              tcp_ipv6_select(dev);
+            }
+
           tcp_input(dev, domain, iplen, NULL);
 
           iob_free_queue(iob, &conn->pendingahead,
