@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdlib/lib_valloc.c
+ * mm/umm_heap/umm_posix_memalign.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,29 +23,14 @@
  ****************************************************************************/
 
 #include <stdlib.h>
-#include <unistd.h>
+#include <errno.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: valloc
- *
- * Description:
- *   valloc has the same effect as malloc(), except that the allocated
- *   memory is aligned to a page boundary.
- *
- * Input Parameters:
- *   size - Specifies the size (in bytes) of the allocated block of memory.
- *   If size is zero, a unique pointer to the heap is returned.
- *
- * Returned Value:
- *   The address of the allocated memory (NULL on failure to allocate)
- *
- ****************************************************************************/
-
-FAR void *valloc(size_t size)
+int posix_memalign(FAR void **mem, size_t align, size_t size)
 {
-  return memalign(sysconf(_SC_PAGESIZE), size);
+  *mem = memalign(align, size);
+  return *mem ? OK : ENOMEM;
 }
