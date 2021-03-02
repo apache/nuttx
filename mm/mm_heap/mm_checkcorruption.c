@@ -29,6 +29,8 @@
 #include <nuttx/mm/mm.h>
 #include <nuttx/irq.h>
 
+#include "mm_heap/mm.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -43,8 +45,13 @@
 
 void mm_checkcorruption(FAR struct mm_heap_s *heap)
 {
+  FAR struct mm_heap_impl_s *heap_impl;
   FAR struct mm_allocnode_s *node;
   FAR struct mm_allocnode_s *prev;
+
+  DEBUGASSERT(MM_IS_VALID(heap));
+  heap_impl = heap->mm_impl;
+
 #if CONFIG_MM_REGIONS > 1
   int region;
 #else
@@ -54,7 +61,7 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
   /* Visit each region */
 
 #if CONFIG_MM_REGIONS > 1
-  for (region = 0; region < heap->mm_nregions; region++)
+  for (region = 0; region < heap_impl->mm_nregions; region++)
 #endif
     {
       irqstate_t flags = 0;
@@ -67,7 +74,7 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
 
       if (up_interrupt_context() || sched_idletask())
         {
-          if (heap->mm_counts_held)
+          if (heap_impl->mm_counts_held)
             {
 #if CONFIG_MM_REGIONS > 1
               continue;
@@ -83,8 +90,8 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
           mm_takesemaphore(heap);
         }
 
-      for (node = heap->mm_heapstart[region];
-           node < heap->mm_heapend[region];
+      for (node = heap_impl->mm_heapstart[region];
+           node < heap_impl->mm_heapend[region];
            node = (FAR struct mm_allocnode_s *)
                   ((FAR char *)node + node->size))
         {
@@ -111,7 +118,7 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
           prev = node;
         }
 
-      assert(node == heap->mm_heapend[region]);
+      assert(node == heap_impl->mm_heapend[region]);
 
       if (up_interrupt_context() || sched_idletask())
         {

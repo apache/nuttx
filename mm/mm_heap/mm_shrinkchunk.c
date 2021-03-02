@@ -43,6 +43,8 @@
 
 #include <nuttx/mm/mm.h>
 
+#include "mm_heap/mm.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -82,7 +84,8 @@ void  mm_shrinkchunk(FAR struct mm_heap_s *heap,
 
       /* Get the chunk next the next node (which could be the tail chunk) */
 
-      andbeyond = (FAR struct mm_allocnode_s *)((FAR char *)next + next->size);
+      andbeyond = (FAR struct mm_allocnode_s *)
+                  ((FAR char *)next + next->size);
 
       /* Remove the next node.  There must be a predecessor, but there may
        * not be a successor node.
