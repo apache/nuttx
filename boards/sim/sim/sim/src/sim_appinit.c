@@ -101,13 +101,13 @@ int board_app_initialize(uintptr_t arg)
 
 #ifdef CONFIG_SENSORS_FAKESENSOR
   fakesensor_init(SENSOR_TYPE_ACCELEROMETER,
-                  "/data/boards/sim/sim/sim/src/csv/accel.csv", 0);
+                  "/data/boards/sim/sim/sim/src/csv/accel.csv", 0, 50);
 
   fakesensor_init(SENSOR_TYPE_MAGNETIC_FIELD,
-                  "/data/boards/sim/sim/sim/src/csv/mag.csv", 0);
+                  "/data/boards/sim/sim/sim/src/csv/mag.csv", 0, 50);
 
   fakesensor_init(SENSOR_TYPE_GYROSCOPE,
-                  "/data/boards/sim/sim/sim/src/csv/gyro.csv", 0);
+                  "/data/boards/sim/sim/sim/src/csv/gyro.csv", 0, 50);
 #endif
 
 #ifdef CONFIG_RC_DUMMY
