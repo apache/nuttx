@@ -39,8 +39,8 @@
  * Name: ffsl
  *
  * Description:
- *   The ffsl() function will find the first bit set (beginning with the least
- *   significant bit) in j, and return the index of that bit. Bits are
+ *   The ffsl() function will find the first bit set (beginning with the
+ *   least significant bit) in j, and return the index of that bit. Bits are
  *   numbered starting at one (the least significant bit).
  *
  * Returned Value:

@@ -81,7 +81,9 @@ int pthread_once(FAR pthread_once_t *once_control,
           return OK;
         }
 
-      /* The init_routine has already been called.  Restore pre-emption and return */
+      /* The init_routine has already been called.
+       * Restore pre-emption and return
+       */
 
       sched_unlock();
       return OK;

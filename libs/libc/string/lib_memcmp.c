@@ -50,6 +50,7 @@ int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
       p1++;
       p2++;
     }
+
   return 0;
 }
 #endif

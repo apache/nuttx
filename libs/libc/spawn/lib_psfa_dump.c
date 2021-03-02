@@ -59,7 +59,8 @@
  *
  ****************************************************************************/
 
-void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
+void posix_spawn_file_actions_dump(
+                            FAR posix_spawn_file_actions_t *file_actions)
 {
   FAR struct spawn_general_file_action_s *entry;
 

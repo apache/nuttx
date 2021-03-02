@@ -58,7 +58,9 @@ struct usr_wqueue_s
 
 extern struct usr_wqueue_s g_usrwork;
 
-/* This semaphore/mutex supports exclusive access to the user-mode work queue */
+/* This semaphore/mutex supports exclusive access to the user-mode work
+ * queue
+ */
 
 #ifdef CONFIG_BUILD_PROTECTED
 extern sem_t g_usrsem;

@@ -37,4 +37,8 @@
 struct group g_group;
 char g_group_buffer[GRPBUF_RESERVE_SIZE];
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #endif /* CONFIG_LIBC_GROUP_FILE */

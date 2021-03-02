@@ -46,8 +46,8 @@
  *   If 'options' is TCSANOW, the change will occur immediately.
  *
  *   If 'options' is TCSADRAIN, the change will occur after all output
- *   written to 'fd' is transmitted. This function should be used when changing
- *   parameters that affect output.
+ *   written to 'fd' is transmitted. This function should be used when
+ *   changing parameters that affect output.
  *
  *   If 'options' is TCSAFLUSH, the change will occur after all
  *   output written to 'fd' is transmitted, and all input so far received but

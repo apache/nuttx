@@ -55,10 +55,13 @@ static off_t lib_getrdoffset(FAR FILE *stream)
   off_t rdoffset = 0;
   lib_take_semaphore(stream);
 
-  if (stream->fs_bufstart != NULL && stream->fs_bufread != stream->fs_bufstart)
+  if (stream->fs_bufstart !=
+      NULL && stream->fs_bufread !=
+      stream->fs_bufstart)
     {
 #if CONFIG_NUNGET_CHARS > 0
-      rdoffset = stream->fs_bufread - stream->fs_bufpos + stream->fs_nungotten;
+      rdoffset = stream->fs_bufread - stream->fs_bufpos +
+                 stream->fs_nungotten;
 #else
       rdoffset = stream->fs_bufread - stream->fs_bufpos;
 #endif

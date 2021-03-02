@@ -65,8 +65,9 @@ void abort(void)
    *
    * Note that pthread_exit() is called instead of exit().  That is because
    * we do no know if abort was called from a pthread or a normal thread
-   * (we could find out, of course).  If abort() is called from a non-pthread,
-   * then pthread_exit() should fail and fall back to call exit() anyway.
+   * (we could find out, of course).  If abort() is called from a
+   * non-pthread, then pthread_exit() should fail and fall back to call
+   * exit() anyway.
    *
    * If exit() is called (either below or via pthread_exit()), then exit()
    * will flush and close all open files and terminate the thread.  If this

@@ -97,7 +97,9 @@ FAR char *strcasestr(FAR const char *str, FAR const char *substr)
           return NULL;
         }
 
-      /* Check if this is the beginning of a matching substring (ignoring case) */
+      /* Check if this is the beginning of a matching substring
+       * (ignoring case)
+       */
 
       if (strncasecmp(candidate, substr, len) == 0)
         {
@@ -113,8 +115,8 @@ FAR char *strcasestr(FAR const char *str, FAR const char *substr)
       candidate++;
     }
 
-  /* Won't get here, but some compilers might complain.  Others might complain
-   * about this code being unreachable too.
+  /* Won't get here, but some compilers might complain.  Others might
+   * complain about this code being unreachable too.
    */
 
   return NULL;

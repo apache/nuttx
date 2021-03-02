@@ -57,7 +57,8 @@
  *
  ****************************************************************************/
 
-int posix_spawn_file_actions_destroy(FAR posix_spawn_file_actions_t *file_actions)
+int posix_spawn_file_actions_destroy(
+                                FAR posix_spawn_file_actions_t *file_actions)
 {
   FAR struct spawn_general_file_action_s *curr;
   FAR struct spawn_general_file_action_s *next;
@@ -70,7 +71,9 @@ int posix_spawn_file_actions_destroy(FAR posix_spawn_file_actions_t *file_action
        curr;
        curr = next)
     {
-      /* Get the pointer to the next element before destroying the current one */
+      /* Get the pointer to the next element before destroying the current
+       * one
+       */
 
       next = curr->flink;
       lib_free(curr);

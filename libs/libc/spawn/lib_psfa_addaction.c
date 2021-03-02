@@ -55,7 +55,8 @@ void add_file_action(FAR posix_spawn_file_actions_t *file_actions,
 
   /* Find the end of the list */
 
-  for (prev = NULL, next = (FAR struct spawn_general_file_action_s *)*file_actions;
+  for (prev = NULL,
+       next = (FAR struct spawn_general_file_action_s *)*file_actions;
        next;
        prev = next, next = next->flink);
 

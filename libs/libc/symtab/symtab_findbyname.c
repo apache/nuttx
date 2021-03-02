@@ -61,5 +61,6 @@ symtab_findbyname(FAR const struct symtab_s *symtab,
           return symtab;
         }
     }
+
   return NULL;
 }

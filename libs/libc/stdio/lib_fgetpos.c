@@ -39,10 +39,10 @@
  *
  * Description:
  *   fgetpos() function is an alternate interfaces equivalent to ftell().
- *   It gets the current value of the file offset and store it in the location
- *   referenced by pos.  On some non-UNIX systems an fpos_t object may be a
- *   complex object and fsetpos may be the only way to portably reposition a
- *   stream.
+ *   It gets the current value of the file offset and store it in the
+ *   location referenced by pos.  On some non-UNIX systems an fpos_t object
+ *   may be a complex object and fsetpos may be the only way to portably
+ *   reposition a stream.
  *
  * Returned Value:
  *   Zero on succes; -1 on failure with errno set appropriately.

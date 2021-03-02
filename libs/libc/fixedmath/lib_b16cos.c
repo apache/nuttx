@@ -45,5 +45,6 @@ b16_t b16cos(b16_t rad)
     {
       rad -= b16TWOPI;
     }
+
   return b16sin(rad);
 }

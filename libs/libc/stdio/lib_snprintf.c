@@ -51,8 +51,8 @@ int snprintf(FAR char *buf, size_t size, FAR const IPTR char *format, ...)
 
   /* "If the value of [size] is zero on a call to snprintf(), nothing shall
    *  be written, the number of bytes that would have been written had [size]
-   *  been sufficiently large excluding the terminating null shall be returned,
-   *  and [buf] may be a null pointer." -- opengroup.org
+   *  been sufficiently large excluding the terminating null shall be
+   *  returned, and [buf] may be a null pointer." -- opengroup.org
    */
 
   if (size > 0)

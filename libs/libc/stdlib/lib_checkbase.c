@@ -63,7 +63,9 @@ int lib_checkbase(int base, FAR const char **pptr)
 
       base = 10;
 
-      /* Check for leading '0' - that would signify octal or hex (or binary) */
+      /* Check for leading '0' - that would signify octal
+       * or hex (or binary)
+       */
 
       if (*ptr == '0')
         {
@@ -83,7 +85,9 @@ int lib_checkbase(int base, FAR const char **pptr)
         }
     }
 
-  /* If it a hexadecimal representation, than discard any leading "0X" or "0x" */
+  /* If it a hexadecimal representation,
+   * than discard any leading "0X" or "0x"
+   */
 
   else if (base == 16)
     {

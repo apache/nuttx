@@ -50,7 +50,8 @@
  *
  ********************************************************************************/
 
-int pthread_barrierattr_getpshared(FAR const pthread_barrierattr_t *attr, FAR int *pshared)
+int pthread_barrierattr_getpshared(FAR const pthread_barrierattr_t *attr,
+                                   FAR int *pshared)
 {
   int ret = OK;
 
@@ -62,5 +63,6 @@ int pthread_barrierattr_getpshared(FAR const pthread_barrierattr_t *attr, FAR in
     {
       *pshared = attr->pshared;
     }
+
   return ret;
 }

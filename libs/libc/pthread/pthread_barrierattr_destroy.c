@@ -63,5 +63,6 @@ int pthread_barrierattr_destroy(FAR pthread_barrierattr_t *attr)
     {
       attr->pshared = PTHREAD_PROCESS_PRIVATE;
     }
+
   return ret;
 }

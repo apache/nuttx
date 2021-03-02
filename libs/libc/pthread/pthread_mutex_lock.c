@@ -36,9 +36,9 @@
  * Description:
  *   The mutex object referenced by mutex is locked by calling
  *   pthread_mutex_lock(). If the mutex is already locked, the calling thread
- *   blocks until the mutex becomes available. This operation returns with the
- *   mutex object referenced by mutex in the locked state with the calling
- *   thread as its owner.
+ *   blocks until the mutex becomes available. This operation returns with
+ *   the mutex object referenced by mutex in the locked state with the
+ *   calling thread as its owner.
  *
  *   If the mutex type is PTHREAD_MUTEX_NORMAL, deadlock detection is not
  *   provided. Attempting to relock the mutex causes deadlock. If a thread
@@ -56,9 +56,9 @@
  *   for the first time, the lock count is set to one. Every time a thread
  *   relocks this mutex, the lock count is incremented by one. Each time the
  *   thread unlocks the mutex, the lock count is decremented by one. When the
- *   lock count reaches zero, the mutex becomes available for other threads to
- *   acquire. If a thread attempts to unlock a mutex that it has not locked or
- *   a mutex which is unlocked, an error will be returned.
+ *   lock count reaches zero, the mutex becomes available for other threads
+ *   to acquire. If a thread attempts to unlock a mutex that it has not
+ *   locked or a mutex which is unlocked, an error will be returned.
  *
  *   If a signal is delivered to a thread waiting for a mutex, upon return
  *   from the signal handler the thread resumes waiting for the mutex as if

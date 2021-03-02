@@ -58,10 +58,10 @@
  *   it is unspecified whether that signal has any effect other than causing
  *   usleep() to return.
  *
- *   If a signal-catching function interrupts usleep() and examines or changes
- *   either the time a SIGALRM is scheduled to be generated, the action
- *   associated with the SIGALRM signal, or whether the SIGALRM signal is
- *   blocked from delivery, the results are unspecified.
+ *   If a signal-catching function interrupts usleep() and examines or
+ *   changes either the time a SIGALRM is scheduled to be generated, the
+ *   action associated with the SIGALRM signal, or whether the SIGALRM signal
+ *   is blocked from delivery, the results are unspecified.
  *
  *   If a signal-catching function interrupts usleep() and calls siglongjmp()
  *   or longjmp() to restore an environment saved prior to the usleep() call,
@@ -70,15 +70,15 @@
  *   unspecified whether the SIGALRM signal is blocked, unless the process'
  *   signal mask is restored as part of the environment.
  *
- *   Implementations may place limitations on the granularity of timer values.
- *   For each interval timer, if the requested timer value requires a finer
- *   granularity than the implementation supports, the actual timer value will
- *   be rounded up to the next supported value.
+ *   Implementations may place limitations on the granularity of timer
+ *   values. For each interval timer, if the requested timer value requires a
+ *   finer granularity than the implementation supports, the actual timer
+ *   value will be rounded up to the next supported value.
  *
  *   Interactions between usleep() and any of the following are unspecified:
  *
- *   nanosleep(), setitimer(), timer_create(), timer_delete(), timer_getoverrun(),
- *   timer_gettime(), timer_settime(), ualarm(), sleep()
+ *   nanosleep(), setitimer(), timer_create(), timer_delete(),
+ *   timer_getoverrun(), timer_gettime(), timer_settime(), ualarm(), sleep()
  *
  * Input Parameters:
  *   usec - the number of microseconds to wait.

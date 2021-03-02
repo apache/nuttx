@@ -42,7 +42,8 @@
 
 static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  FAR struct lib_rawoutstream_s *rthis = (FAR struct lib_rawoutstream_s *)this;
+  FAR struct lib_rawoutstream_s *rthis =
+                                (FAR struct lib_rawoutstream_s *)this;
   char buffer = ch;
   int nwritten;
   int errcode;

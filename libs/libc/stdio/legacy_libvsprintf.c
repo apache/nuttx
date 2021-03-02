@@ -34,6 +34,12 @@
 
 #include "libc.h"
 
+/* Include floating point functions */
+
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+#  include "stdio/lib_libdtoa.c"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -192,12 +198,6 @@ static const char g_nullstring[] = "(null)";
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/* Include floating point functions */
-
-#ifdef CONFIG_LIBC_FLOATINGPOINT
-#  include "stdio/lib_libdtoa.c"
-#endif
 
 /****************************************************************************
  * Name: ptohex

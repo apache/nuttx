@@ -42,7 +42,8 @@
  *   Function for flushing a terminal/serial device
  *
  * Input Parameters:
- *   fd  - The 'fd' argument is an open file descriptor associated with a terminal.
+ *   fd  - The 'fd' argument is an open file descriptor associated with a
+ *         terminal.
  *   cmd - The TCFLSH ioctl argument.
  *
  * Returned Value:

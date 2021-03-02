@@ -45,7 +45,9 @@ FAR char *strpbrk(FAR const char *str, FAR const char *charset)
 
   while (*str)
     {
-      /* Check if the character from the string matches any character in the charset */
+      /* Check if the character from the string matches any character in the
+       * charset
+       */
 
       if (strchr(charset, *str) != NULL)
         {
@@ -54,15 +56,15 @@ FAR char *strpbrk(FAR const char *str, FAR const char *charset)
           return (FAR char *)str;
         }
 
-      /* This character from the strings matches none of those in the charset.
-       * Try the next character from the string.
+      /* This character from the strings matches none of those in the
+       * charset. Try the next character from the string.
        */
 
       str++;
     }
 
-  /* We have looked at every character in the string, and none of them match any of
-   * the characters in charset.
+  /* We have looked at every character in the string, and none of them match
+   * any of the characters in charset.
    */
 
   return NULL;

@@ -40,9 +40,9 @@
  *
  * Description:
  *   Find the symbol in the symbol table whose value closest (but not greater
- *   than), the provided value. This version assumes that table is not ordered
- *   with respect to symbol name and, hence, access time will be linear with
- *   respect to nsyms.
+ *   than), the provided value. This version assumes that table is not
+ *   ordered with respect to symbol name and, hence, access time will be
+ *   linear with respect to nsyms.
  *
  * Returned Value:
  *   A reference to the symbol table entry if an entry with the matching
@@ -59,7 +59,9 @@ symtab_findbyvalue(FAR const struct symtab_s *symtab,
   DEBUGASSERT(symtab != NULL);
   for (; nsyms > 0; symtab++, nsyms--)
     {
-      /* Look for symbols of lesser or equal value (probably address) to value */
+      /* Look for symbols of lesser or equal value (probably address) to
+       * value
+       */
 
       if (symtab->sym_value <= value)
         {
@@ -73,8 +75,9 @@ symtab_findbyvalue(FAR const struct symtab_s *symtab,
 
               retval = symtab;
 
-              /* If it is exactly equal to the search 'value', then we might as
-               * well terminate early because we can't do any better than that.
+              /* If it is exactly equal to the search 'value', then we might
+               * as well terminate early because we can't do any better than
+               * that.
                */
 
               if (retval->sym_value == value)
