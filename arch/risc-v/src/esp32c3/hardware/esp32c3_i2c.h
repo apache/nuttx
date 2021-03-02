@@ -231,7 +231,7 @@
 /* I2C_TIME_OUT_REG : R/W ;bitpos:[4:0] ;default: 5'h10 ; */
 
 #define I2C_TIME_OUT_REG    0x0000001F
-#define I2C_TIME_OUT_REG_M  ((I2C_TIME_OUT_VALUE_V)<<(I2C_TIME_OUT_VALUE_S))
+#define I2C_TIME_OUT_REG_M  ((I2C_TIME_OUT_REG_V)<<(I2C_TIME_OUT_REG_S))
 #define I2C_TIME_OUT_REG_V  0x1F
 #define I2C_TIME_OUT_REG_S  0
 
