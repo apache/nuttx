@@ -59,3 +59,11 @@ void rp2040_gpio_set_function(uint32_t gpio, uint32_t func)
   putreg32(func & RP2040_IO_BANK0_GPIO_CTRL_FUNCSEL_MASK,
            RP2040_IO_BANK0_GPIO_CTRL(gpio));
 }
+
+void rp2040_gpio_set_pulls(uint32_t gpio, int up, int down)
+{
+  modbits_reg32((up   ? RP2040_PADS_BANK0_GPIO_PUE : 0) |
+                (down ? RP2040_PADS_BANK0_GPIO_PDE : 0),
+                RP2040_PADS_BANK0_GPIO_PUE | RP2040_PADS_BANK0_GPIO_PDE,
+                RP2040_PADS_BANK0_GPIO(gpio));
+}
