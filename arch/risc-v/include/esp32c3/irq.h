@@ -77,7 +77,7 @@
 #define ESP32C3_PERIPH_USB                 26
 #define ESP32C3_PERIPH_RTC_CORE            27
 #define ESP32C3_PERIPH_RMT                 28
-#define ESP32C3_PERIPH_I2C_EXT0            39
+#define ESP32C3_PERIPH_I2C_EXT0            29
 
 #define ESP32C3_PERIPH_TIMER1              30
 #define ESP32C3_PERIPH_TIMER2              31
