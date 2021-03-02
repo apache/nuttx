@@ -1,5 +1,5 @@
-############################################################################
-# boards/arm/rp2040/raspberrypi-pico/src/Makefile
+#############################################################################
+# boards/arm/rp2040/common/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -16,16 +16,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-############################################################################
+#############################################################################
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = rp2040_boardinitialize.c
-CSRCS += rp2040_appinit.c
-CSRCS += rp2040_bringup.c
+include board/Make.defs
+include src/Make.defs
 
-ifeq ($(CONFIG_BOARDCTL_RESET),y)
-CSRCS += rp2040_reset.c
-endif
+DEPPATH += --dep-path board
+DEPPATH += --dep-path src
 
 include $(TOPDIR)/boards/Board.mk
+
+ARCHSRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+BOARDDIR = $(ARCHSRCDIR)$(DELIM)board
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(BOARDDIR)$(DELIM)include)
+

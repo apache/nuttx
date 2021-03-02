@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/raspberrypi-pico/include/board.h
+ * boards/arm/rp2040/raspberrypi-pico/include/rp2040_i2cdev.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,47 +18,15 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_BOARD_H
-#define __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_RP2040_I2CDEV_H
+#define __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_RP2040_I2CDEV_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include "rp2040_i2cdev.h"
-
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Clocking *****************************************************************/
-
-#define MHZ                     1000000
-
-#define BOARD_XOSC_FREQ         (12 * MHZ)
-#define BOARD_PLL_SYS_FREQ      (125 * MHZ)
-#define BOARD_PLL_USB_FREQ      (48 * MHZ)
-
-#define BOARD_REF_FREQ          (12 * MHZ)
-#define BOARD_SYS_FREQ          (125 * MHZ)
-#define BOARD_PERI_FREQ         (125 * MHZ)
-#define BOARD_USB_FREQ          (48 * MHZ)
-#define BOARD_ADC_FREQ          (48 * MHZ)
-#define BOARD_RTC_FREQ          46875
-
-#define BOARD_UART_BASEFREQ     BOARD_PERI_FREQ
-
-#define BOARD_TICK_CLOCK        (1 * MHZ)
-
-/* GPIO definitions *********************************************************/
-
-#define BOARD_GPIO_LED_PIN      25
+#include <stdint.h>
 
 /****************************************************************************
  * Public Types
@@ -84,26 +52,21 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rp2040_boardearlyinitialize
+ * Name: board_i2cdev_initialize
  *
  * Description:
+ *   Initialize i2c driver and register the /dev/i2c device.
  *
  ****************************************************************************/
 
-void rp2040_boardearlyinitialize(void);
-
-/****************************************************************************
- * Name: rp2040_boardinitialize
- *
- * Description:
- *
- ****************************************************************************/
-
-void rp2040_boardinitialize(void);
+#ifdef CONFIG_RP2040_I2C_DRIVER
+int board_i2cdev_initialize(int bus);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
+
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_RP2040_I2CDEV_H */

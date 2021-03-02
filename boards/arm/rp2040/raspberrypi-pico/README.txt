@@ -10,6 +10,7 @@ Currently only the following devices are suppored.
   Supported:
   - UART  (console port)
     - GPIO 0 (UART0 TX) and GPIO 1 (UART0 RX) are used for the console.
+  - I2C
   - Flash ROM Boot
   - SRAM Boot
     - If Pico SDK is available, nuttx.uf2 file which can be used in
@@ -45,6 +46,27 @@ Installation
 
 5. To access the console, GPIO 0 and 1 pins must be connected to the
    device such as USB-serial converter.
+
+Defconfigs
+==========
+
+- nsh
+    Minimum configuration with NutShell
+
+- nshsram
+    Load NuttX binary to SRAM
+  
+- smp
+    Enable SMP mode. Both Core 0 and Core 1 are used by NuttX.
+
+- ssd1306
+    SSD1306 OLED display (I2C) test configuration
+    Connection:
+       SSD1306       Raspberry Pi Pico
+           GND ----- GND            (Pin 3 or 38 or ...)
+           VCC ----- 3V3 OUT        (Pin 36)
+           SDA ----- GP4 (I2C0 SDA) (Pin 6)
+           SCL ----- GP5 (I2C0 SCL) (Pin 7)
 
 License exceptions
 ==================
