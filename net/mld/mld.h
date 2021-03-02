@@ -229,17 +229,6 @@ struct mld_mcast_listen_report_v2_s; /* Forward reference */
 struct mld_mcast_listen_done_s;      /* Forward reference */
 
 /****************************************************************************
- * Name: mld_initialize()
- *
- * Description:
- *   Initialize the MLD structures.  Called once and only from the
- *   networking layer.
- *
- ****************************************************************************/
-
-void mld_initialize(void);
-
-/****************************************************************************
  * Name:  mld_devinit
  *
  * Description:
