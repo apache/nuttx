@@ -471,9 +471,9 @@ static int stm32_getstatus(FAR struct watchdog_lowerhalf_s *lower,
   status->timeleft = (priv->timeout * elapsed) / (priv->reload + 1);
 
   wdinfo("Status     :\n");
-  wdinfo("  flags    : %08x\n", status->flags);
-  wdinfo("  timeout  : %d\n", status->timeout);
-  wdinfo("  timeleft : %d\n", status->flags);
+  wdinfo("  flags    : %08x\n", (unsigned)status->flags);
+  wdinfo("  timeout  : %u\n", (unsigned)status->timeout);
+  wdinfo("  timeleft : %u\n", (unsigned)status->flags);
   return OK;
 }
 
@@ -503,14 +503,14 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   int wdgtb;
 
   DEBUGASSERT(priv);
-  wdinfo("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%u\n", (unsigned)timeout);
 
   /* Can this timeout be represented? */
 
   if (timeout < 1 || timeout > WWDG_MAXTIMEOUT)
     {
-      wderr("ERROR: Cannot represent timeout=%d > %d\n",
-            timeout, WWDG_MAXTIMEOUT);
+      wderr("ERROR: Cannot represent timeout=%u > %lu\n",
+            (unsigned)timeout, WWDG_MAXTIMEOUT);
       return -ERANGE;
     }
 
@@ -591,8 +591,8 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   priv->fwwdg  = fwwdg;
   priv->reload = reload;
 
-  wdinfo("wdgtb=%d fwwdg=%d reload=%d timeout=%d\n",
-         wdgtb, fwwdg, reload, priv->timeout);
+  wdinfo("wdgtb=%d fwwdg=%u reload=%u timeout=%u\n",
+         wdgtb, (unsigned)fwwdg, (unsigned)reload, (unsigned)priv->timeout);
 
   /* Set WDGTB[1:0] bits according to calculated value */
 
