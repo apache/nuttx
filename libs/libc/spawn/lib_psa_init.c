@@ -98,7 +98,6 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
   attr->budget.tv_nsec      = param.sched_ss_init_budget.tv_nsec;
 #endif
 
-
 #ifndef CONFIG_ARCH_ADDRENV
   /* Default stack size */
 

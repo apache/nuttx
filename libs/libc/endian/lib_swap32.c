@@ -32,9 +32,9 @@
 #ifndef __SWAP_UINT32_ISMACRO
 uint32_t __swap_uint32(uint32_t n)
 {
-  return (uint32_t)(((((uint32_t)(n)) & 0x000000ffUL) << 24) |
-                    ((((uint32_t)(n)) & 0x0000ff00UL) <<  8) |
-                    ((((uint32_t)(n)) & 0x00ff0000UL) >>  8) |
-                    ((((uint32_t)(n)) & 0xff000000UL) >> 24));
+  return (uint32_t)(((((uint32_t)(n)) & 0x000000fful) << 24) |
+                    ((((uint32_t)(n)) & 0x0000ff00ul) <<  8) |
+                    ((((uint32_t)(n)) & 0x00ff0000ul) >>  8) |
+                    ((((uint32_t)(n)) & 0xff000000ul) >> 24));
 }
 #endif

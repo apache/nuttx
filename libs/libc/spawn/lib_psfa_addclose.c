@@ -58,8 +58,9 @@
  *
  ****************************************************************************/
 
-int posix_spawn_file_actions_addclose(FAR posix_spawn_file_actions_t *file_actions,
-                                      int fd)
+int posix_spawn_file_actions_addclose(
+                      FAR posix_spawn_file_actions_t *file_actions,
+                      int fd)
 {
   FAR struct spawn_close_file_action_s *entry;
 
@@ -82,6 +83,7 @@ int posix_spawn_file_actions_addclose(FAR posix_spawn_file_actions_t *file_actio
 
   /* And add it to the file action list */
 
-  add_file_action(file_actions, (FAR struct spawn_general_file_action_s *)entry);
+  add_file_action(file_actions,
+                 (FAR struct spawn_general_file_action_s *)entry);
   return OK;
 }

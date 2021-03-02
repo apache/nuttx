@@ -80,12 +80,13 @@ FAR char *dirname(FAR char *path)
   /* Check for trailing slash characters */
 
   len = strlen(path);
-  while (path[len-1] == '/')
+  while (path[len - 1] == '/')
     {
       /* Remove trailing '/' UNLESS this would make a zero length string */
+
       if (len > 1)
         {
-          path[len-1] = '\0';
+          path[len - 1] = '\0';
           len--;
         }
       else
@@ -102,8 +103,8 @@ FAR char *dirname(FAR char *path)
   p = strrchr(path, '/');
   if (p)
     {
-      /* Handle the case where the only '/' in the string is the at the beginning
-       * of the path.
+      /* Handle the case where the only '/' in the string is the at the
+       * beginning of the path.
        */
 
       if (p == path)

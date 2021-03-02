@@ -68,30 +68,33 @@ int lib_rdflush(FAR FILE *stream)
   lib_take_semaphore(stream);
 
   /* If the buffer is currently being used for read access, then discard all
-   * of the read-ahead data.  We do not support concurrent buffered read/write
+   * of the read-ahead data. We do not support concurrent buffered read/write
    * access.
    */
 
   if (stream->fs_bufread != stream->fs_bufstart)
     {
-      /* Now adjust the stream pointer to account for the read-ahead data that
-       * was not actually read by the user.
+      /* Now adjust the stream pointer to account for the read-ahead data
+       * that was not actually read by the user.
        */
 
 #if CONFIG_NUNGET_CHARS > 0
-      off_t rdoffset = stream->fs_bufread - stream->fs_bufpos + stream->fs_nungotten;
+      off_t rdoffset = stream->fs_bufread - stream->fs_bufpos +
+                       stream->fs_nungotten;
 #else
       off_t rdoffset = stream->fs_bufread - stream->fs_bufpos;
 #endif
-      /* Mark the buffer as empty (do this before calling fseek() because fseek()
-       * also calls this function).
+      /* Mark the buffer as empty (do this before calling fseek() because
+       * fseek() also calls this function).
        */
 
       stream->fs_bufpos = stream->fs_bufread = stream->fs_bufstart;
 #if CONFIG_NUNGET_CHARS > 0
       stream->fs_nungotten = 0;
 #endif
-      /* Then seek to the position corresponding to the last data read by the user */
+      /* Then seek to the position corresponding to the last data read by the
+       * user
+       */
 
       if (fseek(stream, -rdoffset, SEEK_CUR) < 0)
         {

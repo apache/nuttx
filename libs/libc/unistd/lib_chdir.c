@@ -85,8 +85,8 @@ static inline void _trimdir(char *path)
  *     'path' argument OR more that SYMLOOP_MAX symbolic links in the
  *     resolution of the 'path' argument.
  *   ENAMETOOLONG
- *     The length of the path argument exceeds PATH_MAX or a pathname component
- *     is longer than NAME_MAX.
+ *     The length of the path argument exceeds PATH_MAX or a pathname
+ *     component is longer than NAME_MAX.
  *   ENOENT
  *     A component of 'path' does not name an existing directory or path is
  *     an empty string.
@@ -128,7 +128,9 @@ int chdir(FAR const char *path)
       goto errout;
     }
 
-  /* Yes, it is a directory. Remove any trailing '/' characters from the path */
+  /* Yes, it is a directory.
+   * Remove any trailing '/' characters from the path
+   */
 
   _trimdir(path);
 

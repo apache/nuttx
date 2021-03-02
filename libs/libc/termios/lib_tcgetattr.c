@@ -44,12 +44,14 @@
  *   referenced by 'termiosp'.
  *
  * Input Parameters:
- *   fd - The 'fd' argument is an open file descriptor associated with a terminal.
+ *   fd - The 'fd' argument is an open file descriptor associated with a
+ *        terminal.
  *   termiosp - The termiosp argument is a pointer to a termios structure.
  *
  * Returned Value:
  *   Upon successful completion, 0 is returned. Otherwise, -1 is returned and
- *   errno is set to indicate the error.  The following errors may be reported:
+ *   errno is set to indicate the error.
+ *   The following errors may be reported:
  *
  *   - EBADF: The 'fd' argument is not a valid file descriptor.
  *   - ENOTTY: The file associated with 'fd' is not a terminal.

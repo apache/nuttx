@@ -61,7 +61,8 @@ int pthread_mutexattr_setrobust(pthread_mutexattr_t *attr, int robust)
 
 #elif defined(CONFIG_PTHREAD_MUTEX_BOTH)
 
-  if (attr != NULL && (robust == PTHREAD_MUTEX_STALLED || robust == _PTHREAD_MFLAGS_ROBUST))
+  if (attr != NULL && (robust == PTHREAD_MUTEX_STALLED ||
+      robust == _PTHREAD_MFLAGS_ROBUST))
     {
       attr->robust = robust;
       return OK;

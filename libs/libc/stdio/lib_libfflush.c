@@ -42,8 +42,8 @@
  * Name: lib_fflush
  *
  * Description:
- *  The function lib_fflush() forces a write of all user-space buffered data for
- *  the given output or update stream via the stream's underlying write
+ *  The function lib_fflush() forces a write of all user-space buffered data
+ *  for the given output or update stream via the stream's underlying write
  *  function.  The open status of the stream is unaffected.
  *
  * Input Parameters:
@@ -83,7 +83,7 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
 
       ret = 0;
       goto errout_with_sem;
-   }
+    }
 
   /* Make sure that the buffer holds valid data */
 
@@ -146,10 +146,10 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
        */
 
       while (nbuffer)
-       {
-         *stream->fs_bufpos++ = *src++;
-         --nbuffer;
-       }
+        {
+          *stream->fs_bufpos++ = *src++;
+          --nbuffer;
+        }
     }
 
   /* Restore normal access to the stream and return the number of bytes

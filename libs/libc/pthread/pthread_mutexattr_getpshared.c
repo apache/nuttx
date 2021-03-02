@@ -49,7 +49,8 @@
  *
  ****************************************************************************/
 
-int pthread_mutexattr_getpshared(FAR const pthread_mutexattr_t *attr, FAR int *pshared)
+int pthread_mutexattr_getpshared(FAR const pthread_mutexattr_t *attr,
+                                 FAR int *pshared)
 {
   int ret = OK;
 

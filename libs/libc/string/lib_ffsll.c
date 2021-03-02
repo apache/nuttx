@@ -41,8 +41,8 @@
  * Name: ffsll
  *
  * Description:
- *   The ffsll() function will find the first bit set (beginning with the least
- *   significant bit) in i, and return the index of that bit. Bits are
+ *   The ffsll() function will find the first bit set (beginning with the
+ *   least significant bit) in i, and return the index of that bit. Bits are
  *   numbered starting at one (the least significant bit).
  *
  * Returned Value:

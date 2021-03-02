@@ -44,8 +44,8 @@
  *
  * Description:
  *   Cancel previously queued work.  This removes work from the work queue.
- *   After work has been cancelled, it may be re-queue by calling work_queue()
- *   again.
+ *   After work has been cancelled, it may be re-queue by calling
+ *   work_queue() again.
  *
  * Input Parameters:
  *   qid    - The work queue ID
@@ -60,7 +60,8 @@
  *
  ****************************************************************************/
 
-static int work_qcancel(FAR struct usr_wqueue_s *wqueue, FAR struct work_s *work)
+static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
+                        FAR struct work_s *work)
 {
   int ret = -ENOENT;
 

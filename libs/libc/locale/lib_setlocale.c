@@ -49,6 +49,7 @@
 FAR char *setlocale(int category, FAR const char *locale)
 {
   return ((locale == NULL || strcmp(locale, "POSIX") == 0 ||
-           strcmp(locale, "C") == 0 || strcmp(locale, "") == 0) ? "C" :  NULL);
+           strcmp(locale, "C") == 0 || strcmp(locale, "") ==
+            0) ? "C" :  NULL);
 }
 #endif

@@ -18,7 +18,6 @@
  *
  ****************************************************************************/
 
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -164,7 +163,7 @@ FAR void *memset(FAR void *s, int c, size_t n)
 #else
   /* This version is optimized for size */
 
-  FAR unsigned char *p = (FAR unsigned char*)s;
+  FAR unsigned char *p = (FAR unsigned char *)s;
   while (n-- > 0) *p++ = c;
 #endif
   return s;

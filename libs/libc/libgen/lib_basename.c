@@ -80,12 +80,13 @@ FAR char *basename(FAR char *path)
   /* Check for trailing slash characters */
 
   len = strlen(path);
-  while (path[len-1] == '/')
+  while (path[len - 1] == '/')
     {
       /* Remove trailing '/' UNLESS this would make a zero length string */
+
       if (len > 1)
         {
-          path[len-1] = '\0';
+          path[len - 1] = '\0';
           len--;
         }
       else

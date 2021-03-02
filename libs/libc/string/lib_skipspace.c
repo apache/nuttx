@@ -46,7 +46,7 @@
 
 void lib_skipspace(const char **pptr)
 {
-   const char *ptr = *pptr;
-   while (isspace(*ptr)) ptr++;
-   *pptr = ptr;
+  const char *ptr = *pptr;
+  while (isspace(*ptr)) ptr++;
+  *pptr = ptr;
 }

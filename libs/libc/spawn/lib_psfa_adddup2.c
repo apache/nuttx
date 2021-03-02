@@ -59,8 +59,9 @@
  *
  ****************************************************************************/
 
-int posix_spawn_file_actions_adddup2(FAR posix_spawn_file_actions_t *file_actions,
-                                     int fd1, int fd2)
+int posix_spawn_file_actions_adddup2(
+                         FAR posix_spawn_file_actions_t *file_actions,
+                         int fd1, int fd2)
 {
   FAR struct spawn_dup2_file_action_s *entry;
 
@@ -86,6 +87,7 @@ int posix_spawn_file_actions_adddup2(FAR posix_spawn_file_actions_t *file_action
 
   /* And add it to the file action list */
 
-  add_file_action(file_actions, (FAR struct spawn_general_file_action_s *)entry);
+  add_file_action(file_actions,
+                 (FAR struct spawn_general_file_action_s *)entry);
   return OK;
 }

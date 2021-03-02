@@ -46,8 +46,8 @@
  *   set to SEEK_SET, SEEK_CUR, or SEEK_END, the offset is relative to the
  *   start of the file, the current position indicator, or end-of-file,
  *   respectively. A successful call to the fseek() function clears the
- *   end-of-file indicator for the stream and undoes any effects of the ungetc(3)
- *   function on the same stream.
+ *   end-of-file indicator for the stream and undoes any effects of the
+ *   ungetc(3) function on the same stream.
  *
  * Returned Value:
  *   Zero on succes; -1 on failure with errno set appropriately.

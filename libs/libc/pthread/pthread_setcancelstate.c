@@ -31,7 +31,10 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-/* These are defined in different header files but must have the same values. */
+
+/* These are defined in different header files but must have the same
+ * values.
+ */
 
 #if PTHREAD_CANCEL_ENABLE != TASK_CANCEL_ENABLE
 #  error We must have  PTHREAD_CANCEL_ENABLE == TASK_CANCEL_ENABLE

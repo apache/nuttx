@@ -171,6 +171,7 @@ b16_t b16sqr(b16_t a)
     {
       sq = b16MAX;
     }
+
   return sq;
 }
 
@@ -236,7 +237,7 @@ ub16_t ub16divub16(ub16_t num, ub16_t denom)
   term1 = ((uint32_t)num & 0xffff0000) / denom;
   if (term1 >= 0x00010000)
     {
-        return ub16MAX; /* Will overflow */
+      return ub16MAX; /* Will overflow */
     }
 
   /* Finish the division */
@@ -249,8 +250,9 @@ ub16_t ub16divub16(ub16_t num, ub16_t denom)
 
   if (product < term1)
     {
-        return ub16MAX; /* Overflowed */
+      return ub16MAX; /* Overflowed */
     }
+
   return product;
 }
 

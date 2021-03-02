@@ -38,7 +38,8 @@
 
 static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  FAR struct lib_stdoutstream_s *sthis = (FAR struct lib_stdoutstream_s *)this;
+  FAR struct lib_stdoutstream_s *sthis =
+                               (FAR struct lib_stdoutstream_s *)this;
   int result;
 
   DEBUGASSERT(this && sthis->stream);
@@ -70,7 +71,8 @@ static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
 static int stdoutstream_flush(FAR struct lib_outstream_s *this)
 {
-  FAR struct lib_stdoutstream_s *sthis = (FAR struct lib_stdoutstream_s *)this;
+  FAR struct lib_stdoutstream_s *sthis =
+                                (FAR struct lib_stdoutstream_s *)this;
 
   DEBUGASSERT(sthis != NULL && sthis->stream != NULL);
   return lib_fflush(sthis->stream, true);

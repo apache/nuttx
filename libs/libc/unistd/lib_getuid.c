@@ -35,7 +35,8 @@
  * Name: getuid
  *
  * Description:
- *   The getuid() function will return the real user ID of the calling process.
+ *   The getuid() function will return the real user ID of the calling
+ *   process.
  *
  * Input Parameters:
  *   None

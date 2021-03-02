@@ -45,6 +45,7 @@ int strcasecmp(FAR const char *cs, FAR const char *ct)
       cs++;
       ct++;
     }
+
   return result;
 }
 #endif

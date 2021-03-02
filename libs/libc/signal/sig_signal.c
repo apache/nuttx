@@ -100,9 +100,9 @@ _sa_handler_t signal(int signo, _sa_handler_t func)
    */
 
   if (ret == OK)
-   {
-     return oact.sa_handler;
-   }
+    {
+      return oact.sa_handler;
+    }
 
   return (_sa_handler_t)SIG_ERR;
 }

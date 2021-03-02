@@ -61,24 +61,24 @@ void swab(FAR const void *src, FAR void *dest, ssize_t nbytes)
    */
 
   if (nbytes > 1)
-  {
-    /* The end of dest buffer + 1 byte (skipping any odd numbered byte at
-     * the end of the buffer.
-     */
+    {
+      /* The end of dest buffer + 1 byte (skipping any odd numbered byte at
+       * the end of the buffer.
+       */
 
-    end8 = dest8 + (nbytes & ~1);
+      end8 = dest8 + (nbytes & ~1);
 
-    /* Loop until the destination is equal to the end + 1 address */
+      /* Loop until the destination is equal to the end + 1 address */
 
-    while (dest8 != end8)
-      {
-        register uint8_t tmp;
+      while (dest8 != end8)
+        {
+          register uint8_t tmp;
 
-        /* Transfer the bytes, swapping the order */
+          /* Transfer the bytes, swapping the order */
 
-        tmp      = *src8++;
-        *dest8++ = *src8++;
-        *dest8++ = tmp;
-      }
-  }
+          tmp      = *src8++;
+          *dest8++ = *src8++;
+          *dest8++ = tmp;
+        }
+    }
 }

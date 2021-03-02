@@ -37,4 +37,8 @@
 struct passwd g_passwd;
 char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #endif /* CONFIG_LIBC_GROUP_FILE */

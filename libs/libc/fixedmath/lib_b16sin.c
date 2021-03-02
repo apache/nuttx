@@ -38,7 +38,8 @@
 
 /****************************************************************************
  * Name: b16sin
- * Ref: http://lab.polygonal.de/2007/07/18/fast-and-accurate-sinecosine-approximation/
+ * Ref:
+ * lab.polygonal.de/2007/07/18/fast-and-accurate-sinecosine-approximation/
  ****************************************************************************/
 
 b16_t b16sin(b16_t rad)
@@ -54,29 +55,28 @@ b16_t b16sin(b16_t rad)
       rad += b16TWOPI;
     }
   else if (rad > b16PI)
-   {
+    {
       rad -= b16TWOPI;
-   }
+    }
 
   /* tmp1 = 1.27323954 * rad
    * tmp2 = .405284735 * rad * rad
    */
-
 
   tmp1 = b16mulb16(b16_1P27323954, rad);
   tmp2 = b16mulb16(b16_P405284735, b16sqr(rad));
 
   if (rad < 0)
     {
-       /* tmp3 = 1.27323954 * rad + .405284735 * rad * rad */
+      /* tmp3 = 1.27323954 * rad + .405284735 * rad * rad */
 
-       tmp3 = tmp1 + tmp2;
+      tmp3 = tmp1 + tmp2;
     }
   else
     {
-       /* tmp3 = 1.27323954 * rad - 0.405284735 * rad * rad */
+      /* tmp3 = 1.27323954 * rad - 0.405284735 * rad * rad */
 
-       tmp3 = tmp1 - tmp2;
+      tmp3 = tmp1 - tmp2;
     }
 
   /* tmp1 = tmp3*tmp3 */

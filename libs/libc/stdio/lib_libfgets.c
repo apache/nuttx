@@ -74,9 +74,9 @@
  * Name: consume_eol
  *
  * Description:
- *   If 'consume' is true, then consume_eol() will read and discard bytes from
- *   'stream' until an EOF or a newline encountered or until a read error
- *   occurs.
+ *   If 'consume' is true, then consume_eol() will read and discard bytes
+ *   from 'stream' until an EOF or a newline encountered or until a read
+ *   error occurs.
  *
  ****************************************************************************/
 

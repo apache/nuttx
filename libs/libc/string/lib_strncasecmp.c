@@ -46,6 +46,7 @@ int strncasecmp(const char *cs, const char *ct, size_t nb)
       cs++;
       ct++;
     }
+
   return result;
 }
 #endif

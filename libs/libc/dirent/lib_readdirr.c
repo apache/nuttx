@@ -78,19 +78,20 @@ int readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
   tmp = readdir(dirp);
   if (!tmp)
     {
-       int error = get_errno();
-       if (!error)
-          {
-            if (result)
-              {
-                *result = NULL;
-              }
-            return 0;
-          }
-       else
-          {
-            return error;
-          }
+      int error = get_errno();
+      if (!error)
+        {
+          if (result)
+            {
+              *result = NULL;
+            }
+
+          return 0;
+        }
+      else
+        {
+          return error;
+        }
     }
 
   if (entry)
@@ -102,5 +103,6 @@ int readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
     {
       *result = entry;
     }
+
   return 0;
 }

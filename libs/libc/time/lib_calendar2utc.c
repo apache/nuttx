@@ -54,17 +54,17 @@ static time_t clock_gregorian2utc(int year, int month, int day)
 
   temp = (month <= 2 ? -1:0);
 
-  return (1461*(year + 4800 + temp))/4
-    + (367*(month - 2 - 12*temp))/12
-    - (3*((year + 4900 + temp)/100))/4 + day - 32075;
+  return (1461 * (year + 4800 + temp)) / 4
+    + (367 * (month - 2 - 12 * temp)) / 12
+    - (3 * ((year + 4900 + temp) / 100)) / 4 + day - 32075;
 }
 
 #ifdef CONFIG_JULIAN_TIME
 static time_t clock_julian2utc(int year, int month, int day)
 {
-  return 367*year
-    - (7*(year + 5001 + (month-9)/7))/4
-    + (275*month)/9
+  return 367 * year
+    - (7 * (year + 5001 + (month - 9) / 7)) / 4
+    + (275 * month) / 9
     + day + 1729777;
 }
 #endif /* CONFIG_JULIAN_TIME */
@@ -95,7 +95,7 @@ time_t clock_calendar2utc(int year, int month, int day)
 
   /* Correct year & month ranges.  Shift month into range 1-12 */
 
-  dyear = (month-1) / 12;
+  dyear = (month - 1) / 12;
   month -= 12 * dyear;
   year += dyear;
 

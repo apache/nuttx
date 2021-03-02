@@ -70,10 +70,10 @@
  *   unspecified whether the SIGALRM signal is blocked, unless the process'
  *   signal mask is restored as part of the environment.
  *
- *   Implementations may place limitations on the granularity of timer values.
- *   For each interval timer, if the requested timer value requires a finer
- *   granularity than the implementation supports, the actual timer value will
- *   be rounded up to the next supported value.
+ *   Implementations may place limitations on the granularity of timer
+ *   values. For each interval timer, if the requested timer value requires a
+ *   finer granularity than the implementation supports, the actual timer
+ *   value will be rounded up to the next supported value.
  *
  *   Interactions between sleep() and any of setitimer(), ualarm() or sleep()
  *   are unspecified.
@@ -109,8 +109,8 @@ unsigned int sleep(unsigned int seconds)
 
       ret = clock_nanosleep(CLOCK_REALTIME, 0, &rqtp, &rmtp);
 
-      /* clock_nanosleep() should only fail if it was interrupted by a signal,
-       * but we treat all errors the same,
+      /* clock_nanosleep() should only fail if it was interrupted by a
+       * signal, but we treat all errors the same,
        */
 
       if (ret < 0)

@@ -84,5 +84,6 @@ bool lib_isbasedigit(int ch, int base, int *value)
     {
       *value = tmp;
     }
+
   return ret;
 }

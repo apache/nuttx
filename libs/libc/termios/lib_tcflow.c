@@ -55,8 +55,8 @@
  *                     intended to cause the terminal device to start
  *                     transmitting data to the system.
  *
- *   The default on the opening of a terminal file is that neither its input nor
- *   its output are suspended.
+ *   The default on the opening of a terminal file is that neither its input
+ *   nor its output are suspended.
  *
  * Returned Value:
  *   Upon successful completion, 0 is returned. Otherwise, -1 is returned and
