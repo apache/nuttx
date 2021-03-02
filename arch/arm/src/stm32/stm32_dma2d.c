@@ -483,7 +483,7 @@ static int stm32_dma2d_loadclut(uintptr_t pfcreg)
   /* Start clut loading */
 
   regval  = getreg32(pfcreg);
-  regval |= DMA2D_xGPFCCR_START;
+  regval |= DMA2D_XGPFCCR_START;
   reginfo("set regval=%08x\n", regval);
   putreg32(regval, pfcreg);
   reginfo("configured regval=%08x\n", getreg32(pfcreg));
@@ -692,7 +692,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 
   /* Set color format */
 
-  pfccrreg = DMA2D_xGPFCCR_CM(fmt);
+  pfccrreg = DMA2D_XGPFCCR_CM(fmt);
 
 #ifdef CONFIG_STM32_FB_CMAP
   if (fmt == DMA2D_PF_L8)
@@ -701,17 +701,17 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 
       /* Load CLUT automatically */
 
-      pfccrreg |= DMA2D_xGPFCCR_START;
+      pfccrreg |= DMA2D_XGPFCCR_START;
 
       /* Set the CLUT color mode */
 
 #  ifndef CONFIG_STM32_FB_TRANSPARENCY
-      pfccrreg |= DMA2D_xGPFCCR_CCM;
+      pfccrreg |= DMA2D_XGPFCCR_CCM;
 #  endif
 
       /* Set CLUT size */
 
-      pfccrreg |= DMA2D_xGPFCCR_CS(DMA2D_CLUT_SIZE);
+      pfccrreg |= DMA2D_XGPFCCR_CS(DMA2D_CLUT_SIZE);
 
       /* Set the CLUT memory address */
 
@@ -725,14 +725,14 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 
   /* Set alpha blend mode */
 
-  pfccrreg |= DMA2D_xGPFCCR_AM(blendmode);
+  pfccrreg |= DMA2D_XGPFCCR_AM(blendmode);
 
   if (blendmode == STM32_DMA2D_PFCCR_AM_CONST ||
         blendmode == STM32_DMA2D_PFCCR_AM_PIXEL)
     {
       /* Set alpha value */
 
-      pfccrreg |= DMA2D_xGPFCCR_ALPHA(alpha);
+      pfccrreg |= DMA2D_XGPFCCR_ALPHA(alpha);
     }
 
   putreg32(pfccrreg, stm32_pfccr_layer_t[lid]);

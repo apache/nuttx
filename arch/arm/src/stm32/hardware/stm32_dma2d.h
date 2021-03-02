@@ -49,52 +49,52 @@
 
 #define STM32_DMA2D_NCLUT           256    /* Number of entries in the CLUT */
 
-/* DMA2D Register Offsets ****************************************************/
+/* DMA2D Register Offsets ***************************************************/
 
 #define STM32_DMA2D_CR_OFFSET       0x0000 /* DMA2D Control Register */
 #define STM32_DMA2D_ISR_OFFSET      0x0004 /* DMA2D Interrupt Status Register */
 #define STM32_DMA2D_IFCR_OFFSET     0x0008 /* DMA2D Interrupt Flag Clear Register */
-#define STM32_DMA2D_FGMAR_OFFSET    0x000C /* DMA2D Foreground Memory Address Register */
+#define STM32_DMA2D_FGMAR_OFFSET    0x000c /* DMA2D Foreground Memory Address Register */
 #define STM32_DMA2D_FGOR_OFFSET     0x0010 /* DMA2D Foreground Offset Register */
 #define STM32_DMA2D_BGMAR_OFFSET    0x0014 /* DMA2D Background Memory Address Register */
 #define STM32_DMA2D_BGOR_OFFSET     0x0018 /* DMA2D Background Offset Register */
-#define STM32_DMA2D_FGPFCCR_OFFSET  0x001C /* DMA2D Foreground PFC Control Register */
+#define STM32_DMA2D_FGPFCCR_OFFSET  0x001c /* DMA2D Foreground PFC Control Register */
 #define STM32_DMA2D_FGCOLR_OFFSET   0x0020 /* DMA2D Foreground Color Register */
 #define STM32_DMA2D_BGPFCCR_OFFSET  0x0024 /* DMA2D Background PFC Control Register */
 #define STM32_DMA2D_BGCOLR_OFFSET   0x0028 /* DMA2D Background Color Register */
-#define STM32_DMA2D_FGCMAR_OFFSET   0x002C /* DMA2D Foreground CLUT Memory Address Register */
+#define STM32_DMA2D_FGCMAR_OFFSET   0x002c /* DMA2D Foreground CLUT Memory Address Register */
 #define STM32_DMA2D_BGCMAR_OFFSET   0x0030 /* DMA2D Background CLUT Memory Address Register */
 #define STM32_DMA2D_OPFCCR_OFFSET   0x0034 /* DMA2D Output PFC Control Register */
 #define STM32_DMA2D_OCOLR_OFFSET    0x0038 /* DMA2D Output Color Register */
-#define STM32_DMA2D_OMAR_OFFSET     0x003C /* DMA2D Output Memory Address Register */
+#define STM32_DMA2D_OMAR_OFFSET     0x003c /* DMA2D Output Memory Address Register */
 #define STM32_DMA2D_OOR_OFFSET      0x0040 /* DMA2D Output Offset Register */
 #define STM32_DMA2D_NLR_OFFSET      0x0044 /* DMA2D Number Of Line Register */
 #define STM32_DMA2D_LWR_OFFSET      0x0048 /* DMA2D Line Watermark Register */
-#define STM32_DMA2D_AMTCR_OFFSET    0x004C /* DMA2D AHB Master Time Configuration Register */
+#define STM32_DMA2D_AMTCR_OFFSET    0x004c /* DMA2D AHB Master Time Configuration Register */
 
-/* DMA2D Register Addresses **************************************************/
+/* DMA2D Register Addresses *************************************************/
 
-#define STM32_DMA2D_CR              (STM32_DMA2D_BASE+STM32_DMA2D_CR_OFFSET)
-#define STM32_DMA2D_ISR             (STM32_DMA2D_BASE+STM32_DMA2D_ISR_OFFSET)
-#define STM32_DMA2D_IFCR            (STM32_DMA2D_BASE+STM32_DMA2D_IFCR_OFFSET)
-#define STM32_DMA2D_FGMAR           (STM32_DMA2D_BASE+STM32_DMA2D_FGMAR_OFFSET)
-#define STM32_DMA2D_FGOR            (STM32_DMA2D_BASE+STM32_DMA2D_FGOR_OFFSET)
-#define STM32_DMA2D_BGMAR           (STM32_DMA2D_BASE+STM32_DMA2D_BGMAR_OFFSET)
-#define STM32_DMA2D_BGOR            (STM32_DMA2D_BASE+STM32_DMA2D_BGOR_OFFSET)
-#define STM32_DMA2D_FGPFCCR         (STM32_DMA2D_BASE+STM32_DMA2D_FGPFCCR_OFFSET)
-#define STM32_DMA2D_FGCOLR          (STM32_DMA2D_BASE+STM32_DMA2D_FGCOLR_OFFSET)
-#define STM32_DMA2D_BGPFCCR         (STM32_DMA2D_BASE+STM32_DMA2D_BGPFCCR_OFFSET)
-#define STM32_DMA2D_BGCOLR          (STM32_DMA2D_BASE+STM32_DMA2D_BGCOLR_OFFSET)
-#define STM32_DMA2D_FGCMAR          (STM32_DMA2D_BASE+STM32_DMA2D_FGCMAR_OFFSET)
-#define STM32_DMA2D_BGCMAR          (STM32_DMA2D_BASE+STM32_DMA2D_BGCMAR_OFFSET)
-#define STM32_DMA2D_OPFCCR          (STM32_DMA2D_BASE+STM32_DMA2D_OPFCCR_OFFSET)
-#define STM32_DMA2D_OCOLR           (STM32_DMA2D_BASE+STM32_DMA2D_OCOLR_OFFSET)
-#define STM32_DMA2D_OMAR            (STM32_DMA2D_BASE+STM32_DMA2D_OMAR_OFFSET)
-#define STM32_DMA2D_OOR             (STM32_DMA2D_BASE+STM32_DMA2D_OOR_OFFSET)
-#define STM32_DMA2D_NLR             (STM32_DMA2D_BASE+STM32_DMA2D_NLR_OFFSET)
-#define STM32_DMA2D_LWR             (STM32_DMA2D_BASE+STM32_DMA2D_LWR_OFFSET)
+#define STM32_DMA2D_CR              (STM32_DMA2D_BASE + STM32_DMA2D_CR_OFFSET)
+#define STM32_DMA2D_ISR             (STM32_DMA2D_BASE + STM32_DMA2D_ISR_OFFSET)
+#define STM32_DMA2D_IFCR            (STM32_DMA2D_BASE + STM32_DMA2D_IFCR_OFFSET)
+#define STM32_DMA2D_FGMAR           (STM32_DMA2D_BASE + STM32_DMA2D_FGMAR_OFFSET)
+#define STM32_DMA2D_FGOR            (STM32_DMA2D_BASE + STM32_DMA2D_FGOR_OFFSET)
+#define STM32_DMA2D_BGMAR           (STM32_DMA2D_BASE + STM32_DMA2D_BGMAR_OFFSET)
+#define STM32_DMA2D_BGOR            (STM32_DMA2D_BASE + STM32_DMA2D_BGOR_OFFSET)
+#define STM32_DMA2D_FGPFCCR         (STM32_DMA2D_BASE + STM32_DMA2D_FGPFCCR_OFFSET)
+#define STM32_DMA2D_FGCOLR          (STM32_DMA2D_BASE + STM32_DMA2D_FGCOLR_OFFSET)
+#define STM32_DMA2D_BGPFCCR         (STM32_DMA2D_BASE + STM32_DMA2D_BGPFCCR_OFFSET)
+#define STM32_DMA2D_BGCOLR          (STM32_DMA2D_BASE + STM32_DMA2D_BGCOLR_OFFSET)
+#define STM32_DMA2D_FGCMAR          (STM32_DMA2D_BASE + STM32_DMA2D_FGCMAR_OFFSET)
+#define STM32_DMA2D_BGCMAR          (STM32_DMA2D_BASE + STM32_DMA2D_BGCMAR_OFFSET)
+#define STM32_DMA2D_OPFCCR          (STM32_DMA2D_BASE + STM32_DMA2D_OPFCCR_OFFSET)
+#define STM32_DMA2D_OCOLR           (STM32_DMA2D_BASE + STM32_DMA2D_OCOLR_OFFSET)
+#define STM32_DMA2D_OMAR            (STM32_DMA2D_BASE + STM32_DMA2D_OMAR_OFFSET)
+#define STM32_DMA2D_OOR             (STM32_DMA2D_BASE + STM32_DMA2D_OOR_OFFSET)
+#define STM32_DMA2D_NLR             (STM32_DMA2D_BASE + STM32_DMA2D_NLR_OFFSET)
+#define STM32_DMA2D_LWR             (STM32_DMA2D_BASE + STM32_DMA2D_LWR_OFFSET)
 
-/* DMA2D Register Bit Definitions ********************************************/
+/* DMA2D Register Bit Definitions *******************************************/
 
 /* DMA2D Control Register */
 
@@ -107,7 +107,7 @@
 #define DMA2D_CR_CAEIE              (1 << 11) /* CLUT Access Error Interrupt Enable Bit */
 #define DMA2D_CR_CTCIE              (1 << 12) /* CLUT Transfer Complete Interrupt Enable Bit */
 #define DMA2D_CR_CEIE               (1 << 13) /* Configuration Error Interrupt Enable Bit */
-#define DMA2D_CR_MODE_SHIFT         (16) /* Bits 16-17 DMA2D mode Bits */
+#define DMA2D_CR_MODE_SHIFT         (16)      /* Bits 16-17 DMA2D mode Bits */
 #define DMA2D_CR_MODE_MASK          (3 << DMA2D_CR_MODE_SHIFT)
 #define DMA2D_CR_MODE(n)            ((uint32_t)(n) << DMA2D_CR_MODE_SHIFT)
 
@@ -135,26 +135,26 @@
 
 /* DMA2D Foreground/Background Offset Register */
 
-#define DMA2D_xGOR_SHIFT            (0)  /* Bits 0-13 Line Offset */
-#define DMA2D_xGOR_MASK             (0x3FFF << DMA2D_xGOR_SHIFT)
-#define DMA2D_xGOR(n)               ((uint32_t)(n) << DMA2D_xGOR_SHIFT)
+#define DMA2D_XGOR_SHIFT            (0)      /* Bits 0-13 Line Offset */
+#define DMA2D_XGOR_MASK             (0x3fff << DMA2D_XGOR_SHIFT)
+#define DMA2D_XGOR(n)               ((uint32_t)(n) << DMA2D_XGOR_SHIFT)
 
 /* DMA2D Foreground/Background PFC Control Register */
 
-#define DMA2D_xGPFCCR_CM_SHIFT      (0)  /* Bits 0-3 Color Mode */
-#define DMA2D_xGPFCCR_CM_MASK       (0xF << DMA2D_xGPFCCR_CM_SHIFT)
-#define DMA2D_xGPFCCR_CM(n)         ((uint32_t)(n) << DMA2D_xGPFCCR_CM_SHIFT)
-#define DMA2D_xGPFCCR_CCM           (1 << 4)  /* CLUT Color Mode */
-#define DMA2D_xGPFCCR_START         (1 << 5)  /* Start */
-#define DMA2D_xGPFCCR_CS_SHIFT      (8)  /* Bits 8-15 CLUT Size */
-#define DMA2D_xGPFCCR_CS_MASK       (0xFF << DMA2D_xGPFCCR_CS_SHIFT)
-#define DMA2D_xGPFCCR_CS(n)         ((uint32_t)(n) << DMA2D_xGPFCCR_CS_SHIFT)
-#define DMA2D_xGPFCCR_AM_SHIFT      (16)  /* Bits 16-17 Alpha Mode */
-#define DMA2D_xGPFCCR_AM_MASK       (3 << DMA2D_xGPFCCR_AM_SHIFT)
-#define DMA2D_xGPFCCR_AM(n)         ((uint32_t)(n) << DMA2D_xGPFCCR_AM_SHIFT)
-#define DMA2D_xGPFCCR_ALPHA_SHIFT   (24)  /* Bits 24-31 Alpha Value */
-#define DMA2D_xGPFCCR_ALPHA_MASK    (0xFF << DMA2D_xGPFCCR_ALPHA_SHIFT)
-#define DMA2D_xGPFCCR_ALPHA(n)      ((uint32_t)(n) << DMA2D_xGPFCCR_ALPHA_SHIFT)
+#define DMA2D_XGPFCCR_CM_SHIFT      (0)      /* Bits 0-3 Color Mode */
+#define DMA2D_XGPFCCR_CM_MASK       (0xf << DMA2D_XGPFCCR_CM_SHIFT)
+#define DMA2D_XGPFCCR_CM(n)         ((uint32_t)(n) << DMA2D_XGPFCCR_CM_SHIFT)
+#define DMA2D_XGPFCCR_CCM           (1 << 4) /* CLUT Color Mode */
+#define DMA2D_XGPFCCR_START         (1 << 5) /* Start */
+#define DMA2D_XGPFCCR_CS_SHIFT      (8)      /* Bits 8-15 CLUT Size */
+#define DMA2D_XGPFCCR_CS_MASK       (0xff << DMA2D_XGPFCCR_CS_SHIFT)
+#define DMA2D_XGPFCCR_CS(n)         ((uint32_t)(n) << DMA2D_XGPFCCR_CS_SHIFT)
+#define DMA2D_XGPFCCR_AM_SHIFT      (16)     /* Bits 16-17 Alpha Mode */
+#define DMA2D_XGPFCCR_AM_MASK       (3 << DMA2D_XGPFCCR_AM_SHIFT)
+#define DMA2D_XGPFCCR_AM(n)         ((uint32_t)(n) << DMA2D_XGPFCCR_AM_SHIFT)
+#define DMA2D_XGPFCCR_ALPHA_SHIFT   (24)     /* Bits 24-31 Alpha Value */
+#define DMA2D_XGPFCCR_ALPHA_MASK    (0xff << DMA2D_XGPFCCR_ALPHA_SHIFT)
+#define DMA2D_XGPFCCR_ALPHA(n)      ((uint32_t)(n) << DMA2D_XGPFCCR_ALPHA_SHIFT)
 
 /* DMA2D PFC alpha mode */
 
@@ -164,15 +164,15 @@
 
 /* DMA2D Foreground/Background Color Register */
 
-#define DMA2D_xGCOLR_BLUE_SHIFT     (0)  /* Bits 0-7 Blue Value */
-#define DMA2D_xGCOLR_BLUE_MASK      (0xFF << DMA2D_xGCOLR_BLUE_SHIFT)
-#define DMA2D_xGCOLR_BLUE(n)        ((uint32_t)(n) << DMA2D_xGCOLR_BLUE_SHIFT)
-#define DMA2D_xGCOLR_GREEN_SHIFT    (8)  /* Bits 8-15 Green Value */
-#define DMA2D_xGCOLR_GREEN_MASK     (0xFF << DMA2D_xGCOLR_GREEN_SHIFT)
-#define DMA2D_xGCOLR_GREEN(n)       ((uint32_t)(n) << DMA2D_xGCOLR_GREEN_SHIFT)
-#define DMA2D_xGCOLR_RED_SHIFT      (16)  /* Bits 16-23 Red Value */
-#define DMA2D_xGCOLR_RED_MASK       (0xFF << DMA2D_xGCOLR_RED_SHIFT)
-#define DMA2D_xGCOLR_RED(n)         ((uint32_t)(n) << DMA2D_xGCOLR_RED_SHIFT)
+#define DMA2D_XGCOLR_BLUE_SHIFT     (0)      /* Bits 0-7 Blue Value */
+#define DMA2D_XGCOLR_BLUE_MASK      (0xff << DMA2D_XGCOLR_BLUE_SHIFT)
+#define DMA2D_XGCOLR_BLUE(n)        ((uint32_t)(n) << DMA2D_XGCOLR_BLUE_SHIFT)
+#define DMA2D_XGCOLR_GREEN_SHIFT    (8)      /* Bits 8-15 Green Value */
+#define DMA2D_XGCOLR_GREEN_MASK     (0xff << DMA2D_XGCOLR_GREEN_SHIFT)
+#define DMA2D_XGCOLR_GREEN(n)       ((uint32_t)(n) << DMA2D_XGCOLR_GREEN_SHIFT)
+#define DMA2D_XGCOLR_RED_SHIFT      (16)     /* Bits 16-23 Red Value */
+#define DMA2D_XGCOLR_RED_MASK       (0xff << DMA2D_XGCOLR_RED_SHIFT)
+#define DMA2D_XGCOLR_RED(n)         ((uint32_t)(n) << DMA2D_XGCOLR_RED_SHIFT)
 
 /* DMA2D Foreground CLUT Memory Address Register */
 
@@ -201,46 +201,46 @@
 /* DMA2D Output Color Register */
 
 #define DMA2D_OCOLR_BLUE_SHIFT      (0)  /* Bits 0-7 Blue Value */
-#define DMA2D_OCOLR_BLUE_MASK       (0xFF << DMA2D_OCOLR_BLUE_SHIFT)
+#define DMA2D_OCOLR_BLUE_MASK       (0xff << DMA2D_OCOLR_BLUE_SHIFT)
 #define DMA2D_OCOLR_BLUE(n)         ((uint32_t)(n) << DMA2D_OCOLR_BLUE_SHIFT)
 #define DMA2D_OCOLR_GREEN_SHIFT     (8)  /* Bits 8-15 Green Value */
-#define DMA2D_OCOLR_GREEN_MASK      (0xFF << DMA2D_OCOLR_GREEN_SHIFT)
+#define DMA2D_OCOLR_GREEN_MASK      (0xff << DMA2D_OCOLR_GREEN_SHIFT)
 #define DMA2D_OCOLR_GREEN(n)        ((uint32_t)(n) << DMA2D_OCOLR_GREEN_SHIFT)
 #define DMA2D_OCOLR_RED_SHIFT       (16)  /* Bits 16-23 Red Value */
-#define DMA2D_OCOLR_RED_MASK        (0xFF << DMA2D_OCOLR_RED_SHIFT)
+#define DMA2D_OCOLR_RED_MASK        (0xff << DMA2D_OCOLR_RED_SHIFT)
 #define DMA2D_OCOLR_RED(n)          ((uint32_t)(n) << DMA2D_OCOLR_RED_SHIFT)
 #define DMA2D_OCOLR_ALPHA_SHIFT     (24)  /* Bits 24-31 Alpha Value */
-#define DMA2D_OCOLR_ALPHA_MASK      (0xFF << DMA2D_OCOLR_ALPHA_SHIFT)
+#define DMA2D_OCOLR_ALPHA_MASK      (0xff << DMA2D_OCOLR_ALPHA_SHIFT)
 #define DMA2D_OCOLR_ALPHA(n)        ((uint32_t)(n) << DMA2D_OCOLR_ALPHA_SHIFT)
 
 /* DMA2D Output Memory Address Register */
 
 /* DMA2D Output Offset Register */
 
-#define DMA2D_OOR_LO_SHIFT          (0)  /* Bits 0-13 Line Offset */
-#define DMA2D_OOR_LO_MASK           (0x3FFF << DMA2D_OOR_LO_SHIFT)
+#define DMA2D_OOR_LO_SHIFT          (0)      /* Bits 0-13 Line Offset */
+#define DMA2D_OOR_LO_MASK           (0x3fff << DMA2D_OOR_LO_SHIFT)
 #define DMA2D_OOR_LO(n)             ((uint32_t)(n) << DMA2D_OOR_LO_SHIFT)
 
 /* DMA2D Number Of Line Register */
 
-#define DMA2D_NLR_NL_SHIFT          (0)  /* Bits 0-15 Number Of Lines */
-#define DMA2D_NLR_NL_MASK           (0xFFFF << DMA2D_NLR_NL_SHIFT)
+#define DMA2D_NLR_NL_SHIFT          (0)      /* Bits 0-15 Number Of Lines */
+#define DMA2D_NLR_NL_MASK           (0xffff << DMA2D_NLR_NL_SHIFT)
 #define DMA2D_NLR_NL(n)             ((uint32_t)(n) << DMA2D_NLR_NL_SHIFT)
-#define DMA2D_NLR_PL_SHIFT          (16) /* Bits 16-29 Pixel per Lines */
-#define DMA2D_NLR_PL_MASK           (0x3FFF << DMA2D_NLR_PL_SHIFT)
+#define DMA2D_NLR_PL_SHIFT          (16)     /* Bits 16-29 Pixel per Lines */
+#define DMA2D_NLR_PL_MASK           (0x3fff << DMA2D_NLR_PL_SHIFT)
 #define DMA2D_NLR_PL(n)             ((uint32_t)(n) << DMA2D_NLR_PL_SHIFT)
 
 /* DMA2D Line Watermark Register */
 
-#define DMA2D_LWR_LW_SHIFT          (0)  /* Bits 0-15 Line Watermark */
-#define DMA2D_LWR_LW_MASK           (0xFFFF << DMA2D_LWR_LW_SHIFT)
+#define DMA2D_LWR_LW_SHIFT          (0)      /* Bits 0-15 Line Watermark */
+#define DMA2D_LWR_LW_MASK           (0xffff << DMA2D_LWR_LW_SHIFT)
 #define DMA2D_LWR_LW(n)             ((uint32_t)(n) << DMA2D_LWR_LW_SHIFT)
 
 /* DMA2D AHB Master Timer Configuration Register */
 
-#define DMA2D_AMTCR_EN              (1 << 0)  /* Enable */
-#define DMA2D_AMTCR_DT_SHIFT        (0)  /* Bits 8-15 Dead Time */
-#define DMA2D_AMTCR_DT_MASK         (0xFF << DMA2D_AMTCR_DT_SHIFT)
+#define DMA2D_AMTCR_EN              (1 << 0) /* Enable */
+#define DMA2D_AMTCR_DT_SHIFT        (0)      /* Bits 8-15 Dead Time */
+#define DMA2D_AMTCR_DT_MASK         (0xff << DMA2D_AMTCR_DT_SHIFT)
 #define DMA2D_AMTCR_DT(n)           ((uint32_t)(n) << DMA2D_AMTCR_DT_SHIFT)
 
 /****************************************************************************
