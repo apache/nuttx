@@ -72,3 +72,27 @@ config RP2040_UART1_2STOP
 		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
 
 endif
+
+config RP2040_I2C
+	bool "I2C"
+	select I2C
+
+if RP2040_I2C
+
+config RP2040_I2C0
+	bool "I2C0"
+
+config RP2040_I2C1
+	bool "I2C1"
+
+config RP2040_I2C_DRIVER
+	bool "I2C character driver"
+	default n
+	select I2C_DRIVER
+	---help---
+		Build in support for a character driver at /dev/i2c[N] that may be
+		used to perform I2C bus transfers from applications.  The intent of
+		this driver is to support I2C testing.  It is not suitable for use
+		in any real driver application.
+
+endif

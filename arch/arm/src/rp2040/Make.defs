@@ -67,6 +67,10 @@ CHIP_CSRCS += rp2040_cpuidlestack.c
 CHIP_CSRCS += rp2040_testset.c
 endif
 
+ifeq ($(CONFIG_RP2040_I2C),y)
+CHIP_CSRCS += rp2040_i2c.c
+endif
+
 ifeq ($(CONFIG_RP2040_FLASH_BOOT),y)
 ifneq ($(PICO_SDK_PATH),)
 include chip/boot2/Make.defs
