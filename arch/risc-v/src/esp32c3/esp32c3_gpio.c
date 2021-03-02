@@ -159,8 +159,8 @@ int esp32c3_configgpio(int pin, gpio_pinattr_t attr)
 
   func |= (uint32_t)(2ul << FUN_DRV_S);
 
-  /* Select the pad's function.  If no function was given, consider it a
-   * normal input or output (i.e. function3).
+  /* Select the pad's function. If no function was given, consider it a
+   * normal input or output (i.e. function1).
    */
 
   if ((attr & FUNCTION_MASK) != 0)
@@ -169,12 +169,12 @@ int esp32c3_configgpio(int pin, gpio_pinattr_t attr)
     }
   else
     {
-      func |= (uint32_t)((2 >> FUNCTION_SHIFT) << MCU_SEL_S);
+      func |= (uint32_t)(PIN_FUNC_GPIO << MCU_SEL_S);
     }
 
   if ((attr & OPEN_DRAIN) != 0)
     {
-      cntrl = (1 << GPIO_PIN_PAD_DRIVER_S);
+      cntrl |= (1 << GPIO_PIN_PAD_DRIVER_S);
     }
 
   /* Set the pin function to its register */
