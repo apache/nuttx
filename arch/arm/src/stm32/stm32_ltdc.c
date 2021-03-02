@@ -85,13 +85,13 @@
 
 /* LTDC_LxWHPCR register */
 
-#define STM32_LTDC_LxWHPCR_WHSTPOS  (BOARD_LTDC_HSYNC + BOARD_LTDC_HBP - 1)
+#define STM32_LTDC_LXWHPCR_WHSTPOS  (BOARD_LTDC_HSYNC + BOARD_LTDC_HBP - 1)
 #define STM32_LTDC_LxWHPCR_WHSPPOS  (BOARD_LTDC_HSYNC + BOARD_LTDC_HBP + \
                                     STM32_LTDC_WIDTH - 1)
 
 /* LTDC_LxWVPCR register */
 
-#define STM32_LTDC_LxWVPCR_WVSTPOS  (BOARD_LTDC_VSYNC + BOARD_LTDC_VBP - 1)
+#define STM32_LTDC_LXWVPCR_WVSTPOS  (BOARD_LTDC_VSYNC + BOARD_LTDC_VBP - 1)
 #define STM32_LTDC_LxWVPCR_WVSPPOS  (BOARD_LTDC_VSYNC + BOARD_LTDC_VBP + \
                                     STM32_LTDC_HEIGHT - 1)
 
@@ -102,8 +102,8 @@
 
 /* LTDC_BPCR register */
 
-#define STM32_LTDC_BPCR_AVBP        LTDC_BPCR_AVBP(STM32_LTDC_LxWVPCR_WVSTPOS)
-#define STM32_LTDC_BPCR_AHBP        LTDC_BPCR_AHBP(STM32_LTDC_LxWHPCR_WHSTPOS)
+#define STM32_LTDC_BPCR_AVBP        LTDC_BPCR_AVBP(STM32_LTDC_LXWVPCR_WVSTPOS)
+#define STM32_LTDC_BPCR_AHBP        LTDC_BPCR_AHBP(STM32_LTDC_LXWHPCR_WHSTPOS)
 
 /* LTDC_AWCR register */
 
@@ -153,23 +153,23 @@
 #if defined(CONFIG_STM32_LTDC_L1_L8)
 #  define STM32_LTDC_L1_BPP         8
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB8
-#  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_L8)
+#  define STM32_LTDC_L1PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_L8)
 #  define STM32_LTDC_L1_DMA2D_PF    DMA2D_PF_L8
 #  define STM32_LTDC_L1CMAP
 #elif defined(CONFIG_STM32_LTDC_L1_RGB565)
 #  define STM32_LTDC_L1_BPP         16
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB16_565
-#  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_RGB565)
+#  define STM32_LTDC_L1PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_RGB565)
 #  define STM32_LTDC_L1_DMA2D_PF    DMA2D_PF_RGB565
 #elif defined(CONFIG_STM32_LTDC_L1_RGB888)
 #  define STM32_LTDC_L1_BPP         24
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB24
-#  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_RGB888)
+#  define STM32_LTDC_L1PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_RGB888)
 #  define STM32_LTDC_L1_DMA2D_PF    DMA2D_PF_RGB888
 #elif defined(CONFIG_STM32_LTDC_L1_ARGB8888)
 #  define STM32_LTDC_L1_BPP         32
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB32
-#  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB8888)
+#  define STM32_LTDC_L1PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_ARGB8888)
 #  define STM32_LTDC_L1_DMA2D_PF    DMA2D_PF_ARGB8888
 #else
 #  error "LTDC pixel format not supported"
@@ -181,23 +181,23 @@
 #  if defined(CONFIG_STM32_LTDC_L2_L8)
 #   define STM32_LTDC_L2_BPP         8
 #   define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB8
-#   define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_L8)
+#   define STM32_LTDC_L2PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_L8)
 #   define STM32_LTDC_L2_DMA2D_PF    DMA2D_PF_L8
 #   define STM32_LTDC_L2CMAP
 #  elif defined(CONFIG_STM32_LTDC_L2_RGB565)
 #   define STM32_LTDC_L2_BPP         16
 #   define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB16_565
-#   define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_RGB565)
+#   define STM32_LTDC_L2PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_RGB565)
 #   define STM32_LTDC_L2_DMA2D_PF    DMA2D_PF_RGB565
 #  elif defined(CONFIG_STM32_LTDC_L2_RGB888)
 #   define STM32_LTDC_L2_BPP         24
 #   define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB24
-#   define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_RGB888)
+#   define STM32_LTDC_L2PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_RGB888)
 #   define STM32_LTDC_L2_DMA2D_PF    DMA2D_PF_RGB888
 #  elif defined(CONFIG_STM32_LTDC_L2_ARGB8888)
 #   define STM32_LTDC_L2_BPP         32
 #   define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB32
-#   define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB8888)
+#   define STM32_LTDC_L2PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_ARGB8888)
 #   define STM32_LTDC_L2_DMA2D_PF    DMA2D_PF_ARGB8888
 #  else
 #   error "LTDC pixel format not supported"
@@ -220,7 +220,7 @@
 
 /* LTDC only supports 8 bit per pixel overal */
 
-#define STM32_LTDC_Lx_BYPP(n)       ((n) / 8)
+#define STM32_LTDC_LX_BYPP(n)       ((n) / 8)
 
 #define STM32_LTDC_L1_FBSIZE        (STM32_LTDC_L1_STRIDE * STM32_LTDC_HEIGHT)
 
@@ -1772,18 +1772,18 @@ static void stm32_ltdc_lframebuffer(FAR struct stm32_ltdc_s *layer)
 
   /* Calculate register position */
 
-  rxpos = STM32_LTDC_LxWHPCR_WHSTPOS + 1;
-  rypos = STM32_LTDC_LxWVPCR_WVSTPOS + 1;
+  rxpos = STM32_LTDC_LXWHPCR_WHSTPOS + 1;
+  rypos = STM32_LTDC_LXWVPCR_WVSTPOS + 1;
 
   /* Accumulate horizontal position */
 
-  whpcr =  LTDC_LxWHPCR_WHSTPOS(rxpos);
-  whpcr |= LTDC_LxWHPCR_WHSPPOS(rxpos + stm32_width_layer_t[layerno] - 1);
+  whpcr =  LTDC_LXWHPCR_WHSTPOS(rxpos);
+  whpcr |= LTDC_LXWHPCR_WHSPPOS(rxpos + stm32_width_layer_t[layerno] - 1);
 
   /* Accumulate vertical position */
 
-  wvpcr =  LTDC_LxWVPCR_WVSTPOS(rypos);
-  wvpcr |= LTDC_LxWVPCR_WVSPPOS(rypos + stm32_height_layer_t[layerno] - 1);
+  wvpcr =  LTDC_LXWVPCR_WVSTPOS(rypos);
+  wvpcr |= LTDC_LXWVPCR_WVSPPOS(rypos + stm32_height_layer_t[layerno] - 1);
 
   /* Configure LxWHPCR / LxWVPCR register */
 
@@ -1802,9 +1802,9 @@ static void stm32_ltdc_lframebuffer(FAR struct stm32_ltdc_s *layer)
 
   /* Calculate line length */
 
-  cfblr = LTDC_LxCFBLR_CFBP(stm32_stride_layer_t[layerno]) |
-          LTDC_LxCFBLR_CFBLL(stm32_width_layer_t[layerno] *
-          STM32_LTDC_Lx_BYPP(stm32_bpp_layer_t[layerno]) + 3);
+  cfblr = LTDC_LXCFBLR_CFBP(stm32_stride_layer_t[layerno]) |
+          LTDC_LXCFBLR_CFBLL(stm32_width_layer_t[layerno] *
+          STM32_LTDC_LX_BYPP(stm32_bpp_layer_t[layerno]) + 3);
 
   reginfo("set LTDC_L%dCFBLR=%08x\n", layerno + 1, cfblr);
   putreg32(cfblr, stm32_cfblr_layer_t[layerno]);
@@ -1843,11 +1843,11 @@ static void stm32_ltdc_lenable(FAR struct stm32_ltdc_s *layer, bool enable)
 
   if (enable == true)
     {
-      regval |= LTDC_LxCR_LEN;
+      regval |= LTDC_LXCR_LEN;
     }
   else
     {
-      regval &= ~LTDC_LxCR_LEN;
+      regval &= ~LTDC_LXCR_LEN;
     }
 
   /* Enable/Disable layer */
@@ -1901,11 +1901,11 @@ static void stm32_ltdc_ltransp(FAR struct stm32_ltdc_s *layer,
 #endif
 
   reginfo("set LTDC_L%dBFCR=%08x\n", layer->layerno + 1,
-          (LTDC_LxBFCR_BF1(bf1) | LTDC_LxBFCR_BF2(bf2)));
+          (LTDC_LXBFCR_BF1(bf1) | LTDC_LXBFCR_BF2(bf2)));
 
   /* Set blendmode */
 
-  putreg32((LTDC_LxBFCR_BF1(bf1) | LTDC_LxBFCR_BF2(bf2)),
+  putreg32((LTDC_LXBFCR_BF1(bf1) | LTDC_LXBFCR_BF2(bf2)),
             stm32_bfcr_layer_t[layer->layerno]);
 
   /* Set alpha */
@@ -1985,11 +1985,11 @@ static void stm32_ltdc_lchromakeyenable(FAR struct stm32_ltdc_s *layer,
 
   if (enable == true)
     {
-      regval |= LTDC_LxCR_COLKEN;
+      regval |= LTDC_LXCR_COLKEN;
     }
   else
     {
-      regval &= ~LTDC_LxCR_COLKEN;
+      regval &= ~LTDC_LXCR_COLKEN;
     }
 
   reginfo("set LTDC_L%dCR=%08x\n", layer->layerno + 1, regval);
@@ -2025,11 +2025,11 @@ static void stm32_ltdc_lclutenable(FAR struct stm32_ltdc_s *layer,
 
   if (enable == true)
     {
-      regval |= LTDC_LxCR_CLUTEN;
+      regval |= LTDC_LXCR_CLUTEN;
     }
   else
     {
-      regval &= ~LTDC_LxCR_CLUTEN;
+      regval &= ~LTDC_LXCR_CLUTEN;
     }
 
   reginfo("set LTDC_L%dCR=%08x\n", layer->oinfo.overlay, regval);
