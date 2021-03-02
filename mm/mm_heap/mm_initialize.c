@@ -30,6 +30,8 @@
 
 #include <nuttx/mm/mm.h>
 
+#include "mm_heap/mm.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -55,11 +57,16 @@
 void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
                   size_t heapsize)
 {
+  FAR struct mm_heap_impl_s *heap_impl;
   FAR struct mm_freenode_s *node;
   uintptr_t heapbase;
   uintptr_t heapend;
 #if CONFIG_MM_REGIONS > 1
-  int IDX = heap->mm_nregions;
+  int IDX;
+
+  DEBUGASSERT(MM_IS_VALID(heap));
+  heap_impl = heap->mm_impl;
+  IDX = heap_impl->mm_nregions;
 
   /* Writing past CONFIG_MM_REGIONS would have catastrophic consequences */
 
@@ -71,6 +78,9 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
 #else
 # define IDX 0
+
+  DEBUGASSERT(MM_IS_VALID(heap));
+  heap_impl = heap->mm_impl;
 #endif
 
 #if defined(CONFIG_MM_SMALL) && !defined(CONFIG_SMALL_MEMORY)
@@ -96,7 +106,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   /* Add the size of this region to the total size of the heap */
 
-  heap->mm_heapsize += heapsize;
+  heap_impl->mm_heapsize += heapsize;
 
   /* Create two "allocated" guard nodes at the beginning and end of
    * the heap.  These only serve to keep us from allocating outside
@@ -106,24 +116,23 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
    * all available memory.
    */
 
-  heap->mm_heapstart[IDX]            = (FAR struct mm_allocnode_s *)heapbase;
-  heap->mm_heapstart[IDX]->size      = SIZEOF_MM_ALLOCNODE;
-  heap->mm_heapstart[IDX]->preceding = MM_ALLOC_BIT;
-
-  node                               = (FAR struct mm_freenode_s *)
-                                       (heapbase + SIZEOF_MM_ALLOCNODE);
-  node->size                         = heapsize - 2*SIZEOF_MM_ALLOCNODE;
-  node->preceding                    = SIZEOF_MM_ALLOCNODE;
-
-  heap->mm_heapend[IDX]              = (FAR struct mm_allocnode_s *)
-                                       (heapend - SIZEOF_MM_ALLOCNODE);
-  heap->mm_heapend[IDX]->size        = SIZEOF_MM_ALLOCNODE;
-  heap->mm_heapend[IDX]->preceding   = node->size | MM_ALLOC_BIT;
+  heap_impl->mm_heapstart[IDX]            = (FAR struct mm_allocnode_s *)
+                                            heapbase;
+  heap_impl->mm_heapstart[IDX]->size      = SIZEOF_MM_ALLOCNODE;
+  heap_impl->mm_heapstart[IDX]->preceding = MM_ALLOC_BIT;
+  node                                    = (FAR struct mm_freenode_s *)
+                                            (heapbase + SIZEOF_MM_ALLOCNODE);
+  node->size                              = heapsize - 2*SIZEOF_MM_ALLOCNODE;
+  node->preceding                         = SIZEOF_MM_ALLOCNODE;
+  heap_impl->mm_heapend[IDX]              = (FAR struct mm_allocnode_s *)
+                                            (heapend - SIZEOF_MM_ALLOCNODE);
+  heap_impl->mm_heapend[IDX]->size        = SIZEOF_MM_ALLOCNODE;
+  heap_impl->mm_heapend[IDX]->preceding   = node->size | MM_ALLOC_BIT;
 
 #undef IDX
 
 #if CONFIG_MM_REGIONS > 1
-  heap->mm_nregions++;
+  heap_impl->mm_nregions++;
 #endif
 
   /* Add the single, large free node to the nodelist */
@@ -155,9 +164,18 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
                    size_t heapsize)
 {
+  FAR struct mm_heap_impl_s *heap_impl;
   int i;
 
   minfo("Heap: start=%p size=%zu\n", heapstart, heapsize);
+
+  /* Reserve a block space for mm_heap_impl_s context */
+
+  DEBUGASSERT(heapsize > sizeof(struct mm_heap_impl_s));
+  heap->mm_impl = (FAR struct mm_heap_impl_s *)heapstart;
+  heap_impl = heap->mm_impl;
+  heapsize -= sizeof(struct mm_heap_impl_s);
+  heapstart = (FAR char *)heapstart + sizeof(struct mm_heap_impl_s);
 
   /* The following two lines have cause problems for some older ZiLog
    * compilers in the past (but not the more recent).  Life is easier if we
@@ -173,23 +191,24 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   /* Set up global variables */
 
-  heap->mm_heapsize = 0;
+  heap_impl->mm_heapsize = 0;
 
 #if CONFIG_MM_REGIONS > 1
-  heap->mm_nregions = 0;
+  heap_impl->mm_nregions = 0;
 #endif
 
   /* Initialize mm_delaylist */
 
-  heap->mm_delaylist = NULL;
+  heap_impl->mm_delaylist = NULL;
 
   /* Initialize the node array */
 
-  memset(heap->mm_nodelist, 0, sizeof(struct mm_freenode_s) * MM_NNODES);
+  memset(heap_impl->mm_nodelist, 0,
+         sizeof(struct mm_freenode_s) * MM_NNODES);
   for (i = 1; i < MM_NNODES; i++)
     {
-      heap->mm_nodelist[i - 1].flink = &heap->mm_nodelist[i];
-      heap->mm_nodelist[i].blink     = &heap->mm_nodelist[i - 1];
+      heap_impl->mm_nodelist[i - 1].flink = &heap_impl->mm_nodelist[i];
+      heap_impl->mm_nodelist[i].blink     = &heap_impl->mm_nodelist[i - 1];
     }
 
   /* Initialize the malloc semaphore to one (to support one-at-
