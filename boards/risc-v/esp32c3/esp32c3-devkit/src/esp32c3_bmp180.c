@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3-devkit.h
+ * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_bmp180.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,103 +18,48 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_SRC_ESP32C3_DEVKIT_H
-#define __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_SRC_ESP32C3_DEVKIT_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/compiler.h>
+#include <nuttx/config.h>
+
+#include <stdio.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/sensors/bmp180.h>
+#include <nuttx/i2c/i2c_master.h>
+
+#include "esp32c3_i2c.h"
+#include "esp32c3-devkit.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize()
- *
+ * Private Data
  ****************************************************************************/
-
-int esp32c3_bringup(void);
 
 /****************************************************************************
- * Name: esp32c3_gpio_init
+ * Public Data
  ****************************************************************************/
-
-#ifdef CONFIG_DEV_GPIO
-int esp32c3_gpio_init(void);
-#endif
 
 /****************************************************************************
- * Name: board_wdt_init
- *
- * Description:
- *   Configure the timer driver.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
- *
+ * Private Functions
  ****************************************************************************/
-
-#ifdef CONFIG_WATCHDOG
-int board_wdt_init(void);
-#endif
 
 /****************************************************************************
- * Name: board_i2c_init
- *
- * Description:
- *   Configure the I2C driver.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
- *
+ * Public Functions
  ****************************************************************************/
-#ifdef CONFIG_I2C_DRIVER
-int board_i2c_init(void);
-#endif
-
-/****************************************************************************
- * Name: board_tim_init
- *
- * Description:
- *   Configure the timer driver.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_TIMER
-int board_tim_init(void);
-#endif
 
 /****************************************************************************
  * Name: board_bmp180_initialize
@@ -131,9 +76,34 @@ int board_tim_init(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SENSORS_BMP180
-int board_bmp180_initialize(int devno, int busno);
-#endif
+int board_bmp180_initialize(int devno, int busno)
+{
+  struct i2c_master_s *i2c;
+  char devpath[12];
+  int ret;
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_SRC_ESP32C3_DEVKIT_H */
+  sninfo("Initializing BMP180!\n");
+
+  /* Initialize BMP180 */
+
+  i2c = esp32c3_i2cbus_initialize(busno);
+
+  if (i2c)
+    {
+      /* Then try to register the barometer sensor in I2C0 */
+
+      snprintf(devpath, 12, "/dev/press%d", devno);
+      ret = bmp180_register(devpath, i2c);
+      if (ret < 0)
+        {
+          snerr("ERROR: Error registering BMP180 in I2C%d\n", busno);
+        }
+    }
+  else
+    {
+      ret = -ENODEV;
+    }
+
+  return ret;
+}
+

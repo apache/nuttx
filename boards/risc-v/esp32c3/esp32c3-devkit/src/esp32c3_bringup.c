@@ -106,6 +106,19 @@ int esp32c3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_BMP180
+  /* Try to register BMP180 device in I2C0 */
+
+  ret = board_bmp180_initialize(0, 0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize BMP180 "
+                       "Driver for I2C0: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_WATCHDOG
   /* Configure watchdog timer */
 
