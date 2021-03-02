@@ -72,10 +72,13 @@
 #define RP2040_BUSCTRL_BASE              0x40030000  /* Register block for busfabric control signals and performance counters */
 #define RP2040_UART0_BASE                0x40034000
 #define RP2040_UART1_BASE                0x40038000
+#define RP2040_UART_BASE(n)              (0x40034000 + (n) * 0x4000)
 #define RP2040_SPI0_BASE                 0x4003c000
 #define RP2040_SPI1_BASE                 0x40040000
+#define RP2040_SPI_BASE(n)               (0x4003c000 + (n) * 0x4000)
 #define RP2040_I2C0_BASE                 0x40044000  /* DW_apb_i2c address block */
 #define RP2040_I2C1_BASE                 0x40048000  /* DW_apb_i2c address block */
+#define RP2040_I2C_BASE(n)               (0x40044000 + (n) * 0x4000)
 #define RP2040_ADC_BASE                  0x4004c000  /* Control and data interface to SAR ADC */
 #define RP2040_PWM_BASE                  0x40050000  /* Simple PWM */
 #define RP2040_TIMER_BASE                0x40054000  /* Controls time and alarms time is a 64 bit value indicating the time in usec since power-on timeh is the top 32 bits of time & timel is the bottom 32 bits to change time write to timelw before timehw to read time read from timelr before timehr An alarm is set by setting alarm_enable and writing to the corresponding alarm register When an alarm is pending, the corresponding alarm_running signal will be high An alarm can be cancelled before it has finished by clearing the alarm_enable When an alarm fires, the corresponding alarm_irq is set and alarm_running is cleared To clear the interrupt write a 1 to the corresponding alarm_irq */
@@ -88,6 +91,7 @@
 #define RP2040_USBCTRL_REGS_BASE         0x50110000  /* USB FS/LS controller device registers */
 #define RP2040_PIO0_BASE                 0x50200000  /* Programmable IO block */
 #define RP2040_PIO1_BASE                 0x50300000  /* Programmable IO block */
+#define RP2040_PIO_BASE(n)               (0x50200000 + (n) * 0x100000)
 #define RP2040_SIO_BASE                  0xd0000000  /* Single-cycle IO block Provides core-local and inter-core hardware for the two processors, with single-cycle access. */
 #define RP2040_PPB_BASE                  0xe0000000
 
