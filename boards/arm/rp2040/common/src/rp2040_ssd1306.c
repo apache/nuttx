@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/raspberrypi-pico/include/board.h
+ * boards/arm/rp2040/common/src/rp2040_ssd1306.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,92 +18,93 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_BOARD_H
-#define __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_BOARD_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include "rp2040_i2cdev.h"
+#include <debug.h>
 
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
+#include <nuttx/board.h>
+#include <nuttx/lcd/lcd.h>
+#include <nuttx/lcd/ssd1306.h>
+#include <nuttx/i2c/i2c_master.h>
+
+#include "rp2040_i2c.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *****************************************************************/
-
-#define MHZ                     1000000
-
-#define BOARD_XOSC_FREQ         (12 * MHZ)
-#define BOARD_PLL_SYS_FREQ      (125 * MHZ)
-#define BOARD_PLL_USB_FREQ      (48 * MHZ)
-
-#define BOARD_REF_FREQ          (12 * MHZ)
-#define BOARD_SYS_FREQ          (125 * MHZ)
-#define BOARD_PERI_FREQ         (125 * MHZ)
-#define BOARD_USB_FREQ          (48 * MHZ)
-#define BOARD_ADC_FREQ          (48 * MHZ)
-#define BOARD_RTC_FREQ          46875
-
-#define BOARD_UART_BASEFREQ     BOARD_PERI_FREQ
-
-#define BOARD_TICK_CLOCK        (1 * MHZ)
-
-/* GPIO definitions *********************************************************/
-
-#define BOARD_GPIO_LED_PIN      25
+#define OLED_I2C_PORT         0 /* OLED display connected to I2C0 */
 
 /****************************************************************************
- * Public Types
+ * Private Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+static FAR struct lcd_dev_s    *g_lcddev;
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Name: board_lcd_initialize
+ ****************************************************************************/
+
+int board_lcd_initialize(void)
 {
-#else
-#define EXTERN extern
-#endif
+  FAR struct i2c_master_s *i2c;
+  const int busno = OLED_I2C_PORT;
+  const int devno = 0;
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+  /* Initialize I2C */
 
-/****************************************************************************
- * Name: rp2040_boardearlyinitialize
- *
- * Description:
- *
- ****************************************************************************/
+  i2c = rp2040_i2cbus_initialize(busno);
+  if (!i2c)
+    {
+      lcderr("ERROR: Failed to initialize I2C port %d\n", busno);
+      return -ENODEV;
+    }
 
-void rp2040_boardearlyinitialize(void);
+  /* Bind the I2C port to the OLED */
 
-/****************************************************************************
- * Name: rp2040_boardinitialize
- *
- * Description:
- *
- ****************************************************************************/
+  g_lcddev = ssd1306_initialize(i2c, NULL, devno);
+  if (!g_lcddev)
+    {
+      lcderr("ERROR: Failed to bind I2C port %d to OLED %d\n", busno, devno);
+      return -ENODEV;
+    }
+  else
+    {
+      lcdinfo("Bound I2C port %d to OLED %d\n", busno, devno);
 
-void rp2040_boardinitialize(void);
+      /* And turn the OLED on */
 
-#undef EXTERN
-#if defined(__cplusplus)
+      g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);
+      return OK;
+    }
 }
-#endif
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_BOARD_H */
+
+/****************************************************************************
+ * Name:  board_lcd_getdev
+ ****************************************************************************/
+
+FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+{
+  if (lcddev == 0)
+    {
+      return g_lcddev;
+    }
+
+  return NULL;
+}
+
+/****************************************************************************
+ * Name:  board_lcd_uninitialize
+ ****************************************************************************/
+
+void board_lcd_uninitialize(void)
+{
+}
