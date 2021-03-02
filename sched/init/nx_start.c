@@ -52,9 +52,6 @@
 #ifndef CONFIG_DISABLE_MQUEUE
 #  include "mqueue/mqueue.h"
 #endif
-#ifndef CONFIG_DISABLE_PTHREAD
-#  include "pthread/pthread.h"
-#endif
 #include "clock/clock.h"
 #include "timer/timer.h"
 #include "irq/irq.h"
@@ -655,17 +652,6 @@ void nx_start(void)
 #endif
     {
       nxmq_initialize();
-    }
-#endif
-
-#ifndef CONFIG_DISABLE_PTHREAD
-  /* Initialize the thread-specific data facility (if in link) */
-
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (pthread_initialize != NULL)
-#endif
-    {
-      pthread_initialize();
     }
 #endif
 

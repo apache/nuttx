@@ -38,26 +38,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_initialize
- *
- * Description:
- *   This is an internal OS function called only at power-up boot time.  It
- *   no longer does anything since all of the pthread data structures have
- *   been moved into the "task group"
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void pthread_initialize(void)
-{
-}
-
-/****************************************************************************
  * Name: pthread_sem_take, pthread_sem_trytake, and
  *       pthread_sem_give
  *

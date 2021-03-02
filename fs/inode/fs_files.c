@@ -60,18 +60,6 @@ static int _files_semtake(FAR struct filelist *list)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: files_initialize
- *
- * Description:
- *   This is called from the FS initialization logic to configure the files.
- *
- ****************************************************************************/
-
-void files_initialize(void)
-{
-}
-
-/****************************************************************************
  * Name: files_initlist
  *
  * Description: Initializes the list of files for a new task

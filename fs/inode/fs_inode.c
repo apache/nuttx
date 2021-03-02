@@ -90,15 +90,6 @@ void inode_initialize(void)
   /* Reserve the root node */
 
   inode_root_reserve();
-
-  /* Initialize files array (if it is used) */
-
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (files_initialize != NULL)
-#endif
-    {
-      files_initialize();
-    }
 }
 
 /****************************************************************************
