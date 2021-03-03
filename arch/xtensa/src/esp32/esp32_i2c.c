@@ -503,7 +503,10 @@ static void esp32_i2c_init(FAR struct esp32_i2c_priv_s *priv)
   esp32_gpiowrite(config->scl_pin, 1);
   esp32_gpiowrite(config->sda_pin, 1);
 
-  esp32_configgpio(config->scl_pin, OUTPUT | OPEN_DRAIN | FUNCTION_3);
+  esp32_configgpio(config->scl_pin, INPUT |
+                                    OUTPUT |
+                                    OPEN_DRAIN |
+                                    FUNCTION_3);
   esp32_gpio_matrix_out(config->scl_pin, config->scl_outsig, 0, 0);
   esp32_gpio_matrix_in(config->scl_pin, config->scl_insig, 0);
 
