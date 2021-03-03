@@ -1862,6 +1862,15 @@ config ARCH_BOARD_STM32L476_MDK
 		The STM32L476ME is a Cortex-M4 optimised for low-power operation
 		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
 
+config ARCH_BOARD_STM32L562E_DK
+	bool "STM32L562E-DK"
+	depends on ARCH_CHIP_STM32L562QE
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro STM32L562E-DK board based on the STMicro STM32L562QEI6 MCU.
+
 config ARCH_BOARD_STM32L_DISCOVERY
 	bool "STMicro STM32L-Discovery board"
 	depends on ARCH_CHIP_STM32L152RB || ARCH_CHIP_STM32L152RC
@@ -2395,6 +2404,7 @@ config ARCH_BOARD
 	default "stm32l476vg-disco"        if ARCH_BOARD_STM32L476VG_DISCO
 	default "stm32l476-mdk"            if ARCH_BOARD_STM32L476_MDK
 	default "stm32l4r9ai-disco"        if ARCH_BOARD_STM32L4R9AI_DISCO
+	default "stm32l562e-dk"            if ARCH_BOARD_STM32L562E_DK
 	default "stm32ldiscovery"          if ARCH_BOARD_STM32L_DISCOVERY
 	default "stm32vldiscovery"         if ARCH_BOARD_STM32VL_DISCOVERY
 	default "mikroe-stm32f4"           if ARCH_BOARD_MIKROE_STM32F4
@@ -2795,6 +2805,9 @@ source "boards/arm/stm32l4/stm32l476vg-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32L4R9AI_DISCO
 source "boards/arm/stm32l4/stm32l4r9ai-disco/Kconfig"
+endif
+if ARCH_BOARD_STM32L562E_DK
+source "boards/arm/stm32l5/stm32l562e-dk/Kconfig"
 endif
 if ARCH_BOARD_AXOLOTI
 source "boards/arm/stm32/axoloti/Kconfig"
