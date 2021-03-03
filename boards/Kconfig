@@ -3156,6 +3156,12 @@ if ARCH_BOARD_BL602EVB
 source "boards/risc-v/bl602/bl602evb/Kconfig"
 endif
 
+comment "Board-Common Options"
+
+if ARCH_CHIP_STM32
+source boards/arm/stm32/common/Kconfig
+endif
+
 config BOARD_CRASHDUMP
 	bool "Enable Board level logging of crash dumps"
 	default n
