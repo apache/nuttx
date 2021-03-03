@@ -206,10 +206,34 @@ static const char *g_white_prefix[] =
 
 static const char *g_white_list[] =
 {
-  "__EIT_entry",             /* Ref:  gnu_unwind_find_exidx.c */
-  "__gnu_Unwind_Find_exidx", /* Ref:  gnu_unwind_find_exidx.c */
-  "_Exit",                   /* Ref:  stdlib.h */
-  "_Unwind_Ptr",             /* Ref:  unwind-arm-common.h */
+  /* Ref:  gnu_unwind_find_exidx.c */
+
+  "__EIT_entry",
+
+  /* Ref:  gnu_unwind_find_exidx.c */
+
+  "__gnu_Unwind_Find_exidx",
+
+  /* Ref:  stdlib.h */
+
+  "_Exit",
+
+  /* Ref:  unwind-arm-common.h */
+
+  "_Unwind_Ptr",
+
+  /* Ref:
+   * https://pubs.opengroup.org/onlinepubs/9699919799/functions/tempnam.html
+   */
+
+  "P_tmpdir",
+
+  /* Ref:
+   * https://pubs.opengroup.org/onlinepubs/9699919799/functions/tempnam.html
+   */
+
+  "L_tmpnam",
+
   NULL
 };
 
