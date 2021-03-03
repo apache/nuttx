@@ -69,6 +69,7 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_STM32F7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 static const uint32_t drives[4] =
 {
     RCC_BDCR_LSEDRV_LOW,
@@ -76,6 +77,7 @@ static const uint32_t drives[4] =
     RCC_BDCR_LSEDRV_MEDHI,
     RCC_BDCR_LSEDRV_HIGH
 };
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -123,7 +125,8 @@ void stm32_rcc_enablelse(void)
        */
 
       regval &= ~(RCC_BDCR_LSEDRV_MASK);
-      regval |= drives[CONFIG_STM32F7_RTC_LSECLOCK_START_DRV_CAPABILITY];
+      regval |= CONFIG_STM32F7_RTC_LSECLOCK_START_DRV_CAPABILITY <<
+                RCC_BDCR_LSEDRV_SHIFT;
 #endif
 
 #ifdef CONFIG_STM32F7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
@@ -166,7 +169,8 @@ void stm32_rcc_enablelse(void)
       /* Set running drive capability for LSE oscillator. */
 
       regval &= ~RCC_BDCR_LSEDRV_MASK;
-      regval |= drives[CONFIG_STM32F7_RTC_LSECLOCK_RUN_DRV_CAPABILITY];
+      regval |= CONFIG_STM32F7_RTC_LSECLOCK_RUN_DRV_CAPABILITY <<
+                RCC_BDCR_LSEDRV_SHIFT;
       putreg32(regval, STM32_RCC_BDCR);
 #endif
 
