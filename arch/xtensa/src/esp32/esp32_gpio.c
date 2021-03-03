@@ -227,7 +227,7 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
 
   if ((attr & OPEN_DRAIN) != 0)
     {
-      cntrl = (1 << GPIO_PIN_PAD_DRIVER_S);
+      cntrl |= (1 << GPIO_PIN_PAD_DRIVER_S);
     }
 
   regaddr = DR_REG_IO_MUX_BASE + g_pin2func[pin];
