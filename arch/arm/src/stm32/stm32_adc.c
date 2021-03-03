@@ -2498,7 +2498,7 @@ static void adc_sampletime_cfg(FAR struct adc_dev_s *dev)
    */
 
 #ifdef CONFIG_STM32_ADC_CHANGE_SAMPLETIME
-  adc_sampletime_write((FAR struct stm32_adc_dev_s *)dev);
+  adc_sampletime_write((FAR struct stm32_adc_dev_s *)dev->ad_priv);
 #else
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
 
