@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-devkitc/src/esp32_spi.c
+ * boards/xtensa/esp32/common/src/esp32_mcp2515.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,50 +18,66 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_MCP2515_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_MCP2515_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
-
-#include <nuttx/spi/spi.h>
-#include <arch/board/board.h>
-
-#include "esp32-devkitc.h"
-
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  esp32_spi2_status
+ * Type Definitions
  ****************************************************************************/
 
-uint8_t esp32_spi2_status(FAR struct spi_dev_s *dev, uint32_t devid)
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  uint8_t status = 0;
-
-#ifdef CONFIG_MMCSD_SPI
-  if (devid == SPIDEV_MMCSD(0))
-    {
-       status |= SPI_STATUS_PRESENT;
-    }
+#else
+#define EXTERN extern
 #endif
 
-  return status;
-}
-
 /****************************************************************************
- * Name:  esp32_spi3_status
+ * Inline Functions
  ****************************************************************************/
 
-uint8_t esp32_spi3_status(FAR struct spi_dev_s *dev, uint32_t devid)
-{
-  uint8_t status = 0;
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-  return status;
+/****************************************************************************
+ * Name: board_mcp2515_initialize
+ *
+ * Description:
+ *   Initialize and register the MCP2515 CAN driver.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/can0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int board_mcp2515_initialize(int devno);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_BMP180_H */
