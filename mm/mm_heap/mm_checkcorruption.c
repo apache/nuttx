@@ -25,7 +25,9 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <sched.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/irq.h>
 
@@ -79,7 +81,7 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
 #if CONFIG_MM_REGIONS > 1
               continue;
 #else
-              return 0;
+              return;
 #endif
             }
 

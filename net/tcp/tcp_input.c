@@ -1152,11 +1152,15 @@ static void tcp_process_cache(FAR struct net_driver_s *dev, uint8_t domain,
 
           if (IFF_IS_IPv4(dev->d_flags))
             {
+#ifdef CONFIG_NET_IPv4
               tcp_ipv4_select(dev);
+#endif
             }
           else
             {
+#ifdef CONFIG_NET_IPv6
               tcp_ipv6_select(dev);
+#endif
             }
 
           tcp_input(dev, domain, iplen, NULL);
