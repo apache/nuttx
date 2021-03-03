@@ -62,6 +62,10 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#ifdef CONFIG_CAN_MCP2515
+#  include "esp32_mcp2515.h"
+#endif
+
 #ifdef CONFIG_TIMER
 #  include "esp32_board_tim.h"
 #endif
@@ -244,6 +248,16 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_CAN_MCP2515
+  /* Configure and initialize the MCP2515 CAN device */
+
+  ret = board_mcp2515_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_mcp2515_initialize() failed: %d\n", ret);
     }
 #endif
 

@@ -55,7 +55,11 @@
  * This is an externally connected LED used for testing.
  */
 
-#define GPIO_LED1     2
+#define GPIO_LED1             2
+
+/* MCP2515 Interrupt pin */
+
+#define GPIO_MCP2515_IRQ      22
 
 /****************************************************************************
  * Public Types

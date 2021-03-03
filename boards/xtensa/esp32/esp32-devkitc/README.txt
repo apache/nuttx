@@ -796,6 +796,17 @@ NOTES:
        crash in the waitpid() test.  At the time of the crash, there is
        extensive memory corruption and a user exception occurs (cause=28).
 
+  mcp2515:
+
+    This config is used to communicate with MCP2515 CAN over SPI chip.
+    SPI3 is used and kept with the default IOMUX pins, i.e.:
+        CS   --> 5
+        SCK  --> 18
+        MOSI --> 23
+        MISO --> 19
+    The MCP2515 interrupt (INT) pin is connected to the pin 22 of the
+    ESP32-Devkit.
+
   mmcsdspi:
 
     This config tests the SPI driver by connecting an SD Card reader over SPI.
