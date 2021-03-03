@@ -681,6 +681,12 @@ static int32_t esp32c3_wdt_setisr(struct esp32c3_wdt_dev_s *dev,
           /* Disable the provided CPU interrupt to configure it. */
 
           up_disable_irq(wdt->cpuint);
+
+          /* Free CPU interrupt that is attached to this peripheral
+           * because we will get another from esp32c3_request_irq()
+           */
+
+          esp32c3_free_cpuint(wdt->periph);
         }
 
       wdt->cpuint = esp32c3_request_irq(wdt->periph,
