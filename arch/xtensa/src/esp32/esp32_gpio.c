@@ -180,6 +180,10 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
           putreg32((1ul << (pin - 32)), GPIO_ENABLE1_W1TC_REG);
         }
 
+      /* Input enable */
+
+      func |= FUN_IE;
+
       if ((attr & PULLUP) != 0)
         {
           func |= FUN_PU;
@@ -207,10 +211,6 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
   /* Add drivers */
 
   func |= (uint32_t)(2ul << FUN_DRV_S);
-
-  /* Input enable... Required for output as well? */
-
-  func |= FUN_IE;
 
   /* Select the pad's function.  If no function was given, consider it a
    * normal input or output (i.e. function3).
