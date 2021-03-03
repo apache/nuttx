@@ -38,14 +38,14 @@
  * Public Data
  ****************************************************************************/
 
-/* This variable holds the group ID of the current task group.  This ID is
+/* This variable holds the PID of the current task group.  This ID is
  * zero if the current task is a kernel thread that has no address
  * environment (other than the kernel context).
  *
  * This must only be accessed with interrupts disabled.
  */
 
-grpid_t g_grpid_current;
+pid_t g_pid_current = INVALID_PROCESS_ID;
 
 /****************************************************************************
  * Public Functions
@@ -84,7 +84,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
   FAR struct task_group_s *group;
   FAR struct task_group_s *oldgroup;
   irqstate_t flags;
-  grpid_t grpid;
+  pid_t pid;
   int ret;
 
   /* NULL for the tcb means to use the TCB of the task at the head of the
@@ -110,23 +110,23 @@ int group_addrenv(FAR struct tcb_s *tcb)
       return OK;
     }
 
-  /* Get the ID of the group that needs the address environment */
+  /* Get the PID of the group that needs the address environment */
 
-  grpid = group->tg_grpid;
-  DEBUGASSERT(grpid != 0);
+  pid = group->tg_pid;
+  DEBUGASSERT(pid != INVALID_PROCESS_ID);
 
   /* Are we going to change address environments? */
 
   flags = enter_critical_section();
-  if (grpid != g_grpid_current)
+  if (pid != g_pid_current)
     {
       /* Yes.. Is there a current address environment in place? */
 
-      if (g_grpid_current != 0)
+      if (g_pid_current != INVALID_PROCESS_ID)
         {
           /* Find the old group with this ID. */
 
-          oldgroup = group_findby_grpid(g_grpid_current);
+          oldgroup = group_findbypid(g_pid_current);
           DEBUGASSERT(oldgroup &&
                       (oldgroup->tg_flags & GROUP_FLAG_ADDRENV) != 0);
 
@@ -154,7 +154,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
 
       /* Save the new, current group */
 
-      g_grpid_current = grpid;
+      g_pid_current = pid;
     }
 
   leave_critical_section(flags);

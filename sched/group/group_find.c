@@ -41,59 +41,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_findby_grpid
- *
- * Description:
- *   Given a group ID, find the group task structure with that ID.  IDs are
- *   used instead of pointers to group structures.  This is done because a
- *   group can disappear at any time leaving a stale pointer; an ID is
- *   cleaner because if the group disappears, this function will fail
- *   gracefully.
- *
- * Input Parameters:
- *   grpid - The group ID to find.
- *
- * Returned Value:
- *   On success, a pointer to the group task structure is returned.  This
- *   function can fail only if there is no group that corresponds to the
- *   group ID.
- *
- * Assumptions:
- *   Called during when signally tasks in a safe context.  No special
- *   precautions should be required here.  However, extra care is taken when
- *   accessing the global g_grouphead list.
- *
- ****************************************************************************/
-
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
-FAR struct task_group_s *group_findby_grpid(grpid_t grpid)
-{
-  FAR struct task_group_s *group;
-  irqstate_t flags;
-
-  /* Find the status structure with the matching GID  */
-
-  flags = enter_critical_section();
-  for (group = g_grouphead; group; group = group->flink)
-    {
-      if (group->tg_grpid == grpid)
-        {
-          leave_critical_section(flags);
-          return group;
-        }
-    }
-
-  leave_critical_section(flags);
-  return NULL;
-}
-#endif
-
-/****************************************************************************
  * Name: group_findbypid
  *
  * Description:
  *   Given a task ID, find the group task structure with was started by that
- *   task ID.  That task's ID is retained in the group as tg_task and will
+ *   task ID.  That task's ID is retained in the group as tg_pid and will
  *   be remember even if the main task thread leaves the group.
  *
  * Input Parameters:
@@ -111,7 +63,7 @@ FAR struct task_group_s *group_findby_grpid(grpid_t grpid)
  *
  ****************************************************************************/
 
-#ifdef HAVE_GROUP_MEMBERS
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
 FAR struct task_group_s *group_findbypid(pid_t pid)
 {
   FAR struct task_group_s *group;
@@ -122,7 +74,7 @@ FAR struct task_group_s *group_findbypid(pid_t pid)
   flags = enter_critical_section();
   for (group = g_grouphead; group; group = group->flink)
     {
-      if (group->tg_task == pid)
+      if (group->tg_pid == pid)
         {
           leave_critical_section(flags);
           return group;

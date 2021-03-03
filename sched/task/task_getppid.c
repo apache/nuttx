@@ -84,11 +84,7 @@ pid_t getppid(void)
            * ready-to-run task list
            */
 
-#ifdef HAVE_GROUP_MEMBERS
-          return rtcb->group->tg_pgrpid;
-#else
           return rtcb->group->tg_ppid;
-#endif
         }
 
       /* No.. return -ESRCH to indicate this condition */

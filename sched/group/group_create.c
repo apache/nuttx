@@ -47,16 +47,6 @@
 #define GROUP_INITIAL_MEMBERS 4
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* This is counter that is used to generate unique task group IDs */
-
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
-static grpid_t g_grpid_counter;
-#endif
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -69,68 +59,6 @@ FAR struct task_group_s *g_grouphead;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: group_assign_grpid
- *
- * Description:
- *   Create a unique group ID.
- *
- * Input Parameters:
- *   tcb - The tcb in need of the task group.
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called during task creation in a safe context.  No special precautions
- *   are required here.
- *
- ****************************************************************************/
-
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
-static void group_assign_grpid(FAR struct task_group_s *group)
-{
-  irqstate_t flags;
-  grpid_t grpid;
-
-  /* Pre-emption should already be disabled, but let's be paranoid careful */
-
-  sched_lock();
-
-  /* Loop until we create a unique ID */
-
-  for (; ; )
-    {
-      /* Increment the ID counter. It is global data so be extra paranoid. */
-
-      flags = enter_critical_section();
-      grpid = ++g_grpid_counter;
-
-      /* Check for overflow */
-
-      if (grpid <= 0)
-        {
-          g_grpid_counter = 1;            /* One is the IDLE group */
-          leave_critical_section(flags);
-        }
-      else
-        {
-          /* Does a task group with this ID already exist? */
-
-          leave_critical_section(flags);
-          if (group_findby_grpid(grpid) == NULL)
-            {
-              /* No.. Assign this ID to the new group and return */
-
-              group->tg_grpid = grpid;
-              sched_unlock();
-              return;
-            }
-        }
-    }
-}
-#endif /* HAVE_GROUP_MEMBERS */
 
 /****************************************************************************
  * Name: group_inherit_identity
@@ -243,14 +171,6 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   tcb->cmn.group = group;
 
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
-  /* Assign the group a unique ID.  If g_grpid_counter were to wrap before we
-   * finish with task creation, that would be a problem.
-   */
-
-  group_assign_grpid(group);
-#endif
-
   /* Inherit the user identity from the parent task group */
 
   group_inherit_identity(group);
@@ -349,7 +269,6 @@ int group_initialize(FAR struct task_tcb_s *tcb)
   group->flink = g_grouphead;
   g_grouphead = group;
   leave_critical_section(flags);
-
 #endif
 
   /* Save the ID of the main task within the group of threads.  This needed
@@ -358,9 +277,7 @@ int group_initialize(FAR struct task_tcb_s *tcb)
    * task has exited.
    */
 
-#if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
-  group->tg_task = tcb->cmn.pid;
-#endif
+  group->tg_pid = tcb->cmn.pid;
 
   /* Mark that there is one member in the group, the main task */
 
