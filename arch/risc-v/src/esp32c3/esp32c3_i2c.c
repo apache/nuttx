@@ -54,7 +54,7 @@
 #include "hardware/esp32c3_system.h"
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Helper for applying the mask for a given register field.
@@ -95,6 +95,26 @@
                           I2C_TIME_OUT_INT_ENA_M | \
                           I2C_ARBITRATION_LOST_INT_ENA_M)
 
+/* I2C event trace logic.
+ * NOTE: trace uses the internal, non-standard, low-level debug interface
+ * syslog() but does not require that any other debug is enabled.
+ */
+
+#ifndef CONFIG_I2C_TRACE
+#  define esp32c3_i2c_tracereset(p)
+#  define esp32c3_i2c_tracenew(p,s)
+#  define esp32c3_i2c_traceevent(p,e,a,s)
+#  define esp32c3_i2c_tracedump(p)
+#endif
+
+#ifndef CONFIG_I2C_NTRACE
+#  define CONFIG_I2C_NTRACE 32
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
 /* I2C state */
 
 enum esp32c3_i2cstate_e
@@ -108,7 +128,7 @@ enum esp32c3_i2cstate_e
 
 /* I2C hardware command */
 
-enum i2c_opmode_e
+enum esp32c3_i2c_opmode_e
 {
   I2C_CMD_RESTART = 6,        /* I2C restart command */
   I2C_CMD_WRITE = 1,          /* I2C write command */
@@ -116,6 +136,34 @@ enum i2c_opmode_e
   I2C_CMD_STOP = 2,           /* I2C stop command */
   I2C_CMD_END = 4             /* I2C end command */
 };
+
+#ifdef CONFIG_I2C_TRACE
+
+/* Trace events */
+
+enum esp32c3_trace_e
+{
+  I2CEVENT_NONE = 0,      /* No events have occurred with this status */
+  I2CEVENT_SENDADDR,      /* Start/Master bit set and address sent, param = addr */
+  I2CEVENT_SENDBYTE,      /* Send byte, param = bytes */
+  I2CEVENT_RCVMODEEN,     /* Receive mode enabled, param = 0 */
+  I2CEVENT_RCVBYTE,       /* Read more dta, param = bytes */
+  I2CEVENT_STOP,          /* Last byte sten, send stop, param = length */
+  I2CEVENT_ERROR          /* Error occurred, param = 0 */
+};
+
+/* Trace data */
+
+struct esp32c3_trace_s
+{
+  uint32_t status;               /* I2C 32-bit SR status */
+  uint32_t count;                /* Interrupt count when status change */
+  enum esp32c3_i2cstate_e event; /* Last event that occurred with this status */
+  uint32_t parm;                 /* Parameter associated with the event */
+  clock_t time;                  /* First of event or first status */
+};
+
+#endif /* CONFIG_I2C_TRACE */
 
 /* I2C Device hardware configuration */
 
@@ -170,6 +218,17 @@ struct esp32c3_i2c_priv_s
   bool ready_read;             /* If I2C is ready for receiving data */
 
   uint32_t clk_freq;           /* Current I2C Clock frequency */
+
+  /* I2C trace support */
+
+#ifdef CONFIG_I2C_TRACE
+  int tndx;                    /* Trace array index */
+  clock_t start_time;          /* Time when the trace was started */
+
+  /* The actual trace data */
+
+  struct esp32c3_trace_s trace[CONFIG_I2C_NTRACE];
+#endif
 };
 
 /****************************************************************************
@@ -185,7 +244,18 @@ static int  esp32c3_i2c_transfer(struct i2c_master_s *dev,
                                  int count);
 #ifdef CONFIG_I2C_RESET
 static int  esp32c3_i2c_reset(struct i2c_master_s *dev);
-#endif
+#endif /* CONFIG_I2C_RESET */
+
+#ifdef CONFIG_I2C_TRACE
+static void esp32c3_i2c_tracereset(struct esp32c3_i2c_priv_s *priv);
+static void esp32c3_i2c_tracenew(struct esp32c3_i2c_priv_s *priv,
+                                 uint32_t status);
+static void esp32c3_i2c_traceevent(struct esp32c3_i2c_priv_s *priv,
+                                   enum esp32c3_trace_e event,
+                                   uint32_t parm,
+                                   uint32_t status);
+static void esp32c3_i2c_tracedump(struct esp32c3_i2c_priv_s *priv);
+#endif /* CONFIG_I2C_TRACE */
 
 /****************************************************************************
  * Private Data
@@ -236,6 +306,21 @@ static struct esp32c3_i2c_priv_s esp32c3_i2c0_priv =
   .clk_freq   = 0
 };
 
+#endif
+
+/* Trace events strings */
+
+#ifdef CONFIG_I2C_TRACE
+static const char *g_trace_names[] =
+{
+  "NONE      ",
+  "SENDADDR  ",
+  "SENDBYTE  ",
+  "RCVMODEEN ",
+  "RCVBYTE   ",
+  "STOP      ",
+  "ERROR     "
+};
 #endif
 
 /****************************************************************************
@@ -824,6 +909,13 @@ static int esp32c3_i2c_transfer(struct i2c_master_s *dev,
 
       esp32c3_i2c_init_clock(priv, msgs[i].frequency);
 
+      /* Reset I2C trace logic */
+
+      esp32c3_i2c_tracereset(priv);
+
+      esp32c3_i2c_traceevent(priv, I2CEVENT_SENDADDR, msgs[i].addr,
+                             getreg32(I2C_SR_REG(priv->id)));
+
       esp32c3_i2c_sendstart(priv);
 
       if (esp32c3_i2c_sem_waitdone(priv) < 0)
@@ -849,6 +941,10 @@ static int esp32c3_i2c_transfer(struct i2c_master_s *dev,
 
         i2cinfo("Message %" PRIu8 " transfer complete.\n", priv->msgid);
     }
+
+  /* Dump the trace result */
+
+  esp32c3_i2c_tracedump(priv);
 
   esp32c3_i2c_sem_post(priv);
 
@@ -896,6 +992,185 @@ static int esp32c3_i2c_reset(struct i2c_master_s *dev)
 #endif
 
 /****************************************************************************
+ * Name: esp32c3_i2c_traceclear
+ *
+ * Description:
+ *   Set I2C trace fields to default value.
+ *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_TRACE
+static void esp32c3_i2c_traceclear(struct esp32c3_i2c_priv_s *priv)
+{
+  struct esp32c3_trace_s *trace = &priv->trace[priv->tndx];
+
+  trace->status = 0;
+  trace->count  = 0;
+  trace->event  = I2CEVENT_NONE;
+  trace->parm   = 0;
+  trace->time   = 0;
+}
+#endif /* CONFIG_I2C_TRACE */
+
+/****************************************************************************
+ * Name: esp32c3_i2c_tracereset
+ *
+ * Description:
+ *   Reset the trace info for a new data collection.
+ *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_TRACE
+static void esp32c3_i2c_tracereset(struct esp32c3_i2c_priv_s *priv)
+{
+  priv->tndx       = 0;
+  priv->start_time = clock_systime_ticks();
+  esp32c3_i2c_traceclear(priv);
+}
+#endif /* CONFIG_I2C_TRACE */
+
+/****************************************************************************
+ * Name: esp32c3_i2c_tracenew
+ *
+ * Description:
+ *   Create a new trace entry.
+ *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
+ *   status        - Current value of I2C status register.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_TRACE
+static void esp32c3_i2c_tracenew(struct esp32c3_i2c_priv_s *priv,
+                                 uint32_t status)
+{
+  struct esp32c3_trace_s *trace = &priv->trace[priv->tndx];
+
+  /* Check if the current entry is already initialized or if its status had
+   * already changed
+   */
+
+  if (trace->count == 0 || status != trace->status)
+    {
+      /* Check whether the status changed  */
+
+      if (trace->count != 0)
+        {
+          /* Bump up the trace index (unless we are out of trace entries) */
+
+          if (priv->tndx >= (CONFIG_I2C_NTRACE - 1))
+            {
+              i2cerr("ERROR: Trace table overflow\n");
+              return;
+            }
+
+          priv->tndx++;
+          trace = &priv->trace[priv->tndx];
+        }
+
+      /* Initialize the new trace entry */
+
+      esp32c3_i2c_traceclear(priv);
+      trace->status = status;
+      trace->count  = 1;
+      trace->time   = clock_systime_ticks();
+    }
+  else
+    {
+      /* Just increment the count of times that we have seen this status */
+
+      trace->count++;
+    }
+}
+#endif /* CONFIG_I2C_TRACE */
+
+/****************************************************************************
+ * Name: esp32c3_i2c_traceevent
+ *
+ * Description:
+ *   Record a new trace event.
+ *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
+ *   event         - Event to be recorded on the trace.
+ *   parm          - Parameter associated with the event.
+ *   status        - Current value of I2C status register.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_TRACE
+static void esp32c3_i2c_traceevent(struct esp32c3_i2c_priv_s *priv,
+                                   enum esp32c3_trace_e event,
+                                   uint32_t parm,
+                                   uint32_t status)
+{
+  /* Check for new trace setup */
+
+  esp32c3_i2c_tracenew(priv, status);
+
+  if (event != I2CEVENT_NONE)
+    {
+      struct esp32c3_trace_s *trace = &priv->trace[priv->tndx];
+
+      /* Initialize the new trace entry */
+
+      trace->event  = event;
+      trace->parm   = parm;
+
+      /* Bump up the trace index (unless we are out of trace entries) */
+
+      if (priv->tndx >= (CONFIG_I2C_NTRACE - 1))
+        {
+          i2cerr("ERROR: Trace table overflow\n");
+          return;
+        }
+
+      priv->tndx++;
+      esp32c3_i2c_traceclear(priv);
+    }
+}
+#endif /* CONFIG_I2C_TRACE */
+
+/****************************************************************************
+ * Name: esp32c3_i2c_tracedump
+ *
+ * Description:
+ *   Dump the trace results.
+ *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_TRACE
+static void esp32c3_i2c_tracedump(struct esp32c3_i2c_priv_s *priv)
+{
+  struct esp32c3_trace_s *trace;
+  int i;
+
+  syslog(LOG_DEBUG, "Elapsed time: %" PRIu32 "\n",
+         (clock_systime_ticks() - priv->start_time));
+
+  for (i = 0; i < priv->tndx; i++)
+    {
+      trace = &priv->trace[i];
+      syslog(LOG_DEBUG,
+             "%2d. STATUS: %08" PRIx32 " COUNT: %3" PRIu32 " EVENT: %s(%2d)"
+             " PARM: %08" PRIx32 " TIME: %" PRIu32 "\n",
+             i + 1, trace->status, trace->count, g_trace_names[trace->event],
+             trace->event, trace->parm, trace->time - priv->start_time);
+    }
+}
+#endif /* CONFIG_I2C_TRACE */
+
+/****************************************************************************
  * Name: esp32c3_i2c_irq
  *
  * Description:
@@ -918,13 +1193,15 @@ static int esp32c3_i2c_irq(int cpuint, void *context, void *arg)
   struct esp32c3_i2c_priv_s *priv = (struct esp32c3_i2c_priv_s *)arg;
   struct i2c_msg_s *msg = &priv->msgv[priv->msgid];
 
-  uint32_t status = getreg32(I2C_INT_STATUS_REG(priv->id));
-  putreg32(status, I2C_INT_CLR_REG(priv->id));
+  uint32_t irq_status = getreg32(I2C_INT_STATUS_REG(priv->id));
+  putreg32(irq_status, I2C_INT_CLR_REG(priv->id));
 
-  if (I2C_INT_ERR_MASK & status)
+  if (I2C_INT_ERR_MASK & irq_status)
     {
-      priv->error = status & I2C_INT_ERR_MASK;
+      priv->error = irq_status & I2C_INT_ERR_MASK;
       priv->i2cstate = I2CSTATE_ERROR;
+      esp32c3_i2c_traceevent(priv, I2CEVENT_ERROR, priv->error,
+                             getreg32(I2C_SR_REG(priv->id)));
       esp32c3_i2c_intr_disable(priv);
       nxsem_post(&priv->sem_isr);
     }
@@ -936,6 +1213,8 @@ static int esp32c3_i2c_irq(int cpuint, void *context, void *arg)
             {
               if (priv->ready_read)
                 {
+                  esp32c3_i2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->bytes,
+                                         getreg32(I2C_SR_REG(priv->id)));
                   esp32c3_i2c_recvdata(priv);
 
                   priv->ready_read = false;
@@ -943,12 +1222,16 @@ static int esp32c3_i2c_irq(int cpuint, void *context, void *arg)
 
               if (priv->bytes == msg->length)
                 {
+                  esp32c3_i2c_traceevent(priv, I2CEVENT_STOP, msg->length,
+                                         getreg32(I2C_SR_REG(priv->id)));
                   esp32c3_i2c_sendstop(priv);
 
                   priv->i2cstate = I2CSTATE_FINISH;
                 }
               else
                 {
+                  esp32c3_i2c_traceevent(priv, I2CEVENT_RCVMODEEN, 0,
+                                         getreg32(I2C_SR_REG(priv->id)));
                   esp32c3_i2c_startrecv(priv);
 
                   priv->ready_read = true;
@@ -956,6 +1239,8 @@ static int esp32c3_i2c_irq(int cpuint, void *context, void *arg)
             }
           else
             {
+              esp32c3_i2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->bytes,
+                                     getreg32(I2C_SR_REG(priv->id)));
               esp32c3_i2c_senddata(priv);
 
               if (priv->bytes == msg->length)
@@ -966,6 +1251,8 @@ static int esp32c3_i2c_irq(int cpuint, void *context, void *arg)
         }
       else if (priv->i2cstate == I2CSTATE_STOP)
         {
+          esp32c3_i2c_traceevent(priv, I2CEVENT_STOP, msg->length,
+                                 getreg32(I2C_SR_REG(priv->id)));
           esp32c3_i2c_sendstop(priv);
 
           priv->i2cstate = I2CSTATE_FINISH;
