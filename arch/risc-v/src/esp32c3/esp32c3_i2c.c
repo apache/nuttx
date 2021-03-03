@@ -85,6 +85,12 @@
 
 #define I2C_FILTER_CYC_NUM_DEF (7)
 
+/* Number of bus cycles for the master to generate when the slave is in
+ * deadlock
+ */
+
+#define I2C_SCL_CYC_NUM_DEF (9)
+
 /* I2C default clock frequency */
 
 #define I2C_CLK_FREQ_DEF (100 * 1000)
@@ -740,6 +746,7 @@ static void esp32c3_i2c_deinit(struct esp32c3_i2c_priv_s *priv)
 static void esp32c3_i2c_reset_fsmc(struct esp32c3_i2c_priv_s *priv)
 {
   esp32c3_i2c_deinit(priv);
+
   esp32c3_i2c_init(priv);
 }
 
@@ -952,6 +959,101 @@ static int esp32c3_i2c_transfer(struct i2c_master_s *dev,
 }
 
 /****************************************************************************
+ * Name: esp32c3_i2c_clear_bus
+ *
+ * Description:
+ *   Clear I2C bus, when the slave is stuck in a deadlock and keeps pulling
+ *   the bus low, master can control the SCL bus to generate 9 CLKs.
+ *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+static void esp32c3_i2c_clear_bus(struct esp32c3_i2c_priv_s *priv)
+{
+  uint32_t clock_count;
+  uint32_t stretch_count;
+  int ret;
+
+  const struct esp32c3_i2c_config_s *config = priv->config;
+
+  /* Use GPIO configuration to un-wedge the bus */
+
+  esp32c3_configgpio(config->scl_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
+  esp32c3_gpio_matrix_out(config->scl_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp32c3_configgpio(config->sda_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
+  esp32c3_gpio_matrix_out(config->sda_pin, SIG_GPIO_OUT_IDX, 0, 0);
+
+  /* Let SDA go high */
+
+  esp32c3_gpiowrite(config->sda_pin, 1);
+
+  /* Clock the bus until any slaves currently driving it let it go. */
+
+  clock_count = 0;
+  while (!esp32c3_gpioread(config->sda_pin))
+    {
+      /* Give up if we have tried too hard */
+
+      if (clock_count++ >= I2C_SCL_CYC_NUM_DEF)
+        {
+          ret = -EIO;
+          goto out;
+        }
+
+      /* Sniff to make sure that clock stretching has finished.
+       *
+       * If the bus never relaxes, the reset has failed.
+       */
+
+      stretch_count = 0;
+      while (!esp32c3_gpioread(config->scl_pin))
+        {
+          /* Give up if we have tried too hard */
+
+          if (stretch_count++ > 10)
+            {
+              ret = -EIO;
+              goto out;
+            }
+
+          up_udelay(10);
+        }
+
+      /* Drive SCL low */
+
+      esp32c3_gpiowrite(config->scl_pin, 0);
+      up_udelay(10);
+
+      /* Drive SCL high again */
+
+      esp32c3_gpiowrite(config->scl_pin, 1);
+      up_udelay(10);
+    }
+
+  /* Generate a start followed by a stop to reset slave
+   * state machines.
+   */
+
+  esp32c3_gpiowrite(config->sda_pin, 0);
+  up_udelay(10);
+  esp32c3_gpiowrite(config->scl_pin, 0);
+  up_udelay(10);
+  esp32c3_gpiowrite(config->scl_pin, 1);
+  up_udelay(10);
+  esp32c3_gpiowrite(config->sda_pin, 1);
+  up_udelay(10);
+
+  ret = OK;
+
+out:
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: esp32c3_i2c_reset
  *
  * Description:
@@ -978,7 +1080,11 @@ static int esp32c3_i2c_reset(struct i2c_master_s *dev)
 
   flags = enter_critical_section();
 
-  esp32c3_i2c_reset_fsmc(priv);
+  esp32c3_i2c_deinit(priv);
+
+  esp32c3_i2c_clear_bus(priv);
+
+  esp32c3_i2c_init(priv);
 
   priv->i2cstate   = I2CSTATE_IDLE;
   priv->msgid      = 0;
