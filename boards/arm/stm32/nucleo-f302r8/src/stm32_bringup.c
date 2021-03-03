@@ -107,6 +107,26 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_STM32_FOC
+  /* Initialize and register the FOC device */
+
+  ret = stm32_foc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_foc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
