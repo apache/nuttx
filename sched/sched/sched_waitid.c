@@ -168,11 +168,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
       ctcb = nxsched_get_tcb((pid_t)id);
       if (ctcb != NULL)
         {
-#ifdef HAVE_GROUP_MEMBERS
-          if (ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
-#else
-          if (ctcb->group->tg_ppid != rtcb->pid)
-#endif
+          if (ctcb->group->tg_ppid != rtcb->group->tg_pid)
             {
               ret = -ECHILD;
               goto errout;
@@ -212,11 +208,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
 
       ctcb = nxsched_get_tcb((pid_t)id);
 
-#ifdef HAVE_GROUP_MEMBERS
-      if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
-#else
-      if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
-#endif
+      if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->group->tg_pid)
         {
           ret = -ECHILD;
           goto errout;

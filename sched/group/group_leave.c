@@ -176,7 +176,7 @@ static inline void group_release(FAR struct task_group_s *group)
 
   /* Mark no address environment */
 
-  g_grpid_current = 0;
+  g_pid_current = INVALID_PROCESS_ID;
 #endif
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)

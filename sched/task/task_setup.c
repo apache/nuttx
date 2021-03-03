@@ -211,19 +211,12 @@ static inline void nxtask_save_parent(FAR struct tcb_s *tcb, uint8_t ttype)
 
       DEBUGASSERT(rtcb != NULL && rtcb->group != NULL);
 
-#ifdef HAVE_GROUP_MEMBERS
-      /* Save the ID of the parent tasks' task group in the child's task
+      /* Save the PID of the parent tasks' task group in the child's task
        * group.  Copy the ID from the parent's task group structure to
        * child's task group.
        */
 
-      tcb->group->tg_pgrpid = rtcb->group->tg_grpid;
-
-#else
-      /* Save the parent task's ID in the child task's group. */
-
-      tcb->group->tg_ppid = rtcb->pid;
-#endif
+      tcb->group->tg_ppid = rtcb->group->tg_pid;
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
       /* Tasks can also suppress retention of their child status by applying

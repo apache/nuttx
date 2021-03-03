@@ -362,12 +362,6 @@ struct pthread_cleanup_s
 #  endif
 #endif
 
-/* type grpid_t *****************************************************************/
-
-/* The task group ID */
-
-typedef int16_t grpid_t;
-
 /* struct dspace_s **************************************************************/
 
 /* This structure describes a reference counted D-Space region.  This must be a
@@ -466,14 +460,9 @@ struct task_group_s
 {
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
   struct task_group_s *flink;       /* Supports a singly linked list            */
-  grpid_t tg_grpid;                 /* The ID of this task group                */
 #endif
-#ifdef HAVE_GROUP_MEMBERS
-  grpid_t tg_pgrpid;                /* The ID of the parent task group          */
-#endif
-#if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
-  pid_t tg_task;                    /* The ID of the task within the group      */
-#endif
+  pid_t tg_pid;                     /* The ID of the task within the group      */
+  pid_t tg_ppid;                    /* This is the ID of the parent thread      */
   uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
 
   /* User identity **************************************************************/
@@ -508,16 +497,9 @@ struct task_group_s
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *tg_children; /* Head of a list of child status     */
+#else
+  uint16_t tg_nchildren;                  /* This is the number active children */
 #endif
-
-#ifndef HAVE_GROUP_MEMBERS
-  /* REVISIT: What if parent thread exits?  Should use tg_pgrpid. */
-
-  pid_t    tg_ppid;                 /* This is the ID of the parent thread      */
-#ifndef CONFIG_SCHED_CHILD_STATUS
-  uint16_t tg_nchildren;            /* This is the number active children       */
-#endif
-#endif /* HAVE_GROUP_MEMBERS */
 #endif /* CONFIG_SCHED_HAVE_PARENT */
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
