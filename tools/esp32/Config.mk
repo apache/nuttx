@@ -61,7 +61,6 @@ else
 	ESPTOOL_WRITEFLASH_OPTS := $(ESPTOOL_FLASH_OPTS)
 endif
 
-
 ifdef ESPTOOL_BINDIR
 	BL_OFFSET=0x1000
 	PT_OFFSET=0x8000
@@ -84,7 +83,6 @@ define POSTBUILD
 	$(Q) if ! esptool.py version 1>/dev/null 2>&1; then \
 		echo ""; \
 		echo "esptool.py not found.  Please run: \"pip install esptool\""; \
-		echo "Or run: \"make -C $(TOPDIR)/tools/esp32\" to install all IDF tools."; \
 		echo ""; \
 		echo "Run make again to create the nuttx.bin image."; \
 		exit 1; \
