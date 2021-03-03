@@ -196,7 +196,7 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
 
   /* Handle output pins */
 
-  else if ((attr & OUTPUT) != 0)
+  if ((attr & OUTPUT) != 0)
     {
       if (pin < 32)
         {
