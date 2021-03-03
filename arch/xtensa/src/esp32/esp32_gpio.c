@@ -222,7 +222,7 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
     }
   else
     {
-      func |= (uint32_t)((2 >> FUNCTION_SHIFT) << MCU_SEL_S);
+      func |= (uint32_t)(PIN_FUNC_GPIO << MCU_SEL_S);
     }
 
   if ((attr & OPEN_DRAIN) != 0)
