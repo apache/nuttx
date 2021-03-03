@@ -23,19 +23,18 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
+#include <nuttx/arch.h>
+#include <nuttx/timers/timer.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
-#include <stdio.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/timers/timer.h>
 
 #include "xtensa.h"
+
 #include "hardware/esp32_soc.h"
+
 #include "esp32_tim.h"
 #include "esp32_clockconfig.h"
 
@@ -45,13 +44,7 @@
 
 /* TIMER configuration */
 
-/* Lowest divider, Highest Frequency Best Resolution */
-#define ESP32_TIMER_PRESCALER   2
-/* Number of cycles to complete 1 microsecond */
-#define ESP32_1USECOND          ((esp_clk_apb_freq()/ESP32_TIMER_PRESCALER)/1000000)
-#define ESP32_INIT_CNTR_VALUE   0    /* Initial counter value */
 #define ESP32_TIMER_MAX_USECOND 0xffffffff
-#define ESP32_TIMER_MAX         (ESP32_1USECOND*ESP32_TIMER_MAX_USECOND)
 
 /****************************************************************************
  * Private Types
@@ -64,6 +57,7 @@ struct esp32_timer_lowerhalf_s
   tccb_t                        callback;   /* Current user interrupt callback */
   FAR void                     *arg;        /* Argument passed to upper half callback */
   bool                          started;    /* True: Timer has been started */
+  void *upper;                              /* Pointer to watchdog_upperhalf_s */
 };
 
 /****************************************************************************
@@ -160,15 +154,13 @@ static int esp32_timer_handler(int irq, void *context, void *arg)
     (FAR struct esp32_timer_lowerhalf_s *)arg;
   uint32_t next_interval_us = 0;
 
-  /* Clear Interrupt Bits */
-
-  if (priv->callback(&next_interval_us, priv->arg))
+  if (priv->callback(&next_interval_us, priv->upper))
     {
       if (next_interval_us > 0)
         {
           /* Set a value to the alarm */
 
-          ESP32_TIM_SETALRVL(priv->tim, next_interval_us*ESP32_1USECOND);
+          ESP32_TIM_SETALRVL(priv->tim, next_interval_us);
         }
     }
   else
@@ -177,7 +169,6 @@ static int esp32_timer_handler(int irq, void *context, void *arg)
     }
 
   ESP32_TIM_SETALRM(priv->tim, true); /* Re-enables the alarm */
-  ESP32_TIM_CLEAR(priv->tim);         /* Reset the counter */
   ESP32_TIM_ACKINT(priv->tim);        /* Clear the Interrupt */
   return OK;
 }
@@ -202,6 +193,7 @@ static int esp32_timer_start(FAR struct timer_lowerhalf_s *lower)
   FAR struct esp32_timer_lowerhalf_s *priv =
     (FAR struct esp32_timer_lowerhalf_s *)lower;
   int ret = OK;
+  uint16_t pre;
   irqstate_t flags;
 
   DEBUGASSERT(priv);
@@ -218,43 +210,33 @@ static int esp32_timer_start(FAR struct timer_lowerhalf_s *lower)
    * unpredictable results, so it is disabled before configuring
    */
 
-  ret = ESP32_TIM_STOP(priv->tim);
-  if (ret != OK)
-    {
-      goto errout;
-    }
+  ESP32_TIM_STOP(priv->tim);
+
+  /* Calculate the suitable prescaler according to the current apb
+   * frequency to generate a period of 1 us.
+   */
+
+  pre = esp_clk_apb_freq() / 1000000;
 
   /* Configure TIMER prescaler */
 
-  ret = ESP32_TIM_SETPRE(priv->tim, ESP32_TIMER_PRESCALER);
-  if (ret != OK)
-    {
-      goto errout;
-    }
+  ESP32_TIM_SETPRE(priv->tim, pre);
 
   /* Configure TIMER mode */
 
-  ret = ESP32_TIM_SETMODE(priv->tim, ESP32_TIM_MODE_UP);
-  if (ret != OK)
-    {
-      goto errout;
-    }
+  ESP32_TIM_SETMODE(priv->tim, ESP32_TIM_MODE_UP);
 
   /* Clear TIMER counter value */
 
-  ret = ESP32_TIM_CLEAR(priv->tim);
-  if (ret != OK)
-    {
-      goto errout;
-    }
+  ESP32_TIM_CLEAR(priv->tim);
+
+  /* Enable autoreload */
+
+  ESP32_TIM_SETARLD(priv->tim, true);
 
   /* Enable TIMER alarm */
 
-  ret = ESP32_TIM_SETALRM(priv->tim, true);
-  if (ret != OK)
-    {
-      goto errout;
-    }
+  ESP32_TIM_SETALRM(priv->tim, true);
 
   /* Clear Interrupt Bits Status */
 
@@ -265,21 +247,19 @@ static int esp32_timer_start(FAR struct timer_lowerhalf_s *lower)
   if (priv->callback != NULL)
     {
       flags = enter_critical_section();
-
-      ESP32_TIM_SETISR(priv->tim, esp32_timer_handler, priv);
-      ESP32_TIM_ENABLEINT(priv->tim);
-
+      ret = ESP32_TIM_SETISR(priv->tim, esp32_timer_handler, priv);
       leave_critical_section(flags);
+      if (ret != OK)
+        {
+          goto errout;
+        }
+
+      ESP32_TIM_ENABLEINT(priv->tim);
     }
 
   /* Finally, start the TIMER */
 
-  ret = ESP32_TIM_START(priv->tim);
-  if (ret != OK)
-    {
-      goto errout;
-    }
-
+  ESP32_TIM_START(priv->tim);
   priv->started = true;
 
 errout:
@@ -306,6 +286,7 @@ static int esp32_timer_stop(FAR struct timer_lowerhalf_s *lower)
   FAR struct esp32_timer_lowerhalf_s *priv =
     (FAR struct esp32_timer_lowerhalf_s *)lower;
   int ret = OK;
+  irqstate_t flags;
 
   DEBUGASSERT(priv);
 
@@ -318,7 +299,9 @@ static int esp32_timer_stop(FAR struct timer_lowerhalf_s *lower)
     }
 
   ESP32_TIM_DISABLEINT(priv->tim);
-  ESP32_TIM_SETISR(priv->tim, NULL, NULL);
+  flags = enter_critical_section();
+  ret = ESP32_TIM_SETISR(priv->tim, NULL, NULL);
+  leave_critical_section(flags);
   ESP32_TIM_STOP(priv->tim);
 
   priv->started = false;
@@ -378,25 +361,15 @@ static int esp32_timer_getstatus(FAR struct timer_lowerhalf_s *lower,
 
   /* Get the current counter value */
 
-  ret = ESP32_TIM_GETCTR(priv->tim, &current_counter_value);
-  if (ret != OK)
-    {
-      goto errout;
-    }
+  ESP32_TIM_GETCTR(priv->tim, &current_counter_value);
 
   /* Get the current configured timeout */
 
-  ret = ESP32_TIM_GETALRVL(priv->tim, &alarm_value);
-  if (ret != OK)
-    {
-      goto errout;
-    }
+  ESP32_TIM_GETALRVL(priv->tim, &alarm_value);
 
-  status->timeout  = (uint32_t)(alarm_value / ESP32_1USECOND);
-  status->timeleft = (uint32_t)((alarm_value - current_counter_value)
-                      / ESP32_1USECOND);
+  status->timeout  = (uint32_t)(alarm_value);
+  status->timeleft = (uint32_t)((alarm_value - current_counter_value));
 
-errout:
   return ret;
 }
 
@@ -422,30 +395,13 @@ static int esp32_timer_settimeout(FAR struct timer_lowerhalf_s *lower,
   FAR struct esp32_timer_lowerhalf_s *priv =
     (FAR struct esp32_timer_lowerhalf_s *)lower;
   int      ret = OK;
-  uint64_t timeout_64;
 
   DEBUGASSERT(priv);
 
-  /* Verify if it is already running (set timeout must be called
-   * before start)
-   */
-
-  if (priv->started == true)
-    {
-      ret = -EPERM;
-      goto errout;
-    }
-
   /* Set the timeout */
 
-  timeout_64 = timeout*ESP32_1USECOND;
-  ret = ESP32_TIM_SETALRVL(priv->tim, timeout_64);
-  if (ret != OK)
-    {
-      goto errout;
-    }
+  ESP32_TIM_SETALRVL(priv->tim, (uint64_t)timeout);
 
-errout:
   return ret;
 }
 
@@ -468,7 +424,7 @@ errout:
 static int esp32_timer_maxtimeout(FAR struct timer_lowerhalf_s *lower,
                                   uint32_t *max_timeout)
 {
-  DEBUGASSERT(priv);
+  DEBUGASSERT(max_timeout);
 
   *max_timeout = ESP32_TIMER_MAX_USECOND;
 
@@ -501,30 +457,32 @@ static void esp32_timer_setcallback(FAR struct timer_lowerhalf_s *lower,
   FAR struct esp32_timer_lowerhalf_s *priv =
     (FAR struct esp32_timer_lowerhalf_s *)lower;
   irqstate_t flags;
+  int ret = OK;
 
   DEBUGASSERT(priv);
-
-  flags = enter_critical_section();
 
   /* Save the new callback */
 
   priv->callback = callback;
   priv->arg      = arg;
 
+  flags = enter_critical_section();
+
   /* There is a user callback and the timer has already been started */
 
   if (callback != NULL && priv->started == true)
     {
-      ESP32_TIM_SETISR(priv->tim, esp32_timer_handler, priv);
+      ret = ESP32_TIM_SETISR(priv->tim, esp32_timer_handler, priv);
       ESP32_TIM_ENABLEINT(priv->tim);
     }
   else
     {
       ESP32_TIM_DISABLEINT(priv->tim);
-      ESP32_TIM_SETISR(priv->tim, NULL, NULL);
+      ret = ESP32_TIM_SETISR(priv->tim, NULL, NULL);
     }
 
   leave_critical_section(flags);
+  assert(ret == OK);
 }
 
 /****************************************************************************
@@ -552,7 +510,6 @@ static void esp32_timer_setcallback(FAR struct timer_lowerhalf_s *lower,
 int esp32_timer_initialize(FAR const char *devpath, uint8_t timer)
 {
   struct esp32_timer_lowerhalf_s *lower = NULL;
-  FAR void                       *drvr  = NULL;
   int                             ret   = OK;
 
   DEBUGASSERT(devpath);
@@ -623,8 +580,9 @@ int esp32_timer_initialize(FAR const char *devpath, uint8_t timer)
    * REVISIT: The returned handle is discarded here.
    */
 
-  drvr = timer_register(devpath, (FAR struct timer_lowerhalf_s *)lower);
-  if (drvr == NULL)
+  lower->upper  = timer_register(devpath,
+                                 (FAR struct timer_lowerhalf_s *)lower);
+  if (lower->upper  == NULL)
     {
       /* The actual cause of the failure may have been a failure to allocate
        * perhaps a failure to register the timer driver (such as if the
