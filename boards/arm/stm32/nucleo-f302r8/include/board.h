@@ -203,6 +203,11 @@
 #define GPIO_USART2_RX GPIO_USART2_RX_2 /* PA3 */
 #define GPIO_USART2_TX GPIO_USART2_TX_2 /* PA2 */
 
+/* USART1 */
+
+#define GPIO_USART1_RX GPIO_USART1_RX_2 /* PB7 */
+#define GPIO_USART1_TX GPIO_USART1_TX_2 /* PB6 */
+
 /* PWM configuration ********************************************************/
 
 /* TIM1 PWM */
@@ -227,5 +232,48 @@
 /* ADC */
 
 #define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
+
+#ifdef CONFIG_BOARD_STM32_IHM07M1
+
+/* Configuration specific for the X-NUCLEO-IHM07M1 expansion board with
+ * the L6230 gate drivers.
+ */
+
+/* TIM1 configuration *******************************************************/
+
+#  define GPIO_TIM1_CH1OUT   GPIO_TIM1_CH1OUT_2 /* TIM1 CH1  - PA8  - U high */
+#  define GPIO_TIM1_CH2OUT   GPIO_TIM1_CH2OUT_2 /* TIM1 CH2  - PA9  - V high */
+#  define GPIO_TIM1_CH3OUT   GPIO_TIM1_CH3OUT_2 /* TIM1 CH3  - PA10 - W high */
+#  define GPIO_TIM1_CH4OUT   0                  /* not used as output */
+
+/* UVW ENABLE */
+
+#  define GPIO_FOC_EN_U (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|  \
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN10)
+#  define GPIO_FOC_EN_V (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|  \
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN11)
+#  define GPIO_FOC_EN_W (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|  \
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN12)
+
+/* DIAG/ENABLE */
+
+#  define GPIO_FOC_DIAGEN (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN11)
+
+#  define GPIO_FOC_LED2   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN2)
+
+/* Debug pins */
+
+#  define GPIO_FOC_DEBUG0 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN8)
+#  define GPIO_FOC_DEBUG1 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN9)
+#  define GPIO_FOC_DEBUG2 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN6)
+#  define GPIO_FOC_DEBUG3 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN5)
+
+#endif  /* CONFIG_BOARD_STM32_IHM07M1 */
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_F302R8_INCLUDE_BOARD_H */

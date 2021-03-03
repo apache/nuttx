@@ -44,6 +44,10 @@ ifeq ($(CONFIG_NUCLEOF302R8_HIGHPRI),y)
 CSRCS += stm32_highpri.c
 endif
 
+ifeq ($(CONFIG_BOARD_STM32_IHM07M1),y)
+CSRCS += stm32_foc_ihm07m1.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
