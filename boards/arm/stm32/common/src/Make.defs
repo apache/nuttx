@@ -114,6 +114,14 @@ ifeq ($(CONFIG_LIS3DSH),y)
   CSRCS += stm32_lis3dsh.c
 endif
 
+ifeq ($(CONFIG_BOARD_STM32_IHM07M1),y)
+  CSRCS += stm32_ihm07m1.c
+endif
+
+ifeq ($(CONFIG_BOARD_STM32_IHM08M1),y)
+  CSRCS += stm32_ihm08m1.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
