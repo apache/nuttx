@@ -1502,8 +1502,8 @@ config STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 		the OSC running. See app note AN2867
 
 			0 = Low drive capability (default)
-			1 = Medium high drive capability
-			2 = Medium low drive capability
+			1 = Medium low drive capability
+			2 = Medium high drive capability
 			3 = High drive capability
 
 		*It will take into account the rev of the silicon and use
@@ -1518,8 +1518,8 @@ config STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY
 	depends on !STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 	---help---
 		0 = Low drive capability (default)
-		1 = Medium high drive capability
-		2 = Medium low drive capability
+		1 = Medium low drive capability
+		2 = Medium high drive capability
 		3 = High drive capability
 
 		It will take into account the rev of the silicon and use
@@ -1534,8 +1534,8 @@ config STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
 	depends on !STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 	---help---
 		0 = Low drive capability (default)
-		1 = Medium high drive capability
-		2 = Medium low drive capability
+		1 = Medium low drive capability
+		2 = Medium high drive capability
 		3 = High drive capability
 
 		It will take into account the rev of the silicon and use
