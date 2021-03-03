@@ -3,6 +3,23 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+choice
+	prompt "Build heap manager"
+	default MM_DEFAULT_MANAGER
+
+config MM_DEFAULT_MANAGER
+	bool "Default heap manager"
+	---help---
+		NuttX original memory manager strategy.
+
+config MM_CUSTOMIZE_MANAGER
+	bool "Customized heap manager"
+	---help---
+		Customized memory manger policy. The build will failed
+		if the MM heap module not defined by customer.
+
+endchoice
+
 config MM_KERNEL_HEAP
 	bool "Support a protected, kernel heap"
 	default y
