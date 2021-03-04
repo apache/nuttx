@@ -1,7 +1,5 @@
 /****************************************************************************
  * drivers/mtd/w25.c
- * Driver for SPI-based W25x16, x32, and x64 and W25q16, q32, q64, and q128
- * FLASH from Winbond (and work-alike parts from AMIC)
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,6 +17,10 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* Driver for SPI-based W25x16, x32, and x64 and W25q16, q32, q64, and q128
+ * FLASH from Winbond (and work-alike parts from AMIC)
+ */
 
 /****************************************************************************
  * Included Files

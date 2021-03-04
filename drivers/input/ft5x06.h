@@ -4,10 +4,6 @@
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *   "FT5x06", FocalTech Systems Co., Ltd, D-FT5x06-1212-V4.0, Revised
- *   Dec. 18, 2012
- *
  * Some of this driver was developed with input from NXP sample code for
  * the LPCXpresso-LPC54628 board.  That sample code as a compatible BSD
  * license:
@@ -43,6 +39,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ *   "FT5x06", FocalTech Systems Co., Ltd, D-FT5x06-1212-V4.0, Revised
+ *   Dec. 18, 2012
+ */
 
 /* The FT5x06 Series ICs are single-chip capacitive touch panel controller
  * ICs with a built-in 8 bit Micro-controller unit (MCU).  They adopt the

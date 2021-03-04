@@ -1,6 +1,5 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc.h
- * Mass storage class device.  Bulk-only with SCSI subclass.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +17,8 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* Mass storage class device.  Bulk-only with SCSI subclass. */
 
 #ifndef __DRIVERS_USBDEV_USBMSC_H
 #define __DRIVERS_USBDEV_USBMSC_H

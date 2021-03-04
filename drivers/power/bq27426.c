@@ -1,8 +1,6 @@
 /****************************************************************************
  * drivers/power/bq27426.c
  *
- * Lower half driver for BQ27426 battery fuel gauge
- *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -19,6 +17,8 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* Lower half driver for BQ27426 battery fuel gauge */
 
 /****************************************************************************
  * Included Files

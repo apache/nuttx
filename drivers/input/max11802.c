@@ -5,10 +5,6 @@
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Petteri Aimonen <jpa@nx.mail.kapsi.fi>
  *
- * References:
- *   "Low-Power, Ultra-Small Resistive Touch-Screen Controllers
- *    with I2C/SPI Interface" Maxim IC, Rev 3, 10/2010
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -37,6 +33,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ *   "Low-Power, Ultra-Small Resistive Touch-Screen Controllers
+ *    with I2C/SPI Interface" Maxim IC, Rev 3, 10/2010
+ */
 
 /****************************************************************************
  * Included Files

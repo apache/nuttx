@@ -1,6 +1,5 @@
 /****************************************************************************
  * drivers/power/battery_monitor.c
- * Upper-half, character driver for battery manager & monitor ICs.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +17,8 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* Upper-half, character driver for battery manager & monitor ICs. */
 
 /****************************************************************************
  * Included Files

@@ -1,11 +1,25 @@
 /**************************************************************************************
  * drivers/lcd/mio283qt2.c
  *
- * This is a driver for the MI0283QT-2 LCD from Multi-Inno Technology Co., Ltd.  This
- * LCD is based on the Himax HX8347-D LCD controller.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ **************************************************************************************/
+
+/* This is a driver for the MI0283QT-2 LCD from Multi-Inno Technology Co., Ltd.  This
+ * LCD is based on the Himax HX8347-D LCD controller.
  *
  * References:
  * 1) LCD Module Specification, Model : MI0283QT-2, Multi-Inno Technology Co.,
@@ -13,35 +27,7 @@
  * 2) Data Sheet: HX8347-D(T), 240RGB x 320 dot, 262K color, with internal GRAM, TFT
  *    Mobile Single Chip Driver Version 02 March, Doc No. HX8347-D(T)-DS, Himax
  *    Technologies, Inc., 2009,
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- **************************************************************************************/
+ */
 
 /**************************************************************************************
  * Included Files
@@ -102,7 +88,8 @@
 #  define CONFIG_LCD_LANDSCAPE 1
 #endif
 
-/* Display/Color Properties ***********************************************************/
+/* Display/Color Properties *************************************************/
+
 /* Display Resolution */
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
@@ -118,7 +105,8 @@
 #define MIO283QT2_BPP           16
 #define MIO283QT2_COLORFMT      FB_FMT_RGB16_565
 
-/* Hardware LCD/LCD controller definitions ********************************************/
+/* Hardware LCD/LCD controller definitions **********************************/
+
 /* In this driver, I chose to use all literal constants for register address and
  * values.  Some recent experiences have shown me that during LCD bringup, it is more
  * important to know the binary values rather than nice, people friendly names.  Sad,
@@ -127,7 +115,8 @@
 
 #define HIMAX_ID 0x0047
 
-/* LCD Profiles ***********************************************************************/
+/* LCD Profiles *************************************************************/
+
 /* Many details of the controller initialization must, unfortunately, vary from LCD to
  * LCD.  I have looked at the spec and at three different drivers for LCDs that have
  * MIO283QT2 controllers.  I have tried to summarize these differences as "LCD profiles"

@@ -62,7 +62,8 @@
  * Pre-processor Definitions
  ********************************************************************************************/
 
-/* Configuration ****************************************************************************/
+/* Configuration ************************************************************/
+
 /* Prerequisites:
  *   CONFIG_I2C
  *     I2C support is required
@@ -91,12 +92,14 @@
 
 #undef CONFIG_PCA9555_REFCNT
 
-/* Driver support ***************************************************************************/
-/* This format is used to construct the /dev/input[n] device driver path.  It defined here
+/* Driver support ***********************************************************/
+
+/* This format is used to construct the /dev/input[n] device driver path.
+ *  It defined here
  * so that it will be used consistently in all places.
  */
 
-/* PCA9555 Resources ************************************************************************/
+/* PCA9555 Resources ********************************************************/
 
 #define PCA9555_GPIO_NPINS 16 /* All pins can be used as GPIOs */
 
@@ -110,7 +113,8 @@
 
 #define PCA9555_I2C_MAXFREQUENCY    400000       /* 400KHz */
 
-/* PCA9555 Registers ************************************************************************/
+/* PCA9555 Registers ********************************************************/
+
 /* Register Addresses */
 
 #define PCA9555_REG_INPUT  0x00

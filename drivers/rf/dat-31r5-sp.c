@@ -1,7 +1,5 @@
 /****************************************************************************
  * drivers/rf/dat-31r5-sp.c
- * Character driver for the Mini-Circuits DAT-31R5-SP+ digital step
- * attenuator.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +14,10 @@
  * limitations under the License.
  *
  ****************************************************************************/
+
+/* Character driver for the Mini-Circuits DAT-31R5-SP+ digital step
+ * attenuator.
+ */
 
 /****************************************************************************
  * Included Files
