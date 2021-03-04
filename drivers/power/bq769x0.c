@@ -1,6 +1,5 @@
 /****************************************************************************
  * drivers/power/bq769x0.c
- * Lower half driver for BQ769x0 battery monitor
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +17,8 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* Lower half driver for BQ769x0 battery monitor */
 
 /* The bq76920/bq76930/bq76940 battery monitor ICs provide voltage, current,
  * and temperature monitoring of up to 15-series cells.  These ICs also
