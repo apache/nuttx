@@ -92,7 +92,6 @@
 #define PIPE_UNLINK(f)      do { (f) |= PIPE_FLAG_UNLINKED; } while (0)
 #define PIPE_IS_UNLINKED(f) (((f) & PIPE_FLAG_UNLINKED) != 0)
 
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -108,8 +107,8 @@ typedef uint8_t pipe_ndx_t;   /*  8-bit index */
 #endif
 
 /* This structure represents the state of one pipe.  A reference to this
- * structure is retained in the i_private field of the inode whenthe pipe/fifo
- * device is registered.
+ * structure is retained in the i_private field of the inode whenthe
+ * pipe/fifo device is registered.
  */
 
 struct pipe_dev_s

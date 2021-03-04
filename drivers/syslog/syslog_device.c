@@ -244,8 +244,8 @@ static int syslog_dev_outputready(void)
         {
           /* Try again to initialize the device.  We may do this repeatedly
            * because the log device might be something that was not ready
-           * the first time that syslog_dev_initialize() was called (such as a
-           * USB serial device that has not yet been connected or a file in
+           * the first time that syslog_dev_initialize() was called (such as
+           * a USB serial device that has not yet been connected or a file in
            * an NFS mounted file system that has not yet been mounted).
            */
 
@@ -515,7 +515,8 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
               writelen = (size_t)((uintptr_t)endptr - (uintptr_t)buffer);
               if (writelen > 0)
                 {
-                  nwritten = file_write(&g_syslog_dev.sl_file, buffer, writelen);
+                  nwritten = file_write(&g_syslog_dev.sl_file,
+                                        buffer, writelen);
                   if (nwritten < 0)
                     {
                       ret = (int)nwritten;

@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * drivers/input/stmpe811.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "STMPE811 S-Touch advanced resistive touchscreen controller with 8-bit
@@ -26,9 +26,9 @@
 #ifndef __DRIVERS_INPUT_STMPE811_H
 #define __DRIVERS_INPUT_STMPE811_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -40,26 +40,29 @@
 
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_STMPE811)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ****************************************************************************/
+/* Configuration ************************************************************/
 
-/* Reference counting is partially implemented, but not needed in the current design. */
+/* Reference counting is partially implemented, but not needed in the current
+ * design.
+ */
 
 #undef CONFIG_STMPE811_REFCNT
 
-/* Driver support ***************************************************************************/
+/* Driver support ***********************************************************/
 
-/* This format is used to construct the /dev/input[n] device driver path.  It defined here
- * so that it will be used consistently in all places.
+/* This format is used to construct the /dev/input[n] device driver path.
+ * It defined here so that it will be used consistently in all places.
  */
 
 #define DEV_FORMAT   "/dev/input%d"
 #define DEV_NAMELEN  16
 
-/* STMPE811 Resources ***********************************************************************/
+/* STMPE811 Resources *******************************************************/
+
 #ifndef CONFIG_STMPE811_TSC_DISABLE
 #  define STMPE811_ADC_NPINS  4 /* Only pins 0-3 can be used for ADC */
 #  define STMPE811_GPIO_NPINS 4 /* Only pins 0-3 can be used as GPIOs */
@@ -79,9 +82,9 @@
 
 #define STMPE811_PENUP_TICKS            MSEC2TICK(100)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* This describes the state of one contact */
 
@@ -127,7 +130,9 @@ struct stmpe811_dev_s
   uint8_t flags;                        /* See STMPE811_FLAGS_* definitions */
   struct work_s work;                   /* Supports the interrupt handling "bottom half" */
 
-  /* Fields that may be disabled to save size if touchscreen support is not used. */
+  /* Fields that may be disabled to save size if touchscreen support
+   * is not used.
+   */
 
 #ifndef CONFIG_STMPE811_TSC_DISABLE
 #ifdef CONFIG_STMPE811_REFCNT
@@ -161,61 +166,63 @@ struct stmpe811_dev_s
 #endif
 };
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Name: stmpe811_getreg8
  *
  * Description:
  *   Read from an 8-bit STMPE811 register
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 uint8_t stmpe811_getreg8(FAR struct stmpe811_dev_s *priv, uint8_t regaddr);
 
-/********************************************************************************************
+/****************************************************************************
  * Name: stmpe811_putreg8
  *
  * Description:
  *   Write a value to an 8-bit STMPE811 register
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
-void stmpe811_putreg8(FAR struct stmpe811_dev_s *priv, uint8_t regaddr, uint8_t regval);
+void stmpe811_putreg8(FAR struct stmpe811_dev_s *priv,
+                      uint8_t regaddr, uint8_t regval);
 
-/********************************************************************************************
+/****************************************************************************
  * Name: stmpe811_getreg16
  *
  * Description:
  *   Read 16-bits of data from an STMPE-11 register
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 uint16_t stmpe811_getreg16(FAR struct stmpe811_dev_s *priv, uint8_t regaddr);
 
-/********************************************************************************************
+/****************************************************************************
  * Name: stmpe811_tscint
  *
  * Description:
- *   Handle touchscreen interrupt events (this function actually executes in the context of
- *   the worker thread).
+ *   Handle touchscreen interrupt events (this function actually executes in
+ *   the context of the worker thread).
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_STMPE811_TSC_DISABLE
-void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta) weak_function;
+void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv,
+                         uint8_t intsta) weak_function;
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Name: stmpe811_gpioworker
  *
  * Description:
- *   Handle GPIO interrupt events (this function actually executes in the context of the
- *   worker thread).
+ *   Handle GPIO interrupt events (this function actually executes in the
+ *   context of the worker thread).
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_STMPE811_GPIO_DISABLE) && !defined(CONFIG_STMPE811_GPIOINT_DISABLE)
 void stmpe811_gpioworker(FAR struct stmpe811_dev_s *priv) weak_function;

@@ -482,7 +482,9 @@ EXTERN const char g_compserialstr[];
 #define g_mscserialstr  g_compserialstr
 #endif
 
-/* Used to hand-off the state structure when the SCSI worker thread is started */
+/* Used to hand-off the state structure when the SCSI worker thread is
+ * started
+ */
 
 EXTERN FAR struct usbmsc_dev_s *g_usbmsc_handoff;
 

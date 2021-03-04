@@ -50,15 +50,15 @@ static ssize_t syslog_chardev_write(FAR struct file *filep,
 
 static const struct file_operations syslog_fops =
 {
-  NULL,          /* open */
-  NULL,          /* close */
-  NULL,          /* read */
+  NULL,                 /* open */
+  NULL,                 /* close */
+  NULL,                 /* read */
   syslog_chardev_write, /* write */
-  NULL,          /* seek */
-  NULL,          /* ioctl */
-  NULL           /* poll */
+  NULL,                 /* seek */
+  NULL,                 /* ioctl */
+  NULL                  /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
+  , NULL                /* unlink */
 #endif
 };
 

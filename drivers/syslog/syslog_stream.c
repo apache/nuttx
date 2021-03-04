@@ -84,7 +84,8 @@ static int syslogstream_flush(FAR struct lib_syslogstream_s *stream)
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_BUFFER
-static void syslogstream_addchar(FAR struct lib_syslogstream_s *stream, int ch)
+static void syslogstream_addchar(FAR struct lib_syslogstream_s *stream,
+                                 int ch)
 {
   FAR struct iob_s *iob = stream->iob;
 

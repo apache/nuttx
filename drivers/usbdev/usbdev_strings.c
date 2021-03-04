@@ -266,4 +266,8 @@ const struct trace_msg_t g_usb_trace_strings_clserror[] =
   TRACE_STR_END
 };
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #endif /* CONFIG_USBDEV_TRACE_STRINGS */

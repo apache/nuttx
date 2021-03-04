@@ -1,6 +1,5 @@
-/*******************************************************************************
+/****************************************************************************
  * include/nuttx/wireless/spirit/include/spirit_aes.h
- * Configuration and management of SPIRIT AES Engine.
  *
  *   Copyright(c) 2015 STMicroelectronics
  *   Author: VMA division - AMS
@@ -9,30 +8,34 @@
  *   Adapted for NuttX by:
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
+
+/* Configuration and management of SPIRIT AES Engine. */
 
 #ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_AES_H
 #define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_AES_H
@@ -90,23 +93,23 @@
  *      spirit_aes_read_dataout(spirit, outbuffer, buflen);
  */
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include "spirit_regs.h"
 #include "spirit_types.h"
 
-/******************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_aes_enable
  *
  * Description:
@@ -120,12 +123,12 @@ extern "C"
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_aes_enable(FAR struct spirit_library_s *spirit,
                       enum spirit_functional_state_e newstate);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_aes_write_datain
  *
  * Description:
@@ -145,12 +148,12 @@ int spirit_aes_enable(FAR struct spirit_library_s *spirit,
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_aes_write_datain(FAR struct spirit_library_s *spirit,
                             FAR const uint8_t *buffer, uint8_t buflen);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_aes_read_dataout
  *
  * Description:
@@ -168,12 +171,12 @@ int spirit_aes_write_datain(FAR struct spirit_library_s *spirit,
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_aes_read_dataout(FAR struct spirit_library_s *spirit,
                             FAR uint8_t *buffer, uint8_t buflen);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_aes_write_key
  *
  * Description:
@@ -189,12 +192,12 @@ int spirit_aes_read_dataout(FAR struct spirit_library_s *spirit,
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_aes_write_key(FAR struct spirit_library_s *spirit,
                          FAR const uint8_t *key);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_aes_read_key
  *
  * Description:
@@ -203,18 +206,21 @@ int spirit_aes_write_key(FAR struct spirit_library_s *spirit,
  * Input Parameters:
  *   spirit  - Reference to a Spirit library state structure instance
  *  key  pointer to the buffer of 4 words (16 bytes) containing the AES key.
- *         The first byte of the buffer shall be the most significant byte AES_KEY_0 of the AES key.
- *         The last byte of the buffer shall be the less significant byte AES_KEY_15 of the AES key.
+ *         The first byte of the buffer shall be the most significant byte
+ *         AES_KEY_0 of the AES key.
+ *         The last byte of the buffer shall be the less significant byte
+ *         AES_KEY_15 of the AES key.
  *         This parameter is an uint8_t*.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-int spirit_aes_read_key(FAR struct spirit_library_s *spirit, FAR uint8_t *key);
+int spirit_aes_read_key(FAR struct spirit_library_s *spirit,
+                        FAR uint8_t *key);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_aes_enc2deckey
  *
  * Description:
@@ -226,11 +232,11 @@ int spirit_aes_read_key(FAR struct spirit_library_s *spirit, FAR uint8_t *key);
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_aes_enc2deckey(FAR struct spirit_library_s *spirit);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_aes_encrypt
  *
  * Description:
@@ -242,11 +248,11 @@ int spirit_aes_enc2deckey(FAR struct spirit_library_s *spirit);
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_aes_encrypt(FAR struct spirit_library_s *spirit);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_aes_decrypt
  *
  * Description:
@@ -258,11 +264,11 @@ int spirit_aes_encrypt(FAR struct spirit_library_s *spirit);
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_aes_decrypt(FAR struct spirit_library_s *spirit);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_aes_derivekey_decrypt
  *
  * Description:
@@ -274,7 +280,7 @@ int spirit_aes_decrypt(FAR struct spirit_library_s *spirit);
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_aes_derivekey_decrypt(FAR struct spirit_library_s *spirit);
 

@@ -110,13 +110,13 @@ static const struct file_operations g_qeops =
  * Private Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: qe_open
  *
  * Description:
  *   This function is called whenever the QEncoder device is opened.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int qe_open(FAR struct file *filep)
 {
@@ -179,13 +179,13 @@ errout:
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: qe_close
  *
  * Description:
  *   This function is called when the QEncoder device is closed.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int qe_close(FAR struct file *filep)
 {
@@ -234,43 +234,48 @@ errout:
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: qe_read
  *
  * Description:
  *   A dummy read method.  This is provided only to satisfy the VFS layer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t qe_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t qe_read(FAR struct file *filep,
+                       FAR char *buffer,
+                       size_t buflen)
 {
   /* Return zero -- usually meaning end-of-file */
 
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: qe_write
  *
  * Description:
  *   A dummy write method.  This is provided only to satisfy the VFS layer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t qe_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
+static ssize_t qe_write(FAR struct file *filep,
+                        FAR const char *buffer,
+                        size_t buflen)
 {
   /* Return a failure */
 
   return -EPERM;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: qe_ioctl
  *
  * Description:
- *   The standard ioctl method.  This is where ALL of the QEncoder work is done.
+ *   The standard ioctl method.
+ *   This is where ALL of the QEncoder work is done.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
@@ -320,7 +325,9 @@ static int qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* Any unrecognized IOCTL commands might be platform-specific ioctl commands */
+      /* Any unrecognized IOCTL commands might be platform-specific ioctl
+       * commands
+       */
 
       default:
         {
@@ -366,14 +373,17 @@ int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower)
 
   /* Allocate the upper-half data structure */
 
-  upper = (FAR struct qe_upperhalf_s *)kmm_zalloc(sizeof(struct qe_upperhalf_s));
+  upper = (FAR struct qe_upperhalf_s *)
+           kmm_zalloc(sizeof(struct qe_upperhalf_s));
   if (!upper)
     {
       snerr("ERROR: Allocation failed\n");
       return -ENOMEM;
     }
 
-  /* Initialize the QEncoder device structure (it was already zeroed by kmm_zalloc()) */
+  /* Initialize the QEncoder device structure
+   * (it was already zeroed by kmm_zalloc())
+   */
 
   nxsem_init(&upper->exclsem, 0, 1);
   upper->lower = lower;

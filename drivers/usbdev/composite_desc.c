@@ -192,10 +192,12 @@ FAR const struct usb_devdesc_s *composite_getdevdesc(void)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv, FAR uint8_t *buf,
+int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv,
+                            FAR uint8_t *buf,
                             uint8_t speed, uint8_t type)
 #else
-int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv, FAR uint8_t *buf)
+int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv,
+                            FAR uint8_t *buf)
 #endif
 {
   FAR struct usb_cfgdesc_s *cfgdesc = (FAR struct usb_cfgdesc_s *)buf;
@@ -223,7 +225,9 @@ int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv, FAR uint8_t *buf)
                          COMPOSITE_REMOTEWAKEUP;
   cfgdesc->mxpower     = (CONFIG_USBDEV_MAXPOWER + 1) / 2; /* Max power (mA/2) */
 
-  /* increment the size and buf to point right behind the information filled in */
+  /* increment the size and buf to point right behind the information
+   * filled in
+   */
 
   total = USB_SIZEOF_CFGDESC;
   buf += USB_SIZEOF_CFGDESC;
@@ -234,13 +238,13 @@ int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv, FAR uint8_t *buf)
     {
 #ifdef CONFIG_USBDEV_DUALSPEED
       len = priv->device[i].compdesc.mkconfdesc(buf,
-                                                &priv->device[i].compdesc.devinfo,
-                                                speed, type);
+                                        &priv->device[i].compdesc.devinfo,
+                                        speed, type);
       total += len;
       buf += len;
 #else
       len = priv->device[i].compdesc.mkconfdesc(buf,
-                                                &priv->device[i].compdesc.devinfo);
+                                        &priv->device[i].compdesc.devinfo);
       total += len;
       buf += len;
 #endif

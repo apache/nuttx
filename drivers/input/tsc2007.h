@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * drivers/input/tsc2007.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,12 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* The TSC2007 is an analog interface circuit for a human interface touch screen device.
- * All peripheral functions are controlled through the command byte and onboard state
- * machines.
+/* The TSC2007 is an analog interface circuit for a human interface touch
+ * screen device.
+ * All peripheral functions are controlled through the command byte and
+ * onboard state machines.
  */
 
 /* References:
@@ -32,13 +33,13 @@
 #ifndef __DRIVERS_INPUT_TSC2007_H
 #define __DRIVERS_INPUT_TSC2007_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* TSC2007 Address */
 
@@ -52,6 +53,7 @@
 /* TSC2007 Command Byte */
 
 #define TSC2007_CMD_FUNC_SHIFT    (4)       /* Bits 4-7: Converter function select bits */
+
 #define TSC2007_CMD_FUNC_MASK     (15 << TSC2007_CMD_FUNC_SHIFT)
 #  define TSC2007_CMD_FUNC_TEMP0  (0 << TSC2007_CMD_FUNC_SHIFT)  /* Measure TEMP0 */
 #  define TSC2007_CMD_FUNC_AUX    (2 << TSC2007_CMD_FUNC_SHIFT)  /* Measure AUX */
@@ -64,12 +66,14 @@
 #  define TSC2007_CMD_FUNC_YPOS   (13 << TSC2007_CMD_FUNC_SHIFT) /* Measure Y position */
 #  define TSC2007_CMD_FUNC_Z1POS  (14 << TSC2007_CMD_FUNC_SHIFT) /* Measure Z1 position */
 #  define TSC2007_CMD_FUNC_Z2POS  (15 << TSC2007_CMD_FUNC_SHIFT) /* Measure Z2 position */
+
 #define TSC2007_CMD_PWRDN_SHIFT   (2)       /* Bits 2-3: Power-down bits */
 #define TSC2007_CMD_PWRDN_MASK    (3 << TSC2007_CMD_PWRDN_SHIFT)
 #  define TSC2007_CMD_PWRDN_IRQEN (0 << TSC2007_CMD_PWRDN_SHIFT)  /* 00: Power down between cycles; PENIRQ enabled */
 #  define TSC2007_CMD_ADCON_IRQDIS (1 << TSC2007_CMD_PWRDN_SHIFT) /* 01: A/D converter on; PENIRQ disabled */
 #  define TSC2007_CMD_ADCOFF_IRQEN (2 << TSC2007_CMD_PWRDN_SHIFT) /* 10: A/D converter off; PENIRQ enabled. */
                                                                   /* 11: A/D converter on; PENIRQ disabled. */
+
 #define TSC2007_CMD_12BIT         (0)       /* Bit 1: 0=12-bit */
 #define TSC2007_CMD_8BIT          (1 << 1)  /* Bit 1: 1=8-bit */
                                             /* Bit 0: Don't care */
@@ -77,19 +81,20 @@
 /* TSC2007 Setup Command */
 
 #define TSC2007_SETUP_CMD         TSC2007_CMD_FUNC_SETUP         /* Bits 4-7: Setup command */
+
                                             /* Bits 2-3: Must be zero */
 #define TSC2007_CMD_USEMAV        (0)       /* Bit 1: 0: Use the onboard MAV filter (default) */
 #define TSC2007_CMD_BYPASSMAV     (1 << 1)  /* Bit 1: 1: Bypass the onboard MAV filter */
 #define TSC2007_CMD_PU_50KOHM     (0)       /* Bit 0: 0: RIRQ = 50kOhm (default). */
 #define TSC2007_CMD_PU_90KOHM     (1 << 1)  /* Bit 0: 1: 1: RIRQ = 90kOhm */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

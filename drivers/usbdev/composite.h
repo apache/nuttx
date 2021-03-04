@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* Packet sizes */
 
 #ifndef CONFIG_COMPOSITE_EP0MAXPACKET
@@ -96,6 +97,7 @@
 #define NUM_DEVICES_TO_HANDLE         (4)
 
 /* Descriptors **************************************************************/
+
 /* These settings are not modifiable via the NuttX configuration */
 
 #define COMPOSITE_CONFIGIDNONE        (0)  /* Config ID = 0 means to return to address mode */

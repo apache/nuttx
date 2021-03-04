@@ -64,8 +64,9 @@ int syslog_putc(int ch)
 #if defined(CONFIG_SYSLOG_INTBUFFER)
       if (up_interrupt_context())
         {
-          /* Buffer the character in the interrupt buffer.  The interrupt buffer
-           * will be flushed before the next normal, non-interrupt SYSLOG output.
+          /* Buffer the character in the interrupt buffer.
+           *  The interrupt buffer will be flushed before the next normal,
+           * non-interrupt SYSLOG output.
            */
 
           return syslog_add_intbuffer(ch);
@@ -73,7 +74,8 @@ int syslog_putc(int ch)
       else
 #endif
         {
-          /* Force the character to the SYSLOG device immediately (if possible).
+          /* Force the character to the SYSLOG device immediately
+           * (if possible).
            * This means that the interrupt data may not be in synchronization
            * with output data that may have been buffered by sc_putc().
            */

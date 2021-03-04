@@ -43,7 +43,8 @@
 /* Extend the size of the interrupt buffer so that a "[truncated]\n"
  * indication can be append to the end.
  *
- * The usable capacity of the interrupt buffer is (CONFIG_SYSLOG_INTBUFSIZE - 1).
+ * The usable capacity of the interrupt buffer is
+ * (CONFIG_SYSLOG_INTBUFSIZE - 1).
  */
 
 #define SYSLOG_BUFOVERRUN_MESSAGE  "[truncated]\n"
@@ -78,7 +79,8 @@ struct g_syslog_intbuffer_s
  ****************************************************************************/
 
 static struct g_syslog_intbuffer_s g_syslog_intbuffer;
-static const char g_overrun_msg[SYSLOG_BUFOVERRUN_SIZE] = SYSLOG_BUFOVERRUN_MESSAGE;
+static const char g_overrun_msg[SYSLOG_BUFOVERRUN_SIZE] =
+                                            SYSLOG_BUFOVERRUN_MESSAGE;
 
 /****************************************************************************
  * Private Data
@@ -227,16 +229,16 @@ int syslog_add_intbuffer(int ch)
     }
   else if (inuse < USABLE_INTBUFSIZE)
     {
-       /* Copy one character */
+      /* Copy one character */
 
-       g_syslog_intbuffer.si_buffer[inndx] = (uint8_t)ch;
+      g_syslog_intbuffer.si_buffer[inndx] = (uint8_t)ch;
 
-       /* Increment the IN index, handling wrap-around */
+      /* Increment the IN index, handling wrap-around */
 
-       if (++inndx >= SYSLOG_INTBUFSIZE)
-         {
-           inndx -= SYSLOG_INTBUFSIZE;
-         }
+      if (++inndx >= SYSLOG_INTBUFSIZE)
+        {
+          inndx -= SYSLOG_INTBUFSIZE;
+        }
 
       g_syslog_intbuffer.si_inndx = (uint16_t)inndx;
       ret = OK;

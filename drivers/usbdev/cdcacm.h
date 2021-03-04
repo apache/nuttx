@@ -63,8 +63,8 @@
 #  endif
 #endif
 
-/* Interface IDs.  If the serial driver is built as a component of a composite
- * device, then the interface IDs may need to be offset.
+/* Interface IDs.  If the serial driver is built as a component of a
+ * composite device, then the interface IDs may need to be offset.
  */
 
 #ifndef CONFIG_CDCACM_COMPOSITE
@@ -145,7 +145,7 @@
 #define CDCACM_LASTSTRID           CDCACM_DATAIFSTRID
 #define CDCACM_NSTRIDS             (CDCACM_LASTSTRID - CDCACM_STRBASE)
 
-/* Endpoint configuration ****************************************************/
+/* Endpoint configuration ***************************************************/
 
 #define CDCACM_MKEPINTIN(desc)     (USB_DIR_IN | (desc)->epno[CDCACM_EP_INTIN_IDX])
 #define CDCACM_EPINTIN_ATTR        (USB_EP_ATTR_XFER_INT)

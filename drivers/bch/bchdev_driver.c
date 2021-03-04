@@ -433,7 +433,9 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 #endif
 
-      /* Otherwise, pass the IOCTL command on to the contained block driver. */
+      /* Otherwise, pass the IOCTL command on to the contained block
+       * driver.
+       */
 
       default:
         {

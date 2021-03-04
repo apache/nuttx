@@ -120,7 +120,8 @@ static bool usbhost_idmatch(const struct usbhost_id_s *classid,
  *
  ****************************************************************************/
 
-const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id)
+const struct usbhost_registry_s *usbhost_findclass(
+                                             const struct usbhost_id_s *id)
 {
   struct usbhost_registry_s *usbclass;
   irqstate_t flags;
@@ -146,8 +147,8 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
        * protocol, then try each.
        */
 
-     uinfo("Checking class:%p nids:%d\n", usbclass, usbclass->nids);
-     for (ndx = 0; ndx < usbclass->nids; ndx++)
+      uinfo("Checking class:%p nids:%d\n", usbclass, usbclass->nids);
+      for (ndx = 0; ndx < usbclass->nids; ndx++)
         {
           /* Did we find a matching ID? */
 

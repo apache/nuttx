@@ -31,7 +31,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SPI *******************************************************************/
+/* SPI **********************************************************************/
 
 /* SPI Command Set */
 
@@ -110,7 +110,9 @@
 #define MMCSD_SPIR7_VERSION_MASK  ((uint32_t)0x0f << MMCSD_SPIR7_VERSION_SHIFT)
 #define MMCSD_SPIR7_VOLTAGE_SHIFT (8)    /* Bits 8-11: Voltage accepted */
 #define MMCSD_SPIR7_VOLTAGE_MASK  ((uint32_t)0x0f << MMCSD_SPIR7_VOLTAGE_SHIFT)
+
 #define   MMCSD_SPIR7_VOLTAGE_27  ((uint32_t)0x01 << MMCSD_SPIR7_VOLTAGE_SHIFT) /* 2.7-3.6V */
+
 #define MMCSD_SPIR7_ECHO_SHIFT    (0)    /* Bits 0-7: Echoed check pattern */
 #define MMCSD_SPIR7_ECHO_MASK     ((uint32_t)0xff << MMCSD_SPIR7_ECHO_SHIFT)
 
@@ -154,13 +156,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

@@ -518,7 +518,9 @@ static inline int usbmsc_cmdread6(FAR struct usbmsc_dev_s *priv)
     {
       lun = priv->lun;
 
-      /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
+      /* Get the Logical Block Address (LBA) from cdb[] as the starting
+       * sector
+       */
 
       priv->sector =
         (uint32_t)(read6->mslba & SCSICMD_READ6_MSLBAMASK) << 16 |
@@ -582,7 +584,9 @@ static inline int usbmsc_cmdwrite6(FAR struct usbmsc_dev_s *priv)
     {
       lun = priv->lun;
 
-      /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
+      /* Get the Logical Block Address (LBA) from cdb[] as the starting
+       * sector
+       */
 
       priv->sector =
         (uint32_t)(write6->mslba & SCSICMD_WRITE6_MSLBAMASK) << 16 |
@@ -853,7 +857,9 @@ static int inline usbmsc_cmdmodesense6(FAR struct usbmsc_dev_s *priv,
                                 modesense->pcpgcode, &mdlen);
           if (ret == OK)
             {
-              /* Store the mode data length and return the total message size */
+              /* Store the mode data length and return the total message
+               * size
+               */
 
               mph->mdlen      =
                 mdlen + SCSIRESP_MODEPARAMETERHDR6_SIZEOF - 1;
@@ -1050,7 +1056,9 @@ static inline int usbmsc_cmdread10(FAR struct usbmsc_dev_s *priv)
     {
       lun = priv->lun;
 
-      /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
+      /* Get the Logical Block Address (LBA) from cdb[] as the starting
+       * sector
+       */
 
       priv->sector = usbmsc_getbe32(read10->lba);
 
@@ -1116,7 +1124,9 @@ static inline int usbmsc_cmdwrite10(FAR struct usbmsc_dev_s *priv)
     {
       lun = priv->lun;
 
-      /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
+      /* Get the Logical Block Address (LBA) from cdb[] as the starting
+       * sector
+       */
 
       priv->sector = usbmsc_getbe32(write10->lba);
 
@@ -1271,7 +1281,9 @@ static inline int usbmsc_cmdsynchronizecache10(FAR struct usbmsc_dev_s *priv)
 
   priv->u.alloclen = 0;
 
-  /* Verify that we have the LUN structure and the block driver has been bound */
+  /* Verify that we have the LUN structure and the block driver has been
+   * bound
+   */
 
   if (!priv->lun->inode)
     {
@@ -1361,7 +1373,9 @@ static int inline usbmsc_cmdmodesense10(FAR struct usbmsc_dev_s *priv,
                                 modesense->pcpgcode, &mdlen);
           if (ret == OK)
             {
-              /* Store the mode data length and return the total message size */
+              /* Store the mode data length and return the total message
+               * size
+               */
 
               usbmsc_putbe16(mph->mdlen, mdlen - 2);
               priv->nreqbytes = mdlen + SCSIRESP_MODEPARAMETERHDR10_SIZEOF;
@@ -1393,7 +1407,9 @@ static inline int usbmsc_cmdread12(FAR struct usbmsc_dev_s *priv)
     {
       lun = priv->lun;
 
-      /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
+      /* Get the Logical Block Address (LBA) from cdb[] as the starting
+       * sector
+       */
 
       priv->sector = usbmsc_getbe32(read12->lba);
 
@@ -1459,7 +1475,9 @@ static inline int usbmsc_cmdwrite12(FAR struct usbmsc_dev_s *priv)
     {
       lun = priv->lun;
 
-      /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
+      /* Get the Logical Block Address (LBA) from cdb[] as the starting
+       * sector
+       */
 
       priv->sector = usbmsc_getbe32(write12->lba);
 
@@ -1574,7 +1592,9 @@ static int inline usbmsc_setupcmd(FAR struct usbmsc_dev_s *priv,
     }
   else if (lun)
     {
-      /* Block transfer: Calculate the total size of all sectors to be transferred */
+      /* Block transfer: Calculate the total size of all sectors to be
+       * transferred
+       */
 
       datlen = priv->u.alloclen * lun->sectorsize;
     }
@@ -2267,7 +2287,9 @@ static int usbmsc_cmdreadstate(FAR struct usbmsc_dev_s *priv)
       nbytes = MIN(priv->epbulkin->maxpacket - priv->nreqbytes,
                    priv->nsectbytes);
 
-      /* Copy the data from the sector buffer to the USB request and update counts */
+      /* Copy the data from the sector buffer to the USB request and update
+       * counts
+       */
 
       memcpy(dest, src, nbytes);
       priv->nreqbytes  += nbytes;
@@ -2401,14 +2423,18 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
 
       while (priv->nreqbytes > 0 && priv->u.xfrlen > 0)
         {
-          /* Copy the data received in the read request into the sector I/O buffer */
+          /* Copy the data received in the read request into the sector I/O
+           * buffer
+           */
 
           src  = &req->buf[xfrd - priv->nreqbytes];
           dest = &priv->iobuffer[priv->nsectbytes];
 
           nbytes = MIN(lun->sectorsize - priv->nsectbytes, priv->nreqbytes);
 
-          /* Copy the data from the sector buffer to the USB request and update counts */
+          /* Copy the data from the sector buffer to the USB request and
+           * update counts
+           */
 
           memcpy(dest, src, nbytes);
           priv->nsectbytes += nbytes;
@@ -2869,7 +2895,9 @@ int usbmsc_scsi_main(int argc, char *argv[])
               usbmsc_setconfig(priv, priv->thvalue);
             }
 
-          /* These events required that we send a deferred EP0 setup response */
+          /* These events required that we send a deferred EP0 setup
+           * response
+           */
 
           if ((eventset & (USBMSC_EVENT_RESET | USBMSC_EVENT_CFGCHANGE |
                            USBMSC_EVENT_IFCHANGE)) != 0)
@@ -2877,7 +2905,9 @@ int usbmsc_scsi_main(int argc, char *argv[])
               usbmsc_deferredresponse(priv, false);
             }
 
-          /* For all of these events... terminate any transactions in progress */
+          /* For all of these events... terminate any transactions in
+           * progress
+           */
 
           priv->thstate = USBMSC_STATE_IDLE;
         }

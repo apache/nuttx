@@ -180,6 +180,7 @@
 #    define PCF85263_RTC_TSR_TSR1M_NONE    (0 << PCF85263_RTC_TSR_TSR1M_SHIFT) /* No timestamp */
 #    define PCF85263_RTC_TSR_TSR1M_FE      (1 << PCF85263_RTC_TSR_TSR1M_SHIFT) /* Record First TS pin Event */
 #    define PCF85263_RTC_TSR_TSR1M_LE      (2 << PCF85263_RTC_TSR_TSR1M_SHIFT) /* Record Last TS pin Event */
+
 #  define PCF85263_RTC_TSR_TSR2M_SHIFT     (2)       /* Bit 2-4: Timestamp register 2 mode */
 #  define PCF85263_RTC_TSR_TSR2M_MASK      (7 << PCF85263_RTC_TSR_TSR2M_SHIFT)
 #    define PCF85263_RTC_TSR_TSR2M_NONE    (0 << PCF85263_RTC_TSR_TSR2M_SHIFT) /* No timestamp */
@@ -188,6 +189,7 @@
 #    define PCF85263_RTC_TSR_TSR2M_LV      (3 << PCF85263_RTC_TSR_TSR2M_SHIFT) /* Record Last time switch to VDD event */
 #    define PCF85263_RTC_TSR_TSR2M_FE      (4 << PCF85263_RTC_TSR_TSR2M_SHIFT) /* Record First TS pin Event */
 #    define PCF85263_RTC_TSR_TSR2M_LE      (5 << PCF85263_RTC_TSR_TSR2M_SHIFT) /* Record Last TS pin Event */
+
 #  define PCF85263_RTC_TSR_TSR3M_SHIFT     (6)       /* Bit 6-7: Timestamp register 3 mode */
 #  define PCF85263_RTC_TSR_TSR3M_MASK      (3 << PCF85263_RTC_TSR_TSR3M_SHIFT)
 #    define PCF85263_RTC_TSR_TSR3M_NONE    (0 << PCF85263_RTC_TSR_TSR3M_SHIFT) /* No timestamp */
@@ -303,6 +305,7 @@
 #    define PCF85263_STW_TSR_TSR1M_NONE    (0 << PCF85263_STW_TSR_TSR1M_SHIFT) /* No timestamp */
 #    define PCF85263_STW_TSR_TSR1M_FE      (1 << PCF85263_STW_TSR_TSR1M_SHIFT) /* Record First TS pin Event */
 #    define PCF85263_STW_TSR_TSR1M_LE      (2 << PCF85263_STW_TSR_TSR1M_SHIFT) /* Record Last TS pin Event */
+
 #  define PCF85263_STW_TSR_TSR2M_SHIFT     (2)       /* Bit 2-4: Timestamp register 2 mode */
 #  define PCF85263_STW_TSR_TSR2M_MASK      (7 << PCF85263_STW_TSR_TSR2M_SHIFT)
 #    define PCF85263_STW_TSR_TSR2M_NONE    (0 << PCF85263_STW_TSR_TSR2M_SHIFT) /* No timestamp */
@@ -311,6 +314,7 @@
 #    define PCF85263_STW_TSR_TSR2M_LV      (3 << PCF85263_STW_TSR_TSR2M_SHIFT) /* Record Last time switch to VDD event */
 #    define PCF85263_STW_TSR_TSR2M_FE      (4 << PCF85263_STW_TSR_TSR2M_SHIFT) /* Record First TS pin Event */
 #    define PCF85263_STW_TSR_TSR2M_LE      (5 << PCF85263_STW_TSR_TSR2M_SHIFT) /* Record Last TS pin Event */
+
 #  define PCF85263_STW_TSR_TSR3M_SHIFT     (6)       /* Bit 6-7: Timestamp register 3 mode */
 #  define PCF85263_STW_TSR_TSR3M_MASK      (3 << PCF85263_STW_TSR_TSR3M_SHIFT)
 #    define PCF85263_STW_TSR_TSR3M_NONE    (0 << PCF85263_STW_TSR_TSR3M_SHIFT) /* No timestamp */
@@ -331,11 +335,13 @@
 #    define PCF85263_CTL_OSC_CL_7PF        (0 << PCF85263_CTL_OSC_CL_SHIFT) /* 7.0 pF */
 #    define PCF85263_CTL_OSC_CL_6PF        (1 << PCF85263_CTL_OSC_CL_SHIFT) /* 6.0 pF */
 #    define PCF85263_CTL_OSC_CL_12p5PF     (2 << PCF85263_CTL_OSC_CL_SHIFT) /* 12.5 pF */
+
 #  define PCF85263_CTL_OSC_OSCD_SHIFT      (2)       /* Bits 1-2: Oscillator driver bits */
 #  define PCF85263_CTL_OSC_OSCD_MASK       (3 << PCF85263_CTL_OSC_OSCD_SHIFT)
 #    define PCF85263_CTL_OSC_OSCD_NORMAL   (0 << PCF85263_CTL_OSC_OSCD_SHIFT) /* Normal drive; RS(max): 100 kohm */
 #    define PCF85263_CTL_OSC_OSCD_LOW      (1 << PCF85263_CTL_OSC_OSCD_SHIFT) /* Low drive; RS(max): 60 kohm; reduced IDD */
 #    define PCF85263_CTL_OSC_OSCD_HIGH     (2 << PCF85263_CTL_OSC_OSCD_SHIFT) /* High drive; RS(max): 500 kohm; increased IDD */
+
 #  define PCF85263_CTL_OSC_LOWJ            (1 << 4)  /* Bit 4:  Low jitter mode */
 #  define PCF85263_CTL_OSC_12_24           (1 << 5)  /* Bit 5:  12-/24-hour mode */
 #  define PCF85263_CTL_OSC_OFFM            (1 << 6)  /* Bit 6:  Offset calibration mode */
@@ -349,6 +355,7 @@
 #    define PCF85263_CTL_BATTERY_BSM_VBAT  (1 << PCF85263_CTL_BATTERY_BSM_SHIFT) /* Switching at the VBAT level */
 #    define PCF85263_CTL_BATTERY_BSM_MAX   (2 << PCF85263_CTL_BATTERY_BSM_SHIFT) /* Switching at the higher level of Vth or VBAT */
 #    define PCF85263_CTL_BATTERY_BSM_MIN   (3 << PCF85263_CTL_BATTERY_BSM_SHIFT) /* Switching at the lower level of Vth or VBAT */
+
 #  define PCF85263_CTL_BATTERY_BSRR        (1 << 3)  /* Bit 3:  Battery switch refresh rate */
 #  define PCF85263_CTL_BATTERY_BSOFF       (1 << 4)  /* Bit 4:  Battery switch on/off */
 
@@ -359,12 +366,14 @@
 #    define PCF85263_CTL_INTAPM_BAT        (1 << PCF85263_CTL_INTAPM_SHIFT) /* Battery mode indication */
 #    define PCF85263_CTL_INTAPM_INTA       (2 << PCF85263_CTL_INTAPM_SHIFT) /* INTA output */
 #    define PCF85263_CTL_INTAPM_HIZ        (3 << PCF85263_CTL_INTAPM_SHIFT) /* Hi-Z */
+
 #  define PCF85263_CTL_TSPM_SHIFT          (2)       /* Bits 2-3: TS pin I/O control */
 #  define PCF85263_CTL_TSPM_MASK           (3 << PCF85263_CTL_TSPM_SHIFT)
 #    define PCF85263_CTL_TSPM_DISABLED     (0 << PCF85263_CTL_TSPM_SHIFT) /* Disabled; input can be left floating */
 #    define PCF85263_CTL_TSPM_INTB         (1 << PCF85263_CTL_TSPM_SHIFT) /* INTB output; push-pull */
 #    define PCF85263_CTL_TSPM_CLK          (2 << PCF85263_CTL_TSPM_SHIFT) /* CLK output; push-pull */
 #    define PCF85263_CTL_TSPM_INPUT        (3 << PCF85263_CTL_TSPM_SHIFT) /* Input mode */
+
 #  define PCF85263_CTL_TSIM                (1 << 4)  /* Bit 4:  TS pin input mode */
 #  define PCF85263_CTL_TSL                 (1 << 5)  /* Bit 5:  TS pin input sense */
 #  define PCF85263_CTL_TSPULL              (1 << 6)  /* Bit 6:  TS pin pull-up resistor value */
@@ -372,6 +381,7 @@
 
 #define PCF85263_CTL_FUNCTION              0x28      /* Function control register */
 #  define PCF85263_CTL_FUNC_COF_SHIFT      (0)       /* Bits 0-2: Clock output frequency */
+
 #  define PCF85263_CTL_FUNC_COF_MASK       (7 << PCF85263_CTL_FUNC_COF_SHIFT) /* CLK pin    TS pin     INTA pin */
 #    define PCF85263_CTL_FUNC_COF_32KHZ    (0 << PCF85263_CTL_FUNC_COF_SHIFT) /* 32768      32768      32768    */
 #    define PCF85263_CTL_FUNC_COF_16KHZ    (1 << PCF85263_CTL_FUNC_COF_SHIFT) /* 16384      16384      16384    */
@@ -381,6 +391,7 @@
 #    define PCF85263_CTL_FUNC_COF_1KHZ     (5 << PCF85263_CTL_FUNC_COF_SHIFT) /* 1024       1024       1024     */
 #    define PCF85263_CTL_FUNC_COF_1HZ      (6 << PCF85263_CTL_FUNC_COF_SHIFT) /* 1          1          1        */
 #    define PCF85263_CTL_FUNC_COF_LOW      (7 << PCF85263_CTL_FUNC_COF_SHIFT) /* static LOW static LOW Hi-Z     */
+
 #  define PCF85263_CTL_FUNC_STOPM          (1 << 3)  /* Bit 3:  STOP mode */
 #  define PCF85263_CTL_FUNC_RTCM           (1 << 4)  /* Bit 4:  RTC mode */
 #  define PCF85263_CTL_FUNC_PI_SHIFT       (5)       /* Bits 5-6: Periodic interrupt */
@@ -389,6 +400,7 @@
 #    define PCF85263_CTL_FUNC_PI_SEC       (1 << PCF85263_CTL_FUNC_PI_SHIFT) /* Once per second */
 #    define PCF85263_CTL_FUNC_PI_MIN       (2 << PCF85263_CTL_FUNC_PI_SHIFT) /* Once per minute */
 #    define PCF85263_CTL_FUNC_PI_HOUR      (3 << PCF85263_CTL_FUNC_PI_SHIFT) /* Once per hour */
+
 #  define PCF85263_CTL_FUNC_100TH          (1 << 7)  /* Bit 7:  100th seconds mode */
 
 #define PCF85263_CTL_INTA_ENABLE           0x29      /* Interrupt A control bits */
@@ -435,6 +447,7 @@
 #    define PCF85263_CTL_WDS_1SEC          (1 << PCF85263_CTL_WDS_SHIFT) /* 1 second (1 Hz) */
 #    define PCF85263_CTL_WDS_250MSEC       (2 << PCF85263_CTL_WDS_SHIFT) /* 1⁄4 second (4 Hz) */
 #    define PCF85263_CTL_WDS_67MSEC        (3 << PCF85263_CTL_WDS_SHIFT) /* 1⁄16 second (16 Hz) */
+
 #  define PCF85263_CTL_WDR_SHIFT           (2)       /* Bits 2-6: Watchdog register bits */
 #  define PCF85263_CTL_WDR_MASK            (31 << PCF85263_CTL_WDR_SHIFT)
 #    define PCF85263_CTL_WDR(n)            ((uint9_t)(n) << PCF85263_CTL_WDR_SHIFT)

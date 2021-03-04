@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * drivers/ioexpander/pca9555.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -35,14 +35,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __DRIVERS_IOEXPANDER_PCA9555_H
 #define __DRIVERS_IOEXPANDER_PCA9555_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -58,9 +58,9 @@
 
 #if defined(CONFIG_IOEXPANDER) && defined(CONFIG_IOEXPANDER_PCA9555)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* Configuration ************************************************************/
 
@@ -122,19 +122,19 @@
 #define PCA9555_REG_POLINV 0x04
 #define PCA9555_REG_CONFIG 0x06
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 /* This type represents on registered pin interrupt callback */
 
 struct pca9555_callback_s
 {
-   ioe_pinset_t pinset;                 /* Set of pin interrupts that will generate
-                                         * the callback. */
-   ioe_callback_t cbfunc;               /* The saved callback function pointer */
-   FAR void *cbarg;                       /* Callback argument */
+  ioe_pinset_t pinset;                 /* Set of pin interrupts that will generate
+                                        * the callback. */
+  ioe_callback_t cbfunc;               /* The saved callback function pointer */
+  FAR void *cbarg;                     /* Callback argument */
 };
 #endif
 

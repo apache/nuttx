@@ -1,8 +1,5 @@
-/**************************************************************************************
+/****************************************************************************
  * drivers/lcd/st7565.h
- *
- * Definitions for the ST7565 128x64 Dot Matrix LCD
- * Driver with C
  *
  *   Copyright (C) 2014 Pierre-noel Bouteville. All rights reserved.
  *   Author: Pierre-noel Boutevlle <pnb990@gmail.com>
@@ -15,10 +12,6 @@
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * References: SSD1305.pdf, "Solomon Systech SSD1305 136x64 Dot Matrix OLED/PLED
- *             Segment/Common Driver with Controller," Solomon Systech Limited,
- *             http://www.solomon-systech.com, May, 2008.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,20 +40,29 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
+
+/* Definitions for the ST7565 128x64 Dot Matrix LCD
+ * Driver with C
+ *
+ * References:
+ * SSD1305.pdf, "Solomon Systech SSD1305 136x64 Dot Matrix OLED/PLED
+ * Segment/Common Driver with Controller," Solomon Systech Limited,
+ * http://www.solomon-systech.com, May, 2008.
+ */
 
 #ifndef __DRIVERS_LCD_ST7565_H
 #define __DRIVERS_LCD_ST7565_H
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
+ ****************************************************************************/
 
-/* Fundamental Commands ***************************************************************/
+/* Fundamental Commands *****************************************************/
 
 #define ST7565_DISPOFF             0xae /* 0xae: Display OFF (sleep mode) */
 #define ST7565_DISPON              0xaf /* 0xaf: Display ON in normal mode */
@@ -139,8 +141,8 @@
 
 #define ST7565_NOP                 0xe3 /* 0xe3: NOP Command for no operation */
 
-/**************************************************************************************
+/****************************************************************************
  * Public Data
- **************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __DRIVERS_LCD_ST7565_H */
