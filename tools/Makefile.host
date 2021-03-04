@@ -131,7 +131,8 @@ endif
 # nxstyle - Check a file for compliance to NuttX coding style
 
 nxstyle$(HOSTEXEEXT): nxstyle.c
-	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o nxstyle$(HOSTEXEEXT) nxstyle.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -DTOPDIR=\"$(realpath $(TOPDIR))\" \
+		-o nxstyle$(HOSTEXEEXT) nxstyle.c
 
 ifdef HOSTEXEEXT
 nxstyle: nxstyle$(HOSTEXEEXT)
