@@ -263,6 +263,8 @@ int esp32_bringup(void)
     }
 #endif
 
+#endif
+
 #ifdef CONFIG_SENSORS_BMP180
   /* Try to register BMP180 device in I2C0 */
 
@@ -270,12 +272,9 @@ int esp32_bringup(void)
 
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize BMP180"
-                       "Driver for I2C0: %d\n", ret);
+      syslog(LOG_ERR, "Failed to initialize BMP180 driver: %d\n", ret);
       return ret;
     }
-#endif
-
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
