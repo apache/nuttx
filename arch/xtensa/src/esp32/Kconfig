@@ -125,16 +125,19 @@ config ESP32_ESP32SXWDXX
 	bool
 	default n
 	select ESP32_SINGLE_CPU
+	select ARCH_HAVE_I2CRESET
 
 config ESP32_ESP32UXWDXX
 	bool
 	default n
 	select ESP32_SINGLE_CPU
+	select ARCH_HAVE_I2CRESET
 
 config ESP32_ESP32DXWDXX
 	bool
 	default n
 	select ESP32_DUAL_CPU
+	select ARCH_HAVE_I2CRESET
 
 choice ESP32_FLASH_MODE
 	prompt "SPI FLASH mode"
