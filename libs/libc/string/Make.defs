@@ -41,7 +41,7 @@ CSRCS += lib_flsll.c lib_isbasedigit.c lib_memset.c lib_memchr.c
 CSRCS += lib_memccpy.c lib_memcmp.c lib_memmove.c lib_memrchr.c
 CSRCS += lib_popcount.c lib_popcountl.c lib_popcountll.c
 CSRCS += lib_skipspace.c lib_stpcpy.c lib_stpncpy.c lib_strcasecmp.c
-CSRCS += lib_strcat.c lib_strchr.c lib_strcpy.c lib_strcmp.c lib_strcspn.c
+CSRCS += lib_strcat.c lib_strchr.c lib_strcpy.c lib_strcspn.c
 CSRCS += lib_strdup.c lib_strerror.c lib_strlen.c lib_strnlen.c
 CSRCS += lib_strncasecmp.c lib_strncat.c lib_strncmp.c lib_strncpy.c
 CSRCS += lib_strndup.c lib_strcasestr.c lib_strpbrk.c lib_strrchr.c
@@ -57,6 +57,10 @@ CSRCS += lib_vikmemcpy.c
 else
 CSRCS += lib_memcpy.c
 endif
+endif
+
+ifneq ($(CONFIG_LIBC_ARCH_STRCMP),y)
+CSRCS += lib_strcmp.c
 endif
 
 ifeq ($(CONFIG_LIBC_LOCALE),y)
