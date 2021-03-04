@@ -441,15 +441,11 @@ config ESP32_I2C0
 	bool "I2C 0"
 	default n
 	select ESP32_I2C
-	select I2C
-	select I2C_DRIVER
 
 config ESP32_I2C1
 	bool "I2C 1"
 	default n
 	select ESP32_I2C
-	select I2C
-	select I2C_DRIVER
 
 config ESP32_AES_ACCELERATOR
 	bool "AES Accelerator"
