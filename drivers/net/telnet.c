@@ -1070,9 +1070,9 @@ static int telnet_session(FAR struct telnet_session_s *session)
       goto errout_with_semaphore;
     }
 
-  /* Close the original psoock (keeping the clone) */
+  /* Close the original psock (keeping the clone) */
 
-  psock_close(psock);
+  nx_close(session->ts_sd);
 
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
   telnet_sendopt(priv, TELNET_DO, TELNET_NAWS);
