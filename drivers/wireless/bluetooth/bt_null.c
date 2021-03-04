@@ -172,7 +172,8 @@ static void btnull_format_buffersize_rsp(FAR struct bt_buf_s *buf,
   bufsize.status     = 0;
   bufsize.le_max_len = BLUETOOTH_MAX_FRAMELEN;
   bufsize.le_max_num = 1;
-  memcpy(&data[ndx], &bufsize, sizeof(struct bt_hci_rp_le_read_buffer_size_s));
+  memcpy(&data[ndx], &bufsize,
+          sizeof(struct bt_hci_rp_le_read_buffer_size_s));
   ndx       += sizeof(struct bt_hci_rp_le_read_buffer_size_s);
 
   buf->frame->io_len = len;

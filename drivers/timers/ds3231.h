@@ -152,6 +152,7 @@
 #      define DS1307_CR_RS_4KHZ          (1 << DS1307_CR_RS_SHIFT) /* 4.096kHz */
 #      define DS1307_CR_RS_8KHZ          (2 << DS1307_CR_RS_SHIFT) /* 8.192kHz */
 #      define DS1307_CR_RS_32KHZ         (3 << DS1307_CR_RS_SHIFT) /* 32.768kHz */
+
 #    define DS1307_CR_SQWE               (1 << 4)  /* Bit 4:  Square wave enable */
 #    define DS1307_CR_OUT                (1 << 7)  /* Bit 7:  Output control */
 #  define DS1307_RAM_BASER               0x08      /* 0x08-0x3f: 56x8 RAM */
@@ -290,6 +291,7 @@
 #      define DS323X_CR_RS_1KHZ          (1 << DS323X_CR_RS_SHIFT) /* 1.024kHz */
 #      define DS323X_CR_RS_4KHZ          (2 << DS323X_CR_RS_SHIFT) /* 4.096kHz */
 #      define DS323X_CR_RS_8KHZ          (3 << DS323X_CR_RS_SHIFT) /* 8.192kHz */
+
 #    define DS323X_CR_CONV               (1 << 5)  /* Bit 5:  Convert temperature */
 #    define DS323X_CR_BBSQW              (1 << 6)  /* Bit 6:  Battery backed square wave enable */
 #    define DS323X_CR_EOSC               (1 << 7)  /* Bit 7:  Enable oscillator */

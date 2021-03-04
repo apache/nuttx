@@ -1,4 +1,4 @@
-/**************************************************************************************
+/****************************************************************************
  * drivers/lcd/ra8875.c
  *
  * Driver for the RAiO Technologies RA8875 LCD controller
@@ -35,11 +35,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -59,10 +59,11 @@
 
 #ifdef CONFIG_LCD_RA8875
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
-/* Configuration **********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 /* Check contrast selection */
 
@@ -99,7 +100,8 @@
 #  define CONFIG_LCD_LANDSCAPE 1
 #endif
 
-/* Display/Color Properties ***********************************************************/
+/* Display/Color Properties *************************************************/
+
 /* Display Resolution */
 
 #if defined(CONFIG_RA8875_XRES)
@@ -158,9 +160,9 @@
 #  define RA8875_2LAYER_POSSIBLE 1
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Private Type Definition
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This structure describes the state of this driver */
 
@@ -180,8 +182,10 @@ struct ra8875_dev_s
 #endif
 
   /* Shadow these registers to speed up rendering */
+
   uint8_t shadow_mwcr0;
-  uint16_t shadow_w_curh, shadow_w_curv;
+  uint16_t shadow_w_curh;
+  uint16_t shadow_w_curv;
 
   /* These fields simplify and reduce debug output */
 
@@ -194,48 +198,59 @@ struct ra8875_dev_s
 #endif
 
   /* This is working memory allocated by the LCD driver for each LCD device
-   * and for each color plane.  This memory will hold one raster line of data.
+   * and for each color plane.
+   * This memory will hold one raster line of data.
    * The size of the allocated run buffer must therefore be at least
    * (bpp * xres / 8).  Actual alignment of the buffer must conform to the
    * bitwidth of the underlying pixel type.
    *
    * If there are multiple planes, they may share the same working buffer
    * because different planes will not be operate on concurrently.  However,
-   * if there are multiple LCD devices, they must each have unique run buffers.
+   * if there are multiple LCD devices, they must each have unique run
+   * buffers.
    */
 
   uint16_t runbuffer[RA8875_XRES];
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- **************************************************************************************/
+ ****************************************************************************/
+
 /* Low Level LCD access */
 
-static inline void ra8875_putreg(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr,
-                           uint8_t regval);
-static inline void ra8875_putreg16(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr,
-                            uint16_t regval);
+static inline void ra8875_putreg(FAR struct ra8875_lcd_s *lcd,
+                                 uint8_t regaddr,
+                                 uint8_t regval);
+static inline void ra8875_putreg16(FAR struct ra8875_lcd_s *lcd,
+                                   uint8_t regaddr,
+                                   uint16_t regval);
 #ifndef CONFIG_LCD_NOGETRUN
-static inline uint8_t ra8875_readreg(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr);
-static inline void ra8875_waitreg(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr,
-                                  uint8_t mask);
+static inline uint8_t ra8875_readreg(FAR struct ra8875_lcd_s *lcd,
+                                     uint8_t regaddr);
+static inline void ra8875_waitreg(FAR struct ra8875_lcd_s *lcd,
+                                  uint8_t regaddr, uint8_t mask);
 #endif
-static void ra8875_set_writecursor(FAR struct ra8875_dev_s *dev, uint16_t column,
-                                    uint16_t row);
-static void ra8875_set_readcursor(FAR struct ra8875_lcd_s *lcd, uint16_t column,
-                                    uint16_t row);
+static void ra8875_set_writecursor(FAR struct ra8875_dev_s *dev,
+                                   uint16_t column, uint16_t row);
+static void ra8875_set_readcursor(FAR struct ra8875_lcd_s *lcd,
+                                  uint16_t column, uint16_t row);
 static void ra8875_set_mwcr0(FAR struct ra8875_dev_s *dev, uint8_t value);
-static void ra8875_setwindow(FAR struct ra8875_lcd_s *lcd, uint16_t x, uint16_t y,
-                              uint16_t width, uint16_t height);
-static inline void ra8875_setbackground(FAR struct ra8875_lcd_s *lcd, uint16_t color);
-static inline void ra8875_setforeground(FAR struct ra8875_lcd_s *lcd, uint16_t color);
+static void ra8875_setwindow(FAR struct ra8875_lcd_s *lcd,
+                             uint16_t x, uint16_t y,
+                             uint16_t width, uint16_t height);
+static inline void ra8875_setbackground(FAR struct ra8875_lcd_s *lcd,
+                                        uint16_t color);
+static inline void ra8875_setforeground(FAR struct ra8875_lcd_s *lcd,
+                                        uint16_t color);
 static void ra8875_clearmem(FAR struct ra8875_lcd_s *lcd);
 
 /* LCD Data Transfer Methods */
 
 #if 0 /* Sometimes useful */
-static void ra8875_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels);
+static void ra8875_dumprun(FAR const char *msg,
+                           FAR uint16_t *run,
+                           size_t npixels);
 #else
 #  define ra8875_dumprun(m,r,n)
 #endif
@@ -247,17 +262,20 @@ static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,
 #  define ra8875_showrun(p,r,c,n,b)
 #endif
 
-static int ra8875_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-             size_t npixels);
-static int ra8875_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-             size_t npixels);
+static int ra8875_putrun(fb_coord_t row, fb_coord_t col,
+                         FAR const uint8_t *buffer,
+                         size_t npixels);
+static int ra8875_getrun(fb_coord_t row, fb_coord_t col,
+                         FAR uint8_t *buffer,
+                         size_t npixels);
 
 /* LCD Configuration */
 
 static int ra8875_getvideoinfo(FAR struct lcd_dev_s *dev,
-             FAR struct fb_videoinfo_s *vinfo);
-static int ra8875_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-             FAR struct lcd_planeinfo_s *pinfo);
+                               FAR struct fb_videoinfo_s *vinfo);
+static int ra8875_getplaneinfo(FAR struct lcd_dev_s *dev,
+                               unsigned int planeno,
+                               FAR struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
 
@@ -276,76 +294,83 @@ static int ra8875_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 static int ra8875_getpower(FAR struct lcd_dev_s *dev);
 static int ra8875_setpower(FAR struct lcd_dev_s *dev, int power);
 static int ra8875_getcontrast(FAR struct lcd_dev_s *dev);
-static int ra8875_setcontrast(FAR struct lcd_dev_s *dev, unsigned int contrast);
+static int ra8875_setcontrast(FAR struct lcd_dev_s *dev,
+                              unsigned int contrast);
 
 /* Initialization */
 
 static inline int ra8875_hwinitialize(FAR struct ra8875_dev_s *priv);
 
-/**************************************************************************************
+/****************************************************************************
  * Private Data
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This driver can support only a signal RA8875 device.  This is due to an
- * unfortunate decision made when the getrun and putrun methods were designed.  The
- * following is the single RA8875 driver state instance:
+ * unfortunate decision made when the getrun and putrun methods were
+ * designed.  The following is the single RA8875 driver state instance:
  */
 
 static struct ra8875_dev_s g_lcddev;
 
-/**************************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_putreg(lcd,
  *
  * Description:
  *   Write to an LCD register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void ra8875_putreg(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr,
                           uint8_t regval)
 {
-  /* Set the index register to the register address and write the register contents */
+  /* Set the index register to the register address and write the register
+   * contents
+   */
 
   lcdinfo("putreg 0x%02x = 0x%02x\n", regaddr, regval);
 
   lcd->write_reg(lcd, regaddr, regval);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_putreg16(lcd,
  *
  * Description:
  *   Write to an LCD register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void ra8875_putreg16(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr,
                             uint16_t regval)
 {
-  /* Set the index register to the register address and write the register contents */
+  /* Set the index register to the register address and write the register
+   * contents
+   */
 
   lcdinfo("putreg 0x%02x = 0x%04x\n", regaddr, regval);
 
   lcd->write_reg16(lcd, regaddr, regval);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_readreg
  *
  * Description:
  *   Read from an LCD register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_LCD_NOGETRUN
 static uint8_t ra8875_readreg(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr)
 {
   uint8_t regval;
-  /* Set the index register to the register address and read the register contents */
+  /* Set the index register to the register address and read the register
+   * contents
+   */
 
   regval = lcd->read_reg(lcd, regaddr);
 
@@ -354,18 +379,19 @@ static uint8_t ra8875_readreg(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr)
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_waitreg
  *
  * Description:
  *   Wait while an LCD register match set mask
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_LCD_NOGETRUN
-static void ra8875_waitreg(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr, uint8_t mask)
+static void ra8875_waitreg(FAR struct ra8875_lcd_s *lcd,
+                           uint8_t regaddr, uint8_t mask)
 {
-  int i = 20000/100;
+  int i = 20000 / 100;
 
   while (i-- && ra8875_readreg(lcd, regaddr) & mask)
     {
@@ -374,15 +400,16 @@ static void ra8875_waitreg(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr, uint8_
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_set_writecursor
  *
  * Description:
  *   Set the position to use for the write cursor
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static void ra8875_set_writecursor(FAR struct ra8875_dev_s *dev, uint16_t column,
+static void ra8875_set_writecursor(FAR struct ra8875_dev_s *dev,
+                                   uint16_t column,
                                    uint16_t row)
 {
   FAR struct ra8875_lcd_s *lcd = dev->lcd;
@@ -414,15 +441,16 @@ static void ra8875_set_writecursor(FAR struct ra8875_dev_s *dev, uint16_t column
 #endif
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_set_readcursor
  *
  * Description:
  *   Set the position to use for the read cursor
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static void ra8875_set_readcursor(FAR struct ra8875_lcd_s *lcd, uint16_t column,
+static void ra8875_set_readcursor(FAR struct ra8875_lcd_s *lcd,
+                                  uint16_t column,
                                   uint16_t row)
 {
 #if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
@@ -445,67 +473,70 @@ static void ra8875_set_mwcr0(FAR struct ra8875_dev_s *dev, uint8_t value)
     }
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_setwindow
  *
  * Description:
  *   Set hardware clipping window
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static void ra8875_setwindow(FAR struct ra8875_lcd_s *lcd, uint16_t x, uint16_t y,
+static void ra8875_setwindow(FAR struct ra8875_lcd_s *lcd,
+                             uint16_t x, uint16_t y,
                              uint16_t width, uint16_t height)
 {
 #if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
   ra8875_putreg16(lcd, RA8875_HSAW0, y);
   ra8875_putreg16(lcd, RA8875_VSAW0, x);
-  ra8875_putreg16(lcd, RA8875_HEAW0, (y+height-1));
-  ra8875_putreg16(lcd, RA8875_VEAW0, (x+width-1));
+  ra8875_putreg16(lcd, RA8875_HEAW0, (y + height - 1));
+  ra8875_putreg16(lcd, RA8875_VEAW0, (x + width - 1));
 #elif defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
   ra8875_putreg16(lcd, RA8875_HSAW0, x);
   ra8875_putreg16(lcd, RA8875_VSAW0, y);
-  ra8875_putreg16(lcd, RA8875_HEAW0, (x+width-1));
-  ra8875_putreg16(lcd, RA8875_VEAW0, (y+height-1));
+  ra8875_putreg16(lcd, RA8875_HEAW0, (x + width - 1));
+  ra8875_putreg16(lcd, RA8875_VEAW0, (y + height - 1));
 #endif
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_setbackground
  *
  * Description:
  *   Set the background color to use for the BTE engine
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static inline void ra8875_setbackground(FAR struct ra8875_lcd_s *lcd, uint16_t color)
+static inline void ra8875_setbackground(FAR struct ra8875_lcd_s *lcd,
+                                        uint16_t color)
 {
   ra8875_putreg(lcd, RA8875_BGCR0, RA8875_UNPACK_RED(color));
   ra8875_putreg(lcd, RA8875_BGCR1, RA8875_UNPACK_GREEN(color));
   ra8875_putreg(lcd, RA8875_BGCR2, RA8875_UNPACK_BLUE(color));
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_setforeground
  *
  * Description:
  *   Set the foreground color to use for the BTE engine
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static inline void ra8875_setforeground(FAR struct ra8875_lcd_s *lcd, uint16_t color)
+static inline void ra8875_setforeground(FAR struct ra8875_lcd_s *lcd,
+                                        uint16_t color)
 {
   ra8875_putreg(lcd, RA8875_FGCR0, RA8875_UNPACK_RED(color));
   ra8875_putreg(lcd, RA8875_FGCR1, RA8875_UNPACK_GREEN(color));
   ra8875_putreg(lcd, RA8875_FGCR2, RA8875_UNPACK_BLUE(color));
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_clearmem
  *
  * Description:
  *
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void ra8875_clearmem(FAR struct ra8875_lcd_s *lcd)
 {
@@ -518,14 +549,14 @@ static void ra8875_clearmem(FAR struct ra8875_lcd_s *lcd)
   lcdinfo("clearmem done\n");
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_showrun
  *
  * Description:
- *   When LCD debug is enabled, try to reduce then amount of output data generated by
- *   ra8875_putrun and ra8875_getrun
+ *   When LCD debug is enabled, try to reduce then amount of output data
+ *   generated by ra8875_putrun and ra8875_getrun
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
 static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,
@@ -533,7 +564,9 @@ static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,
 {
   fb_coord_t nextrow = priv->lastrow + 1;
 
-  /* Has anything changed (other than the row is the next row in the sequence)? */
+  /* Has anything changed
+   * (other than the row is the next row in the sequence)?
+   */
 
   if (put == priv->put && row == nextrow && col == priv->col &&
       npixels == priv->npixels)
@@ -544,7 +577,8 @@ static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,
     }
   else
     {
-      /* Yes... then this is the end of the preceding sequence.  Output the last run
+      /* Yes... then this is the end of the preceding sequence.
+       *  Output the last run
        * (if there were more than one run in the sequence).
        */
 
@@ -563,8 +597,8 @@ static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,
       lcdinfo("%s row: %d col: %d npixels: %d\n",
               put ? "PUT" : "GET", row, col, npixels);
 
-      /* And save information about the run so that we can detect continuations
-       * of the sequence.
+      /* And save information about the run so that we can detect
+       * continuations of the sequence.
        */
 
       priv->put      = put;
@@ -576,7 +610,7 @@ static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_putrun
  *
  * Description:
@@ -588,9 +622,10 @@ static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int ra8875_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+static int ra8875_putrun(fb_coord_t row, fb_coord_t col,
+                         FAR const uint8_t *buffer,
                          size_t npixels)
 {
   FAR struct ra8875_dev_s *priv = &g_lcddev;
@@ -615,7 +650,8 @@ static int ra8875_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
 
   /* Set the cursor position */
 
-  ra8875_set_mwcr0(priv, RA8875_MWCR0_MODE_GRAPHICS | RA8875_MWCR0_MEMDIR_LEFTRIGHT |
+  ra8875_set_mwcr0(priv, RA8875_MWCR0_MODE_GRAPHICS |
+                         RA8875_MWCR0_MEMDIR_LEFTRIGHT |
                          RA8875_MWCR0_WINC_ENABLE);
   ra8875_set_writecursor(priv, col, row);
 
@@ -626,12 +662,14 @@ static int ra8875_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
 
   /* Retransform coordinates, write right to left */
 
-  col = (RA8875_XRES-1) - col;
-  row = (RA8875_YRES-1) - row;
+  col = (RA8875_XRES - 1) - col;
+  row = (RA8875_YRES - 1) - row;
 
   /* Set the cursor position */
 
-  ra8875_set_mwcr0(priv, RA8875_MWCR0_MODE_GRAPHICS | RA8875_MWCR0_MEMDIR_RIGHTLEFT | RA8875_MWCR0_WINC_ENABLE);
+  ra8875_set_mwcr0(priv, RA8875_MWCR0_MODE_GRAPHICS |
+                         RA8875_MWCR0_MEMDIR_RIGHTLEFT |
+                         RA8875_MWCR0_WINC_ENABLE);
   ra8875_set_writecursor(priv, col, row);
 
   curhinc = -npixels;
@@ -639,11 +677,12 @@ static int ra8875_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
 
 #elif defined(CONFIG_LCD_PORTRAIT)
 
-  row = (RA8875_YRES-1) - row;
+  row = (RA8875_YRES - 1) - row;
 
   /* Set the cursor position */
 
-  ra8875_set_mwcr0(priv, RA8875_MWCR0_MODE_GRAPHICS | RA8875_MWCR0_MEMDIR_TOPDOWN |
+  ra8875_set_mwcr0(priv, RA8875_MWCR0_MODE_GRAPHICS |
+                         RA8875_MWCR0_MEMDIR_TOPDOWN |
                          RA8875_MWCR0_WINC_ENABLE);
   ra8875_set_writecursor(priv, col, row);
 
@@ -652,11 +691,12 @@ static int ra8875_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
 
 #else /* CONFIG_LCD_RPORTRAIT */
 
-  col = (RA8875_XRES-1) - col;
+  col = (RA8875_XRES - 1) - col;
 
   /* Set the cursor position */
 
-  ra8875_set_mwcr0(priv, RA8875_MWCR0_MODE_GRAPHICS | RA8875_MWCR0_MEMDIR_DOWNTOP |
+  ra8875_set_mwcr0(priv, RA8875_MWCR0_MODE_GRAPHICS |
+                         RA8875_MWCR0_MEMDIR_DOWNTOP |
                          RA8875_MWCR0_WINC_ENABLE);
   ra8875_set_writecursor(priv, col, row);
 
@@ -690,7 +730,7 @@ static int ra8875_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_getrun
  *
  * Description:
@@ -702,7 +742,7 @@ static int ra8875_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ra8875_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                          size_t npixels)
@@ -718,7 +758,6 @@ static int ra8875_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   ra8875_showrun(priv, row, col, npixels, false);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-
 #ifdef CONFIG_LCD_LANDSCAPE
   /* Set the cursor position */
 
@@ -732,8 +771,8 @@ static int ra8875_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 #elif defined(CONFIG_LCD_RLANDSCAPE)
   /* Retransform coordinates, write right to left */
 
-  col = (RA8875_XRES-1) - col;
-  row = (RA8875_YRES-1) - row;
+  col = (RA8875_XRES - 1) - col;
+  row = (RA8875_YRES - 1) - row;
 
   /* Set the cursor position */
 
@@ -747,7 +786,7 @@ static int ra8875_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 #elif defined(CONFIG_LCD_PORTRAIT)
   /* Retransform coordinates, write right to left */
 
-  row = (RA8875_YRES-1) - row;
+  row = (RA8875_YRES - 1) - row;
 
   /* Set the cursor position */
 
@@ -761,7 +800,7 @@ static int ra8875_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 #else /* CONFIG_LCD_RPORTRAIT */
   /* Retransform coordinates, write right to left */
 
-  col = (RA8875_XRES-1) - col;
+  col = (RA8875_XRES - 1) - col;
 
   /* Set the cursor position */
 
@@ -793,13 +832,13 @@ static int ra8875_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 #endif
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ra8875_getvideoinfo(FAR struct lcd_dev_s *dev,
                                FAR struct fb_videoinfo_s *vinfo)
@@ -815,16 +854,17 @@ static int ra8875_getvideoinfo(FAR struct lcd_dev_s *dev,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int ra8875_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                                FAR struct lcd_planeinfo_s *pinfo)
+static int ra8875_getplaneinfo(FAR struct lcd_dev_s *dev,
+                               unsigned int planeno,
+                               FAR struct lcd_planeinfo_s *pinfo)
 {
   FAR struct ra8875_dev_s *priv = (FAR struct ra8875_dev_s *)dev;
 
@@ -838,14 +878,15 @@ static int ra8875_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ra8875_getpower(FAR struct lcd_dev_s *dev)
 {
@@ -853,14 +894,15 @@ static int ra8875_getpower(FAR struct lcd_dev_s *dev)
   return g_lcddev.power;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_poweroff
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ra8875_poweroff(FAR struct ra8875_lcd_s *lcd)
 {
@@ -879,14 +921,15 @@ static int ra8875_poweroff(FAR struct ra8875_lcd_s *lcd)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ra8875_setpower(FAR struct lcd_dev_s *dev, int power)
 {
@@ -905,7 +948,8 @@ static int ra8875_setpower(FAR struct lcd_dev_s *dev, int power)
           /* Set the backlight level */
 
           ra8875_putreg(lcd, RA8875_P1CR, RA8875_P1CR_PWM_ENABLE);
-          ra8875_putreg(lcd, RA8875_P1CR, RA8875_P1CR_PWM_ENABLE | RA8875_P1CR_CSDIV(1));
+          ra8875_putreg(lcd, RA8875_P1CR,
+                        RA8875_P1CR_PWM_ENABLE | RA8875_P1CR_CSDIV(1));
         }
 
       ra8875_putreg(lcd, RA8875_P1DCR, power);
@@ -926,13 +970,13 @@ static int ra8875_setpower(FAR struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ra8875_getcontrast(FAR struct lcd_dev_s *dev)
 {
@@ -940,27 +984,28 @@ static int ra8875_getcontrast(FAR struct lcd_dev_s *dev)
   return -ENOSYS;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int ra8875_setcontrast(FAR struct lcd_dev_s *dev, unsigned int contrast)
+static int ra8875_setcontrast(FAR struct lcd_dev_s *dev,
+                              unsigned int contrast)
 {
   lcdinfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_hwinitialize
  *
  * Description:
  *   Initialize the LCD hardware.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline int ra8875_hwinitialize(FAR struct ra8875_dev_s *priv)
 {
@@ -1000,7 +1045,8 @@ static inline int ra8875_hwinitialize(FAR struct ra8875_dev_s *priv)
 
   /* Pixel clock, invert + 4*SYS */
 
-  ra8875_putreg(lcd, RA8875_PCSR, RA8875_PCSR_PCLK_INV | RA8875_PCSR_PERIOD_4SYS);
+  ra8875_putreg(lcd, RA8875_PCSR,
+                RA8875_PCSR_PCLK_INV | RA8875_PCSR_PERIOD_4SYS);
   up_mdelay(1);
 
   /* Horizontal Settings */
@@ -1056,19 +1102,20 @@ static inline int ra8875_hwinitialize(FAR struct ra8875_dev_s *priv)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_lcdinitialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the LCD video hardware.
+ *   The initial state of the LCD is fully initialized, display memory
+ *   cleared,  and the LCD ready to use, but with the power setting at 0
+ *   (full off).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *ra8875_lcdinitialize(FAR struct ra8875_lcd_s *lcd)
 {
@@ -1076,9 +1123,10 @@ FAR struct lcd_dev_s *ra8875_lcdinitialize(FAR struct ra8875_lcd_s *lcd)
 
   lcdinfo("Initializing\n");
 
-  /* If we could support multiple RA8875 devices, this is where we would allocate
-   * a new driver data structure... but we can't.  Why not?  Because of a bad should
-   * the form of the getrun() and putrun methods.
+  /* If we could support multiple RA8875 devices, this is where we would
+   * allocate a new driver data structure... but we can't.
+   * Why not?  Because of a bad should the form of the getrun() and putrun
+   * methods.
    */
 
   FAR struct ra8875_dev_s *priv = &g_lcddev;
@@ -1114,19 +1162,20 @@ FAR struct lcd_dev_s *ra8875_lcdinitialize(FAR struct ra8875_lcd_s *lcd)
   return NULL;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_clear
  *
  * Description:
  *   This is a non-standard LCD interface just for the RA8875.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all video memory to the specified color.
+ *   of the various rotations, clearing the display in the normal way by
+ *   writing a sequences of runs that covers the entire display can be very
+ *   slow.  Here the display is cleared by simply setting all video memory to
+ *   the specified color.
  *
- *   NOTE: This function is not available to applications in the protected or kernel
- *   build modes.
+ *   NOTE: This function is not available to applications in the protected
+ *   or kernel build modes.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 void ra8875_clear(FAR struct lcd_dev_s *dev, uint16_t color)
 {
@@ -1157,25 +1206,31 @@ void ra8875_clear(FAR struct lcd_dev_s *dev, uint16_t color)
   ra8875_drawrectangle(dev, 0, 0, RA8875_XRES, RA8875_YRES, color, true);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_drawrectangle
  *
- *   This is a non-standard function to draw a rectangle on the LCD.  This function is
- *   also used internally as part of the ra8875_clear implementation
+ *   This is a non-standard function to draw a rectangle on the LCD.
+ *   This function is also used internally as part of the ra8875_clear
+ *   implementation
  *
- *   NOTE: This non-standard function is not available to applications in the
- *   protected or kernel build modes.
+ *   NOTE: This non-standard function is not available to applications in
+ *   the protected or kernel build modes.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-void ra8875_drawrectangle(FAR struct lcd_dev_s *dev, uint16_t x, uint16_t y,
-                          uint16_t width, uint16_t height, uint16_t color, bool fill)
+void ra8875_drawrectangle(FAR struct lcd_dev_s *dev,
+                          uint16_t x, uint16_t y,
+                          uint16_t width, uint16_t height,
+                          uint16_t color, bool fill)
 {
   FAR struct ra8875_dev_s *priv = (FAR struct ra8875_dev_s *)dev;
   FAR struct ra8875_lcd_s *lcd  = priv->lcd;
 
   uint8_t draw_cmd = RA8875_DCR_SQUARE;
-  uint16_t sx, sy, ex, ey;
+  uint16_t sx;
+  uint16_t sy;
+  uint16_t ex;
+  uint16_t ey;
 
   /* Set the color to use for filling */
 
@@ -1185,11 +1240,11 @@ void ra8875_drawrectangle(FAR struct lcd_dev_s *dev, uint16_t x, uint16_t y,
 
   if (width == 1)
     {
-      ra8875_drawline(dev, x, y, x, y+height, color);
+      ra8875_drawline(dev, x, y, x, y + height, color);
     }
   else if (height == 1)
     {
-      ra8875_drawline(dev, x, y, x+width, y, color);
+      ra8875_drawline(dev, x, y, x + width, y, color);
     }
 
   if (fill)
@@ -1242,32 +1297,39 @@ void ra8875_drawrectangle(FAR struct lcd_dev_s *dev, uint16_t x, uint16_t y,
   ra8875_waitreg(lcd, RA8875_DCR, RA8875_DCR_LINE_START);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_drawline
  *
  * Description:
- *   This is a non-standard function to draw a line on the LCD.  This function is
- *   also used internally as part of the ra8875_rectandle implementation.
+ *   This is a non-standard function to draw a line on the LCD.
+ *   This function is also used internally as part of the
+ *   ra8875_rectandle implementation.
  *
- *   NOTE: This non-standard function is not available to applications in the
- *   protected or kernel build modes.
+ *   NOTE: This non-standard function is not available to applications in
+ *   the protected or kernel build modes.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-void ra8875_drawline(FAR struct lcd_dev_s *dev, uint16_t x1, uint16_t y1, uint16_t x2,
-                     uint16_t y2, uint16_t color)
+void ra8875_drawline(FAR struct lcd_dev_s *dev,
+                     uint16_t x1, uint16_t y1,
+                     uint16_t x2, uint16_t y2,
+                     uint16_t color)
 {
   FAR struct ra8875_dev_s *priv = (FAR struct ra8875_dev_s *)dev;
   FAR struct ra8875_lcd_s *lcd  = priv->lcd;
 
   uint8_t draw_cmd = RA8875_DCR_LINE;
-  uint16_t sx, sy, ex, ey;
+  uint16_t sx;
+  uint16_t sy;
+  uint16_t ex;
+  uint16_t ey;
 
   /* Set the color to use for filling */
 
   ra8875_setforeground(lcd, color);
 
   /* Handle degenerate cases */
+
   /* Setup coordinates */
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
@@ -1299,28 +1361,35 @@ void ra8875_drawline(FAR struct lcd_dev_s *dev, uint16_t x1, uint16_t y1, uint16
   ra8875_waitreg(lcd, RA8875_DCR, RA8875_DCR_LINE_START);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_drawtriangle
  *
  * Description:
- *   This is a non-standard function to draw a triangle on the LCD.  This function is
- *   also used internally as part of the ra8875_rectandle implementation.
+ *   This is a non-standard function to draw a triangle on the LCD.
+ *   This function is also used internally as part of the ra8875_rectandle
+ *   implementation.
  *
  *   NOTE: This non-standard function is not available to applications in the
  *   protected or kernel build modes.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LCD_RA8875_EXTENDED
-void ra8875_drawtriangle(FAR struct lcd_dev_s *dev, uint16_t x0, uint16_t y0, uint16_t x1,
-                         uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, bool fill)
+void ra8875_drawtriangle(FAR struct lcd_dev_s *dev,
+                         uint16_t x0, uint16_t y0, uint16_t x1,
+                         uint16_t y1, uint16_t x2, uint16_t y2,
+                         uint16_t color, bool fill)
 {
   FAR struct ra8875_dev_s *priv = (FAR struct ra8875_dev_s *)dev;
   FAR struct ra8875_lcd_s *lcd  = priv->lcd;
 
   uint8_t draw_cmd = RA8875_DCR_TRIANGLE;
-  uint16_t _x0, _x1, _x2;
-  uint16_t _y0, _y1, _y2;
+  uint16_t _x0;
+  uint16_t _x1;
+  uint16_t _x2;
+  uint16_t _y0;
+  uint16_t _y1;
+  uint16_t _y2;
 
   /* Set the color to use for filling */
 
@@ -1371,27 +1440,30 @@ void ra8875_drawtriangle(FAR struct lcd_dev_s *dev, uint16_t x0, uint16_t y0, ui
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_drawcircle
  *
  * Description:
- *   This is a non-standard function to draw a circle on the LCD.  This function is
- *   also used internally as part of the ra8875_rectandle implementation.
+ *   This is a non-standard function to draw a circle on the LCD.
+ *   This function is also used internally as part of the ra8875_rectandle
+ *   implementation.
  *
  *   NOTE: This non-standard function is not available to applications in the
  *   protected or kernel build modes.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LCD_RA8875_EXTENDED
-void ra8875_drawcircle(FAR struct lcd_dev_s *dev, uint16_t x, uint16_t y, uint8_t radius,
+void ra8875_drawcircle(FAR struct lcd_dev_s *dev,
+                       uint16_t x, uint16_t y, uint8_t radius,
                        uint16_t color, bool fill)
 {
   FAR struct ra8875_dev_s *priv = (FAR struct ra8875_dev_s *)dev;
   FAR struct ra8875_lcd_s *lcd  = priv->lcd;
 
   uint8_t draw_cmd = 0;
-  uint16_t _x, _y;
+  uint16_t _x;
+  uint16_t _y;
 
   /* Set the color to use for filling */
 
@@ -1420,7 +1492,7 @@ void ra8875_drawcircle(FAR struct lcd_dev_s *dev, uint16_t x, uint16_t y, uint8_
   ra8875_putreg16(lcd, RA8875_DCVR0, _y);
   ra8875_putreg(lcd, RA8875_DCRR, radius);
 
-    /* Run drawing */
+  /* Run drawing */
 
   ra8875_putreg(lcd, RA8875_DCR, draw_cmd);
   ra8875_putreg(lcd, RA8875_DCR, draw_cmd | RA8875_DCR_CIRCLE_START);

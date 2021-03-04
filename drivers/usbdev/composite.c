@@ -78,7 +78,7 @@ static struct usbdev_req_s *composite_allocreq(FAR struct usbdev_ep_s *ep,
 static void    composite_freereq(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
 
-/* USB class device ********************************************************/
+/* USB class device *********************************************************/
 
 static int     composite_bind(FAR struct usbdevclass_driver_s *driver,
                  FAR struct usbdev_s *dev);
@@ -214,7 +214,8 @@ static int composite_msftdescriptor(FAR struct composite_dev_s *priv,
               memset(func, 0, sizeof(*func));
               func->firstif = priv->device[i].compdesc.devinfo.ifnobase;
               func->nifs    = priv->device[i].compdesc.devinfo.ninterfaces;
-              memcpy(func->compatible_id, priv->device[i].compdesc.msft_compatible_id,
+              memcpy(func->compatible_id,
+                     priv->device[i].compdesc.msft_compatible_id,
                      sizeof(func->compatible_id));
               memcpy(func->sub_id, priv->device[i].compdesc.msft_sub_id,
                      sizeof(func->sub_id));
@@ -248,8 +249,8 @@ static int composite_msftdescriptor(FAR struct composite_dev_s *priv,
       /* Extended properties are per-interface, pass the request to
        * subdevice.  NOTE: The documentation in OS_Desc_Ext_Prop.docx seems
        * a bit incorrect here, the interface is in ctrl->value low byte.
-       * Also WinUSB driver has limitation that index[0] will not be correct if
-       * trying to read descriptors using e.g. libusb xusb.exe.
+       * Also WinUSB driver has limitation that index[0] will not be correct
+       * if trying to read descriptors using e.g. libusb xusb.exe.
        */
 
       uint8_t interface = ctrl->value[0];
@@ -533,8 +534,9 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
         {
         case USB_REQ_GETDESCRIPTOR:
           {
-            /* The value field specifies the descriptor type in the MS byte and the
-             * descriptor index in the LS byte (order is little endian)
+            /* The value field specifies the descriptor type in the MS byte
+             * and the descriptor index in the LS byte
+             * (order is little endian)
              */
 
             switch (ctrl->value[1])
@@ -590,8 +592,8 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
                       static const uint8_t msft_response[16] =
                       {
-                        'M', 0, 'S', 0, 'F', 0, 'T', 0, '1', 0, '0', 0, '0', 0,
-                        0xff, 0
+                        'M', 0, 'S', 0, 'F', 0, 'T', 0, '1', 0, '0', 0,
+                        '0', 0, 0xff, 0
                       };
 
                       buf->len = 18;
@@ -606,12 +608,16 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
                       for (i = 0; i < priv->ndevices; i++)
                         {
-                          if (strid >  priv->device[i].compdesc.devinfo.strbase &&
-                              strid <= priv->device[i].compdesc.devinfo.strbase +
-                                       priv->device[i].compdesc.devinfo.nstrings)
+                          if (strid >
+                              priv->device[i].compdesc.devinfo.strbase &&
+                              strid <=
+                              priv->device[i].compdesc.devinfo.strbase +
+                              priv->device[i].compdesc.devinfo.nstrings)
                             {
-                              ret = priv->device[i].compdesc.mkstrdesc(strid -
-                                    priv->device[i].compdesc.devinfo.strbase, buf);
+                              ret = priv->device[i].compdesc.mkstrdesc(
+                                    strid -
+                                    priv->device[i].compdesc.devinfo.strbase,
+                                    buf);
                               break;
                             }
                         }
@@ -621,8 +627,9 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
               default:
                 {
-                  usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_GETUNKNOWNDESC),
-                           value);
+                  usbtrace(
+                       TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_GETUNKNOWNDESC),
+                       value);
                 }
                 break;
               }
@@ -635,7 +642,9 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
               {
                 int i;
 
-                /* Save the configuration and inform the constituent classes */
+                /* Save the configuration and inform the constituent
+                 * classes
+                 */
 
                 for (i = 0; i < priv->ndevices; i++)
                   {
@@ -705,8 +714,8 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
        * Non-Standard Class Requests
        **********************************************************************/
 
-       /* Class implementations should handle their own interface and endpoint
-        * requests.
+       /* Class implementations should handle their own interface and
+        * endpoint requests.
         */
 
       ret = composite_classsetup(priv, dev, ctrl, dataout, outlen);
@@ -730,7 +739,8 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
       ret = EP_SUBMIT(dev->ep0, ctrlreq);
       if (ret < 0)
         {
-          usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_EPRESPQ), (uint16_t)-ret);
+          usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_EPRESPQ),
+                  (uint16_t)-ret);
           ctrlreq->result = OK;
           composite_ep0incomplete(dev->ep0, ctrlreq);
         }
@@ -963,8 +973,8 @@ FAR void *composite_initialize(uint8_t ndevices,
 
       ret =
         priv->device[i].compdesc.classobject(priv->device[i].compdesc.minor,
-                                             &priv->device[i].compdesc.devinfo,
-                                             &priv->device[i].dev);
+                                        &priv->device[i].compdesc.devinfo,
+                                        &priv->device[i].dev);
       if (ret < 0)
         {
           usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_CLASSOBJECT),
@@ -1015,7 +1025,8 @@ errout_with_alloc:
  *   class objects for each of the members of the composite.
  *
  * Input Parameters:
- *   handle - The handle returned by a previous call to composite_initialize().
+ *   handle - The handle returned by a previous call to
+ *            composite_initialize().
  *
  * Returned Value:
  *   None
@@ -1024,7 +1035,8 @@ errout_with_alloc:
 
 void composite_uninitialize(FAR void *handle)
 {
-  FAR struct composite_alloc_s *alloc = (FAR struct composite_alloc_s *)handle;
+  FAR struct composite_alloc_s *alloc =
+                               (FAR struct composite_alloc_s *)handle;
   FAR struct composite_dev_s *priv;
   int i;
 

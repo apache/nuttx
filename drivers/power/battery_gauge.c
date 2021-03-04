@@ -57,12 +57,14 @@
 
 static int     bat_gauge_open(FAR struct file *filep);
 static int     bat_gauge_close(FAR struct file *filep);
-static ssize_t bat_gauge_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
-static ssize_t bat_gauge_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+static ssize_t bat_gauge_read(FAR struct file *filep,
+                              FAR char *buffer,
+                              size_t buflen);
+static ssize_t bat_gauge_write(FAR struct file *filep,
+                               FAR const char *buffer,
+                               size_t buflen);
 static int     bat_gauge_ioctl(FAR struct file *filep, int cmd,
-                 unsigned long arg);
+                               unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -125,8 +127,9 @@ static ssize_t bat_gauge_read(FAR struct file *filep, FAR char *buffer,
  * Name: bat_gauge_write
  ****************************************************************************/
 
-static ssize_t bat_gauge_write(FAR struct file *filep, FAR const char *buffer,
-                          size_t buflen)
+static ssize_t bat_gauge_write(FAR struct file *filep,
+                               FAR const char *buffer,
+                               size_t buflen)
 {
   /* Return nothing written */
 
@@ -137,7 +140,9 @@ static ssize_t bat_gauge_write(FAR struct file *filep, FAR const char *buffer,
  * Name: bat_gauge_ioctl
  ****************************************************************************/
 
-static int bat_gauge_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int bat_gauge_ioctl(FAR struct file *filep,
+                           int cmd,
+                           unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct battery_gauge_dev_s *dev  = inode->i_private;

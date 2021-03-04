@@ -1,4 +1,4 @@
-/**************************************************************************************
+/****************************************************************************
  * drivers/lcd/ug-2864ambag01.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,19 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-/* Driver for Univision UG-2864AMBAG01 OLED display (with SH1101A controller) in SPI
- * mode
+/* Driver for Univision UG-2864AMBAG01 OLED display (with SH1101A controller)
+ * in SPI mode
  *
  * References:
- *   1. Product Specification (Preliminary), Part Name: OEL Display Module, Part ID:
+ *   1. Product Specification (Preliminary),
+ *      Part Name: OEL Display Module, Part ID:
  *      UG-2864AMBAG01, Doc No: SASI-9015-A, Univision Technology Inc.
- *   2. SH1101A, 132 X 64 Dot Matrix OLED/PLED, Preliminary Segment/Common Driver with
+ *   2. SH1101A, 132 X 64 Dot Matrix OLED/PLED,
+ *      Preliminary Segment/Common Driver with
  *      Controller, Sino Wealth
  */
 
-/**************************************************************************************
+/****************************************************************************
  * Device memory organization:
  *
  *          +----------------------------+
@@ -60,50 +62,50 @@
  *  Page 7  |    |   |   |   |     |     |
  *  --------+----+---+---+---+-...-+-----+
  *
- *  -----------------------------------+---------------------------------------
- *  Landscape Display:                 | Reverse Landscape Display:
- *  --------+-----------------------+  |  --------+---------------------------+
- *          |       Column          |  |          |         Column            |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 0  | 0 | 1 | 2 |     | 131 |  |  Page 7  | 131 | 130 | 129 |     | 0 |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 1  | V                     |  |  Page 6  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 2  | V                     |  |  Page 5  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 3  | V                     |  |  Page 4  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 4  | V                     |  |  Page 3  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 5  | V                     |  |  Page 2  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 6  | V                     |  |  Page 1  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  Page 7  | V                     |  |  Page 0  |                         ^ |
- *  --------+---+---+---+-...-+-----+  |  --------+-----+-----+-----+-...-+---+
- *  -----------------------------------+---------------------------------------
+ *  ----------------------------------+--------------------------------------
+ *  Landscape Display:                | Reverse Landscape Display:
+ *  --------+-----------------------+ |  -------+---------------------------+
+ *          |       Column          | |         |         Column            |
+ *  --------+---+---+---+-...-+-----+ |  -------+-----+-----+-----+-...-+---+
+ *  Page 0  | 0 | 1 | 2 |     | 131 | |  Page 7 | 131 | 130 | 129 |     | 0 |
+ *  --------+---+---+---+-...-+-----+ |  -------+-----+-----+-----+-...-+---+
+ *  Page 1  | V                     | |  Page 6 |                         ^ |
+ *  --------+---+---+---+-...-+-----+ |  -------+-----+-----+-----+-...-+---+
+ *  Page 2  | V                     | |  Page 5 |                         ^ |
+ *  --------+---+---+---+-...-+-----+ |  -------+-----+-----+-----+-...-+---+
+ *  Page 3  | V                     | |  Page 4 |                         ^ |
+ *  --------+---+---+---+-...-+-----+ |  -------+-----+-----+-----+-...-+---+
+ *  Page 4  | V                     | |  Page 3 |                         ^ |
+ *  --------+---+---+---+-...-+-----+ |  -------+-----+-----+-----+-...-+---+
+ *  Page 5  | V                     | |  Page 2 |                         ^ |
+ *  --------+---+---+---+-...-+-----+ |  -------+-----+-----+-----+-...-+---+
+ *  Page 6  | V                     | |  Page 1 |                         ^ |
+ *  --------+---+---+---+-...-+-----+ |  -------+-----+-----+-----+-...-+---+
+ *  Page 7  | V                     | |  Page 0 |                         ^ |
+ *  --------+---+---+---+-...-+-----+ |  -------+-----+-----+-----+-...-+---+
+ *  ----------------------------------+--------------------------------------
  *
- *  -----------------------------------+---------------------------------------
- *  Portrait Display:                  | Reverse Portrait Display:
- *  -----------+---------------------+ |  -----------+---------------------+
- *             |         Page        | |             |       Page          |
- *  -----------+---+---+---+-...-+---+ |  -----------+---+---+---+-...-+---+
- *  Column 0   | 0 | 1 | 2 |     | 7 | |  Column 131 | 7 | 6 | 5 |     | 0 |
- *  -----------+---+---+---+-...-+---+ |  -----------+---+---+---+-...-+---+
- *  Column 1   | >   >   >    >    > | |  Column 130 |                     |
- *  -----------+---+---+---+-...-+---+ |  -----------+---+---+---+-...-+---+
- *  Column 2   |                     | |  Column 129 |                     |
- *  -----------+---+---+---+-...-+---+ |  -----------+---+---+---+-...-+---+
- *  ...        |                     | |  ...        |                     |
- *  -----------+---+---+---+-...-+---+ |  -----------+---+---+---+-...-+---+
- *  Column 131 |                     | |  Column 0   | <   <   <    <    < |
- *  -----------+---+---+---+-...-+---+ |  -----------+---+---+---+-...-+---+
- *  -----------------------------------+----------------------------------------
- **************************************************************************************/
+ *  ----------------------------------+--------------------------------------
+ *  Portrait Display:                 | Reverse Portrait Display:
+ *  -----------+---------------------+|  -----------+---------------------+
+ *             |         Page        ||             |       Page          |
+ *  -----------+---+---+---+-...-+---+|  -----------+---+---+---+-...-+---+
+ *  Column 0   | 0 | 1 | 2 |     | 7 ||  Column 131 | 7 | 6 | 5 |     | 0 |
+ *  -----------+---+---+---+-...-+---+|  -----------+---+---+---+-...-+---+
+ *  Column 1   | >   >   >    >    > ||  Column 130 |                     |
+ *  -----------+---+---+---+-...-+---+|  -----------+---+---+---+-...-+---+
+ *  Column 2   |                     ||  Column 129 |                     |
+ *  -----------+---+---+---+-...-+---+|  -----------+---+---+---+-...-+---+
+ *  ...        |                     ||  ...        |                     |
+ *  -----------+---+---+---+-...-+---+|  -----------+---+---+---+-...-+---+
+ *  Column 131 |                     ||  Column 0   | <   <   <    <    < |
+ *  -----------+---+---+---+-...-+---+|  -----------+---+---+---+-...-+---+
+ *  ----------------------------------+--------------------------------------
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -123,10 +125,12 @@
 
 #ifdef CONFIG_LCD_UG2864AMBAG01
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
-/* Configuration **********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
 /* Limitations of the current configuration that I hope to fix someday */
 
 #if CONFIG_UG2864AMBAG01_NINTERFACES != 1
@@ -143,7 +147,7 @@
 #  undef CONFIG_LCD_RPORTRAIT
 #endif
 
-/* SH1101A Commands *******************************************************************/
+/* SH1101A Commands *********************************************************/
 
 #define SH1101A_SETCOLL(ad)      (0x00 | ((ad) & 0x0f)) /* Set Lower Column Address: (00h - 0fh) */
 #define SH1101A_SETCOLH(ad)      (0x10 | ((ad) & 0x0f)) /* Set Higher Column Address: (10h - 1fh) */
@@ -190,11 +194,12 @@
 #define SH1101A_STATUS_ONOFF     (0x40)
 #define SH1101A_RDDATA(d)        (d)                    /* Read Display Data */
 
-/* Color Properties *******************************************************************/
+/* Color Properties *********************************************************/
+
 /* Display Resolution
  *
- * The SH1101A display controller can handle a resolution of 132x64. The UG-2864AMBAG01
- * on the base board is 128x64.
+ * The SH1101A display controller can handle a resolution of 132x64.
+ * The UG-2864AMBAG01 on the base board is 128x64.
  */
 
 #define UG2864AMBAG01_DEV_XRES    128 /* Only 128 of 131 columns used */
@@ -248,9 +253,9 @@
 #define LS_BIT                     (1 << 0)
 #define MS_BIT                     (1 << 7)
 
-/**************************************************************************************
+/****************************************************************************
  * Private Type Definition
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This structure describes the state of this driver */
 
@@ -264,18 +269,18 @@ struct ug2864ambag01_dev_s
   uint8_t                contrast; /* Current contrast setting */
   bool                   on;       /* true: display is on */
 
-
-  /* The SH1101A does not support reading from the display memory in SPI mode.
-   * Since there is 1 BPP and access is byte-by-byte, it is necessary to keep
-   * a shadow copy of the framebuffer memory. At 128x64, this amounts to 1KB.
+  /* The SH1101A does not support reading from the display memory in SPI
+   * mode. Since there is 1 BPP and access is byte-by-byte, it is necessary
+   * to keep a shadow copy of the framebuffer memory. At 128x64, this amounts
+   * to 1KB.
    */
 
   uint8_t fb[UG2864AMBAG01_FBSIZE];
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Function Protototypes
- **************************************************************************************/
+ ****************************************************************************/
 
 /* Low-level SPI helpers */
 
@@ -286,14 +291,16 @@ static void ug2864ambag01_unlock(FAR struct spi_dev_s *spi);
 
 static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col,
                                 FAR const uint8_t *buffer, size_t npixels);
-static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col,
+                                FAR uint8_t *buffer,
                                 size_t npixels);
 
 /* LCD Configuration */
 
 static int ug2864ambag01_getvideoinfo(FAR struct lcd_dev_s *dev,
                                       FAR struct fb_videoinfo_s *vinfo);
-static int ug2864ambag01_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int ug2864ambag01_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                      unsigned int planeno,
                                       FAR struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
@@ -313,11 +320,12 @@ static int ug2864ambag01_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int pl
 static int ug2864ambag01_getpower(struct lcd_dev_s *dev);
 static int ug2864ambag01_setpower(struct lcd_dev_s *dev, int power);
 static int ug2864ambag01_getcontrast(struct lcd_dev_s *dev);
-static int ug2864ambag01_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
+static int ug2864ambag01_setcontrast(struct lcd_dev_s *dev,
+                                     unsigned int contrast);
 
-/**************************************************************************************
+/****************************************************************************
  * Private Data
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This is working memory allocated by the LCD driver for each LCD device
  * and for each color plane.  This memory will hold one raster line of data.
@@ -352,7 +360,9 @@ static const struct lcd_planeinfo_s g_planeinfo =
   .bpp    = UG2864AMBAG01_BPP,            /* Bits-per-pixel */
 };
 
-/* This is the OLED driver instance (only a single device is supported for now) */
+/* This is the OLED driver instance
+ * (only a single device is supported for now)
+ */
 
 static struct ug2864ambag01_dev_s g_oleddev =
 {
@@ -364,6 +374,7 @@ static struct ug2864ambag01_dev_s g_oleddev =
     .getplaneinfo = ug2864ambag01_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
+
     /* Cursor Controls -- Not supported */
 
     /* LCD Specific Controls */
@@ -375,11 +386,11 @@ static struct ug2864ambag01_dev_s g_oleddev =
   },
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name: ug2864ambag01_lock
  *
  * Description:
@@ -393,11 +404,13 @@ static struct ug2864ambag01_dev_s g_oleddev =
  *
  * Assumptions:
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void ug2864ambag01_lock(FAR struct spi_dev_s *spi)
 {
-  /* Lock the SPI bus if there are multiple devices competing for the SPI bus. */
+  /* Lock the SPI bus if there are multiple devices competing for the SPI
+   * bus.
+   */
 
   SPI_LOCK(spi, true);
 
@@ -411,7 +424,7 @@ static inline void ug2864ambag01_lock(FAR struct spi_dev_s *spi)
   SPI_SETFREQUENCY(spi, CONFIG_UG2864AMBAG01_FREQUENCY);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: ug2864ambag01_unlock
  *
  * Description:
@@ -425,7 +438,7 @@ static inline void ug2864ambag01_lock(FAR struct spi_dev_s *spi)
  *
  * Assumptions:
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void ug2864ambag01_unlock(FAR struct spi_dev_s *spi)
 {
@@ -434,7 +447,7 @@ static inline void ug2864ambag01_unlock(FAR struct spi_dev_s *spi)
   SPI_LOCK(spi, false);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ug2864ambag01_putrun
  *
  * Description:
@@ -447,15 +460,19 @@ static inline void ug2864ambag01_unlock(FAR struct spi_dev_s *spi)
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
-static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col,
+                                FAR const uint8_t *buffer,
                                 size_t npixels)
 {
-  /* Because of this line of code, we will only be able to support a single UG device */
+  /* Because of this line of code, we will only be able to support a single
+   * UG device
+   */
 
-  FAR struct ug2864ambag01_dev_s *priv = (FAR struct ug2864ambag01_dev_s *)&g_oleddev;
+  FAR struct ug2864ambag01_dev_s *priv =
+                      (FAR struct ug2864ambag01_dev_s *)&g_oleddev;
   FAR uint8_t *fbptr;
   FAR uint8_t *ptr;
   uint8_t devcol;
@@ -471,7 +488,8 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
   /* Clip the run to the display */
 
   pixlen = npixels;
-  if ((unsigned int)col + (unsigned int)pixlen > (unsigned int)UG2864AMBAG01_XRES)
+  if ((unsigned int)col + (unsigned int)pixlen >
+      (unsigned int)UG2864AMBAG01_XRES)
     {
       pixlen = (int)UG2864AMBAG01_XRES - (int)col;
     }
@@ -489,7 +507,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
    */
 
 #ifdef UG2864AMBAG01_DEV_REVERSEY
-  row = (UG2864AMBAG01_DEV_YRES-1) - row;
+  row = (UG2864AMBAG01_DEV_YRES - 1) - row;
 #endif
 
   /* If the column is switched then the start of the run is the mirror of
@@ -506,7 +524,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
    */
 
 #ifdef UG2864AMBAG01_DEV_REVERSEX
-  col  = (UG2864AMBAG01_DEV_XRES-1) - col;
+  col  = (UG2864AMBAG01_DEV_XRES - 1) - col;
   col -= (pixlen - 1);
 #endif
 
@@ -617,6 +635,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
   SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), true);
 
   /* Set the starting position for the run */
+
   /* Set the column address to the XOFFSET value */
 
   SPI_SEND(priv->spi, SH1101A_SETCOLL(devcol & 0x0f));
@@ -644,7 +663,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
 #  error "Configuration not implemented"
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ug2864ambag01_getrun
  *
  * Description:
@@ -659,13 +678,16 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
-static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col,
+                                FAR uint8_t *buffer,
                                 size_t npixels)
 {
-  /* Because of this line of code, we will only be able to support a single UG device */
+  /* Because of this line of code, we will only be able to support a single
+   * UG device
+   */
 
   FAR struct ug2864ambag01_dev_s *priv = &g_oleddev;
   FAR uint8_t *fbptr;
@@ -681,7 +703,8 @@ static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buf
   /* Clip the run to the display */
 
   pixlen = npixels;
-  if ((unsigned int)col + (unsigned int)pixlen > (unsigned int)UG2864AMBAG01_XRES)
+  if ((unsigned int)col + (unsigned int)pixlen >
+      (unsigned int)UG2864AMBAG01_XRES)
     {
       pixlen = (int)UG2864AMBAG01_XRES - (int)col;
     }
@@ -699,7 +722,7 @@ static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buf
    */
 
 #ifdef UG2864AMBAG01_DEV_REVERSEY
-  row = (UG2864AMBAG01_DEV_YRES-1) - row;
+  row = (UG2864AMBAG01_DEV_YRES - 1) - row;
 #endif
 
   /* If the column is switched then the start of the run is the mirror of
@@ -716,10 +739,11 @@ static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buf
    */
 
 #ifdef UG2864AMBAG01_DEV_REVERSEX
-  col  = (UG2864AMBAG01_DEV_XRES-1) - col;
+  col  = (UG2864AMBAG01_DEV_XRES - 1) - col;
 #endif
 
   /* Then transfer the display data from the shadow frame buffer memory */
+
   /* Get the page number.  The range of 64 lines is divided up into eight
    * pages of 8 lines each.
    */
@@ -808,34 +832,36 @@ static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buf
 #  error "Configuration not implemented"
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ug2864ambag01_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ug2864ambag01_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
   lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
-          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
+          g_videoinfo.fmt, g_videoinfo.xres,
+          g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ug2864ambag01_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int ug2864ambag01_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                              FAR struct lcd_planeinfo_s *pinfo)
+static int ug2864ambag01_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                      unsigned int planeno,
+                                      FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(pinfo && planeno == 0);
   lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
@@ -843,32 +869,35 @@ static int ug2864ambag01_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int pl
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ug2864ambag01_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on. On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on.)
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ug2864ambag01_getpower(FAR struct lcd_dev_s *dev)
 {
-  FAR struct ug2864ambag01_dev_s *priv = (FAR struct ug2864ambag01_dev_s *)dev;
+  FAR struct ug2864ambag01_dev_s *priv =
+                                (FAR struct ug2864ambag01_dev_s *)dev;
   DEBUGASSERT(priv);
 
   lcdinfo("power: %s\n", priv->on ? "ON" : "OFF");
   return priv->on ? CONFIG_LCD_MAXPOWER : 0;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ug2864ambag01_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
+ *   Enable/disable LCD panel power
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on). On
  *   backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ug2864ambag01_setpower(struct lcd_dev_s *dev, int power)
 {
@@ -904,13 +933,13 @@ static int ug2864ambag01_setpower(struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ug2864ambag01_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ug2864ambag01_getcontrast(struct lcd_dev_s *dev)
 {
@@ -921,15 +950,16 @@ static int ug2864ambag01_getcontrast(struct lcd_dev_s *dev)
   return priv->contrast;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ug2864ambag01_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int ug2864ambag01_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
+static int ug2864ambag01_setcontrast(struct lcd_dev_s *dev,
+                                     unsigned int contrast)
 {
   struct ug2864ambag01_dev_s *priv = (struct ug2864ambag01_dev_s *)dev;
   unsigned int scaled;
@@ -978,11 +1008,11 @@ static int ug2864ambag01_setcontrast(struct lcd_dev_s *dev, unsigned int contras
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ug2864ambag01_initialize
  *
  * Description:
@@ -993,7 +1023,8 @@ static int ug2864ambag01_setcontrast(struct lcd_dev_s *dev, unsigned int contras
  * Input Parameters:
  *
  *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 through CONFIG_UG2864AMBAG01_NINTERFACES-1.
+ *   devno - A value in the range of 0 through
+ *           CONFIG_UG2864AMBAG01_NINTERFACES-1.
  *     This allows support for multiple OLED devices.
  *
  * Returned Value:
@@ -1001,9 +1032,10 @@ static int ug2864ambag01_setcontrast(struct lcd_dev_s *dev, unsigned int contras
  *   On success, this function returns a reference to the LCD object for
  *   the specified OLED.  NULL is returned on any failure.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-FAR struct lcd_dev_s *ug2864ambag01_initialize(FAR struct spi_dev_s *spi, unsigned int devno)
+FAR struct lcd_dev_s *ug2864ambag01_initialize(FAR struct spi_dev_s *spi,
+                                               unsigned int devno)
 {
   FAR struct ug2864ambag01_dev_s  *priv = &g_oleddev;
 
@@ -1062,12 +1094,13 @@ FAR struct lcd_dev_s *ug2864ambag01_initialize(FAR struct spi_dev_s *spi, unsign
   return &priv->dev;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ug2864ambag01_fill
  *
  * Description:
- *   This non-standard method can be used to clear the entire display by writing one
- *   color to the display.  This is much faster than writing a series of runs.
+ *   This non-standard method can be used to clear the entire display by
+ *   writing one color to the display.
+ *   This is much faster than writing a series of runs.
  *
  * Input Parameters:
  *   priv   - Reference to private driver structure
@@ -1075,7 +1108,7 @@ FAR struct lcd_dev_s *ug2864ambag01_initialize(FAR struct spi_dev_s *spi, unsign
  * Assumptions:
  *   Caller has selected the OLED section.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 void ug2864ambag01_fill(FAR struct lcd_dev_s *dev, uint8_t color)
 {

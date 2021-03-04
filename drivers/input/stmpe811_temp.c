@@ -124,7 +124,7 @@ uint16_t stmpe811_tempread(STMPE811_HANDLE handle)
   /* Read the temperature */
 
   temp1 = stmpe811_getreg8(priv, STMPE811_SYS_CTRL2);
-  temp2 = stmpe811_getreg8(priv, STMPE811_SYS_CTRL2+1);
+  temp2 = stmpe811_getreg8(priv, STMPE811_SYS_CTRL2 + 1);
 
   add_sensor_randomness((temp1 << 8) | temp2);
 
@@ -159,6 +159,7 @@ uint16_t stmpe811_tempread(STMPE811_HANDLE handle)
  *   returned to indicate the nature of the failure.
  *
  ****************************************************************************/
+
 /* Not implemented */
 
 #endif /* CONFIG_INPUT && CONFIG_INPUT_STMPE811 && !CONFIG_STMPE811_TEMP_DISABLE */

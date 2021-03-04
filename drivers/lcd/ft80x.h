@@ -1,4 +1,4 @@
-/*******************************************************************************************
+/****************************************************************************
  * drivers/lcd/ft80x.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,38 +16,42 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *******************************************************************************************/
+ ****************************************************************************/
 
 /* Definitions for the FTDI FT80x GUI
  *
  * References:
- *  - Document No.: FT_000792, "FT800 Embedded Video Engine", Datasheet Version 1.1,
- *    Clearance No.: FTDI# 334, Future Technology Devices International Ltd.
- *  - Document No.: FT_000986, "FT801 Embedded Video Engine Datasheet", Version 1.0,
- *    Clearance No.: FTDI#376, Future Technology Devices International Ltd.
+ *  - Document No.:
+ *     FT_000792, "FT800 Embedded Video Engine", Datasheet Version 1.1,
+ *    Clearance No.:
+ *     FTDI# 334, Future Technology Devices International Ltd.
+ *  - Document No.:
+ *     FT_000986, "FT801 Embedded Video Engine Datasheet", Version 1.0,
+ *    Clearance No.:
+ *     FTDI#376, Future Technology Devices International Ltd.
  *  - Some definitions derive from FTDI sample code.
  */
 
 #ifndef __DRIVERS_LCD_FT80X_H
 #define __DRIVERS_LCD_FT80X_H
 
-/*******************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
 
-/*******************************************************************************************
+/****************************************************************************
  * Public Types
- *******************************************************************************************/
+ ****************************************************************************/
 
 /* Host write command
  *
- * For a SPI write command write transaction, the host writes a zero bit followed by a one
- * bit, followed by the 5-bit command, followed by two bytes of zero. All data is streamed
- * with a single chip select.
+ * For a SPI write command write transaction, the host writes a zero bit
+ * followed by a one bit, followed by the 5-bit command, followed by two
+ * bytes of zero. All data is streamed with a single chip select.
  *
  * I2C data format is equivalent (with obvious differences in bus protocol)
  */
@@ -59,11 +63,12 @@ struct ft80x_hostwrite_s
   uint8_t pad2;  /* Zero */
 };
 
-/* For SPI memory read transaction, the host sends two zero bits, followed by the 22-bit
- * address. This is followed by a dummy byte. After the dummy byte, the FT80x responds to
- * each host byte with read data bytes.
+/* For SPI memory read transaction, the host sends two zero bits, followed
+ * by the 22-bit address. This is followed by a dummy byte. After the dummy
+ * byte, the FT80x responds to each host byte with read data bytes.
  *
- * For I2C memory read transaction, bytes are packed in the I2C protocol as follow:
+ * For I2C memory read transaction, bytes are packed in the I2C protocol
+ * as follow:
  *
  *   [start] <DEVICE ADDRESS + write bit>
  *   <00b+Address[21:16]>
@@ -90,10 +95,11 @@ struct ft80x_i2cread_s
   uint8_t addrl;   /* Address[7:0] */
 };
 
-/* For SPI memory write transaction, the host sends a '1' bit and '0' bit, followed by the
- * 22-bit address. This is followed by the write data.
+/* For SPI memory write transaction, the host sends a '1' bit and '0' bit,
+ * followed by the 22-bit address. This is followed by the write data.
  *
- * For I2C memory write transaction, bytes are packed in the I2C protocol as follow:
+ * For I2C memory write transaction, bytes are packed in the I2C protocol
+ * as follow:
  *
  *  [start] <DEVICE ADDRESS + write bit>
  *  <10b,Address[21:16]>
@@ -183,7 +189,7 @@ struct ft80x_dev_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

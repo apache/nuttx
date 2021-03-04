@@ -1,4 +1,4 @@
-/***********************************************************************************
+/****************************************************************************
  * drivers/audio/wm8994.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
-/***********************************************************************************
+/****************************************************************************
  * Included Files
- ***********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -73,9 +73,9 @@
 #define WM8994_DEFAULT_INPUT_DEVICE                           (WM8994_INPUT_DEVICE_DIGITAL_MIC1_MIC2)
 #define WM8994_STARTUP_MODE_COLD                              (1)
 
-/***********************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ***********************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_WM8994_REGDUMP) && !defined(CONFIG_WM8994_CLKDEBUG)
 static
@@ -837,7 +837,8 @@ static int wm8994_stop(FAR struct audio_lowerhalf_s *dev)
 
   term_msg.msg_id = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
-  (void)file_mq_send(&priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+  (void)file_mq_send(&priv->mq, (FAR const char *)&term_msg,
+                     sizeof(term_msg),
                      CONFIG_WM8994_MSG_PRIO);
 
   /* Join the worker thread */
@@ -939,9 +940,10 @@ static int wm8994_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   dq_addlast(&apb->dq_entry, &priv->pendq);
   wm8994_givesem(&priv->pendsem);
 
-  /* Send a message to the worker thread indicating that a new buffer has been
-   * enqueued.  If mq is NULL, then the playing has not yet started.  In that
-   * case we are just "priming the pump" and we don't need to send any message.
+  /* Send a message to the worker thread indicating that a new buffer has
+   * been enqueued.  If mq is NULL, then the playing has not yet started.
+   * In that case we are just "priming the pump" and we don't need to send
+   * any message.
    */
 
   ret = OK;
@@ -1256,7 +1258,8 @@ static void *wm8994_workerthread(pthread_addr_t pvarg)
 
       /* Wait for messages from our message queue */
 
-      msglen = file_mq_receive(&priv->mq, (FAR char *)&msg, sizeof(msg), &prio);
+      msglen = file_mq_receive(&priv->mq, (FAR char *)&msg,
+                               sizeof(msg), &prio);
 
       /* Handle the case when we return with no message */
 
@@ -1587,7 +1590,8 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
           wm8994_writereg(priv, WM8994_DAC2_RIGHT_MIXER_ROUTING, regval);
           break;
         case WM8994_OUTPUT_DEVICE_BOTH:
-          if (WM8994_DEFAULT_INPUT_DEVICE == WM8994_INPUT_DEVICE_DIGITAL_MIC1_MIC2)
+          if (WM8994_DEFAULT_INPUT_DEVICE ==
+              WM8994_INPUT_DEVICE_DIGITAL_MIC1_MIC2)
           {
             wm8994_writereg(priv, 0x005, 0x0303 | 0x0c0c);
             wm8994_writereg(priv, 0x601, 0x0003);
@@ -1924,9 +1928,9 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
   wm8994_clock_analysis(&priv->dev, "After configuration");
 }
 
-/***********************************************************************************
+/****************************************************************************
  * Public Functions
- ***********************************************************************************/
+ ****************************************************************************/
 
 /* Name: wm8994_initialize
  *

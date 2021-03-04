@@ -1,8 +1,5 @@
-/**************************************************************************************
+/****************************************************************************
  * drivers/lcd/st7567.c
- *
- * Driver for the TM12864J1CCWGWA Display with the ST7567 LCD
- * controller.
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: Manikandan <code@zilogic.com>
@@ -11,9 +8,6 @@
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Reference: "Product Specification, OEL Display Module, ST7567", Univision
- *            Technology Inc., SAS1-6020-B, January 3, 2008.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,11 +36,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/* Driver for the TM12864J1CCWGWA Display with the ST7567 LCD
+ * controller.
+ *
+ * Reference:
+ * "Product Specification, OEL Display Module, ST7567", Univision
+ * Technology Inc., SAS1-6020-B, January 3, 2008.
+ */
+
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -64,11 +66,11 @@
 
 #include "st7567.h"
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration **********************************************************************/
+/* Configuration ************************************************************/
 
 /* ST7567 Configuration Settings:
  *
@@ -85,7 +87,8 @@
  *
  * Required LCD driver settings:
  * CONFIG_LCD_ST7567 - Enable ST7567 support
- * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+ * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be
+ *   accepted.
  * CONFIG_LCD_MAXPOWER should be 2:  0=off, 1=dim, 2=normal
  *
  * Required SPI driver settings:
@@ -94,8 +97,8 @@
 
 /* Verify that all configuration requirements have been met */
 
-/* The ST7567 spec says that is supports SPI mode 0,0 only.  However, sometimes
- * you need to tinker with these things.
+/* The ST7567 spec says that is supports SPI mode 0,0 only.
+ *  However, sometimes you need to tinker with these things.
  */
 
 #ifndef CONFIG_ST7567_SPIMODE
@@ -165,7 +168,7 @@
 #  error "CONFIG_SPI_CMDDATA must be defined in your NuttX configuration"
 #endif
 
-/* Color Properties *******************************************************************/
+/* Color Properties *********************************************************/
 
 /* The ST7567 display controller can handle a resolution of 128x64.
  */
@@ -203,9 +206,9 @@
 #define LS_BIT          (1 << 0)
 #define MS_BIT          (1 << 7)
 
-/**************************************************************************************
+/****************************************************************************
  * Private Type Definition
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This structure describes the state of this driver */
 
@@ -229,9 +232,9 @@ struct st7567_dev_s
   uint8_t fb[ST7567_FBSIZE];
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Function Protototypes
- **************************************************************************************/
+ ****************************************************************************/
 
 /* SPI helpers */
 
@@ -240,17 +243,20 @@ static void st7567_deselect(FAR struct spi_dev_s *spi);
 
 /* LCD Data Transfer Methods */
 
-static int st7567_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                     size_t npixels);
-static int st7567_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                     size_t npixels);
+static int st7567_putrun(fb_coord_t row, fb_coord_t col,
+                         FAR const uint8_t *buffer,
+                         size_t npixels);
+static int st7567_getrun(fb_coord_t row, fb_coord_t col,
+                         FAR uint8_t *buffer,
+                         size_t npixels);
 
 /* LCD Configuration */
 
 static int st7567_getvideoinfo(FAR struct lcd_dev_s *dev,
-                           FAR struct fb_videoinfo_s *vinfo);
-static int st7567_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                           FAR struct lcd_planeinfo_s *pinfo);
+                               FAR struct fb_videoinfo_s *vinfo);
+static int st7567_getplaneinfo(FAR struct lcd_dev_s *dev,
+                               unsigned int planeno,
+                               FAR struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
 
@@ -269,15 +275,16 @@ static int st7567_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 static int st7567_getpower(struct lcd_dev_s *dev);
 static int st7567_setpower(struct lcd_dev_s *dev, int power);
 static int st7567_getcontrast(struct lcd_dev_s *dev);
-static int st7567_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
+static int st7567_setcontrast(struct lcd_dev_s *dev,
+                              unsigned int contrast);
 
 /* Initialization */
 
 static inline void up_clear(FAR struct st7567_dev_s  *priv);
 
-/**************************************************************************************
+/****************************************************************************
  * Private Data
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This is working memory allocated by the LCD driver for each LCD device
  * and for each color plane.  This memory will hold one raster line of data.
@@ -336,11 +343,11 @@ static struct st7567_dev_s g_st7567dev =
   },
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name: st7567_select
  *
  * Description:
@@ -354,7 +361,7 @@ static struct st7567_dev_s g_st7567dev =
  *
  * Assumptions:
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void st7567_select(FAR struct spi_dev_s *spi)
 {
@@ -377,7 +384,7 @@ static void st7567_select(FAR struct spi_dev_s *spi)
 #endif
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: st7567_deselect
  *
  * Description:
@@ -391,7 +398,7 @@ static void st7567_select(FAR struct spi_dev_s *spi)
  *
  * Assumptions:
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void st7567_deselect(FAR struct spi_dev_s *spi)
 {
@@ -401,7 +408,7 @@ static void st7567_deselect(FAR struct spi_dev_s *spi)
   SPI_LOCK(spi, false);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7567_putrun
  *
  * Description:
@@ -413,10 +420,11 @@ static void st7567_deselect(FAR struct spi_dev_s *spi)
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int st7567_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                       size_t npixels)
+static int st7567_putrun(fb_coord_t row, fb_coord_t col,
+                         FAR const uint8_t *buffer,
+                         size_t npixels)
 {
   /* Because of this line of code, we will only be able to support a single
    * ST7567 device
@@ -552,7 +560,7 @@ static int st7567_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7567_getrun
  *
  * Description:
@@ -564,7 +572,7 @@ static int st7567_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int st7567_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                      size_t npixels)
@@ -681,34 +689,36 @@ static int st7567_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7567_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int st7567_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
   ginfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
-         g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
+         g_videoinfo.fmt, g_videoinfo.xres,
+         g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7567_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int st7567_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                              FAR struct lcd_planeinfo_s *pinfo)
+static int st7567_getplaneinfo(FAR struct lcd_dev_s *dev,
+                               unsigned int planeno,
+                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
   ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
@@ -716,14 +726,15 @@ static int st7567_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7567_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int st7567_getpower(struct lcd_dev_s *dev)
 {
@@ -733,14 +744,15 @@ static int st7567_getpower(struct lcd_dev_s *dev)
   return priv->powered;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7567_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int st7567_setpower(struct lcd_dev_s *dev, int power)
 {
@@ -772,13 +784,13 @@ static int st7567_setpower(struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7567_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int st7567_getcontrast(struct lcd_dev_s *dev)
 {
@@ -787,13 +799,13 @@ static int st7567_getcontrast(struct lcd_dev_s *dev)
   return (int)priv->contrast;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7567_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int st7567_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
@@ -827,13 +839,13 @@ static int st7567_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  up_clear
  *
  * Description:
  *   Clear the display.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void up_clear(FAR struct st7567_dev_s  *priv)
 {
@@ -877,11 +889,11 @@ static inline void up_clear(FAR struct st7567_dev_s  *priv)
   st7567_deselect(spi);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7567_initialize
  *
  * Description:
@@ -892,17 +904,19 @@ static inline void up_clear(FAR struct st7567_dev_s  *priv)
  * Input Parameters:
  *
  *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 throst7567h CONFIG_ST7567_NINTERFACES-1.
+ *   devno - A value in the range of 0 throst7567h
+ *           CONFIG_ST7567_NINTERFACES-1.
  *     This allows support for multiple OLED devices.
  *
  * Returned Value:
  *
- *   On success, this function returns a reference to the LCD object for the specified
- *   OLED.  NULL is returned on any failure.
+ *   On success, this function returns a reference to the LCD object for the
+ *   specified OLED.  NULL is returned on any failure.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-FAR struct lcd_dev_s *st7567_initialize(FAR struct spi_dev_s *spi, unsigned int devno)
+FAR struct lcd_dev_s *st7567_initialize(FAR struct spi_dev_s *spi,
+                                        unsigned int devno)
 {
   /* Configure and enable LCD */
 

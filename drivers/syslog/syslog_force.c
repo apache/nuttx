@@ -55,7 +55,8 @@
 
 int syslog_force(int ch)
 {
-  DEBUGASSERT(g_syslog_channel != NULL && g_syslog_channel->sc_force != NULL);
+  DEBUGASSERT(g_syslog_channel != NULL &&
+              g_syslog_channel->sc_force != NULL);
 
 #ifdef CONFIG_SYSLOG_INTBUFFER
   /* Flush any characters that may have been added to the interrupt

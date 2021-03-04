@@ -1,4 +1,4 @@
-/**************************************************************************************
+/****************************************************************************
  * drivers/lcd/ssd1305.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 /* Definitions for the Solomon Systech SSD1305 132x64 Dot Matrix OLED/PLED
  * Segment/Common Driver with C
@@ -30,13 +30,14 @@
 #ifndef __DRIVERS_LCD_SSD1305_H
 #define __DRIVERS_LCD_SSD1305_H
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
+ ****************************************************************************/
+
 /* General Definitions ******************************************************/
 
 #define SSD1305_COLORA              0
@@ -72,6 +73,7 @@
                                          /*   Data 2: Color A: 31-63  */
                                          /*   Data 3: Color B: 31-63 */
                                          /*   Data 4: Color C: 31-63 */
+
 #define SSD1305_SETBANKCOLOR1       0x92      /* 0x92: Set bank 1-16 color */
 #  define SSD1305_SETBANK1(c)       (c)       /* Data 1, Bits 0-1: Bank 1 color */
 #  define SSD1305_SETBANK2(c)       (c << 2)  /* Data 1, Bits 2-3: Bank 2 color */
@@ -106,6 +108,7 @@
 #  define SSD1305_SETBANK30(c)      (c << 2)  /* Data 4, Bits 2-3: Bank 30 color */
 #  define SSD1305_SETBANK31(c)      (c << 4)  /* Data 4, Bits 4-5: Bank 31 color */
 #  define SSD1305_SETBANK32(c)      (c << 6)  /* Data 4, Bits 6-7: Bank 32 color */
+
 #define SSD1305_MAPCOL0             0xa0 /* 0xa0: Column address 0 is mapped to SEG0 */
 #define SSD1305_MAPCOL131           0xa1 /* 0xa1: Column address 131 is mapped to SEG0 */
 #define SSD1305_DISPRAM             0xa4 /* 0xa4: Resume to RAM content display */
@@ -152,9 +155,9 @@
 #  define SSD1305_COMCONFIG_NOREMAP 0x02 /*   Data 1, Bit 5: 0=Disable COM Left/Right remap */
 #  define SSD1305_COMCONFIG_REMAP   0x22 /*   Data 1, Bit 5: 1=Enable COM Left/Right remap */
 #define SSD1305_SETVCOMHDESEL       0xdb /* 0xdb: Set VCOMH delselect level */
-#  define SSD1305_VCOMH_x4p3        0x00 /*   Data 1: ~0.43 x Vcc */
-#  define SSD1305_VCOMH_x7p7        0x34 /*   Data 1: ~0.77 x Vcc */
-#  define SSD1305_VCOMH_x8p3        0x3c /*   Data 1: ~0.83 x Vcc */
+#  define SSD1305_VCOMH_X4P3        0x00 /*   Data 1: ~0.43 x Vcc */
+#  define SSD1305_VCOMH_X7P7        0x34 /*   Data 1: ~0.77 x Vcc */
+#  define SSD1305_VCOMH_X8P3        0x3c /*   Data 1: ~0.83 x Vcc */
 #define SSD1305_ENTER_RMWMODE       0xe0 /* 0xe0: Enter the Read Modify Write mode */
 #define SSD1305_NOP                 0xe3 /* 0xe3: NOP Command for no operation */
 #define SSD1305_EXIT_RMWMODE        0xee /* 0xee: Leave the Read Modify Write mode */

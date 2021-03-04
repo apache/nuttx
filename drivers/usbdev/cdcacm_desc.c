@@ -42,7 +42,7 @@
  * Private Data
  ****************************************************************************/
 
-/* USB descriptor templates these will be copied and modified **************/
+/* USB descriptor templates these will be copied and modified ***************/
 
 /* Device Descriptor.  If the USB serial device is configured as part of
  * composite device, then the device descriptor will be provided by the
@@ -358,8 +358,9 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 #if !defined(CONFIG_CDCACM_COMPOSITE)
   if (buf != NULL)
     {
-      /* Configuration descriptor.  If the USB serial device is configured as part of
-       * composite device, then the configuration descriptor will be provided by the
+      /* Configuration descriptor.
+       * If the USB serial device is configured as part of  composite device,
+       * then the configuration descriptor will be provided by the
        * composite device logic.
        */
 
@@ -451,7 +452,8 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
   if (buf != NULL)
     {
-      FAR struct cdc_hdr_funcdesc_s *dest = (FAR struct cdc_hdr_funcdesc_s *)buf;
+      FAR struct cdc_hdr_funcdesc_s *dest =
+                                  (FAR struct cdc_hdr_funcdesc_s *)buf;
 
       dest->size    = SIZEOF_HDR_FUNCDESC;                   /* Descriptor length */
       dest->type    = USB_DESC_TYPE_CSINTERFACE;             /* Descriptor type */
@@ -468,7 +470,8 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
   if (buf != NULL)
     {
-      FAR struct cdc_acm_funcdesc_s *dest = (FAR struct cdc_acm_funcdesc_s *)buf;
+      FAR struct cdc_acm_funcdesc_s *dest =
+                                     (FAR struct cdc_acm_funcdesc_s *)buf;
 
       dest->size    = SIZEOF_ACM_FUNCDESC;                   /* Descriptor length */
       dest->type    = USB_DESC_TYPE_CSINTERFACE;             /* Descriptor type */
@@ -487,7 +490,8 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
   if (buf != NULL)
     {
-      FAR struct cdc_union_funcdesc_s *dest = (FAR struct cdc_union_funcdesc_s *)buf;
+      FAR struct cdc_union_funcdesc_s *dest =
+                                      (FAR struct cdc_union_funcdesc_s *)buf;
 
       dest->size     = SIZEOF_UNION_FUNCDESC(1);              /* Descriptor length */
       dest->type     = USB_DESC_TYPE_CSINTERFACE;             /* Descriptor type */

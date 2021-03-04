@@ -54,7 +54,8 @@
  * Name: get_trstring
  *
  * Description:
- *   Search the driver string data to find the string matching the provided ID.
+ *   Search the driver string data to find the string matching the
+ *   provided ID.
  *
  ****************************************************************************/
 
@@ -380,7 +381,8 @@ void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value)
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
           trprintf("%-18s %02x: %-40s %04x\n", "Class API call",
                    TRACE_DATA(event),
-                   get_trstring(g_usb_trace_strings_clsapi, TRACE_DATA(event)),
+                   get_trstring(g_usb_trace_strings_clsapi,
+                   TRACE_DATA(event)),
                    value);
 #else
           trprintf("%-18s %02x: %04x\n", "Class API call",
@@ -392,7 +394,8 @@ void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value)
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
           trprintf("%-18s %02x: %-40s %04x\n", "Class state",
                    TRACE_DATA(event),
-                   get_trstring(g_usb_trace_strings_clsstate, TRACE_DATA(event)),
+                   get_trstring(g_usb_trace_strings_clsstate,
+                   TRACE_DATA(event)),
                    value);
 #else
           trprintf("%-18s %02x: %04x\n", "Class state",
@@ -414,7 +417,8 @@ void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value)
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
           trprintf("%-18s%3d: %-40s %04x\n", "Interrupt decode",
                    TRACE_DATA(event),
-                   get_trstring(g_usb_trace_strings_intdecode, TRACE_DATA(event)),
+                   get_trstring(g_usb_trace_strings_intdecode,
+                   TRACE_DATA(event)),
                    value);
 #else
           trprintf("%-18s%3d: %04x\n", "Interrupt decode",
@@ -491,7 +495,8 @@ void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value)
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
           trprintf("%-18s %02x: %-40s %04x\n", "Controller error",
                    TRACE_DATA(event),
-                   get_trstring(g_usb_trace_strings_deverror, TRACE_DATA(event)),
+                   get_trstring(g_usb_trace_strings_deverror,
+                   TRACE_DATA(event)),
                    value);
 #else
           trprintf("%-18s %02x: %04x\n", "Controller error",
@@ -504,7 +509,8 @@ void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value)
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
           trprintf("%-18s %02x: %-40s %04x\n", "Class error",
                    TRACE_DATA(event),
-                   get_trstring(g_usb_trace_strings_clserror, TRACE_DATA(event)),
+                   get_trstring(g_usb_trace_strings_clserror,
+                   TRACE_DATA(event)),
                    value);
 #else
           trprintf("%-18s %02x: %04x\n", "Class error",

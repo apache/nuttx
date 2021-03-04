@@ -91,9 +91,11 @@ void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype)
       sd2 ? SD20_CSD_NSAC(csd) : MMCSD_CSD_NSAC(csd));
   finfo("  TRAN_SPEED:\n");
   finfo("    TIME_VALUE:            0x%02x\n",
-      sd2 ? SD20_CSD_TRANSPEED_TIMEVALUE(csd) : MMCSD_CSD_TRANSPEED_TIMEVALUE(csd));
+      sd2 ? SD20_CSD_TRANSPEED_TIMEVALUE(csd) :
+      MMCSD_CSD_TRANSPEED_TIMEVALUE(csd));
   finfo("    RATE_UNIT:             0x%02x\n",
-      sd2 ? SD20_CSD_TRANSPEED_TRANSFERRATEUNIT(csd) : MMCSD_CSD_TRANSPEED_TRANSFERRATEUNIT(csd));
+      sd2 ? SD20_CSD_TRANSPEED_TRANSFERRATEUNIT(csd) :
+      MMCSD_CSD_TRANSPEED_TRANSFERRATEUNIT(csd));
   finfo("  CCC:                     0x%03x\n",
       sd2 ? SD20_CSD_CCC(csd) : MMCSD_CSD_CCC(csd));
   finfo("  READ_BL_LEN:             %d\n",
@@ -101,9 +103,11 @@ void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype)
   finfo("  READ_BL_PARTIAL:         %d\n",
       sd2 ? SD20_CSD_READBLPARTIAL(csd) : MMCSD_CSD_READBLPARTIAL(csd));
   finfo("  WRITE_BLK_MISALIGN:      %d\n",
-      sd2 ? SD20_CSD_WRITEBLKMISALIGN(csd) : MMCSD_CSD_WRITEBLKMISALIGN(csd));
+      sd2 ? SD20_CSD_WRITEBLKMISALIGN(csd) :
+      MMCSD_CSD_WRITEBLKMISALIGN(csd));
   finfo("  READ_BLK_MISALIGN:       %d\n",
-      sd2 ? SD20_CSD_READBLKMISALIGN(csd) : MMCSD_CSD_READBLKMISALIGN(csd));
+      sd2 ? SD20_CSD_READBLKMISALIGN(csd) :
+      MMCSD_CSD_READBLKMISALIGN(csd));
   finfo("  DSR_IMP:                 %d\n",
       sd2 ? SD20_CSD_DSRIMP(csd) : MMCSD_CSD_DSRIMP(csd));
   finfo("  C_SIZE:                  %d\n",
@@ -134,6 +138,7 @@ void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype)
       finfo("  SD WP_GRP_SIZE:          %d\n",
           sd2 ? SD_CSD_WPGRPSIZE(csd) : SD_CSD_WPGRPSIZE(csd));
     }
+
   finfo("  WP_GRP_EN:               %d\n",
       sd2 ? SD20_WPGRPEN(csd) : MMCSD_WPGRPEN(csd));
   finfo("  R2W_FACTOR:              %d\n",
@@ -147,7 +152,8 @@ void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype)
   finfo("  COPY:                    %d\n",
       sd2 ? SD20_CSD_COPY(csd) : MMCSD_CSD_COPY(csd));
   finfo("  PERM_WRITE_PROTECT:      %d\n",
-      sd2 ? SD20_CSD_PERMWRITEPROTECT(csd) : MMCSD_CSD_PERMWRITEPROTECT(csd));
+      sd2 ? SD20_CSD_PERMWRITEPROTECT(csd) :
+      MMCSD_CSD_PERMWRITEPROTECT(csd));
   finfo("  TMP_WRITE_PROTECT:       %d\n",
       sd2 ?SD20_CSD_TMPWRITEPROTECT(csd) : MMCSD_CSD_TMPWRITEPROTECT(csd));
   finfo("  FILE_FORMAT:             %d\n",
@@ -157,6 +163,7 @@ void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype)
       finfo("  MMC ECC:                 %d\n",
           sd2 ? MMC_CSD_ECC(csd) : MMC_CSD_ECC(csd));
     }
+
   finfo("  CRC:                     %02x\n",
       sd2 ? SD20_CSD_CRC(csd) : MMCSD_CSD_CRC(csd));
 }

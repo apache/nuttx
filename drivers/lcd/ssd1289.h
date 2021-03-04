@@ -1,4 +1,4 @@
-/**************************************************************************************
+/****************************************************************************
  * drivers/lcd/ssd1289.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 /* Definitions for the Solomon Systech SSD1289 LCD controller
  *
@@ -26,17 +26,17 @@
 #ifndef __DRIVERS_LCD_SSD1289_H
 #define __DRIVERS_LCD_SSD1289_H
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #ifdef CONFIG_LCD_SSD1289
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
+ ****************************************************************************/
 
 /* SSD1289 Register Addresses (All with DC=1) */
 
@@ -229,9 +229,11 @@
 #define SSD1289_FCYCCTRL_EQ_SHIFT       (8)       /* Sets the equalizing period */
 #define SSD1289_FCYCCTRL_EQ_MASK        (3 << SSD1289_FCYCCTRL_EQ_SHIFT)
 #  define SSD1289_FCYCCTRL_EQ(n)        (((n)-1) << SSD1289_FCYCCTRL_EQ_SHIFT) /* n = 2-8 clocks */
+
 #define SSD1289_FCYCCTRL_SDT_SHIFT      (12)      /* Set delay amount from the gate output */
 #define SSD1289_FCYCCTRL_SDT_MASK       (3 << SSD1289_FCYCCTRL_SDT_SHIFT)
 #  define SSD1289_FCYCCTRL_SDT(n)       ((n) << SSD1289_FCYCCTRL_SDT_SHIFT) /* n = 1-3 clocks */
+
 #define SSD1289_FCYCCTRL_NO_SHIFT       (14)      /* Sets amount of non-overlap of the gate output */
 #define SSD1289_FCYCCTRL_NO_MASK        (3 << SSD1289_FCYCCTRL_NO_SHIFT)
 #  define SSD1289_FCYCCTRL_NO(n)        ((n) << SSD1289_FCYCCTRL_NO_SHIFT) /* n = 1-3 clocks */

@@ -576,7 +576,8 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
     /* Command:     AJOYIOC_SUPPORTED
-     * Description: Report the set of button events supported by the hardware;
+     * Description: Report the set of button events supported by the
+     *              hardware;
      * Argument:    A pointer to writeable integer value in which to return
      *              the set of supported buttons.
      * Return:      Zero (OK) on success.  Minus one will be returned on
@@ -782,7 +783,6 @@ errout_with_dusem:
 
 int ajoy_register(FAR const char *devname,
                   FAR const struct ajoy_lowerhalf_s *lower)
-
 {
   FAR struct ajoy_upperhalf_s *priv;
   int ret;

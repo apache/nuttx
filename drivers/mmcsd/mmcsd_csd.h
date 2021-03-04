@@ -76,7 +76,7 @@
 
 #define MMCSD_CSD_CCC(csd) ((csd[2] >> 4) & 0x0fff)
 
- /* READ_BL_LEN 80-83 = Max. read data block length */
+/* READ_BL_LEN 80-83 = Max. read data block length */
 
 #define MMCSD_CSD_READBLLEN(csd) (csd[2] & 0x0f)
 
@@ -132,7 +132,7 @@
 
 #define MMC_CSD_SECTORSIZE(csd) ((csd[5] >> 10) & 0x1f)
 
-/* ER_GRP_SIZE 37-41 = Erase group size (MMC)*/
+/* ER_GRP_SIZE 37-41 = Erase group size (MMC) */
 
 #define MMC_CSD_ERGRPSIZE(csd) ((csd[5] >> 5) & 0x1f)
 
@@ -240,7 +240,7 @@
 #define MMCSD_CSD_CCC(csd) (((uint16_t)csd[4] << 4) | ((uint16_t)csd[5] >> 4))
 #define SD20_CSD_CCC(csd) MMCSD_CSD_CCC(csd)
 
- /* READ_BL_LEN 80-83 = Max. read data block length */
+/* READ_BL_LEN 80-83 = Max. read data block length */
 
 #define MMCSD_CSD_READBLLEN(csd) (csd[5] & 0x0f)
 #define SD20_CSD_READBLLEN(csd) (9)
@@ -309,7 +309,7 @@
 
 #define MMC_CSD_SECTORSIZE(csd) ((csd[10] >> 2) & 0x1f)
 
-/* ER_GRP_SIZE 37-41 = Erase group size (MMC)*/
+/* ER_GRP_SIZE 37-41 = Erase group size (MMC) */
 
 #define MMC_CSD_ERGRPSIZE(csd) (((csd[10] & 3) << 3) | (csd[11] > 5))
 
@@ -391,13 +391,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
