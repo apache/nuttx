@@ -1540,6 +1540,10 @@ static int cxd56_epinterrupt(int irq, FAR void *context)
   uint16_t len;
   int n;
 
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
+
   eps = getreg32(CXD56_USB_DEV_EP_INTR);
     {
       for (n = 0; n < CXD56_NENDPOINTS; n++)
@@ -1812,6 +1816,10 @@ static int cxd56_epinterrupt(int irq, FAR void *context)
             }
         }
     }
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
 
   return OK;
 }
@@ -2585,6 +2593,10 @@ static int cxd56_epstall(FAR struct usbdev_ep_s *ep, bool resume)
   uint32_t ctrl;
   uint32_t addr;
 
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
+
   addr = USB_ISEPIN(ep->eplog) ? CXD56_USB_IN_EP_CONTROL(privep->epphy)
                                : CXD56_USB_OUT_EP_CONTROL(privep->epphy);
 
@@ -2602,6 +2614,10 @@ static int cxd56_epstall(FAR struct usbdev_ep_s *ep, bool resume)
       putreg32(ctrl | USB_STALL, addr);
       privep->stalled = 1;
     }
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
 
   return OK;
 }
