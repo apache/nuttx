@@ -860,13 +860,26 @@ errout:
   return ret;
 }
 
+static uint32_t rpmsg_socket_get_iovlen(FAR const struct iovec *buf,
+                                       size_t iovcnt)
+{
+  uint32_t len = 0;
+  while (iovcnt--)
+    {
+      len += (buf++)->iov_len;
+    }
+
+  return len;
+}
+
 static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
-                                            FAR const void *buf,
-                                            size_t len)
+                                            FAR const struct iovec *buf,
+                                            size_t iovcnt)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
-  FAR const char *cur = buf;
-  size_t written = 0;
+  uint32_t len = rpmsg_socket_get_iovlen(buf, iovcnt);
+  uint32_t written = 0;
+  uint32_t offset = 0;
   int ret = 0;
 
   rpmsg_socket_lock(&conn->sendlock);
@@ -875,6 +888,7 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
     {
       uint32_t block = MIN(len - written, rpmsg_socket_get_space(conn));
       FAR struct rpmsg_socket_data_s *msg;
+      uint32_t block_written = 0;
       uint32_t ipcsize;
 
       if (block == 0)
@@ -916,7 +930,20 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
       msg->cmd = RPMSG_SOCKET_CMD_DATA;
       msg->pos = conn->recvpos;
       msg->len = block;
-      memcpy(msg->data, cur, block);
+      while (block_written < block)
+        {
+          uint32_t chunk = MIN(block - block_written, buf->iov_len - offset);
+          memcpy(msg->data + block_written,
+                 (FAR const char *)buf->iov_base + offset, chunk);
+          offset += chunk;
+          if (offset == buf->iov_len)
+            {
+              buf++;
+              offset = 0;
+            }
+
+          block_written += chunk;
+        }
 
       conn->lastpos  = conn->recvpos;
       conn->sendpos += msg->len;
@@ -928,7 +955,6 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
         }
 
       written += block;
-      cur     += block;
     }
 
   rpmsg_socket_unlock(&conn->sendlock);
@@ -937,12 +963,16 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
 }
 
 static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
-                                        FAR const void *buf, size_t len)
+                                        FAR const struct iovec *buf,
+                                        size_t iovcnt)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
   FAR struct rpmsg_socket_data_s *msg;
+  uint32_t len = rpmsg_socket_get_iovlen(buf, iovcnt);
   uint32_t total = len + sizeof(*msg) + sizeof(uint32_t);
+  uint32_t written = 0;
   uint32_t ipcsize;
+  char *msgpos;
   int ret;
 
   if (total > conn->sendsize)
@@ -989,7 +1019,7 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
   if (total > ipcsize)
     {
       total = ipcsize;
-      len   = ipcsize - sizeof(*msg) + sizeof(uint32_t);
+      len = ipcsize - sizeof(*msg) - sizeof(uint32_t);
     }
 
   /* SOCK_DGRAM need write len to buffer */
@@ -998,7 +1028,22 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
   msg->pos = conn->recvpos;
   msg->len = len;
   memcpy(msg->data, &len, sizeof(uint32_t));
-  memcpy(msg->data + sizeof(uint32_t), buf, len);
+  msgpos = msg->data + sizeof(uint32_t);
+  while (written < len)
+    {
+      if (len - written < buf->iov_len)
+        {
+          memcpy(msgpos, buf->iov_base, len - written);
+          written = len;
+        }
+      else
+        {
+          memcpy(msgpos, buf->iov_base, buf->iov_len);
+          written += buf->iov_len;
+          msgpos  += buf->iov_len;
+          buf++;
+        }
+    }
 
   conn->lastpos  = conn->recvpos;
   conn->sendpos += len + sizeof(uint32_t);
@@ -1035,18 +1080,11 @@ static ssize_t rpmsg_socket_send_internal(FAR struct socket *psock,
 static ssize_t rpmsg_socket_sendmsg(FAR struct socket *psock,
                                     FAR struct msghdr *msg, int flags)
 {
-  FAR void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
+  FAR const struct iovec *buf = msg->msg_iov;
+  size_t len = msg->msg_iovlen;
   FAR struct sockaddr *to = msg->msg_name;
   socklen_t tolen = msg->msg_namelen;
   ssize_t ret;
-
-  /* Validity check, only single iov supported */
-
-  if (msg->msg_iovlen != 1)
-    {
-      return -ENOTSUP;
-    }
 
   if (!_SS_ISCONNECTED(psock->s_flags))
     {
