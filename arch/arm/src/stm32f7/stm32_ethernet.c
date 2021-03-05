@@ -233,6 +233,10 @@
 #  define CONFIG_STM32F7_ETH_NTXDESC 4
 #endif
 
+#ifndef min
+#  define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
 /* We need at least one more free buffer than transmit buffers */
 
 #define STM32_ETH_NFREEBUFFERS (CONFIG_STM32F7_ETH_NTXDESC+1)
@@ -1701,50 +1705,63 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
               dev->d_len = ((rxdesc->rdes0 & ETH_RDES0_FL_MASK) >>
                             ETH_RDES0_FL_SHIFT) - 4;
 
-              /* Get a buffer from the free list.  We don't even check if
-               * this is successful because we already assure the free
-               * list is not empty above.
-               */
+              if (priv->segments > 1 ||
+                  dev->d_len > ALIGNED_BUFSIZE)
+                {
+                  /* The Frame is to big, it spans segments */
 
-              buffer = stm32_allocbuffer(priv);
+                  nerr("ERROR: Dropped, RX descriptor Too big: %d in %d "
+                      "segments\n", dev->d_len, priv->segments);
 
-              /* Take the buffer from the RX descriptor of the first free
-               * segment, put it into the network device structure, then
-               * replace the buffer in the RX descriptor with the newly
-               * allocated buffer.
-               */
+                  stm32_freesegment(priv, rxcurr, priv->segments);
+                }
+              else
+                {
+                  /* Get a buffer from the free list.  We don't even check if
+                   * this is successful because we already assure the free
+                   * list is not empty above.
+                   */
 
-              DEBUGASSERT(dev->d_buf == NULL);
-              dev->d_buf    = (uint8_t *)rxcurr->rdes2;
-              rxcurr->rdes2 = (uint32_t)buffer;
+                  buffer = stm32_allocbuffer(priv);
 
-              /* Make sure that the modified RX descriptor is written to
-               * physical memory.
-               */
+                  /* Take the buffer from the RX descriptor of the first free
+                   * segment, put it into the network device structure, then
+                   * replace the buffer in the RX descriptor with the newly
+                   * allocated buffer.
+                   */
 
-              up_clean_dcache((uintptr_t)rxcurr,
-                (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+                  DEBUGASSERT(dev->d_buf == NULL);
+                  dev->d_buf    = (uint8_t *)rxcurr->rdes2;
+                  rxcurr->rdes2 = (uint32_t)buffer;
 
-              /* Remember where we should re-start scanning and reset the
-               * segment scanning logic
-               */
+                  /* Make sure that the modified RX descriptor is written to
+                   * physical memory.
+                   */
 
-              priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
-              stm32_freesegment(priv, rxcurr, priv->segments);
+                  up_clean_dcache((uintptr_t)rxcurr,
+                    (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
 
-              /* Force the completed RX DMA buffer to be re-read from
-               * physical memory.
-               */
+                  /* Remember where we should re-start scanning and reset the
+                   * segment scanning logic
+                   */
 
-              up_invalidate_dcache((uintptr_t)dev->d_buf,
-                                   (uintptr_t)dev->d_buf + dev->d_len);
+                  priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
+                  stm32_freesegment(priv, rxcurr, priv->segments);
 
-              ninfo("rxhead: %p d_buf: %p d_len: %d\n",
-                    priv->rxhead, dev->d_buf, dev->d_len);
+                  /* Force the completed RX DMA buffer to be re-read from
+                   * physical memory.
+                   */
 
-              /* Return success */
+                  up_invalidate_dcache((uintptr_t)dev->d_buf,
+                                       min(dev->d_len, ALIGNED_BUFSIZE));
 
-              return OK;
+                  ninfo("rxhead: %p d_buf: %p d_len: %d\n",
+                        priv->rxhead, dev->d_buf, dev->d_len);
+
+                  /* Return success */
+
+                  return OK;
+                }
             }
           else
             {
