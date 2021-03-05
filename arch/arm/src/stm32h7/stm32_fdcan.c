@@ -836,7 +836,7 @@
                             FDCAN_INT_TEFL)
 #define FDCAN_TXDEDBUF_INTS FDCAN_TXCOMMON_INTS
 
-#define FDCAN_TXERR_INTS    (FDCAN_INT_TEFL)
+#define FDCAN_TXERR_INTS    (FDCAN_INT_TEFL | FDCAN_INT_PEA | FDCAN_INT_PED)
 
 /* Common-, TX- and RX-Error-Mask */
 
@@ -3968,6 +3968,26 @@ static int fdcan_interrupt(int irq, void *context, FAR void *arg)
             {
               canerr("ERROR: Common %08x\n", pending & FDCAN_CMNERR_INTS);
 
+              /* When a protocol error ocurrs, the problem is recorded in
+               * the LEC/DLEC fields of the PSR register. In lieu of
+               * seprate interrupt flags for each error, the hardware
+               * groups procotol errors under a single interrupt each for
+               * arbitration and data phases.
+               *
+               * These errors have a tendency to flood the system with
+               * interrupts, so they are disabled here until we get a
+               * successful transfer/receive on the hardware
+               */
+              
+              uint32_t psr = fdcan_getreg(priv, STM32_FDCAN_PSR_OFFSET);
+              
+              if ((psr & FDCAN_PSR_LEC_MASK) != 0)
+                {
+                  ie &= ~(FDCAN_INT_PEA | FDCAN_INT_PED);
+                  fdcan_putreg(priv, STM32_FDCAN_IE_OFFSET, ie);
+                  caninfo("disabled protocol error intterupts\n");
+                }
+
               /* Clear the error indications */
 
               fdcan_putreg(priv, STM32_FDCAN_IR_OFFSET, FDCAN_CMNERR_INTS);
@@ -3989,9 +4009,15 @@ static int fdcan_interrupt(int irq, void *context, FAR void *arg)
                * least one message successfully (see FDCAN_INT_TC below).
                */
 
-              //TODO: 
-              // ie &= ~FDCAN_INT_ACKE;
-              // fdcan_putreg(priv, STM32_FDCAN_IE_OFFSET, ie);
+              // uint32_t psr = fdcan_getreg(priv, STM32_FDCAN_PSR_OFFSET);
+
+              // if ((psr & FDCAN_PSR_LEC(FDCAN_PSR_EC_ACK_ERROR)) != 0)
+              //   {
+              //     ie &= ~(FDCAN_INT_PEA | FDCAN_INT_PED);
+              //     fdcan_putreg(priv, STM32_FDCAN_IE_OFFSET, ie);
+              //     caninfo("disabled pea/d\n");
+              //   }
+
 
               /* Clear the error indications */
 
@@ -4049,12 +4075,12 @@ static int fdcan_interrupt(int irq, void *context, FAR void *arg)
            * re-enable the error interrupt here again.
            */
 
-          //TODO: 
-          // if ((ie & FDCAN_INT_ACKE) == 0)
-          //   {
-          //       ie |= FDCAN_INT_ACKE;
-          //       fdcan_putreg(priv, STM32_FDCAN_IE_OFFSET, ie);
-          //   }
+          if ((ie & (FDCAN_INT_PEA | FDCAN_INT_PED)) == 0)
+            {
+                ie |= (FDCAN_INT_PEA | FDCAN_INT_PED);
+                fdcan_putreg(priv, STM32_FDCAN_IE_OFFSET, ie);
+                caninfo("Renabled protocol error intterupts\n");
+            }
 
           /* Clear the pending TX completion interrupt (and all
            * other TX-related interrupts)
