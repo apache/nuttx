@@ -48,9 +48,4 @@
 
 #define ARMV8M_PERIPHERAL_INTERRUPTS STM32L5_IRQ_NEXTINTS
 
-/* Cache line sizes (in bytes) for the STM32L5 */
-
-#define ARMV8M_DCACHE_LINESIZE 0  /* no cache */
-#define ARMV8M_ICACHE_LINESIZE 0  /* no cache */
-
 #endif /* __ARCH_ARM_SRC_STM32L5_CHIP_H */
