@@ -73,6 +73,29 @@ config RP2040_UART1_2STOP
 
 endif
 
+config RP2040_SPI
+	bool "SPI"
+	select SPI
+
+if RP2040_SPI
+
+config RP2040_SPI0
+	bool "SPI0"
+
+config RP2040_SPI1
+	bool "SPI1"
+
+config RP2040_SPI_DRIVER
+	bool "SPI character driver"
+	default y
+	select SPI_DRIVER
+	---help---
+		Build in support for a character driver at /dev/spi[N] that may be
+		used to perform SPI bus transfers from applications.  The intent of
+		this driver is to support SPI testing.
+
+endif
+
 config RP2040_I2C
 	bool "I2C"
 	select I2C
@@ -96,3 +119,25 @@ config RP2040_I2C_DRIVER
 		in any real driver application.
 
 endif
+
+menuconfig RP2040_SPISD
+	bool "SPI SD Card"
+	default n
+	select MMCSD_SPI
+
+if RP2040_SPISD
+
+config RP2040_SPISD_SLOT_NO
+	int "SPI SD Card Slot Number"
+	default 0
+	---help---
+		Select spi sd card slot number.
+
+config RP2040_SPISD_SPI_CH
+	int "SPI channel number"
+	default 0
+	range 0 1
+	---help---
+		Select spi channel number to use spi sd card.
+
+endif # SPISD Configuration
