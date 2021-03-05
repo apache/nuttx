@@ -3390,10 +3390,14 @@ static int fdcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    * REVISIT:  Should we disable interrupts?  can_txdone() was designed to
    * be called from an interrupt handler and, hence, may be unsafe when
    * called from the tasking level.
+   *
+   * NOTE: The calls to enter/leave_critical_section() were added below to satisify
+   * the requirement that interrupts are disabled when can_txdone() is called.
    */
 
+  flags = enter_critical_section();
   can_txdone(dev);
-  fdcan_dumptxregs(priv, "After send");
+  leave_critical_section(flags);
 
   return OK;
 }
