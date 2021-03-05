@@ -1012,7 +1012,7 @@ static int fdcan_dev_lock(FAR struct stm32_fdcan_s *priv);
 static int fdcan_dev_lock_noncancelable(FAR struct stm32_fdcan_s *priv);
 #define fdcan_dev_unlock(priv) nxsem_post(&priv->locksem)
 
-static void fdcan_buffer_reserve(FAR struct stm32_fdcan_s *priv);
+static int fdcan_buffer_reserve(FAR struct stm32_fdcan_s *priv);
 static void fdcan_buffer_release(FAR struct stm32_fdcan_s *priv);
 
 /* FDCAN helpers */
@@ -1711,7 +1711,7 @@ static int fdcan_dev_lock_noncancelable(FAR struct stm32_fdcan_s *priv)
  *
  ****************************************************************************/
 
-static void fdcan_buffer_reserve(FAR struct stm32_fdcan_s *priv)
+static int fdcan_buffer_reserve(FAR struct stm32_fdcan_s *priv)
 {
   irqstate_t flags;
   uint32_t txfqs1;
@@ -1736,6 +1736,10 @@ static void fdcan_buffer_reserve(FAR struct stm32_fdcan_s *priv)
        *
        * An missed TX interrupt could cause the semaphore count to fail to
        * be incremented and, hence, to be too low.
+       *
+       * REVISIT: Should we really wait here? In theory the time to wait is
+       * small, but it is still wait time nonetheless. If the upper-level
+       * driver is operating in non-blocking mode, is this acceptable?
        */
 
       for (; ; )
@@ -1782,6 +1786,8 @@ static void fdcan_buffer_reserve(FAR struct stm32_fdcan_s *priv)
               canerr("ERROR: TX FIFOQ full but txfsem is %d\n", sval);
               nxsem_reset(&priv->txfsem, 0);
             }
+
+          return -ENOMEM;
         }
 
       /* The FIFO is not full so the semaphore count should be greater
@@ -1815,7 +1821,7 @@ static void fdcan_buffer_reserve(FAR struct stm32_fdcan_s *priv)
            */
 
           leave_critical_section(flags);
-          return;
+          return OK;
         }
 #else
       /* Tx FIFO Free Level */
@@ -1849,12 +1855,13 @@ static void fdcan_buffer_reserve(FAR struct stm32_fdcan_s *priv)
         }
 #endif
 
-      /* The semaphore value is reasonable.  Wait for the next TC interrupt. */
+      /* The semaphore value is reasonable. See if we can obtain it now. */
 
-      ret = nxsem_wait(&priv->txfsem);
+      ret = nxsem_trywait(&priv->txfsem);
       leave_critical_section(flags);
+      return ret;
     }
-  while (ret < 0);
+  while (1); /* REVIST: I do not like infinite loops */
 }
 
 /****************************************************************************
@@ -3231,6 +3238,7 @@ static int fdcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   FAR const uint8_t *src;
   FAR uint32_t *dest;
   uint32_t regval;
+  irqstate_t flags;
   // unsigned int msglen;
   unsigned int ndx;
   unsigned int nbytes;
@@ -3254,22 +3262,25 @@ static int fdcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   DEBUGASSERT(config->ntxfifoq > 0);
 
-  /* Reserve a buffer for the transmission, waiting if necessary.  When
-   * fdcan_buffer_reserve() returns, we are guaranteed that the TX FIFOQ is
-   * not full and cannot become full at least until we add our packet to
-   * the FIFO.
+  /* Reserve a buffer for the transmission.  If fdcan_buffer_reserve()
+   * returns succesful, we are guaranteed that the TX FIFOQ is not full
+   * and cannot become full at least until we add our packet to the FIFO.
+   * If it returns unsuccesful, we should exit now to ensure that non-blocking
+   * operation is maintained.
    *
    * We can't get exclusive access to FDCAN resources here because that
-   * lock the FDCAN while we wait for a free buffer.  Instead, the
+   * locks the FDCAN while we wait for a free buffer.  Instead, the
    * scheduler is locked here momentarily.  See discussion in
    * fdcan_buffer_reserve() for an explanation.
-   *
-   * REVISIT: This needs to be extended in order to handler case where
-   * the FDCAN device was opened O_NONBLOCK.
    */
 
   sched_lock();
-  fdcan_buffer_reserve(priv);
+  ret = fdcan_buffer_reserve(priv);
+  if (ret < 0)
+    {
+      sched_unlock();
+      return ret;
+    }
 
   /* Get exclusive access to the FDCAN peripheral */
 
@@ -4025,7 +4036,7 @@ static int fdcan_interrupt(int irq, void *context, FAR void *arg)
 
               /* REVISIT:  Will FDCAN_INT_TC also be set in the event of
                * a transmission error?  Each write must conclude with a
-               * call to man_buffer_release(), whether or not the write
+               * call to fdcan_buffer_release(), whether or not the write
                * was successful.
                *
                * We assume that FDCAN_INT_TC will be called for each
