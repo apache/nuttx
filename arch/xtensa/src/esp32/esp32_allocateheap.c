@@ -96,17 +96,41 @@ void xtensa_add_region(void)
 {
   void  *start;
   size_t size;
+  int availregions;
+  int nregions = CONFIG_MM_REGIONS - 1;
+
+#ifdef CONFIG_SMP
+  availregions = 2;
+#  ifdef CONFIG_BOARD_LATE_INITIALIZE
+  availregions++;
+#  else
+  minfo("A ~3KB heap region can be added to the heap by enabling"
+        " CONFIG_BOARD_LATE_INITIALIZE\n");
+#  endif
+#else
+  availregions = 1;
+#endif
+
+#ifdef CONFIG_ESP32_SPIRAM
+  availregions++;
+#endif
+
+  if (nregions < availregions)
+    {
+      mwarn("Some memory regions are left unused!\n");
+      mwarn("Increase CONFIG_MM_NREGIONS to add them to the heap\n");
+    }
 
 #ifndef CONFIG_SMP
   start = (FAR void *)(HEAP_REGION2_START + XTENSA_IMEM_REGION_SIZE);
   size  = (size_t)(uintptr_t)&_eheap - (size_t)start;
   umm_addregion(start, size);
-                
+
 #else
   start = (FAR void *)HEAP_REGION2_START;
   size  = (size_t)(HEAP_REGION2_END - HEAP_REGION2_START);
   umm_addregion(start, size);
-           
+
   start = (FAR void *)HEAP_REGION3_START + XTENSA_IMEM_REGION_SIZE;
   size  = (size_t)(uintptr_t)&_eheap - (size_t)start;
   umm_addregion(start, size);
