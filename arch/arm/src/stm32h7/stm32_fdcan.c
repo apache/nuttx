@@ -1564,7 +1564,7 @@ static void fdcan_dumptxregs(FAR struct stm32_fdcan_s *priv,
 #endif
 
 /****************************************************************************
- * Name: stm32can_showramlayout
+ * Name: stm32can_dumpramlayout
  *
  * Description:
  *   Print the layout of the message RAM
@@ -3367,10 +3367,12 @@ static int fdcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
     }
 
   /* Flush the D-Cache to memory before initiating the transfer */
+  /* REVISIT: Make sure D-Cache isn't actually used by FDCAN */
 
-  // msglen = 2 * sizeof(uint32_t) + nbytes;
-  // up_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + msglen);
-  // UNUSED(msglen);
+  /* msglen = 2 * sizeof(uint32_t) + nbytes;
+   * up_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + msglen);
+   * UNUSED(msglen);
+   */
 
   /* Enable transmit interrupts from the TX FIFOQ buffer by setting TC
    * interrupt bit in IR (also requires that the TC interrupt is enabled)
@@ -3847,22 +3849,18 @@ static void fdcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
 {
   struct can_hdr_s hdr;
   uint32_t regval;
-  // unsigned int nbytes;
+  /* unsigned int nbytes; */
   int ret;
 
   fdcan_dumprxregs(dev->cd_priv, "Before receive");
 
-  caninfo("*** Raw message data ***\n");
-  caninfo("   R0 @%08x : %08x\n", &rxbuffer[0], rxbuffer[0]); 
-  caninfo("   R1 @%08x : %08x\n", &rxbuffer[1], rxbuffer[1]); 
-  caninfo("   R2 @%08x : %08x\n", &rxbuffer[2], rxbuffer[2]);
-  caninfo("   R3 @%08x : %08x\n", &rxbuffer[3], rxbuffer[3]);
-
   /* Invalidate the D-Cache so that we reread the RX buffer data from memory. */
+  /* REVISIT: Make sure D-Cache actually isn't used by FDCAN */
 
-  // nbytes = (nwords << 2);
-  // up_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
-  caninfo("rx address: %p\n",rxbuffer);
+  /* nbytes = (nwords << 2);
+   * up_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
+   */
+
   /* Format the CAN header */
 
   /* Work R0 contains the CAN ID */
