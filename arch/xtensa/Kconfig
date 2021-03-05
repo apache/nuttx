@@ -131,6 +131,13 @@ config XTENSA_IMEM_REGION_SIZE
 	depends on XTENSA_IMEM_USE_SEPARATE_HEAP
 	default 0x18000
 
+config XTENSA_EXTMEM_BSS
+	bool "Allow BSS section in external memory"
+	default n
+	help
+		Adds a section and an attribute that allows to force variables into
+		the external memory.
+
 source arch/xtensa/src/lx6/Kconfig
 if ARCH_CHIP_ESP32
 source arch/xtensa/src/esp32/Kconfig
