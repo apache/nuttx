@@ -28,6 +28,7 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 #include <malloc.h>
+#include <arch/esp32/memory_layout.h>
 
 #include "xtensa.h"
 
@@ -36,26 +37,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Region 1 of the heap is the area from the end of the .data section to the
- * begining of the ROM data.  The start address is defined from the linker
- * script as "_sheap".  Then end is defined here, as follows:
- */
-
-#ifndef HEAP_REGION1_END
-#define HEAP_REGION1_END    0x3ffdfff0
-#endif
-
-/* If define CONFIG_XTENSA_IMEM_MAXIMIZE_HEAP_REGION, it means
- * using maximum separate heap for internal memory, but part of
- * the available memory is reserved for the Region 1 heap.
- */
-
-#ifdef CONFIG_XTENSA_IMEM_MAXIMIZE_HEAP_REGION
-#ifndef HEAP_REGION_OFFSET
-#define HEAP_REGION_OFFSET  0x2000
-#endif
-#endif
 
 /****************************************************************************
  * Private Data
