@@ -35,12 +35,7 @@
 #include "arm_arch.h"
 
 #include "chip.h"
-
 #include "rp2040_gpio.h"
-
-#include "hardware/rp2040_pads_bank0.h"
-#include "hardware/rp2040_io_bank0.h"
-#include "hardware/rp2040_sio.h"
 
 /****************************************************************************
  * Private Functions
@@ -66,4 +61,11 @@ void rp2040_gpio_set_pulls(uint32_t gpio, int up, int down)
                 (down ? RP2040_PADS_BANK0_GPIO_PDE : 0),
                 RP2040_PADS_BANK0_GPIO_PUE | RP2040_PADS_BANK0_GPIO_PDE,
                 RP2040_PADS_BANK0_GPIO(gpio));
+}
+
+void rp2040_gpio_init(uint32_t gpio)
+{
+  rp2040_gpio_setdir(gpio, false);
+  rp2040_gpio_put(gpio, false);
+  rp2040_gpio_set_function(gpio, RP2040_GPIO_FUNC_SIO);
 }
