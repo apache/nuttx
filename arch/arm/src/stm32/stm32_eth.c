@@ -1644,34 +1644,48 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
               dev->d_len = ((rxdesc->rdes0 & ETH_RDES0_FL_MASK) >>
                             ETH_RDES0_FL_SHIFT) - 4;
 
-              /* Get a buffer from the free list.  We don't even check if
-               * this is successful because we already assure the free
-               * list is not empty above.
-               */
+              if (priv->segments > 1 ||
+                  dev->d_len > CONFIG_STM32_ETH_BUFSIZE)
+                {
+                  /* The Frame is to big, it spans segments */
 
-              buffer = stm32_allocbuffer(priv);
+                  nerr("ERROR: Dropped, RX descriptor Too big: %d in %d "
+                      "segments\n", dev->d_len, priv->segments);
 
-              /* Take the buffer from the RX descriptor of the first free
-               * segment, put it into the network device structure, then
-               * replace the buffer in the RX descriptor with the newly
-               * allocated buffer.
-               */
+                  stm32_freesegment(priv, rxcurr, priv->segments);
+                }
 
-              DEBUGASSERT(dev->d_buf == NULL);
-              dev->d_buf    = (uint8_t *)rxcurr->rdes2;
-              rxcurr->rdes2 = (uint32_t)buffer;
+              else
+                {
+                  /* Get a buffer from the free list.  We don't even check if
+                   * this is successful because we already assure the free
+                   * list is not empty above.
+                   */
 
-              /* Return success, remembering where we should re-start
-               * scanning and resetting the segment scanning logic
-               */
+                  buffer = stm32_allocbuffer(priv);
 
-              priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
-              stm32_freesegment(priv, rxcurr, priv->segments);
+                  /* Take the buffer from the RX descriptor of the first free
+                   * segment, put it into the network device structure, then
+                   * replace the buffer in the RX descriptor with the newly
+                   * allocated buffer.
+                   */
 
-              ninfo("rxhead: %p d_buf: %p d_len: %d\n",
-                    priv->rxhead, dev->d_buf, dev->d_len);
+                  DEBUGASSERT(dev->d_buf == NULL);
+                  dev->d_buf    = (uint8_t *)rxcurr->rdes2;
+                  rxcurr->rdes2 = (uint32_t)buffer;
 
-              return OK;
+                  /* Return success, remembering where we should re-start
+                   * scanning and resetting the segment scanning logic
+                   */
+
+                  priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
+                  stm32_freesegment(priv, rxcurr, priv->segments);
+
+                  ninfo("rxhead: %p d_buf: %p d_len: %d\n",
+                        priv->rxhead, dev->d_buf, dev->d_len);
+
+                  return OK;
+                }
             }
           else
             {
