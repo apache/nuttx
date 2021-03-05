@@ -28,6 +28,9 @@
 #include <nuttx/config.h>
 
 #include "rp2040_i2cdev.h"
+#include "rp2040_spidev.h"
+
+#include "rp2040_spisd.h"
 
 #ifndef __ASSEMBLY__
 # include <stdint.h>
