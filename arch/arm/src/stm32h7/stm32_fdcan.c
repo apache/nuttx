@@ -887,7 +887,8 @@ enum can_state_s
 {
   FDCAN_STATE_UNINIT = 0,    /* Not yet initialized */
   FDCAN_STATE_RESET,         /* Initialized, reset state */
-  FDCAN_STATE_SETUP,         /* can_setup() has been called */
+  FDCAN_STATE_SETUP,         /* fdcan_setup() has been called */
+  FDCAN_STATE_DISABLED       /* Disabled by a fdcan_shutdown() */
 };
 
 /* This structure describes the FDCAN message RAM layout */
@@ -2670,11 +2671,17 @@ static void fdcan_reset(FAR struct can_dev_s *dev)
   nxsem_destroy(&priv->txfsem);
   nxsem_init(&priv->txfsem, 0, config->ntxfifoq);
 
-  /* Disable peripheral clocking to the FDCAN controller */
+  /* Disable the FDCAN controller */
+  /* REVISIT: Should fdcan_shutdown() be called here? */
 
-  // sam_disableperiph1(priv->config->pid); //TODO: check this
+  // fdcan_shutdown(dev);
 
-   /* Reset the FD CAN */
+  /* Reset the FD CAN */
+  /* REVISIT:  Since there is only a single reset for both FDCAN
+   * controllers, do we really want to use the RCC reset here?
+   * This will nuke operation of the second controller if another
+   * device is registered.
+   */
 
   regval  = getreg32(STM32_RCC_APB1HRSTR);
   regval |= RCC_APB1HRSTR_FDCANRST;
@@ -2756,10 +2763,14 @@ static int fdcan_setup(FAR struct can_dev_s *dev)
       return ret;
     }
 
-  /* Enable receive interrupts */
-
   priv->state = FDCAN_STATE_SETUP;
-  fdcan_rxint(dev, true);
+
+  /* Enable receive interrupts */
+  /* REVIST: this is done by can_open() as well. The comment below seems to
+   * indicate that receive interrupts should be disabled on leaving here
+   */
+
+  /* fdcan_rxint(dev, true); */
 
   /* Enable the interrupts at the NVIC (they are still disabled at the FDCAN
    * peripheral).
@@ -2790,6 +2801,7 @@ static void fdcan_shutdown(FAR struct can_dev_s *dev)
 {
   FAR struct stm32_fdcan_s *priv;
   FAR const struct stm32_config_s *config;
+  uint32_t regval;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
@@ -2818,9 +2830,20 @@ static void fdcan_shutdown(FAR struct can_dev_s *dev)
   irq_detach(config->irq0);
   irq_detach(config->irq1);
 
-  /* Disable peripheral clocking to the FDCAN controller */
+  /* Disable device by setting the Clock Stop Request bit */
 
-  // sam_disableperiph1(priv->config->pid); //TODO: check this
+  regval = fdcan_getreg(priv, STM32_FDCAN_CCCR_OFFSET);
+  regval |= FDCAN_CCCR_CSR;
+  fdcan_putreg(priv, STM32_FDCAN_CCCR_OFFSET, regval);
+
+  /* Wait for Init and Clock Stop Acknowledge bits to verify
+   * device is in the powered down state
+   */
+
+  while ((fdcan_getreg(priv, STM32_FDCAN_CCCR_OFFSET) & FDCAN_CCCR_INIT) == 0);
+  while ((fdcan_getreg(priv, STM32_FDCAN_CCCR_OFFSET) & FDCAN_CCCR_CSA) == 0);
+  priv->state = FDCAN_STATE_DISABLED;
+
   fdcan_dev_unlock(priv);
 }
 
@@ -4247,6 +4270,23 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
 
   stm32_configgpio(config->rxpinset);
   stm32_configgpio(config->txpinset);
+
+  /* Renable device if previosuly disabled in fdcan_shutdown() */
+
+  if (priv->state == FDCAN_STATE_DISABLED)
+  {
+    /* Reset Clock Stop Request bit */
+
+    regval  = fdcan_getreg(priv, STM32_FDCAN_CCCR_OFFSET);
+    regval &= ~FDCAN_CCCR_CSR;
+    fdcan_putreg(priv, STM32_FDCAN_CCCR_OFFSET, regval);
+
+    /* Wait for Clock Stop Acknowledge bit reset to indicate
+     * device is operational
+     */
+
+    while ((fdcan_getreg(priv, STM32_FDCAN_CCCR_OFFSET) & FDCAN_CCCR_CSA) == 1);
+  }
 
   /* Enable the Initialization state */
 
