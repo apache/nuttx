@@ -51,4 +51,16 @@ config RP2040_I2C1_GPIO
 	range -1 29
 	depends on RP2040_I2C1
 
+config RP2040_SPI0_GPIO
+	int "SPI0 GPIO pin assign (0,4,16,20 or -1:no assign)"
+	default -1
+	range -1 29
+	depends on RP2040_SPI0
+
+config RP2040_SPI1_GPIO
+	int "SPI1 GPIO pin assign (8,12,24,28 or -1:no assign)"
+	default -1
+	range -1 29
+	depends on RP2040_SPI1
+
 endif

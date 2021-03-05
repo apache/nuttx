@@ -11,6 +11,7 @@ Currently only the following devices are suppored.
   - UART  (console port)
     - GPIO 0 (UART0 TX) and GPIO 1 (UART0 RX) are used for the console.
   - I2C
+  - SPI (DMA transfer is not supported yet)
   - Flash ROM Boot
   - SRAM Boot
     - If Pico SDK is available, nuttx.uf2 file which can be used in
@@ -51,7 +52,7 @@ Defconfigs
 ==========
 
 - nsh
-    Minimum configuration with NutShell
+    Minimum configuration with NuttShell
 
 - nshsram
     Load NuttX binary to SRAM
@@ -67,6 +68,20 @@ Defconfigs
            VCC ----- 3V3 OUT        (Pin 36)
            SDA ----- GP4 (I2C0 SDA) (Pin 6)
            SCL ----- GP5 (I2C0 SCL) (Pin 7)
+
+- spisd
+    SD card support (SPI connection)
+    Connection:
+      SD card slot   Raspberry Pi Pico
+       DAT2          (NC)
+       DAT3/CS ----- GP17 (SPI0 CSn) (Pin 22)
+       CMD /DI ----- GP19 (SPI0 TX)  (Pin 25)
+       VDD     ----- 3V3 OUT         (Pin 36)
+       CLK/SCK ----- GP18 (SPI0 SCK) (Pin 24)
+       VSS     ----- GND             (Pin 3 or 38 or ...)
+       DAT0/DO ----- GP16 (SPI0 RX)  (Pin 21)
+       DAT1          (NC)
+    * Card hot swapping is not supported.
 
 License exceptions
 ==================

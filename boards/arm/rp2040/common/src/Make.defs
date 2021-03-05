@@ -22,8 +22,16 @@ ifeq ($(CONFIG_RP2040_I2C_DRIVER),y)
 CSRCS += rp2040_i2cdev.c
 endif
 
+ifeq ($(CONFIG_RP2040_SPI_DRIVER),y)
+CSRCS += rp2040_spidev.c
+endif
+
 ifeq ($(CONFIG_LCD_SSD1306),y)
 CSRCS += rp2040_ssd1306.c
+endif
+
+ifeq ($(CONFIG_RP2040_SPISD),y)
+  CSRCS += rp2040_spisd.c
 endif
 
 DEPPATH += --dep-path src

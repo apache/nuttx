@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/raspberrypi-pico/src/rp2040_bringup.c
+ * boards/arm/rp2040/raspberrypi-pico/include/rp2040_spisd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,89 +18,66 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_RP2040_SPISD_H
+#define __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_RP2040_SPISD_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-#include <stddef.h>
-
-#include <nuttx/fs/fs.h>
-
-#include <arch/board/board.h>
-
-#include "rp2040_pico.h"
-
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
 /****************************************************************************
- * Name: rp2040_bringup
+ * Public Data
  ****************************************************************************/
 
-int rp2040_bringup(void)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  int ret = 0;
-
-#ifdef CONFIG_RP2040_I2C_DRIVER
-  #ifdef CONFIG_RP2040_I2C0
-  ret = board_i2cdev_initialize(0);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to initialize I2C0.\n");
-    }
-  #endif
-
-  #ifdef CONFIG_RP2040_I2C1
-  ret = board_i2cdev_initialize(1);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to initialize I2C1.\n");
-    }
-  #endif
+#else
+#define EXTERN extern
 #endif
 
-#ifdef CONFIG_RP2040_SPI_DRIVER
-  #ifdef CONFIG_RP2040_SPI0
-  ret = board_spidev_initialize(0);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to initialize SPI0.\n");
-    }
-  #endif
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-  #ifdef CONFIG_RP2040_SPI1
-  ret = board_spidev_initialize(1);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to initialize SPI1.\n");
-    }
-  #endif
-#endif
+/****************************************************************************
+ * Name: board_spisd_initialize
+ *
+ * Description:
+ *   Initialize the SPI-based SD card.
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_RP2040_SPISD
-  /* Mount the SPI-based MMC/SD block driver */
-
-  ret = board_spisd_initialize(0, CONFIG_RP2040_SPISD_SPI_CH);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to initialize SPI device to MMC/SD: %d\n",
-           ret);
-    }
+int board_spisd_initialize(int minor, int bus);
 #endif
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
+/****************************************************************************
+ * Name: board_spisd_status
+ *
+ * Description:
+ *   Get the status whether SD Card is present or not.
+ *
+ ****************************************************************************/
 
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
-    }
+#ifdef CONFIG_RP2040_SPISD
+uint8_t board_spisd_status(FAR struct spi_dev_s *dev, uint32_t devid);
 #endif
 
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_RP2040_SPISD_H */

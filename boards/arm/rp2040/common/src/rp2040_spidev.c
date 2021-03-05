@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/raspberrypi-pico/src/rp2040_bringup.c
+ * boards/arm/rp2040/common/src/rp2040_spidev.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,83 +24,46 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <debug.h>
-#include <stddef.h>
+#include <errno.h>
+#include <nuttx/spi/spi_transfer.h>
 
-#include <nuttx/fs/fs.h>
-
-#include <arch/board/board.h>
-
-#include "rp2040_pico.h"
+#include "rp2040_spi.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rp2040_bringup
+ * Name: board_spidev_initialize
+ *
+ * Description:
+ *   Initialize and register spi driver for the specified spi port
+ *
  ****************************************************************************/
 
-int rp2040_bringup(void)
+int board_spidev_initialize(int port)
 {
-  int ret = 0;
+  int ret;
+  FAR struct spi_dev_s *spi;
 
-#ifdef CONFIG_RP2040_I2C_DRIVER
-  #ifdef CONFIG_RP2040_I2C0
-  ret = board_i2cdev_initialize(0);
+  spiinfo("Initializing /dev/spi%d..\n", port);
+
+  /* Initialize spi device */
+
+  spi = rp2040_spibus_initialize(port);
+  if (!spi)
+    {
+      spierr("ERROR: Failed to initialize spi%d.\n", port);
+      return -ENODEV;
+    }
+
+  ret = spi_register(spi, port);
   if (ret < 0)
     {
-      _err("ERROR: Failed to initialize I2C0.\n");
+      spierr("ERROR: Failed to register spi%d: %d\n", port, ret);
     }
-  #endif
-
-  #ifdef CONFIG_RP2040_I2C1
-  ret = board_i2cdev_initialize(1);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to initialize I2C1.\n");
-    }
-  #endif
-#endif
-
-#ifdef CONFIG_RP2040_SPI_DRIVER
-  #ifdef CONFIG_RP2040_SPI0
-  ret = board_spidev_initialize(0);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to initialize SPI0.\n");
-    }
-  #endif
-
-  #ifdef CONFIG_RP2040_SPI1
-  ret = board_spidev_initialize(1);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to initialize SPI1.\n");
-    }
-  #endif
-#endif
-
-#ifdef CONFIG_RP2040_SPISD
-  /* Mount the SPI-based MMC/SD block driver */
-
-  ret = board_spisd_initialize(0, CONFIG_RP2040_SPISD_SPI_CH);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to initialize SPI device to MMC/SD: %d\n",
-           ret);
-    }
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
-    }
-#endif
 
   return ret;
 }
