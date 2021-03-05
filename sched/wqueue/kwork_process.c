@@ -206,16 +206,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
         }
     }
 
-  /* When multiple worker threads are created for this work queue, only
-   * thread 0 (wndx = 0) will monitor the unexpired works.
-   *
-   * Other worker threads (wndx > 0) just process no-delay or expired
-   * works, then sleep. The unexpired works are left in the queue. They
-   * will be handled by thread 0 when it finishes current work and iterate
-   * over the queue again.
-   */
-
-  if (wndx > 0 || next == WORK_DELAY_MAX)
+  if (next == WORK_DELAY_MAX)
     {
       sigset_t set;
 
