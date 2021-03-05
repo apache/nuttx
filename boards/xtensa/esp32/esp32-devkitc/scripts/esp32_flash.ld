@@ -123,6 +123,16 @@ SECTIONS
     _sheap = ABSOLUTE(.);
   } >dram0_0_seg
 
+  /* External memory bss, from any global variable with EXT_RAM_ATTR attribute */
+
+  .extmem.bss (NOLOAD) :
+  {
+    _sbss_extmem = ABSOLUTE(.);
+    *(.extmem.bss .extmem.bss.*)
+    . = ALIGN(4);
+    _ebss_extmem = ABSOLUTE(.);
+  } > extmem_seg
+
   .flash.rodata :
   {
     _srodata = ABSOLUTE(.);
