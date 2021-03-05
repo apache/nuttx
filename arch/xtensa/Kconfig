@@ -141,6 +141,11 @@ config XTENSA_IMEM_REGION_SIZE
 	depends on XTENSA_IMEM_USE_SEPARATE_HEAP && !XTENSA_IMEM_MAXIMIZE_HEAP_REGION
 	default 0x18000
 
+config XTENSA_IMEM_USE_REGION2_AS_IMEM
+	bool "Use the whole region2 for the imem heap"
+	depends on XTENSA_IMEM_USE_SEPARATE_HEAP
+	default n
+
 source arch/xtensa/src/lx6/Kconfig
 if ARCH_CHIP_ESP32
 source arch/xtensa/src/esp32/Kconfig

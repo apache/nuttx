@@ -77,6 +77,12 @@ void xtensa_imm_initialize(void)
 
   mm_initialize(&g_iheap, start, size);
 
+#if defined(CONFIG_XTENSA_IMEM_USE_REGION2_AS_IMEM)
+  mm_addregion(&g_iheap,
+               (FAR void *)HEAP_REGION2_START,
+               (size_t)(uintptr_t)&_eheap - HEAP_REGION2_START);
+#endif
+
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   static struct procfs_meminfo_entry_s g_imm_procfs;
 
