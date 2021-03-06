@@ -593,16 +593,19 @@ static inline void rcc_enableccip(void)
 #ifdef CONFIG_STM32L4_I2C1
   /* Select HSI16 as I2C1 clock source. */
 
+  regval &= ~RCC_CCIPR_I2C1SEL_MASK;
   regval |= RCC_CCIPR_I2C1SEL_HSI;
 #endif
 #ifdef CONFIG_STM32L4_I2C2
   /* Select HSI16 as I2C2 clock source. */
 
+  regval &= ~RCC_CCIPR_I2C2SEL_MASK;
   regval |= RCC_CCIPR_I2C2SEL_HSI;
 #endif
 #ifdef CONFIG_STM32L4_I2C3
   /* Select HSI16 as I2C3 clock source. */
 
+  regval &= ~RCC_CCIPR_I2C3SEL_MASK;
   regval |= RCC_CCIPR_I2C3SEL_HSI;
 #endif
 #endif /* STM32L4_I2C_USE_HSI16 */
@@ -613,12 +616,14 @@ static inline void rcc_enableccip(void)
    * warning messages.
    */
 
+  regval &= ~RCC_CCIPR_CLK48SEL_MASK;
   regval |= STM32L4_CLK48_SEL;
 #endif
 
 #if defined(CONFIG_STM32L4_ADC1) || defined(CONFIG_STM32L4_ADC2) || defined(CONFIG_STM32L4_ADC3)
   /* Select SYSCLK as ADC clock source */
 
+  regval &= ~RCC_CCIPR_ADCSEL_MASK;
   regval |= RCC_CCIPR_ADCSEL_SYSCLK;
 #endif
 
@@ -638,7 +643,8 @@ static inline void rcc_enableccip(void)
 
   /* Select HSI16 as I2C4 clock source. */
 
-  regval |= RCC_CCIPR_I2C4SEL_HSI;
+  regval &= ~RCC_CCIPR2_I2C4SEL_MASK;
+  regval |= RCC_CCIPR2_I2C4SEL_HSI;
 
   putreg32(regval, STM32L4_RCC_CCIPR2);
 #endif

@@ -117,7 +117,7 @@ static inline void rcc_enableahb1(void)
 {
   uint32_t regval;
 
-  /* Set the appropriate bits in the AHB1ENR register to enabled the
+  /* Set the appropriate bits in the AHB1ENR register to enable the
    * selected AHB1 peripherals.
    */
 
@@ -162,7 +162,7 @@ static inline void rcc_enableahb2(void)
 {
   uint32_t regval;
 
-  /* Set the appropriate bits in the AHB2ENR register to enable the
+  /* Set the appropriate bits in the AHB2ENR register to enabled the
    * selected AHB2 peripherals.
    */
 
@@ -519,16 +519,19 @@ static inline void rcc_enableccip(void)
 #ifdef CONFIG_STM32L4_I2C1
   /* Select HSI16 as I2C1 clock source. */
 
+  regval &= ~RCC_CCIPR_I2C1SEL_MASK;
   regval |= RCC_CCIPR_I2C1SEL_HSI;
 #endif
 #ifdef CONFIG_STM32L4_I2C2
   /* Select HSI16 as I2C2 clock source. */
 
+  regval &= ~RCC_CCIPR_I2C2SEL_MASK;
   regval |= RCC_CCIPR_I2C2SEL_HSI;
 #endif
 #ifdef CONFIG_STM32L4_I2C3
   /* Select HSI16 as I2C3 clock source. */
 
+  regval &= ~RCC_CCIPR_I2C3SEL_MASK;
   regval |= RCC_CCIPR_I2C3SEL_HSI;
 #endif
 #endif /* STM32L4_I2C_USE_HSI16 */
@@ -539,12 +542,14 @@ static inline void rcc_enableccip(void)
    * warning messages.
    */
 
+  regval &= ~RCC_CCIPR_CLK48SEL_MASK;
   regval |= STM32L4_CLK48_SEL;
 #endif
 
 #if defined(CONFIG_STM32L4_ADC1)
   /* Select SYSCLK as ADC clock source */
 
+  regval &= ~RCC_CCIPR_ADCSEL_MASK;
   regval |= RCC_CCIPR_ADCSEL_SYSCLK;
 #endif
 
@@ -570,7 +575,8 @@ static inline void rcc_enableccip(void)
 
   /* Select HSI16 as I2C4 clock source. */
 
-  regval |= RCC_CCIPR_I2C4SEL_HSI;
+  regval &= ~RCC_CCIPR2_I2C4SEL_MASK;
+  regval |= RCC_CCIPR2_I2C4SEL_HSI;
 
   putreg32(regval, STM32L4_RCC_CCIPR2);
 #endif
@@ -637,6 +643,7 @@ static void stm32l4_stdclockconfig(void)
   /* setting MSIRANGE */
 
   regval  = getreg32(STM32L4_RCC_CR);
+  regval &= ~RCC_CR_MSIRANGE_MASK;
   regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION);    /* Enable MSI and frequency */
   putreg32(regval, STM32L4_RCC_CR);
 
