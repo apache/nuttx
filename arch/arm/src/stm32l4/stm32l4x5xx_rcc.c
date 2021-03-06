@@ -688,9 +688,9 @@ static void stm32l4_stdclockconfig(void)
 #if 0
       /* Ensure Power control is enabled before modifying it. */
 
-      regval  = getreg32(STM32L4_RCC_APB1ENR);
-      regval |= RCC_APB1ENR_PWREN;
-      putreg32(regval, STM32L4_RCC_APB1ENR);
+      regval  = getreg32(STM32L4_RCC_APB1ENR1);
+      regval |= RCC_APB1ENR1_PWREN;
+      putreg32(regval, STM32L4_RCC_APB1ENR1);
 
       /* Select regulator voltage output Scale 1 mode to support system
        * frequencies up to 168 MHz.
