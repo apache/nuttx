@@ -398,9 +398,8 @@ static int  cxd56_sdio_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
 /* EVENT handler */
 
 static void cxd56_sdio_waitenable(FAR struct sdio_dev_s *dev,
-              sdio_eventset_t eventset);
-static sdio_eventset_t cxd56_sdio_eventwait(FAR struct sdio_dev_s *dev,
-              uint32_t timeout);
+              sdio_eventset_t eventset, uint32_t timeout);
+static sdio_eventset_t cxd56_sdio_eventwait(FAR struct sdio_dev_s *dev);
 static void cxd56_sdio_callbackenable(FAR struct sdio_dev_s *dev,
               sdio_eventset_t eventset);
 static int  cxd56_sdio_registercallback(FAR struct sdio_dev_s *dev,
@@ -2494,7 +2493,7 @@ static int cxd56_sdio_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
  ****************************************************************************/
 
 static void cxd56_sdio_waitenable(FAR struct sdio_dev_s *dev,
-                             sdio_eventset_t eventset)
+                             sdio_eventset_t eventset, uint32_t timeout)
 {
   struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
   uint32_t waitints;
@@ -2523,6 +2522,32 @@ static void cxd56_sdio_waitenable(FAR struct sdio_dev_s *dev,
   /* Enable event-related interrupts */
 
   cxd56_configwaitints(priv, waitints, eventset, 0);
+
+  /* Check if the timeout event is specified in the event set */
+
+  if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
+    {
+      int delay;
+      int ret;
+
+      /* Yes.. Handle a corner case */
+
+      if (!timeout)
+        {
+          priv->wkupevent = SDIOWAIT_TIMEOUT;
+          return;
+        }
+
+      /* Start the watchdog timer */
+
+      delay = MSEC2TICK(timeout);
+      ret   = wd_start(&priv->waitwdog, delay,
+                       cxd56_eventtimeout, (wdparm_t)priv);
+      if (ret != OK)
+        {
+          mcerr("ERROR: wd_start failed: %d\n", ret);
+        }
+    }
 }
 
 /****************************************************************************
@@ -2546,8 +2571,7 @@ static void cxd56_sdio_waitenable(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static sdio_eventset_t cxd56_sdio_eventwait(FAR struct sdio_dev_s *dev,
-                                       uint32_t timeout)
+static sdio_eventset_t cxd56_sdio_eventwait(FAR struct sdio_dev_s *dev)
 {
   struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
   sdio_eventset_t wkupevent = 0;
@@ -2560,30 +2584,6 @@ static sdio_eventset_t cxd56_sdio_eventwait(FAR struct sdio_dev_s *dev,
 
   DEBUGASSERT((priv->waitevents != 0 && priv->wkupevent == 0) ||
               (priv->waitevents == 0 && priv->wkupevent != 0));
-
-  /* Check if the timeout event is specified in the event set */
-
-  if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
-    {
-      int delay;
-
-      /* Yes.. Handle a corner case */
-
-      if (!timeout)
-        {
-          return SDIOWAIT_TIMEOUT;
-        }
-
-      /* Start the watchdog timer */
-
-      delay = MSEC2TICK(timeout);
-      ret   = wd_start(&priv->waitwdog, delay,
-                       cxd56_eventtimeout, (wdparm_t)priv);
-      if (ret != OK)
-        {
-          mcerr("ERROR: wd_start failed: %d\n", ret);
-        }
-    }
 
   /* Loop until the event (or the timeout occurs). Race conditions are
    * avoided by calling cxd56_waitenable prior to triggering the logic that

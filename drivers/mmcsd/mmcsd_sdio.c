@@ -178,7 +178,7 @@ static int     mmcsd_verifystate(FAR struct mmcsd_state_s *priv,
 
 static bool    mmcsd_wrprotected(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
-                 sdio_eventset_t failevents, uint32_t timeout);
+                 sdio_eventset_t failevents);
 static int     mmcsd_transferready(FAR struct mmcsd_state_s *priv);
 #ifndef CONFIG_MMCSD_MULTIBLOCK_DISABLE
 static int     mmcsd_stoptransmission(FAR struct mmcsd_state_s *priv);
@@ -486,8 +486,8 @@ static int mmsd_get_scr(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
   SDIO_RECVSETUP(priv->dev, (FAR uint8_t *)scr, 8);
 
   SDIO_WAITENABLE(priv->dev,
-                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT |
-                  SDIOWAIT_ERROR);
+                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
+                  MMCSD_SCR_DATADELAY);
 
   /* Send CMD55 APP_CMD with argument as card's RCA */
 
@@ -496,6 +496,7 @@ static int mmsd_get_scr(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
   if (ret != OK)
     {
       ferr("ERROR: RECVR1 for CMD55 failed: %d\n", ret);
+      SDIO_CANCEL(priv->dev);
       return ret;
     }
 
@@ -512,8 +513,7 @@ static int mmsd_get_scr(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
 
   /* Wait for data to be transferred */
 
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
-                        MMCSD_SCR_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
   if (ret != OK)
     {
       ferr("ERROR: mmcsd_eventwait for READ DATA failed: %d\n", ret);
@@ -1153,13 +1153,13 @@ static bool mmcsd_wrprotected(FAR struct mmcsd_state_s *priv)
  ****************************************************************************/
 
 static int mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
-                           sdio_eventset_t failevents, uint32_t timeout)
+                           sdio_eventset_t failevents)
 {
   sdio_eventset_t wkupevent;
 
   /* Wait for the set of events enabled by SDIO_EVENTENABLE. */
 
-  wkupevent = SDIO_EVENTWAIT(priv->dev, timeout);
+  wkupevent = SDIO_EVENTWAIT(priv->dev);
 
   /* SDIO_EVENTWAIT returns the event set containing the event(s) that ended
    * the wait.  It should always be non-zero, but may contain failure as
@@ -1228,8 +1228,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
    */
 
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
-                        MMCSD_BLOCK_WDATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
   if (ret != OK)
     {
       ferr("ERROR: mmcsd_eventwait for transfer ready failed: %d\n", ret);
@@ -1440,7 +1439,8 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 
   SDIO_BLOCKSETUP(priv->dev, priv->blocksize, 1);
   SDIO_WAITENABLE(priv->dev,
-                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
+                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
+                  MMCSD_BLOCK_RDATADELAY);
 
 #ifdef CONFIG_SDIO_DMA
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
@@ -1449,6 +1449,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
       if (ret != OK)
         {
           finfo("SDIO_DMARECVSETUP: error %d\n", ret);
+          SDIO_CANCEL(priv->dev);
           return ret;
         }
     }
@@ -1475,8 +1476,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 
   /* Then wait for the data transfer to complete */
 
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
-                        MMCSD_BLOCK_RDATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
   if (ret != OK)
     {
       ferr("ERROR: CMD17 transfer failed: %d\n", ret);
@@ -1576,7 +1576,8 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
 
   SDIO_BLOCKSETUP(priv->dev, priv->blocksize, nblocks);
   SDIO_WAITENABLE(priv->dev,
-                 SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
+                 SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
+                 nblocks * MMCSD_BLOCK_RDATADELAY);
 
 #ifdef CONFIG_SDIO_DMA
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
@@ -1585,6 +1586,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
       if (ret != OK)
         {
           finfo("SDIO_DMARECVSETUP: error %d\n", ret);
+          SDIO_CANCEL(priv->dev);
           return ret;
         }
     }
@@ -1609,8 +1611,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
 
   /* Wait for the transfer to complete */
 
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
-                        nblocks * MMCSD_BLOCK_RDATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
   if (ret != OK)
     {
       ferr("ERROR: CMD18 transfer failed: %d\n", ret);
@@ -1798,7 +1799,8 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 
   SDIO_BLOCKSETUP(priv->dev, priv->blocksize, 1);
   SDIO_WAITENABLE(priv->dev,
-                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
+                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
+                  MMCSD_BLOCK_WDATADELAY);
 
 #ifdef CONFIG_SDIO_DMA
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
@@ -1807,6 +1809,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       if (ret != OK)
         {
           finfo("SDIO_DMASENDSETUP: error %d\n", ret);
+          SDIO_CANCEL(priv->dev);
           return ret;
         }
     }
@@ -1834,9 +1837,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 
   /* Wait for the transfer to complete */
 
-  ret = mmcsd_eventwait(priv,
-                        SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
-                        MMCSD_BLOCK_WDATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
   if (ret != OK)
     {
       ferr("ERROR: CMD24 transfer failed: %d\n", ret);
@@ -1852,7 +1853,8 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   /* Arm the write complete detection with timeout */
 
-  SDIO_WAITENABLE(priv->dev, SDIOWAIT_WRCOMPLETE | SDIOWAIT_TIMEOUT);
+  SDIO_WAITENABLE(priv->dev, SDIOWAIT_WRCOMPLETE | SDIOWAIT_TIMEOUT,
+                  MMCSD_BLOCK_WDATADELAY);
 #endif
 
   /* On success, return the number of blocks written */
@@ -2003,7 +2005,8 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 
   SDIO_BLOCKSETUP(priv->dev, priv->blocksize, nblocks);
   SDIO_WAITENABLE(priv->dev,
-                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
+                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
+                  nblocks * MMCSD_BLOCK_WDATADELAY);
 
 #ifdef CONFIG_SDIO_DMA
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
@@ -2012,6 +2015,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       if (ret != OK)
         {
           finfo("SDIO_DMASENDSETUP: error %d\n", ret);
+          SDIO_CANCEL(priv->dev);
           return ret;
         }
     }
@@ -2041,8 +2045,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 
   /* Wait for the transfer to complete */
 
-  evret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
-                          nblocks * MMCSD_BLOCK_WDATADELAY);
+  evret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
   if (evret != OK)
     {
       ferr("ERROR: CMD25 transfer failed: %d\n", evret);
@@ -2077,7 +2080,8 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   /* Arm the write complete detection with timeout */
 
-  SDIO_WAITENABLE(priv->dev, SDIOWAIT_WRCOMPLETE | SDIOWAIT_TIMEOUT);
+  SDIO_WAITENABLE(priv->dev, SDIOWAIT_WRCOMPLETE | SDIOWAIT_TIMEOUT,
+                  nblocks * MMCSD_BLOCK_WDATADELAY);
 #endif
 
   /* On success, return the number of blocks written */
@@ -2845,7 +2849,8 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv)
 
   SDIO_BLOCKSETUP(priv->dev, 512, 1);
   SDIO_WAITENABLE(priv->dev,
-                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
+                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
+                  MMCSD_BLOCK_RDATADELAY);
 
 #ifdef CONFIG_SDIO_DMA
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
@@ -2854,6 +2859,7 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv)
       if (ret != OK)
         {
           finfo("SDIO_DMARECVSETUP: error %d\n", ret);
+          SDIO_CANCEL(priv->dev);
           return ret;
         }
     }
@@ -2873,13 +2879,13 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv)
   if (ret != OK)
     {
       ferr("ERROR: Could not get MMC extended CSD register: %d\n", ret);
+      SDIO_CANCEL(priv->dev);
       return ret;
     }
 
   /* Then wait for the data transfer to complete */
 
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
-                        MMCSD_BLOCK_RDATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
   if (ret != OK)
     {
       ferr("ERROR: CMD17 transfer failed: %d\n", ret);
