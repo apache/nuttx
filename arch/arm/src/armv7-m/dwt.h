@@ -63,6 +63,12 @@
 #ifndef __ARCH_ARM_SRC_ARMV7_M_DWT_H
 #define __ARCH_ARM_SRC_ARMV7_M_DWT_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include "arm_arch.h"
+
 /***********************************************************************************************
  * Pre-processor Definitions
  ***********************************************************************************************/
@@ -95,6 +101,12 @@
 #define DWT_COMP3                    (DWT_BASE + 0x0050)  /* Comparator Register 3 */
 #define DWT_MASK3                    (DWT_BASE + 0x0054)  /* Mask Register 3 */
 #define DWT_FUNCTION3                (DWT_BASE + 0x0058)  /* Function Register 3 */
+#define DWT_LAR                      (DWT_BASE + 0x0FB0)  /* Lock Access Register */
+
+#define DWT_LAR_ACCESS               (0xC5ACCE55) /* Lock Access Magic Value */
+
+#define DWT_GRANT_ACCESS()           (putreg32(DWT_LAR_ACCESS, DWT_LAR))
+#define DWT_REVOKE_ACCESS()          (putreg32(~DWT_LAR_ACCESS, DWT_LAR))
 
 /* DWT Register Bit Field Definitions **********************************************************/
 
@@ -187,5 +199,132 @@
 #define DWT_FUNCTION_EMITRANGE_MASK   (0x1ul << DWT_FUNCTION_EMITRANGE_SHIFT)
 #define DWT_FUNCTION_FUNCTION_SHIFT   0
 #define DWT_FUNCTION_FUNCTION_MASK    (0xful << DWT_FUNCTION_FUNCTION_SHIFT)
+
+#define DWT_FUNCTION_WATCHPOINT_RO    (0x05ul << DWT_FUNCTION_FUNCTION_SHIFT)
+#define DWT_FUNCTION_WATCHPOINT_WO    (0x06ul << DWT_FUNCTION_FUNCTION_SHIFT)
+#define DWT_FUNCTION_WATCHPOINT_RW    (0x07ul << DWT_FUNCTION_FUNCTION_SHIFT)
+
+#define DWT_DATAVSIZE_BYTE            (0x00ul << DWT_FUNCTION_DATAVSIZE_SHIFT)
+#define DWT_DATAVSIZE_HALFWORD        (0x01ul << DWT_FUNCTION_DATAVSIZE_SHIFT)
+#define DWT_DATAVSIZE_WORD            (0x02ul << DWT_FUNCTION_DATAVSIZE_SHIFT)
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+static inline void dwt_comparator_setup(int compnum, uint32_t comp,
+                                        uint32_t mask, uint32_t func)
+{
+  DWT_GRANT_ACCESS();
+  switch (compnum)
+    {
+        case 0:
+            putreg32(comp, DWT_COMP0); 
+            putreg32(mask, DWT_MASK0); 
+            putreg32(func, DWT_FUNCTION0); 
+            break;
+        case 1:
+            putreg32(comp, DWT_COMP1); 
+            putreg32(mask, DWT_MASK1); 
+            putreg32(func, DWT_FUNCTION1); 
+            break;
+        case 2:
+            putreg32(comp, DWT_COMP2); 
+            putreg32(mask, DWT_MASK2); 
+            putreg32(func, DWT_FUNCTION2); 
+            break;
+        case 3:
+            putreg32(comp, DWT_COMP3); 
+            putreg32(mask, DWT_MASK3); 
+            putreg32(func, DWT_FUNCTION3); 
+            break;
+        default:
+            break;
+    }
+  DWT_REVOKE_ACCESS();
+}
+
+static inline void dwt_comparator_reset(int compnum)
+{
+  DWT_GRANT_ACCESS();
+  switch (compnum)
+    {
+        case 0:
+            putreg32(0, DWT_COMP0); 
+            putreg32(0, DWT_MASK0); 
+            putreg32(0, DWT_FUNCTION0); 
+            break;
+        case 1:
+            putreg32(0, DWT_COMP1); 
+            putreg32(0, DWT_MASK1); 
+            putreg32(0, DWT_FUNCTION1); 
+            break;
+        case 2:
+            putreg32(0, DWT_COMP2); 
+            putreg32(0, DWT_MASK2); 
+            putreg32(0, DWT_FUNCTION2); 
+            break;
+        case 3:
+            putreg32(0, DWT_COMP3); 
+            putreg32(0, DWT_MASK3); 
+            putreg32(0, DWT_FUNCTION3); 
+            break;
+        default:
+            break;
+    }
+  DWT_REVOKE_ACCESS();
+}
+
+static inline uint32_t dwt_comparator_block(int compnum)
+{
+  uint32_t funcval = 0;
+  DWT_GRANT_ACCESS();
+  switch (compnum)
+    {
+        case 0:
+            funcval = getreg32(DWT_FUNCTION0); 
+            putreg32(0, DWT_FUNCTION0); 
+            break;
+        case 1:
+            funcval = getreg32(DWT_FUNCTION1); 
+            putreg32(0, DWT_FUNCTION1); 
+            break;
+        case 2:
+            funcval = getreg32(DWT_FUNCTION2); 
+            putreg32(0, DWT_FUNCTION2); 
+            break;
+        case 3:
+            funcval = getreg32(DWT_FUNCTION3); 
+            putreg32(0, DWT_FUNCTION3); 
+            break;
+        default:
+            break;
+    }
+  DWT_REVOKE_ACCESS();
+  return funcval;
+}
+
+static inline void dwt_comparator_restore(int compnum, uint32_t func)
+{
+  DWT_GRANT_ACCESS();
+  switch (compnum)
+    {
+        case 0:
+            putreg32(func, DWT_FUNCTION0); 
+            break;
+        case 1:
+            putreg32(func, DWT_FUNCTION1); 
+            break;
+        case 2:
+            putreg32(func, DWT_FUNCTION2); 
+            break;
+        case 3:
+            putreg32(func, DWT_FUNCTION3); 
+            break;
+        default:
+            break;
+    }
+  DWT_REVOKE_ACCESS();
+}
 
 #endif /* __ARCH_ARM_SRC_ARMV7_M_DWT_H */
