@@ -243,7 +243,7 @@
 #endif
 #define FLASH_CR_START              (1 << 16)               /* Bit 16: Start Erase */
 #define FLASH_CR_OPTSTRT            (1 << 17)               /* Bit 17: Options modification Start */
-#define FLASH_CR_FSTPG              (1 << 23)               /* Bit 23: Fast programming */
+#define FLASH_CR_FSTPG              (1 << 18)               /* Bit 18: Fast programming */
 #define FLASH_CR_EOPIE              (1 << 24)               /* Bit 24: End of operation interrupt enable */
 #define FLASH_CR_ERRIE              (1 << 25)               /* Bit 25: Error interrupt enable */
 #define FLASH_CR_RDERRIE            (1 << 26)               /* Bit 26: PCROP read error interrupt enable */
