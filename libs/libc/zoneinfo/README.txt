@@ -127,10 +127,6 @@ Sample Code to Mount the ROMFS Filesystem
 #  error "Mountpoint support is disabled"
 #endif
 
-#if CONFIG_NFILE_DESCRIPTORS < 4
-#  error "Not enough file descriptors"
-#endif
-
 #ifndef CONFIG_FS_ROMFS
 #  error "ROMFS support not enabled"
 #endif

@@ -79,7 +79,6 @@ fi
 romfsetc=`grep CONFIG_NSH_ROMFSETC= $topdir/.config | cut -d'=' -f2`
 disablempt=`grep CONFIG_DISABLE_MOUNTPOINT= $topdir/.config | cut -d'=' -f2`
 disablescript=`grep CONFIG_NSH_DISABLESCRIPT= $topdir/.config | cut -d'=' -f2`
-ndescriptors=`grep CONFIG_NFILE_DESCRIPTORS= $topdir/.config | cut -d'=' -f2`
 devconsole=`grep CONFIG_DEV_CONSOLE= $topdir/.config | cut -d'=' -f2`
 romfs=`grep CONFIG_FS_ROMFS= $topdir/.config | cut -d'=' -f2`
 romfsmpt=`grep CONFIG_NSH_ROMFSMOUNTPT= $topdir/.config | cut -d'=' -f2`
@@ -112,15 +111,6 @@ fi
 if [ "X$disablescript" = "Xy" ]; then
   echo "NSH scripting support is required for this feature"
   echo "Set CONFIG_NSH_DISABLESCRIPT=n to continue"
-  exit 1
-fi
-
-# We need at least 5 file descriptors:  One for the ROMFS mount and one for
-# FAT mount performed in rcS, plus three for stdio.
-
-if [ -z "$ndescriptors" -o "$ndescriptors" -lt 5 ]; then
-  echo "Insufficient file descriptors have been allocated"
-  echo "Set CONFIG_NFILE_DESCRIPTORS to value greater than 4"
   exit 1
 fi
 
