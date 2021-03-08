@@ -492,6 +492,18 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_SDMMC2EN;
 #endif
 
+#ifdef CONFIG_STM32H7_USART1
+  /* USART1 clock enable */
+
+  regval |= RCC_APB2ENR_USART1EN;
+#endif
+
+#ifdef CONFIG_STM32H7_USART6
+  /* USART1 clock enable */
+
+  regval |= RCC_APB2ENR_USART6EN;
+#endif
+
   putreg32(regval, STM32_RCC_APB2ENR);   /* Enable peripherals */
 }
 
