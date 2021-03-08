@@ -73,6 +73,11 @@ config RP2040_UART1_2STOP
 
 endif
 
+config RP2040_DMAC
+	bool "DMAC support"
+	default y
+	select ARCH_DMA
+
 config RP2040_SPI
 	bool "SPI"
 	select SPI

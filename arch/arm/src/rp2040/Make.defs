@@ -67,6 +67,10 @@ CHIP_CSRCS += rp2040_cpuidlestack.c
 CHIP_CSRCS += rp2040_testset.c
 endif
 
+ifeq ($(CONFIG_RP2040_DMAC),y)
+CHIP_CSRCS += rp2040_dmac.c
+endif
+
 ifeq ($(CONFIG_RP2040_SPI),y)
 CHIP_CSRCS += rp2040_spi.c
 endif
