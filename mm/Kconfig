@@ -12,6 +12,11 @@ config MM_DEFAULT_MANAGER
 	---help---
 		NuttX original memory manager strategy.
 
+config MM_TLSF_MANAGER
+	bool "TLSF heap manager"
+	---help---
+		TLSF memory manager strategy.
+
 config MM_CUSTOMIZE_MANAGER
 	bool "Customized heap manager"
 	---help---

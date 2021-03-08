@@ -1,0 +1,47 @@
+############################################################################
+# mm/tlsf/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# tlfs memory allocator
+
+ifeq ($(CONFIG_MM_TLSF_MANAGER),y)
+
+TLSF = tlsf/tlsf/.git
+$(TLSF):
+	$(Q) echo "Downloading: tlsf"
+	$(Q) git clone git@github.com:mattconte/tlsf.git tlsf/tlsf
+	$(Q) patch -p0 < tlsf/0001-Add-TLSF_API-and-tlsf_printf.patch
+	$(Q) patch -p0 < tlsf/0002-Define-_DEBUG-to-0-if-not-done-yet.patch
+	$(Q) patch -p0 < tlsf/0003-Support-customize-FL_INDEX_MAX-to-reduce-the-memory-.patch
+	$(Q) patch -p0 < tlsf/0004-Add-tlsf_extend_pool-function.patch
+	$(Q) patch -p0 < tlsf/0005-Fix-warnining-on-implicit-pointer-conversion.patch
+context::$(TLSF)
+
+distclean::
+	$(Q) rm -rf tlsf/tlsf
+
+CSRCS += mm_tlsf.c tlsf.c
+
+CFLAGS += ${shell $(DEFINE) "$(CC)" tlsf_printf=if(0)}
+
+# Add the tlsf directory to the build
+
+DEPPATH += --dep-path tlsf --dep-path tlsf/tlsf
+VPATH += :tlsf:tlsf/tlsf
+endif

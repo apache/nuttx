@@ -32,6 +32,7 @@ include circbuf/Make.defs
 include mempool/Make.defs
 include kasan/Make.defs
 include ubsan/Make.defs
+include tlsf/Make.defs
 include map/Make.defs
 
 BINDIR ?= bin
@@ -48,7 +49,7 @@ KBIN = libkmm$(LIBEXT)
 BIN ?= libmm$(LIBEXT)
 
 all: $(BIN)
-.PHONY: clean distclean
+.PHONY: context depend clean distclean
 
 $(AOBJS): $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -72,6 +73,8 @@ $(KBIN): $(OBJS)
 endif
 
 # Dependencies
+
+context::
 
 makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 	$(call CATFILE, bin/Make.dep, $^)
@@ -101,7 +104,7 @@ clean:
 
 # Deep clean -- removes all traces of the configuration
 
-distclean: clean
+distclean:: clean
 	$(Q) $(MAKE) -C bin  distclean
 	$(Q) $(MAKE) -C kbin distclean
 	$(call DELFILE, bin$(DELIM)Make.dep)
