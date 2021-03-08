@@ -1,5 +1,5 @@
 ############################################################################
-# arch/misoc/src/Makefile
+# arch/misoc/src/minerva/Make.defs
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/ov2640/Make.defs
+# drivers/video/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 ############################################################################
-# configs/rx65n-grrose/src/Makefile
+# boards/renesas/rx65n/rx65n-grrose/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

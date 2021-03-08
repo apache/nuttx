@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32l4/stm32l476vg_disco/kernel/Makefile
+# boards/arm/stm32l4/stm32l476vg-disco/kernel/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

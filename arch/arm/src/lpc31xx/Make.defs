@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/lpc31xx/Make.defs
+# arch/arm/src/lpc31xx/Make.defs
 #
 #   Copyright (C) 2009-2011, 2014, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

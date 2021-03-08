@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/src/kinetis/Make.defs
+# arch/arm/src/xmc4/Make.defs
 #
 #   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

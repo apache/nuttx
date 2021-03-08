@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/c5471/c5471/c5471evm/src/Makefile
+# boards/arm/c5471/c5471evm/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

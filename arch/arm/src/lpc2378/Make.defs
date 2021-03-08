@@ -1,5 +1,5 @@
 ##############################################################################
-# lpc23xx/Make.defs
+# arch/arm/src/lpc2378/Make.defs
 #
 #   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
 #   Author: Rommel Marcelo

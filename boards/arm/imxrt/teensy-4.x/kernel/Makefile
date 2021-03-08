@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/imxrt/teensy-4.x/kernel/Make.defs
+# boards/arm/imxrt/teensy-4.x/kernel/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

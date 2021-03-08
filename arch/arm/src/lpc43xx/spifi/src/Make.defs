@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/src/lpc43xx/spfi/src/Make.defs
+# arch/arm/src/lpc43xx/spifi/src/Make.defs
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

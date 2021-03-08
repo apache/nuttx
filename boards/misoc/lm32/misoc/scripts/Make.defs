@@ -1,5 +1,5 @@
 ############################################################################
-# boards/misoc/scripts/Make.defs
+# boards/misoc/lm32/misoc/scripts/Make.defs
 #
 #   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

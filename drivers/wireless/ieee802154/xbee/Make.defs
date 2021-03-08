@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/ieee802154/xbee/Make.defs
+# drivers/wireless/ieee802154/xbee/Make.defs
 #
 #   Copyright (C) 2017 Verge Inc. All rights reserved.
 #   Author: Anthony Merlino <anthony@vergeaero.com>

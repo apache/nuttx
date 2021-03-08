@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/efm32/efm32-g8xx-stk/nsh/Make.defs
+# boards/arm/efm32/efm32gg-stk3700/scripts/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

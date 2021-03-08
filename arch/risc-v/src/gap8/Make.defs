@@ -1,5 +1,5 @@
 ############################################################################
-# arch/risc-v/src/gapuino/Make.defs
+# arch/risc-v/src/gap8/Make.defs
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: hhuysqt <1020988872@qq.com>

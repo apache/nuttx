@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/imxrt/imxrt-1020-evk/src/Makefile
+# boards/arm/imxrt/imxrt1020-evk/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
