@@ -28,7 +28,7 @@
 #include <nuttx/config.h>
 #include <nuttx/spi/spi.h>
 #include "hardware/rp2040_spi.h"
-#ifdef CONFIG_RP2040_DMAC
+#ifdef CONFIG_RP2040_SPI_DMA
 #include "rp2040_dmac.h"
 #endif
 
@@ -57,9 +57,6 @@
  *    (e.g., calling  mmcsd_spislotinitialize(), for example, will bind the
  *    SPI driver to the SPI MMC/SD driver).
  */
-
-#define RP2040_SPI_DMAC_CHTYPE_TX (0)
-#define RP2040_SPI_DMAC_CHTYPE_RX (1)
 
 /****************************************************************************
  * Public Types
@@ -99,28 +96,6 @@ extern "C"
  ****************************************************************************/
 
 FAR struct spi_dev_s *rp2040_spibus_initialize(int port);
-
-/****************************************************************************
- * Name: rp2040_spi_dmaconfig
- *
- * Description:
- *   Enable DMA configuration.
- *
- * Input Parameter:
- *   port   - Port number
- *   chtype - Channel type(TX or RX)
- *   handle - DMA channel handle
- *   conf   - DMA configuration
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RP2040_DMAC
-void rp2040_spi_dmaconfig(int port, int chtype, DMA_HANDLE handle,
-                          FAR dma_config_t *conf);
-#endif
 
 /****************************************************************************
  * Name:  rp2040_spiXselect, rp2040_spiXstatus, and rp2040_spiXcmddata
