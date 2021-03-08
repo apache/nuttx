@@ -728,7 +728,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
        * recvfrom() will get an end-of-file indication.
        */
 
-      if (ret <= 0 || _SS_ISCLOSED(psock->s_flags))
+      if (ret <= 0 && !_SS_ISCLOSED(psock->s_flags))
         {
           /* Nothing was previously received from the read-ahead buffers.
            * The SOCK_STREAM must be (re-)connected in order to receive any
