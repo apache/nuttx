@@ -44,6 +44,7 @@ include mm_gran/Make.defs
 include shm/Make.defs
 include iob/Make.defs
 include circbuf/Make.defs
+include tlsf/Make.defs
 
 BINDIR ?= bin
 
