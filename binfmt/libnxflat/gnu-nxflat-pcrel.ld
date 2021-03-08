@@ -1,5 +1,5 @@
 /****************************************************************************
- * examples/nxflat/gnu-nxflat-pcrel.ld
+ * binfmt/libnxflat/gnu-nxflat-pcrel.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/sama5/sama5d3x-ek/scripts/pg-isram.ld
+ * boards/arm/sama5/sama5d3x-ek/scripts/pg-sram.ld
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

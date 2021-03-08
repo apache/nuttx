@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/hc/m9s12/demo9s12ne64/ostest/demo9s12ne64-banked.ld
+ * boards/hc/m9s12/demo9s12ne64/scripts/demo9s12ne64-banked.ld
  *
  *   Copyright (C) 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

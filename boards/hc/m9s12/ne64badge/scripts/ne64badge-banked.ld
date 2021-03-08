@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/hc/m9s12/ne64badge/ostest/ne64badge-banked.ld
+ * boards/hc/m9s12/ne64badge/scripts/ne64badge-banked.ld
  *
  *   Copyright (C) 2011m, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

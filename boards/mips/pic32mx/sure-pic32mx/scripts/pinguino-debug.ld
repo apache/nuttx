@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx/sure-pic32mx/nsh/mips-release.ld
+ * boards/mips/pic32mx/sure-pic32mx/scripts/pinguino-debug.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
