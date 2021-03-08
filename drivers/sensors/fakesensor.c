@@ -27,7 +27,6 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
-#include <string.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
@@ -36,6 +35,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/sensors/fakesensor.h>
 #include <nuttx/sensors/sensor.h>
+#include <nuttx/signal.h>
 
 /****************************************************************************
  * Private Types
@@ -46,6 +46,7 @@ struct fakesensor_s
   struct sensor_lowerhalf_s lower;
   struct file data;
   unsigned int interval;
+  unsigned int batch;
   int raw_start;
   FAR const char *file_path;
   sem_t run;
@@ -59,8 +60,9 @@ static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower,
                                bool sw);
 static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                    FAR unsigned int *period_us);
-static int fakesensor_fetch(FAR struct sensor_lowerhalf_s *lower,
-                            FAR char *buffer, size_t buflen);
+static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
+                            FAR unsigned int *latency_us);
+static void fakesensor_push_event(FAR struct sensor_lowerhalf_s *lower);
 static int fakesensor_thread(int argc, char** argv);
 
 /****************************************************************************
@@ -71,7 +73,7 @@ static struct sensor_ops_s g_fakesensor_ops =
 {
   .activate = fakesensor_activate,
   .set_interval = fakesensor_set_interval,
-  .fetch = fakesensor_fetch,
+  .batch = fakesensor_batch,
 };
 
 /****************************************************************************
@@ -165,8 +167,26 @@ static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
   return OK;
 }
 
-static int fakesensor_fetch(FAR struct sensor_lowerhalf_s *lower,
-                            FAR char *buffer, size_t buflen)
+static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
+                            FAR unsigned int *latency_us)
+{
+  FAR struct fakesensor_s *sensor = container_of(lower,
+                                                 struct fakesensor_s, lower);
+  uint32_t max_latency = sensor->lower.buffer_number * sensor->interval;
+  if (*latency_us > max_latency)
+    {
+      *latency_us = max_latency;
+    }
+  else if (*latency_us < sensor->interval && *latency_us > 0)
+    {
+      *latency_us = sensor->interval;
+    }
+
+  sensor->batch = *latency_us;
+  return OK;
+}
+
+static void fakesensor_push_event(FAR struct sensor_lowerhalf_s *lower)
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
@@ -180,37 +200,36 @@ static int fakesensor_fetch(FAR struct sensor_lowerhalf_s *lower,
       sscanf(raw, "%f,%f,%f\n", &accel.x, &accel.y, &accel.z);
       accel.temperature = NAN;
       accel.timestamp = sensor_get_timestamp();
-      memcpy(buffer, &accel, buflen);
-      return buflen;
+      lower->push_event(lower->priv, &accel,
+                        sizeof(struct sensor_event_accel));
     }
-
-  if (lower->type == SENSOR_TYPE_MAGNETIC_FIELD)
+  else if (lower->type == SENSOR_TYPE_MAGNETIC_FIELD)
     {
-      struct sensor_event_accel mag;
+      struct sensor_event_mag mag;
       char raw[50];
       fakesensor_read_csv_line(
           &sensor->data, raw, sizeof(raw), sensor->raw_start);
       sscanf(raw, "%f,%f,%f\n", &mag.x, &mag.y, &mag.z);
       mag.temperature = NAN;
       mag.timestamp = sensor_get_timestamp();
-      memcpy(buffer, &mag, buflen);
-      return buflen;
+      lower->push_event(lower->priv, &mag, sizeof(struct sensor_event_mag));
     }
-
-  if (lower->type == SENSOR_TYPE_GYROSCOPE)
+  else if (lower->type == SENSOR_TYPE_GYROSCOPE)
     {
-      struct sensor_event_accel gyro;
+      struct sensor_event_gyro gyro;
       char raw[50];
       fakesensor_read_csv_line(
           &sensor->data, raw, sizeof(raw), sensor->raw_start);
       sscanf(raw, "%f,%f,%f\n", &gyro.x, &gyro.y, &gyro.z);
       gyro.temperature = NAN;
       gyro.timestamp = sensor_get_timestamp();
-      memcpy(buffer, &gyro, buflen);
-      return buflen;
+      lower->push_event(lower->priv, &gyro,
+                        sizeof(struct sensor_event_gyro));
     }
-
-  return -ENOTSUP;
+  else
+    {
+      snerr("fakesensor: unsupported type sensor type\n");
+    }
 }
 
 static int fakesensor_thread(int argc, char** argv)
@@ -222,13 +241,25 @@ static int fakesensor_thread(int argc, char** argv)
     {
       if (sensor->data.f_inode != NULL)
         {
-          /* Notify upper */
-
-          sensor->lower.notify_event(sensor->lower.priv);
-
           /* Sleeping thread for interval */
 
-          usleep(sensor->interval);
+          nxsig_usleep(sensor->batch ? sensor->batch : sensor->interval);
+
+          /* Notify upper */
+
+          if (sensor->batch)
+            {
+              uint32_t batch_num = sensor->batch / sensor->interval;
+
+              for (int i = 0; i < batch_num; i++)
+                {
+                  fakesensor_push_event(&sensor->lower);
+                }
+            }
+          else
+            {
+              fakesensor_push_event(&sensor->lower);
+            }
         }
       else
         {
@@ -251,21 +282,23 @@ static int fakesensor_thread(int argc, char** argv)
  *   report the data from csv file.
  *
  * Input Parameters:
- *   type      - The type of sensor and Defined in <nuttx/sensors/sensor.h>
- *   file_name - The name of csv name and the file structure is as follows:
- *               First row : set interval, unit millisecond
- *               Second row: csv file header
- *               third row : data
- *               (Each line should not exceed 50 characters)
- *               For example:
- *               interval:12
- *               x,y,z
- *               2.1234,3.23443,2.23456
- *               ...
- *   devno     - The user specifies which device of this type, from 0.
+ *   type        - The type of sensor and defined in <nuttx/sensors/sensor.h>
+ *   file_name   - The name of csv name and the file structure is as follows:
+ *                    First row : set interval, unit millisecond
+ *                    Second row: csv file header
+ *                    third row : data
+ *                    (Each line should not exceed 50 characters)
+ *                    For example:
+ *                    interval:12
+ *                    x,y,z
+ *                    2.1234,3.23443,2.23456
+ *                    ...
+ *   devno       - The user specifies which device of this type, from 0.
+ *   batch_number- The maximum number of batch
  ****************************************************************************/
 
-int fakesensor_init(int type, FAR const char *file_name, int devno)
+int fakesensor_init(int type, FAR const char *file_name,
+                    int devno, uint32_t batch_number)
 {
   FAR struct fakesensor_s *sensor;
   FAR char *argv[2];
@@ -283,7 +316,8 @@ int fakesensor_init(int type, FAR const char *file_name, int devno)
 
   sensor->lower.type = type;
   sensor->lower.ops = &g_fakesensor_ops;
-  sensor->interval = 1;
+  sensor->lower.buffer_number = batch_number;
+  sensor->interval = 100000;
   sensor->file_path = file_name;
 
   nxsem_init(&sensor->run, 0, 0);

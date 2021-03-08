@@ -44,21 +44,23 @@ extern "C"
  *   report the data from csv file.
  *
  * Input Parameters:
- *   type      - The type of sensor and Defined in <nuttx/sensors/sensor.h>
- *   file_name - The name of csv name and the file structure is as follows:
- *               First row : set interval,  unit millisecond
- *               Second row: csv file header
- *               third row : data
- *               (Each line should not exceed 50 characters)
- *               For example:
- *               interval:12
- *               x,y,z
- *               2.1234,3.23443,2.23456
- *               ...
- *   devno     - The user specifies which device of this type, from 0.
+ *   type        - The type of sensor and defined in <nuttx/sensors/sensor.h>
+ *   file_name   - The name of csv name and the file structure is as follows:
+ *                    First row : set interval, unit millisecond
+ *                    Second row: csv file header
+ *                    third row : data
+ *                    (Each line should not exceed 50 characters)
+ *                    For example:
+ *                    interval:12
+ *                    x,y,z
+ *                    2.1234,3.23443,2.23456
+ *                    ...
+ *   devno       - The user specifies which device of this type, from 0.
+ *   batch_number- The maximum number of batch
  ****************************************************************************/
 
-int fakesensor_init(int type, FAR const char *file_name, int devno);
+int fakesensor_init(int type, FAR const char *file_name,
+                    int devno, uint32_t batch_number);
 
 #ifdef __cplusplus
 }
