@@ -107,7 +107,7 @@ config USBHOST_MSC
 	depends on !BULK_DISABLE
 	---help---
 		Enable support for the mass storage class driver.  This also depends on
-		NFILE_DESCRIPTORS > 0 && SCHED_WORKQUEUE=y
+		SCHED_WORKQUEUE=y
 
 config USBHOST_MSC_NOTIFIER
 	bool "Support USB Mass Storage notifications"
