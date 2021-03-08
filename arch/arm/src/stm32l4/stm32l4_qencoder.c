@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/stm32;4_qencoder.c
+ * arch/arm/src/stm32l4/stm32l4_qencoder.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

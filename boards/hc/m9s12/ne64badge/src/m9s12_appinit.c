@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/m9s12/ne64badge/src/m9s12_appinit.c
+ * boards/hc/m9s12/ne64badge/src/m9s12_appinit.c
  *
  *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

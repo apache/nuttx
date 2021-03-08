@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86/src/common/up_usestack.c
+ * arch/x86/src/i486/up_usestack.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

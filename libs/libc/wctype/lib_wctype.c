@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/wctype/wctype.c
+ * libs/libc/wctype/lib_wctype.c
  *
  *    Copyright (c) 2002 Red Hat Incorporated.
  *    All rights reserved.

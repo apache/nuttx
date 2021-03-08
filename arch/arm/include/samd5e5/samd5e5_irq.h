@@ -1,5 +1,5 @@
 /************************************************************************************************
- * arch/arm/include/samd5e5/sam4l_irq.h
+ * arch/arm/include/samd5e5/samd5e5_irq.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

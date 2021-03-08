@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/ioexpander/pcf8574.h
+ * drivers/ioexpander/pcf8574.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

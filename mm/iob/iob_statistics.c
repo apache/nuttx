@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/procfs/netdev_statistics.c
+ * mm/iob/iob_statistics.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Anthony Merlino <anthony@vergeeaero.com>

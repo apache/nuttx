@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/ez08/z180_scc.c
+ * arch/z80/src/z180/z180_scc.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

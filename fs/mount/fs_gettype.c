@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/mount/fs_mount.c
+ * fs/mount/fs_gettype.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

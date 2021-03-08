@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/x86_64/src/intel64/intel64_capability.c
+ * arch/x86_64/src/intel64/intel64_check_capability.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

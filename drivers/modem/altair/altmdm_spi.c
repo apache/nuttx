@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/modem/altmdm/altmdm_spi.c
+ * drivers/modem/altair/altmdm_spi.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/spiffs.h/spiffs_mtd.c
+ * fs/spiffs/src/spiffs_mtd.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

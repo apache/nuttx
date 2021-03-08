@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_dma_v1.c
+ * arch/arm/src/stm32f0l0g0/stm32_dma_v1.c
  *
  *   Copyright (C) 2009, 2011-2013, 2016-2018 Gregory Nutt. All rights
  *     reserved.

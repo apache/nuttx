@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/or1k/src/common/up_interruptcontext.c
+ * arch/or1k/src/common/up_interruptcontext.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

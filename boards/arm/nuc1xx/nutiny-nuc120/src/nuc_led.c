@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nuc1xx/nutiny-nuc120/src/up_autoleds.c
+ * boards/arm/nuc1xx/nutiny-nuc120/src/nuc_led.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

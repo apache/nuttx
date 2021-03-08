@@ -1,5 +1,5 @@
 /*******************************************************************************
- * arch/arm/src/stm32/stm32_can.c
+ * arch/arm/src/stm32f7/stm32_can.c
  *
  *   Copyright (C) 2011, 2016-2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

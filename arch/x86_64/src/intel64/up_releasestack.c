@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/x86/src/common/up_releasestack.c
+ * arch/x86_64/src/intel64/up_releasestack.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

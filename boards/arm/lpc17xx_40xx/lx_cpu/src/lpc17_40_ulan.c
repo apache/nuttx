@@ -1,5 +1,5 @@
 /************************************************************************************
- * boards/lpc17xx_40xx/src/lpc17_40_ulan.c
+ * boards/arm/lpc17xx_40xx/lx_cpu/src/lpc17_40_ulan.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Pavel Pisa <ppisa@pikron.com>

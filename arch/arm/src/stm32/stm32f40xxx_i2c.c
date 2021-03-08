@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32f40xx_i2c.c
+ * arch/arm/src/stm32/stm32f40xxx_i2c.c
  * STM32 I2C Hardware Layer - Device Driver
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.

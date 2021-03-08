@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/mld/mld_init.c
+ * net/mld/mld_initialize.c
  * MLD initialization logic
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

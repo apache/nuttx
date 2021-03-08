@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/nrf52/nrf52_idle.c
+ * arch/arm/src/nrf52/nrf52_idle.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

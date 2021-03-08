@@ -1,5 +1,5 @@
 /****************************************************************************
- * c5471/c5471_timerisr.c
+ * arch/arm/src/c5471/c5471_timerisr.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

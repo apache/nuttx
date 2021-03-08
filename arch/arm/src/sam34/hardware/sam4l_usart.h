@@ -1,5 +1,5 @@
 /************************************************************************************************
- * arch/arm/src/sam34/hardware/sam4l_uart.h
+ * arch/arm/src/sam34/hardware/sam4l_usart.h
  * Universal Synchronous Asynchronous Receiver Transmitter (USART) definitions for the SAM4L
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.

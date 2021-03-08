@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/imxrt/imxrt_idle.c
+ * arch/arm/src/imxrt/imxrt_idle.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>

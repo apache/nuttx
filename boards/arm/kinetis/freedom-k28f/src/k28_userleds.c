@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/kinetis/freedom-k28f/src/kinetis_userleds.c
+ * boards/arm/kinetis/freedom-k28f/src/k28_userleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/drivers/analog/dac7554.c
+ * drivers/analog/dac7554.c
  *
  *   Copyright (C) 2010, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2018 Daniel P. Carvalho. All rights reserved.

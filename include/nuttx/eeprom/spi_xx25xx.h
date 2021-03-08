@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/eeprom/m25xx.h
+ * include/nuttx/eeprom/spi_xx25xx.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>

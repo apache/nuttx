@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/spiffs.h/spiffs_core.h
+ * fs/spiffs/src/spiffs_core.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

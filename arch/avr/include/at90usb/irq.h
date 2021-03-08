@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/include/avr/at90usb/irq.h
+ * arch/avr/include/at90usb/irq.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

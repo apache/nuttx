@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/modem/altmdm/altmdm_pm_state.h
+ * drivers/modem/altair/altmdm_pm_state.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

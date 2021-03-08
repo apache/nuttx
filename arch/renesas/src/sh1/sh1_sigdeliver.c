@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/renesas/src/common/up_sigdeliver.c
+ * arch/renesas/src/sh1/sh1_sigdeliver.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

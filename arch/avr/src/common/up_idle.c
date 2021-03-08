@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/avr/src/common/up_idle.c
+ * arch/avr/src/common/up_idle.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/pic32mz/chip/pic32mz_timer-lowerhalf.c
+ * arch/mips/src/pic32mz/pic32mz_timer_lowerhalf.c
  *
  *   Copyright (C) 2019 Abdelatif Guettouche. All rights reserved.
  *   Author: Abdelatif Guettouche <abdelatif.guettouche@gmail.com>

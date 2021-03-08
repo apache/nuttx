@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86/src/qemu_keypad.c
+ * arch/x86/src/qemu/qemu_keypad.c
  *
  *   Copyright (C) 2013 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/imxrt/hardware/imxrt_usb_phy.h
+ * arch/arm/src/imxrt/hardware/imxrt_usbphy.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

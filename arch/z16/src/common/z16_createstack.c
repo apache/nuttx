@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z16/common/z16_createstack.c
+ * arch/z16/src/common/z16_createstack.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

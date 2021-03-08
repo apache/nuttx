@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/power/bq2429x.h
+ * include/nuttx/power/bq2429x.h
  * Lower half driver for BQ2429X battery charger
  *
  *   Copyright (C) 2017 Neil Hancock. All rights reserved.

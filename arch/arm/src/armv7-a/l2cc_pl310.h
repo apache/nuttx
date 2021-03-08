@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv7-a/chip/l2cc_pl310.h
+ * arch/arm/src/armv7-a/l2cc_pl310.h
  *
  * Register definitions for the L2 Cache Controller (L2CC) is based on the
  * L2CC-PL310 ARM multi-way cache macrocell, version r3p2.

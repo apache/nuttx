@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/xmc4/xmc4700-relax/include/xmc4_autoleds.c
+ * boards/arm/xmc4/xmc4700-relax/src/xmc4_autoleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

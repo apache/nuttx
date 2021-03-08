@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/net/ieee802154_loopback.h
+ * include/nuttx/wireless/ieee802154/ieee802154_loopback.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/lpc43xx/hardware/lpc4310203050_pinconfig.h
+ * arch/arm/src/lpc43xx/hardware/lpc4357fet256_pinconfig.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

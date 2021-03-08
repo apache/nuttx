@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/renesas/include/sh1/limits.h
+ * arch/renesas/include/sh1Plimits.h
  *
  *   Copyright (C) 2008, 2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

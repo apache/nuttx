@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sam34/sam_ethernet.h
+ * arch/arm/src/sam34/sam_emac.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

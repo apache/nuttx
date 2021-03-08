@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm3210e_eval/src/stm32_leds.c
+ * boards/arm/stm32/stm3210e-eval/src/stm32_leds.c
  *
  *   Copyright (C) 2009-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

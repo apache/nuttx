@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32l4/nucleo-l476rg/src/stm32l4_spi.c
+ * boards/arm/stm32l4/nucleo-l476rg/src/stm32_spi.c
  *
  *   Copyright (C) 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

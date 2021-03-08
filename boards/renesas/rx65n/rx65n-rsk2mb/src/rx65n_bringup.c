@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/renesas/rx65n/rx65n-rsk2mb/src/rx65n.bringup.c
+ * boards/renesas/rx65n/rx65n-rsk2mb/src/rx65n_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

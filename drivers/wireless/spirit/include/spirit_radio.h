@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_radio.h
+ * drivers/wireless/spirit/include/spirit_radio.h
  * This file provides all the low level API to manage Analog and Digital radio
  * part of SPIRIT.
  *

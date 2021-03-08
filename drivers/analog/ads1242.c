@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/ads1242.c
+ * drivers/analog/ads1242.c
  * Character driver for the MCP3426 Differential Input 16 Bit Delta/Sigma ADC
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.

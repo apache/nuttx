@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/hardware/stm32f10xx_rcc.h
+ * arch/arm/src/stm32/hardware/stm32f10xxx_rcc.h
  *
  *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/crypto/testmngr.h
+ * crypto/testmngr.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author:  Max Nekludov <macscomp@gmail.com>

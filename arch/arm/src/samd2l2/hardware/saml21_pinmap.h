@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/samd2l2/hardware/samd20_pinmap.h
+ * arch/arm/src/samd2l2/hardware/saml21_pinmap.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

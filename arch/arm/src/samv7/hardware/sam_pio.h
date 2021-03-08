@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/src/samv7/hardware/sam4e_pio.h
+ * arch/arm/src/samv7/hardware/sam_pio.h
  * Parallel Input/Output (PIO) Controller definitions for the SAMV71
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.

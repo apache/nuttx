@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/nucleo-f334r8/src/stm32_appinitialize.c
+ * boards/arm/stm32/nucleo-f334r8/src/stm32_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

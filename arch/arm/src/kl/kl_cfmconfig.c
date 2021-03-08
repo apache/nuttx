@@ -1,5 +1,5 @@
 /****************************************************************************
- * Barely based on "bare metal" sample from Freedom board:
+ * arch/arm/src/kl/kl_cfmconfig.c
  * Copyright (c) 2012-2013 Andrew Payne
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy

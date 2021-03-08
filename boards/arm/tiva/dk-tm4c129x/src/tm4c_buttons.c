@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/tiva/dk-tm4c/src/tm4c_buttons.c
+ * boards/arm/tiva/dk-tm4c129x/src/tm4c_buttons.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

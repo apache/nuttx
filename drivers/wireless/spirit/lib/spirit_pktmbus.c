@@ -1,5 +1,5 @@
 /******************************************************************************
- * drivers/wireless/spirit/spirit_pktmbus.c
+ * drivers/wireless/spirit/lib/spirit_pktmbus.c
  * Configuration and management of SPIRIT MBUS packets.
  *
  *   Copyright(c) 2015 STMicroelectronics

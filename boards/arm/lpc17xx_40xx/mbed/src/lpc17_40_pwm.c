@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/lpc17xx_40xx/mbed/lpc17_40_pwm.c
+ * boards/arm/lpc17xx_40xx/mbed/src/lpc17_40_pwm.c
  *
  * Based on onfigs/lpcexpresso-lpc1768/lpc17_40_pwm.c
  *

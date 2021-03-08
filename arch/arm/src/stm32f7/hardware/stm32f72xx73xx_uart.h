@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32f7/hardware/stm32f74xxf77xx_uart.h
+ * arch/arm/src/stm32f7/hardware/stm32f72xx73xx_uart.h
  *
  *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

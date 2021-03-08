@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtena_irqdispatch.c
+ * arch/xtensa/src/common/xtensa_irqdispatch.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

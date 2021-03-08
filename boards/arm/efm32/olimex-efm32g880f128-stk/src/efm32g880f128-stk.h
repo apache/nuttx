@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/emf32/olimex-efm32g880f128-stk/src/efm32g880f128-stk.h
+ * boards/arm/efm32/olimex-efm32g880f128-stk/src/efm32g880f128-stk.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

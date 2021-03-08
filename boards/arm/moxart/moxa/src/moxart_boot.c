@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/moxart/moxart/src/moxart_boot.c
+ * boards/arm/moxart/moxa/src/moxart_boot.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Anton D. Kachalov <mouse@mayc.ru>

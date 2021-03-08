@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/armv7-r/arm_initialstate.c
+ * arch/arm/src/armv7-r/arm_initialstate.c
  *
  *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

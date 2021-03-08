@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/ltc1867l.h
+ * include/nuttx/analog/ltc1867l.h
  *
  *   Copyright (C) 2017 DS-Automotion GmbH. All rights reserved.
  *   Author: Martin Lederhilger <m.lederhilger@ds-automotion.com>

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/include/efm32s/irq.h
+ * arch/arm/include/efm32/irq.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam34/sam_freerun.c
+ * arch/arm/src/sam34/sam4cm_freerun.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

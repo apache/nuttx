@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardmware/lm/4f_memorymap.h
+ * arch/arm/src/tiva/hardware/lm/lm4f_memorymap.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

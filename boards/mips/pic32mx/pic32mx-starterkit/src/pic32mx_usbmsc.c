@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx/pic32mx-starterkit/src/up_usbmsc.c
+ * boards/mips/pic32mx/pic32mx-starterkit/src/pic32mx_usbmsc.c
  *
  *   Copyright (C) 2012, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

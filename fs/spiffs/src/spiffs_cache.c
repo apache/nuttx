@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/spiffs.h/spiffs_cache.c
+ * fs/spiffs/src/spiffs_cache.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

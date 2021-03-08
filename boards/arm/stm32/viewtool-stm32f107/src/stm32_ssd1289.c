@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/viewtool-stm32f107/src/ssd1289.c
+ * boards/arm/stm32/viewtool-stm32f107/src/stm32_ssd1289.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

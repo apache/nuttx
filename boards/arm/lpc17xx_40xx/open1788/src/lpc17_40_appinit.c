@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/lpc17xx_40xx/open1877/src/lpc17_40_appinit.c
+ * boards/arm/lpc17xx_40xx/open1788/src/lpc17_40_appinit.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

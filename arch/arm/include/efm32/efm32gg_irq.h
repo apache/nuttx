@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/efm32s/efm32gg_irq.h
+ * arch/arm/include/efm32/efm32gg_irq.h
  *
  *   Copyright (C) 2014 Pierre-noel Bouteville . All rights reserved.
  *   Author: Pierre-noel Bouteville <pnb990@gmail.com>

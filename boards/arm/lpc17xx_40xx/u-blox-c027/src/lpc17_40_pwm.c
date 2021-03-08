@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/lpc17xx_40xx/u-blox-c027/lpc17_40_pwm.c
+ * boards/arm/lpc17xx_40xx/u-blox-c027/src/lpc17_40_pwm.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

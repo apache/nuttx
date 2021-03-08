@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch.h
+ * arch/sim/include/arch.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

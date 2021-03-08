@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/lpc17xx_40xxx/lpc178x_40xx_irq.h
+ * arch/arm/include/lpc17xx_40xx/lpc178x_40xx_irq.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Authors: Rommel Marcelo

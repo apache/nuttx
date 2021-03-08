@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_mfrc522.c
+ * boards/arm/stm32/stm32f103-minimum/src/stm32_mfrc522.c
  *
  *   Copyright (C) 2015 Alan Carvalho de Assis. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>

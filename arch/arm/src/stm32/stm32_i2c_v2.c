@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_i2c.c
+ * arch/arm/src/stm32/stm32_i2c_v2.c
  * STM32 I2C IPv2 Hardware Layer - Device Driver ported from STM32F7
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc43xx/lpc43_usbdev.h
+ * arch/arm/src/lpc43xx/lpc43_usb0dev.h
  *
  *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

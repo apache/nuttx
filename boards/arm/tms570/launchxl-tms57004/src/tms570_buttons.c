@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/tms570/launchx1-tms57004/src/tms570_buttons.c
+ * boards/arm/tms570/launchxl-tms57004/src/tms570_buttons.c
  *
  *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * board/risc-v/bl602/bl602evb/src/bl602_gpio.c
+ * boards/risc-v/bl602/bl602evb/src/bl602_gpio.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

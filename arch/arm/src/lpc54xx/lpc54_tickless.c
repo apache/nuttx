@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/lpc54xx/lpc54_rit.c
+ * arch/arm/src/lpc54xx/lpc54_tickless.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>

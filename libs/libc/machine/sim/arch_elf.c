@@ -1,5 +1,5 @@
 /****************************************************************************
- * machine/sim/arm_elf.c
+ * libs/libc/machine/sim/arch_elf.c
  *
  *   Copyright (C) 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

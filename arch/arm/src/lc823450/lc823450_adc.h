@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lc823450/chip/lc823450_adc.h
+ * arch/arm/src/lc823450/lc823450_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

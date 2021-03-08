@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/risc-v/src/rv64gc/riscv_reprioritizertr.c
+ * arch/risc-v/src/rv64gc/riscv_reprioritizertr.c
  *
  *   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

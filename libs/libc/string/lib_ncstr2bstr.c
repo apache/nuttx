@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/stdlib/lib_ncstr2bstr.c
+ * libs/libc/string/lib_ncstr2bstr.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

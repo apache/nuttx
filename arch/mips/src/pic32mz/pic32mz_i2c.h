@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/mips/src/pic32mz/chip/pic32mz_i2c.h
+ * arch/mips/src/pic32mz/pic32mz_i2c.h
  *
  *   Copyright (C) 2018 Abdelatif Guettouche. All rights reserved.
  *   Author: Abdelatif Guettouche <abdelatif.guettouche@gmail.com>

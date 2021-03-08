@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/renesas/src/common/up_udelay.c
+ * arch/renesas/src/common/up_udelay.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

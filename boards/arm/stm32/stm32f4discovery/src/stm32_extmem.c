@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4disovery/src/stm32_extmem.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_extmem.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

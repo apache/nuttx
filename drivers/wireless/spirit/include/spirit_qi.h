@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_qi.h
+ * drivers/wireless/spirit/include/spirit_qi.h
  * Configuration and management of SPIRIT QI.
  *
  *   Copyright(c) 2015 STMicroelectronics

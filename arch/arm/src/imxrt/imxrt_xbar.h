@@ -1,5 +1,5 @@
 /**************************************************************************************************************************************************
- * arch/arm/src/imxrt/imxrt_abar.h
+ * arch/arm/src/imxrt/imxrt_xbar.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

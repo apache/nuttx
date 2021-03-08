@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/i2c/i2c_bitbang.h
+ * include/nuttx/i2c/i2c_bitbang.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

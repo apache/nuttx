@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/include/kinetis/chip.h
+ * arch/arm/include/kl/chip.h
  *
  *   Copyright (C) 2013, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

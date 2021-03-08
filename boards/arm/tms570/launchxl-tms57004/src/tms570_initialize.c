@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/tms570/launchxl-tms57004/src/moxart_boot.c
+ * boards/arm/tms570/launchxl-tms57004/src/tms570_initialize.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

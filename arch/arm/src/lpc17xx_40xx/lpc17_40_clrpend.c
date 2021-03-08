@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc17/lpc17_40_clrpend.c
- * arch/arm/src/chip/lpc17_40_clrpend.c
+ * arch/arm/src/lpc17xx_40xx/lpc17_40_clrpend.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

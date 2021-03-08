@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/hex2bin/hex2bin.c
+ * libs/libc/hex2bin/lib_hex2bin.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

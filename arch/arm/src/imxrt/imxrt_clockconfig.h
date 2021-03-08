@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/imrt/imxrt_clockconfig.h
+ * arch/arm/src/imxrt/imxrt_clockconfig.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>

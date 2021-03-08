@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32l4/stm32f4discovery/src/stm32_usb.c
+ * boards/arm/stm32l4/stm32l476vg-disco/src/stm32_usb.c
  *
  *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/x86/qemu-i486/src/qemu_i486.h
+ * boards/x86/qemu/qemu-i486/src/qemu_i486.h
  *
  *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

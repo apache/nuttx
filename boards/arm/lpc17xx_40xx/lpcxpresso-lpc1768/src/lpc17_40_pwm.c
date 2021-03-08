@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/lpc17xx_40xx/lpcexpresso-lpc1768/lpc17_40_pwm.c
+ * boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/src/lpc17_40_pwm.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

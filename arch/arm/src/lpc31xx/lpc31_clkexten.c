@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc31xx/lpc31_exten.c
+ * arch/arm/src/lpc31xx/lpc31_clkexten.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

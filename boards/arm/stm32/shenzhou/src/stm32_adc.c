@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/shenzhou/src/stm32_adc.c
+ * boards/arm/stm32/shenzhou/src/stm32_adc.c
  *
  *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

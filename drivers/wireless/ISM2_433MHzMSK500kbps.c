@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ISM2_905MHzGFSK250kbps.c
+ * drivers/wireless/ISM2_433MHzMSK500kbps.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Copyright (C) 2011 Ales Verbic.  All rights reserved.

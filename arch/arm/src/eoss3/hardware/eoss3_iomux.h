@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/eoss3/eoss3_iomux.h
+ * arch/arm/src/eoss3/hardware/eoss3_iomux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

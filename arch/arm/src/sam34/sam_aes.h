@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sam34/sam4cm_aes.h
+ * arch/arm/src/sam34/sam_aes.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author:  Max Nekludov <macscomp@gmail.com>

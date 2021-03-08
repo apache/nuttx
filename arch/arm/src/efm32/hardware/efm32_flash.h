@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/efm32/chip/efm32_flash.h
+ * arch/arm/src/efm32/hardware/efm32_flash.h
  *
  *   Copyright (C) 2015 Bouteville Pierre-Noel. All rights reserved.
  *   Author: Bouteville Pierre-Noel <pnb990@gmail.com>

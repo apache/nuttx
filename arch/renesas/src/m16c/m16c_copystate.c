@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/renesas/src/m16c/up_copystate.c
+ * arch/renesas/src/m16c/m16c_copystate.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

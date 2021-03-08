@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libnx/nxglib/nxglib_rectnonintersecting.c
+ * libs/libnx/nxglib/nxglib_nonintersecting.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

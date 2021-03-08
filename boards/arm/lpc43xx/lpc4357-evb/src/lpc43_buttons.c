@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/lpc43xx/lpc4357-evb/src/board_buttons.c
+ * boards/arm/lpc43xx/lpc4357-evb/src/lpc43_buttons.c
  *
  *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

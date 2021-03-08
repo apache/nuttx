@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/spiffs/spiffs.c
+ * fs/spiffs/src/spiffs_vfs.c
  * Interface between SPIFFS and the NuttX VFS
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.

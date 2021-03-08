@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samd2l2/samd_glck.c
+ * arch/arm/src/samd2l2/samd_gclk.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

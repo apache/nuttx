@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sam34/sam_rtc.h
+ * arch/arm/src/sam34/sam4cm_supc.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

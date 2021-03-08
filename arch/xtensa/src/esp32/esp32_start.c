@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/esp32_start.c
+ * arch/xtensa/src/esp32/esp32_start.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

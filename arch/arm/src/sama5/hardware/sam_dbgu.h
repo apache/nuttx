@@ -1,5 +1,5 @@
 /************************************************************************************************
- * arch/arm/src/sama5/hardware/sam3u_uart.h
+ * arch/arm/src/sama5/hardware/sam_dbgu.h
  * Debug Unit (DBGU) definitions for the SAMA5D3
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.

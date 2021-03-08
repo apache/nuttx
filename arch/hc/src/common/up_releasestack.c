@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/hc/src/common/up_releasestack.c
+ * arch/hc/src/common/up_releasestack.c
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

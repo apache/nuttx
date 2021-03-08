@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/vnc/vnc_keymap.c
+ * graphics/vnc/server/vnc_keymap.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

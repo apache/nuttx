@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/sam/sam_oneshot_lowerhalf.c
+ * arch/arm/src/samv7/sam_oneshot_lowerhalf.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

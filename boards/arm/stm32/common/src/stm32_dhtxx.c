@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/olimex-stm32-p407/src/stm32_dhtxx.c
+ * boards/arm/stm32/common/src/stm32_dhtxx.c
  *
  *   Copyright (C) 2014 Abdelatif GUETTOUCHE. All rights reserved.
  *   Author: Abdelatif GUETTOUCHE <abdelatif.guettouche@gmail.com>

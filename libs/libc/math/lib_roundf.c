@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/math/lib_roundf.c
+ * libs/libc/math/lib_roundf.c
  *
  * This file is a part of NuttX:
  *

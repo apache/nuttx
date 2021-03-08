@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/x86_64/intel/qemu/include/board.h
+ * boards/x86_64/intel64/qemu-intel64/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

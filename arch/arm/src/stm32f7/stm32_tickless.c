@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_tickless.c
+ * arch/arm/src/stm32f7/stm32_tickless.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2017 Ansync Labs. All rights reserved.

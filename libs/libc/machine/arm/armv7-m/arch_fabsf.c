@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm/armv7-m/math/arch_fabsf.c
+ * libs/libc/machine/arm/armv7-m/arch_fabsf.c
  *
  * This file is a part of NuttX:
  *

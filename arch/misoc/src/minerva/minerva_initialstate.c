@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/minerva/up_initialstate.c
+ * arch/misoc/src/minerva/minerva_initialstate.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

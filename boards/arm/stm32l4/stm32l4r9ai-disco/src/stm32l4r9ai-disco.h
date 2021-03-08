@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32l4/stm32l476vg-disco/src/stm32l476vg-disco.h
+ * boards/arm/stm32l4/stm32l4r9ai-disco/src/stm32l4r9ai-disco.h
  *
  *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Frank Bennett

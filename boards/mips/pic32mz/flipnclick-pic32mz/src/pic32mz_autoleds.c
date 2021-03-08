@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mz/flipnclick-pic32mz/src/pic32mz_leds.c
+ * boards/mips/pic32mz/flipnclick-pic32mz/src/pic32mz_autoleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

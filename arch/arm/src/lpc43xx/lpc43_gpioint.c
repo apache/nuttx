@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/lpc43/lpc43_gpioint.c
+ * arch/arm/src/lpc43xx/lpc43_gpioint.c
  *
  *   Copyright (C) 2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

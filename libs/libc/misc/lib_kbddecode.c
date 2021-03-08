@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/msic/lib_kbddecode.c
+ * libs/libc/misc/lib_kbddecode.c
  * Decoding side of the Keyboard CODEC
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/up_allocateheap.c
+ * arch/risc-v/src/gap8/gap8_allocateheap.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

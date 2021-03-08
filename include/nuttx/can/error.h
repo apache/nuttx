@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier:
- * ((GPL-2.0-only WITH Linux-syscall-note) OR BSD-3-Clause)
+ * include/nuttx/can/error.h
  */
 
 /****************************************************************************

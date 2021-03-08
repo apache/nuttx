@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32l4/nucleo-l496zg/stc/stm32_dma_alloc.c
+ * boards/arm/stm32l4/nucleo-l496zg/src/stm32_dma_alloc.c
  *
  *   Copyright (C) 2016 PX4 Development Team. All rights reserved.
  *

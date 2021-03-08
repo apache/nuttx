@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/risc-v/src/rv32im/riscv_unblocktask.c
+ * arch/risc-v/src/rv32im/riscv_unblocktask.c
  *
  *   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

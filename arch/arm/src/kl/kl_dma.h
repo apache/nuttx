@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/kl/kl_gpio.h
+ * arch/arm/src/kl/kl_dma.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

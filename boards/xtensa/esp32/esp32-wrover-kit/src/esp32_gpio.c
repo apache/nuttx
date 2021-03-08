@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32-wrover-kit/src/esp32_gpio.c
+ * boards/xtensa/esp32/esp32-wrover-kit/src/esp32_gpio.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

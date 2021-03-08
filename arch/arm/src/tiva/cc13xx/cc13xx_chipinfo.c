@@ -1,5 +1,5 @@
 /*****************************************************************************
- * arch/arm/src/tiva/tiv_chipinfo.h
+ * arch/arm/src/tiva/cc13xx/cc13xx_chipinfo.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

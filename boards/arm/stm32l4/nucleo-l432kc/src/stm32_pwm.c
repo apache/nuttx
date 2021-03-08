@@ -1,5 +1,5 @@
 /*******************************************************************************
- * boards/arm/stm32l4/nucleo-l432kc/src/stm32l4_pwm.c
+ * boards/arm/stm32l4/nucleo-l432kc/src/stm32_pwm.c
  *
  *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

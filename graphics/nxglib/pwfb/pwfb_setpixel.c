@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxglib/fb/pwfb_setpixel.c
+ * graphics/nxglib/pwfb/pwfb_setpixel.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

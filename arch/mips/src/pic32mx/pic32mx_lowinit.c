@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/pic32/pic32mx_lowinit.c
+ * arch/mips/src/pic32mx/pic32mx_lowinit.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f411e-disco/include/board.h
+ * boards/arm/stm32/nucleo-f412zg/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Konstantin Berezenko <kpberezenko@gmail.com>

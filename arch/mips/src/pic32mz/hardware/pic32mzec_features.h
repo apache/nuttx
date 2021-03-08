@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/mips/src/pic32mz/hardware/pic32mzec-features.h
+ * arch/mips/src/pic32mz/hardware/pic32mzec_features.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

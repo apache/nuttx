@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/sim/src/sim/up_oneshot.c
+ * arch/sim/src/sim/up_oneshot.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/pkt/pkt_callback.c
+ * net/can/can_callback.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

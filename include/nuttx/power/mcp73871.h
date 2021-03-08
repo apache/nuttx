@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/power/mcp73871.h
+ * include/nuttx/power/mcp73871.h
  * Lower half driver for MCP73871 battery charger
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/vfs/fs_epoll.c
+ * include/sys/epoll.h
  *
  *   Copyright (C) 2015 Anton D. Kachalov. All rights reserved.
  *   Author: Anton D. Kachalov <mouse@mayc.ru>

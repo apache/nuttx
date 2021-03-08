@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm3210e_eval/src/stm3210e-eval.h
+ * boards/arm/stm32/stm3210e-eval/src/stm3210e-eval.h
  *
  *   Copyright (C) 2009, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

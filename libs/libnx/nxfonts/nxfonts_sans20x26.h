@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libnx/nxfonts/nxfonts_serif30x26.h
+ * libs/libnx/nxfonts/nxfonts_sans20x26.h
  *
  *   Copyright (C) 2011-2012 NX Engineering, S.A., All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

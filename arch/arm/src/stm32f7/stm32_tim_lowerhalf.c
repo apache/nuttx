@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_tim_lowerhalf.c
+ * arch/arm/src/stm32f7/stm32_tim_lowerhalf.c
  *
  *   Copyright (C) 2015 Wail Khemir. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.

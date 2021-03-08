@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/lpc54xx/chip/lpc546x_memorymap.h
+ * arch/arm/src/lpc54xx/hardware/lpc546x_memorymap.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

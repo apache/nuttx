@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/at90usb/at90usb_usbdev.c
+ * arch/avr/src/at90usb/at90usb_usbdev.c
  *
  *   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

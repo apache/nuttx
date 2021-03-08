@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/st71x/st71x_irq.c
+ * arch/arm/src/str71x/str71x_irq.c
  *
  *   Copyright (C) 2008-2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

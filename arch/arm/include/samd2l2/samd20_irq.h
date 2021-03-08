@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/include/samd/samd20_irq.h
+ * arch/arm/include/samd2l2/samd20_irq.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

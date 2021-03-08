@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/chip/arm-l2cc_pl310.c
+ * arch/arm/src/armv7-a/arm_l2cc_pl310.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

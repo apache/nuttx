@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/gapuino/gap8_tim.c
+ * arch/risc-v/src/gap8/gap8_tim.c
  * GAP8 basic timer
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.

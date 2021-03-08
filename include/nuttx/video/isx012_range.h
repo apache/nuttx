@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/video/isx012_range.h
+ * include/nuttx/video/isx012_range.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

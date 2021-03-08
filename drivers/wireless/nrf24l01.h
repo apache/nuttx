@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/drivers/wireless/nrf24l01.h
+ * drivers/wireless/nrf24l01.h
  *
  *   Copyright (C) 2013 Laurent Latil
  *   Author: Laurent Latil <laurent@latil.nom.fr>

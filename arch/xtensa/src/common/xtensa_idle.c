@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/xtensa/src/common/xtensa_idle.c
+ * arch/xtensa/src/common/xtensa_idle.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

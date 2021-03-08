@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/at90usb/teens-2.0/src/at90usb_usbmsc.c
+ * boards/avr/at90usb/teensy-2.0/src/at90usb_usbmsc.c
  *
  *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

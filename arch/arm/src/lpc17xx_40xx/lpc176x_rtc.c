@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx_40xx/lpc176x_rtcc.c
+ * arch/arm/src/lpc17xx_40xx/lpc176x_rtc.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

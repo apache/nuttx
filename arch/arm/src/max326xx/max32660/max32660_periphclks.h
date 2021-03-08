@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/max32600/max326_periphclks.h
+ * arch/arm/src/max326xx/max32660/max32660_periphclks.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

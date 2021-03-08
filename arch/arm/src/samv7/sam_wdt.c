@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samv7/sam_wdg.c
+ * arch/arm/src/samv7/sam_wdt.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

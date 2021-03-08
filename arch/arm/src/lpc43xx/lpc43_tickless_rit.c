@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/lpc43/lpc43_rit.c
+ * arch/arm/src/lpc43xx/lpc43_tickless_rit.c
  *
  *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *

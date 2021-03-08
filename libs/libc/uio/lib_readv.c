@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_readv.c
+ * libs/libc/uio/lib_readv.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

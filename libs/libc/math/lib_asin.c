@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/math/lib_sin.c
+ * libs/libc/math/lib_asin.c
  *
  * This file is a part of NuttX:
  *

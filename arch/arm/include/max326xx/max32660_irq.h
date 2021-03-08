@@ -1,5 +1,5 @@
 /************************************************************************************************
- * arch/arm/include/max326xx/max32660.h
+ * arch/arm/include/max326xx/max32660_irq.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

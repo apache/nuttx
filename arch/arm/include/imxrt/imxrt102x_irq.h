@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/include/imxrt/imxrt105x_irq.h
+ * arch/arm/include/imxrt/imxrt102x_irq.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_regs.h
+ * drivers/wireless/spirit/include/spirit_regs.h
  * This file contains all the SPIRIT registers address and masks.
  *
  *   Copyright(c) 2015 STMicroelectronics

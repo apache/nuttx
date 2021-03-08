@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/max7219.c
+ * drivers/leds/max7219.c
  * Maxim MAX7219 driver used to control 7-segment display.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.

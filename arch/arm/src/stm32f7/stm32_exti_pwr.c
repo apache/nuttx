@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32v7/stm32_exti_pwr.c
+ * arch/arm/src/stm32f7/stm32_exti_pwr.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

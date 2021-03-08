@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/nucleo-l432kc/src/stm32_spwm.c
+ * boards/arm/stm32l4/nucleo-l432kc/src/stm32_spwm.c
  *
  *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>

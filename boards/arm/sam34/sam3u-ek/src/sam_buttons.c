@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/sam34/sam3u-ek/src/up_leds.c
+ * boards/arm/sam34/sam3u-ek/src/sam_buttons.c
  *
  *   Copyright (C) 2010, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxglib/fb/pwfb_moverectangle.c
+ * graphics/nxglib/pwfb/pwfb_moverectangle.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

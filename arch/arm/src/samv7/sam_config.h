@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samv7/sam-config.h
+ * arch/arm/src/samv7/sam_config.h
  *
  *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

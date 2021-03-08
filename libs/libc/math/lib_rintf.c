@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/fixedmath/lib_rintf.c
+ * libs/libc/math/lib_rintf.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

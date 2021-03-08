@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32l4_exti_comp.c
+ * arch/arm/src/stm32l4/stm32l4_exti_comp.c
  *
  *   Copyright (c) 2017 Gregory Nutt. All rights reserved
  *   Copyright (c) 2016 Motorola Mobility, LLC. All rights reserved.

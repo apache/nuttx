@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/atmega/arduino-mega2560/src/arduino-mega2560.h
+ * boards/avr/atmega/arduino-mega2560/src/arduino_mega2560.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

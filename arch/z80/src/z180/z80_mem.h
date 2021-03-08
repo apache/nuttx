@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/z80/common/sdcc.h
+ * arch/z80/src/z180/z80_mem.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

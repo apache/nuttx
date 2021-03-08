@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/samd5e5/hardware/sam_memorymap.h
+ * arch/arm/src/samd5e5/hardware/sam_pinmap.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/max32660/max326_gpioirq.c
+ * arch/arm/src/max326xx/max32660/max32660_gpioirq.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

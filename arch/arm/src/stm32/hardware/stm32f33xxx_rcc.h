@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/hardware/stm32f33xx_rcc.h
+ * arch/arm/src/stm32/hardware/stm32f33xxx_rcc.h
  * For STM32F33xx advanced ARM-based 32-bit MCUs
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.

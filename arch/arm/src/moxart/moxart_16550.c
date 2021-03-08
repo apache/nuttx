@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/moxart/moxart_irq.c
+ * arch/arm/src/moxart/moxart_16550.c
  * Driver for MoxaRT IRQ controller
  *
  *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.

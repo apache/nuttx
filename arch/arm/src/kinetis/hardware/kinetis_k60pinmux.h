@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/kinetis/hardware/kinetis_k60pinset.h
+ * arch/arm/src/kinetis/hardware/kinetis_k60pinmux.h
  *
  *   Copyright (C) 2011, 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

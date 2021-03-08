@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/viewtools-stm32f107/src/stm32_max3421e.c
+ * boards/arm/stm32/viewtool-stm32f107/src/stm32_max3421e.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

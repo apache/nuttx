@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/renesas/m16c/scp16c26/src/m16c_lcdconsole.c
+ * boards/renesas/m16c/skp16c26/src/m16c_lcdconsole.c
  *
  *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

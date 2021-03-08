@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/tiva/tm4c123g-launchpad/tm4c_adc.c
+ * boards/arm/tiva/tm4c123g-launchpad/src/tm4c_adc.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

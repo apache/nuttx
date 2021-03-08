@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/avr/src/common/up_interruptcontext.c
+ * arch/avr/src/common/up_interruptcontext.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

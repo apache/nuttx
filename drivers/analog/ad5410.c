@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/drivers/analog/ad5410.c
+ * drivers/analog/ad5410.c
  *
  *   Copyright (C) 2010, 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/include/x32k1xx/chip.h
+ * arch/arm/include/s32k1xx/chip.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

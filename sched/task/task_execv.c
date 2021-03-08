@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task/lib_execv.c
+ * sched/task/task_execv.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

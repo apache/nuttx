@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sim/sim/sim/scripts/sim_buttons.c
+ * boards/sim/sim/sim/src/sim_buttons.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

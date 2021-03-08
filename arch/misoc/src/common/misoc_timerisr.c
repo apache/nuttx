@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/nr5m100/nr5_timerisr.c
+ * arch/misoc/src/common/misoc_timerisr.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/lpc2378/lpc23xx_head.S
+ * arch/arm/src/lpc2378/lpc23xx_io.c
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
  *   Author: Rommel Marcelo

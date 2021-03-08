@@ -1,5 +1,5 @@
 /****************************************************************************
- *  boards/arm/sama5/giant-board/src/giant-board.h
+ * boards/arm/sama5/giant-board/src/giant-board.h
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with

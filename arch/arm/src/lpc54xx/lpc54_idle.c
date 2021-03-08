@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/lpc54/lpc54_idle.c
+ * arch/arm/src/lpc54xx/lpc54_idle.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

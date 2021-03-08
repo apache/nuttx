@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/riscv/src/esp32c3/esp32c3_wdt_lowerhalf.h
+ * arch/risc-v/src/esp32c3/esp32c3_wdt_lowerhalf.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

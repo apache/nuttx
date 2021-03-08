@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/x86/src/qemu/qemu_serial.c
+ * arch/x86/src/qemu/qemu_serial.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

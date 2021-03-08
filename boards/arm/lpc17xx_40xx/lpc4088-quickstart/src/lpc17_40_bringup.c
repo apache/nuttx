@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/lpc17xx_40xx/lpc4088_quickstart/src/lpc17_40_bringup.c
+ * boards/arm/lpc17xx_40xx/lpc4088-quickstart/src/lpc17_40_bringup.c
  *
  *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

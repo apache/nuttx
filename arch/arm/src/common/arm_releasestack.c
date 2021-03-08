@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/common/arm_releasestack.c
+ * arch/arm/src/common/arm_releasestack.c
  *
  *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

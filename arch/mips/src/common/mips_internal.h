@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/common/mips_internal.h
+ * arch/mips/src/common/mips_internal.h
  *
  *   Copyright (C) 2011, 2012, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

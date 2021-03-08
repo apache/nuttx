@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/ieee802154/at86rf23x.h
+ * include/nuttx/wireless/ieee802154/at86rf23x.h
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2014-2015 Sebastien Lorquet. All rights reserved.

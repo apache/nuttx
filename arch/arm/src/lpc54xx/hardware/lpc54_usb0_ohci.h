@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc54xx/chip/lpc54_usb0_ohci.h
+ * arch/arm/src/lpc54xx/hardware/lpc54_usb0_ohci.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/tiva/tm4c1294-launchpad/src/ek-tm4c1294xl.h
+ * boards/arm/tiva/tm4c1294-launchpad/src/tm4c1294-launchpad.h
  *
  *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/s32k144evb/src/s32k1xx_spi.c
+ * boards/arm/s32k1xx/s32k146evb/src/s32k1xx_spi.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>

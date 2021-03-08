@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z16f/chip.h
+ * arch/z16/include/z16f/chip.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

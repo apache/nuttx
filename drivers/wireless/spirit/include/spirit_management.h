@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_management.h
+ * drivers/wireless/spirit/include/spirit_management.h
  * The management layer for SPIRIT1 library.
  *
  *   Copyright(c) 2015 STMicroelectronics

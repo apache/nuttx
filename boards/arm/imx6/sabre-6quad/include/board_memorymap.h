@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/imx6/sabr-6quad/include/board_memorymap.h
+ * boards/arm/imx6/sabre-6quad/include/board_memorymap.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

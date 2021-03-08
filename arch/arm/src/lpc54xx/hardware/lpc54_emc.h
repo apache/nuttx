@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/lpc54xx/lpc54_emc.h
+ * arch/arm/src/lpc54xx/hardware/lpc54_emc.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

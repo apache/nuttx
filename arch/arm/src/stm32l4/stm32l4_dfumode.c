@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32l4_dfumode.c
+ * arch/arm/src/stm32l4/stm32l4_dfumode.c
  *
  *   Copyright (C) 2019 Bill Gatliff. All rights reserved.
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.

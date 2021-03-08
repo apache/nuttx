@@ -1,5 +1,5 @@
 /************************************************************************************
- * dm320/dm320_busc.h
+ * arch/arm/src/dm320/dm320_busc.h
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

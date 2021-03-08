@@ -1,5 +1,5 @@
 /****************************************************************************
- * c5471/c5471_serial.c
+ * arch/arm/src/c5471/c5471_serial.c
  *
  *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

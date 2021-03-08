@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/eoss3/src/eoss3_start.c
+ * arch/arm/src/eoss3/eoss3_start.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

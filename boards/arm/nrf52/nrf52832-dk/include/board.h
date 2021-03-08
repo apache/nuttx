@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf52/nrf52_feather/include/board.h
+ * boards/arm/nrf52/nrf52832-dk/include/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>

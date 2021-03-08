@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/imxrt/imxrt106x_daisy.c
+ * arch/arm/src/imxrt/imxrt102x_daisy.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Dave Marples <dave@marples.net>

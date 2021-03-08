@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/hardware/esp32_gpio.c
+ * arch/xtensa/src/esp32/hardware/esp32_iomux.h
  *
  * Developed for NuttX by:
  *

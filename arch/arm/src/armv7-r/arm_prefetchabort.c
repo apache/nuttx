@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/armv7-r/arm_prefetchabort.c
+ * arch/arm/src/armv7-r/arm_prefetchabort.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

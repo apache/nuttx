@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/kl/kl_idle.c
+ * arch/arm/src/kl/kl_idle.c
  *
  *   Copyright (C) 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

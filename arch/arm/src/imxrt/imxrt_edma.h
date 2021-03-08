@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imxrt/imxrt_dmac.h
+ * arch/arm/src/imxrt/imxrt_edma.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

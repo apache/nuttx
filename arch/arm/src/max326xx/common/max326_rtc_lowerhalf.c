@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/max326xx/max326_rtc_lowerhalf.c
+ * arch/arm/src/max326xx/common/max326_rtc_lowerhalf.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

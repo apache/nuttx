@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/input/adxl345.h
+ * include/nuttx/sensors/adxl345.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

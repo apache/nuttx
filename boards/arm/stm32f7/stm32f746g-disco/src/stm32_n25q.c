@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/stm32f746g-disco/src/stm32_n25.c
+ * boards/arm/stm32f7/stm32f746g-disco/src/stm32_n25q.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

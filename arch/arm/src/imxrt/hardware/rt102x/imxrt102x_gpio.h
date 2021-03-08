@@ -1,5 +1,5 @@
 /*****************************************************************************
- * arch/arm/src/imxrt/hardware/rt102x/imxrt105x_gpio.h
+ * arch/arm/src/imxrt/hardware/rt102x/imxrt102x_gpio.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

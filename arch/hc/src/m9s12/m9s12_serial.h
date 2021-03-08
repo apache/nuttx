@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/hc/src/m9s12/serial.h
+ * arch/hc/src/m9s12/m9s12_serial.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

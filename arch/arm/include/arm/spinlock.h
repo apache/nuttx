@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/armv7-a/spinlock.h
+ * arch/arm/include/arm/spinlock.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

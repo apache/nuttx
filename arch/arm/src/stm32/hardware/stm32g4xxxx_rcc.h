@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32/hardware/stm32g4xxxx_rcc.h
+ * arch/arm/src/stm32/hardware/stm32g4xxxx_rcc.h
  *  Register offsets, addresses, and bitfield defines for STM32G4Xxxx RCC
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/misoc/m32/misoc/include/board.h
+ * boards/misoc/lm32/misoc/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

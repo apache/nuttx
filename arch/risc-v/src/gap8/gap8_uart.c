@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/gapuino/gap8_uart.c
+ * arch/risc-v/src/gap8/gap8_uart.c
  * UART driver on uDMA subsystem for GAP8
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.

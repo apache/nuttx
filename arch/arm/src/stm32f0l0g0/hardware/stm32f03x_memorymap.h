@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32f0l0g0/hardware/stm32f05xf07xf09x_memorymap.h
+ * arch/arm/src/stm32f0l0g0/hardware/stm32f03x_memorymap.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libnx/nxfonts/nxfonts_serif17x23b.h
+ * libs/libnx/nxfonts/nxfonts_sans17x23b.h
  *
  *   Copyright (C) 2011-2012 NX Engineering, S.A., All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

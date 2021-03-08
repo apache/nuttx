@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/k210_gpiohs.h
+ * arch/risc-v/src/k210/k210_gpiohs.c
  *
  * Derives from software originally provided by Canaan Inc
  *

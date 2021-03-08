@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/minerva/csrdefs.h
+ * arch/misoc/include/minerva/csrdefs.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Ramtin Amin <keytwo@gmail.com>

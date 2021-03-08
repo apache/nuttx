@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/s32k1xx/chip/s32k1xx_ewm.h
+ * arch/arm/src/s32k1xx/hardware/s32k1xx_ewm.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

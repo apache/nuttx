@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_capture.c
+ * arch/arm/src/stm32f7/stm32_capture.c
  *
  *   Copyright (C) 2015 Bouteville Pierre-Noel. All rights reserved.
  *   Author: Bouteville Pierre-Noel <pnb990@gmail.com>

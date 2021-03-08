@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samd5e5/sam_oneshot.c
+ * arch/arm/src/samd5e5/sam_oneshot.h
  *
  *   Copyright 2020 Falker Automacao Agricola LTDA.
  *   Author: Leomar Mateus Radke <leomar@falker.com.br>

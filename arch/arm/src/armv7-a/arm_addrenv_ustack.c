@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7/arm_addrenv_ustack.c
+ * arch/arm/src/armv7-a/arm_addrenv_ustack.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/stm32l4/stm32l4_comp.h
+ * arch/arm/src/stm32l4/hardware/stm32l4_comp.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/usbhost/usbdev_composite.h
+ * drivers/usbhost/usbhost_composite.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32ldiscovery/src/up_spi.c
+ * boards/arm/stm32/stm32ldiscovery/src/stm32_spi.c
  * arch/arm/src/board/up_spi.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.

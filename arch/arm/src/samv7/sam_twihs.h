@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/samv7/sam_twih.h
+ * arch/arm/src/samv7/sam_twihs.h
  *
  *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

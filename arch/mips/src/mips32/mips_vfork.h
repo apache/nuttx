@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/mips/mips_vfork.h
+ * arch/mips/src/mips32/mips_vfork.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

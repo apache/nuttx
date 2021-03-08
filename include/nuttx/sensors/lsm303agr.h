@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/lsm303agr.h [from the IKS01A2 MEMS board STM]
+ * include/nuttx/sensors/lsm303agr.h
  *
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
  *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>

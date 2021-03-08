@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/or1k/src/mor1kx/common/up_internal.h
+ * arch/or1k/src/common/up_internal.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

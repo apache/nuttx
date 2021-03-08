@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/same5d5/hardware/sam_gmac.h
+ * arch/arm/src/samd5e5/hardware/sam_gmac.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

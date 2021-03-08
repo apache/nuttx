@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/fs/hostfs/hostfs.c
+ * fs/hostfs/hostfs.c
  *
  *   Copyright (C) 2015 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>

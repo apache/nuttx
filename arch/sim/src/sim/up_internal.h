@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/up_internal.h
+ * arch/sim/src/sim/up_internal.h
  *
  *   Copyright (C) 2007, 2009, 2011-2012, 2014, 2016-2017 Gregory Nutt.
  *     All rights reserved.

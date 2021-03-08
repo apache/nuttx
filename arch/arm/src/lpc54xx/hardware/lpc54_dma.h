@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/lpc54xx/lpc54_dma.h
+ * arch/arm/src/lpc54xx/hardware/lpc54_dma.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

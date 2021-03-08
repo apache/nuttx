@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/ez80/ez80f910200kitg/include/board.h
+ * boards/z80/ez80/ez80f910200kitg/include/board.h
  *
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

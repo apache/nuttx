@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/string/lib_psfa_addaction.c
+ * libs/libc/spawn/lib_psfa_addaction.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

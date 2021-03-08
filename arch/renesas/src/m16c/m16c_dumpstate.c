@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/renesas/src/m16c/m16c_assert.c
+ * arch/renesas/src/m16c/m16c_dumpstate.c
  *
  *   Copyright (C) 2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

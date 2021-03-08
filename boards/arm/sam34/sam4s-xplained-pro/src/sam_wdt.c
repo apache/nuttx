@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/sam34/sam4s-xplained-pro/src/up_wdt.c
+ * boards/arm/sam34/sam4s-xplained-pro/src/sam_wdt.c
  *
  *   Copyright (C) 2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/lpc2378/chip.h
+ * arch/arm/src/lpc2378/lpc2378.h
  *
  *   Copyright (C) 2010, 2015 Rommel Marcelo. All rights reserved.
  *   Author: Rommel Marcelo

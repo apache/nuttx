@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/mips/src/common/mips_releasestack.c
+ * arch/mips/src/common/mips_releasestack.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

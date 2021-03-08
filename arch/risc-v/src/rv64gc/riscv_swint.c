@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/riscv/src/rv64gc/riscv_swint.c
+ * arch/risc-v/src/rv64gc/riscv_swint.c
  *
  *   Copyright (C) 2011-2012, 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

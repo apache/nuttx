@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/hardware/esp32c3_rcccntl.h
+ * arch/risc-v/src/esp32c3/hardware/esp32c3_rtccntl.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
