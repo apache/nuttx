@@ -80,61 +80,41 @@ static void aio_write_worker(FAR void *arg)
 #endif
   aiocbp = aioc_decant(aioc);
 
-#ifdef AIO_HAVE_PSOCK
-  if (aiocbp->aio_fildes < CONFIG_NFILE_DESCRIPTORS)
-#endif
+  /* Call fcntl(F_GETFL) to get the file open mode. */
+
+  oflags = file_fcntl(aioc->aioc_filep, F_GETFL);
+  if (oflags < 0)
     {
-      /* Call file_fcntl(F_GETFL) to get the file open mode. */
-
-      oflags = file_fcntl(aioc->u.aioc_filep, F_GETFL);
-      if (oflags < 0)
-        {
-          ferr("ERROR: file_fcntl failed: %d\n", oflags);
-          aiocbp->aio_result = oflags;
-          goto errout;
-        }
-
-      /* Perform the write using:
-       *
-       *   u.aioc_filep - File structure pointer
-       *   aio_buf      - Location of buffer
-       *   aio_nbytes   - Length of transfer
-       *   aio_offset   - File offset
-       */
-
-      /* Check if O_APPEND is set in the file open flags */
-
-      if ((oflags & O_APPEND) != 0)
-        {
-          /* Append to the current file position */
-
-          nwritten = file_write(aioc->u.aioc_filep,
-                                (FAR const void *)aiocbp->aio_buf,
-                                aiocbp->aio_nbytes);
-        }
-      else
-        {
-          nwritten = file_pwrite(aioc->u.aioc_filep,
-                                 (FAR const void *)aiocbp->aio_buf,
-                                 aiocbp->aio_nbytes,
-                                 aiocbp->aio_offset);
-        }
+      ferr("ERROR: file_fcntl failed: %d\n", oflags);
+      aiocbp->aio_result = oflags;
+      goto errout;
     }
-#ifdef AIO_HAVE_PSOCK
+
+  /* Perform the write using:
+   *
+   *   aioc_filep   - File structure pointer
+   *   aio_buf      - Location of buffer
+   *   aio_nbytes   - Length of transfer
+   *   aio_offset   - File offset
+   */
+
+  /* Check if O_APPEND is set in the file open flags */
+
+  if ((oflags & O_APPEND) != 0)
+    {
+      /* Append to the current file position */
+
+      nwritten = file_write(aioc->aioc_filep,
+                            (FAR const void *)aiocbp->aio_buf,
+                            aiocbp->aio_nbytes);
+    }
   else
     {
-      /* Perform the send using:
-       *
-       *   u.aioc_psock - Socket structure pointer
-       *   aio_buf      - Location of buffer
-       *   aio_nbytes   - Length of transfer
-       */
-
-      nwritten = psock_send(aioc->u.aioc_psock,
-                            (FAR const void *)aiocbp->aio_buf,
-                            aiocbp->aio_nbytes, 0);
+      nwritten = file_pwrite(aioc->aioc_filep,
+                             (FAR const void *)aiocbp->aio_buf,
+                             aiocbp->aio_nbytes,
+                             aiocbp->aio_offset);
     }
-#endif
 
   if (nwritten < 0)
     {
