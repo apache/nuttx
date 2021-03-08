@@ -42,12 +42,16 @@
 
 int iob_get_queue_count(FAR struct iob_queue_s *queue)
 {
-  FAR struct iob_qentry_s *qentry;
+  FAR struct iob_qentry_s *iobq;
+  FAR struct iob_s *iob;
   int count = 0;
 
-  for (qentry = queue->qh_head; qentry != NULL; qentry = qentry->qe_flink)
+  for (iobq = queue->qh_head; iobq != NULL; iobq = iobq->qe_flink)
     {
-      count++;
+      for (iob = iobq->qe_head; iob; iob = iob->io_flink)
+        {
+          count++;
+        }
     }
 
   return count;
