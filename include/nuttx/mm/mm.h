@@ -29,8 +29,6 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
-#include <string.h>
-#include <semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -183,25 +181,6 @@ void umm_addregion(FAR void *heapstart, size_t heapsize);
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 void kmm_addregion(FAR void *heapstart, size_t heapsize);
-#endif
-
-/* Functions contained in mm_sem.c ******************************************/
-
-void mm_seminitialize(FAR struct mm_heap_s *heap);
-void mm_takesemaphore(FAR struct mm_heap_s *heap);
-int  mm_trysemaphore(FAR struct mm_heap_s *heap);
-void mm_givesemaphore(FAR struct mm_heap_s *heap);
-
-/* Functions contained in umm_sem.c *****************************************/
-
-int  umm_trysemaphore(void);
-void umm_givesemaphore(void);
-
-/* Functions contained in kmm_sem.c *****************************************/
-
-#ifdef CONFIG_MM_KERNEL_HEAP
-int  kmm_trysemaphore(void);
-void kmm_givesemaphore(void);
 #endif
 
 /* Functions contained in mm_malloc.c ***************************************/

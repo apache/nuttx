@@ -29,8 +29,6 @@
 
 EXTERN(umm_initialize)
 EXTERN(umm_addregion)
-EXTERN(umm_trysemaphore)
-EXTERN(umm_givesemaphore)
 
 EXTERN(malloc)
 EXTERN(realloc)
