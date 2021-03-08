@@ -152,6 +152,16 @@ static inline void stm32_mco2config(uint32_t source, uint32_t div)
 void stm32_clockconfig(void);
 
 /****************************************************************************
+ * Name: stm32_stdclockconfig
+ *
+ * Description:
+ *   Setup the system using the "standard" clock configuration
+ *
+ ****************************************************************************/
+
+void stm32_stdclockconfig(void);
+
+/****************************************************************************
  * Name: stm32_board_clockconfig
  *
  * Description:
