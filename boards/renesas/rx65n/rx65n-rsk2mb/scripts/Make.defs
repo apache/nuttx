@@ -1,5 +1,5 @@
 ##############################################################################
-# configs/rx65n-rsk2mb/scripts/Make.defs
+# boards/renesas/rx65n/rx65n-rsk2mb/scripts/Make.defs
 #
 #   Copyright (C) 2008-2019 Gregory Nutt. All rights reserved.
 #   Author: Anjana <anjana@tataelxsi.co.in>

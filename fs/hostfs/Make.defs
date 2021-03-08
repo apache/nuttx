@@ -1,5 +1,5 @@
 ############################################################################
-# Make.defs
+# fs/hostfs/Make.defs
 #
 #   Copyright (C) 2015 Ken Pettit. All rights reserved.
 #   Author: Ken Pettit <pettitkd@gmail.com>

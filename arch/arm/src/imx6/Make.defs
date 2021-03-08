@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/imx6/Make.defs
+# arch/arm/src/imx6/Make.defs
 #
 #   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

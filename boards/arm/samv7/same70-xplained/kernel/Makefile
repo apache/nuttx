@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/samv7/same70-xplainged/kernel/Makefile
+# boards/arm/samv7/same70-xplained/kernel/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/lpwan/Make.defs
+# drivers/wireless/lpwan/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

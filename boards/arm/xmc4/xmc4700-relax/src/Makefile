@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/xmc4/xmc4500-relax/src/Makefile
+# boards/arm/xmc4/xmc4700-relax/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

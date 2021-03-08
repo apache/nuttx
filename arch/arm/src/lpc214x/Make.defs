@@ -1,5 +1,5 @@
 ##############################################################################
-# lpc214x/Make.defs
+# arch/arm/src/lpc214x/Make.defs
 #
 #   Copyright (C) 2007, 2008, 2013-2014, 2018 Gregory Nutt. All rights
 #     reserved.

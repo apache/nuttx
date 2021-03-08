@@ -1,5 +1,5 @@
 ############################################################################
-# c5471/Make.defs
+# arch/arm/src/c5471/Make.defs
 #
 #   Copyright (C) 2007, 2013-2014, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

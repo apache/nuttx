@@ -1,5 +1,5 @@
 ############################################################################
-# boards/risc-v/fe310/maix-bit/scripts/Make.defs
+# boards/risc-v/k210/maix-bit/scripts/Make.defs
 #
 #   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
 #   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>

@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/src/s32k1xx/x32k11x/Make.defs
+# arch/arm/src/s32k1xx/s32k11x/Make.defs
 #
 #   Copyright (C) 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

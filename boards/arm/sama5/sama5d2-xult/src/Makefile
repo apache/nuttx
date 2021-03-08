@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/sama5/sama5d3-xplained/src/Makefile
+# boards/arm/sama5/sama5d2-xult/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

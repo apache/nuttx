@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/stm32f4discovery/scripts/Make.defs
+# boards/arm/eoss3/quickfeather/scripts/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

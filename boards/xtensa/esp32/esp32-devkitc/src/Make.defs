@@ -1,5 +1,5 @@
 ############################################################################
-# boards/xtensa/esp32/esp32-devkitc/src/Makefile
+# boards/xtensa/esp32/esp32-devkitc/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

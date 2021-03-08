@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/nucleo-f4x1re/scripts/Make.defs
+# boards/arm/stm32/nucleo-f446re/scripts/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

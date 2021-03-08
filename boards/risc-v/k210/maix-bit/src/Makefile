@@ -1,5 +1,5 @@
 ############################################################################
-# boards/risc-v/k210/hifive1-revb/src/Makefile
+# boards/risc-v/k210/maix-bit/src/Makefile
 #
 #   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
 #   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
