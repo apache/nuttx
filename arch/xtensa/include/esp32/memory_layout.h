@@ -59,12 +59,10 @@
 
 /* Region 1 of the heap is the area from the end of the .data section to the
  * beginning of the ROM data.  The start address is defined from the linker
- * script as "_sheap".  Then end is defined here, as follows:
+ * script as "_sheap".  The end is defined here, as follows:
  */
 
-#ifndef HEAP_REGION1_END
-#  define HEAP_REGION1_END    0x3ffdfff0
-#endif
+#define HEAP_REGION1_END    0x3ffdfff0
 
 /* Region 2 of the heap is the area from the end of the ROM data to the end
  * of DRAM.  The linker script has already set "_eheap" as the end of DRAM,
@@ -73,13 +71,14 @@
  * enabled include APP's region with the heap.
  *
  * When an internal heap is enabled this region starts at an offset equal to
- * the size of the internal heap. (see esp32_imem.c)
+ * the size of the internal heap.
  */
 
-#ifndef CONFIG_SMP
-#  define HEAP_REGION2_START  0x3ffe1330
-#else
-#  define HEAP_REGION2_START  0x3ffe7e40
+#define HEAP_REGION2_START  0x3ffe0450
+
+#ifdef CONFIG_SMP
+#  define HEAP_REGION2_END    0x3ffe3f10
+#  define HEAP_REGION3_START  0x3ffe5240
 #endif
 
 #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
@@ -88,12 +87,15 @@
 #  define	XTENSA_IMEM_REGION_SIZE	0
 #endif
 
-/* Internal heap starts at the end of the ROM data. */
+/* Internal heap starts at the end of the ROM data.
+ * This is either the start of region2 if SMP is disabled or start of region3
+ * if SMP is enabled.
+ */
 
 #ifndef CONFIG_SMP
-#  define ESP32_IMEM_START  0x3ffe1330
+#  define ESP32_IMEM_START  HEAP_REGION2_START
 #else
-#  define ESP32_IMEM_START  0x3ffe7e40
+#  define ESP32_IMEM_START  HEAP_REGION3_START
 #endif
 
 /* Region of unused ROM App data */
