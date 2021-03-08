@@ -1,0 +1,127 @@
+From 76f37069b107ebc4dab50aa2ed553a3f751dc671 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Tue, 9 Mar 2021 21:54:16 +0800
+Subject: [PATCH 4/8] Add tlsf_extend_pool function
+
+could work with sbrk to extend the pool size dynamically
+
+Change-Id: I4f2cda419f88a31bc478e74813ebcd0d1275617c
+---
+ tlsf.c | 56 ++++++++++++++++++++++++++++++++++++++++++--------------
+ tlsf.h |  1 +
+ 2 files changed, 43 insertions(+), 14 deletions(-)
+
+diff --git a/tlsf.c tlsf/tlsf/tlsf.c
+index 66daf33..6fd281a 100644
+--- a/tlsf.c
++++ tlsf/tlsf/tlsf.c
+@@ -997,17 +997,18 @@ TLSF_API size_t tlsf_alloc_overhead(void)
+ 	return block_header_overhead;
+ }
+ 
+-TLSF_API pool_t tlsf_add_pool(tlsf_t tlsf, void* mem, size_t bytes)
++TLSF_API pool_t tlsf_extend_pool(tlsf_t tlsf, void* mem, size_t bytes, size_t incr)
+ {
+ 	block_header_t* block;
+ 	block_header_t* next;
+ 
++	control_t* control = tlsf_cast(control_t*, tlsf);
+ 	const size_t pool_overhead = tlsf_pool_overhead();
+ 	const size_t pool_bytes = align_down(bytes - pool_overhead, ALIGN_SIZE);
+ 
+ 	if (((ptrdiff_t)mem % ALIGN_SIZE) != 0)
+ 	{
+-		tlsf_printf("tlsf_add_pool: Memory must be aligned by %u bytes.\n",
++		tlsf_printf("tlsf_extend_pool: Memory must be aligned by %u bytes.\n",
+ 			(unsigned int)ALIGN_SIZE);
+ 		return 0;
+ 	}
+@@ -1015,27 +1016,49 @@ TLSF_API pool_t tlsf_add_pool(tlsf_t tlsf, void* mem, size_t bytes)
+ 	if (pool_bytes < block_size_min || pool_bytes > block_size_max)
+ 	{
+ #if defined (TLSF_64BIT)
+-		tlsf_printf("tlsf_add_pool: Memory size must be between 0x%x and 0x%x00 bytes.\n", 
++		tlsf_printf("tlsf_extend_pool: Memory size must be between 0x%x and 0x%x00 bytes.\n", 
+ 			(unsigned int)(pool_overhead + block_size_min),
+ 			(unsigned int)((pool_overhead + block_size_max) / 256));
+ #else
+-		tlsf_printf("tlsf_add_pool: Memory size must be between %u and %u bytes.\n", 
++		tlsf_printf("tlsf_extend_pool: Memory size must be between %u and %u bytes.\n", 
+ 			(unsigned int)(pool_overhead + block_size_min),
+ 			(unsigned int)(pool_overhead + block_size_max));
+ #endif
+ 		return 0;
+ 	}
+ 
+-	/*
+-	** Create the main free block. Offset the start of the block slightly
+-	** so that the prev_phys_block field falls outside of the pool -
+-	** it will never be used.
+-	*/
+-	block = offset_to_block(mem, -(tlsfptr_t)block_header_overhead);
+-	block_set_size(block, pool_bytes);
+-	block_set_free(block);
+-	block_set_prev_used(block);
+-	block_insert(tlsf_cast(control_t*, tlsf), block);
++	if (incr > 0 && incr < tlsf_block_size_min())
++	{
++		tlsf_printf("tlsf_extend_pool: Increased size must be at least %u bytes.\n",
++			(unsigned int)tlsf_block_size_min());
++		return 0;
++	}
++
++	if (incr == 0) /* Initialize the pool */
++	{
++		/*
++		** Create the main free block. Offset the start of the block slightly
++		** so that the prev_phys_block field falls outside of the pool -
++		** it will never be used.
++		*/
++		block = offset_to_block(mem, -(tlsfptr_t)block_header_overhead);
++		block_set_size(block, pool_bytes);
++		block_set_free(block);
++		block_set_prev_used(block);
++		block_insert(control, block);
++	}
++	else /* Extend the pool */
++	{
++		/* Extend the sentinel block */
++		const size_t new_bytes = align_down((bytes + incr) -
++			(pool_overhead + pool_bytes) - block_header_overhead, ALIGN_SIZE);
++
++		block = offset_to_block(mem, pool_bytes);
++		block_set_size(block, new_bytes);
++		block_set_free(block);
++		block = block_merge_prev(control, block);
++		block_insert(control, block);
++	}
+ 
+ 	/* Split the block to create a zero-size sentinel block. */
+ 	next = block_link_next(block);
+@@ -1046,6 +1069,11 @@ TLSF_API pool_t tlsf_add_pool(tlsf_t tlsf, void* mem, size_t bytes)
+ 	return mem;
+ }
+ 
++TLSF_API pool_t tlsf_add_pool(tlsf_t tlsf, void* mem, size_t bytes)
++{
++	return tlsf_extend_pool(tlsf, mem, bytes, 0);
++}
++
+ TLSF_API void tlsf_remove_pool(tlsf_t tlsf, pool_t pool)
+ {
+ 	control_t* control = tlsf_cast(control_t*, tlsf);
+diff --git a/tlsf.h tlsf/tlsf/tlsf.h
+index c2c4161..085e053 100644
+--- a/tlsf.h
++++ tlsf/tlsf/tlsf.h
+@@ -63,6 +63,7 @@ TLSF_API pool_t tlsf_get_pool(tlsf_t tlsf);
+ 
+ /* Add/remove memory pools. */
+ TLSF_API pool_t tlsf_add_pool(tlsf_t tlsf, void* mem, size_t bytes);
++TLSF_API pool_t tlsf_extend_pool(tlsf_t tlsf, void* mem, size_t bytes, size_t incr);
+ TLSF_API void tlsf_remove_pool(tlsf_t tlsf, pool_t pool);
+ 
+ /* malloc/memalign/realloc/free replacements. */
+-- 
+2.34.1
+

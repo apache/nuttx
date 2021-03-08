@@ -1,0 +1,95 @@
+From d2d18a9ed8836dac252f7c4c61541c2a9e4ebbf0 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Wed, 10 Mar 2021 02:30:33 +0800
+Subject: [PATCH 3/8] Support customize FL_INDEX_MAX to reduce the memory
+ overhead
+
+user can define the max pool size through TLSF_MAX_POOL_SIZE
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+Change-Id: I021b816f65c1bc5c1025969bc6cc458029f3bc88
+---
+ tlsf.c | 46 +++++++++++++++++++++++++++++-----------------
+ 1 file changed, 29 insertions(+), 17 deletions(-)
+
+diff --git a/tlsf.c tlsf/tlsf/tlsf.c
+index ea8d640..66daf33 100644
+--- a/tlsf.c
++++ tlsf/tlsf/tlsf.c
+@@ -48,6 +48,29 @@
+ #define TLSF_64BIT
+ #endif
+ 
++/*
++** Returns one plus the index of the most significant 1-bit of n,
++** or if n is zero, returns zero.
++*/
++#ifdef TLSF_64BIT
++#define TLSF_FLS(n) ((n) & 0xffffffff00000000ull ? 32 + TLSF_FLS32((size_t)(n) >> 32) : TLSF_FLS32(n))
++#else
++#define TLSF_FLS(n) TLSF_FLS32(n)
++#endif
++
++#define TLSF_FLS32(n) ((n) & 0xffff0000 ? 16 + TLSF_FLS16((n) >> 16) : TLSF_FLS16(n))
++#define TLSF_FLS16(n) ((n) & 0xff00     ?  8 + TLSF_FLS8 ((n) >>  8) : TLSF_FLS8 (n))
++#define TLSF_FLS8(n)  ((n) & 0xf0       ?  4 + TLSF_FLS4 ((n) >>  4) : TLSF_FLS4 (n))
++#define TLSF_FLS4(n)  ((n) & 0xc        ?  2 + TLSF_FLS2 ((n) >>  2) : TLSF_FLS2 (n))
++#define TLSF_FLS2(n)  ((n) & 0x2        ?  1 + TLSF_FLS1 ((n) >>  1) : TLSF_FLS1 (n))
++#define TLSF_FLS1(n)  ((n) & 0x1        ?  1 : 0)
++
++/*
++** Returns round up value of log2(n).
++** Note: it is used at compile time.
++*/
++#define TLSF_LOG2_CEIL(n) ((n) & (n - 1) ? TLSF_FLS(n) : TLSF_FLS(n) - 1)
++
+ /*
+ ** gcc 3.4 and above have builtin support, specialized for architecture.
+ ** Some compilers masquerade as gcc; patchlevel test filters them out.
+@@ -155,29 +178,16 @@ tlsf_decl int tlsf_fls(unsigned int word)
+ #else
+ /* Fall back to generic implementation. */
+ 
+-tlsf_decl int tlsf_fls_generic(unsigned int word)
+-{
+-	int bit = 32;
+-
+-	if (!word) bit -= 1;
+-	if (!(word & 0xffff0000)) { word <<= 16; bit -= 16; }
+-	if (!(word & 0xff000000)) { word <<= 8; bit -= 8; }
+-	if (!(word & 0xf0000000)) { word <<= 4; bit -= 4; }
+-	if (!(word & 0xc0000000)) { word <<= 2; bit -= 2; }
+-	if (!(word & 0x80000000)) { word <<= 1; bit -= 1; }
+-
+-	return bit;
+-}
+-
+ /* Implement ffs in terms of fls. */
+ tlsf_decl int tlsf_ffs(unsigned int word)
+ {
+-	return tlsf_fls_generic(word & (~word + 1)) - 1;
++	const unsigned int reverse = word & (~word + 1);
++	return TLSF_FLS32(reverse) - 1;
+ }
+ 
+ tlsf_decl int tlsf_fls(unsigned int word)
+ {
+-	return tlsf_fls_generic(word) - 1;
++	return TLSF_FLS32(word) - 1;
+ }
+ 
+ #endif
+@@ -242,7 +252,9 @@ enum tlsf_private
+ 	** blocks below that size into the 0th first-level list.
+ 	*/
+ 
+-#if defined (TLSF_64BIT)
++#if defined (TLSF_MAX_POOL_SIZE)
++	FL_INDEX_MAX = TLSF_LOG2_CEIL(TLSF_MAX_POOL_SIZE),
++#elif defined (TLSF_64BIT)
+ 	/*
+ 	** TODO: We can increase this to support larger sizes, at the expense
+ 	** of more overhead in the TLSF structure.
+-- 
+2.34.1
+
