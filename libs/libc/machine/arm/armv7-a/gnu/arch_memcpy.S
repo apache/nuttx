@@ -1,461 +1,329 @@
-/************************************************************************************
- * libs/libc/machine/arm/armv7-a/arch_memcpy.S
- * ARMv7-A optimized memcpy.
- *
- * Adapted for use with ARMv7-A and NuttX by:
- *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Based on the ARMv7-M version contributed by Mike Smith.  Apparently in the public
- * domain and is re-released here under the modified BSD license:
- *
- * Obtained via a posting on the Stellaris forum:
- *  http://e2e.ti.com/support/microcontrollers/\
- *       stellaris_arm_cortex-m3_microcontroller/f/473/t/44360.aspx
- *
- * Posted by rocksoft on Jul 24, 2008 10:19 AM
- *
- *   Hi,
- *
- *   I recently finished a "memcpy" replacement and thought it might be useful for
- *   others...
- *
- *   I've put some instructions and the code here:
- *
- *   http://www.rock-software.net/downloads/memcpy/
- *
- *   Hope it works for you as well as it did for me.
- *
- *   Liam.
+/*
+ * Copyright (c) 2013 ARM Ltd
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the company may not be used to endorse or promote
+ *    products derived from this software without specific prior written
+ *    permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
-
-/************************************************************************************
- * Public Symbols
- ************************************************************************************/
-
-	.global	memcpy
-	.syntax	unified
-	.file	"arch_memcpy.S"
-
-/************************************************************************************
- * .text
- ************************************************************************************/
-
-	.text
-
-/************************************************************************************
- * Private Constant Data
- ************************************************************************************/
-
-/* We have 16 possible alignment combinations of src and dst, this jump table
- * directs the copy operation
- *
- * Bits:  Src=00, Dst=00 - Long to Long copy
- * Bits:  Src=00, Dst=01 - Long to Byte before half word
- * Bits:  Src=00, Dst=10 - Long to Half word
- * Bits:  Src=00, Dst=11 - Long to Byte before long word
- * Bits:  Src=01, Dst=00 - Byte before half word to long
- * Bits:  Src=01, Dst=01 - Byte before half word to byte before half word -
- *                         Same alignment
- * Bits:  Src=01, Dst=10 - Byte before half word to half word
- * Bits:  Src=01, Dst=11 - Byte before half word to byte before long word
- * Bits:  Src=10, Dst=00 - Half word to long word
- * Bits:  Src=10, Dst=01 - Half word to byte before half word
- * Bits:  Src=10, Dst=10 - Half word to half word - Same Alignment
- * Bits:  Src=10, Dst=11 - Half word to byte before long word
- * Bits:  Src=11, Dst=00 - Byte before long word to long word
- * Bits:  Src=11, Dst=01 - Byte before long word to byte before half word
- * Bits:  Src=11, Dst=11 - Byte before long word to half word
- * Bits:  Src=11, Dst=11 - Byte before long word to Byte before long word -
- *                         Same alignment
+ * THIS SOFTWARE IS PROVIDED BY ARM LTD ``AS IS'' AND ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL ARM LTD BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-MEM_DataCopyTable:
-	.byte	(MEM_DataCopy0  - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy1  - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy2  - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy3  - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy4  - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy5  - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy6  - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy7  - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy8  - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy9  - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy10 - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy11 - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy12 - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy13 - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy14 - MEM_DataCopyJump) >> 2
-	.byte	(MEM_DataCopy15 - MEM_DataCopyJump) >> 2
+/* This memcpy routine is optimised for Cortex-M3/M4 cores with/without
+   unaligned access.
+
+   If compiled with GCC, this file should be enclosed within following
+   pre-processing check:
+   if defined (__ARM_ARCH_7M__) || defined (__ARM_ARCH_7EM__)
+
+   Prototype: void *memcpy (void *dst, const void *src, size_t count);
+
+   The job will be done in 5 steps.
+   Step 1: Align src/dest pointers, copy mis-aligned if fail to align both
+   Step 2: Repeatedly copy big block size of __OPT_BIG_BLOCK_SIZE
+   Step 3: Repeatedly copy big block size of __OPT_MID_BLOCK_SIZE
+   Step 4: Copy word by word
+   Step 5: Copy byte-to-byte
+
+   Tunable options:
+     __OPT_BIG_BLOCK_SIZE: Size of big block in words.  Default to 64.
+     __OPT_MID_BLOCK_SIZE: Size of big block in words.  Default to 16.
+ */
+#ifndef __OPT_BIG_BLOCK_SIZE
+#define __OPT_BIG_BLOCK_SIZE (4 * 16)
+#endif
+
+#ifndef __OPT_MID_BLOCK_SIZE
+#define __OPT_MID_BLOCK_SIZE (4 * 4)
+#endif
+
+#if __OPT_BIG_BLOCK_SIZE == 16
+#define BEGIN_UNROLL_BIG_BLOCK \
+  .irp offset, 0,4,8,12
+#elif __OPT_BIG_BLOCK_SIZE == 32
+#define BEGIN_UNROLL_BIG_BLOCK \
+  .irp offset, 0,4,8,12,16,20,24,28
+#elif __OPT_BIG_BLOCK_SIZE == 64
+#define BEGIN_UNROLL_BIG_BLOCK \
+  .irp offset, 0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60
+#else
+#error "Illegal __OPT_BIG_BLOCK_SIZE"
+#endif
+
+#if __OPT_MID_BLOCK_SIZE == 8
+#define BEGIN_UNROLL_MID_BLOCK \
+  .irp offset, 0,4
+#elif __OPT_MID_BLOCK_SIZE == 16
+#define BEGIN_UNROLL_MID_BLOCK \
+  .irp offset, 0,4,8,12
+#else
+#error "Illegal __OPT_MID_BLOCK_SIZE"
+#endif
+
+#define END_UNROLL .endr
+
+	.syntax unified
+	.text
+	.align	2
+	.global	memcpy
+	.thumb
+	.thumb_func
+	.type	memcpy, %function
+memcpy:
+	@ r0: dst
+	@ r1: src
+	@ r2: len
+#ifdef __ARM_FEATURE_UNALIGNED
+	/* In case of UNALIGNED access supported, ip is not used in
+	   function body.  */
+	mov	ip, r0
+#else
+	push	{r0}
+#endif
+	orr	r3, r1, r0
+	ands	r3, r3, #3
+	bne	.Lmisaligned_copy
+
+.Lbig_block:
+	subs	r2, __OPT_BIG_BLOCK_SIZE
+	blo	.Lmid_block
+
+	/* Kernel loop for big block copy */
+	.align 2
+.Lbig_block_loop:
+	BEGIN_UNROLL_BIG_BLOCK
+#ifdef __ARM_ARCH_7EM__
+	ldr	r3, [r1], #4
+	str	r3, [r0], #4
+	END_UNROLL
+#else /* __ARM_ARCH_7M__ */
+	ldr	r3, [r1, \offset]
+	str	r3, [r0, \offset]
+	END_UNROLL
+	adds	r0, __OPT_BIG_BLOCK_SIZE
+	adds	r1, __OPT_BIG_BLOCK_SIZE
+#endif
+	subs	r2, __OPT_BIG_BLOCK_SIZE
+	bhs .Lbig_block_loop
+
+.Lmid_block:
+	adds	r2, __OPT_BIG_BLOCK_SIZE - __OPT_MID_BLOCK_SIZE
+	blo	.Lcopy_word_by_word
+
+	/* Kernel loop for mid-block copy */
+	.align 2
+.Lmid_block_loop:
+	BEGIN_UNROLL_MID_BLOCK
+#ifdef __ARM_ARCH_7EM__
+	ldr	r3, [r1], #4
+	str	r3, [r0], #4
+	END_UNROLL
+#else /* __ARM_ARCH_7M__ */
+	ldr	r3, [r1, \offset]
+	str	r3, [r0, \offset]
+	END_UNROLL
+	adds    r0, __OPT_MID_BLOCK_SIZE
+	adds    r1, __OPT_MID_BLOCK_SIZE
+#endif
+	subs	r2, __OPT_MID_BLOCK_SIZE
+	bhs	.Lmid_block_loop
+
+.Lcopy_word_by_word:
+	adds	r2, __OPT_MID_BLOCK_SIZE - 4
+	blo	.Lcopy_less_than_4
+
+	/* Kernel loop for small block copy */
+	.align 2
+.Lcopy_word_by_word_loop:
+	ldr	r3, [r1], #4
+	str	r3, [r0], #4
+	subs	r2, #4
+	bhs	.Lcopy_word_by_word_loop
+
+.Lcopy_less_than_4:
+	adds	r2, #4
+	beq	.Ldone
+
+	lsls	r2, r2, #31
+	itt ne
+	ldrbne  r3, [r1], #1
+	strbne  r3, [r0], #1
+
+	bcc	.Ldone
+#ifdef __ARM_FEATURE_UNALIGNED
+	ldrh	r3, [r1]
+	strh	r3, [r0]
+#else
+	ldrb	r3, [r1]
+	strb	r3, [r0]
+	ldrb	r3, [r1, #1]
+	strb	r3, [r0, #1]
+#endif /* __ARM_FEATURE_UNALIGNED */
+
+.Ldone:
+#ifdef __ARM_FEATURE_UNALIGNED
+	mov	r0, ip
+#else
+	pop	{r0}
+#endif
+	bx	lr
 
 	.align 2
-
-MEM_LongCopyTable:
-	.byte	(MEM_LongCopyEnd   - MEM_LongCopyJump) >> 2	/* 0 bytes left */
-	.byte	(MEM_LongCopyJump0 - MEM_LongCopyJump) >> 2	/* 4 bytes left */
-	.byte	(MEM_LongCopyJump1 - MEM_LongCopyJump) >> 2	/* 8 bytes left */
-	.byte	(MEM_LongCopyJump2 - MEM_LongCopyJump) >> 2	/* 12 bytes left */
-	.byte	(MEM_LongCopyJump3 - MEM_LongCopyJump) >> 2	/* 16 bytes left */
-	.byte	(MEM_LongCopyJump4 - MEM_LongCopyJump) >> 2	/* 20 bytes left */
-	.byte	(MEM_LongCopyJump5 - MEM_LongCopyJump) >> 2	/* 24 bytes left */
-	.byte	(MEM_LongCopyJump6 - MEM_LongCopyJump) >> 2	/* 28 bytes left */
-	.byte	(MEM_LongCopyJump7 - MEM_LongCopyJump) >> 2	/* 32 bytes left */
-	.byte	(MEM_LongCopyJump8 - MEM_LongCopyJump) >> 2	/* 36 bytes left */
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-/************************************************************************************
- * Name: memcpy
- *
- * Description:
- *   Optimized "general" copy routine
- *
- * Input Parameters:
- *   r0 = destination, r1 = source, r2 = length
- *
- * Returned Value:
- *   r0 = destination r1-r3 burned
- *
- ************************************************************************************/
-
-	.align 4
-
-memcpy:
-	push	{r14}
-	push    {r0}
-	bl      _do_memcpy
-	pop     {r0}
-	pop     {pc}
-
-	.align 4
-
-_do_memcpy:
-	push    {r14}
-	push    {r4}
-
-	/* This allows the inner workings to "assume" a minimum amount of bytes */
-	/* Quickly check for very short copies */
-
-	cmp		r2, #4
-	blt		MEM_DataCopyBytes
-
-	and		r14, r0, #3		 		/* Get destination alignment bits */
-	bfi		r14, r1, #2, #2	 		/* Get source alignment bits */
-
-	ldr		r3, =MEM_DataCopyTable	/* Jump table base address */
-	ldrb	r4, [r3, r14]			/* DWord offset for this alignment combination */
-	ldr		r3, =MEM_DataCopyJump	/* Base of branch table anchor */
-	add		r3, r3, r4, lsl #2		/* Absolute address of logic */
-	bx		r3
-
-	/* data copy branch table anchor */
-
-	.align 4
-MEM_DataCopyJump:
-
-/* Bits:  Src=01, Dst=01 - Byte before half word to byte before half word - Same alignment
- * 3 bytes to read for long word aligning
- */
-
-MEM_DataCopy5:
-	ldrb	r3, [r1], #0x01
-	strb	r3, [r0], #0x01
-	sub		r2, r2, #0x01
-
-/* Bits:  Src=10, Dst=10 - Half word to half word - Same Alignment
- * 2 bytes to read for long word aligning
- */
-
-MEM_DataCopy10:
-	ldrb	r3, [r1], #0x01
-	strb	r3, [r0], #0x01
-	sub		r2, r2, #0x01
-
-/* Bits:  Src=11, Dst=11 - Byte before long word to Byte before long word - Same alignment
- * 1 bytes to read for long word aligning
- */
-
-MEM_DataCopy15:
-	ldrb	r3, [r1], #0x01
-	strb	r3, [r0], #0x01
-	sub		r2, r2, #0x01
-
-/* Bits:  Src=00, Dst=00 - Long to Long copy */
-
-MEM_DataCopy0:
-	/* Save regs that may be used by memcpy */
-
-	push	{r5-r12}
-
-	/* Check for short word-aligned copy */
-
-	cmp		r2, #0x28
-	blt		MEM_DataCopy0_2
-
-	/* Bulk copy loop */
-
-MEM_DataCopy0_1:
-	ldmia	r1!, {r3-r12}
-	stmia	r0!, {r3-r12}
-	sub		r2, r2, #0x28
-	cmp		r2, #0x28
-	bge		MEM_DataCopy0_1
-
-	/* Copy remaining long words */
-
-MEM_DataCopy0_2:
-	ldr		r14, =MEM_LongCopyTable	/* Jump table base address */
-	lsr		r11, r2, 2				/* Convert byte count to word count */
-	add		r14, r14, r11			/* Jump table offset address */
-	ldrb	r3, [r14]				/* DWord offset from branch table anchor */
-	ldr		r11, =MEM_LongCopyJump	/* Address of branch table anchor */
-	add		r11, r11, r3, lsl #2	/* Absolute address into branch table */
-	bx		r11						/* Go there */
-
-	/* longword copy branch table anchor */
-
-MEM_LongCopyJump:
-
-MEM_LongCopyJump0:
-	ldr		r3, [r1], #0x04		/* 4 bytes remain */
-	str		r3, [r0], #0x04
-	b		MEM_LongCopyEnd
-
-MEM_LongCopyJump1:
-	ldmia	r1!, {r3-r4}		/* 8 bytes remain */
-	stmia	r0!, {r3-r4}
-	b		MEM_LongCopyEnd
-
-MEM_LongCopyJump2:
-	ldmia	r1!, {r3-r5}		/* 12 bytes remain */
-	stmia	r0!, {r3-r5}
-	b		MEM_LongCopyEnd
-
-MEM_LongCopyJump3:
-	ldmia	r1!, {r3-r6}		/* 16 bytes remain */
-	stmia	r0!, {r3-r6}
-	b		MEM_LongCopyEnd
-
-MEM_LongCopyJump4:
-	ldmia	r1!, {r3-r7}		/* 20 bytes remain */
-	stmia	r0!, {r3-r7}
-	b		MEM_LongCopyEnd
-
-MEM_LongCopyJump5:
-	ldmia	r1!, {r3-r8}		/* 24 bytes remain */
-	stmia	r0!, {r3-r8}
-	b		MEM_LongCopyEnd
-
-MEM_LongCopyJump6:
-	ldmia	r1!, {r3-r9}		/* 28 bytes remain */
-	stmia	r0!, {r3-r9}
-	b		MEM_LongCopyEnd
-
-MEM_LongCopyJump7:
-	ldmia	r1!, {r3-r10}		/* 32 bytes remain */
-	stmia	r0!, {r3-r10}
-	b		MEM_LongCopyEnd
-
-MEM_LongCopyJump8:
-	ldmia	r1!, {r3-r11}		/* 36 bytes remain */
-	stmia	r0!, {r3-r11}
-
-MEM_LongCopyEnd:
-	pop		{r5-r12}
-	and		r2, r2, #0x03		/* All the longs have been copied */
-
-	/* Deal with up to 3 remaining bytes */
-
-MEM_DataCopyBytes:
-	/* Deal with up to 3 remaining bytes */
-
-	pop		{r4}
-	cmp		r2, #0x00
-	it		eq
-	popeq	{pc}
-
-	ldrb	r3, [r1], #0x01
-	strb	r3, [r0], #0x01
-	subs	r2, r2, #0x01
-	it		eq
-	popeq	{pc}
-
-	ldrb	r3, [r1], #0x01
-	strb	r3, [r0], #0x01
-	subs	r2, r2, #0x01
-	it		eq
-	popeq	{pc}
-
-	ldrb	r3, [r1], #0x01
-	strb	r3, [r0], #0x01
-	pop		{pc}
-
- .align 4
-
-/* Bits:  Src=01, Dst=11 - Byte before half word to byte before long word
- * 3 bytes to read for long word aligning the source
- */
-
-MEM_DataCopy7:
-	ldrb	r3, [r1], #0x01
-	strb	r3, [r0], #0x01
-	sub		r2, r2, #0x01
-
-/* Bits:  Src=10, Dst=00 - Half word to long word
- * 2 bytes to read for long word aligning the source
- */
-
-MEM_DataCopy8:
-	ldrb	r3, [r1], #0x01
-	strb	r3, [r0], #0x01
-	sub		r2, r2, #0x01
-
-/* Bits:  Src=11, Dst=01 - Byte before long word to byte before half word
- * 1 byte to read for long word aligning the source
- */
-
-MEM_DataCopy13:
-	ldrb	r3, [r1], #0x01
-	strb	r3, [r0], #0x01
-	sub		r2, r2, #0x01
-
-/* Bits:  Src=00, Dst=10 - Long to Half word */
-
-MEM_DataCopy2:
-	cmp		r2, #0x28
-	blt		MEM_DataCopy2_1
-
-	/* Save regs */
-
-	push	{r5-r12}
-
-	/* Bulk copy loop */
-
-MEM_DataCopy2_2:
-	ldmia	r1!, {r3-r12}
-
-	strh	r3, [r0], #0x02
-
-	lsr		r3, r3, #0x10
-	bfi		r3, r4, #0x10, #0x10
-	lsr		r4, r4, #0x10
-	bfi		r4, r5, #0x10, #0x10
-	lsr		r5, r5, #0x10
-	bfi		r5, r6, #0x10, #0x10
-	lsr		r6, r6, #0x10
-	bfi		r6, r7, #0x10, #0x10
-	lsr		r7, r7, #0x10
-	bfi		r7, r8, #0x10, #0x10
-	lsr		r8, r8, #0x10
-	bfi		r8, r9, #0x10, #0x10
-	lsr		r9, r9, #0x10
-	bfi		r9, r10, #0x10, #0x10
-	lsr		r10, r10, #0x10
-	bfi		r10, r11, #0x10, #0x10
-	lsr		r11, r11, #0x10
-	bfi		r11, r12, #0x10, #0x10
-	stmia	r0!, {r3-r11}
-	lsr		r12, r12, #0x10
-	strh	r12, [r0], #0x02
-
-	sub		r2, r2, #0x28
-	cmp		r2, #0x28
-	bge		MEM_DataCopy2_2
-	pop		{r5-r12}
-
-MEM_DataCopy2_1: /* Read longs and write 2 x half words */
-	cmp		r2, #4
-	blt		MEM_DataCopyBytes
-	ldr		r3, [r1], #0x04
-	strh	r3, [r0], #0x02
-	lsr		r3, r3, #0x10
-	strh	r3, [r0], #0x02
-	sub		r2, r2, #0x04
-	b		MEM_DataCopy2
-
-/* Bits:  Src=01, Dst=00 - Byte before half word to long
- * Bits:  Src=01, Dst=10 - Byte before half word to half word
- * 3 bytes to read for long word aligning the source
- */
-
-MEM_DataCopy4:
-MEM_DataCopy6:
-	/* Read B and write B */
-
-	ldrb	r3, [r1], #0x01
-	strb	r3, [r0], #0x01
-	sub		r2, r2, #0x01
-
-/* Bits:  Src=10, Dst=01 - Half word to byte before half word
- * Bits:  Src=10, Dst=11 - Half word to byte before long word
- * 2 bytes to read for long word aligning the source
- */
-
-MEM_DataCopy9:
-MEM_DataCopy11:
-	ldrb	r3, [r1], #0x01
-	strb	r3, [r0], #0x01
-	sub		r2, r2, #0x01
-
-/* Bits:  Src=11, Dst=00 -chm Byte before long word to long word
- * Bits:  Src=11, Dst=11 - Byte before long word to half word
- * 1 byte to read for long word aligning the source
- */
-
-MEM_DataCopy12:
-MEM_DataCopy14:
-	/* Read B and write B */
-
-	ldrb	r3, [r1], #0x01
-	strb	r3, [r0], #0x01
-	sub		r2, r2, #0x01
-
-/* Bits:  Src=00, Dst=01 - Long to Byte before half word
- * Bits:  Src=00, Dst=11 - Long to Byte before long word
- */
-
-MEM_DataCopy1: /* Read longs, write B->H->B */
-MEM_DataCopy3:
-	cmp		r2, #4
-	blt		MEM_DataCopyBytes
-	ldr		r3, [r1], #0x04
-	strb	r3, [r0], #0x01
-	lsr		r3, r3, #0x08
-	strh	r3, [r0], #0x02
-	lsr		r3, r3, #0x10
-	strb	r3, [r0], #0x01
-	sub		r2, r2, #0x04
-	b		MEM_DataCopy3
+.Lmisaligned_copy:
+#ifdef __ARM_FEATURE_UNALIGNED
+	/* Define label DST_ALIGNED to BIG_BLOCK.  It will go to aligned copy
+	   once destination is adjusted to aligned.  */
+#define Ldst_aligned Lbig_block
+
+	/* Copy word by word using LDR when alignment can be done in hardware,
+	i.e., SCTLR.A is set, supporting unaligned access in LDR and STR.  */
+
+	cmp	r2, #8
+	blo	.Lbyte_copy
+
+	/* if src is aligned, just go to the big block loop.  */
+	lsls	r3, r1, #30
+	beq	.Ldst_aligned
+#else
+	/* if len < 12, misalignment adjustment has more overhead than
+	just byte-to-byte copy.  Also, len must >=8 to guarantee code
+	afterward work correctly.  */
+	cmp	r2, #12
+	blo	.Lbyte_copy
+#endif /* __ARM_FEATURE_UNALIGNED */
+
+	/* Align dst only, not trying to align src.  That is the because
+	handling of aligned src and misaligned dst need more overhead than
+	otherwise.  By doing this the worst case is when initial src is aligned,
+	additional up to 4 byte additional copy will executed, which is
+	acceptable.  */
+
+	ands	r3, r0, #3
+	beq	.Ldst_aligned
+
+	rsb	r3, #4
+	subs	r2, r3
+
+	lsls    r3, r3, #31
+	itt ne
+	ldrbne  r3, [r1], #1
+	strbne  r3, [r0], #1
+
+	bcc .Ldst_aligned
+
+#ifdef __ARM_FEATURE_UNALIGNED
+	ldrh    r3, [r1], #2
+	strh    r3, [r0], #2
+	b	.Ldst_aligned
+#else
+	ldrb    r3, [r1], #1
+	strb    r3, [r0], #1
+	ldrb    r3, [r1], #1
+	strb    r3, [r0], #1
+	/* Now that dst is aligned */
+.Ldst_aligned:
+	/* if r1 is aligned now, it means r0/r1 has the same misalignment,
+	and they are both aligned now.  Go aligned copy.  */
+	ands	r3, r1, #3
+	beq	.Lbig_block
+
+	/* dst is aligned, but src isn't.  Misaligned copy.  */
+
+	push	{r4, r5}
+	subs	r2, #4
+
+	/* Backward r1 by misaligned bytes, to make r1 aligned.
+	Since we need to restore r1 to unaligned address after the loop,
+	we need keep the offset bytes to ip and sub it from r1 afterward.  */
+	subs	r1, r3
+	rsb	ip, r3, #4
+
+	/* Pre-load on word */
+	ldr	r4, [r1], #4
+
+	cmp	r3, #2
+	beq	.Lmisaligned_copy_2_2
+	cmp	r3, #3
+	beq	.Lmisaligned_copy_3_1
+
+	.macro mis_src_copy shift
+1:
+#ifdef __ARM_BIG_ENDIAN
+	lsls	r4, r4, \shift
+#else
+	lsrs	r4, r4, \shift
+#endif
+	ldr	r3, [r1], #4
+#ifdef __ARM_BIG_ENDIAN
+	lsrs	r5, r3, 32-\shift
+#else
+	lsls	r5, r3, 32-\shift
+#endif
+	orr	r4, r4, r5
+	str	r4, [r0], #4
+	mov	r4, r3
+	subs	r2, #4
+	bhs	1b
+	.endm
+
+.Lmisaligned_copy_1_3:
+	mis_src_copy shift=8
+	b	.Lsrc_misaligned_tail
+
+.Lmisaligned_copy_3_1:
+	mis_src_copy shift=24
+	b	.Lsrc_misaligned_tail
+
+.Lmisaligned_copy_2_2:
+	/* For 2_2 misalignment, ldr is still faster than 2 x ldrh.  */
+	mis_src_copy shift=16
+
+.Lsrc_misaligned_tail:
+	adds	r2, #4
+	subs	r1, ip
+	pop	{r4, r5}
+
+#endif /* __ARM_FEATURE_UNALIGNED */
+
+.Lbyte_copy:
+	subs	r2, #4
+	blo	.Lcopy_less_than_4
+
+.Lbyte_copy_loop:
+	subs    r2, #1
+	ldrb    r3, [r1], #1
+	strb    r3, [r0], #1
+	bhs	.Lbyte_copy_loop
+
+	ldrb	r3, [r1]
+	strb	r3, [r0]
+	ldrb	r3, [r1, #1]
+	strb	r3, [r0, #1]
+	ldrb	r3, [r1, #2]
+	strb	r3, [r0, #2]
+
+#ifdef __ARM_FEATURE_UNALIGNED
+	mov	r0, ip
+#else
+	pop	{r0}
+#endif
+	bx	lr
 
 	.size	memcpy, .-memcpy
-	.end
