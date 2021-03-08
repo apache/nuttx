@@ -72,9 +72,23 @@
  *
  * When an internal heap is enabled this region starts at an offset equal to
  * the size of the internal heap.
+ *
+ * The QEMU bootloader image is slightly different than the chip's one.
+ * The ROM on PRO and APP uses different regions for static data. In QEMU,
+ * however, we load only one ROM binary, taken from the PRO CPU, and it is
+ * used by both CPUs.  So, in QEMU, if we allocate this part early, it will
+ * be clobbered once the APP CPU starts.
+ * We can delay the allocation to when everything has started through the
+ * board_late_initiliaze hook, as is done for the APP data, however this
+ * should be fixed from QEMU side.  The following macros, then, just skip
+ * PRO CPU's data when a QEMU image generation is enabled with SMP.
  */
 
-#define HEAP_REGION2_START  0x3ffe0450
+#if defined(CONFIG_ESP32_QEMU_IMAGE) && defined(CONFIG_SMP)
+#  define HEAP_REGION2_START  0x3ffe1330
+#else
+#  define HEAP_REGION2_START  0x3ffe0450
+#endif
 
 #ifdef CONFIG_SMP
 #  define HEAP_REGION2_END    0x3ffe3f10
