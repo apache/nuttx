@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_timer.c
+ * arch/risc-v/src/esp32c3/esp32c3_wlan.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,66 +18,50 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WLAN_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WLAN_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <debug.h>
+#ifndef __ASSEMBLY__
 
-#include "esp32c3_tim_lowerhalf.h"
-#include "esp32c3_tim.h"
-
-#include "esp32c3-devkit.h"
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_tim_init
+ * Name: esp32c3_wlan_sta_initialize
  *
  * Description:
- *   Configure the timer driver.
+ *   Initialize the ESP32-C3 WLAN station netcard driver
+ *
+ * Input Parameters:
+ *   None
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
+ *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-int board_tim_init(void)
-{
-  int ret = OK;
+int esp32c3_wlan_sta_initialize(void);
 
-#if defined(CONFIG_ESP32C3_TIMER0) && !defined(CONFIG_ESP32C3_RT_TIMER)
-  ret = esp32c3_timer_initialize("/dev/timer0", ESP32C3_TIMER0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      return ret;
-    }
-#endif /* CONFIG_ESP32C3_TIMER0 */
-
-#ifdef CONFIG_ESP32C3_TIMER1
-  ret = esp32c3_timer_initialize("/dev/timer1", ESP32C3_TIMER1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      return ret;
-    }
-#endif /* CONFIG_ESP32C3_TIMER1 */
-
-  return ret;
+#ifdef __cplusplus
 }
+#endif
+#undef EXTERN
 
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WLAN_H */

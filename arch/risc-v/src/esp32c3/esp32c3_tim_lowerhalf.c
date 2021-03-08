@@ -97,7 +97,7 @@ static const struct timer_ops_s g_esp32c3_timer_ops =
   .ioctl       = NULL,
 };
 
-#ifdef CONFIG_ESP32C3_TIMER0
+#if defined(CONFIG_ESP32C3_TIMER0) && !defined(CONFIG_ESP32C3_RT_TIMER)
 /* TIMER0 lower-half */
 
 static struct esp32c3_timer_lowerhalf_s g_esp32c3_timer0_lowerhalf =
@@ -500,7 +500,7 @@ int esp32c3_timer_initialize(FAR const char *devpath, uint8_t timer)
 
   switch (timer)
     {
-#ifdef CONFIG_ESP32C3_TIMER0
+#if defined(CONFIG_ESP32C3_TIMER0) && !defined(CONFIG_ESP32C3_RT_TIMER)
       case 0:
         {
           lower = &g_esp32c3_timer0_lowerhalf;
