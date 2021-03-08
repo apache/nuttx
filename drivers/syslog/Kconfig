@@ -111,12 +111,6 @@ config SYSLOG_TIMESTAMP_REALTIME
 		CLOCK_MONOTONIC, if enabled, will be used or the system timer
 		is not.
 
-config SYSLOG_PROCESSID
-	bool "Prepend Process ID to syslog message"
-	default n
-	---help---
-		Prepend Process ID to syslog message.
-
 config SYSLOG_PREFIX
 	bool "Prepend prefix to syslog message"
 	default n
