@@ -127,6 +127,10 @@
 #define ESP32C3_CPUINT_MIN             1
 #define ESP32C3_CPUINT_MAX             31
 
+/* Reserved CPU interrupt for specific drivers */
+
+#define ESP32C3_CPUINT_WMAC            1  /* Wi-Fi MAC */
+
 /* IRQ numbers. */
 
 /* ecall is dispatched like normal interrupts.  It occupies an IRQ number. */

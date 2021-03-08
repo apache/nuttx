@@ -37,6 +37,8 @@
 
 #include <nuttx/fs/fs.h>
 
+#include "esp32c3_wlan.h"
+
 #include "esp32c3-devkit.h"
 
 /****************************************************************************
@@ -140,6 +142,15 @@ int esp32c3_bringup(void)
       syslog(LOG_ERR,
              "ERROR: Failed to initialize timer drivers: %d\n",
              ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32C3_WIRELESS
+  ret = esp32c3_wlan_sta_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi\n");
+      return ret;
     }
 #endif
 

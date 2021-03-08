@@ -45,6 +45,11 @@ config ARCH_CHIP_ESP32C3
 	select RV32IM_HW_MULDIV
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_RESET
+	select LIBC_ARCH_MEMCHR
+	select LIBC_ARCH_MEMCMP
+	select LIBC_ARCH_MEMCCMP
+	select LIBC_ARCH_MEMMOVE
+	select LIBC_ARCH_MEMSET
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 

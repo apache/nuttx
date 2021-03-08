@@ -36,6 +36,11 @@ SECTIONS
     *(.iram1)
     *(.iram1.*)
 
+    *(.wifi0iram .wifi0iram.*)
+    *(.wifirxiram .wifirxiram.*)
+    *(.wifislpiram .wifislpiram.*)
+    *(.wifislprxiram .wifislprxiram.*)
+
   } >iram0_0_seg
 
   /* This section is required to skip .iram0.text area because iram0_0_seg
@@ -134,6 +139,9 @@ SECTIONS
 
     *(.rodata)
     *(.rodata.*)
+
+    *(.srodata.*)
+
     *(.irom1.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.gnu.linkonce.r.*)
     *(.rodata1)
