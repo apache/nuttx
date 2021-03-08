@@ -11,7 +11,8 @@ Currently only the following devices are suppored.
   - UART  (console port)
     - GPIO 0 (UART0 TX) and GPIO 1 (UART0 RX) are used for the console.
   - I2C
-  - SPI (DMA transfer is not supported yet)
+  - SPI
+  - DMAC
   - Flash ROM Boot
   - SRAM Boot
     - If Pico SDK is available, nuttx.uf2 file which can be used in

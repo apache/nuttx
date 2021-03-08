@@ -46,6 +46,10 @@
 #include "rp2040_spi.h"
 #include "hardware/rp2040_spi.h"
 
+#ifdef CONFIG_RP2040_SPI_DMA
+#include "rp2040_dmac.h"
+#endif
+
 #ifdef CONFIG_RP2040_SPI
 
 /****************************************************************************
@@ -81,6 +85,14 @@ struct rp2040_spidev_s
   uint8_t          mode;        /* Mode 0,1,2,3 */
   uint8_t          port;        /* Port number */
   int              initialized; /* Initialized flag */
+#ifdef CONFIG_RP2040_SPI_DMA
+  bool             dmaenable;   /* Use DMA or not */
+  DMA_HANDLE       rxdmach;     /* RX DMA channel handle */
+  DMA_HANDLE       txdmach;     /* TX DMA channel handle */
+  sem_t            dmasem;      /* Wait for DMA to complete */
+  dma_config_t     rxconfig;    /* RX DMA configuration */
+  dma_config_t     txconfig;    /* TX DMA configuration */
+#endif
 };
 
 /****************************************************************************
@@ -93,6 +105,27 @@ static inline uint32_t spi_getreg(FAR struct rp2040_spidev_s *priv,
                                   uint8_t offset);
 static inline void spi_putreg(FAR struct rp2040_spidev_s *priv,
                               uint8_t offset, uint32_t value);
+
+/* DMA support */
+
+#ifdef CONFIG_RP2040_SPI_DMA
+static void __unused spi_dmaexchange(FAR struct spi_dev_s *dev,
+                                     FAR const void *txbuffer,
+                                     FAR void *rxbuffer, size_t nwords);
+static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *data);
+static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *data);
+static void spi_dmatxsetup(FAR struct rp2040_spidev_s *priv,
+                           FAR const void *txbuffer, size_t nwords);
+static void spi_dmarxsetup(FAR struct rp2040_spidev_s *priv,
+                           FAR const void *rxbuffer, size_t nwords);
+static void spi_dmatrxwait(FAR struct rp2040_spidev_s *priv);
+#ifndef CONFIG_SPI_EXCHANGE
+static void spi_dmasndblock(FAR struct spi_dev_s *dev,
+                            FAR const void *buffer, size_t nwords);
+static void spi_dmarecvblock(FAR struct spi_dev_s *dev,
+                             FAR const void *buffer, size_t nwords);
+#endif
+#endif
 
 /* SPI methods */
 
@@ -205,6 +238,13 @@ static struct rp2040_spidev_s g_spi1dev =
   .spiirq            = RP2040_SPI1_IRQ,
 #endif
 };
+#endif
+
+#ifdef CONFIG_RP2040_SPI_DMA
+/* Dummy data if no data transfer needed */
+
+uint32_t g_spitxdmadummy = 0xffffffff;
+uint32_t g_spirxdmadummy = 0;
 #endif
 
 /****************************************************************************
@@ -452,6 +492,18 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
        */
 
       priv->nbits = nbits;
+#ifdef CONFIG_RP2040_SPI_DMA
+      if (priv->nbits > 8)
+        {
+          priv->txconfig.size = RP2040_DMA_SIZE_HALFWORD;
+          priv->rxconfig.size = RP2040_DMA_SIZE_HALFWORD;
+        }
+      else
+        {
+          priv->txconfig.size = RP2040_DMA_SIZE_BYTE;
+          priv->rxconfig.size = RP2040_DMA_SIZE_BYTE;
+        }
+#endif
     }
 }
 
@@ -628,7 +680,24 @@ static void spi_do_exchange(FAR struct spi_dev_s *dev,
 static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
-  spi_do_exchange(dev, txbuffer, rxbuffer, nwords);
+#ifdef CONFIG_RP2040_SPI_DMA
+  FAR struct rp2040_spidev_s *priv = (FAR struct rp2040_spidev_s *)dev;
+
+#ifdef CONFIG_RP2040_SPI_DMATHRESHOLD
+  size_t dmath = CONFIG_RP2040_SPI_DMATHRESHOLD;
+#else
+  size_t dmath = 0;
+#endif
+
+  if (priv->dmaenable && dmath < nwords)
+    {
+      spi_dmaexchange(dev, txbuffer, rxbuffer, nwords);
+    }
+  else
+#endif
+    {
+      spi_do_exchange(dev, txbuffer, rxbuffer, nwords);
+    }
 }
 
 /****************************************************************************
@@ -708,18 +777,30 @@ FAR struct spi_dev_s *rp2040_spibus_initialize(int port)
   FAR struct rp2040_spidev_s *priv;
   uint32_t regval;
   int i;
+#ifdef CONFIG_RP2040_SPI_DMA
+  dma_config_t txconf;
+  dma_config_t rxconf;
+#endif
 
   switch (port)
     {
 #ifdef CONFIG_RP2040_SPI0
       case 0:
         priv = &g_spi0dev;
+#ifdef CONFIG_RP2040_SPI_DMA
+        txconf.dreq = RP2040_DMA_DREQ_SPI0_TX;
+        rxconf.dreq = RP2040_DMA_DREQ_SPI0_RX;
+#endif
         break;
 #endif
 
 #ifdef CONFIG_RP2040_SPI1
       case 1:
         priv = &g_spi1dev;
+#ifdef CONFIG_RP2040_SPI_DMA
+        txconf.dreq = RP2040_DMA_DREQ_SPI1_TX;
+        rxconf.dreq = RP2040_DMA_DREQ_SPI1_RX;
+#endif
         break;
 #endif
 
@@ -737,6 +818,25 @@ FAR struct spi_dev_s *rp2040_spibus_initialize(int port)
   /* Configure clocking */
 
   priv->spibasefreq = BOARD_PERI_FREQ;
+
+  /* DMA settings */
+
+#ifdef CONFIG_RP2040_SPI_DMA
+  nxsem_init(&priv->dmasem, 0, 0);
+  nxsem_set_protocol(&priv->dmasem, SEM_PRIO_NONE);
+
+  priv->txdmach = rp2040_dmachannel();
+  txconf.size = RP2040_DMA_SIZE_BYTE;
+  txconf.noincr = false;
+  priv->txconfig = txconf;
+
+  priv->rxdmach = rp2040_dmachannel();
+  rxconf.size = RP2040_DMA_SIZE_BYTE;
+  rxconf.noincr = false;
+  priv->rxconfig = rxconf;
+
+  priv->dmaenable = true;
+#endif
 
   /* Configure 8-bit SPI mode */
 
@@ -824,5 +924,225 @@ void spi_flush(FAR struct spi_dev_s *dev)
     }
   while (spi_getreg(priv, RP2040_SPI_SSPSR_OFFSET) & RP2040_SPI_SSPSR_RNE);
 }
+
+#ifdef CONFIG_RP2040_SPI_DMA
+
+/****************************************************************************
+ * Name: spi_dmaexchange
+ *
+ * Description:
+ *   Exchange a block of data from SPI using DMA
+ *
+ ****************************************************************************/
+
+static void spi_dmaexchange(FAR struct spi_dev_s *dev,
+                            FAR const void *txbuffer,
+                            FAR void *rxbuffer, size_t nwords)
+{
+  FAR struct rp2040_spidev_s *priv = (FAR struct rp2040_spidev_s *)dev;
+
+  DEBUGASSERT(priv && priv->spibase);
+
+  /* Setup DMAs */
+
+  spi_dmatxsetup(priv, txbuffer, nwords);
+  spi_dmarxsetup(priv, rxbuffer, nwords);
+
+  /* Start the DMAs */
+
+  rp2040_dmastart(priv->rxdmach, spi_dmarxcallback, priv);
+  rp2040_dmastart(priv->txdmach, spi_dmatxcallback, priv);
+
+  /* Then wait for each to complete */
+
+  spi_dmatrxwait(priv);
+}
+
+#ifndef CONFIG_SPI_EXCHANGE
+
+/****************************************************************************
+ * Name: spi_dmasndblock
+ *
+ * Description:
+ *   Send a block of data on SPI using DMA
+ *
+ ****************************************************************************/
+
+static void spi_dmasndblock(FAR struct spi_dev_s *dev,
+                            FAR const void *buffer, size_t nwords)
+{
+  spi_dmaexchange(dev, buffer, NULL, nwords);
+}
+
+/****************************************************************************
+ * Name: spi_dmarecvblock
+ *
+ * Description:
+ *   Receive a block of data on SPI using DMA
+ *
+ ****************************************************************************/
+
+static void spi_dmarecvblock(FAR struct spi_dev_s *dev,
+                             FAR const void *buffer, size_t nwords)
+{
+  spi_dmaexchange(dev, NULL, buffer, nwords);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmatxcallback
+ *
+ * Description:
+ *   Called when the TX DMA completes
+ *
+ ****************************************************************************/
+
+static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *data)
+{
+  FAR struct rp2040_spidev_s *priv = (FAR struct rp2040_spidev_s *)data;
+
+  /* Wake-up the SPI driver */
+
+  if (status != 0)
+    {
+      spierr("dma error\n");
+    }
+
+  nxsem_post(&priv->dmasem);
+}
+
+/****************************************************************************
+ * Name: spi_dmarxcallback
+ *
+ * Description:
+ *   Called when the RX DMA completes
+ *
+ ****************************************************************************/
+
+static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *data)
+{
+  FAR struct rp2040_spidev_s *priv = (FAR struct rp2040_spidev_s *)data;
+
+  /* Wake-up the SPI driver */
+
+  if (status != 0)
+    {
+      spierr("dma error\n");
+    }
+
+  nxsem_post(&priv->dmasem);
+}
+
+/****************************************************************************
+ * Name: spi_dmatxsetup
+ *
+ * Description:
+ *   Setup to perform TX DMA
+ *
+ ****************************************************************************/
+
+static void spi_dmatxsetup(FAR struct rp2040_spidev_s *priv,
+                           FAR const void *txbuffer, size_t nwords)
+{
+  uint32_t dst;
+  uint32_t val;
+
+  val = spi_getreg(priv, RP2040_SPI_SSPDMACR_OFFSET);
+  val |= RP2040_SPI_SSPDMACR_TXDMAE;
+  spi_putreg(priv, RP2040_SPI_SSPDMACR_OFFSET, val);
+
+  dst = priv->spibase + RP2040_SPI_SSPDR_OFFSET;
+
+  if (txbuffer == NULL)
+    {
+      /* No source data buffer.  Point to our dummy buffer and leave
+       * the txconfig so that no address increment is performed.
+       */
+
+      txbuffer = (FAR const void *)&g_spitxdmadummy;
+      priv->txconfig.noincr = true;
+    }
+  else
+    {
+      /* Source data is available.  Use normal TX memory incrementing. */
+
+      priv->txconfig.noincr = false;
+    }
+
+  rp2040_txdmasetup(priv->txdmach, (uintptr_t)dst, (uintptr_t)txbuffer,
+                   nwords, priv->txconfig);
+}
+
+/****************************************************************************
+ * Name: spi_dmarxsetup
+ *
+ * Description:
+ *   Setup to perform RX DMA
+ *
+ ****************************************************************************/
+
+static void spi_dmarxsetup(FAR struct rp2040_spidev_s *priv,
+                           FAR const void *rxbuffer, size_t nwords)
+{
+  uint32_t src;
+  uint32_t val;
+
+  val = spi_getreg(priv, RP2040_SPI_SSPDMACR_OFFSET);
+  val |= RP2040_SPI_SSPDMACR_RXDMAE;
+  spi_putreg(priv, RP2040_SPI_SSPDMACR_OFFSET, val);
+
+  src = priv->spibase + RP2040_SPI_SSPDR_OFFSET;
+
+  if (rxbuffer == NULL)
+    {
+      /* No sink data buffer.  Point to our dummy buffer and leave
+       * the rxconfig so that no address increment is performed.
+       */
+
+      rxbuffer = (FAR const void *)&g_spirxdmadummy;
+      priv->rxconfig.noincr = true;
+    }
+  else
+    {
+      /* Receive buffer is available.  Use normal RX memory incrementing. */
+
+      priv->rxconfig.noincr = false;
+    }
+
+  rp2040_rxdmasetup(priv->rxdmach, (uintptr_t)src, (uintptr_t)rxbuffer,
+                   nwords, priv->rxconfig);
+}
+
+/****************************************************************************
+ * Name: spi_dmatrxwait
+ *
+ * Description:
+ *   Wait for TX RX DMA to complete.
+ *
+ ****************************************************************************/
+
+static void spi_dmatrxwait(FAR struct rp2040_spidev_s *priv)
+{
+  uint32_t val;
+
+  if (nxsem_wait_uninterruptible(&priv->dmasem) != OK)
+    {
+      spierr("dma error\n");
+    }
+
+  if (nxsem_wait_uninterruptible(&priv->dmasem) != OK)
+    {
+      spierr("dma error\n");
+    }
+
+  rp2040_dmastop(priv->txdmach);
+  rp2040_dmastop(priv->rxdmach);
+
+  val = spi_getreg(priv, RP2040_SPI_SSPDMACR_OFFSET);
+  val &= ~(RP2040_SPI_SSPDMACR_RXDMAE | RP2040_SPI_SSPDMACR_TXDMAE);
+  spi_putreg(priv, RP2040_SPI_SSPDMACR_OFFSET, val);
+}
+
+#endif
 
 #endif

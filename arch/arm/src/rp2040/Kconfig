@@ -90,6 +90,22 @@ config RP2040_SPI0
 config RP2040_SPI1
 	bool "SPI1"
 
+config RP2040_SPI_DMA
+	bool "SPI DMA"
+	default y
+	depends on RP2040_DMAC
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config RP2040_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on RP2040_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by RP2040_SPI_DMATHRESHOLD.
+
 config RP2040_SPI_DRIVER
 	bool "SPI character driver"
 	default y
