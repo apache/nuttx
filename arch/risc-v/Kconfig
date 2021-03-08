@@ -61,6 +61,12 @@ config ARCH_CHIP_ESP32C3
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
+config ARCH_CHIP_C906
+	bool "THEAD C906"
+	select ARCH_RV64GC
+	---help---
+		THEAD C906 processor (RISC-V 64bit core with GCVX extensions).
+
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
 	select ARCH_CHIP_CUSTOM
@@ -99,6 +105,7 @@ config ARCH_CHIP
 	default "gap8"		if ARCH_CHIP_GAP8
 	default "bl602"		if ARCH_CHIP_BL602
 	default "esp32c3"	if ARCH_CHIP_ESP32C3
+	default "c906"		if ARCH_CHIP_C906
 
 config NR5_MPU
 	bool "MPU support"
@@ -136,5 +143,8 @@ source arch/risc-v/src/bl602/Kconfig
 endif
 if ARCH_CHIP_ESP32C3
 source arch/risc-v/src/esp32c3/Kconfig
+endif
+if ARCH_CHIP_C906
+source arch/risc-v/src/c906/Kconfig
 endif
 endif
