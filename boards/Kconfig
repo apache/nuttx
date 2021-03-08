@@ -602,6 +602,14 @@ config ARCH_BOARD_MAIX_BIT
 		This is the board configuration for the port of NuttX to the
 		Sipeed Maix Bit board. This board features the RISC-V K210
 
+config ARCH_BOARD_SMARTL_C906
+	bool "smartl evaluation board for C906"
+	depends on ARCH_CHIP_C906
+	select ARCH_HAVE_LEDS if !C906_WITH_QEMU
+	---help---
+		This is the board configuration for the port of NuttX to the
+		THEAD smartl-c906 board. This board features the RISC-V C906.
+
 config ARCH_BOARD_MAX32660_EVSYS
 	bool "Maxim Integrated MAX32660-EVSYS"
 	depends on ARCH_CHIP_MAX32660
@@ -2268,6 +2276,7 @@ config ARCH_BOARD
 	default "lpcxpresso-lpc54628"      if ARCH_BOARD_LPCXPRESSO_LPC54628
 	default "lx_cpu"                   if ARCH_BOARD_LX_CPU
 	default "maix-bit"                 if ARCH_BOARD_MAIX_BIT
+	default "smartl-c906"              if ARCH_BOARD_SMARTL_C906
 	default "maple"                    if ARCH_BOARD_MAPLE
 	default "makerlisp"                if ARCH_BOARD_MAKERLISP
 	default "max32660-evsys"           if ARCH_BOARD_MAX32660_EVSYS
@@ -3036,6 +3045,9 @@ source "boards/risc-v/fe310/hifive1-revb/Kconfig"
 endif
 if ARCH_BOARD_MAIX_BIT
 source "boards/risc-v/k210/maix-bit/Kconfig"
+endif
+if ARCH_BOARD_SMARTL_C906
+source "boards/risc-v/c906/smartl-c906/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_DEVKIT
 source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
