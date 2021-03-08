@@ -70,8 +70,6 @@ extern "C"
 
 #define kumm_initialize(h,s)     umm_initialize(h,s)
 #define kumm_addregion(h,s)      umm_addregion(h,s)
-#define kumm_trysemaphore()      umm_trysemaphore()
-#define kumm_givesemaphore()     umm_givesemaphore()
 
 #define kumm_calloc(n,s)         calloc(n,s);
 #define kumm_malloc(s)           malloc(s)
@@ -91,8 +89,6 @@ extern "C"
 
 #  define kmm_initialize(h,s)    /* Initialization done by kumm_initialize */
 #  define kmm_addregion(h,s)     umm_addregion(h,s)
-#  define kmm_trysemaphore()     umm_trysemaphore()
-#  define kmm_givesemaphore()    umm_givesemaphore()
 
 #  define kmm_calloc(n,s)        calloc(n,s);
 #  define kmm_malloc(s)          malloc(s)

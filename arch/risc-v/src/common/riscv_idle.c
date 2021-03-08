@@ -68,24 +68,4 @@ void up_idle(void)
    */
 
   nxsched_process_timer();
-#else
-
-  /* This would be an appropriate place to put some MCU-specific logic to
-   * sleep in a reduced power mode until an interrupt occurs to save power
-   */
-
-  /* This is a kludge that I still don't understand.  The call to
-   * kmm_trysemaphore() in the nx_start.c IDLE loop seems necessary for the
-   * good health of the IDLE loop.  When the work queue is enabled, this
-   * logic is removed from the IDLE loop and it appears that we are somehow
-   * left idling with interrupts non-functional. The following should be
-   * no-op, it just disables then re-enables interrupts.  But it fixes the
-   * problem and will stay here until I understand the problem/fix better.
-   */
-
-#ifdef CONFIG_SCHED_WORKQUEUE
-  irqstate_t flags = enter_critical_section();
-  leave_critical_section(flags);
-#endif
-#endif
 }
