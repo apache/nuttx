@@ -32,7 +32,7 @@
  *
  * CONFIG_HEAP2_BASE                         eg. 3f80 0000
  *     :
- *     : g_mmheap region3 (CONFIG_ESP32_SPIRAM)
+ *     : g_mmheap (CONFIG_ESP32_SPIRAM)
  *     :
  * CONFIG_HEAP2_BASE + CONFIG_HEAP2_SIZE     eg. 3fc0 0000
  *
@@ -44,7 +44,10 @@
  *     :
  *     : ROM data
  *     :
- * HEAP_REGION2_START                            3ffe 1330 or 3ffe 7e40
+ *---------------------------------------------------------------------
+ * if !CONFIG_SMP
+ *
+ * HEAP_REGION2_START                            3ffe 0450
  *     :
  *     : g_iheap (CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
  *     :
@@ -52,8 +55,26 @@
  *     :
  *     : g_mmheap region2
  *     :
- *     : about 123KB
+ *---------------------------------------------------------------------
+ * if CONFIG_SMP
+ *
+ * HEAP_REGION2_START                            3ffe 0450
  *     :
+ *     : g_mmheap region2
+ *     :
+ * HEAP_REGION2_END                              3ffe 3f10
+ *     :
+ *     : ROM data
+ *     :
+ * HEAP_REGION3_START                            3ffe 5240
+ *     :
+ *     : g_iheap (CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
+ *     :
+ * HEAP_REGION3_START + CONFIG_XTENSA_IMEM_REGION_SIZE
+ *     :
+ *     : g_mmheap region3
+ *     :
+ *---------------------------------------------------------------------
  * _eheap                                        4000 0000
  */
 
