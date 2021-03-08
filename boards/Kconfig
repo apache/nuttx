@@ -1917,6 +1917,17 @@ config ARCH_BOARD_STM32H747I_DISCO
 		MCU. The STM32H747XIH6 is a dual core (480MHz Cortex-M7, 240MHz Cortex-M4)
 		with 2048Kb Flash memory and 1024Kb SRAM.
 
+config ARCH_BOARD_PORTENTA_H7
+	bool "Arduino Portenta H7 board"
+	depends on ARCH_CHIP_STM32H747XI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Arduino Portenta H7 development board featuring the STM32H747XIH6
+		MCU. The STM32H747XIH6 is a dual core (480MHz Cortex-M7, 240MHz Cortex-M4)
+		with 2048Kb Flash memory and 1024Kb SRAM
+
 config ARCH_BOARD_STM32F746_WS
 	bool "Waveshare STM32F746 board"
 	depends on ARCH_CHIP_STM32F746IG
@@ -2585,6 +2596,7 @@ config ARCH_BOARD
 	default "stm32f746g-disco"         if ARCH_BOARD_STM32F746G_DISCO
 	default "stm32f769i-disco"         if ARCH_BOARD_STM32F769I_DISCO
 	default "stm32h747i-disco"         if ARCH_BOARD_STM32H747I_DISCO
+	default "portenta-h7"              if ARCH_BOARD_PORTENTA_H7
 	default "stm32f746-ws"             if ARCH_BOARD_STM32F746_WS
 	default "b-g474e-dpow1"            if ARCH_BOARD_B_G474E_DPOW1
 	default "b-g431b-esc1"             if ARCH_BOARD_B_G431B_ESC1
@@ -2985,6 +2997,9 @@ source "boards/arm/stm32f7/stm32f769i-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32H747I_DISCO
 source "boards/arm/stm32h7/stm32h747i-disco/Kconfig"
+endif
+if ARCH_BOARD_PORTENTA_H7
+source "boards/arm/stm32h7/portenta-h7/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_H743ZI
 source "boards/arm/stm32h7/nucleo-h743zi/Kconfig"
