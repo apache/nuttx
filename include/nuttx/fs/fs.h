@@ -377,12 +377,18 @@ struct file
   FAR void         *f_priv;     /* Per file driver private data */
 };
 
-/* This defines a list of files indexed by the file descriptor */
+/* This defines a two layer array of files indexed by the file descriptor.
+ * Each row of this array is fixed size: CONFIG_NFCHUNK_DESCRIPTORS.
+ * You can get file instance in filelist by the follow methods:
+ * (file descriptor / CONFIG_NFCHUNK_DESCRIPTORS) as row index and
+ * (file descriptor % CONFIG_NFCHUNK_DESCRIPTORS) as column index.
+ */
 
 struct filelist
 {
-  sem_t   fl_sem;               /* Manage access to the file list */
-  struct file fl_files[CONFIG_NFILE_DESCRIPTORS];
+  sem_t             fl_sem;     /* Manage access to the file list */
+  uint8_t           fl_rows;    /* The number of rows of fl_files array */
+  FAR struct file **fl_files;   /* The pointer of two layer file descriptors array */
 };
 
 /* The following structure defines the list of files used for standard C I/O.
@@ -712,6 +718,20 @@ void files_initlist(FAR struct filelist *list);
  ****************************************************************************/
 
 void files_releaselist(FAR struct filelist *list);
+
+/****************************************************************************
+ * Name: files_duplist
+ *
+ * Description:
+ *   Duplicate parent task's file descriptors.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist);
 
 /****************************************************************************
  * Name: file_dup

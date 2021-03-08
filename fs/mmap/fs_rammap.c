@@ -140,12 +140,6 @@ FAR void *rammap(int fd, size_t length, off_t offset)
 
   /* Allocate a region of memory of the specified size */
 
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-    {
-      errcode = EBADF;
-      goto errout;
-    }
-
   alloc = (FAR uint8_t *)kumm_malloc(sizeof(struct fs_rammap_s) + length);
   if (!alloc)
     {

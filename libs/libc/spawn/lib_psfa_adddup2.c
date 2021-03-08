@@ -79,9 +79,7 @@ int posix_spawn_file_actions_adddup2(FAR posix_spawn_file_actions_t *file_action
 {
   FAR struct spawn_dup2_file_action_s *entry;
 
-  DEBUGASSERT(file_actions &&
-              fd1 >= 0 && fd1 < CONFIG_NFILE_DESCRIPTORS &&
-              fd2 >= 0 && fd2 < CONFIG_NFILE_DESCRIPTORS);
+  DEBUGASSERT(file_actions && fd1 >= 0 && fd2 >= 0);
 
   /* Allocate the action list entry */
 

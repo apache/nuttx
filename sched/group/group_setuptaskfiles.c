@@ -25,93 +25,11 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
-#include <errno.h>
-#include <fcntl.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/net/net.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Determine how many file descriptors to clone.  If CONFIG_FDCLONE_DISABLE
- * is set, no file descriptors will be cloned.  If CONFIG_FDCLONE_STDIO is
- * set, only the first three descriptors (stdin, stdout, and stderr) will
- * be cloned.  Otherwise all file descriptors will be cloned.
- */
-
-#if defined(CONFIG_FDCLONE_STDIO) && CONFIG_NFILE_DESCRIPTORS > 3
-#  define NFDS_TOCLONE 3
-#else
-#  define NFDS_TOCLONE CONFIG_NFILE_DESCRIPTORS
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: sched_dupfiles
- *
- * Description:
- *   Duplicate parent task's file descriptors.
- *
- * Input Parameters:
- *   tcb - tcb of the new task.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifndef CONFIG_FDCLONE_DISABLE
-static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
-{
-  /* The parent task is the one at the head of the ready-to-run list */
-
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct file *parent;
-  FAR struct file *child;
-  int i;
-
-  DEBUGASSERT(tcb && tcb->cmn.group && rtcb->group);
-
-  /* Duplicate the file descriptors.  This will be either all of the
-   * file descriptors or just the first three (stdin, stdout, and stderr)
-   * if CONFIG_FDCLONE_STDIO is defined.  NFSDS_TOCLONE is set
-   * accordingly above.
-   */
-
-  /* Get pointers to the parent and child task file lists */
-
-  parent = rtcb->group->tg_filelist.fl_files;
-  child  = tcb->cmn.group->tg_filelist.fl_files;
-
-  /* Check each file in the parent file list */
-
-  for (i = 0; i < NFDS_TOCLONE; i++)
-    {
-      /* Check if this file is opened by the parent.  We can tell if
-       * if the file is open because it contain a reference to a non-NULL
-       * i-node structure.
-       */
-
-      if (parent[i].f_inode &&
-          (parent[i].f_oflags & O_CLOEXEC) == 0)
-        {
-          /* Yes... duplicate it for the child */
-
-          file_dup2(&parent[i], &child[i]);
-        }
-    }
-}
-#else /* !CONFIG_FDCLONE_DISABLE */
-#  define sched_dupfiles(tcb)
-#endif /* !CONFIG_FDCLONE_DISABLE */
 
 /****************************************************************************
  * Public Functions
@@ -138,6 +56,10 @@ static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
 int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
 {
   FAR struct task_group_s *group = tcb->cmn.group;
+#ifndef CONFIG_FDCLONE_DISABLE
+  FAR struct tcb_s *rtcb = this_task();
+  int ret;
+#endif
 
   DEBUGASSERT(group);
 #ifndef CONFIG_DISABLE_PTHREAD
@@ -149,9 +71,17 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
 
   files_initlist(&group->tg_filelist);
 
+#ifndef CONFIG_FDCLONE_DISABLE
+  DEBUGASSERT(rtcb->group);
+
   /* Duplicate the parent task's file descriptors */
 
-  sched_dupfiles(tcb);
+  ret = files_duplist(&rtcb->group->tg_filelist, &group->tg_filelist);
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
 
   /* Allocate file/socket streams for the new TCB */
 

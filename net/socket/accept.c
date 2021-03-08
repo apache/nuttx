@@ -244,6 +244,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
   FAR struct socket *newsock;
+  FAR struct file *filep;
   int newfd;
   int errcode;
   int ret;
@@ -261,7 +262,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
        * used in the wrong context.
        */
 
-      if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)
+      if (fs_getfilep(sockfd, &filep) == 0)
         {
           errcode = ENOTSOCK;
         }
