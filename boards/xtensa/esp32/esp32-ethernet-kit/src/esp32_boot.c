@@ -27,7 +27,9 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/mm/mm.h>
 #include <arch/board/board.h>
+#include <arch/esp32/memory_layout.h>
 
 #include "esp32-ethernet-kit.h"
 
@@ -78,5 +80,17 @@ void board_late_initialize(void)
   /* Perform board-specific initialization */
 
   esp32_bringup();
+
+#ifdef CONFIG_SMP
+  /* To avoid corrupting the heap, this region of memory (~3KB) is not
+   * included until the APP CPU has started.
+   * So we can't add it with the rest of the regions at xtensa_add_region(),
+   * that function is called early from up_initialize().  We wait until the
+   * SMP bringup is complete.
+   */
+
+  umm_addregion((FAR void *)HEAP_REGION_ROMAPP_START,
+                (size_t)(HEAP_REGION_ROMAPP_END - HEAP_REGION_ROMAPP_START));
+#endif
 }
 #endif

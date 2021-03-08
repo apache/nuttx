@@ -96,8 +96,15 @@ void xtensa_add_region(void)
 {
   size_t region2_start = HEAP_REGION2_START + XTENSA_IMEM_REGION_SIZE;
 
+#ifndef CONFIG_SMP
   umm_addregion((FAR void *)region2_start,
                 (size_t)(uintptr_t)&_eheap - region2_start);
+#else
+  umm_addregion((FAR void *)region2_start,
+                (size_t)HEAP_REGION2_END - region2_start);
+  umm_addregion((FAR void *)HEAP_REGION3_START,
+                (size_t)&_eheap - HEAP_REGION3_START);
+#endif
 
 #if defined(CONFIG_ESP32_SPIRAM)
   /* Check for any additional memory regions */

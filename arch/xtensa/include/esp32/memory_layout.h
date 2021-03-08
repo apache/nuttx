@@ -96,3 +96,8 @@
 #  define ESP32_IMEM_START  0x3ffe7e40
 #endif
 
+/* Region of unused ROM App data */
+
+#define HEAP_REGION_ROMAPP_START  0x3ffe4360
+#define HEAP_REGION_ROMAPP_END    0x3ffe5230
+
