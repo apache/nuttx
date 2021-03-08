@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/tiva/lm4f120-launchpad/src/lm4f_leds.c
+ * boards/arm/tiva/lm4f120-launchpad/src/lm4f_autoleds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

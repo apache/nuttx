@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/mmap/rammap.h
+ * fs/mmap/fs_rammap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/wchar/lib_towupper.c
+ * libs/libc/wctype/lib_towupper.c
  *
  *    Copyright (c) 2002 Red Hat Incorporated.
  *    All rights reserved.

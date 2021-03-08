@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/lpc43xx/lpc4357-link2/include/board.h
+ * boards/arm/lpc43xx/lpc4370-link2/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

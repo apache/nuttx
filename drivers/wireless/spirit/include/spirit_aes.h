@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_aes.h
+ * drivers/wireless/spirit/include/spirit_aes.h
  *
  *   Copyright(c) 2015 STMicroelectronics
  *   Author: VMA division - AMS

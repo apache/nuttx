@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/include/stm32h7/stm32h7x7xx_irq.h.h
+ * arch/arm/include/stm32h7/stm32h7x7xx_irq.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

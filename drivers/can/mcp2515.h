@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/can/mcp2515.c
+ * drivers/can/mcp2515.h
  *
  *   Copyright (C) 2017 Alan Carvalho de Assis. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>

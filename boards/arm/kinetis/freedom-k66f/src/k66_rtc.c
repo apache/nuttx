@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/kinetis/freedom-k66f/src/k66_bringup.c
+ * boards/arm/kinetis/freedom-k66f/src/k66_rtc.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

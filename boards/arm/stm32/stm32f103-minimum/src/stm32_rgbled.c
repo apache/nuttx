@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_rgbled.c
+ * boards/arm/stm32/stm32f103-minimum/src/stm32_rgbled.c
  *
  *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>

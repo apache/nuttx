@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/stm32l4/hardware/stm32l4x6xx_rcc.h
+ * arch/arm/src/stm32l4/hardware/stm32l4xrxx_rcc.h
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.

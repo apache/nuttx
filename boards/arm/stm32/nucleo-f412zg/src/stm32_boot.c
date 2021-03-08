@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f411e-disco/src/stm32_boot.c
+ * boards/arm/stm32/nucleo-f412zg/src/stm32_boot.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

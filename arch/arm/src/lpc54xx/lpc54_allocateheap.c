@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc54xx/lpx54_allocateheap.c
+ * arch/arm/src/lpc54xx/lpc54_allocateheap.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /******************************************************************************
- * drivers/wireless/spirit/spirit_general.c
+ * drivers/wireless/spirit/lib/spirit_general.c
  * Configuration and management of SPIRIT General functionalities.
  *
  *   Copyright(c) 2015 STMicroelectronics

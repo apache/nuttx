@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/x86/src/common/up_interruptcontext.c
+ * arch/x86/src/common/up_interruptcontext.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

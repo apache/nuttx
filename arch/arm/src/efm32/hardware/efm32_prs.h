@@ -1,5 +1,5 @@
 /*******************************************************************************************************************************
- * arch/arm/src/efm32/chip/efm32_prs.h
+ * arch/arm/src/efm32/hardware/efm32_prs.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *

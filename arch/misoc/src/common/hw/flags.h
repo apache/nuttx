@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/common/hw/emac_mem.h
+ * arch/misoc/src/common/hw/flags.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Ramtin Amin <keytwo@gmail.com>

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32f7/hardware/stm32f72xxx73xx_gpio.h
+ * arch/arm/src/stm32f7/hardware/stm32f72xx73xx_gpio.h
  *
  *   Copyright (C) 2005 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

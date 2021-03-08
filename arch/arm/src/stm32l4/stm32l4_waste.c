@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32l4/stm32l4_waste.c
+ * arch/arm/src/stm32l4/stm32l4_waste.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>

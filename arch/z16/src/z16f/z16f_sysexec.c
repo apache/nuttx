@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z16/src/1`z16f/z16f_sysexec.c
+ * arch/z16/src/z16f/z16f_sysexec.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

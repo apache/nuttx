@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f429i-disco/src/stm32_usbdev.c
+ * boards/arm/stm32/stm32f429i-disco/src/stm32_usb.c
  *
  *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/efm32/chip/efm32_memorymap.h
+ * arch/arm/src/efm32/hardware/efm32_memorymap.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

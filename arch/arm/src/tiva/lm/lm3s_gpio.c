@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tiva/common/tiva_gpio.c
+ * arch/arm/src/tiva/lm/lm3s_gpio.c
  *
  *   Copyright (C) 2009-2010, 2014-2015, 2018 Gregory Nutt. All rights
  *     reserved.

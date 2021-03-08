@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/bluetooth_sockif.c
+ * net/bluetooth/bluetooth_sockif.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

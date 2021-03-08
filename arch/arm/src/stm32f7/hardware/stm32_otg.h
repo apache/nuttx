@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/stm32f7/hardware/stm32f_otg.h
+ * arch/arm/src/stm32f7/hardware/stm32_otg.h
  *
  *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.

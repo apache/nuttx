@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/include/kinetis/irq.h
+ * arch/arm/include/kl/irq.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

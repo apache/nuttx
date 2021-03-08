@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32fdiscover/src/stm32_ssd1289.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_ssd1289.c
  *
  * This logic supports the connection of an SSD1289-based LCD to the STM32F4Discovery
  * board.

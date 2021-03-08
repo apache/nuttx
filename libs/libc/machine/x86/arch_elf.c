@@ -1,5 +1,5 @@
 /****************************************************************************
- * machine/x86/src/up_elf.c
+ * libs/libc/machine/x86/arch_elf.c
  *
  *   Copyright (C) 2012, 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

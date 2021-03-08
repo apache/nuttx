@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/risc-v/src/common/riscv_udelay.c
+ * arch/risc-v/src/common/riscv_udelay.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

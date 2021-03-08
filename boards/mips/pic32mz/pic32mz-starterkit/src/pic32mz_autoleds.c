@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mz/pic32mz-starterkit/src/pic32mz_leds.c
+ * boards/mips/pic32mz/pic32mz-starterkit/src/pic32mz_autoleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

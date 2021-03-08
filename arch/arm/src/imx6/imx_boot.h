@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/imx/imx_boot.h
+ * arch/arm/src/imx6/imx_boot.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

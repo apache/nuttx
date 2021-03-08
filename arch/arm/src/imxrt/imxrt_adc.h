@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc17xx_40xx/lpc17_40_adc.h
+ * arch/arm/src/imxrt/imxrt_adc.h
  *
  *   Copyright (C) 2020 Actia Nordic AB. All rights reserved.
  *   Author: Thomas Axelsson <thomas.axelsson@actia.se>

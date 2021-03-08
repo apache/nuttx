@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/nr5m100/nr5m100_nexys4/src/nr5_autoleds.c
+ * boards/risc-v/nr5m100/nr5m100-nexys4/src/nr5_autoleds.c
  *
  *   Copyright (C) 2016 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>

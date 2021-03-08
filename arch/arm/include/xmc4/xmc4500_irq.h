@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/include/xmc4/xmc4500_.h
+ * arch/arm/include/xmc4/xmc4500_irq.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

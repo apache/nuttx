@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/adxl345.c
+ * drivers/sensors/adxl345_base.c
  *
  *   Copyright (C) 2014 Alan Carvalho de Assis. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>

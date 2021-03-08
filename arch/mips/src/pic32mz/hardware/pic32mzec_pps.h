@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/mips/src/pic32mz/hardware/pic32mzec-pps.h
+ * arch/mips/src/pic32mz/hardware/pic32mzec_pps.h
  *
  *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

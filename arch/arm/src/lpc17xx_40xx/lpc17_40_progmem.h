@@ -1,5 +1,5 @@
 /******************************************************************************
- * arch/arm/src/lpc17xx_40xx/lpc17_40_progmem.c
+ * arch/arm/src/lpc17xx_40xx/lpc17_40_progmem.h
  *
  *   Copyright (C) 2018 Michael Jung. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>

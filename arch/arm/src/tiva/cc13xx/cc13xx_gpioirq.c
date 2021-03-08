@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tiva/common/cc13xx_gpioirq.c
+ * arch/arm/src/tiva/cc13xx/cc13xx_gpioirq.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

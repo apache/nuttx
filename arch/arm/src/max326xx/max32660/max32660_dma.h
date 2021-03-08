@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/max326xx/max32660_dma.h
+ * arch/arm/src/max326xx/max32660/max32660_dma.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

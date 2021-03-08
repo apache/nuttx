@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/kl/kl_pin.c
+ * arch/arm/src/kl/kl_gpio.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

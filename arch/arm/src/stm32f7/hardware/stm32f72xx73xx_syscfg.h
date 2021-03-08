@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/stm32f7/hardware/stm32f72xx74xx_syscfg.h
+ * arch/arm/src/stm32f7/hardware/stm32f72xx73xx_syscfg.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

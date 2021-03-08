@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/stm32_sdmmc.h
+ * arch/arm/src/stm32l4/stm32l4_sdmmc.h
  *
  *   Copyright (C) 2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

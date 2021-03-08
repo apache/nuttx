@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm3210e_eval/src/stm32_spi.c
+ * boards/arm/stm32/stm3210e-eval/src/stm32_spi.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

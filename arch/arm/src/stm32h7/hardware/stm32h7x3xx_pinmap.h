@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32h7/hardware/stm32h76xx77xx_pinmap.h
+ * arch/arm/src/stm32h7/hardware/stm32h7x3xx_pinmap.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

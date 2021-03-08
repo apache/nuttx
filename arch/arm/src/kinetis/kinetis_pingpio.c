@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/kinetis/kinetis_pingpio.c
+ * arch/arm/src/kinetis/kinetis_pingpio.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

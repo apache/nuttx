@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/pnev5180b/src/lpc17_40_composite.c
+ * boards/arm/lpc17xx_40xx/lx_cpu/src/lpc17_40_composite.c
  * Configure and register CDC-ACM and CDC-ECM
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.

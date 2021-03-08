@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/net/cdcecm.c
+ * drivers/usbdev/cdcecm.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Michael Jung <mijung@gmx.net>

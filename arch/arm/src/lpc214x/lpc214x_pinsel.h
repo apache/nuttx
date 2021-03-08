@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc214x/lpc214x_pinsl.h
+ * arch/arm/src/lpc214x/lpc214x_pinsel.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

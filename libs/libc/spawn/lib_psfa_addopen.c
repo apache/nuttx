@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/string/lib_psfa_addopen.c
+ * libs/libc/spawn/lib_psfa_addopen.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

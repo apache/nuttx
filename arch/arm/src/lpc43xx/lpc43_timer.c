@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc43/lpc43_timer.c
+ * arch/arm/src/lpc43xx/lpc43_timer.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

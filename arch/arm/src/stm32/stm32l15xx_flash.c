@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm3l15xx_flash.c
+ * arch/arm/src/stm32/stm32l15xx_flash.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>

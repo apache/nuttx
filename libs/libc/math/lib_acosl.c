@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/math/lib_acos.c
+ * libs/libc/math/lib_acosl.c
  *
  * This file is a part of NuttX:
  *

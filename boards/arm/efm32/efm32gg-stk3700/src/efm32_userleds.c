@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/efm32/efm32gg-stk3700/include/efm32_userleds.c
+ * boards/arm/efm32/efm32gg-stk3700/src/efm32_userleds.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /*******************************************************************************************************************************
- * arch/arm/src/efm32/chip/efm32_rmu.h
+ * arch/arm/src/efm32/hardware/efm32_rmu.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *

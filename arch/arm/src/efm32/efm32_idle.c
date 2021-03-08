@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/efm32/efm32_idle.c
+ * arch/arm/src/efm32/efm32_idle.c
  *
  *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

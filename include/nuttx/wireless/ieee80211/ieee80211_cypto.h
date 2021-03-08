@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/ieee80211/ieee80211_crypto.h
+ * include/nuttx/wireless/ieee80211/ieee80211_cypto.h
  * 802.11 protocol crypto-related definitions.
  *
  * Copyright (c) 2007, 2008 Damien Bergamini <damien.bergamini@free.fr>

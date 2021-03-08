@@ -1,5 +1,5 @@
 /****************************************************************************
- * control/lib_motor.c
+ * libs/libdsp/lib_motor.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32f0l0g0/stm32_idle.c
+ * arch/arm/src/stm32f0l0g0/stm32_idle.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

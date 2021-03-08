@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/hc/src/m9s12/m9s12_mebi.h (v3)
+ * arch/hc/src/m9s12/m9s12_mebi.h
  *
  *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

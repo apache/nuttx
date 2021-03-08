@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/st7032.c
+ * drivers/lcd/st7032.c
  * Alphanumeric LCD driver for ST7032i (tested on JLX1602G-390)
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.

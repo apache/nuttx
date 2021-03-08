@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardmware/lm/4f_pinmap.h
+ * arch/arm/src/tiva/hardware/lm/lm4f_pinmap.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

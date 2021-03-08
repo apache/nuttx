@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/xtensa/src/common/xtensa_mdelay.c
+ * arch/xtensa/src/common/xtensa_mdelay.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

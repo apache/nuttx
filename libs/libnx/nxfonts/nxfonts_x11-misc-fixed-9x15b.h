@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libnx/nxfonts/nxfonts_x11-misc-fixed-9x15B.h
+ * libs/libnx/nxfonts/nxfonts_x11-misc-fixed-9x15b.h
  *
  *   Copyright (C) 2014 Pierre-Noel Bouteville. All rights reserved.
  *   Author: Pierre-Noel Bouteville <pnb990@gmail.com>

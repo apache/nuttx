@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/minerva/minerva_unblocktask.c
+ * arch/misoc/src/minerva/minerva_unblocktask.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

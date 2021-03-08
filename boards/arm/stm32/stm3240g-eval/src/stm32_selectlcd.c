@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm3210e-eval/src/stm32_selectlcd.c
+ * boards/arm/stm32/stm3240g-eval/src/stm32_selectlcd.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

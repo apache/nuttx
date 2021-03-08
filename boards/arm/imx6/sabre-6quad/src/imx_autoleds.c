@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/imx6/sabre-6quad/include/imx_autoleds.c
+ * boards/arm/imx6/sabre-6quad/src/imx_autoleds.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

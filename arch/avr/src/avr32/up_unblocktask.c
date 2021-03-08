@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/avr/src/avr32/up_unblocktask.c
+ * arch/avr/src/avr32/up_unblocktask.c
  *
  *   Copyright (C) 2010, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/net/lib_inetaton
+ * libs/libc/net/lib_inetaton.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Juha Niskanen <juha.niskanen@haltian.com>

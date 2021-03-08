@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/bcm43xxx/bcmf_netdev.c
+ * drivers/wireless/ieee80211/bcm43xxx/bcmf_netdev.c
  *
  *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

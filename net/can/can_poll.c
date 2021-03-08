@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/pkt/pkt_poll.c
+ * net/can/can_poll.c
  * Poll for the availability of packet TX data
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

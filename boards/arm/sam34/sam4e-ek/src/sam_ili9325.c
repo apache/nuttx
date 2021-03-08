@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/sam34/sam4e-ek/src/sam_ili9335.c
+ * boards/arm/sam34/sam4e-ek/src/sam_ili9325.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

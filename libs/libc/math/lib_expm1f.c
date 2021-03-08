@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/math/lib_expm1f.c
+ * libs/libc/math/lib_expm1f.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

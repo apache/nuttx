@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/xmc4/xmc4_idle.c
+ * arch/arm/src/xmc4/xmc4_idle.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

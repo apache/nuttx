@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/mtd/mtd_onfi.c
+ * drivers/mtd/mtd_onfi.c
  *
  * ONFI Support.  The Open NAND Flash Interface (ONFI) is an industry
  * Workgroup made up of more than 100 companies that build, design-in, or

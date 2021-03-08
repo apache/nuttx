@@ -1,5 +1,5 @@
 /************************************************************************************
- * dm320/dm320_memorymap.h
+ * arch/arm/src/dm320/dm320_memorymap.h
  *
  *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

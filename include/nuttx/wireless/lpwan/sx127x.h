@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/wireless/sx127x.c
+ * include/nuttx/wireless/lpwan/sx127x.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

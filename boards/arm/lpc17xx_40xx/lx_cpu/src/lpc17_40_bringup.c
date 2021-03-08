@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lx_cpu/src/lpc17_40_bringup.c
+ * boards/arm/lpc17xx_40xx/lx_cpu/src/lpc17_40_bringup.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

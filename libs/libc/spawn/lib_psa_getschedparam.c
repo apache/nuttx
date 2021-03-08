@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/string/lib_psa_getschedparam.c
+ * libs/libc/spawn/lib_psa_getschedparam.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

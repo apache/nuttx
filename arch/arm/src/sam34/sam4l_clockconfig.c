@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/sam34/sam4l_clockconfig.c
+ * arch/arm/src/sam34/sam4l_clockconfig.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32f0xxx_alarm.h
+ * arch/arm/src/stm32/stm32f40xxx_alarm.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Neil hancock - delegated to Gregory Nutt Mar 30, 2016

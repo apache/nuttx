@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_wwdg.c
+ * arch/arm/src/sama5/sam_wdt.c
  *
  *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

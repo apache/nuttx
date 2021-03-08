@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_directrf.h
+ * drivers/wireless/spirit/include/spirit_directrf.h
  * Configuration and management of SPIRIT direct transmission / receive modes.
  *
  *   Copyright(c) 2015 STMicroelectronics

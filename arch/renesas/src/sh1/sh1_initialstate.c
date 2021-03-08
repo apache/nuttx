@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/renesas/src/sh1/sh1_initialstate.c
+ * arch/renesas/src/sh1/sh1_initialstate.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f4/nucleo-f429zi/src/stm32_romfs_initialize.c
+ * boards/arm/stm32/nucleo-f429zi/src/stm32_romfs_initialize.c
  * This file provides contents of an optional ROMFS volume, mounted at boot.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

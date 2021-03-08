@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/stm32f746-ws/stc/stm32_dma_alloc.c
+ * boards/arm/stm32f7/stm32f746-ws/src/stm32_dma_alloc.c
  *
  *   Copyright (C) 2016 PX4 Development Team. All rights reserved.
  *

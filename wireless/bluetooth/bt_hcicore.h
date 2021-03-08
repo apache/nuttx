@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/bluetooth/bt_hdicore.h
+ * wireless/bluetooth/bt_hcicore.h
  * HCI core Bluetooth handling.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.

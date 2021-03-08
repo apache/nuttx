@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/max326xx/max32660-evsys/src/max326_buttons.c
+ * boards/arm/max326xx/max32660-evsys/src/max326_button.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

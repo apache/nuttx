@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sam34/hardware/sam3u_pinmap.h
+ * arch/arm/src/sam34/hardware/sam4l_pinmap.h
  *
  *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

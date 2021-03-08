@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/msic/lib_kbdencode.c
+ * libs/libc/misc/lib_kbdencode.c
  * Encoding side of the Keyboard CODEC
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.

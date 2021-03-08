@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/bcm43xxx/ieee80211/bcmf_chip_43438.c
+ * drivers/wireless/ieee80211/bcm43xxx/bcmf_chip_43438.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Simon Piriou <spiriou31@gmail.com>

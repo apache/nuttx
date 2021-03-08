@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/ioexpander/tca64.h
+ * drivers/ioexpander/tca64xx.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>

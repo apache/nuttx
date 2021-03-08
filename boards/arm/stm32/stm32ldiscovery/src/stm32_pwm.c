@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32ldiscovery/src/up_pwm.c
+ * boards/arm/stm32/stm32ldiscovery/src/stm32_pwm.c
  *
  *   Copyright (C) 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

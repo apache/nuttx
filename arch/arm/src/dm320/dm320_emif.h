@@ -1,5 +1,5 @@
 /************************************************************************************
- * dm320/dm320_emif.h
+ * arch/arm/src/dm320/dm320_emif.h
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

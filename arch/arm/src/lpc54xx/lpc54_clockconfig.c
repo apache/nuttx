@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc54628/lpc54_clockconfig.c
+ * arch/arm/src/lpc54xx/lpc54_clockconfig.c
  *
  *   Copyright (C) 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

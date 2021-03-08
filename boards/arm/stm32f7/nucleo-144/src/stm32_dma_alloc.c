@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/nucleo-144/stc/stm32_dma_alloc.c
+ * boards/arm/stm32f7/nucleo-144/src/stm32_dma_alloc.c
  *
  *   Copyright (C) 2016 PX4 Development Team. All rights reserved.
  *

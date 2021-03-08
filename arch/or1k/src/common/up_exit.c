@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_exit.c
+ * arch/or1k/src/common/up_exit.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

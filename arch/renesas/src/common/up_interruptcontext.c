@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/renesas/src/common/up_interruptcontext.c
+ * arch/renesas/src/common/up_interruptcontext.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

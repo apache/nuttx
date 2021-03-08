@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/imxrt/imxrt_lcd.c
+ * arch/arm/src/imxrt/imxrt_lcd.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Johannes Schock

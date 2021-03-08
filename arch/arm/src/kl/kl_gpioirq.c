@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/kl/kl_gpioirq.c
+ * arch/arm/src/kl/kl_gpioirq.c
  *
  *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

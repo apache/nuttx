@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/hardware/stm32l4x6xx_dma.h
+ * arch/arm/src/stm32l4/hardware/stm32l4x5xx_dma.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

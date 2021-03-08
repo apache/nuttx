@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/lpc31xx/olimex-lpc-h3131/src/lp31_mem.c
+ * boards/arm/lpc31xx/olimex-lpc-h3131/src/lpc31_mem.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

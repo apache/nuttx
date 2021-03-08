@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z16/z16f/z16f2800100zcog/z16f_leds.c
+ * boards/z16/z16f/z16f2800100zcog/src/z16f_leds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

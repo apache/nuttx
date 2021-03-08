@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/samd20-xplained/src/sam_appinit.c
+ * boards/arm/samd2l2/samd20-xplained/src/sam_appinit.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

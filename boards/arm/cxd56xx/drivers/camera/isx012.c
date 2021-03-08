@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/drivers/video/isx012.c
+ * boards/arm/cxd56xx/drivers/camera/isx012.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

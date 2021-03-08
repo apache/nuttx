@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/sam34/sam4l-xlplained/src/sam_slcd.c
+ * boards/arm/sam34/sam4l-xplained/src/sam_slcd.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

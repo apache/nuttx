@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/spirit_pktstack.h
+ * drivers/wireless/spirit/include/spirit_pktstack.h
  * Configuration and management of SPIRIT STack packets.
  *
  *   Copyright(c) 2015 STMicroelectronics

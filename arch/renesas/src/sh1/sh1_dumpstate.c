@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/renesas/src/sh1/sh1_assert.c
+ * arch/renesas/src/sh1/sh1_dumpstate.c
  *
  *   Copyright (C) 2008-2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

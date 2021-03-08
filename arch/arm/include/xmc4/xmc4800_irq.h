@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/include/xmc4/xmc4800_.h
+ * arch/arm/include/xmc4/xmc4800_irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/bl602/hardware/bl602_sec.h
+ * arch/risc-v/src/bl602/hardware/bl602_ir.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

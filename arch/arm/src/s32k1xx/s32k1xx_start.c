@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/x32k1xx/s32k1xx_start.c
+ * arch/arm/src/s32k1xx/s32k1xx_start.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

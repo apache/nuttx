@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/arch.h
+ * arch/z80/include/z180/arch.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

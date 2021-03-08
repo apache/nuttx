@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32L4/stm32l4_dfsdm.h
+ * arch/arm/src/stm32l4/stm32l4_dfsdm.h
  *
  *   Copyright (C) 2017 Haltian Ltd. All rights reserved.
  *   Authors: Juha Niskanen <juha.niskanen@haltian.com>

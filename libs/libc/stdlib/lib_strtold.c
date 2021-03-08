@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdlib/lib_strtod.c
+ * libs/libc/stdlib/lib_strtold.c
  * Convert string to long double
  *
  *   Copyright (C) 2002 Michael Ringgaard. All rights reserved.

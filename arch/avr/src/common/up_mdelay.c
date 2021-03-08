@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/avr/src/common/up_mdelay.c
+ * arch/avr/src/common/up_mdelay.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

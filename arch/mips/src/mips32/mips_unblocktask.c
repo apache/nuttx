@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/mips/src/mips32/mips_unblocktask.c
+ * arch/mips/src/mips32/mips_unblocktask.c
  *
  *   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

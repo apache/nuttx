@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/mikroe_stm32f4/src/stm32_extmem.c
+ * boards/arm/stm32/mikroe-stm32f4/src/stm32_extmem.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

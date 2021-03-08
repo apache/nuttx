@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/input/max31855.h
+ * include/nuttx/sensors/max31855.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

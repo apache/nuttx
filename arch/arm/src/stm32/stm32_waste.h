@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32/stm32_waste.h
+ * arch/arm/src/stm32/stm32_waste.h
  *
  *   Copyright (C) 2011, 2015 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>

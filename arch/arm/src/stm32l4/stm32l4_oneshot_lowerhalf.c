@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32l4/stm32l4_oneshot_lowerhalf.c
+ * arch/arm/src/stm32l4/stm32l4_oneshot_lowerhalf.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

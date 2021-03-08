@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/a1x/pcduino-a10/src/pcduino-a10.h
+ * boards/arm/a1x/pcduino-a10/src/pcduino_a10.h
  *
  *   Copyright (C) 2013, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

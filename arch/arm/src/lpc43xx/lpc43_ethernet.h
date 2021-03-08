@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc43xx/lpc43_eth.h
+ * arch/arm/src/lpc43xx/lpc43_ethernet.h
  *
  *   Copyright (C) 2009-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

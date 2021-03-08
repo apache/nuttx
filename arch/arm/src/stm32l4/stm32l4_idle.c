@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32l4/stm32l4_idle.c
+ * arch/arm/src/stm32l4/stm32l4_idle.c
  *
  *   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

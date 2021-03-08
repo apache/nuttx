@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/gap8/gapduino/src/gapduino_sysinit.c
+ * boards/risc-v/gap8/gapuino/src/gapuino_sysinit.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: hhuysqt <1020988872@qq.com>

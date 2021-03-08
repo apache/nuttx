@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/include/lpc54xxx/lpc546x_irq.h
+ * arch/arm/include/lpc54xx/lpc546x_irq.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

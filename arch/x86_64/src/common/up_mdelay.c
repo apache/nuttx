@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/x86/src/common/up_mdelay.c
+ * arch/x86_64/src/common/up_mdelay.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

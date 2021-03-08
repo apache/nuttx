@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/nucleo-f4x1re/src/nucleo-f4x1re.h
+ * boards/arm/stm32/nucleo-f446re/src/nucleo-f446re.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Frank Bennett

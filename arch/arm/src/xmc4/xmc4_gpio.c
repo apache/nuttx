@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/xmc4/xmc4_gpio.c
+ * arch/arm/src/xmc4/xmc4_gpio.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

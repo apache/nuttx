@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/commong/misoc_net_net.c
+ * arch/misoc/src/common/misoc_net.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

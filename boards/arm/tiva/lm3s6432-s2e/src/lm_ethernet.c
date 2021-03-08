@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/tiva/lm3s6432-s3e/src/lm_ethernet.c
+ * boards/arm/tiva/lm3s6432-s2e/src/lm_ethernet.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

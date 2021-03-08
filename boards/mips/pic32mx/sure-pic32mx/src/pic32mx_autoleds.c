@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx/sure-pic32mx/src/pic32mx_leds.c
+ * boards/mips/pic32mx/sure-pic32mx/src/pic32mx_autoleds.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

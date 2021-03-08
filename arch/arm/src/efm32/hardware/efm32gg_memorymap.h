@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/efm32/chip/efm32gg_memorymap.h
+ * arch/arm/src/efm32/hardware/efm32gg_memorymap.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *

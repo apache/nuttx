@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32l4/stm32l476vg_disco/kernel/stm32l4_userspace.c
+ * boards/arm/stm32l4/stm32l476vg-disco/kernel/stm32l4_userspace.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

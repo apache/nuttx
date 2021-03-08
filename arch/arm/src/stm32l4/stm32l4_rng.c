@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32l4_rng.c
+ * arch/arm/src/stm32l4/stm32l4_rng.c
  *
  *   Copyright (C) 2012 Max Holtzberg. All rights reserved.
  *   Author: Max Holtzberg <mh@uvc.de>

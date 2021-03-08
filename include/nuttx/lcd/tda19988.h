@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/lcd/tca19988.h
+ * include/nuttx/lcd/tda19988.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

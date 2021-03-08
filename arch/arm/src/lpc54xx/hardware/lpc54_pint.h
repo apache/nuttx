@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/lpc54xx/chip/lpc54_pint.h
+ * arch/arm/src/lpc54xx/hardware/lpc54_pint.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

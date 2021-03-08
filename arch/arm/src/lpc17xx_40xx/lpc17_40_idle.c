@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/lpc17/lpc17_40_idle.c
+ * arch/arm/src/lpc17xx_40xx/lpc17_40_idle.c
  *
  *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

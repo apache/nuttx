@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/nucleo-f446re/include/nucleo-f411re.h
+ * boards/arm/stm32/nucleo-f446re/include/nucleo-f446re.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

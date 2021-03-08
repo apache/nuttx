@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/vl53l1x.h
+ * include/nuttx/sensors/vl53l1x.h
  *
  *   Copyright (C) 2019 Acutronics Robotics. All rights reserved.
  *   Author: Acutronics Robotics (Juan Flores Muñoz) <juan@erlerobotics.com>

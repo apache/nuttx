@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/sensors.h
+ * include/nuttx/sensors/sensor.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

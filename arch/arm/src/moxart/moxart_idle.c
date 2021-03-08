@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/common/moxart_idle.c
+ * arch/arm/src/moxart/moxart_idle.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/src/sam34/hardware/sam_rtt.h
+ * arch/arm/src/sam34/hardware/sam_acc.h
  *Analog Comparator Controller (ACC) definitions for the SAM4E
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.

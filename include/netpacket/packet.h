@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/netpacket/netpacket.h
+ * include/netpacket/packet.h
  * Definitions for use with AF_PACKET sockets
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.

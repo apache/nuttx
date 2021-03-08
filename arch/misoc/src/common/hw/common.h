@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/common/hw/common.h
+ * arch/misoc/src/common/hw/common.h
  *
  *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Ramtin Amin <keytwo@gmail.com>

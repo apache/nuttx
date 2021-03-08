@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/lzf/lzf_c.c
+ * libs/libc/lzf/lzf_d.c
  *
  * Copyright (c) 2000-2010
  *      Author:  Marc Alexander Lehmann <schmorp@schmorp.de>

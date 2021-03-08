@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/msic/lib_slcdencode.c
+ * libs/libc/misc/lib_slcdencode.c
  * Encoding side of the SLCD CODEC
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.

@@ -1,5 +1,5 @@
 /************************************************************************************
- * boards/zkit-arm-1769/src/lpc17_40_can.c
+ * boards/arm/lpc17xx_40xx/lx_cpu/src/lpc17_40_can.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: Raashid Muhammed <code@zilogic.com>

@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/minerva/minerva_releasepending.c
+ * arch/misoc/src/minerva/minerva_releasepending.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

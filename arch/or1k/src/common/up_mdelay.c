@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/or1k/src/common/up_mdelay.c
+ * arch/or1k/src/common/up_mdelay.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/spiffs.h/spiffs_volume.c
+ * fs/spiffs/src/spiffs_volume.c
  * SPIFFS Utility Functions for Volume and File Object Support
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.

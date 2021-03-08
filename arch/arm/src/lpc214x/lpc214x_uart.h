@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc214x/uart.h
+ * arch/arm/src/lpc214x/lpc214x_uart.h
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

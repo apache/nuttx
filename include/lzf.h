@@ -1,5 +1,5 @@
 /****************************************************************************
- * lzf -- an extremely fast/free compression/decompression-method
+ * include/lzf.h
  * http://liblzf.plan9.de/
  *
  *   Copyright (c) 2000-2008 Marc Alexander Lehmann <schmorp@schmorp.de>

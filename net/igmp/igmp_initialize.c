@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/igmp/igmp_init.c
+ * net/igmp/igmp_initialize.c
  * IGMP initialization logic
  *
  *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.

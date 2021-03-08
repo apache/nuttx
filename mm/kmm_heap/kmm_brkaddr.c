@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/kmm_heap/kmm_breakaddr.c
+ * mm/kmm_heap/kmm_brkaddr.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

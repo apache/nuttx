@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z80/ez80/ez80f910200zco/src/ez80_leds.c
+ * boards/z80/ez80/ez80f910200zco/src/ez80_buttons.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

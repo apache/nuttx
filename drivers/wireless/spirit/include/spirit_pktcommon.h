@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_pktcommon.h
+ * drivers/wireless/spirit/include/spirit_pktcommon.h
  * Configuration and management of the common features of SPIRIT packets.
  *
  *   Copyright(c) 2015 STMicroelectronics

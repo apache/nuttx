@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/mikroe_stm32f4/src/stm32_pwm.c
+ * boards/arm/stm32/mikroe-stm32f4/src/stm32_pwm.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

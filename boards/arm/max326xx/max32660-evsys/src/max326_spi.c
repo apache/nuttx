@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/max326xx/max32660-evsys/src/ma326_spi.c
+ * boards/arm/max326xx/max32660-evsys/src/max326_spi.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

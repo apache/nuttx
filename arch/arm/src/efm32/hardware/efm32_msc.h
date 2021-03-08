@@ -1,5 +1,5 @@
 /*******************************************************************************************************************************
- * arch/arm/src/efm32/chip/efm32_msc.h
+ * arch/arm/src/efm32/hardware/efm32_msc.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *

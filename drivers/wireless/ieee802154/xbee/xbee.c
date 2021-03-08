@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/xbee/drivers/xbee.c
+ * drivers/wireless/ieee802154/xbee/xbee.c
  *
  *   Copyright (C) 2017 Verge Inc. All rights reserved.
  *   Author:  Anthony Merlino <anthony@vergeaero.com>

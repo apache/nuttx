@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/renesas/src/m16c/m16c_initialstate.c
+ * arch/renesas/src/m16c/m16c_initialstate.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

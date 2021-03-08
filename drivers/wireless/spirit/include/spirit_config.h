@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_config.h
+ * drivers/wireless/spirit/include/spirit_config.h
  * Spirit Configuration and useful defines
  *
  *   Copyright(c) 2015 STMicroelectronics

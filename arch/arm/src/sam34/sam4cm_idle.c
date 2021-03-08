@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/sam34/sam4cm_idle.c
+ * arch/arm/src/sam34/sam4cm_idle.c
  *
  *   Copyright (C) 2016 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>

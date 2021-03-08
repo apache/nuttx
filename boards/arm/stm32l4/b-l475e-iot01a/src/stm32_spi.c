@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32l4/b-f475e-iot01a/src/stm32_spi.c
+ * boards/arm/stm32l4/b-l475e-iot01a/src/stm32_spi.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

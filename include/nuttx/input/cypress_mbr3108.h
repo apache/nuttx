@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/input/cypress_mbr3108.c
+ * include/nuttx/input/cypress_mbr3108.h
  *
  *   Copyright (C) 2014 Haltian Ltd. All rights reserved.
  *   Author: Jussi Kivilinna <jussi.kivilinna@haltian.com>

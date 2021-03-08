@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc2378/lpc231x_gpio.h
+ * arch/arm/src/lpc2378/lpc23xx_gpio.h
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
  *   Author: Rommel Marcelo

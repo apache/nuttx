@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_uid.h
+ * arch/arm/src/stm32f7/stm32_uid.h
  *
  *   Copyright (C) 2015 Marawan Ragab. All rights reserved.
  *   Author: Marawan Ragab <marawan31@gmail.com>

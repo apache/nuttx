@@ -1,5 +1,5 @@
 /************************************************************************************************
- * arch/arm/src/sama5/hardware/sam3u_uart.h
+ * arch/arm/src/sama5/hardware/sam_flexcom_usart.h
  * Universal Synchronous Asynchronous Receiver Transmitter (FLEXUS) definitions for the SAMA5D2
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam34/sam_tc.c
+ * arch/arm/src/sam34/sam4cm_tc.c
  *
  *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

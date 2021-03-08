@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm3220g-eval/src/stm3220g.h
+ * boards/arm/stm32/stm3220g-eval/src/stm3220g-eval.h
  *
  *   Copyright (C) 2012, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

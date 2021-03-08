@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/hc/src/common/up_unblocktask.c
+ * arch/hc/src/common/up_unblocktask.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

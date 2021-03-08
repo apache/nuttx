@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_libsscanf.c
+ * libs/libc/stdio/lib_libvscanf.c
  *
  *   Copyright (C) 2007, 2008, 2011-2014, 2016, 2019 Gregory Nutt. All
  *     rights reserved.

@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/risc-v/src/common/up_idle.c
+ * arch/risc-v/src/gap8/gap8_idle.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

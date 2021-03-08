@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/x86/src/common/up_releasestack.c
+ * arch/x86/src/i486/up_releasestack.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/viewtools-stm32f107/src/stm32_ads7843e.c
+ * boards/arm/stm32/viewtool-stm32f107/src/stm32_ads7843e.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

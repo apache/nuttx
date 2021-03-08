@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_gpio.h
+ * drivers/wireless/spirit/include/spirit_gpio.h
  * This file provides all the low level API to manage SPIRIT GPIO.
  *
  *   Copyright(c) 2015 STMicroelectronics

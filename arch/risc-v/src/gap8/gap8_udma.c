@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/gapuino/gap8_udma.c
+ * arch/risc-v/src/gap8/gap8_udma.c
  * uDMA driver for GAP8
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.

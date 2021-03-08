@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/misc/lib_match.c - simple shell-style filename matcher
+ * libs/libc/misc/lib_match.c
  *
  * Simple shell-style filename pattern matcher written by Jef Poskanzer
  * This pattern matcher only handles '?', '*' and '**', and  multiple

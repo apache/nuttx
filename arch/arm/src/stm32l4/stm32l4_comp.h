@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32l4_comp.h
+ * arch/arm/src/stm32l4/stm32l4_comp.h
  *
  * Copyright (c) 2016 Motorola Mobility, LLC.
  * All rights reserved.

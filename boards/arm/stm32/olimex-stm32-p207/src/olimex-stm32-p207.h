@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/olimex-stm32-p107/src/olimex-stm32-p207.h
+ * boards/arm/stm32/olimex-stm32-p207/src/olimex-stm32-p207.h
  *
  *   Copyright (C) 2013 Max Holtzberg. All rights reserved.
  *   Author: Max Holtzberg <mholtzberg@uvc-ingenieure.de>

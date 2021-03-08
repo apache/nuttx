@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rnf52/nrf52_lowputc.c
+ * arch/arm/src/nrf52/nrf52_lowputc.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>

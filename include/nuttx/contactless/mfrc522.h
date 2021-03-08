@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/contactless/mfrc522.h
+ * include/nuttx/contactless/mfrc522.h
  *
  *   Copyright(C) 2016 Uniquix Ltda. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>

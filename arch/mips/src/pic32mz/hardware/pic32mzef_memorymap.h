@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/mips/src/pic32mz/hardware/pic32mzef-memorymap.h
+ * arch/mips/src/pic32mz/hardware/pic32mzef_memorymap.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

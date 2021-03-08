@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf52/nrf52832-dk/src/nrf53_bringup.c
+ * boards/arm/nrf52/nrf52832-dk/src/nrf52_bringup.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

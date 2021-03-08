@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/mikroe_stm32f4/src/stm32_usb.c
+ * boards/arm/stm32/mikroe-stm32f4/src/stm32_usb.c
  *
  *   Copyright (C) 2012-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

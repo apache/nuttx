@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/riscv/src/nr5/nr5_uart.h
+ * arch/risc-v/src/nr5m100/nr5_uart.h
  *
  *   Copyright (C) 2016 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/atmega/moteino-mega/src/moteino-mega.h
+ * boards/avr/atmega/moteino-mega/src/moteino_mega.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /***************************************************************************************************
- * arch/arm/src/stm32f7/hardware/stm32f76xx77xx_dbgmcu.h
+ * arch/arm/src/stm32h7/hardware/stm32h7xxx_dbgmcu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

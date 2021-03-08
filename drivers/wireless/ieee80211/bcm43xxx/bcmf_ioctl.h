@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (c) 2015 Broadcom
+ * drivers/wireless/ieee80211/bcm43xxx/bcmf_ioctl.h
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,

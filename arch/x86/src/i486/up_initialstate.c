@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/x86/src/i486/up_initialstate.c
+ * arch/x86/src/i486/up_initialstate.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

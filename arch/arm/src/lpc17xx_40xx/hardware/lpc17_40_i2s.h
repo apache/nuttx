@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_i2s
+ * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_i2s.h
  *
  *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

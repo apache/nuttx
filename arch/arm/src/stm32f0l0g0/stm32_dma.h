@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_dma.h
+ * arch/arm/src/stm32f0l0g0/stm32_dma.h
  *
  *   Copyright (C) 2009, 2011-2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/SAMV7/sam_tc.c
+ * arch/arm/src/samv7/sam_tc.c
  *
  *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

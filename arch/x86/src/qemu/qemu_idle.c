@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/x86/src/qemu/qemu_idle.c
+ * arch/x86/src/qemu/qemu_idle.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

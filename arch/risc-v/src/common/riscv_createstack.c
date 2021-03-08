@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/riscv/src/common/riscv_createstack.c
+ * arch/risc-v/src/common/riscv_createstack.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

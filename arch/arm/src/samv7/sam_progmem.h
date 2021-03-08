@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samv7/sam_progmem.c
+ * arch/arm/src/samv7/sam_progmem.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

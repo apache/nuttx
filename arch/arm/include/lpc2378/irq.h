@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/lpc2378/irq.h
+ * arch/arm/include/lpc2378/irq.h
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.

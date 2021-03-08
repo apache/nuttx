@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/samd2l2/hardware/saml_dac.h
+ * arch/arm/src/samd2l2/hardware/samd_dac.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/net/lib_netdb.h
+ * libs/libc/netdb/lib_netdb.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

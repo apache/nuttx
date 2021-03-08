@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc54xx/chip/lpc546x_pinmux.h
+ * arch/arm/src/lpc54xx/hardware/lpc546x_pinmux.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

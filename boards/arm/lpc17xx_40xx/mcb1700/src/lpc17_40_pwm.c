@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/lpc17xx_40xx/mcb1700/lpc17_40_pwm.c
+ * boards/arm/lpc17xx_40xx/mcb1700/src/lpc17_40_pwm.c
  *
  * Based on boards/lpcexpresso-lpc1768/lpc17_40_pwm.c
  *

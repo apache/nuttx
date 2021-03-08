@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/cc13xx/cc13x2_cc26xx2_v1_rom.h
+ * arch/arm/src/tiva/cc13xx/cc13x2_cc26x2_v1_rom.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

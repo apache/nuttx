@@ -1,5 +1,5 @@
 /**************************************************************************************************
- * arch/arm/src/stm32f0l0g0/stm32_serial.c
+ * arch/arm/src/stm32f0l0g0/stm32_serial_v2.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

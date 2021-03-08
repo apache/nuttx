@@ -1,5 +1,5 @@
 /******************************************************************************
- * drivers/wireless/spirit/spirit_pktstack.c
+ * drivers/wireless/spirit/lib/spirit_pktstack.c
  * Configuration and management of SPIRIT STack packets.
  *
  *   Copyright(c) 2015 STMicroelectronics

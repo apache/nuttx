@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imxrt/imxrt_lpsrtc.c
+ * arch/arm/src/imxrt/imxrt_hprtc.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

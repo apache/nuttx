@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/tms570/tms570ls31x-usb-kit/src/moxart_boot.c
+ * boards/arm/tms570/tms570ls31x-usb-kit/src/tms570_initialize.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

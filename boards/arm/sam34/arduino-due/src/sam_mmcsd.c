@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/sam34/arduino-due/src/up_mmcsd.c
+ * boards/arm/sam34/arduino-due/src/sam_mmcsd.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

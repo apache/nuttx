@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardmware/lm/3s_memorymap.h
+ * arch/arm/src/tiva/hardware/lm/lm3s_memorymap.h
  *
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

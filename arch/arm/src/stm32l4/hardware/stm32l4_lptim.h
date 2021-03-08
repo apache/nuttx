@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/stm32l4/stm32l4_lptim.h
+ * arch/arm/src/stm32l4/hardware/stm32l4_lptim.h
  *
  *   Copyright (C) 2016 Motorola Mobility, LLC. All rights reserved.
  *   Copyright (C) 2009, 2011-2012, 2017 Gregory Nutt. All rights reserved.

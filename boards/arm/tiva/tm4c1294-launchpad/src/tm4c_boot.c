@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/tiva/tm4c1294xl/src/tm4c_boot.c
+ * boards/arm/tiva/tm4c1294-launchpad/src/tm4c_boot.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

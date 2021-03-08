@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/tiva/hardware/cc13c0/cc13c0_prcm.h
+ * arch/arm/src/tiva/hardware/cc13x0/cc13x0_prcm.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

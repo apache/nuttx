@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libnx/nxfonts/nxfonts_serif38x49.h
+ * libs/libnx/nxfonts/nxfonts_serif38x49b.h
  *
  *   Copyright (C) 2011-2012 NX Engineering, S.A., All rights reserved.
  *   Author: Jose Pablo Carballo Gomez <jcarballo@nx-engineering.com>

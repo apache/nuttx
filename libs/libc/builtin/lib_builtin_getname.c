@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/builtin/libbuiltin_getname.c
+ * libs/libc/builtin/lib_builtin_getname.c
  *
  * Originally by:
  *

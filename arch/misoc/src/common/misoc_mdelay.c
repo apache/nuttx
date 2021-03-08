@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/common/misoc_mdelay.c
+ * arch/misoc/src/common/misoc_mdelay.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

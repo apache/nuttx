@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/at32uc3_/at32uc3_irq.c
+ * arch/avr/src/at32uc3/at32uc3_irq.c
  * arch/avr/src/chip/at32uc3_irq.c
  *
  *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/dirent/fs_telldir.c
+ * libs/libc/dirent/lib_telldir.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

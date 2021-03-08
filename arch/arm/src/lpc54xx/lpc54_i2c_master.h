@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc54xx/lpc54_i2c.h
+ * arch/arm/src/lpc54xx/lpc54_i2c_master.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_barriedestroy.c
+ * libs/libc/pthread/pthread_barrierdestroy.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

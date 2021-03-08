@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/fire-stm32v2/src/stm32_enc28j60.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_enc28j60.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

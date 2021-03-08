@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/imx6/imx_irq.c
+ * arch/arm/src/imx6/imx_iomuxc.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

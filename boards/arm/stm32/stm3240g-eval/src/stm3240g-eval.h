@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm3240g-eval/src/stm3240g_eval.h
+ * boards/arm/stm32/stm3240g-eval/src/stm3240g-eval.h
  *
  *   Copyright (C) 2011-2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

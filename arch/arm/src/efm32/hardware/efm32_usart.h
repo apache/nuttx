@@ -1,5 +1,5 @@
 /********************************************************************************************************************************
- * arch/arm/src/efm32/EFM32GG/efm32_usart.h
+ * arch/arm/src/efm32/hardware/efm32_usart.h
  *
  *    (C) Copyright 2014 Silicon Labs, http://www.silabs.com
  *

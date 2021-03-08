@@ -1,5 +1,5 @@
 /****************************************************************************
- *  boards/arm/stm32/b-g474e-dpow1/src/stm32_appinit.c
+ * boards/arm/stm32/b-g474e-dpow1/src/stm32_appinit.c
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc2378/lpc2378/uart.h
+ * arch/arm/src/lpc2378/lpc23xx_uart.h
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
  *   Author: Rommel Marcelo

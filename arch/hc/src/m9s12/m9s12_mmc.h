@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/hc/src/m9s12/m9s12_mmcv4.h (v4)
+ * arch/hc/src/m9s12/m9s12_mmc.h
  *
  *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

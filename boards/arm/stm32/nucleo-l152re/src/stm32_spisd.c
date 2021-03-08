@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32-l152re/src/stm32_spisd.c
+ * boards/arm/stm32/nucleo-l152re/src/stm32_spisd.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

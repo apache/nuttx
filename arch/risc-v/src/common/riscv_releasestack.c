@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/risc-v/src/common/riscv_releasestack.c
+ * arch/risc-v/src/common/riscv_releasestack.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

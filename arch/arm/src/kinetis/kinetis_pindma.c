@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/kinetis/kinetis_pindma.c
+ * arch/arm/src/kinetis/kinetis_pindma.c
  *
  *   Copyright (C) 201, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

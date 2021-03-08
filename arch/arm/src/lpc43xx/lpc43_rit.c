@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/lpc43/lpc43_rit.c
+ * arch/arm/src/lpc43xx/lpc43_rit.c
  *
  *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Brandon Warhurst <warhurst_002@yahoo.com>

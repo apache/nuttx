@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_timer.h
+ * arch/arm/src/tiva/hardware/cc13x0/cc13x0_timer.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

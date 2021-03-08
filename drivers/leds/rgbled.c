@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/rgbled.c
+ * drivers/leds/rgbled.c
  *
  *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>

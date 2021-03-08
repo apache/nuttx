@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/nrf24l01/nrf24l01.c
+ * drivers/wireless/nrf24l01.c
  *
  *   Copyright (C) 2013 Laurent Latil. All rights reserved.
  *   Authors: Laurent Latil <laurent@latil.nom.fr>

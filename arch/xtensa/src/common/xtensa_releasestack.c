@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/xtensa/src/common/xtensa_releasestack.c
+ * arch/xtensa/src/common/xtensa_releasestack.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

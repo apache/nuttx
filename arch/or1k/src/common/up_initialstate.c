@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/or1k/src/mor1kx/up_initialstate.c
+ * arch/or1k/src/common/up_initialstate.c
  *
  *   Copyright (C) 2018 Extent3D. All rights reserved.
  *   Author: Matt Thompson <matt@extent3d.com>

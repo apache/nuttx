@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/hc/src/m9s12/m9s12_phyv2.h (v2)
+ * arch/hc/src/m9s12/m9s12_phy.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/common/up_udelay.c
+ * arch/misoc/src/common/misoc_udelay.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

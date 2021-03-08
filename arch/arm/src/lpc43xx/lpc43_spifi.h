@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/lpc43/lpc43_spifi.h
+ * arch/arm/src/lpc43xx/lpc43_spifi.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/efm32/efm32gg-stk3700/include/efm32gg-stk3700.h
+ * boards/arm/efm32/efm32gg-stk3700/src/efm32gg-stk3700.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

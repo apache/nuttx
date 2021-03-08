@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/mips/src/common/mips_mdelay.c
+ * arch/mips/src/common/mips_mdelay.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /************************************************************************************************************
- * arch/arm/src/imxrt/hardware/rt105x/imxrt_ccm.h
+ * arch/arm/src/imxrt/hardware/rt105x/imxrt105x_ccm.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors:  Janne Rosberg <janne@offcode.fi>

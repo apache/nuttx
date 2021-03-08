@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/samd5e5/sam_idle.c
+ * arch/arm/src/samd5e5/sam_idle.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

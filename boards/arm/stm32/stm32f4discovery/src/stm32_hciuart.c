@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_xen1210.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_hciuart.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author:  Alan Carvalho de Assis <acassis@gmail.com>

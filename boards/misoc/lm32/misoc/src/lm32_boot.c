@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/misoc/m32/misoc/src/lm32_boot.c
+ * boards/misoc/lm32/misoc/src/lm32_boot.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

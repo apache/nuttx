@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/dm320/ntods-dm320/include/board/board.h
+ * boards/arm/dm320/ntosd-dm320/include/board.h
  *
  *   Copyright (C) 2007-201, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

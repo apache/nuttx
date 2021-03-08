@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm/armv-7a/arm_elf.c
+ * libs/libc/machine/arm/armv7-a/arch_elf.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

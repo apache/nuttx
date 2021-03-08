@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/minerva/up_interruptcontext.c
+ * arch/misoc/src/minerva/minerva_interruptcontext.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

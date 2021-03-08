@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf52/nrf52832-dk/src/lpc43_boot.c
+ * boards/arm/nrf52/nrf52832-dk/src/nrf52_boot.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

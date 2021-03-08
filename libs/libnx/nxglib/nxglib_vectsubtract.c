@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libnx/nxglib/nxglib_vectorsubtract.c
+ * libs/libnx/nxglib/nxglib_vectsubtract.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/kinetis/kinetis_pin.c
+ * arch/arm/src/kinetis/kinetis_pin.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/tiva/hardmware/lm/4f_sysctrl.h
+ * arch/arm/src/tiva/hardware/lm/lm4f_sysctrl.h
  *
  *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

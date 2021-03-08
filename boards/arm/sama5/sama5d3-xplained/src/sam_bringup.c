@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/sama5/sama5d4-ek/src/sam_bringup.c
+ * boards/arm/sama5/sama5d3-xplained/src/sam_bringup.c
  *
  *   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

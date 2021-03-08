@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/input/bh1750fvi.h
+ * include/nuttx/sensors/bh1750fvi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

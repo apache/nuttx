@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc2378/lpc23xx_irq.c
+ * arch/arm/src/lpc2378/lpc23xx_pllsetup.c
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
  *   Author: Rommel Marcelo

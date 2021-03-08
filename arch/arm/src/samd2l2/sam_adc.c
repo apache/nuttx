@@ -1,5 +1,5 @@
 /*****************************************************************************
- * arch/arm/include/samd2l2/sam_adc.c
+ * arch/arm/src/samd2l2/sam_adc.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Alexander Vasiliev<alexvasiljev@gmail.com>

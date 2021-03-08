@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/risc-v/src/nr5m100/hardware/nr5_epic.h
+ * arch/risc-v/src/nr5m100/hardware/nr5m1xx_epic.h
  *
  *   Copyright (C) 2016 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32l4/nucleo-l476rg/src/stm32l4_boot.c
+ * boards/arm/stm32l4/nucleo-l476rg/src/stm32_boot.c
  *
  *   Copyright (C) 2014-2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/riscv/src/rv32im/riscv_vfork.c
+ * arch/risc-v/src/rv32im/riscv_vfork.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

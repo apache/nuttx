@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/common/arm_udelay.c
+ * arch/arm/src/common/arm_udelay.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

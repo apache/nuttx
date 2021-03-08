@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32f7/hardware/stm32f76xxx77xxx_memorymap.h
+ * arch/arm/src/stm32f7/hardware/stm32f76xx77xx_memorymap.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

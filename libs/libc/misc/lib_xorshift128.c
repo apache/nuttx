@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/misc/lib_xorshift.c
+ * libs/libc/misc/lib_xorshift128.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: David S. Alessio
