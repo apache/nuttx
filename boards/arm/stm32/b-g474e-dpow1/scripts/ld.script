@@ -1,5 +1,5 @@
 /****************************************************************************
- *  boards/arm/stm32/b-g474e-dpow1/scripts/ld.script
+ * boards/arm/stm32/b-g474e-dpow1/scripts/ld.script
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/renesas/sh1/us7032evb1/nsh/ld.script
+ * boards/renesas/sh1/us7032evb1/scripts/sram.ld
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

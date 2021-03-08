@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm3240-eval/scripts/memory.ld
+ * boards/arm/stm32/stm3240g-eval/scripts/memory.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

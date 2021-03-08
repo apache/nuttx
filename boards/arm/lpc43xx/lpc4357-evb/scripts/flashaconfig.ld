@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/lpc43xx/lpc4357-evb/scripts/flashconfig.ld
+ * boards/arm/lpc43xx/lpc4357-evb/scripts/flashaconfig.ld
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

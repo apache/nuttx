@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/imxrt/simxrt1050-evk/scripts/user-space.ld
+ * boards/arm/imxrt/imxrt1050-evk/scripts/user-space.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

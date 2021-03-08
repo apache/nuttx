@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/misoc/m32/misoc/hello/script/ld.script
+ * boards/misoc/lm32/misoc/scripts/lm32.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

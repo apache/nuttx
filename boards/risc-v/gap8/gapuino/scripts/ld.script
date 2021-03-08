@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/gap8/gapduino/scripts/ld.script
+ * boards/risc-v/gap8/gapuino/scripts/ld.script
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: hhuysqt <1020988872@qq.com>

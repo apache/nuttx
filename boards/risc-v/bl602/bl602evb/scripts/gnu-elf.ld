@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/k210/maix-bit/scripts/gnu-elf.ld
+ * boards/risc-v/bl602/bl602evb/scripts/gnu-elf.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx/pic32mx7mmb/scripts/mips-release.ld
+ * boards/mips/pic32mx/pic32mx7mmb/scripts/pinguino-debug.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

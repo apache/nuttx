@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx/mirtoo/scripts/mips-elf-debug.ld
+ * boards/mips/pic32mx/mirtoo/scripts/pinguino-debug.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

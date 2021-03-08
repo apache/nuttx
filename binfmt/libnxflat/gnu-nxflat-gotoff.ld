@@ -1,5 +1,5 @@
 /****************************************************************************
- * examples/nxflat/gnu-nxflat-gotoff.ld
+ * binfmt/libnxflat/gnu-nxflat-gotoff.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

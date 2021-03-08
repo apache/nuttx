@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32h7/stm32h747i-disco/scripts/kernel-space.ld
+ * boards/arm/stm32h7/stm32h747i-disco/scripts/kernel.space.ld
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

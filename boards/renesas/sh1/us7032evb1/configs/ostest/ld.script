@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/enesas/us7032evb1/ostest/ld.script
+ * boards/renesas/sh1/us7032evb1/configs/ostest/ld.script
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
