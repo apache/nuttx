@@ -45,9 +45,6 @@ also depends on:
   -  ``CONFIG_DISABLE_MOUNTPOINT=n``. If mount point support is disabled,
      then you cannot mount *any* file systems.
 
-  -  ``CONFIG_NFILE_DESCRIPTORS > 4``. Of course you have to have file
-     descriptions to use any thing in the file system.
-
   -  ``CONFIG_FS_ROMFS`` enabled. This option enables ROMFS file system
      support.
 
