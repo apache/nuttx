@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32h7x3xx_rcc.c
+ * arch/arm/src/stm32h7/stm32h7x7xx_rcc.c
  *
  *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
