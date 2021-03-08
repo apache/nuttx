@@ -558,6 +558,26 @@ static inline void rcc_enableapb4(void)
 }
 
 /****************************************************************************
+ * Name: rcc_enableperiphals
+ ****************************************************************************/
+
+static inline void rcc_enableperipherals(void)
+{
+  rcc_enableahb1();
+  rcc_enableahb2();
+  rcc_enableahb3();
+  rcc_enableahb4();
+  rcc_enableapb1();
+  rcc_enableapb2();
+  rcc_enableapb3();
+  rcc_enableapb4();
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: stm32_stdclockconfig
  *
  * Description:
@@ -567,8 +587,7 @@ static inline void rcc_enableapb4(void)
  *   power clocking modes!
  ****************************************************************************/
 
-#ifndef CONFIG_STM32H7_CUSTOM_CLOCKCONFIG
-static void stm32_stdclockconfig(void)
+void stm32_stdclockconfig(void)
 {
   uint32_t regval;
   volatile int32_t timeout;
@@ -943,24 +962,3 @@ static void stm32_stdclockconfig(void)
 #endif
     }
 }
-#endif
-
-/****************************************************************************
- * Name: rcc_enableperiphals
- ****************************************************************************/
-
-static inline void rcc_enableperipherals(void)
-{
-  rcc_enableahb1();
-  rcc_enableahb2();
-  rcc_enableahb3();
-  rcc_enableahb4();
-  rcc_enableapb1();
-  rcc_enableapb2();
-  rcc_enableapb3();
-  rcc_enableapb4();
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
