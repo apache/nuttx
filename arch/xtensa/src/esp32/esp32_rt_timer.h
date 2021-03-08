@@ -52,7 +52,7 @@ enum rt_timer_state_e
 
 struct rt_timer_s
 {
-  uint32_t timeout;             /* Timeout value */
+  uint64_t timeout;             /* Timeout value */
   uint64_t alarm;               /* Timeout period */
   void (*callback)(void *arg);  /* Callback function */
   void *arg;                    /* Private data */
@@ -115,7 +115,7 @@ int rt_timer_create(FAR const struct rt_timer_args_s *args,
  ****************************************************************************/
 
 void rt_timer_start(FAR struct rt_timer_s *timer,
-                    uint32_t timeout,
+                    uint64_t timeout,
                     bool repeat);
 
 /****************************************************************************

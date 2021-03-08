@@ -480,7 +480,7 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
 
 /* WiFi feature capacity data */
 
-uint64_t g_wifi_feature_caps;
+uint64_t g_wifi_feature_caps = CONFIG_FEATURE_WPA3_SAE_BIT;
 
 /* WiFi TAG string data */
 
@@ -4175,8 +4175,6 @@ int32_t esp_timer_start_once(esp_timer_handle_t timer, uint64_t timeout_us)
 {
   struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
 
-  DEBUGASSERT(timeout_us <= UINT32_MAX);
-
   rt_timer_start(rt_timer, timeout_us, false);
 
   return 0;
@@ -4200,8 +4198,6 @@ int32_t esp_timer_start_once(esp_timer_handle_t timer, uint64_t timeout_us)
 int32_t esp_timer_start_periodic(esp_timer_handle_t timer, uint64_t period)
 {
   struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
-
-  DEBUGASSERT(period <= UINT32_MAX);
 
   rt_timer_start(rt_timer, period, true);
 
@@ -4709,6 +4705,8 @@ int esp_wifi_connect_internal(void)
   memset(&wifi_cfg, 0, sizeof(wifi_config_t));
   memcpy((char *)wifi_cfg.sta.ssid, g_ssid, g_ssid_len);
   memcpy((char *)wifi_cfg.sta.password, g_password, g_password_len);
+
+  wifi_cfg.sta.pmf_cfg.capable = true;
 
   ret = esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_cfg);
   if (ret)

@@ -93,7 +93,7 @@ static struct esp32_tim_dev_s *s_esp32_tim_dev;
  ****************************************************************************/
 
 static void start_rt_timer(FAR struct rt_timer_s *timer,
-                           uint32_t timeout,
+                           uint64_t timeout,
                            bool repeat)
 {
   irqstate_t flags;
@@ -507,7 +507,7 @@ int rt_timer_create(FAR const struct rt_timer_args_s *args,
  ****************************************************************************/
 
 void rt_timer_start(FAR struct rt_timer_s *timer,
-                    uint32_t timeout,
+                    uint64_t timeout,
                     bool repeat)
 {
   stop_rt_timer(timer);
