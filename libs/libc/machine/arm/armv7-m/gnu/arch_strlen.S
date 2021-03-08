@@ -67,6 +67,7 @@
 	.type \f, %function
 \f:
 	.endm
+
 #ifdef __ARMEB__
 #define S2LO		lsl
 #define S2HI		lsr
