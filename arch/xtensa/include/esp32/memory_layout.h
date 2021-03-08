@@ -38,10 +38,6 @@
  *
  * _sheap                                    eg. 3ffc 8c6c
  *     :
- *     : g_iheap (CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
- *     :
- * _sheap + CONFIG_XTENSA_IMEM_REGION_SIZE   eg. 3ffd ebfc
- *     :
  *     : g_mmheap region1
  *     :
  * HEAP_REGION1_END                              3ffd fff0
@@ -49,6 +45,10 @@
  *     : ROM data
  *     :
  * HEAP_REGION2_START                            3ffe 1330 or 3ffe 7e40
+ *     :
+ *     : g_iheap (CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
+ *     :
+ * HEAP_REGION2_START + CONFIG_XTENSA_IMEM_REGION_SIZE
  *     :
  *     : g_mmheap region2
  *     :
@@ -63,7 +63,7 @@
  */
 
 #ifndef HEAP_REGION1_END
-#define HEAP_REGION1_END    0x3ffdfff0
+#  define HEAP_REGION1_END    0x3ffdfff0
 #endif
 
 /* Region 2 of the heap is the area from the end of the ROM data to the end
@@ -71,6 +71,9 @@
  * the following defines the start of region2.
  * N.B: That ROM data consists of 2 regions, one per CPU.  If SMP is not
  * enabled include APP's region with the heap.
+ *
+ * When an internal heap is enabled this region starts at an offset equal to
+ * the size of the internal heap. (see esp32_imem.c)
  */
 
 #ifndef CONFIG_SMP
@@ -80,18 +83,16 @@
 #endif
 
 #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
-#define	XTENSA_IMEM_REGION_SIZE	CONFIG_XTENSA_IMEM_REGION_SIZE
+#  define	XTENSA_IMEM_REGION_SIZE	CONFIG_XTENSA_IMEM_REGION_SIZE
 #else
-#define	XTENSA_IMEM_REGION_SIZE	0
+#  define	XTENSA_IMEM_REGION_SIZE	0
 #endif
 
-/* If CONFIG_XTENSA_IMEM_MAXIMIZE_HEAP_REGION is defined, it means
- * using maximum separate heap for internal memory, but part of
- * the available memory is reserved for the Region 1 heap.
- */
+/* Internal heap starts at the end of the ROM data. */
 
-#ifdef CONFIG_XTENSA_IMEM_MAXIMIZE_HEAP_REGION
-#ifndef HEAP_REGION_OFFSET
-#define HEAP_REGION_OFFSET      0x2000
+#ifndef CONFIG_SMP
+#  define ESP32_IMEM_START  0x3ffe1330
+#else
+#  define ESP32_IMEM_START  0x3ffe7e40
 #endif
-#endif
+

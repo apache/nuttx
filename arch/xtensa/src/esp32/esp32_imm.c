@@ -61,20 +61,8 @@ void xtensa_imm_initialize(void)
   void  *start;
   size_t size;
 
-  start = (FAR void *)&_sheap;
-#ifdef CONFIG_XTENSA_IMEM_MAXIMIZE_HEAP_REGION
-  size_t offset = HEAP_REGION_OFFSET;
-  size = (size_t)(HEAP_REGION1_END - (uintptr_t)start - offset);
-#else
-
-  /* If the following DEBUGASSERT fails,
-   * probably you have too large CONFIG_XTENSA_IMEM_REGION_SIZE.
-   */
-
-  size = CONFIG_XTENSA_IMEM_REGION_SIZE;
-  DEBUGASSERT(HEAP_REGION1_END >  ((uintptr_t)start + size));
-#endif
-
+  start = (FAR void *)ESP32_IMEM_START;
+  size  = CONFIG_XTENSA_IMEM_REGION_SIZE;
   mm_initialize(&g_iheap, start, size);
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)

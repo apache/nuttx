@@ -76,19 +76,10 @@
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
-#ifdef CONFIG_XTENSA_IMEM_MAXIMIZE_HEAP_REGION
-  *heap_size = (size_t)HEAP_REGION_OFFSET;
-  *heap_start = (FAR void *)(HEAP_REGION1_END - *heap_size);
-#else
-  *heap_start = (FAR void *)&_sheap + XTENSA_IMEM_REGION_SIZE;
 
-  /* If the following DEBUGASSERT fails,
-   * probably you have too large CONFIG_XTENSA_IMEM_REGION_SIZE.
-   */
-
+  *heap_start = (FAR void *)&_sheap;
   DEBUGASSERT(HEAP_REGION1_END > (uintptr_t)*heap_start);
   *heap_size = (size_t)(HEAP_REGION1_END - (uintptr_t)*heap_start);
-#endif
 }
 
 /****************************************************************************
@@ -103,8 +94,10 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void xtensa_add_region(void)
 {
-  umm_addregion((FAR void *)HEAP_REGION2_START,
-                (size_t)(uintptr_t)&_eheap - HEAP_REGION2_START);
+  size_t region2_start = HEAP_REGION2_START + XTENSA_IMEM_REGION_SIZE;
+
+  umm_addregion((FAR void *)region2_start,
+                (size_t)(uintptr_t)&_eheap - region2_start);
 
 #if defined(CONFIG_ESP32_SPIRAM)
   /* Check for any additional memory regions */
