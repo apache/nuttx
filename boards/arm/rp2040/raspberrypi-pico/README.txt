@@ -17,6 +17,7 @@ Currently only the following devices are suppored.
   - SRAM Boot
     - If Pico SDK is available, nuttx.uf2 file which can be used in
       BOOTSEL mode will be created.
+  - BMP180 sensor at I2C0 (don't forget to define I2C0 GPIOs at "I2C0 GPIO pin assign" in Board Selection menu)
 
   Not supported:
   - All other devices
