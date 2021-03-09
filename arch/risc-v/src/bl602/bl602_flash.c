@@ -73,7 +73,7 @@ int bl602_flash_erase(uint32_t addr, int len)
 
   flags = up_irq_save();
   ((bl602_romdrv_erase_fn)(*((uint32_t *)(ROMAPI_SFLASH_EREASE_NEEDLOCK))))
-    (g_bl602_romflash_cfg.cfg, addr, addr + len);
+    (g_bl602_romflash_cfg.cfg, addr, addr + len - 1);
   up_irq_restore(flags);
 
   return 0;
