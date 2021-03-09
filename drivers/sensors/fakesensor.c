@@ -35,6 +35,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/sensors/fakesensor.h>
 #include <nuttx/sensors/sensor.h>
+#include <nuttx/signal.h>
 
 /****************************************************************************
  * Private Types
@@ -242,7 +243,7 @@ static int fakesensor_thread(int argc, char** argv)
         {
           /* Sleeping thread for interval */
 
-          usleep(sensor->batch ? sensor->batch : sensor->interval);
+          nxsig_usleep(sensor->batch ? sensor->batch : sensor->interval);
 
           /* Notify upper */
 
