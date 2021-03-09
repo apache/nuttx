@@ -230,6 +230,10 @@ config STM32L5_HAVE_UART5
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
+config STM32L5_SPI
+	bool
+	default n
+
 config STM32L5_USART
 	bool
 	default n
@@ -251,6 +255,18 @@ config STM32L5_PWR
 config STM32L5_RTC
 	bool "RTC"
 	default n
+
+config STM32L5_SPI2
+	bool "SPI2"
+	default n
+	select SPI
+	select STM32L5_SPI
+
+config STM32L5_SPI3
+	bool "SPI3"
+	default n
+	select SPI
+	select STM32L5_SPI
 
 config STM32L5_LPUART1
 	bool "LPUART1"
@@ -292,6 +308,12 @@ comment "APB2 Peripherals"
 config STM32L5_SYSCFG
 	bool "SYSCFG"
 	default y
+
+config STM32L5_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+	select STM32L5_SPI
 
 config STM32L5_USART1
 	bool "USART1"
