@@ -58,26 +58,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Internal nxsem_* interfaces are not available in the user space in
- * PROTECTED and KERNEL builds.  In that context, the application semaphore
- * interfaces must be used.  The differences between the two sets of
- * interfaces are:  (1) the nxsem_* interfaces do not cause cancellation
- * points and (2) they do not modify the errno variable.
- *
- * See additional definitions in include/nuttx/semaphore.h
- *
- * REVISIT:  The fact that sem_wait() is a cancellation point is an issue
- * and does cause a violation:  It makes all of the memory management
- * interfaces into cancellation points when used from user space in the
- * PROTECTED and KERNEL builds.
- */
-
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-#  define _SEM_GETERROR(r)
-#else
-#  define _SEM_GETERROR(r)  (r) = -errno
-#endif
-
 /* This is a special value that indicates that there is no holder of the
  * semaphore.  The valid range of PIDs is 0-32767 and any value outside of
  * that range could be used (except -ESRCH which is a special return value
@@ -121,7 +101,7 @@ void mm_seminitialize(FAR struct mm_heap_s *heap)
    * private data sets).
    */
 
-  nxsem_init(&heap_impl->mm_semaphore, 0, 1);
+  _SEM_INIT(&heap_impl->mm_semaphore, 0, 1);
 
   heap_impl->mm_holder      = NO_HOLDER;
   heap_impl->mm_counts_held = 0;
@@ -205,7 +185,7 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
       ret = _SEM_TRYWAIT(&heap_impl->mm_semaphore);
       if (ret < 0)
         {
-          _SEM_GETERROR(ret);
+          ret = _SEM_ERRVAL(ret);
           goto errout;
         }
 
@@ -270,13 +250,8 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
 
           if (ret < 0)
             {
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+              ret = _SEM_ERRVAL(ret);
               DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-#else
-              int errcode = get_errno();
-              DEBUGASSERT(errcode == EINTR || errcode == ECANCELED);
-              ret = -errcode;
-#endif
             }
         }
       while (ret == -EINTR);
