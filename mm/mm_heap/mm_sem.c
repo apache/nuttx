@@ -85,7 +85,7 @@ void mm_seminitialize(FAR struct mm_heap_s *heap)
    * private data sets).
    */
 
-  nxsem_init(&heap_impl->mm_semaphore, 0, 1);
+  _SEM_INIT(&heap_impl->mm_semaphore, 0, 1);
 
   heap_impl->mm_holder      = NO_HOLDER;
   heap_impl->mm_counts_held = 0;
