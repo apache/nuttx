@@ -70,7 +70,11 @@ ifdef ESPTOOL_BINDIR
 endif
 
 ifeq ($(CONFIG_ESP32_QEMU_IMAGE),y)
-	MK_QEMU_IMG=$(TOPDIR)/tools/esp32/mk_qemu_img.sh -b $(BOOTLOADER) -p $(PARTITION_TABLE)
+	# The "echo" part makes sure that the QEMU script doesn't abort the rest of
+	# the make process.  So, if the script fails, the help message is printed.
+
+	MK_QEMU_IMG=$(TOPDIR)/tools/esp32/mk_qemu_img.sh -b $(BOOTLOADER) -p $(PARTITION_TABLE) \
+				|| echo "Try make ESPTOOL_BINDIR=bins_path"
 else
 	MK_QEMU_IMG=
 endif

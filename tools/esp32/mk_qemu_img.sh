@@ -36,6 +36,7 @@ usage() {
   echo "  -n <nuttx> path to the nuttx image (default nuttx.bin)"
   echo "  -i <image_name> name of the resulting image (default esp32_qemu_img.bin)"
   echo "  -h will show this help and terminate"
+  echo ""
 }
 
 while [ -n "${1}" ]; do
@@ -71,7 +72,8 @@ done
 # Make sure we have the required argument(s)
 
 if [ -z "${BOOTLOADER_IMG}" ] || [ -z "${PARTITION_IMG}" ] ; then
-  echo "Missing bootloader and partition table binary images."
+  echo ""
+  echo "${SCRIPT_NAME}: Missing bootloader and partition table binary images."
   usage
   exit 1
 fi
@@ -86,7 +88,7 @@ dd if="${PARTITION_IMG}" bs=1 seek="$(printf '%d' 0x8000)" of="${FLASH_IMG}" con
 dd if="${NUTTX_IMG}" bs=1 seek="$(printf '%d' 0x10000)" of="${FLASH_IMG}" conv=notrunc
 
 if [ ${?} -ne 0 ]; then
-  printf "Failed to generate %s.\n" "${FLASH_IMG}"
+  printf "Failed to generate %s!\n" "${FLASH_IMG}"
   exit 1
 fi
 
