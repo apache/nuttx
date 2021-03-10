@@ -43,8 +43,13 @@ mount -t vfat CONCAT(/dev/ram, CONFIG_NSH_FATDEVNO) CONFIG_NSH_FATMOUNTPT
 
 #ifdef CONFIG_FS_HOSTFS
 
+#ifdef CONFIG_FS_HOSTFS_RPMSG
+mount -t hostfs -o fs=/system /system
+mount -t hostfs -o fs=/data /data
+#else
 mount -t hostfs -o fs=../apps /system
 mount -t hostfs -o fs=. /data
+#endif
 
 #ifdef CONFIG_TESTING_TESTRUNNER
 
