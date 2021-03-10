@@ -135,10 +135,21 @@ int host_dup(int fd)
 
 int host_fstat(int fd, struct stat *buf)
 {
-  /* XXX determine the size using lseek? */
+  /* Determine the size using lseek.
+   *
+   * Assumptions:
+   *  - host_lseek never fails
+   *  - It's ok to change the file offset temporarily as
+   *    hostfs_semtake provides enough serialization.
+   */
+
+  off_t saved_off = host_lseek(fd, 0, SEEK_CUR);
+  off_t size = host_lseek(fd, 0, SEEK_END);
+  host_lseek(fd, saved_off, SEEK_SET);
 
   memset(buf, 0, sizeof(*buf));
   buf->st_mode = S_IFREG | 0777;
+  buf->st_size = size;
   return 0;
 }
 
