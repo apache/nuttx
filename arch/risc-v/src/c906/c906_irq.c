@@ -215,7 +215,11 @@ uint32_t up_get_newintctx(void)
    * user code. Also set machine previous interrupt enable.
    */
 
+#ifdef CONFIG_ARCH_FPU
   return (MSTATUS_FS_INIT | MSTATUS_MPPM | MSTATUS_MPIE);
+#else
+  return (MSTATUS_MPPM | MSTATUS_MPIE);
+#endif
 }
 
 /****************************************************************************

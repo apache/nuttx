@@ -197,8 +197,13 @@ int up_swint(int irq, FAR void *context, FAR void *arg);
 uint32_t up_get_newintctx(void);
 
 #ifdef CONFIG_ARCH_FPU
+#ifdef CONFIG_ARCH_RV64GC
+void up_savefpu(uint64_t *regs);
+void up_restorefpu(const uint64_t *regs);
+#else /* !CONFIG_ARCH_RV64GC */
 void up_savefpu(uint32_t *regs);
 void up_restorefpu(const uint32_t *regs);
+#endif /* CONFIG_ARCH_RV64GC */
 #else
 #  define up_savefpu(regs)
 #  define up_restorefpu(regs)

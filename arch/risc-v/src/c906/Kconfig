@@ -5,6 +5,14 @@
 
 comment "C906 Configuration Options"
 
+config C906_ENABLE_DPFPU
+	bool "C906 DP_FPU Support"
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	---help---
+		Enable the RISC-V Double-Precision Floating Point Unit (DP-FPU).
+
 menu "C906 Peripheral Support"
 
 # These "hidden" settings determine whether a peripheral option is available
