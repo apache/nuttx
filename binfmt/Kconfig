@@ -8,7 +8,7 @@ config BINFMT_DISABLE
 	default n
 	---help---
 		By default, support for loadable binary formats is built.  This logic
-		may be suppressed be defining this setting.
+		may be suppressed by defining this setting.
 
 if !BINFMT_DISABLE
 
@@ -64,7 +64,7 @@ config BINFMT_CONSTRUCTORS
 	default n
 	depends on HAVE_CXX && SCHED_STARTHOOK && ELF
 	---help---
-		Build in support for C++ constructors in loaded modules.  Currently
+		Built-in support for C++ constructors in loaded modules.  Currently
 		only support for ELF binary formats.
 
 config SYMTAB_ORDEREDBYNAME
@@ -73,5 +73,5 @@ config SYMTAB_ORDEREDBYNAME
 	---help---
 		Select if the symbol table is ordered by symbol name.  In this case,
 		the logic can perform faster lookups using a binary search.
-		Otherwise, the symbol table is assumed to be un-ordered an only
+		Otherwise, the symbol table is assumed to be un-ordered and only
 		slow, linear searches are supported.

@@ -22,7 +22,7 @@ config ELF_BUFFERSIZE
 		This is an I/O buffer that is used to access the ELF file.  Variable length items
 		will need to be read (such as symbol names).  This is really just this initial
 		size of the buffer; it will be reallocated as necessary to hold large symbol
-		names).  Default: 32
+		names.  Default: 32
 
 config ELF_BUFFERINCR
 	int "ELF I/O Buffer Realloc Increment"
@@ -53,12 +53,12 @@ config ELF_RELOCATION_BUFFERCOUNT
 	int "ELF Relocation Table Buffer Count"
 	default 256
 	---help---
-		This is an relocation buffer that is used to store elf relocation table to
+		This is a relocation buffer that is used to store elf relocation table to
 		reduce access fs. Default: 256
 
 config ELF_SYMBOL_CACHECOUNT
 	int "ELF SYMBOL Table Cache Count"
 	default 256
 	---help---
-		This is an cache that is used to store elf symbol table to
+		This is a cache that is used to store elf symbol table to
 		reduce access fs. Default: 256
