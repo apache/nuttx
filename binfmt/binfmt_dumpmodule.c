@@ -42,12 +42,13 @@
  * Name: dump_module
  *
  * Description:
- *   Load a module into memory and prep it for execution.
+ *   Dump the contents of struct binary_s.
+ *
+ * Input Parameters:
+ *   bin      - Load structure
  *
  * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
+ *   Zero (OK) on success; a negated errno value on failure
  *
  ****************************************************************************/
 
