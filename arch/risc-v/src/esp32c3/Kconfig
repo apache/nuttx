@@ -180,12 +180,14 @@ config ESP32C3_UART0
 	default y
 	select ESP32C3_UART
 	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config ESP32C3_UART1
 	bool "UART1"
 	default n
 	select ESP32C3_UART
 	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config ESP32C3_I2C0
 	bool "I2C 0"

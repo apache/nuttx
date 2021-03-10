@@ -92,9 +92,9 @@ struct esp32c3_uart_s
   uint8_t   id;             /* UART ID */
   uint8_t   irq;            /* IRQ associated with this UART */
   uint32_t  baud;           /* Configured baud rate */
-  uint8_t   bits;
+  uint8_t   bits;           /* Data length (5 to 8 bits). */
   uint8_t   parity;         /* 0=no parity, 1=odd parity, 2=even parity */
-  uint8_t   stop_b2;        /* Use 2 stop bits? 0 no, others yes */
+  uint8_t   stop_b2;        /* Use 2 stop bits? 0 = no (use 1) 1 = yes (use 2) */
   uint8_t   int_pri;        /* UART Interrupt Priority */
   uint8_t   txpin;          /* TX pin */
   uint8_t   txsig;          /* TX signal */
