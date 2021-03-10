@@ -142,20 +142,20 @@ config SYSLOG_TIMESTAMP_BUFFER
 	---help---
 		Buffer size to store syslog formatted timestamps.
 
-config SYSLOG_COLOR_OUTPUT
-	bool "Colored syslog output"
-	default n
-	---help---
-		Enables colored output in syslog, according to message priority.
-
 config SYSLOG_PRIORITY
 	bool "Prepend priority to syslog message"
 	default n
 	---help---
 		Prepend log priority (severity) to syslog message.
 
+config SYSLOG_PROCESS_NAME
+  bool "Prepend process name to syslog message"
+	default n
+	---help---
+		Prepend Process name to syslog message.
+
 config SYSLOG_PROCESSID
-	bool "Prepend Process ID to syslog message"
+	bool "Prepend process ID to syslog message"
 	default n
 	---help---
 		Prepend Process ID to syslog message.
@@ -172,6 +172,12 @@ config SYSLOG_PREFIX_STRING
 	default ""
 	---help---
 		The prefix string to be prepend.
+
+config SYSLOG_COLOR_OUTPUT
+	bool "Colored syslog output"
+	default n
+	---help---
+		Enables colored output in syslog, according to message priority.
 
 choice
 	prompt "System log device"
