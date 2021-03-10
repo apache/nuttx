@@ -36,6 +36,12 @@
  *     :
  * CONFIG_HEAP2_BASE + CONFIG_HEAP2_SIZE     eg. 3fc0 0000
  *
+ * HEAP_REGION0_START                        3ffa e6f0
+ *     :
+ *     : g_mmheap region0
+ *     :
+ * HEAP_REGION0_END                          3ffa fff0
+ *     :
  * _sheap                                    eg. 3ffc 8c6c
  *     :
  *     : g_mmheap region1
@@ -77,6 +83,19 @@
  *---------------------------------------------------------------------
  * _eheap                                        4000 0000
  */
+
+/* This region is supposed to be part of the ROM data.  However, the ROM
+ * isn't using the last 6KB, so we get it as heap. It's called REGION0
+ * because it starts before _sheap.
+ * Although this region is adjacent to 0x3ffb0000 (start of static memory)
+ * we don't add it to static memory but we add it as heap.  The reason is the
+ * Bluetooth controller uses a fixed 64KB region at the start of 0x3ffb0000.
+ * It's cleaner, from a source code perspective, to start static memory at
+ * 0x3ffb0000 and get what's before that as heap.
+ */
+
+#define HEAP_REGION0_START  0x3ffae6f0
+#define HEAP_REGION0_END    0x3ffafff0
 
 /* Region 1 of the heap is the area from the end of the .data section to the
  * beginning of the ROM data.  The start address is defined from the linker
