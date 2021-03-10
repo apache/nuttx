@@ -1,37 +1,20 @@
 /****************************************************************************
  * arch/risc-v/include/rv64gc/irq.h
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Modified for RISC-V:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Copyright (C) 2016 Ken Pettit. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -132,9 +115,63 @@
 
 #define REG_INT_CTX_NDX     32
 
-#define XCPTCONTEXT_REGS    33
+#define INT_XCPT_REGS       33
 
-#define XCPTCONTEXT_SIZE    (8*XCPTCONTEXT_REGS)
+#define INT_XCPT_SIZE       (8 * INT_XCPT_REGS)
+
+/* FPU REG size in uint64_t */
+
+#ifdef CONFIG_ARCH_FPU
+#if defined(CONFIG_ARCH_DPFPU)
+#  define FPU_REG_SIZE      1
+#elif defined(CONFIG_ARCH_QPFPU)
+#  define FPU_REG_SIZE      2
+#else
+#  error not supported !!!
+#endif
+
+#  define REG_F0_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 0)
+#  define REG_F1_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 1)
+#  define REG_F2_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 2)
+#  define REG_F3_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 3)
+#  define REG_F4_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 4)
+#  define REG_F5_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 5)
+#  define REG_F6_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 6)
+#  define REG_F7_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 7)
+#  define REG_F8_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 8)
+#  define REG_F9_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 9)
+#  define REG_F10_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 10)
+#  define REG_F11_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 11)
+#  define REG_F12_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 12)
+#  define REG_F13_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 13)
+#  define REG_F14_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 14)
+#  define REG_F15_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 15)
+#  define REG_F16_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 16)
+#  define REG_F17_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 17)
+#  define REG_F18_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 18)
+#  define REG_F19_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 19)
+#  define REG_F20_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 20)
+#  define REG_F21_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 21)
+#  define REG_F22_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 22)
+#  define REG_F23_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 23)
+#  define REG_F24_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 24)
+#  define REG_F25_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 25)
+#  define REG_F26_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 26)
+#  define REG_F27_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 27)
+#  define REG_F28_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 28)
+#  define REG_F29_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 29)
+#  define REG_F30_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 30)
+#  define REG_F31_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 31)
+#  define REG_FCSR_NDX      (INT_XCPT_REGS + FPU_REG_SIZE * 32)
+
+#  define FPU_XCPT_REGS     (FPU_REG_SIZE * 33)
+#else /* !CONFIG_ARCH_FPU */
+#  define FPU_XCPT_REGS     0
+#endif /* CONFIG_ARCH_FPU */
+
+#define XCPTCONTEXT_REGS    (INT_XCPT_REGS + FPU_XCPT_REGS)
+
+#define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
 
 /* In assembly language, values have to be referenced as byte address
  * offsets.  But in C, it is more convenient to reference registers as
@@ -175,6 +212,43 @@
 #  define REG_X30           (8*REG_X30_NDX)
 #  define REG_X31           (8*REG_X31_NDX)
 #  define REG_INT_CTX       (8*REG_INT_CTX_NDX)
+
+#ifdef CONFIG_ARCH_FPU
+#  define REG_F0            (8*REG_F0_NDX)
+#  define REG_F1            (8*REG_F1_NDX)
+#  define REG_F2            (8*REG_F2_NDX)
+#  define REG_F3            (8*REG_F3_NDX)
+#  define REG_F4            (8*REG_F4_NDX)
+#  define REG_F5            (8*REG_F5_NDX)
+#  define REG_F6            (8*REG_F6_NDX)
+#  define REG_F7            (8*REG_F7_NDX)
+#  define REG_F8            (8*REG_F8_NDX)
+#  define REG_F9            (8*REG_F9_NDX)
+#  define REG_F10           (8*REG_F10_NDX)
+#  define REG_F11           (8*REG_F11_NDX)
+#  define REG_F12           (8*REG_F12_NDX)
+#  define REG_F13           (8*REG_F13_NDX)
+#  define REG_F14           (8*REG_F14_NDX)
+#  define REG_F15           (8*REG_F15_NDX)
+#  define REG_F16           (8*REG_F16_NDX)
+#  define REG_F17           (8*REG_F17_NDX)
+#  define REG_F18           (8*REG_F18_NDX)
+#  define REG_F19           (8*REG_F19_NDX)
+#  define REG_F20           (8*REG_F20_NDX)
+#  define REG_F21           (8*REG_F21_NDX)
+#  define REG_F22           (8*REG_F22_NDX)
+#  define REG_F23           (8*REG_F23_NDX)
+#  define REG_F24           (8*REG_F24_NDX)
+#  define REG_F25           (8*REG_F25_NDX)
+#  define REG_F26           (8*REG_F26_NDX)
+#  define REG_F27           (8*REG_F27_NDX)
+#  define REG_F28           (8*REG_F28_NDX)
+#  define REG_F29           (8*REG_F29_NDX)
+#  define REG_F30           (8*REG_F30_NDX)
+#  define REG_F31           (8*REG_F31_NDX)
+#  define REG_FCSR          (8*REG_FCSR_NDX)
+#endif
+
 #else
 #  define REG_EPC           REG_EPC_NDX
 #  define REG_X1            REG_X1_NDX
@@ -209,6 +283,43 @@
 #  define REG_X30           REG_X30_NDX
 #  define REG_X31           REG_X31_NDX
 #  define REG_INT_CTX       REG_INT_CTX_NDX
+
+#ifdef CONFIG_ARCH_FPU
+#  define REG_F0            REG_F0_NDX
+#  define REG_F1            REG_F1_NDX
+#  define REG_F2            REG_F2_NDX
+#  define REG_F3            REG_F3_NDX
+#  define REG_F4            REG_F4_NDX
+#  define REG_F5            REG_F5_NDX
+#  define REG_F6            REG_F6_NDX
+#  define REG_F7            REG_F7_NDX
+#  define REG_F8            REG_F8_NDX
+#  define REG_F9            REG_F9_NDX
+#  define REG_F10           REG_F10_NDX
+#  define REG_F11           REG_F11_NDX
+#  define REG_F12           REG_F12_NDX
+#  define REG_F13           REG_F13_NDX
+#  define REG_F14           REG_F14_NDX
+#  define REG_F15           REG_F15_NDX
+#  define REG_F16           REG_F16_NDX
+#  define REG_F17           REG_F17_NDX
+#  define REG_F18           REG_F18_NDX
+#  define REG_F19           REG_F19_NDX
+#  define REG_F20           REG_F20_NDX
+#  define REG_F21           REG_F21_NDX
+#  define REG_F22           REG_F22_NDX
+#  define REG_F23           REG_F23_NDX
+#  define REG_F24           REG_F24_NDX
+#  define REG_F25           REG_F25_NDX
+#  define REG_F26           REG_F26_NDX
+#  define REG_F27           REG_F27_NDX
+#  define REG_F28           REG_F28_NDX
+#  define REG_F29           REG_F29_NDX
+#  define REG_F30           REG_F30_NDX
+#  define REG_F31           REG_F31_NDX
+#  define REG_FCSR          REG_FCSR_NDX
+#endif
+
 #endif
 
 /* Now define more user friendly alternative name that can be used either

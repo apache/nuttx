@@ -88,7 +88,18 @@
 
 /* Context switching system calls *******************************************/
 
-/* SYS call 0: (not used) */
+/* SYS call 0:
+ *
+ * int up_saveusercontext(uint64_t *saveregs);
+ *
+ * Return:
+ * 0: Normal Return
+ * 1: Context Switch Return
+ */
+
+#define SYS_save_context (0)
+#define up_saveusercontext(saveregs) \
+  (int)sys_call1(SYS_save_context, (uintptr_t)saveregs)
 
 /* SYS call 1:
  *
