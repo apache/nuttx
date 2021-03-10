@@ -67,6 +67,9 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
   struct lib_syslogstream_s stream;
   int ret;
+#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
+  struct tcb_s *tcb;
+#endif
 #if defined(CONFIG_SYSLOG_TIMESTAMP_FORMATTED)
   time_t time;
   struct tm tm;
@@ -131,7 +134,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
     }
 
 #if defined(CONFIG_SYSLOG_TIMESTAMP)
-  /* Pre-pend the message with the current time, if available */
+  /* Prepend the message with the current time, if available */
 
 #if defined(CONFIG_SYSLOG_TIMESTAMP_FORMATTED)
   time = ts.tv_sec;
@@ -157,7 +160,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #endif
 
 #if defined(CONFIG_SYSLOG_PROCESSID)
-  /* Pre-pend the Process ID */
+  /* Prepend the Process ID */
 
   ret += lib_sprintf(&stream.public, "[%2d] ", (int)getpid());
 #endif
@@ -201,15 +204,22 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #endif
 
 #if defined(CONFIG_SYSLOG_PRIORITY)
-  /* Pre-pend the message priority. */
+  /* Prepend the message priority. */
 
   ret += lib_sprintf(&stream.public, "[%6s] ", g_priority_str[priority]);
 #endif
 
 #if defined(CONFIG_SYSLOG_PREFIX)
-  /* Pre-pend the prefix, if available */
+  /* Prepend the prefix, if available */
 
   ret += lib_sprintf(&stream.public, "%s", CONFIG_SYSLOG_PREFIX_STRING);
+#endif
+
+#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
+  /* Prepend the process name */
+
+  tcb = nxsched_get_tcb(getpid());
+  ret += lib_sprintf(&stream.public, "%s: ", tcb->name);
 #endif
 
   /* Generate the output */
