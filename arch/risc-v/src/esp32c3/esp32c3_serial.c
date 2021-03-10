@@ -26,6 +26,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/fs/ioctl.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -34,6 +35,10 @@
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
+
+#ifdef CONFIG_SERIAL_TERMIOS
+#  include <termios.h>
+#endif
 
 #include "riscv_internal.h"
 #include "riscv_arch.h"
@@ -656,9 +661,208 @@ static int esp32c3_receive(struct uart_dev_s *dev, unsigned int *status)
   return (int)rx_fifo;
 }
 
+/****************************************************************************
+ * Name: esp32c3_ioctl
+ *
+ * Description:
+ *   All ioctl calls will be routed through this method.
+ *   Here it's employed to implement the TERMIOS ioctls and TIOCSERGSTRUCT.
+ *
+ * Parameters:
+ *   filep    Pointer to a file structure instance.
+ *   cmd      The ioctl command.
+ *   arg      The argument of the ioctl cmd.
+ *
+ * Returned Value:
+ *   Returns a non-negative number on success;  A negated errno value is
+ *   returned on any failure (see comments ioctl() for a list of appropriate
+ *   errno values).
+ *
+ ****************************************************************************/
+
 static int esp32c3_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  return OK;
+  /* Get access to the internal instance of the driver through the file
+   *  pointer.
+   */
+
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT)
+  struct inode      *inode = filep->f_inode;
+  struct uart_dev_s *dev   = inode->i_private;
+#endif
+  int ret = OK;
+
+  /* Run the requested ioctl command. */
+
+  switch (cmd)
+    {
+#ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
+
+    /* Get the internal driver data structure for debug purposes. */
+
+    case TIOCSERGSTRUCT:
+      {
+         struct esp32c3_uart_s *user = (struct esp32c3_uart_s *)arg;
+         if (!user)
+           {
+             ret = -EINVAL;
+           }
+         else
+           {
+             memcpy(user, dev->priv, sizeof(struct esp32c3_uart_s));
+           }
+       }
+       break;
+#endif
+
+#ifdef CONFIG_SERIAL_TERMIOS
+
+    /* Fill a termios structure with the required information. */
+
+    case TCGETS:
+      {
+        struct termios  *termiosp    = (struct termios *)arg;
+        struct esp32c3_uart_s *priv  = (struct esp32c3_uart_s *)dev->priv;
+        if (!termiosp)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Return parity (0 = no parity, 1 = odd parity, 2 = even parity). */
+
+        termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
+                            ((priv->parity == 1) ? PARODD : 0);
+
+        /* Return stop bits */
+
+        termiosp->c_cflag |= (priv->stop_b2) ? CSTOPB : 0;
+
+        /* Set the baud rate in ther termiosp using the
+         * cfsetispeed interface.
+         */
+
+        cfsetispeed(termiosp, priv->baud);
+
+        /* Return number of bits. */
+
+        switch (priv->bits)
+          {
+          case 5:
+            termiosp->c_cflag |= CS5;
+            break;
+
+          case 6:
+            termiosp->c_cflag |= CS6;
+            break;
+
+          case 7:
+            termiosp->c_cflag |= CS7;
+            break;
+
+          default:
+          case 8:
+            termiosp->c_cflag |= CS8;
+            break;
+          }
+      }
+      break;
+
+    case TCSETS:
+      {
+        struct termios  *termiosp    = (struct termios *)arg;
+        struct esp32c3_uart_s *priv  = (struct esp32c3_uart_s *)dev->priv;
+        uint32_t baud;
+        uint32_t current_int_sts;
+        uint8_t  parity;
+        uint8_t  bits;
+        uint8_t  stop2;
+
+        if (!termiosp)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Get the target baud rate to change. */
+
+        baud = cfgetispeed(termiosp);
+
+        /* Decode number of bits. */
+
+        switch (termiosp->c_cflag & CSIZE)
+          {
+          case CS5:
+            bits = 5;
+            break;
+
+          case CS6:
+            bits = 6;
+            break;
+
+          case CS7:
+            bits = 7;
+            break;
+
+          case CS8:
+            bits = 8;
+            break;
+
+          default:
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Decode parity. */
+
+        if ((termiosp->c_cflag & PARENB) != 0)
+          {
+            parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+          }
+        else
+          {
+            parity = 0;
+          }
+
+        /* Decode stop bits. */
+
+        stop2 = (termiosp->c_cflag & CSTOPB) ? 1 : 0;
+
+        /* Verify that all settings are valid before
+         * performing the changes.
+         */
+
+        if (ret == OK)
+          {
+            /* Fill the private struct fields. */
+
+            priv->baud      = baud;
+            priv->parity    = parity;
+            priv->bits      = bits;
+            priv->stop_b2   = stop2;
+
+            /* Effect the changes immediately - note that we do not
+             * implement TCSADRAIN or TCSAFLUSH, only TCSANOW option.
+             * See nuttx/libs/libc/termios/lib_tcsetattr.c
+             */
+
+            esp32c3_lowputc_disable_all_uart_int(priv, &current_int_sts);
+            ret = esp32c3_setup(dev);
+
+            /* Restore the interrupt state */
+
+            esp32c3_lowputc_restore_all_uart_int(priv, &current_int_sts);
+          }
+      }
+      break;
+#endif /* CONFIG_SERIAL_TERMIOS */
+
+    default:
+      ret = -ENOTTY;
+      break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
