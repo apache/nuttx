@@ -114,6 +114,18 @@
 #define LED_ASSERTION           (BOARD_LED1_BIT | BOARD_LED2_BIT | BOARD_LED3_BIT)
 #define LED_PANIC               (BOARD_LED4_BIT)
 
+#ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
+/* NOTE: LED_CPUx is not a bit pattern but just a number which
+ * does not conflict with existing LED bit patterns
+ */
+
+#define LED_CPU0                (100)
+#define LED_CPU1                (101)
+#define LED_CPU2                (102)
+#define LED_CPU3                (103)
+#define LED_CPU                 (LED_CPU0 + up_cpu_index())
+#endif
+
 /* Buttons definitions ******************************************************/
 
 #define BOARD_NUM_BUTTONS   (2)
