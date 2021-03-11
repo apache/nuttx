@@ -3020,13 +3020,6 @@ RISC-V
 RISC-V Architectural Support. Basic support for the RISC-V architecture
 was contributed by Ken Pettit in NuttX-7.19.
 
-NEXT RISC-V NR5Mxx
-------------------
-
-This support is for a custom NEXT RISC-V NR5Mxx (RV32IM). The initial release
-is *thin* but a great starting point for anyone interested in RISC-V development with
-NuttX.
-
 GreenWaves GAP8
 ---------------
 

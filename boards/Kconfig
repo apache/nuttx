@@ -1022,14 +1022,6 @@ config ARCH_BOARD_PIC32MZ_STARTERKIT
 
 		See www.microchip.com for further information.
 
-config ARCH_BOARD_NR5M100_NEXYS4
-	bool "NEXT RISC-V NR5M100 on Nexys-4 board"
-	depends on ARCH_CHIP_NR5M100
-	select UART_SERIALDRIVER
-	---help---
-		This is the port NuttX to the NEXT RISC-V processor runnining on a Digilent
-		Nexys-4 (non DDR version) FPGA board.
-
 config ARCH_BOARD_NUCLEO_F429ZI
 	bool "STMicro NUCLEO-F429ZI"
 	depends on ARCH_CHIP_STM32F429Z
@@ -2320,7 +2312,6 @@ config ARCH_BOARD
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
 	default "nucleo-l496zg"            if ARCH_BOARD_NUCLEO_L496ZG
 	default "nutiny-nuc120"            if ARCH_BOARD_NUTINY_NUC120
-	default "nr5m100-nexys4"           if ARCH_BOARD_NR5M100_NEXYS4
 	default "olimex-efm32g880f128-stk" if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
 	default "olimex-lpc1766stk"        if ARCH_BOARD_LPC1766STK
 	default "olimex-lpc2378"           if ARCH_BOARD_OLIMEXLPC2378
@@ -3045,9 +3036,6 @@ source "boards/risc-v/litex/arty_a7/Kconfig"
 endif
 if ARCH_BOARD_GAPUINO
 source "boards/risc-v/gap8/gapuino/Kconfig"
-endif
-if ARCH_BOARD_NR5M100_NEXYS4
-source "boards/risc-v/nr5m100/nr5m100-nexys4/Kconfig"
 endif
 if ARCH_BOARD_HIFIVE_REVB
 source "boards/risc-v/fe310/hifive1-revb/Kconfig"
