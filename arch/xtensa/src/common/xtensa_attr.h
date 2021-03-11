@@ -69,10 +69,12 @@
 
 #define RTC_RODATA_ATTR __attribute__((section(".rtc.rodata")))
 
-/* Forces bss variable into external memory. */
+/* Allow bss variables into external memory. */
 
 #ifdef CONFIG_XTENSA_EXTMEM_BSS
 #  define EXT_RAM_ATTR __attribute__((section(".extmem.bss")))
+#else
+#  define EXT_RAM_ATTR
 #endif
 
 #endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_ATTR_H */
