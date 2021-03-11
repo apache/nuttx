@@ -27,9 +27,11 @@
 #include <stdint.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/irq.h>
+#include <arch/board/board.h>
 
 #include "chip.h"
 #include "nvic.h"
@@ -564,6 +566,10 @@ void up_enable_irq(int irq)
 
 void arm_ack_irq(int irq)
 {
+#ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
+  board_autoled_on(LED_CPU);
+#endif
+
   /* Check for external interrupt */
 
   if (irq >= CXD56_IRQ_EXTINT)
