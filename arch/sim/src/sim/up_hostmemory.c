@@ -25,9 +25,13 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
+#include <malloc.h>
 
 #include <sys/mman.h>
 #include <sys/stat.h>
+
+#include "up_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -112,4 +116,41 @@ void *host_alloc_shmem(const char *name, size_t size, int master)
 void host_free_shmem(void *mem)
 {
   munmap(mem, 0);
+}
+
+void *host_malloc(size_t size)
+{
+  return malloc(size);
+}
+
+void host_free(void *mem)
+{
+  free(mem);
+}
+
+void *host_realloc(void *oldmem, size_t size)
+{
+  return realloc(oldmem, size);
+}
+
+void *host_calloc(size_t n, size_t elem_size)
+{
+  return calloc(n , elem_size);
+}
+
+void *host_memalign(size_t alignment, size_t size)
+{
+  return memalign(alignment, size);
+}
+
+void host_mallinfo(struct host_mallinfo *info)
+{
+  struct mallinfo tmp;
+
+  tmp = mallinfo();
+  info->arena = tmp.arena;
+  info->ordblks = tmp.ordblks;
+  info->mxordblk = tmp.usmblks;
+  info->uordblks = tmp.uordblks;
+  info->fordblks = tmp.fordblks;
 }

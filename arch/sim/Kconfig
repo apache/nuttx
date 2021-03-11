@@ -58,6 +58,14 @@ config SIM_CYGWIN_DECORATED
 		run:  It will crash early, probably in some function due to the failure to
 		allocate memory.
 
+config SIM_SANITIZE
+	bool "Address Sanitizer"
+	default n
+	depends on MM_CUSTOMIZE_MANAGER
+	---help---
+		AddressSanitizer (ASan) is a fast compiler-based tool for detecting memory
+		bugs in native code.
+
 choice
 	prompt "X64_64 ABI"
 	default SIM_X8664_SYSTEMV if HOST_LINUX
