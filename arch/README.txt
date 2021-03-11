@@ -258,7 +258,6 @@ arch/risc-v
       arch/risc-v/include/gap8 and arch/risc-v/src/gap8
       arch/risc-v/include/k210 and arch/risc-v/src/k210
       arch/risc-v/include/litex and arch/risc-v/src/litex
-      arch/risc-v/include/nr5m100 and arch/risc-v/src/nr5m100
       arch/risc-v/include/rv32im and arch/risc-v/src/rv32im
       arch/risc-v/include/rv64gc and arch/risc-v/src/rv64gc
 

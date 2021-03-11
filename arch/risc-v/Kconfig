@@ -8,7 +8,7 @@ comment "RISC-V Options"
 
 choice
 	prompt "RISC-V chip selection"
-	default ARCH_CHIP_NR5
+	default ARCH_CHIP_RISCV_CUSTOM
 
 config ARCH_CHIP_FE310
 	bool "SiFive FE310"
@@ -30,12 +30,6 @@ config ARCH_CHIP_LITEX
 	select ARCH_RV32IM
 	---help---
 		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA).
-
-config ARCH_CHIP_NR5
-	bool "NEXT NanoRisc5"
-	select ARCH_RV32IM
-	---help---
-		NEXT RISC-V NR5Mxx architectures (RISC-V RV32IM cores).
 
 config ARCH_CHIP_GAP8
 	bool "GreenwavesTechnologies GAP8"
@@ -101,21 +95,10 @@ config ARCH_CHIP
 	default "fe310"		if ARCH_CHIP_FE310
 	default "k210"		if ARCH_CHIP_K210
 	default "litex"		if ARCH_CHIP_LITEX
-	default "nr5m100"	if ARCH_CHIP_NR5
 	default "gap8"		if ARCH_CHIP_GAP8
 	default "bl602"		if ARCH_CHIP_BL602
 	default "esp32c3"	if ARCH_CHIP_ESP32C3
 	default "c906"		if ARCH_CHIP_C906
-
-config NR5_MPU
-	bool "MPU support"
-	default n
-	depends on ARCH_HAVE_MPU
-	select ARCH_USE_MPU
-	---help---
-		Build in support for the RISC-V Memory Protection Unit (MPU).
-		Check your chip specifications first; not all RISC-V architectures
-		support the MPU.
 
 if ARCH_RV32IM
 source arch/risc-v/src/rv32im/Kconfig
@@ -131,9 +114,6 @@ source arch/risc-v/src/k210/Kconfig
 endif
 if ARCH_CHIP_LITEX
 source arch/risc-v/src/litex/Kconfig
-endif
-if ARCH_CHIP_NR5
-source arch/risc-v/src/nr5m100/Kconfig
 endif
 if ARCH_CHIP_GAP8
 source arch/risc-v/src/gap8/Kconfig

@@ -625,9 +625,6 @@ boards/x86/qemu/qemu-i486
   Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
   hardware (Google the Bifferboard).
 
-boards/risc-v/nr5m100/nr5m100-nexys4
-  Port of NuttX to RISC-V platform on IQ-Analog NR5M100 RISC-V FPGA platform.
-
 boards/arm/s32k1xx/s32k118evb
   This directory holds the port of NuttX to the NXP S32K118EVB board
   featuring the S32K118 Cortex-M0+.

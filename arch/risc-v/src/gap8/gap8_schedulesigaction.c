@@ -49,7 +49,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/nr5m100/irq.h>
+#include <arch/gap8/irq.h>
 
 #include "sched/sched.h"
 #include "riscv_internal.h"

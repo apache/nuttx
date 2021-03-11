@@ -225,8 +225,6 @@ Current architecture/chip directories are summarized below:
 -  ``arch/renesas``: This directory is the home for various
    Renesas architectures, currently only the M16C and vererable
    SuperH-1 architectures.
--  ``arch/risc-v``: This directory supports the RISC-V NR5
-   architecture.
 -  ``arch/xtensa``: This directory supports the Xtensa LX6
    architecture as used by the ESP32.
 -  ``arch/z16f``: Zilog z16f Microcontroller.
