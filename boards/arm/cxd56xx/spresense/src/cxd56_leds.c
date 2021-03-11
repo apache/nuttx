@@ -108,9 +108,33 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
+#ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
+  switch (led)
+    {
+      case LED_CPU0:
+        cxd56_gpio_write(GPIO_LED1, 1);
+        break;
+
+      case LED_CPU1:
+        cxd56_gpio_write(GPIO_LED2, 1);
+        break;
+
+      case LED_CPU2:
+        cxd56_gpio_write(GPIO_LED3, 1);
+        break;
+
+      case LED_CPU3:
+        cxd56_gpio_write(GPIO_LED4, 1);
+        break;
+
+      default:
+        break;
+    }
+#else
   led_clrbits(BOARD_LED1_BIT | BOARD_LED2_BIT |
               BOARD_LED3_BIT | BOARD_LED4_BIT);
   led_setbits(led);
+#endif
 }
 
 /****************************************************************************
@@ -119,7 +143,31 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
+#ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
+  switch (led)
+    {
+      case LED_CPU0:
+        cxd56_gpio_write(GPIO_LED1, 0);
+        break;
+
+      case LED_CPU1:
+        cxd56_gpio_write(GPIO_LED2, 0);
+        break;
+
+      case LED_CPU2:
+        cxd56_gpio_write(GPIO_LED3, 0);
+        break;
+
+      case LED_CPU3:
+        cxd56_gpio_write(GPIO_LED4, 0);
+        break;
+
+      default:
+        break;
+    }
+#else
   led_clrbits(led);
+#endif
 }
 
 #endif /* CONFIG_ARCH_LEDS */
