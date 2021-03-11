@@ -41,9 +41,9 @@
  * IDLE state?
  */
 
-#if defined(CONFIG_ARCH_LEDS) && defined(LED_IDLE)
-#  define BEGIN_IDLE() board_autoled_on(LED_IDLE)
-#  define END_IDLE()   board_autoled_off(LED_IDLE)
+#ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
+#  define BEGIN_IDLE() board_autoled_off(LED_CPU)
+#  define END_IDLE()
 #else
 #  define BEGIN_IDLE()
 #  define END_IDLE()
