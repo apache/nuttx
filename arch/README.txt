@@ -255,7 +255,6 @@ arch/risc-v
 
     MCU support
       arch/risc-v/include/fe310 and arch/risc-v/src/fe310
-      arch/risc-v/include/gap8 and arch/risc-v/src/gap8
       arch/risc-v/include/k210 and arch/risc-v/src/k210
       arch/risc-v/include/litex and arch/risc-v/src/litex
       arch/risc-v/include/rv32im and arch/risc-v/src/rv32im
