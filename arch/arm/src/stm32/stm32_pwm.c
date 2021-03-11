@@ -311,7 +311,7 @@
 #  endif
 #endif
 
-/* Synchronisation support */
+/* TRGO/TRGO2 support */
 
 #ifdef CONFIG_STM32_PWM_TRGO
 #  define HAVE_TRGO
@@ -465,7 +465,7 @@ static int pwm_timer_enable(FAR struct pwm_lowerhalf_s *dev, bool state);
 static int pwm_break_dt_configure(FAR struct stm32_pwmtimer_s *priv);
 #endif
 #ifdef HAVE_TRGO
-static int pwm_sync_configure(FAR struct stm32_pwmtimer_s *priv,
+static int pwm_trgo_configure(FAR struct pwm_lowerhalf_s *dev,
                               uint8_t trgo);
 #endif
 #if defined(HAVE_PWM_COMPLEMENTARY) && defined(CONFIG_STM32_PWM_LL_OPS)
@@ -473,6 +473,10 @@ static int pwm_deadtime_update(FAR struct pwm_lowerhalf_s *dev, uint8_t dt);
 #endif
 #ifdef CONFIG_STM32_PWM_LL_OPS
 static uint32_t pwm_ccr_get(FAR struct pwm_lowerhalf_s *dev, uint8_t index);
+static uint16_t pwm_rcr_get(FAR struct pwm_lowerhalf_s *dev);
+#endif
+#ifdef HAVE_ADVTIM
+static int pwm_rcr_update(FAR struct pwm_lowerhalf_s *dev, uint16_t rcr);
 #endif
 
 #ifdef CONFIG_PWM_PULSECOUNT
@@ -543,6 +547,11 @@ static const struct stm32_pwm_ops_s g_llpwmops =
   .ccr_get         = pwm_ccr_get,
   .arr_update      = pwm_arr_update,
   .arr_get         = pwm_arr_get,
+  .rcr_update      = pwm_rcr_update,
+  .rcr_get         = pwm_rcr_get,
+#ifdef HAVE_TRGO
+  .trgo_set        = pwm_trgo_configure,
+#endif
   .outputs_enable  = pwm_outputs_enable,
   .soft_update     = pwm_soft_update,
   .freq_update     = pwm_frequency_update,
@@ -2263,6 +2272,36 @@ static uint32_t pwm_arr_get(FAR struct pwm_lowerhalf_s *dev)
   return pwm_getreg(priv, STM32_GTIM_ARR_OFFSET);
 }
 
+#ifdef HAVE_ADVTIM
+/****************************************************************************
+ * Name: pwm_rcr_update
+ ****************************************************************************/
+
+static int pwm_rcr_update(FAR struct pwm_lowerhalf_s *dev, uint16_t rcr)
+{
+  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+
+  /* Update RCR register */
+
+  pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, rcr);
+
+  return OK;
+}
+#endif
+
+#ifdef CONFIG_STM32_PWM_LL_OPS
+/****************************************************************************
+ * Name: pwm_rcr_get
+ ****************************************************************************/
+
+static uint16_t pwm_rcr_get(FAR struct pwm_lowerhalf_s *dev)
+{
+  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+
+  return pwm_getreg(priv, STM32_ATIM_RCR_OFFSET);
+}
+#endif
+
 /****************************************************************************
  * Name: pwm_duty_update
  *
@@ -3010,16 +3049,17 @@ errout:
 
 #ifdef HAVE_TRGO
 /****************************************************************************
- * Name: pwm_sync_configure
+ * Name: pwm_trgo_configure
  *
  * Description:
  *   Confiugre an output synchronisation event for PWM timer (TRGO/TRGO2)
  *
  ****************************************************************************/
 
-static int pwm_sync_configure(FAR struct stm32_pwmtimer_s *priv,
+static int pwm_trgo_configure(FAR struct pwm_lowerhalf_s *dev,
                               uint8_t trgo)
 {
+  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
   uint32_t cr2 = 0;
 
   /* Configure TRGO (4 LSB in trgo) */
@@ -3281,7 +3321,7 @@ static int pwm_pulsecount_configure(FAR struct pwm_lowerhalf_s *dev)
 #ifdef HAVE_TRGO
   /* Configure TRGO/TRGO2 */
 
-  ret = pwm_sync_configure(priv, priv->trgo);
+  ret = pwm_trgo_configure(dev, priv->trgo);
   if (ret < 0)
     {
       goto errout;
@@ -3393,7 +3433,7 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
        */
 
       priv->prev  = pwm_pulsecount(info->count);
-      pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, (uint16_t)priv->prev - 1);
+      pwm_rcr_update(dev, priv->prev - 1);
 
       /* Generate an update event to reload the prescaler.  This should
        * preload the RCR into active repetition counter.
@@ -3407,7 +3447,7 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
 
       priv->count = info->count;
       priv->curr  = pwm_pulsecount(info->count - priv->prev);
-      pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
+      pwm_rcr_update(dev, priv->curr - 1);
     }
 
   /* Otherwise, just clear the repetition counter */
@@ -3416,7 +3456,7 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
     {
       /* Set the repetition counter to zero */
 
-      pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, 0);
+      pwm_rcr_update(dev, 0);
 
       /* Generate an update event to reload the prescaler */
 
@@ -3522,7 +3562,7 @@ static int pwm_configure(FAR struct pwm_lowerhalf_s *dev)
 #ifdef HAVE_TRGO
       /* Configure TRGO/TRGO2 */
 
-      ret = pwm_sync_configure(priv, priv->trgo);
+      ret = pwm_trgo_configure(dev, priv->trgo);
       if (ret < 0)
         {
           goto errout;
@@ -3719,7 +3759,7 @@ static int pwm_timer(FAR struct pwm_lowerhalf_s *dev,
 
       /* Set the repetition counter to zero */
 
-      pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, 0);
+      pwm_rcr_update(dev, 0);
 
       /* Generate an update event to reload the prescaler */
 
@@ -3827,7 +3867,7 @@ static int pwm_interrupt(FAR struct pwm_lowerhalf_s *dev)
 
       priv->prev = priv->curr;
       priv->curr = pwm_pulsecount(priv->count - priv->prev);
-      pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
+      pwm_rcr_update(dev, priv->curr - 1);
     }
 
   /* Now all of the time critical stuff is done so we can do some debug
