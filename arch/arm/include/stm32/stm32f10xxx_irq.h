@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32/stm32f10xxx_irq.h
  *
  *   Copyright (C) 2009, 2012, 2018 Gregory Nutt. All rights reserved.
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This file should never be included directly but, rather,
  * only indirectly through nuttx/irq.h
@@ -40,28 +40,28 @@
 #ifndef __ARCH_ARM_INCLUDE_STM32_STM32F10XXX_IRQ_H
 #define __ARCH_ARM_INCLUDE_STM32_STM32F10XXX_IRQ_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
+/* IRQ numbers.  The IRQ number corresponds vector number and hence map
+ * directly to bits in the NVIC.  This does, however, waste several words of
+ * memory in the IRQ to handle mapping tables.
  *
- * Processor Exceptions (vectors 0-15).  These common definitions can be found
- * in nuttx/arch/arm/include/stm32/irq.h
+ * Processor Exceptions (vectors 0-15).  These common definitions can be
+ * found in nuttx/arch/arm/include/stm32/irq.h
  *
  * External interrupts (vectors >= 16)
  */
 
- /* Value line devices */
+/* Value line devices */
 
 #if defined(CONFIG_STM32_VALUELINE)
 #  define STM32_IRQ_WWDG        (16) /* 0:  Window Watchdog interrupt */
@@ -282,13 +282,13 @@
 #  define STM32_IRQ_CAN1RX0     STM32_IRQ_USBLPCANRX0
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -299,9 +299,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus
