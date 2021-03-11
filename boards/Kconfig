@@ -2444,6 +2444,15 @@ config ARCH_LEDS
 	---help---
 		Use board LEDs to show NuttX execution status state. Unique to boards that have LEDs
 
+if ARCH_LEDS
+config ARCH_LEDS_CPU_ACTIVITY
+	bool "Use LED for CPU activities"
+	default n
+	depends on ARCH_LEDS
+	---help---
+		Use board LEDs to show CPU activities
+endif
+
 config ARCH_HAVE_BUTTONS
 	bool
 
