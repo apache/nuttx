@@ -3020,18 +3020,6 @@ RISC-V
 RISC-V Architectural Support. Basic support for the RISC-V architecture
 was contributed by Ken Pettit in NuttX-7.19.
 
-GreenWaves GAP8
----------------
-
-(RV32IM architecture)
-
-Basic support GreenWaves GAP8 *gapuino* board
-was added by hhuysqt in NuttX-7.27. The GAP8 is a 1+8-core DSP-like
-RISC-V MCU. The GAP8 features a RI5CY core called Fabric Controller(FC),
-and a cluster of 8 RI5CY cores that runs at a bit slower speed. The GAP8
-is an implementation of the opensource PULP platform, a
-Parallel-Ultra-Low-Power design.
-
 `Sipeed Maix bit <#k210>`__
 
 Initial support for the Sipeed Maix bit board was added in NuttX-9.0.

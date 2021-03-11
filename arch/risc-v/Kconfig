@@ -31,13 +31,6 @@ config ARCH_CHIP_LITEX
 	---help---
 		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA).
 
-config ARCH_CHIP_GAP8
-	bool "GreenwavesTechnologies GAP8"
-	select ARCH_RV32IM
-	---help---
-		GreenwavesTechnologies GAP8 features a 1+8-core RI5CY DSP-like
-		processor, which originally comes from the ETH PULP platform.
-
 config ARCH_CHIP_BL602
 	bool "BouffaloLab BL602"
 	select ARCH_RV32IM
@@ -95,7 +88,6 @@ config ARCH_CHIP
 	default "fe310"		if ARCH_CHIP_FE310
 	default "k210"		if ARCH_CHIP_K210
 	default "litex"		if ARCH_CHIP_LITEX
-	default "gap8"		if ARCH_CHIP_GAP8
 	default "bl602"		if ARCH_CHIP_BL602
 	default "esp32c3"	if ARCH_CHIP_ESP32C3
 	default "c906"		if ARCH_CHIP_C906
@@ -114,9 +106,6 @@ source arch/risc-v/src/k210/Kconfig
 endif
 if ARCH_CHIP_LITEX
 source arch/risc-v/src/litex/Kconfig
-endif
-if ARCH_CHIP_GAP8
-source arch/risc-v/src/gap8/Kconfig
 endif
 if ARCH_CHIP_BL602
 source arch/risc-v/src/bl602/Kconfig
