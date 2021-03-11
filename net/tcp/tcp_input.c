@@ -521,6 +521,7 @@ found:
 
           dev->d_len += hdrlen;
           tcp_input_cache(dev, conn, iplen);
+          dev->d_len -= hdrlen;
 
           tcp_send(dev, conn, TCP_ACK, tcpiplen);
           return;
@@ -1164,6 +1165,12 @@ static void tcp_process_cache(FAR struct net_driver_s *dev, uint8_t domain,
             }
 
           tcp_input(dev, domain, iplen, NULL);
+
+          if (dev->d_len > 0)
+            {
+              d_len = dev->d_len;
+              memcpy(d_buf, dev->d_buf, d_len);
+            }
 
           iob_free_queue(iob, &conn->pendingahead,
                          IOBUSER_NET_TCP_PENDINGAHEAD);
