@@ -92,15 +92,6 @@ static ssize_t local_send(FAR struct socket *psock,
           /* Send the packet */
 
           ret = local_send_packet(&peer->lc_outfile, buf, len);
-
-          /* If the send was successful, then the full packet will have been
-           * sent
-           */
-
-          if (ret >= 0)
-            {
-              ret = len;
-            }
         }
         break;
 #endif /* CONFIG_NET_LOCAL_STREAM */

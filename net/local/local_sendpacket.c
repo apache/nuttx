@@ -120,8 +120,8 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
  *   len      Length of data to send
  *
  * Returned Value:
- *   Zero is returned on success; a negated errno value is returned on any
- *   failure.
+ *   Packet length is returned on success; a negated errno value is returned
+ *   on any failure.
  *
  ****************************************************************************/
 
@@ -158,10 +158,10 @@ int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
               if (ret < 0)
                 break;
               else
-                len16 += ret;
+                len16 += iov->iov_len;
             }
 
-          if (ret > 0)
+          if (ret == OK)
             ret = len16;
         }
     }
