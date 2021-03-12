@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32h7/irq.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,28 +31,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through
- * nuttx/irq.h
+/* This file should never be included directly but, rather, only indirectly
+ * through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_STM32H7_IRQ_H
 #define __ARCH_ARM_INCLUDE_STM32H7_IRQ_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
+/* IRQ numbers.  The IRQ number corresponds vector number and hence map
+ * directly to bits in the NVIC.  This does, however, waste several words of
+ * memory in the IRQ to handle mapping tables.
  */
 
 /* Processor Exceptions (vectors 0-15) */
@@ -72,9 +72,15 @@
 #define STM32_IRQ_PENDSV        (14) /* Vector 14: Pendable system service request */
 #define STM32_IRQ_SYSTICK       (15) /* Vector 15: System tick */
 
-/* External interrupts (vectors >= 16).  These definitions are chip-specific */
+/* External interrupts (vectors >= 16).  These definitions are
+ * chip-specific
+ */
 
 #define STM32_IRQ_FIRST         (16) /* Vector number of the first external interrupt */
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32H7_STM32H7X3XX)
 #  include <arch/stm32h7/stm32h7x3xx_irq.h>
@@ -84,13 +90,13 @@
 #  error "Unsupported STM32 H7 chip"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -101,9 +107,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus
