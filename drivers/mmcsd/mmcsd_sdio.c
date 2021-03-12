@@ -1477,9 +1477,6 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 
   ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
                         MMCSD_BLOCK_RDATADELAY);
-#ifdef CONFIG_SDIO_DMA
-  SDIO_DMADELYDINVLDT(priv->dev, buffer, priv->blocksize);
-#endif
   if (ret != OK)
     {
       ferr("ERROR: CMD17 transfer failed: %d\n", ret);
@@ -1623,9 +1620,6 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
   /* Send STOP_TRANSMISSION */
 
   ret = mmcsd_stoptransmission(priv);
-#ifdef CONFIG_SDIO_DMA
-  SDIO_DMADELYDINVLDT(priv->dev, buffer, priv->blocksize * nblocks);
-#endif
 
   if (ret != OK)
     {
@@ -2886,9 +2880,6 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv)
 
   ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
                         MMCSD_BLOCK_RDATADELAY);
-#ifdef CONFIG_SDIO_DMA
-  SDIO_DMADELYDINVLDT(priv->dev, buffer, 512);
-#endif
   if (ret != OK)
     {
       ferr("ERROR: CMD17 transfer failed: %d\n", ret);
