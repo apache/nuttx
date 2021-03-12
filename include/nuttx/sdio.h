@@ -810,31 +810,6 @@
 #endif
 
 /****************************************************************************
- * Name: SDIO_DMADELYDINVLDT
- *
- * Description:
- *   Delayed D-cache invalidation.
- *   This function should be called after receive DMA completion to perform
- *   D-cache invalidation. This eliminates the need for cache aligned DMA
- *   buffers when the D-cache is in store-through mode.
- *
- * Input Parameters:
- *   dev    - An instance of the SDIO device interface
- *   buffer - The memory to DMA from
- *   buflen - The size of the DMA transfer in bytes
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT)
-#  define SDIO_DMADELYDINVLDT(dev,buffer,len) ((dev)->dmadelydinvldt(dev,buffer,len))
-#else
-#  define SDIO_DMADELYDINVLDT(dev,buffer,len) (OK)
-#endif
-
-/****************************************************************************
  * Name: SDIO_DMASENDSETUP
  *
  * Description:
@@ -969,10 +944,6 @@ struct sdio_dev_s
           size_t buflen);
   int   (*dmasendsetup)(FAR struct sdio_dev_s *dev,
           FAR const uint8_t *buffer, size_t buflen);
-#ifdef CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT
-  int   (*dmadelydinvldt)(FAR struct sdio_dev_s *dev,
-          FAR const uint8_t *buffer, size_t buflen);
-#endif
 #endif /* CONFIG_SDIO_DMA */
 };
 

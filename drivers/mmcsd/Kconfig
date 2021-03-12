@@ -17,10 +17,6 @@ config ARCH_HAVE_SDIO_PREFLIGHT
 	bool
 	default n
 
-config ARCH_HAVE_SDIO_DELAYED_INVLDT
-	bool
-	default n
-
 menuconfig MMCSD
 	bool "MMC/SD Driver Support"
 	default n
