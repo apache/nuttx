@@ -153,6 +153,13 @@ CHIP_CSRCS += esp32_tim_lowerhalf.c
 endif
 endif
 
+ifeq ($(CONFIG_ESP32_ONESHOT),y)
+CHIP_CSRCS += esp32_oneshot.c
+ifeq ($(CONFIG_ONESHOT),y)
+CHIP_CSRCS += esp32_oneshot_lowerhalf.c
+endif
+endif
+
 ifeq ($(CONFIG_ESP32_PARTITION),y)
 CHIP_CSRCS += esp32_partition.c
 endif
