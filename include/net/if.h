@@ -209,9 +209,7 @@ struct lifconf
 struct ifreq
 {
   char                        ifr_name[IFNAMSIZ];       /* Network device name (e.g. "eth0") */
-#ifdef CONFIG_NETDEV_IFINDEX
   int16_t                     ifr_ifindex;              /* Interface index */
-#endif
   union
   {
     struct sockaddr           ifru_addr;                /* IP Address */
