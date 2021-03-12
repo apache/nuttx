@@ -366,7 +366,7 @@
 #define RTC_TAMPCR_TAMPPUDIS      (1 << 15) /* Bit 15: RTC_TAMPx pull-up disable */
 #define RTC_TAMPCR_TAMP1IE        (1 << 16) /* Bit 16:  RTC_TAMP1 interrupt enable */
 #define RTC_TAMPCR_TAMP1NOERASE   (1 << 17) /* Bit 17:  RTC_TAMP1 no erase */
-#define RTC_TAMPCR_TAMP1F         (1 << 18) /* Bit 18:  RTC_TAMP1 mask flag */
+#define RTC_TAMPCR_TAMP1MF        (1 << 18) /* Bit 18:  RTC_TAMP1 mask flag */
 #define RTC_TAMPCR_TAMP2IE        (1 << 19) /* Bit 19:  RTC_TAMP2 interrupt enable */
 #define RTC_TAMPCR_TAMP2NOERASE   (1 << 20) /* Bit 20:  RTC_TAMP2 no erase */
 #define RTC_TAMPCR_TAMP2MF        (1 << 21) /* Bit 21:  RTC_TAMP2 mask flag */
@@ -383,7 +383,7 @@
 
 /* RTC option register */
 
-#define RTC_OR_ALARMTYPE          (1 << 0)  /* Bit 0:  RTC alarm type on PC13/PB14, pushpull/OD */
-#define RTC_OR_OUTRMP             (1 << 1)  /* Bit 1:  remap output to PB14 */
+#define RTC_OR_ALARMTYPE          (1 << 0)  /* Bit 0:  RTC alarm type on PC13, pushpull/OD */
+#define RTC_OR_OUTRMP             (1 << 1)  /* Bit 1:  remap output to PB2 */
 
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_RTCC_H */
