@@ -103,7 +103,7 @@
 #endif
 
 #if !defined (CONFIG_NET_TCP_WRITE_BUFFERS) && (CONFIG_IMX_ENET_NTXBUFFERS != 1)
-#  error "CONFIG_IMX_ENET_NTXBUFFERS must be 1 without TCP_WRITE_BUFFERS"
+#  error "TCP_WRITE_BUFFERS are disabled. CONFIG_IMX_ENET_NTXBUFFERS must be set to 1"
 #endif
 
 #if CONFIG_IMX_ENET_NRXBUFFERS < 1
