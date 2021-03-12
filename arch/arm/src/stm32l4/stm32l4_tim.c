@@ -1127,7 +1127,7 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
 
   /* Further we use range as 0..3; if channel=0 it will also overflow here */
 
-  if (--channel > 4)
+  if (--channel > 3)
     {
       return -EINVAL;
     }
