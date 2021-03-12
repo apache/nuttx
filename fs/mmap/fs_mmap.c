@@ -29,6 +29,7 @@
 #include <sys/ioctl.h>
 #include <stdint.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
@@ -95,6 +96,10 @@
  *   On success, mmap() returns a pointer to the mapped area. On error, the
  *   value MAP_FAILED is returned, and errno is set appropriately.
  *
+ *     EACCES
+ *       The fd argument is not open for read, regardless of the
+ *       protection specified, or fd is not open for write and PROT_WRITE
+ *       was specified for a MAP_SHARED type mapping.
  *     ENOSYS
  *       Returned if any of the unsupported mmap() features are attempted
  *     EBADF
@@ -114,6 +119,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
                int fd, off_t offset)
 {
   FAR void *addr;
+  FAR struct file *filep;
   int ret;
 
   /* Since only a tiny subset of mmap() functionality, we have to verify many
@@ -153,6 +159,30 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       goto errout;
     }
 #endif /* CONFIG_DEBUG_FEATURES */
+
+  if (fs_getfilep(fd, &filep) < 0)
+    {
+      ferr("ERROR: Invalid file descriptor, fd=%d\n", fd);
+      ret = -EBADF;
+      goto errout;
+    }
+
+  if ((filep->f_oflags & O_WROK) == 0 && prot == PROT_WRITE &&
+      (flags & MAP_SHARED) != 0)
+    {
+      ferr("ERROR: Unsupported options for read-only file descriptor,"
+           "fd=%d prot=%x flags=%04x\n", fd, prot, flags);
+      ret = -EACCES;
+      goto errout;
+    }
+
+  if ((filep->f_oflags & O_RDOK) == 0)
+    {
+      ferr("ERROR: File descriptor does not have read permission,"
+           "fd=%d\n", fd);
+      ret = -EACCES;
+      goto errout;
+    }
 
   /* Check if we are just be asked to allocate memory, i.e., MAP_ANONYMOUS
    * set meaning that the memory is not backed up from a file.  The file
