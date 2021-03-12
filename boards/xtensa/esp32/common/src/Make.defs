@@ -18,12 +18,12 @@
 #
 #############################################################################
 
-ifeq ($(CONFIG_TIMER),y)
-  CSRCS += esp32_board_tim.c
-endif
-
 ifeq ($(CONFIG_WATCHDOG),y)
   CSRCS += esp32_board_wdt.c
+endif
+
+ifeq ($(CONFIG_ONESHOT),y)
+  CSRCS += esp32_oneshot.c
 endif
 
 ifeq ($(CONFIG_I2C_DRIVER),y)

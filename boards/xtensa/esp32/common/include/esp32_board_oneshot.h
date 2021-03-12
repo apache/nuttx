@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/src/esp32_board_tim.c
+ * boards/xtensa/esp32/common/include/esp32_board_oneshot.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,48 +18,49 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_ONESHOT_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_ONESHOT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-#include <sys/types.h>
-#include <nuttx/timers/timer.h>
-
-#include "esp32_tim_lowerhalf.h"
-#include "esp32_board_tim.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32_TIMER0
-#  define ESP32_TIMER0 (0)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER1
-#  define ESP32_TIMER1 (1)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER2
-#  define ESP32_TIMER2 (2)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER3
-#  define ESP32_TIMER3 (3)
-#endif
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Data
  ****************************************************************************/
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
- * Name: board_timer_init
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_ONESHOT
+
+/****************************************************************************
+ * Name: esp32_oneshot_init
  *
  * Description:
- *   Configure the timer driver.
+ *   Configure the oneshot.
+ *
+ * Input Parameters:
+ *   timer      - Timer instance to be used as oneshot timer.
+ *   resolution - Oneshot timer resolution.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
@@ -67,55 +68,14 @@
  *
  ****************************************************************************/
 
-int board_timer_init(void)
-{
-  int ret = OK;
+int esp32_oneshot_init(int timer, uint16_t resolution);
 
-#ifdef CONFIG_ESP32_TIMER0
-  ret = esp32_timer_initialize("/dev/timer0", ESP32_TIMER0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
+#endif /* CONFIG_ONESHOT */
 
-#ifdef CONFIG_ESP32_TIMER1
-  ret = esp32_timer_initialize("/dev/timer1", ESP32_TIMER1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-#ifdef CONFIG_ESP32_TIMER2
-  ret = esp32_timer_initialize("/dev/timer2", ESP32_TIMER2);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-#ifdef CONFIG_ESP32_TIMER3
-  ret = esp32_timer_initialize("/dev/timer3", ESP32_TIMER3);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-errout:
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_ONESHOT_H */

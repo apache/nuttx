@@ -50,6 +50,18 @@
 
 #define GPIO_MCP2515_IRQ      22
 
+/* TIMERS */
+
+#define TIMER0 0
+#define TIMER1 1
+#define TIMER2 2
+#define TIMER3 3
+
+/* ONESHOT */
+
+#define ONESHOT_TIMER         1
+#define ONESHOT_RESOLUTION_US 1
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
