@@ -157,7 +157,8 @@ static int max6675_close(FAR struct file *filep)
  * Name: max6675_read
  ****************************************************************************/
 
-static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t max6675_read(FAR struct file *filep,
+                            FAR char *buffer, size_t buflen)
 {
   FAR struct inode         *inode = filep->f_inode;
   FAR struct max6675_dev_s *priv  = inode->i_private;
@@ -176,7 +177,8 @@ static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buf
 
   if (buflen != 2)
     {
-      snerr("ERROR: You can't read something other than 16 bits (2 bytes)\n");
+      snerr("ERROR:");
+      snerr(" You can't read something other than 16 bits (2 bytes)\n");
       return -EINVAL;
     }
 
@@ -271,7 +273,8 @@ int max6675_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   /* Initialize the MAX6675 device structure */
 
-  priv = (FAR struct max6675_dev_s *)kmm_malloc(sizeof(struct max6675_dev_s));
+  priv = (FAR struct max6675_dev_s *)
+          kmm_malloc(sizeof(struct max6675_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

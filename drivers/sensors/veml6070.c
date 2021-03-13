@@ -287,7 +287,8 @@ static ssize_t veml6070_write(FAR struct file *filep,
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/uvlight0"
- *   i2c - An instance of the I2C interface to use to communicate with VEML6070
+ *   i2c - An instance of the I2C interface to use to communicate with
+ *         VEML6070
  *   addr - The I2C address of the VEML6070.
  *
  * Returned Value:

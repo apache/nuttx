@@ -183,7 +183,8 @@ static int max7219_close(FAR struct file *filep)
  * Name: max7219_read
  ****************************************************************************/
 
-static ssize_t max7219_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t max7219_read(FAR struct file *filep,
+                            FAR char *buffer, size_t buflen)
 {
   return -ENOSYS;
 }
@@ -339,7 +340,8 @@ int max7219_leds_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   /* Initialize the MAX7219 device structure */
 
-  priv = (FAR struct max7219_dev_s *)kmm_malloc(sizeof(struct max7219_dev_s));
+  priv = (FAR struct max7219_dev_s *)
+                kmm_malloc(sizeof(struct max7219_dev_s));
   if (!priv)
     {
       lederr("ERROR: Failed to allocate instance\n");

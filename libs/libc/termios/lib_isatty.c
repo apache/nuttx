@@ -18,7 +18,6 @@
  *
  ****************************************************************************/
 
-
 /*   Source:
  *     https://github.com/raggi/apue.2e/blob/master/termios/isatty.c
  *     based on Advanced Programming in the UNIX Environment

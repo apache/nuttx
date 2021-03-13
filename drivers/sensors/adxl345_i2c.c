@@ -109,7 +109,7 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv,
 {
   /* 8-bit data read sequence:
    *
-   *  Start - I2C_Write_Address - ADXL345_Reg_Address - ADXL345_Write_Data - STOP
+   * Start-I2C_Write_Address-ADXL345_Reg_Address-ADXL345_Write_Data-STOP
    */
 
   struct i2c_msg_s msg;

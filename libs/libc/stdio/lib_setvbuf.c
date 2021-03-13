@@ -54,10 +54,10 @@
  *   _IONBF - Will cause input/output to be unbuffered.
  *
  *  If buf is not a null pointer, the array it points to may be used instead
- *  of a buffer allocated by setvbuf() and the argument size specifies the size
- *  of the array; otherwise, size may determine the size of a buffer allocated
- *  by the setvbuf() function. The contents of the array at any time are
- *  unspecified.
+ *  of a buffer allocated by setvbuf() and the argument size specifies the
+ *  size of the array; otherwise, size may determine the size of a buffer
+ *  allocated by the setvbuf() function. The contents of the array at any
+ *  time are unspecified.
  *
  * Input Parameters:
  *   stream - the stream to flush
@@ -81,6 +81,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
   int errcode;
 
   /* Verify arguments */
+
   /* Make sure that a valid mode was provided */
 
   if (mode != _IOFBF && mode != _IOLBF && mode != _IONBF)
@@ -169,6 +170,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
         /* Fall through */
 
       case _IOFBF:
+
         /* Use the existing buffer if size == 0 */
 
         if (size > 0)
@@ -181,8 +183,8 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
               {
                 newbuf = (FAR unsigned char *)buffer;
 
-                /* Indicate that we have an I/O buffer managed by the caller of
-                 * setvbuf.
+                /* Indicate that we have an I/O buffer managed by the caller
+                 * of setvbuf.
                  */
 
                 flags |= __FS_FLAG_UBF;
@@ -212,6 +214,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
         break;
 
       case _IONBF:
+
         /* No buffer needed... We must be performing unbuffered I/O */
 
         newbuf = NULL;
@@ -225,8 +228,8 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
     * on a previous call to setvbuf().
     */
 
-   if (stream->fs_bufstart != NULL &&
-       (stream->fs_flags & __FS_FLAG_UBF) == 0)
+  if (stream->fs_bufstart != NULL &&
+     (stream->fs_flags & __FS_FLAG_UBF) == 0)
     {
       lib_free(stream->fs_bufstart);
     }

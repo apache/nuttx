@@ -103,7 +103,8 @@ static int adxl345_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t adxl345_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t adxl345_read(FAR struct file *filep,
+                            FAR char *buffer, size_t len)
 {
   FAR struct inode         *inode;
   FAR struct adxl345_dev_s *priv;
@@ -141,11 +142,14 @@ static ssize_t adxl345_read(FAR struct file *filep, FAR char *buffer, size_t len
   /* Read accelerometer X Y Z axes */
 
   sample.data_x =  adxl345_getreg8(priv, ADXL345_DATAX1);
-  sample.data_x = (sample.data_x << 8) | adxl345_getreg8(priv, ADXL345_DATAX0);
+  sample.data_x = (sample.data_x << 8) |
+                   adxl345_getreg8(priv, ADXL345_DATAX0);
   sample.data_y =  adxl345_getreg8(priv, ADXL345_DATAY1);
-  sample.data_y = (sample.data_y << 8) | adxl345_getreg8(priv, ADXL345_DATAY0);
+  sample.data_y = (sample.data_y << 8) |
+                   adxl345_getreg8(priv, ADXL345_DATAY0);
   sample.data_z =  adxl345_getreg8(priv, ADXL345_DATAZ1);
-  sample.data_z = (sample.data_z << 8) | adxl345_getreg8(priv, ADXL345_DATAZ0);
+  sample.data_z = (sample.data_z << 8) |
+                   adxl345_getreg8(priv, ADXL345_DATAZ0);
 
   add_sensor_randomness(sample.data_x);
   add_sensor_randomness((sample.data_z << 16) | sample.data_y);
@@ -162,8 +166,8 @@ static ssize_t adxl345_read(FAR struct file *filep, FAR char *buffer, size_t len
  * Name: adxl345_register
  *
  * Description:
- *  This function will register the accelerometer driver as /dev/accelN where N
- *  is the minor device number
+ *  This function will register the accelerometer driver as /dev/accelN where
+ *  N is the minor device number
  *
  * Input Parameters:
  *   handle    - The handle previously returned by adxl345_register
@@ -266,7 +270,8 @@ static void adxl345_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void adxl345_interrupt(FAR struct adxl345_config_s *config, FAR void *arg)
+static void adxl345_interrupt(FAR struct adxl345_config_s *config,
+                              FAR void *arg)
 {
   FAR struct adxl345_dev_s *priv = (FAR struct adxl345_dev_s *)arg;
   int ret;
@@ -381,7 +386,8 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
 
   /* Allocate the ADXL345 driver instance */
 
-  priv = (FAR struct adxl345_dev_s *)kmm_zalloc(sizeof(struct adxl345_dev_s));
+  priv = (FAR struct adxl345_dev_s *)
+              kmm_zalloc(sizeof(struct adxl345_dev_s));
   if (!priv)
     {
       snerr("ERROR: Failed to allocate the device structure!\n");
@@ -414,7 +420,9 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
 
   adxl345_reset(priv);
 
-  /* Configure the interrupt output pin to generate interrupts on high or low level. */
+  /* Configure the interrupt output pin to generate interrupts on high or low
+   * level.
+   */
 
   regval  = adxl345_getreg8(priv, ADXL345_DATA_FORMAT);
 #ifdef CONFIG_ADXL345_ACTIVELOW
@@ -426,7 +434,9 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
 
   /* Attach the ADXL345 interrupt handler. */
 
-  config->attach(config, (adxl345_handler_t)adxl345_interrupt, (FAR void *)priv);
+  config->attach(config,
+                (adxl345_handler_t)adxl345_interrupt,
+                (FAR void *)priv);
 
   /* Leave standby mode */
 

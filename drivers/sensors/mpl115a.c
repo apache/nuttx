@@ -119,7 +119,8 @@ static inline void mpl115a_configspi(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
+static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv,
+                               uint8_t regaddr)
 {
   uint8_t regval;
 
@@ -325,7 +326,8 @@ static int mpl115a_close(FAR struct file *filep)
  * Name: mpl115a_read
  ****************************************************************************/
 
-static ssize_t mpl115a_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t mpl115a_read(FAR struct file *filep,
+                            FAR char *buffer, size_t buflen)
 {
   FAR struct inode         *inode = filep->f_inode;
   FAR struct mpl115a_dev_s *priv  = inode->i_private;
@@ -339,7 +341,8 @@ static ssize_t mpl115a_read(FAR struct file *filep, FAR char *buffer, size_t buf
 
   if (buflen != 2)
     {
-      snerr("ERROR: You can't read something other than 16 bits (2 bytes)\n");
+      snerr("ERROR:");
+      snerr(" You can't read something other than 16 bits (2 bytes)\n");
       return -1;
     }
 
@@ -392,7 +395,8 @@ int mpl115a_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   /* Initialize the MPL115A device structure */
 
-  priv = (FAR struct mpl115a_dev_s *)kmm_malloc(sizeof(struct mpl115a_dev_s));
+  priv = (FAR struct mpl115a_dev_s *)
+          kmm_malloc(sizeof(struct mpl115a_dev_s));
   if (!priv)
     {
       snerr("ERROR: Failed to allocate instance\n");

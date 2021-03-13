@@ -275,7 +275,6 @@ static unsigned short rgbled_lightness(unsigned char color_level)
 static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen)
 {
-
   FAR struct inode *inode = filep->f_inode;
   FAR struct rgbled_upperhalf_s *upper = inode->i_private;
   FAR struct pwm_lowerhalf_s *ledr = upper->devledr;
