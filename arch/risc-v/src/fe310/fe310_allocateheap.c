@@ -36,6 +36,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
 
 #include "fe310.h"

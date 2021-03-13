@@ -178,8 +178,6 @@ void riscv_addregion(void);
 # define riscv_addregion()
 #endif
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
-
 /* IRQ initialization *******************************************************/
 
 void riscv_ack_irq(int irq);

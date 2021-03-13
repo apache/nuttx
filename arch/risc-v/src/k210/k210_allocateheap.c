@@ -35,9 +35,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/userspace.h>
 
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
 
 #include "k210.h"
