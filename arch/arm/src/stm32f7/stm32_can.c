@@ -58,6 +58,8 @@
 #include "arm_arch.h"
 
 #include "chip.h"
+
+#include "stm32_rcc.h" 
 #include "stm32_can.h"
 #include "stm32_gpio.h"
 
