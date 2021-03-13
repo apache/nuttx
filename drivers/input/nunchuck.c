@@ -20,7 +20,8 @@
 
 /* This file provides a driver for a Nintendo Wii Nunchuck joystick device.
  * The nunchuck joystick provides X/Y positional data as integer values.
- * The analog positional data may also be accompanied by discrete button data.
+ * The analog positional data may also be accompanied by discrete button
+ * data.
  *
  * The nunchuck joystick driver exports a standard character driver
  * interface. By convention, the nunchuck joystick is registered as an input
@@ -98,7 +99,9 @@ static ssize_t nunchuck_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static int     nunchuck_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
+
 /* I2C Helpers */
+
 static int     nunchuck_i2c_read(FAR struct nunchuck_dev_s *priv,
                  FAR uint8_t *regval, int len);
 static int     nunchuck_i2c_write(FAR struct nunchuck_dev_s *priv,
@@ -200,7 +203,7 @@ static int nunchuck_sample(FAR struct nunchuck_dev_s *priv,
 
       /* Delay 20ms */
 
-      nxsig_usleep(20*1000);
+      nxsig_usleep(20 * 1000);
 
       initialized = true;
     }
@@ -259,10 +262,11 @@ static int nunchuck_sample(FAR struct nunchuck_dev_s *priv,
   buffer->acc_x       = (uint16_t) data[2];
   buffer->acc_y       = (uint16_t) data[3];
   buffer->acc_z       = (uint16_t) data[4];
-  buffer->nck_buttons = (uint8_t)  ((data[5]+1) & 0x03);
+  buffer->nck_buttons = (uint8_t) ((data[5] + 1) & 0x03);
 
   iinfo("X: %03d | Y: %03d | AX: %03d AY: %03d AZ: %03d | B: %d\n",
-        data[0], data[1], data[2], data[3], data[4], ((data[5]+1) & 0x03));
+        data[0], data[1], data[2], data[3],
+        data[4], ((data[5] + 1) & 0x03));
 
   return OK;
 }
@@ -303,7 +307,8 @@ static int nunchuck_open(FAR struct file *filep)
 
   /* Allocate a new open structure */
 
-  opriv = (FAR struct nunchuck_open_s *)kmm_zalloc(sizeof(struct nunchuck_open_s));
+  opriv = (FAR struct nunchuck_open_s *)
+               kmm_zalloc(sizeof(struct nunchuck_open_s));
   if (!opriv)
     {
       ierr("ERROR: Failed to allocate open structure\n");
@@ -493,11 +498,12 @@ static int nunchuck_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
     /* Command:     NUNCHUCKIOC_SUPPORTED
-     * Description: Report the set of button events supported by the hardware;
-     * Argument:    A pointer to writeable integer value in which to return the
-     *              set of supported buttons.
-     * Return:      Zero (OK) on success.  Minus one will be returned on failure
-     *              with the errno value set appropriately.
+     * Description: Report the set of button events supported by the
+     *              hardware;
+     * Argument:    A pointer to writeable integer value in which to
+     *              return the set of supported buttons.
+     * Return:      Zero (OK) on success.  Minus one will be returned
+     *              on failure with the errno value set appropriately.
      */
 
     case NUNCHUCKIOC_SUPPORTED:

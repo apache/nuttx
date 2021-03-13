@@ -267,7 +267,8 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           ret = bh1750fvi_write8(priv, BH1750FVI_CONTINUOUS_HRM);
           if (ret < 0)
             {
-              snerr("ERROR: Cannot change to Continuously H-Resolution Mode!\n");
+              snerr("ERROR:");
+              snerr(" Cannot change to Continuously H-Resolution Mode!\n");
             }
         }
         break;
@@ -279,7 +280,8 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           ret = bh1750fvi_write8(priv, BH1750FVI_CONTINUOUS_HRM2);
           if (ret < 0)
             {
-              snerr("ERROR: Cannot change to Continuously H-Resolution Mode2!\n");
+              snerr("ERROR:");
+              snerr(" Cannot change to Continuously H-Resolution Mode2!\n");
             }
         }
         break;
@@ -291,7 +293,8 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           ret = bh1750fvi_write8(priv, BH1750FVI_CONTINUOUS_LRM);
           if (ret < 0)
             {
-              snerr("ERROR: Cannot change to Continuously L-Resolution Mode!\n");
+              snerr("ERROR:");
+              snerr(" Cannot change to Continuously L-Resolution Mode!\n");
             }
         }
         break;
@@ -315,7 +318,8 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           ret = bh1750fvi_write8(priv, BH1750FVI_ONETIME_HRM2);
           if (ret < 0)
             {
-              snerr("ERROR: Cannot change to One Time H-Resolution Mode2!\n");
+              snerr("ERROR:");
+              snerr(" Cannot change to One Time H-Resolution Mode2!\n");
             }
         }
         break;
@@ -379,7 +383,8 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/light0"
- *   i2c - An instance of the I2C interface to use to communicate with BH1750FVI
+ *   i2c - An instance of the I2C interface to use to communicate with
+ *         BH1750FVI
  *   addr - The I2C address of the BH1750FVI.
  *
  * Returned Value:

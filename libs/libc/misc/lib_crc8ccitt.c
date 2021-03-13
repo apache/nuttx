@@ -82,7 +82,6 @@ static const uint8_t crc8_tab[256] =
 
 uint8_t crc8ccittpart(FAR const uint8_t *src, size_t len, uint8_t crc8val)
 {
-
   uint8_t *pos = (uint8_t *) src;
   uint8_t *end = pos + len;
 
@@ -106,5 +105,5 @@ uint8_t crc8ccittpart(FAR const uint8_t *src, size_t len, uint8_t crc8val)
 
 uint8_t crc8ccitt(FAR const uint8_t *src, size_t len)
 {
-    return crc8ccittpart(src, len, 0);
+  return crc8ccittpart(src, len, 0);
 }

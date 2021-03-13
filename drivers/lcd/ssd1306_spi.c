@@ -87,7 +87,8 @@ int ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
  *
  ****************************************************************************/
 
-int ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
+int ssd1306_sendblk(FAR struct ssd1306_dev_s *priv,
+                    uint8_t *data, uint8_t len)
 {
   /* Send byte value to display */
 
