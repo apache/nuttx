@@ -139,7 +139,7 @@ int up_cpu_paused(int cpu)
    * of the assigned task list for this CPU.
    */
 
-  up_savestate(tcb->xcp.regs);
+  riscv_savestate(tcb->xcp.regs);
 
   /* Wait for the spinlock to be released */
 
@@ -166,7 +166,7 @@ int up_cpu_paused(int cpu)
    * will be made when the interrupt returns.
    */
 
-  up_restorestate(tcb->xcp.regs);
+  riscv_restorestate(tcb->xcp.regs);
 
   spin_unlock(&g_cpu_wait[cpu]);
 

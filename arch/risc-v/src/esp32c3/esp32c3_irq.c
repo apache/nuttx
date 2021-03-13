@@ -95,7 +95,7 @@ void up_irqinitialize(void)
 
   /* Attach the ECALL interrupt. */
 
-  irq_attach(ESP32C3_IRQ_ECALL_M, up_swint, NULL);
+  irq_attach(ESP32C3_IRQ_ECALL_M, riscv_swint, NULL);
 
 #ifdef CONFIG_ESP32C3_GPIO_IRQ
   /* Initialize GPIO interrupt support */
@@ -112,14 +112,14 @@ void up_irqinitialize(void)
 }
 
 /****************************************************************************
- * Name: up_get_newintctx
+ * Name: riscv_get_newintctx
  *
  * Description:
  *   Return initial mstatus when a task is created.
  *
  ****************************************************************************/
 
-uint32_t up_get_newintctx(void)
+uint32_t riscv_get_newintctx(void)
 {
   /* Set machine previous privilege mode to machine mode.
    * Also set machine previous interrupt enable

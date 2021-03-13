@@ -93,7 +93,7 @@ void up_release_pending(void)
            * Just copy the g_current_regs into the OLD rtcb.
            */
 
-           up_savestate(rtcb->xcp.regs);
+           riscv_savestate(rtcb->xcp.regs);
 
           /* Restore the exception context of the rtcb at the (new) head
            * of the ready-to-run task list.
@@ -109,7 +109,7 @@ void up_release_pending(void)
            * changes will be made when the interrupt returns.
            */
 
-          up_restorestate(rtcb->xcp.regs);
+          riscv_restorestate(rtcb->xcp.regs);
         }
 
       /* No, then we will need to perform the user context switch */

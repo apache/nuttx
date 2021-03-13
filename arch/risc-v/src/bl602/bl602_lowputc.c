@@ -333,14 +333,14 @@ void bl602_uart_configure(const struct uart_config_s *config)
 }
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: riscv_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void riscv_lowputc(char ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait for FIFO */

@@ -77,7 +77,7 @@ void *fe310_dispatch_irq(uint32_t vector, uint32_t *regs)
 
   /* Acknowledge the interrupt */
 
-  up_ack_irq(irq);
+  riscv_ack_irq(irq);
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();

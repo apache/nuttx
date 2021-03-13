@@ -81,10 +81,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_stackdump
+ * Name: riscv_stackdump
  ****************************************************************************/
 
-static void up_stackdump(uint32_t sp, uint32_t stack_base)
+static void riscv_stackdump(uint32_t sp, uint32_t stack_base)
 {
   uint32_t stack ;
 
@@ -98,11 +98,11 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
 }
 
 /****************************************************************************
- * Name: up_taskdump
+ * Name: riscv_taskdump
  ****************************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
+static void riscv_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
 {
   /* Dump interesting properties of this task */
 
@@ -119,25 +119,25 @@ static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
 #endif
 
 /****************************************************************************
- * Name: up_showtasks
+ * Name: riscv_showtasks
  ****************************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-static inline void up_showtasks(void)
+static inline void riscv_showtasks(void)
 {
   /* Dump interesting properties of each task in the crash environment */
 
-  nxsched_foreach(up_taskdump, NULL);
+  nxsched_foreach(riscv_taskdump, NULL);
 }
 #else
-#  define up_showtasks()
+#  define riscv_showtasks()
 #endif
 
 /****************************************************************************
- * Name: up_registerdump
+ * Name: riscv_registerdump
  ****************************************************************************/
 
-static inline void up_registerdump(void)
+static inline void riscv_registerdump(void)
 {
   /* Are user registers available from interrupt processing? */
 
@@ -179,10 +179,10 @@ static inline void up_registerdump(void)
 }
 
 /****************************************************************************
- * Name: up_dumpstate
+ * Name: riscv_dumpstate
  ****************************************************************************/
 
-static void up_dumpstate(void)
+static void riscv_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
   uint32_t sp = riscv_getsp();
@@ -195,7 +195,7 @@ static void up_dumpstate(void)
 
   /* Dump the registers (if available) */
 
-  up_registerdump();
+  riscv_registerdump();
 
   /* Get the limits on the user stack memory */
 
@@ -223,7 +223,7 @@ static void up_dumpstate(void)
     {
       /* Yes.. dump the interrupt stack */
 
-      up_stackdump(sp, istackbase);
+      riscv_stackdump(sp, istackbase);
 
       /* Extract the user stack pointer which should lie
        * at the base of the interrupt stack.
@@ -235,7 +235,7 @@ static void up_dumpstate(void)
   else if (g_current_regs)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      up_stackdump(istackbase - istacksize, istackbase);
+      riscv_stackdump(istackbase - istacksize, istackbase);
     }
 
   /* Show user stack info */
@@ -256,21 +256,21 @@ static void up_dumpstate(void)
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
       _alert("ERROR: Stack pointer is not within allocated stack\n");
-      up_stackdump(ustackbase - ustacksize, ustackbase);
+      riscv_stackdump(ustackbase - ustacksize, ustackbase);
     }
   else
     {
-      up_stackdump(sp, ustackbase);
+      riscv_stackdump(sp, ustackbase);
     }
 }
 
 #endif /* CONFIG_ARCH_STACKDUMP */
 
 /****************************************************************************
- * Name: _up_assert
+ * Name: riscv_assert
  ****************************************************************************/
 
-static void _up_assert(void)
+static void riscv_assert(void)
 {
   /* Flush any buffered SYSLOG data */
 
@@ -354,11 +354,11 @@ void up_assert(const char *filename, int lineno)
         filename, lineno);
 #endif
 
-  up_dumpstate();
+  riscv_dumpstate();
 
   /* Dump the state of all tasks (if available) */
 
-  up_showtasks();
+  riscv_showtasks();
 
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */
@@ -374,5 +374,5 @@ void up_assert(const char *filename, int lineno)
   board_crashdump(riscv_getsp(), running_task(), filename, lineno);
 #endif
 
-  _up_assert();
+  riscv_assert();
 }

@@ -36,8 +36,8 @@
  ************************************************************************************/
 
     .globl        up_fpuconfig
-    .globl        up_savefpu
-    .globl        up_restorefpu
+    .globl        riscv_savefpu
+    .globl        riscv_restorefpu
 
     .file         "riscv_fpu.S"
 
@@ -88,14 +88,14 @@ up_fpuconfig:
     ret
 
 /************************************************************************************
- * Name: up_savefpu
+ * Name: riscv_savefpu
  *
  * Description:
  *   Given the pointer to a register save area (in A0), save the state of the
  *   floating point registers.
  *
  * C Function Prototype:
- *   void up_savefpu(uint32_t *regs);
+ *   void riscv_savefpu(uint32_t *regs);
  *
  * Input Parameters:
  *   regs - A pointer to the register save area in which to save the floating point
@@ -106,9 +106,9 @@ up_fpuconfig:
  *
  ************************************************************************************/
 
-    .type         up_savefpu, function
+    .type         riscv_savefpu, function
 
-up_savefpu:
+riscv_savefpu:
     lw            t0, REG_INT_CTX(a0)
     li            t1, FS_MASK
     and           t2, t0, t1
@@ -162,14 +162,14 @@ up_savefpu:
     ret
 
 /************************************************************************************
- * Name: up_restorefpu
+ * Name: riscv_restorefpu
  *
  * Description:
  *   Given the pointer to a register save area (in A0), restore the state of the
  *   floating point registers.
  *
  * C Function Prototype:
- *   void up_restorefpu(const uint32_t *regs);
+ *   void riscv_restorefpu(const uint32_t *regs);
  *
  * Input Parameters:
  *   regs - A pointer to the register save area containing the floating point
@@ -181,9 +181,9 @@ up_savefpu:
  *
  ************************************************************************************/
 
-    .type        up_restorefpu, function
+    .type        riscv_restorefpu, function
 
-up_restorefpu:
+riscv_restorefpu:
     lw           t0, REG_INT_CTX(a0)
     li           t1, FS_MASK
     and          t2, t0, t1
