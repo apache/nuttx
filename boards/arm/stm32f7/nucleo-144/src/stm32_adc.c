@@ -80,7 +80,7 @@
 
 /* The number of ADC channels in the conversion list */
 
-#define ADC1_NCHANNELS 1
+#define ADC1_NCHANNELS 3
 
 /****************************************************************************
  * Private Data
@@ -92,7 +92,7 @@
  */
 
 #ifdef CONFIG_STM32F7_ADC1
-static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {3};
+static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {3, 10, 13};
 
 /* Configurations of pins used byte each ADC channels
  *
@@ -101,7 +101,11 @@ static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {3};
  *  GPIO_ADC1_IN11, GPIO_ADC1_IN12, GPIO_ADC1_IN13, GPIO_ADC1_IN15};
  */
 
-static const uint32_t g_pinlist[ADC1_NCHANNELS] = {GPIO_ADC1_IN3};
+static const uint32_t g_pinlist[ADC1_NCHANNELS] = {
+  GPIO_ADC1_IN3,
+  GPIO_ADC1_IN10,
+  GPIO_ADC1_IN13
+};
 #endif
 
 /****************************************************************************
