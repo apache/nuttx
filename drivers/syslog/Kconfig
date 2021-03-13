@@ -17,6 +17,12 @@ config SYSLOG_WRITE
 	bool
 	default n
 
+config SYSLOG_MAX_CHANNELS
+	int "Maximum SYSLOG channels"
+	default 1
+	---help---
+		Maximum number of supported SYSLOG channels.
+
 config RAMLOG
 	bool "RAM log device support"
 	default n

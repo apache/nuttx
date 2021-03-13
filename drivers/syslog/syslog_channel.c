@@ -92,7 +92,11 @@ static const struct syslog_channel_s g_default_channel =
 
 /* This is the current syslog channel in use */
 
-FAR const struct syslog_channel_s *g_syslog_channel = &g_default_channel;
+FAR const struct syslog_channel_s
+*g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
+{
+  &g_default_channel
+};
 
 /****************************************************************************
  * Private Functions
@@ -135,14 +139,82 @@ static int syslog_default_putc(int ch)
 
 int syslog_channel(FAR const struct syslog_channel_s *channel)
 {
+#if (CONFIG_SYSLOG_MAX_CHANNELS != 1)
+  int i;
+#endif
+
   DEBUGASSERT(channel != NULL);
 
   if (channel != NULL)
     {
       DEBUGASSERT(channel->sc_putc != NULL && channel->sc_force != NULL);
 
-      g_syslog_channel = channel;
+#if (CONFIG_SYSLOG_MAX_CHANNELS == 1)
+      g_syslog_channel[0] = channel;
       return OK;
+#else
+      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
+        {
+          if (g_syslog_channel[i] == NULL)
+            {
+              g_syslog_channel[i] = channel;
+              return OK;
+            }
+          else if (g_syslog_channel[i] == channel)
+            {
+              return OK;
+            }
+        }
+#endif
+    }
+
+  return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: syslog_channel_remove
+ *
+ * Description:
+ *   Removes an already configured SYSLOG channel from the list of used
+ *   channels.
+ *
+ * Input Parameters:
+ *   channel - Provides the interface to the channel to be removed.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_channel_remove(FAR const struct syslog_channel_s *channel)
+{
+  int i;
+
+  DEBUGASSERT(channel != NULL);
+
+  if (channel != NULL)
+    {
+      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
+        {
+          if (g_syslog_channel[i] == channel)
+            {
+              /* Get the rest of the channels one position back
+               * to ensure that there are no holes in the list.
+               */
+
+              while (i < (CONFIG_SYSLOG_MAX_CHANNELS - 1) &&
+                     g_syslog_channel[i + 1] != NULL)
+                {
+                  g_syslog_channel[i] = g_syslog_channel[i + 1];
+                  i++;
+                }
+
+              g_syslog_channel[i] = NULL;
+
+              return OK;
+            }
+        }
     }
 
   return -EINVAL;

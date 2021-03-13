@@ -264,7 +264,6 @@ int syslog_add_intbuffer(int ch)
  *   to the SYSLOG device.
  *
  * Input Parameters:
- *   channel - The syslog channel to use in performing the flush operation.
  *   force   - Use the force() method of the channel vs. the putc() method.
  *
  * Returned Value:
@@ -276,41 +275,49 @@ int syslog_add_intbuffer(int ch)
  *
  ****************************************************************************/
 
-int syslog_flush_intbuffer(FAR const struct syslog_channel_s *channel,
-                           bool force)
+int syslog_flush_intbuffer(bool force)
 {
   syslog_putc_t putfunc;
   int ch;
-  int ret = OK;
-
-  /* Select which putc function to use for this flush */
-
-  putfunc = force ? channel->sc_putc : channel->sc_force;
+  int i;
 
   /* This logic is performed with the scheduler disabled to protect from
    * concurrent modification by other tasks.
    */
 
   sched_lock();
+
   do
     {
       /* Transfer one character to time.  This is inefficient, but is
        * done in this way to: (1) Deal with concurrent modification of
        * the interrupt buffer from interrupt activity, (2) Avoid keeper
        * interrupts disabled for a long time, and (3) to handler
-       * wraparound of the circular buffer indices.
+       * wrap-around of the circular buffer indices.
        */
 
       ch = syslog_remove_intbuffer();
-      if (ch != EOF)
+
+      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
         {
-          ret = putfunc(ch);
+          if ((g_syslog_channel[i] == NULL) || (ch == EOF))
+            {
+              break;
+            }
+
+          /* Select which putc function to use for this flush */
+
+          putfunc = force ? g_syslog_channel[i]->sc_putc :
+                    g_syslog_channel[i]->sc_force;
+
+          putfunc(ch);
         }
     }
-  while (ch != EOF && ret >= 0);
+  while (ch != EOF);
 
   sched_unlock();
-  return ret;
+
+  return ch;
 }
 
 #endif /* CONFIG_SYSLOG_INTBUFFER */
