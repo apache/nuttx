@@ -158,7 +158,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * water marks.
    */
 
-  up_stack_color((FAR void *)((uintptr_t)tcb->stack_alloc_ptr +
+  riscv_stack_color((FAR void *)((uintptr_t)tcb->stack_alloc_ptr +
                  sizeof(struct tls_info_s)),
                  size_of_stack - sizeof(struct tls_info_s));
 #endif

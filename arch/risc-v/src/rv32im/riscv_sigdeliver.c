@@ -64,7 +64,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_sigdeliver
+ * Name: riscv_sigdeliver
  *
  * Description:
  *   This is the a signal handling trampoline.  When a signal action was
@@ -73,7 +73,7 @@
  *
  ****************************************************************************/
 
-void up_sigdeliver(void)
+void riscv_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];
@@ -93,7 +93,7 @@ void up_sigdeliver(void)
 
   /* Save the return state on the stack. */
 
-  up_copyfullstate(regs, rtcb->xcp.regs);
+  riscv_copyfullstate(regs, rtcb->xcp.regs);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then make sure that interrupts are enabled.  Signal handlers must always

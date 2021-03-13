@@ -125,6 +125,6 @@ void up_initial_state(struct tcb_s *tcb)
    *
    */
 
-  regval = up_get_newintctx();
+  regval = riscv_get_newintctx();
   xcp->regs[REG_INT_CTX] = regval;
 }

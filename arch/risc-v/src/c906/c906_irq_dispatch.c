@@ -83,7 +83,7 @@ void *c906_dispatch_irq(uint64_t vector, uint64_t *regs)
 
   /* Acknowledge the interrupt */
 
-  up_ack_irq(irq);
+  riscv_ack_irq(irq);
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
@@ -126,7 +126,7 @@ void *c906_dispatch_irq(uint64_t vector, uint64_t *regs)
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      up_restorefpu((uint64_t *)CURRENT_REGS);
+      riscv_restorefpu((uint64_t *)CURRENT_REGS);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
