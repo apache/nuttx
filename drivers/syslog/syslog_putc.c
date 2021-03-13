@@ -55,7 +55,7 @@
 
 int syslog_putc(int ch)
 {
-  DEBUGASSERT(g_syslog_channel != NULL);
+  int i;
 
   /* Is this an attempt to do SYSLOG output from an interrupt handler? */
 
@@ -65,8 +65,8 @@ int syslog_putc(int ch)
       if (up_interrupt_context())
         {
           /* Buffer the character in the interrupt buffer.
-           *  The interrupt buffer will be flushed before the next normal,
-           * non-interrupt SYSLOG output.
+           * The interrupt buffer will be flushed before the next
+           * normal,non-interrupt SYSLOG output.
            */
 
           return syslog_add_intbuffer(ch);
@@ -76,27 +76,46 @@ int syslog_putc(int ch)
         {
           /* Force the character to the SYSLOG device immediately
            * (if possible).
-           * This means that the interrupt data may not be in synchronization
-           * with output data that may have been buffered by sc_putc().
+           * This means that the interrupt data may not be in
+           * synchronization with output data that may have been
+           * buffered by sc_putc().
            */
 
-          DEBUGASSERT(g_syslog_channel->sc_force != NULL);
+          for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
+            {
+              if (g_syslog_channel[i] == NULL)
+                {
+                  break;
+                }
 
-          return g_syslog_channel->sc_force(ch);
+              DEBUGASSERT(g_syslog_channel[i]->sc_force != NULL);
+
+              g_syslog_channel[i]->sc_force(ch);
+            }
         }
     }
   else
     {
-      DEBUGASSERT(g_syslog_channel->sc_putc != NULL);
-
 #ifdef CONFIG_SYSLOG_INTBUFFER
       /* Flush any characters that may have been added to the interrupt
        * buffer.
        */
 
-      syslog_flush_intbuffer(g_syslog_channel, false);
+      syslog_flush_intbuffer(false);
 #endif
 
-      return g_syslog_channel->sc_putc(ch);
+      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
+        {
+          if (g_syslog_channel[i] == NULL)
+            {
+              break;
+            }
+
+          DEBUGASSERT(g_syslog_channel[i]->sc_putc != NULL);
+
+          g_syslog_channel[i]->sc_putc(ch);
+        }
     }
+
+  return ch;
 }

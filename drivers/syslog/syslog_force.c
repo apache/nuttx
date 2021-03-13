@@ -55,18 +55,29 @@
 
 int syslog_force(int ch)
 {
-  DEBUGASSERT(g_syslog_channel != NULL &&
-              g_syslog_channel->sc_force != NULL);
+  int i;
 
 #ifdef CONFIG_SYSLOG_INTBUFFER
   /* Flush any characters that may have been added to the interrupt
    * buffer through the emergency channel
    */
 
-  syslog_flush_intbuffer(g_syslog_channel, true);
+  syslog_flush_intbuffer(true);
 #endif
 
-  /* Then send the character to the emergency channel */
+  for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
+    {
+      if (g_syslog_channel[i] == NULL)
+        {
+          break;
+        }
 
-  return g_syslog_channel->sc_force(ch);
+      DEBUGASSERT(g_syslog_channel[i]->sc_force != NULL);
+
+      /* Then send the character to the emergency channel */
+
+      g_syslog_channel[i]->sc_force(ch);
+    }
+
+  return ch;
 }

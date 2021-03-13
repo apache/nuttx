@@ -48,7 +48,8 @@ extern "C"
  */
 
 struct syslog_channel_s; /* Forward reference */
-EXTERN FAR const struct syslog_channel_s *g_syslog_channel;
+EXTERN FAR const struct syslog_channel_s *g_syslog_channel
+                                                [CONFIG_SYSLOG_MAX_CHANNELS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -216,7 +217,6 @@ int syslog_add_intbuffer(int ch);
  *   to the SYSLOG device.
  *
  * Input Parameters:
- *   channel - The syslog channel to use in performing the flush operation.
  *   force   - Use the force() method of the channel vs. the putc() method.
  *
  * Returned Value:
@@ -229,8 +229,7 @@ int syslog_add_intbuffer(int ch);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_INTBUFFER
-int syslog_flush_intbuffer(FAR const struct syslog_channel_s *channel,
-                           bool force);
+int syslog_flush_intbuffer(bool force);
 #endif
 
 /****************************************************************************
