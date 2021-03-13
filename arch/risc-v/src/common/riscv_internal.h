@@ -166,10 +166,6 @@ EXTERN uint32_t _ebss;            /* End+1 of .bss */
 
 #ifndef __ASSEMBLY__
 
-/* Low level initialization provided by board-level logic *******************/
-
-void up_boot(void);
-
 /* Memory allocation ********************************************************/
 
 #if CONFIG_MM_REGIONS > 1
