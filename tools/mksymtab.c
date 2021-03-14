@@ -286,7 +286,7 @@ int main(int argc, char **argv, char **envp)
 
       /* Output the symbol table entry */
 
-      fprintf(outstream, "%s  { \"%s\", (FAR const void *)%s }",
+      fprintf(outstream, "%s  { \"%s\", (FAR const void *)&%s }",
               nextterm, g_parm[NAME_INDEX], g_parm[NAME_INDEX]);
 
       if (cond)
