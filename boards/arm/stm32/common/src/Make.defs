@@ -46,6 +46,10 @@ ifeq ($(CONFIG_AUDIO_TONE),y)
   CSRCS += stm32_tone.c
 endif
 
+ifeq ($(CONFIG_LCD_BACKPACK),y)
+  CSRCS += stm32_lcd_backpack.c
+endif
+
 ifeq ($(CONFIG_LCD_SSD1306),y)
   CSRCS += stm32_ssd1306.c
 endif
