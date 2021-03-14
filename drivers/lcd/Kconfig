@@ -595,6 +595,18 @@ config LCD_ST7789
 	default n
 
 if LCD_ST7789
+	config LCD_ST7789_XRES
+		int "ST7789 X Resolution"
+		default 240
+		---help---
+			Specifies the X resolution of the LCD.
+
+	config LCD_ST7789_YRES
+		int "ST7789 Y Resolution"
+		default 320
+		---help---
+			Specifies the Y resolution of the LCD.
+
 	config LCD_ST7789_BPP
 		int "Bit Per Pixel (12 or 16)"
 		default 16
