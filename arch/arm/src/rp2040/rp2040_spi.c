@@ -1070,7 +1070,7 @@ static void spi_dmatxsetup(FAR struct rp2040_spidev_s *priv,
     }
 
   rp2040_txdmasetup(priv->txdmach, (uintptr_t)dst, (uintptr_t)txbuffer,
-                   nwords, priv->txconfig);
+                   nwords << priv->txconfig.size, priv->txconfig);
 }
 
 /****************************************************************************
@@ -1110,7 +1110,7 @@ static void spi_dmarxsetup(FAR struct rp2040_spidev_s *priv,
     }
 
   rp2040_rxdmasetup(priv->rxdmach, (uintptr_t)src, (uintptr_t)rxbuffer,
-                   nwords, priv->rxconfig);
+                   nwords << priv->rxconfig.size, priv->rxconfig);
 }
 
 /****************************************************************************
