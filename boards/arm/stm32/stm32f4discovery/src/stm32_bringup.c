@@ -111,6 +111,10 @@
 #include "stm32_lis3dsh.h"
 #endif
 
+#ifdef CONFIG_LCD_BACKPACK
+#include "stm32_lcd_backpack.h"
+#endif
+
 #ifdef CONFIG_SENSORS_MAX31855
 #include "stm32_max31855.h"
 #endif
@@ -273,6 +277,17 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_LCD_BACKPACK
+  /* slcd:0, i2c:1, rows=2, cols=16 */
+
+  ret = board_lcd_backpack_init(0, 1, 2, 16);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize PCF8574 LCD, error %d\n", ret);
+      return ret;
     }
 #endif
 
