@@ -4,6 +4,9 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ *   Imported by Roberto Bucher <roberto.bucher@supsi.ch>
+ *   and adapted from original stm32l4/nucleo-l476rg/src
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
