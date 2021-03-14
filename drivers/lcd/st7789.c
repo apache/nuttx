@@ -93,16 +93,22 @@
 
 /* Display Resolution */
 
-#  define CONFIG_ST7789_XRES 240
-#  define CONFIG_ST7789_YRES 320
-#  define ST7789_LUT_SIZE    320
+#if !defined(CONFIG_LCD_ST7789_XRES)
+#  define CONFIG_LCD_ST7789_XRES 240
+#endif
+
+#if !defined(CONFIG_LCD_ST7789_YRES)
+#  define CONFIG_LCD_ST7789_YRES 320
+#endif
+
+#define ST7789_LUT_SIZE    CONFIG_LCD_ST7789_YRES
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
-#  define ST7789_XRES       CONFIG_ST7789_YRES
-#  define ST7789_YRES       CONFIG_ST7789_XRES
+#  define ST7789_XRES       CONFIG_LCD_ST7789_YRES
+#  define ST7789_YRES       CONFIG_LCD_ST7789_XRES
 #else
-#  define ST7789_XRES       CONFIG_ST7789_XRES
-#  define ST7789_YRES       CONFIG_ST7789_YRES
+#  define ST7789_XRES       CONFIG_LCD_ST7789_XRES
+#  define ST7789_YRES       CONFIG_LCD_ST7789_YRES
 #endif
 
 /* Color depth and format */
@@ -175,8 +181,10 @@ static void st7789_setarea(FAR struct st7789_dev_s *dev,
 static void st7789_bpp(FAR struct st7789_dev_s *dev, int bpp);
 static void st7789_wrram(FAR struct st7789_dev_s *dev,
                          FAR const uint16_t *buff, size_t size);
+#ifndef CONFIG_LCD_NOGETRUN
 static void st7789_rdram(FAR struct st7789_dev_s *dev,
                          FAR uint16_t *buff, size_t size);
+#endif
 static void st7789_fill(FAR struct st7789_dev_s *dev, uint16_t color);
 
 /* LCD Data Transfer Methods */
@@ -403,6 +411,7 @@ static void st7789_wrram(FAR struct st7789_dev_s *dev,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_LCD_NOGETRUN
 static void st7789_rdram(FAR struct st7789_dev_s *dev,
                          FAR uint16_t *buff, size_t size)
 {
@@ -412,6 +421,7 @@ static void st7789_rdram(FAR struct st7789_dev_s *dev,
   SPI_RECVBLOCK(dev->spi, buff, size);
   st7789_deselect(dev->spi);
 }
+#endif
 
 /****************************************************************************
  * Name: st7789_fill
