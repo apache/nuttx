@@ -85,8 +85,8 @@ void stm32_boardinitialize(void)
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-   * into the build.
+   * disabled, and 3) the weak function stm32_usbinitialize() has been
+   * broughtvinto the build.
    */
 
   stm32_usbinitialize();
@@ -111,12 +111,10 @@ void stm32_boardinitialize(void)
 void board_late_initialize(void)
 {
   /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in user-space
-   * but the initialization function must run in kernel space.
+   * alternative NSH initialization is necessary when NSH is ran in
+   * user-space but the initialization function must run in kernel space.
    */
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
   board_app_initialize(0);
-#endif
 }
 #endif

@@ -261,6 +261,18 @@ int stm32_adc_setup(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN
+int stm32_can_setup(void);
+#endif
+
+/****************************************************************************
  * Name: board_ajoy_initialize
  *
  * Description:

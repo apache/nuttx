@@ -46,16 +46,13 @@
 #endif
 
 #include <stm32.h>
+#include <arch/board/nucleo-f446re.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *******************************************************************/
-
-#include <arch/board/nucleo-f446re.h>
-
-/* DMA Channel/Stream Selections **********************************************/
+/* DMA Channel/Stream Selections ********************************************/
 
 /* Stream selections are arbitrary for now but might become important in the
  * future is we set aside more DMA channels/streams.
@@ -74,7 +71,7 @@
 #define DMACHAN_SPI2_RX DMAMAP_SPI2_RX
 #define DMACHAN_SPI2_TX DMAMAP_SPI2_TX
 
-/* Alternate function pin selections ******************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART1:
  *   RXD: PA10  CN9 pin 3, CN10 pin 33
@@ -156,6 +153,14 @@
 #define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2
 
+/* CAN */
+
+#define GPIO_CAN1_RX     GPIO_CAN1_RX_2
+#define GPIO_CAN1_TX     GPIO_CAN1_TX_2
+
+#define GPIO_CAN2_RX     GPIO_CAN2_RX_2
+#define GPIO_CAN2_TX     GPIO_CAN2_TX_2
+
 /* LEDs
  *
  * The Nucleo F446RE and F411RE boards provide a single user LED, LD2.  LD2
@@ -208,8 +213,8 @@
 
 /* Buttons
  *
- *   B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
- *   microcontroller.
+ *   B1 USER: the user button is connected to the I/O PC13 (pin 2) of
+ *   the STM32 microcontroller.
  */
 
 #define BUTTON_USER        0
