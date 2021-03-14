@@ -137,6 +137,10 @@
 #include "board_qencoder.h"
 #endif
 
+#ifdef CONFIG_LCD_BACKPACK
+#include "stm32_lcd_backpack.h"
+#endif
+
 #ifdef CONFIG_USBADB
 #include <nuttx/usb/adb.h>
 #endif
@@ -224,7 +228,9 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_LCD_BACKPACK
-  ret = stm32_lcd_backpack_init("/dev/slcd0");
+  /* slcd:0, i2c:1, rows=2, cols=16 */
+
+  ret = board_lcd_backpack_init(0, 1, 2, 16);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize PCF8574 LCD, error %d\n", ret);
