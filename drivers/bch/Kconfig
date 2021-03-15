@@ -3,16 +3,18 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menuconfig BCH
-	bool "Block-to-Character (BCH) Support"
-	default n
-	---help---
-		Contains logic that may be used to convert a block driver into
-		a character driver.  This is the complementary conversion as that
-		performed by loop.c.  See include/nuttx/drivers/drivers.h for
-		registration information.
+# Block-to-Character (BCH) Support
+#
+# BCH contains logic that may be used to convert a block driver into
+# a character driver.  This is the complementary conversion as that
+# performed by loop.c.  See include/nuttx/drivers/drivers.h for
+# registration information.
+#
+# The BCH support itself is enabled unless CONFIG_DISABLE_MOUNTPOINT
+# is set.
+# Its optional features are listed below.
 
-if BCH
+if !DISABLE_MOUNTPOINT
 
 config BCH_ENCRYPTION
 	bool "Enable BCH encryption"
@@ -24,4 +26,4 @@ config BCH_ENCRYPTION_KEY_SIZE
 	default 16
 	depends on BCH_ENCRYPTION
 
-endif # BCH
+endif # !DISABLE_MOUNTPOINT
