@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32f7/stm32f72xx73xx_irq.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
@@ -33,31 +33,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  *Change Record:
- * bf20171107 Created file. It's identical to stm32f74xx75xx_irq except for the
- *             exclusions noted by this tag, and the addition of the last IRQ
- *             for SDMMC2 (IRQ103).
- ****************************************************************************************************/
+ * bf20171107 Created file. It's identical to stm32f74xx75xx_irq except for
+ *             the exclusions noted by this tag, and the addition of the
+ *             last IRQ for SDMMC2 (IRQ103).
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through arch/irq.h */
+/* This file should never be included directly but, rather, only indirectly
+ * through arch/irq.h
+ */
 
 #ifndef __ARCH_ARM_INCLUDE_STM32F7_STM32F72XX73XX_IRQ_H
 #define __ARCH_ARM_INCLUDE_STM32F7_STM32F72XX73XX_IRQ_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to bits in the
- * NVIC.  This does, however, waste several words of memory in the IRQ to handle mapping tables.
+/* IRQ numbers.  The IRQ number corresponds vector number and hence map
+ * directly to bits in the NVIC.  This does, however, waste several words of
+ * memory in the IRQ to handle mapping tables.
  *
- * Processor Exceptions (vectors 0-15).  These common definitions can be found in the file
- * nuttx/arch/arm/include/stm32f7/irq.h which includes this file
+ * Processor Exceptions (vectors 0-15).  These common definitions can be
+ * found in the file nuttx/arch/arm/include/stm32f7/irq.h, which includes
+ * this file.
  *
  * External interrupts (vectors >= 16)
  */
@@ -166,13 +170,13 @@
 
 #define NR_IRQS               (STM32_IRQ_FIRST + STM32_IRQ_NEXTINTS)
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -183,9 +187,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus
