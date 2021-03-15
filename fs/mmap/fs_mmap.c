@@ -98,13 +98,15 @@
  *     ENOSYS
  *       Returned if any of the unsupported mmap() features are attempted
  *     EBADF
- *      'fd' is not a valid file descriptor.
+ *       'fd' is not a valid file descriptor.
  *     EINVAL
- *      Length is 0. flags contained neither MAP_PRIVATE or MAP_SHARED, or
- *      contained both of these values.
+ *       Length is 0. flags contained neither MAP_PRIVATE or MAP_SHARED, or
+ *       contained both of these values.
  *     ENODEV
- *      The underlying filesystem of the specified file does not support
- *      memory mapping.
+ *       The underlying filesystem of the specified file does not support
+ *       memory mapping.
+ *     ENOMEM
+ *       Insufficient memory is available to map the file.
  *
  ****************************************************************************/
 
