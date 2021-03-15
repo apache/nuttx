@@ -235,7 +235,7 @@ bool bt_uart_filter_forward_send(FAR struct bt_uart_filter_s *filter,
 
   if (buffer[0] == H4_CMD)
     {
-      opcode = buffer[2] << 8 | buffer[1];
+      opcode = (uint16_t)buffer[2] << 8 | (uint16_t)buffer[1];
 
       switch (opcode)
         {
