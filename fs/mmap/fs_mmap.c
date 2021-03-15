@@ -112,7 +112,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
                int fd, off_t offset)
 {
   FAR void *addr;
-  int ret = -1;
+  int ret;
 
   /* Since only a tiny subset of mmap() functionality, we have to verify many
    * things.
@@ -132,6 +132,16 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       goto errout;
     }
 
+#ifndef CONFIG_FS_RAMMAP
+  if ((flags & MAP_PRIVATE) != 0)
+    {
+      ferr("ERROR: MAP_PRIVATE is not supported without file mapping"
+           "emulation\n");
+      ret = -ENOSYS;
+      goto errout;
+    }
+#endif /* CONFIG_FS_RAMMAP */
+
   /* A length of 0 is invalid. */
 
   if (length == 0)
@@ -140,7 +150,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       ret = -EINVAL;
       goto errout;
     }
-#endif
+#endif /* CONFIG_DEBUG_FEATURES */
 
   /* Check if we are just be asked to allocate memory, i.e., MAP_ANONYMOUS
    * set meaning that the memory is not backed up from a file.  The file
@@ -169,17 +179,24 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       return alloc;
     }
 
+  if ((flags & MAP_PRIVATE) != 0)
+    {
+#ifdef CONFIG_FS_RAMMAP
+      /* Allocate memory and copy the file into memory.  We would, of course,
+       * do much better in the KERNEL build using the MMU.
+       */
+
+      return rammap(fd, length, offset);
+#endif
+    }
+
   /* Perform the ioctl to get the base address of the file in 'mapped'
    * in memory. (casting to uintptr_t first eliminates complaints on some
    * architectures where the sizeof long is different from the size of
    * a pointer).
    */
 
-  if ((flags & MAP_PRIVATE) == 0)
-    {
-      ret = nx_ioctl(fd, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
-    }
-
+  ret = nx_ioctl(fd, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
   if (ret < 0)
     {
       /* Not directly mappable, probably because the underlying media does
