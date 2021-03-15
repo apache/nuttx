@@ -10,6 +10,7 @@ menu "LC823450 Peripheral Support"
 config LC823450_IPL2
 	bool "IPL2"
 	default n
+	select BCH
 
 config LC823450_UART0
 	bool "UART0"
