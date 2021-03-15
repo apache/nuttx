@@ -36,10 +36,12 @@ ifeq ($(CONFIG_LCD_ILI9225),y)
 CSRCS +=  stm32_ili9225.c
 endif
 
+ifeq ($(CONFIG_STM32_FOC),n)
 ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
 ifeq ($(CONFIG_INPUT_AJOYSTICK),y)
 CSRCS += stm32_ajoystick.c
+endif
 endif
 endif
 
@@ -49,6 +51,10 @@ endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
+endif
+
+ifeq ($(CONFIG_BOARD_STM32_IHM08M1),y)
+CSRCS += stm32_foc_ihm08m1.c
 endif
 
 DEPPATH += --dep-path board
