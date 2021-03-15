@@ -607,6 +607,18 @@ if LCD_ST7789
 		---help---
 			Specifies the Y resolution of the LCD.
 
+	config LCD_ST7789_XOFFSET
+		int "ST7789 X Offset"
+		default 0
+		---help---
+			Specifies the X offset of the LCD.
+
+	config LCD_ST7789_YOFFSET
+		int "ST7789 Y Offset"
+		default 0
+		---help---
+			Specifies the Y offset of the LCD.
+
 	config LCD_ST7789_BPP
 		int "Bit Per Pixel (12 or 16)"
 		default 16
