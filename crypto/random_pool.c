@@ -175,7 +175,7 @@ static void addentropy(FAR const uint32_t *buf, size_t n, bool inc_new)
       uint32_t i;
 
       rotate = g_rng.rd_rotate;
-      w = ROTL_32(*buf, rotate);
+      w = rotate ? ROTL_32(*buf, rotate) : *buf;
       i = g_rng.rd_addptr = (g_rng.rd_addptr - 1) & POOL_MASK;
 
       /* Normal round, we add 7 bits of rotation to the pool.
@@ -463,7 +463,7 @@ void up_rngaddentropy(enum rnd_source_t kindof, FAR const uint32_t *buf,
    */
 
   clock_gettime(CLOCK_REALTIME, &ts);
-  tbuf[0] = ROTL_32(ts.tv_nsec, 17) ^ ROTL_32(ts.tv_sec, 3);
+  tbuf[0] = ROTL_32((uint32_t)ts.tv_nsec, 17) ^ ROTL_32(ts.tv_sec, 3);
   tbuf[0] += ROTL_32(kindof, 27);
   tbuf[0] += ROTL_32((uintptr_t)&tbuf[0], 11);
 
