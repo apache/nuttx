@@ -54,6 +54,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define LSERDY_TIMEOUT (500 * CONFIG_BOARD_LOOPSPERMSEC)
+
 #ifdef CONFIG_STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY
 # if CONFIG_STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
      CONFIG_STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
@@ -84,6 +86,7 @@ void stm32l5_rcc_enablelse(void)
 {
   bool writable;
   uint32_t regval;
+  volatile int32_t timeout;
 
   /* Check if both the External Low-Speed (LSE) oscillator and the LSE system
    * clock are already running.
@@ -119,16 +122,25 @@ void stm32l5_rcc_enablelse(void)
 
       putreg32(regval, STM32L5_RCC_BDCR);
 
-      /* Wait for the LSE clock to be ready */
+      /* Wait for the LSE clock to be ready (or until a timeout elapsed)
+       */
 
-      while (((regval = getreg32(STM32L5_RCC_BDCR)) & RCC_BDCR_LSERDY) == 0)
+      for (timeout = LSERDY_TIMEOUT; timeout > 0; timeout--)
         {
-          up_waste();
+          /* Check if the LSERDY flag is the set in the BDCR */
+
+          regval = getreg32(STM32L5_RCC_BDCR);
+
+          if (regval & RCC_BDCR_LSERDY)
+            {
+              /* If so, then break-out with timeout > 0 */
+
+              break;
+            }
         }
 
-      /* Enable LSE system clock.  The LSE system clock has been introduced
-       * first by the STM32L5 family of MCUs.  It seems to provide a means
-       * to gate the LSE clock distribution to peripherals.  It must be
+      /* Enable LSE system clock.  The LSE system clock seems to provide a
+       * means to gate the LSE clock distribution to peripherals.  It must be
        * enabled for MSI PLL mode (syncing the MSI to the LSE).
        */
 
