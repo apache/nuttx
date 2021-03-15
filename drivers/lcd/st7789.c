@@ -106,9 +106,13 @@
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
 #  define ST7789_XRES       CONFIG_LCD_ST7789_YRES
 #  define ST7789_YRES       CONFIG_LCD_ST7789_XRES
+#  define ST7789_XOFFSET    CONFIG_LCD_ST7789_YOFFSET
+#  define ST7789_YOFFSET    CONFIG_LCD_ST7789_XOFFSET
 #else
 #  define ST7789_XRES       CONFIG_LCD_ST7789_XRES
 #  define ST7789_YRES       CONFIG_LCD_ST7789_YRES
+#  define ST7789_XOFFSET    CONFIG_LCD_ST7789_XOFFSET
+#  define ST7789_YOFFSET    CONFIG_LCD_ST7789_YOFFSET
 #endif
 
 /* Color depth and format */
@@ -174,6 +178,7 @@ static void st7789_deselect(FAR struct spi_dev_s *spi);
 
 static inline void st7789_sendcmd(FAR struct st7789_dev_s *dev, uint8_t cmd);
 static void st7789_sleep(FAR struct st7789_dev_s *dev, bool sleep);
+static void st7789_setorientation(FAR struct st7789_dev_s *dev);
 static void st7789_display(FAR struct st7789_dev_s *dev, bool on);
 static void st7789_setarea(FAR struct st7789_dev_s *dev,
                            uint16_t x0, uint16_t y0,
@@ -327,6 +332,42 @@ static void st7789_display(FAR struct st7789_dev_s *dev, bool on)
 }
 
 /****************************************************************************
+ * Name: st7789_setorientation
+ *
+ * Description:
+ *   Set screen orientation.
+ *
+ ****************************************************************************/
+
+static void st7789_setorientation(FAR struct st7789_dev_s *dev)
+{
+  /* No need to change the orientation in PORTRAIT mode */
+
+#if !defined(CONFIG_LCD_PORTRAIT)
+  st7789_sendcmd(dev, ST7789_MADCTL);
+  st7789_select(dev->spi, 8);
+
+#  if defined(CONFIG_LCD_RLANDSCAPE)
+  /* RLANDSCAPE : MY=1 MV=1 */
+
+  SPI_SEND(dev->spi, 0xa0);
+
+#  elif defined(CONFIG_LCD_LANDSCAPE)
+  /* LANDSCAPE : MX=1 MV=1 */
+
+  SPI_SEND(dev->spi, 0x70);
+
+#  elif defined(CONFIG_LCD_RPORTRAIT)
+  /* RPORTRAIT : MX=1 MY=1 */
+
+  SPI_SEND(dev->spi, 0xc0);
+#  endif
+
+  st7789_deselect(dev->spi);
+#endif
+}
+
+/****************************************************************************
  * Name: st7789_setarea
  *
  * Description:
@@ -342,16 +383,16 @@ static void st7789_setarea(FAR struct st7789_dev_s *dev,
 
   st7789_sendcmd(dev, ST7789_RASET);
   st7789_select(dev->spi, 16);
-  SPI_SEND(dev->spi, y0);
-  SPI_SEND(dev->spi, y1);
+  SPI_SEND(dev->spi, y0 + ST7789_YOFFSET);
+  SPI_SEND(dev->spi, y1 + ST7789_YOFFSET);
   st7789_deselect(dev->spi);
 
   /* Set column address */
 
   st7789_sendcmd(dev, ST7789_CASET);
   st7789_select(dev->spi, 16);
-  SPI_SEND(dev->spi, x0);
-  SPI_SEND(dev->spi, x1);
+  SPI_SEND(dev->spi, x0 + ST7789_XOFFSET);
+  SPI_SEND(dev->spi, x1 + ST7789_XOFFSET);
   st7789_deselect(dev->spi);
 }
 
@@ -671,6 +712,7 @@ FAR struct lcd_dev_s *st7789_lcdinitialize(FAR struct spi_dev_s *spi)
 
   st7789_sleep(priv, false);
   st7789_bpp(priv, ST7789_BPP);
+  st7789_setorientation(priv);
   st7789_display(priv, true);
   st7789_fill(priv, 0xffff);
 
