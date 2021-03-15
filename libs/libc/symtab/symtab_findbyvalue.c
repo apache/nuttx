@@ -41,12 +41,12 @@
  * Description:
  *   Find the symbol in the symbol table whose value closest (but not greater
  *   than), the provided value. This version assumes that table is not
- *   ordered with respect to symbol name and, hence, access time will be
+ *   ordered with respect to symbol value and, hence, access time will be
  *   linear with respect to nsyms.
  *
  * Returned Value:
  *   A reference to the symbol table entry if an entry with the matching
- *   name is found; NULL is returned if the entry is not found.
+ *   value is found; NULL is returned if the entry is not found.
  *
  ****************************************************************************/
 
