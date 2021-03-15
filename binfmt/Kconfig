@@ -66,12 +66,3 @@ config BINFMT_CONSTRUCTORS
 	---help---
 		Built-in support for C++ constructors in loaded modules.  Currently
 		only support for ELF binary formats.
-
-config SYMTAB_ORDEREDBYNAME
-	bool "Symbol Tables Ordered by Name"
-	default n
-	---help---
-		Select if the symbol table is ordered by symbol name.  In this case,
-		the logic can perform faster lookups using a binary search.
-		Otherwise, the symbol table is assumed to be un-ordered and only
-		slow, linear searches are supported.

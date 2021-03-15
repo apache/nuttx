@@ -20,8 +20,7 @@
 
 # Symbol table source files
 
-CSRCS += symtab_findbyname.c symtab_findbyvalue.c
-CSRCS += symtab_findorderedbyname.c symtab_sortbyname.c
+CSRCS += symtab_findbyname.c symtab_findbyvalue.c symtab_sortbyname.c
 
 # Add the symtab directory to the build
 
