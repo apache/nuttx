@@ -43,7 +43,7 @@ config IOB_NCHAINS
 		zero disables this features.
 
 		These generic I/O buffer chain containers are not currently used
-		by any logic in NuttX.  That is because their other other specialized
+		by any logic in NuttX.  That is because their other specialized
 		I/O buffer chain containers that also carry a payload of usage
 		specific information.
 
