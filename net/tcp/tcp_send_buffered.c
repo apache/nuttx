@@ -918,6 +918,44 @@ static inline void send_txnotify(FAR struct socket *psock,
 }
 
 /****************************************************************************
+ * Name: tcp_max_wrb_size
+ *
+ * Description:
+ *   Calculate the desired amount of data for a single
+ *   struct tcp_wrbuffer_s.
+ *
+ ****************************************************************************/
+
+static uint32_t tcp_max_wrb_size(FAR struct tcp_conn_s *conn)
+{
+  const uint32_t mss = conn->mss;
+  uint32_t size;
+
+  /* a few segments should be fine */
+
+  size = 4 * mss;
+
+  /* but it should not hog too many IOB buffers */
+
+  if (size > CONFIG_IOB_NBUFFERS * CONFIG_IOB_BUFSIZE / 2)
+    {
+      size = CONFIG_IOB_NBUFFERS * CONFIG_IOB_BUFSIZE / 2;
+    }
+
+  /* also, we prefer a multiple of mss */
+
+  if (size > mss)
+    {
+      const uint32_t odd = size % mss;
+      size -= odd;
+    }
+
+  DEBUGASSERT(size > 0);
+  ninfo("tcp_max_wrb_size = %" PRIu32 " for conn %p\n", size, conn);
+  return size;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -982,6 +1020,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 {
   FAR struct tcp_conn_s *conn;
   FAR struct tcp_wrbuffer_s *wrb;
+  FAR const uint8_t *cp;
   ssize_t    result = 0;
   bool       nonblock;
   int        ret = OK;
@@ -1043,30 +1082,15 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   BUF_DUMP("psock_tcp_send", buf, len);
 
-  if (len > 0)
+  cp = buf;
+  while (len > 0)
     {
-      /* Allocate a write buffer.  Careful, the network will be momentarily
-       * unlocked here.
-       */
+      uint32_t max_wrb_size;
+      unsigned int off;
+      size_t chunk_len = len;
+      ssize_t chunk_result;
 
       net_lock();
-      if (nonblock)
-        {
-          wrb = tcp_wrbuffer_tryalloc();
-        }
-      else
-        {
-          wrb = tcp_wrbuffer_alloc();
-        }
-
-      if (wrb == NULL)
-        {
-          /* A buffer allocation error occurred */
-
-          nerr("ERROR: Failed to allocate write buffer\n");
-          ret = nonblock ? -EAGAIN : -ENOMEM;
-          goto errout_with_lock;
-        }
 
       /* Allocate resources to receive a callback */
 
@@ -1083,7 +1107,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
           nerr("ERROR: Failed to allocate callback\n");
           ret = nonblock ? -EAGAIN : -ENOMEM;
-          goto errout_with_wrb;
+          goto errout_with_lock;
         }
 
       /* Set up the callback in the connection */
@@ -1093,10 +1117,62 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       psock->s_sndcb->priv  = (FAR void *)psock;
       psock->s_sndcb->event = psock_send_eventhandler;
 
+      /* Allocate a write buffer.  Careful, the network will be momentarily
+       * unlocked here.
+       */
+
+      /* Try to coalesce into the last wrb.
+       *
+       * But only when it might yield larger segments.
+       * (REVISIT: It might make sense to lift this condition.
+       * IOB boundaries and segment boundaries usually do not match.
+       * It makes sense to save the number of IOBs.)
+       *
+       * Also, for simplicity, do it only when we haven't sent anything
+       * from the the wrb yet.
+       */
+
+      max_wrb_size = tcp_max_wrb_size(conn);
+      wrb = (FAR struct tcp_wrbuffer_s *)sq_tail(&conn->write_q);
+      if (wrb != NULL && TCP_WBSENT(wrb) == 0 && TCP_WBNRTX(wrb) == 0 &&
+          TCP_WBPKTLEN(wrb) < max_wrb_size &&
+          (TCP_WBPKTLEN(wrb) % conn->mss) != 0)
+        {
+          wrb = (FAR struct tcp_wrbuffer_s *)sq_remlast(&conn->write_q);
+          ninfo("coalesce %zu bytes to wrb %p (%" PRIu16 ")\n", len, wrb,
+                TCP_WBPKTLEN(wrb));
+          DEBUGASSERT(TCP_WBPKTLEN(wrb) > 0);
+        }
+      else if (nonblock)
+        {
+          wrb = tcp_wrbuffer_tryalloc();
+          ninfo("new wrb %p (non blocking)\n", wrb);
+        }
+      else
+        {
+          wrb = tcp_wrbuffer_alloc();
+          ninfo("new wrb %p\n", wrb);
+        }
+
+      if (wrb == NULL)
+        {
+          /* A buffer allocation error occurred */
+
+          nerr("ERROR: Failed to allocate write buffer\n");
+          ret = nonblock ? -EAGAIN : -ENOMEM;
+          goto errout_with_lock;
+        }
+
       /* Initialize the write buffer */
 
       TCP_WBSEQNO(wrb) = (unsigned)-1;
       TCP_WBNRTX(wrb)  = 0;
+
+      off = TCP_WBPKTLEN(wrb);
+      if (off + chunk_len > max_wrb_size)
+        {
+          chunk_len = max_wrb_size - off;
+        }
 
       /* Copy the user data into the write buffer.  We cannot wait for
        * buffer space if the socket was opened non-blocking.
@@ -1112,13 +1188,21 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
            * remaining data.
            */
 
-          result = TCP_WBTRYCOPYIN(wrb, (FAR uint8_t *)buf, len);
-          if (result == -ENOMEM)
+          chunk_result = TCP_WBTRYCOPYIN(wrb, cp, chunk_len, off);
+          if (chunk_result == -ENOMEM)
             {
               if (TCP_WBPKTLEN(wrb) > 0)
                 {
                   ninfo("INFO: Allocated part of the requested data\n");
-                  result = TCP_WBPKTLEN(wrb);
+                  DEBUGASSERT(TCP_WBPKTLEN(wrb) >= off);
+                  chunk_result = TCP_WBPKTLEN(wrb) - off;
+
+                  /* Note: chunk_result here can be 0 if we are trying
+                   * to coalesce into the existing buffer and we failed
+                   * to add anything.
+                   */
+
+                  DEBUGASSERT(chunk_result >= 0);
                 }
               else
                 {
@@ -1129,7 +1213,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
             }
           else
             {
-              result = len;
+              DEBUGASSERT(chunk_result == chunk_len);
             }
         }
       else
@@ -1143,7 +1227,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
            */
 
           blresult = net_breaklock(&count);
-          result = TCP_WBCOPYIN(wrb, (FAR uint8_t *)buf, len);
+          ninfo("starting copyin to wrb %p\n", wrb);
+          chunk_result = TCP_WBCOPYIN(wrb, cp, chunk_len, off);
+          ninfo("finished copyin to wrb %p\n", wrb);
           if (blresult >= 0)
             {
               net_restorelock(count);
@@ -1167,6 +1253,28 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       send_txnotify(psock, conn);
       net_unlock();
+
+      if (chunk_result == 0)
+        {
+          DEBUGASSERT(nonblock);
+          break;
+        }
+
+      if (chunk_result < 0)
+        {
+          if (result == 0)
+            {
+              result = chunk_result;
+            }
+
+          break;
+        }
+
+      DEBUGASSERT(chunk_result <= len);
+      DEBUGASSERT(result >= 0);
+      cp += chunk_result;
+      len -= chunk_result;
+      result += chunk_result;
     }
 
   /* Check for errors.  Errors are signaled by negative errno values
@@ -1195,6 +1303,11 @@ errout_with_lock:
   net_unlock();
 
 errout:
+  if (result > 0)
+    {
+      return result;
+    }
+
   return ret;
 }
 
