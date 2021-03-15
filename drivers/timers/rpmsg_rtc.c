@@ -111,6 +111,11 @@ struct rpmsg_rtc_lowerhalf_s
 #endif
 };
 
+struct rpmsg_rtc_server_s
+{
+  struct rpmsg_endpoint ept;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -365,6 +370,79 @@ static int rpmsg_rtc_rdalarm(FAR struct rtc_lowerhalf_s *lower_,
 }
 #endif
 
+static void rpmsg_rtc_server_ns_unbind(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct rpmsg_rtc_server_s *priv = ept->priv;
+
+  rpmsg_destroy_ept(&priv->ept);
+  kmm_free(priv);
+}
+
+static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
+                                   FAR void *data, size_t len, uint32_t src,
+                                   FAR void *priv)
+{
+  FAR struct rpmsg_rtc_header_s *header= data;
+  struct timespec ts;
+
+  switch (header->command)
+    {
+    case RPMSG_RTC_GET:
+      {
+        FAR struct rpmsg_rtc_get_s *msg = data;
+
+        header->result = clock_gettime(CLOCK_REALTIME, &ts);
+        msg->sec = ts.tv_sec;
+        msg->nsec = ts.tv_nsec;
+        return rpmsg_send(ept, msg, sizeof(*msg));
+      }
+
+    case RPMSG_RTC_SET:
+      {
+        FAR struct rpmsg_rtc_set_s *msg = data;
+
+        ts.tv_sec = msg->sec;
+        ts.tv_nsec = msg->nsec;
+        header->result = clock_settime(CLOCK_REALTIME, &ts);
+        return rpmsg_send(ept, msg, sizeof(*msg));
+      }
+
+    default:
+      header->result = -ENOSYS;
+      return rpmsg_send(ept, header, sizeof(*header));
+    }
+}
+
+static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
+                                     FAR void *priv_,
+                                     FAR const char *name,
+                                     uint32_t dest)
+{
+  FAR struct rpmsg_rtc_server_s *priv;
+  int ret;
+
+  if (strcmp(name, RPMSG_RTC_EPT_NAME))
+    {
+      return;
+    }
+
+  priv = kmm_zalloc(sizeof(*priv));
+  if (!priv)
+    {
+      return;
+    }
+
+  priv->ept.priv = priv;
+  ret = rpmsg_create_ept(&priv->ept, rdev, RPMSG_RTC_EPT_NAME,
+                         RPMSG_ADDR_ANY, dest,
+                         rpmsg_rtc_server_ept_cb,
+                         rpmsg_rtc_server_ns_unbind);
+  if (ret < 0)
+    {
+      kmm_free(priv);
+    }
+}
+
 /****************************************************************************
  * Name: rpmsg_rtc_initialize
  *
@@ -401,4 +479,23 @@ FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(FAR const char *cpuname,
     }
 
   return (FAR struct rtc_lowerhalf_s *)lower;
+}
+
+/****************************************************************************
+ * Name: rpmsg_rtc_server_initialize
+ *
+ * Description:
+ *   Sync RTC info to remote core without external RTC hardware through rpmsg.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int rpmsg_rtc_server_initialize(void)
+{
+  return rpmsg_register_callback(NULL,
+                                 NULL,
+                                 NULL,
+                                 rpmsg_rtc_server_ns_bind);
 }
