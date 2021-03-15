@@ -53,23 +53,12 @@
 #include "stm32_romfs.h"
 #endif
 
-/*
-#ifdef CONFIG_STM32F7_ADC1
-#include stm32_adc.h
-#endif
-
-#endif CONFIG_PWM
-#include stm32_pwm.c
-#endif
-*/
-
 #ifdef CONFIG_DEV_GPIO
 int stm32_gpio_initialize(void);
 #endif
- 
 
 #ifdef CONFIG_SENSORS_QENCODER
-int stm32F746_qencoder_initialize(FAR const char *devpath, int timer);
+int stm32f7_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
 #ifdef CONFIG_STM32F7_CAN
@@ -212,7 +201,7 @@ int board_app_initialize(uintptr_t arg)
   char buf[9];
 
   sprintf(buf, "/dev/qe0");
-  ret = stm32F746_qencoder_initialize(buf, 2);
+  ret = stm32f7_qencoder_initialize(buf, 2);
   if (ret < 0)
     {
       syslog(LOG_ERR,
