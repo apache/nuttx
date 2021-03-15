@@ -318,4 +318,16 @@ int stm32_can_setup(void);
 int board_ajoy_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_foc_setup
+ *
+ * Description:
+ *  Initialize FOC peripheral for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_FOC
+int stm32_foc_setup(void);
+#endif
+
 #endif /* __BOARDS_ARM_STM32_NUCLEO_F401RE_SRC_NUCLEO_F446RE_H */

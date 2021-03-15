@@ -218,6 +218,10 @@
 #define DMACHAN_SPI2_RX DMAMAP_SPI2_RX
 #define DMACHAN_SPI2_TX DMAMAP_SPI2_TX
 
+/* ADC 1 */
+
+#define ADC1_DMA_CHAN           DMAMAP_ADC1_1
+
 /* Alternate function pin selections ****************************************/
 
 /* USART1:
@@ -227,7 +231,7 @@
  *        PB6   CN5 pin 3, CN10 pin 17
  */
 
-#if 1
+#if !defined(CONFIG_BOARD_STM32_IHM08M1)
 #  define GPIO_USART1_RX GPIO_USART1_RX_1    /* PA10 */
 #  define GPIO_USART1_TX GPIO_USART1_TX_1    /* PA9  */
 #else
@@ -375,5 +379,39 @@
 
 #define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_1 | GPIO_PULLUP)
 #define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_1 | GPIO_PULLUP)
+
+#ifdef CONFIG_BOARD_STM32_IHM08M1
+
+/* Configuration specific to the X-NUCLEO-IHM08M1 expansion board with
+ * the L6398 gate drivers.
+ */
+
+/* TIM1 configuration *******************************************************/
+
+#define GPIO_TIM1_CH1OUT   GPIO_TIM1_CH1OUT_1 /* TIM1 CH1  - PA8  - U high */
+#define GPIO_TIM1_CH1NOUT  GPIO_TIM1_CH1N_1   /* TIM1 CH1N - PA7  - U low */
+#define GPIO_TIM1_CH2OUT   GPIO_TIM1_CH2OUT_1 /* TIM1 CH2  - PA9  - V high */
+#define GPIO_TIM1_CH2NOUT  GPIO_TIM1_CH2N_1   /* TIM1 CH2N - PB0  - V low */
+#define GPIO_TIM1_CH3OUT   GPIO_TIM1_CH3OUT_1 /* TIM1 CH3  - PA10 - W high */
+#define GPIO_TIM1_CH3NOUT  GPIO_TIM1_CH3N_1   /* TIM1 CH3N - PB1  - W low */
+#define GPIO_TIM1_CH4OUT   0                  /* not used as output */
+
+/* Board LED */
+
+#  define GPIO_FOC_LED2   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN2)
+
+/* Debug pin */
+
+#  define GPIO_FOC_DEBUG0 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN12)
+#  define GPIO_FOC_DEBUG1 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|  \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN9)
+#  define GPIO_FOC_DEBUG2 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|  \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN6)
+#  define GPIO_FOC_DEBUG3 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|  \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN5)
+
+#endif  /* CONFIG_BOARD_STM32_IHM08M1 */
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_F446RE_INCLUDE_BOARD_H */
