@@ -39,11 +39,15 @@
 
 #include <arch/board/board.h>
 
-#include "nucleo-f446re.h"
+#ifdef CONFIG_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
 
 #ifdef CONFIG_SENSORS_QENCODER
 #include "board_qencoder.h"
 #endif
+
+#include "nucleo-f446re.h"
 
 /****************************************************************************
  * Public Functions
@@ -66,6 +70,16 @@
 int stm32_bringup(void)
 {
   int ret = OK;
+
+#ifdef CONFIG_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
 
 #ifdef HAVE_MMCSD
   /* First, get an instance of the SDIO interface */
