@@ -105,10 +105,10 @@ void weak_function at90usb_spidev_initialize(void)
  * Name:  avr_spiselect and avr_spistatus
  *
  * Description:
- *   The external functions, avr_spiselect and avr_spistatus  must be provided
- *   by board-specific logic.  They are implementations of the select and
- *   status methods of the SPI interface defined by struct spi_ops_s
- *   (see include/nuttx/spi/spi.h).
+ *   The external functions, avr_spiselect and avr_spistatus  must be
+ *   provided by board-specific logic.  They are implementations of the
+ *   select and status methods of the SPI interface defined by struct
+ *   spi_ops_s (see include/nuttx/spi/spi.h).
  *   All other methods (including avr_spibus_initialize()) are provided by
  *   common AVR logic.
  *   To use this common SPI logic on your board:
@@ -116,8 +116,8 @@ void weak_function at90usb_spidev_initialize(void)
  *   1. Provide logic in avr_spidev_initialize() to configure SPI
  *      chip select pins.
  *   2. Provide avr_spiselect() and avr_spistatus() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations in the way your board is configured.
+ *      board-specific logic.  These functions will perform chip selection
+ *      and status operations in the way your board is configured.
  *   3. Add a calls to at90usb_spidev_initialize() in your low level
  *      application initialization logic
  *   4. The handle returned by avr_spibus_initialize() may then be used to

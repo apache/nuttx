@@ -45,7 +45,8 @@ extern "C"
  * Name: at90usb_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Teensy++ 2.0 board.
+ *   Called to configure SPI chip select GPIO pins for the Teensy++ 2.0
+ *   board.
  *
  ****************************************************************************/
 
