@@ -46,6 +46,10 @@ ifeq ($(CONFIG_CAN_MCP2515),y)
   CSRCS += esp32_mcp2515.c
 endif
 
+ifeq ($(CONFIG_LCD_ILI9341),y)
+  CSRCS += esp32_ili9341.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
