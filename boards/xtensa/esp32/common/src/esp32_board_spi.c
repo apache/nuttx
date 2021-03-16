@@ -52,6 +52,13 @@ static inline uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
     }
 #endif
 
+#ifdef CONFIG_LCD_ILI9341
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+       status |= SPI_STATUS_PRESENT;
+    }
+#endif
+
   return status;
 }
 
@@ -64,6 +71,19 @@ static inline uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
 static inline int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
                               bool cmd)
 {
+#ifdef CONFIG_LCD_ILI9341
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      /*  This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
+
+      esp32_gpiowrite(DISPLAY_DC, !cmd);
+
+      return OK;
+    }
+#endif
+
   return -ENODEV;
 }
 
