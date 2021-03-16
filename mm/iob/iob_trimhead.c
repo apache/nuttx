@@ -61,7 +61,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen,
 
   if (iob && trimlen > 0)
     {
-      /* Trim from the head of the I/IO buffer chain */
+      /* Trim from the head of the I/O buffer chain */
 
       pktlen = iob->io_pktlen;
       while (trimlen > 0 && iob != NULL)
