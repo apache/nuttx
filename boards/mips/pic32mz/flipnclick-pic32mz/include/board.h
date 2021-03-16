@@ -279,10 +279,10 @@
  * 2) Mikroe Click Serial Shield.  There are four Click bus connectors with
  *    serial ports available as follows:
  *
- *    Click A:  UART4 UART4_RX and UART4_TX which are RG9 and RE3, respectively.
- *    Click B:  UART3 UART3_RX and UART3_TX which are RF0 and RF1, respectively.
- *    Click C:  UART1 UART1_RX and UART1_TX which are RC1 and RE5, respectively.
- *    Click D:  UART2 UART2_RX and UART2_TX which are RC3 and RC2, respectively.
+ *  Click A: UART4 UART4_RX and UART4_TX which are RG9 and RE3, respectively.
+ *  Click B: UART3 UART3_RX and UART3_TX which are RF0 and RF1, respectively.
+ *  Click C: UART1 UART1_RX and UART1_TX which are RC1 and RE5, respectively.
+ *  Click D: UART2 UART2_RX and UART2_TX which are RC3 and RC2, respectively.
  */
 
 #define BOARD_U1RX_PPS  U1RXR_RPC1

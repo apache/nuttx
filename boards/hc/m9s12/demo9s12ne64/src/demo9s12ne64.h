@@ -45,14 +45,15 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: hcs12_spidev_initialize
  *
  * Description:
- *  Called to configure SPI chip select GPIO pins for the STM3210E-EVAL board.
+ *  Called to configure SPI chip select GPIO pins for the STM3210E-EVAL
+ *  board.
  *
  ****************************************************************************/
 

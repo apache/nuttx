@@ -39,8 +39,8 @@
 
 /* Configuration ************************************************************/
 
-/* The Mirtoo features a PGA117 amplifier/multipexer that can be configured to
- * bring any analog signal from PORT0,.. PORT7 to pin 19 of the PIC32MX:
+/* The Mirtoo features a PGA117 amplifier/multipexer that can be configured
+ * to bring any analog signal from PORT0,.. PORT7 to pin 19 of the PIC32MX:
  *
  * --- ------------------------------------------------ ---------------------
  * PIN PIC32 SIGNAL(s)                                  BOARD SIGNAL/USAGE

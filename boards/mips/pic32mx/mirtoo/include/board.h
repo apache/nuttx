@@ -93,7 +93,7 @@
  * controllable from software.
  */
 
- /* LED index values for use with board_userled() */
+/* LED index values for use with board_userled() */
 
 #define PIC32MX_MIRTOO_LED0     0
 #define PIC32MX_MIRTOO_LED1     1
