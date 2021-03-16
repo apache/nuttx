@@ -29,6 +29,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "socket/socket.h"
 
 /****************************************************************************
@@ -128,6 +130,7 @@ int psock_listen(FAR struct socket *psock, int backlog)
 int listen(int sockfd, int backlog)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
+  FAR struct file *filep;
   int errcode;
   int ret;
 
@@ -140,7 +143,7 @@ int listen(int sockfd, int backlog)
        * descriptor used in the wrong context.
        */
 
-      if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)
+      if (fs_getfilep(sockfd, &filep) == 0)
         {
           errcode = ENOTSOCK;
         }
