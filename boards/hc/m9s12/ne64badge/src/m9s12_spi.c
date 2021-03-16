@@ -56,20 +56,20 @@ void weak_function hcs12_spidev_initialize(void)
  *
  * Description:
  *   The external functions, hcs12_spiselect and hcs12_spistatus must be
- *   provided by board-specific logic.  They are implementations of the select
+ *   provided by board-specific logic. They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
  *   include/nuttx/spi/spi.h).
  *   All other methods (including hcs12_spibus_initialize())
- *   are provided by common HCS12 logic.  To use this common SPI logic on your
+ *   are provided by common HCS12 logic. To use this common SPI logic on your
  *   board:
  *
  *   1. Provide logic in hcs12_boardinitialize() to configure SPI chip select
  *      pins.
  *   2. Provide hcs12_spiselect() and hcs12_spistatus() functions in your
- *      board-specific logic.  These functions will perform chip selection and
+ *      board-specific logic. These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to hcs12_spibus_initialize() in your low level application
- *      initialization logic
+ *   3. Add a calls to hcs12_spibus_initialize() in your low level
+ *      application initialization logic
  *   4. The handle returned by hcs12_spibus_initialize() may then be used to
  *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
@@ -77,7 +77,8 @@ void weak_function hcs12_spidev_initialize(void)
  *
  ****************************************************************************/
 
-void hcs12_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void hcs12_spiselect(FAR struct spi_dev_s *dev,
+                     uint32_t devid, bool selected)
 {
 }
 

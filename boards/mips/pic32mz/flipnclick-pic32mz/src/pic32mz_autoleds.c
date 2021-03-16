@@ -102,7 +102,14 @@
 
 static void board_autoled_setone(int ledndx)
 {
-  bool ledon[NLEDS] = {false, false, false, false, false};
+  bool ledon[NLEDS] =
+    {
+      false,
+      false,
+      false,
+      false,
+      false
+    };
 
   ledon[ledndx] = true;
   pic32mz_gpiowrite(GPIO_LED_L, ledon[INDEX_LED_L]);

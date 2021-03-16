@@ -93,22 +93,24 @@
  * D9  "Flash"  Yellow  RF0 Low illuminates
  * D10 "Error"  Red     RF1 Low illuminates
  */
-                                  /* ON                  OFF                 */
-                                  /* USB SD  FLASH ERROR USB SD  FLASH ERROR */
-#define LED_STARTED            0  /* OFF OFF OFF   OFF   --- --- ---   ---   */
-#define LED_HEAPALLOCATE       1  /* ON  OFF N/C   N/C   --- --- ---   ---   */
-#define LED_IRQSENABLED        2  /* OFF ON  N/C   N/C   --- --- ---   ---   */
-#define LED_STACKCREATED       3  /* ON  ON  N/C   N/C   --- --- ---   ---   */
-#define LED_INIRQ              4  /* N/C N/C ON    N/C   N/C N/C OFF   N/C   */
-#define LED_SIGNAL             4  /* N/C N/C ON    N/C   N/C N/C OFF   N/C   */
-#define LED_ASSERTION          4  /* N/C N/C ON    N/C   N/C N/C OFF   N/C   */
-#define LED_PANIC              5  /* N/C N/C N/C   ON    N/C N/C N/C   OFF   */
-#define LED_NVALUES            6
+
+                                  /* ON                  OFF               */
+
+                                /* USB SD  FLASH ERROR USB SD  FLASH ERROR */
+#define LED_STARTED          0  /* OFF OFF OFF   OFF   --- --- ---   ---   */
+#define LED_HEAPALLOCATE     1  /* ON  OFF N/C   N/C   --- --- ---   ---   */
+#define LED_IRQSENABLED      2  /* OFF ON  N/C   N/C   --- --- ---   ---   */
+#define LED_STACKCREATED     3  /* ON  ON  N/C   N/C   --- --- ---   ---   */
+#define LED_INIRQ            4  /* N/C N/C ON    N/C   N/C N/C OFF   N/C   */
+#define LED_SIGNAL           4  /* N/C N/C ON    N/C   N/C N/C OFF   N/C   */
+#define LED_ASSERTION        4  /* N/C N/C ON    N/C   N/C N/C OFF   N/C   */
+#define LED_PANIC            5  /* N/C N/C N/C   ON    N/C N/C N/C   OFF   */
+#define LED_NVALUES          6
 
 /* The Sure DB-DP11212 PIC32 General Purpose Demo Board does not have any
  * user controllable LEDs, but does does have a segment LED display.
- * That display is however, obscured by the larger segment display attached to
- * the board and, so, is not supported.
+ * That display is however, obscured by the larger segment display attached
+ * to the board and, so, is not supported.
  */
 
 /* For distinguishing individual LEDs */
@@ -122,9 +124,9 @@
 
 /* The Sure PIC32MX board has three buttons.
  *
- * SW1  (SW_UP, left arrow)          RB3 Pulled high, Grounded/low when depressed
- * SW2  (SW_DOWN, down/right arrow)  RB2 Pulled high, Grounded/low when depressed
- * SW3  (SW_OK, right arrow)         RB4 Pulled high, Grounded/low when depressed
+ * SW1  (SW_UP, left arrow)          RB3 Pulled high, GND/low when depressed
+ * SW2  (SW_DOWN, down/right arrow)  RB2 Pulled high, GND/low when depressed
+ * SW3  (SW_OK, right arrow)         RB4 Pulled high, GND/low when depressed
  */
 
 #define BUTTON_SW1             0
@@ -152,7 +154,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

@@ -45,7 +45,8 @@
  * Name: pic32mz_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Sure PIC32MZ board.
+ *   Called to configure SPI chip select GPIO pins for the Sure PIC32MZ
+ *   board.
  *
  ****************************************************************************/
 
@@ -76,8 +77,8 @@ void weak_function pic32mz_spidev_initialize(void)
  *      configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      pic32mz_spiNcmddata() functions in your board-specific logic.
- *      These functions will perform cmd/data selection operations using GPIOs
- *      in the way your board is configured.
+ *      These functions will perform cmd/data selection operations using
+ *      GPIOs in the way your board is configured.
  *   3. Add a call to pic32mz_spibus_initialize() in your low level
  *      application initialization logic
  *   4. The handle returned by pic32mz_spibus_initialize() may then be used
@@ -104,6 +105,7 @@ uint8_t pic32mz_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #warning "Missing logic"
   return 0;
 }
+
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
@@ -128,6 +130,7 @@ uint8_t pic32mz_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 #warning "Missing logic"
   return 0;
 }
+
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
@@ -152,6 +155,7 @@ uint8_t pic32mz_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 #warning "Missing logic"
   return 0;
 }
+
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
@@ -176,6 +180,7 @@ uint8_t pic32mz_spi4status(FAR struct spi_dev_s *dev, uint32_t devid)
 #warning "Missing logic"
   return 0;
 }
+
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
@@ -200,6 +205,7 @@ uint8_t pic32mz_spi5status(FAR struct spi_dev_s *dev, uint32_t devid)
 #warning "Missing logic"
   return 0;
 }
+
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
                         bool cmd)
@@ -225,6 +231,7 @@ uint8_t pic32mz_spi6status(FAR struct spi_dev_s *dev, uint32_t devid)
 #warning "Missing logic"
   return 0;
 }
+
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi6cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {

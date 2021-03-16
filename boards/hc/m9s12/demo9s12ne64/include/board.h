@@ -43,9 +43,9 @@
 /* PLL Settings
  *
  * SYNR register controls the multiplication factor of the PLL.
- * If the PLL is on, the count in the loop divider (SYNR) register effectively
- * multiplies up the PLL clock (PLLCLK) from the reference frequency by 2 x
- * (SYNR+1).
+ * If the PLL is on, the count in the loop divider (SYNR) register
+ * effectively multiplies up the PLL clock (PLLCLK) from the reference
+ * frequency by 2 x(SYNR+1).
  * PLLCLK will not be below the minimum VCO frequency (fSCM).
  *
  * The REFDV register provides a finer granularity for the PLL multiplier

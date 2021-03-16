@@ -80,7 +80,8 @@
  *   RD0   SPO1    SD card slot              SPI1 data OUT
  *   RD10  SCK1    SD card slot              SD card, SPI clock
  *
- *   RA9   SD_CS#  SD card slot              SD card, SPI chip select (active low)
+ *   RA9   SD_CS#  SD card slot              SD card, SPI chip select
+ *                                           (active low)
  *   RG6   SD_WP   SD card slot              SD card, write protect
  *   RG7   SD_CD#  SD card slot              SD card, card detect (not)
  */

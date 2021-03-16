@@ -112,14 +112,15 @@
  * Name: pic32mx_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Sure PIC32MX board.
+ *   Called to configure SPI chip select GPIO pins for the Sure PIC32MX
+ *   board.
  *
  ****************************************************************************/
 
 void weak_function pic32mx_spidev_initialize(void)
 {
-  /* Configure the SPI2 chip select (CS) GPIO output, and the card detect (CD)
-   * and write protect (WP) inputs.
+  /* Configure the SPI2 chip select (CS) GPIO output, and the card detect
+   * (CD) and write protect (WP) inputs.
    */
 
 #ifdef PIC32_HAVE_SD

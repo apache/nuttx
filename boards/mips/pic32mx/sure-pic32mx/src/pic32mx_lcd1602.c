@@ -260,7 +260,8 @@ static void lcd_dumpstream(FAR const char *msg,
 
 static int lcd_getstream(FAR struct lib_instream_s *instream)
 {
-  FAR struct lcd_instream_s *lcdstream = (FAR struct lcd_instream_s *)instream;
+  FAR struct lcd_instream_s *lcdstream =
+                            (FAR struct lcd_instream_s *)instream;
 
   DEBUGASSERT(lcdstream && lcdstream->buffer);
   if (lcdstream->nbytes > 0)
@@ -564,7 +565,9 @@ static void lcd_action(enum slcdcode_e code, uint8_t count)
         {
           int tmp;
 
-          /* If we are at the home position or if the count is zero, then ignore the action */
+          /* If we are at the home position or if the count is zero,
+           * then ignore the action
+           */
 
           if (g_lcd1602.curcol < 1 || count < 1)
             {
@@ -603,7 +606,9 @@ static void lcd_action(enum slcdcode_e code, uint8_t count)
             nchars = LCD_NCOLUMNS - g_lcd1602.curcol;
             nmove  = MIN(nchars, count) - 1;
 
-            /* Move all characters after the current cursor position left by 'nmove' characters */
+            /* Move all characters after the current cursor position left by
+             * 'nmove' characters
+             */
 
             for (i = g_lcd1602.curcol + nmove; i < LCD_NCOLUMNS - 1; i++)
               {
@@ -636,7 +641,9 @@ static void lcd_action(enum slcdcode_e code, uint8_t count)
                 last = LCD_NCOLUMNS - 1;
               }
 
-            /* Erase N characters after the current cursor position left by one */
+            /* Erase N characters after the current cursor position left by
+             * one
+             */
 
             for (i = g_lcd1602.curcol; i < last; i++)
               {
@@ -662,7 +669,9 @@ static void lcd_action(enum slcdcode_e code, uint8_t count)
         {
           int i;
 
-          /* Erase characters after the current cursor position to the end of the line */
+          /* Erase characters after the current cursor position to the end of
+           * the line
+           */
 
           for (i = g_lcd1602.curcol; i < LCD_NCOLUMNS; i++)
             {
@@ -834,7 +843,8 @@ static ssize_t lcd_write(FAR struct file *filep,  FAR const char *buffer,
   /* Now decode and process every byte in the input buffer */
 
   memset(&state, 0, sizeof(struct slcdstate_s));
-  while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) != SLCDRET_EOF)
+  while ((result = slcd_decode(&instream.stream,
+         &state, &ch, &count)) != SLCDRET_EOF)
     {
       lcdinfo("slcd_decode returned result=%d char=%d count=%d\n",
               result, ch, count);
@@ -910,7 +920,8 @@ static int lcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SLCDIOC_GETATTRIBUTES:
         {
-          FAR struct slcd_attributes_s *attr = (FAR struct slcd_attributes_s *)((uintptr_t)arg);
+          FAR struct slcd_attributes_s *attr =
+                            (FAR struct slcd_attributes_s *)((uintptr_t)arg);
 
           lcdinfo("SLCDIOC_GETATTRIBUTES:\n");
 
@@ -935,9 +946,11 @@ static int lcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SLCDIOC_CURPOS:
         {
-          FAR struct slcd_curpos_s *curpos = (FAR struct slcd_curpos_s *)((uintptr_t)arg);
+          FAR struct slcd_curpos_s *curpos =
+                              (FAR struct slcd_curpos_s *)((uintptr_t)arg);
 
-          lcdinfo("SLCDIOC_CURPOS: row=%d column=%d\n", g_lcd1602.currow, g_lcd1602.curcol);
+          lcdinfo("SLCDIOC_CURPOS: row=%d column=%d\n",
+                   g_lcd1602.currow, g_lcd1602.curcol);
 
           if (!curpos)
             {
@@ -1007,12 +1020,13 @@ static int lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* Data is always available to be read */
 
-      fds->revents |= (fds->events & (POLLIN|POLLOUT));
+      fds->revents |= (fds->events & (POLLIN | POLLOUT));
       if (fds->revents != 0)
         {
           nxsem_post(fds->sem);
         }
     }
+
   return OK;
 }
 
@@ -1054,7 +1068,7 @@ int up_lcd1602_initialize(void)
       g_lcd1602.brightness = 0;                 /* Remember the light is off */
 
       /* A small delay is necessary between when GPIO_LCD_E was set up as an
-       * output with initial value of 0 and this operation.  That delay should
+       * output with initial value of 0 and this operation. That delay should
        * be well covered by the intervening GPIO configurations.
        */
 
@@ -1066,8 +1080,8 @@ int up_lcd1602_initialize(void)
 
       up_mdelay(5);
 
-      /* Select the 8-bit interface. BF cannot be checked before this command.
-       * This needs to be done a few times with some magic delays.
+      /* Select the 8-bit interface. BF cannot be checked before this
+       * command. This needs to be done a few times with some magic delays.
        *
        * Function set: 5x7 Style | N=2R | DL=8D
        */

@@ -64,7 +64,8 @@
  *  SCK2   SCK    PGA117 and SST25VF032B     SPI2 clock
  *
  *  RB7   ~CSAI   PGA117                     PGA117 chip select (active low)
- *  RB13  ~CSM    SST25VF032B                SST25VF032B chip select (active low)
+ *  RB13  ~CSM    SST25VF032B                SST25VF032B chip select
+ *                                           (active low)
  */
 
 #define GPIO_SI             (GPIO_OUTPUT|GPIO_PORTA|GPIO_PIN1)

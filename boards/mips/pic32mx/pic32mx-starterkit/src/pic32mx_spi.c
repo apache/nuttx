@@ -47,7 +47,8 @@
  * Name: pic32mx_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Sure PIC32MX board.
+ *   Called to configure SPI chip select GPIO pins for the Sure PIC32MX
+ *   board.
  *
  ****************************************************************************/
 
@@ -106,8 +107,10 @@ uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #warning "Missing logic"
   return 0;
 }
+
 #ifdef CONFIG_SPI_CMDDATA
-int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev,
+                        uint32_t devid, bool cmd)
 {
 #warning "Missing logic"
   return 0;
@@ -130,6 +133,7 @@ uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #warning "Missing logic"
   return 0;
 }
+
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
@@ -154,6 +158,7 @@ uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 #warning "Missing logic"
   return 0;
 }
+
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
@@ -178,6 +183,7 @@ uint8_t pic32mx_spi4status(FAR struct spi_dev_s *dev, uint32_t devid)
 #warning "Missing logic"
   return 0;
 }
+
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mx_spi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {

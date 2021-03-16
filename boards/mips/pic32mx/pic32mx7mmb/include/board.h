@@ -157,6 +157,7 @@
 #define LED_NVALUES            6
 
 /* Switch definitions *******************************************************/
+
 /* The Mikroelektronika PIC32MX7 MMB has a joystick:
  *
  * ------ -------- --------------------------
