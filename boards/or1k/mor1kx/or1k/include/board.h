@@ -39,7 +39,7 @@
 #define LED_PANIC         (1 << 7)
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #endif /* __BOARDS_OR1K_MOR1KX_OR1K_INCLUDE_BOARD_H */
