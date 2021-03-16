@@ -53,7 +53,8 @@ void at90usb_boardinitialize(void)
 {
 #ifdef CONFIG_AVR_SPI
   /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the
-   * weak function at90usb_spidev_initialize() has been brought into the link.
+   * weak function at90usb_spidev_initialize() has been brought into the
+   * link.
    */
 
   if (at90usb_spidev_initialize)

@@ -36,8 +36,8 @@
 
 /* Clocking *****************************************************************/
 
-/* Oscillator setup:  RCOSC, OSC32, OSC0, OSC1.  Only RCOSC, OSC0, or PLL0 can
- * drive the main clock.
+/* Oscillator setup:  RCOSC, OSC32, OSC0, OSC1.  Only RCOSC, OSC0, or PLL0
+ * can drive the main clock.
  */
 
 /* The RCOSC frequency needs to be calibrated! */
@@ -50,8 +50,8 @@
 #define AVR32_FOSC0          12000000   /* OSC0 frequency in Hz */
 #define AVR32_OSC0STARTUP    3          /* OSC0 startup time in RCOSC periods. */
 
-/* #define AVR32_FOSC1       12000000      OSC1 frequency: Hz.
- * #define AVR32_OSC1STARTUP 3             OSC1 startup time in RCOSC periods.
+/* #define AVR32_FOSC1       12000000     OSC1 frequency: Hz.
+ * #define AVR32_OSC1STARTUP 3            OSC1 startup time in RCOSC periods.
  */
 
 /* PLL setup
@@ -128,9 +128,12 @@
 
 /* LED definitions **********************************************************/
 
-/* The AVR32DEV1 board has 3 LEDs, two of which can be controlled through GPIO pins */
+/* The AVR32DEV1 board has 3 LEDs,
+ * two of which can be controlled through GPIO pins
+ */
 
                                  /*    ON        OFF    */
+
                                  /* LED1 LED2 LED1 LED2 */
 #define LED_STARTED           0  /* OFF  OFF  OFF  OFF  */
 #define LED_HEAPALLOCATE      0  /* OFF  OFF  OFF  OFF  */
@@ -143,7 +146,9 @@
 
 /* Button definitions *******************************************************/
 
-/* The AVR32DEV1 board has 3 BUTTONs, two of which can be sensed through GPIO pins. */
+/* The AVR32DEV1 board has 3 BUTTONs,
+ * two of which can be sensed through GPIO pins.
+ */
 
 #define BUTTON1               1 /* Bit 0: Button 1 */
 #define BUTTON2               2 /* Bit 1: Button 2 */
