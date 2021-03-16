@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32l4/chip.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
@@ -33,27 +33,29 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_STM32L4_CHIP_H
 #define __ARCH_ARM_INCLUDE_STM32L4_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* STM32L475, STM32L476, STM32L486, STM32L496, STM32L4A6
  *
  * Differences between family members:
- *  - L475 has no TSC, no LCD, no AES, no I2C4, no CAN2, No Hash/CRS, no DCMI,
- *    no DMA2D
+ *  - L475 has no TSC, no LCD, no AES, no I2C4, no CAN2, No Hash/CRS, no
+ *    DCMI, no DMA2D
  *  - L486 has AES
- *  - L496, L4A6 has 320 Kib SRAM, 2xCAN and CameraIF. Most (all?) of these have I2C4.
+ *  - L496, L4A6 has 320 Kib SRAM, 2xCAN and CameraIF. Most (all?) of these
+ *    have I2C4.
  *  - L4A6 has AES and HASH
  *
  *   ----------- ---------------- ----- ------ ------ ---- ---- -----
@@ -335,7 +337,8 @@
 #  define STM32L4_NOPAMP                   1   /* Operational Amplifiers */
 #endif /* CONFIG_STM32L4_STM32L412XX || CONFIG_STM32L4_STM32L422XX */
 
-/* NVIC priority levels *************************************************************/
+/* NVIC priority levels *****************************************************/
+
 /* 16 Programmable interrupt levels */
 
 #define NVIC_SYSH_PRIORITY_MIN     0xf0 /* All bits set in minimum priority */

@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32l4/stm32l4x6xx_irq.h
  *
  *   Copyright (C) 2015 Sebastien Lorquet. All rights reserved.
@@ -32,43 +32,47 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through arch/irq.h */
+/* This file should never be included directly but, rather, only indirectly
+ * through arch/irq.h
+ */
 
 #ifndef __ARCH_ARM_INCLUDE_STM32L4_STM32L4X6XX_IRQ_H
 #define __ARCH_ARM_INCLUDE_STM32L4_STM32L4X6XX_IRQ_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to bits in the
- * NVIC.  This does, however, waste several words of memory in the IRQ to handle mapping tables.
+/* IRQ numbers.  The IRQ number corresponds vector number and hence map
+ * directly to bits in the NVIC.  This does, however, waste several words of
+ * memory in the IRQ to handle mapping tables.
  *
- * Processor Exceptions (vectors 0-15).  These common definitions can be found in the file
- * nuttx/arch/arm/include/stm32l4/irq.h which includes this file.
+ * Processor Exceptions (vectors 0-15).  These common definitions can be
+ * found in the file nuttx/arch/arm/include/stm32l4/irq.h which includes
+ * this file.
  *
  * External interrupts (vectors >= 16)
  */
 
-#define STM32L4_IRQ_WWDG        (STM32L4_IRQ_FIRST + 0)  /* 0:  Window Watchdog interrupt */
-#define STM32L4_IRQ_PVD         (STM32L4_IRQ_FIRST + 1)  /* 1:  PVD through EXTI Line detection interrupt */
-#define STM32L4_IRQ_TAMPER      (STM32L4_IRQ_FIRST + 2)  /* 2:  Tamper and time stamp interrupts */
-#define STM32L4_IRQ_TIMESTAMP   (STM32L4_IRQ_FIRST + 2)  /* 2:  Tamper and time stamp interrupts */
-#define STM32L4_IRQ_RTC_WKUP    (STM32L4_IRQ_FIRST + 3)  /* 3:  RTC global interrupt */
-#define STM32L4_IRQ_FLASH       (STM32L4_IRQ_FIRST + 4)  /* 4:  Flash global interrupt */
-#define STM32L4_IRQ_RCC         (STM32L4_IRQ_FIRST + 5)  /* 5:  RCC global interrupt */
-#define STM32L4_IRQ_EXTI0       (STM32L4_IRQ_FIRST + 6)  /* 6:  EXTI Line 0 interrupt */
-#define STM32L4_IRQ_EXTI1       (STM32L4_IRQ_FIRST + 7)  /* 7:  EXTI Line 1 interrupt */
-#define STM32L4_IRQ_EXTI2       (STM32L4_IRQ_FIRST + 8)  /* 8:  EXTI Line 2 interrupt */
-#define STM32L4_IRQ_EXTI3       (STM32L4_IRQ_FIRST + 9)  /* 9:  EXTI Line 3 interrupt */
+#define STM32L4_IRQ_WWDG        (STM32L4_IRQ_FIRST + 0)  /*  0: Window Watchdog interrupt */
+#define STM32L4_IRQ_PVD         (STM32L4_IRQ_FIRST + 1)  /*  1: PVD through EXTI Line detection interrupt */
+#define STM32L4_IRQ_TAMPER      (STM32L4_IRQ_FIRST + 2)  /*  2: Tamper and time stamp interrupts */
+#define STM32L4_IRQ_TIMESTAMP   (STM32L4_IRQ_FIRST + 2)  /*  2: Tamper and time stamp interrupts */
+#define STM32L4_IRQ_RTC_WKUP    (STM32L4_IRQ_FIRST + 3)  /*  3: RTC global interrupt */
+#define STM32L4_IRQ_FLASH       (STM32L4_IRQ_FIRST + 4)  /*  4: Flash global interrupt */
+#define STM32L4_IRQ_RCC         (STM32L4_IRQ_FIRST + 5)  /*  5: RCC global interrupt */
+#define STM32L4_IRQ_EXTI0       (STM32L4_IRQ_FIRST + 6)  /*  6: EXTI Line 0 interrupt */
+#define STM32L4_IRQ_EXTI1       (STM32L4_IRQ_FIRST + 7)  /*  7: EXTI Line 1 interrupt */
+#define STM32L4_IRQ_EXTI2       (STM32L4_IRQ_FIRST + 8)  /*  8: EXTI Line 2 interrupt */
+#define STM32L4_IRQ_EXTI3       (STM32L4_IRQ_FIRST + 9)  /*  9: EXTI Line 3 interrupt */
 #define STM32L4_IRQ_EXTI4       (STM32L4_IRQ_FIRST + 10) /* 10: EXTI Line 4 interrupt */
 #define STM32L4_IRQ_DMA1CH1     (STM32L4_IRQ_FIRST + 11) /* 11: DMA1 Channel 1 global interrupt */
 #define STM32L4_IRQ_DMA1CH2     (STM32L4_IRQ_FIRST + 12) /* 12: DMA1 Channel 2 global interrupt */
@@ -170,13 +174,13 @@
 
 #define NR_IRQS                 (STM32L4_IRQ_FIRST + STM32L4_IRQ_NEXTINTS)
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -187,9 +191,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus
