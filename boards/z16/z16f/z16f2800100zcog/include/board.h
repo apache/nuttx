@@ -28,6 +28,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The Z16F2800100ZCOG board has a 20MHz crystal.  The ZNEO clocking will be
  * configured to use this crystal frequency directly as the clock source
  */
@@ -91,7 +92,7 @@
 #define LED_PANIC              8
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN
