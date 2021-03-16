@@ -38,7 +38,8 @@
  * For details, please see ICD (RTA-FoUSB-MON) User Manual on Target M16C
  * ROM Monitor Resources or related ICD application notes."
  *
- * However, the schematic appears to show that SIO/UART2 is actual connection.
+ * However, the schematic appears to show that SIO/UART2 is actual
+ * connection.
  * To be safe, we will error out on either selection:
  */
 

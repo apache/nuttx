@@ -461,8 +461,8 @@ static void interrupt(int signo)
 static void show_usage(const char *progname, int exitcode)
 {
   fprintf(stderr,
-          "\nUSAGE: %s [-h] [-d] [-t <ttyname>] [-b <baud>] [-l <log-file>]\n",
-          progname);
+     "\nUSAGE: %s [-h] [-d] [-t <ttyname>] [-b <baud>] [-l <log-file>]\n",
+     progname);
   fprintf(stderr, "\nWhere:\n");
   fprintf(stderr, "\t-h: Prints this message then exit.\n");
   fprintf(stderr, "\t-d: Enable debug output (twice for verbose output).\n");
@@ -512,7 +512,8 @@ int main(int argc, char **argv, char **envp)
           break;
 
         case ':':
-          fprintf(stderr, "ERROR: Missing argument to option '%c'\n", optopt);
+          fprintf(stderr, "ERROR: Missing argument to option '%c'\n",
+                  optopt);
           show_usage(argv[0], 1);
           break;
 
@@ -723,8 +724,8 @@ int main(int argc, char **argv, char **envp)
     }
 #endif
 
-  /* Catch attempts to control-C out of the program so that we can restore the
-   * TTY settings.
+  /* Catch attempts to control-C out of the program so that we can restore
+   * the TTY settings.
    */
 
   signal(SIGINT, interrupt);
@@ -752,8 +753,9 @@ int main(int argc, char **argv, char **envp)
       ret = readbyte(g_fdnb, &ch);
       if (ret == 0)
         {
-          printconsole("ERROR: Unexpected number of bytes read(%d) from %s\n",
-                       ret, g_ttydev);
+          printconsole(
+               "ERROR: Unexpected number of bytes read(%d) from %s\n",
+               ret, g_ttydev);
           close_tty();
           return 15;
         }
@@ -807,5 +809,6 @@ int main(int argc, char **argv, char **envp)
             }
         }
     }
+
   return 0;
 }
