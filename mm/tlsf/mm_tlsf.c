@@ -574,7 +574,7 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
         }
       else
         {
-          mm_takesemaphore(heap);
+          mm_takesemaphore(impl);
         }
 
       /* Check tlsf control block in the first pass */
@@ -596,7 +596,7 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
         }
       else
         {
-          mm_givesemaphore(heap);
+          mm_givesemaphore(impl);
         }
     }
 #undef region
