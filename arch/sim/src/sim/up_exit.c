@@ -80,18 +80,6 @@ void up_exit(int status)
   tcb = this_task();
   sinfo("New Active Task TCB=%p\n", tcb);
 
-  /* The way that we handle signals in the simulation is kind of
-   * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
-   * driven environment.
-   */
-
-  if (tcb->xcp.sigdeliver)
-    {
-      sinfo("Delivering signals TCB=%p\n", tcb);
-      ((sig_deliver_t)tcb->xcp.sigdeliver)(tcb);
-      tcb->xcp.sigdeliver = NULL;
-    }
-
   /* Then switch contexts */
 
   up_longjmp(tcb->xcp.regs, 1);

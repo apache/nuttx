@@ -139,18 +139,6 @@ int up_cpu_paused(int cpu)
 
       rtcb = current_task(cpu);
 
-      /* The way that we handle signals in the simulation is kind of a
-       * kludge.  This would be unsafe in a truly multi-threaded,
-       * interrupt driven environment.
-       */
-
-      if (rtcb->xcp.sigdeliver)
-        {
-          sinfo("CPU%d: Delivering signals TCB=%p\n", cpu, rtcb);
-          ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
-          rtcb->xcp.sigdeliver = NULL;
-        }
-
 #ifdef CONFIG_SCHED_INSTRUMENTATION
       /* Notify that we have resumed */
 
@@ -164,6 +152,21 @@ int up_cpu_paused(int cpu)
       /* Then switch contexts */
 
       up_longjmp(rtcb->xcp.regs, 1);
+    }
+  else
+    {
+      /* The way that we handle signals in the simulation is kind of
+       * a kludge.  This would be unsafe in a truly multi-threaded,
+       * interrupt driven environment.
+       */
+
+      rtcb = this_task();
+      if (rtcb->xcp.sigdeliver)
+        {
+          sinfo("CPU%d: Delivering signals TCB=%p\n", this_cpu(), rtcb);
+          ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+          rtcb->xcp.sigdeliver = NULL;
+        }
     }
 
   return OK;
