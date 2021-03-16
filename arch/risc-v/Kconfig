@@ -56,6 +56,7 @@ config ARCH_CHIP_ESP32C3
 config ARCH_CHIP_C906
 	bool "THEAD C906"
 	select ARCH_RV64GC
+	select ARCH_HAVE_MPU
 	---help---
 		THEAD C906 processor (RISC-V 64bit core with GCVX extensions).
 

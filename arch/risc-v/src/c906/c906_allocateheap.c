@@ -28,6 +28,7 @@
 #include <nuttx/userspace.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "c906.h"
@@ -41,6 +42,75 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_allocate_heap
+ *
+ * Description:
+ *   This function will be called to dynamically set aside the heap region.
+ *
+ *   For the kernel build (CONFIG_BUILD_PROTECTED=y) with both kernel- and
+ *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
+ *   size of the unprotected, user-space heap.
+ *
+ *   If a protected kernel-space heap is provided, the kernel heap must be
+ *   allocated (and protected) by an analogous up_allocate_kheap().
+ *
+ *   The following memory map is assumed for the flat build:
+ *
+ *   .data region.  Size determined at link time.
+ *   .bss  region  Size determined at link time.
+ *   IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
+ *   Heap.  Extends to the end of SRAM.
+ *
+ *   The following memory map is assumed for the kernel build:
+ *
+ *   Kernel .data region       Size determined at link time
+ *   Kernel .bss  region       Size determined at link time
+ *   Kernel IDLE thread stack  Size determined by CONFIG_IDLETHREAD_STACKSIZE
+ *   Padding for alignment
+ *   User .data region         Size determined at link time
+ *   User .bss region          Size determined at link time
+ *   Kernel heap               Size determined by CONFIG_MM_KERNEL_HEAPSIZE
+ *   User heap                 Extends to the end of SRAM
+ *
+ ****************************************************************************/
+
+void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+{
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Get the unaligned size and position of the user-space heap.
+   * This heap begins after the user-space .bss section at an offset
+   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
+   */
+
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+    CONFIG_MM_KERNEL_HEAPSIZE;
+  size_t    usize = SRAM1_END - ubase;
+
+  DEBUGASSERT(ubase < (uintptr_t)SRAM1_END);
+
+  /* Adjust that size to account for MPU alignment requirements.
+   * NOTE that there is an implicit assumption that the SRAM1_END
+   * is aligned to the MPU requirement.
+   */
+
+  ubase = SRAM1_END - usize;
+
+  /* Return the user-space heap settings */
+
+  *heap_start = (FAR void *)ubase;
+  *heap_size  = usize;
+
+  /* TODO: Allow user-mode access to the user heap memory in PMP */
+
+#else
+  /* Return the heap settings */
+
+  *heap_start = (FAR void *)g_idle_topstack;
+  *heap_size = CONFIG_RAM_END - g_idle_topstack;
+#endif
+}
 
 /****************************************************************************
  * Name: up_allocate_kheap
