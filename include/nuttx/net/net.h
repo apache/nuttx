@@ -77,13 +77,6 @@
 #  define _NX_RECVFROM(s,b,l,f,a,n) recvfrom(s,b,l,f,a,n)
 #endif
 
-/* Socket descriptors are the index into the TCB sockets list, offset by the
- * following amount. This offset is used to distinguish file descriptors from
- * socket descriptors
- */
-
-#define __SOCKFD_OFFSET CONFIG_NFILE_DESCRIPTORS
-
 /* Capabilities of a socket */
 
 #define SOCKCAP_NONBLOCKING (1 << 0)  /* Bit 0: Socket supports non-blocking

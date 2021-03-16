@@ -1024,6 +1024,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   size_t copysize;
   size_t totalsize;
   int i;
+  int j;
 
   DEBUGASSERT(group != NULL);
 
@@ -1046,27 +1047,32 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
   /* Examine each open file descriptor */
 
-  for (i = 0, file = group->tg_filelist.fl_files;
-       i < CONFIG_NFILE_DESCRIPTORS;
-       i++, file++)
+  for (i = 0; i < group->tg_filelist.fl_rows; i++)
     {
-      /* Is there an inode associated with the file descriptor? */
-
-      if (file->f_inode && !INODE_IS_SOCKET(file->f_inode))
+      for (j = 0, file = group->tg_filelist.fl_files[i];
+           j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+           j++, file++)
         {
-          linesize   = snprintf(procfile->line, STATUS_LINELEN,
-                                "%3d %8ld %04x\n", i, (long)file->f_pos,
-                                file->f_oflags);
-          copysize   = procfs_memcpy(procfile->line, linesize, buffer,
-                                     remaining, &offset);
+          /* Is there an inode associated with the file descriptor? */
 
-          totalsize += copysize;
-          buffer    += copysize;
-          remaining -= copysize;
-
-          if (totalsize >= buflen)
+          if (file->f_inode && !INODE_IS_SOCKET(file->f_inode))
             {
-              return totalsize;
+              linesize   = snprintf(procfile->line, STATUS_LINELEN,
+                                    "%3d %8ld %04x\n",
+                                    i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK +
+                                    j, (long)file->f_pos,
+                                    file->f_oflags);
+              copysize   = procfs_memcpy(procfile->line, linesize, buffer,
+                                         remaining, &offset);
+
+              totalsize += copysize;
+              buffer    += copysize;
+              remaining -= copysize;
+
+              if (totalsize >= buflen)
+                {
+                  return totalsize;
+                }
             }
         }
     }
@@ -1089,30 +1095,33 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
   /* Examine each open socket descriptor */
 
-  for (i = 0, file = group->tg_filelist.fl_files;
-       i < CONFIG_NFILE_DESCRIPTORS;
-       i++, file++)
+  for (i = 0; i < group->tg_filelist.fl_rows; i++)
     {
-      /* Is there an connection associated with the socket descriptor? */
-
-      if (file->f_inode && INODE_IS_SOCKET(file->f_inode))
+      for (j = 0, file = group->tg_filelist.fl_files[i];
+           j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+           j++, file++)
         {
-          FAR struct socket *socket = file->f_priv;
-          linesize   = snprintf(procfile->line, STATUS_LINELEN,
-                                "%3d %3d %02x",
-                                i + CONFIG_NFILE_DESCRIPTORS,
-                                socket->s_type,
-                                socket->s_flags);
-          copysize   = procfs_memcpy(procfile->line, linesize, buffer,
-                                     remaining, &offset);
+          /* Is there an connection associated with the socket descriptor? */
 
-          totalsize += copysize;
-          buffer    += copysize;
-          remaining -= copysize;
-
-          if (totalsize >= buflen)
+          if (file->f_inode && INODE_IS_SOCKET(file->f_inode))
             {
-              return totalsize;
+              FAR struct socket *socket = file->f_priv;
+              linesize   = snprintf(procfile->line, STATUS_LINELEN,
+                                    "%3d %3d %02x",
+                                    i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK +
+                                    j, socket->s_type,
+                                    socket->s_flags);
+              copysize   = procfs_memcpy(procfile->line, linesize, buffer,
+                                         remaining, &offset);
+
+              totalsize += copysize;
+              buffer    += copysize;
+              remaining -= copysize;
+
+              if (totalsize >= buflen)
+                {
+                  return totalsize;
+                }
             }
         }
     }
