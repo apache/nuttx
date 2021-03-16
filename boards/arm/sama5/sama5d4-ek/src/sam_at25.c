@@ -76,8 +76,10 @@ int sam_at25_automount(int minor)
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
 #ifdef CONFIG_SAMA5D4EK_AT25_CHARDEV
+#if defined(CONFIG_BCH)
   char blockdev[18];
   char chardev[12];
+#endif /* defined(CONFIG_BCH) */
 #endif
   static bool initialized = false;
   int ret;
@@ -127,6 +129,7 @@ int sam_at25_automount(int minor)
           return ret;
         }
 
+#if defined(CONFIG_BCH)
       /* Use the minor number to create device paths */
 
       snprintf(blockdev, 18, "/dev/mtdblock%d", minor);
@@ -140,6 +143,7 @@ int sam_at25_automount(int minor)
           ferr("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
           return ret;
         }
+#endif /* defined(CONFIG_BCH) */
 
 #elif defined(CONFIG_SAMA5D4EK_AT25_NXFFS)
       /* Initialize to provide NXFFS on the MTD interface */
