@@ -132,8 +132,10 @@ int board_app_initialize(uintptr_t arg)
   FAR struct mtd_dev_s *mtd_temp;
 #endif
 #if defined(HAVE_N25QXXX_CHARDEV)
+#if defined(CONFIG_BCH)
   char blockdev[18];
   char chardev[12];
+#endif /* defined(CONFIG_BCH) */
 #endif
   int ret = OK;
 
@@ -264,6 +266,7 @@ int board_app_initialize(uintptr_t arg)
           return ret;
         }
 
+#if defined(CONFIG_BCH)
       /* Use the minor number to create device paths */
 
       snprintf(blockdev, 18, "/dev/mtdblock%d", N25QXXX_MTD_MINOR);
@@ -277,6 +280,7 @@ int board_app_initialize(uintptr_t arg)
           _err("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
           return ret;
         }
+#endif /* defined(CONFIG_BCH) */
 #endif
     }
 #endif
