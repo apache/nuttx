@@ -64,8 +64,8 @@
 #define SRAM2_START  STM32L5_SRAM2_BASE
 #define SRAM2_END    (SRAM2_START + STM32L5_SRAM2_SIZE)
 
-#define IDLE_STACK ((uintptr_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
-#define HEAP_BASE  ((uintptr_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
+#define IDLE_STACK ((uintptr_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE - 4)
+#define HEAP_BASE  ((uintptr_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 
 /* g_idle_topstack: _sbss is the start of the BSS region as defined by the
  * linker script. _ebss lies at the end of the BSS region. The idle task
