@@ -196,10 +196,13 @@ void board_autoled_initialize(void)
   putreg8(0x00, PEOC);          /* PE Out Ctrl = push-pull */
   putreg8(0x00, PGOC);          /* PG Out Ctrl = push-pull */
 
-/*putreg8(0x00, PEDD);           * PA Data Dir = output */
+  /* putreg8(0x00, PEDD);           * PA Data Dir = output */
+
   putreg8(0x01, PEADDR);        /* PA Data Dir = output */
   putreg8(0x00, PECTL);         /* OUTPUT */
-/*putreg8(0x00, PGDD);           * PA Data Dir = output */
+
+  /* putreg8(0x00, PGDD);           * PA Data Dir = output */
+
   putreg8(0x01, PGADDR);        /* PA Data Dir = output */
   putreg8(0x00, PGCTL);         /* OUTPUT */
 
@@ -214,7 +217,7 @@ void board_autoled_on(int led)
 {
   if ((unsigned)led <= 8)
     {
-      z8_putarray(&g_ledarray[led+1][0]);
+      z8_putarray(&g_ledarray[led + 1][0]);
     }
 }
 
@@ -226,7 +229,7 @@ void board_autoled_off(int led)
 {
   if (led >= 1)
     {
-      board_autoled_on(led-1);
+      board_autoled_on(led - 1);
     }
 }
 #endif /* CONFIG_ARCH_LEDS */
