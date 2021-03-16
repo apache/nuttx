@@ -103,18 +103,6 @@ void up_release_pending(void)
           rtcb = this_task();
           sinfo("New Active Task TCB=%p\n", rtcb);
 
-          /* The way that we handle signals in the simulation is kind of
-           * a kludge.  This would be unsafe in a truly multi-threaded,
-           * interrupt driven environment.
-           */
-
-          if (rtcb->xcp.sigdeliver)
-            {
-              sinfo("Delivering signals TCB=%p\n", rtcb);
-              ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
-              rtcb->xcp.sigdeliver = NULL;
-            }
-
           /* Update scheduler parameters */
 
           nxsched_resume_scheduler(rtcb);
@@ -122,6 +110,21 @@ void up_release_pending(void)
           /* Then switch contexts */
 
           up_longjmp(rtcb->xcp.regs, 1);
+        }
+      else
+        {
+          /* The way that we handle signals in the simulation is kind of
+           * a kludge.  This would be unsafe in a truly multi-threaded,
+           * interrupt driven environment.
+           */
+
+          rtcb = this_task();
+          if (rtcb->xcp.sigdeliver)
+            {
+              sinfo("Delivering signals TCB=%p\n", rtcb);
+              ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+              rtcb->xcp.sigdeliver = NULL;
+            }
         }
     }
 }
