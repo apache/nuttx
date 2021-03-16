@@ -54,7 +54,7 @@
 #define BUTTON_PB2                 0x04 /* PB2: SW3 Bit 2 of GPIO Port B    */
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN

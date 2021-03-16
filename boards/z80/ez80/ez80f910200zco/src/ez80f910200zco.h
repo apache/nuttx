@@ -36,6 +36,7 @@
 /* Memory map.  Board-specific extensions to the basic ez80f91 memory map
  * (see arch/z80/src/ez80/ez80f91.h
  */
+
                                    /* CS0: 0x000000 256Kb of on-chip flash */
 #define EZ80_OFFCHIPFLASH 0x400000 /* CS0: Off chip flash (Up to 4Mb-256Kb) */
 #define EZ80_LEDGPIOCNTRL 0x800000 /* CS2: (See below) */
@@ -116,7 +117,7 @@
 #define EZ80_PB2_IRQ EZ80_PORTB2_IRQ  /* Vector Oxa8 */
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN

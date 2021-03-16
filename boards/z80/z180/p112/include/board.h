@@ -28,6 +28,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The Z180 is driven by a 16MHz crystal.  The system clock
  * is equal to the crystal frequency.
  */
@@ -36,7 +37,7 @@
 #define Z180_SYSCLOCK    Z180_BOARD_XTAL /* 16 MHz */
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #if defined(__cplusplus)

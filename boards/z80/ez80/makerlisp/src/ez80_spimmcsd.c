@@ -78,7 +78,9 @@ int ez80_mmcsd_initialize(void)
       return -ENODEV;
     }
 
-  /* Register the MMC/SD block driver for slot 0 with device minor number 0. */
+  /* Register the MMC/SD block driver for slot 0 with device minor
+   * number 0.
+   */
 
   ret = mmcsd_spislotinitialize(0, 0, spi);
   if (ret < 0)
