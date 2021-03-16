@@ -45,6 +45,7 @@
 #include <sys/types.h>
 #include <debug.h>
 #include <syslog.h>
+#include <stdio.h>
 
 #include "nucleo-144.h"
 #include <nuttx/fs/fs.h>
