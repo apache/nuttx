@@ -1582,6 +1582,15 @@ static int s32k1xx_initialize(struct s32k1xx_driver_s *priv)
       return -1;
     }
 
+  /* Reset CTRL1 register to reset value */
+
+  regval  = getreg32(priv->base + S32K1XX_CAN_CTRL1_OFFSET);
+  regval &= ~(CAN_CTRL1_LOM | CAN_CTRL1_LBUF | CAN_CTRL1_TSYN |
+              CAN_CTRL1_BOFFREC | CAN_CTRL1_SMP | CAN_CTRL1_RWRNMSK |
+              CAN_CTRL1_TWRNMSK | CAN_CTRL1_LPB | CAN_CTRL1_ERRMSK |
+              CAN_CTRL1_BOFFMSK);
+  putreg32(regval, priv->base + S32K1XX_CAN_CTRL1_OFFSET);
+
 #ifndef CONFIG_NET_CAN_CANFD
   regval  = getreg32(priv->base + S32K1XX_CAN_CTRL1_OFFSET);
 
