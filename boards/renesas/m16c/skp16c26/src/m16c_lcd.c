@@ -150,7 +150,7 @@ static inline void up_enpulse(bool data)
 
 void up_lcdwrite(bool data, uint8_t ch)
 {
-  up_setrs(data);				/* Set RS appropriately */
+  up_setrs(data);             /* Set RS appropriately */
 
   /* Write upper nibble first.  Only the lower 4 bits of P9 are valid.
    * The upper four bits are reserved and must be zero.
@@ -233,7 +233,7 @@ void up_lcdinit(void)
   up_lcddelay(20);
   up_lcdwrite(false, 0x32);
   up_lcddelay(20);
-  up_lcdwrite(false, FUNCTION_SET);	/* reset sequence */
+  up_lcdwrite(false, FUNCTION_SET);  /* reset sequence */
   up_lcdwrite(false, FUNCTION_SET);
   up_lcdwrite(false, LCD_CURSOR_OFF);
   up_lcdwrite(false, LCD_CLEAR);

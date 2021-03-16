@@ -81,10 +81,9 @@ static const uint8_t g_ledstate[7] =
   (GREEN_LED_ON  | YELLOW_LED_OFF | RED_LED_OFF), /* LED_HEAPALLOCATE */
   (GREEN_LED_OFF | YELLOW_LED_ON  | RED_LED_OFF), /* LED_IRQSENABLED */
   (GREEN_LED_ON  | YELLOW_LED_ON  | RED_LED_OFF), /* LED_STACKCREATED */
-
-  (GREEN_LED_ON  | YELLOW_LED_OFF | RED_LED_ON ), /* LED_INIRQ */
-  (GREEN_LED_OFF | YELLOW_LED_ON  | RED_LED_ON ), /* LED_SIGNAL */
-  (GREEN_LED_ON  | YELLOW_LED_ON  | RED_LED_ON )  /* LED_ASSERTION */
+  (GREEN_LED_ON  | YELLOW_LED_OFF | RED_LED_ON),  /* LED_INIRQ */
+  (GREEN_LED_OFF | YELLOW_LED_ON  | RED_LED_ON),  /* LED_SIGNAL */
+  (GREEN_LED_ON  | YELLOW_LED_ON  | RED_LED_ON)   /* LED_ASSERTION */
 };
 
 static uint8_t g_prevled[3];
@@ -154,8 +153,8 @@ void board_autoled_on(int led)
 {
   uint8_t ledset;
 
-  /* If this is the ASSERTION led, preserve the Y&G bits from the last setting
-   * and set the RED LED on.
+  /* If this is the ASSERTION led, preserve the Y&G bits from the last
+   * setting and set the RED LED on.
    */
 
   if (led == LED_ASSERTION)
@@ -178,6 +177,7 @@ void board_autoled_on(int led)
         {
           g_nestlevel++;
         }
+
       g_prevled[g_nestlevel] = led;
     }
 }
