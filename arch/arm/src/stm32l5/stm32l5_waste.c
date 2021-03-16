@@ -1,5 +1,5 @@
 /*****************************************************************************
- *  arch/arm/src/stm32l5/stm32l5_waste.c
+ * arch/arm/src/stm32l5/stm32l5_waste.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

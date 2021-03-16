@@ -1,5 +1,5 @@
 /*****************************************************************************
- * arm/arm/src/stm32l5/stm32l5_tim.c
+ * arch/arm/src/stm32l5/stm32l5_tim.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>
