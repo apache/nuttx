@@ -86,7 +86,7 @@ int posix_spawn_file_actions_adddup2(FAR posix_spawn_file_actions_t *file_action
   /* Allocate the action list entry */
 
   entry = (FAR struct spawn_dup2_file_action_s *)
-    lib_zalloc(sizeof(struct spawn_close_file_action_s));
+    lib_zalloc(sizeof(struct spawn_dup2_file_action_s));
 
   if (!entry)
     {
