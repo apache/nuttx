@@ -80,7 +80,7 @@ int esp32c3_bringup(void)
 #ifdef CONFIG_FS_TMPFS
   /* Mount the tmpfs file system */
 
-  ret = mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
