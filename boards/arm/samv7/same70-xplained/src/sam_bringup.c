@@ -154,8 +154,10 @@ int sam_bringup(void)
 {
 #ifdef HAVE_PROGMEM_CHARDEV
   FAR struct mtd_dev_s *mtd;
+#if defined(CONFIG_BCH)
   char blockdev[18];
   char chardev[12];
+#endif /* defined(CONFIG_BCH) */
 #endif
   int ret;
 
@@ -285,6 +287,7 @@ int sam_bringup(void)
       return ret;
     }
 
+#if defined(CONFIG_BCH)
   /* Use the minor number to create device paths */
 
   snprintf(blockdev, 18, "/dev/mtdblock%d", PROGMEM_MTD_MINOR);
@@ -299,6 +302,7 @@ int sam_bringup(void)
              chardev, ret);
       return ret;
     }
+#endif /* defined(CONFIG_BCH) */
 #endif
 
 #ifdef HAVE_USBHOST
