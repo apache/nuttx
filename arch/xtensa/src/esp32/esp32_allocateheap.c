@@ -127,6 +127,11 @@ void xtensa_add_region(void)
   umm_addregion(start, size);
 
 #else
+#ifdef CONFIG_ESP32_QEMU_IMAGE
+  start = (FAR void *)HEAP_REGION2_START;
+  size  = (size_t)(uintptr_t)&_eheap - (size_t)start;
+  umm_addregion(start, size);
+#else
   start = (FAR void *)HEAP_REGION2_START;
   size  = (size_t)(HEAP_REGION2_END - HEAP_REGION2_START);
   umm_addregion(start, size);
@@ -135,10 +140,13 @@ void xtensa_add_region(void)
   size  = (size_t)(uintptr_t)&_eheap - (size_t)start;
   umm_addregion(start, size);
 #endif
+#endif
 
+#ifndef CONFIG_ESP32_QEMU_IMAGE
   start = (FAR void *)HEAP_REGION0_START;
   size  = (size_t)(HEAP_REGION0_END - HEAP_REGION0_START);
   umm_addregion(start, size);
+#endif
 
 #if defined(CONFIG_ESP32_SPIRAM)
   /* Check for any additional memory regions */
