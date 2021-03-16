@@ -54,7 +54,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SYS_syscall 0x900001
+#define SYS_syscall 0x00
 
 #if defined(__thumb__) || defined(__thumb2__)
 #  define SYS_smhcall 0xab
