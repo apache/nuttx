@@ -220,6 +220,8 @@ config ARCH_BOARD_ESP32_WROVERKIT
 	bool "Espressif ESP-WROVER-KIT"
 	depends on ARCH_CHIP_ESP32WROVER
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		ESP-WROVER-KIT is an ESP32-based development board produced by Espressif.
 		ESP-WROVER-KIT features the following integrated components:
