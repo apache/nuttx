@@ -386,7 +386,14 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
 static inline void rpmsg_socket_destroy_ept(
                     FAR struct rpmsg_socket_conn_s *conn)
 {
-  if (conn && conn->ept.rdev)
+  if (!conn)
+    {
+      return;
+    }
+
+  rpmsg_socket_lock(&conn->recvlock);
+
+  if (conn->ept.rdev)
     {
       if (conn->backlog)
         {
@@ -400,6 +407,8 @@ static inline void rpmsg_socket_destroy_ept(
       rpmsg_socket_post(&conn->recvsem);
       rpmsg_socket_pollnotify(conn, POLLIN | POLLOUT);
     }
+
+  rpmsg_socket_unlock(&conn->recvlock);
 }
 
 static void rpmsg_socket_ns_unbind(FAR struct rpmsg_endpoint *ept)
