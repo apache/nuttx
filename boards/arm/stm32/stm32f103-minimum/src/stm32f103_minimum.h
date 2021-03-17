@@ -187,6 +187,18 @@
 #define WS2812_NLEDS 2
 #define WS2812_SPI 1
 
+/* Sensor */
+
+#define BOARD_HYT271_NBUS      2 /* Bus number of connected HYT271 */
+
+#define BOARD_HYT271_POWOUT    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz| \
+                                GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN0)
+#define BOARD_HYT271_POWIN     (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA| \
+                                GPIO_PIN1)
+
+#define BOARD_DS18B20_NBUS     2 /* Bus number of connected DS18B20 */
+#define BOARD_DS18B20_NSLAVES  2 /* Number of expected DS18B20 slaves */
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -322,6 +334,42 @@ void stm32_usbinitialize(void);
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_hyt271initialize
+ *
+ * Description:
+ *   Function used to initialize HYT271 snesors on a i2c bus
+ *
+ * Parameter:
+ *   devno   - First character device number
+ *
+ * Return
+ *   Error or number of device that have been successfully registered.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_HYT271
+int stm32_hyt271initialize(int devno);
+#endif
+
+/****************************************************************************
+ * Name: stm32_ds18b20initialize
+ *
+ * Description:
+ *   Function used to initialize DS18B20 snesors on a 1wire bus
+ *
+ * Parameter:
+ *   devno   - First character device number
+ *
+ * Return
+ *   Error or number of device that have been successfully registered.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_DS18B20
+int stm32_ds18b20initialize(int devno);
 #endif
 
 /****************************************************************************

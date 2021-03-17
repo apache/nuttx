@@ -17,6 +17,8 @@ Contents
   - SDCard support
   - SPI NOR Flash
   - Nokia 5110 LCD Display support
+  - HYT271 sensor
+  - DS18B20 sensor
   - USB Console support
   - STM32F103 Minimum - specific Configuration Options
   - Configurations
@@ -493,6 +495,56 @@ Nokia 5110 LCD Display support:
   Now just run nxhello and you should see "Hello World" in the display:
 
   nsh> nxhello
+
+HYT271 sensor support:
+======================
+
+The existing sensor configuration allows connecting several sensors of type
+hyt271 on i2c bus number 2. For full feature support, be able to change the
+i2c address of the sensor, the following hardware setup is necessary.
+
+  ----------                                            -----------
+  |        |------ GND ------------------------ GND ----|         |
+  |        |                                            |         |
+  |        |                                            |         |
+  |        |                                            |         |
+  |        |---- POWIN A00 ------.                      |         |
+  |        |                     |                      |         |
+  |        |                    4.7k                    |         |
+  |        |                     |                      |         |
+  | STM32  |--- POWOUT A01 ------.------.------ VDD ----| HYT271  |
+  |        |                     |      |               |         |
+  |        |                    2.2k    |               |         |
+  |        |                     |      |               |         |
+  |        |----- SDA2 B11 ------.----  | ----- SDA ----|         |
+  |        |                            |               |         |
+  |        |                           2.2k             |         |
+  |        |                            |               |         |
+  |        |----- SCL2 B10 -------------.------ SCL ----|         |
+  |        |                                            |         |
+  ---------                                             -----------
+
+
+DS18B20 sensor support:
+======================
+
+The existing sensor configuration allows connecting several sensors of type
+ds18b20 on 1wire bus number 2. The following hardware setup is necessary.
+
+  ---------                                            -----------
+  |       |------ GND ----------.------------- GND ----|         |
+  |       |                                            |         |
+  |       |                                            |         |
+  |       |                                            |         |
+  |       |------ VDD ----------.------------- VDD ----|         |
+  | STM32 |                     |                      | DS18B20 |
+  |       |                    4.7k                    |         |
+  |       |                     |                      |         |
+  |       |----- TX2 A02 -------.------.------- DQ ----|         |
+  |       |                                            |         |
+  --------                                             -----------
+
+
 
 USB Console support:
 ====================
