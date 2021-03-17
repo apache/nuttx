@@ -52,8 +52,8 @@
 #  define HD4478OU_SHIFT_DISPLAY  (1 << 3)   /*   Display shift */
 #  define HD4478OU_SHIFT_CURSOR   (0x00)     /*   Cursor shift */
 #define HD4478OU_FUNC             (0x23)     /* Set DL, display line, font */
-#  define HD4478OU_FUNC_F5x10     (1 << 2)   /*   5x10 Style */
-#  define HD4478OU_FUNC_F5x7      (0x00)     /*   5x7 Style */
+#  define HD4478OU_FUNC_F5X10     (1 << 2)   /*   5x10 Style */
+#  define HD4478OU_FUNC_F5X7      (0x00)     /*   5x7 Style */
 #  define HD4478OU_FUNC_N1        (1 << 3)   /*   N=2R */
 #  define HD4478OU_FUNC_N0        (0x00)     /*   N=1R */
 #  define HD4478OU_FUNC_DL8D      (1 << 4)   /*   DL=8D, 8-bit interface */
