@@ -83,11 +83,16 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SIM_SANITIZE
+__attribute__((no_sanitize_address))
+#endif
 pid_t up_vfork(const xcpt_reg_t *context)
 {
   struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
   size_t stacksize;
+  unsigned char *pout;
+  unsigned char *pin;
   unsigned long newsp;
   unsigned long newfp;
   unsigned long stackutil;
@@ -151,7 +156,9 @@ pid_t up_vfork(const xcpt_reg_t *context)
    */
 
   newsp = (unsigned long)child->cmn.adj_stack_ptr - stackutil;
-  memcpy((void *)newsp, (const void *)context[JB_SP], stackutil);
+  pout = (unsigned char *)newsp;
+  pin  = (unsigned char *)context[JB_SP];
+  while (stackutil-- > 0) *pout++ = *pin++;
 
   /* Was there a frame pointer in place before? */
 
@@ -180,7 +187,8 @@ pid_t up_vfork(const xcpt_reg_t *context)
    * child thread.
    */
 
-  memcpy(child->cmn.xcp.regs, context, sizeof(xcpt_reg_t) * XCPTCONTEXT_REGS);
+  memcpy(child->cmn.xcp.regs, context,
+         sizeof(xcpt_reg_t) * XCPTCONTEXT_REGS);
   child->cmn.xcp.regs[JB_FP] = newfp; /* Frame pointer */
   child->cmn.xcp.regs[JB_SP] = newsp; /* Stack pointer */
 
