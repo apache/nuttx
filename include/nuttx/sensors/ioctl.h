@@ -223,6 +223,12 @@
 #define SNIOC_SET_RESOLUTION       _SNIOC(0x0065) /* Arg: uint8_t value */
 #define SNIOC_SET_RANGE            _SNIOC(0x0066) /* Arg: uint8_t value */
 
+/* IOCTL commands unique to the HYS271 */
+
+/* SNIOC_CHANGEADDR */                            /* Arg: uint8_t value */
+
+#define SNIOC_READADDR             SNIOC_READID   /* Arg: uint8_t* pointer */
+
 /* Command:      SNIOC_ACTIVATE
  * Description:  Enable or disable sensor
  * Argument:     true or false.
