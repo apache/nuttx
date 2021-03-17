@@ -51,6 +51,14 @@ ifeq ($(CONFIG_PWM),y)
   CSRCS += stm32_pwm.c
 endif
 
+ifeq ($(CONFIG_SENSORS_HYT271),y)
+  CSRCS += stm32_hyt271.c
+endif
+
+ifeq ($(CONFIG_SENSORS_DS18B20),y)
+  CSRCS += stm32_ds18b20.c
+endif
+
 ifeq ($(CONFIG_RGBLED),y)
   CSRCS += stm32_rgbled.c
 endif
