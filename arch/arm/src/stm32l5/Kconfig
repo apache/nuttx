@@ -248,6 +248,10 @@ config STM32L5_PWR
 	bool "PWR"
 	default n
 
+config STM32L5_RTC
+	bool "RTC"
+	default n
+
 config STM32L5_LPUART1
 	bool "LPUART1"
 	default n
@@ -389,10 +393,24 @@ endchoice
 
 if STM32L5_RTC_LSECLOCK
 
+config STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+	bool "Automaticaly boost the LSE oscillator drive capability level until it starts-up"
+	default n
+	---help---
+		This will cycle through the values from low to high. To avoid
+		damaging the the crystal. We want to use the lowest setting that gets
+		the OSC running. See app note AN2867
+
+			0 = Low drive capability (default)
+			1 = Medium low drive capability
+			2 = Medium high drive capability
+			3 = High drive capability
+
 config STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY
 	int "LSE oscillator drive capability level at LSE start-up"
 	default 0
 	range 0 3
+	depends on !STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 	---help---
 		0 = Low drive capability (default)
 		1 = Medium low drive capability
@@ -403,6 +421,7 @@ config STM32L5_RTC_LSECLOCK_RUN_DRV_CAPABILITY
 	int "LSE oscillator drive capability level after LSE start-up"
 	default 0
 	range 0 3
+	depends on !STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 	---help---
 		0 = Low drive capability (default)
 		1 = Medium low drive capability

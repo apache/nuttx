@@ -71,6 +71,20 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+static const uint32_t drives[4] =
+{
+    RCC_BDCR_LSEDRV_LOW,
+    RCC_BDCR_LSEDRV_MEDLO,
+    RCC_BDCR_LSEDRV_MEDHI,
+    RCC_BDCR_LSEDRV_HIGH
+};
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -87,6 +101,9 @@ void stm32l5_rcc_enablelse(void)
   bool writable;
   uint32_t regval;
   volatile int32_t timeout;
+#ifdef CONFIG_STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+  volatile int32_t drive = 0;
+#endif
 
   /* Check if both the External Low-Speed (LSE) oscillator and the LSE system
    * clock are already running.
@@ -113,46 +130,72 @@ void stm32l5_rcc_enablelse(void)
       regval |= RCC_BDCR_LSEON;
 
 #ifdef CONFIG_STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY
-      /* Set start-up drive capability for LSE oscillator. */
-
-      regval &= ~RCC_BDCR_LSEDRV_MASK;
-      regval |= CONFIG_STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY <<
-                RCC_BDCR_LSEDRV_SHIFT;
-#endif
-
-      putreg32(regval, STM32L5_RCC_BDCR);
-
-      /* Wait for the LSE clock to be ready (or until a timeout elapsed)
+      /* Set start-up drive capability for LSE oscillator.  LSE must be OFF
+       * to change drive strength.
        */
 
-      for (timeout = LSERDY_TIMEOUT; timeout > 0; timeout--)
+      regval &= ~(RCC_BDCR_LSEDRV_MASK | RCC_BDCR_LSEON);
+      regval |= CONFIG_STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY <<
+                RCC_BDCR_LSEDRV_SHIFT;
+      putreg32(regval, STM32L5_RCC_BDCR);
+      regval |= RCC_BDCR_LSEON;
+#endif
+
+#ifdef CONFIG_STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+      do
         {
-          /* Check if the LSERDY flag is the set in the BDCR */
+          regval &= ~(RCC_BDCR_LSEDRV_MASK | RCC_BDCR_LSEON);
+          regval |= drives[drive++];
+          putreg32(regval, STM32L5_RCC_BDCR);
+          regval |= RCC_BDCR_LSEON;
+#endif
 
-          regval = getreg32(STM32L5_RCC_BDCR);
+          putreg32(regval, STM32L5_RCC_BDCR);
 
-          if (regval & RCC_BDCR_LSERDY)
+          /* Wait for the LSE clock to be ready (or until a timeout elapsed)
+           */
+
+          for (timeout = LSERDY_TIMEOUT; timeout > 0; timeout--)
             {
-              /* If so, then break-out with timeout > 0 */
+              /* Check if the LSERDY flag is the set in the BDCR */
 
+              regval = getreg32(STM32L5_RCC_BDCR);
+
+              if (regval & RCC_BDCR_LSERDY)
+                {
+                  /* If so, then break-out with timeout > 0 */
+
+                  break;
+                }
+            }
+
+#ifdef CONFIG_STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+          if (timeout != 0)
+            {
               break;
             }
         }
+      while (drive < sizeof(drives) / sizeof(drives[0]));
+#endif
 
-      /* Enable LSE system clock.  The LSE system clock seems to provide a
-       * means to gate the LSE clock distribution to peripherals.  It must be
-       * enabled for MSI PLL mode (syncing the MSI to the LSE).
-       */
-
-      regval |= RCC_BDCR_LSESYSEN;
-
-      putreg32(regval, STM32L5_RCC_BDCR);
-
-      /* Wait for the LSE system clock to be ready */
-
-      while (!((regval = getreg32(STM32L5_RCC_BDCR)) & RCC_BDCR_LSESYSRDY))
+      if (timeout != 0)
         {
-          up_waste();
+          /* Enable LSE system clock.  The LSE system clock seems to provide
+           * a means to gate the LSE clock distribution to peripherals.  It
+           * must be enabled for MSI PLL mode (syncing the MSI to the LSE).
+           */
+
+          regval |= RCC_BDCR_LSESYSEN;
+
+          putreg32(regval, STM32L5_RCC_BDCR);
+
+          /* Wait for the LSE system clock to be ready */
+
+          while (!((regval = getreg32(STM32L5_RCC_BDCR)) &
+                   RCC_BDCR_LSESYSRDY))
+            {
+              up_waste();
+            }
         }
 
 #if defined(CONFIG_STM32L5_RTC_LSECLOCK_RUN_DRV_CAPABILITY) && \
