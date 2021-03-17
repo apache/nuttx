@@ -649,7 +649,7 @@ static void esp32_spislv_tx(struct esp32_spislv_priv_s *priv)
   if (priv->dma_chan)
     {
       esp32_dma_init(s_tx_desc[priv->dma_chan - 1], SPI_DMADESC_NUM,
-                     priv->txbuffer, priv->txlen, 0);
+                     priv->txbuffer, priv->txlen);
 
       regval = (uint32_t)s_tx_desc[priv->dma_chan - 1] & SPI_OUTLINK_ADDR_V;
       esp32_spi_set_reg(priv, SPI_DMA_OUT_LINK_OFFSET,
@@ -725,7 +725,7 @@ static void esp32_spislv_rx(struct esp32_spislv_priv_s *priv)
           /* Start to receive next block of data */
 
           esp32_dma_init(s_rx_desc[priv->dma_chan - 1], SPI_DMADESC_NUM,
-                        priv->rxbuffer + priv->rxlen, tmp, 1);
+                        priv->rxbuffer + priv->rxlen, tmp);
 
           regval = (uint32_t)s_rx_desc[priv->dma_chan - 1] &
                    SPI_INLINK_ADDR_V;
@@ -911,7 +911,7 @@ static void esp32_spislv_initialize(FAR struct spi_sctrlr_s *dev)
                                                    SPI_OUTDSCR_BURST_EN_M);
 
       esp32_dma_init(s_rx_desc[priv->dma_chan - 1], SPI_DMADESC_NUM,
-                     priv->rxbuffer, SPI_SLAVE_BUFSIZE, 1);
+                     priv->rxbuffer, SPI_SLAVE_BUFSIZE);
 
       regval = (uint32_t)s_rx_desc[priv->dma_chan - 1] & SPI_INLINK_ADDR_V;
       esp32_spi_set_reg(priv, SPI_DMA_IN_LINK_OFFSET,

@@ -917,7 +917,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       esp32_spi_reset_regbits(priv, SPI_DMA_CONF_OFFSET, SPI_DMA_RESET_MASK);
 
       n = esp32_dma_init(s_dma_txdesc[priv->config->dma_chan - 1],
-                         SPI_DMADESC_NUM, tp, bytes, 0);
+                         SPI_DMADESC_NUM, tp, bytes);
 
       regval = (uintptr_t)s_dma_txdesc[priv->config->dma_chan - 1] &
                SPI_OUTLINK_ADDR_V;
@@ -936,7 +936,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       if (rp)
         {
           esp32_dma_init(s_dma_rxdesc[priv->config->dma_chan - 1],
-                         SPI_DMADESC_NUM, rp, bytes, 1);
+                         SPI_DMADESC_NUM, rp, bytes);
 
           regval = (uintptr_t)s_dma_rxdesc[priv->config->dma_chan - 1] &
                    SPI_INLINK_ADDR_V;

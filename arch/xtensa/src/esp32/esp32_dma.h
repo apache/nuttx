@@ -80,7 +80,6 @@ struct esp32_dmadesc_s
  *   num     - DMA descriptions number
  *   pbuf    - RX/TX buffer pointer
  *   len     - RX/TX buffer length
- *   isrx    - true: RX DMA descriptions. false: TX DMA descriptions
  *
  * Returned Value:
  *   Bind pbuf data bytes
@@ -88,7 +87,7 @@ struct esp32_dmadesc_s
  ****************************************************************************/
 
 uint32_t esp32_dma_init(struct esp32_dmadesc_s *dmadesc, uint32_t num,
-                        uint8_t *pbuf, uint32_t len, int isrx);
+                        uint8_t *pbuf, uint32_t len);
 
 #ifdef __cplusplus
 }
