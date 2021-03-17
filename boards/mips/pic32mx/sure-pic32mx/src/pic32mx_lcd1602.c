@@ -1086,16 +1086,16 @@ int up_lcd1602_initialize(void)
        * Function set: 5x7 Style | N=2R | DL=8D
        */
 
-      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 |
+      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5X7 |
                     HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
       up_udelay(100);            /* Delay more than 100uS */
-      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 |
+      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5X7 |
                     HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
       up_udelay(40);             /* Delay more than 40uS */
-      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 |
+      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5X7 |
                     HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
       lcd_waitbusy();
-      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 |
+      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5X7 |
                     HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
       lcd_waitbusy();
 
