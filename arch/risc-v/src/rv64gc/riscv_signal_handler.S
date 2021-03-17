@@ -69,8 +69,8 @@ up_signal_handler:
 
   /* Save ra on the stack */
 
-  addi sp, sp, -8
-  sd   ra, (sp)
+  addi sp, sp, -16
+  sd   ra, 8(sp)
 
   /* Call the signal handler */
 
@@ -82,8 +82,8 @@ up_signal_handler:
 
   /* Restore the register */
 
-  ld   ra, (sp)  /* Restore ra in sp */
-  addi sp, sp, 8
+  ld   ra, 8(sp)  /* Restore ra in sp */
+  addi sp, sp, 16
 
   /* Execute the SYS_signal_handler_return SVCall (will not return) */
 
