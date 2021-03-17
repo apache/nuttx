@@ -226,141 +226,141 @@ static const uint8_t g_chat[7]     =
 };  /* @ */
 #endif
 
-static const uint8_t g_chA[7]      =
+static const uint8_t g_ch_up_a[7]      =
 {
   0x11, 0x0e, 0x0e, 0x0e, 0x00, 0x0e, 0x0e
 };  /* A */
 
 #if 0 /* Not used */
-static const uint8_t g_chB[7]      =
+static const uint8_t g_ch_up_b[7]      =
 {
   0x01, 0x0e, 0x0e, 0x01, 0x0e, 0x0e, 0x01
 };  /* B */
 #endif
 
-static const uint8_t g_chC[7]      =
+static const uint8_t g_ch_up_c[7]      =
 {
   0x11, 0x0e, 0x0f, 0x0f, 0x0f, 0x0e, 0x11
 };  /* C */
 
 #if 0 /* Not used */
-static const uint8_t g_chD[7]       =
+static const uint8_t g_ch_up_d[7]       =
 {
   0x01, 0x0e, 0x0e, 0x0e, 0x0e, 0x0e, 0x01
 };  /* D */
 #endif
 
-static const uint8_t g_chE[7]       =
+static const uint8_t g_ch_up_e[7]       =
 {
   0x00, 0x0f, 0x0f, 0x01, 0x0f, 0x0f, 0x00
 };  /* E */
 
 #if 0 /* Not used */
-static const uint8_t g_chF[7]      =
+static const uint8_t g_ch_up_f[7]      =
 {
   0x00, 0x0f, 0x0f, 0x01, 0x0f, 0x0f, 0x0f
 };  /* F */
 
-static const uint8_t g_chG[7]      =
+static const uint8_t g_ch_up_g[7]      =
 {
   0x11, 0x0e, 0x0f, 0x08, 0x0e, 0x0e, 0x11
 };  /* G */
 #endif
 
-static const uint8_t g_chH[7]      =
+static const uint8_t g_ch_up_h[7]      =
 {
   0x0e, 0x0e, 0x0e, 0x00, 0x0e, 0x0e, 0x0e
 };  /* H */
 
-static const uint8_t g_chI[7]      =
+static const uint8_t g_ch_up_i[7]      =
 {
   0x00, 0x1b, 0x1b, 0x1b, 0x1b, 0x1b, 0x00
 };  /* I */
 
 #if 0 /* Not used */
-static const uint8_t g_chJ[7]      =
+static const uint8_t g_ch_up_j[7]      =
 {
   0x00, 0x1d, 0x1d, 0x1d, 0x0d, 0x0d, 0x13
 };  /* J */
 
-static const uint8_t g_chK[7]      =
+static const uint8_t g_ch_up_k[7]      =
 {
   0x0e, 0x0d, 0x0b, 0x07, 0x0b, 0x0d, 0x0e
 };  /* K */
 
-static const uint8_t g_chL[7]      =
+static const uint8_t g_ch_up_l[7]      =
 {
   0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x00
 };  /* L */
 
-static const uint8_t g_chM[7]      =
+static const uint8_t g_ch_up_m[7]      =
 {
   0x0e, 0x04, 0x0a, 0x0a, 0x0e, 0x0e, 0x0e
 };  /* M */
 
-static const uint8_t g_chN[7]      =
+static const uint8_t g_ch_up_n[7]      =
 {
   0x0e, 0x0e, 0x06, 0x0a, 0x0c, 0x0e, 0x0e
 };  /* N */
 
-static const uint8_t g_chO[7]      =
+static const uint8_t g_ch_up_o[7]      =
 {
   0x11, 0x0e, 0x0e, 0x0e, 0x0e, 0x0e, 0x11
 };  /* O */
 
-static const uint8_t g_chP[7]      =
+static const uint8_t g_ch_up_p[7]      =
 {
   0x01, 0x0e, 0x0e, 0x01, 0x0f, 0x0f, 0x0f
 };  /* P */
 
-static const uint8_t g_chQ[7]      =
+static const uint8_t g_ch_up_q[7]      =
 {
   0x11, 0x0e, 0x0e, 0x0e, 0x0a, 0x0c, 0x10
 };  /* Q */
 #endif
 
-static const uint8_t g_chR[7]      =
+static const uint8_t g_ch_up_r[7]      =
 {
   0x01, 0x0e, 0x0e, 0x01, 0x0b, 0x0d, 0x0e
 };  /* R */
 
-static const uint8_t g_chS[7]      =
+static const uint8_t g_ch_up_s[7]      =
 {
   0x11, 0x0e, 0x0f, 0x11, 0x1e, 0x0e, 0x11
 };  /* S */
 
 #if 0 /* Not used */
-static const uint8_t g_chT[7]      =
+static const uint8_t g_ch_up_t[7]      =
 {
   0x00, 0x1b, 0x1b, 0x1b, 0x1b, 0x1b, 0x1b
 };  /* T */
 
-static const uint8_t g_chU[7]      =
+static const uint8_t g_ch_up_u[7]      =
 {
   0x0e, 0x0e, 0x0e, 0x0e, 0x0e, 0x0e, 0x11
 };  /* U */
 
-static const uint8_t g_chV[7]      =
+static const uint8_t g_ch_up_v[7]      =
 {
   0x0e, 0x0e, 0x0e, 0x0e, 0x0e, 0x15, 0x1b
 };  /* V */
 
-static const uint8_t g_chW[7]      =
+static const uint8_t g_ch_up_w[7]      =
 {
   0x0e, 0x0e, 0x0a, 0x0a, 0x0a, 0x0a, 0x15
 };  /* W */
 
-static const uint8_t g_chX[7]      =
+static const uint8_t g_ch_up_x[7]      =
 {
   0x0e, 0x0e, 0x15, 0x1b, 0x15, 0x0e, 0x0e
 };  /* X */
 
-static const uint8_t g_chY[7]      =
+static const uint8_t g_ch_up_y[7]      =
 {
   0x0e, 0x0e, 0x15, 0x1b, 0x1b, 0x1b, 0x1b
 };  /* Y */
 
-static const uint8_t g_chZ[7]      =
+static const uint8_t g_ch_up_z[7]      =
 {
   0x00, 0x1e, 0x1d, 0x1b, 0x17, 0x0f, 0x00
 };  /* Z */
@@ -592,19 +592,19 @@ void board_autoled_on(int led)
       break;
 
     case LED_HEAPALLOCATE:
-      g_currglyph = g_chH;
+      g_currglyph = g_ch_up_h;
       break;
 
     case LED_IRQSENABLED:
-      g_currglyph = g_chE;
+      g_currglyph = g_ch_up_e;
       break;
 
     case LED_STACKCREATED:
-      g_currglyph = g_chC;
+      g_currglyph = g_ch_up_s;
       break;
 
     case LED_IDLE:
-      g_currglyph = g_chR;
+      g_currglyph = g_ch_up_r;
       break;
 
     case LED_INIRQ:
@@ -612,11 +612,11 @@ void board_autoled_on(int led)
       return;
 
     case LED_ASSERTION:
-      g_currglyph = g_chA;
+      g_currglyph = g_ch_up_a;
       break;
 
     case LED_SIGNAL:
-      g_currglyph = g_chS;
+      g_currglyph = g_ch_up_s;
       break;
 
     case LED_PANIC:
@@ -642,7 +642,7 @@ void board_autoled_off(int led)
     }
   else if (led == LED_PANIC && g_intcount > 0)
     {
-      g_currglyph = g_chI;
+      g_currglyph = g_ch_up_i;
     }
   else
     {
