@@ -184,6 +184,34 @@ config SENSORS_HCSR04
 	---help---
 		Enable driver support for the HC-SR04 Distance Sensor.
 
+config SENSORS_HYT271
+	bool "IST HYT271 Humidity and Temperature Sensor support"
+	default n
+	---help---
+		Enable driver support for the HYT271/HYT221/HYT939 humidity/temperature sensor family.
+
+config SENSORS_HYT271_POLL
+	bool "Enables polling sensor data"
+	depends on SENSORS_HYT271
+	default n
+	---help---
+		Enables polling of sensor.
+
+config SENSORS_HYT271_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on SENSORS_HYT271 && SENSORS_HYT271_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_HYT271_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_HYT271 && SENSORS_HYT271_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
 if SENSORS_HCSR04
 
 config HCSR04_DEBUG
