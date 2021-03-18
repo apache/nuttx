@@ -194,7 +194,7 @@ void stm32l5_rcc_enablelse(void)
           while (!((regval = getreg32(STM32L5_RCC_BDCR)) &
                    RCC_BDCR_LSESYSRDY))
             {
-              up_waste();
+              stm32l5_waste();
             }
         }
 
