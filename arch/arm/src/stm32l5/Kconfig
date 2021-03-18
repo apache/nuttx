@@ -417,16 +417,14 @@ config STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY
 		2 = Medium high drive capability
 		3 = High drive capability
 
-config STM32L5_RTC_LSECLOCK_RUN_DRV_CAPABILITY
-	int "LSE oscillator drive capability level after LSE start-up"
-	default 0
-	range 0 3
+config STM32L5_RTC_LSECLOCK_LOWER_RUN_DRV_CAPABILITY
+	bool "Decrease LSE oscillator drive capability after LSE start-up"
+	default n
 	depends on !STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 	---help---
-		0 = Low drive capability (default)
-		1 = Medium low drive capability
-		2 = Medium high drive capability
-		3 = High drive capability
+		The LSE oscillator drive capability can remain at the level used
+		during LSE start-up at run-time, or it can be reduced to the
+		'Low drive capability' once the LSE started up successfully.
 
 endif # STM32L5_RTC_LSECLOCK
 
