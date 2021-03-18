@@ -48,12 +48,14 @@
  *
  * CONFIG_SAM4EEK_120MHZ
  *  PLLA: PLL Divider = 1, Multiplier = 20 to generate PLLACK = 240MHz
- *  Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 120MHz
+ *  Master Clock (MCK): Source = PLLACK,
+ *  Prescalar = 1 to generate MCK = 120MHz
  *  CPU clock: 120MHz
  *
  * CONFIG_SAM4EEK_96MHZ
  *  PLLA: PLL Divider = 1, Multiplier = 16 to generate PLLACK = 192MHz
- *  Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 96MHz
+ *  Master Clock (MCK): Source = PLLACK,
+ *  Prescalar = 1 to generate MCK = 96MHz
  *  CPU clock: 96MHz
  */
 

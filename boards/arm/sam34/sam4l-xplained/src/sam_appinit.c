@@ -100,6 +100,7 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 #if defined(CONFIG_SAM34_SPI0) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
+
   /* Initialize the SPI-based MMC/SD slot */
 
   int ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);

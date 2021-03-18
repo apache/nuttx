@@ -126,10 +126,14 @@
  *                Signal               Connector    Connector
  * -------------- -------------------- ------------ -------------------------
  * Pin 11 PENIRQ\ PENIRQ (pulled high) PORT3 Pin 1  P2.15 PENIRQ
- * Pin 12 DOUT    MISO                 PORT3 Pin 4  P1.18 MISO1  (Also USB HOST UP LED)
+ * Pin 12 DOUT    MISO                 PORT3 Pin 4  P1.18 MISO1
+ *                                                  (Also USB HOST UP LED)
  * Pin 13 BUSY    BUSY (pulled high)   PORT3 Pin 9  P2.14 BUSY
- * Pin 14 DIN     MOSI                 PORT3 Pin 3  P0.13 MOSI1  (Also USB Device up LED and SD CD pin)
- * Pin 15 CS\     SSEL (pulled high)   PORT3 Pin 6  P1.8  GPIO   (Also RMII_CRS_DV)
+ * Pin 14 DIN     MOSI                 PORT3 Pin 3  P0.13 MOSI1
+ *                                                  (Also USB Device up LED
+ *                                                  and SD CD pin)
+ * Pin 15 CS\     SSEL (pulled high)   PORT3 Pin 6  P1.8  GPIO
+ *                                                  (Also RMII_CRS_DV)
  * Pin 16 DCLK    SCK                  PORT3 Pin 5  P1.19 SCK1
  * -------------- -------------------- ------------ -------------------------
  *
@@ -144,13 +148,13 @@
 #define LPC17_40_IRQ_PENIRQ LPC17_40_IRQ_P2p15
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

@@ -109,7 +109,9 @@ static void k64_mediachange(void)
     {
       mcinfo("Media change: %d->%d\n",  g_sdhc.inserted, inserted);
 
-      /* Yes.. perform the appropriate action (this might need some debounce). */
+      /* Yes..
+       * perform the appropriate action (this might need some debounce).
+       */
 
       g_sdhc.inserted = inserted;
       sdhc_mediachange(g_sdhc.sdhc, inserted);
@@ -180,7 +182,8 @@ int k64_sdhc_initialize(void)
   ret = mmcsd_slotinitialize(MMSCD_MINOR, g_sdhc.sdhc);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SDHC to the MMC/SD driver: %d\n",
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDHC to the MMC/SD driver: %d\n",
              ret);
       return ret;
     }

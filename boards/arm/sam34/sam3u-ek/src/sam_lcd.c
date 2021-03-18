@@ -24,49 +24,55 @@
  * The LCD display size is 2.8 inches, with a native resolution of 240 x 320
  * pixels.
  *
- *   LCD Module Pin Out:                         SAM3U PIO:
- *  -------------------------------------------- --------------------------------------
- *   Pin Symbol Function                         LCD            PeriphA  PeriphB Extra
- *  ---- ------ -------------------------------- -------------- -------- ------- ------
- *   1   GND    Ground                           N/A            ---      ---     ---
- *   2   CS     Chip Select                      PC16           NCS2     PWML3   AD12BAD5
- *   3   RS     Register select signal           PB8 (see A1)   CTS0     A1      AD3
- *   4   WR     Write operation signal           PB23 (NWE)     NWR0/NEW PCK1    ---
- *   5   RD     Read operation signal            PB19 (NRD)     NRD      PWML2   ---
- *   6   DB0    Data bus                         PB9            D0       DTR0    ---
- *   7   DB1    Data bus                         PB10           D1       DSR0    ---
- *   8   DB2    Data bus                         PB11           D2       DCD0    ---
- *   9   DB3    Data bus                         PB12           D3       RI0     ---
- *   10  DB4    Data bus                         PB13           D4       PWMH0   ---
- *   11  DB5    Data bus                         PB14           D5       PWMH1   ---
- *   12  DB6    Data bus                         PB15           D6       PWMH2   ---
- *   13  DB7    Data bus                         PB16           D7       PMWH3   ---
- *   14  DB8    Data bus                         PB25           D8       PWML0   ---
- *   15  DB9    Data bus                         PB26           D9       PWML1   ---
- *   16  DB10   Data bus                         PB27           D10      PWML2   ---
- *   17  DB11   Data bus                         PB28           D11      PWML3   ---
- *   18  DB12   Data bus                         PB29           D12      ---     ---
- *   19  DB13   Data bus                         PB30           D13      ---     ---
- *   20  DB14   Data bus                         PB31           D14      ---     ---
- *   21  DB15   Data bus                         PB6            TIOA1    D15     AD1
- *   22  NC     No connection                    N/A            ---      ---     ---
- *   23  NC     No connection                    N/A            ---      ---     ---
- *   24  RESET  Reset signal                     N/A            ---      ---     ---
- *   25  GND    Ground                           N/A            ---      ---     ---
- *   26  X+     Touch panel X_RIGHT              PA15           SPCK     PWMH2   ---
- *   27  Y+     Touch panel Y_UP                 PA14           MOSI     ---     ---
- *   28  X-     Touch panel X_LEFT               PA13           MISO     ---     ---
- *   29  Y-     Touch panel Y_DOWN               PC14           A3       NPCS2   ---
- *   30  GND    Ground                           N/A            ---      ---     ---
- *   31  VDD1   Power supply for digital IO Pad  N/A            ---      ---     ---
- *   32  VDD2   Power supply for analog circuit  N/A            ---      ---     ---
- *   33  A1     Power supply for backlight       PB8 (see RS)   CTS0     A1      AD3
- *   34  A2     Power supply for backlight       N/A            ---      ---     ---
- *   35  A3     Power supply for backlight       N/A            ---      ---     ---
- *   36  A4     Power supply for backlight       N/A            ---      ---     ---
- *   37  NC     No connection                    N/A            ---      ---     ---
- *   38  NC     No connection                    N/A            ---      ---     ---
- *   39  K      Backlight ground                 N/A            ---      ---     ---
+ *   LCD Module Pin Out:                   SAM3U PIO:
+ *  ---------------------------------- ------------------------------------
+ *   Pin Symbol Function                  LCD        PeriphA  PeriphB Extra
+ *  ---- ------ ---------------------- ------------ -------- ------- ------
+ *   1   GND    Ground                 N/A          ---      ---     ---
+ *   2   CS     Chip Select            PC16         NCS2     PWML3   AD12BAD5
+ *   3   RS     Register select signal PB8 (see A1) CTS0     A1      AD3
+ *   4   WR     Write operation signal PB23 (NWE)   NWR0/NEW PCK1    ---
+ *   5   RD     Read operation signal  PB19 (NRD)   NRD      PWML2   ---
+ *   6   DB0    Data bus               PB9          D0       DTR0    ---
+ *   7   DB1    Data bus               PB10         D1       DSR0    ---
+ *   8   DB2    Data bus               PB11         D2       DCD0    ---
+ *   9   DB3    Data bus               PB12         D3       RI0     ---
+ *   10  DB4    Data bus               PB13         D4       PWMH0   ---
+ *   11  DB5    Data bus               PB14         D5       PWMH1   ---
+ *   12  DB6    Data bus               PB15         D6       PWMH2   ---
+ *   13  DB7    Data bus               PB16         D7       PMWH3   ---
+ *   14  DB8    Data bus               PB25         D8       PWML0   ---
+ *   15  DB9    Data bus               PB26         D9       PWML1   ---
+ *   16  DB10   Data bus               PB27         D10      PWML2   ---
+ *   17  DB11   Data bus               PB28         D11      PWML3   ---
+ *   18  DB12   Data bus               PB29         D12      ---     ---
+ *   19  DB13   Data bus               PB30         D13      ---     ---
+ *   20  DB14   Data bus               PB31         D14      ---     ---
+ *   21  DB15   Data bus               PB6          TIOA1    D15     AD1
+ *   22  NC     No connection          N/A          ---      ---     ---
+ *   23  NC     No connection          N/A          ---      ---     ---
+ *   24  RESET  Reset signal           N/A          ---      ---     ---
+ *   25  GND    Ground                 N/A          ---      ---     ---
+ *   26  X+     Touch panel X_RIGHT    PA15         SPCK     PWMH2   ---
+ *   27  Y+     Touch panel Y_UP       PA14         MOSI     ---     ---
+ *   28  X-     Touch panel X_LEFT     PA13         MISO     ---     ---
+ *   29  Y-     Touch panel Y_DOWN     PC14         A3       NPCS2   ---
+ *   30  GND    Ground                 N/A          ---      ---     ---
+ *   31  VDD1   Power supply for
+ *              digital IO Pad         N/A          ---      ---     ---
+ *   32  VDD2   Power supply for
+ *              analog circuit         N/A          ---      ---     ---
+ *   33  A1     Power supply for
+ *              backlight              PB8 (see RS) CTS0     A1      AD3
+ *   34  A2     Power supply for
+ *              backlight              N/A          ---      ---     ---
+ *   35  A3     Power supply for
+ *              backlight              N/A          ---      ---     ---
+ *   36  A4     Power supply for
+ *              backlight              N/A          ---      ---     ---
+ *   37  NC     No connection          N/A          ---      ---     ---
+ *   38  NC     No connection          N/A          ---      ---     ---
+ *   39  K      Backlight ground       N/A          ---      ---     ---
  *
  * The LCD module gets its reset from NRST. As explained previously, this
  * NRST is shared with the JTAG port and the push button BP1. The LCD chip

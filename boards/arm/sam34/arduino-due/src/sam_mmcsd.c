@@ -38,6 +38,10 @@
 
 #include "arduino-due.h"
 
+/* Include the bit-band skeleton logic */
+
+#include <nuttx/spi/spi_bitbang.c>
+
 /* In order to use the SD card on the ITEAD shield, you must enable the SPI
  * bit-bang driver as well as support for SPI-based MMC/SD cards.
  */
@@ -106,12 +110,6 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Include the bit-band skeleton logic
- ****************************************************************************/
-
-#include <nuttx/spi/spi_bitbang.c>
 
 /****************************************************************************
  * Name: spi_select

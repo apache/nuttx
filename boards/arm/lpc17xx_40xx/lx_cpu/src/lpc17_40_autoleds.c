@@ -48,7 +48,8 @@
  * LED1 -- Connected to P1[29]
  * LED2 -- Connected to P0[16]
  *
- * These LEDs are connected to ground so a high output value will illuminate them.
+ * These LEDs are connected to ground so a high output value will illuminate
+ * them.
  *
  * If CONFIG_ARCH_LEDs is defined, then NuttX will control the four LEDs
  * on the WaveShare Open1788K.  The following definitions describe how NuttX
@@ -135,22 +136,22 @@
 static const uint16_t g_ledbits[8] =
 {
   (LED_STARTED_ON_SETBITS       | LED_STARTED_ON_CLRBITS |
-   LED_STARTED_OFF_SETBITS      | LED_STARTED_OFF_CLRBITS),
+  LED_STARTED_OFF_SETBITS      | LED_STARTED_OFF_CLRBITS),
 
   (LED_HEAPALLOCATE_ON_SETBITS  | LED_HEAPALLOCATE_ON_CLRBITS |
-   LED_HEAPALLOCATE_OFF_SETBITS | LED_HEAPALLOCATE_OFF_CLRBITS),
+  LED_HEAPALLOCATE_OFF_SETBITS | LED_HEAPALLOCATE_OFF_CLRBITS),
 
   (LED_IRQSENABLED_ON_SETBITS   | LED_IRQSENABLED_ON_CLRBITS |
-   LED_IRQSENABLED_OFF_SETBITS  | LED_IRQSENABLED_OFF_CLRBITS),
+  LED_IRQSENABLED_OFF_SETBITS  | LED_IRQSENABLED_OFF_CLRBITS),
 
   (LED_STACKCREATED_ON_SETBITS  | LED_STACKCREATED_ON_CLRBITS |
-   LED_STACKCREATED_OFF_SETBITS | LED_STACKCREATED_OFF_CLRBITS),
+  LED_STACKCREATED_OFF_SETBITS | LED_STACKCREATED_OFF_CLRBITS),
 
   (LED_EVENT_ON_SETBITS         | LED_EVENT_ON_CLRBITS |
-   LED_EVENT_OFF_SETBITS        | LED_EVENT_OFF_CLRBITS),
+  LED_EVENT_OFF_SETBITS        | LED_EVENT_OFF_CLRBITS),
 
   (LED_IDLE_ON_SETBITS          | LED_IDLE_ON_CLRBITS |
-   LED_IDLE_OFF_SETBITS         | LED_IDLE_OFF_CLRBITS)
+  LED_IDLE_OFF_SETBITS         | LED_IDLE_OFF_CLRBITS)
 };
 
 /****************************************************************************

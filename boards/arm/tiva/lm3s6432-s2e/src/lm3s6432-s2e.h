@@ -90,7 +90,7 @@
 #define XCVR_OFF_GPIO (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE  | GPIO_PORTB | 5)
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

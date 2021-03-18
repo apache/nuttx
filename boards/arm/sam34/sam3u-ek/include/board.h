@@ -45,7 +45,8 @@
  *
  *   MAINOSC:  Frequency = 12MHz (crysta)
  *   PLLA: PLL Divider = 1, Multiplier = 16 to generate PLLACK = 192MHz
- *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 96MHz
+ *   Master Clock (MCK): Source = PLLACK,
+ *   Prescalar = 1 to generate MCK = 96MHz
  *   CPU clock: 96MHz
  */
 

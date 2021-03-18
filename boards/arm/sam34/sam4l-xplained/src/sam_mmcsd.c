@@ -99,7 +99,8 @@ int sam_sdinitialize(int minor)
   ret = mmcsd_spislotinitialize(minor, SAM34_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to bind SPI chip select %d to MMC/SD slot %d: %d\n",
+      ferr(
+          "ERROR: Failed to bind SPI chip select %d to MMC/SD slot %d: %d\n",
             SD_CSNO, SAM34_MMCSDSLOTNO, ret);
       return ret;
     }

@@ -98,10 +98,12 @@ int sam_dacdev_initialize(void)
           return ret;
         }
 #endif
+
       /* Now we are initialized */
 
       initialized = true;
     }
+
   return OK;
 }
 

@@ -162,7 +162,7 @@
 /* PE7/PP7/PT2-3 are used for the touch screen */
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

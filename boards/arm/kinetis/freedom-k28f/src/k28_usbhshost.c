@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/kinetis/freedom-k28f/src/k28_usbhshost.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -57,9 +57,9 @@
 
 #if defined(CONFIG_KINETIS_USBHS) && defined(CONFIG_USBHOST)
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
 #define BOARD_USB_PHY_D_CAL     (0x0CU)
 #define BOARD_USB_PHY_TXCAL45DP (0x06U)
@@ -77,9 +77,9 @@
 #  endif
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
 static int ehci_waiter(int argc, char *argv[]);
 static void ehci_hwinit(void);
@@ -90,9 +90,9 @@ static void unmount_retry_timeout(wdparm_t arg);
 static void usb_msc_disconnect(FAR void *arg);
 #  endif
 
-/*****************************************************************************
+/****************************************************************************
  * Private Data
- *****************************************************************************/
+ ****************************************************************************/
 
 /* Retained device driver handle */
 
@@ -104,17 +104,17 @@ static struct usbhost_connection_s *g_ehciconn;
 static struct wdog_s g_umount_tmr[CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV];
 #  endif
 
-/*****************************************************************************
+/****************************************************************************
  * Private Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: ehci_waiter
  *
  * Description:
  *   Wait for USB devices to be connected to the EHCI root hub.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int ehci_waiter(int argc, char *argv[])
 {
@@ -144,13 +144,13 @@ static int ehci_waiter(int argc, char *argv[])
   return 0;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: ehci_hw_init
  *
  * Description:
  *   Initialize PHY and clocks for EHCI
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void ehci_hwinit(void)
 {
@@ -241,13 +241,13 @@ static void ehci_hwinit(void)
 }
 
 #  ifdef HAVE_USB_AUTOMOUNTER
-/*****************************************************************************
+/****************************************************************************
  * Name: usb_msc_connect
  *
  * Description:
  *   Mount the USB mass storage device
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void usb_msc_connect(FAR void *arg)
 {
@@ -258,7 +258,8 @@ static void usb_msc_connect(FAR void *arg)
   char blkdev[32];
   char mntpnt[32];
 
-  DEBUGASSERT(index >= 0 && index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV);
+  DEBUGASSERT(index >= 0 &&
+              index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV);
 
   wd_cancel(&g_umount_tmr[index]);
 
@@ -282,7 +283,7 @@ static void usb_msc_connect(FAR void *arg)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: unmount_retry_timeout
  *
  * Description:
@@ -300,7 +301,7 @@ static void usb_msc_connect(FAR void *arg)
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void unmount_retry_timeout(wdparm_t arg)
 {
@@ -316,13 +317,13 @@ static void unmount_retry_timeout(wdparm_t arg)
   usbhost_msc_notifier_signal(WORK_USB_MSC_DISCONNECT, sdchar);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: usb_msc_disconnect
  *
  * Description:
  *   Unmount the USB mass storage device
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void usb_msc_disconnect(FAR void *arg)
 {
@@ -332,7 +333,8 @@ static void usb_msc_disconnect(FAR void *arg)
 
   char mntpnt[32];
 
-  DEBUGASSERT(index >= 0 && index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV);
+  DEBUGASSERT(index >= 0 &&
+              index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV);
 
   wd_cancel(&g_umount_tmr[index]);
 
@@ -379,11 +381,11 @@ static void usb_msc_disconnect(FAR void *arg)
 }
 #  endif /* HAVE_USB_AUTOMOUNTER */
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: k28_usbhost_initialize
  *
  * Description:
@@ -392,7 +394,7 @@ static void usb_msc_disconnect(FAR void *arg)
  *   This function will start a thread that will monitor for device
  *   connection/disconnection events.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int k28_usbhost_initialize(void)
 {
@@ -489,7 +491,7 @@ int k28_usbhost_initialize(void)
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: kinetis_usbhost_vbusdrive
  *
  * Description:
@@ -506,7 +508,7 @@ int k28_usbhost_initialize(void)
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #define HCOR ((volatile struct ehci_hcor_s *)KINETIS_USBHS_HCOR_BASE)
 
@@ -533,7 +535,7 @@ void kinetis_usbhost_vbusdrive(int rhport, bool enable)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: kinetis_setup_overcurrent
  *
  * Description:
@@ -548,7 +550,7 @@ void kinetis_usbhost_vbusdrive(int rhport, bool enable)
  *   Zero (OK) returned on success; a negated errno value is returned on
  *   failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not ready yet */
 int kinetis_setup_overcurrent(xcpt_t handler, void *arg)

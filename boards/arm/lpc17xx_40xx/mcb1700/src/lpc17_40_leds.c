@@ -180,7 +180,6 @@ void board_autoled_off(int led)
  ****************************************************************************/
 
 void lpc17_40_led(int lednum, int state)
-
 {
   lpc17_40_gpiowrite(lednum, state);
 }

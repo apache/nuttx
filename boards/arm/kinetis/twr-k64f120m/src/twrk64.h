@@ -239,7 +239,9 @@
 #define GPIO_SW1           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTC | PIN6)
 #define GPIO_SW3           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTA | PIN4)
 
-/* LEDs. Note that LED1-3 are used by system, LED4 is for user defined apps. */
+/* LEDs.
+ * Note that LED1-3 are used by system, LED4 is for user defined apps.
+ */
 
 #define GPIO_LED1          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN6)
 #define GPIO_LED2          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN7)
@@ -251,20 +253,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: k64_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the TWR-K64F120M board.
+ *   Called to configure SPI chip select GPIO pins for the TWR-K64F120M
+ *   board.
  *
  ****************************************************************************/
 
@@ -356,7 +359,8 @@ void k64_automount_initialize(void);
  * Name:  k64_automount_event
  *
  * Description:
- *   The SDHC card detection logic has detected an insertion or removal event.
+ *   The SDHC card detection logic has detected an insertion or removal
+ *   event.
  *   It has already scheduled the MMC/SD block driver operations. Now we need
  *   to schedule the auto-mount event which will occur with a substantial
  *   delay to make sure that everything has settle down.

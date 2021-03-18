@@ -226,7 +226,7 @@ int main(int argc, char **argv, char **envp)
       exit(2);
     }
 
-  outfd = open(g_outfile, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+  outfd = open(g_outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
   if (outfd < 0)
     {
       fprintf(stderr, "Failed to open %s for writing: %s\n", g_outfile,
@@ -253,7 +253,8 @@ int main(int argc, char **argv, char **envp)
 #else
   g_hdr.imageType       = 0x0000000b;
 #endif
-  g_hdr.imageLength     = (buf.st_size + sizeof(struct lpc31_header_s) + 511) & ~0x1ff;
+  g_hdr.imageLength     = (buf.st_size +
+                           sizeof(struct lpc31_header_s) + 511) & ~0x1ff;
 
   /* This is how much we must pad at the end of the binary image. */
 
@@ -262,7 +263,7 @@ int main(int argc, char **argv, char **envp)
   /* Calculate CRCs */
 
   g_hdr.execution_crc32 = infilecrc32(infd, buf.st_size, padlen);
-  g_hdr.header_crc32    = crc32((const uint8_t*)&g_hdr, HDR_CRC_SIZE);
+  g_hdr.header_crc32    = crc32((const uint8_t *)&g_hdr, HDR_CRC_SIZE);
 
   /* Write the header */
 

@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32l4/nucleo-l452re/src/stm32_dac.c
  *
  *   Copyright (C) 2017 Haltian Ltd. All rights reserved.
@@ -89,6 +89,7 @@ int stm32l4_dac_setup(void)
           return ret;
         }
 #endif
+
       initialized = true;
     }
 

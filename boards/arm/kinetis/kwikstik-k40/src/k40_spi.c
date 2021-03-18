@@ -47,7 +47,8 @@
  * Name: kinetis_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the KwikStik-K40 board.
+ *   Called to configure SPI chip select GPIO pins for the KwikStik-K40
+ *   board.
  *
  ****************************************************************************/
 

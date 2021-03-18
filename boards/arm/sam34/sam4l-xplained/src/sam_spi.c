@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * boards/arm/sam34/sam4l-xplained/src/sam_spi.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,34 +36,35 @@
 
 #ifdef CONFIG_SAM34_SPI0
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the SAM3U10E-EVAL board.
+ *   Called to configure SPI chip select GPIO pins for the SAM3U10E-EVAL
+ *   board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function sam_spidev_initialize(void)
 {
-  /* The I/O module containing the SD connector may or may not be installed.  And, if
-   * it is installed, it may be in connector EXT1 or EXT2.
+  /* The I/O module containing the SD connector may or may not be installed.
+   * And, if it is installed, it may be in connector EXT1 or EXT2.
    */
 
 #ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
   /* TODO: enable interrupt on card detect */
 
-   sam_configgpio(GPIO_SD_CD);     /* Card detect input */
-   sam_configgpio(GPIO_SD_CS);     /* Chip select output */
+  sam_configgpio(GPIO_SD_CD);     /* Card detect input */
+  sam_configgpio(GPIO_SD_CS);     /* Chip select output */
 #endif
 
 #ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
-   sam_configgpio(GPIO_OLED_DATA); /* Command/data */
-   sam_configgpio(GPIO_OLED_CS);   /* Card detect input */
+  sam_configgpio(GPIO_OLED_DATA); /* Command/data */
+  sam_configgpio(GPIO_OLED_CS);   /* Card detect input */
 #endif
 }
 
@@ -84,8 +85,8 @@ void weak_function sam_spidev_initialize(void)
  *
  *   1. Provide logic in sam_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide sam_spi0select() and sam_spi0status() functions in your board-
- *      specific logic.  These functions will perform chip selection and
+ *   2. Provide sam_spi0select() and sam_spi0status() functions in your
+ *      board specific logic. These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spic0mddata() functions in your board-specific logic.  This
@@ -93,8 +94,8 @@ void weak_function sam_spidev_initialize(void)
  *      the way your board is configured.
  *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by sam_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by sam_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
@@ -231,6 +232,7 @@ int sam_spic0mddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
       sam_gpiowrite(GPIO_OLED_DATA, !cmd);
     }
 #endif
+
       return OK;
 }
 #endif

@@ -18,7 +18,8 @@
  *
  ****************************************************************************/
 
-/* The SAME54 Xplained Pro has three LEDs, but only one is controllable by software:
+/* The SAME54 Xplained Pro has three LEDs,
+ * but only one is controllable by software:
  *
  *   1. LED0 near the edge of the board
  *
@@ -214,6 +215,7 @@ void board_autoled_on(int led)
 
     case 3:   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
     case 1:   /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
+
       ledstate = false;       /* Set ledstate == false to turn ON */
       break;
     }

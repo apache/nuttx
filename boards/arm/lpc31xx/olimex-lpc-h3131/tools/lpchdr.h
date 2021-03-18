@@ -38,6 +38,7 @@
 struct lpc31_header_s
 {
                               /* OFFS DESCRIPTION */
+
   uint32_t vector;            /* 0x00    Valid ARM instruction. Usually this will be
                                *    a branch instruction to entry point of the
                                *    image. */
@@ -76,11 +77,11 @@ struct lpc31_header_s
 };
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 extern uint32_t crc32part(const uint8_t *src, size_t len, uint32_t crc32val);

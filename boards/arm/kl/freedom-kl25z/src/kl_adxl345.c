@@ -272,7 +272,8 @@ int adxl345_archinitialize(int minor)
       /* Instantiate the ADXL345 driver */
 
       g_adxl345config.handle =
-        adxl345_instantiate(dev, (FAR struct adxl345_config_s *)&g_adxl345config);
+        adxl345_instantiate(dev,
+                           (FAR struct adxl345_config_s *)&g_adxl345config);
       if (!g_adxl345config.handle)
         {
           snerr("ERROR: Failed to instantiate the ADXL345 driver\n");
@@ -281,7 +282,8 @@ int adxl345_archinitialize(int minor)
 
       /* Initialize and register the ADXL345 driver */
 
-      ret = adxl345_register(g_adxl345config.handle, CONFIG_ADXL345_DEVMINOR);
+      ret = adxl345_register(g_adxl345config.handle,
+                             CONFIG_ADXL345_DEVMINOR);
       if (ret < 0)
         {
           snerr("ERROR: Failed to register ADXL345 driver: %d\n", ret);

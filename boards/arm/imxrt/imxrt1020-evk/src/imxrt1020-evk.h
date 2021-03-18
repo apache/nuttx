@@ -80,12 +80,10 @@
  * 2. SW4 (IRQ88, USER)   Wakeup, GPIO5-0
  */
 
-
 #define GPIO_SWWAKE     (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | \
                          IOMUX_SWWAKE_DEFAULT | GPIO_PORT5 | GPIO_PIN0)  /* WAKE */
 
-
-/* ETH Disambiguation ********************************************************/
+/* ETH Disambiguation *******************************************************/
 
 #define GPIO_ENET_INT   (IOMUX_ENET_INT_DEFAULT | GPIO_INTERRUPT | \
                          GPIO_INT_FALLINGEDGE |	GPIO_PORT1 | GPIO_PIN22) /* AD_B1_06 */
@@ -93,13 +91,13 @@
 #define GPIO_ENET_RST   (GPIO_OUTPUT | IOMUX_ENET_RST_DEFAULT | \
                          GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN4 )  /* AD_B0_04, Inverted logic */
 
-/* USBOTG *********************************************************************/
+/* USBOTG *******************************************************************/
 
 #define GPIO_USBOTG_ID  (GPIO_USB_OTG_ID_1 | IOMUX_USBOTG_ID_DEFAULT)      /* AD_B1_11 */
 #define GPIO_USBOTG_PWR (GPIO_USB_OTG_PWR_1 | IOMUX_USBOTG_PWR_DEFAULT)    /* AD_B1_10 */
 #define GPIO_USBOTG_OC  (GPIO_USB_OTG_OC_1 | IOMUX_USBOTG_OC_DEFAULT)      /* AD_B1_12 */
 
-/* USDHC **********************************************************************/
+/* USDHC ********************************************************************/
 
 #define PIN_USDHC1_CD   (IOMUX_VSD_DEFAULT | \
                          GPIO_PORT3 | GPIO_PIN19 )                         /* SD_B0_06 */
@@ -113,13 +111,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -144,7 +142,7 @@ int imxrt_bringup(void);
 
 void imxrt_spidev_initialize(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: imxrt_mmcsd_spi_initialize
  *
  * Description:

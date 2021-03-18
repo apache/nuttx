@@ -42,6 +42,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The SAM4E-EK board has three, user-controllable LEDs labelled D2 (blue),
  * D3 (amber), and D4 (green) on the board.  Usage of these LEDs is defined
  * in include/board.h and src/up_leds.c. They are encoded as follows:

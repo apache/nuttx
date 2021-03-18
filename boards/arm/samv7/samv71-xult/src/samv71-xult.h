@@ -425,8 +425,8 @@
 
 /* LEDs
  *
- * There are two yellow LED available on the SAM V71 Xplained Ultra board that
- * can be turned on and off.  The LEDs can be activated by driving the
+ * There are two yellow LED available on the SAM V71 Xplained Ultra board
+ * that can be turned on and off.  The LEDs can be activated by driving the
  * connected I/O line to GND.
  *
  *   ------ ----------- ---------------------
@@ -445,10 +445,10 @@
 
 /* Buttons
  *
- * SAM V71 Xplained Ultra contains three mechanical buttons. One button is the
- * RESET button connected to the SAM V71 reset line and the others are generic
- * user configurable buttons. When a button is pressed it will drive the I/O
- * line to GND.
+ * SAM V71 Xplained Ultra contains three mechanical buttons. One button is
+ * the RESET button connected to the SAM V71 reset line and the others are
+ * generic user configurable buttons. When a button is pressed it will drive
+ * the I/O line to GND.
  *
  *   ------ ----------- ---------------------
  *   SAMV71 Function    Shared functionality
@@ -461,9 +461,9 @@
  *
  * NOTES:
  *
- *   - There are no pull-up resistors connected to the generic user buttons so
- *     it is necessary to enable the internal pull-up in the SAM V71 to use
- *     the button.
+ *   - There are no pull-up resistors connected to the generic user buttons
+ *     so it is necessary to enable the internal pull-up in the SAM V71 to
+ *     use the button.
  *   - PB12 is set up as a system flash ERASE pin when the firmware boots. To
  *     use the SW1, PB12 has to be configured as a normal regular I/O pin in
  *     the MATRIX module. For more information see the SAM V71 datasheet.
@@ -557,8 +557,10 @@
  * AD1 PC31  microBUS2 Analog               PC31 AFE1_AD6   GPIO_AFE1_AD6
  * AD2 PD30  microBUS2 GPIO reset output    PD30
  * AD3 PA19  microBUS1 GPIO reset output    PA19
- * AD4 PC13  (both) I2C-SDA                 PC13 *** Does not support I2C SDA ***
- * AD5 PC30  (both) I2C-SCL                 PC30 *** Does not support I2C SCL ***
+ * AD4 PC13  (both) I2C-SDA                 PC13
+ *                                          *** Does not support I2C SDA ***
+ * AD5 PC30  (both) I2C-SCL                 PC30
+ *                                          *** Does not support I2C SCL ***
  * AD6 PA17  *** Not used ***
  * AD7 PC12  *** Not used ***
  * D0  PD28  (both) HDR_RX                  PD28 URXD3      GPIO_UART3_RXD
@@ -616,13 +618,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

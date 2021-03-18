@@ -43,6 +43,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /*  There are three user-controllable LEDs on board the Arduino Due board:
  *
  *     LED              GPIO
@@ -71,7 +72,7 @@
  *   LED_INIRQ            In an interrupt            N/C      GLOW     OFF
  *   LED_SIGNAL           In a signal handler        N/C      GLOW     OFF
  *   LED_ASSERTION        An assertion failed        N/C      GLOW     OFF
- *   LED_PANIC            The system has crashed     N/C      N/C      Blinking
+ *   LED_PANIC            The system has crashed     N/C      N/C    Blinking
  *   LED_IDLE             MCU is is sleep mode       ------ Not used --------
  *
  * Thus if LED L is statically on, NuttX has successfully booted and is,

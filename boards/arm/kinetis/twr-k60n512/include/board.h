@@ -105,8 +105,11 @@
 #  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
 #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(2)
 #else
-//#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
-//#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3)
+
+/* #  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2 */
+
+/* #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3)   */
+
 #  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV16
 #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(15)
 #endif
@@ -156,9 +159,9 @@
  */
 
 /* On-Board Connections
- * -------------------- ------------------------- -------- -------------------
+ * -------------------- ------------------------- -------- ------------------
  * FEATURE              CONNECTION                PORT/PIN PIN FUNCTION
- * -------------------- ------------------------- -------- -------------------
+ * -------------------- ------------------------- -------- ------------------
  * OSJTAG USB-to-serial OSJTAG Bridge RX Data     PTE9     UART5_RX
  * Bridge               OSJTAG Bridge TX Data     PTE8     UART5_TX
  * SD Card Slot         SD Clock                  PTE2     SDHC0_DCLK
@@ -208,9 +211,9 @@
 #define PIN_I2C0_SCL  PIN_I2C0_SCL_3
 
 /* Connections via the General Purpose Tower Plug-in (TWRPI) Socket
- * -------------------- ------------------------- -------- -------------------
+ * -------------------- ------------------------- -------- ------------------
  * FEATURE             CONNECTION                 PORT/PIN PIN FUNCTION
- * -------------------- ------------------------- -------- -------------------
+ * -------------------- ------------------------- -------- ------------------
  * General Purpose      TWRPI AN0 (J4 Pin 8)       ?        ADC0_DP0/ADC1_DP3
  * TWRPI Socket         TWRPI AN1 (J4 Pin 9)       ?        ADC0_DM0/ADC1_DM3
  *                      TWRPI AN2 (J4 Pin 12)      ?        ADC1_DP0/ADC0_DP3

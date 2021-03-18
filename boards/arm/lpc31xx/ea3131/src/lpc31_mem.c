@@ -111,8 +111,8 @@
  *    should be applied. All banks must then be precharged, thereby placing
  *    the device in the all banks idle state.
  *
- *   "Once in the idle state, two AUTO REFRESH cycles must be performed. After
- *    the AUTO REFRESH cycles are complete, the SDRAM is ready for mode
+ *   "Once in the idle state, two AUTO REFRESH cycles must be performed.
+ *    After the AUTO REFRESH cycles are complete, the SDRAM is ready for mode
  *    register programming.
  *
  *   "Because the mode register will power up in an unknown state, it should
@@ -250,8 +250,8 @@ static void lpc31_sdraminitialize(void)
   /* Program the SDRAM internal mode registers on bank nSDCE0 and reconfigure
    * the SDRAM chips.
    * Bus speeds up to 90MHz requires use of a CAS latency = 2.
-   * To get correct value on address bus CAS cycle, requires a shift by 13 for
-   * 16bit mode
+   * To get correct value on address bus CAS cycle, requires a shift by 13
+   * for 16bit mode
    */
 
   getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 13));

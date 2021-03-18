@@ -353,7 +353,8 @@
 
 /* LEDs
  *
- *   The SAME54 Xplained Pro has three LEDs, but only one is controllable by software:
+ *   The SAME54 Xplained Pro has three LEDs,
+ *   but only one is controllable by software:
  *
  *   1. LED0 near the edge of the board
  *
@@ -405,7 +406,8 @@
 
 /* The SERCOM bus clock (CLK_SERCOMx_APB) can be enabled and disabled in the
  * Main Clock Controller.
- * The SERCOM uses two generic clocks: GCLK_SERCOMn_CORE and GCLK_SERCOM_SLOW.
+ * The SERCOM uses two generic clocks:
+ * GCLK_SERCOMn_CORE and GCLK_SERCOM_SLOW.
  * The core clock (GCLK_SERCOMx_CORE) is required to clock the SERCOM while
  * working as a master.  The slow clock (GCLK_SERCOM_SLOW) is only  required
  * for certain functions and is common to all SERCOM modules.
@@ -421,7 +423,8 @@
 /* SERCOM2
  *
  * Built-in virtual COM port using the EDBG chip on the board.
- * DTR must be asserted by your console software in order to enable this port.
+ * DTR must be asserted by your console software in order to enable this
+ * port.
  *
  *   ----------------- ---------
  *   SAMD5E5           FUNCTION

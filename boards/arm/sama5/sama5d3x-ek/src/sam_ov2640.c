@@ -104,14 +104,19 @@ static inline FAR struct fb_vtable_s *ov2640_lcd_initialize(void)
  *   ---                     4  GND          ---
  *   PE28  ?  ?              5  ZB_SLPTR     ???
  *   PE29  ?  ?              6  ZB_RST       C6 RESETB Reset mode (?)
- *   PC27  B  TWI1_CK        7  TWCK1        C2 SIO_C SCCB serial interface clock input
- *   PC26  B  TWI1_D         8  TWD1         C1 SIO_D SCCB serial interface data I/O
+ *   PC27  B  TWI1_CK        7  TWCK1        C2 SIO_C SCCB
+ *                                           serial interface clock input
+ *   PC26  B  TWI1_D         8  TWD1         C1 SIO_D SCCB
+ *                                           serial interface data I/O
  *   ---                     9  GND          ---
- *   PD31  B  PCK1 (ISI_MCK) 10 ISI_MCK      C4 XVCLK System clock input (?)
+ *   PD31  B  PCK1 (ISI_MCK) 10 ISI_MCK      C4 XVCLK
+ *                                           System clock input (?)
  *   ---                     11 GND          ---
- *   PA30  C  ISI_VSYNC      12 ISI_VSYNC    D2 VSYNC Vertical synchronization
+ *   PA30  C  ISI_VSYNC      12 ISI_VSYNC    D2 VSYNC
+ *                                           Vertical synchronization
  *   ---                     13 GND          ---
- *   PA31  C  ISI_HSYNC      14 ISI_HSYNC    C3 HREF Horizontal reference output (?)
+ *   PA31  C  ISI_HSYNC      14 ISI_HSYNC    C3 HREF
+ *                                           Horizontal reference output (?)
  *   ---                     15 GND          ---
  *   PC30  C  ISI_PCK        16 ISI_PCK      E3 PCLK Pixel clock output
  *   ---                     17 GND          ---
@@ -129,10 +134,11 @@ static inline FAR struct fb_vtable_s *ov2640_lcd_initialize(void)
  *   PC26  C  ISI_D11        29 ISI_D11      ---
  *   ---                     30 GND          ---
  *
- *   ???                     ??              A2 EXPST_B Snapshot exposure start trigger
+ *   ???                     ??              A2 EXPST_B
+ *                                           Snapshot exposure start trigger
  *   ???                     ??              A6 STROBE  Flash control output
- *   ???                     ??              B2 FREX    Snapshot trigger
- *   ???                     ??              B6 PWDN    Power-down mode enable
+ *   ???                     ??              B2 FREX   Snapshot trigger
+ *   ???                     ??              B6 PWDN   Power-down mode enable
  *
  ****************************************************************************/
 

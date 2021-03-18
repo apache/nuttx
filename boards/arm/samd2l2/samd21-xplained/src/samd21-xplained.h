@@ -142,9 +142,10 @@
 
 /* OLED1
  *
- * Support for the microSD card slot on the I/O1 module.  The I/O1 requires
- * SPI support and three output PORTs.  These the PORTs will vary if the OLED1
- * is installed on the EXT1 or EXT2 connector:
+ * Support for the microSD card slot on the I/O1 module.
+ * The I/O1 requires SPI support and three output PORTs.
+ * These the PORTs will vary if the OLED1 is installed on the EXT1
+ * or EXT2 connector:
  *
  *
  *   PIN EXT1                EXT2                 Description
@@ -216,13 +217,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

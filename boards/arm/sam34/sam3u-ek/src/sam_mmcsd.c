@@ -105,6 +105,7 @@ bool sam_cardinserted(unsigned char slot)
       return true;
 #endif
     }
+
   return false;
 }
 
@@ -128,6 +129,7 @@ bool sam_writeprotected(unsigned char slot)
       return false;
 #endif
     }
+
   return false;
 }
 

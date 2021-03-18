@@ -122,7 +122,7 @@ static int board_mscclassobject(int minor,
  * Name: board_mscuninitialize
  *
  * Description:
- *   Un-initialize the USB storage class driver.  This is just an application-
+ *   Un-initialize the USB storage class driver. This is just an application
  *   specific wrapper aboutn usbmsc_unitialize() that is called form the
  *   composite device logic.
  *
@@ -298,7 +298,9 @@ FAR void *board_composite_connect(int port, int configid)
 
       for (ia = 0; ia < 3; ia++)
         {
-          /* Ask the cdcacm driver to fill in the constants we didn't know here */
+          /* Ask the cdcacm driver to fill in the constants we didn't know
+           * here
+           */
 
           cdcacm_get_composite_devdesc(&dev[ia]);
 

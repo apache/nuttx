@@ -53,14 +53,15 @@
 
 /* This is the clock setup we configure for:
  *
- * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz -> Select Main oscillator for source
+ * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz -> Select Main oscillator for
+ *          source
  * PLL0CLK = (10 * SYSCLK) / 1 = 120MHz -> PLL0 multipler=10, pre-divider=1
  * CCLCK = 120MHz  -> CCLK divider = 1
  */
 
-#define LPC17_40_CCLK              120000000  /* 120Mhz */
-#define BOARD_PCLKDIV              2  /* Peripheral clock = LPC17_40_CCLK/2 */
-#define BOARD_PCLK_FREQUENCY       (LPC17_40_CCLK / BOARD_PCLKDIV)
+#define LPC17_40_CCLK         120000000  /* 120Mhz */
+#define BOARD_PCLKDIV         2          /* Peripheral clock = LPC17_40_CCLK/2 */
+#define BOARD_PCLK_FREQUENCY (LPC17_40_CCLK / BOARD_PCLKDIV)
 
 /* Select the main oscillator as the frequency source.
  *  SYSCLK is then the frequency of the main oscillator.
@@ -235,20 +236,21 @@
  * on the LPC4088 OEM Board.
  * The following definitions describe how NuttX controls the LEDs:
  */
-                                      /* LED1 LED2 LED3 LED4                        */
-#define LED_STARTED                0  /*  OFF  OFF  OFF  OFF                        */
-#define LED_HEAPALLOCATE           1  /*  ON   OFF  OFF  OFF                        */
-#define LED_IRQSENABLED            2  /*  OFF   ON  OFF  OFF                        */
-#define LED_STACKCREATED           3  /*  ON    ON  OFF  OFF                        */
-#define LED_INIRQ                  4  /*  LED3 glows, on while in interrupt         */
-#define LED_SIGNAL                 4  /*  LED3 glows, on while in signal handler    */
-#define LED_ASSERTION              4  /*  LED3 glows, on while in assertion         */
-#define LED_PANIC                  4  /*  LED3 Flashes at 2Hz                       */
-#define LED_IDLE                   5  /*  LED4 glows: ON while active
-                                       *              OFF while sleeping
-                                       */
 
-/* Button definitions ***************************************************************/
+                                /* LED1 LED2 LED3 LED4                 */
+#define LED_STARTED          0  /*  OFF  OFF  OFF  OFF                 */
+#define LED_HEAPALLOCATE     1  /*  ON   OFF  OFF  OFF                 */
+#define LED_IRQSENABLED      2  /*  OFF   ON  OFF  OFF                 */
+#define LED_STACKCREATED     3  /*  ON    ON  OFF  OFF                 */
+#define LED_INIRQ            4  /*  LED3 glows, on while in interrupt  */
+#define LED_SIGNAL           4  /*  LED3 glows, on while in signal handler */
+#define LED_ASSERTION        4  /*  LED3 glows, on while in assertion  */
+#define LED_PANIC            4  /*  LED3 Flashes at 2Hz                */
+#define LED_IDLE             5  /*  LED4 glows: ON while active
+                                 *              OFF while sleeping
+                                 */
+
+/* Button definitions *******************************************************/
 
 /* The LPC4088 Developer's Kit supports several buttons.
  * All have external pullup resistors.
@@ -421,10 +423,14 @@
  *                Signal               Connector    Connector
  * -------------- -------------------- ------------ -------------------------
  * Pin 11 PENIRQ\ PENIRQ (pulled high) PORT3 Pin 1  P2.15 PENIRQ
- * Pin 12 DOUT    MISO                 PORT3 Pin 4  P1.18 MISO1  (Also USB HOST UP LED)
+ * Pin 12 DOUT    MISO                 PORT3 Pin 4  P1.18 MISO1
+ *                                                 (Also USB HOST UP LED)
  * Pin 13 BUSY    BUSY (pulled high)   PORT3 Pin 9  P2.14 BUSY
- * Pin 14 DIN     MOSI                 PORT3 Pin 3  P0.13 MOSI1  (Also USB Device up LED and SD CD pin)
- * Pin 15 CS\     SSEL (pulled high)   PORT3 Pin 6  P1.8  GPIO   (Also RMII_CRS_DV)
+ * Pin 14 DIN     MOSI                 PORT3 Pin 3  P0.13 MOSI1
+ *                                                 (Also USB Device up LED
+ *                                                  and SD CD pin)
+ * Pin 15 CS\     SSEL (pulled high)   PORT3 Pin 6  P1.8  GPIO
+ *                                                 (Also RMII_CRS_DV)
  * Pin 16 DCLK    SCK                  PORT3 Pin 5  P1.19 SCK1
  * -------------- -------------------- ------------ -------------------------
  */

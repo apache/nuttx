@@ -233,9 +233,10 @@
 /* UART0:
  *
  *   The kit contains a board controller that is responsible for performing
- *   various board level tasks, such as handling the debugger and the Advanced
- *   Energy Monitor. An interface is provided between the EFM32 and the board
- *   controller in the form of a UART connection. The connection is enabled by
+ *   various board level tasks, such as handling the debugger and the
+ *   Advanced Energy Monitor.
+ *   An interface is provided between the EFM32 and the board controller in
+ *   the form of a UART connection. The connection is enabled by
  *   setting the EFM_BC_EN (PF7) line high, and using the lines EFM_BC_TX
  *   (PE0) and EFM_BC_RX (PE1) for communicating.
  *

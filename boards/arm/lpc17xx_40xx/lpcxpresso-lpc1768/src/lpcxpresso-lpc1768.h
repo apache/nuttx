@@ -70,12 +70,16 @@
 #define LPCXPRESSO_I2C1_EPROM_SDL GPIO_I2C1_SCL_2
 #define LPCXPRESSO_LED (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN22)
 
-/* P1[0]/ENET-TXD0                   J6-34?  TXD0            TX-(Ethernet PHY)
- * P1[1]/ENET_TXD1                   J6-35?  TXD1            TX+(Ethernet PHY)
+/* P1[0]/ENET-TXD0                   J6-34?  TXD0            TX-
+ *                                                           (Ethernet PHY)
+ * P1[1]/ENET_TXD1                   J6-35?  TXD1            TX+
+ *                                                           (Ethernet PHY)
  * P1[4]/ENET_TX_EN                          TXEN            N/A
  * P1[8]/ENET_CRS                            CRS_DV/MODE2    N/A
- * P1[9]/ENET_RXD0                   J6-32?  RXD0/MODE0      RD-(Ethernet PHY)
- * P1[10]/ENET_RXD1                  J6-33?  RXD1/MODE1      RD+(Ethernet PHY)
+ * P1[9]/ENET_RXD0                   J6-32?  RXD0/MODE0      RD-
+ *                                                           (Ethernet PHY)
+ * P1[10]/ENET_RXD1                  J6-33?  RXD1/MODE1      RD+
+ *                                                           (Ethernet PHY)
  * P1[14]/ENET_RX_ER                         RXER/PHYAD0     N/A
  * P1[15]/ENET_REF_CLK                       REFCLK          N/A
  * P1[16]/ENET_MDC                           MDC             N/A
@@ -126,8 +130,10 @@
  * SD   Signal      Pin   Pin
  * ---  ----------- ----- --------
  * CS   PIO1_11*     55   P2.2        (See LPCXPRESSO_SD_CS)
- * DIN  PIO0_9-MOSI   5   P0.9 MOSI1  (See GPIO_SSP1_MOSI in chip/lpcxpresso_ssp.h)
- * DOUT PIO0_8-MISO   6   P0.8 MISO1  (See GPIO_SSP1_MISO in chip/lpcxpresso_ssp.h)
+ * DIN  PIO0_9-MOSI   5   P0.9 MOSI1  (See GPIO_SSP1_MOSI in chip/
+ *                                     lpcxpresso_ssp.h)
+ * DOUT PIO0_8-MISO   6   P0.8 MISO1  (See GPIO_SSP1_MISO in chip/
+ *                                     lpcxpresso_ssp.h)
  * CLK  PIO2_11-SCK   7   P0.9 SCK1   (See GPIO_SSP1_SCK in board.h)
  * CD   PIO2_10      52   P2.11       (See LPCXPRESSO_SD_CD)
  */
@@ -180,9 +186,12 @@
  *  ----------------------------+-------+-------------- ---------------------
  *  LPC1758 Pin                 | J4/6  | Base Board    Description
  *  ----------------------------+-------+-------------- ---------------------
- *  P2.1/PWM1.2/RXD1            |  43   | PIO1_10       FAN5331 Power Control (SHDN#)
- *  P0.6/I2SRX-SDA/SSEL1/MAT2.0 |   8   | PIO0_2        OLED chip select (CS#)
- *  P2.7/RD2/RTS1               |  49   | PIO2_7        OLED command/data (D/C#)
+ *  P2.1/PWM1.2/RXD1            |  43   | PIO1_10       FAN5331 Power Control
+ *                                                      (SHDN#)
+ *  P0.6/I2SRX-SDA/SSEL1/MAT2.0 |   8   | PIO0_2        OLED chip select
+ *                                                      (CS#)
+ *  P2.7/RD2/RTS1               |  49   | PIO2_7        OLED command/data
+ *                                                      (D/C#)
  *  P0.7/I2STX-CLK/SCK1/MAT2.1  |   7   | PIO2_11-SCK   OLED clock (D0)
  *  P0.9/I2STX-SDA/MOSI1/MAT2.3 |   5   | PIO0_9-MOSI   OLED data in (D1)
  *  ----------------------------+-------+-------------- ---------------------
@@ -197,13 +206,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

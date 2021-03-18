@@ -114,8 +114,11 @@
 #  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
 #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(2)
 #else
-//#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
-//#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3)
+
+/* #  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2 */
+
+/* #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3) */
+
 #  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV16
 #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(15)
 #endif
@@ -124,7 +127,7 @@
 
 /* TPM0 Channels */
 
-#define GPIO_TPM0_CH0OUT PIN_TPM0_CH0_3 //PIN_TPM0_CH0_1
+#define GPIO_TPM0_CH0OUT PIN_TPM0_CH0_3 /* PIN_TPM0_CH0_1 */
 #define GPIO_TPM0_CH1OUT PIN_TPM0_CH1_1
 #define GPIO_TPM0_CH2OUT PIN_TPM0_CH2_1
 #define GPIO_TPM0_CH3OUT PIN_TPM0_CH3_1
@@ -153,7 +156,8 @@
  *   Blue Cathode  PTD1
  *
  * NOTE:
- *  PTD1 is also connected to the I/O header on J2 pin 10 (also known as D13).
+ *  PTD1 is also connected to the I/O header on J2 pin 10
+ *  (also known as D13).
  *
  *  If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
  *  the Freedom KL25Z.

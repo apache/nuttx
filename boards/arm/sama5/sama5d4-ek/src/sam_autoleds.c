@@ -20,13 +20,13 @@
 
 /* There are 3 LEDs on the SAMA5D4-EK:
  *
- * ------------------------------ ------------------- -----------------------
- * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -----------------------
- * PE28/NWAIT/RTS4/A19            1Wire_PE28          1-WIRE ROM, LCD, D8 (green)
- * PE8/A8/TCLK3/PWML3             LED_USER_PE8        LED_USER (D10)
- * PE9/A9/TIOA2                   LED_POWER_PE9       LED_POWER (D9, Red)
- * ------------------------------ ------------------- -----------------------
+ * --------------------------- ----------------- -----------------------
+ * SAMA5D4 PIO                 SIGNAL            USAGE
+ * --------------------------- ----------------- -----------------------
+ * PE28/NWAIT/RTS4/A1          1Wire_PE28        1-WIRE ROM, LCD, D8 (green)
+ * PE8/A8/TCLK3/PWML3          LED_USER_PE8      LED_USER (D10)
+ * PE9/A9/TIOA2                LED_POWER_PE9     LED_POWER (D9, Red)
+ * --------------------------- ----------------- -----------------------
  *
  * - D8: D8 is shared with other functions and cannot be used if the
  *   1-Wire ROM is used.
@@ -104,7 +104,7 @@ void board_autoled_on(int led)
   switch (led)
     {
       default:
-      case 0: /* LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED */
+      case 0:  /* LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED */
         break; /* Leave USER LED off */
 
       case 1:   /* LED_STACKCREATED */

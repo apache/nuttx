@@ -81,8 +81,8 @@
 
 /* Button definitions *******************************************************/
 
-/*   B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
- *   microcontroller.
+/* B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
+ * microcontroller.
  */
 
 #define MIN_IRQBUTTON   BUTTON_USER
@@ -109,13 +109,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -138,7 +138,8 @@ int stm32_bringup(void);
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Nucleo-H743ZI board.
+ *   Called to configure SPI chip select GPIO pins for the Nucleo-H743ZI
+ *   board.
  *
  ****************************************************************************/
 
@@ -146,7 +147,7 @@ int stm32_bringup(void);
 void stm32_spidev_initialize(void);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_lpwaninitialize
  *
  * Description:

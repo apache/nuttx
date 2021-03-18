@@ -89,7 +89,8 @@ struct sama5d4ek_tscinfo_s
  *   clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int  mxt_attach(FAR const struct mxt_lower_s *lower, mxt_handler_t isr,
+static int  mxt_attach(FAR const struct mxt_lower_s *lower,
+                       mxt_handler_t isr,
                        FAR void *arg);
 static void mxt_enable(FAR const struct mxt_lower_s *lower, bool enable);
 static void mxt_clear(FAR const struct mxt_lower_s *lower);

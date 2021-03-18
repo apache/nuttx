@@ -122,17 +122,19 @@ void lpc4088_devkit_sdram_initialize(void)
 
   /* Configure the SDRAM */
 
-  putreg32(    EMC_NS2CLK(20), LPC17_40_EMC_DYNAMICRP);   /* TRP   = 20 nS */
-  putreg32(                15, LPC17_40_EMC_DYNAMICRAS);  /* RAS   = 42ns to 100K ns,  */
-  putreg32(                 0, LPC17_40_EMC_DYNAMICSREX); /* TSREX = 1 clock */
-  putreg32(                 1, LPC17_40_EMC_DYNAMICAPR);  /* TAPR  = 2 clocks? */
+  putreg32(EMC_NS2CLK(20), LPC17_40_EMC_DYNAMICRP);  /* TRP   = 20 nS */
+  putreg32(15, LPC17_40_EMC_DYNAMICRAS);             /* RAS   = 42ns to 100K ns,  */
+  putreg32(0, LPC17_40_EMC_DYNAMICSREX);             /* TSREX = 1 clock */
+  putreg32(1, LPC17_40_EMC_DYNAMICAPR);              /* TAPR  = 2 clocks? */
+
   putreg32(EMC_NS2CLK(20) + 2, LPC17_40_EMC_DYNAMICDAL);  /* TDAL  = TRP + TDPL = 20ns + 2clk  */
-  putreg32(                 1, LPC17_40_EMC_DYNAMICWR);   /* TWR   = 2 clocks */
-  putreg32(    EMC_NS2CLK(63), LPC17_40_EMC_DYNAMICRC);   /* H57V2562GTR-75C TRC = 63ns(min) */
-  putreg32(    EMC_NS2CLK(63), LPC17_40_EMC_DYNAMICRFC);  /* H57V2562GTR-75C TRFC = TRC */
-  putreg32(                15, LPC17_40_EMC_DYNAMICXSR);  /* Exit self-refresh to active */
-  putreg32(    EMC_NS2CLK(63), LPC17_40_EMC_DYNAMICRRD);  /* 3 clock, TRRD = 15ns (min) */
-  putreg32(                 1, LPC17_40_EMC_DYNAMICMRD);  /* 2 clock, TMRD = 2 clocks (min) */
+
+  putreg32(1, LPC17_40_EMC_DYNAMICWR);               /* TWR   = 2 clocks */
+  putreg32(EMC_NS2CLK(63), LPC17_40_EMC_DYNAMICRC);  /* H57V2562GTR-75C TRC = 63ns(min) */
+  putreg32(EMC_NS2CLK(63), LPC17_40_EMC_DYNAMICRFC); /* H57V2562GTR-75C TRFC = TRC */
+  putreg32(15, LPC17_40_EMC_DYNAMICXSR);             /* Exit self-refresh to active */
+  putreg32(EMC_NS2CLK(63), LPC17_40_EMC_DYNAMICRRD); /* 3 clock, TRRD = 15ns (min) */
+  putreg32(1, LPC17_40_EMC_DYNAMICMRD);              /* 2 clock, TMRD = 2 clocks (min) */
 
   /* Command delayed strategy, using EMCCLKDELAY */
 

@@ -50,9 +50,9 @@
 
 /* On-Board Connections
  *
- * ------------------- -------------------------- -------- -------------------
+ * ------------------- -------------------------- -------- ------------------
  * FEATURE             CONNECTION                 PORT/PIN PIN FUNCTION
- * ------------------- -------------------------- -------- -------------------
+ * ------------------- -------------------------- -------- ------------------
  * Audio Jack Output   Audio Amp On               PTE28    PTE28
  *                     Audio Output               DAC1_OUT DAC1_OUT
  *                     Volume Up                  PTD10    PTD10
@@ -81,9 +81,9 @@
 #define GPIO_SD_CARDON     (GPIO_HIGHDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN6)
 
 /* Connections via the General Purpose Tower Plug-in (TWRPI) Socket
- * ------------------- -------------------------- -------- -------------------
+ * ------------------- -------------------------- -------- ------------------
  * FEATURE             CONNECTION                 PORT/PIN PIN FUNCTION
- * ------------------- -------------------------- -------- -------------------
+ * ------------------- -------------------------- -------- ------------------
  * General Purpose     TWRPI AN0 (J8 Pin 8)       ?        ADC0_DP0/ADC1_DP3
  * TWRPI Socket        TWRPI AN1 (J8 Pin 9)       ?        ADC0_DM0/ADC1_DM3
  *                     TWRPI AN2 (J8 Pin 12)      ?        ADC1_DP0/ADC0_DP3
@@ -135,20 +135,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: kinetis_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the KwikStik-K40 board.
+ *   Called to configure SPI chip select GPIO pins for the KwikStik-K40
+ *   board.
  *
  ****************************************************************************/
 

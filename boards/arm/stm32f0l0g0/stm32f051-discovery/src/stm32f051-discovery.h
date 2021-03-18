@@ -79,10 +79,13 @@
  *
  * And two LEDs can be controlled by software:
  *
- * User LD3:  Green LED is a user LED connected to the I/O PB7 of the STM32L152 MCU.
- * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the STM32L152 MCU.
+ * User LD3:
+ *     Green LED is a user LED connected to the I/O PB7 of the STM32L152 MCU.
+ * User LD4:
+ *      Blue LED is a user LED connected to the I/O PB6 of the STM32L152 MCU.
  *
- * The other side of the LED connects to ground so high value will illuminate the LED.
+ * The other side of the LED connects to ground so high value will illuminate
+ * the LED.
  */
 
 #define GPIO_LED1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_MEDIUM | \
@@ -95,8 +98,10 @@
 /* The STM32F0Discovery supports two buttons; only one button is controllable
  * by software:
  *
- *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32F303VCT6.
- *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32F303VCT6.
+ *   B1 USER:
+ *     user and wake-up button connected to the I/O PA0 of the STM32F303VCT6.
+ *   B2 RESET:
+ *     pushbutton connected to NRST is used to RESET the STM32F303VCT6.
  *
  * NOTE that  EXTI interrupts are configured
  */
@@ -112,13 +117,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

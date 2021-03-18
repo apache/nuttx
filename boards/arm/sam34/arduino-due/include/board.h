@@ -166,19 +166,19 @@
  * events as follows:
  *
  *  SYMBOL                MEANING                         LED STATE
- *                                                         L         TX       RX
- *  -----------------------  --------------------------  -------- -------- --------
+ *                                                         L   TX   RX
+ *  -----------------------  --------------------------  ---- ---- ----
  */
 
-#define LED_STARTED       0  /* NuttX has been started     OFF      OFF      OFF       */
-#define LED_HEAPALLOCATE  0  /* Heap has been allocated    OFF      OFF      OFF       */
-#define LED_IRQSENABLED   0  /* Interrupts enabled         OFF      OFF      OFF       */
-#define LED_STACKCREATED  1  /* Idle stack created         ON       OFF      OFF       */
-#define LED_INIRQ         2  /* In an interrupt            N/C      GLOW     OFF       */
-#define LED_SIGNAL        2  /* In a signal handler        N/C      GLOW     OFF       */
-#define LED_ASSERTION     2  /* An assertion failed        N/C      GLOW     OFF       */
-#define LED_PANIC         3  /* The system has crashed     N/C      N/C      Blinking  */
-#define LED_PANIC         3  /* MCU is is sleep mode       ------ Not used --------    */
+#define LED_STARTED       0  /* NuttX has been started   OFF OFF  OFF      */
+#define LED_HEAPALLOCATE  0  /* Heap has been allocated  OFF OFF  OFF      */
+#define LED_IRQSENABLED   0  /* Interrupts enabled       OFF OFF  OFF      */
+#define LED_STACKCREATED  1  /* Idle stack created       ON  OFF  OFF      */
+#define LED_INIRQ         2  /* In an interrupt          N/C GLOW OFF      */
+#define LED_SIGNAL        2  /* In a signal handler      N/C GLOW OFF      */
+#define LED_ASSERTION     2  /* An assertion failed      N/C GLOW OFF      */
+#define LED_PANIC         3  /* The system has crashed   N/C N/C  Blinking */
+#define LED_PANIC         3  /* MCU is is sleep mode    ---- Not used ---- */
 
 /* Thus if LED L is statically on, NuttX has successfully booted and is,
  * apparently, running normmally.  If LED RX is glowing, then NuttX is
@@ -200,8 +200,9 @@
  * That problem was resolved as follows:
  *
  *  "... The issue was in my hardware. I found the difference between Arduino
- *   Due shematics (revision R2) and actual PCB layout of my Arduino (revision
- *   R3). On a schematics which I download from arduino.cc was shown that 2nd
+ *   Due shematics (revision R2) and actual PCB layout of my Arduino
+ *   (revision R3).
+ *   On a schematics which I download from arduino.cc was shown that 2nd
  *   pin of IC10 is connected to the ground, but on my Arduino the 2nd pin
  *   of IC10 was connected to its 1st pin instead of ground and in my case
  *   IC10 works in open-drain mode, but RX0 pin on SAM3x doesn't have pull-up
@@ -209,7 +210,7 @@
  *   this pin always '0'.
  *
  *  "My solution is to enable internal pull-up in SAM3x. ...
- *   Now shell console on UART0 (via USB programming connector) of Arduino Due
+ *   Now shell console on UART0 (via USB programming connector) of Arduino
  *   Due works as expected."
  */
 

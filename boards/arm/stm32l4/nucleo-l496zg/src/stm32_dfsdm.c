@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32l4/nucleo-l496zg/src/stm32_dfsdm.c
  *
  *   Copyright (C) 2017 Haltian Ltd. All rights reserved.
@@ -89,6 +89,7 @@ int stm32_dfsdm_setup(void)
           return ret;
         }
 #endif
+
 #ifdef CONFIG_STM32L4_DFSDM1_FLT1
       adc = stm32l4_dfsdm_initialize(1, (const uint8_t[2]){0,1}, 2);
       if (adc == NULL)
@@ -104,6 +105,7 @@ int stm32_dfsdm_setup(void)
           return ret;
         }
 #endif
+
 #ifdef CONFIG_STM32L4_DFSDM1_FLT2
       adc = stm32l4_dfsdm_initialize(2, (const uint8_t[8]){0,1,2,3,4,5,6,7}, 8);
       if (adc == NULL)
@@ -119,6 +121,7 @@ int stm32_dfsdm_setup(void)
           return ret;
         }
 #endif
+
 #ifdef CONFIG_STM32L4_DFSDM1_FLT3
       adc = stm32l4_dfsdm_initialize(3, (const uint8_t[4]){6,5,4,3}, 4);
       if (adc == NULL)

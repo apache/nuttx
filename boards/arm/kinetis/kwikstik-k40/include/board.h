@@ -103,8 +103,11 @@
 #  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
 #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(2)
 #else
-//#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
-//#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3)
+
+/* #  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2 */
+
+/* #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3) */
+
 #  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV16
 #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(15)
 #endif
@@ -138,9 +141,9 @@
 
 /* On-Board Connections
  *
- * ------------------- -------------------------- -------- -------------------
+ * ------------------- -------------------------- -------- ------------------
  * FEATURE             CONNECTION                 PORT/PIN PIN FUNCTION
- * ------------------- -------------------------- -------- -------------------
+ * ------------------- -------------------------- -------- ------------------
  * Audio Jack Output   Audio Amp On               PTE28    PTE28
  *                     Audio Output               DAC1_OUT DAC1_OUT
  *                     Volume Up                  PTD10    PTD10
@@ -168,9 +171,9 @@
 #define PIN_FTM1_CH0   PIN_FTM1_CH0_1
 
 /* Connections via the General Purpose Tower Plug-in (TWRPI) Socket
- * ------------------- -------------------------- -------- -------------------
+ * ------------------- -------------------------- -------- ------------------
  * FEATURE             CONNECTION                 PORT/PIN PIN FUNCTION
- * ------------------- -------------------------- -------- -------------------
+ * ------------------- -------------------------- -------- ------------------
  * General Purpose     TWRPI AN0 (J8 Pin 8)       ?        ADC0_DP0/ADC1_DP3
  * TWRPI Socket        TWRPI AN1 (J8 Pin 9)       ?        ADC0_DM0/ADC1_DM3
  *                     TWRPI AN2 (J8 Pin 12)      ?        ADC1_DP0/ADC0_DP3

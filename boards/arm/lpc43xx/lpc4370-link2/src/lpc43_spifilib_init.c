@@ -47,6 +47,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Local memory, 32-bit aligned that will be used for driver context
  * (handle).
  */
@@ -85,7 +86,7 @@ void board_spifi_initialize(void)
 
   /* Initialize and detect a device and get device context */
 
-  SPIFI_HANDLE_T* pSpifi = spifiInitDevice(&lmem, sizeof(lmem),
+  SPIFI_HANDLE_T *pSpifi = spifiInitDevice(&lmem, sizeof(lmem),
                                            LPC43_SPIFI_CTRL,
                                            LPC43_LOCSRAM_SPIFI_BASE);
 

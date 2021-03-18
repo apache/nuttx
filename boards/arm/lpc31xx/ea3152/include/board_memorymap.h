@@ -35,8 +35,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If the LPC31xx ROM page table is selected, then the board-logic is required
- * to provide:
+/* If the LPC31xx ROM page table is selected, then the board-logic is
+ * required to provide:
  *
  *   PGTABLE_BASE_PADDR - The physical address of the page table in ROM,
  *   PGTABLE_BASE_VADDR - The mapped address of the page table in ROM, and
@@ -44,7 +44,8 @@
  */
 
 #ifdef CONFIG_ARCH_ROMPGTABLE
-  /* The LPC31xx ROM page table uses a 1-1 physical to virtual memory mapping */
+
+/* The LPC31xx ROM page table uses a 1-1 physical to virtual memory mapping */
 
 #  define LPC31_SHADOWSPACE_VSECTION 0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
 #  define LPC31_INTSRAM_VSECTION     0x11028000 /*                        Internal SRAM 96Kb-192Kb */

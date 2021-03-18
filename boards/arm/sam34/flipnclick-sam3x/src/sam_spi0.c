@@ -82,7 +82,8 @@ void weak_function sam_spidev_initialize(void)
  *      pins.
  *   2. Provide sam_spi0select() and sam_spi0status() functions in your
  *      board- specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
+ *      and status operations using GPIOs in the way your board is
+ *      configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spic0mddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using GPIOs in
@@ -157,6 +158,7 @@ uint8_t sam_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
   spiinfo("Returning nothing\n");
   return 0;
 }
+
 /****************************************************************************
  * Name: sam_spi0cmddata
  *

@@ -44,7 +44,8 @@
  * Name: kl_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the FRDM-KL25Z board.
+ *   Called to configure SPI chip select GPIO pins for the FRDM-KL25Z
+ *   board.
  *
  ****************************************************************************/
 
@@ -66,10 +67,10 @@ void weak_function kl_spidev_initialize(void)
  *
  * Description:
  *   These external functions must be provided by board-specific logic.  They
- *   are implementations of the select, status, and cmddata methods of the SPI
- *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All
- *   other methods including kl_spibus_initialize()) are provided by common
- *   Kinetis logic.  To use this common SPI logic on your board:
+ *   are implementations of the select, status, and cmddata methods of the
+ *   SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods including kl_spibus_initialize()) are provided by
+ *   common Kinetis logic.  To use this common SPI logic on your board:
  *
  *   1. Provide logic in kl_boardinitialize() to configure SPI chip select
  *      pins.
@@ -83,8 +84,8 @@ void weak_function kl_spidev_initialize(void)
  *      the way your board is configured.
  *   3. Add a call to kl_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by kl_spibus_initialize() may then be used to bind
- *      the SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by kl_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

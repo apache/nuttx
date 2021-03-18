@@ -66,8 +66,8 @@
 #  error Only the Mikroe uSD click boards are supported
 #endif
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
- * is not enabled.
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO
+ * support is not enabled.
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT)
@@ -133,11 +133,15 @@ static void stm32_mmcsd_carddetect(FAR void *arg);
 static int stm32_mmcsd_setup(FAR struct stm32_mmcsd_state_s *);
 
 #ifdef CONFIG_CLICKER2_STM32_MB1_MMCSD
-static int stm32_mb1_mmcsd_carddetect(int irq, FAR void *regs, FAR void *arg);
+static int stm32_mb1_mmcsd_carddetect(int irq,
+                                      FAR void *regs,
+                                      FAR void *arg);
 #endif
 
 #ifdef CONFIG_CLICKER2_STM32_MB2_MMCSD
-static int stm32_mb2_mmcsd_carddetect(int irq, FAR void *regs, FAR void *arg);
+static int stm32_mb2_mmcsd_carddetect(int irq,
+                                      FAR void *regs,
+                                      FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -211,7 +215,8 @@ static bool stm32_cardinserted_internal(struct stm32_mmcsd_state_s *state)
 static void stm32_mmcsd_carddetect(FAR void *arg)
 {
   bool cd;
-  FAR struct stm32_mmcsd_state_s *state = (FAR struct stm32_mmcsd_state_s *)arg;
+  FAR struct stm32_mmcsd_state_s *state =
+                                   (FAR struct stm32_mmcsd_state_s *)arg;
 
   /* Get the current card insertion state */
 
@@ -270,6 +275,7 @@ static int stm32_mmcsd_setup(struct stm32_mmcsd_state_s *state)
 {
   struct spi_dev_s *spi;
   int ret;
+
   /* Initialize the SPI bus and get an instance of the SPI interface */
 
   spi = stm32_spibus_initialize(state->spidev);
@@ -304,7 +310,8 @@ static int stm32_mmcsd_setup(struct stm32_mmcsd_state_s *state)
   stm32_automount_event(state->slotno, stm32_cardinserted(state->slotno));
 #endif
 
-  mcinfo("INFO: mmcsd%d card has been initialized successfully\n", state->minor);
+  mcinfo("INFO: mmcsd%d card has been initialized successfully\n",
+         state->minor);
   return OK;
 }
 
@@ -372,6 +379,7 @@ bool stm32_cardinserted(int slotno)
     }
 #endif
 #ifdef CONFIG_CLICKER2_STM32_MB2_MMCSD
+
   if (slotno == g_mb2_mmcsd.slotno)
     {
       state = &g_mb2_mmcsd;
@@ -389,7 +397,7 @@ bool stm32_cardinserted(int slotno)
   return stm32_cardinserted_internal(state);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_spi2register
  *
  * Description:
@@ -407,7 +415,7 @@ int stm32_spi2register(struct spi_dev_s *dev, spi_mediachange_t callback,
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_spi3register
  *
  * Description:

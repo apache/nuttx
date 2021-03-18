@@ -134,6 +134,7 @@ void board_autoled_on(int led)
         case LED_IRQSENABLED:
           led2 = 1;
         }
+
       lpc17_40_led(MBED_LED1, led1);
       lpc17_40_led(MBED_LED2, led2);
     }

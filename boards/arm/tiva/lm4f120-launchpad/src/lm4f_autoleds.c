@@ -132,13 +132,17 @@ void board_autoled_on(int led)
       case 0:
         break;
 
-      /* The GREEN component is illuminated at the final initialization step */
+      /* The GREEN component is illuminated at the final initialization
+       * step
+       */
 
       case 1:
         tiva_gpiowrite(GPIO_LED_G, false);
         break;
 
-      /* These will illuminate the BLUE component with on effect no RED and GREEN */
+      /* These will illuminate the BLUE component with on effect no RED
+       * and GREEN
+       */
 
       case 2:
         tiva_gpiowrite(GPIO_LED_B, false);
@@ -150,7 +154,9 @@ void board_autoled_on(int led)
         tiva_gpiowrite(GPIO_LED_G, true);
         tiva_gpiowrite(GPIO_LED_B, true);
 
-      /* This will illuminate the RED component with no effect on RED and GREEN */
+      /* This will illuminate the RED component with no effect on RED
+       * and GREEN
+       */
 
       case 3:
         tiva_gpiowrite(GPIO_LED_R, false);
@@ -173,13 +179,17 @@ void board_autoled_off(int led)
       case 1:
         break;
 
-      /* These will extinguish the BLUE component with no effect on RED and GREEN */
+      /* These will extinguish the BLUE component with no effect on RED
+       * and GREEN
+       */
 
       case 2:
         tiva_gpiowrite(GPIO_LED_B, true);
         break;
 
-      /* These will extinguish the RED component with on effect on RED and GREEN */
+      /* These will extinguish the RED component with on effect on RED
+       * and GREEN
+       */
 
       case 3:
       case 4:

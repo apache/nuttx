@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32l5/nucleo-l552ze/scripts/flash.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

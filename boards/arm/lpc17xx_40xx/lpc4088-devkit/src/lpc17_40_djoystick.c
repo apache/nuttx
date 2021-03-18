@@ -52,8 +52,8 @@
  * JOY_D           -- Connected to P2[27]
  * JOY_CTR         -- Connected to P2[22]
  *
- * The switches are all connected to ground and should be pulled up and sensed
- * with a value of '0' when closed.
+ * The switches are all connected to ground and should be pulled up and
+ * sensed with a value of '0' when closed.
  *
  * Mapping to DJOYSTICK buttons:
  *
@@ -73,11 +73,13 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static djoy_buttonset_t djoy_supported(FAR const struct djoy_lowerhalf_s *lower);
-static djoy_buttonset_t djoy_sample(FAR const struct djoy_lowerhalf_s *lower);
+static djoy_buttonset_t djoy_supported(
+                     FAR const struct djoy_lowerhalf_s *lower);
+static djoy_buttonset_t djoy_sample(
+                     FAR const struct djoy_lowerhalf_s *lower);
 static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
-                         djoy_buttonset_t press, djoy_buttonset_t release,
-                         djoy_interrupt_t handler, FAR void *arg);
+                        djoy_buttonset_t press, djoy_buttonset_t release,
+                        djoy_interrupt_t handler, FAR void *arg);
 
 static void djoy_disable(void);
 static int djoy_interrupt(int irq, FAR void *context, FAR void *arg);
@@ -135,7 +137,8 @@ static const struct djoy_lowerhalf_s g_djoylower =
  *
  ****************************************************************************/
 
-static djoy_buttonset_t djoy_supported(FAR const struct djoy_lowerhalf_s *lower)
+static djoy_buttonset_t djoy_supported(
+                               FAR const struct djoy_lowerhalf_s *lower)
 {
   iinfo("Supported: %02x\n", DJOY_ALLBITS);
   return (djoy_buttonset_t)DJOY_ALLBITS;

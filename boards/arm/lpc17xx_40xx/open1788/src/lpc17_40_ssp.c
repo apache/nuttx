@@ -104,8 +104,8 @@ void weak_function open1788_sspdev_initialize(void)
  *      chip select pins.
  *   2. Provide lpc17_40_ssp0/1/2select() and lpc17_40_ssp0/1/2status()
  *      functions in your board-specific logic.  These functions will perform
- *      chip selection and status operations using GPIOs in the way your board
- *      is configured.
+ *      chip selection and status operations using GPIOs in the way your
+ *      board is configured.
  *   3. Add a calls to lpc17_40_sspbus_initialize() in your low level
  *      application initialization logic
  *   4. The handle returned by lpc17_40_sspbus_initialize() may then be used

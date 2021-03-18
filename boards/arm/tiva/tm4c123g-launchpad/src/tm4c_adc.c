@@ -60,7 +60,15 @@ int tm4c_adc_setup(void)
   struct tiva_adc_cfg_s adc_cfg;
   struct tiva_adc_step_cfg_s step_cfg[] =
   {
-    {0, 0, 0, 0, (TIVA_ADC_FLAG_TS | TIVA_ADC_FLAG_IE | TIVA_ADC_FLAG_END), 0},
+    {
+      0,
+      0,
+      0,
+      0,
+      (TIVA_ADC_FLAG_TS |
+       TIVA_ADC_FLAG_IE |
+       TIVA_ADC_FLAG_END),
+      0},
   };
 
   sse_cfg0.priority = 0;

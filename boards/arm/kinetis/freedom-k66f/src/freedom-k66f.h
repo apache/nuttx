@@ -210,9 +210,9 @@
  * low-power wake up signal. Also, only SW3 can be a non-maskable interrupt.
  *
  *   Switch    GPIO Function
- *   --------- ---------------------------------------------------------------
- *   SW2       PTD11/LLWU_P25/SPI2_PCS0/SDHC0_CLKIN/LPUART0_CTS/FB_A19
- *   SW3       PTA10/LLWU_P22/FTM2_CH0/MII0_RXD2/FTM2_QD_PHA/TPM2_CH0/TRACE_D0
+ *   -------- ---------------------------------------------------------------
+ *   SW2      PTD11/LLWU_P25/SPI2_PCS0/SDHC0_CLKIN/LPUART0_CTS/FB_A19
+ *   SW3      PTA10/LLWU_P22/FTM2_CH0/MII0_RXD2/FTM2_QD_PHA/TPM2_CH0/TRACE_D0
  */
 
 #define GPIO_SW2           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTD | PIN11)
@@ -240,13 +240,13 @@
 #define PIN_SPI1_PCS0    (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTD | PIN4)
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -359,7 +359,8 @@ void k66_automount_initialize(void);
  * Name:  k66_automount_event
  *
  * Description:
- *   The SDHC card detection logic has detected an insertion or removal event.
+ *   The SDHC card detection logic has detected an insertion or removal
+ *   event.
  *   It has already scheduled the MMC/SD block driver operations.
  *   Now we need to schedule the auto-mount event which will occur with a
  *   substantial delay to make sure that everything has settle down.

@@ -149,7 +149,9 @@ int sam_hsmci_initialize(int minor)
       sam_gpioirq(GPIO_MCI_CD);
       irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect, NULL);
 
-      /* Then inform the HSMCI driver if there is or is not a card in the slot. */
+      /* Then inform the HSMCI driver if there is or is not a card in the
+       * slot.
+       */
 
       g_hsmci.inserted = sam_cardinserted(0);
       sdio_mediachange(g_hsmci.hsmci, g_hsmci.inserted);

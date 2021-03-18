@@ -163,7 +163,7 @@ int stm32_pwm_setup(void);
 int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_bringup
  *
  * Description:
