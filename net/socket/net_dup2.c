@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/net/net.h>
+#include <nuttx/net/tcp.h>
 
 #include "inet/inet.h"
 #include "tcp/tcp.h"
@@ -74,6 +75,7 @@
 
 int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2)
 {
+  FAR struct tcp_conn_s *conn;
   int ret = OK;
 
   /* Parts of this operation need to be atomic */
@@ -112,7 +114,11 @@ int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2)
    * the network connection is lost.
    */
 
-  if (psock2->s_type == SOCK_STREAM)
+  conn = (FAR struct tcp_conn_s *)psock2->s_conn;
+
+  if (psock2->s_type == SOCK_STREAM && conn &&
+      (conn->tcpstateflags == TCP_ESTABLISHED ||
+       conn->tcpstateflags == TCP_SYN_RCVD))
     {
       ret = tcp_start_monitor(psock2);
 
