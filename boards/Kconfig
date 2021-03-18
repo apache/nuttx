@@ -1802,6 +1802,15 @@ config ARCH_BOARD_B_G474E_DPOW1
 		MCU, a Cortex-M4 with FPU, 170 MHz, 128 KB SRAM, 512 KB code.
 		See boards/arm/stm32/b-g474e-dpow1/README.txt.
 
+config ARCH_BOARD_B_G431B_ESC1
+	bool "ST Micro B-G431B-ESC1 Discovery Kit"
+	depends on ARCH_CHIP_STM32G431C
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		ST Micro B-G431B-ESC1 Discovery Kit, based on the STM32G431CB
+		MCU, a Cortex-M4 with FPU, 170 MHz, 32 KB SRAM, 128 KB code.
+
 config ARCH_BOARD_NUCLEO_G431RB
 	bool "STM32G431RB Nucleo G431RB"
 	depends on ARCH_CHIP_STM32G431R
@@ -2398,6 +2407,7 @@ config ARCH_BOARD
 	default "stm32h747i-disco"         if ARCH_BOARD_STM32H747I_DISCO
 	default "stm32f746-ws"             if ARCH_BOARD_STM32F746_WS
 	default "b-g474e-dpow1"            if ARCH_BOARD_B_G474E_DPOW1
+	default "b-g431b-esc1"             if ARCH_BOARD_B_G431B_ESC1
 	default "nucleo-g431rb"            if ARCH_BOARD_NUCLEO_G431RB
 	default "b-l072z-lrwan1"           if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"           if ARCH_BOARD_B_L475E_IOT01A
@@ -2733,6 +2743,9 @@ source "boards/arm/samv7/samv71-xult/Kconfig"
 endif
 if ARCH_BOARD_B_G474E_DPOW1
 source "boards/arm/stm32/b-g474e-dpow1/Kconfig"
+endif
+if ARCH_BOARD_B_G431B_ESC1
+source "boards/arm/stm32/b-g431b-esc1/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_G431RB
 source "boards/arm/stm32/nucleo-g431rb/Kconfig"

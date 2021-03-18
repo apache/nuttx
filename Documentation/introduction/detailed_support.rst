@@ -1808,6 +1808,11 @@ One board is supported in this family:
    `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/stm32/nucleo-g431rb/README.txt>`__
    file for further information.
 
+-  **B-G431B-ESC1**. Initial board support for the
+   B-G431B-ESC1 was added in NuttX-10.0. Refer to the NuttX board
+   `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/stm32/b-g431b-esc1/README.txt>`__
+   file for further information.
+
 STMicro STM32 L475
 ------------------
 
