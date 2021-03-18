@@ -64,7 +64,9 @@ void tiva_boardinitialize(void)
    * lm_ssidev_initialize() has been brought into the link.
    */
 
-  /* The LM3S6965 Eval Kit microSD CS and OLED are on SSI0 (Duh! There is no SSI1) */
+  /* The LM3S6965 Eval Kit microSD CS and OLED are on SSI0
+   * (Duh! There is no SSI1)
+   */
 
 #if defined(CONFIG_TIVA_SSI0) /* || defined(CONFIG_TIVA_SSI1) */
   if (lm_ssidev_initialize)
@@ -86,7 +88,7 @@ void tiva_boardinitialize(void)
  * Description:
  *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
+ *   function called board_late_initialize(). board_late_initialize() will be
  *   called immediately after up_initialize() is called and just before the
  *   initial application is started.  This additional initialization phase
  *   may be used, for example, to initialize board-specific device drivers.

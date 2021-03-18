@@ -76,10 +76,10 @@ void lpc31_boardinitialize(void)
     }
 #endif
 
-   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-    * disabled, and 3) the weak function lpc31_usbinitialize() has been
-    * brought into the build.
-    */
+  /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is
+   * not disabled, and 3) the weak function lpc31_usbinitialize() has
+   * been brought into the build.
+   */
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_LPC31_USBOTG)
   if (lpc31_usbinitialize)

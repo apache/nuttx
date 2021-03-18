@@ -138,8 +138,9 @@ static int wm8904_attach(FAR const struct wm8904_lower_s *lower,
 {
   if (isr)
     {
-      /* Just save the address of the handler and its argument for now.  The
-       * new handler will called via wm8904_interrupt() when the interrupt occurs.
+      /* Just save the address of the handler and its argument for now.
+       * The new handler will called via wm8904_interrupt() when the
+       * interrupt occurs.
        */
 
       audinfo("Attaching %p\n", isr);
@@ -157,7 +158,8 @@ static int wm8904_attach(FAR const struct wm8904_lower_s *lower,
   return OK;
 }
 
-static bool wm8904_enable(FAR const struct wm8904_lower_s *lower, bool enable)
+static bool wm8904_enable(FAR const struct wm8904_lower_s *lower,
+                          bool enable)
 {
   static bool enabled;
   irqstate_t flags;
@@ -241,10 +243,11 @@ int sam_wm8904_initialize(int minor)
   audinfo("minor %d\n", minor);
   DEBUGASSERT(minor >= 0 && minor <= 25);
 
-  /* Have we already initialized?  Since we never uninitialize we must prevent
-   * multiple initializations.  This is necessary, for example, when the
-   * touchscreen example is used as a built-in application in NSH and can be
-   * called numerous time.  It will attempt to initialize each time.
+  /* Have we already initialized?
+   * Since we never uninitialize we must prevent multiple initializations.
+   * This is necessary, for example, when the touchscreen example is used as
+   * a built-in application in NSH and can be called numerous times.
+   *   It will attempt to initialize each time.
    */
 
   if (!initialized)
@@ -273,7 +276,8 @@ int sam_wm8904_initialize(int minor)
           goto errout_with_i2c;
         }
 
-      /* Configure the DAC master clock.  This clock is provided by PCK2 (PB10)
+      /* Configure the DAC master clock.
+       * This clock is provided by PCK2 (PB10)
        * that is connected to the WM8904 MCLK.
        */
 
@@ -340,7 +344,8 @@ int sam_wm8904_initialize(int minor)
       ret = audio_register(devname, pcm);
       if (ret < 0)
         {
-          auderr("ERROR: Failed to register /dev/%s device: %d\n", devname, ret);
+          auderr("ERROR: Failed to register /dev/%s device: %d\n",
+                 devname, ret);
           goto errout_with_pcm;
         }
 

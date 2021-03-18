@@ -47,7 +47,7 @@
 #  undef CONFIG_TIVA_SSI1
 #endif
 
-/* Eagle-100 GPIOs ******************************************************************/
+/* Eagle-100 GPIOs **********************************************************/
 
 /* GPIO for microSD card chip select */
 
@@ -56,7 +56,7 @@
 #define LED_GPIO   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTE | 1)
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

@@ -58,7 +58,8 @@
  * Name: tm4c_ssidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the TM4C123G LaunchPad.
+ *   Called to configure SPI chip select GPIO pins for the TM4C123G
+ *   LaunchPad.
  *
  ****************************************************************************/
 

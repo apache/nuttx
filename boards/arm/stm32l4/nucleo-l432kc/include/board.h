@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32l4/nucleo-l432kc/include/board.h
  *
  *   Copyright (C) 2016, 2018-2019 Gregory Nutt. All rights reserved.
@@ -31,21 +31,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_STM32L4_NUCLEO_L432KC_INCLUDE_BOARD_H
 #define __BOARDS_ARM_STM32L4_NUCLEO_L432KC_INCLUDE_BOARD_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
 
-/* Clocking ******************************************************************/
+/* Clocking *****************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_STM32L432KC)
 #  include <arch/board/nucleo-l432kc.h>
@@ -53,11 +53,11 @@
 
 /* Do not include STM32L4 header files here */
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* DMA Channel/Stream Selections *********************************************/
+/* DMA Channel/Stream Selections ********************************************/
 
 /* Stream selections are arbitrary for now but might become important in the
  * future is we set aside more DMA channels/streams.
@@ -76,7 +76,7 @@
 
 #define ADC1_DMA_CHAN DMACHAN_ADC1_1
 
-/* Alternate function pin selections *****************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART1:
  *   RXD: PA10  CN9 pin 3, CN10 pin 33
@@ -267,9 +267,9 @@
 #  define GPIO_LPTIM2_CH1OUT GPIO_LPTIM2_OUT_2
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Public Data
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -282,19 +282,20 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l4_board_initialize
  *
  * Description:
- *   All STM32L4 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory has
- *   been configured and mapped but before any devices have been initialized.
+ *   All STM32L4 architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void stm32l4_board_initialize(void);
 

@@ -60,8 +60,8 @@ void weak_function kinetis_spidev_initialize(void)
  * Name:  kinetis_spi0/1/2select and kinetis_spi0/1/2status
  *
  * Description:
- *   The external functions, kinetis_spi0/1/2select and kinetis_spi0/1/2status
- *   must be provided by board-specific logic.
+ *   The external functions, kinetis_spi0/1/2select and
+ *   kinetis_spi0/1/2status must be provided by board-specific logic.
  *   They are implementations of the select and status methods of the SPI
  *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
  *   All other methods (including kinetis_spibus_initialize()) are provided

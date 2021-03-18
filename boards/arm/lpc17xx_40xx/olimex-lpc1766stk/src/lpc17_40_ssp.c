@@ -162,6 +162,7 @@ static int ssp0_cdinterrupt(int irq, FAR void *context)
     {
       g_ssp0callback.callback(g_ssp0callback.arg);
     }
+
   return OK;
 }
 #endif
@@ -175,6 +176,7 @@ static int ssp1_cdinterrupt(int irq, FAR void *context)
     {
       g_ssp1callback.callback(g_ssp1callback.arg);
     }
+
   return OK;
 }
 #endif
@@ -244,8 +246,8 @@ void weak_function lpc1766stk_sspdev_initialize(void)
  *      select pins.
  *   2. Provide lpc17_40_ssp0/ssp1select() and lpc17_40_ssp0/ssp1status()
  *      functions in your board-specific logic.  These functions will perform
- *      chip selection and status operations using GPIOs in the way your board
- *      is configured.
+ *      chip selection and status operations using GPIOs in the way your
+ *      board is configured.
  *   3. Add a calls to lpc17_40_sspbus_initialize() in your low level
  *      application initialization logic
  *   4. The handle returned by lpc17_40_sspbus_initialize() may then be used

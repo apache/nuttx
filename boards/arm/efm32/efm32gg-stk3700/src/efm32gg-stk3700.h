@@ -28,6 +28,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* UART0
  *
  * The kit contains a board controller that is responsible for performing

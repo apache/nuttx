@@ -28,10 +28,6 @@
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-/*****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
 /* Clocking *****************************************************************/
 
 /* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.
@@ -94,6 +90,10 @@
 
 #endif
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 /* LED definitions **********************************************************/
 
 /* There are two LEDs on the SAMA5D3 series-CM board that can be controlled
@@ -154,8 +154,8 @@
  *    1. One board reset button (BP2). When pressed and released, this push
  *       button causes a power-on reset of the whole board.
  *
- *    2. One wakeup pushbutton that brings the processor out of Low-power mode
- *       (BP1)
+ *    2. One wakeup pushbutton that brings the processor out of Low-power
+ *       mode (BP1)
  *
  *    3. One user pushbutton (BP3)
  *

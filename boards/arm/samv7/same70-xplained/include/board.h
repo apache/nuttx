@@ -230,9 +230,10 @@
  * generic user configurable button.
  * When a button is pressed it will drive the I/O line to GND.
  *
- * NOTE: There are no pull-up resistors connected to the generic user buttons
- * so it is necessary to enable the internal pull-up in the SAM E70 to use the
- * button.
+ * NOTE:
+ * There are no pull-up resistors connected to the generic user buttons
+ * so it is necessary to enable the internal pull-up in the SAM E70 to
+ * use the button.
  */
 
 #define BUTTON_SW0        0
@@ -322,9 +323,9 @@
 
 /* MCAN1
  *
- * SAM E70 Xplained has two MCAN modules that performs communication according
- * to ISO11898-1 (Bosch CAN specification 2.0 part A,B) and Bosch CAN FD
- * specification V1.0.
+ * SAM E70 Xplained has two MCAN modules that performs communication
+ * according to ISO11898-1 (Bosch CAN specification 2.0 part A,B) and Bosch
+ * CAN FD specification V1.0.
  *  MCAN1 is connected to an on-board ATA6561 CAN physical-layer transceiver.
  *
  *   ------- -------- -------- -------------
@@ -359,7 +360,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

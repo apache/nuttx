@@ -77,7 +77,9 @@ int board_usbmsc_initialize(int port)
 
   /* Get the SPI port */
 
-  syslog(LOG_INFO, "Initializing SPI port %d\n", LPC17XX_40XX_MMCSDSPIPORTNO);
+  syslog(LOG_INFO,
+         "Initializing SPI port %d\n",
+         LPC17XX_40XX_MMCSDSPIPORTNO);
 
   spi = lpc17_40_sspbus_initialize(LPC17XX_40XX_MMCSDSPIPORTNO);
   if (!spi)

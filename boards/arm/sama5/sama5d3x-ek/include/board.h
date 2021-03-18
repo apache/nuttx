@@ -28,10 +28,6 @@
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
 /* Clocking *****************************************************************/
 
 /* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.
@@ -88,6 +84,10 @@
 #  include <arch/board/board_396mhz.h>
 
 #endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /* LCD Interface, Geometry and Timing */
 

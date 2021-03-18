@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * boards/arm/kinetis/freedom-k28f/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_KINETIS_FREEDOM_K28F_INCLUDE_BOARD_H
 #define __BOARDS_ARM_KINETIS_FREEDOM_K28F_INCLUDE_BOARD_H
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -34,11 +34,11 @@
 # include <arch/chip/kinetis_mcg.h>
 #endif
 
-/********************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *********************************************************************/
+/* Clocking *****************************************************************/
 
 /* The Freedom K28F uses a 12MHz external Oscillator.
  * The Kinetis MCU startup from an internal digitally-controlled oscillator
@@ -114,7 +114,8 @@
                                          BOARD_SIM_CLKDIV2_USBFRAC)
 #endif
 
-/* Divider output clock = Divider input clock * ((PLLFLLFRAC+1)/(PLLFLLDIV+1))
+/* Divider output
+ *  clock = Divider input clock * ((PLLFLLFRAC+1)/(PLLFLLDIV+1))
  *  SIM_CLKDIV3_FREQ = BOARD_SOPT2_FREQ * ((PLLFLLFRAC+1) / (PLLFLLDIV+1))
  *  SIM_CLKDIV3_FREQ = BOARD_SOPT2_FREQ / (PLLFLLDIV+1) * (PLLFLLFRAC+1)
  *                72MHz = 144MHz / (1 + 1) * (1 + 0)
@@ -132,7 +133,7 @@
 #define BOARD_TPM_CLKSRC     SIM_SOPT2_TPMSRC_MCGCLK
 #define BOARD_TPM_FREQ       BOARD_SIM_CLKDIV3_FREQ
 
-/* SDHC clocking ****************************************************************/
+/* SDHC clocking ************************************************************/
 
 /* SDCLK configurations corresponding to various modes of operation.
  *   Formula is:
@@ -214,7 +215,7 @@
 #define GPIO_FTM2_CH0OUT PIN_FTM2_CH0    /* Pin 25: PTB18 */
 #define GPIO_FTM2_CH1OUT PIN_FTM2_CH1    /* Pin 32: PTB19 */
 
-/* LED definitions **************************************************************/
+/* LED definitions **********************************************************/
 
 /* A single LED is available driven by PTC5.  The LED is grounded so bringing
  * PTC5 high will illuminate the LED.
@@ -246,11 +247,11 @@
 #define LED_ASSERTION                3 /* STATUS LED=no change */
 #define LED_PANIC                    3 /* STATUS LED=flashing */
 
-/* Button definitions ***********************************************************/
+/* Button definitions *******************************************************/
 
 /* The freedom-k28f board has no standard GPIO contact buttons */
 
-/* Alternative pin resolution ***************************************************/
+/* Alternative pin resolution ***********************************************/
 
 /* The Freedom K28F has five LPUARTs with pin availability as follows:
  *
@@ -411,7 +412,7 @@
 #  define PIN_SDHC0_DCLK    PIN_SDHC0_DCLK_1
 #endif
 
-/* LED definitions **************************************************************/
+/* LED definitions **********************************************************/
 
 /* The Freedom K28F has a single RGB LED driven by the K28F as follows:
  *
@@ -457,7 +458,7 @@
 #define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
 #undef  LED_IDLE            /* K28 is in sleep mode     (Not used)        */
 
-/* Button definitions ***********************************************************/
+/* Button definitions *******************************************************/
 
 /* Two push buttons, SW2 and SW3, are available on FRDM-K28F board,
  * where SW2 is connected to PTA4 and SW3 is connected to PTD0.

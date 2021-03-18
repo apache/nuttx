@@ -137,8 +137,10 @@
 #define BOARD_SOPT2_PLLFLLSEL        SIM_SOPT2_PLLFLLSEL_MCGPLLCLK
 #define BOARD_SOPT2_FREQ             BOARD_MCG_FREQ
 
-  /* Divider output clock = Divider input clock × [ (USBFRAC+1) / (USBDIV+1) ]
-   *     SIM_CLKDIV2_FREQ = BOARD_SOPT2_FREQ × [ (USBFRAC+1) / (USBDIV+1) ]
+  /* Divider output clock = Divider input clock ×
+   *                        [ (USBFRAC+1) / (USBDIV+1) ]
+   *     SIM_CLKDIV2_FREQ = BOARD_SOPT2_FREQ ×
+   *                        [ (USBFRAC+1) / (USBDIV+1) ]
    */
 
 #if BOARD_SOPT2_FREQ == 96000000

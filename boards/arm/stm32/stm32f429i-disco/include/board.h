@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * boards/arm/stm32/stm32f429i-disco/include/board.h
  *
  *   Copyright (C) 2012, 2015-2016, 2019 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_STM32_STM32F429I_DISCO_INCLUDE_BOARD_H
 #define __BOARDS_ARM_STM32_STM32F429I_DISCO_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,18 +48,19 @@
 
 /* DO NOT include STM32 internal header files here */
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
-/* The STM32F4 Discovery board features a single 8MHz crystal.  Space is provided
- * for a 32kHz RTC backup crystal, but it is not stuffed.
+/* The STM32F4 Discovery board features a single 8MHz crystal.
+ *  Space is provided for a 32kHz RTC backup crystal, but it is not stuffed.
  *
  * This is the canonical configuration:
  *   System Clock source           : PLL (HSE)
- *   SYSCLK(Hz)                    : 180000000    Determined by PLL configuration
+ *   SYSCLK(Hz)                    : 180000000    Determined by PLL
+ *                                                configuration
  *   HCLK(Hz)                      : 180000000    (STM32_RCC_CFGR_HPRE)
  *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
  *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
@@ -69,7 +70,8 @@
  *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
  *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
  *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
- *   Main regulator output voltage : Scale1 mode  Needed for high speed SYSCLK
+ *   Main regulator output voltage : Scale1 mode  Needed for high speed
+ *                                                SYSCLK
  *   Flash Latency(WS)             : 5
  *   Prefetch Buffer               : OFF
  *   Instruction cache             : ON
@@ -161,10 +163,10 @@
 #define BOARD_TIM7_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
 
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -181,8 +183,9 @@
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 #define BOARD_LED2_BIT    (1 << BOARD_LED2)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
- * stm32f429i-disco.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on
+ * board the stm32f429i-disco.
+ * The following definitions describe how NuttX controls the LEDs:
  */
 
 #define LED_STARTED       0  /* LED1 */
@@ -194,7 +197,7 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
 
 /* The STM32F4 Discovery supports one button: */
 
@@ -204,13 +207,13 @@
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART1:
  *
  * The STM32F4 Discovery has no on-board serial devices, but the console is
- * brought out to PA9 (TX) and PA10 (RX) for connection to an external serial device.
- * (See the README.txt file for other options)
+ * brought out to PA9 (TX) and PA10 (RX) for connection to an external serial
+ * device. (See the README.txt file for other options)
  */
 
 #define GPIO_USART1_RX GPIO_USART1_RX_1
@@ -218,8 +221,8 @@
 
 /* PWM
  *
- * The STM32F4 Discovery has no real on-board PWM devices, but the board can be
- * configured to output a pulse train using TIM4 CH2 on PD13.
+ * The STM32F4 Discovery has no real on-board PWM devices, but the board can
+ * be configured to output a pulse train using TIM4 CH2 on PD13.
  */
 
 #define GPIO_TIM4_CH2OUT GPIO_TIM4_CH2OUT_2
@@ -268,8 +271,9 @@
 /* LCD
  *
  * The STM32F429I-DISCO board contains an onboard TFT LCD connected to the
- * LTDC interface of the uC.  The LCD is 240x320 pixels. Define the parameters
- * of the LCD and the interface here.
+ * LTDC interface of the uC.
+ * The LCD is 240x320 pixels.
+ * Define the parameters of the LCD and the interface here.
  */
 
 /* Panel configuration
@@ -471,7 +475,7 @@
 
 #define BOARD_LIS3DSH_GPIO_EXT0 GPIO_LIS3DSH_EXT0
 
-/* DMA ******************************************************************************/
+/* DMA **********************************************************************/
 
 #define ADC1_DMA_CHAN DMAMAP_ADC1_1
 

@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/imxrt/imxrt1020-evk/src/imxrt_spi.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -57,17 +57,17 @@
 #if defined(CONFIG_IMXRT_LPSPI1) || defined(CONFIG_IMXRT_LPSPI2) || \
     defined(CONFIG_IMXRT_LPSPI3) || defined(CONFIG_IMXRT_LPSPI4)
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: imxrt_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the versiboard2.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void weak_function imxrt_spidev_initialize(void)
 {
@@ -84,12 +84,13 @@ void weak_function imxrt_spidev_initialize(void)
  * Name:  imxrt_lpspi1/2/3select and imxrt_lpspi1/2/3status
  *
  * Description:
- *   The external functions, imxrt_lpspi1/2/3select and imxrt_lpspi1/2/3status
- *   must be provided by board-specific logic.  They are implementations of
- *   the select and status methods of the SPI interface defined by
- *   struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   (including imxrt_lpspibus_initialize()) are provided by common
- *   logic.  To use this common SPI logic on your board:
+ *   The external functions, imxrt_lpspi1/2/3select and
+ *   imxrt_lpspi1/2/3status must be provided by board-specific logic.
+ *   They are implementations of the select and status methods of the SPI
+ *   interface defined bystruct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods (including imxrt_lpspibus_initialize()) are
+ *   provided by common logic.
+ *   To use this common SPI logic on your board:
  *
  *   1. Provide logic in imxrt_boardinitialize() to configure SPI chip select
  *      pins.

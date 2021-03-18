@@ -166,15 +166,24 @@
  * Where CLKDIV has a range of 0-255.
  */
 
-/* MCK = 132MHz, CLKDIV = 164, MCI_SPEED = 132MHz / (2*164 + 0 + 2) = 400 KHz */
+/* MCK = 132MHz,
+ * CLKDIV = 164,
+ * MCI_SPEED = 132MHz / (2*164 + 0 + 2) = 400 KHz
+ */
 
 #define HSMCI_INIT_CLKDIV          (164 << HSMCI_MR_CLKDIV_SHIFT)
 
-/* MCK = 132MHz, CLKDIV = 2 w/CLOCKODD, MCI_SPEED = 132MHz /(2*2 + 1 + 2) = 18.9 MHz */
+/* MCK = 132MHz,
+ * CLKDIV = 2 w/CLOCKODD,
+ * MCI_SPEED = 132MHz /(2*2 + 1 + 2) = 18.9 MHz
+ */
 
 #define HSMCI_MMCXFR_CLKDIV        ((2 << HSMCI_MR_CLKDIV_SHIFT) | HSMCI_MR_CLKODD)
 
-/* MCK = 132MHz, CLKDIV = 2, MCI_SPEED = 132MHz /(2*2 + 0 + 2) = 22 MHz */
+/* MCK = 132MHz,
+ * CLKDIV = 2,
+ * MCI_SPEED = 132MHz /(2*2 + 0 + 2) = 22 MHz
+ */
 
 #define HSMCI_SDXFR_CLKDIV         (2 << HSMCI_MR_CLKDIV_SHIFT)
 #define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV

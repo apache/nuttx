@@ -1,4 +1,4 @@
-/*****************************************************************************************
+/****************************************************************************
  * boards/arm/stm32f7/stm32f746g-disco/include/board.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_STM32F7_STM32F746G_DISCO_INCLUDE_BOARD_H
 #define __BOARDS_ARM_STM32F7_STM32F746G_DISCO_INCLUDE_BOARD_H
 
-/*****************************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,16 +48,18 @@
 
 /* No not include STM32 F7 header files here. */
 
-/*****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking */
 
 /* The STM32F7 Discovery board provides the following clock sources:
  *
- *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module (daughter board)
- *   X2:  25 MHz oscillator for STM32F746NGH6 microcontroller and Ethernet PHY.
+ *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module
+ *       (daughter board)
+ *   X2:  25 MHz oscillator for STM32F746NGH6 microcontroller and
+ *        Ethernet PHY.
  *   X3:  32.768 KHz crystal for STM32F746NGH6 embedded RTC
  *
  * So we have these clock source available within the STM32
@@ -267,10 +269,13 @@
  * near the reset button, that can be controlled by software (LD2 is a power
  * indicator, LD3-6 indicate USB status, LD7 is controlled by the ST-Link).
  *
- * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino interface.
- * One end of LD1 is grounded so a high output on PI1 will illuminate the LED.
+ * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino
+ * interface.
+ * One end of LD1 is grounded so a high output on PI1 will illuminate the
+ * LED.
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any way.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.
  * The following definitions are used to access individual LEDs.
  */
 
@@ -286,8 +291,8 @@
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c. The LEDs are used to encode
+ * OS-related events as follows:
  *
  *   SYMBOL              Meaning                 LD1
  *   ------------------- ----------------------- ------
@@ -346,7 +351,8 @@
 
 /* USART1:
  *
- * USART1 is connected to the "Virtual Com Port" lines of the ST-LINK controller.
+ * USART1 is connected to the "Virtual Com Port" lines of the ST-LINK
+ * controller.
  *
  *   -------- ---------------
  *               STM32F7
@@ -482,8 +488,8 @@
 
 /* SDMMC */
 
-/* Stream selections are arbitrary for now but might become important in the future
- * if we set aside more DMA channels/streams.
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
  *
  * SDIO DMA
  *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3

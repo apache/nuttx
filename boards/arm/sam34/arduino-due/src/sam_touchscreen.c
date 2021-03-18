@@ -42,6 +42,10 @@
 
 #include "arduino-due.h"
 
+/* Include the bit-band skeleton logic */
+
+#include <nuttx/spi/spi_bitbang.c>
+
 /* In order to use the SD card on the ITEAD shield, you must enable the SPI
  * bit-bang driver as well as support for SPI-based ADS7843E/XPT2046
  * touchscreen controller.
@@ -162,12 +166,6 @@ static struct ads7843e_config_s g_tscinfo =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Include the bit-band skeleton logic
- ****************************************************************************/
-
-#include <nuttx/spi/spi_bitbang.c>
 
 /****************************************************************************
  * Name: spi_select

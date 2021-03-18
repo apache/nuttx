@@ -103,8 +103,9 @@
    _D1B(CLKID_CGUPCLK)|_D1B(CLKID_SYSCREGPCLK)|_D1B(CLKID_OTPPCLK)|\
    _D1B(CLKID_RNGPCLK))
 
-/* Domain 2 (DOMAINID_AHB0APB1), Clocks 40-49, Fraction dividers 9-10.  Clocks
- * not defined in the clock sets will be sourced with AHB_APB1_BASE_CLK.
+/* Domain 2 (DOMAINID_AHB0APB1), Clocks 40-49, Fraction dividers 9-10.
+ *  Clocks not defined in the clock sets will be sourced with
+ * AHB_APB1_BASE_CLK.
  */
 
 /* Domain 2, Fractional divider 9: */
@@ -279,13 +280,20 @@ const struct lpc31_clkinit_s g_boardclks =
   {
     CGU_FREQIN_HPPLL1,
     {
-      {{1, 1, 2}, CGU_CLKSET_DOMAIN0_DIV0},
-      {{0, 0, 0}, CGU_CLKSET_DOMAIN0_DIV1},
-      {{1, 1, 2}, CGU_CLKSET_DOMAIN0_DIV2},
-      {{1, 1, 4}, CGU_CLKSET_DOMAIN0_DIV3},
-      {{1, 1, 4}, CGU_CLKSET_DOMAIN0_DIV4},
-      {{1, 1, 2}, CGU_CLKSET_DOMAIN0_DIV5},
-      {{1, 1, 2}, CGU_CLKSET_DOMAIN0_DIV6}
+      {
+        {1, 1, 2}, CGU_CLKSET_DOMAIN0_DIV0},
+      {
+        {0, 0, 0}, CGU_CLKSET_DOMAIN0_DIV1},
+      {
+        {1, 1, 2}, CGU_CLKSET_DOMAIN0_DIV2},
+      {
+        {1, 1, 4}, CGU_CLKSET_DOMAIN0_DIV3},
+      {
+        {1, 1, 4}, CGU_CLKSET_DOMAIN0_DIV4},
+      {
+        {1, 1, 2}, CGU_CLKSET_DOMAIN0_DIV5},
+      {
+        {1, 1, 2}, CGU_CLKSET_DOMAIN0_DIV6}
     }
   },
 
@@ -294,8 +302,10 @@ const struct lpc31_clkinit_s g_boardclks =
   {
     CGU_FREQIN_FFAST,
     {
-      {{1, 1, 38}, CGU_CLKSET_DOMAIN1_DIV7},
-      {{1, 1, 2}, CGU_CLKSET_DOMAIN1_DIV8}
+      {
+        {1, 1, 38}, CGU_CLKSET_DOMAIN1_DIV7},
+      {
+        {1, 1, 2}, CGU_CLKSET_DOMAIN1_DIV8}
     }
   },
 
@@ -304,8 +314,10 @@ const struct lpc31_clkinit_s g_boardclks =
   {
     CGU_FREQIN_FFAST,
     {
-      {{1, 1, 2}, CGU_CLKSET_DOMAIN2_DIV9},
-      {{1, 1, 2}, CGU_CLKSET_DOMAIN2_DIV10}
+      {
+        {1, 1, 2}, CGU_CLKSET_DOMAIN2_DIV9},
+      {
+        {1, 1, 2}, CGU_CLKSET_DOMAIN2_DIV10}
     }
   },
 
@@ -314,9 +326,12 @@ const struct lpc31_clkinit_s g_boardclks =
   {
     CGU_FREQIN_HPPLL1,
     {
-      {{1, 1, 2}, CGU_CLKSET_DOMAIN3_DIV11},
-      {{1, 1, 40}, CGU_CLKSET_DOMAIN3_DIV12},
-      {{0, 0, 0}, CGU_CLKSET_DOMAIN3_DIV13}
+      {
+        {1, 1, 2}, CGU_CLKSET_DOMAIN3_DIV11},
+      {
+        {1, 1, 40}, CGU_CLKSET_DOMAIN3_DIV12},
+      {
+        {0, 0, 0}, CGU_CLKSET_DOMAIN3_DIV13}
     }
   },
 
@@ -325,7 +340,8 @@ const struct lpc31_clkinit_s g_boardclks =
   {
     CGU_FREQIN_FFAST,
     {
-      {{1, 1, 2}, CGU_CLKSET_DOMAIN4_DIV14}
+      {
+        {1, 1, 2}, CGU_CLKSET_DOMAIN4_DIV14}
     }
   },
 
@@ -334,7 +350,8 @@ const struct lpc31_clkinit_s g_boardclks =
   {
     CGU_FREQIN_HPPLL1,
     {
-      {{1, 1, 2}, CGU_CLKSET_DOMAIN5_DIV15}
+      {
+        {1, 1, 2}, CGU_CLKSET_DOMAIN5_DIV15}
     }
   },
 
@@ -343,7 +360,8 @@ const struct lpc31_clkinit_s g_boardclks =
   {
     CGU_FREQIN_FFAST,
     {
-      {{0, 0, 0}, CGU_CLKSET_DOMAIN6_DIV16}
+      {
+        {0, 0, 0}, CGU_CLKSET_DOMAIN6_DIV16}
     }
   },
 
@@ -352,12 +370,18 @@ const struct lpc31_clkinit_s g_boardclks =
   {
     CGU_FREQIN_HPPLL0,
     {
-      {{1, 1, 256}, CGU_CLKSET_DOMAIN7_DIV17},
-      {{1, 1, 4}, CGU_CLKSET_DOMAIN7_DIV18},
-      {{0, 0, 0}, CGU_CLKSET_DOMAIN7_DIV19},
-      {{1, 1, 4}, CGU_CLKSET_DOMAIN7_DIV20},
-      {{1, 1, 32}, CGU_CLKSET_DOMAIN7_DIV21},
-      {{1, 1, 2}, CGU_CLKSET_DOMAIN7_DIV22}
+      {
+        {1, 1, 256}, CGU_CLKSET_DOMAIN7_DIV17},
+      {
+        {1, 1, 4}, CGU_CLKSET_DOMAIN7_DIV18},
+      {
+        {0, 0, 0}, CGU_CLKSET_DOMAIN7_DIV19},
+      {
+        {1, 1, 4}, CGU_CLKSET_DOMAIN7_DIV20},
+      {
+        {1, 1, 32}, CGU_CLKSET_DOMAIN7_DIV21},
+      {
+        {1, 1, 2}, CGU_CLKSET_DOMAIN7_DIV22}
     }
   },
 
@@ -378,7 +402,8 @@ const struct lpc31_clkinit_s g_boardclks =
   {
     CGU_FREQIN_HPPLL1,
     {
-      {{1, 1, 2}, CGU_CLKSET_DOMAIN10_DIV23}
+      {
+        {1, 1, 2}, CGU_CLKSET_DOMAIN10_DIV23}
     }
   },
 
@@ -393,25 +418,46 @@ const struct lpc31_clkinit_s g_boardclks =
 #if 0 /* Dynamic fractional divider initialization not implemented */
   {
     {
-      CGU_DYNSEL_ALLBITS, {1, 1, 64}
+      CGU_DYNSEL_ALLBITS,
+        {
+          1, 1, 64
+        }
     },
     {
-      CGU_DYNSEL_ALLBITS, {0, 0, 0}
+      CGU_DYNSEL_ALLBITS,
+        {
+          0, 0, 0
+        }
     },
     {
-      CGU_DYNSEL_ALLBITS, {1, 1, 3}
+      CGU_DYNSEL_ALLBITS,
+        {
+          1, 1, 3
+        }
     },
     {
-      CGU_DYNSEL_ALLBITS, {1, 1, 6}
+      CGU_DYNSEL_ALLBITS,
+        {
+          1, 1, 6
+        }
     },
     {
-      CGU_DYNSEL_ALLBITS, {1, 1, 6}
+      CGU_DYNSEL_ALLBITS,
+        {
+          1, 1, 6
+        }
     },
     {
-      CGU_DYNSEL_ALLBITS, {1, 1, 6}
+      CGU_DYNSEL_ALLBITS,
+        {
+          1, 1, 6
+        }
     },
     {
-      CGU_DYNSEL_ALLBITS, {1, 1, 3}
+      CGU_DYNSEL_ALLBITS,
+        {
+          1, 1, 3
+        }
     }
   }
 #endif

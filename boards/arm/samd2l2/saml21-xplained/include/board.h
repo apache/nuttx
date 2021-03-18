@@ -47,16 +47,16 @@
  * We will use its default, POR frequency of 4MHz to avoid an additional
  * clock switch.
  *
- * OSC16M              Output = 4MHz
- * `- GCLK1            Input  = 4MHz  Prescaler    = 1  output         = 4MHz
- *     `- DFLL         Input  = 4MHz  Multiplier   = 12 output         = 48MHz
- *         `- GCLK0    Input  = 48MHz Prescaler    = 1  output         = 48MHz
- *             `- MCLK Input  = 48Mhz CPU divider  = 1  CPU frequency  = 48MHz
- *                                    APBA divider = 1  APBA frequency = 48MHz
- *                                    APBB divider = 1  APBB frequency = 48MHz
- *                                    APBC divider = 1  APBC frequency = 48MHz
- *                                    APBD divider = 1  APBD frequency = 48MHz
- *                                    APBE divider = 1  APBE frequency = 48MHz
+ * OSC16M             Output = 4MHz
+ * `- GCLK1           Input  = 4MHz  Prescaler    = 1  output         = 4MHz
+ *    `- DFLL         Input  = 4MHz  Multiplier   = 12 output         = 48MHz
+ *        `- GCLK0    Input  = 48MHz Prescaler    = 1  output         = 48MHz
+ *            `- MCLK Input  = 48Mhz CPU divider  = 1  CPU frequency  = 48MHz
+ *                                   APBA divider = 1  APBA frequency = 48MHz
+ *                                   APBB divider = 1  APBB frequency = 48MHz
+ *                                   APBC divider = 1  APBC frequency = 48MHz
+ *                                   APBD divider = 1  APBD frequency = 48MHz
+ *                                   APBE divider = 1  APBE frequency = 48MHz
  *
  * The SAML21 Xplained Pro has one on-board crystal:
  *
@@ -266,11 +266,14 @@
  *   BOARD_FDPLL96M_LBYPASS         - Boolean (defined / not defined)
  *   BOARD_FDPLL96M_WUF             - Boolean (defined / not defined)
  *   BOARD_FDPLL96M_LPEN            - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_FILTER          - See OSCCTRL_DPLLCTRLB_FILTER_* definitions
- *   BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
+ *   BOARD_FDPLL96M_FILTER          - See OSCCTRL_DPLLCTRLB_FILTER_*
+ *                                    definitions
+ *   BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_*
+ *                                    definitions
  *   BOARD_FDPLL96M_REFCLK_CLKGEN   - GCLK index in the range {0..8}
  *   BOARD_FDPLL96M_LOCKTIME_ENABLE - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_LOCKTIME        - See OSCCTRL_DPLLCTRLB_LTIME_* definitions
+ *   BOARD_FDPLL96M_LOCKTIME        - See OSCCTRL_DPLLCTRLB_LTIME_*
+ *                                    definitions
  *   BOARD_FDPLL96M_LOCKTIME_CLKGEN - GCLK index in the range {0..8}
  *   BOARD_FDPLL96M_REFDIV          - Numeric value, 1 - 2047
  *   BOARD_FDPLL96M_PRESCALER       - See OSCCTRL_DPLLPRESC_* definitions

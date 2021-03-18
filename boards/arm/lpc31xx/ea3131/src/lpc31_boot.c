@@ -89,8 +89,8 @@ void lpc31_boardinitialize(void)
 #endif
 
   /* Initialize USB if the 1) the HS host or device controller is in the
-   * configuration and 2) the weak function lpc31_usbhost_bootinitialize() has
-   * been brought into the build. Presumably either CONFIG_USBDEV or
+   * configuration and 2) the weak function lpc31_usbhost_bootinitialize()
+   * has been brought into the build. Presumably either CONFIG_USBDEV or
    * CONFIG_USBHOST is also selected.
    */
 

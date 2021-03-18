@@ -51,8 +51,10 @@
 
 /* This is the clock setup we configure for:
  *
- * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
- * PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
+ * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for
+ *                                             source
+ * PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20,
+ *                                             pre-divider=1
  * CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
  */
 
@@ -119,7 +121,8 @@
 
 /* Ethernet configuration */
 
-//#define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV44
+/* #define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV44 */
+
 #define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV20
 
 /* LED definitions **********************************************************/
@@ -147,6 +150,7 @@
  * on board the Olimex LPC1766-STK.  The following definitions
  * describe how NuttX controls the LEDs:
  */
+
                                       /* LED1 LED2 */
 #define LED_STARTED                0  /*  OFF  OFF = Still initializing */
 #define LED_HEAPALLOCATE           0  /*  OFF  OFF = Still initializing */

@@ -339,6 +339,7 @@ static int nsh_usbhostinitialize(void)
                         (main_t)nsh_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }
+
   return -ENODEV;
 }
 #else

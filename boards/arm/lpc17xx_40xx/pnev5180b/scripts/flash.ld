@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/lpc17xx_40xx/pnev5180b/scripts/flash.ld
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -36,7 +36,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 /* The LPC1769 has 512Kb of FLASH beginning at address 0x0000:0000 and
  * 64Kb of total SRAM: 32Kb of SRAM in the CPU block beginning at address

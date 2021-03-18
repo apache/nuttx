@@ -47,7 +47,8 @@
  * Name: kinetis_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the KwikStik-K40 board.
+ *   Called to configure SPI chip select GPIO pins for the KwikStik-K40
+ *   board.
  *
  ****************************************************************************/
 
@@ -60,12 +61,12 @@ void weak_function kinetis_spidev_initialize(void)
  * Name:  kinetis_spi0/1/2select and kinetis_spi0/1/2status
  *
  * Description:
- *   The external functions, kinetis_spi0/1/2select and kinetis_spi0/1/2status
- *   must be provided by board-specific logic.
+ *   The external functions, kinetis_spi0/1/2select and
+ *   kinetis_spi0/1/2status must be provided by board-specific logic.
  *   They are implementations of the select and status methods of the SPI
  *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
- *   All other methods (including kinetis_spibus_initialize()) are provided by
- *   common Kinetis logic.
+ *   All other methods (including kinetis_spibus_initialize()) are provided
+ *   by common Kinetis logic.
  *   To use this common SPI logic on your board:
  *
  *   1. Provide logic in kinetis_boardinitialize() to configure SPI chip
@@ -76,8 +77,8 @@ void weak_function kinetis_spidev_initialize(void)
  *      using GPIOs in the way your board is configured.
  *   3. Add a calls to kinetis_spibus_initialize() in your low level
  *      application initialization logic
- *   4. The handle returned by kinetis_spibus_initialize() may then be used to
- *      bind the SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by kinetis_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

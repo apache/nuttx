@@ -104,6 +104,7 @@ void board_autoled_on(int led)
     case 3:    /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
 
     case 1:    /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
+
       ledstate = false;       /* Set ledstate == false to turn ON */
 
       break;

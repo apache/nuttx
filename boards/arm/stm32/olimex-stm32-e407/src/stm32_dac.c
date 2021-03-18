@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32/olimex-stm32-e407/src/stm32_dac.c
  *
  *   Copyright (C) 2019 Acutronics Robotics All rights reserved.
@@ -62,19 +62,19 @@ static struct dac_dev_s *g_dac;
  * Public Functions
  ****************************************************************************/
 
- /****************************************************************************
-  * Name: stm32_dac_setup
-  *
-  * Description:
-  *   Initialize and register the DAC0 of the microcontroller.
-  *
-  * Input parameters:
-  *   devpath - The full path to the driver to register. E.g., "/dev/dac0"
-  *
-  * Returned Value:
-  *   Zero (OK) on success; a negated errno value on failure.
-  *
-  ****************************************************************************/
+/****************************************************************************
+ * Name: stm32_dac_setup
+ *
+ * Description:
+ *   Initialize and register the DAC0 of the microcontroller.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/dac0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
 
 int stm32_dac_setup(void)
 {
@@ -82,7 +82,6 @@ int stm32_dac_setup(void)
 
   if (!initialized)
     {
-
       int ret;
 
       g_dac = stm32_dacinitialize(1);

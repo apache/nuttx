@@ -53,8 +53,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* How many SPI modules does this chip support? Most support 2 SPI modules (others
- * may support more -- in such case, the following must be expanded).
+/* How many SPI modules does this chip support?
+ * Most support 2 SPI modules (others may support more -- in such case,
+ * the following must be expanded).
  */
 
 #if STM32_NSPI < 1
@@ -77,7 +78,8 @@
 #  undef HAVE_I2CTOOL
 #endif
 
-/* STM3210E-EVAL GPIOs **************************************************************/
+/* STM3210E-EVAL GPIOs ******************************************************/
+
 /* LEDs */
 
 #define GPIO_LED1        (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
@@ -163,7 +165,7 @@ struct extmem_save_s
 };
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -174,7 +176,7 @@ struct extmem_save_s
 extern const uint16_t g_commonconfig[NCOMMON_CONFIG];
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -197,7 +199,8 @@ int stm32_bringup(void);
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the STM3210E-EVAL board.
+ *   Called to configure SPI chip select GPIO pins for the STM3210E-EVAL
+ *   board.
  *
  ****************************************************************************/
 
@@ -346,8 +349,8 @@ void stm32_ledpminitialize(void);
  * Name: stm32_pmbuttons
  *
  * Description:
- *   Configure all the buttons of the STM3210e-eval board as EXTI, so any button is
- *   able to wakeup the MCU from the PM_STANDBY mode
+ *   Configure all the buttons of the STM3210e-eval board as EXTI, so any
+ *   button is able to wakeup the MCU from the PM_STANDBY mode
  *
  ****************************************************************************/
 

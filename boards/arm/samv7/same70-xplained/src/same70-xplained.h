@@ -291,8 +291,8 @@
  * When a button is pressed it will drive the I/O line to GND.
  *
  * NOTE: There are no pull-up resistors connected to the generic user buttons
- * so it is necessary to enable the internal pull-up in the SAM E70 to use the
- * button.
+ * so it is necessary to enable the internal pull-up in the SAM E70 to use
+ * the button.
  */
 
 #define GPIO_SW0      (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
@@ -325,10 +325,10 @@
 
 /* USB Host
  *
- * The SAM E70 Xplained has a Micro-USB connector for use with the SAM E70 USB
- * module labeled as TARGET USB on the kit. In USB host mode VBUS voltage is
- * provided by the kit and has to be enabled by setting the "VBUS Host Enable"
- * pin (PC16) low.
+ * The SAM E70 Xplained has a Micro-USB connector for use with the SAM E70
+ * USB module labeled as TARGET USB on the kit. In USB host mode VBUS voltage
+ * is provided by the kit and has to be enabled by setting the "VBUS Host
+ * Enable" pin (PC16) low.
  */
 
 #define GPIO_VBUSON (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
@@ -343,8 +343,10 @@
  * AD1 PC31  microBUS2 Analog               PC31 AFE1_AD6   GPIO_AFE1_AD6
  * AD2 PD30  microBUS2 GPIO reset output    PD30
  * AD3 PA19  microBUS1 GPIO reset output    PA19
- * AD4 PC13  (both) I2C-SDA                 PC13 *** Does not support I2C SDA ***
- * AD5 PC30  (both) I2C-SCL                 PC30 *** Does not support I2C SCL ***
+ * AD4 PC13  (both) I2C-SDA                 PC13
+ *                                           *** Does not support I2C SDA ***
+ * AD5 PC30  (both) I2C-SCL                 PC30
+ *                                           *** Does not support I2C SCL ***
  * AD6 PA17  *** Not used ***
  * AD7 PC12  *** Not used ***
  * D0  PD28  (both) HDR_RX                  PD28 URXD3      GPIO_UART3_RXD
@@ -395,13 +397,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

@@ -140,7 +140,9 @@ static void kinetis_mediachange(void)
 
   if (inserted != g_nsh.inserted)
     {
-      /* Yes.. perform the appropriate action (this might need some debounce). */
+      /* Yes..
+       * perform the appropriate action (this might need some debounce).
+       */
 
       g_nsh.inserted = inserted;
       sdhc_mediachange(g_nsh.sdhc, inserted);
@@ -229,7 +231,8 @@ int board_app_initialize(uintptr_t arg)
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_nsh.sdhc);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SDHC to the MMC/SD driver: %d\n",
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDHC to the MMC/SD driver: %d\n",
              ret);
       return ret;
     }

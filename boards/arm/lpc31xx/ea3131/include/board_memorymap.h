@@ -44,7 +44,10 @@
  */
 
 #ifdef CONFIG_ARCH_ROMPGTABLE
-  /* The LPC31xx ROM page table uses a 1-1 physical to virtual memory mapping */
+
+/* The LPC31xx ROM page table uses a 1-1 physical to virtual memory
+ * mapping
+ */
 
 #  define LPC31_SHADOWSPACE_VSECTION 0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
 #  define LPC31_INTSRAM_VSECTION     0x11028000 /*                        Internal SRAM 96Kb-192Kb */

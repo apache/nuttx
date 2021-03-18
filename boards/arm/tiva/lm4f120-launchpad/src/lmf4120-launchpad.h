@@ -107,7 +107,7 @@
 #define GPIO_SW2     (GPIO_FUNC_INTERRUPT | GPIO_INT_BOTHEDGES | GPIO_PORTF | GPIO_PIN_1)
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

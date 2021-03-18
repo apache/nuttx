@@ -17,6 +17,7 @@
  * under the License.
  *
  ****************************************************************************/
+
 /* The Freedom KL26Z has a single RGB LED driven by the KL26Z as follows:
  *
  *   ------------- --------

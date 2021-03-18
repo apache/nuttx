@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * boards/arm/lpc17xx_40xx/lx_cpu/src/lpc17_40_boardinitialize.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,19 +36,20 @@
 
 #include "lx_cpu.h"
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_boardinitialize
  *
  * Description:
- *   All LPC17xx architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All LPC17xx architectures must provide the following entry point.
+ *   This entry point is called early in the initialization --
+ *   after all memory has beenconfigured and mapped but before any
+ *   devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc17_40_boardinitialize(void)
 {
@@ -67,7 +68,7 @@ void lpc17_40_boardinitialize(void)
 
 #endif
 
-#endif /*BOARD_EMC_CONFIG_BY_LOADER*/
+#endif /* BOARD_EMC_CONFIG_BY_LOADER */
 
 #if defined(CONFIG_LPC17_40_SSP0) || defined(CONFIG_LPC17_40_SSP1) || \
     defined(CONFIG_LPC17_40_SSP2)

@@ -117,13 +117,13 @@ int max326_bringup(void);
  *   Called to configure SPI chip select GPIO pins for the MAX3660-EVSYS
  *   board.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_MAX326XX_HAVE_SPIM
 void max326_spidev_initialize(void);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: max326_mmcsd_initialize
  *
  * Description:

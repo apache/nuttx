@@ -38,8 +38,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* The Open1788 supports several buttons.  All will read "1" when open and "0"
- * when closed
+
+/* The Open1788 supports several buttons.
+ * All will read "1" when open and "0" when closed
  *
  *   USER1           Connected to P4[26]
  *   USER2           Connected to P2[22]
@@ -53,8 +54,8 @@
  *   JOY_D           Connected to P2[19]
  *   JOY_CTR         Connected to P0[14]
  *
- * The switches are all connected to ground and should be pulled up and sensed
- * with a value of '0' when closed.
+ * The switches are all connected to ground and should be pulled up and
+ * sensed with a value of '0' when closed.
  *
  * Mapping to DJOYSTICK buttons:
  *
@@ -76,8 +77,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static djoy_buttonset_t djoy_supported(FAR const struct djoy_lowerhalf_s *lower);
-static djoy_buttonset_t djoy_sample(FAR const struct djoy_lowerhalf_s *lower);
+static djoy_buttonset_t djoy_supported(
+                         FAR const struct djoy_lowerhalf_s *lower);
+static djoy_buttonset_t djoy_sample(
+                         FAR const struct djoy_lowerhalf_s *lower);
 static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
                          djoy_buttonset_t press, djoy_buttonset_t release,
                          djoy_interrupt_t handler, FAR void *arg);
@@ -88,6 +91,7 @@ static int djoy_interrupt(int irq, FAR void *context, FAR void *arg);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each Open1788 joystick "button."  Indexed using
  * DJOY_* definitions in include/nuttx/input/djoystick.h.
  */
@@ -137,7 +141,8 @@ static const struct djoy_lowerhalf_s g_djoylower =
  *
  ****************************************************************************/
 
-static djoy_buttonset_t djoy_supported(FAR const struct djoy_lowerhalf_s *lower)
+static djoy_buttonset_t djoy_supported(
+                           FAR const struct djoy_lowerhalf_s *lower)
 {
   iinfo("Supported: %02x\n", DJOY_ALLBITS);
   return (djoy_buttonset_t)DJOY_ALLBITS;

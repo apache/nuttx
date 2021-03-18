@@ -140,6 +140,7 @@
 #endif
 
 /* Mickroe Clicker2 STM32 GPIOs *********************************************/
+
 /* LEDs
  *
  * The Mikroe Clicker2 STM32 has two user controllable LEDs:
@@ -173,10 +174,12 @@
  *   PA9  OTG_FS_VBUS VBUS sensing (USB-DET)
  *
  * USB host does not appear to be supported.  My interpretation is that power
- * is provided via LTC3586 which can be driven either from USB VBUS or from PWR-EN
- * (controlled by SW1).  But I don't see any capability to drive VBUS power.
+ * is provided via LTC3586 which can be driven either from USB VBUS or from
+ * PWR-EN (controlled by SW1).
+ * But I don't see any capability to drive VBUS power.
  *
- * Overcurrent and battery status are provided by the LTC3586, but not USB power.
+ * Overcurrent and battery status are provided by the LTC3586, but not USB
+ * power.
  *
  *   PC6  Overcurrent detection (PC6-FAULT)
  *   PD4  Battery status (PD4-BATSTAT)
@@ -193,7 +196,7 @@
 #define GPIO_PWR_FAULT   (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTC|GPIO_PIN6)
 #define GPIO_PWR_BATSTAT (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTD|GPIO_PIN4)
 
-/* mikroBUS *************************************************************************/
+/* mikroBUS *****************************************************************/
 
 /* U[S]ARTs
  *
@@ -246,8 +249,9 @@
  *   mikroBUS1 Interrupt: PE10-MB1_INT
  *   mikroBUS2 Interrupt: PE14-MB2_INT
  *
- * I assume that the interrupt lines are active low.  No pull-ups are provided on
- * board so pull-ups are provided in the pin configurations.
+ * I assume that the interrupt lines are active low.
+ * No pull-ups are provided on board so pull-ups are provided
+ * in the pin configurations.
  */
 
 #define GPIO_MB1_INT     (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTE|GPIO_PIN10)
@@ -256,15 +260,15 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Mikroe Clicker2 STM32
- *   board.
+ *   Called to configure SPI chip select GPIO pins for the Mikroe Clicker2
+ *   STM32 board.
  *
  ****************************************************************************/
 
@@ -290,8 +294,8 @@ int stm32_bringup(void);
  * Name: stm32_usb_configure
  *
  * Description:
- *   Called from stm32_boardinitialize very early in inialization to setup USB-related
- *   GPIO pins for the Mikroe Clicker2 STM32 board.
+ *   Called from stm32_boardinitialize very early in inialization to setup
+ *   USB-related GPIO pins for the Mikroe Clicker2 STM32 board.
  *
  ****************************************************************************/
 
@@ -408,10 +412,10 @@ int stm32_automount_initialize(void);
  * Name: stm32_automount_event
  *
  * Description:
- *   The MMCSD card detection logic has detected an insertion or removal event.  It
- *   has already scheduled the MMC/SD block driver operations.  Now we need to
- *   schedule the auto-mount event which will occur with a substantial delay to make
- *   sure that everything has settle down.
+ *   The MMCSD card detection logic has detected an insertion or removal
+ *   event.  It has already scheduled the MMC/SD block driver operations.
+ *   Now we need to schedule the auto-mount event which will occur with a
+ *   substantial delay to make sure that everything has settle down.
  *
  * Input Parameters:
  *   slotno - Identifies the MB slot: MB1_MMCSD_SLOTNO or MB2_MMCSD_SLOTNO.

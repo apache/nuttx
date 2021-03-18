@@ -17,6 +17,7 @@
  * under the License.
  *
  ****************************************************************************/
+
 /* The Freedom K64F has a single RGB LED driven by the K64F as follows:
  *
  *   LED    K64

@@ -154,7 +154,8 @@ static int k64_attach(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static void k64_enable(FAR const struct automount_lower_s *lower, bool enable)
+static void k64_enable(FAR const struct automount_lower_s *lower,
+                       bool enable)
 {
   FAR const struct k64_automount_config_s *config;
   FAR struct k64_automount_state_s *state;
@@ -246,7 +247,8 @@ void k64_automount_initialize(void)
  * Name:  k64_automount_event
  *
  * Description:
- *   The SDHC card detection logic has detected an insertion or removal event.
+ *   The SDHC card detection logic has detected an insertion or removal
+ *   event.
  *   It has already scheduled the MMC/SD block driver operations.
  *   Now we need to schedule the auto-mount event which will occur with a
  *   substantial delay to make sure that everything has settle down.

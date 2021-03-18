@@ -73,7 +73,9 @@
 #  undef HAVE_USBDEV
 #endif
 
-/* Can't support MMC/SD features if mountpoints or SDIO support are disabled */
+/* Can't support MMC/SD features if mountpoints or SDIO support are
+ * disabled
+ */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO)
 #  undef HAVE_SDIO
@@ -159,7 +161,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

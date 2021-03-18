@@ -55,7 +55,9 @@
 void sam_spidev_initialize(void)
 {
 #ifdef CONFIG_SAMV7_SPI0_MASTER
-  /* Make sure that the EDBG DIGI_SPI CS is high so that it does not interfere */
+  /* Make sure that the EDBG DIGI_SPI CS is high so that it does not
+   * interfere
+   */
 
   sam_configgpio(CLICK_EDBG_CS);
 

@@ -158,7 +158,8 @@ static int wm8904_attach(FAR const struct wm8904_lower_s *lower,
   return OK;
 }
 
-static bool wm8904_enable(FAR const struct wm8904_lower_s *lower, bool enable)
+static bool wm8904_enable(FAR const struct wm8904_lower_s *lower,
+                          bool enable)
 {
   static bool enabled;
   irqstate_t flags;
@@ -242,10 +243,11 @@ int sam_wm8904_initialize(int minor)
   audinfo("minor %d\n", minor);
   DEBUGASSERT(minor >= 0 && minor <= 25);
 
-  /* Have we already initialized?  Since we never uninitialize we must prevent
-   * multiple initializations.  This is necessary, for example, when the
-   * touchscreen example is used as a built-in application in NSH and can be
-   * called numerous time.  It will attempt to initialize each time.
+  /* Have we already initialized?
+   * Since we never uninitialize we must prevent multiple initializations.
+   * This is necessary, for example, when the touchscreen example is used
+   * as a built-in application in NSH and can be called numerous times.
+   * It will attempt to initialize each time.
    */
 
   if (!initialized)

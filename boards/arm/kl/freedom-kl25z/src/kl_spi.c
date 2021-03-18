@@ -69,10 +69,10 @@ void weak_function kl_spidev_initialize(void)
  *
  * Description:
  *   These external functions must be provided by board-specific logic.  They
- *   are implementations of the select, status, and cmddata methods of the SPI
- *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All
- *   other methods including kl_spibus_initialize()) are provided by common
- *   Kinetis logic.  To use this common SPI logic on your board:
+ *   are implementations of the select, status, and cmddata methods of the
+ *   SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods including kl_spibus_initialize()) are provided by
+ *   common Kinetis logic.  To use this common SPI logic on your board:
  *
  *   1. Provide logic in kl_boardinitialize() to configure SPI chip select
  *      pins.

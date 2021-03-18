@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * boards/arm/lpc31xx/ea3131/tools/lpchdr.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -33,24 +33,24 @@
 #include <errno.h>
 #include "lpchdr.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define IO_BUF_SIZE  1024
 #define HDR_SIZE     0x80
 #define HDR_CRC_SIZE 0x6c
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static const char *g_infile;
 static const char *g_outfile;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 static void show_usage(const char *progname, int exitcode)
 {
@@ -198,9 +198,9 @@ static inline void writefile(int infd, int outfd, size_t len, size_t padlen)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 int main(int argc, char **argv, char **envp)
 {
@@ -221,14 +221,18 @@ int main(int argc, char **argv, char **envp)
   infd = open(g_infile, O_RDONLY);
   if (infd < 0)
     {
-      fprintf(stderr, "Failed to open %s for reading: %s\n", g_infile, strerror(errno));
+      fprintf(stderr,
+              "Failed to open %s for reading: %s\n",
+              g_infile, strerror(errno));
       exit(2);
     }
 
-  outfd = open(g_outfile, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+  outfd = open(g_outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
   if (outfd < 0)
     {
-      fprintf(stderr, "Failed to open %s for writing: %s\n", g_outfile, strerror(errno));
+      fprintf(stderr,
+              "Failed to open %s for writing: %s\n",
+              g_outfile, strerror(errno));
       exit(2);
     }
 
@@ -237,7 +241,8 @@ int main(int argc, char **argv, char **envp)
   ret = fstat(infd, &buf);
   if (ret < 0)
     {
-      fprintf(stderr, "stat of %s failed: %s\n", g_infile, strerror(errno));
+      fprintf(stderr,
+              "stat of %s failed: %s\n", g_infile, strerror(errno));
       exit(3);
     }
 
@@ -251,7 +256,8 @@ int main(int argc, char **argv, char **envp)
 #else
   g_hdr.imageType       = 0x0000000b;
 #endif
-  g_hdr.imageLength     = (buf.st_size + sizeof(struct lpc31_header_s) + 511) & ~0x1ff;
+  g_hdr.imageLength     = (buf.st_size +
+                           sizeof(struct lpc31_header_s) + 511) & ~0x1ff;
 
   /* This is how much we must pad at the end of the binary image. */
 
@@ -260,14 +266,16 @@ int main(int argc, char **argv, char **envp)
   /* Calculate CRCs */
 
   g_hdr.execution_crc32 = infilecrc32(infd, buf.st_size, padlen);
-  g_hdr.header_crc32    = crc32((const uint8_t*)&g_hdr, HDR_CRC_SIZE);
+  g_hdr.header_crc32    = crc32((const uint8_t *)&g_hdr, HDR_CRC_SIZE);
 
   /* Write the header */
 
   nbytes = write(outfd, &g_hdr, HDR_SIZE);
   if (nbytes != 0x80)
     {
-      fprintf(stderr, "write of header to of %s failed: %s\n", g_outfile, strerror(errno));
+      fprintf(stderr,
+              "write of header to of %s failed: %s\n",
+              g_outfile, strerror(errno));
       exit(4);
     }
 

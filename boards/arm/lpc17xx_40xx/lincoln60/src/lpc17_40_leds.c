@@ -70,8 +70,9 @@
  * IRQSENABLED     OFF   BLUE
  * STACKCREATED    OFF    OFF
  *
- * After the system is booted, this logic will no longer use LEDs 1 & 2.  They
- * are available for use by applications using lpc17_40_led (prototyped below)
+ * After the system is booted, this logic will no longer use LEDs 1 & 2. They
+ * are available for use by applications using lpc17_40_led
+ * (prototyped below)
  */
 
 static bool g_initialized;
@@ -128,6 +129,7 @@ void board_autoled_on(int led)
         case LED_IRQSENABLED:
           led2 = 1;
         }
+
       lpc17_40_led(LINCOLN60_LED1, led1);
       lpc17_40_led(LINCOLN60_LED2, led2);
     }
@@ -177,7 +179,6 @@ void board_autoled_off(int led)
  ****************************************************************************/
 
 void lpc17_40_led(int lednum, int state)
-
 {
   lpc17_40_gpiowrite(lednum, state);
 }

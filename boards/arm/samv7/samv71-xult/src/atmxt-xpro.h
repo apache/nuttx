@@ -153,7 +153,8 @@
  *                       SAMV71-XULT               maxTouch Xplained Pro
  * PIN  FUNCTION EXT1 FUNC        EXT2 FUNC        Description
  * ---- -------- ---- ----------- ---- ----------- --------------------------
- *  1   ID        -    -           -    -          Communication line to ID chip
+ *  1   ID        -    -           -    -          Communication line to
+ *                                                 ID chip
  *  2   GND       -    -           -    -          Ground
  *  3   N/C      PC31  -          PD30  -
  *  4   N/C      PA19  -          PC13  -
@@ -161,15 +162,21 @@
  *  6   N/C      PB2   -          PD11  -
  *  7   PWM      PA0  PWMC0_PWMH0 PC19 PWMC0_PMWH2 Backlight control
  *  8   N/C      PC30  -          PD26  -
- *  9   GPIO/IRQ PD28 GPIO        PA2  GPIO        IRQ from maXTouch controller
- *  10  GPIO     PA5  GPIO        PA24 GPIO        RESET signal for maXTouch and LCD controller
- *  11  I2C SDA  PA3  TWID0       PA3  TWID0       I2C Data line for maXTouch controller
- *  12  I2C SCL  PA4  TWICK0      PA4  TWICK0      I2C Clock line for maXTouch controller
+ *  9   GPIO/IRQ PD28 GPIO        PA2  GPIO        IRQ from
+ *                                                 maXTouch controller
+ *  10  GPIO     PA5  GPIO        PA24 GPIO        RESET signal
+ *                                                 for maXTouch and
+ *                                                 LCD controller
+ *  11  I2C SDA  PA3  TWID0       PA3  TWID0       I2C Data line for
+ *                                                 maXTouch controller
+ *  12  I2C SCL  PA4  TWICK0      PA4  TWICK0      I2C Clock line for
+ *                                                 maXTouch controller
  *  13  N/C      PB0   -          PA21  -
  *  14  N/C      PB1   -          PB4   -
  *  15  CS       PD25 GPIO        PD27 GPIO        CS line for LCD controller
  *  16  SPI MOSI PD21 SPI0_MOSI   PD21 SPI0_MOSI   SPI Data to LCD controller
- *  17  SPI MISO PD20 SPI0_MISO   PD20 SPI0_MISO   SPI Data from LCD controller
+ *  17  SPI MISO PD20 SPI0_MISO   PD20 SPI0_MISO   SPI Data from
+ *                                                 LCD controller
  *  18  SPI SCK  PD22 SPI0_SPCK   PD22 SPI0_SPCK   SPI Clock line
  *  19  GND       -    -           -      -        Ground
  *  20  VCC       -    -           -      -        Target supply voltage
@@ -351,7 +358,7 @@ struct atmxt_config_s
 };
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -365,7 +372,7 @@ extern const struct atmxt_config_s g_atmxt_config[];
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */

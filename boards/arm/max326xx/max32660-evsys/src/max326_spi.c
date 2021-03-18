@@ -72,8 +72,8 @@ void max326_spidev_initialize(void)
  *   are provided by common STM32 logic.
  *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in max326_boardinitialize() to configure SPI chip select
- *      pins.
+ *   1. Provide logic in max326_boardinitialize() to configure SPI chip
+ *      select pins.
  *   2. Provide max326_spi0/1select() and max326_spi0/1status() functions in
  *      your board-specific logic.
  *      These functions will perform chip selection and status operations

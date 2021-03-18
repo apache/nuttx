@@ -103,10 +103,10 @@
 #define GPIO_LD2        (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                          GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN5)
 
-
 /* Button definitions *******************************************************/
 
-/* B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
+/* B1 USER:
+ * the user button is connected to the I/O PC13 (pin 2) of the STM32
  * microcontroller.
  */
 
@@ -122,13 +122,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -149,7 +149,9 @@ int stm32l4_adc_setup(void);
  *
  ****************************************************************************/
 
-int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *vext);
+int stm32l4_adc_measure_voltages(uint32_t *vrefint,
+                                 uint32_t *vbat,
+                                 uint32_t *vext);
 
 /****************************************************************************
  * Name: stm32l4_dac_setup

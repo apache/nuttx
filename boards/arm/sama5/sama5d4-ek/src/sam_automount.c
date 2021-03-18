@@ -190,7 +190,8 @@ static int sam_attach(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static void sam_enable(FAR const struct automount_lower_s *lower, bool enable)
+static void sam_enable(FAR const struct automount_lower_s *lower,
+                       bool enable)
 {
   FAR const struct sam_automount_config_s *config;
   FAR struct sam_automount_state_s *state;

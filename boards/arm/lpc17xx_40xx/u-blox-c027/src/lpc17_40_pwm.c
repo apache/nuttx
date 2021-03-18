@@ -96,7 +96,8 @@ int lpc17_40_pwm_setup(void)
       mcpwm = lpc17_40_mcpwminitialize(0);
       if (!mcpwm)
         {
-          aerr("ERROR: Failed to get the LPC17XX_40XX MOTOR PWM lower half\n");
+          aerr(
+             "ERROR: Failed to get the LPC17XX_40XX MOTOR PWM lower half\n");
           return -ENODEV;
         }
 

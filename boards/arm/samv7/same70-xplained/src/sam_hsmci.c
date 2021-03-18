@@ -145,6 +145,7 @@ static int sam_hsmci_cardetect(struct sam_hsmci_state_s *state)
 
       sdio_mediachange(state->hsmci, cd);
     }
+
   return OK;
 }
 

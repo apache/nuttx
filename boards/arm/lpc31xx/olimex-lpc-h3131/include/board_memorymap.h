@@ -35,8 +35,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If the LPC31xx ROM page table is selected, then the board-logic is required
- * to provide:
+/* If the LPC31xx ROM page table is selected, then the board-logic is
+ * required to provide:
  *
  *   PGTABLE_BASE_PADDR - The physical address of the page table in ROM,
  *   PGTABLE_BASE_VADDR - The mapped address of the page table in ROM, and

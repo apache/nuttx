@@ -86,7 +86,7 @@
 #define LED_ASSERTION       3   /* An assertion failed      N/C  N/C  Soft glow */
 #define LED_PANIC           3   /* The system has crashed   N/C  N/C  2Hz Flashing */
 
-/*      LED_IDLE           ---  /* MCU is is sleep mode         Not used
+/*      LED_IDLE           ---     MCU is is sleep mode         Not used
  *
  * After booting, LED1 and 3 are not longer used by the system and can be
  * used for other purposes by the application (Of course, all LEDs are

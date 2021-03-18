@@ -39,7 +39,8 @@
 
 /* LEDs
  *
- *   The SAME54 Xplained Pro has three LEDs, but only one is controllable by software:
+ *   The SAME54 Xplained Pro has three LEDs,
+ *   but only one is controllable by software:
  *
  *   1. LED0 near the edge of the board
  *
@@ -72,13 +73,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

@@ -238,9 +238,9 @@ static inline void lpc31_sdraminitialize(void)
 
   /* Program the SDRAM internal mode registers on bank nSDCE0 and reconfigure
    * the SDRAM chips.
-   *  Bus speeds up to 90MHz requires use of a CAS latency = 2.
-   * To get correct value on address bus CAS cycle, requires a shift by 12 for
-   * 16bit mode
+   * Bus speeds up to 90MHz requires use of a CAS latency = 2.
+   * To get correct value on address bus CAS cycle, requires a shift by 12
+   * for 16bit mode
    */
 
   getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 12));

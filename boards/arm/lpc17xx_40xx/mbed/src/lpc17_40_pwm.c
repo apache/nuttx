@@ -73,7 +73,9 @@ int mbed_pwm_setup(void)
 
   if (!initialized)
     {
-      /* Call lpc17_40_pwminitialize() to get an instance of the PWM interface */
+      /* Call lpc17_40_pwminitialize() to get an instance of the PWM
+       * interface
+       */
 
       pwm = lpc17_40_pwminitialize(0);
       if (!pwm)
@@ -94,7 +96,8 @@ int mbed_pwm_setup(void)
       mcpwm = lpc17_40_mcpwminitialize(0);
       if (!mcpwm)
         {
-          aerr("ERROR: Failed to get the LPC17XX_40XX MOTOR PWM lower half\n");
+          aerr(
+             "ERROR: Failed to get the LPC17XX_40XX MOTOR PWM lower half\n");
           return -ENODEV;
         }
 

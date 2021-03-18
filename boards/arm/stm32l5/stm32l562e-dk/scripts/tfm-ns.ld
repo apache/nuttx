@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32l5/stm32l562e-dk/scripts/tfm-ns.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

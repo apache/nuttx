@@ -20,8 +20,8 @@
 
 /* LEDs
  *
- * There are two yellow LED available on the SAM V71 Xplained Ultra board that
- * can be turned on and off.  The LEDs can be activated by driving the
+ * There are two yellow LED available on the SAM V71 Xplained Ultra board
+ * that can be turned on and off.  The LEDs can be activated by driving the
  * connected I/O line to GND.
  *
  *   ------ ----------- ---------------------
@@ -106,6 +106,7 @@ void board_autoled_on(int led)
         break;
 
       case 1:  /* LED_STACKCREATED */
+
         sam_gpiowrite(GPIO_LED0, false); /* Low illuminates */
         break;
 
@@ -114,6 +115,7 @@ void board_autoled_on(int led)
         return;
 
       case 3:  /* LED_PANIC */
+
         sam_gpiowrite(GPIO_LED1, false); /* Low illuminates */
         break;
     }

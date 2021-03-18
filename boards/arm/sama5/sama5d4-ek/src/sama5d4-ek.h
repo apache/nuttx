@@ -190,9 +190,10 @@
 #  define AT25_MINOR  _AT25_MINOR
 #endif
 
-/* MMC/SD minor numbers:  The NSH device minor extended is extended to support
- * two devices.  If CONFIG_NSH_MMCSDMINOR is zero, these will be:  /dev/mmcsd0
- * and /dev/mmcsd1.
+/* MMC/SD minor numbers:
+ * The NSH device minor extended is extended to support two devices.
+ * If CONFIG_NSH_MMCSDMINOR is zero, these will be:
+ *  /dev/mmcsd0 and /dev/mmcsd1.
  */
 
 #ifndef CONFIG_NSH_MMCSDMINOR
@@ -483,13 +484,13 @@
 
 /* There are 3 LEDs on the SAMA5D4-EK:
  *
- * ------------------------------ ------------------- -----------------------
- * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -----------------------
- * PE28/NWAIT/RTS4/A19            1Wire_PE28          1-WIRE ROM, LCD, D8 (green)
- * PE8/A8/TCLK3/PWML3             LED_USER_PE8        LED_USER (D10)
- * PE9/A9/TIOA2                   LED_POWER_PE9       LED_POWER (D9, Red)
- * ------------------------------ ------------------- -----------------------
+ * ---------------------------- ----------------- -----------------------
+ * SAMA5D4 PIO                  SIGNAL            USAGE
+ * ---------------------------- ----------------- -----------------------
+ * PE28/NWAIT/RTS4/A19          1Wire_PE28        1-WIRE ROM, LCD, D8 (green)
+ * PE8/A8/TCLK3/PWML3           LED_USER_PE8      LED_USER (D10)
+ * PE9/A9/TIOA2                 LED_POWER_PE      LED_POWER (D9, Red)
+ * ---------------------------- ----------------- -----------------------
  *
  * - D8: D8 is shared with other functions and cannot be used if the
  *   1-Wire ROM is used.
@@ -802,13 +803,18 @@
  * ---- ------------------ ---------------- ---------- ----------------------
  * PIO  USAGE              BOARD SIGNAL     WM8904 PIN NOTE
  * ---- ------------------ ---------------- ---------- ----------------------
- * PA30 TWD0               AUDIO_TWD0_PA30  SDA        Pulled up, See J23 note below
+ * PA30 TWD0               AUDIO_TWD0_PA30  SDA        Pulled up,
+ *                                                     See J23 note below
  * PA31 TWCK0              AUDIO_TWCK0_PA31 SCLK       Pulled up
  * PB10 AUDIO_PCK2/EXP     AUDIO_PCK2_PB10  MCLK
- * PB27 AUDIO/HDMI_TK0/EXP AUDIO_TK0_PB27   BCLK/GPIO4 TK0/RK0 are mutually exclusive
- * PB26 AUDIO_RK0          AUDIO_RK0_PB26   "  "/"   " " "/" " " " "      " "       "
- * PB30 AUDIO_RF/ZIG_TWCK2 AUDIO_RF0_PB30   LRCLK      TF0/RF0 are mutually exclusive
- * PB31 AUDIO/HDMI_TF0/EXP AUDIO_TF0_PB31   "   "      " "/" " " " "      " "       "
+ * PB27 AUDIO/HDMI_TK0/EXP AUDIO_TK0_PB27   BCLK/GPIO4 TK0/RK0 are
+ *                                                     mutually exclusive
+ * PB26 AUDIO_RK0          AUDIO_RK0_PB26   "  "/"   " " "/" " " " "      "
+ *                                                                  "       "
+ * PB30 AUDIO_RF/ZIG_TWCK2 AUDIO_RF0_PB30   LRCLK      TF0/RF0 are
+ *                                                     mutually exclusive
+ * PB31 AUDIO/HDMI_TF0/EXP AUDIO_TF0_PB31   "   "      " "/" " " " "      "
+ *                                                                  "       "
  * PB29 AUDIO_RD0/ZIG_TWD2 AUDIO_RD0_PB29   ADCDAT
  * PB28 AUDIO/HDMI_TD0/EXP AUDIO_TD0_PB28   ACDAT
  * PE4  AUDIO_IRQ          AUDIO_IRQ_PE4    IRQ/GPIO1  Audio interrupt
@@ -871,13 +877,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

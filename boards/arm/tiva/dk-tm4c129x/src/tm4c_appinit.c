@@ -57,8 +57,8 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  /* If CONFIG_BOARD_LATE_INITIALIZE is selected then board initialization was
-   * already performed in board_late_initialize.
+  /* If CONFIG_BOARD_LATE_INITIALIZE is selected then board initialization
+   * was already performed in board_late_initialize.
    */
 
 #ifndef CONFIG_BOARD_LATE_INITIALIZE

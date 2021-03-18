@@ -70,8 +70,8 @@ void sam_usbinitialize(void)
  * Name:  sam_usbsuspend
  *
  * Description:
- *   Board logic must provide the sam_usbsuspend logic if the USBDEV driver is
- *   used.
+ *   Board logic must provide the sam_usbsuspend logic if the USBDEV driver
+ *   is used.
  *   This function is called whenever the USB enters or leaves suspend mode.
  *   This is an opportunity for the board logic to shutdown clocks, power,
  *   etc. while the USB is suspended.

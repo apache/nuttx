@@ -20,11 +20,11 @@
 
 /* There are three LEDs on board the SAML21 Xplained Pro board:  The EDBG
  * controls two of the LEDs, a power LED and a status LED.  There is only
- * one user controllable LED, a yellow LED labelled STATUS near the SAML21 USB
- * connector.
+ * one user controllable LED, a yellow LED labelled STATUS near the SAML21
+ * USB connector.
  *
- * This LED is controlled by PB10 and the LED can be activated by driving PB10
- * to GND.
+ * This LED is controlled by PB10 and the LED can be activated by driving
+ * PB10 to GND.
  *
  * When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
  * control the LED as follows:
@@ -103,6 +103,7 @@ void board_autoled_on(int led)
 
     case 3:   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
     case 1:   /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
+
       ledstate = false;       /* Set ledstate == false to turn ON */
       break;
     }

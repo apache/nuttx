@@ -147,6 +147,7 @@ void  lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid,
 
       lpc17_40_gpiowrite(C027_OLED_CS, !selected);
     }
+
 #endif
   ssp_dumpgpio("lpc17_40_ssp1select() Exit");
 }
