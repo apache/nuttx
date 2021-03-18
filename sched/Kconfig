@@ -1819,7 +1819,7 @@ config IDLETHREAD_STACKSIZE
 
 config PTHREAD_STACK_MIN
 	int "Minimum pthread stack size"
-	default 256
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		Minimum pthread stack size
 
