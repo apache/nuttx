@@ -44,16 +44,16 @@ extern "C"
 
 /* Waste CPU Time
  *
- * up_waste() is the logic that will be executed when portions of kernel
+ * stm32l5_waste() is the logic that will be executed when portions of kernel
  * or user-app is polling some register or similar, waiting for desired
- * status. This time is wasted away. This function offers a measure of
- * badly written piece of software or some undesired behavior.
+ * status. This time is wasted away. This function offers a measure of badly
+ * written piece of software or some undesired behavior.
  *
  * At the same time this function adds to some IDLE time which portion
  * cannot be used for other purposes (yet).
  */
 
-void up_waste(void);
+void stm32l5_waste(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
