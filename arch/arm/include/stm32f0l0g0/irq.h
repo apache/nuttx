@@ -76,6 +76,10 @@
 
 #define STM32_IRQ_EXTINT        (16) /* Vector number of the first external interrupt */
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 /* Include MCU-specific external interrupt definitions */
 
 #if defined(CONFIG_ARCH_CHIP_STM32F0)

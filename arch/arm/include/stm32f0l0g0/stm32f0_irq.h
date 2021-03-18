@@ -53,12 +53,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
+/* IRQ numbers.  The IRQ number corresponds vector number and hence map
+ * directly to bits in the NVIC.  This does, however, waste several words of
+ * memory in the IRQ to handle mapping tables.
  *
- * Processor Exceptions (vectors 0-15).  These common definitions can be found
- * in nuttx/arch/arm/include/stm32f0l0g0/irq.h
+ * Processor Exceptions (vectors 0-15).  These common definitions can be
+ * found in nuttx/arch/arm/include/stm32f0l0g0/irq.h
  */
 
 #define STM32_IRQ_WWDG          (STM32_IRQ_EXTINT + 0)  /* 0: WWDG */
