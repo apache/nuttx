@@ -240,6 +240,8 @@ EXTERN uint32_t _sdata;           /* Start of .data */
 EXTERN uint32_t _edata;           /* End+1 of .data */
 EXTERN uint32_t _sbss;            /* Start of .bss */
 EXTERN uint32_t _ebss;            /* End+1 of .bss */
+EXTERN uint32_t _sheap;           /* Start of heap */
+EXTERN uint32_t _eheap;           /* End+1 of heap */
 
 /* Sometimes, functions must be executed from RAM.  In this case, the
  * following macro may be used (with GCC!) to specify a function that will
