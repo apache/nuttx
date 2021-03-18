@@ -99,16 +99,6 @@ int usrsock_event(FAR struct usrsock_conn_s *conn, uint16_t events)
       conn->state = USRSOCK_CONN_STATE_ABORTED;
     }
 
-  if (events & USRSOCK_EVENT_REMOTE_CLOSED)
-    {
-      /* After reception of remote close event, clear input/output flags. */
-
-      conn->flags &= ~(USRSOCK_EVENT_SENDTO_READY |
-                       USRSOCK_EVENT_RECVFROM_AVAIL);
-
-      conn->flags |= USRSOCK_EVENT_REMOTE_CLOSED;
-    }
-
   if ((conn->state == USRSOCK_CONN_STATE_READY ||
        conn->state == USRSOCK_CONN_STATE_CONNECTING) &&
       !(conn->flags & USRSOCK_EVENT_REMOTE_CLOSED))
@@ -122,6 +112,15 @@ int usrsock_event(FAR struct usrsock_conn_s *conn, uint16_t events)
         {
           conn->flags |= USRSOCK_EVENT_RECVFROM_AVAIL;
         }
+    }
+
+  if (events & USRSOCK_EVENT_REMOTE_CLOSED)
+    {
+      /* After reception of remote close event, clear input flags. */
+
+      conn->flags &= ~USRSOCK_EVENT_SENDTO_READY;
+
+      conn->flags |= USRSOCK_EVENT_REMOTE_CLOSED;
     }
 
   /* Send events to callbacks */
