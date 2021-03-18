@@ -63,13 +63,6 @@
 #endif
 #endif
 
-#ifdef CONFIG_STM32L5_RTC_LSECLOCK_RUN_DRV_CAPABILITY
-# if CONFIG_STM32L5_RTC_LSECLOCK_RUN_DRV_CAPABILITY < 0 || \
-     CONFIG_STM32L5_RTC_LSECLOCK_RUN_DRV_CAPABILITY > 3
-#  error "Invalid LSE drive capability setting"
-#endif
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -198,19 +191,12 @@ void stm32l5_rcc_enablelse(void)
             }
         }
 
-#if defined(CONFIG_STM32L5_RTC_LSECLOCK_RUN_DRV_CAPABILITY) && \
-    CONFIG_STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY != \
-    CONFIG_STM32L5_RTC_LSECLOCK_RUN_DRV_CAPABILITY
-
-#  if CONFIG_STM32L5_RTC_LSECLOCK_RUN_DRV_CAPABILITY != 0
-#    error "STM32L5 only allows lowering LSE drive capability to zero"
-#  endif
+#ifdef CONFIG_STM32L5_RTC_LSECLOCK_LOWER_RUN_DRV_CAPABILITY
 
       /* Set running drive capability for LSE oscillator. */
 
       regval &= ~RCC_BDCR_LSEDRV_MASK;
-      regval |= CONFIG_STM32L5_RTC_LSECLOCK_RUN_DRV_CAPABILITY <<
-                RCC_BDCR_LSEDRV_SHIFT;
+      regval |= RCC_BDCR_LSEDRV_LOW << RCC_BDCR_LSEDRV_SHIFT;
       putreg32(regval, STM32L5_RCC_BDCR);
 #endif
 
