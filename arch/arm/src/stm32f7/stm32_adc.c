@@ -735,7 +735,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
    *   position.
    */
 
-  ainfo("Initializing timers extsel = 0x%08x\n", priv->extsel);
+  ainfo("Initializing timers extsel = 0x%08lx\n", priv->extsel);
 
   adc_modifyreg(priv, STM32_ADC_EXTREG_OFFSET,
                 ADC_EXTREG_EXTEN_MASK | ADC_EXTREG_EXTSEL_MASK,
@@ -1414,19 +1414,17 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   leave_critical_section(flags);
 
-  ainfo("SR:   0x%08" PRIx32 " CR1:  0x%08" PRIx32
-        " CR2:  0x%08" PRIx32 "\n",
+  ainfo("SR:   0x%08lx CR1:  0x%08lx CR2:  0x%08lx\n",
         adc_getreg(priv, STM32_ADC_SR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR1_OFFSET),
         adc_getreg(priv, STM32_ADC_CR2_OFFSET));
 
-  ainfo("SQR1: 0x%08" PRIx32 " SQR2: 0x%08" PRIx32
-        " SQR3: 0x%08" PRIx32 "\n",
+  ainfo("SQR1: 0x%08lx SQR2: 0x%08lx SQR3: 0x%08lx\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR3_OFFSET));
 
-  ainfo("CCR:  0x%08" PRIx32 "\n", getreg32(STM32_ADC_CCR));
+  ainfo("CCR:  0x%08lx\n", getreg32(STM32_ADC_CCR));
 }
 
 /****************************************************************************

@@ -862,11 +862,11 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
       rwb->rhbuffer = kmm_malloc(allocsize);
       if (!rwb->rhbuffer)
         {
-          ferr("Read-ahead buffer kmm_malloc(%d) failed\n", allocsize);
+          ferr("Read-ahead buffer kmm_malloc(%lu) failed\n", allocsize);
           return -ENOMEM;
         }
 
-      finfo("Read-ahead buffer size: %d bytes\n", allocsize);
+      finfo("Read-ahead buffer size: %lu bytes\n", allocsize);
     }
 #endif /* CONFIG_DRVR_READAHEAD */
 

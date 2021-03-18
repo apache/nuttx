@@ -989,7 +989,7 @@ static inline ssize_t can_rtrread(FAR struct file *filep,
 
           request->ci_msg->cm_hdr.ch_rtr = 1;
           ret = can_write(filep,
-                          request->ci_msg,
+                          (const char *) request->ci_msg,
                           CAN_MSGLEN(request->ci_msg->cm_hdr.ch_dlc));
           request->ci_msg->cm_hdr.ch_rtr = 0;
 #else
