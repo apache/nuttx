@@ -161,12 +161,8 @@ FAR void *rammap(int fd, size_t length, off_t offset)
   fpos = lseek(fd, offset,  SEEK_SET);
   if (fpos == (off_t)-1)
     {
-      /* Seek failed... errno has already been set, but EINVAL is probably
-       * the correct response.
-       */
-
       ferr("ERROR: Seek to position %d failed\n", (int)offset);
-      errcode = EINVAL;
+      errcode = get_errno();
       goto errout_with_region;
     }
 
