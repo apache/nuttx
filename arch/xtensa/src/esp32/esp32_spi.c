@@ -108,7 +108,7 @@ struct esp32_spi_config_s
   uint32_t rst_bit;           /* SPI reset bit */
 
   bool use_dma;               /* Use DMA */
-  uint8_t dma_chan_s;         /* DMA channel regitser shift */
+  uint8_t dma_chan_s;         /* DMA channel register shift */
   uint8_t dma_chan;           /* DMA channel */
   uint32_t dma_clk_bit;       /* DMA clock enable bit */
   uint32_t dma_rst_bit;       /* DMA reset bit */
@@ -153,10 +153,6 @@ struct esp32_spi_priv_s
   /* Actual SPI send/receive bits once transmission */
 
   uint8_t          nbits;
-
-  /* Copy from config to speed up checking */
-
-  uint8_t dma_chan;
 };
 
 /****************************************************************************
@@ -802,7 +798,7 @@ static void esp32_spi_setbits(FAR struct spi_dev_s *dev, int nbits)
        * calculated buffer length.
        */
 
-      if (!priv->dma_chan)
+      if (!priv->config->use_dma)
         {
           esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET,
                             (priv->nbits - 1) << SPI_USR_MISO_DBITLEN_S);
@@ -920,10 +916,10 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       esp32_spi_set_reg(priv, SPI_DMA_CONF_OFFSET, SPI_DMA_RESET_MASK);
       esp32_spi_reset_regbits(priv, SPI_DMA_CONF_OFFSET, SPI_DMA_RESET_MASK);
 
-      n = esp32_dma_init(s_dma_txdesc[priv->dma_chan - 1],
+      n = esp32_dma_init(s_dma_txdesc[priv->config->dma_chan - 1],
                          SPI_DMADESC_NUM, tp, bytes, 0);
 
-      regval = (uint32_t)s_dma_txdesc[priv->dma_chan - 1] &
+      regval = (uintptr_t)s_dma_txdesc[priv->config->dma_chan - 1] &
                SPI_OUTLINK_ADDR_V;
       esp32_spi_set_reg(priv, SPI_DMA_OUT_LINK_OFFSET,
                         regval | SPI_OUTLINK_START_M);
@@ -939,10 +935,10 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
 
       if (rp)
         {
-          esp32_dma_init(s_dma_rxdesc[priv->dma_chan - 1],
+          esp32_dma_init(s_dma_rxdesc[priv->config->dma_chan - 1],
                          SPI_DMADESC_NUM, rp, bytes, 1);
 
-          regval = (uint32_t)s_dma_rxdesc[priv->dma_chan - 1] &
+          regval = (uintptr_t)s_dma_rxdesc[priv->config->dma_chan - 1] &
                    SPI_INLINK_ADDR_V;
           esp32_spi_set_reg(priv, SPI_DMA_IN_LINK_OFFSET,
                             regval | SPI_INLINK_START_M);
@@ -983,7 +979,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
  * Name: esp32_spi_poll_send
  *
  * Description:
- *   Exchange one word on SPI by polling mode.
+ *   Send one word on SPI by polling mode.
  *
  * Input Parameters:
  *   priv - SPI private state data
@@ -1017,36 +1013,10 @@ static uint32_t esp32_spi_poll_send(FAR struct esp32_spi_priv_s *priv,
 }
 
 /****************************************************************************
- * Name: esp32_spi_dma_send
- *
- * Description:
- *   Exchange one word on SPI by SPI DMA mode.
- *
- * Input Parameters:
- *   dev - Device-specific state data
- *   wd  - The word to send.  the size of the data is determined by the
- *         number of bits selected for the SPI interface.
- *
- * Returned Value:
- *   Received value
- *
- ****************************************************************************/
-
-static uint32_t esp32_spi_dma_send(FAR struct esp32_spi_priv_s *priv,
-                                   uint32_t wd)
-{
-  uint32_t rd;
-
-  esp32_spi_dma_exchange(priv, &wd, &rd, 1);
-
-  return rd;
-}
-
-/****************************************************************************
  * Name: esp32_spi_send
  *
  * Description:
- *   Exchange one word on SPI.
+ *   Send one word on SPI.
  *
  * Input Parameters:
  *   dev - Device-specific state data
@@ -1061,18 +1031,8 @@ static uint32_t esp32_spi_dma_send(FAR struct esp32_spi_priv_s *priv,
 static uint32_t esp32_spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   FAR struct esp32_spi_priv_s *priv = (FAR struct esp32_spi_priv_s *)dev;
-  uint32_t rd;
 
-  if (priv->dma_chan)
-    {
-      rd = esp32_spi_dma_send(priv, wd);
-    }
-  else
-    {
-      rd = esp32_spi_poll_send(priv, wd);
-    }
-
-  return rd;
+  return esp32_spi_poll_send(priv, wd);
 }
 
 /****************************************************************************
@@ -1164,7 +1124,13 @@ static void esp32_spi_exchange(FAR struct spi_dev_s *dev,
 {
   FAR struct esp32_spi_priv_s *priv = (FAR struct esp32_spi_priv_s *)dev;
 
-  if (priv->dma_chan)
+#ifdef CONFIG_ESP32_SPI_DMATHRESHOLD
+  size_t thld = CONFIG_ESP32_SPI_DMATHRESHOLD;
+#else
+  size_t thld = 0;
+#endif
+
+  if (priv->config->use_dma && nwords > thld)
     {
       esp32_spi_dma_exchange(priv, txbuffer, rxbuffer, nwords);
     }
@@ -1339,7 +1305,7 @@ static void esp32_spi_init(FAR struct spi_dev_s *dev)
   esp32_spi_set_reg(priv, SPI_CTRL_OFFSET, 0);
   esp32_spi_set_reg(priv, SPI_CTRL2_OFFSET, (0 << SPI_HOLD_TIME_S));
 
-  if (priv->dma_chan)
+  if (config->use_dma)
     {
       nxsem_init(&priv->sem_isr, 0, 0);
       nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
@@ -1380,7 +1346,7 @@ static void esp32_spi_deinit(FAR struct spi_dev_s *dev)
 {
   FAR struct esp32_spi_priv_s *priv = (FAR struct esp32_spi_priv_s *)dev;
 
-  if (priv->dma_chan)
+  if (priv->config->use_dma)
     {
       modifyreg32(DPORT_PERIP_CLK_EN_REG, priv->config->dma_clk_bit, 0);
     }
@@ -1392,7 +1358,6 @@ static void esp32_spi_deinit(FAR struct spi_dev_s *dev)
   priv->actual    = 0;
   priv->mode      = SPIDEV_MODE0;
   priv->nbits     = 0;
-  priv->dma_chan  = 0;
 }
 
 /****************************************************************************
@@ -1469,15 +1434,6 @@ FAR struct spi_dev_s *esp32_spibus_initialize(int port)
 
   if (priv->config->use_dma)
     {
-      priv->dma_chan = priv->config->dma_chan;
-    }
-  else
-    {
-      priv->dma_chan = 0;
-    }
-
-  if (priv->dma_chan)
-    {
       priv->cpuint = esp32_alloc_levelint(1);
       if (priv->cpuint < 0)
         {
@@ -1543,7 +1499,7 @@ int esp32_spibus_uninitialize(FAR struct spi_dev_s *dev)
 
   leave_critical_section(flags);
 
-  if (priv->dma_chan)
+  if (priv->config->use_dma)
     {
       up_disable_irq(priv->cpuint);
       esp32_detach_peripheral(priv->config->cpu,
