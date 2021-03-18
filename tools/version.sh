@@ -112,7 +112,7 @@ if [ "X${MAJOR}.${MINOR}" = "X${VERSION}" ]; then
   echo $ADVICE
   exit 4
 fi
-PATCH=`echo ${VERSION} | cut -d'.' -f3`
+PATCH=`echo ${VERSION} | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+" | cut -d'.' -f3`
 
 # Get GIT information (if not provided on the command line)
 
