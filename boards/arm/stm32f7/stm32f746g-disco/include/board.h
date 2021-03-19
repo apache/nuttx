@@ -381,7 +381,7 @@
 
 #define GPIO_TP_INT  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTI|GPIO_PIN13)
 
-#define FT5x06_I2C_ADDRESS          (0x70 >> 1)
+#define FT5X06_I2C_ADDRESS          (0x70 >> 1)
 
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *

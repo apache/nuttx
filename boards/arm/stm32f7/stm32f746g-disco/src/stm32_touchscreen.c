@@ -53,7 +53,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define FT5x06_FREQUENCY 100000  /* For now, will boost later */
+#define FT5X06_FREQUENCY 100000  /* For now, will boost later */
 
 #ifdef CONFIG_INPUT_FT5X06
 #ifndef CONFIG_INPUT
@@ -107,8 +107,8 @@ static void stm32_ft5x06_nreset(FAR const struct ft5x06_config_s *config,
 
 static const struct ft5x06_config_s g_ft5x06_config =
 {
-  .address   = FT5x06_I2C_ADDRESS,
-  .frequency = FT5x06_FREQUENCY,
+  .address   = FT5X06_I2C_ADDRESS,
+  .frequency = FT5X06_FREQUENCY,
 #ifndef CONFIG_FT5X06_POLLMODE
   .attach    = stm32_ft5x06_attach,
   .enable    = stm32_ft5x06_enable,
