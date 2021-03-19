@@ -145,7 +145,7 @@
                                       /* LED1  LED2  LED3 LED4 */
 #define LED_INIRQ                4  /*  NC    NC   NC   ON  (momentary) */
 #define LED_SIGNAL               5  /*  NC    NC   NC   ON  (momentary) */
-#define LED_ASSERTIO             6  /*  NC    NC   NC   ON  (momentary) */
+#define LED_ASSERTION            6  /*  NC    NC   NC   ON  (momentary) */
 #define LED_PANIC                7  /*  NC    NC   NC   ON  (1Hz flashing) */
 
 #define GPIO_SSP0_SCK              GPIO_SSP0_SCK_1
