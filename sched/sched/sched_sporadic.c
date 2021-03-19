@@ -390,8 +390,8 @@ static int sporadic_replenish_start(FAR struct replenishment_s *repl)
  *   Start the delay prior to providing the replenishment.
  *
  * Input Parameters:
- *   tcb       - Current thread's tCB
  *   repl      - Replenishment timer to be used
+ *   period    - Delay to the timer expiration
  *   replenish - The replenish time to be applied after the delay
  *
  * Returned Value:
@@ -487,11 +487,11 @@ static void sporadic_budget_expire(wdparm_t arg)
       uint32_t unrealized;
 
       /* The unrealized time is the interval from when the thread was
-       * suspended (or which the budget interval was started in the case
+       * suspended (or when the budget interval was started in the case
        * that the thread was delayed for the entire interval).
        */
 
-      unrealized = sporadic->eventtime - clock_systime_ticks();
+      unrealized = clock_systime_ticks() - sporadic->eventtime;
       if (unrealized > 0)
         {
           /* Allocate a new replenishment timer.  This will limit us to the
@@ -501,11 +501,18 @@ static void sporadic_budget_expire(wdparm_t arg)
           repl = sporadic_alloc_repl(sporadic);
           if (repl != NULL)
             {
-              /* The delay is one half of the scheduler cycle relative to
-               * the suspend time. Hence, we subtract the unrealized amount.
-               */
-
               uint32_t period;
+
+              /* Calculate the delay to when replenishment interval begins.
+               * That time is one half of the scheduler cycle relative to
+               * the suspend time.  The delay relative to the current time
+               * is then:
+               *
+               *   repl_time = susp_time + repl_interval / 2;
+               *   delay     = repl_time - curr_time
+               *   delay     = susp_time - curr_time + repl_interval / 2
+               *   delay     = repl_interval / 2 - unrealized
+               */
 
               DEBUGASSERT(unrealized <= (sporadic->repl_period >> 1));
               period = (sporadic->repl_period >> 1) - unrealized;
@@ -1066,12 +1073,18 @@ int nxsched_resume_sporadic(FAR struct tcb_s *tcb)
               repl = sporadic_alloc_repl(sporadic);
               if (repl != NULL)
                 {
-                  /* The delay is one half of the scheduler cycle relative
-                   * to the suspend time. Hence, we subtract the unrealized.
-                   * amount.
-                   */
-
                   uint32_t period;
+
+                  /* Calculate the delay to when replenishment interval
+                   * begins.  That time is one half of the scheduler cycle
+                   * relative to the suspend time.  The delay relative to
+                   * the current time is then:
+                   *
+                   *   repl_time = susp_time + repl_interval / 2;
+                   *   delay     = repl_time - curr_time
+                   *   delay     = susp_time - curr_time + repl_interval / 2
+                   *   delay     = repl_interval / 2 - unrealized
+                   */
 
                   DEBUGASSERT(unrealized <= (sporadic->repl_period >> 1));
                   period = (sporadic->repl_period >> 1) - unrealized;
@@ -1102,7 +1115,7 @@ int nxsched_resume_sporadic(FAR struct tcb_s *tcb)
  * Name: nxsched_suspend_sporadic
  *
  * Description:
- *   Called to when a thread with sporadic scheduling is suspended.  In this
+ *   Called when a thread with sporadic scheduling is suspended.  In this
  *   case, there will be unaccounted for time from the time that the last
  *   when the task is resumed.  All that we need to do here is remember
  *   that time that we were suspended.
