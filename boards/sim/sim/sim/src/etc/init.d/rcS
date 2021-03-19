@@ -46,6 +46,14 @@ mount -t vfat CONCAT(/dev/ram, CONFIG_NSH_FATDEVNO) CONFIG_NSH_FATMOUNTPT
 #ifdef CONFIG_FS_HOSTFS_RPMSG
 mount -t hostfs -o fs=/system /system
 mount -t hostfs -o fs=/data /data
+
+  #if defined (CONFIG_NSH_PROC_MOUNTPOINT) && defined (CONFIG_FS_UNIONFS)
+    umount CONFIG_NSH_PROC_MOUNTPOINT
+    mount -t procfs /proc1
+    mount -t hostfs -o fs=/proc/net /net2
+    mount -t unionfs -o fspath1=/proc1,fspath2=/net2,prefix2=net CONFIG_NSH_PROC_MOUNTPOINT
+  #endif
+
 #else
 mount -t hostfs -o fs=../apps /system
 mount -t hostfs -o fs=. /data
@@ -97,3 +105,9 @@ bttester
 sensor &
 
 #endif /* CONFIG_SENSOR_MANAGER */
+
+#if defined (CONFIG_NET_USRSOCK)
+  usrsock server &
+#elif defined (CONFIG_NETUTILS_USRSOCK_RPMSG)
+  usrsock &
+#endif
