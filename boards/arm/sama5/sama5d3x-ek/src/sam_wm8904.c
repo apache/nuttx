@@ -104,8 +104,8 @@ static struct sama5d3ek_mwinfo_s g_wm8904info =
   .lower =
   {
     .address   = WM8904_I2C_ADDRESS,
-    .frequency = CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY,
-#ifdef CONFIG_SAMA5D3xEK_WM8904_SRCSCK
+    .frequency = CONFIG_SAMA5D3XEK_WM8904_I2CFREQUENCY,
+#ifdef CONFIG_SAMA5D3XEK_WM8904_SRCSCK
     .mclk      = BOARD_SLOWCLK_FREQUENCY,
 #else
     .mclk      = BOARD_MAINCK_FREQUENCY,
@@ -281,7 +281,7 @@ int sam_wm8904_initialize(int minor)
        * that is connected to the WM8904 MCLK.
        */
 
-#ifdef CONFIG_SAMA5D3xEK_WM8904_SRCSCK
+#ifdef CONFIG_SAMA5D3XEK_WM8904_SRCSCK
       /* Drive the DAC with the slow clock (32.768 KHz).
        *  The slow clock was enabled in sam_boot.c if needed.
        */

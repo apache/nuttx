@@ -86,7 +86,7 @@ void board_autoled_initialize(void)
   /* Configure LED PIOs for output */
 
   sam_configpio(PIO_BLUE);
-#ifndef CONFIG_SAMA5D3xEK_NOREDLED
+#ifndef CONFIG_SAMA5D3XEK_NOREDLED
   sam_configpio(PIO_RED);
 #endif
 }
@@ -98,7 +98,7 @@ void board_autoled_initialize(void)
 void board_autoled_on(int led)
 {
   bool blueoff = true;  /* Low illuminates */
-#ifndef CONFIG_SAMA5D3xEK_NOREDLED
+#ifndef CONFIG_SAMA5D3XEK_NOREDLED
   bool redon   = false; /* High illuminates */
 #endif
 
@@ -116,7 +116,7 @@ void board_autoled_on(int led)
         return;
 
       case 3:  /* LED_PANIC */
-#ifdef CONFIG_SAMA5D3xEK_NOREDLED
+#ifdef CONFIG_SAMA5D3XEK_NOREDLED
         blueoff = false;
 #else
         redon = true;
@@ -125,7 +125,7 @@ void board_autoled_on(int led)
     }
 
   sam_piowrite(PIO_BLUE, blueoff);
-#ifndef CONFIG_SAMA5D3xEK_NOREDLED
+#ifndef CONFIG_SAMA5D3XEK_NOREDLED
   sam_piowrite(PIO_RED, redon);
 #endif
 }
@@ -139,7 +139,7 @@ void board_autoled_off(int led)
   if (led != 2)
     {
       sam_piowrite(PIO_BLUE, true);  /* Low illuminates */
-#ifndef CONFIG_SAMA5D3xEK_NOREDLED
+#ifndef CONFIG_SAMA5D3XEK_NOREDLED
       sam_piowrite(PIO_RED, false);  /* High illuminates */
 #endif
     }

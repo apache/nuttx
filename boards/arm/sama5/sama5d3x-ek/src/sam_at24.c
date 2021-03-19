@@ -105,7 +105,7 @@ int sam_at24_automount(int minor)
           return -ENODEV;
         }
 
-#if defined(CONFIG_SAMA5D3xEK_AT24_FTL)
+#if defined(CONFIG_SAMA5D3XEK_AT24_FTL)
       /* And use the FTL layer to wrap the MTD driver as a block driver */
 
       finfo("Initialize the FTL layer to create /dev/mtdblock%d\n",
@@ -117,7 +117,7 @@ int sam_at24_automount(int minor)
           return ret;
         }
 
-#elif defined(CONFIG_SAMA5D3xEK_AT24_NXFFS)
+#elif defined(CONFIG_SAMA5D3XEK_AT24_NXFFS)
       /* Initialize to provide NXFFS on the MTD interface */
 
       finfo("Initialize the NXFFS file system\n");

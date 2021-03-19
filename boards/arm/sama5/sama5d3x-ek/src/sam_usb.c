@@ -50,12 +50,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_SAMA5D3xEK_USBHOST_PRIO
-#  define CONFIG_SAMA5D3xEK_USBHOST_PRIO 50
+#ifndef CONFIG_SAMA5D3XEK_USBHOST_PRIO
+#  define CONFIG_SAMA5D3XEK_USBHOST_PRIO 50
 #endif
 
-#ifndef CONFIG_SAMA5D3xEK_USBHOST_STACKSIZE
-#  define CONFIG_SAMA5D3xEK_USBHOST_STACKSIZE 1024
+#ifndef CONFIG_SAMA5D3XEK_USBHOST_STACKSIZE
+#  define CONFIG_SAMA5D3XEK_USBHOST_STACKSIZE 1024
 #endif
 
 #ifdef HAVE_USBDEV
@@ -346,8 +346,8 @@ int sam_usbhost_initialize(void)
   /* Start a thread to handle device connection. */
 
   pid = kthread_create("OHCI Monitor",
-                      CONFIG_SAMA5D3xEK_USBHOST_PRIO,
-                      CONFIG_SAMA5D3xEK_USBHOST_STACKSIZE,
+                      CONFIG_SAMA5D3XEK_USBHOST_PRIO,
+                      CONFIG_SAMA5D3XEK_USBHOST_STACKSIZE,
                       (main_t)ohci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {
@@ -368,8 +368,8 @@ int sam_usbhost_initialize(void)
 
   /* Start a thread to handle device connection. */
 
-  pid = kthread_create("EHCI Monitor", CONFIG_SAMA5D3xEK_USBHOST_PRIO,
-                       CONFIG_SAMA5D3xEK_USBHOST_STACKSIZE,
+  pid = kthread_create("EHCI Monitor", CONFIG_SAMA5D3XEK_USBHOST_PRIO,
+                       CONFIG_SAMA5D3XEK_USBHOST_STACKSIZE,
                        (main_t)ehci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {

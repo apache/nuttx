@@ -62,7 +62,7 @@ uint32_t board_userled_initialize(void)
   /* Configure LED PIOs for output */
 
   sam_configpio(PIO_BLUE);
-#ifndef CONFIG_SAMA5D3xEK_NOREDLED
+#ifndef CONFIG_SAMA5D3XEK_NOREDLED
   sam_configpio(PIO_RED);
 #endif
   return BOARD_NLEDS;
@@ -83,7 +83,7 @@ void board_userled(int led, bool ledon)
       ledcfg = PIO_BLUE;
       ledon  = !ledon;
     }
-#ifndef CONFIG_SAMA5D3xEK_NOREDLED
+#ifndef CONFIG_SAMA5D3XEK_NOREDLED
   else if (led == BOARD_RED)
     {
       /* High illuminates */
@@ -112,7 +112,7 @@ void board_userled_all(uint32_t ledset)
   ledon = ((ledset & BOARD_BLUE_BIT) == 0);
   sam_piowrite(PIO_BLUE, ledon);
 
-#ifndef CONFIG_SAMA5D3xEK_NOREDLED
+#ifndef CONFIG_SAMA5D3XEK_NOREDLED
   /* High illuminates */
 
   ledon = ((ledset & BOARD_RED_BIT) != 0);

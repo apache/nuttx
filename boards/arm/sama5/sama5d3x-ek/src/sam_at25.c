@@ -85,7 +85,7 @@ int sam_at25_automount(int minor)
           return -ENODEV;
         }
 
-#if defined(CONFIG_SAMA5D3xEK_AT25_FTL)
+#if defined(CONFIG_SAMA5D3XEK_AT25_FTL)
       /* And finally, use the FTL layer to wrap the MTD driver as a block
        * driver
        */
@@ -97,7 +97,7 @@ int sam_at25_automount(int minor)
           return ret;
         }
 
-#elif defined(CONFIG_SAMA5D3xEK_AT25_NXFFS)
+#elif defined(CONFIG_SAMA5D3XEK_AT25_NXFFS)
       /* Initialize to provide NXFFS on the MTD interface */
 
       ret = nxffs_initialize(mtd);
