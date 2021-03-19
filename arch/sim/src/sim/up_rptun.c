@@ -237,9 +237,7 @@ int up_rptun_init(void)
   syslog_rpmsg_server_init();
 #endif
 
-#if CONFIG_SIM_RPTUN_MASTER
-  rpmsg_rtc_server_initialize();
-#else
+#if CONFIG_SIM_RPTUN_MASTER == 0
   up_rtc_set_lowerhalf(rpmsg_rtc_initialize("server", 0));
 #endif
 

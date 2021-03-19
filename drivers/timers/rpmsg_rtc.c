@@ -24,7 +24,9 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/list.h>
 #include <nuttx/clock.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/semaphore.h>
@@ -44,6 +46,7 @@
 #define RPMSG_RTC_ALARM_SET         2
 #define RPMSG_RTC_ALARM_CANCEL      3
 #define RPMSG_RTC_ALARM_FIRE        4
+#define RPMSG_RTC_SYNC              5
 
 /****************************************************************************
  * Private Types
@@ -105,6 +108,7 @@ struct rpmsg_rtc_lowerhalf_s
 
   struct rpmsg_endpoint      ept;
   FAR const char             *cpuname;
+  struct work_s              syncwork;
 
 #ifdef CONFIG_RTC_ALARM
   struct lower_setalarm_s    alarminfo[CONFIG_RTC_NALARMS];
@@ -113,6 +117,15 @@ struct rpmsg_rtc_lowerhalf_s
 
 struct rpmsg_rtc_server_s
 {
+  FAR struct rtc_ops_s *ops;
+  FAR struct rtc_lowerhalf_s *lower;
+  struct list_node list;
+  sem_t exclsem;
+};
+
+struct rpmsg_rtc_session_s
+{
+  struct list_node node;
   struct rpmsg_endpoint ept;
 };
 
@@ -136,6 +149,7 @@ static int rpmsg_rtc_rdtime(FAR struct rtc_lowerhalf_s *lower,
 static int rpmsg_rtc_settime(FAR struct rtc_lowerhalf_s *lower,
               FAR const struct rtc_time *rtctime);
 static bool rpmsg_rtc_havesettime(FAR struct rtc_lowerhalf_s *lower);
+
 #ifdef CONFIG_RTC_ALARM
 static int rpmsg_rtc_setalarm(FAR struct rtc_lowerhalf_s *lower_,
               FAR const struct lower_setalarm_s *alarminfo);
@@ -147,6 +161,30 @@ static int rpmsg_rtc_rdalarm(FAR struct rtc_lowerhalf_s *lower_,
               FAR struct lower_rdalarm_s *alarminfo);
 #endif
 
+static int rpmsg_rtc_server_rdtime(FAR struct rtc_lowerhalf_s *lower,
+                                   FAR struct rtc_time *rtctime);
+static int rpmsg_rtc_server_settime(FAR struct rtc_lowerhalf_s *lower,
+                                    FAR const struct rtc_time *rtctime);
+static bool rpmsg_rtc_server_havesettime(FAR struct rtc_lowerhalf_s *lower);
+
+#ifdef CONFIG_RTC_ALARM
+static int rpmsg_rtc_server_setalarm(FAR struct rtc_lowerhalf_s *lower,
+              FAR const struct lower_setalarm_s *alarminfo);
+static int rpmsg_rtc_server_setrelative(FAR struct rtc_lowerhalf_s *lower,
+              FAR const struct lower_setrelative_s *relinfo);
+static int rpmsg_rtc_server_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
+                                        int alarmid);
+static int rpmsg_rtc_server_rdalarm(FAR struct rtc_lowerhalf_s *lower,
+              FAR struct lower_rdalarm_s *alarminfo);
+#endif
+
+#ifdef CONFIG_RTC_PERIODIC
+static int rpmsg_rtc_server_setperiodic(FAR struct rtc_lowerhalf_s *lower,
+              FAR const struct lower_setperiodic_s *alarminfo);
+
+static int rpmsg_rtc_server_cancelperiodic
+              (FAR struct rtc_lowerhalf_s *lower, int alarmid);
+#endif
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -161,6 +199,23 @@ static const struct rtc_ops_s g_rpmsg_rtc_ops =
   .setrelative = rpmsg_rtc_setrelative,
   .cancelalarm = rpmsg_rtc_cancelalarm,
   .rdalarm     = rpmsg_rtc_rdalarm,
+#endif
+};
+
+static struct rtc_ops_s g_rpmsg_rtc_server_ops =
+{
+  .rdtime      = rpmsg_rtc_server_rdtime,
+  .settime     = rpmsg_rtc_server_settime,
+  .havesettime = rpmsg_rtc_server_havesettime,
+#ifdef CONFIG_RTC_ALARM
+  .setalarm    = rpmsg_rtc_server_setalarm,
+  .setrelative = rpmsg_rtc_server_setrelative,
+  .cancelalarm = rpmsg_rtc_server_cancelalarm,
+  .rdalarm     = rpmsg_rtc_server_rdalarm,
+#endif
+#ifdef CONFIG_RTC_PERIODIC
+  .setperiodic    = rpmsg_rtc_server_setperiodic,
+  .cancelperiodic = rpmsg_rtc_server_cancelperiodic,
 #endif
 };
 
@@ -207,17 +262,33 @@ static void rpmsg_rtc_alarm_fire_handler(FAR struct rpmsg_endpoint *ept,
 #endif
 }
 
+static void rpmsg_rtc_syncworker(FAR void *arg)
+{
+  clock_synchronize();
+}
+
+static void rpmsg_rtc_sync_handler(FAR void *priv)
+{
+  FAR struct rpmsg_rtc_lowerhalf_s *lower = priv;
+
+  work_queue(HPWORK, &lower->syncwork, rpmsg_rtc_syncworker, NULL, 0);
+}
+
 static int rpmsg_rtc_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
                             size_t len, uint32_t src, FAR void *priv)
 {
   FAR struct rpmsg_rtc_header_s *header = data;
   FAR struct rpmsg_rtc_cookie_s *cookie =
-      (struct rpmsg_rtc_cookie_s *)(uintptr_t)header->cookie;
+      (FAR struct rpmsg_rtc_cookie_s *)(uintptr_t)header->cookie;
 
   switch (header->command)
     {
     case RPMSG_RTC_ALARM_FIRE:
       rpmsg_rtc_alarm_fire_handler(ept, data, len, src, priv);
+      break;
+
+    case RPMSG_RTC_SYNC:
+      rpmsg_rtc_sync_handler(priv);
       break;
 
     default:
@@ -236,7 +307,7 @@ static int rpmsg_rtc_send_recv(FAR struct rpmsg_rtc_lowerhalf_s *lower,
                                uint32_t command,
                                FAR struct rpmsg_rtc_header_s *msg, int len)
 {
-  FAR struct rpmsg_rtc_cookie_s cookie;
+  struct rpmsg_rtc_cookie_s cookie;
   int ret;
 
   nxsem_init(&cookie.sem, 0, 0);
@@ -326,8 +397,8 @@ static int rpmsg_rtc_setalarm(FAR struct rtc_lowerhalf_s *lower_,
 }
 
 static int
-  rpmsg_rtc_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                        FAR const struct lower_setrelative_s *relinfo)
+rpmsg_rtc_setrelative(FAR struct rtc_lowerhalf_s *lower,
+                      FAR const struct lower_setrelative_s *relinfo)
 {
   struct lower_setalarm_s alarminfo =
   {
@@ -370,26 +441,147 @@ static int rpmsg_rtc_rdalarm(FAR struct rtc_lowerhalf_s *lower_,
 }
 #endif
 
+static int rpmsg_rtc_server_rdtime(FAR struct rtc_lowerhalf_s *lower,
+                                   FAR struct rtc_time *rtctime)
+{
+  FAR struct rpmsg_rtc_server_s *server =
+                         (FAR struct rpmsg_rtc_server_s *)lower;
+
+  return server->lower->ops->rdtime(server->lower, rtctime);
+}
+
+static int rpmsg_rtc_server_settime(FAR struct rtc_lowerhalf_s *lower,
+                                    FAR const struct rtc_time *rtctime)
+{
+  FAR struct rpmsg_rtc_server_s *server =
+                         (FAR struct rpmsg_rtc_server_s *)lower;
+  FAR struct rpmsg_rtc_session_s *session;
+  FAR struct list_node *node;
+  struct rpmsg_rtc_header_s header;
+  int ret;
+
+  ret = server->lower->ops->settime(server->lower, rtctime);
+  if (ret >= 0)
+    {
+      nxsem_wait_uninterruptible(&server->exclsem);
+      header.command = RPMSG_RTC_SYNC;
+      list_for_every(&server->list, node)
+        {
+          session = (FAR struct rpmsg_rtc_session_s *)node;
+          rpmsg_send(&session->ept, &header, sizeof(header));
+        }
+
+      nxsem_post(&server->exclsem);
+    }
+
+  return ret;
+}
+
+static bool rpmsg_rtc_server_havesettime(FAR struct rtc_lowerhalf_s *lower)
+{
+  FAR struct rpmsg_rtc_server_s *server =
+                         (FAR struct rpmsg_rtc_server_s *)lower;
+
+  return server->lower->ops->havesettime(server->lower);
+}
+
+#ifdef CONFIG_RTC_ALARM
+static int rpmsg_rtc_server_setalarm(FAR struct rtc_lowerhalf_s *lower,
+              FAR const struct lower_setalarm_s *alarminfo)
+{
+  FAR struct rpmsg_rtc_server_s *server =
+                         (FAR struct rpmsg_rtc_server_s *)lower;
+
+  return server->lower->ops->setalarm(server->lower, alarminfo);
+}
+
+static int rpmsg_rtc_server_setrelative(FAR struct rtc_lowerhalf_s *lower,
+              FAR const struct lower_setrelative_s *relinfo)
+{
+  FAR struct rpmsg_rtc_server_s *server =
+                         (FAR struct rpmsg_rtc_server_s *)lower;
+
+  return server->lower->ops->setrelative(server->lower, relinfo);
+}
+
+static int rpmsg_rtc_server_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
+              int alarmid)
+{
+  FAR struct rpmsg_rtc_server_s *server =
+                         (FAR struct rpmsg_rtc_server_s *)lower;
+
+  return server->lower->ops->cancelalarm(server->lower, alarmid);
+}
+
+static int rpmsg_rtc_server_rdalarm(FAR struct rtc_lowerhalf_s *lower,
+              FAR struct lower_rdalarm_s *alarminfo)
+{
+  FAR struct rpmsg_rtc_server_s *server =
+                         (FAR struct rpmsg_rtc_server_s *)lower;
+
+  return server->lower->ops->rdalarm(server->lower, alarminfo);
+}
+#endif
+
+#ifdef CONFIG_RTC_PERIODIC
+static int rpmsg_rtc_server_setperiodic(FAR struct rtc_lowerhalf_s *lower,
+                     FAR const struct lower_setperiodic_s *alarminfo)
+{
+  FAR struct rpmsg_rtc_server_s *server =
+                         (FAR struct rpmsg_rtc_server_s *)lower;
+
+  return server->lower->ops->setperiodic(server->lower, alarminfo);
+}
+
+static int rpmsg_rtc_server_cancelperiodic
+                     (FAR struct rtc_lowerhalf_s *lower, int alarmid)
+{
+  FAR struct rpmsg_rtc_server_s *server =
+                         (FAR struct rpmsg_rtc_server_s *)lower;
+
+  return server->lower->ops->cancelperiodic(server->lower, alarmid);
+}
+#endif
+
 static void rpmsg_rtc_server_ns_unbind(FAR struct rpmsg_endpoint *ept)
 {
-  FAR struct rpmsg_rtc_server_s *priv = ept->priv;
+  FAR struct rpmsg_rtc_session_s *session = container_of(ept,
+                                            struct rpmsg_rtc_session_s, ept);
+  FAR struct rpmsg_rtc_server_s *server = ept->priv;
 
-  rpmsg_destroy_ept(&priv->ept);
-  kmm_free(priv);
+  nxsem_wait_uninterruptible(&server->exclsem);
+  list_delete(&session->node);
+  nxsem_post(&server->exclsem);
+  rpmsg_destroy_ept(&session->ept);
+  kmm_free(session);
 }
+
+#ifdef CONFIG_RTC_ALARM
+static void rpmsg_rtc_server_alarm_cb(FAR void *priv, int alarmid)
+{
+  FAR struct rpmsg_rtc_session_s *session = priv;
+  struct rpmsg_rtc_alarm_fire_s msg =
+  {
+    .header.command = RPMSG_RTC_ALARM_FIRE,
+    .id = alarmid,
+  };
+
+  rpmsg_send(&session->ept, &msg, sizeof(msg));
+}
+#endif
 
 static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
                                    FAR void *data, size_t len, uint32_t src,
                                    FAR void *priv)
 {
-  FAR struct rpmsg_rtc_header_s *header= data;
-  struct timespec ts;
+  FAR struct rpmsg_rtc_header_s *header = data;
 
   switch (header->command)
     {
     case RPMSG_RTC_GET:
       {
         FAR struct rpmsg_rtc_get_s *msg = data;
+        struct timespec ts;
 
         header->result = clock_gettime(CLOCK_REALTIME, &ts);
         msg->sec = ts.tv_sec;
@@ -400,12 +592,45 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
     case RPMSG_RTC_SET:
       {
         FAR struct rpmsg_rtc_set_s *msg = data;
+        struct timespec ts;
 
         ts.tv_sec = msg->sec;
         ts.tv_nsec = msg->nsec;
         header->result = clock_settime(CLOCK_REALTIME, &ts);
         return rpmsg_send(ept, msg, sizeof(*msg));
       }
+
+#ifdef CONFIG_RTC_ALARM
+    case RPMSG_RTC_ALARM_SET:
+      {
+        FAR struct rpmsg_rtc_session_s *session = container_of(ept,
+                                            struct rpmsg_rtc_session_s, ept);
+        FAR struct rpmsg_rtc_alarm_set_s *msg = data;
+        FAR struct rpmsg_rtc_server_s *server = priv;
+        time_t time = msg->sec;
+        struct lower_setalarm_s alarminfo =
+        {
+          .id = msg->id,
+          .cb = rpmsg_rtc_server_alarm_cb,
+          .priv = session
+        };
+
+        gmtime_r(&time, (FAR struct tm *)&alarminfo.time);
+        alarminfo.time.tm_nsec = msg->nsec;
+        header->result = server->lower->ops->setalarm(server->lower,
+                                                      &alarminfo);
+        return rpmsg_send(ept, msg, sizeof(*msg));
+      }
+
+    case RPMSG_RTC_ALARM_CANCEL:
+      {
+        FAR struct rpmsg_rtc_alarm_cancel_s *msg = data;
+        FAR struct rpmsg_rtc_server_s *server = priv;
+        header->result = server->lower->ops->cancelalarm(server->lower,
+                                                         msg->id);
+        return rpmsg_send(ept, msg, sizeof(*msg));
+      }
+#endif
 
     default:
       header->result = -ENOSYS;
@@ -414,33 +639,37 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
 }
 
 static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
-                                     FAR void *priv_,
+                                     FAR void *priv,
                                      FAR const char *name,
                                      uint32_t dest)
 {
-  FAR struct rpmsg_rtc_server_s *priv;
-  int ret;
+  FAR struct rpmsg_rtc_server_s *server = priv;
+  FAR struct rpmsg_rtc_session_s *session;
 
   if (strcmp(name, RPMSG_RTC_EPT_NAME))
     {
       return;
     }
 
-  priv = kmm_zalloc(sizeof(*priv));
-  if (!priv)
+  session = kmm_zalloc(sizeof(*session));
+  if (!session)
     {
       return;
     }
 
-  priv->ept.priv = priv;
-  ret = rpmsg_create_ept(&priv->ept, rdev, RPMSG_RTC_EPT_NAME,
-                         RPMSG_ADDR_ANY, dest,
-                         rpmsg_rtc_server_ept_cb,
-                         rpmsg_rtc_server_ns_unbind);
-  if (ret < 0)
+  session->ept.priv = server;
+  if (rpmsg_create_ept(&session->ept, rdev, RPMSG_RTC_EPT_NAME,
+                       RPMSG_ADDR_ANY, dest,
+                       rpmsg_rtc_server_ept_cb,
+                       rpmsg_rtc_server_ns_unbind) < 0)
     {
-      kmm_free(priv);
+      kmm_free(session);
+      return;
     }
+
+  nxsem_wait_uninterruptible(&server->exclsem);
+  list_add_tail(&server->list, &session->node);
+  nxsem_post(&server->exclsem);
 }
 
 /****************************************************************************
@@ -485,17 +714,34 @@ FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(FAR const char *cpuname,
  * Name: rpmsg_rtc_server_initialize
  *
  * Description:
- *   Sync RTC info to remote core without external RTC hardware through rpmsg.
+ *   Sync RTC info to remote core without external RTC hardware through
+ *   rpmsg.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
  ****************************************************************************/
 
-int rpmsg_rtc_server_initialize(void)
+FAR struct rtc_lowerhalf_s *rpmsg_rtc_server_initialize(
+                                         FAR struct rtc_lowerhalf_s *lower)
 {
-  return rpmsg_register_callback(NULL,
-                                 NULL,
-                                 NULL,
-                                 rpmsg_rtc_server_ns_bind);
+  FAR struct rpmsg_rtc_server_s *server;
+
+  server = kmm_zalloc(sizeof(*server));
+  if (server)
+    {
+      server->ops = &g_rpmsg_rtc_server_ops;
+      server->lower = lower;
+      list_initialize(&server->list);
+      nxsem_init(&server->exclsem, 0, 1);
+      if (rpmsg_register_callback(server, NULL, NULL,
+                                  rpmsg_rtc_server_ns_bind) < 0)
+        {
+          nxsem_destroy(&server->exclsem);
+          kmm_free(server);
+          return NULL;
+        }
+    }
+
+  return (FAR struct rtc_lowerhalf_s *)server;
 }
