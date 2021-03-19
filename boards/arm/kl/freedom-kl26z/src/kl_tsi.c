@@ -74,7 +74,11 @@ static uint8_t  g_channel = 0;         /* Current g_channel */
 
 /* Channel assigned to each sensor */
 
-static uint8_t const g_chsensor[NSENSORS] = { 9, 10 };
+static uint8_t const g_chsensor[NSENSORS] =
+{
+  9,
+  10
+};
 
 /* Character driver operations */
 

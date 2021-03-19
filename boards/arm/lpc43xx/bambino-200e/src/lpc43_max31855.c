@@ -63,7 +63,8 @@
  *
  ****************************************************************************/
 
-int lpc43_max31855initialize(FAR const char *devpath, int bus, uint16_t devid)
+int lpc43_max31855initialize(FAR const char *devpath, int bus,
+                             uint16_t devid)
 {
   FAR struct spi_dev_s *spi;
   spi = lpc43_sspbus_initialize(bus);

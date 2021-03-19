@@ -144,7 +144,7 @@ static int mcp2515_attach(FAR struct mcp2515_config_s *state,
   priv->handler = handler;
   priv->arg = arg;
 
-  /* Configure the interrupt for falling edge*/
+  /* Configure the interrupt for falling edge */
 
   stm32_gpiosetevent(GPIO_MCP2515_IRQ, false, true, false,
                      mcp2515_interrupt, priv);
