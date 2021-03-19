@@ -240,11 +240,11 @@ static FAR struct tcp_conn_s *
  *   been created with this port number.
  *
  * Input Parameters:
- *   portno -- the selected port number in host order. Zero means no port
+ *   portno -- the selected port number in network order. Zero means no port
  *     selected.
  *
  * Returned Value:
- *   Selected or verified port number in host order on success, a negated
+ *   Selected or verified port number in network order on success, a negated
  *   errno on failure:
  *
  *   EADDRINUSE
@@ -479,11 +479,11 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 
   net_lock();
 
-  /* Verify or select a local port (host byte order) */
+  /* Verify or select a local port (network byte order) */
 
   port = tcp_selectport(PF_INET,
                        (FAR const union ip_addr_u *)&addr->sin_addr.s_addr,
-                        ntohs(addr->sin_port));
+                       addr->sin_port);
   if (port < 0)
     {
       nerr("ERROR: tcp_selectport failed: %d\n", port);
@@ -492,7 +492,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 
   /* Save the local address in the connection structure (network order). */
 
-  conn->lport = htons(port);
+  conn->lport = port;
   net_ipv4addr_copy(conn->u.ipv4.laddr, addr->sin_addr.s_addr);
 
   /* Find the device that can receive packets on the network associated with
@@ -544,13 +544,13 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 
   net_lock();
 
-  /* Verify or select a local port (host byte order) */
+  /* Verify or select a local port (network byte order) */
 
   /* The port number must be unique for this address binding */
 
   port = tcp_selectport(PF_INET6,
                 (FAR const union ip_addr_u *)addr->sin6_addr.in6_u.u6_addr16,
-                ntohs(addr->sin6_port));
+                addr->sin6_port);
   if (port < 0)
     {
       nerr("ERROR: tcp_selectport failed: %d\n", port);
@@ -559,7 +559,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 
   /* Save the local address in the connection structure (network order). */
 
-  conn->lport = htons(port);
+  conn->lport = port;
   net_ipv6addr_copy(conn->u.ipv6.laddr, addr->sin6_addr.in6_u.u6_addr16);
 
   /* Find the device that can receive packets on the network
@@ -1153,8 +1153,8 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
       if (conn->domain == PF_INET)
 #endif
         {
-          /* Select a port that is unique for this IPv4 local address (host
-           * order).
+          /* Select a port that is unique for this IPv4 local address
+           * (network order).
            */
 
           port = tcp_selectport(PF_INET,
@@ -1168,8 +1168,8 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
       else
 #endif
         {
-          /* Select a port that is unique for this IPv6 local address (host
-           * order).
+          /* Select a port that is unique for this IPv6 local address
+           * (network order).
            */
 
           port = tcp_selectport(PF_INET6,
