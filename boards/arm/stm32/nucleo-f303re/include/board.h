@@ -1,6 +1,5 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f303re/include/board.h
- * include/arch/board/board.h
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
