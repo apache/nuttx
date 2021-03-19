@@ -72,6 +72,7 @@ uint32_t esp32_dma_init(struct esp32_dmadesc_s *dmadesc, uint32_t num,
   uint32_t bytes = len;
   uint8_t *pdata = pbuf;
   uint32_t data_len;
+  uint32_t buf_len;
 
   DEBUGASSERT(dmadesc != NULL);
   DEBUGASSERT(pbuf != NULL);
@@ -81,8 +82,14 @@ uint32_t esp32_dma_init(struct esp32_dmadesc_s *dmadesc, uint32_t num,
     {
       data_len = MIN(bytes, ESP32_DMA_DATALEN_MAX);
 
+      /* Round the number of bytes to the nearest word, since the buffer
+       * length must be word-aligned.
+       */
+
+      buf_len = (data_len + sizeof(uintptr_t) - 1) / sizeof(uintptr_t);
+
       dmadesc[i].ctrl = (data_len << DMA_CTRL_DATALEN_S) |
-                        (data_len << DMA_CTRL_BUFLEN_S) |
+                        (buf_len << DMA_CTRL_BUFLEN_S) |
                         DMA_CTRL_OWN;
       dmadesc[i].pbuf = pdata;
       dmadesc[i].next = &dmadesc[i + 1];
