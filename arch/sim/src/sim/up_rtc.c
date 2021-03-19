@@ -27,6 +27,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/timers/rtc.h>
 #include <nuttx/timers/arch_rtc.h>
+#include <nuttx/timers/rpmsg_rtc.h>
 
 #include "up_internal.h"
 
@@ -122,6 +123,10 @@ static bool sim_rtc_havesettime(FAR struct rtc_lowerhalf_s *lower)
 
 int up_rtc_initialize(void)
 {
+#ifdef CONFIG_SIM_RPTUN_MASTER
+  up_rtc_set_lowerhalf(rpmsg_rtc_server_initialize(&g_sim_rtc));
+#else
   up_rtc_set_lowerhalf(&g_sim_rtc);
+#endif
   return rtc_initialize(0, &g_sim_rtc);
 }

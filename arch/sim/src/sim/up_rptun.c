@@ -27,6 +27,8 @@
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/serial/uart_rpmsg.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
+#include <nuttx/timers/arch_rtc.h>
+#include <nuttx/timers/rpmsg_rtc.h>
 
 #include "up_internal.h"
 
@@ -235,6 +237,10 @@ int up_rptun_init(void)
 
 #ifdef CONFIG_SYSLOG_RPMSG_SERVER
   syslog_rpmsg_server_init();
+#endif
+
+#if CONFIG_SIM_RPTUN_MASTER == 0
+  up_rtc_set_lowerhalf(rpmsg_rtc_initialize("server", 0));
 #endif
 
 #ifdef CONFIG_FS_HOSTFS_RPMSG

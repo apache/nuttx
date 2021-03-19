@@ -45,6 +45,9 @@ extern "C"
 FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(FAR const char *cpu_name,
                                                  int minor);
 
+FAR struct rtc_lowerhalf_s *rpmsg_rtc_server_initialize(
+                                         FAR struct rtc_lowerhalf_s *lower);
+
 #endif /* CONFIG_RTC_RPMSG */
 
 #undef EXTERN
