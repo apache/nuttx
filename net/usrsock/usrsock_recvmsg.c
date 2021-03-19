@@ -99,7 +99,7 @@ static uint16_t recvfrom_event(FAR struct net_driver_s *dev,
           pstate->valuelen_nontrunc = conn->resp.valuelen_nontrunc;
         }
 
-      if (pstate->reqstate.result >= 0 ||
+      if (pstate->reqstate.result == 0 ||
           pstate->reqstate.result == -EAGAIN)
         {
           /* After reception of data, mark input not ready. Daemon will
@@ -426,7 +426,14 @@ ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
               outaddrlen = state.valuelen_nontrunc;
 
-              conn->flags |= USRSOCK_EVENT_RECVFROM_AVAIL;
+              /* If the MSG_PEEK flag is enabled, it will only peek
+               * from the buffer, so remark the input as ready.
+               */
+
+              if (flags & MSG_PEEK)
+                {
+                  conn->flags |= USRSOCK_EVENT_RECVFROM_AVAIL;
+                }
             }
         }
 
