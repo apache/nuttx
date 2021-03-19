@@ -133,7 +133,6 @@ endif
   STDLIBS += -lX11 -lXext
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   CSRCS += up_touchscreen.c
-  LINKOBJS += up_touchscreen$(OBJEXT)
   HOSTCFLAGS += -DCONFIG_SIM_TOUCHSCREEN=1
   HOSTSRCS += up_x11eventloop.c
 else ifeq ($(CONFIG_SIM_AJOYSTICK),y)
