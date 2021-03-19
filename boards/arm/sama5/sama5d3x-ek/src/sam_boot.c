@@ -56,7 +56,7 @@
 
 void sam_boardinitialize(void)
 {
-#ifdef CONFIG_SAMA5D3xEK_SLOWCLOCK
+#ifdef CONFIG_SAMA5D3XEK_SLOWCLOCK
   /* Enable the external slow clock */
 
   sam_sckc_enable(true);

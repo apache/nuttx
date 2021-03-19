@@ -53,7 +53,7 @@
 
 #  include <arch/board/board_sdram.h>
 
-#elif defined(CONFIG_SAMA5D3xEK_384MHZ)
+#elif defined(CONFIG_SAMA5D3XEK_384MHZ)
 /* OHCI Only.
  * This is an alternative slower configuration that will produce a 48MHz
  * USB clock with the required accuracy using only PLLA.
@@ -66,7 +66,7 @@
 
 #  include <arch/board/board_384mhz.h>
 
-#elif defined(CONFIG_SAMA5D3xEK_528MHZ)
+#elif defined(CONFIG_SAMA5D3XEK_528MHZ)
 /* This is the configuration results in a CPU clock of 528MHz.
  *
  * In this configuration, UPLL is the source of the UHPHS clock (if enabled).
@@ -74,7 +74,7 @@
 
 #  include <arch/board/board_528mhz.h>
 
-#else /* #elif defined(CONFIG_SAMA5D3xEK_396MHZ) */
+#else /* #elif defined(CONFIG_SAMA5D3XEK_396MHZ) */
 /* This is the configuration provided in the Atmel example code.
  * This setup results in a CPU clock of 396MHz.
  *
@@ -129,7 +129,7 @@
 /* LED index values for use with board_userled() */
 
 #define BOARD_BLUE        0
-#ifdef CONFIG_SAMA5D3xEK_NOREDLED
+#ifdef CONFIG_SAMA5D3XEK_NOREDLED
 #  define BOARD_NLEDS     1
 #else
 #  define BOARD_RED       1
@@ -139,7 +139,7 @@
 /* LED bits for use with board_userled_all() */
 
 #define BOARD_BLUE_BIT    (1 << BOARD_BLUE)
-#ifndef CONFIG_SAMA5D3xEK_NOREDLED
+#ifndef CONFIG_SAMA5D3XEK_NOREDLED
 #  define BOARD_RED_BIT   (1 << BOARD_RED)
 #endif
 
@@ -163,7 +163,7 @@
 #define LED_PANIC         3  /* The system has crashed     OFF      Blinking */
 #undef  LED_IDLE             /* MCU is is sleep mode         Not used        */
 
-/* If CONFIG_SAMA5D3xEK_NOREDLED=y, then the red LED is not used by the
+/* If CONFIG_SAMA5D3XEK_NOREDLED=y, then the red LED is not used by the
  * system.  The only difference from the above is that it is the blue, not
  * the red LED that blinks in the event of an PANIC.
  *

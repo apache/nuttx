@@ -50,7 +50,7 @@
 #define NOR_WAIT        1
 #define NOR_NO_WAIT     0
 
-#ifdef CONFIG_SAMA5D3xEK_NOR_START
+#ifdef CONFIG_SAMA5D3XEK_NOR_START
 #  define NOR_BOOT_MODE NOR_NO_WAIT
 #else
 #  define NOR_BOOT_MODE NOR_WAIT

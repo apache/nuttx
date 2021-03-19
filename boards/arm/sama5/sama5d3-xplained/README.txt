@@ -3123,8 +3123,8 @@ Configurations
      re-configured:
 
        Board Selection -> CPU Frequency
-         CONFIG_SAMA5D3xEK_396MHZ=n     # Disable 396MHz operation
-         CONFIG_SAMA5D3xEK_528MHZ=y     # Enable 528MHz operation
+         CONFIG_SAMA5D3XEK_396MHZ=n     # Disable 396MHz operation
+         CONFIG_SAMA5D3XEK_528MHZ=y     # Enable 528MHz operation
 
      If you switch to 528MHz, you should also check the loop calibration
      value in your .config file.  Of course, it would be best to re-calibrate
