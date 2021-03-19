@@ -54,7 +54,7 @@ void lpc54_lcd_initialize(void)
    * (putting it into reset)
    */
 
-  lpc54_gpio_config(GPIO_FT5x06_CTRSTn);
+  lpc54_gpio_config(GPIO_FT5X06_CTRSTN);
 }
 
 /****************************************************************************

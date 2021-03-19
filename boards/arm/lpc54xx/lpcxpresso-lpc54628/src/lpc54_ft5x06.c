@@ -41,7 +41,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define FT5x06_FREQUENCY 400000  /* For now, will boost later */
+#define FT5X06_FREQUENCY 400000  /* For now, will boost later */
 
 /****************************************************************************
  * Private Function Ptototypes
@@ -65,8 +65,8 @@ static void lpc54_ft5x06_nreset(FAR const struct ft5x06_config_s *config,
 
 static const struct ft5x06_config_s g_ft5x06_config =
 {
-  .address   = FT5x06_I2C_ADDRESS,
-  .frequency = FT5x06_FREQUENCY,
+  .address   = FT5X06_I2C_ADDRESS,
+  .frequency = FT5X06_FREQUENCY,
 #ifndef CONFIG_FT5X06_POLLMODE
   .attach    = lpc54_ft5x06_attach,
   .enable    = lpc54_ft5x06_enable,
@@ -163,7 +163,7 @@ static void lpc54_ft5x06_wakeup(FAR const struct ft5x06_config_s *config)
 static void lpc54_ft5x06_nreset(FAR const struct ft5x06_config_s *config,
                                 bool nstate)
 {
-  lpc54_gpio_write(GPIO_FT5x06_CTRSTn, nstate);
+  lpc54_gpio_write(GPIO_FT5X06_CTRSTN, nstate);
 }
 
 /****************************************************************************
@@ -190,8 +190,8 @@ int lpc54_ft5x06_register(void)
    * early LCD initialization.  The Part is in reset now.
    */
 
-  lpc54_gpio_config(GPIO_FT5x06_INTR);
-  irq = lpc54_gpio_irqno(GPIO_FT5x06_INTR);
+  lpc54_gpio_config(GPIO_FT5X06_INTR);
+  irq = lpc54_gpio_irqno(GPIO_FT5X06_INTR);
   DEBUGASSERT(irq > 0 && irq < UINT8_MAX);
   g_ft5x06_irq = (uint8_t)irq;
 
@@ -203,7 +203,7 @@ int lpc54_ft5x06_register(void)
 
   /* Take the FT5x06 out of reset */
 
-  lpc54_gpio_write(GPIO_FT5x06_CTRSTn, true);
+  lpc54_gpio_write(GPIO_FT5X06_CTRSTN, true);
 
   /* The FT5x06 is on I2C2.  Get the handle and register the F5x06 device */
 
@@ -221,7 +221,7 @@ int lpc54_ft5x06_register(void)
           syslog(LOG_ERR, "ERROR: Failed to register FT5x06 driver: %d\n",
                  ret);
 
-          lpc54_gpio_write(GPIO_FT5x06_CTRSTn, false);
+          lpc54_gpio_write(GPIO_FT5X06_CTRSTN, false);
           lpc54_i2c_free(I2C2NDX);
           return ret;
         }

@@ -272,18 +272,18 @@
  * The FT4x06's WAKE-UP interrupt pin is not brought out.
  */
 
-#define GPIO_FT5x06_CTRSTn \
+#define GPIO_FT5X06_CTRSTN \
   (GPIO_PORT2 | GPIO_PIN27 | GPIO_VALUE_ZERO | GPIO_OUTPUT | \
    GPIO_MODE_DIGITAL | GPIO_FILTER_OFF | GPIO_PUSHPULL | GPIO_PULLUP)
 
-#define GPIO_FT5x06_INTR \
+#define GPIO_FT5X06_INTR \
   (GPIO_PORT4 | GPIO_PIN20 | GPIO_INTFE | GPIO_MODE_DIGITAL | GPIO_FILTER_OFF)
 
 /* I2C addresses (7-bit): */
 
 #define CODEC_I2C_ADDRESS   0x1a
 #define ACCEL_I2C_ADDRESS   0x1d
-#define FT5x06_I2C_ADDRESS  0x38
+#define FT5X06_I2C_ADDRESS  0x38
 
 /****************************************************************************
  * Public Types
