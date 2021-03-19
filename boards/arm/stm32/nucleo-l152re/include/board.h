@@ -1,6 +1,5 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-l152re/include/board.h
- * include/arch/board/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
