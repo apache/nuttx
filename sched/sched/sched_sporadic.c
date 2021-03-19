@@ -462,8 +462,7 @@ static void sporadic_budget_expire(wdparm_t arg)
 
   if (nxsched_islocked_tcb(tcb))
     {
-      DEBUGASSERT((mrepl->flags && SPORADIC_FLAG_ALLOCED) != 0 &&
-                  sporadic->nrepls > 0);
+      DEBUGASSERT((mrepl->flags && SPORADIC_FLAG_ALLOCED) != 0);
 
       /* Set the timeslice to the magic value */
 
@@ -476,8 +475,8 @@ static void sporadic_budget_expire(wdparm_t arg)
     }
 
   /* Were we suspended at the end of the budget time?  If so, start a new
-   * replenishment timer for the since we were suspended (which might be
-   * as long as the whole budget interval).
+   * replenishment timer for the time since we were suspended (which might
+   * be as long as the whole budget interval).
    */
 
   sporadic = tcb->sporadic;
@@ -487,7 +486,7 @@ static void sporadic_budget_expire(wdparm_t arg)
     {
       uint32_t unrealized;
 
-      /* The unrealized time is the interval from when the thread as
+      /* The unrealized time is the interval from when the thread was
        * suspended (or which the budget interval was started in the case
        * that the thread was delayed for the entire interval).
        */
@@ -508,7 +507,7 @@ static void sporadic_budget_expire(wdparm_t arg)
 
               uint32_t period;
 
-              DEBUGASSERT(unrealized <= (sporadic->repl_period >> 1))
+              DEBUGASSERT(unrealized <= (sporadic->repl_period >> 1));
               period = (sporadic->repl_period >> 1) - unrealized;
 
               /* Start the delay into the next cycle to perform the
@@ -1074,7 +1073,7 @@ int nxsched_resume_sporadic(FAR struct tcb_s *tcb)
 
                   uint32_t period;
 
-                  DEBUGASSERT(unrealized <= (sporadic->repl_period >> 1))
+                  DEBUGASSERT(unrealized <= (sporadic->repl_period >> 1));
                   period = (sporadic->repl_period >> 1) - unrealized;
 
                   /* Start the delay into the next cycle to perform the
