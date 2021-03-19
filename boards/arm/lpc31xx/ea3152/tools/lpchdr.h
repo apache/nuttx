@@ -52,31 +52,31 @@ struct lpc31_header_s
                                *    to ‘0xA’, this field is ignored by boot
                                *    ROM.
                                */
-  uint32_t Reserved0[4];      /* 0x0c-0x18: Should be zero. */
-  uint32_t imageType;         /* 0x1c Specifies whether CRC check should be
+  uint32_t reserved0[4];      /* 0x0c-0x18: Should be zero. */
+  uint32_t imagetype;         /* 0x1c Specifies whether CRC check should be
                                *    done on the image or not:
                                *      0xA – No CRC check required.
                                *      0xB – Do CRC32 check on both header and
                                *            execution part of the image.
                                */
-  uint32_t imageLength;       /* 0x20    Total image length including header
+  uint32_t imagelength;       /* 0x20    Total image length including header
                                *    rounded up to the nearest 512 byte
                                *    boundary. In C language the field can be
                                *    computed as:
-                               *    imageLength = (Actual length + 511) & ~0x1FF;
+                               *    imagelength = (Actual length + 511) & ~0x1FF;
                                */
-  uint32_t releaseID;         /* 0x24    Release or version number of the
+  uint32_t releaseid;         /* 0x24    Release or version number of the
                                *    image.
                                *    Note, this field is not used by boot ROM
                                *    but is provided to track the image
                                *    versions.
                                */
-  uint32_t buildTime;         /* 0x28 Time (expressed in EPOC time format) at
+  uint32_t buildtime;         /* 0x28 Time (expressed in EPOC time format) at
                                *    which image is built. Note, this field is
                                *    not used by boot ROM but is provided to
                                *    track the image versions.
                                */
-  uint32_t sbzBootParameter;  /* 0x2c    hould be zero. */
+  uint32_t sbzbootparameter;  /* 0x2c    hould be zero. */
   uint32_t cust_reserved[15]; /* 0x30-0x68: Reserved for customer use
                                *                   (60 bytes)
                                */
@@ -85,7 +85,7 @@ struct lpc31_header_s
                                *    If the ‘image_type’ is set to ‘0xA’,
                                *    this field is ignored by boot ROM.
                                */
-  uint32_t Reserved1[4];      /* 0x70-0x7c: Should be zero. */
+  uint32_t reserved1[4];      /* 0x70-0x7c: Should be zero. */
                               /* 0x80    Start of program code (128Kb max).
                                *    The final image has to be padded to the
                                *    nearest 512 byte boundary
