@@ -222,7 +222,7 @@ static int qe_close(FAR struct file *filep)
       /* Disable the QEncoder device */
 
       DEBUGASSERT(lower->ops->shutdown != NULL);
-      sninfo("calling shutdown: %d\n");
+      sninfo("calling shutdown\n");
 
       lower->ops->shutdown(lower);
     }
