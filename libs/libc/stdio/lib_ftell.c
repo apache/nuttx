@@ -65,25 +65,29 @@
  ****************************************************************************/
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
-static off_t lib_getrdoffset(FAR FILE *stream)
+static off_t lib_getoffset(FAR FILE *stream)
 {
-  off_t rdoffset = 0;
+  off_t offset = 0;
   lib_take_semaphore(stream);
 
   if (stream->fs_bufstart != NULL && stream->fs_bufread != stream->fs_bufstart)
     {
 #if CONFIG_NUNGET_CHARS > 0
-      rdoffset = stream->fs_bufread - stream->fs_bufpos + stream->fs_nungotten;
+      offset = stream->fs_bufread - stream->fs_bufpos + stream->fs_nungotten;
 #else
-      rdoffset = stream->fs_bufread - stream->fs_bufpos;
+      offset = stream->fs_bufread - stream->fs_bufpos;
 #endif
+    }
+  else
+    {
+      offset = -(stream->fs_bufpos - stream->fs_bufstart);
     }
 
   lib_give_semaphore(stream);
-  return rdoffset;
+  return offset;
 }
 #else
-#  define lib_getrdoffset(stream) (0)
+#  define lib_getoffset(stream) (0)
 #endif
 
 /****************************************************************************
@@ -121,7 +125,7 @@ long ftell(FAR FILE *stream)
   position = lseek(stream->fs_fd, 0, SEEK_CUR);
   if (position != (off_t)-1)
     {
-      return (long)(position - lib_getrdoffset(stream));
+      return (long)(position - lib_getoffset(stream));
     }
   else
     {
