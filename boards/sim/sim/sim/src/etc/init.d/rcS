@@ -70,10 +70,12 @@ testrunner >/system/testing/testrunner.log &
 #endif /* CONFIG_NSH_ROMFSETC */
 
 #ifdef CONFIG_KVDB
+#ifndef KVDB_REMOTE_SERVER
 
 kvdbd &
 usleep 10
 
+#endif /* !CONFIG_REMOTE_SERVER */
 #endif /* CONFIG_KVDB */
 
 #ifdef CONFIG_UORB
