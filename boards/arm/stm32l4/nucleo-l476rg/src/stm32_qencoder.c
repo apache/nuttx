@@ -43,8 +43,8 @@
  * Name: qe_devinit
  *
  * Description:
- *   All STM32L4 architectures must provide the following interface to work with
- *   examples/qencoder.
+ *   All STM32L4 architectures must provide the following interface to work
+ *   with examples/qencoder.
  *
  ****************************************************************************/
 

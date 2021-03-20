@@ -35,11 +35,7 @@
 #include "stm32_sdio.h"
 #include "stm32.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_STM32F107VC)
 # include <arch/board/board-stm32f107vct6.h>
@@ -49,10 +45,15 @@
 #  error Unrecognized STM32 chip
 #endif
 
-/* LED definitions ******************************************************************/
-/* There are four LEDs on the ViewTool STM32F103/F107 board that can be controlled
- * by software:  LED1 through LED4.  All pulled high and can be illuminated by
- * driving the output to low
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* LED definitions **********************************************************/
+
+/* There are four LEDs on the ViewTool STM32F103/F107 board that can be
+ * controlled by software:  LED1 through LED4.  All pulled high and can be
+ * illuminated by driving the output to low
  *
  *   LED1 PA6
  *   LED2 PA7
@@ -77,12 +78,13 @@
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c. The LEDs are used to encode
+ * OS-related events as follows:
  *
  *      SYMBOL            Val    Meaning                     LED state
  *                                                       LED1 LED2 LED3 LED4
- *      ----------------- ---   -----------------------  ---- ---- ---- ----  */
+ *      ----------------- ---   -----------------------  ---- ---- ---- ----
+ */
 #define LED_STARTED       0  /* NuttX has been started   ON   OFF  OFF  OFF   */
 #define LED_HEAPALLOCATE  1  /* Heap has been allocated  OFF  ON   OFF  OFF   */
 #define LED_IRQSENABLED   2  /* Interrupts enabled       ON   ON   OFF  OFF   */
@@ -93,12 +95,13 @@
 #define LED_PANIC         4  /* The system has crashed   N/C  N/C  N/C  FLASH */
 #undef  LED_IDLE             /* MCU is is sleep mode         Not used         */
 
-/* After booting, LED1-3 are not longer used by the system and can be used for
- * other purposes by the application (Of course, all LEDs are available to the
- * application if CONFIG_ARCH_LEDS is not defined.
+/* After booting, LED1-3 are not longer used by the system and can be used
+ * for other purposes by the application (Of course, all LEDs are available
+ * to the application if CONFIG_ARCH_LEDS is not defined.
  */
 
-/* Buttons **************************************************************************/
+/* Buttons ******************************************************************/
+
 /* All pulled high and will be sensed low when depressed.
  *
  *   SW2 PC11  Needs J42 closed

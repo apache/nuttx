@@ -75,13 +75,15 @@ int stm32l4_pwm_setup(void)
 
   if (!initialized)
     {
-      /* Call stm32l4_pwminitialize() to get an instance of the PWM interface */
+      /* Call stm32l4_pwminitialize() to get an instance of the PWM
+       * interface
+       */
 
       /* PWM
        *
-       * The Nucleo-l476rg has no real on-board PWM devices, but the board can be
-       * configured to output a pulse train using TIM1 or 8, or others (see board.h).
-       * Let's figure out which the user has configured.
+       * The Nucleo-l476rg has no real on-board PWM devices, but the board
+       * can be configured to output a pulse train using TIM1 or 8, or others
+       * (see board.h). Let's figure out which the user has configured.
        */
 
 #if defined(CONFIG_STM32L4_TIM1_PWM)

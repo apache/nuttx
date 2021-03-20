@@ -84,7 +84,7 @@
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd4     /* PCLK1 = HCLK / 4 */
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
 
-/* Timers driven from APB1 will be twice PCLK1 (60Mhz)*/
+/* Timers driven from APB1 will be twice PCLK1 (60Mhz) */
 
 #define STM32_APB1_TIM2_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM3_CLKIN   (2*STM32_PCLK1_FREQUENCY)
@@ -101,7 +101,7 @@
 #define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLKd2     /* PCLK2 = HCLK / 2 */
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
-/* Timers driven from APB2 will be twice PCLK2 (120Mhz)*/
+/* Timers driven from APB2 will be twice PCLK2 (120Mhz) */
 
 #define STM32_APB2_TIM1_CLKIN   (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM8_CLKIN   (2*STM32_PCLK2_FREQUENCY)
@@ -123,9 +123,11 @@
 #define BOARD_TIM7_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
-/* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the status LED in any
- * way.  The following definitions are used to access individual LEDs.
+/* LED definitions **********************************************************/
+
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the status
+ * LED in any way.
+ * The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -137,8 +139,9 @@
 
 #define BOARD_LED_STATUS_BIT    (1 << BOARD_LED1)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the status LED of the
- * Olimex STM32-H405.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the status LED of
+ * the Olimex STM32-H405.
+ * The following definitions describe how NuttX controls the LEDs:
  */
 
 #define LED_STARTED       0  /* LED_STATUS on */
@@ -150,7 +153,8 @@
 #define LED_ASSERTION     6  /* LED_STATUS off */
 #define LED_PANIC         7  /* LED_STATUS blinking */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The Olimex STM32-H405 supports one buttons: */
 
 #define BUTTON_BUT     0
@@ -158,19 +162,20 @@
 
 #define BUTTON_BUT_BIT (1 << BUTTON_BUT)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
-//USART3:
-#define GPIO_USART3_RX    GPIO_USART3_RX_1  //PB11
-#define GPIO_USART3_TX    GPIO_USART3_TX_1  //PB10
-#define GPIO_USART3_CTS   GPIO_USART3_CTS_1 //PB13
-#define GPIO_USART3_RTS   GPIO_USART3_RTS_1 //PB14
+/* USART3: */
+
+#define GPIO_USART3_RX    GPIO_USART3_RX_1  /* PB11 */
+#define GPIO_USART3_TX    GPIO_USART3_TX_1  /* PB10 */
+#define GPIO_USART3_CTS   GPIO_USART3_CTS_1 /* PB13 */
+#define GPIO_USART3_RTS   GPIO_USART3_RTS_1 /* PB14 */
 
 /* CAN: */
 
-#define GPIO_CAN1_RX      GPIO_CAN1_RX_2 //PB8
-#define GPIO_CAN1_TX      GPIO_CAN1_TX_2 //PB9
-#define GPIO_CAN2_RX      GPIO_CAN1_RX_2 //PB5
-#define GPIO_CAN2_TX      GPIO_CAN1_TX_2 //PB6
+#define GPIO_CAN1_RX      GPIO_CAN1_RX_2 /* PB8 */
+#define GPIO_CAN1_TX      GPIO_CAN1_TX_2 /* PB9 */
+#define GPIO_CAN2_RX      GPIO_CAN1_RX_2 /* PB5 */
+#define GPIO_CAN2_TX      GPIO_CAN1_TX_2 /* PB6 */
 
 #endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_H405_INCLUDE_BOARD_H */

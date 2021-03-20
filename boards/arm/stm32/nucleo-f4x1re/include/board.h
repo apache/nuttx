@@ -30,11 +30,7 @@
 # include <stdint.h>
 #endif
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_STM32F401RE)
 #  include <arch/board/nucleo-f401re.h>
@@ -42,9 +38,14 @@
 #  include <arch/board/nucleo-f411re.h>
 #endif
 
-/* DMA Channel/Stream Selections ****************************************************/
-/* Stream selections are arbitrary for now but might become important in the future
- * is we set aside more DMA channels/streams.
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* DMA Channel/Stream Selections ********************************************/
+
+/* Stream selections are arbitrary for now but might become important in
+ * the future is we set aside more DMA channels/streams.
  *
  * SDIO DMA
  *   DMAMAP_SDIO_1 = Channel 4, Stream 3 <- may later be used by SPI DMA
@@ -60,7 +61,7 @@
 #define DMACHAN_SPI2_RX DMAMAP_SPI2_RX
 #define DMACHAN_SPI2_TX DMAMAP_SPI2_TX
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART1:
  *   RXD: PA10  CN9 pin 3, CN10 pin 33
@@ -190,7 +191,8 @@
 
 /* Buttons
  *
- *   B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
+ *   B1 USER:
+ *   the user button is connected to the I/O PC13 (pin 2) of the STM32
  *   microcontroller.
  */
 

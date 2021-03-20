@@ -95,6 +95,7 @@ static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* LCD pin mapping (see boards/arm/stm32/stm324discovery/README.txt
  * MAPPING TO STM32 F4:
  *
@@ -126,9 +127,10 @@ static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power);
  *
  *   1 Used for the RED LED
  *   2 Used for the BLUE LED
- *   3 Used for the RED LED and for OTG FS Overcurrent.  It may be okay to use
- *     for the parallel interface if PC0 is held high (or floating).  PC0 enables
- *     the STMPS2141STR IC power switch that drives the OTG FS host VBUS.
+ *   3 Used for the RED LED and for OTG FS Overcurrent.  It may be okay to
+ *     use for the parallel interface if PC0 is held high (or floating).
+ *     PC0 enables the STMPS2141STR IC power switch that drives the OTG FS
+ *     host VBUS.
  *   4 Also the reset pin for the CS43L22 audio Codec.
  */
 
@@ -145,7 +147,9 @@ static const uint32_t g_lcdconfig[] =
 };
 #define NLCD_CONFIG (sizeof(g_lcdconfig)/sizeof(uint32_t))
 
-/* This is the driver state structure (there is no retained state information) */
+/* This is the driver state structure
+ * (there is no retained state information)
+ */
 
 static struct ssd1289_lcd_s g_ssd1289 =
 {
@@ -282,14 +286,17 @@ void stm32_selectlcd(void)
 
   /* Bank1 NOR/SRAM timing register configuration */
 
-  putreg32(FSMC_BTR_ADDSET(5) | FSMC_BTR_ADDHLD(0) | FSMC_BTR_DATAST(9) | FSMC_BTR_BUSTURN(0) |
-           FSMC_BTR_CLKDIV(0) | FSMC_BTR_DATLAT(0) | FSMC_BTR_ACCMODA, STM32_FSMC_BTR1);
+  putreg32(FSMC_BTR_ADDSET(5) | FSMC_BTR_ADDHLD(0) |
+           FSMC_BTR_DATAST(9) | FSMC_BTR_BUSTURN(0) |
+           FSMC_BTR_CLKDIV(0) | FSMC_BTR_DATLAT(0) |
+           FSMC_BTR_ACCMODA, STM32_FSMC_BTR1);
 
   putreg32(0xffffffff, STM32_FSMC_BWTR1);
 
   /* Enable the bank by setting the MBKEN bit */
 
-  putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM | FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR1);
+  putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM |
+           FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR1);
 }
 
 /****************************************************************************
@@ -300,9 +307,9 @@ void stm32_selectlcd(void)
  * Name:  board_lcd_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the LCD video hardware. The initial state of the LCD is fully
+ *   initialized, display memory cleared, and the LCD ready to use, but with
+ *   the power setting at 0 (full off).
  *
  ****************************************************************************/
 
@@ -351,8 +358,8 @@ int board_lcd_initialize(void)
  * Name:  board_lcd_getdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows support
- *   for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.
+ *    This allows support for multiple LCD devices.
  *
  ****************************************************************************/
 

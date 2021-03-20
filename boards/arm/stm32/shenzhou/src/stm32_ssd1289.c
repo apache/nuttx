@@ -70,10 +70,12 @@ struct stm32_lower_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Helpers */
 
 #ifdef CONFIG_LCD_REGDEBUG
-static void stm32_lcdshow(FAR struct stm32_lower_s *priv, FAR const char *msg);
+static void stm32_lcdshow(FAR struct stm32_lower_s *priv,
+                          FAR const char *msg);
 #else
 #  define stm32_lcdshow(p,m)
 #endif
@@ -104,22 +106,26 @@ static void stm32_lcdoutput(FAR struct stm32_lower_s *priv);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* TFT LCD
  *
  * -- ---- -------------- ---------------------------------------------------
  * PN NAME SIGNAL         NOTES
  * -- ---- -------------- ---------------------------------------------------
  * 37 PB2  DATA_LE        To TFT LCD (CN13, ping 28)
- * 96 PB9  F_CS           To both the TFT LCD (CN13, pin 30) and to the W25X16 SPI FLASH
+ * 96 PB9  F_CS           To both the TFT LCD (CN13, pin 30) and
+ *                        to the W25X16 SPI FLASH
  * 34 PC5  TP_INT         JP6.  To TFT LCD (CN13) module (CN13, pin 26)
  * 65 PC8  LCD_CS         Active low: Pulled high (CN13, pin 19)
  * 66 PC9  TP_CS          Active low: Pulled high (CN13, pin 31)
  * 78 PC10 SPI3_SCK       To TFT LCD (CN13, pin 29)
  * 79 PC11 SPI3_MISO      To TFT LCD (CN13, pin 25)
  * 80 PC12 SPI3_MOSI      To TFT LCD (CN13, pin 27)
- * 58 PD11 SD_CS          Active low: Pulled high (See also TFT LCD CN13, pin 32)
+ * 58 PD11 SD_CS          Active low: Pulled high
+ *                        (See also TFT LCD CN13, pin 32)
  * 60 PD13 LCD_RS         To TFT LCD (CN13, pin 20)
- * 61 PD14 LCD_WR         To TFT LCD (CN13, pin 21). Schematic is wrong LCD_WR is PB14.
+ * 61 PD14 LCD_WR         To TFT LCD (CN13, pin 21).
+ *                        Schematic is wrong LCD_WR is PB14.
  * 62 PD15 LCD_RD         To TFT LCD (CN13, pin 22)
  * 97 PE0  DB00           To TFT LCD (CN13, pin 3)
  * 98 PE1  DB01           To TFT LCD (CN13, pin 4)
@@ -138,7 +144,8 @@ static void stm32_lcdoutput(FAR struct stm32_lower_s *priv);
  * 45 PE14 DB14           To TFT LCD (CN13, pin 17)
  * 46 PE15 DB15           To TFT LCD (CN13, pin 18)
  *
- * NOTE:  The backlight signl NC_BL (CN13, pin 24) is pulled high and not under
+ * NOTE:
+ * The backlight signl NC_BL (CN13, pin 24) is pulled high and not under
  * software control
  *
  * On LCD module:
@@ -182,24 +189,33 @@ static void stm32_lcdoutput(FAR struct stm32_lower_s *priv);
 #ifndef CONFIG_LCD_FASTCONFIG
 static const uint32_t g_lcdout[16] =
 {
-  GPIO_LCD_D0OUT,  GPIO_LCD_D1OUT,  GPIO_LCD_D2OUT,  GPIO_LCD_D3OUT,
-  GPIO_LCD_D4OUT,  GPIO_LCD_D5OUT,  GPIO_LCD_D6OUT,  GPIO_LCD_D7OUT,
-  GPIO_LCD_D8OUT,  GPIO_LCD_D9OUT,  GPIO_LCD_D10OUT, GPIO_LCD_D11OUT,
-  GPIO_LCD_D12OUT, GPIO_LCD_D13OUT, GPIO_LCD_D14OUT, GPIO_LCD_D15OUT
+  GPIO_LCD_D0OUT,  GPIO_LCD_D1OUT,
+  GPIO_LCD_D2OUT,  GPIO_LCD_D3OUT,
+  GPIO_LCD_D4OUT,  GPIO_LCD_D5OUT,
+  GPIO_LCD_D6OUT,  GPIO_LCD_D7OUT,
+  GPIO_LCD_D8OUT,  GPIO_LCD_D9OUT,
+  GPIO_LCD_D10OUT, GPIO_LCD_D11OUT,
+  GPIO_LCD_D12OUT, GPIO_LCD_D13OUT,
+  GPIO_LCD_D14OUT, GPIO_LCD_D15OUT
 };
 
 static const uint32_t g_lcdin[16] =
 {
-  GPIO_LCD_D0IN,   GPIO_LCD_D1IN,   GPIO_LCD_D2IN,   GPIO_LCD_D3IN,
-  GPIO_LCD_D4IN,   GPIO_LCD_D5IN,   GPIO_LCD_D6IN,   GPIO_LCD_D7IN,
-  GPIO_LCD_D8IN,   GPIO_LCD_D9IN,   GPIO_LCD_D10IN,  GPIO_LCD_D11IN,
-  GPIO_LCD_D12IN,  GPIO_LCD_D13IN,  GPIO_LCD_D14IN,  GPIO_LCD_D15IN
+  GPIO_LCD_D0IN,   GPIO_LCD_D1IN,
+  GPIO_LCD_D2IN,   GPIO_LCD_D3IN,
+  GPIO_LCD_D4IN,   GPIO_LCD_D5IN,
+  GPIO_LCD_D6IN,   GPIO_LCD_D7IN,
+  GPIO_LCD_D8IN,   GPIO_LCD_D9IN,
+  GPIO_LCD_D10IN,  GPIO_LCD_D11IN,
+  GPIO_LCD_D12IN,  GPIO_LCD_D13IN,
+  GPIO_LCD_D14IN,  GPIO_LCD_D15IN
 };
 #endif
 
 static const uint32_t g_lcdconfig[] =
 {
-  GPIO_LCD_RS,     GPIO_LCD_CS,     GPIO_LCD_RD,     GPIO_LCD_WR,
+  GPIO_LCD_RS,     GPIO_LCD_CS,
+  GPIO_LCD_RD,     GPIO_LCD_WR,
   GPIO_LCD_LE,
 };
 #define NLCD_CONFIG (sizeof(g_lcdconfig)/sizeof(uint32_t))
@@ -235,7 +251,8 @@ static struct stm32_lower_s g_lcdlower =
  ****************************************************************************/
 
 #ifdef CONFIG_LCD_REGDEBUG
-static void stm32_lcdshow(FAR struct stm32_lower_s *priv, FAR const char *msg)
+static void stm32_lcdshow(FAR struct stm32_lower_s *priv,
+                          FAR const char *msg)
 {
   _info("%s:\n", msg);
   _info("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
@@ -298,7 +315,9 @@ static inline uint16_t stm32_rddata(FAR struct stm32_lower_s *priv)
 
   putreg32(1, LCD_RD_CLEAR);
 
-  /* Data should appear 250ns after RD.  Total RD pulse width should be 500nS */
+  /* Data should appear 250ns after RD.
+   * Total RD pulse width should be 500nS
+   */
 
   __asm__ __volatile__(" nop\n nop\n nop\n nop\n");
   regval = (uint16_t)getreg32(LCD_IDR);
@@ -445,6 +464,7 @@ static void stm32_lcdinput(FAR struct stm32_lower_s *priv)
           stm32_configgpio(g_lcdin[i]);
         }
 #endif
+
       /* No longer configured for output */
 
       priv->output = false;
@@ -481,6 +501,7 @@ static void stm32_lcdoutput(FAR struct stm32_lower_s *priv)
           stm32_configgpio(g_lcdout[i]);
         }
 #endif
+
       /* Now we are configured for output */
 
       priv->output = true;
@@ -495,9 +516,10 @@ static void stm32_lcdoutput(FAR struct stm32_lower_s *priv)
  * Name:  board_lcd_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the LCD video hardware.
+ *   The initial state of the LCD is fully initialized, display memory
+ *   cleared, and the LCD ready to use, but with the power setting at 0
+ *   (full off).
  *
  ****************************************************************************/
 
@@ -540,8 +562,8 @@ int board_lcd_initialize(void)
  * Name:  board_lcd_getdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows
- *   support for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.
+ *    This allows support for multiple LCD devices.
  *
  ****************************************************************************/
 

@@ -39,7 +39,7 @@
 
 /****************************************************************************
  * Public Functions
- ***************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_boardinitialize
@@ -55,9 +55,10 @@
 void stm32_boardinitialize(void)
 {
 #if defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)
-  /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
-   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-   * into the build. Presumeably either CONFIG_USBDEV is also selected.
+  /* Initialize USB if the 1) OTG FS controller is in the configuration and
+   * 2) disabled, and 3) the weak function stm32_usbinitialize() has been
+   * brought into the build. Presumeably either CONFIG_USBDEV is also
+   * selected.
    */
 
   if (stm32_usbinitialize)
@@ -85,7 +86,7 @@ void stm32_boardinitialize(void)
  * Description:
  *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
+ *   function called board_late_initialize(). board_late_initialize() will be
  *   called immediately after up_initialize() is called and just before the
  *   initial application is started.  This additional initialization phase
  *   may be used, for example, to initialize board-specific device drivers.

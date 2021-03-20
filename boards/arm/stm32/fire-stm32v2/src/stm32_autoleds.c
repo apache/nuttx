@@ -135,19 +135,19 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
 static const uint16_t g_ledbits[8] =
 {
   (LED_STARTED_ON_SETBITS       | LED_STARTED_ON_CLRBITS |
-   LED_STARTED_OFF_SETBITS      | LED_STARTED_OFF_CLRBITS),
+  LED_STARTED_OFF_SETBITS      | LED_STARTED_OFF_CLRBITS),
 
   (LED_HEAPALLOCATE_ON_SETBITS  | LED_HEAPALLOCATE_ON_CLRBITS |
-   LED_HEAPALLOCATE_OFF_SETBITS | LED_HEAPALLOCATE_OFF_CLRBITS),
+  LED_HEAPALLOCATE_OFF_SETBITS | LED_HEAPALLOCATE_OFF_CLRBITS),
 
   (LED_IRQSENABLED_ON_SETBITS   | LED_IRQSENABLED_ON_CLRBITS |
-   LED_IRQSENABLED_OFF_SETBITS  | LED_IRQSENABLED_OFF_CLRBITS),
+  LED_IRQSENABLED_OFF_SETBITS  | LED_IRQSENABLED_OFF_CLRBITS),
 
   (LED_STACKCREATED_ON_SETBITS  | LED_STACKCREATED_ON_CLRBITS |
-   LED_STACKCREATED_OFF_SETBITS | LED_STACKCREATED_OFF_CLRBITS),
+  LED_STACKCREATED_OFF_SETBITS | LED_STACKCREATED_OFF_CLRBITS),
 
   (LED_FLASH_ON_SETBITS         | LED_FLASH_ON_CLRBITS |
-   LED_FLASH_OFF_SETBITS        | LED_FLASH_OFF_CLRBITS)
+  LED_FLASH_OFF_SETBITS        | LED_FLASH_OFF_CLRBITS)
 };
 
 #ifdef CONFIG_PM
@@ -248,35 +248,30 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
       case(PM_NORMAL):
         {
           /* Restore normal LEDs operation */
-
         }
         break;
 
       case(PM_IDLE):
         {
           /* Entering IDLE mode - Turn leds off */
-
         }
         break;
 
       case(PM_STANDBY):
         {
           /* Entering STANDBY mode - Logic for PM_STANDBY goes here */
-
         }
         break;
 
       case(PM_SLEEP):
         {
           /* Entering SLEEP mode - Logic for PM_SLEEP goes here */
-
         }
         break;
 
       default:
         {
           /* Should not get here */
-
         }
         break;
     }
@@ -318,11 +313,11 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
 #ifdef CONFIG_ARCH_LEDS
 void board_autoled_initialize(void)
 {
-   /* Configure LED1-4 GPIOs for output */
+  /* Configure LED1-4 GPIOs for output */
 
-   stm32_configgpio(GPIO_LED1);
-   stm32_configgpio(GPIO_LED2);
-   stm32_configgpio(GPIO_LED3);
+  stm32_configgpio(GPIO_LED1);
+  stm32_configgpio(GPIO_LED2);
+  stm32_configgpio(GPIO_LED3);
 }
 
 /****************************************************************************
@@ -354,7 +349,7 @@ void up_ledpminitialize(void)
 
   int ret = pm_register(&g_ledscb);
   if (ret != OK)
-  {
+    {
       board_autoled_on(LED_ASSERTION);
     }
 }

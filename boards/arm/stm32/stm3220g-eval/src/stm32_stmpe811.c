@@ -79,8 +79,9 @@
 #endif
 
 /* Board definitions ********************************************************/
-/* The STM3220G-EVAL has two STMPE811QTR I/O expanders on board both connected
- * to the STM32 via I2C1.  They share a common interrupt line: PI2.
+
+/* The STM3220G-EVAL has two STMPE811QTR I/O expanders on board both
+ * connected to the STM32 via I2C1.  They share a common interrupt line: PI2.
  *
  * STMPE811 U24, I2C address 0x41 (7-bit)
  * ------ ---- ---------------- --------------------------------------------
@@ -142,7 +143,8 @@ struct stm32_stmpe811config_s
 
 static int  stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr,
                             FAR void *arg);
-static void stmpe811_enable(FAR struct stmpe811_config_s *state, bool enable);
+static void stmpe811_enable(FAR struct stmpe811_config_s *state,
+                            bool enable);
 static void stmpe811_clear(FAR struct stmpe811_config_s *state);
 
 /****************************************************************************
@@ -200,7 +202,8 @@ static struct stm32_stmpe811config_s g_stmpe811config =
 static int stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr,
                            FAR void *arg)
 {
-  FAR struct stm32_stmpe811config_s *priv = (FAR struct stm32_stmpe811config_s *)state;
+  FAR struct stm32_stmpe811config_s *priv =
+                               (FAR struct stm32_stmpe811config_s *)state;
 
   iinfo("Saving handler %p\n", isr);
   DEBUGASSERT(priv);
@@ -214,7 +217,8 @@ static int stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr,
 
 static void stmpe811_enable(FAR struct stmpe811_config_s *state, bool enable)
 {
-  FAR struct stm32_stmpe811config_s *priv = (FAR struct stm32_stmpe811config_s *)state;
+  FAR struct stm32_stmpe811config_s *priv =
+                               (FAR struct stm32_stmpe811config_s *)state;
   irqstate_t flags;
 
   /* Attach and enable, or detach and disable.  Enabling and disabling GPIO
@@ -291,14 +295,16 @@ int stm32_tsc_setup(int minor)
       dev = stm32_i2cbus_initialize(CONFIG_STMPE811_I2CDEV);
       if (!dev)
         {
-          ierr("ERROR: Failed to initialize I2C bus %d\n", CONFIG_STMPE811_I2CDEV);
+          ierr("ERROR: Failed to initialize I2C bus %d\n",
+               CONFIG_STMPE811_I2CDEV);
           return -ENODEV;
         }
 
       /* Instantiate the STMPE811 driver */
 
       g_stmpe811config.handle =
-        stmpe811_instantiate(dev, (FAR struct stmpe811_config_s *)&g_stmpe811config);
+        stmpe811_instantiate(dev,
+                        (FAR struct stmpe811_config_s *)&g_stmpe811config);
       if (!g_stmpe811config.handle)
         {
           ierr("ERROR: Failed to instantiate the STMPE811 driver\n");
@@ -307,11 +313,14 @@ int stm32_tsc_setup(int minor)
 
       /* Initialize and register the I2C touchscreen device */
 
-      ret = stmpe811_register(g_stmpe811config.handle, CONFIG_STMPE811_DEVMINOR);
+      ret = stmpe811_register(g_stmpe811config.handle,
+                              CONFIG_STMPE811_DEVMINOR);
       if (ret < 0)
         {
           ierr("ERROR: Failed to register STMPE driver: %d\n", ret);
+
           /* stm32_i2cbus_uninitialize(dev); */
+
           return -ENODEV;
         }
     }

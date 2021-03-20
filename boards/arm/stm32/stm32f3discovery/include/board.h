@@ -38,7 +38,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* HSI - Internal 8 MHz RC Oscillator
  * LSI - 32 KHz RC
@@ -53,7 +53,10 @@
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
 #define STM32_LSE_FREQUENCY     32768            /* X2 on board */
 
-/* PLL source is HSE/1, PLL multipler is 9: PLL frequency is 8MHz (XTAL) x 9 = 72MHz */
+/* PLL source is HSE/1,
+ * PLL multipler is 9:
+ * PLL frequency is 8MHz (XTAL) x 9 = 72MHz
+ */
 
 #define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC
 #define STM32_CFGR_PLLXTPRE     0
@@ -105,7 +108,6 @@
 
 #define STM32_CFGR_USBPRE       0
 
-
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
  * otherwise frequency is 2xAPBx.
  * Note: TIM1,8 are on APB2, others on APB1
@@ -120,27 +122,30 @@
 #define BOARD_TIM7_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
-/* LED definitions ******************************************************************/
-/* The STM32F3Discovery board has ten LEDs.  Two of these are controlled by logic on
- * the board and are not available for software control:
+/* LED definitions **********************************************************/
+
+/* The STM32F3Discovery board has ten LEDs.  Two of these are controlled by
+ * logic on the board and are not available for software control:
  *
  * LD1 PWR:   red LED indicates that the board is powered.
  * LD2 COM:   LD2 default status is red. LD2 turns to green to indicate that
- *            communications are in progress between the PC and the ST-LINK/V2.
+ *            communications are in progress between the PC and the
+ *            ST-LINK/V2.
  *
  * And eight can be controlled by software:
  *
- * User LD3:  red LED is a user LED connected to the I/O PE9 of the STM32F303VCT6.
- * User LD4:  blue LED is a user LED connected to the I/O PE8 of the STM32F303VCT6.
- * User LD5:  orange LED is a user LED connected to the I/O PE10 of the STM32F303VCT6.
- * User LD6:  green LED is a user LED connected to the I/O PE15 of the STM32F303VCT6.
- * User LD7:  green LED is a user LED connected to the I/O PE11 of the STM32F303VCT6.
- * User LD8:  orange LED is a user LED connected to the I/O PE14 of the STM32F303VCT6.
- * User LD9:  blue LED is a user LED connected to the I/O PE12 of the STM32F303VCT6.
- * User LD10: red LED is a user LED connected to the I/O PE13 of the STM32F303VCT6.
+ * User LEDs connected to the I/O of the STM32F303VCT6.
+ * User LD3:  red LED is a user LED connected to the PE9 I/O.
+ * User LD4:  blue LED is a user LED connected to the PE8 I/O.
+ * User LD5:  orange LED is a user LED connected to the PE10 I/O.
+ * User LD6:  green LED is a user LED connected to the PE15 I/O.
+ * User LD7:  green LED is a user LED connected to the PE11 I/O.
+ * User LD8:  orange LED is a user LED connected to the PE14 I/O.
+ * User LD9:  blue LED is a user LED connected to the PE12 I/O.
+ * User LD10: red LED is a user LED connected to the PE13 I/O.
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -166,8 +171,9 @@
 #define BOARD_LED7_BIT    (1 << BOARD_LED7)
 #define BOARD_LED8_BIT    (1 << BOARD_LED8)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 8 LEDs on board the
- * stm32f3discovery.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 8 LEDs on
+ * board the stm32f3discovery.
+ * The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
  *                                              Initially all LEDs are OFF
@@ -178,7 +184,8 @@
  *   LED_STACKCREATED     Idle stack created       LD6 ON
  *   LED_INIRQ            In an interrupt          LD7 should glow
  *   LED_SIGNAL           In a signal handler      LD8 might glow
- *   LED_ASSERTION        An assertion failed      LD9 ON while handling the assertion
+ *   LED_ASSERTION        An assertion failed      LD9 ON while handling
+ *                                                 the assertion
  *   LED_PANIC            The system has crashed   LD10 Blinking at 2Hz
  *   LED_IDLE             STM32 is is sleep mode   (Optional, not used)
  */
@@ -192,12 +199,16 @@
 #define LED_ASSERTION     6
 #define LED_PANIC         7
 
-/* Button definitions ***************************************************************/
-/* The STM32F3Discovery supports two buttons; only one button is controllable by
- * software:
+/* Button definitions *******************************************************/
+
+/* The STM32F3Discovery supports two buttons; only one button is controllable
+ * by software:
  *
- *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32F303VCT6.
- *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32F303VCT6.
+ *   B1 USER:
+ *      user and wake-up button connected to the I/O PA0 of the
+ *      STM32F303VCT6.
+ *   B2 RESET:
+ *      pushbutton connected to NRST is used to RESET the STM32F303VCT6.
  */
 
 #define BUTTON_USER        0
@@ -206,7 +217,7 @@
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART
  *
@@ -214,7 +225,8 @@
  *    RX (PC5)
  *    TX (PC4)
  *
- *  USART2: Connect to an external UART<->RS232 transceiver for use as console.
+ *  USART2:
+ *    Connect to an external UART<->RS232 transceiver for use as console.
  *    RX (PA3)
  *    TX (PA2)
  */

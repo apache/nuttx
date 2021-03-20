@@ -54,7 +54,8 @@
 #  undef STM32_MMCSDSLOTNO
 #  define STM32_MMCSDSLOTNO 0
 #else
-   /* Add configuration for new STM32 boards here */
+/* Add configuration for new STM32 boards here */
+
 #  error "Unrecognized STM32 board"
 #endif
 
@@ -73,7 +74,8 @@
 int board_usbmsc_initialize(int port)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initialized in board_app_initialize() (see stm32_appinit.c).
+   * already have been initialized in board_app_initialize()
+   * (see stm32_appinit.c).
    * In this case, there is nothing further to be done here.
    */
 
@@ -95,7 +97,7 @@ int board_usbmsc_initialize(int port)
 
   /* Now bind the SDIO interface to the MMC/SD driver */
 
-  syslog(LOG_INFO,"Bind SDIO to the MMC/SD driver, minor=%d\n",
+  syslog(LOG_INFO, "Bind SDIO to the MMC/SD driver, minor=%d\n",
          CONFIG_SYSTEM_USBMSC_DEVMINOR1);
 
   ret = mmcsd_slotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1, sdio);
@@ -109,16 +111,16 @@ int board_usbmsc_initialize(int port)
 
   syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
 
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the Hy-Mini STM32v board supports a GPIO to detect if there is a card in
-   * the slot.
+  /* Then let's guess and say that there is a card in the slot.
+   * I need to check to see if the Hy-Mini STM32v board supports a GPIO to
+   * detect if there is a card in the slot.
    */
 
-   sdio_mediachange(sdio, true);
+  sdio_mediachange(sdio, true);
 
 #endif /* CONFIG_NSH_BUILTIN_APPS */
 
-   return OK;
+  return OK;
 }
 
 #endif /* CONFIG_STM32_SDIO */

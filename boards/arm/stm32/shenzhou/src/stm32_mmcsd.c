@@ -87,7 +87,8 @@ int stm32_sdinitialize(int minor)
   spi = stm32_spibus_initialize(STM32_MMCSDSPIPORTNO);
   if (!spi)
     {
-      ferr("ERROR: Failed to initialize SPI port %d\n", STM32_MMCSDSPIPORTNO);
+      ferr("ERROR: Failed to initialize SPI port %d\n",
+           STM32_MMCSDSPIPORTNO);
       return -ENODEV;
     }
 

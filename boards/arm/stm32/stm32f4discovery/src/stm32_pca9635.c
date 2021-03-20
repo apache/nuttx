@@ -62,11 +62,12 @@
 
 int stm32_pca9635_initialize(void)
 {
-
   FAR struct i2c_master_s *i2c;
   int ret;
 
-  /* Get the I2C driver that interfaces with the pca9635 (PCA9635_I2CBUS)*/
+  /* Get the I2C driver that interfaces with the pca9635
+   * (PCA9635_I2CBUS)
+   */
 
   i2c = stm32_i2cbus_initialize(PCA9635_I2CBUS);
   if (!i2c)
@@ -79,7 +80,7 @@ int stm32_pca9635_initialize(void)
   if (ret < 0)
     {
       snerr("ERROR: Failed to register PCA9635 driver: %d\n", ret);
-     return ret;
+      return ret;
     }
 
   return OK;

@@ -65,7 +65,7 @@
  * Private Data
  ****************************************************************************/
 
-/* GPIOs Configuration *******************************************************
+/* GPIOs Configuration ******************************************************
  * PD0  <-> FSMC_D2   PE0  <-> FSMC_NBL0  PF0  <-> FSMC_A0  PG0 <-> FSMC_A10
  * PD1  <-> FSMC_D3   PE1  <-> FSMC_NBL1  PF1  <-> FSMC_A1  PG1 <-> FSMC_A11
  * PD4  <-> FSMC_NOE  PE3  <-> FSMC_A19   PF2  <-> FSMC_A2  PG2 <-> FSMC_A12
@@ -155,7 +155,8 @@ void stm32_selectsram(void)
    *   Write burst        : Disabled
    */
 
-  putreg32((FSMC_BCR_PSRAM | FSMC_BCR_MWID16 | FSMC_BCR_WREN), STM32_FSMC_BCR2);
+  putreg32((FSMC_BCR_PSRAM | FSMC_BCR_MWID16 |
+            FSMC_BCR_WREN), STM32_FSMC_BCR2);
 
   /* Bank1 NOR/SRAM timing register configuration */
 

@@ -37,18 +37,19 @@
 
 /* Clocking *****************************************************************/
 
-/* Four different clock sources can be used to drive the system clock (SYSCLK):
+/* Four different clock sources can be used to drive the system clock
+ * (SYSCLK):
  *
  * - HSI high-speed internal oscillator clock
  *   Generated from an internal 8 MHz RC oscillator
  * - HSE high-speed external oscillator clock
- *   Normally driven by an external crystal (X3).  However, this crystal is not
- *   fitted on the STM32F0-Discovery board.
+ *   Normally driven by an external crystal (X3). However, this crystal is
+ *   not fitted on the STM32F0-Discovery board.
  * - PLL clock
  * - MSI multispeed internal oscillator clock
- *   The MSI clock signal is generated from an internal RC oscillator. Seven frequency
- *   ranges are available: 65.536 kHz, 131.072 kHz, 262.144 kHz, 524.288 kHz, 1.048 MHz,
- *   2.097 MHz (default value) and 4.194 MHz.
+ *   The MSI clock signal is generated from an internal RC oscillator. Seven
+ *   frequency ranges are available: 65.536 kHz, 131.072 kHz, 262.144 kHz,
+ *   524.288 kHz, 1.048 MHz, 2.097 MHz (default value) and 4.194 MHz.
  *
  * The devices have the following two secondary clock sources
  * - LSI low-speed internal RC clock
@@ -108,8 +109,8 @@
 #  define STM32_PLL_FREQUENCY    (12*STM32_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 48MHz */
 #endif
 
-/* Use the PLL and set the SYSCLK source to be the divided down PLL VCO output
- * frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
+/* Use the PLL and set the SYSCLK source to be the divided down PLL VCO
+ * output frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
  */
 
 #define STM32_SYSCLK_SW          RCC_CFGR_SW_PLL     /* Use the PLL as the SYSCLK */
@@ -155,18 +156,19 @@
  * logic on the board and are not available for software control:
  *
  * LD1 COM:   LD2 default status is red. LD2 turns to green to indicate that
- *            communications are in progress between the PC and the ST-LINK/V2.
+ *            communications are in progress between the PC and the
+ *            ST-LINK/V2.
  * LD2 PWR:   Red LED indicates that the board is powered.
  *
  * And two LEDs can be controlled by software:
  *
- * User LD3:  Green LED is a user LED connected to the I/O PB7 of the STM32F051R8
- *            MCU.
- * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the STM32F051R8
- *            MCU.
+ * User LD3:  Green LED is a user LED connected to the I/O PB7 of the
+ *            STM32F051R8 MCU.
+ * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the
+ *            STM32F051R8 MCU.
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -180,8 +182,9 @@
 #define BOARD_LED1_BIT           (1 << BOARD_LED1)
 #define BOARD_LED2_BIT           (1 << BOARD_LED2)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 8 LEDs on board the
- * STM32F0-Discovery.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 8 LEDs on
+ * board the STM32F0-Discovery.
+ * The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
  *                                                   LED1     LED2
@@ -208,11 +211,13 @@
 
 /* Button definitions *******************************************************/
 
-/* The STM32F0-Discovery supports two buttons; only one button is controllable by
- * software:
+/* The STM32F0-Discovery supports two buttons; only one button is
+ * controllable by software:
  *
- *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32F051R8.
- *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32F051R8.
+ *   B1 USER:
+ *      user and wake-up button connected to the I/O PA0 of the STM32F051R8.
+ *   B2 RESET:
+ *      pushbutton connected to NRST is used to RESET the STM32F051R8.
  */
 
 #define BUTTON_USER              0

@@ -49,9 +49,9 @@
 
 void board_autoled_initialize(void)
 {
-   /* Configure LED_STATUS GPIO for output */
+  /* Configure LED_STATUS GPIO for output */
 
-   stm32_configgpio(GPIO_LED_STATUS);
+  stm32_configgpio(GPIO_LED_STATUS);
 }
 
 /****************************************************************************

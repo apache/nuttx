@@ -249,17 +249,22 @@ int stm32_tsc_setup(int minor)
   dev = stm32_spibus_initialize(CONFIG_ADS7843E_SPIDEV);
   if (!dev)
     {
-      ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
+      ierr("ERROR: Failed to initialize SPI bus %d\n",
+           CONFIG_ADS7843E_SPIDEV);
       return -ENODEV;
     }
 
   /* Initialize and register the SPI touschscreen device */
 
-  ret = ads7843e_register(dev, &g_tscinfo.dev, CONFIG_ADS7843E_DEVMINOR);
+  ret = ads7843e_register(dev, &g_tscinfo.dev,
+                          CONFIG_ADS7843E_DEVMINOR);
   if (ret < 0)
     {
-      ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
+      ierr("ERROR: Failed to initialize SPI bus %d\n",
+           CONFIG_ADS7843E_SPIDEV);
+
       /* up_spiuninitialize(dev); */
+
       return -ENODEV;
     }
 

@@ -74,14 +74,19 @@
  *
  * Formulae:
  *
- *   VCO input frequency        = PLL input clock frequency / PLLM, 2 <= PLLM <= 63
- *   VCO output frequency       = VCO input frequency × PLLN,       192 <= PLLN <= 432
- *   PLL output clock frequency = VCO frequency / PLLP,             PLLP = 2, 4, 6, or 8
- *   USB OTG FS clock frequency = VCO frequency / PLLQ,             2 <= PLLQ <= 15
+ *   VCO input frequency        = PLL input clock frequency / PLLM,
+ *                                2 <= PLLM <= 63
+ *   VCO output frequency       = VCO input frequency × PLLN,
+ *                                192 <= PLLN <= 432
+ *   PLL output clock frequency = VCO frequency / PLLP,
+ *                                PLLP = 2, 4, 6, or 8
+ *   USB OTG FS clock frequency = VCO frequency / PLLQ,
+ *                                2 <= PLLQ <= 15
  *
 
  * There is no config for 100 MHz and 48 MHz for usb,
- * so we would like to have SYSYCLK=104MHz and we must have the USB clock= 48MHz.
+ * so we would like to have SYSYCLK=104MHz and we must have
+ * the USB clock= 48MHz.
  *
  * PLLQ = 13 PLLP = 6 PLLN=390 PLLM=10
  *
@@ -119,6 +124,7 @@
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
 /* Timers driven from APB1 will be twice PCLK1 */
+
 /* REVISIT */
 
 #define STM32_APB1_TIM2_CLKIN   (2*STM32_PCLK1_FREQUENCY)
@@ -137,6 +143,7 @@
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/1)
 
 /* Timers driven from APB2 will be twice PCLK2 */
+
 /* REVISIT */
 
 #define STM32_APB2_TIM1_CLKIN   (2*STM32_PCLK2_FREQUENCY)
@@ -149,6 +156,7 @@
  * otherwise frequency is 2xAPBx.
  * Note: TIM1,8 are on APB2, others on APB1
  */
+
 /* REVISIT */
 
 #define BOARD_TIM1_FREQUENCY    (2*STM32_PCLK2_FREQUENCY)
@@ -167,6 +175,7 @@
  *
  * HCLK=72MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(178+2)=400 KHz
  */
+
 /* REVISIT */
 
 #define SDIO_INIT_CLKDIV        (178 << SDIO_CLKCR_CLKDIV_SHIFT)
@@ -174,6 +183,7 @@
 /* DMA ON:  HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(2+2)=18 MHz
  * DMA OFF: HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(3+2)=14.4 MHz
  */
+
 /* REVISIT */
 
 #ifdef CONFIG_SDIO_DMA
@@ -185,6 +195,7 @@
 /* DMA ON:  HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(1+2)=24 MHz
  * DMA OFF: HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(3+2)=14.4 MHz
  */
+
 /* REVISIT */
 
 #ifdef CONFIG_SDIO_DMA

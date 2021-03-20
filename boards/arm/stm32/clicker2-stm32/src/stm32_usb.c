@@ -53,15 +53,17 @@
  * Name: stm32_usb_configure
  *
  * Description:
- *   Called from stm32_boardinitialize very early in inialization to setup USB-related
- *   GPIO pins for the Olimex STM32 P407 board.
+ *   Called from stm32_boardinitialize very early in inialization to setup
+ *   USB-related GPIO pins for the Olimex STM32 P407 board.
  *
  ****************************************************************************/
 
 void stm32_usb_configure(void)
 {
 #ifdef CONFIG_STM32_OTGFS
-  /* The OTG FS has an internal soft pull-up.  No GPIO configuration is required */
+  /* The OTG FS has an internal soft pull-up.
+   * No GPIO configuration is required
+   */
 
   /* Configure the OTG FS VBUS sensing GPIO */
 
@@ -73,10 +75,11 @@ void stm32_usb_configure(void)
  * Name:  stm32_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV
+ *   driver is used.  This function is called whenever the USB enters or
+ *   leaves suspend mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power,
+ *   etc. while the USB is suspended.
  *
  ****************************************************************************/
 

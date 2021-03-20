@@ -41,7 +41,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
+
 /* Up to 3 ADC interfaces are supported */
 
 #if STM32_NADC < 3
@@ -68,6 +69,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* The Olimex STM32-P405 has a 10 Kohm potentiometer AN_TR connected to PC0
  * ADC123_IN10
  */
@@ -75,19 +77,31 @@
 /* Identifying number of each ADC channel: Variable Resistor. */
 
 #ifdef CONFIG_STM32_ADC1
-static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {1};/*,  2,  3,
-                                                    4,  5,  6,
-                                                    7,  8,  9,
-                                                    10, 11, 12,
-                                                    13, 15};*/
+static const uint8_t  g_chanlist[ADC1_NCHANNELS] =
+{
+  1
+};
+/*   ,  2,  3,
+ *  4,  5,  6,
+ *  7,  8,  9,
+ * 10, 11, 12,
+ * 13, 15
+ * };
+ */
 
 /* Configurations of pins used byte each ADC channels */
 
-static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN1};/*,  GPIO_ADC1_IN2,  GPIO_ADC1_IN3,
-                                                    GPIO_ADC1_IN4,  GPIO_ADC1_IN5,  GPIO_ADC1_IN6,
-                                                    GPIO_ADC1_IN7,  GPIO_ADC1_IN8,  GPIO_ADC1_IN9,
-                                                    GPIO_ADC1_IN10, GPIO_ADC1_IN11, GPIO_ADC1_IN12,
-                                                    GPIO_ADC1_IN13, GPIO_ADC1_IN15};*/
+static const uint32_t g_pinlist[ADC1_NCHANNELS]  =
+{
+  GPIO_ADC1_IN1
+};
+/*                ,  GPIO_ADC1_IN2,  GPIO_ADC1_IN3,
+ *   GPIO_ADC1_IN4,  GPIO_ADC1_IN5,  GPIO_ADC1_IN6,
+ *   GPIO_ADC1_IN7,  GPIO_ADC1_IN8,  GPIO_ADC1_IN9,
+ *   GPIO_ADC1_IN10, GPIO_ADC1_IN11, GPIO_ADC1_IN12,
+ *   GPIO_ADC1_IN13, GPIO_ADC1_IN15
+ * };
+ */
 #endif
 
 /****************************************************************************

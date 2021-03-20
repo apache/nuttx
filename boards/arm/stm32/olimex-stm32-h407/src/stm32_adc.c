@@ -80,7 +80,10 @@
  */
 
 #ifdef CONFIG_STM32_ADC1
-static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {1};
+static const uint8_t  g_chanlist[ADC1_NCHANNELS] =
+{
+  1
+};
 
 /* Configurations of pins used byte each ADC channels
  *
@@ -90,7 +93,10 @@ static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {1};
  *   GPIO_ADC1_IN13, GPIO_ADC1_IN15};
  */
 
-static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN1};
+static const uint32_t g_pinlist[ADC1_NCHANNELS]  =
+{
+  GPIO_ADC1_IN1
+};
 #endif
 
 /****************************************************************************

@@ -32,29 +32,32 @@
 #endif
 
 /* Logic in arch/arm/src and boards/ may need to include these file prior to
- * including board.h:  stm32_rcc.h, stm32_sdio.h, stm32.h.  They cannot be included
- * here because board.h is used in other contexts where the STM32 internal header
- * files are not available.
+ * including board.h:  stm32_rcc.h, stm32_sdio.h, stm32.h.  They cannot be
+ * included here because board.h is used in other contexts where the STM32
+ * internal header files are not available.
  */
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* Four clock sources are available on STM3240G-EVAL evaluation board for
  * STM32F407IGH6 and RTC embedded:
  *
- * X1, 25 MHz crystal for Ethernet PHY with socket. It can be removed when clock is
- *     provided by MCO pin of the MCU
+ * X1, 25 MHz crystal for Ethernet PHY with socket.
+ *     It can be removed when clock is provided by MCO pin of the MCU
  * X2, 26 MHz crystal for USB OTG HS PHY
  * X3, 32 kHz crystal for embedded RTC
- * X4, 25 MHz crystal with socket for STM32F407IGH6 microcontroller (It can be removed
- *     from socket when internal RC clock is used.)
+ * X4, 25 MHz crystal with socket for STM32F407IGH6 microcontroller
+ *     (It can be removed from socket when internal RC clock is used.)
  *
- * This is the "standard" configuration as set up by arch/arm/src/stm32f40xx_rcc.c:
+ * This is the "standard" configuration as set up by
+ * arch/arm/src/stm32f40xx_rcc.c:
  *   System Clock source           : PLL (HSE)
- *   SYSCLK(Hz)                    : 168000000    Determined by PLL configuration
+ *   SYSCLK(Hz)                    : 168000000    Determined by PLL
+ *                                                 configuration
  *   HCLK(Hz)                      : 168000000    (STM32_RCC_CFGR_HPRE)
  *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
  *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
@@ -64,7 +67,8 @@
  *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
  *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
  *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
- *   Main regulator output voltage : Scale1 mode  Needed for high speed SYSCLK
+ *   Main regulator output voltage : Scale1 mode  Needed for high speed
+ *                                                SYSCLK
  *   Flash Latency(WS)             : 5
  *   Prefetch Buffer               : OFF
  *   Instruction cache             : ON
@@ -193,7 +197,8 @@
 #  define SDIO_SDXFR_CLKDIV     (2 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
-/* Ethernet *************************************************************************/
+/* Ethernet *****************************************************************/
+
 /* We need to provide clocking to the MII PHY via MCO1 (PA8) */
 
 #if defined(CONFIG_NET) && defined(CONFIG_STM32_ETHMAC)
@@ -212,9 +217,10 @@
 #  endif
 #endif
 
-/* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+/* LED definitions **********************************************************/
+
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -232,8 +238,9 @@
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
 #define BOARD_LED4_BIT    (1 << BOARD_LED4)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
- * STM3240G-EVAL.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on
+ * board the STM3240G-EVAL.
+ * The following definitions describe how NuttX controls the LEDs:
  */
 
 #define LED_STARTED       0  /* LED1 */
@@ -245,7 +252,8 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The STM3240G-EVAL supports three buttons: */
 
 #define BUTTON_WAKEUP      0
@@ -258,15 +266,16 @@
 #define BUTTON_TAMPER_BIT  (1 << BUTTON_TAMPER)
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-/* SRAM definitions *****************************************************************/
-/* The 16 Mbit SRAM is connected to the STM32F407IGH6 FSMC bus which shares the same
- * I/Os with the CAN1 bus. Jumper settings:
+/* SRAM definitions *********************************************************/
+
+/* The 16 Mbit SRAM is connected to the STM32F407IGH6 FSMC bus which shares
+ * the same I/Os with the CAN1 bus. Jumper settings:
  *
  * JP1: Connect PE4 to SRAM as A20
  * JP2: onnect PE3 to SRAM as A19
  *
- * JP3 and JP10 must not be fitted for SRAM and LCD application.  JP3 and JP10
- * select CAN1 or CAN2 if fitted; neither if not fitted.
+ * JP3 and JP10 must not be fitted for SRAM and LCD application.
+ * JP3 and JP10 select CAN1 or CAN2 if fitted; neither if not fitted.
  */
 
 #if defined(CONFIG_STM32_FSMC) && defined(CONFIG_STM32_EXTERNAL_RAM)
@@ -280,7 +289,7 @@
 #define BOARD_SRAM_BASE    0x64000000
 #define BOARD_SRAM_SIZE    (2*1024*1024)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* UART3:
  *
@@ -335,7 +344,8 @@
  * If FSMC is not used:
  *   TIM4 CH2OUT: PD13 FSMC_A18 / MC_TIM4_CH2OUT
  *   Daughterboard Extension Connector, CN3, pin 32
- *   Motor Control Connector CN15, pin 33 -- not available unless you bridge SB14.
+ *   Motor Control Connector CN15,
+ *   pin 33 -- not available unless you bridge SB14.
  *
  *   TIM1 CH1OUT: PE9 FSMC_D6
  *   Daughterboard Extension Connector, CN2, pin 24
@@ -409,7 +419,8 @@
 
 /* CAN
  *
- * Connector 10 (CN10) is DB-9 male connector that can be used with CAN1 or CAN2.
+ * Connector 10 (CN10)
+ * is DB-9 male connector that can be used with CAN1 or CAN2.
  *
  *   JP10 connects CAN1_RX or CAN2_RX to the CAN transceiver
  *   JP3 connects CAN1_TX or CAN2_TX to the CAN transceiver
@@ -433,7 +444,8 @@
 #define GPIO_CAN2_RX        GPIO_CAN2_RX_2
 #define GPIO_CAN2_TX        GPIO_CAN2_TX_1
 
-/* I2C.  Only I2C1 is available on the STM3240G-EVAL.  I2C1_SCL and I2C1_SDA are
+/* I2C.
+ * Only I2C1 is available on the STM3240G-EVAL.  I2C1_SCL and I2C1_SDA are
  * available on the following pins:
  *
  * - PB6  is I2C1_SCL
@@ -443,9 +455,10 @@
 #define GPIO_I2C1_SCL       GPIO_I2C1_SCL_1
 #define GPIO_I2C1_SDA       GPIO_I2C1_SDA_2
 
-/* DMA Channel/Stream Selections *****************************************************/
-/* Stream selections are arbitrary for now but might become important in the future
- * if we set aside more DMA channels/streams.
+/* DMA Channel/Stream Selections ********************************************/
+
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
  *
  * SDIO DMA
  *   DMAMAP_SDIO_1 = Channel 4, Stream 3
@@ -477,10 +490,11 @@ extern "C"
  * Name:  stm3240g_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the STM3210E-EVAL board.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface just for the STM3210E-EVAL board.
+ *   Because of the various rotations, clearing the display in the normal
+ *   way by writing a sequences of runs that covers the entire display can be
+ *   very slow.  Here the display is cleared by simply setting all GRAM
+ *   memory to the specified color.
  *
  ****************************************************************************/
 

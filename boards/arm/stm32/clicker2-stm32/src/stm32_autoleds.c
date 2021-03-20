@@ -145,7 +145,7 @@ static void board_led2_off(int led)
         return;
     }
 
-   stm32_gpiowrite(GPIO_LED2, false);
+  stm32_gpiowrite(GPIO_LED2, false);
 }
 
 /****************************************************************************
@@ -158,10 +158,10 @@ static void board_led2_off(int led)
 
 void board_autoled_initialize(void)
 {
-   /* Configure LED1-2 GPIOs for output */
+  /* Configure LED1-2 GPIOs for output */
 
-   stm32_configgpio(GPIO_LED1);
-   stm32_configgpio(GPIO_LED2);
+  stm32_configgpio(GPIO_LED1);
+  stm32_configgpio(GPIO_LED2);
 }
 
 /****************************************************************************

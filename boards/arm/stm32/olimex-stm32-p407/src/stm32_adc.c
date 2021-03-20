@@ -69,6 +69,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* The Olimex STM32-P407 has a 10 Kohm potentiometer AN_TR connected to PC0
  * ADC123_IN10
  */
@@ -76,11 +77,17 @@
 /* Identifying number of each ADC channel: Variable Resistor. */
 
 #ifdef CONFIG_STM32_ADC1
-static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {10};
+static const uint8_t  g_chanlist[ADC1_NCHANNELS] =
+{
+  10
+};
 
 /* Configurations of pins used byte each ADC channels */
 
-static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN10};
+static const uint32_t g_pinlist[ADC1_NCHANNELS]  =
+{
+  GPIO_ADC1_IN10
+};
 #endif
 
 /****************************************************************************

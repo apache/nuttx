@@ -75,7 +75,9 @@ int kinetis_pwm_setup(void)
   if (!initialized)
     {
 #ifdef CONFIG_KINETIS_FTM0_PWM
-      /* Call kinetis_pwminitialize() to get an instance of the PWM interface */
+      /* Call kinetis_pwminitialize() to get an instance of
+       * the PWM interface
+       */
 
       pwm = kinetis_pwminitialize(0);
       if (!pwm)

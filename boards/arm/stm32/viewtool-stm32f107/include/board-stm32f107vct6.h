@@ -37,7 +37,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* HSI - 8 MHz RC factory-trimmed
  * LSI - 40 KHz RC (30-60KHz, uncalibrated)
@@ -98,7 +98,8 @@
 
 #define STM32_CFGR_OTGFSPRE     0
 
-/* MCO output driven by PLL3. From above, we already have PLL3 input frequency as:
+/* MCO output driven by PLL3.
+ * From above, we already have PLL3 input frequency as:
  *
  *  STM32_PLL_PREDIV2 = 5, 25MHz / 5 => 5MHz
  *
@@ -120,7 +121,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

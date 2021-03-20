@@ -57,8 +57,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static djoy_buttonset_t djoy_supported(FAR const struct djoy_lowerhalf_s *lower);
-static djoy_buttonset_t djoy_sample(FAR const struct djoy_lowerhalf_s *lower);
+static djoy_buttonset_t
+djoy_supported(FAR const struct djoy_lowerhalf_s *lower);
+static djoy_buttonset_t
+djoy_sample(FAR const struct djoy_lowerhalf_s *lower);
 static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
                          djoy_buttonset_t press, djoy_buttonset_t release,
                          djoy_interrupt_t handler, FAR void *arg);
@@ -69,6 +71,7 @@ static int djoy_interrupt(int irq, FAR void *context, FAR void *arg);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each STM3210E-EVAL joystick "button."  Index using
  * DJOY_* definitions in include/nuttx/input/djoystick.h.
  */
@@ -104,7 +107,8 @@ static const struct djoy_lowerhalf_s g_djoylower =
  *
  ****************************************************************************/
 
-static djoy_buttonset_t djoy_supported(FAR const struct djoy_lowerhalf_s *lower)
+static djoy_buttonset_t
+djoy_supported(FAR const struct djoy_lowerhalf_s *lower)
 {
   iinfo("Supported: %02x\n", DJOY_SUPPORTED);
   return (djoy_buttonset_t)DJOY_SUPPORTED;
@@ -127,11 +131,11 @@ static djoy_buttonset_t djoy_sample(FAR const struct djoy_lowerhalf_s *lower)
 
   for (i = 0; i < DJOY_NGPIOS; i++)
     {
-       bool released = stm32_gpioread(g_joygpio[i]);
-       if (!released)
-         {
-            ret |= (1 << i);
-         }
+      bool released = stm32_gpioread(g_joygpio[i]);
+      if (!released)
+        {
+          ret |= (1 << i);
+        }
     }
 
   iinfo("Retuning: %02x\n", DJOY_SUPPORTED);
@@ -181,26 +185,26 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
 
       for (i = 0; i < DJOY_NGPIOS; i++)
         {
-           /* Enable interrupts on each pin that has either a press or
-            * release event associated with it.
-            */
+          /* Enable interrupts on each pin that has either a press or
+           * release event associated with it.
+           */
 
-           bit = (1 << i);
-           if ((either & bit) != 0)
-             {
-               /* Active low so a press corresponds to a falling edge and
-                * a release corresponds to a rising edge.
-                */
+          bit = (1 << i);
+          if ((either & bit) != 0)
+            {
+              /* Active low so a press corresponds to a falling edge and
+               * a release corresponds to a rising edge.
+               */
 
-               falling = ((press & bit) != 0);
-               rising  = ((release & bit) != 0);
+              falling = ((press & bit) != 0);
+              rising  = ((release & bit) != 0);
 
-               iinfo("GPIO %d: rising: %d falling: %d\n",
+              iinfo("GPIO %d: rising: %d falling: %d\n",
                       i, rising, falling);
 
-               stm32_gpiosetevent(g_joygpio[i], rising, falling,
+              stm32_gpiosetevent(g_joygpio[i], rising, falling,
                                   true, djoy_interrupt, NULL);
-             }
+            }
         }
     }
 

@@ -32,13 +32,13 @@
 
 /* Do not include STM32 L4 header files here */
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
 /* Clocking *****************************************************************/
 
 #include <arch/board/stm32l4r9ai-disco-clocking.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /* DMA Channel/Stream Selections ********************************************/
 
@@ -52,10 +52,10 @@
 
 #if 0
 
-#define DMACHAN_SDMMC DMACHAN_SDMMC_1      /* 2 choices * /
+#define DMACHAN_SDMMC DMACHAN_SDMMC_1     /* 2 choices */
 
-#define DMACHAN_SPI1_RX DMACHAN_SPI1_RX_1 /* 2 choices * /
-#define DMACHAN_SPI1_TX DMACHAN_SPI1_TX_1 /* 2 choices * /
+#define DMACHAN_SPI1_RX DMACHAN_SPI1_RX_1 /* 2 choices */
+#define DMACHAN_SPI1_TX DMACHAN_SPI1_TX_1 /* 2 choices */
 
 /* UART RX DMA configurations */
 
@@ -106,7 +106,6 @@
 #define GPIO_UART4_RX   GPIO_UART4_RX_1    /* PA1 */
 #define GPIO_UART4_TX   GPIO_UART4_TX_1    /* PA0 */
 
-
 /* I2C
  *
  * The optional GPIO configurations allow the I2C driver to manually
@@ -129,7 +128,9 @@
 
 /* XXX Is I2C2 used on Disco? */
 
-/* I2C3 connects to Arduino Uno V3 connector pins D15 (I2C3_SCL) and D14 (I2C3_SDA). */
+/* I2C3 connects to Arduino Uno V3 connector pins
+ * D15 (I2C3_SCL) and D14 (I2C3_SDA).
+ */
 
 #define GPIO_I2C3_SCL    (GPIO_I2C3_SCL_2|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET)
 #define GPIO_I2C3_SDA    (GPIO_I2C3_SDA_2|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET)
@@ -180,7 +181,8 @@
 
 /* LEDs
  *
- * The STM32L4R9AI-DISCO board provides two user LEDs, LD1 (orange) and LD2 (green).
+ * The STM32L4R9AI-DISCO board provides two user LEDs,
+ * LD1 (orange) and LD2 (green).
  *
  * PB0 is LD1 (orange)
  * PH4 is LD2 (green)
@@ -204,8 +206,8 @@
  * include/board.h and src/stm32_autoleds.c. The LEDs are used to encode
  * OS-related events as follows when the red and green LEDs are available:
  *
- *   SYMBOL                Meaning                  BOARD_LED_GRN  BOARD_LED_RED
- *   -------------------  -----------------------  -----------    ------------
+ *   SYMBOL               Meaning                BOARD_LED_GRN  BOARD_LED_RED
+ *   -------------------  ---------------------  -----------    ------------
  *   LED_STARTED          NuttX has been started
  *   LED_HEAPALLOCATE     Heap has been allocated
  *   LED_IRQSENABLED      Interrupts enabled
@@ -216,9 +218,9 @@
  *   LED_PANIC            The system has crashed                  Blinking
  *   LED_IDLE             MCU is is sleep mode       ON
  *
- * Thus if BOARD_LED_GRN, NuttX has successfully booted and is, apparently, running
- * normally.  If BOARD_LED_RED is flashing at approximately 2Hz, then a fatal error
- * has been detected and the system has halted.
+ * Thus if BOARD_LED_GRN, NuttX has successfully booted and is, apparently,
+ * running normally.  If BOARD_LED_RED is flashing at approximately 2Hz, then
+ * a fatal error has been detected and the system has halted.
  */
 
 #define LED_STARTED      0

@@ -80,8 +80,9 @@ struct viewtool_ft80xlower_s
  */
 
 static int  ft80x_attach(FAR const struct ft80x_config_s *lower, xcpt_t isr,
-              FAR void *arg);
-static void ft80x_enable(FAR const struct ft80x_config_s *lower, bool enable);
+                         FAR void *arg);
+static void ft80x_enable(FAR const struct ft80x_config_s *lower,
+                         bool enable);
 static void ft80x_clear(FAR const struct ft80x_config_s *lower);
 
 static void ft80x_pwrdown(FAR const struct ft80x_config_s *lower,
@@ -285,7 +286,9 @@ int stm32_ft80x_setup(void)
   if (ret < 0)
     {
       lcderr("ERROR: Failed to register touchscreen device\n");
+
       /* up_spiuninitialize(spi); */
+
       return -ENODEV;
     }
 
