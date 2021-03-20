@@ -37,18 +37,19 @@
 
 /* Clocking *****************************************************************/
 
-/* Four different clock sources can be used to drive the system clock (SYSCLK):
+/* Four different clock sources can be used to drive the system clock
+ * (SYSCLK):
  *
  * - HSI high-speed internal oscillator clock
  *   Generated from an internal 8 MHz RC oscillator
  * - HSE high-speed external oscillator clock
- *   Normally driven by an external crystal (X3).  However, this crystal is not
- *   fitted on the STM32F0-Discovery board.
+ *   Normally driven by an external crystal (X3).  However, this crystal is
+ *   not fitted on the STM32F0-Discovery board.
  * - PLL clock
  * - MSI multispeed internal oscillator clock
- *   The MSI clock signal is generated from an internal RC oscillator. Seven frequency
- *   ranges are available: 65.536 kHz, 131.072 kHz, 262.144 kHz, 524.288 kHz, 1.048 MHz,
- *   2.097 MHz (default value) and 4.194 MHz.
+ *   The MSI clock signal is generated from an internal RC oscillator. Seven
+ *   frequency ranges are available: 65.536 kHz, 131.072 kHz, 262.144 kHz,
+ *   524.288 kHz, 1.048 MHz, 2.097 MHz (default value) and 4.194 MHz.
  *
  * The devices have the following two secondary clock sources
  * - LSI low-speed internal RC clock
@@ -97,32 +98,32 @@
  */
 
 #define STM32_CFGR_PLLSRC        RCC_CFGR_PLLSRC_HSId2         /* Source is HSI/2 */
-#define STM32_PLLSRC_FREQUENCY   (STM32_HSI_FREQUENCY/2)     /* 8MHz / 2 = 4MHz */
+#define STM32_PLLSRC_FREQUENCY   (STM32_HSI_FREQUENCY/2)       /* 8MHz / 2 = 4MHz */
 #ifdef CONFIG_STM32F0L0G0_USB
 #  undef  STM32_CFGR2_PREDIV                                   /* Not used with source HSI/2 */
 #  define STM32_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx12        /* PLLMUL = 12 */
-#  define STM32_PLL_FREQUENCY    (12*STM32_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 48MHz */
+#  define STM32_PLL_FREQUENCY    (12*STM32_PLLSRC_FREQUENCY)   /* PLL VCO Frequency is 48MHz */
 #else
 #  undef  STM32_CFGR2_PREDIV                                   /* Not used with source HSI/2 */
 #  define STM32_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx12        /* PLLMUL = 12 */
-#  define STM32_PLL_FREQUENCY    (12*STM32_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 48MHz */
+#  define STM32_PLL_FREQUENCY    (12*STM32_PLLSRC_FREQUENCY)   /* PLL VCO Frequency is 48MHz */
 #endif
 
-/* Use the PLL and set the SYSCLK source to be the divided down PLL VCO output
- * frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
+/* Use the PLL and set the SYSCLK source to be the divided down PLL VCO
+ * output frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
  */
 
-#define STM32_SYSCLK_SW          RCC_CFGR_SW_PLL       /* Use the PLL as the SYSCLK */
+#define STM32_SYSCLK_SW          RCC_CFGR_SW_PLL      /* Use the PLL as the SYSCLK */
 #define STM32_SYSCLK_SWS         RCC_CFGR_SWS_PLL
 #ifdef CONFIG_STM32F0L0G0_USB
-#  define STM32_SYSCLK_FREQUENCY STM32_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 48MHz */
+#  define STM32_SYSCLK_FREQUENCY STM32_PLL_FREQUENCY  /* SYSCLK frequency is PLL VCO = 48MHz */
 #else
-#  define STM32_SYSCLK_FREQUENCY STM32_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 48MHz */
+#  define STM32_SYSCLK_FREQUENCY STM32_PLL_FREQUENCY  /* SYSCLK frequency is PLL VCO = 48MHz */
 #endif
 
 #define STM32_RCC_CFGR_HPRE      RCC_CFGR_HPRE_SYSCLK
 #define STM32_HCLK_FREQUENCY     STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK         STM32_HCLK_FREQUENCY    /* Same as above, to satisfy compiler */
+#define STM32_BOARD_HCLK         STM32_HCLK_FREQUENCY /* Same as above, to satisfy compiler */
 
 /* APB1 clock (PCLK1) is HCLK (48MHz) */
 
@@ -155,18 +156,20 @@
  * logic on the board and are not available for software control:
  *
  * LD1 COM:   LD2 default status is red. LD2 turns to green to indicate that
- *            communications are in progress between the PC and the ST-LINK/V2.
+ *            communications are in progress between the PC and the
+ *            ST-LINK/V2.
  * LD2 PWR:   Red LED indicates that the board is powered.
  *
  * And two LEDs can be controlled by software:
  *
- * User LD3:  Green LED is a user LED connected to the I/O PB7 of the STM32F072RB
- *            MCU.
- * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the STM32F072RB
- *            MCU.
+ * User LD3:  Green LED is a user LED connected to the I/O PB7 of the
+ *            STM32F072RB MCU.
+ * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the
+ *            STM32F072RB MCU.
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs
+ * in any way.
+ * The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -184,8 +187,9 @@
 #define BOARD_LED3_BIT           (1 << BOARD_LED3)
 #define BOARD_LED4_BIT           (1 << BOARD_LED4)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 8 LEDs on board the
- * STM32F0-Discovery.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 8 LEDs on
+ * board the STM32F0-Discovery.
+ * The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
  *                                                   LED1     LED2
@@ -212,11 +216,13 @@
 
 /* Button definitions *******************************************************/
 
-/* The STM32F0-Discovery supports two buttons; only one button is controllable by
- * software:
+/* The STM32F0-Discovery supports two buttons; only one button is
+ * controllable by software:
  *
- *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32F072RB.
- *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32F072RB.
+ *   B1 USER:
+ *      user and wake-up button connected to the I/O PA0 of the STM32F072RB.
+ *   B2 RESET:
+ *      pushbutton connected to NRST is used to RESET the STM32F072RB.
  */
 
 #define BUTTON_USER              0
@@ -224,7 +230,7 @@
 
 #define BUTTON_USER_BIT          (1 << BUTTON_USER)
 
-/* Alternate Pin Functions **********************************************************/
+/* Alternate Pin Functions **************************************************/
 
 /* USART 1 */
 

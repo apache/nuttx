@@ -73,7 +73,9 @@
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #else
-   /* Add configuration for new STM32 boards here */
+
+/* Add configuration for new STM32 boards here */
+
 #  error "Unrecognized STM32 board"
 #  undef NSH_HAVEUSBDEV
 #  undef NSH_HAVEMMCSD
@@ -85,8 +87,8 @@
 #  undef NSH_HAVEUSBDEV
 #endif
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
- * is not enabled.
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO
+ * support is not enabled.
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO)
@@ -212,15 +214,18 @@ int stm32_bringup(void)
   mtd = m25p_initialize(spi);
   if (!mtd)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
       return -ENODEV;
     }
 
-  syslog(LOG_INFO, "Successfully bound SPI port 0 to the SPI FLASH driver\n");
+  syslog(LOG_INFO,
+         "Successfully bound SPI port 0 to the SPI FLASH driver\n");
 #warning "Now what are we going to do with this SPI FLASH driver?"
 #endif
 
   /* Create the SPI FLASH MTD instance */
+
   /* The M25Pxx is not a give media to implement a file system..
    * its block sizes are too large
    */
@@ -249,18 +254,19 @@ int stm32_bringup(void)
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
   syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
 
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the STM3210E-EVAL board supports a GPIO to detect if there is a card in
-   * the slot.
+  /* Then let's guess and say that there is a card in the slot.
+   * I need to check to see if the STM3210E-EVAL board supports a GPIO
+   * to detect if there is a card in the slot.
    */
 
-   sdio_mediachange(sdio, true);
+  sdio_mediachange(sdio, true);
 #endif
 
 #ifdef CONFIG_ADC
@@ -299,7 +305,8 @@ int stm32_bringup(void)
   ret = stm32_djoy_initialization();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the joystick driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the joystick driver: %d\n", ret);
       return ret;
     }
 

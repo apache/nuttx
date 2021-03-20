@@ -77,7 +77,7 @@ struct stm32l4_priv_s
  *
  *   stm32l4_reset      - Reset the Spirit part.
  *   stm32l4_attach_irq - Attach the Spirit interrupt handler to the GPIO
-                          interrupt
+ *                        interrupt
  *   stm32l4_enable_irq - Enable or disable the GPIO interrupt
  */
 
@@ -214,8 +214,8 @@ static int stm32l4_spirit_devsetup(FAR struct stm32l4_priv_s *priv)
    * powers down the Spirit.
    */
 
-   stm32l4_configgpio(priv->intcfg);
-   stm32l4_configgpio(priv->sdncfg);
+  stm32l4_configgpio(priv->intcfg);
+  stm32l4_configgpio(priv->sdncfg);
 
   /* Initialize the SPI bus and get an instance of the SPI interface */
 

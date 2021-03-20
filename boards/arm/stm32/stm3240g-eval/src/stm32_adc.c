@@ -71,6 +71,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* The STM3240G-EVAL has a 10 Kohm potentiometer RV1 connected to PF9 of
  * STM32F407IGH6 on the board: TIM14_CH1/FSMC_CD/ADC3_IN7
  */
@@ -78,11 +79,17 @@
 /* Identifying number of each ADC channel: Variable Resistor. */
 
 #ifdef CONFIG_STM32_ADC3
-static const uint8_t  g_chanlist[ADC3_NCHANNELS] = {7};
+static const uint8_t  g_chanlist[ADC3_NCHANNELS] =
+{
+  7
+};
 
 /* Configurations of pins used byte each ADC channels */
 
-static const uint32_t g_pinlist[ADC3_NCHANNELS]  = {GPIO_ADC3_IN7};
+static const uint32_t g_pinlist[ADC3_NCHANNELS]  =
+{
+  GPIO_ADC3_IN7
+};
 #endif
 
 /****************************************************************************

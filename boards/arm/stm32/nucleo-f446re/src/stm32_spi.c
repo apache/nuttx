@@ -20,7 +20,7 @@
 
 /****************************************************************************
  * Included Files
- ***************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -43,7 +43,7 @@
 
 /****************************************************************************
  * Public Data
- ***************************************************************************/
+ ****************************************************************************/
 
 /* Global driver instances */
 
@@ -56,7 +56,7 @@ struct spi_dev_s *g_spi2;
 
 /****************************************************************************
  * Public Functions
- ***************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_spidev_initialize
@@ -65,7 +65,7 @@ struct spi_dev_s *g_spi2;
  *   Called to configure SPI chip select GPIO pins for the Nucleo-F401RE and
  *   Nucleo-F411RE boards.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 void weak_function stm32_spidev_initialize(void)
 {
@@ -107,8 +107,8 @@ void weak_function stm32_spidev_initialize(void)
  *      in your board-specific logic.  These functions will perform chip
  *      selection and status operations using GPIOs in the way your board is
  *      configured.
- *   3. Add a calls to stm32_spibus_initialize() in your low level application
- *      initialization logic
+ *   3. Add a calls to stm32_spibus_initialize() in your low level
+ *      application initialization logic
  *   4. The handle returned by stm32_spibus_initialize() may then be used to
  *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to

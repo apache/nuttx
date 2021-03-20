@@ -55,14 +55,16 @@
  * Name: stm32_usbdev_initialize
  *
  * Description:
- *   Called from stm32_boardinitialize very early in initialization to setup USB-
- *   related GPIO pins for the Viewtool STM32F107 board.
+ *   Called from stm32_boardinitialize very early in initialization to setup
+ *   USB related GPIO pins for the Viewtool STM32F107 board.
  *
  ****************************************************************************/
 
 void stm32_usbdev_initialize(void)
 {
-  /* The OTG FS has an internal soft pull-up.  No GPIO configuration is required */
+  /* The OTG FS has an internal soft pull-up.
+   * No GPIO configuration is required
+   */
 
 #ifdef CONFIG_ARCH_CHIP_STM32F103VC
   stm32_configgpio(GPIO_USB_PULLUP);
@@ -73,11 +75,11 @@ void stm32_usbdev_initialize(void)
  * Name:  stm32_usbpullup
  *
  * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide stm32_pullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
- *   NULL.
+ *   If USB is supported and the board supports a pullup via GPIO (for USB
+ *   software connect and disconnect), then the board software must provide
+ *   stm32_pullup. See include/nuttx/usb/usbdev.h for additional
+ *   description of this method. Alternatively, if no pull-up GPIO the
+ *   following EXTERN can be redefined to be NULL.
  *
  ****************************************************************************/
 
@@ -94,10 +96,10 @@ int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
  * Name: stm32_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver
+ *   is used.  This function is called whenever the USB enters or leaves
+ *   suspend mode. This is an opportunity for the board logic to shutdown
+ *   clocks, power, etc. while the USB is suspended.
  *
  ****************************************************************************/
 

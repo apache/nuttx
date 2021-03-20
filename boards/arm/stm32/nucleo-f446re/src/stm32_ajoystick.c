@@ -99,13 +99,16 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower);
+static ajoy_buttonset_t
+ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower);
 static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
                        FAR struct ajoy_sample_s *sample);
-static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower);
-static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
-                         ajoy_buttonset_t press, ajoy_buttonset_t release,
-                         ajoy_handler_t handler, FAR void *arg);
+static ajoy_buttonset_t
+ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower);
+static void
+ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
+            ajoy_buttonset_t press, ajoy_buttonset_t release,
+            ajoy_handler_t handler, FAR void *arg);
 
 static void ajoy_disable(void);
 static int ajoy_interrupt(int irq, FAR void *context, FAR void *arg);
@@ -113,6 +116,7 @@ static int ajoy_interrupt(int irq, FAR void *context, FAR void *arg);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each Itead joystick button.  Index using AJOY_*
  * button definitions in include/nuttx/input/ajoystick.h.
  */
@@ -163,7 +167,8 @@ static FAR void *g_ajoyarg;
  *
  ****************************************************************************/
 
-static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower)
+static ajoy_buttonset_t
+ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower)
 {
   iinfo("Supported: %02x\n", AJOY_SUPPORTED);
   return (ajoy_buttonset_t)AJOY_SUPPORTED;
@@ -278,7 +283,8 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
+static ajoy_buttonset_t
+ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
 {
   ajoy_buttonset_t ret = 0;
   int i;

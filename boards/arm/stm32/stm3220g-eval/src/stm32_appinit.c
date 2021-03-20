@@ -75,8 +75,8 @@
 #  define CONFIG_NSH_MMCSDSLOTNO 0
 #endif
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
- * is not enabled.
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO
+ * support is not enabled.
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO)
@@ -227,7 +227,8 @@ int board_app_initialize(uintptr_t arg)
   mtd = m25p_initialize(spi);
   if (!mtd)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
       return -ENODEV;
     }
 
@@ -252,20 +253,21 @@ int board_app_initialize(uintptr_t arg)
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the STM3220G-EVAL board supports a GPIO to detect if there is a card in
-   * the slot.
+  /* Then let's guess and say that there is a card in the slot.  I need to
+   * check to see if the STM3220G-EVAL board supports a GPIO to detect if
+   * there is a card in the slot.
    */
 
-   sdio_mediachange(sdio, true);
+  sdio_mediachange(sdio, true);
 #endif
 
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
+   * thread will monitor for USB connection and disconnection events.
    */
 
 #ifdef HAVE_USBHOST

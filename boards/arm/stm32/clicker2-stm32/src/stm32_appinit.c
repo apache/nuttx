@@ -90,8 +90,8 @@ int board_app_initialize(uintptr_t arg)
 
 #ifdef CONFIG_CLICKER2_STM32_SYSLOG_FILE
 
-  /* Delay some time for the automounter to finish mounting before bringing up
-   * file syslog.
+  /* Delay some time for the automounter to finish mounting before
+   * bringing up file syslog.
    */
 
   nxsig_usleep(CONFIG_CLICKER2_STM32_SYSLOG_FILE_DELAY * 1000);

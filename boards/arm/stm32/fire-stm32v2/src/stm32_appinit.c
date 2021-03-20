@@ -39,6 +39,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Assume that we support everything until convinced otherwise */
@@ -48,6 +49,7 @@
 #define HAVE_W25      1
 
 /* Configuration ************************************************************/
+
 /* SPI1 connects to the SD CARD (and to the SPI FLASH) */
 
 #define STM32_MMCSDSPIPORTNO   1  /* SPI1 */

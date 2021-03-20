@@ -51,9 +51,9 @@
  * Private Data
  ****************************************************************************/
 
-/* 512Kx16 SRAM is connected to bank2 of the FSMC interface and both 8- and 16-bit
- * accesses are allowed by BLN0 and BLN1 connected to BLE and BHE of SRAM,
- * respectively.
+/* 512Kx16 SRAM is connected to bank2 of the FSMC interface and both 8- and
+ * 16-bit accesses are allowed by BLN0 and BLN1 connected to BLE and BHE of
+ * SRAM, respectively.
  *
  * Pin Usage (per schematic)
  *                         FLASH   SRAM    NAND    LCD
@@ -111,18 +111,21 @@ void stm32_selectsram(void)
 
   /* Bank1 NOR/SRAM control register configuration */
 
-  putreg32(FSMC_BCR_MWID16|FSMC_BCR_WREN, STM32_FSMC_BCR3);
+  putreg32(FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR3);
 
   /* Bank1 NOR/SRAM timing register configuration */
 
-  putreg32(FSMC_BTR_ADDSET(1)|FSMC_BTR_ADDHLD(1)|FSMC_BTR_DATAST(3)|FSMC_BTR_BUSTURN(1)|
-           FSMC_BTR_CLKDIV(1)|FSMC_BTR_DATLAT(2)|FSMC_BTR_ACCMODA, STM32_FSMC_BTR3);
+  putreg32(FSMC_BTR_ADDSET(1) | FSMC_BTR_ADDHLD(1) |
+           FSMC_BTR_DATAST(3) | FSMC_BTR_BUSTURN(1) |
+           FSMC_BTR_CLKDIV(1) | FSMC_BTR_DATLAT(2) |
+           FSMC_BTR_ACCMODA, STM32_FSMC_BTR3);
 
   putreg32(0xffffffff, STM32_FSMC_BWTR3);
 
   /* Enable the bank */
 
-  putreg32(FSMC_BCR_MBKEN|FSMC_BCR_MWID16|FSMC_BCR_WREN, STM32_FSMC_BCR3);
+  putreg32(FSMC_BCR_MBKEN | FSMC_BCR_MWID16 |
+           FSMC_BCR_WREN, STM32_FSMC_BCR3);
 }
 
 #endif /* CONFIG_STM32_FSMC */

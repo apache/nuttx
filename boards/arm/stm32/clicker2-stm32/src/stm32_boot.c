@@ -40,17 +40,18 @@
  * Name: stm32_boardinitialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All STM32 architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
  ****************************************************************************/
 
 void stm32_boardinitialize(void)
 {
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spidev_initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function stm32_spidev_initialize() has been brought into the link.
    */
 
   if (stm32_spidev_initialize)
@@ -60,10 +61,10 @@ void stm32_boardinitialize(void)
 #endif
 
 #ifdef CONFIG_STM32_OTGFS
-  /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
-   * disabled, and 3) the weak function stm32_usb_configure() has been brought
-   * into the build. Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also
-   * selected.
+  /* Initialize USB if the 1) OTG FS controller is in the configuration and
+   * 2) disabled, and 3) the weak function stm32_usb_configure() has been
+   * brought into the build. Presumeably either CONFIG_USBDEV or
+   * CONFIG_USBHOST is also selected.
    */
 
       stm32_usb_configure();
@@ -88,7 +89,7 @@ void stm32_boardinitialize(void)
  * Description:
  *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
+ *   function called board_late_initialize(). board_late_initialize() will be
  *   called immediately after up_initialize() is called and just before the
  *   initial application is started.  This additional initialization phase
  *   may be used, for example, to initialize board-specific device drivers.

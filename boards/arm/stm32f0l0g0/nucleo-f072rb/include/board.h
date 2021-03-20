@@ -35,20 +35,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
-/* Four different clock sources can be used to drive the system clock (SYSCLK):
+/* Four different clock sources can be used to drive the system clock
+ * (SYSCLK):
  *
  * - HSI high-speed internal oscillator clock
  *   Generated from an internal 8 MHz RC oscillator
  * - HSE high-speed external oscillator clock
- *   Normally driven by an external crystal (X3).  However, this crystal is not
- *   fitted on the Nucleo-F072RB board.
+ *   Normally driven by an external crystal (X3).  However, this crystal is
+ *   not fitted on the Nucleo-F072RB board.
  * - PLL clock
  * - MSI multispeed internal oscillator clock
- *   The MSI clock signal is generated from an internal RC oscillator. Seven frequency
- *   ranges are available: 65.536 kHz, 131.072 kHz, 262.144 kHz, 524.288 kHz, 1.048 MHz,
- *   2.097 MHz (default value) and 4.194 MHz.
+ *   The MSI clock signal is generated from an internal RC oscillator. Seven
+ *   frequency ranges are available: 65.536 kHz, 131.072 kHz, 262.144 kHz,
+ *   524.288 kHz, 1.048 MHz, 2.097 MHz (default value) and 4.194 MHz.
  *
  * The devices have the following two secondary clock sources
  * - LSI low-speed internal RC clock
@@ -108,8 +109,8 @@
 #  define STM32_PLL_FREQUENCY    (12*STM32_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 48MHz */
 #endif
 
-/* Use the PLL and set the SYSCLK source to be the divided down PLL VCO output
- * frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
+/* Use the PLL and set the SYSCLK source to be the divided down PLL VCO
+ * output frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
  */
 
 #define STM32_SYSCLK_SW          RCC_CFGR_SW_PLL     /* Use the PLL as the SYSCLK */
@@ -149,7 +150,7 @@
 #define STM32_APB1_TIM16_CLKIN   (STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM17_CLKIN   (STM32_PCLK1_FREQUENCY)
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
 
 /* LEDs
  *
@@ -201,7 +202,7 @@
 #define LED_ASSERTION    2
 #define LED_PANIC        1
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
 
 /* Buttons
  *
@@ -214,7 +215,7 @@
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-/* Alternate Pin Functions **********************************************************/
+/* Alternate Pin Functions **************************************************/
 
 /* USART 1 */
 

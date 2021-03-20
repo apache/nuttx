@@ -42,8 +42,9 @@
 #include "stm32.h"
 #include "olimex-stm32-h407.h"
 
-/* Conditional logic in olimex-stm32-h407.h will determine if certain features
- * are supported.  Tests for these features need to be made after including
+/* Conditional logic in olimex-stm32-h407.h will determine if certain
+ * features are supported.
+ * Tests for these features need to be made after including
  * olimex-stm32-h407.h.
  */
 
@@ -114,8 +115,9 @@ int stm32_bringup(void)
 #endif
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation.
+   * stm32_usbhost_initialize() starts a thread will monitor for USB
+   * connection and disconnection events.
    */
 
   ret = stm32_usbhost_initialize();

@@ -58,13 +58,16 @@
 
 /* 2.4" TFT + Touchscreen.  FSMC Bank1
  *
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
- * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
+ * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                            SPI 2M FLASH
+ * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                            SPI 2M FLASH
+ * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                            SPI 2M FLASH
  * 92  PB6    PB6-I2C1-SCL   2.4" TFT + Touchscreen, AT24C02
  * 93  PB7    PB7-I2C1-SDA   2.4" TFT + Touchscreen, AT24C02
  * 81  PD0    PD0-FSMC_D2    2.4" TFT + Touchscreen
@@ -90,7 +93,9 @@
  * 45  PE14   PE14-FSMC_D11  2.4" TFT + Touchscreen
  * 46  PE15   PE15-FSMC_D12  2.4" TFT + Touchscreen
  *
- * NOTE:  SPI and I2C pin configuration is controlled in the SPI and I2C drivers, respectively.
+ * NOTE:
+ * SPI and I2C pin configuration is controlled in the SPI and I2C drivers,
+ * respectively.
  */
 
 static const uint16_t g_lcdconfig[NCOMMON_CONFIG] =
@@ -159,14 +164,17 @@ void stm32_selectlcd(void)
 
   /* Bank1 NOR/SRAM timing register configuration */
 
-  putreg32(FSMC_BTR_ADDSET(1)|FSMC_BTR_ADDHLD(0)|FSMC_BTR_DATAST(2)|FSMC_BTR_BUSTURN(0)|
-           FSMC_BTR_CLKDIV(0)|FSMC_BTR_DATLAT(0)|FSMC_BTR_ACCMODA, STM32_FSMC_BTR1);
+  putreg32(FSMC_BTR_ADDSET(1) | FSMC_BTR_ADDHLD(0) |
+           FSMC_BTR_DATAST(2) | FSMC_BTR_BUSTURN(0) |
+           FSMC_BTR_CLKDIV(0) | FSMC_BTR_DATLAT(0) |
+           FSMC_BTR_ACCMODA, STM32_FSMC_BTR1);
 
   putreg32(0xffffffff, STM32_FSMC_BWTR4);
 
   /* Enable the bank by setting the MBKEN bit */
 
-  putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM | FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR1);
+  putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM |
+           FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR1);
   leave_critical_section(flags);
 }
 

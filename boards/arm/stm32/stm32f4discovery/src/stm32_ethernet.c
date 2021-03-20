@@ -59,6 +59,7 @@
 #define AT24XX_MACADDR_OFFSET 0x9a
 
 /* Debug ********************************************************************/
+
 /* Extra, in-depth debug output that is only available if
  * CONFIG_NETDEV_PHY_DEBUG us defined.
  */

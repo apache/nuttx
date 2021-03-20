@@ -151,7 +151,8 @@ static struct viewtool_tscinfo_s g_tscinfo =
 
 static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
 {
-  FAR struct viewtool_tscinfo_s *priv = (FAR struct viewtool_tscinfo_s *)state;
+  FAR struct viewtool_tscinfo_s *priv =
+                                (FAR struct viewtool_tscinfo_s *)state;
 
   if (isr)
     {
@@ -174,7 +175,8 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
 
 static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
 {
-  FAR struct viewtool_tscinfo_s *priv = (FAR struct viewtool_tscinfo_s *)state;
+  FAR struct viewtool_tscinfo_s *priv =
+                                (FAR struct viewtool_tscinfo_s *)state;
   irqstate_t flags;
 
   /* Attach and enable, or detach and disable.  Enabling and disabling GPIO
@@ -272,7 +274,9 @@ int stm32_tsc_setup(int minor)
   if (ret < 0)
     {
       ierr("ERROR: Failed to register touchscreen device\n");
+
       /* up_spiuninitialize(dev); */
+
       return -ENODEV;
     }
 

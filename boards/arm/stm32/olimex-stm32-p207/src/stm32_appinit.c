@@ -141,8 +141,8 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
+   * thread will monitor for USB connection and disconnection events.
    */
 
   ret = stm32_usbhost_initialize();

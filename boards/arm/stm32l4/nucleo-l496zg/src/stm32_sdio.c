@@ -39,7 +39,6 @@
 
 #ifdef CONFIG_MMCSD
 
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -122,6 +121,7 @@ int stm32l4_sdio_initialize(void)
 #endif
 
   /* Mount the SDIO-based MMC/SD block driver */
+
   /* First, get an instance of the SDIO interface */
 
   finfo("Initializing SDIO slot %d\n", SDIO_SLOTNO);

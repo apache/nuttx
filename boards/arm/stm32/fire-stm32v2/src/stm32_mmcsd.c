@@ -37,6 +37,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #define HAVE_MMCSD           1 /* Assume that we have SD support */
@@ -89,16 +90,17 @@ int stm32_sdinitialize(int minor)
   ret = mmcsd_slotinitialize(minor, sdio);
   if (ret != OK)
     {
-      ferr("ERROR: Failed to bind SDIO slot %d to the MMC/SD driver, minor=%d\n",
+      ferr("ERROR:");
+      ferr(" Failed to bind SDIO slot %d to the MMC/SD driver, minor=%d\n",
               STM32_MMCSDSLOTNO, minor);
     }
 
   finfo("Bound SDIO slot %d to the MMC/SD driver, minor=%d\n",
          STM32_MMCSDSLOTNO, minor);
 
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the M3 Wildfire board supports a GPIO to detect if there is a card in
-   * the slot.
+  /* Then let's guess and say that there is a card in the slot.
+   * I need to check to see if the M3 Wildfire board supports a GPIO to
+   * detect if there is a card in the slot.
    */
 
   sdio_mediachange(sdio, true);

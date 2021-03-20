@@ -54,28 +54,43 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Identifying number of each ADC channel. */
 
 #ifdef CONFIG_AJOYSTICK
 #ifdef CONFIG_ADC_DMA
 /* The Itead analog joystick gets inputs on ADC_IN1 and ADC_IN2 */
 
-static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] = {1, 2};
+static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] =
+{
+  1,
+  2
+};
 
 /* Configurations of pins used byte each ADC channels */
 
-static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN1, GPIO_ADC1_IN2};
+static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  =
+{
+  GPIO_ADC1_IN1,
+  GPIO_ADC1_IN2
+};
 
 #else
 /* Without DMA, only a single channel can be supported */
 
 /* The Itead analog joystick gets input on ADC_IN1 */
 
-static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] = {1};
+static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] =
+{
+  1
+};
 
 /* Configurations of pins used byte each ADC channels */
 
-static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN1};
+static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  =
+{
+  GPIO_ADC1_IN1
+};
 
 #endif /* CONFIG_ADC_DMA */
 #endif /* CONFIG_AJOYSTICK */

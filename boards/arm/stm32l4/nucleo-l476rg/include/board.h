@@ -30,22 +30,22 @@
 # include <stdint.h>
 #endif
 
-/* Do not include STM32 L4 header files here */
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
 /* Clocking *****************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_STM32L476RG)
 #  include <arch/board/nucleo-l476rg.h>
 #endif
 
+/* Do not include STM32 L4 header files here */
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 /* DMA Channel/Stream Selections ********************************************/
 
-/* Stream selections are arbitrary for now but might become important in the future
- * is we set aside more DMA channels/streams.
+/* Stream selections are arbitrary for now but might become important in the
+ * future is we set aside more DMA channels/streams.
  */
 
 /* Values defined in arch/arm/src/stm32l4/hardware/stm32l4x6xx_dma.h */
@@ -212,7 +212,8 @@
 
 /* Buttons
  *
- *   B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
+ *   B1 USER:
+ *   the user button is connected to the I/O PC13 (pin 2) of the STM32
  *   microcontroller.
  */
 

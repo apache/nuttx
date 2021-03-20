@@ -29,13 +29,13 @@
  * When the I/O is HIGH value, the LED is OFF.
  * When the I/O is LOW, the LED is ON.
  *
- * Following this convention, only the white LED is made available even though
- * they all could be user-application controlled if desired.
+ * Following this convention, only the white LED is made available even
+ * though they all could be user-application controlled if desired.
  *
- * None of the LEDs are used by the board port unless CONFIG_ARCH_LEDS is defined.
- * In that case, the white LED (only) will be controlled.  Usage by the board port
- * is defined in include/board.h and src/stm32_autoleds.c.  The white LED will be
- * used to encode OS-related events as follows:
+ * None of the LEDs are used by the board port unless CONFIG_ARCH_LEDS is
+ * defined. In that case, the white LED (only) will be controlled.  Usage
+ * by the board port is defined in include/board.h and src/stm32_autoleds.c.
+ *  The white LED will be used to encode OS-related events as follows:
  *
  *   ------------------ ------------------------ ------
  *   SYMBOL             Meaning                  LED
@@ -51,9 +51,10 @@
  *   LED_PANIC          The system has crashed   FLASH
  *   LED_IDLE           MCU is is sleep mode     Not used
  *
- * Thus if the white LED is statically on, NuttX has successfully  booted and is,
- * apparently, running normally.  If white LED is flashing at approximately 2Hz,
- * then a fatal error has been detected and the system has halted.
+ * Thus if the white LED is statically on, NuttX has successfully booted and
+ * is, apparently, running normally.  If white LED is flashing at
+ * approximately 2Hz, then a fatal error has been detected and the system has
+ * halted.
  */
 
 /****************************************************************************

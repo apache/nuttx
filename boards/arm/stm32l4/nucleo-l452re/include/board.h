@@ -30,15 +30,15 @@
 # include <stdint.h>
 #endif
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
 /* Clocking *****************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_STM32L452RE)
 #  include <arch/board/nucleo-l452re.h>
 #endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /* DMA Channel/Stream Selections ********************************************/
 
@@ -187,7 +187,8 @@
 
 /* Buttons
  *
- *   B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
+ *   B1 USER:
+ *   the user button is connected to the I/O PC13 (pin 2) of the STM32
  *   microcontroller.
  */
 

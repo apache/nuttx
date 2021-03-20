@@ -39,29 +39,30 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* The Mikroe STM32F4 Mikromedia board features a single 32kHz crystal.  The main
- * clock uses the internal 16Mhz RC oscillator.
+/* Clocking *****************************************************************/
+
+/* The Mikroe STM32F4 Mikromedia board features a single 32kHz crystal.
+ * The main clock uses the internal 16Mhz RC oscillator.
  *
  * This is the canonical configuration:
- *   System Clock source           : PLL (HSE)
- *   SYSCLK(Hz)                    : 168000000    Determined by PLL configuration
- *   HCLK(Hz)                      : 168000000    (STM32_RCC_CFGR_HPRE)
- *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
- *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
- *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
- *   HSI Frequency(Hz)             : 16000000     (STM32_HSI_FREQUENCY)
- *   PLLM                          : 16           (STM32_PLLCFG_PLLM)
- *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
- *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
- *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
- *   Main regulator output voltage : Scale1 mode  Needed for high speed SYSCLK
- *   Flash Latency(WS)             : 5
- *   Prefetch Buffer               : OFF
- *   Instruction cache             : ON
- *   Data cache                    : ON
- *   Require 48MHz for USB OTG FS, : Enabled
- *   SDIO and RNG clock
+ * System Clock source           :PLL (HSE)
+ * SYSCLK(Hz)                    :168000000   Determined by PLL configuration
+ * HCLK(Hz)                      :168000000   (STM32_RCC_CFGR_HPRE)
+ * AHB Prescaler                 :1           (STM32_RCC_CFGR_HPRE)
+ * APB1 Prescaler                :4           (STM32_RCC_CFGR_PPRE1)
+ * APB2 Prescaler                :2           (STM32_RCC_CFGR_PPRE2)
+ * HSI Frequency(Hz)             :16000000    (STM32_HSI_FREQUENCY)
+ * PLLM                          :16          (STM32_PLLCFG_PLLM)
+ * PLLN                          :36         (STM32_PLLCFG_PLLN)
+ * PLLP                          :2           (STM32_PLLCFG_PLLP)
+ * PLLQ                          :7           (STM32_PLLCFG_PLLQ)
+ * Main regulator output voltage :Scale1 mode Needed for high speed SYSCLK
+ * Flash Latency(WS)             :5
+ * Prefetch Buffer               :OFF
+ * Instruction cache             :ON
+ * Data cache                    :ON
+ * Require 48MHz for USB OTG FS, :Enabled
+ * SDIO and RNG clock
  */
 
 /* HSI - 16 MHz RC factory-trimmed
@@ -147,9 +148,10 @@
 #define BOARD_TIM7_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
-/* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+/* LED definitions **********************************************************/
+
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -175,8 +177,9 @@
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
 #define BOARD_LED4_BIT    (1 << BOARD_LED4)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
- * stm32f4discovery.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined,
+ * then NuttX will control the 4 LEDs on board the stm32f4discovery.
+ * The following definitions describe how NuttX controls the LEDs:
  */
 
 #define LED_STARTED       0  /* LED1 */
@@ -188,7 +191,8 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The STM32F4 Discovery supports one button: */
 
 #define BUTTON_USER        0
@@ -199,12 +203,12 @@
 
 #endif /* 0 */
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* UART2:
  *
- * The Mikroe-STM32F4 board has no on-board serial devices, but it brings out UART2
- * to the expansion header.
+ * The Mikroe-STM32F4 board has no on-board serial devices, but it brings out
+ * UART2 to the expansion header.
  * (See the README.txt file for other options)
  */
 
@@ -213,8 +217,8 @@
 
 /* PWM
  *
- * The STM32F4 Discovery has no real on-board PWM devices, but the board can be
- * configured to output a pulse train using TIM4 CH2 on PD13.
+ * The STM32F4 Discovery has no real on-board PWM devices, but the board can
+ * be configured to output a pulse train using TIM4 CH2 on PD13.
  */
 
 #define GPIO_TIM4_CH2OUT GPIO_TIM4_CH2OUT_2

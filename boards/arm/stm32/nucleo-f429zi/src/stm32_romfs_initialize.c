@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-/* This file provides contents of an optional ROMFS volume, mounted at boot /*
+/* This file provides contents of an optional ROMFS volume, mounted at boot */
 
 /****************************************************************************
  * Included Files

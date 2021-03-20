@@ -170,14 +170,17 @@ void arm_netinitialize(void)
   int ret;
 
   /* Assumptions:
-   * 1) ENCX24J600 pins were configured in up_spi.c early in the boot-up phase.
-   * 2) Clocking for the SPI1 peripheral was also provided earlier in boot-up.
+   * 1) ENCX24J600 pins were configured in up_spi.c early in the boot-up
+   *    phase.
+   * 2) Clocking for the SPI1 peripheral was also provided earlier in
+   *    boot-up.
    */
 
   spi = stm32_spibus_initialize(ENCX24J600_SPI_PORTNO);
   if (!spi)
     {
-      nerr("ERROR: Failed to initialize SPI port %d\n", ENCX24J600_SPI_PORTNO);
+      nerr("ERROR: Failed to initialize SPI port %d\n",
+            ENCX24J600_SPI_PORTNO);
       return;
     }
 

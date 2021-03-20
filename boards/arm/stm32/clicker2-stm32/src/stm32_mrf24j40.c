@@ -90,7 +90,7 @@ struct stm32_priv_s
  * varying boards and MCUs.
  *
  *   irq_attach - Attach the MRF24J40 interrupt handler to the GPIO
-                  interrupt
+ *                interrupt
  *   irq_enable - Enable or disable the GPIO interrupt
  */
 
@@ -217,7 +217,7 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
 
   /* Configure the interrupt pin */
 
-   stm32_configgpio(priv->intcfg);
+  stm32_configgpio(priv->intcfg);
 
   /* Initialize the SPI bus and get an instance of the SPI interface */
 
@@ -269,7 +269,8 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
   ret = mac802154dev_register(mac, 0);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to register the MAC character driver /dev/ieee%d: %d\n",
+      wlerr("ERROR:");
+      wlerr(" Failed to register the MAC character driver /dev/ieee%d: %d\n",
             0, ret);
       return ret;
     }

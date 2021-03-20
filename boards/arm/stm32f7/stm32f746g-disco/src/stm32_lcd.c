@@ -40,6 +40,10 @@
 
 #ifdef CONFIG_STM32F7_LTDC
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: up_fbinitialize
  *
  * Description:
@@ -73,7 +77,8 @@ int up_fbinitialize(int display)
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
- *   plane of the specified plane.  Many OSDs support multiple planes of video.
+ *   plane of the specified plane.
+ *   Many OSDs support multiple planes of video.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this

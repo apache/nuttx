@@ -127,12 +127,12 @@ static inline void led_setbits(unsigned int setbits)
 
 void board_autoled_initialize(void)
 {
-   /* Configure LED1-4 GPIOs for output */
+  /* Configure LED1-4 GPIOs for output */
 
-   stm32_configgpio(GPIO_LED1);
-   stm32_configgpio(GPIO_LED2);
-   stm32_configgpio(GPIO_LED3);
-   stm32_configgpio(GPIO_LED4);
+  stm32_configgpio(GPIO_LED1);
+  stm32_configgpio(GPIO_LED2);
+  stm32_configgpio(GPIO_LED3);
+  stm32_configgpio(GPIO_LED4);
 }
 
 /****************************************************************************
@@ -141,7 +141,8 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  led_clrbits(BOARD_LED1_BIT | BOARD_LED2_BIT | BOARD_LED3_BIT | BOARD_LED4_BIT);
+  led_clrbits(BOARD_LED1_BIT | BOARD_LED2_BIT |
+              BOARD_LED3_BIT | BOARD_LED4_BIT);
   led_setbits(g_ledbits[led]);
 }
 
