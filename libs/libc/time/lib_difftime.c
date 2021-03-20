@@ -61,7 +61,8 @@ float difftime(time_t time1, time_t time0)
     }
   else
     {
-      /* Result will be negative.  REVISIT: Am I missing any case where bit 31
+      /* Result will be negative.
+       * REVISIT: Am I missing any case where bit 31
        * might not be set?
        */
 
