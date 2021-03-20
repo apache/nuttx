@@ -212,6 +212,13 @@ config ESP32C3_TIMER1
 	---help---
 		Enables Timer 1
 
+config ESP32C3_SPIFLASH
+	bool "SPI Flash"
+	default n
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+
 config ESP32C3_MWDT0
 	bool "Main System Watchdog Timer (Group 0)"
 	default n
@@ -297,6 +304,13 @@ config ESP32C3_UART1_RXPIN
 
 endif # ESP32C3_UART1
 
+config ESP32C3_PARTITION
+	bool "ESP32-C3 Partition"
+	default n
+	select ESP32C3_SPIFLASH
+	---help---
+		Decode partition file and initialize partition as MTD.
+
 endmenu
 
 menu "Real-Time Timer"
@@ -378,5 +392,43 @@ config ESP32C3_WIFI_FS_MOUNTPT
 		Mount point of Wi-Fi storage file system.
 
 endmenu # ESP32C3_WIRELESS
+
+menu "SPI Flash configuration"
+	depends on ESP32C3_SPIFLASH
+
+config ESP32C3_MTD_OFFSET
+	hex "MTD base address in SPI Flash"
+	default 0x180000
+	help
+		MTD base address in SPI Flash.
+
+config ESP32C3_MTD_SIZE
+	hex "MTD size in SPI Flash"
+	default 0x100000
+	help
+		MTD size in SPI Flash.
+
+config ESP32C3_SPIFLASH_DEBUG
+	bool "Debug SPI Flash"
+	default n
+	depends on DEBUG_FS_INFO
+	help
+		If this option is enabled, SPI Flash driver read and write functions
+		will output input parameters and return values (if applicable).
+
+endmenu # ESP32C3_SPIFLASH
+
+menu "Partition Configuration"
+        depends on ESP32C3_PARTITION
+
+config ESP32C3_PARTITION_OFFSET
+        hex "Partition offset"
+        default "0x8000"
+
+config ESP32C3_PARTITION_MOUNT
+        string "Partition mount point"
+        default "/dev/esp/partition/"
+
+endmenu # ESP32C3_PARTITION
 
 endif # ARCH_CHIP_ESP32C3

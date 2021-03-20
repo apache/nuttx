@@ -63,6 +63,14 @@ ifeq ($(CONFIG_ESP32C3_I2C),y)
 CHIP_CSRCS += esp32c3_i2c.c
 endif
 
+ifeq ($(CONFIG_ESP32C3_SPIFLASH),y)
+CHIP_CSRCS += esp32c3_spiflash.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_PARTITION),y)
+CHIP_CSRCS += esp32c3_partition.c
+endif
+
 ifeq ($(CONFIG_ESP32C3_WDT),y)
 CHIP_CSRCS += esp32c3_wdt.c
 ifeq ($(CONFIG_WATCHDOG),y)
