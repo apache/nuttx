@@ -61,14 +61,16 @@
 
 /* Formula for calculating default macMaxFrameWaitTime is on pg. 130
  *
- * For PHYs other than CSS and UWB, the attribute phyMaxFrameDuration is given by:
+ * For PHYs other than CSS and UWB, the attribute phyMaxFrameDuration
+ * is given by:
  *
  * phyMaxFrameDuration = phySHRDuration +
- *                       ceiling([aMaxPHYPacketSize + 1] x phySymbolsPerOctet)
+ *                       ceiling([aMaxPHYPacketSize + 1] x
+ *                       phySymbolsPerOctet)
  *
- * where ceiling() is a function that returns the smallest integer value greater
- * than or equal to its argument value. [1] pg. 158
-*/
+ * where ceiling() is a function that returns the smallest integer value
+ * greater than or equal to its argument value. [1] pg. 158
+ */
 
 #define MRF24J40_DEFAULT_MAX_FRAME_WAITTIME 1824
 
@@ -82,7 +84,7 @@
 #define MRF24J40_SUPERFRAMEDURATION_NSEC(sforder) \
   (IEEE802154_BASE_SUPERFRAME_DURATION * (1 << sforder) * (16 * 1000))
 
-/* Configuration *************************************************************/
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_SCHED_HPWORK
 #  error High priority work queue required in this driver
@@ -108,7 +110,7 @@
 
 struct mrf24j40_radio_s
 {
-  struct ieee802154_radio_s radio;  /* The public device instance */
+  struct ieee802154_radio_s radio;          /* The public device instance */
   FAR struct ieee802154_radiocb_s *radiocb; /* Registered callbacks */
 
   /* Low-level MCU-specific support */
@@ -186,7 +188,7 @@ static inline void mrf24j40_spi_lock(FAR struct spi_dev_s *spi)
 
 static inline void mrf24j40_spi_unlock(FAR struct spi_dev_s *spi)
 {
-  SPI_LOCK(spi,0);
+  SPI_LOCK(spi, 0);
 }
 
 /****************************************************************************
