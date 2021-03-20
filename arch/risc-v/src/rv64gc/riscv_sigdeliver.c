@@ -183,5 +183,5 @@ void riscv_sigdeliver(void)
    */
 
   board_autoled_off(LED_SIGNAL);
-  up_fullcontextrestore(regs);
+  riscv_fullcontextrestore(regs);
 }
