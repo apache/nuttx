@@ -80,6 +80,7 @@ static int rwb_semtake(FAR sem_t *sem)
  * Name: rwb_forcetake
  ****************************************************************************/
 
+#if defined(CONFIG_DRVR_WRITEBUFFER) && CONFIG_DRVR_WRDELAY != 0
 static int rwb_forcetake(FAR sem_t *sem)
 {
   int result;
@@ -103,6 +104,7 @@ static int rwb_forcetake(FAR sem_t *sem)
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: rwb_semgive
@@ -862,11 +864,12 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
       rwb->rhbuffer = kmm_malloc(allocsize);
       if (!rwb->rhbuffer)
         {
-          ferr("Read-ahead buffer kmm_malloc(%lu) failed\n", allocsize);
+          ferr("Read-ahead buffer kmm_malloc(%" PRIu32 ") failed\n",
+          allocsize);
           return -ENOMEM;
         }
 
-      finfo("Read-ahead buffer size: %lu bytes\n", allocsize);
+      finfo("Read-ahead buffer size: %" PRIu32 " bytes\n", allocsize);
     }
 #endif /* CONFIG_DRVR_READAHEAD */
 
