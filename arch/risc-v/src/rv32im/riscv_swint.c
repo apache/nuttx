@@ -147,7 +147,7 @@ int riscv_swint(int irq, FAR void *context, FAR void *arg)
     {
       /* A0=SYS_save_context:  This is a save context command:
        *
-       *  int up_saveusercontext(uint32_t *saveregs);
+       *  int riscv_saveusercontext(uint32_t *saveregs);
        *
        * At this point, the following values are saved in context:
        *
@@ -172,7 +172,8 @@ int riscv_swint(int irq, FAR void *context, FAR void *arg)
 
       /* A0=SYS_restore_context: This a restore context command:
        *
-       * void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+       * void
+       *   riscv_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
@@ -195,7 +196,7 @@ int riscv_swint(int irq, FAR void *context, FAR void *arg)
 
       /* A0=SYS_switch_context: This a switch context command:
        *
-       *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+       * void riscv_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
        *
        * At this point, the following values are saved in context:
        *
