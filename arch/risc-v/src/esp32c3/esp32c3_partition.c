@@ -544,7 +544,7 @@ static int esp32c3_part_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 
 /****************************************************************************
  * Name: esp32c3_partition_init
- * 
+ *
  *   Initialize ESP32-C3 partition. Read partition information, and use
  *   these data for creating MTD.
  *
