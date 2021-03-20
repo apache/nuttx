@@ -133,7 +133,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: up_syscall0
+ * Name: sys_call0
  *
  * Description:
  *   System call SYS_ argument and no additional parameters.
@@ -143,7 +143,7 @@ extern "C"
 uintptr_t sys_call0(unsigned int nbr);
 
 /****************************************************************************
- * Name: up_syscall1
+ * Name: sys_call1
  *
  * Description:
  *   System call SYS_ argument and one additional parameter.
@@ -153,7 +153,7 @@ uintptr_t sys_call0(unsigned int nbr);
 uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1);
 
 /****************************************************************************
- * Name: up_syscall2
+ * Name: sys_call2
  *
  * Description:
  *   System call SYS_ argument and two additional parameters.
@@ -163,7 +163,7 @@ uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1);
 uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1, uintptr_t parm2);
 
 /****************************************************************************
- * Name: up_syscall3
+ * Name: sys_call3
  *
  * Description:
  *   System call SYS_ argument and three additional parameters.
@@ -174,7 +174,7 @@ uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
                     uintptr_t parm3);
 
 /****************************************************************************
- * Name: up_syscall4
+ * Name: sys_call4
  *
  * Description:
  *   System call SYS_ argument and four additional parameters.
@@ -185,7 +185,7 @@ uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
                     uintptr_t parm3, uintptr_t parm4);
 
 /****************************************************************************
- * Name: up_syscall5
+ * Name: sys_call5
  *
  * Description:
  *   System call SYS_ argument and five additional parameters.
