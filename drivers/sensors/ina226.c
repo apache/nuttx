@@ -117,14 +117,16 @@ static int ina226_access(FAR struct ina226_dev_s *priv,
   struct i2c_msg_s msg[I2C_NOSTARTSTOP_MSGS];
   int ret;
 
-  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].frequency = CONFIG_INA226_I2C_FREQUENCY;
+  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].frequency =
+                                        CONFIG_INA226_I2C_FREQUENCY;
 
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr = priv->addr;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].flags = 0;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].buffer = &start_register_address;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].length = 1;
 
-  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].addr = msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr;
+  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].addr =
+                                 msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr;
   msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].flags = reading ? I2C_M_READ : 0;
   msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].buffer = register_value;
   msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].length = data_length;
@@ -196,7 +198,7 @@ static int ina226_readpower(FAR struct ina226_dev_s *priv,
 
   /* Convert register value to bus voltage */
 
-  buffer->voltage = ((uint32_t)reg) * BV_LSB; /* 1 LSB 1,25mV*/
+  buffer->voltage = ((uint32_t)reg) * BV_LSB; /* 1 LSB 1,25mV */
 
   /* Read the raw shunt voltage */
 
