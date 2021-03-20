@@ -234,6 +234,35 @@ static const char *g_white_list[] =
 
   "L_tmpnam",
 
+  /* Ref: ascii.h */
+
+  "ASCII_a",
+  "ASCII_b",
+  "ASCII_c",
+  "ASCII_d",
+  "ASCII_e",
+  "ASCII_f",
+  "ASCII_g",
+  "ASCII_h",
+  "ASCII_i",
+  "ASCII_j",
+  "ASCII_k",
+  "ASCII_l",
+  "ASCII_m",
+  "ASCII_n",
+  "ASCII_o",
+  "ASCII_p",
+  "ASCII_q",
+  "ASCII_r",
+  "ASCII_s",
+  "ASCII_t",
+  "ASCII_u",
+  "ASCII_v",
+  "ASCII_w",
+  "ASCII_x",
+  "ASCII_y",
+  "ASCII_z",
+
   NULL
 };
 
