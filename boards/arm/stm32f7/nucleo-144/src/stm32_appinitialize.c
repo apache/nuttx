@@ -224,9 +224,3 @@ int board_app_initialize(uintptr_t arg)
   UNUSED(ret);
   return OK;
 }
-
-#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
-void arm_netinitialize(void)
-{
-}
-#endif
