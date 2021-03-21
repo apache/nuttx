@@ -104,7 +104,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   FAR struct mm_heap_impl_s *heap_impl;
   FAR struct mm_freenode_s *node;
   size_t alignsize;
-  void *ret = NULL;
+  FAR void *ret = NULL;
   int ndx;
 
   DEBUGASSERT(MM_IS_VALID(heap));
@@ -224,7 +224,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       /* Handle the case of an exact size match */
 
       node->preceding |= MM_ALLOC_BIT;
-      ret = (void *)((FAR char *)node + SIZEOF_MM_ALLOCNODE);
+      ret = (FAR void *)((FAR char *)node + SIZEOF_MM_ALLOCNODE);
     }
 
   DEBUGASSERT(ret == NULL || mm_heapmember(heap, ret));

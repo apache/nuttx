@@ -784,28 +784,12 @@ static void esp32_spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   spiinfo("nbits=%d\n", nbits);
 
-  /* Has the number of bits changed? */
+  priv->nbits = nbits;
 
-  if (nbits != priv->nbits)
-    {
-      /* Save the selection so that subsequent re-configurations
-       * will be faster.
-       */
-
-      priv->nbits = nbits;
-
-      /* Each DMA transmission will set these value according to
-       * calculated buffer length.
-       */
-
-      if (!priv->config->use_dma)
-        {
-          esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET,
-                            (priv->nbits - 1) << SPI_USR_MISO_DBITLEN_S);
-          esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET,
-                            (priv->nbits - 1) << SPI_USR_MOSI_DBITLEN_S);
-        }
-    }
+  esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET,
+                    (priv->nbits - 1) << SPI_USR_MISO_DBITLEN_S);
+  esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET,
+                    (priv->nbits - 1) << SPI_USR_MOSI_DBITLEN_S);
 }
 
 /****************************************************************************
@@ -905,6 +889,9 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       tp = rp;
     }
 
+  esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_TRANS_DONE_M);
+  esp32_spi_set_regbits(priv, SPI_SLAVE_OFFSET, SPI_INT_EN_M);
+
   while (bytes)
     {
       esp32_spi_set_reg(priv, SPI_DMA_IN_LINK_OFFSET, 0);
@@ -958,6 +945,8 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       tp += n;
       rp += n;
     }
+
+  esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_INT_EN_M);
 
 #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
   if (esp32_ptr_extram(rxbuffer))
@@ -1319,8 +1308,6 @@ static void esp32_spi_init(FAR struct spi_dev_s *dev)
       esp32_spi_set_reg(priv, SPI_DMA_CONF_OFFSET, SPI_OUT_DATA_BURST_EN_M |
                                                    SPI_INDSCR_BURST_EN_M |
                                                    SPI_OUTDSCR_BURST_EN_M);
-
-      esp32_spi_set_regbits(priv, SPI_SLAVE_OFFSET, SPI_INT_EN_M);
     }
 
   esp32_spi_setfrequency(dev, config->clk_freq);
