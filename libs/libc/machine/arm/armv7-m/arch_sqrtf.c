@@ -34,7 +34,7 @@
 float sqrtf(float x)
 {
   float result;
-  asm volatile ( "vsqrt.f32\t%0, %1" : "=t" (result) : "t" (x) );
+  asm volatile ("vsqrt.f32\t%0, %1" : "=t" (result) : "t" (x));
   return result;
 }
 

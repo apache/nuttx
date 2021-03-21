@@ -34,7 +34,7 @@
 float fabsf(float x)
 {
   float result;
-  asm volatile ( "vabs.f32\t%0, %1" : "=t" (result) : "t" (x) );
+  asm volatile ("vabs.f32\t%0, %1" : "=t" (result) : "t" (x));
   return result;
 }
 
