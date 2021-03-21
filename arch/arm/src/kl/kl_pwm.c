@@ -420,42 +420,42 @@ static int pwm_timer(FAR struct kl_pwmtimer_s *priv,
     {
       case 0:  /* PWM Mode configuration: Channel 0 */
         {
-          pwm_putreg(priv, TPM_C0SC_OFFSET, TPM_CnSC_MSB | TPM_CnSC_ELSB);
+          pwm_putreg(priv, TPM_C0SC_OFFSET, TPM_CNSC_MSB | TPM_CNSC_ELSB);
           pwm_putreg(priv, TPM_C0V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 1:  /* PWM Mode configuration: Channel 1 */
         {
-          pwm_putreg(priv, TPM_C1SC_OFFSET, TPM_CnSC_MSB | TPM_CnSC_ELSB);
+          pwm_putreg(priv, TPM_C1SC_OFFSET, TPM_CNSC_MSB | TPM_CNSC_ELSB);
           pwm_putreg(priv, TPM_C1V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 2:  /* PWM Mode configuration: Channel 2 */
         {
-          pwm_putreg(priv, TPM_C2SC_OFFSET, TPM_CnSC_MSB | TPM_CnSC_ELSB);
+          pwm_putreg(priv, TPM_C2SC_OFFSET, TPM_CNSC_MSB | TPM_CNSC_ELSB);
           pwm_putreg(priv, TPM_C2V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 3:  /* PWM Mode configuration: Channel 3 */
         {
-          pwm_putreg(priv, TPM_C3SC_OFFSET, TPM_CnSC_MSB | TPM_CnSC_ELSB);
+          pwm_putreg(priv, TPM_C3SC_OFFSET, TPM_CNSC_MSB | TPM_CNSC_ELSB);
           pwm_putreg(priv, TPM_C3V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 4:  /* PWM Mode configuration: Channel 4 */
         {
-          pwm_putreg(priv, TPM_C4SC_OFFSET, TPM_CnSC_MSB | TPM_CnSC_ELSB);
+          pwm_putreg(priv, TPM_C4SC_OFFSET, TPM_CNSC_MSB | TPM_CNSC_ELSB);
           pwm_putreg(priv, TPM_C4V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 5:  /* PWM Mode configuration: Channel 5 */
         {
-          pwm_putreg(priv, TPM_C5SC_OFFSET, TPM_CnSC_MSB | TPM_CnSC_ELSB);
+          pwm_putreg(priv, TPM_C5SC_OFFSET, TPM_CNSC_MSB | TPM_CNSC_ELSB);
           pwm_putreg(priv, TPM_C5V_OFFSET, (uint16_t) cv);
         }
         break;
