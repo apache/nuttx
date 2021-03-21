@@ -290,14 +290,8 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
 
         /* Check if the base code exports a symbol of this name */
 
-#ifdef CONFIG_SYMTAB_ORDEREDBYNAME
-        symbol = symtab_findorderedbyname(exports,
-                                          (FAR char *)loadinfo->iobuffer,
-                                          nexports);
-#else
         symbol = symtab_findbyname(exports, (FAR char *)loadinfo->iobuffer,
                                    nexports);
-#endif
         if (!symbol)
           {
             berr("SHN_UNDEF: Exported symbol \"%s\" not found\n",

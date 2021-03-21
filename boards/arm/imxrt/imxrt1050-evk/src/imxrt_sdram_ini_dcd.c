@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/imxrt/imxrt1050-evk/src/imxrt_sdram_ini_dcd.c
  *
  *   Copyright (C) 2017, NXP Semiconductors, Inc.
@@ -31,6 +31,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include "imxrt_flexspi_nor_boot.h"
 
 __attribute__((section(".boot_hdr.dcd_data")))
@@ -42,6 +46,7 @@ __attribute__((section(".boot_hdr.dcd_data")))
 const uint8_t g_dcd_data[] =
 {
   /* 0000 */ DCD_TAG_HEADER,
+
   0x04,
   0x30,
   0x41,
@@ -57,7 +62,9 @@ const uint8_t g_dcd_data[] =
   0xff,
   0xff,
   0xff,
+
   /* 0010 */ 0x40,
+
   0x0f,
   0xc0,
   0x6c,
@@ -73,7 +80,9 @@ const uint8_t g_dcd_data[] =
   0xff,
   0xff,
   0xff,
+
   /* 0020 */ 0x40,
+
   0x0f,
   0xc0,
   0x74,
@@ -89,7 +98,9 @@ const uint8_t g_dcd_data[] =
   0xff,
   0xff,
   0xff,
+
   /* 0030 */ 0x40,
+
   0x0f,
   0xc0,
   0x7c,
@@ -105,7 +116,9 @@ const uint8_t g_dcd_data[] =
   0xff,
   0xff,
   0xff,
+
   /* 0040 */ 0x40,
+
   0x0d,
   0x80,
   0x30,
@@ -121,7 +134,9 @@ const uint8_t g_dcd_data[] =
   0x1d,
   0x00,
   0x00,
+
   /* 0050 */ 0x40,
+
   0x0f,
   0xc0,
   0x14,
@@ -137,7 +152,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0060 */ 0x40,
+
   0x1f,
   0x80,
   0x18,
@@ -153,7 +170,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0070 */ 0x40,
+
   0x1f,
   0x80,
   0x20,
@@ -169,7 +188,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0080 */ 0x40,
+
   0x1f,
   0x80,
   0x28,
@@ -185,7 +206,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0090 */ 0x40,
+
   0x1f,
   0x80,
   0x30,
@@ -201,7 +224,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 00a0 */ 0x40,
+
   0x1f,
   0x80,
   0x38,
@@ -217,7 +242,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 00b0 */ 0x40,
+
   0x1f,
   0x80,
   0x40,
@@ -233,7 +260,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 00c0 */ 0x40,
+
   0x1f,
   0x80,
   0x48,
@@ -249,7 +278,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 00d0 */ 0x40,
+
   0x1f,
   0x80,
   0x50,
@@ -265,7 +296,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 00e0 */ 0x40,
+
   0x1f,
   0x80,
   0x58,
@@ -281,7 +314,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 00f0 */ 0x40,
+
   0x1f,
   0x80,
   0x60,
@@ -297,7 +332,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0100 */ 0x40,
+
   0x1f,
   0x80,
   0x68,
@@ -313,7 +350,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0110 */ 0x40,
+
   0x1f,
   0x80,
   0x70,
@@ -329,7 +368,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0120 */ 0x40,
+
   0x1f,
   0x80,
   0x78,
@@ -345,7 +386,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0130 */ 0x40,
+
   0x1f,
   0x80,
   0x80,
@@ -361,7 +404,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0140 */ 0x40,
+
   0x1f,
   0x80,
   0x88,
@@ -377,7 +422,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0150 */ 0x40,
+
   0x1f,
   0x80,
   0x90,
@@ -393,7 +440,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0160 */ 0x40,
+
   0x1f,
   0x80,
   0x98,
@@ -409,7 +458,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0170 */ 0x40,
+
   0x1f,
   0x80,
   0xa0,
@@ -425,7 +476,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0180 */ 0x40,
+
   0x1f,
   0x80,
   0xa8,
@@ -441,7 +494,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0190 */ 0x40,
+
   0x1f,
   0x80,
   0xb0,
@@ -457,7 +512,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 01a0 */ 0x40,
+
   0x1f,
   0x80,
   0xb8,
@@ -473,7 +530,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 01b0 */ 0x40,
+
   0x1f,
   0x82,
   0x08,
@@ -489,7 +548,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 01c0 */ 0x40,
+
   0x1f,
   0x82,
   0x10,
@@ -505,7 +566,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 01d0 */ 0x40,
+
   0x1f,
   0x82,
   0x18,
@@ -521,7 +584,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 01e0 */ 0x40,
+
   0x1f,
   0x82,
   0x20,
@@ -537,7 +602,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 01f0 */ 0x40,
+
   0x1f,
   0x82,
   0x28,
@@ -553,7 +620,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 0200 */ 0x40,
+
   0x1f,
   0x82,
   0x30,
@@ -569,7 +638,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 0210 */ 0x40,
+
   0x1f,
   0x82,
   0x38,
@@ -585,7 +656,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 0220 */ 0x40,
+
   0x1f,
   0x82,
   0x40,
@@ -601,7 +674,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 0230 */ 0x40,
+
   0x1f,
   0x82,
   0x48,
@@ -617,7 +692,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 0240 */ 0x40,
+
   0x1f,
   0x82,
   0x50,
@@ -633,7 +710,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 0250 */ 0x40,
+
   0x1f,
   0x82,
   0x58,
@@ -649,7 +728,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 0260 */ 0x40,
+
   0x1f,
   0x82,
   0x60,
@@ -665,7 +746,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 0270 */ 0x40,
+
   0x1f,
   0x82,
   0x68,
@@ -681,7 +764,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 0280 */ 0x40,
+
   0x1f,
   0x82,
   0x70,
@@ -697,7 +782,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 0290 */ 0x40,
+
   0x1f,
   0x82,
   0x78,
@@ -713,7 +800,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 02a0 */ 0x40,
+
   0x1f,
   0x82,
   0x80,
@@ -729,7 +818,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 02b0 */ 0x40,
+
   0x1f,
   0x82,
   0x88,
@@ -745,7 +836,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 02c0 */ 0x40,
+
   0x1f,
   0x82,
   0x90,
@@ -761,7 +854,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 02d0 */ 0x40,
+
   0x1f,
   0x82,
   0x98,
@@ -777,7 +872,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 02e0 */ 0x40,
+
   0x1f,
   0x82,
   0xa0,
@@ -793,7 +890,9 @@ const uint8_t g_dcd_data[] =
   0x01,
   0x10,
   0xf9,
+
   /* 02f0 */ 0x40,
+
   0x1f,
   0x82,
   0xa8,
@@ -809,7 +908,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x04,
+
   /* 0300 */ 0x40,
+
   0x2f,
   0x00,
   0x08,
@@ -825,7 +926,9 @@ const uint8_t g_dcd_data[] =
   0x03,
   0x05,
   0x24,
+
   /* 0310 */ 0x40,
+
   0x2f,
   0x00,
   0x10,
@@ -841,7 +944,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x1b,
+
   /* 0320 */ 0x40,
+
   0x2f,
   0x00,
   0x18,
@@ -857,7 +962,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x1b,
+
   /* 0330 */ 0x40,
+
   0x2f,
   0x00,
   0x20,
@@ -873,7 +980,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x19,
+
   /*  0340 */ 0x40,
+
   0x2f,
   0x00,
   0x28,
@@ -889,7 +998,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x1b,
+
   /*  0350 */ 0x40,
+
   0x2f,
   0x00,
   0x30,
@@ -905,7 +1016,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x79,
   0xa8,
+
   /* 0360  */ 0x40,
+
   0x2f,
   0x00,
   0x40,
@@ -921,7 +1034,9 @@ const uint8_t g_dcd_data[] =
   0x65,
   0x29,
   0x22,
+
   /* 0370  */ 0x40,
+
   0x2f,
   0x00,
   0x48,
@@ -937,7 +1052,9 @@ const uint8_t g_dcd_data[] =
   0x21,
   0x0a,
   0x08,
+
   /* 0380  */ 0x40,
+
   0x2f,
   0x00,
   0x80,
@@ -953,7 +1070,9 @@ const uint8_t g_dcd_data[] =
   0x88,
   0x88,
   0x88,
+
   /* 0390  */ 0x40,
+
   0x2f,
   0x00,
   0x94,
@@ -969,7 +1088,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 03a0  */ 0x40,
+
   0x2f,
   0x00,
   0x90,
@@ -985,7 +1106,9 @@ const uint8_t g_dcd_data[] =
   0x5a,
   0x00,
   0x0f,
+
   /* 03b0 */ 0xcf,
+
   0x00,
   0x0c,
   0x1c,
@@ -1001,7 +1124,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x14,
   0x04,
+
   /* 03c0 */ 0x40,
+
   0x2f,
   0x00,
   0x90,
@@ -1017,7 +1142,9 @@ const uint8_t g_dcd_data[] =
   0x5a,
   0x00,
   0x0c,
+
   /* 03d0 */ 0xcf,
+
   0x00,
   0x0c,
   0x1c,
@@ -1033,7 +1160,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x14,
   0x04,
+
   /* 03e0 */ 0x40,
+
   0x2f,
   0x00,
   0x90,
@@ -1049,7 +1178,9 @@ const uint8_t g_dcd_data[] =
   0x5a,
   0x00,
   0x0c,
+
   /* 03f0 */ 0xcf,
+
   0x00,
   0x0c,
   0x1c,
@@ -1065,7 +1196,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x1c,
   0x04,
+
   /* 0400 */ 0x40,
+
   0x2f,
   0x00,
   0xa0,
@@ -1081,7 +1214,9 @@ const uint8_t g_dcd_data[] =
   0x00,
   0x00,
   0x00,
+
   /* 0410 */ 0x40,
+
   0x2f,
   0x00,
   0x9c,
@@ -1097,7 +1232,9 @@ const uint8_t g_dcd_data[] =
   0x2f,
   0x00,
   0x3c,
+
   /* 0420 */ 0x00,
+
   0x00,
   0x00,
   0x01,
@@ -1114,3 +1251,7 @@ const uint8_t g_dcd_data[] =
   0x0a,
   0x09,
 };
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

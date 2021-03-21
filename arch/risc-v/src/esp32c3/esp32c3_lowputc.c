@@ -632,7 +632,7 @@ void esp32c3_lowputc_restore_pins(const struct esp32c3_uart_s *priv)
 }
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: riscv_lowputc
  *
  * Description:
  *   Output one byte on the serial console.
@@ -642,7 +642,7 @@ void esp32c3_lowputc_restore_pins(const struct esp32c3_uart_s *priv)
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void riscv_lowputc(char ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
 

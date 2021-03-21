@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/sama5/sama5d3x-ek/src/sama5d3x-ek.h
  *
- *   Copyright (C) 2013-2015, 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -112,27 +97,27 @@
 #endif
 
 /* If we are going to mount the NAND, then they user must also have told
- * us what to do with it by setting one of CONFIG_SAMA5D3xEK_NAND_FTL or
- * CONFIG_SAMA5D3xEK_NAND_NXFFS.
+ * us what to do with it by setting one of CONFIG_SAMA5D3XEK_NAND_FTL or
+ * CONFIG_SAMA5D3XEK_NAND_NXFFS.
  */
 
 #ifndef CONFIG_MTD
-#  undef CONFIG_SAMA5D3xEK_NAND_NXFFS
-#  undef CONFIG_SAMA5D3xEK_NAND_FTL
+#  undef CONFIG_SAMA5D3XEK_NAND_NXFFS
+#  undef CONFIG_SAMA5D3XEK_NAND_FTL
 #endif
 
 #if !defined(CONFIG_FS_NXFFS) || !defined(CONFIG_NXFFS_NAND)
-#  undef CONFIG_SAMA5D3xEK_NAND_NXFFS
+#  undef CONFIG_SAMA5D3XEK_NAND_NXFFS
 #endif
 
-#if !defined(CONFIG_SAMA5D3xEK_NAND_FTL) && !defined(CONFIG_SAMA5D3xEK_NAND_NXFFS)
+#if !defined(CONFIG_SAMA5D3XEK_NAND_FTL) && !defined(CONFIG_SAMA5D3XEK_NAND_NXFFS)
 #  undef HAVE_NAND
 #endif
 
-#if defined(CONFIG_SAMA5D3xEK_NAND_FTL) && defined(CONFIG_SAMA5D3xEK_NAND_NXFFS)
-#  warning Both CONFIG_SAMA5D3xEK_NAND_FTL and CONFIG_SAMA5D3xEK_NAND_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D3xEK_NAND_NXFFS
-#  undef CONFIG_SAMA5D3xEK_NAND_NXFFS
+#if defined(CONFIG_SAMA5D3XEK_NAND_FTL) && defined(CONFIG_SAMA5D3XEK_NAND_NXFFS)
+#  warning Both CONFIG_SAMA5D3XEK_NAND_FTL and CONFIG_SAMA5D3XEK_NAND_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5D3XEK_NAND_NXFFS
+#  undef CONFIG_SAMA5D3XEK_NAND_NXFFS
 #endif
 
 /* AT25 Serial FLASH */
@@ -147,7 +132,7 @@
  * asked to mount the AT25 part
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D3xEK_AT25_BLOCKMOUNT)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D3XEK_AT25_BLOCKMOUNT)
 #  undef HAVE_AT25
 #endif
 
@@ -156,17 +141,17 @@
  */
 
 #ifndef CONFIG_FS_NXFFS
-#  undef CONFIG_SAMA5D3xEK_AT25_NXFFS
+#  undef CONFIG_SAMA5D3XEK_AT25_NXFFS
 #endif
 
-#if !defined(CONFIG_SAMA5D3xEK_AT25_FTL) && !defined(CONFIG_SAMA5D3xEK_AT25_NXFFS)
+#if !defined(CONFIG_SAMA5D3XEK_AT25_FTL) && !defined(CONFIG_SAMA5D3XEK_AT25_NXFFS)
 #  undef HAVE_AT25
 #endif
 
-#if defined(CONFIG_SAMA5D3xEK_AT25_FTL) && defined(CONFIG_SAMA5D3xEK_AT25_NXFFS)
-#  warning Both CONFIG_SAMA5D3xEK_AT25_FTL and CONFIG_SAMA5D3xEK_AT25_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D3xEK_AT25_NXFFS
-#  undef CONFIG_SAMA5D3xEK_AT25_NXFFS
+#if defined(CONFIG_SAMA5D3XEK_AT25_FTL) && defined(CONFIG_SAMA5D3XEK_AT25_NXFFS)
+#  warning Both CONFIG_SAMA5D3XEK_AT25_FTL and CONFIG_SAMA5D3XEK_AT25_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5D3XEK_AT25_NXFFS
+#  undef CONFIG_SAMA5D3XEK_AT25_NXFFS
 #endif
 
 /* AT24 Serial EEPROM
@@ -197,7 +182,7 @@
  * asked to mount the AT25 part
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D3xEK_AT24_BLOCKMOUNT)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D3XEK_AT24_BLOCKMOUNT)
 #  undef HAVE_AT24
 #endif
 
@@ -206,17 +191,17 @@
  */
 
 #ifndef CONFIG_FS_NXFFS
-#  undef CONFIG_SAMA5D3xEK_AT24_NXFFS
+#  undef CONFIG_SAMA5D3XEK_AT24_NXFFS
 #endif
 
-#if !defined(CONFIG_SAMA5D3xEK_AT24_FTL) && !defined(CONFIG_SAMA5D3xEK_AT24_NXFFS)
+#if !defined(CONFIG_SAMA5D3XEK_AT24_FTL) && !defined(CONFIG_SAMA5D3XEK_AT24_NXFFS)
 #  undef HAVE_AT24
 #endif
 
-#if defined(CONFIG_SAMA5D3xEK_AT24_FTL) && defined(CONFIG_SAMA5D3xEK_AT24_NXFFS)
-#  warning Both CONFIG_SAMA5D3xEK_AT24_FTL and CONFIG_SAMA5D3xEK_AT24_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D3xEK_AT24_NXFFS
-#  undef CONFIG_SAMA5D3xEK_AT24_NXFFS
+#if defined(CONFIG_SAMA5D3XEK_AT24_FTL) && defined(CONFIG_SAMA5D3XEK_AT24_NXFFS)
+#  warning Both CONFIG_SAMA5D3XEK_AT24_FTL and CONFIG_SAMA5D3XEK_AT24_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5D3XEK_AT24_NXFFS
+#  undef CONFIG_SAMA5D3XEK_AT24_NXFFS
 #endif
 
 /* Assign minor device numbers.  For example, if we also use MINOR number 0
@@ -353,15 +338,15 @@
 #    undef HAVE_WM8904
 #  endif
 
-#  ifndef CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY
+#  ifndef CONFIG_SAMA5D3XEK_WM8904_I2CFREQUENCY
 #    warning Defaulting to maximum WM8904 I2C frequency
-#    define CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY 400000
+#    define CONFIG_SAMA5D3XEK_WM8904_I2CFREQUENCY 400000
 #  endif
 
-#  if CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY > 400000
+#  if CONFIG_SAMA5D3XEK_WM8904_I2CFREQUENCY > 400000
 #    warning WM8904 I2C frequency cannot exceed 400KHz
-#    undef CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY
-#    define CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY 400000
+#    undef CONFIG_SAMA5D3XEK_WM8904_I2CFREQUENCY
+#    define CONFIG_SAMA5D3XEK_WM8904_I2CFREQUENCY 400000
 #  endif
 #endif
 
@@ -369,7 +354,7 @@
 
 #define OV2640_BUS 1
 
-#ifndef CONFIG_SAMA5D3xEK_OV2640_DEMO
+#ifndef CONFIG_SAMA5D3XEK_OV2640_DEMO
 #  undef HAVE_CAMERA
 #endif
 
@@ -416,7 +401,7 @@
 #define PIO_BLUE     (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
                       PIO_PORT_PIOE | PIO_PIN25)
 
-#ifndef CONFIG_SAMA5D3xEK_NOREDLED
+#ifndef CONFIG_SAMA5D3XEK_NOREDLED
 #  define PIO_RED    (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_CLEAR | \
                       PIO_PORT_PIOE | PIO_PIN24)
 #endif
@@ -682,7 +667,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

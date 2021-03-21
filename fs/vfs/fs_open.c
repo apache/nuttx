@@ -94,7 +94,8 @@ static int file_vopen(FAR struct file *filep,
   inode = desc.node;
   DEBUGASSERT(inode != NULL);
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && \
+#if defined(CONFIG_BCH) && \
+    !defined(CONFIG_DISABLE_MOUNTPOINT) && \
     !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
   /* If the inode is block driver, then we may return a character driver
    * proxy for the block driver.  block_proxy() will instantiate a BCH

@@ -48,7 +48,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Olimex-STM32-P405 GPIOs ****************************************************/
+/* Olimex-STM32-P405 GPIOs **************************************************/
+
 /* LEDs */
 
 #define GPIO_LED_STATUS (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
@@ -72,15 +73,15 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in initialization to setup USB-related
- *   GPIO pins for the Olimex-STM32-H405 board.
+ *   Called from stm32_usbinitialize very early in initialization to setup
+ *   USB-related GPIO pins for the Olimex-STM32-H405 board.
  *
  ****************************************************************************/
 

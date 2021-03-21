@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/imxrt/imxrt1020-evk/include/board.h
  *
  *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
@@ -56,8 +56,10 @@
 
 #define IMXRT_VDD_SOC (0x12)
 
-/* Set Sys PLL (PLL2) to  fOut    = (24Mhz * SYS_PLL_DIV_SELECT) / ARM_PODF_DIVISOR
- *                        528Mhz  = (24Mhz * SYS_PLL_DIV_SELECT) / ARM_PODF_DIVISOR
+/* Set Sys PLL (PLL2) to  fOut    = (24Mhz * SYS_PLL_DIV_SELECT) /
+ *                                   ARM_PODF_DIVISOR
+ *                        528Mhz  = (24Mhz * SYS_PLL_DIV_SELECT) /
+ *                                   ARM_PODF_DIVISOR
  *                        SYS_PLL_DIV_SELECT = 22
  *                        SYS_PODF_DIVISOR   = 1
  *                        528Mhz  = (24Mhz * 22) / 1
@@ -74,7 +76,8 @@
  *                       IMXRT_IPG_PODF_DIVIDER = 4
  *                       125Mhz = 500Mhz / 4
  *
- *     PERCLK_CLOCK_ROOT          = IPG_CLOCK_ROOT / IMXRT_PERCLK_PODF_DIVIDER
+ *     PERCLK_CLOCK_ROOT          = IPG_CLOCK_ROOT /
+ *                                  IMXRT_PERCLK_PODF_DIVIDER
  *                       IMXRT_PERCLK_PODF_DIVIDER = 2
  *                        62.5Mhz = 125Mhz / 2
  *
@@ -134,7 +137,7 @@
 #  define IMXRT_TRACE_CLK_SELECT   CCM_CBCMR_TRACE_CLK_SEL_PLL2_PFD0
 #endif
 
-/* LED definitions ***********************************************************/
+/* LED definitions **********************************************************/
 
 /* There is one user accessible LED status indicator located on the 1020-EVK.
  * The function of the LEDs include:
@@ -182,7 +185,7 @@
 
 #define BOARD_USDHC_SD_ID               (0)
 
-/* Button definitions ********************************************************/
+/* Button definitions *******************************************************/
 
 /* The IMXRT board has three external buttons
  *
@@ -271,13 +274,13 @@
 #define PIN_USDHC1_CD_GPIO  (IOMUX_VSD_DEFAULT | \
                              GPIO_PORT3 | GPIO_PIN19 )                        /* SD_B0_06 */
 
-/*****************************************************************************
+/****************************************************************************
  * Public Types
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Public Data
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -290,9 +293,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -2228,6 +2228,14 @@ Configuration Sub-directories
     In the main NSH console (in USART2) type: "pts_test &". It will create a
     new console in UART3. Just press ENTER and start typing commands on it.
 
+  sporadic
+  --------
+
+    This is an NSH configuration that includes apps/testing/ostest as a builtin.
+    The sporadic scheduler is enabled and the purpose of this configuration is
+    to investigate an error in that scheduler.  See Issue 2035.  The serial
+    console is on USART6.
+
   testlibcxx
   ----------
 

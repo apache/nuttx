@@ -86,6 +86,26 @@ uint8_t rp2040_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 #  endif
   return ret;
 }
+
+#ifdef CONFIG_SPI_CMDDATA
+int rp2040_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+{
+#ifdef CONFIG_LCD_ST7789
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      /*  This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
+
+      rp2040_gpio_put(CONFIG_RP2040_SPI0_GPIO, !cmd);
+
+      return OK;
+    }
+#endif
+
+  return -ENODEV;
+}
+#endif
 #endif
 
 #ifdef CONFIG_RP2040_SPI1
@@ -107,4 +127,11 @@ uint8_t rp2040_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #  endif
   return ret;
 }
+
+#ifdef CONFIG_SPI_CMDDATA
+int rp2040_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+{
+  return -ENODEV;
+}
+#endif
 #endif

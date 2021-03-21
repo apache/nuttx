@@ -455,7 +455,12 @@ begin_packed_struct struct can_hdr_s
   uint8_t      ch_error  : 1; /* 1=ch_id is an error report */
 #endif
   uint8_t      ch_extid  : 1; /* Extended ID indication */
-  uint8_t      ch_unused : 1; /* Unused */
+#ifdef CONFIG_CAN_FD
+  uint8_t      ch_edl    : 1; /* Extended Data Length */
+  uint8_t      ch_brs    : 1; /* Bit Rate Switch */
+  uint8_t      ch_esi    : 1; /* Error State Indicator */
+#endif
+  uint8_t      ch_unused : 1; /* FIXME: This field is useless, kept for backward compatibility */
 } end_packed_struct;
 
 #else
@@ -467,7 +472,12 @@ begin_packed_struct struct can_hdr_s
 #ifdef CONFIG_CAN_ERRORS
   uint8_t      ch_error  : 1; /* 1=ch_id is an error report */
 #endif
-  uint8_t      ch_unused : 2; /* Unused */
+#ifdef CONFIG_CAN_FD
+  uint8_t      ch_edl    : 1; /* Extended Data Length */
+  uint8_t      ch_brs    : 1; /* Bit Rate Switch */
+  uint8_t      ch_esi    : 1; /* Error State Indicator */
+#endif
+  uint8_t      ch_unused : 1; /* FIXME: This field is useless, kept for backward compatibility */
 } end_packed_struct;
 #endif
 

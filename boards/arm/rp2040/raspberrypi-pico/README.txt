@@ -19,6 +19,8 @@ Currently only the following devices are suppored.
       BOOTSEL mode will be created.
   - BMP180 sensor at I2C0 (don't forget to define I2C0 GPIOs at "I2C0 GPIO pin assign" in Board Selection menu)
   - INA219 sensor / module (don't forget to define I2C0 GPIOs at "I2C0 GPIO pin assign" in Board Selection menu)
+  - Pico Display Pack (ST7789 LCD)
+    - RGB leds and buttons are not supported yet.
 
   Not supported:
   - All other devices
@@ -101,6 +103,11 @@ Defconfigs
             SO ----- GP12 (SPI1 RX)  (Pin 16)
            INT ----- GP11            (Pin 15)
          RESET ----- GP10            (Pin 14)
+
+- displaypack
+    Pico Display Pack support
+    See the following page for connection:
+      https://shop.pimoroni.com/products/pico-display-pack
 
 License exceptions
 ==================

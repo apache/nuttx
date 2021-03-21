@@ -1,44 +1,29 @@
-/*****************************************************************************************
+/****************************************************************************
  * boards/arm/stm32f7/stm32f746g-disco/include/board.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- *****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_STM32F7_STM32F746G_DISCO_INCLUDE_BOARD_H
 #define __BOARDS_ARM_STM32F7_STM32F746G_DISCO_INCLUDE_BOARD_H
 
-/*****************************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,16 +33,18 @@
 
 /* No not include STM32 F7 header files here. */
 
-/*****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking */
 
 /* The STM32F7 Discovery board provides the following clock sources:
  *
- *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module (daughter board)
- *   X2:  25 MHz oscillator for STM32F746NGH6 microcontroller and Ethernet PHY.
+ *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module
+ *       (daughter board)
+ *   X2:  25 MHz oscillator for STM32F746NGH6 microcontroller and
+ *        Ethernet PHY.
  *   X3:  32.768 KHz crystal for STM32F746NGH6 embedded RTC
  *
  * So we have these clock source available within the STM32
@@ -267,10 +254,13 @@
  * near the reset button, that can be controlled by software (LD2 is a power
  * indicator, LD3-6 indicate USB status, LD7 is controlled by the ST-Link).
  *
- * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino interface.
- * One end of LD1 is grounded so a high output on PI1 will illuminate the LED.
+ * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino
+ * interface.
+ * One end of LD1 is grounded so a high output on PI1 will illuminate the
+ * LED.
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any way.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.
  * The following definitions are used to access individual LEDs.
  */
 
@@ -286,8 +276,8 @@
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c. The LEDs are used to encode
+ * OS-related events as follows:
  *
  *   SYMBOL              Meaning                 LD1
  *   ------------------- ----------------------- ------
@@ -346,7 +336,8 @@
 
 /* USART1:
  *
- * USART1 is connected to the "Virtual Com Port" lines of the ST-LINK controller.
+ * USART1 is connected to the "Virtual Com Port" lines of the ST-LINK
+ * controller.
  *
  *   -------- ---------------
  *               STM32F7
@@ -375,7 +366,7 @@
 
 #define GPIO_TP_INT  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTI|GPIO_PIN13)
 
-#define FT5x06_I2C_ADDRESS          (0x70 >> 1)
+#define FT5X06_I2C_ADDRESS          (0x70 >> 1)
 
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *
@@ -482,8 +473,8 @@
 
 /* SDMMC */
 
-/* Stream selections are arbitrary for now but might become important in the future
- * if we set aside more DMA channels/streams.
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
  *
  * SDIO DMA
  *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3

@@ -83,7 +83,7 @@ void *k210_dispatch_irq(uint64_t vector, uint64_t *regs)
 
   /* Acknowledge the interrupt */
 
-  up_ack_irq(irq);
+  riscv_ack_irq(irq);
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();

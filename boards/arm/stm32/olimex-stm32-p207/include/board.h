@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/olimex-stm32-p207/include/board.h
  *
- *   Copyright (C) 2009, 2012, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -52,7 +37,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* HSI - 16 MHz RC factory-trimmed
  * LSI - 32 KHz RC (30-60KHz, uncalibrated)
@@ -99,7 +84,7 @@
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd4     /* PCLK1 = HCLK / 4 */
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
 
-/* Timers driven from APB1 will be twice PCLK1 (60Mhz)*/
+/* Timers driven from APB1 will be twice PCLK1 (60Mhz) */
 
 #define STM32_APB1_TIM2_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM3_CLKIN   (2*STM32_PCLK1_FREQUENCY)
@@ -116,7 +101,7 @@
 #define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLKd2     /* PCLK2 = HCLK / 2 */
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
-/* Timers driven from APB2 will be twice PCLK2 (120Mhz)*/
+/* Timers driven from APB2 will be twice PCLK2 (120Mhz) */
 
 #define STM32_APB2_TIM1_CLKIN   (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM8_CLKIN   (2*STM32_PCLK2_FREQUENCY)
@@ -138,9 +123,10 @@
 #define BOARD_TIM7_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
-/* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+/* LED definitions **********************************************************/
+
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -163,8 +149,9 @@
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
 #define BOARD_LED4_BIT    (1 << BOARD_LED4)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
- * Olimex STM32-P207.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on
+ * board the Olimex STM32-P207.
+ * The following definitions describe how NuttX controls the LEDs:
  */
 
 #define LED_STARTED       0  /* LED1 */
@@ -176,7 +163,8 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The Olimex STM32-P207 supports seven buttons: */
 
 #define BUTTON_TAMPER     0
@@ -197,21 +185,21 @@
 #define BUTTON_DOWN_BIT   (1 << BUTTON_DOWN)
 #define BUTTON_CENTER_BIT (1 << BUTTON_CENTER)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
-//USART3:
-#define GPIO_USART3_RX    GPIO_USART3_RX_3  //PD9
-#define GPIO_USART3_TX    GPIO_USART3_TX_3  //PD8
-#define GPIO_USART3_CTS   GPIO_USART3_CTS_2 //PD11
-#define GPIO_USART3_RTS   GPIO_USART3_RTS_2 //PD12
+/* USART3: */
+#define GPIO_USART3_RX    GPIO_USART3_RX_3  /* PD9 */
+#define GPIO_USART3_TX    GPIO_USART3_TX_3  /* PD8 */
+#define GPIO_USART3_CTS   GPIO_USART3_CTS_2 /* PD11 */
+#define GPIO_USART3_RTS   GPIO_USART3_RTS_2 /* PD12 */
 
-//CAN:
-#define GPIO_CAN1_RX      GPIO_CAN1_RX_2 //PB8
-#define GPIO_CAN1_TX      GPIO_CAN1_TX_2 //PB9
+/* CAN: */
+#define GPIO_CAN1_RX      GPIO_CAN1_RX_2 /* PB8 */
+#define GPIO_CAN1_TX      GPIO_CAN1_TX_2 /* PB9 */
 
-//Ethernet:
-/*
- * - PA2  is ETH_MDIO
+/* Ethernet: */
+
+/* - PA2  is ETH_MDIO
  * - PC1  is ETH_MDC
  * - PB5  is ETH_PPS_OUT     - NC (not connected)
  * - PA0  is ETH_MII_CRS     - NC

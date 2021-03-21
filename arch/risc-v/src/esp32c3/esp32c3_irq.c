@@ -54,6 +54,18 @@
 
 #define CPUINT_UNASSIGNED 0xff
 
+/* Wi-Fi reserved CPU interrupt bit */
+
+#ifdef CONFIG_ESP32C3_WIRELESS
+#  define CPUINT_WMAC_MAP (1 << ESP32C3_CPUINT_WMAC)
+#else
+#  define CPUINT_WMAC_MAP 0
+#endif
+
+/* Reserved CPU interrupt bits */
+
+#define CPUINT_RESERVED_MAPS (CPUINT_WMAC_MAP)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -82,6 +94,17 @@ void up_irqinitialize(void)
 
   memset(g_cpuint_map, CPUINT_UNASSIGNED, ESP32C3_CPUINT_MAX);
 
+  /**
+   * Initialize specific driver's CPU interrupt ID:
+   *   Object  |  CPU INT  |  Pheripheral
+   *           |           |
+   *    Wi-Fi  |     1     |      1
+   */
+
+#ifdef CONFIG_ESP32C3_WIRELESS
+  g_cpuint_map[ESP32C3_CPUINT_WMAC] = ESP32C3_PERIPH_WIFI_MAC_NMI;
+#endif
+
   /* Clear all peripheral interrupts from "bootloader" */
 
   for (periphid = 0; periphid < ESP32C3_NPERIPHERALS; periphid++)
@@ -95,7 +118,7 @@ void up_irqinitialize(void)
 
   /* Attach the ECALL interrupt. */
 
-  irq_attach(ESP32C3_IRQ_ECALL_M, up_swint, NULL);
+  irq_attach(ESP32C3_IRQ_ECALL_M, riscv_swint, NULL);
 
 #ifdef CONFIG_ESP32C3_GPIO_IRQ
   /* Initialize GPIO interrupt support */
@@ -112,14 +135,14 @@ void up_irqinitialize(void)
 }
 
 /****************************************************************************
- * Name: up_get_newintctx
+ * Name: riscv_get_newintctx
  *
  * Description:
  *   Return initial mstatus when a task is created.
  *
  ****************************************************************************/
 
-uint32_t up_get_newintctx(void)
+uint32_t riscv_get_newintctx(void)
 {
   /* Set machine previous privilege mode to machine mode.
    * Also set machine previous interrupt enable
@@ -167,6 +190,50 @@ void up_disable_irq(int cpuint)
 }
 
 /****************************************************************************
+ * Name: esp32c3_bind_irq
+ *
+ * Description:
+ *   Bind IRQ and resource with given parameters.
+ *
+ * Input Parameters:
+ *   cpuint    - CPU interrupt ID
+ *   periphid  - Peripheral ID
+ *   prio      - Interrupt priority
+ *   flags     - Interrupt flags
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32c3_bind_irq(uint8_t cpuint, uint8_t periphid, uint8_t prio,
+                      uint32_t flags)
+{
+  /* Disable the CPU interrupt. */
+
+  resetbits(1 << cpuint, INTERRUPT_CPU_INT_ENABLE_REG);
+
+  /* Set the interrupt priority. */
+
+  putreg32(prio, INTERRUPT_CPU_INT_PRI_0_REG + cpuint * 4);
+
+  /* Set the interrupt type (Edge or Level). */
+
+  if (flags & ESP32C3_INT_EDGE)
+    {
+      setbits(1 << cpuint, INTERRUPT_CPU_INT_TYPE_REG);
+    }
+  else
+    {
+      resetbits(1 << cpuint, INTERRUPT_CPU_INT_TYPE_REG);
+    }
+
+  /* Map the CPU interrupt ID to the peripheral. */
+
+  putreg32(cpuint, DR_REG_INTERRUPT_BASE + periphid * 4);
+}
+
+/****************************************************************************
  * Name: esp32c3_request_irq
  *
  * Description:
@@ -198,6 +265,11 @@ int esp32c3_request_irq(uint8_t periphid, uint8_t prio, uint32_t flags)
   /* Skip over enabled interrupts.  NOTE: bit 0 is reserved. */
 
   regval = getreg32(INTERRUPT_CPU_INT_ENABLE_REG);
+
+  /* Skip over reserved CPU interrupts */
+
+  regval |= CPUINT_RESERVED_MAPS;
+
   for (cpuint = 1; cpuint <= ESP32C3_CPUINT_MAX; cpuint++)
     {
       if (!(regval & (1 << cpuint)))
@@ -224,28 +296,9 @@ int esp32c3_request_irq(uint8_t periphid, uint8_t prio, uint32_t flags)
 
       g_cpuint_map[cpuint] = periphid;
 
-      /* Set the interrupt priority. */
+      /* Configure IRQ */
 
-      putreg32(prio, INTERRUPT_CPU_INT_PRI_0_REG + cpuint * 4);
-
-      /* Set the interrupt type (Edge or Level). */
-
-      if (flags & ESP32C3_INT_EDGE)
-        {
-          setbits(1 << cpuint, INTERRUPT_CPU_INT_TYPE_REG);
-        }
-      else
-        {
-          resetbits(1 << cpuint, INTERRUPT_CPU_INT_TYPE_REG);
-        }
-
-      /* Map the CPU interrupt ID to the peripheral. */
-
-      putreg32(cpuint, DR_REG_INTERRUPT_BASE + periphid * 4);
-
-      /* Disable the CPU interrupt. */
-
-      resetbits(1 << cpuint, INTERRUPT_CPU_INT_ENABLE_REG);
+      esp32c3_bind_irq(cpuint, periphid, prio, flags);
     }
   else
     {

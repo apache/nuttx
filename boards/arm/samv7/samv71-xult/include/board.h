@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/samv7/samv71-xult/include/board.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -156,15 +141,24 @@
  * Where CLKDIV has a range of 0-255.
  */
 
-/* MCK = 150MHz, CLKDIV = 186, MCI_SPEED = 150MHz / (2*186 + 1 + 2) = 400 KHz */
+/* MCK = 150MHz,
+ * CLKDIV = 186,
+ * MCI_SPEED = 150MHz / (2*186 + 1 + 2) = 400 KHz
+ */
 
 #define HSMCI_INIT_CLKDIV          ((186 << HSMCI_MR_CLKDIV_SHIFT) | HSMCI_MR_CLKODD)
 
-/* MCK = 150MHz, CLKDIV = 3 w/CLOCKODD, MCI_SPEED = 150MHz /(2*3 + 0 + 2) = 18.75 MHz */
+/* MCK = 150MHz,
+ * CLKDIV = 3 w/CLOCKODD,
+ * MCI_SPEED = 150MHz /(2*3 + 0 + 2) = 18.75 MHz
+ */
 
 #define HSMCI_MMCXFR_CLKDIV        (2 << HSMCI_MR_CLKDIV_SHIFT)
 
-/* MCK = 150MHz, CLKDIV = 2, MCI_SPEED = 150MHz /(2*2 + 0 + 2) = 25 MHz */
+/* MCK = 150MHz,
+ * CLKDIV = 2,
+ * MCI_SPEED = 150MHz /(2*2 + 0 + 2) = 25 MHz
+ */
 
 #define HSMCI_SDXFR_CLKDIV         (2 << HSMCI_MR_CLKDIV_SHIFT)
 #define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV
@@ -251,10 +245,10 @@
 
 /* Buttons
  *
- * SAM V71 Xplained Ultra contains three mechanical buttons. One button is the
- * RESET button connected to the SAM V71 reset line and the others are generic
- * user configurable buttons. When a button is pressed it will drive the I/O
- * line to GND.
+ * SAM V71 Xplained Ultra contains three mechanical buttons. One button is
+ * the RESET button connected to the SAM V71 reset line and the others are
+ * generic user configurable buttons. When a button is pressed it will drive
+ * the I/O line to GND.
  *
  *   ------ ----------- ---------------------
  *   SAMV71 Function    Shared functionality
@@ -267,9 +261,9 @@
  *
  * NOTES:
  *
- *   - There are no pull-up resistors connected to the generic user buttons so
- *     it is necessary to enable the internal pull-up in the SAM V71 to use
- *     the button.
+ *   - There are no pull-up resistors connected to the generic user buttons
+ *     so it is necessary to enable the internal pull-up in the SAM V71 to
+ *     use the button.
  *   - PB12 is set up as a system flash ERASE pin when the firmware boots. To
  *     use the SW1, PB12 has to be configured as a normal regular I/O pin in
  *     the MATRIX module. For more information see the SAM V71 datasheet.
@@ -397,7 +391,8 @@
  *                       SAMV71-XULT               maxTouch Xplained Pro
  * PIN  FUNCTION EXT1 FUNC        EXT2 FUNC        Description
  * ---- -------- ---- ----------- ---- ----------- --------------------------
- *  1   ID        -    -           -    -          Communication line to ID chip
+ *  1   ID        -    -           -    -          Communication line to
+ *                                                 ID chip
  *  2   GND       -    -           -    -          Ground
  *  3   N/C      PC31  -          PD30  -
  *  4   N/C      PA19  -          PC13  -
@@ -405,7 +400,8 @@
  *  6   N/C      PB2   -          PD11  -
  *  7   PWM      PA0  PWMC0_PWMH0 PC19 PWMC0_PMWH2 Backlight control
  *  8   N/C      PC30  -          PD26  -
- *  9   GPIO/IRQ PD28 GPIO        PA2  GPIO        IRQ from maXTouch controller
+ *  9   GPIO/IRQ PD28 GPIO        PA2  GPIO        IRQ from
+ *                                                 maXTouch controller
  *  10  GPIO     PA5  GPIO        PA24 GPIO        RESET signal
  *  11  I2C SDA  PA3  TWID0       PA3  TWID0       maXTouch I2C Data line
  *  12  I2C SCL  PA4  TWICK0      PA4  TWICK0      maXTouch I2C Clock line
@@ -413,7 +409,8 @@
  *  14  N/C      PB1   -          PB4   -
  *  15  CS       PD25 GPIO        PD27 GPIO        CS line for LCD controller
  *  16  SPI MOSI PD21 SPI0_MOSI   PD21 SPI0_MOSI   SPI Data to LCD controller
- *  17  SPI MISO PD20 SPI0_MISO   PD20 SPI0_MISO   SPI Data from LCD controller
+ *  17  SPI MISO PD20 SPI0_MISO   PD20 SPI0_MISO   SPI Data from
+ *                                                 LCD controller
  *  18  SPI SCK  PD22 SPI0_SPCK   PD22 SPI0_SPCK   SPI Clock line
  *  19  GND       -    -           -      -        Ground
  *  20  VCC       -    -           -      -        Target supply voltage
@@ -551,7 +548,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

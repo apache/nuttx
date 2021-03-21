@@ -64,7 +64,7 @@ int posix_spawn_file_actions_addclose(
 {
   FAR struct spawn_close_file_action_s *entry;
 
-  DEBUGASSERT(file_actions && fd >= 0 && fd < CONFIG_NFILE_DESCRIPTORS);
+  DEBUGASSERT(file_actions && fd >= 0);
 
   /* Allocate the action list entry */
 

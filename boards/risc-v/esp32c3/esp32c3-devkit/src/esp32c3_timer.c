@@ -56,7 +56,7 @@ int board_tim_init(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_ESP32C3_TIMER0
+#if defined(CONFIG_ESP32C3_TIMER0) && !defined(CONFIG_ESP32C3_RT_TIMER)
   ret = esp32c3_timer_initialize("/dev/timer0", ESP32C3_TIMER0);
   if (ret < 0)
     {

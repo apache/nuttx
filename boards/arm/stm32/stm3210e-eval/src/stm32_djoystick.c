@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/stm3210e-eval/src/stm32_djoystick.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -54,6 +39,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Number of Joystick discretes */
 
 #define DJOY_NGPIOS  5
@@ -71,8 +57,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static djoy_buttonset_t djoy_supported(FAR const struct djoy_lowerhalf_s *lower);
-static djoy_buttonset_t djoy_sample(FAR const struct djoy_lowerhalf_s *lower);
+static djoy_buttonset_t
+djoy_supported(FAR const struct djoy_lowerhalf_s *lower);
+static djoy_buttonset_t
+djoy_sample(FAR const struct djoy_lowerhalf_s *lower);
 static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
                          djoy_buttonset_t press, djoy_buttonset_t release,
                          djoy_interrupt_t handler, FAR void *arg);
@@ -83,6 +71,7 @@ static int djoy_interrupt(int irq, FAR void *context, FAR void *arg);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each STM3210E-EVAL joystick "button."  Index using
  * DJOY_* definitions in include/nuttx/input/djoystick.h.
  */
@@ -118,7 +107,8 @@ static const struct djoy_lowerhalf_s g_djoylower =
  *
  ****************************************************************************/
 
-static djoy_buttonset_t djoy_supported(FAR const struct djoy_lowerhalf_s *lower)
+static djoy_buttonset_t
+djoy_supported(FAR const struct djoy_lowerhalf_s *lower)
 {
   iinfo("Supported: %02x\n", DJOY_SUPPORTED);
   return (djoy_buttonset_t)DJOY_SUPPORTED;
@@ -141,11 +131,11 @@ static djoy_buttonset_t djoy_sample(FAR const struct djoy_lowerhalf_s *lower)
 
   for (i = 0; i < DJOY_NGPIOS; i++)
     {
-       bool released = stm32_gpioread(g_joygpio[i]);
-       if (!released)
-         {
-            ret |= (1 << i);
-         }
+      bool released = stm32_gpioread(g_joygpio[i]);
+      if (!released)
+        {
+          ret |= (1 << i);
+        }
     }
 
   iinfo("Retuning: %02x\n", DJOY_SUPPORTED);
@@ -195,26 +185,26 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
 
       for (i = 0; i < DJOY_NGPIOS; i++)
         {
-           /* Enable interrupts on each pin that has either a press or
-            * release event associated with it.
-            */
+          /* Enable interrupts on each pin that has either a press or
+           * release event associated with it.
+           */
 
-           bit = (1 << i);
-           if ((either & bit) != 0)
-             {
-               /* Active low so a press corresponds to a falling edge and
-                * a release corresponds to a rising edge.
-                */
+          bit = (1 << i);
+          if ((either & bit) != 0)
+            {
+              /* Active low so a press corresponds to a falling edge and
+               * a release corresponds to a rising edge.
+               */
 
-               falling = ((press & bit) != 0);
-               rising  = ((release & bit) != 0);
+              falling = ((press & bit) != 0);
+              rising  = ((release & bit) != 0);
 
-               iinfo("GPIO %d: rising: %d falling: %d\n",
+              iinfo("GPIO %d: rising: %d falling: %d\n",
                       i, rising, falling);
 
-               stm32_gpiosetevent(g_joygpio[i], rising, falling,
+              stm32_gpiosetevent(g_joygpio[i], rising, falling,
                                   true, djoy_interrupt, NULL);
-             }
+            }
         }
     }
 

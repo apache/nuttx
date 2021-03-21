@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32l4/nucleo-l496zg/src/stm32_dac.c
  *
  *   Copyright (C) 2017 Haltian Ltd. All rights reserved.
@@ -93,6 +93,7 @@ int stm32_dac_setup(void)
           return ret;
         }
 #endif
+
 #ifdef CONFIG_STM32L4_DAC2
       g_dac2 = stm32l4_dacinitialize(1);
       if (g_dac2 == NULL)
@@ -108,6 +109,7 @@ int stm32_dac_setup(void)
           return ret;
         }
 #endif
+
       UNUSED(ret);
       initialized = true;
     }

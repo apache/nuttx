@@ -1,36 +1,20 @@
 /****************************************************************************
  * boards/mips/pic32mx/sure-pic32mx/include/board.h
- * include/arch/board/board.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -109,22 +93,24 @@
  * D9  "Flash"  Yellow  RF0 Low illuminates
  * D10 "Error"  Red     RF1 Low illuminates
  */
-                                  /* ON                  OFF                 */
-                                  /* USB SD  FLASH ERROR USB SD  FLASH ERROR */
-#define LED_STARTED            0  /* OFF OFF OFF   OFF   --- --- ---   ---   */
-#define LED_HEAPALLOCATE       1  /* ON  OFF N/C   N/C   --- --- ---   ---   */
-#define LED_IRQSENABLED        2  /* OFF ON  N/C   N/C   --- --- ---   ---   */
-#define LED_STACKCREATED       3  /* ON  ON  N/C   N/C   --- --- ---   ---   */
-#define LED_INIRQ              4  /* N/C N/C ON    N/C   N/C N/C OFF   N/C   */
-#define LED_SIGNAL             4  /* N/C N/C ON    N/C   N/C N/C OFF   N/C   */
-#define LED_ASSERTION          4  /* N/C N/C ON    N/C   N/C N/C OFF   N/C   */
-#define LED_PANIC              5  /* N/C N/C N/C   ON    N/C N/C N/C   OFF   */
-#define LED_NVALUES            6
+
+                                  /* ON                  OFF               */
+
+                                /* USB SD  FLASH ERROR USB SD  FLASH ERROR */
+#define LED_STARTED          0  /* OFF OFF OFF   OFF   --- --- ---   ---   */
+#define LED_HEAPALLOCATE     1  /* ON  OFF N/C   N/C   --- --- ---   ---   */
+#define LED_IRQSENABLED      2  /* OFF ON  N/C   N/C   --- --- ---   ---   */
+#define LED_STACKCREATED     3  /* ON  ON  N/C   N/C   --- --- ---   ---   */
+#define LED_INIRQ            4  /* N/C N/C ON    N/C   N/C N/C OFF   N/C   */
+#define LED_SIGNAL           4  /* N/C N/C ON    N/C   N/C N/C OFF   N/C   */
+#define LED_ASSERTION        4  /* N/C N/C ON    N/C   N/C N/C OFF   N/C   */
+#define LED_PANIC            5  /* N/C N/C N/C   ON    N/C N/C N/C   OFF   */
+#define LED_NVALUES          6
 
 /* The Sure DB-DP11212 PIC32 General Purpose Demo Board does not have any
  * user controllable LEDs, but does does have a segment LED display.
- * That display is however, obscured by the larger segment display attached to
- * the board and, so, is not supported.
+ * That display is however, obscured by the larger segment display attached
+ * to the board and, so, is not supported.
  */
 
 /* For distinguishing individual LEDs */
@@ -138,9 +124,9 @@
 
 /* The Sure PIC32MX board has three buttons.
  *
- * SW1  (SW_UP, left arrow)          RB3 Pulled high, Grounded/low when depressed
- * SW2  (SW_DOWN, down/right arrow)  RB2 Pulled high, Grounded/low when depressed
- * SW3  (SW_OK, right arrow)         RB4 Pulled high, Grounded/low when depressed
+ * SW1  (SW_UP, left arrow)          RB3 Pulled high, GND/low when depressed
+ * SW2  (SW_DOWN, down/right arrow)  RB2 Pulled high, GND/low when depressed
+ * SW3  (SW_OK, right arrow)         RB4 Pulled high, GND/low when depressed
  */
 
 #define BUTTON_SW1             0
@@ -168,7 +154,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

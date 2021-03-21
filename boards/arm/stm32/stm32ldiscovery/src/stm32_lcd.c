@@ -1,45 +1,31 @@
 /****************************************************************************
  * boards/arm/stm32/stm32ldiscovery/src/stm32_lcd.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* References:
  *   - Based on the NuttX LCD1602 driver.
  *   - "STM32L100xx, STM32L151xx, STM32L152xx and STM32L162xx advanced
  *     ARM-based 32-bit MCUs", STMicroelectronics, RM0038
  *   - "STM32L1 discovery kits: STM32L-DISCOVERY and 32L152CDISCOVERY,"
  *     STMicroelectronics, UM1079
  *   - STM32L-Discovery Firmware Pack V1.0.2 (for character encoding)
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************/
+ */
 
 /****************************************************************************
  * Included Files
@@ -140,35 +126,73 @@
 
 /* These definitions support the logic of slcd_writemem()
  *
- * ---------- ----- ----- ----- ----- ------- ------ ------ ------ ------ ------- ------- -----------------------------
- * LCD SIGNAL COM3  COM2  COM1  COM0  RAM BIT CHAR 1 CHAR 2 CHAR 3 CHAR 4 CHAR 5  CHAR 6  MASKS
- *                                             3210   3210   3210   3210  32  10  32  10
- * ---------- ----- ----- ----- ----- ------- ------ ------ ------ ------ --  --- --  --- -----------------------------
- * LCD SEG0   1N    1P    1D    1E    Bit 0     1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
- * LCD SEG1   1DP   1COL  1C    1M    Bit 1     1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
- * LCD SEG2   2N    2P    2D    2E    Bit 2     0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
- * LCD SEG3   2DP   2COL  2C    2M    Bit 7     0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
- * LCD SEG4   3N    3P    3D    3E    Bit 8     0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
- * LCD SEG5   3DP   3COL  3C    3M    Bit 9     0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
- * LCD SEG6   4N    4P    4D    4E    Bit 10    0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
- * LCD SEG7   4DP   4COL  4C    4M    Bit 11    0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
- * LCD SEG8   5N    5P    5D    5E    Bit 12    0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/0xfff3efff
- * LCD SEG9   BAR2  BAR3  5C    5M    Bit 13    0      0      0      0     0   1   0   0  CHAR 5: 0xfff3cfff/0xfff3efff
- * LCD SEG10  6N    6P    6D    6E    Bit 14    0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/0xfffcbfff
- * LCD SEG11  BAR0  BAR1  6C    6M    Bit 15    0      0      0      0     0   0   0   1  CHAR 6: 0xfffc3fff/0xfffcbfff
- * LCD SEG12  6J    6K    6A    6B    Bit 16    0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/0xfffcbfff
- * LCD SEG13  6H    6Q    6F    6G    Bit 17    0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/0xfffcbfff
- * LCD SEG14  5J    5K    5A    5B    Bit 18    0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/0xfff3efff
- * LCD SEG15  5H    5Q    5F    5G    Bit 19    0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/0xfff3efff
- * LCD SEG16  4J    4K    4A    4B    Bit 20    0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
- * LCD SEG17  4H    4Q    4F    4G    Bit 21    0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
- * LCD SEG18  3J    3K    3A    3B    Bit 24    0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
- * LCD SEG19  3H    3Q    3F    3G    Bit 25    0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
- * LCD SEG20  2J    2K    2A    2B    Bit 26    0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
- * LCD SEG21  2H    2Q    2F    2G    Bit 27    0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
- * LCD SEG22  1J    1K    1A    1B    Bit 28    1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
- * LCD SEG23  1H    1Q    1F    1G    Bit 29    1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
- * ---------- ----- ----- ----- ----- ------- ------ ------ ------ ------ ------- ------- -----------------------------
+ * ---------- ----- ----- ----- ----- -------
+ * LCD SIGNAL COM3  COM2  COM1  COM0  RAM BIT
+ *
+ * ---------- ----- ----- ----- ----- -------
+ * LCD SEG0   1N    1P    1D    1E    Bit 0
+ * LCD SEG1   1DP   1COL  1C    1M    Bit 1
+ * LCD SEG2   2N    2P    2D    2E    Bit 2
+ * LCD SEG3   2DP   2COL  2C    2M    Bit 7
+ * LCD SEG4   3N    3P    3D    3E    Bit 8
+ * LCD SEG5   3DP   3COL  3C    3M    Bit 9
+ * LCD SEG6   4N    4P    4D    4E    Bit 10
+ * LCD SEG7   4DP   4COL  4C    4M    Bit 11
+ * LCD SEG8   5N    5P    5D    5E    Bit 12
+ * LCD SEG9   BAR2  BAR3  5C    5M    Bit 13
+ * LCD SEG10  6N    6P    6D    6E    Bit 14
+ * LCD SEG11  BAR0  BAR1  6C    6M    Bit 15
+ * LCD SEG12  6J    6K    6A    6B    Bit 16
+ * LCD SEG13  6H    6Q    6F    6G    Bit 17
+ * LCD SEG14  5J    5K    5A    5B    Bit 18
+ * LCD SEG15  5H    5Q    5F    5G    Bit 19
+ * LCD SEG16  4J    4K    4A    4B    Bit 20
+ * LCD SEG17  4H    4Q    4F    4G    Bit 21
+ * LCD SEG18  3J    3K    3A    3B    Bit 24
+ * LCD SEG19  3H    3Q    3F    3G    Bit 25
+ * LCD SEG20  2J    2K    2A    2B    Bit 26
+ * LCD SEG21  2H    2Q    2F    2G    Bit 27
+ * LCD SEG22  1J    1K    1A    1B    Bit 28
+ * LCD SEG23  1H    1Q    1F    1G    Bit 29
+ * ---------- ----- ----- ----- ----- --------
+
+ * ---------------- ------ ------ ------ ------- ------- --------------------
+ * LCD       CHAR 1 CHAR 2 CHAR 3 CHAR 4 CHAR 5  CHAR 6  MASKS
+ *  SIGNAL    3210   3210   3210   3210  32  10  32  10
+ * --------- ------ ------ ------ ------ --  --- --  --- --------------------
+ * LCD SEG0  1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
+ * LCD SEG1  0      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
+ * LCD SEG2  0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
+ * LCD SEG3  0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
+ * LCD SEG4  0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
+ * LCD SEG5  0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
+ * LCD SEG6  0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
+ * LCD SEG7  0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
+ * LCD SEG8  0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/
+ *                                                             0xfff3efff
+ * LCD SEG9  0      0      0      0     0   1   0   0  CHAR 5: 0xfff3cfff/
+ *                                                             0xfff3efff
+ * LCD SEG10 0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/
+ *                                                             0xfffcbfff
+ * LCD SEG11 0      0      0      0     0   0   0   1  CHAR 6: 0xfffc3fff/
+ *                                                             0xfffcbfff
+ * LCD SEG12 0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/
+ *                                                             0xfffcbfff
+ * LCD SEG13 0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/
+ *                                                             0xfffcbfff
+ * LCD SEG14 0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/
+ *                                                             0xfff3efff
+ * LCD SEG15 0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/
+ *                                                             0xfff3efff
+ * LCD SEG16 0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
+ * LCD SEG17 0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
+ * LCD SEG18 0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
+ * LCD SEG19 0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
+ * LCD SEG20 0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
+ * LCD SEG21 0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
+ * LCD SEG22 1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
+ * LCD SEG23 1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
+ * --------- ------ ------ ------ ------- ------- ---------------------------
  */
 
 /* SLCD_CHAR1_MASK  COM0-3 0xcffffffc ..11 .... .... .... .... .... .... ..11

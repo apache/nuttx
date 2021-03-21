@@ -40,10 +40,8 @@
 #define ESP32_TIM_START(d)                         ((d)->ops->start(d))
 #define ESP32_TIM_STOP(d)                          ((d)->ops->stop(d))
 #define ESP32_TIM_CLEAR(d)                         ((d)->ops->clear(d))
-#define ESP32_TIM_CONFIGURE(d, p, m, c, av, a, ar) ((d)->ops->configure(d, m, c, av, a, ar))
 #define ESP32_TIM_SETMODE(d, m)                    ((d)->ops->setmode(d, m))
 #define ESP32_TIM_SETPRE(d, p)                     ((d)->ops->setpre(d, p))
-#define ESP32_TIM_GETCONFIG(d, v)                  ((d)->ops->getconfig(d, v))
 #define ESP32_TIM_GETCTR(d, v)                     ((d)->ops->getcounter(d, v))
 #define ESP32_TIM_SETCTR(d, v)                     ((d)->ops->setcounter(d, v))
 #define ESP32_TIM_RLD_NOW(d)                       ((d)->ops->reloadnow(d))
@@ -54,7 +52,6 @@
 #define ESP32_TIM_SETISR(d, hnd, arg)              ((d)->ops->setisr(d, hnd, arg))
 #define ESP32_TIM_ENABLEINT(d)                     ((d)->ops->enableint(d))
 #define ESP32_TIM_DISABLEINT(d)                    ((d)->ops->disableint(d))
-#define ESP32_TIM_CHECKINT(d)                      ((d)->ops->checkint(d))
 #define ESP32_TIM_ACKINT(d)                        ((d)->ops->ackint(d))
 
 /****************************************************************************
@@ -84,39 +81,31 @@ struct esp32_tim_ops_s
 {
   /* Timer tasks */
 
-  CODE int (*start)(FAR struct esp32_tim_dev_s *dev);
-  CODE int (*stop)(FAR struct esp32_tim_dev_s *dev);
-  CODE int (*clear)(FAR struct esp32_tim_dev_s *dev);
-
-  /* Timer configuration */
-
-  CODE int (*configure)(FAR struct esp32_tim_dev_s *dev, uint16_t pre,
-                        uint8_t mode, uint64_t counter_value,
-                        uint64_t alarm_value, bool alarm,
-                        bool autoreload);
+  CODE void (*start)(FAR struct esp32_tim_dev_s *dev);
+  CODE void (*stop)(FAR struct esp32_tim_dev_s *dev);
+  CODE void (*clear)(FAR struct esp32_tim_dev_s *dev);
 
   /* Timer operations */
 
-  CODE int (*setmode)(FAR struct esp32_tim_dev_s *dev, uint8_t mode);
-  CODE int (*setpre)(FAR struct esp32_tim_dev_s *dev, uint16_t pre);
-  CODE int (*getconfig)(FAR struct esp32_tim_dev_s *dev, uint32_t *value);
-  CODE int (*getcounter)(FAR struct esp32_tim_dev_s *dev, uint64_t *value);
-  CODE int (*setcounter)(FAR struct esp32_tim_dev_s *dev, uint64_t value);
-  CODE int (*reloadnow)(FAR struct esp32_tim_dev_s *dev);
-  CODE int (*getalarmvalue)(FAR struct esp32_tim_dev_s *dev,
+  CODE void (*setmode)(FAR struct esp32_tim_dev_s *dev, uint8_t mode);
+  CODE void (*setpre)(FAR struct esp32_tim_dev_s *dev, uint16_t pre);
+  CODE void (*getcounter)(FAR struct esp32_tim_dev_s *dev, uint64_t *value);
+  CODE void (*setcounter)(FAR struct esp32_tim_dev_s *dev, uint64_t value);
+  CODE void (*reloadnow)(FAR struct esp32_tim_dev_s *dev);
+  CODE void (*getalarmvalue)(FAR struct esp32_tim_dev_s *dev,
                             uint64_t *value);
-  CODE int (*setalarmvalue)(FAR struct esp32_tim_dev_s *dev, uint64_t value);
-  CODE int (*setalarm)(FAR struct esp32_tim_dev_s *dev, bool enable);
-  CODE int (*setautoreload)(FAR struct esp32_tim_dev_s *dev, bool enable);
+  CODE void (*setalarmvalue)(FAR struct esp32_tim_dev_s *dev,
+                             uint64_t value);
+  CODE void (*setalarm)(FAR struct esp32_tim_dev_s *dev, bool enable);
+  CODE void (*setautoreload)(FAR struct esp32_tim_dev_s *dev, bool enable);
 
   /* Timer interrupts */
 
   CODE int (*setisr)(FAR struct esp32_tim_dev_s *dev, xcpt_t handler,
                      FAR void * arg);
-  CODE int (*enableint)(FAR struct esp32_tim_dev_s *dev);
-  CODE int (*disableint)(FAR struct esp32_tim_dev_s *dev);
-  CODE int (*checkint)(FAR struct esp32_tim_dev_s *dev);
-  CODE int (*ackint)(FAR struct esp32_tim_dev_s *dev);
+  CODE void (*enableint)(FAR struct esp32_tim_dev_s *dev);
+  CODE void (*disableint)(FAR struct esp32_tim_dev_s *dev);
+  CODE void (*ackint)(FAR struct esp32_tim_dev_s *dev);
 };
 
 /****************************************************************************
@@ -124,7 +113,7 @@ struct esp32_tim_ops_s
  ****************************************************************************/
 
 FAR struct esp32_tim_dev_s *esp32_tim_init(int timer);
-int esp32_tim_deinit(FAR struct esp32_tim_dev_s *dev);
+void esp32_tim_deinit(FAR struct esp32_tim_dev_s *dev);
 FAR struct esp32_tim_dev_s *esp32_tim0_init(void);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_TIM_H */

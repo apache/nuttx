@@ -90,7 +90,7 @@
 
 /* SYS call 0:
  *
- * int up_saveusercontext(uint64_t *saveregs);
+ * int riscv_saveusercontext(uint64_t *saveregs);
  *
  * Return:
  * 0: Normal Return
@@ -98,35 +98,35 @@
  */
 
 #define SYS_save_context (0)
-#define up_saveusercontext(saveregs) \
+#define riscv_saveusercontext(saveregs) \
   (int)sys_call1(SYS_save_context, (uintptr_t)saveregs)
 
 /* SYS call 1:
  *
- * void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ * void riscv_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
  */
 
 #define SYS_restore_context (1)
-#define up_fullcontextrestore(restoreregs) \
+#define riscv_fullcontextrestore(restoreregs) \
   sys_call1(SYS_restore_context, (uintptr_t)restoreregs)
 
 /* SYS call 2:
  *
- * void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ * void riscv_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
  */
 
 #define SYS_switch_context (2)
-#define up_switchcontext(saveregs, restoreregs) \
+#define riscv_switchcontext(saveregs, restoreregs) \
   sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
 
 #ifdef CONFIG_BUILD_KERNEL
 /* SYS call 3:
  *
- * void up_syscall_return(void);
+ * void riscv_syscall_return(void);
  */
 
 #define SYS_syscall_return (3)
-#define up_syscall_return() sys_call0(SYS_syscall_return)
+#define riscv_syscall_return() sys_call0(SYS_syscall_return)
 
 #endif
 #endif /* __ASSEMBLY__ */
@@ -158,7 +158,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: up_syscall0
+ * Name: sys_call0
  *
  * Description:
  *   System call SYS_ argument and no additional parameters.
@@ -181,7 +181,7 @@ static inline uintptr_t sys_call0(unsigned int nbr)
 }
 
 /****************************************************************************
- * Name: up_syscall1
+ * Name: sys_call1
  *
  * Description:
  *   System call SYS_ argument and one additional parameter.
@@ -205,7 +205,7 @@ static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
 }
 
 /****************************************************************************
- * Name: up_syscall2
+ * Name: sys_call2
  *
  * Description:
  *   System call SYS_ argument and two additional parameters.
@@ -231,7 +231,7 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
 }
 
 /****************************************************************************
- * Name: up_syscall3
+ * Name: sys_call3
  *
  * Description:
  *   System call SYS_ argument and three additional parameters.
@@ -258,7 +258,7 @@ static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
 }
 
 /****************************************************************************
- * Name: up_syscall4
+ * Name: sys_call4
  *
  * Description:
  *   System call SYS_ argument and four additional parameters.
@@ -287,7 +287,7 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
 }
 
 /****************************************************************************
- * Name: up_syscall5
+ * Name: sys_call5
  *
  * Description:
  *   System call SYS_ argument and five additional parameters.
@@ -317,7 +317,7 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
 }
 
 /****************************************************************************
- * Name: up_syscall6
+ * Name: sys_call6
  *
  * Description:
  *   System call SYS_ argument and six additional parameters.

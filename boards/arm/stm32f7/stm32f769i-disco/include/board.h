@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32f7/stm32f769i-disco/include/board.h
  *
- *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -56,7 +41,8 @@
 
 /* The STM32F7 Discovery board provides the following clock sources:
  *
- *   X2:  25 MHz oscillator for STM32F769NIH6 microcontroller and Ethernet PHY.
+ *   X2:  25 MHz oscillator for STM32F769NIH6 microcontroller
+ *        and Ethernet PHY.
  *   X1:  32.768 KHz crystal for STM32F769NIH6 embedded RTC
  *
  * So we have these clock source available within the STM32
@@ -176,8 +162,6 @@
 #define STM32_RCC_DCKCFGR1_DFSDM1SRC   0
 #define STM32_RCC_DCKCFGR1_ADFSDM1SRC  0
 
-
-
 /* Configure factors for  PLLI2S clock */
 
 #define STM32_RCC_PLLI2SCFGR_PLLI2SN   RCC_PLLI2SCFGR_PLLI2SN(192)
@@ -264,15 +248,17 @@
 
 /* LED definitions **********************************************************/
 
-/* The STM32F769I-DISCO board has numerous LEDs but only one, LD1 located near the
- * reset button, that can be controlled by software (LD2 is a power indicator, LD3-6
- * indicate USB status, LD7 is controlled by the ST-Link).
+/* The STM32F769I-DISCO board has numerous LEDs but only one, LD1 located
+ * near the reset button, that can be controlled by software
+ * (LD2 is a power indicator, LD3-6  indicate USB status, LD7 is controlled
+ * by the ST-Link).
  *
- * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino interface.
- * One end of LD1 is grounded so a high output on PI1 will illuminate the LED.
+ * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino
+ * interface.  One end of LD1 is grounded so a high output on PI1 will
+ * illuminate the LED.
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any way.
- * The following definitions are used to access individual LEDs.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs
+ *  in any way. The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -287,8 +273,8 @@
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c.
+ * The LEDs are used to encode OS-related events as follows:
  *
  *   SYMBOL              Meaning                 LD1
  *   ------------------- ----------------------- ------
@@ -317,8 +303,9 @@
 
 /* Button definitions *******************************************************/
 
-/* The STM32F7 Discovery supports one button:  Pushbutton B1, labelled "User", is
- * connected to GPIO PA0.  A high value will be sensed when the button is depressed.
+/* The STM32F7 Discovery supports one button:
+ *  Pushbutton B1, labelled "User", is connected to GPIO PA0.
+ *  A high value will be sensed when the button is depressed.
  */
 
 #define BUTTON_USER        0
@@ -329,8 +316,8 @@
 
 /* USART6:
  *
- * These configurations assume that you are using a standard Arduio RS-232 shield
- * with the serial interface with RX on pin D0 and TX on pin D1:
+ * These configurations assume that you are using a standard Arduio RS-232
+ * shield with the serial interface with RX on pin D0 and TX on pin D1:
  *
  *   -------- ---------------
  *               STM32F7
@@ -362,8 +349,8 @@
 
 /* PWM
  *
- * The STM32F7 Discovery has no real on-board PWM devices, but the board can be
- * configured to output a pulse train using TIM1 CH4 on PA11.
+ * The STM32F7 Discovery has no real on-board PWM devices, but the board can
+ * be configured to output a pulse train using TIM1 CH4 on PA11.
  */
 
 #define GPIO_TIM1_CH4OUT  GPIO_TIM1_CH4OUT_1
@@ -407,8 +394,8 @@
 
 /* SDMMC */
 
-/* Stream selections are arbitrary for now but might become important in the future
- * if we set aside more DMA channels/streams.
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
  *
  * SDIO DMA
  *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
@@ -418,7 +405,7 @@
  *   DMAMAP_SDMMC2_2 = Channel 11, Stream 5
  */
 
-// #define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
+/* #define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1 */
 #define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
 
 /* SDIO dividers.  Note that slower clocking is required when DMA is disabled

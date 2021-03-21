@@ -72,14 +72,14 @@
 
 /* SDRAM differences */
 
-#if defined(CONFIG_SAMA5D3xEK_MT47H128M16RT)
+#if defined(CONFIG_SAMA5D3XEK_MT47H128M16RT)
 
   /* Used for SDRAM command handshaking */
 
 #  define DDR2_BA0    (1 << 26)
 #  define DDR2_BA1    (1 << 27)
 
-#elif defined(CONFIG_SAMA5D3xEK_MT47H64M16HR)
+#elif defined(CONFIG_SAMA5D3XEK_MT47H64M16HR)
 
   /* Used for SDRAM command handshaking */
 
@@ -111,13 +111,13 @@
 #define LOOP_GUARD 100
 #  define CYCLES_TO_COUNT(cycles) (((cycles) / 6) + LOOP_GUARD)
 
-#if defined(CONFIG_SAMA5D3xEK_384MHZ)
+#if defined(CONFIG_SAMA5D3XEK_384MHZ)
 #  define NSEC_TO_COUNT(nsec)     ((((nsec) * 1000) / 15625) + LOOP_GUARD)
 #  define USEC_TO_COUNT(usec)     ((((usec) * 1000000) / 15625) + LOOP_GUARD)
-#elif defined(CONFIG_SAMA5D3xEK_528MHZ)
+#elif defined(CONFIG_SAMA5D3XEK_528MHZ)
 #  define NSEC_TO_COUNT(nsec)     ((((nsec) * 1000) / 11364) + LOOP_GUARD)
 #  define USEC_TO_COUNT(usec)     ((((usec) * 1000000) / 11364) + LOOP_GUARD)
-#else /* #elif defined(CONFIG_SAMA5D3xEK_396MHZ) */
+#else /* #elif defined(CONFIG_SAMA5D3XEK_396MHZ) */
 #  define NSEC_TO_COUNT(nsec)     ((((nsec) * 1000) / 15152) + LOOP_GUARD)
 #  define USEC_TO_COUNT(usec)     ((((usec) * 1000000) / 15152) + LOOP_GUARD)
 #endif
@@ -252,7 +252,7 @@ void sam_sdram_config(void)
    * Register
    */
 
-#if defined(CONFIG_SAMA5D3xEK_MT47H128M16RT)
+#if defined(CONFIG_SAMA5D3XEK_MT47H128M16RT)
 
   /* For MT47H128M16RT
    *
@@ -280,7 +280,7 @@ void sam_sdram_config(void)
            MPDDRC_CR_NDQS |     /* Not DQS */
            MPDDRC_CR_UNAL;      /* upport Unaligned Access */
 
-#elif defined(CONFIG_SAMA5D3xEK_MT47H64M16HR)
+#elif defined(CONFIG_SAMA5D3XEK_MT47H64M16HR)
   /* For MT47H64M16HR
    *
    *   NC      = 10 DDR column bits

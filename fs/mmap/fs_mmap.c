@@ -29,6 +29,7 @@
 #include <sys/ioctl.h>
 #include <stdint.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
@@ -95,16 +96,22 @@
  *   On success, mmap() returns a pointer to the mapped area. On error, the
  *   value MAP_FAILED is returned, and errno is set appropriately.
  *
+ *     EACCES
+ *       The fd argument is not open for read, regardless of the
+ *       protection specified, or fd is not open for write and PROT_WRITE
+ *       was specified for a MAP_SHARED type mapping.
  *     ENOSYS
  *       Returned if any of the unsupported mmap() features are attempted
  *     EBADF
- *      'fd' is not a valid file descriptor.
+ *       'fd' is not a valid file descriptor.
  *     EINVAL
- *      Length is 0. flags contained neither MAP_PRIVATE or MAP_SHARED, or
- *      contained both of these values.
+ *       Length is 0. flags contained neither MAP_PRIVATE or MAP_SHARED, or
+ *       contained both of these values.
  *     ENODEV
- *      The underlying filesystem of the specified file does not support
- *      memory mapping.
+ *       The underlying filesystem of the specified file does not support
+ *       memory mapping.
+ *     ENOMEM
+ *       Insufficient memory is available to map the file.
  *
  ****************************************************************************/
 
@@ -112,7 +119,8 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
                int fd, off_t offset)
 {
   FAR void *addr;
-  int ret = -1;
+  FAR struct file *filep;
+  int ret;
 
   /* Since only a tiny subset of mmap() functionality, we have to verify many
    * things.
@@ -132,6 +140,16 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       goto errout;
     }
 
+#ifndef CONFIG_FS_RAMMAP
+  if ((flags & MAP_PRIVATE) != 0)
+    {
+      ferr("ERROR: MAP_PRIVATE is not supported without file mapping"
+           "emulation\n");
+      ret = -ENOSYS;
+      goto errout;
+    }
+#endif /* CONFIG_FS_RAMMAP */
+
   /* A length of 0 is invalid. */
 
   if (length == 0)
@@ -140,7 +158,31 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       ret = -EINVAL;
       goto errout;
     }
-#endif
+#endif /* CONFIG_DEBUG_FEATURES */
+
+  if (fs_getfilep(fd, &filep) < 0)
+    {
+      ferr("ERROR: Invalid file descriptor, fd=%d\n", fd);
+      ret = -EBADF;
+      goto errout;
+    }
+
+  if ((filep->f_oflags & O_WROK) == 0 && prot == PROT_WRITE &&
+      (flags & MAP_SHARED) != 0)
+    {
+      ferr("ERROR: Unsupported options for read-only file descriptor,"
+           "fd=%d prot=%x flags=%04x\n", fd, prot, flags);
+      ret = -EACCES;
+      goto errout;
+    }
+
+  if ((filep->f_oflags & O_RDOK) == 0)
+    {
+      ferr("ERROR: File descriptor does not have read permission,"
+           "fd=%d\n", fd);
+      ret = -EACCES;
+      goto errout;
+    }
 
   /* Check if we are just be asked to allocate memory, i.e., MAP_ANONYMOUS
    * set meaning that the memory is not backed up from a file.  The file
@@ -169,17 +211,24 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       return alloc;
     }
 
+  if ((flags & MAP_PRIVATE) != 0)
+    {
+#ifdef CONFIG_FS_RAMMAP
+      /* Allocate memory and copy the file into memory.  We would, of course,
+       * do much better in the KERNEL build using the MMU.
+       */
+
+      return rammap(fd, length, offset);
+#endif
+    }
+
   /* Perform the ioctl to get the base address of the file in 'mapped'
    * in memory. (casting to uintptr_t first eliminates complaints on some
    * architectures where the sizeof long is different from the size of
    * a pointer).
    */
 
-  if ((flags & MAP_PRIVATE) == 0)
-    {
-      ret = nx_ioctl(fd, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
-    }
-
+  ret = nx_ioctl(fd, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
   if (ret < 0)
     {
       /* Not directly mappable, probably because the underlying media does

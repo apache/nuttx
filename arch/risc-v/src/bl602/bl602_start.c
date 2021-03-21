@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#define showprogress(c) up_lowputc(c)
+#define showprogress(c) riscv_lowputc(c)
 #else
 #define showprogress(c)
 #endif
@@ -118,7 +118,7 @@ void bfl_main(void)
   modifyreg32(BL602_HBN_IRQ_MODE, 0, HBN_IRQ_MODE_REG_AON_PAD_IE_SMT);
 
 #ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  riscv_earlyserialinit();
 #endif
 
   /* Do board initialization */

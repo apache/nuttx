@@ -94,7 +94,17 @@ int find_blockdriver(FAR const char *pathname, int mountflags,
 
   if (!INODE_IS_BLOCK(inode))
     {
-      ferr("ERROR: %s is not a block driver\n", pathname);
+#ifdef CONFIG_MTD
+      if (INODE_IS_MTD(inode))
+        {
+          finfo("%s is a MTD\n", pathname);
+        }
+      else
+#endif
+        {
+          ferr("ERROR: %s is not a block driver\n", pathname);
+        }
+
       ret = -ENOTBLK;
       goto errout_with_inode;
     }

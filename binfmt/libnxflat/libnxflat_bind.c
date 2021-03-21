@@ -461,11 +461,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 
           /* Find the exported symbol value for this symbol name. */
 
-#ifdef CONFIG_SYMTAB_ORDEREDBYNAME
-          symbol = symtab_findorderedbyname(exports, symname, nexports);
-#else
           symbol = symtab_findbyname(exports, symname, nexports);
-#endif
           if (!symbol)
             {
               berr("Exported symbol \"%s\" not found\n", symname);

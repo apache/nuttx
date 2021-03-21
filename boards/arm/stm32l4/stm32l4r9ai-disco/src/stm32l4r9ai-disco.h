@@ -169,6 +169,7 @@
   (GPIO_INPUT |GPIO_PULLDOWN |GPIO_EXTI | GPIO_PORTB | GPIO_PIN1)
 
 /* SPI1 off */
+
 /* XXX is this used on disco? */
 
 #define GPIO_SPI1_MOSI_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
@@ -201,7 +202,7 @@ extern struct spi_dev_s *g_spi2;
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -222,7 +223,9 @@ int stm32l4_adc_setup(void);
  *
  ****************************************************************************/
 
-int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *vext);
+int stm32l4_adc_measure_voltages(uint32_t *vrefint,
+                                 uint32_t *vbat,
+                                 uint32_t *vext);
 
 /****************************************************************************
  * Name: stm32l4_dac_setup

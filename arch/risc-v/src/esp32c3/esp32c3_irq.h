@@ -48,6 +48,26 @@
 void up_irqinitialize(void);
 
 /****************************************************************************
+ * Name: esp32c3_bind_irq
+ *
+ * Description:
+ *   Bind IRQ and resource with given parameters.
+ *
+ * Input Parameters:
+ *   cpuint    - CPU interrupt ID
+ *   periphid  - Peripheral ID
+ *   prio      - Interrupt priority
+ *   flags     - Interrupt flags
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32c3_bind_irq(uint8_t cpuint, uint8_t periphid, uint8_t prio,
+                      uint32_t flags);
+
+/****************************************************************************
  * Name: esp32c3_request_irq
  *
  * Description:

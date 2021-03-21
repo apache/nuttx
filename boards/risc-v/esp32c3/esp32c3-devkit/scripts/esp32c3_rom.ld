@@ -1527,7 +1527,6 @@ lmacReachShortLimit = 0x4000161c;
 lmacRecycleMPDU = 0x40001620;
 lmacRxDone = 0x40001624;
 lmacSetTxFrame = 0x40001628;
-lmacTxDone = 0x4000162c;
 lmacTxFrame = 0x40001630;
 mac_tx_set_duration = 0x40001634;
 mac_tx_set_htsig = 0x40001638;
@@ -1933,3 +1932,28 @@ rom_pll_correct_dcap = 0x40001b1c;
 rom_phy_en_hw_set_freq = 0x40001b20;
 rom_phy_dis_hw_set_freq = 0x40001b24;
 rom_pll_vol_cal = 0x40001b28;
+
+/***************************************
+ Group memory and string
+ ***************************************/
+
+memset = 0x40000354;
+memcpy = 0x40000358;
+memmove = 0x4000035c;
+memcmp = 0x40000360;
+memccpy = 0x400003c4;
+memchr = 0x400003c8;
+memrchr = 0x400003cc;
+strcpy = 0x40000364;
+strncpy = 0x40000368;
+strcmp = 0x4000036c;
+strncmp = 0x40000370;
+strlen = 0x40000374;
+strstr = 0x40000378;
+bzero = 0x4000037c;
+
+/***************************************
+ Redefine functions
+ ***************************************/
+
+PROVIDE ( esp_rom_delay_us = ets_delay_us );

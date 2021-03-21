@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <poll.h>
+#include <fcntl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -86,7 +87,7 @@ enum EPOLL_EVENTS
 
 enum
 {
-  EPOLL_CLOEXEC = 02000000
+  EPOLL_CLOEXEC = O_CLOEXEC
 #define EPOLL_CLOEXEC EPOLL_CLOEXEC
 };
 

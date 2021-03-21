@@ -87,9 +87,9 @@
 #  undef CONFIG_CAN
 #endif
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
- * is not enabled.  Can't support MMC/SD features if the upper half MMC/SD SDIO
- * driver is not enabled.
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO
+ * support is not enabled.  Can't support MMC/SD features if the upper
+ * half MMC/SD SDIO driver is not enabled.
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO)
@@ -123,6 +123,7 @@
 #endif
 
 /* Olimex-STM32-P407 GPIOs **************************************************/
+
 /* LEDs */
 
 #define GPIO_LED_STATUS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
@@ -171,7 +172,8 @@
  * ---------- --------  -------  ---------------------------
  * PIO        SIGNAL    Pulled   Comments
  * ---------- --------  -------  -----------------------
- * --         NCD                Card detect, combined with pins settings CD/PC11
+ * --         NCD                Card detect,
+ *                               combined with pins settings CD/PC11
  * PC9        DAT1      UP 33K    Also interrupt
  * PC8        DAT0      UP 33K   "        " "" "    "
  * PC12       CLK        ----    "        " "" "    "
@@ -187,13 +189,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

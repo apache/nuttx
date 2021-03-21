@@ -1,44 +1,29 @@
-/********************************************************************************
+/****************************************************************************
  * boards/arm/kinetis/freedom-k28f/include/board.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_KINETIS_FREEDOM_K28F_INCLUDE_BOARD_H
 #define __BOARDS_ARM_KINETIS_FREEDOM_K28F_INCLUDE_BOARD_H
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,11 +34,11 @@
 # include <arch/chip/kinetis_mcg.h>
 #endif
 
-/********************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *********************************************************************/
+/* Clocking *****************************************************************/
 
 /* The Freedom K28F uses a 12MHz external Oscillator.
  * The Kinetis MCU startup from an internal digitally-controlled oscillator
@@ -129,7 +114,8 @@
                                          BOARD_SIM_CLKDIV2_USBFRAC)
 #endif
 
-/* Divider output clock = Divider input clock * ((PLLFLLFRAC+1)/(PLLFLLDIV+1))
+/* Divider output
+ *  clock = Divider input clock * ((PLLFLLFRAC+1)/(PLLFLLDIV+1))
  *  SIM_CLKDIV3_FREQ = BOARD_SOPT2_FREQ * ((PLLFLLFRAC+1) / (PLLFLLDIV+1))
  *  SIM_CLKDIV3_FREQ = BOARD_SOPT2_FREQ / (PLLFLLDIV+1) * (PLLFLLFRAC+1)
  *                72MHz = 144MHz / (1 + 1) * (1 + 0)
@@ -147,7 +133,7 @@
 #define BOARD_TPM_CLKSRC     SIM_SOPT2_TPMSRC_MCGCLK
 #define BOARD_TPM_FREQ       BOARD_SIM_CLKDIV3_FREQ
 
-/* SDHC clocking ****************************************************************/
+/* SDHC clocking ************************************************************/
 
 /* SDCLK configurations corresponding to various modes of operation.
  *   Formula is:
@@ -229,7 +215,7 @@
 #define GPIO_FTM2_CH0OUT PIN_FTM2_CH0    /* Pin 25: PTB18 */
 #define GPIO_FTM2_CH1OUT PIN_FTM2_CH1    /* Pin 32: PTB19 */
 
-/* LED definitions **************************************************************/
+/* LED definitions **********************************************************/
 
 /* A single LED is available driven by PTC5.  The LED is grounded so bringing
  * PTC5 high will illuminate the LED.
@@ -261,11 +247,11 @@
 #define LED_ASSERTION                3 /* STATUS LED=no change */
 #define LED_PANIC                    3 /* STATUS LED=flashing */
 
-/* Button definitions ***********************************************************/
+/* Button definitions *******************************************************/
 
 /* The freedom-k28f board has no standard GPIO contact buttons */
 
-/* Alternative pin resolution ***************************************************/
+/* Alternative pin resolution ***********************************************/
 
 /* The Freedom K28F has five LPUARTs with pin availability as follows:
  *
@@ -426,7 +412,7 @@
 #  define PIN_SDHC0_DCLK    PIN_SDHC0_DCLK_1
 #endif
 
-/* LED definitions **************************************************************/
+/* LED definitions **********************************************************/
 
 /* The Freedom K28F has a single RGB LED driven by the K28F as follows:
  *
@@ -472,7 +458,7 @@
 #define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
 #undef  LED_IDLE            /* K28 is in sleep mode     (Not used)        */
 
-/* Button definitions ***********************************************************/
+/* Button definitions *******************************************************/
 
 /* Two push buttons, SW2 and SW3, are available on FRDM-K28F board,
  * where SW2 is connected to PTA4 and SW3 is connected to PTD0.

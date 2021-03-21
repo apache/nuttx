@@ -1,41 +1,26 @@
-/************************************************************************************
+/****************************************************************************
  * boards/arm/lpc17xx_40xx/lx_cpu/src/lpc17_40_sdraminitialize.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,12 +39,13 @@
 
 #if defined(CONFIG_LPC17_40_EMC) && defined(CONFIG_LPC17_40_EXTDRAM)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* The core clock is LPC17_40_EMCCLK which may be either LPC17_40_CCLK* (undivided)
- * or LPC17_40_CCLK / 2 as determined by settings in the board.h header file.
+/* The core clock is LPC17_40_EMCCLK which may be either LPC17_40_CCLK*
+ * (undivided) or LPC17_40_CCLK / 2 as determined by settings in the board.h
+ * header file.
  *
  * For example:
  *   LPC17_40_CCLCK      =  120,000,000
@@ -111,7 +97,7 @@ static volatile uint32_t lx_cpu_ringosccount[2] =
  * Private Functions
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name:
  *   lx_cpu_running_from_sdram
  *
@@ -141,7 +127,7 @@ static int lx_cpu_running_from_sdram(void)
 
 /* SDRAM code based on NXP application notes and emc_sdram.c example */
 
-/*****************************************************************************
+/****************************************************************************
  * Name:
  *   lx_cpu_sdram_test
  *
@@ -183,7 +169,8 @@ static uint32_t lx_cpu_sdram_test(void)
       for (j = 0; j < 0x100; j++)
         {
           data = *wr_ptr;
-          if (data != (((((i + j) + 1) & 0xffff) << 16) | ((i + j) & 0xffff)))
+          if (data != (((((i + j) + 1) & 0xffff) << 16) |
+             ((i + j) & 0xffff)))
             {
               return 0x0;
             }
@@ -270,6 +257,7 @@ static uint32_t lx_cpu_sdram_find_cmddly(void)
       /* A working value couldn't be found, just pick something
        * safe so the system doesn't become unstable
        */
+
       cmddly = 0x10;
     }
 
@@ -438,15 +426,16 @@ static void lx_cpu_sdram_adjust_timing(void)
   fbclkdly <<= SYSCON_EMCDLYCTL_FBCLKDLY_SHIFT;
   fbclkdly  &= SYSCON_EMCDLYCTL_FBCLKDLY_MASK;
 
-  regval    &= ~SYSCON_EMCDLYCTL_CMDDLY_MASK | SYSCON_EMCDLYCTL_FBCLKDLY_MASK;
+  regval    &= ~SYSCON_EMCDLYCTL_CMDDLY_MASK |
+                SYSCON_EMCDLYCTL_FBCLKDLY_MASK;
   regval    |= cmddly | fbclkdly;
 
   putreg32(regval, LPC17_40_SYSCON_EMCDLYCTL);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: lpc17_40_setup_sdram
@@ -509,30 +498,35 @@ void lx_cpu_sdram_initialize(void)
   putreg32(regval, LPC17_40_EMC_DYNAMICRASCAS0); /* 2 RAS, 2 CAS latency */
   putreg32(1, LPC17_40_EMC_DYNAMICREADCONFIG);   /* Command delayed strategy, using EMCCLKDELAY */
 
-                                                 /* EMC_NS2CLK(20)  TRP   = 20 nS */
-  putreg32(1, LPC17_40_EMC_DYNAMICRP);           /* ( n + 1 ) -> 2 clock cycles */
+  /* EMC_NS2CLK(20)  TRP   = 20 nS */
 
-  putreg32(3, LPC17_40_EMC_DYNAMICRAS);          /* ( n + 1 ) -> 4 clock cycles */
+  putreg32(1, LPC17_40_EMC_DYNAMICRP);    /* ( n + 1 ) -> 2 clock cycles */
 
-  putreg32(5, LPC17_40_EMC_DYNAMICSREX);         /* ( n + 1 ) -> 6 clock cycles */
+  putreg32(3, LPC17_40_EMC_DYNAMICRAS);   /* ( n + 1 ) -> 4 clock cycles */
 
-  putreg32(2, LPC17_40_EMC_DYNAMICAPR);          /* ( n + 1 ) -> 3 clock cycles */
+  putreg32(5, LPC17_40_EMC_DYNAMICSREX);  /* ( n + 1 ) -> 6 clock cycles */
 
-                                                 /* EMC_NS2CLK(20) + 2 TRP + TDPL = 20ns + 2clk */
-  putreg32(3, LPC17_40_EMC_DYNAMICDAL);          /* ( n ) -> 3 clock cycles */
+  putreg32(2, LPC17_40_EMC_DYNAMICAPR);   /* ( n + 1 ) -> 3 clock cycles */
 
-  putreg32(1, LPC17_40_EMC_DYNAMICWR);           /* ( n + 1 ) -> 2 clock cycles */
+  /* EMC_NS2CLK(20) + 2 TRP + TDPL = 20ns + 2clk */
 
-                                                 /* EMC_NS2CLK(63) */
-  putreg32(4, LPC17_40_EMC_DYNAMICRC);           /* ( n + 1 ) -> 5 clock cycles */
+  putreg32(3, LPC17_40_EMC_DYNAMICDAL);   /* ( n ) -> 3 clock cycles */
 
-                                                 /* EMC_NS2CLK(63) */
-  putreg32(4, LPC17_40_EMC_DYNAMICRFC);          /* ( n + 1 ) -> 5 clock cycles */
+  putreg32(1, LPC17_40_EMC_DYNAMICWR);    /* ( n + 1 ) -> 2 clock cycles */
 
-  putreg32(5, LPC17_40_EMC_DYNAMICXSR);          /* ( n + 1 ) -> 6 clock cycles */
+  /* EMC_NS2CLK(63) */
 
-                                                 /* EMC_NS2CLK(63) */
-  putreg32(1, LPC17_40_EMC_DYNAMICRRD);          /* ( n + 1 ) -> 2 clock cycles */
+  putreg32(4, LPC17_40_EMC_DYNAMICRC);    /* ( n + 1 ) -> 5 clock cycles */
+
+  /* EMC_NS2CLK(63) */
+
+  putreg32(4, LPC17_40_EMC_DYNAMICRFC);   /* ( n + 1 ) -> 5 clock cycles */
+
+  putreg32(5, LPC17_40_EMC_DYNAMICXSR);   /* ( n + 1 ) -> 6 clock cycles */
+
+  /* EMC_NS2CLK(63) */
+
+  putreg32(1, LPC17_40_EMC_DYNAMICRRD);  /* ( n + 1 ) -> 2 clock cycles */
 
   putreg32(1, LPC17_40_EMC_STATICEXTENDEDWAIT);  /* ( n + 1 ) -> 2 clock cycles */
 
@@ -550,7 +544,9 @@ void lx_cpu_sdram_initialize(void)
 
   /* Timing for 72MHz Bus */
 
-  /* ( n * 16 ) -> 1120 clock cycles -> 15.556uS at 72MHz <= 15.625uS (64ms / 4096 row) */
+  /* ( n * 16 ) -> 1120 clock cycles -> 15.556uS at
+   * 72MHz <= 15.625uS (64ms / 4096 row)
+   */
 
   regval   = 64000000 / (1 << 12);
   regval  -= 16;

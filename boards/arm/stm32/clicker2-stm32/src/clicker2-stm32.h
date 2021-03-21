@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/clicker2-stm32/src/clicker2-stm32.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -140,6 +125,7 @@
 #endif
 
 /* Mickroe Clicker2 STM32 GPIOs *********************************************/
+
 /* LEDs
  *
  * The Mikroe Clicker2 STM32 has two user controllable LEDs:
@@ -173,10 +159,12 @@
  *   PA9  OTG_FS_VBUS VBUS sensing (USB-DET)
  *
  * USB host does not appear to be supported.  My interpretation is that power
- * is provided via LTC3586 which can be driven either from USB VBUS or from PWR-EN
- * (controlled by SW1).  But I don't see any capability to drive VBUS power.
+ * is provided via LTC3586 which can be driven either from USB VBUS or from
+ * PWR-EN (controlled by SW1).
+ * But I don't see any capability to drive VBUS power.
  *
- * Overcurrent and battery status are provided by the LTC3586, but not USB power.
+ * Overcurrent and battery status are provided by the LTC3586, but not USB
+ * power.
  *
  *   PC6  Overcurrent detection (PC6-FAULT)
  *   PD4  Battery status (PD4-BATSTAT)
@@ -193,7 +181,7 @@
 #define GPIO_PWR_FAULT   (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTC|GPIO_PIN6)
 #define GPIO_PWR_BATSTAT (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTD|GPIO_PIN4)
 
-/* mikroBUS *************************************************************************/
+/* mikroBUS *****************************************************************/
 
 /* U[S]ARTs
  *
@@ -246,8 +234,9 @@
  *   mikroBUS1 Interrupt: PE10-MB1_INT
  *   mikroBUS2 Interrupt: PE14-MB2_INT
  *
- * I assume that the interrupt lines are active low.  No pull-ups are provided on
- * board so pull-ups are provided in the pin configurations.
+ * I assume that the interrupt lines are active low.
+ * No pull-ups are provided on board so pull-ups are provided
+ * in the pin configurations.
  */
 
 #define GPIO_MB1_INT     (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTE|GPIO_PIN10)
@@ -256,15 +245,15 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Mikroe Clicker2 STM32
- *   board.
+ *   Called to configure SPI chip select GPIO pins for the Mikroe Clicker2
+ *   STM32 board.
  *
  ****************************************************************************/
 
@@ -290,8 +279,8 @@ int stm32_bringup(void);
  * Name: stm32_usb_configure
  *
  * Description:
- *   Called from stm32_boardinitialize very early in inialization to setup USB-related
- *   GPIO pins for the Mikroe Clicker2 STM32 board.
+ *   Called from stm32_boardinitialize very early in inialization to setup
+ *   USB-related GPIO pins for the Mikroe Clicker2 STM32 board.
  *
  ****************************************************************************/
 
@@ -408,10 +397,10 @@ int stm32_automount_initialize(void);
  * Name: stm32_automount_event
  *
  * Description:
- *   The MMCSD card detection logic has detected an insertion or removal event.  It
- *   has already scheduled the MMC/SD block driver operations.  Now we need to
- *   schedule the auto-mount event which will occur with a substantial delay to make
- *   sure that everything has settle down.
+ *   The MMCSD card detection logic has detected an insertion or removal
+ *   event.  It has already scheduled the MMC/SD block driver operations.
+ *   Now we need to schedule the auto-mount event which will occur with a
+ *   substantial delay to make sure that everything has settle down.
  *
  * Input Parameters:
  *   slotno - Identifies the MB slot: MB1_MMCSD_SLOTNO or MB2_MMCSD_SLOTNO.

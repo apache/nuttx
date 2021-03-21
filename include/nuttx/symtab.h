@@ -73,8 +73,9 @@ extern "C"
  *
  * Description:
  *   Find the symbol in the symbol table with the matching name.
- *   This version assumes that table is not ordered with respect to symbol
- *   name and, hence, access time will be linear with respect to nsyms.
+ *   The implementation will be linear with respect to nsyms if
+ *   CONFIG_SYMTAB_ORDEREDBYNAME is not selected, and logarithmic
+ *   if it is.
  *
  * Returned Value:
  *   A reference to the symbol table entry if an entry with the matching
@@ -87,29 +88,12 @@ symtab_findbyname(FAR const struct symtab_s *symtab,
                   FAR const char *name, int nsyms);
 
 /****************************************************************************
- * Name: symtab_findorderedbyname
- *
- * Description:
- *   Find the symbol in the symbol table with the matching name.
- *   This version assumes that table ordered with respect to symbol name.
- *
- * Returned Value:
- *   A reference to the symbol table entry if an entry with the matching
- *   name is found; NULL is returned if the entry is not found.
- *
- ****************************************************************************/
-
-FAR const struct symtab_s *
-symtab_findorderedbyname(FAR const struct symtab_s *symtab,
-                         FAR const char *name, int nsyms);
-
-/****************************************************************************
  * Name: symtab_findbyvalue
  *
  * Description:
  *   Find the symbol in the symbol table whose value closest (but not greater
  *   than), the provided value. This version assumes that table is not
- *   ordered with respect to symbol name and, hence, access time will be
+ *   ordered with respect to symbol value and, hence, access time will be
  *   linear with respect to nsyms.
  *
  * Returned Value:

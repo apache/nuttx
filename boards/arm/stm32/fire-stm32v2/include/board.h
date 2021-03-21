@@ -1,36 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/fire-stm32v2/include/board.h
- * include/arch/board/board.h
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -53,7 +37,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* HSI - 8 MHz RC factory-trimmed
  * LSI - 40 KHz RC (30-60KHz, uncalibrated)
@@ -68,7 +52,10 @@
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
 #define STM32_LSE_FREQUENCY     32768
 
-/* PLL source is HSE/1, PLL multipler is 9: PLL frequency is 8MHz (XTAL) x 9 = 72MHz */
+/* PLL source is HSE/1,
+ * PLL multipler is 9:
+ * PLL frequency is 8MHz (XTAL) x 9 = 72MHz
+ */
 
 #define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC
 #define STM32_CFGR_PLLXTPRE     0
@@ -118,7 +105,8 @@
 
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
  * otherwise frequency is 2xAPBx.
- * Note: TIM1,8 are on APB2, others on APB1 */
+ * Note: TIM1,8 are on APB2, others on APB1
+ */
 
 #define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM2_FREQUENCY    STM32_HCLK_FREQUENCY
@@ -159,12 +147,15 @@
 #  define SDIO_SDXFR_CLKDIV     (3 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
-/* LED definitions ******************************************************************/
-/* The M3 Wildfire has 3 LEDs labeled LED1, LED2 and LED3.  These LEDs are not
- * used by the NuttX port unless CONFIG_ARCH_LEDS is defined.  In that case, the
- * usage by the board port is defined in include/board.h and src/up_autoleds.c.
+/* LED definitions **********************************************************/
+
+/* The M3 Wildfire has 3 LEDs labeled LED1, LED2 and LED3.
+ * These LEDs are not used by the NuttX port unless CONFIG_ARCH_LEDS is
+ * defined. In that case, the usage by the board port is defined in
+ * include/board.h and src/up_autoleds.c.
  * The LEDs are used to encode OS-related events as follows:
  */
+
                                       /* LED1   LED2   LED3 */
 #define LED_STARTED                0  /* OFF    OFF    OFF */
 #define LED_HEAPALLOCATE           1  /* ON     OFF    OFF */
@@ -186,12 +177,13 @@
 #define BUTTON_KEY1_BIT            (1 << BUTTON_KEY1)
 #define BUTTON_KEY2_BIT            (1 << BUTTON_KEY2)
 
-/* Pin Remapping ********************************************************************/
+/* Pin Remapping ************************************************************/
+
 /* USB 2.0
  *
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
  * 70  PA11   PA11-USBDM     USB2.0
  * 71  PA12   PA12-USBDP     USB2.0
@@ -200,13 +192,16 @@
 
 /* 2.4" TFT + Touchscreen
  *
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
- * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
+ * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                             SPI 2M FLASH
+ * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                             SPI 2M FLASH
+ * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                             SPI 2M FLASH
  * 92  PB6    PB6-I2C1-SCL   2.4" TFT + Touchscreen, AT24C02
  * 93  PB7    PB7-I2C1-SDA   2.4" TFT + Touchscreen, AT24C02
  * 81  PD0    PD0-FSMC_D2    2.4" TFT + Touchscreen
@@ -243,9 +238,9 @@
 
 /* AT24C02
  *
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
  * 92  PB6    PB6-I2C1-SCL   2.4" TFT + Touchscreen, AT24C02
  * 93  PB7    PB7-I2C1-SDA   2.4" TFT + Touchscreen, AT24C02
@@ -257,9 +252,9 @@
 
 /* Potentiometer/ADC
  *
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
  * 16  PC1    PC1/ADC123-IN11 Potentiometer (R16)
  * 24  PA1    PC1/ADC123-IN1
@@ -267,14 +262,18 @@
 
 /* USARTs
  *
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
- * 68  PA9    PA9-US1-TX     MAX3232, DB9 D8, Requires !CONFIG_STM32_USART1_REMAP
- * 69  PA10   PA10-US1-RX    MAX3232, DB9 D8, Requires !CONFIG_STM32_USART1_REMAP
- * 25  PA2    PA2-US2-TX     MAX3232, DB9 D7, Requires !CONFIG_STM32_USART2_REMAP
- * 26  PA3    PA3-US2-RX     MAX3232, DB9 D7, Requires !CONFIG_STM32_USART2_REMAP
+ * 68  PA9    PA9-US1-TX     MAX3232, DB9 D8,
+ *                           Requires !CONFIG_STM32_USART1_REMAP
+ * 69  PA10   PA10-US1-RX    MAX3232, DB9 D8,
+ *                           Requires !CONFIG_STM32_USART1_REMAP
+ * 25  PA2    PA2-US2-TX     MAX3232, DB9 D7,
+ *                           Requires !CONFIG_STM32_USART2_REMAP
+ * 26  PA3    PA3-US2-RX     MAX3232, DB9 D7,
+ *                           Requires !CONFIG_STM32_USART2_REMAP
  */
 
 #if defined(CONFIG_STM32_USART1) && defined(CONFIG_STM32_USART1_REMAP)
@@ -287,14 +286,17 @@
 
 /* 2MBit SPI FLASH
  *
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
  * 29  PA4    PA4-SPI1-NSS   10Mbit ENC28J60, SPI 2M FLASH
- * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
+ * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                          SPI 2M FLASH
+ * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                          SPI 2M FLASH
+ * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                          SPI 2M FLASH
  */
 
 #if defined(CONFIG_STM32_SPI1) && defined(CONFIG_STM32_SPI1_REMAP)
@@ -303,14 +305,17 @@
 
 /* ENC28J60
  *
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
  * 29  PA4    PA4-SPI1-NSS   10Mbit ENC28J60, SPI 2M FLASH
- * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
+ * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                            SPI 2M FLASH
+ * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                            SPI 2M FLASH
+ * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                            SPI 2M FLASH
  * 98  PE1    PE1-FSMC_NBL1  2.4" TFT + Touchscreen, 10Mbit EN28J60 Reset
  * 4   PE5    (no name)      10Mbps ENC28J60 Interrupt
  */
@@ -321,9 +326,9 @@
 
 /* MP3
  *
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
  * 48  PB11   PB11-MP3-RST   MP3
  * 51  PB12   PB12-SPI2-NSS  MP3
@@ -336,9 +341,9 @@
 
 /* SD Card
  *
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
  * 65  PC8    PC8-SDIO-D0    SD card, pulled high
  * 66  PC9    PC9-SDIO-D1    SD card, pulled high
@@ -350,9 +355,9 @@
 
 /* CAN
  *
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
  * 95  PB8    PB8-CAN-RX     CAN transceiver, Header 2H
  * 96  PB9    PB9-CAN-TX     CAN transceiver, Header 2H
@@ -385,10 +390,11 @@ extern "C"
  * Name:  fire_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the M3 Wildfire board.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface just for the M3 Wildfire board.
+ *   Because of the various rotations, clearing the display in the normal
+ *   way by writing a sequences of runs that covers the entire display can be
+ *   very slow.  Here the display is cleared by simply setting all GRAM
+ *   memory to the specified color.
  *
  ****************************************************************************/
 

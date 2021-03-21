@@ -1,42 +1,27 @@
 /****************************************************************************
  * drivers/input/nunchuck.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2017 Alan Carvalho de Assis. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
 /* This file provides a driver for a Nintendo Wii Nunchuck joystick device.
  * The nunchuck joystick provides X/Y positional data as integer values.
- * The analog positional data may also be accompanied by discrete button data.
+ * The analog positional data may also be accompanied by discrete button
+ * data.
  *
  * The nunchuck joystick driver exports a standard character driver
  * interface. By convention, the nunchuck joystick is registered as an input
@@ -114,7 +99,9 @@ static ssize_t nunchuck_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static int     nunchuck_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
+
 /* I2C Helpers */
+
 static int     nunchuck_i2c_read(FAR struct nunchuck_dev_s *priv,
                  FAR uint8_t *regval, int len);
 static int     nunchuck_i2c_write(FAR struct nunchuck_dev_s *priv,
@@ -216,7 +203,7 @@ static int nunchuck_sample(FAR struct nunchuck_dev_s *priv,
 
       /* Delay 20ms */
 
-      nxsig_usleep(20*1000);
+      nxsig_usleep(20 * 1000);
 
       initialized = true;
     }
@@ -275,10 +262,11 @@ static int nunchuck_sample(FAR struct nunchuck_dev_s *priv,
   buffer->acc_x       = (uint16_t) data[2];
   buffer->acc_y       = (uint16_t) data[3];
   buffer->acc_z       = (uint16_t) data[4];
-  buffer->nck_buttons = (uint8_t)  ((data[5]+1) & 0x03);
+  buffer->nck_buttons = (uint8_t) ((data[5] + 1) & 0x03);
 
   iinfo("X: %03d | Y: %03d | AX: %03d AY: %03d AZ: %03d | B: %d\n",
-        data[0], data[1], data[2], data[3], data[4], ((data[5]+1) & 0x03));
+        data[0], data[1], data[2], data[3],
+        data[4], ((data[5] + 1) & 0x03));
 
   return OK;
 }
@@ -319,7 +307,8 @@ static int nunchuck_open(FAR struct file *filep)
 
   /* Allocate a new open structure */
 
-  opriv = (FAR struct nunchuck_open_s *)kmm_zalloc(sizeof(struct nunchuck_open_s));
+  opriv = (FAR struct nunchuck_open_s *)
+               kmm_zalloc(sizeof(struct nunchuck_open_s));
   if (!opriv)
     {
       ierr("ERROR: Failed to allocate open structure\n");
@@ -509,11 +498,12 @@ static int nunchuck_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
     /* Command:     NUNCHUCKIOC_SUPPORTED
-     * Description: Report the set of button events supported by the hardware;
-     * Argument:    A pointer to writeable integer value in which to return the
-     *              set of supported buttons.
-     * Return:      Zero (OK) on success.  Minus one will be returned on failure
-     *              with the errno value set appropriately.
+     * Description: Report the set of button events supported by the
+     *              hardware;
+     * Argument:    A pointer to writeable integer value in which to
+     *              return the set of supported buttons.
+     * Return:      Zero (OK) on success.  Minus one will be returned
+     *              on failure with the errno value set appropriately.
      */
 
     case NUNCHUCKIOC_SUPPORTED:

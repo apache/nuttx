@@ -1670,6 +1670,12 @@ int pcf8574_lcd_backpack_register(FAR const char *devpath,
 
   lcd_init(priv);
 
+  /* If SLCD is console enable the backlight from start */
+
+#ifdef CONFIG_SLCD_CONSOLE
+  lcd_backlight(priv, true);
+#endif
+
   /* Register the character driver */
 
   ret = register_driver(devpath, &g_pcf8574_lcd_fops, 0666, priv);

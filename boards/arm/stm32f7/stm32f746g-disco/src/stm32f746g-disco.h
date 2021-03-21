@@ -1,52 +1,37 @@
-/*******************************************************************************
+/****************************************************************************
  * boards/arm/stm32f7/stm32f746g-disco/src/stm32f746g-disco.h
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_STM32F7_STM32F746G_DISCO_SRC_STM32F746G_DISCO__H
 #define __BOARDS_ARM_STM32F7_STM32F746G_DISCO_SRC_STM32F746G_DISCO__H
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************/
+ ****************************************************************************/
 
 /* procfs File System */
 
@@ -73,7 +58,8 @@
  *
  * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino
  * interface.
- * One end of LD1 is grounded so a high output on PI1 will illuminate the LED.
+ * One end of LD1 is grounded so a high output on PI1 will illuminate the
+ * LED.
  */
 
 #define GPIO_LD1           (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
@@ -91,10 +77,11 @@
 #define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTI | GPIO_PIN11)
 
 /* Sporadic scheduler instrumentation.
- * This configuration has been used for evaluating the NuttX sporadic scheduler.
- * In this evaluation, two GPIO outputs are used.  One indicating the priority
- * (high or low) of the sporadic thread and one indicating where the thread is
- * running or not.
+ * This configuration has been used for evaluating the NuttX sporadic
+ *  scheduler.
+ * In this evaluation, two GPIO outputs are used.
+ * One indicating the priority (high or low) of the sporadic thread and one
+ * indicating where the thread is running or not.
  *
  * There is nothing special about the pin selections:
  *
@@ -120,13 +107,13 @@
 #define SDIO_SLOTNO        0
 #define SDIO_MINOR         0
 
-/*******************************************************************************
- * Public data
- *******************************************************************************/
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_bringup
  *
  * Description:
@@ -138,72 +125,72 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 int stm32_bringup(void);
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the
  *   stm32f746g-disco board.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 void weak_function stm32_spidev_initialize(void);
 
-/*******************************************************************************
+/****************************************************************************
  * Name: arch_sporadic_initialize
  *
  * Description:
  *   This configuration has been used for evaluating the NuttX sporadic
  *   scheduler.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SPORADIC_INSTRUMENTATION
 void arch_sporadic_initialize(void);
 #endif
 
-/*******************************************************************************
+/****************************************************************************
 
  * Name: stm32_enablefmc
  *
  * Description:
  *  enable clocking to the FMC module
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32F7_FMC
 void stm32_enablefmc(void);
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_disablefmc
  *
  * Description:
  *  disable clocking to the FMC module
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32F7_FMC
 void stm32_disablefmc(void);
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32_tsc_setup
  *
  * Description:
@@ -218,7 +205,7 @@ void stm32_disablefmc(void);
  *   Zero is returned on success.  Otherwise, a negated errno value is
  *   returned to indicate the nature of the failure.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_INPUT_FT5X06
 int stm32_tsc_setup(int minor);

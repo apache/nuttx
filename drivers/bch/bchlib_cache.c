@@ -33,7 +33,7 @@
 #include "bch.h"
 
 #if defined(CONFIG_BCH_ENCRYPTION)
-#  include <crypto/crypto.h>
+#  include <nuttx/crypto/crypto.h>
 #endif
 
 /****************************************************************************

@@ -44,8 +44,10 @@
 struct hostfs_rpmsg_server_s
 {
   struct rpmsg_endpoint ept;
-  struct file           files[CONFIG_NFILE_DESCRIPTORS];
-  void                  *dirs[CONFIG_NFILE_DESCRIPTORS];
+  FAR struct file     **files;
+  FAR void            **dirs;
+  int                   file_rows;
+  int                   dir_nums;
   sem_t                 sem;
 };
 
@@ -154,32 +156,180 @@ static const rpmsg_ept_cb g_hostfs_rpmsg_handler[] =
  * Private Functions
  ****************************************************************************/
 
+static int hostfs_rpmsg_attach_file(FAR struct hostfs_rpmsg_server_s *priv,
+                                    FAR struct file *filep)
+{
+  FAR struct file **tmp;
+  int ret;
+  int i;
+  int j;
+
+  nxsem_wait(&priv->sem);
+
+  for (i = 0; i < priv->file_rows; i++)
+    {
+      for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
+        {
+          if (priv->files[i][j].f_inode == NULL)
+            {
+              memcpy(&priv->files[i][j], filep, sizeof(*filep));
+              ret = i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j;
+              goto out;
+            }
+        }
+    }
+
+  tmp = kmm_realloc(priv->files, sizeof(FAR struct file *) * (i + 1));
+  DEBUGASSERT(tmp);
+  if (tmp == NULL)
+    {
+      ret = -ENFILE;
+      goto out;
+    }
+
+  tmp[i] = kmm_zalloc(sizeof(struct file) *
+                      CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
+  DEBUGASSERT(tmp[i]);
+  if (tmp[i] == NULL)
+    {
+      kmm_free(tmp);
+      ret = -ENFILE;
+      goto out;
+    }
+
+  priv->files = tmp;
+  priv->file_rows++;
+
+  memcpy(&priv->files[i][0], filep, sizeof(*filep));
+  ret = i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+
+out:
+  nxsem_post(&priv->sem);
+  return ret;
+}
+
+static int hostfs_rpmsg_detach_file(FAR struct hostfs_rpmsg_server_s *priv,
+                                    int fd, FAR struct file *filep)
+{
+  struct file *tfilep;
+
+  if (fd < 0 || fd >= priv->file_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK)
+    {
+      return -EBADF;
+    }
+
+  nxsem_wait(&priv->sem);
+  tfilep = &priv->files[fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
+                       [fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK];
+  memcpy(filep, tfilep, sizeof(*filep));
+  memset(tfilep, 0, sizeof(*tfilep));
+  nxsem_post(&priv->sem);
+
+  return 0;
+}
+
+static FAR struct file *hostfs_rpmsg_get_file(
+                              FAR struct hostfs_rpmsg_server_s *priv,
+                              int fd)
+{
+  FAR struct file *filep;
+
+  if (fd < 0 || fd >= priv->file_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK)
+    {
+      return NULL;
+    }
+
+  nxsem_wait(&priv->sem);
+  filep = &priv->files[fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
+                      [fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK];
+  nxsem_post(&priv->sem);
+
+  return filep;
+}
+
+static int hostfs_rpmsg_attach_dir(FAR struct hostfs_rpmsg_server_s *priv,
+                                   FAR void *dir)
+{
+  FAR void **tmp;
+  int i;
+
+  nxsem_wait(&priv->sem);
+  for (i = 1; i < priv->dir_nums; i++)
+    {
+      if (priv->dirs[i] == NULL)
+        {
+          priv->dirs[i] = dir;
+          nxsem_post(&priv->sem);
+          return i;
+        }
+    }
+
+  tmp = kmm_realloc(priv->dirs, sizeof(FAR void *) *
+                    (priv->dir_nums + CONFIG_NFILE_DESCRIPTORS_PER_BLOCK));
+  DEBUGASSERT(tmp);
+  if (tmp == NULL)
+    {
+      nxsem_post(&priv->sem);
+      return -ENOMEM;
+    }
+
+  priv->dirs = tmp;
+  priv->dir_nums += CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+
+  priv->dirs[i] = dir;
+  nxsem_post(&priv->sem);
+  return i;
+}
+
+static void *hostfs_rpmsg_detach_dir(FAR struct hostfs_rpmsg_server_s *priv,
+                                    int fd)
+{
+  FAR void *dir = NULL;
+
+  if (fd >= 1 && fd < priv->dir_nums)
+    {
+      nxsem_wait(&priv->sem);
+      dir = priv->dirs[fd];
+      priv->dirs[fd] = NULL;
+      nxsem_post(&priv->sem);
+    }
+
+  return dir;
+}
+
+static FAR void *hostfs_rpmsg_get_dir(
+                              FAR struct hostfs_rpmsg_server_s *priv,
+                              int fd)
+{
+  FAR void *dir = NULL;
+
+  if (fd >= 1 && fd < priv->dir_nums)
+    {
+      nxsem_wait(&priv->sem);
+      dir = priv->dirs[fd];
+      nxsem_post(&priv->sem);
+    }
+
+  return dir;
+}
+
 static int hostfs_rpmsg_open_handler(FAR struct rpmsg_endpoint *ept,
                                      FAR void *data, size_t len,
                                      uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_open_s *msg = data;
-  int i;
-  int ret = -ENOENT;
+  struct file file;
+  int ret;
 
-  nxsem_wait(&priv->sem);
-  for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
+  ret = file_open(&file, msg->pathname, msg->flags, msg->mode);
+  if (ret >= 0)
     {
-      if (!priv->files[i].f_inode)
+      ret = hostfs_rpmsg_attach_file(priv_, &file);
+      if (ret < 0)
         {
-          ret = file_open(&priv->files[i], msg->pathname, msg->flags,
-                          msg->mode);
-          if (ret >= 0)
-            {
-              ret = i;
-            }
-
-          break;
+          file_close(&file);
         }
     }
-
-  nxsem_post(&priv->sem);
 
   msg->header.result = ret;
   return rpmsg_send(ept, msg, sizeof(*msg));
@@ -189,15 +339,14 @@ static int hostfs_rpmsg_close_handler(FAR struct rpmsg_endpoint *ept,
                                       FAR void *data, size_t len,
                                       uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_close_s *msg = data;
-  int ret = -ENOENT;
+  struct file file;
+  int ret;
 
-  if (msg->fd >= 0 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
+  ret = hostfs_rpmsg_detach_file(priv_, msg->fd, &file);
+  if (ret >= 0)
     {
-      nxsem_wait(&priv->sem);
-      ret = file_close(&priv->files[msg->fd]);
-      nxsem_post(&priv->sem);
+      ret = file_close(&file);
     }
 
   msg->header.result = ret;
@@ -208,9 +357,9 @@ static int hostfs_rpmsg_read_handler(FAR struct rpmsg_endpoint *ept,
                                      FAR void *data, size_t len,
                                      uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_read_s *msg = data;
   FAR struct hostfs_rpmsg_read_s *rsp;
+  FAR struct file *filep;
   int ret = -ENOENT;
   uint32_t space;
 
@@ -228,9 +377,10 @@ static int hostfs_rpmsg_read_handler(FAR struct rpmsg_endpoint *ept,
       space = msg->count;
     }
 
-  if (msg->fd >= 0 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
+  filep = hostfs_rpmsg_get_file(priv_, msg->fd);
+  if (filep != NULL)
     {
-      ret = file_read(&priv->files[msg->fd], rsp->buf, space);
+      ret = file_read(filep, rsp->buf, space);
     }
 
   rsp->header.result = ret;
@@ -241,13 +391,14 @@ static int hostfs_rpmsg_write_handler(FAR struct rpmsg_endpoint *ept,
                                       FAR void *data, size_t len,
                                       uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_write_s *msg = data;
+  FAR struct file *filep;
   int ret = -ENOENT;
 
-  if (msg->fd >= 0 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
+  filep = hostfs_rpmsg_get_file(priv_, msg->fd);
+  if (filep != NULL)
     {
-      ret = file_write(&priv->files[msg->fd], msg->buf, msg->count);
+      ret = file_write(filep, msg->buf, msg->count);
     }
 
   msg->header.result = ret;
@@ -258,13 +409,14 @@ static int hostfs_rpmsg_lseek_handler(FAR struct rpmsg_endpoint *ept,
                                       FAR void *data, size_t len,
                                       uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_lseek_s *msg = data;
+  FAR struct file *filep;
   int ret = -ENOENT;
 
-  if (msg->fd >= 0 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
+  filep = hostfs_rpmsg_get_file(priv_, msg->fd);
+  if (filep != NULL)
     {
-      ret = file_seek(&priv->files[msg->fd], msg->offset, msg->whence);
+      ret = file_seek(filep, msg->offset, msg->whence);
     }
 
   msg->header.result = ret;
@@ -275,13 +427,14 @@ static int hostfs_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
                                       FAR void *data, size_t len,
                                       uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_ioctl_s *msg = data;
+  FAR struct file *filep;
   int ret = -ENOENT;
 
-  if (msg->fd >= 0 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
+  filep = hostfs_rpmsg_get_file(priv_, msg->fd);
+  if (filep != NULL)
     {
-      ret = file_ioctl(&priv->files[msg->fd], msg->request, msg->arg);
+      ret = file_ioctl(filep, msg->request, msg->arg);
     }
 
   msg->header.result = ret;
@@ -292,13 +445,14 @@ static int hostfs_rpmsg_sync_handler(FAR struct rpmsg_endpoint *ept,
                                      FAR void *data, size_t len,
                                      uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_sync_s *msg = data;
+  FAR struct file *filep;
   int ret = -ENOENT;
 
-  if (msg->fd >= 0 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
+  filep = hostfs_rpmsg_get_file(priv_, msg->fd);
+  if (filep != NULL)
     {
-      ret = file_fsync(&priv->files[msg->fd]);
+      ret = file_fsync(filep);
     }
 
   msg->header.result = ret;
@@ -309,29 +463,23 @@ static int hostfs_rpmsg_dup_handler(FAR struct rpmsg_endpoint *ept,
                                     FAR void *data, size_t len,
                                     uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_dup_s *msg = data;
-  int i;
+  FAR struct file *filep;
+  struct file newfile;
   int ret = -ENOENT;
 
-  if (msg->fd >= 0 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
+  filep = hostfs_rpmsg_get_file(priv_, msg->fd);
+  if (filep != NULL)
     {
-      nxsem_wait(&priv->sem);
-      for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
+      ret = file_dup2(filep, &newfile);
+      if (ret >= 0)
         {
-          if (!priv->files[i].f_inode)
+          ret = hostfs_rpmsg_attach_file(priv_, &newfile);
+          if (ret < 0)
             {
-              ret = file_dup2(&priv->files[msg->fd], &priv->files[i]);
-              if (ret >= 0)
-                {
-                  ret = i;
-                }
-
-              break;
+              file_close(&newfile);
             }
         }
-
-      nxsem_post(&priv->sem);
     }
 
   msg->header.result = ret;
@@ -342,14 +490,15 @@ static int hostfs_rpmsg_fstat_handler(FAR struct rpmsg_endpoint *ept,
                                       FAR void *data, size_t len,
                                       uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_fstat_s *msg = data;
+  FAR struct file *filep;
   int ret = -ENOENT;
   struct stat buf;
 
-  if (msg->fd >= 0 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
+  filep = hostfs_rpmsg_get_file(priv_, msg->fd);
+  if (filep != NULL)
     {
-      ret = file_fstat(&priv->files[msg->fd], &buf);
+      ret = file_fstat(filep, &buf);
       if (ret >= 0)
         {
           msg->buf = buf;
@@ -364,13 +513,14 @@ static int hostfs_rpmsg_ftruncate_handler(FAR struct rpmsg_endpoint *ept,
                                           FAR void *data, size_t len,
                                           uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_ftruncate_s *msg = data;
+  FAR struct file *filep;
   int ret = -ENOENT;
 
-  if (msg->fd >= 0 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
+  filep = hostfs_rpmsg_get_file(priv_, msg->fd);
+  if (filep != NULL)
     {
-      ret = file_truncate(&priv->files[msg->fd], msg->length);
+      ret = file_truncate(filep, msg->length);
     }
 
   msg->header.result = ret;
@@ -381,28 +531,14 @@ static int hostfs_rpmsg_opendir_handler(FAR struct rpmsg_endpoint *ept,
                                         FAR void *data, size_t len,
                                         uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_opendir_s *msg = data;
   FAR void *dir;
-  int i;
   int ret = -ENOENT;
 
   dir = opendir(msg->pathname);
   if (dir)
     {
-      nxsem_wait(&priv->sem);
-      for (i = 1; i < CONFIG_NFILE_DESCRIPTORS; i++)
-        {
-          if (!priv->dirs[i])
-            {
-              priv->dirs[i] = dir;
-              ret = i;
-              break;
-            }
-        }
-
-      nxsem_post(&priv->sem);
-
+      ret = hostfs_rpmsg_attach_dir(priv_, dir);
       if (ret < 0)
         {
           closedir(dir);
@@ -417,14 +553,15 @@ static int hostfs_rpmsg_readdir_handler(FAR struct rpmsg_endpoint *ept,
                                         FAR void *data, size_t len,
                                         uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_readdir_s *msg = data;
   FAR struct dirent *entry;
   int ret = -ENOENT;
+  FAR void *dir;
 
-  if (msg->fd >= 1 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
+  dir = hostfs_rpmsg_get_dir(priv_, msg->fd);
+  if (dir)
     {
-      entry = readdir(priv->dirs[msg->fd]);
+      entry = readdir(dir);
       if (entry)
         {
           msg->type = entry->d_type;
@@ -442,13 +579,14 @@ static int hostfs_rpmsg_rewinddir_handler(FAR struct rpmsg_endpoint *ept,
                                           FAR void *data, size_t len,
                                           uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_rewinddir_s *msg = data;
   int ret = -ENOENT;
+  FAR void *dir;
 
-  if (msg->fd >= 1 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
+  dir = hostfs_rpmsg_get_dir(priv_, msg->fd);
+  if (dir)
     {
-      rewinddir(priv->dirs[msg->fd]);
+      rewinddir(dir);
       ret = 0;
     }
 
@@ -460,17 +598,14 @@ static int hostfs_rpmsg_closedir_handler(FAR struct rpmsg_endpoint *ept,
                                          FAR void *data, size_t len,
                                          uint32_t src, FAR void *priv_)
 {
-  FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_closedir_s *msg = data;
   int ret = -ENOENT;
+  FAR void *dir;
 
-  if (msg->fd >= 1 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
+  dir = hostfs_rpmsg_detach_dir(priv_, msg->fd);
+  if (dir)
     {
-      ret = closedir(priv->dirs[msg->fd]);
-      nxsem_wait(&priv->sem);
-      priv->dirs[msg->fd] = NULL;
-      nxsem_post(&priv->sem);
-      ret = ret ? -get_errno() : 0;
+      ret = closedir(dir) ? -get_errno() : 0;
     }
 
   msg->header.result = ret;
@@ -603,16 +738,22 @@ static void hostfs_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct hostfs_rpmsg_server_s *priv = ept->priv;
   int i;
+  int j;
 
-  for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
+  for (i = 0; i < priv->file_rows; i++)
     {
-      if (priv->files[i].f_inode)
+      for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
         {
-          file_close(&priv->files[i]);
+          if (priv->files[i][j].f_inode)
+            {
+              file_close(&priv->files[i][j]);
+            }
         }
+
+      kmm_free(priv->files[i]);
     }
 
-  for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
+  for (i = 0; i < priv->dir_nums; i++)
     {
       if (priv->dirs[i])
         {
@@ -623,6 +764,8 @@ static void hostfs_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept)
   rpmsg_destroy_ept(&priv->ept);
   nxsem_destroy(&priv->sem);
 
+  kmm_free(priv->files);
+  kmm_free(priv->dirs);
   kmm_free(priv);
 }
 

@@ -811,7 +811,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
    * shorter than the minimum.
    */
 
-  while ((buflen - nsent) >= CAN_MSGLEN(0))
+  while (((ssize_t)buflen - nsent) >= CAN_MSGLEN(0))
     {
       /* Check if adding this new message would over-run the drivers ability
        * to enqueue xmit data.

@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copyfullstate
+ * Name: riscv_copyfullstate
  *
  * Description:
  *    Copy the entire register save area (including the floating point
@@ -43,7 +43,7 @@
  *
  ****************************************************************************/
 
-void up_copyfullstate(uint32_t *dest, uint32_t *src)
+void riscv_copyfullstate(uint32_t *dest, uint32_t *src)
 {
   int i;
 

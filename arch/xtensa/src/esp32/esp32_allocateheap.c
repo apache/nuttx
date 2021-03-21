@@ -76,19 +76,10 @@
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
-#ifdef CONFIG_XTENSA_IMEM_MAXIMIZE_HEAP_REGION
-  *heap_size = (size_t)HEAP_REGION_OFFSET;
-  *heap_start = (FAR void *)(HEAP_REGION1_END - *heap_size);
-#else
-  *heap_start = (FAR void *)&_sheap + XTENSA_IMEM_REGION_SIZE;
 
-  /* If the following DEBUGASSERT fails,
-   * probably you have too large CONFIG_XTENSA_IMEM_REGION_SIZE.
-   */
-
+  *heap_start = (FAR void *)&_sheap;
   DEBUGASSERT(HEAP_REGION1_END > (uintptr_t)*heap_start);
   *heap_size = (size_t)(HEAP_REGION1_END - (uintptr_t)*heap_start);
-#endif
 }
 
 /****************************************************************************
@@ -103,8 +94,59 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void xtensa_add_region(void)
 {
-  umm_addregion((FAR void *)HEAP_REGION2_START,
-                (size_t)(uintptr_t)&_eheap - HEAP_REGION2_START);
+  void  *start;
+  size_t size;
+  int availregions;
+  int nregions = CONFIG_MM_REGIONS - 1;
+
+#ifdef CONFIG_SMP
+  availregions = 3;
+#  ifdef CONFIG_BOARD_LATE_INITIALIZE
+  availregions++;
+#  else
+  minfo("A ~3KB heap region can be added to the heap by enabling"
+        " CONFIG_BOARD_LATE_INITIALIZE\n");
+#  endif
+#else
+  availregions = 2;
+#endif
+
+#ifdef CONFIG_ESP32_SPIRAM
+  availregions++;
+#endif
+
+  if (nregions < availregions)
+    {
+      mwarn("Some memory regions are left unused!\n");
+      mwarn("Increase CONFIG_MM_NREGIONS to add them to the heap\n");
+    }
+
+#ifndef CONFIG_SMP
+  start = (FAR void *)(HEAP_REGION2_START + XTENSA_IMEM_REGION_SIZE);
+  size  = (size_t)(uintptr_t)&_eheap - (size_t)start;
+  umm_addregion(start, size);
+
+#else
+#ifdef CONFIG_ESP32_QEMU_IMAGE
+  start = (FAR void *)HEAP_REGION2_START;
+  size  = (size_t)(uintptr_t)&_eheap - (size_t)start;
+  umm_addregion(start, size);
+#else
+  start = (FAR void *)HEAP_REGION2_START;
+  size  = (size_t)(HEAP_REGION2_END - HEAP_REGION2_START);
+  umm_addregion(start, size);
+
+  start = (FAR void *)HEAP_REGION3_START + XTENSA_IMEM_REGION_SIZE;
+  size  = (size_t)(uintptr_t)&_eheap - (size_t)start;
+  umm_addregion(start, size);
+#endif
+#endif
+
+#ifndef CONFIG_ESP32_QEMU_IMAGE
+  start = (FAR void *)HEAP_REGION0_START;
+  size  = (size_t)(HEAP_REGION0_END - HEAP_REGION0_START);
+  umm_addregion(start, size);
+#endif
 
 #if defined(CONFIG_ESP32_SPIRAM)
   /* Check for any additional memory regions */

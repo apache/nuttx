@@ -79,16 +79,16 @@
  *
  ****************************************************************************/
 
-int posix_spawn_file_actions_addopen(FAR posix_spawn_file_actions_t *file_actions,
-                                     int fd, FAR const char *path, int oflags,
-                                     mode_t mode)
+int posix_spawn_file_actions_addopen(
+                                FAR posix_spawn_file_actions_t *file_actions,
+                                int fd, FAR const char *path, int oflags,
+                                mode_t mode)
 {
   FAR struct spawn_open_file_action_s *entry;
   size_t len;
   size_t alloc;
 
-  DEBUGASSERT(file_actions && path &&
-              fd >= 0 && fd < CONFIG_NFILE_DESCRIPTORS);
+  DEBUGASSERT(file_actions && path && fd >= 0);
 
   /* Get the size of the action including storage for the path plus its NUL
    * terminating character.
@@ -111,10 +111,11 @@ int posix_spawn_file_actions_addopen(FAR posix_spawn_file_actions_t *file_action
   entry->fd     = fd;
   entry->oflags = oflags;
   entry->mode   = mode;
-  strncpy(entry->path, path, len+1);
+  strncpy(entry->path, path, len + 1);
 
   /* And add it to the file action list */
 
-  add_file_action(file_actions, (FAR struct spawn_general_file_action_s *)entry);
+  add_file_action(file_actions,
+                  (FAR struct spawn_general_file_action_s *)entry);
   return OK;
 }

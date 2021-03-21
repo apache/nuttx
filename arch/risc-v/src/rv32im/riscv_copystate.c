@@ -61,12 +61,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copystate
+ * Name: riscv_copystate
  ****************************************************************************/
 
 /* A little faster than most memcpy's */
 
-void up_copystate(uint32_t *dest, uint32_t *src)
+void riscv_copystate(uint32_t *dest, uint32_t *src)
 {
   int i;
 
@@ -94,7 +94,7 @@ void up_copystate(uint32_t *dest, uint32_t *src)
        */
 
 #ifdef CONFIG_ARCH_FPU
-      up_savefpu(regs);
+      riscv_savefpu(regs);
 #endif
     }
 }

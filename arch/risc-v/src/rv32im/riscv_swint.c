@@ -43,11 +43,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_registerdump
+ * Name: riscv_registerdump
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-static void up_registerdump(const uint32_t *regs)
+static void riscv_registerdump(const uint32_t *regs)
 {
   svcinfo("EPC:%08x\n",
           regs[REG_EPC]);
@@ -74,7 +74,7 @@ static void up_registerdump(const uint32_t *regs)
 #endif
 }
 #else
-#  define up_registerdump(regs)
+#  define riscv_registerdump(regs)
 #endif
 
 /****************************************************************************
@@ -113,7 +113,7 @@ static void dispatch_syscall(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_swint
+ * Name: riscv_swint
  *
  * Description:
  *   This is software interrupt exception handler that performs context
@@ -121,7 +121,7 @@ static void dispatch_syscall(void)
  *
  ****************************************************************************/
 
-int up_swint(int irq, FAR void *context, FAR void *arg)
+int riscv_swint(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
 
@@ -134,7 +134,7 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
   svcinfo("Entry: regs: %p cmd: %d\n", regs, regs[REG_A0]);
-  up_registerdump(regs);
+  riscv_registerdump(regs);
 #endif
 
   /* Skip ECALL instruction */
@@ -147,7 +147,7 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
     {
       /* A0=SYS_save_context:  This is a save context command:
        *
-       *  int up_saveusercontext(uint32_t *saveregs);
+       *  int riscv_saveusercontext(uint32_t *saveregs);
        *
        * At this point, the following values are saved in context:
        *
@@ -165,14 +165,15 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
       case SYS_save_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0);
-          up_copystate((uint32_t *)regs[REG_A1], regs);
+          riscv_copystate((uint32_t *)regs[REG_A1], regs);
           ((uint32_t *)regs[REG_A1])[REG_A0] = 1;
         }
       break;
 
       /* A0=SYS_restore_context: This a restore context command:
        *
-       * void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+       * void
+       *   riscv_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
@@ -195,7 +196,7 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
 
       /* A0=SYS_switch_context: This a switch context command:
        *
-       *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+       * void riscv_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
        *
        * At this point, the following values are saved in context:
        *
@@ -212,7 +213,7 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          up_copystate((uint32_t *)regs[REG_A1], regs);
+          riscv_copystate((uint32_t *)regs[REG_A1], regs);
           g_current_regs = (uint32_t *)regs[REG_A2];
         }
         break;
@@ -309,7 +310,7 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
   if (regs != g_current_regs)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      up_registerdump((const uint32_t *)g_current_regs);
+      riscv_registerdump((const uint32_t *)g_current_regs);
     }
   else
     {

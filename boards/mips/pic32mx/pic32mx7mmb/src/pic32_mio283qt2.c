@@ -1,41 +1,27 @@
 /****************************************************************************
  * boards/mips/pic32mx/pic32mx7mmb/src/pic32_mio283qt2.c
  *
- * Interface definition for the MI0283QT-2 LCD
- * from Multi-Inno Technology Co., Ltd.
- * This LCD is based on the Himax HX8347-D LCD controller.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
+/* Interface definition for the MI0283QT-2 LCD
+ * from Multi-Inno Technology Co., Ltd.
+ * This LCD is based on the Himax HX8347-D LCD controller.
+ */
 
 /****************************************************************************
  * Included Files
@@ -73,37 +59,38 @@
 
 /* PIC32MX7MMB LCD Hardware Definitions *************************************/
 
-/* --- ---------------------------------- -------------------- ------------------------
- * PIN CONFIGURATIONS                     SIGNAL NAME          ON-BOARD CONNECTIONS
- *     (Family Data Sheet Table 1-1)     (PIC32MX7 Schematic)
- * --- ---------------------------------- -------------------- ------------------------
- *   6 RC1/T2CK                           LCD_RST              TFT display
- *  43 PMA1/AETXD3/AN14/ERXD2/PMALH/RB14  LCD-CS#              TFT display, HDR2 pin 3
- *  77 OC3/RD2                            LCD_BLED             LCD backlight LED
- *  44 PMA0/AETXD2/AN15/CN12/ERXD3/OCFB/  LCD-RS               TFT display
+/* --- ---------------------------------- ---------- --------------
+ * PIN CONFIGURATIONS                     SIGNAL NAME   ON-BOARD
+ *     (Family Data Sheet Table 1-1)     (PIC32MX7      CONNECTIONS
+ *                                        Schematic)
+ * --- ---------------------------------- ---------- ------------------------
+ *   6 RC1/T2CK                           LCD_RST    TFT display
+ *  43 PMA1/AETXD3/AN14/ERXD2/PMALH/RB14  LCD-CS#    TFT display, HDR2 pin 3
+ *  77 OC3/RD2                            LCD_BLED   LCD backlight LED
+ *  44 PMA0/AETXD2/AN15/CN12/ERXD3/OCFB/  LCD-RS     TFT display
  *     PMALL/RB15
  *
- *  34 PMA13/AN10/RB10/CVREFOUT           LCD-YD               TFT display
- *  35 PMA12/AETXERR/AN11/ERXERR/RB11     LCD-XR               TFT display
- *  41 PMA11/AECRS/AN12/ERXD0/RB12        LCD-YU               TFT display
- *  42 PMA10/AECOL/AN13/ERXD1/RB13        LCD-XL               TFT display
+ *  34 PMA13/AN10/RB10/CVREFOUT           LCD-YD     TFT display
+ *  35 PMA12/AETXERR/AN11/ERXERR/RB11     LCD-XR     TFT display
+ *  41 PMA11/AECRS/AN12/ERXD0/RB12        LCD-YU     TFT display
+ *  42 PMA10/AECOL/AN13/ERXD1/RB13        LCD-XL     TFT display
  *
- *  93 PMD0/RE0                           PMPD0                TFT display, HDR1 pin 18
- *  94 PMD1/RE1                           PMPD1                TFT display, HDR1 pin 17
- *  98 PMD2/RE2                           PMPD2                TFT display, HDR1 pin 16
- *  99 PMD3/RE3                           PMPD3                TFT display, HDR1 pin 15
- * 100 PMD4/RE4                           PMPD4                TFT display, HDR1 pin 14
- *   3 PMD5/RE5                           PMPD5                TFT display, HDR1 pin 13
- *   4 PMD6/RE6                           PMPD6                TFT display, HDR1 pin 12
- *   5 PMD7/RE7                           PMPD7                TFT display, HDR1 pin 11
- *  90 PMD8/C2RX/RG0                      PMPD8                TFT display, HDR1 pin 10
- *  89 PMD9/C2TX/ETXERR/RG1               PMPD9                TFT display, HDR1 pin 9
- *  88 PMD10/C1TX/ETXD0/RF1               PMPD10               TFT display, HDR1 pin 8
- *  87 PMD11/C1RX/ETXD1/RF0               PMPD11               TFT display, HDR1 pin 7
- *  79 PMD12/ETXD2/IC5/RD12               PMPD12               TFT display, HDR1 pin 6
- *  80 PMD13/CN19/ETXD3/RD13              PMPD13               TFT display, HDR1 pin 5
- *  83 PMD14/CN15/ETXEN/RD6               PMPD14               TFT display, HDR1 pin 4
- *  84 PMD15/CN16/ETXCLK/RD7              PMPD15               TFT display, HDR1 pin 3
+ *  93 PMD0/RE0                           PMPD0      TFT display, HDR1 pin 18
+ *  94 PMD1/RE1                           PMPD1      TFT display, HDR1 pin 17
+ *  98 PMD2/RE2                           PMPD2      TFT display, HDR1 pin 16
+ *  99 PMD3/RE3                           PMPD3      TFT display, HDR1 pin 15
+ * 100 PMD4/RE4                           PMPD4      TFT display, HDR1 pin 14
+ *   3 PMD5/RE5                           PMPD5      TFT display, HDR1 pin 13
+ *   4 PMD6/RE6                           PMPD6      TFT display, HDR1 pin 12
+ *   5 PMD7/RE7                           PMPD7      TFT display, HDR1 pin 11
+ *  90 PMD8/C2RX/RG0                      PMPD8      TFT display, HDR1 pin 10
+ *  89 PMD9/C2TX/ETXERR/RG1               PMPD9      TFT display, HDR1 pin 9
+ *  88 PMD10/C1TX/ETXD0/RF1               PMPD10     TFT display, HDR1 pin 8
+ *  87 PMD11/C1RX/ETXD1/RF0               PMPD11     TFT display, HDR1 pin 7
+ *  79 PMD12/ETXD2/IC5/RD12               PMPD12     TFT display, HDR1 pin 6
+ *  80 PMD13/CN19/ETXD3/RD13              PMPD13     TFT display, HDR1 pin 5
+ *  83 PMD14/CN15/ETXEN/RD6               PMPD14     TFT display, HDR1 pin 4
+ *  84 PMD15/CN16/ETXCLK/RD7              PMPD15     TFT display, HDR1 pin 3
  *
  *  82 CN14/PMRD/RD5                      PMPRD
  *  81 CN13/OC5/PMWR/RD4                  PMPWR

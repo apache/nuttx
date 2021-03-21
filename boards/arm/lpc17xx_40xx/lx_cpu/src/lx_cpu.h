@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/lpc17xx_40xx/lx_cpu/src/lx_cpu.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -85,23 +70,24 @@
 
 /* XPT2046 Touchscreen ******************************************************/
 
-/* -------------- -------------------- ------------ ---------------------------------
+/* -------------- -------------------- ------------ -------------------------
  * XTPT2046       Module               Module       LX_CPU LED
  *                Signal               Connector    Connector
- * -------------- -------------------- ------------ ---------------------------------
+ * -------------- -------------------- ------------ -------------------------
  * Pin 11 PENIRQ\ PENIRQ (pulled high) PORT3 Pin 1  P2.15 PENIRQ
- * Pin 12 DOUT    MISO                 PORT3 Pin 4  P1.18 MISO1  (Also USB HOST UP
- *                                                                LED)
+ * Pin 12 DOUT    MISO                 PORT3 Pin 4  P1.18 MISO1
+ *                                                  (Also USB HOST UP LED)
  * Pin 13 BUSY    BUSY (pulled high)   PORT3 Pin 9  P2.14 BUSY
- * Pin 14 DIN     MOSI                 PORT3 Pin 3  P0.13 MOSI1  (Also USB Device
- *                                                                up LED and SD CD
- *                                                                pin)
- * Pin 15 CS\     SSEL (pulled high)   PORT3 Pin 6  P1.8  GPIO   (Also RMII_CRS_DV)
+ * Pin 14 DIN     MOSI                 PORT3 Pin 3  P0.13 MOSI1
+ *                                                  (Also USB Device up LED
+ *                                                  and SD CD pin)
+ * Pin 15 CS\     SSEL (pulled high)   PORT3 Pin 6  P1.8  GPIO
+ *                                                 (Also RMII_CRS_DV)
  * Pin 16 DCLK    SCK                  PORT3 Pin 5  P1.19 SCK1
- * -------------- -------------------- ------------ ---------------------------------
+ * -------------- -------------------- ------------ -------------------------
  *
- * Pins should not need to be configured as pull-ups because, according to the LCD
- * schematic, the are pulled-up on board the LCD module.
+ * Pins should not need to be configured as pull-ups because, according to
+ * the LCD schematic, the are pulled-up on board the LCD module.
  */
 
 #define GPIO_TC_PENIRQ   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN15)
@@ -111,13 +97,13 @@
 #define LPC17_40_IRQ_PENIRQ LPC17_40_IRQ_P2p15
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

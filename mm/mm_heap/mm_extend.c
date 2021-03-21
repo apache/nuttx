@@ -28,6 +28,8 @@
 
 #include <nuttx/mm/mm.h>
 
+#include "mm_heap/mm.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -50,17 +52,21 @@
 void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
                int region)
 {
-  struct mm_allocnode_s *oldnode;
-  struct mm_allocnode_s *newnode;
+  FAR struct mm_heap_impl_s *heap_impl;
+  FAR struct mm_allocnode_s *oldnode;
+  FAR struct mm_allocnode_s *newnode;
   uintptr_t blockstart;
   uintptr_t blockend;
+
+  DEBUGASSERT(MM_IS_VALID(heap));
+  heap_impl = heap->mm_impl;
 
   /* Make sure that we were passed valid parameters */
 
   DEBUGASSERT(heap && mem);
 #if CONFIG_MM_REGIONS > 1
   DEBUGASSERT(size >= MIN_EXTEND &&
-             (size_t)region < (size_t)heap->mm_nregions);
+      (size_t)region < (size_t)heap_impl->mm_nregions);
 #else
   DEBUGASSERT(size >= MIN_EXTEND && region == 0);
 #endif
@@ -81,7 +87,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
    * immediately follow this node.
    */
 
-  oldnode = heap->mm_heapend[region];
+  oldnode = heap_impl->mm_heapend[region];
   DEBUGASSERT((uintptr_t)oldnode + SIZEOF_MM_ALLOCNODE == (uintptr_t)mem);
 
   /* The size of the old node now extends to the new terminal node.
@@ -103,7 +109,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
   newnode->size      = SIZEOF_MM_ALLOCNODE;
   newnode->preceding = oldnode->size | MM_ALLOC_BIT;
 
-  heap->mm_heapend[region] = newnode;
+  heap_impl->mm_heapend[region] = newnode;
   mm_givesemaphore(heap);
 
   /* Finally "free" the new block of memory where the old terminal node was

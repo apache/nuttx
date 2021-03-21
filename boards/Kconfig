@@ -1275,6 +1275,15 @@ config ARCH_BOARD_NUCLEO_L476RG
 	---help---
 		STMicro Nucleo L476RG board based on the STMicro STM32L476RGT6 MCU.
 
+config ARCH_BOARD_NUCLEO_L552ZE
+	bool "STM32L552 Nucleo L552ZE"
+	depends on ARCH_CHIP_STM32L552ZE
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo STM32L552 board based on the STMicro STM32L552ZET6 MCU.
+
 config ARCH_BOARD_QEMU_I486
 	bool "Qemu i486 Mode"
 	depends on ARCH_X86 || ARCH_I486
@@ -1793,6 +1802,15 @@ config ARCH_BOARD_B_G474E_DPOW1
 		MCU, a Cortex-M4 with FPU, 170 MHz, 128 KB SRAM, 512 KB code.
 		See boards/arm/stm32/b-g474e-dpow1/README.txt.
 
+config ARCH_BOARD_B_G431B_ESC1
+	bool "ST Micro B-G431B-ESC1 Discovery Kit"
+	depends on ARCH_CHIP_STM32G431C
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		ST Micro B-G431B-ESC1 Discovery Kit, based on the STM32G431CB
+		MCU, a Cortex-M4 with FPU, 170 MHz, 32 KB SRAM, 128 KB code.
+
 config ARCH_BOARD_NUCLEO_G431RB
 	bool "STM32G431RB Nucleo G431RB"
 	depends on ARCH_CHIP_STM32G431R
@@ -1852,6 +1870,15 @@ config ARCH_BOARD_STM32L476_MDK
 		Motorola Mods Development Board (MDK) features  STM32L476ME MCU.
 		The STM32L476ME is a Cortex-M4 optimised for low-power operation
 		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
+
+config ARCH_BOARD_STM32L562E_DK
+	bool "STM32L562E-DK"
+	depends on ARCH_CHIP_STM32L562QE
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro STM32L562E-DK board based on the STMicro STM32L562QEI6 MCU.
 
 config ARCH_BOARD_STM32L_DISCOVERY
 	bool "STMicro STM32L-Discovery board"
@@ -2303,6 +2330,7 @@ config ARCH_BOARD
 	default "nucleo-l452re"            if ARCH_BOARD_NUCLEO_L452RE
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
 	default "nucleo-l496zg"            if ARCH_BOARD_NUCLEO_L496ZG
+	default "nucleo-l552ze"            if ARCH_BOARD_NUCLEO_L552ZE
 	default "nutiny-nuc120"            if ARCH_BOARD_NUTINY_NUC120
 	default "olimex-efm32g880f128-stk" if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
 	default "olimex-lpc1766stk"        if ARCH_BOARD_LPC1766STK
@@ -2379,12 +2407,14 @@ config ARCH_BOARD
 	default "stm32h747i-disco"         if ARCH_BOARD_STM32H747I_DISCO
 	default "stm32f746-ws"             if ARCH_BOARD_STM32F746_WS
 	default "b-g474e-dpow1"            if ARCH_BOARD_B_G474E_DPOW1
+	default "b-g431b-esc1"             if ARCH_BOARD_B_G431B_ESC1
 	default "nucleo-g431rb"            if ARCH_BOARD_NUCLEO_G431RB
 	default "b-l072z-lrwan1"           if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"           if ARCH_BOARD_B_L475E_IOT01A
 	default "stm32l476vg-disco"        if ARCH_BOARD_STM32L476VG_DISCO
 	default "stm32l476-mdk"            if ARCH_BOARD_STM32L476_MDK
 	default "stm32l4r9ai-disco"        if ARCH_BOARD_STM32L4R9AI_DISCO
+	default "stm32l562e-dk"            if ARCH_BOARD_STM32L562E_DK
 	default "stm32ldiscovery"          if ARCH_BOARD_STM32L_DISCOVERY
 	default "stm32vldiscovery"         if ARCH_BOARD_STM32VL_DISCOVERY
 	default "mikroe-stm32f4"           if ARCH_BOARD_MIKROE_STM32F4
@@ -2714,6 +2744,9 @@ endif
 if ARCH_BOARD_B_G474E_DPOW1
 source "boards/arm/stm32/b-g474e-dpow1/Kconfig"
 endif
+if ARCH_BOARD_B_G431B_ESC1
+source "boards/arm/stm32/b-g431b-esc1/Kconfig"
+endif
 if ARCH_BOARD_NUCLEO_G431RB
 source "boards/arm/stm32/nucleo-g431rb/Kconfig"
 endif
@@ -2774,6 +2807,9 @@ endif
 if ARCH_BOARD_NUCLEO_L496ZG
 source "boards/arm/stm32l4/nucleo-l496zg/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_L552ZE
+source "boards/arm/stm32l5/nucleo-l552ze/Kconfig"
+endif
 if ARCH_BOARD_STM32L476_MDK
 source "boards/arm/stm32l4/stm32l476-mdk/Kconfig"
 endif
@@ -2782,6 +2818,9 @@ source "boards/arm/stm32l4/stm32l476vg-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32L4R9AI_DISCO
 source "boards/arm/stm32l4/stm32l4r9ai-disco/Kconfig"
+endif
+if ARCH_BOARD_STM32L562E_DK
+source "boards/arm/stm32l5/stm32l562e-dk/Kconfig"
 endif
 if ARCH_BOARD_AXOLOTI
 source "boards/arm/stm32/axoloti/Kconfig"

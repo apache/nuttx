@@ -1058,12 +1058,12 @@ config SDCLONE_DISABLE
 	descriptors by task_create() when a new task is started. If
 	set, all sockets will appear to be closed in the new task.
 
-config NFILE_DESCRIPTORS
-	int "Maximum number of file descriptors per task"
-	default 16
+config NFILE_DESCRIPTORS_PER_BLOCK
+	int "The number of file descriptors per block"
+	default 8
 	range 3 99999
 	---help---
-		The maximum number of file descriptors per task (one for each open)
+		The number of file descriptors per block(one for each open)
 
 config FILE_STREAM
 	bool "Enable FILE stream"

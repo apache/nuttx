@@ -4,10 +4,6 @@
  *   Copyright (C) 2015, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
- * References:
- *   "16-bit I2C-bus and SMBus I/O port with interrupt product datasheet",
- *   Rev. 08 - 22 October 2009, NXP
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -36,6 +32,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ *   "16-bit I2C-bus and SMBus I/O port with interrupt product datasheet",
+ *   Rev. 08 - 22 October 2009, NXP
+ */
 
 /****************************************************************************
  * Included Files

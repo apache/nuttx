@@ -146,7 +146,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * Just copy the CURRENT_REGS into the OLD rtcb.
                */
 
-               up_savestate(rtcb->xcp.regs);
+               riscv_savestate(rtcb->xcp.regs);
 
               /* Restore the exception context of the rtcb at the (new) head
                * of the ready-to-run task list.
@@ -162,7 +162,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * changes will be made when the interrupt returns.
                */
 
-              up_restorestate(rtcb->xcp.regs);
+              riscv_restorestate(rtcb->xcp.regs);
             }
 
           /* No, then we will need to perform the user context switch */
@@ -190,12 +190,13 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
               /* Then switch contexts */
 
-              up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
+              riscv_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
 
-              /* up_switchcontext forces a context switch to the task at the
-               * head of the ready-to-run list.  It does not 'return' in the
-               * normal sense. When it does return, it is because the blocked
-               * task is again ready to run and has execution priority.
+              /* riscv_switchcontext forces a context switch to the task at
+               * the head of the ready-to-run list.  It does not 'return' in
+               * the normal sense. When it does return, it is because the
+               * blocked task is again ready to run and has execution
+               * priority.
                */
             }
         }

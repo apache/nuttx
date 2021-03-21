@@ -70,11 +70,11 @@
  */
 
 #ifdef CONFIG_ARCH_RV64GC
-#define up_savestate(regs)    up_copystate(regs, (uint64_t*)CURRENT_REGS)
-#define up_restorestate(regs) (CURRENT_REGS = regs)
+#define riscv_savestate(regs)    riscv_copystate(regs, (uint64_t*)CURRENT_REGS)
+#define riscv_restorestate(regs) (CURRENT_REGS = regs)
 #else
-#define up_savestate(regs)    up_copystate(regs, (uint32_t*)g_current_regs)
-#define up_restorestate(regs) (g_current_regs = regs)
+#define riscv_savestate(regs)    riscv_copystate(regs, (uint32_t*)g_current_regs)
+#define riscv_restorestate(regs) (g_current_regs = regs)
 #endif
 
 #define _START_TEXT  &_stext
@@ -166,10 +166,6 @@ EXTERN uint32_t _ebss;            /* End+1 of .bss */
 
 #ifndef __ASSEMBLY__
 
-/* Low level initialization provided by board-level logic *******************/
-
-void up_boot(void);
-
 /* Memory allocation ********************************************************/
 
 #if CONFIG_MM_REGIONS > 1
@@ -178,57 +174,55 @@ void riscv_addregion(void);
 # define riscv_addregion()
 #endif
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
-
 /* IRQ initialization *******************************************************/
 
-void up_ack_irq(int irq);
+void riscv_ack_irq(int irq);
 
 #ifdef CONFIG_ARCH_RV64GC
-void up_copystate(uint64_t *dest, uint64_t *src);
-void up_copyfullstate(uint64_t *dest, uint64_t *src);
+void riscv_copystate(uint64_t *dest, uint64_t *src);
+void riscv_copyfullstate(uint64_t *dest, uint64_t *src);
 #else
-void up_copystate(uint32_t *dest, uint32_t *src);
-void up_copyfullstate(uint32_t *dest, uint32_t *src);
+void riscv_copystate(uint32_t *dest, uint32_t *src);
+void riscv_copyfullstate(uint32_t *dest, uint32_t *src);
 #endif
 
-void up_sigdeliver(void);
-int up_swint(int irq, FAR void *context, FAR void *arg);
-uint32_t up_get_newintctx(void);
+void riscv_sigdeliver(void);
+int riscv_swint(int irq, FAR void *context, FAR void *arg);
+uint32_t riscv_get_newintctx(void);
 
 #ifdef CONFIG_ARCH_FPU
 #ifdef CONFIG_ARCH_RV64GC
-void up_savefpu(uint64_t *regs);
-void up_restorefpu(const uint64_t *regs);
+void riscv_savefpu(uint64_t *regs);
+void riscv_restorefpu(const uint64_t *regs);
 #else /* !CONFIG_ARCH_RV64GC */
-void up_savefpu(uint32_t *regs);
-void up_restorefpu(const uint32_t *regs);
+void riscv_savefpu(uint32_t *regs);
+void riscv_restorefpu(const uint32_t *regs);
 #endif /* CONFIG_ARCH_RV64GC */
 #else
-#  define up_savefpu(regs)
-#  define up_restorefpu(regs)
+#  define riscv_savefpu(regs)
+#  define riscv_restorefpu(regs)
 #endif
 
 /* Power management *********************************************************/
 
 #ifdef CONFIG_PM
-void up_pminitialize(void);
+void riscv_pminitialize(void);
 #else
-#  define up_pminitialize()
+#  define riscv_pminitialize()
 #endif
 
 /* Low level serial output **************************************************/
 
-void up_lowputc(char ch);
-void up_puts(const char *str);
-void up_lowputs(const char *str);
+void riscv_lowputc(char ch);
+void riscv_puts(const char *str);
+void riscv_lowputs(const char *str);
 
 #ifdef USE_SERIALDRIVER
-void up_serialinit(void);
+void riscv_serialinit(void);
 #endif
 
 #ifdef USE_EARLYSERIALINIT
-void up_earlyserialinit(void);
+void riscv_earlyserialinit(void);
 #endif
 
 #ifdef CONFIG_RPMSG_UART
@@ -242,7 +236,7 @@ void riscv_exception(uint32_t mcause, uint32_t *regs);
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes);
+void riscv_stack_color(FAR void *stackbase, size_t nbytes);
 #endif
 
 #undef EXTERN

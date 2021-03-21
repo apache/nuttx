@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
+ifeq ($(CONFIG_BCH),y)
 
 # Include BCH driver
 

@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f4x1re/include/nucleo-f401re.h
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -49,13 +34,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* The NUCLEO401RE supports both HSE and LSE crystals (X2 and X3).  However, as
- * shipped, the X2 and X3 crystals are not populated.  Therefore the Nucleo-F401RE
- * will need to run off the 16MHz HSI clock.
+/* Clocking *****************************************************************/
+
+/* The NUCLEO401RE supports both HSE and LSE crystals (X2 and X3).
+ * However, as shipped, the X2 and X3 crystals are not populated.
+ * Therefore the Nucleo-F401RE will need to run off the 16MHz HSI clock.
  *
  *   System Clock source           : PLL (HSI)
- *   SYSCLK(Hz)                    : 84000000     Determined by PLL configuration
+ *   SYSCLK(Hz)                    : 84000000     Determined by PLL
+ *                                                configuration
  *   HCLK(Hz)                      : 84000000     (STM32_RCC_CFGR_HPRE)
  *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
  *   APB1 Prescaler                : 2            (STM32_RCC_CFGR_PPRE1)
@@ -87,10 +74,14 @@
  *
  * Formulae:
  *
- *   VCO input frequency        = PLL input clock frequency / PLLM, 2 <= PLLM <= 63
- *   VCO output frequency       = VCO input frequency × PLLN,       192 <= PLLN <= 432
- *   PLL output clock frequency = VCO frequency / PLLP,             PLLP = 2, 4, 6, or 8
- *   USB OTG FS clock frequency = VCO frequency / PLLQ,             2 <= PLLQ <= 15
+ *   VCO input frequency        = PLL input clock frequency / PLLM,
+ *                                2 <= PLLM <= 63
+ *   VCO output frequency       = VCO input frequency × PLLN,
+ *                                192 <= PLLN <= 432
+ *   PLL output clock frequency = VCO frequency / PLLP,
+ *                                PLLP = 2, 4, 6, or 8
+ *   USB OTG FS clock frequency = VCO frequency / PLLQ,
+ *                                2 <= PLLQ <= 15
  *
  * We would like to have SYSYCLK=84MHz and we must have the USB clock= 48MHz.
  * Some possible solutions include:
@@ -136,6 +127,7 @@
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
 /* Timers driven from APB1 will be twice PCLK1 */
+
 /* REVISIT */
 
 #define STM32_APB1_TIM2_CLKIN   (2*STM32_PCLK1_FREQUENCY)
@@ -154,6 +146,7 @@
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/1)
 
 /* Timers driven from APB2 will be twice PCLK2 */
+
 /* REVISIT */
 
 #define STM32_APB2_TIM1_CLKIN   (2*STM32_PCLK2_FREQUENCY)
@@ -166,6 +159,7 @@
  * otherwise frequency is 2xAPBx.
  * Note: TIM1,8 are on APB2, others on APB1
  */
+
 /* REVISIT */
 
 #define BOARD_TIM1_FREQUENCY    (2*STM32_PCLK2_FREQUENCY)
@@ -184,6 +178,7 @@
  *
  * HCLK=72MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(178+2)=400 KHz
  */
+
 /* REVISIT */
 
 #define SDIO_INIT_CLKDIV        (178 << SDIO_CLKCR_CLKDIV_SHIFT)
@@ -191,6 +186,7 @@
 /* DMA ON:  HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(2+2)=18 MHz
  * DMA OFF: HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(3+2)=14.4 MHz
  */
+
 /* REVISIT */
 
 #ifdef CONFIG_SDIO_DMA
@@ -202,6 +198,7 @@
 /* DMA ON:  HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(1+2)=24 MHz
  * DMA OFF: HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(3+2)=14.4 MHz
  */
+
 /* REVISIT */
 
 #ifdef CONFIG_SDIO_DMA

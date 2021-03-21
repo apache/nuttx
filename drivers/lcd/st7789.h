@@ -46,6 +46,7 @@
 #define ST7789_RASET     0x2b   /* Row Address Set */
 #define ST7789_RAMWR     0x2c   /* Memory Write */
 #define ST7789_RAMRD     0x2e   /* Memory Read */
+#define ST7789_MADCTL    0x36   /* Memory Data Access Control */
 #define ST7789_IDMOFF    0x38   /* Idle Mode Off */
 #define ST7789_IDMON     0x39   /* Idle Mode On */
 #define ST7789_COLMOD    0x3a   /* Interface Pixel Format */

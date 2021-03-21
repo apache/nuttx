@@ -35,9 +35,11 @@ CSRCS += fs_mtdpartition.c
 endif
 endif
 
+ifeq ($(CONFIG_BCH),y)
 ifneq ($(CONFIG_DISABLE_PSEUDOFS_OPERATIONS),y)
 CSRCS += fs_blockproxy.c
 endif
+endif # CONFIG_BCH
 endif # CONFIG_DISABLE_MOUNTPOINT
 
 # Include driver build support

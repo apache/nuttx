@@ -453,7 +453,7 @@ int arm_svcall(int irq, FAR void *context, FAR void *arg)
 
           rtcb->flags         |= TCB_FLAG_SYSCALL;
 #else
-          svcerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
+          svcerr("ERROR: Bad SYS call: %d\n", (int)regs[REG_R0]);
 #endif
         }
         break;

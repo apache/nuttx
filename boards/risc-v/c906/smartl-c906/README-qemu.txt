@@ -30,6 +30,5 @@
 
 6. TODO
 
-  Support FPU
-  Support ELF based file applications
+  Support protect mode via PMP
   Support RISC-V User mode

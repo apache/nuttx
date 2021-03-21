@@ -872,12 +872,12 @@ static int esp32c3_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef USE_EARLYSERIALINIT
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: riscv_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.  NOTE:  This function depends on GPIO pin
+ *   before riscv_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in up_consoleinit() and main clock
  *   initialization performed in up_clkinitialize().
  *
@@ -885,7 +885,7 @@ static int esp32c3_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 /* TODO */
 
-void up_earlyserialinit(void)
+void riscv_earlyserialinit(void)
 {
   /* I've been looking at others chips/arches and I noticed
    * that <chips>_lowsetup performs almost the same of this func and it's
@@ -897,15 +897,15 @@ void up_earlyserialinit(void)
 #endif /* USE_EARLYSERIALINIT */
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: riscv_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   that riscv_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void riscv_serialinit(void)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   uart_register("/dev/console", &CONSOLE_DEV);
@@ -941,10 +941,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      riscv_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  riscv_lowputc(ch);
   esp32c3_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
   return ch;
@@ -953,7 +953,7 @@ int up_putc(int ch)
 #else /* HAVE_UART_DEVICE */
 
 /****************************************************************************
- * Name: up_earlyserialinit, up_serialinit, and up_putc
+ * Name: riscv_earlyserialinit, riscv_serialinit, and up_putc
  *
  * Description:
  *   stubs that may be needed.  These stubs will be used if all UARTs are
@@ -963,11 +963,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void riscv_earlyserialinit(void)
 {
 }
 
-void up_serialinit(void)
+void riscv_serialinit(void)
 {
 }
 
@@ -981,7 +981,7 @@ int up_putc(int ch)
 
 /* Common initialization logic will not not know that the all of the UARTs
  * have been disabled.  So, as a result, we may still have to provide
- * stub implementations of up_earlyserialinit(), up_serialinit(), and
+ * stub implementations of riscv_earlyserialinit(), riscv_serialinit(), and
  * up_putc().
  */
 
@@ -1006,10 +1006,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      riscv_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  riscv_lowputc(ch);
   esp32c3_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
   return ch;

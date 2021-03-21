@@ -82,7 +82,7 @@ void up_irqinitialize(void)
   /* Colorize the interrupt stack for debug purposes */
 
   size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
-  up_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
+  riscv_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
                  intstack_size);
 #endif
 
@@ -92,7 +92,7 @@ void up_irqinitialize(void)
 
   /* Attach the ecall interrupt handler */
 
-  irq_attach(BL602_IRQ_ECALLM, up_swint, NULL);
+  irq_attach(BL602_IRQ_ECALLM, riscv_swint, NULL);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
@@ -171,14 +171,14 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_get_newintctx
+ * Name: riscv_get_newintctx
  *
  * Description:
  *   Return initial mstatus when a task is created.
  *
  ****************************************************************************/
 
-uint32_t up_get_newintctx(void)
+uint32_t riscv_get_newintctx(void)
 {
   /* Set machine previous privilege mode to machine mode.
    * Also set machine previous interrupt enable
@@ -192,14 +192,14 @@ uint32_t up_get_newintctx(void)
 }
 
 /****************************************************************************
- * Name: up_ack_irq
+ * Name: riscv_ack_irq
  *
  * Description:
  *   Acknowledge the IRQ
  *
  ****************************************************************************/
 
-void up_ack_irq(int irq)
+void riscv_ack_irq(int irq)
 {
 }
 

@@ -357,7 +357,7 @@ void rp2040_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
           RP2040_DMA_CTRL_TRIG_TREQ_SEL_MASK) |
          ((ch << RP2040_DMA_CTRL_TRIG_CHAIN_TO_SHIFT) &
           RP2040_DMA_CTRL_TRIG_CHAIN_TO_MASK) |
-         config.size;
+         (config.size << RP2040_DMA_CTRL_TRIG_DATA_SIZE_SHIFT);
 
   if (!config.noincr)
     {
@@ -418,7 +418,7 @@ void rp2040_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
           RP2040_DMA_CTRL_TRIG_TREQ_SEL_MASK) |
          ((ch << RP2040_DMA_CTRL_TRIG_CHAIN_TO_SHIFT) &
           RP2040_DMA_CTRL_TRIG_CHAIN_TO_MASK) |
-         config.size;
+         (config.size << RP2040_DMA_CTRL_TRIG_DATA_SIZE_SHIFT);
 
   if (!config.noincr)
     {
