@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/hardware/stm32_ethernet.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32_ETHERNET_H
 #define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32_ETHERNET_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -34,10 +34,12 @@
 #if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) || \
     defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
-/* Register Offsets *********************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
+
 /* MAC Registers */
 
 #define STM32_ETH_MACCR_OFFSET       0x0000 /* Ethernet MAC configuration register */
@@ -106,7 +108,8 @@
 #define STM32_ETH_DMACHTBAR_OFFSET   0x1050 /* Ethernet DMA current host transmit buffer address register */
 #define STM32_ETH_DMACHRBAR_OFFSET   0x1054 /* Ethernet DMA current host receive buffer address register */
 
-/* Register Base Addresses **************************************************************************/
+/* Register Base Addresses **************************************************/
+
 /* MAC Registers */
 
 #define STM32_ETH_MACCR              (STM32_ETHMAC_BASE+STM32_ETH_MACCR_OFFSET)
@@ -175,7 +178,8 @@
 #define STM32_ETH_DMACHTBAR          (STM32_ETHMAC_BASE+STM32_ETH_DMACHTBAR_OFFSET)
 #define STM32_ETH_DMACHRBAR          (STM32_ETHMAC_BASE+STM32_ETH_DMACHRBAR_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
+
 /* MAC Registers */
 
 /* Ethernet MAC configuration register */
@@ -189,6 +193,7 @@
 #  define ETH_MACCR_BL_8             (1 << ETH_MACCR_BL_SHIFT) /* 01: k = min (n, 8) */
 #  define ETH_MACCR_BL_4             (2 << ETH_MACCR_BL_SHIFT) /* 10: k = min (n, 4) */
 #  define ETH_MACCR_BL_1             (3 << ETH_MACCR_BL_SHIFT) /* 11: k = min (n, 1) */
+
 #define ETH_MACCR_APCS               (1 << 7)  /* Bit 7:  Automatic pad/CRC stripping */
 #define ETH_MACCR_RD                 (1 << 9)  /* Bit 9:  Retry disable */
 #define ETH_MACCR_IPCO               (1 << 10) /* Bit 10: IPv4 checksum offload */
@@ -200,6 +205,7 @@
 #define ETH_MACCR_IFG_SHIFT          (17)      /* Bits 17-19: Interframe gap */
 #define ETH_MACCR_IFG_MASK           (7 << ETH_MACCR_IFG_SHIFT)
 #  define ETH_MACCR_IFG(n)           ((12-((n) >> 3)) << ETH_MACCR_IFG_SHIFT) /* n bit times, n=40,48,..96 */
+
 #define ETH_MACCR_JD                 (1 << 22) /* Bit 22: Jabber disable */
 #define ETH_MACCR_WD                 (1 << 23) /* Bit 23: Watchdog disable */
 #define ETH_MACCR_CSTF               (1 << 25) /* Bits 25: CRC stripping for Type frames */
@@ -218,6 +224,7 @@
 #  define ETH_MACFFR_PCF_PAUSE       (1 << ETH_MACFFR_PCF_SHIFT) /* Prevents all except Pause control frames */
 #  define ETH_MACFFR_PCF_ALL         (2 << ETH_MACFFR_PCF_SHIFT) /* Forwards all control frames */
 #  define ETH_MACFFR_PCF_FILTER      (3 << ETH_MACFFR_PCF_SHIFT) /* Forwards all that pass address filter */
+
 #define ETH_MACFFR_SAIF              (1 << 8)  /* Bit 8: Source address inverse filtering */
 #define ETH_MACFFR_SAF               (1 << 9)  /* Bit 9: Source address filter */
 #define ETH_MACFFR_HPF               (1 << 10) /* Bit 10: Hash or perfect filter */
@@ -236,6 +243,7 @@
 #  define ETH_MACMIIAR_CR_DIV16      (2 << ETH_MACMIIAR_CR_SHIFT) /* 20-35   MHz HCLK/16 */
 #  define ETH_MACMIIAR_CR_DIV26      (3 << ETH_MACMIIAR_CR_SHIFT) /* 35-60   MHz HCLK/26 */
 #  define ETH_MACMIIAR_CR_DIV102     (4 << ETH_MACMIIAR_CR_SHIFT) /* 150-216 MHz HCLK/102 */
+
 #define ETH_MACMIIAR_MR_SHIFT        (6)       /* Bits 6-10: MII register */
 #define ETH_MACMIIAR_MR_MASK         (31 << ETH_MACMIIAR_MR_SHIFT)
 #  define ETH_MACMIIAR_MR(n)         ((uint32_t)(n) << ETH_MACMIIAR_MR_SHIFT)
@@ -259,6 +267,7 @@
 #  define ETH_MACFCR_PLT_M28         (1 << ETH_MACFCR_PLT_SHIFT) /* 01 Pause - 28 slot times */
 #  define ETH_MACFCR_PLT_M144        (2 << ETH_MACFCR_PLT_SHIFT) /* 10 Pause - 144 slot times */
 #  define ETH_MACFCR_PLT_M256        (3 << ETH_MACFCR_PLT_SHIFT) /* 11 Pause -s 256 slot times */
+
 #define ETH_MACFCR_ZQPD              (1 << 7)  /* Bit 7: Zero-quanta pause disable */
 #define ETH_MACFCR_PT_SHIFT          (16)      /* Bits 16-31: Pause time */
 #define ETH_MACFCR_PT_MASK           (0xffff << ETH_MACFCR_PT_SHIFT)
@@ -270,8 +279,8 @@
 #  define ETH_MACVLANTR_VLANTI(n)    ((uint32_t)(n) << ETH_MACVLANTR_VLANTI_SHIFT)
 #define ETH_MACVLANTR_VLANTC         (1 << 16) /* Bit 16: 12-bit VLAN tag comparison */
 
-/* Ethernet MAC remote wakeup frame filter reg.  Provides 32-bit access to remote
- * remote wake-up filters.
+/* Ethernet MAC remote wakeup frame filter reg.
+ * Provides 32-bit access to remote remote wake-up filters.
  */
 
 /* Ethernet MAC PMT control and status register */
@@ -296,12 +305,14 @@
 #  define ETH_MACDBGR_RFRCS_RFRAME   (1 << ETH_MACDBGR_RFRCS_SHIFT) /* 01: Reading frame data */
 #  define ETH_MACDBGR_RFRCS_RSTATUS  (2 << ETH_MACDBGR_RFRCS_SHIFT) /* 10: Reading frame status (or time-stamp) */
 #  define ETH_MACDBGR_RFRCS_FLUSHING (3 << ETH_MACDBGR_RFRCS_SHIFT) /* 11: Flushing the frame data and status */
+
 #define ETH_MACDBGR_RFFL_SHIFT       (8)       /* Bits 8-9: Rx FIFO fill level */
 #define ETH_MACDBGR_RFFL_MASK        (3 << ETH_MACDBGR_RFFL_SHIFT)
 #  define ETH_MACDBGR_RFFL_EMPTY     (0 << ETH_MACDBGR_RFFL_SHIFT) /* 00: RxFIFO empty */
 #  define ETH_MACDBGR_RFFL_DEACT     (1 << ETH_MACDBGR_RFFL_SHIFT) /* 01: RxFIFO fill-level below flow-control de-activate threshold */
 #  define ETH_MACDBGR_RFFL_ACTIV     (2 << ETH_MACDBGR_RFFL_SHIFT) /* 10: RxFIFO fill-level above flow-control activate threshold */
 #  define ETH_MACDBGR_RFFL_FULL      (3 << ETH_MACDBGR_RFFL_SHIFT) /* 11: RxFIFO full */
+
 #define ETH_MACDBGR_MMTEA            (1 << 16) /* Bit 16: MAC MII transmit engine active */
 #define ETH_MACDBGR_MTFCS_SHIFT      (17)      /* Bits 17-18: MAC transmit frame controller status */
 #define ETH_MACDBGR_MTFCS_MASK       (3 << ETH_MACDBGR_MTFCS_SHIFT)
@@ -309,6 +320,7 @@
 #  define ETH_MACDBGR_MTFCS_WAITING  (1 << ETH_MACDBGR_MTFCS_SHIFT) /* 01: Waiting for Status of previous frame or IFG/backoff period to be over */
 #  define ETH_MACDBGR_MTFCS_PAUSE    (2 << ETH_MACDBGR_MTFCS_SHIFT) /* 10: Generating and transmitting a Pause control frame */
 #  define ETH_MACDBGR_MTFCS_FRAME    (3 << ETH_MACDBGR_MTFCS_SHIFT) /* 11: Transferring input frame for transmission */
+
 #define ETH_MACDBGR_MTP              (1 << 19) /* Bit 19: MAC transmitter in pause */
 #define ETH_MACDBGR_TFRS_SHIFT       (20)      /* Bits 20-21: Tx FIFO read status */
 #define ETH_MACDBGR_TFRS_MASK        (3 << ETH_MACDBGR_TFRS_SHIFT)
@@ -316,6 +328,7 @@
 #  define ETH_MACDBGR_TFRS_READ      (1 << ETH_MACDBGR_TFRS_SHIFT) /* 01: Read state */
 #  define ETH_MACDBGR_TFRS_WAITING   (2 << ETH_MACDBGR_TFRS_SHIFT) /* 10: Waiting for TxStatus from MAC transmitter */
 #  define ETH_MACDBGR_TFRS_WRITING   (3 << ETH_MACDBGR_TFRS_SHIFT) /* 11: Writing the received TxStatus or flushing the TxFIFO */
+
 #define ETH_MACDBGR_TFWA             (1 << 22) /* Bit 22: Tx FIFO write active */
 #define ETH_MACDBGR_TFNE             (1 << 24) /* Bit 24: Tx FIFO not empty */
 #define ETH_MACDBGR_TFF              (1 << 25) /* Bit 25: Tx FIFO full */
@@ -356,6 +369,7 @@
 #  define ETH_MACA1HR_MBC_16_23      (0x04 << ETH_MACA1HR_MBC_SHIFT) /* Bit 26: ETH_MACA1LR [16-23] */
 #  define ETH_MACA1HR_MBC_8_15       (0x02 << ETH_MACA1HR_MBC_SHIFT) /* Bit 25: ETH_MACA1LR [8-15] */
 #  define ETH_MACA1HR_MBC_0_7        (0x01 << ETH_MACA1HR_MBC_SHIFT) /* Bit 24: ETH_MACA1LR [0-7] */
+
 #define ETH_MACA1HR_SA               (1 << 30) /* Bit 30: Source address */
 #define ETH_MACA1HR_AE               (1 << 31) /* Bit 31: Address enable */
 
@@ -374,6 +388,7 @@
 #  define ETH_MACA2HR_MBC_16_23      (0x04 << ETH_MACA2HR_MBC_SHIFT) /* Bit 26: ETH_MACA2LR [16-23] */
 #  define ETH_MACA2HR_MBC_8_15       (0x02 << ETH_MACA2HR_MBC_SHIFT) /* Bit 25: ETH_MACA2LR [8-15] */
 #  define ETH_MACA2HR_MBC_0_7        (0x01 << ETH_MACA2HR_MBC_SHIFT) /* Bit 24: ETH_MACA2LR [0-7] */
+
 #define ETH_MACA2HR_SA               (1 << 30) /* Bit 30: Source address */
 #define ETH_MACA2HR_AE               (1 << 31) /* Bit 31: Address enable */
 
@@ -392,6 +407,7 @@
 #  define ETH_MACA3HR_MBC_16_23      (0x04 << ETH_MACA3HR_MBC_SHIFT) /* Bit 26: ETH_MACA3LR [16-23] */
 #  define ETH_MACA3HR_MBC_8_15       (0x02 << ETH_MACA3HR_MBC_SHIFT) /* Bit 25: ETH_MACA3LR [8-15] */
 #  define ETH_MACA3HR_MBC_0_7        (0x01 << ETH_MACA3HR_MBC_SHIFT) /* Bit 24: ETH_MACA3LR [0-7] */
+
 #define ETH_MACA3HR_SA               (1 << 30) /* Bit 30: Source address */
 #define ETH_MACA3HR_AE               (1 << 31) /* Bit 31: Address enable */
 
@@ -454,6 +470,7 @@
 #  define ETH_PTPTSCR_TSCNT_BOUNDARY (1 << ETH_PTPTSCR_TSCNT_SHIFT) /* 01: Boundary clock */
 #  define ETH_PTPTSCR_TSCNT_E2E      (2 << ETH_PTPTSCR_TSCNT_SHIFT) /* 10: End-to-end transparent clock */
 #  define ETH_PTPTSCR_TSCNT_P2P      (3 << ETH_PTPTSCR_TSCNT_SHIFT) /* 11: Peer-to-peer transparent clock */
+
 #define ETH_PTPTSCR_TSPFFMAE         (1 << 18) /* Bit 18: Time stamp PTP frame filtering MAC address enable */
 
 /* Ethernet PTP subsecond increment register */
@@ -475,7 +492,9 @@
 #define ETH_PTPTSLU_MASK             (0x7fffffff) /* Bits 0-30: Time stamp update subsecond */
 
 /* Ethernet PTP time stamp addend register (32-bit) */
+
 /* Ethernet PTP target time high register (32-bit) */
+
 /* Ethernet PTP target time low register (32-bit) */
 
 /* Ethernet PTP time stamp status register */
@@ -496,28 +515,34 @@
 #define ETH_DMABMR_PBL_SHIFT         (8)       /* Bits 8-13: Programmable burst length */
 #define ETH_DMABMR_PBL_MASK          (0x3f << ETH_DMABMR_PBL_SHIFT)
 #  define ETH_DMABMR_PBL(n)          ((n) << ETH_DMABMR_PBL_SHIFT) /* n=1, 2, 4, 8, 16, 32 */
+
 #define ETH_DMABMR_PM_SHIFT          (14)      /* Bits 14-15: Rx Tx priority ratio */
 #define ETH_DMABMR_PM_MASK           (3 << ETH_DMABMR_PM_SHIFT)
 #  define ETH_DMABMR_RTPR_1TO1       (0 << ETH_DMABMR_PM_SHIFT) /* 00: 1:1 */
 #  define ETH_DMABMR_RTPR_2TO1       (1 << ETH_DMABMR_PM_SHIFT) /* 01: 2:1 */
 #  define ETH_DMABMR_RTPR_3TO1       (2 << ETH_DMABMR_PM_SHIFT) /* 10: 3:1 */
 #  define ETH_DMABMR_RTPR_4TO1       (3 << ETH_DMABMR_PM_SHIFT) /* 11: 4:1 */
+
 #define ETH_DMABMR_FB                (1 << 16) /* Bit 16: Fixed burst */
 #define ETH_DMABMR_RDP_SHIFT         (17)      /* Bits 17-22: Rx DMA PBL */
 #define ETH_DMABMR_RDP_MASK          (0x3f << ETH_DMABMR_RDP_SHIFT)
 #  define ETH_DMABMR_RDP(n)          ((n) << ETH_DMABMR_RDP_SHIFT) /* n=1, 2, 4, 8, 16, 32 */
+
 #define ETH_DMABMR_USP               (1 << 23) /* Bit 23: Use separate PBL */
 #define ETH_DMABMR_FPM               (1 << 24) /* Bit 24: 4xPBL mode */
 #define ETH_DMABMR_AAB               (1 << 25) /* Bit 25: Address-aligned beats */
 #define ETH_DMABMR_MB                (1 << 26) /* Bit 26: Mixed burst */
 
 /* Ethernet DMA transmit poll demand register (32-bit) */
+
 /* Ethernet DMA receive poll demand register (32-bit) */
+
 /* Ethernet DMA receive descriptor list address register (32-bit address) */
+
 /* Ethernet DMA transmit descriptor list address register (32-bit address) */
 
-/* Interrupt bit definitions common between the DMA status register (DMASR) and
- * the DMA interrupt enable register (DMAIER).
+/* Interrupt bit definitions common between the DMA status register (DMASR)
+ * and the DMA interrupt enable register (DMAIER).
  */
 
 #define ETH_DMAINT_TI                (1 << 0)  /* Bit 0:  Transmit interrupt */
@@ -546,6 +571,7 @@
 #  define ETH_DMASR_RPS_SUSPENDED    (4 << ETH_DMASR_RPS_SHIFT) /* 100: Suspended: Receive descriptor unavailable */
 #  define ETH_DMASR_RPS_CLOSING      (5 << ETH_DMASR_RPS_SHIFT) /* 101: Running: Closing receive descriptor */
 #  define ETH_DMASR_RPS_TRANSFER     (7 << ETH_DMASR_RPS_SHIFT) /* 111: Running: Transferring the receive data to memory */
+
 #define ETH_DMASR_TPS_SHIFT          (20)      /* Bits 20-22: Transmit process state */
 #define ETH_DMASR_TPS_MASK           (7 << ETH_DMASR_TPS_SHIFT)
 #  define ETH_DMASR_TPS_STOPPED      (0 << ETH_DMASR_TPS_SHIFT) /* 000: Stopped; Reset or Stop Transmit Command issued */
@@ -554,11 +580,13 @@
 #  define ETH_DMASR_TPS_TRANSFER     (3 << ETH_DMASR_TPS_SHIFT) /* 011: Running; Reading data and queuing to transmit (TxFIFO) */
 #  define ETH_DMASR_TPS_SUSPENDED    (6 << ETH_DMASR_TPS_SHIFT) /* 110: Suspended; Transmit descriptor unavailable or buffer underflow */
 #  define ETH_DMASR_TPS_CLOSING      (7 << ETH_DMASR_TPS_SHIFT) /* 111: Running; Closing transmit descriptor */
+
 #define ETH_DMASR_EBS_SHIFT          (23)      /* Bits 23-25: Error bits status */
 #define ETH_DMASR_EBS_MASK           (7 << ETH_DMASR_EBS_SHIFT)
 #  define ETH_DMASR_EBS_TXDMS        (1 << ETH_DMASR_EBS_SHIFT) /* Bit 23 1 Error during data transfer by TxDMA */
 #  define ETH_DMASR_EBS_READ         (2 << ETH_DMASR_EBS_SHIFT) /* Bit 24 1 Error during read transfer */
 #  define ETH_DMASR_EBS_DESC         (4 << ETH_DMASR_EBS_SHIFT) /* Bit 25 1 Error during descriptor access */
+
 #define ETH_DMASR_MMCS               (1 << 27) /* Bit 27: MMC status */
 #define ETH_DMASR_PMTS               (1 << 28) /* Bit 28: PMT status */
 #define ETH_DMASR_TSTS               (1 << 29) /* Bit 29: Time stamp trigger status */
@@ -607,12 +635,24 @@
 
 #define ETH_DMARSWTR_MASK            (0xff)
 
-/* Ethernet DMA current host transmit descriptor register (32-bit address) */
-/* Ethernet DMA current host receive descriptor register (32-bit address) */
-/* Ethernet DMA current host transmit buffer address register (32-bit address) */
-/* Ethernet DMA current host receive buffer address register (32-bit address) */
+/* Ethernet DMA current host transmit descriptor register
+ * (32-bit address)
+ */
 
-/* DMA Descriptors **********************************************************************************/
+/* Ethernet DMA current host receive descriptor register
+ * (32-bit address)
+ */
+
+/* Ethernet DMA current host transmit buffer address register
+ * (32-bit address)
+ */
+
+/* Ethernet DMA current host receive buffer address register
+ * (32-bit address)
+ */
+
+/* DMA Descriptors **********************************************************/
+
 /* TDES0: Transmit descriptor Word0 */
 
 #define ETH_TDES0_DB                 (1 << 0)  /* Bit 0:  Deferred bit */
@@ -640,6 +680,7 @@
 #  define ETH_TDES0_CIC_IH           (1 << ETH_TDES0_CIC_SHIFT) /* IP header checksum enabled */
 #  define ETH_TDES0_CIC_IHPL         (2 << ETH_TDES0_CIC_SHIFT) /* IP header and payload checksum enabled */
 #  define ETH_TDES0_CIC_ALL          (3 << ETH_TDES0_CIC_SHIFT) /* IP Header, payload, and pseudo-header checksum enabled */
+
 #define ETH_TDES0_TTSE               (1 << 25) /* Bit 25: Transmit time stamp enable */
 #define ETH_TDES0_DP                 (1 << 26) /* Bit 26: Disable pad */
 #define ETH_TDES0_DC                 (1 << 27) /* Bit 27: Disable CRC */
@@ -653,13 +694,16 @@
 #define ETH_TDES1_TBS1_SHIFT         (0)  /* Bits 0-12: Transmit buffer 1 size */
 #define ETH_TDES1_TBS1_MASK          (0x1fff << ETH_TDES1_TBS1_SHIFT)
 #  define ETH_TDES1_TBS1(n)          ((uint32_t)(n) << ETH_TDES1_TBS1_SHIFT)
-#define ETH_TDES1_TBS2_SHIFT         (16)  /* Bits 16-28: Transmit buffer 2 size */
+#define ETH_TDES1_TBS2_SHIFT         (16) /* Bits 16-28: Transmit buffer 2 size */
 #define ETH_TDES1_TBS2_MASK          (0x1fff << ETH_TDES1_TBS2_SHIFT)
 #  define ETH_TDES1_TBS2(n)          ((uint32_t)(n) << ETH_TDES1_TBS2_SHIFT)
 
 /* TDES2: Transmit descriptor Word2 (32-bit address) */
+
 /* TDES3: Transmit descriptor Word3 (32-bit address) */
+
 /* TDES6: Transmit descriptor Word6 (32-bit time stamp) */
+
 /* TDES7: Transmit descriptor Word7 (32-bit time stamp) */
 
 /* RDES0: Receive descriptor Word0 */
@@ -701,6 +745,7 @@
 #define ETH_RDES1_DIC                (1 << 31) /* Bit 31: Disable interrupt on completion */
 
 /* RDES2: Receive descriptor Word2 (32-bit address) */
+
 /* RDES3: Receive descriptor Word3 (32-bit address) */
 
 /* RDES4: Receive descriptor Word4 */
@@ -711,6 +756,7 @@
 #  define ETH_RDES4_IPPT_UDP         (1 << ETH_RDES4_IPPT_SHIFT) /* UDP payload in IP datagram */
 #  define ETH_RDES4_IPPT_TCP         (2 << ETH_RDES4_IPPT_SHIFT) /* TCP payload in IP datagram */
 #  define ETH_RDES4_IPPT_ICMP        (3 << ETH_RDES4_IPPT_SHIFT) /* ICMP payload in IP datagram */
+
 #define ETH_RDES4_IPHE               (1 << 3)  /* Bit 3:  IP header error */
 #define ETH_RDES4_IPPE               (1 << 4)  /* Bit 4:  IP payload error */
 #define ETH_RDES4_IPCB               (1 << 5)  /* Bit 5:  IP checksum bypassed */
@@ -733,16 +779,19 @@
                                                                  * peer-to-peer transparent clock) or
                                                                  * Signaling (for ordinary or boundary
                                                                  * clock) */
+
 #define ETH_RDES4_PFT                (1 << 12) /* Bit 12: PTP frame type */
 #define ETH_RDES4_PV                 (1 << 13) /* Bit 13: PTP version */
 
 /* RDES5: Receive descriptor Word5 - Reserved */
+
 /* RDES6: Receive descriptor Word6 (32-bit time stamp) */
+
 /* RDES7: Receive descriptor Word7 (32-bit time stamp) */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -786,9 +835,9 @@ struct eth_rxdesc_s
 #endif
 };
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX || CONFIG_STM32F7_STM32F76XX || CONFIG_STM32F7_STM32F77XX */

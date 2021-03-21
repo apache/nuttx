@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/hardware/stm32f74xx77xx_i2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,16 +16,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_STM32F74XX77XX_I2C_H
 #define __ARCH_ARM_SRC_STM32F7_STM32F74XX77XX_I2C_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_I2C_CR1_OFFSET      0x0000 /* Control register 1 (32-bit) */
 #define STM32_I2C_CR2_OFFSET      0x0004 /* Control register 2 (32-bit) */
@@ -39,7 +39,7 @@
 #define STM32_I2C_RXDR_OFFSET     0x0024 /* Receive data register */
 #define STM32_I2C_TXDR_OFFSET     0x0028 /* Transmit data register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32F7_NI2C > 0
 #  define STM32_I2C1_CR1          (STM32_I2C1_BASE+STM32_I2C_CR1_OFFSET)
@@ -97,7 +97,7 @@
 #  define STM32_I2C4_TXDR         (STM32_I2C4_BASE+STM32_I2C_TXDR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Control register 1 */
 
@@ -113,6 +113,7 @@
 #define I2C_CR1_DNF_MASK          (0xf << I2C_CR1_DNF_SHIFT)
 #  define I2C_CR1_DNF_DISABLE     (0 << I2C_CR1_DNF_SHIFT)
 #  define I2C_CR1_DNF(n)          ((n) << I2C_CR1_DNF_SHIFT) /* Up to n * Ti2cclk, n=1..15 */
+
 #define I2C_CR1_ANFOFF            (1 << 12) /* Bit 12: Analog noise filter OFF */
 #define I2C_CR1_TXDMAEN           (1 << 14) /* Bit 14: DMA transmission requests enable */
 #define I2C_CR1_RXDMAEN           (1 << 15) /* Bit 15: DMA reception requests enable */
@@ -165,6 +166,7 @@
 #  define I2C_OAR2_OA2MSK_6_7     (5 << I2C_OAR2_OA2MSK_SHIFT) /* Only OA2[7:6] are compared */
 #  define I2C_OAR2_OA2MSK_7       (6 << I2C_OAR2_OA2MSK_SHIFT) /* Only OA2[7] is compared */
 #  define I2C_OAR2_OA2MSK_ALL     (7 << I2C_OAR2_OA2MSK_SHIFT) /* All 7-bit addresses acknowledged */
+
 #define I2C_OAR2_OA2EN            (1 << 15)  /* Bit 15: Own Address 2 enable */
 
 /* Timing register */
@@ -201,7 +203,6 @@
 #  define I2C_TIMEOUTR_B(n)       ((n) << I2C_TIMEOUTR_B_SHIFT)
 #define I2C_TIMEOUTR_TEXTEN       (1 << 31) /* Bits 31: Extended clock timeout enable */
 
-
 /* Fields unique to the Interrupt and Status register */
 
 #define I2C_ISR_TXE               (1 << 0)  /* Bit 0:  Transmit data register empty (transmitters) */
@@ -215,6 +216,7 @@
 #define I2C_ISR_ADDCODE_MASK      (0x7f << I2C_ISR_ADDCODE_SHIFT)
 
 /* Interrupt and Status register and interrupt clear register */
+
 /* Common interrupt bits */
 
 #define I2C_INT_ADDR              (1 << 3)  /* Bit 3:  Address matched (slave) */

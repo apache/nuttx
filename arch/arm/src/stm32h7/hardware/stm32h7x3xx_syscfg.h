@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_syscfg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_SYSCFG_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_SYSCFG_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 #include "hardware/stm32_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_SYSCFG_PMC_OFFSET       0x0004 /* SYSCFG peripheral mode configuration register */
 
 #define STM32_SYSCFG_EXTICR_OFFSET(p) (0x0008 + ((p) & 0x000c)) /* Registers are displaced by 4! */
+
 #define STM32_SYSCFG_EXTICR1_OFFSET   0x0008 /* SYSCFG external interrupt configuration register 1 */
 #define STM32_SYSCFG_EXTICR2_OFFSET   0x000c /* SYSCFG external interrupt configuration register 2 */
 #define STM32_SYSCFG_EXTICR3_OFFSET   0x0010 /* SYSCFG external interrupt configuration register 3 */
@@ -69,7 +70,7 @@
 #define STM32_SYSCFG_UR16_OFFSET      0x0340 /* User register 16 */
 #define STM32_SYSCFG_UR17_OFFSET      0x0344 /* User register 17 */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_SYSCFG_PMC              (STM32_SYSCFG_BASE + STM32_SYSCFG_PMC_OFFSET)
 
@@ -84,7 +85,7 @@
 #define STM32_SYSCFG_CCCR             (STM32_SYSCFG_BASE + STM32_SYSCFG_CCCR_OFFSET)
 #define STM32_SYSCFG_PWRCR            (STM32_SYSCFG_BASE + STM32_SYSCFG_PWRCR_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* SYSCFG peripheral mode configuration register */
 
@@ -162,16 +163,19 @@
 #define SYSCFG_EXTICR4_EXTI15_MASK    (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR4_EXTI15_SHIFT)
 
 /* Compensation cell control/status register */
+
 /* REVISIT:  Missing bitfield definitions */
 
 #define SYSCFG_CCSR_
 
 /* Compensation cell value register */
+
 /* REVISIT:  Missing bitfield definitions */
 
 #define SYSCFG_CCVR_
 
 /* Compensation cell code register */
+
 /* REVISIT:  Missing bitfield definitions */
 
 #define SYSCFG_CCCR_
@@ -181,6 +185,7 @@
 #define SYSCFG_PWRCR_ODEN            (1 << 0)  /* Bit 0: Overdrive enable, this bit allows to activate the LDO regulator overdrive mode */
 
 /* User registers 0-17 */
+
 /* REVISIT:  Missing bitfield definitions */
 
 #define SYSCFG_UR0_

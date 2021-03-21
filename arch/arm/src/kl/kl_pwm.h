@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kl/kl_pwm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,27 +16,39 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KL_KINETIS_PWM_H
 #define __ARCH_ARM_SRC_KL_KINETIS_PWM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/* Check if PWM support for any channel is enabled. */
+
+#if defined(CONFIG_KL_TPM0_PWM)  || defined(CONFIG_KL_TPM1_PWM)  || \
+    defined(CONFIG_KL_TPM2_PWM)
+
+#include <arch/board/board.h>
+#include "hardware/kl_pinmux.h"
+#endif
+
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
 /* Timer devices may be used for different purposes.  One special purpose is
- * to generate modulated outputs for such things as motor control.  If CONFIG_KL_TPMn
- * is defined then the CONFIG_KL_TPMn_PWM must also be defined to indicate that
- * timer "n" is intended to be used for pulsed output signal generation.
+ * to generate modulated outputs for such things as motor control.
+ * If CONFIG_KL_TPMn is defined then the CONFIG_KL_TPMn_PWM must also be
+ * defined to indicate that timer "n" is intended to be used for pulsed
+ * output signal generation.
  */
 
 #ifndef CONFIG_KL_TPM0
@@ -54,16 +66,13 @@
 #if defined(CONFIG_KL_TPM0_PWM)  || defined(CONFIG_KL_TPM1_PWM)  || \
     defined(CONFIG_KL_TPM2_PWM)
 
-#include <arch/board/board.h>
-#include "hardware/kl_pinmux.h"
-
-/* For each timer that is enabled for PWM usage, we need the following additional
- * configuration settings:
+/* For each timer that is enabled for PWM usage, we need the following
+ * additional configuration settings:
  *
  * CONFIG_KL_TPMx_CHANNEL - Specifies the timer output channel {1,..,4}
- * PWM_TPMx_CHn - One of the values defined in chip/kl*_pinmap.h.  In the case
- *   where there are multiple pin selections, the correct setting must be provided
- *   in the arch/board/board.h file.
+ * PWM_TPMx_CHn - One of the values defined in chip/kl*_pinmap.h.  In the
+ *   case where there are multiple pin selections, the correct setting must
+ *   be provided in the arch/board/board.h file.
  */
 
 #ifdef CONFIG_KL_TPM0_PWM
@@ -126,13 +135,13 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -145,11 +154,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_pwminitialize
  *
  * Description:
@@ -162,7 +171,7 @@ extern "C"
  *   On success, a pointer to the KL lower half PWM driver is returned.
  *   NULL is returned on any failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct pwm_lowerhalf_s *kl_pwminitialize(int timer);
 

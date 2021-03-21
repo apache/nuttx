@@ -847,7 +847,9 @@ static void stm32l4_stdclockconfig(void)
         }
 #endif
 
-      /* Enable FLASH prefetch, instruction cache, data cache, and 4 wait states */
+      /* Enable FLASH prefetch, instruction cache, data cache,
+       * and 4 wait states
+       */
 
 #ifdef CONFIG_STM32L4_FLASH_PREFETCH
       regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN |

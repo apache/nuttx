@@ -57,7 +57,8 @@
 #  undef OLIMEXINO_STM32_MMCSDSPIPORTNO
 #  define OLIMEXINO_STM32_MMCSDSPIPORTNO 2
 #else
-   /* Add configuration for new STM32 boards here */
+/* Add configuration for new STM32 boards here */
+
 #  error "Unrecognized STM32 board"
 #endif
 
@@ -76,7 +77,8 @@
 int board_usbmsc_initialize(int port)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initialized in board_app_initialize() (see stm32_appinit.c).
+   * already have been initialized in board_app_initialize()
+   * (see stm32_appinit.c).
    * In this case, there is nothing further to be done here.
    */
 
@@ -109,16 +111,15 @@ int board_usbmsc_initialize(int port)
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to bind SPI port %d to MMC/SD minor=%d slot=%d %d\n",
-             OLIMEXINO_STM32_MMCSDSPIPORTNO, CONFIG_SYSTEM_USBMSC_DEVMINOR1,
-             OLIMEXINO_STM32_MMCSDSLOTNO, ret);
+         "ERROR: Failed to bind SPI port %d to MMC/SD minor=%d slot=%d %d\n",
+         OLIMEXINO_STM32_MMCSDSPIPORTNO, CONFIG_SYSTEM_USBMSC_DEVMINOR1,
+         OLIMEXINO_STM32_MMCSDSLOTNO, ret);
       return ret;
     }
 
   syslog(LOG_INFO, "Successfully bound SPI to the MMC/SD driver\n");
 
   return OK;
-
 }
 
 #endif /* CONFIG_STM32_SPI */

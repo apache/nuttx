@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_can.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_CAN_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_CAN_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* 3 TX mailboxes */
 
@@ -48,7 +48,7 @@
 
 #define CAN_NFILTERS 14
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 /* CAN control and status registers */
 
@@ -121,7 +121,7 @@
 
 #define STM32_CAN_FIR_OFFSET(f,i) (0x240 + ((f) << 3)+(((i) - 1) << 2))
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32_NCAN > 0
 #  define STM32_CAN1_MCR          (STM32_CAN1_BASE + STM32_CAN_MCR_OFFSET)
@@ -231,7 +231,7 @@
 #  define STM32_CAN2_FIR(b,i)     (STM32_CAN2_BASE + STM32_CAN_FIR_OFFSET(b,i))
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* CAN master control register */
 
@@ -324,6 +324,7 @@
 #  define CAN_ESR_BDOMERROR       (5 << CAN_ESR_LEC_SHIFT) /* 101: Bit dominant Error */
 #  define CAN_ESR_CRCERRPR        (6 << CAN_ESR_LEC_SHIFT) /* 110: CRC Error */
 #  define CAN_ESR_SWERROR         (7 << CAN_ESR_LEC_SHIFT) /* 111: Set by software */
+
 #define CAN_ESR_TEC_SHIFT         (16)      /* Bits 23-16: LS byte of the 9-bit Transmit Error Counter */
 #define CAN_ESR_TEC_MASK          (0xff << CAN_ESR_TEC_SHIF)
 #define CAN_ESR_REC_SHIFT         (24)      /* Bits 31-24: Receive Error Counter */

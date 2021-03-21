@@ -1,4 +1,4 @@
-/************************************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_ocotp.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_OCOTP_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_OCOTP_H
@@ -27,18 +27,18 @@
  * OTP, OCOTP Indexes are used.
  */
 
-/************************************************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/************************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define IMXRT_OCOTP_CTRL_OFFSET               0x0000  /* OTP Controller Control Register */
 #define IMXRT_OCOTP_CTRL_SET_OFFSET           0x0004  /* OTP Controller Control Register */
@@ -58,7 +58,7 @@
 #define IMXRT_OCOTP_VERSION_OFFSET            0x0090  /* OTP Controller Version Register */
 #define IMXRT_OCOTP_TIMING2_OFFSET            0x0100  /* OTP Controller Timing Register */
 
-/* OCOTP Shadow Offsets *************************************************************/
+/* OCOTP Shadow Offsets *****************************************************/
 
 #define IMXRT_OCOTP_LOCK_OFFSET               0x0400  /* Value of OTP Bank0 Word0 (Lock controls) */
 #define IMXRT_OCOTP_CFG0_OFFSET               0x0410  /* Value of OTP Bank0 Word1 (Configuration and Manufacturing */
@@ -124,7 +124,7 @@
 #define IMXRT_OCOTP_GP42_OFFSET               0x08e0  /* Value of OTP Bank7 Word6 (GP4) */
 #define IMXRT_OCOTP_GP43_OFFSET               0x08f0  /* Value of OTP Bank7 Word7 (GP4) */
 
-/* OCOTP Indexes *****************************************************************/
+/* OCOTP Indexes ************************************************************/
 
 #define IMXRT_OCOTP_O2I(offset)               (((offset) - IMXRT_OCOTP_LOCK_OFFSET) >> 4)
 
@@ -194,7 +194,7 @@
 #define IMXRT_OCOTP_GP42_INDEX                IMXRT_OCOTP_O2IP(IMXRT_OCOTP_GP42_OFFSET)         /* Value of OTP Bank7 Word6 (GP4) */
 #define IMXRT_OCOTP_GP43_INDEX                IMXRT_OCOTP_O2IP(IMXRT_OCOTP_GP43_OFFSET)         /* Value of OTP Bank7 Word7 (GP4) */
 
-/* Register addresses ***********************************************************************************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_OCOTP_CTRL                      (IMXRT_OCOTP_BASE + IMXRT_OCOTP_CTRL_OFFSET)            /* OTP Controller Control Register */
 #define IMXRT_OCOTP_CTRL_SET                  (IMXRT_OCOTP_BASE + IMXRT_OCOTP_CTRL_SET_OFFSET)        /* OTP Controller Control Register */
@@ -276,7 +276,7 @@
 #define IMXRT_OCOTP_GP42                      (IMXRT_OCOTP_BASE + IMXRT_OCOTP_GP42_OFFSET)            /* Value of OTP Bank7 Word6 (GP4) */
 #define IMXRT_OCOTP_GP43                      (IMXRT_OCOTP_BASE + IMXRT_OCOTP_GP43_OFFSET)            /* Value of OTP Bank7 Word7 (GP4) */
 
-/* Register Bit Definitions *********************************************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* OTP Controller Control Register */
 

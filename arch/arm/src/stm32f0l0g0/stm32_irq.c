@@ -35,7 +35,7 @@
 #include "arm_arch.h"
 #include "arm_internal.h"
 
-//#include "stm32_irq.h"
+/* #include "stm32_irq.h" */
 
 /****************************************************************************
  * Pre-processor Definitions

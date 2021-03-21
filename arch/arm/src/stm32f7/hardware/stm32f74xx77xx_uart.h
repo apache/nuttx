@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/hardware/stm32f74xx77xx_uart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_UART_H
 #define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) || \
     defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_USART_CR1_OFFSET    0x0000  /* Control register 1 */
 #define STM32_USART_CR2_OFFSET    0x0004  /* Control register 2 */
@@ -48,7 +48,7 @@
 #define STM32_USART_RDR_OFFSET    0x0024  /* Receive data register */
 #define STM32_USART_TDR_OFFSET    0x0028  /* Transmit data register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32F7_NUSART > 0
 #  define STM32_USART1_CR1        (STM32_USART1_BASE+STM32_USART_CR1_OFFSET)
@@ -170,7 +170,7 @@
 #  define STM32_UART8_TDR        (STM32_UART8_BASE+STM32_USART_TDR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Control register 1 */
 
@@ -217,6 +217,7 @@
 #  define USART_CR2_STOP1         (0 << USART_CR2_STOP_SHIFT) /* 00: 1 Stop bit */
 #  define USART_CR2_STOP2         (2 << USART_CR2_STOP_SHIFT) /* 10: 2 Stop bits */
 #  define USART_CR2_STOP1p5       (3 << USART_CR2_STOP_SHIFT) /* 11: 1.5 Stop bit */
+
 #define USART_CR2_LINEN           (1 << 14) /* Bit 14: LIN mode enable */
 #define USART_CR2_SWAP            (1 << 15) /* Bit 15: Swap TX/RX pins */
 #define USART_CR2_RXINV           (1 << 16) /* Bit 16: RX pin active level inversion */
@@ -230,6 +231,7 @@
 #  define USART_CR2_ABRMOD_FALL   (1 << USART_CR2_ABRMOD_SHIFT) /* Falling edge measurement */
 #  define USART_CR2_ABRMOD_7F     (2 << USART_CR2_ABRMOD_SHIFT) /* 0x7F frame detection */
 #  define USART_CR2_ABRMOD_55     (3 << USART_CR2_ABRMOD_SHIFT) /* 0x55 frame detection */
+
 #define USART_CR2_RTOEN           (1 << 23) /* Bit 23: Receiver timeout enable */
 #define USART_CR2_ADD4L_SHIFT     (24)      /* Bits 24-27: Address[3:0]:of the USART node */
 #define USART_CR2_ADD4L_MASK      (15 << USART_CR2_ADD4L_SHIFT)
@@ -291,6 +293,7 @@
 #  define USART_RTOR_RTO(n)       ((uint32_t)(n) << USART_RTOR_RTO_SHIFT)
 #define USART_RTOR_BLEN_SHIFT     (24)      /* Bits 24-31: Block Length */
 #define USART_RTOR_BLEN_MASK      (0xff << USART_RTOR_BLEN_SHIFT)
+
 #  define USART_RTOR_BLEN(n)      ((uint32_t)(n) << USART_RTOR_BLEN_SHIFT)
 
 /* Request register */

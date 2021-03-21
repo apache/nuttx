@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/hardware/stm32f74xx77xx_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_SPI_H
 #define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_SPI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Maximum allowed speed as per data sheet for all SPIs (both pclk1 and pclk2)*/
+/* Maximum allowed speed as per data sheet for all SPIs
+ * (both pclk1 and pclk2)
+ */
 
 #if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
 #  define STM32_SPI_CLK_MAX       50000000UL
@@ -40,7 +42,7 @@
 #  define STM32_SPI_CLK_MAX       54000000UL
 #endif
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_SPI_CR1_OFFSET      0x0000  /* SPI Control Register 1 (16-bit) */
 #define STM32_SPI_CR2_OFFSET      0x0004  /* SPI control register 2 (16-bit) */
@@ -52,7 +54,7 @@
 #define STM32_SPI_I2SCFGR_OFFSET  0x001c  /* I2S configuration register */
 #define STM32_SPI_I2SPR_OFFSET    0x0020  /* I2S prescaler register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32F7_NSPI > 0
 #  define STM32_SPI1_CR1          (STM32_SPI1_BASE+STM32_SPI_CR1_OFFSET)
@@ -124,7 +126,7 @@
 #  define STM32_SPI6_I2SPR        (STM32_SPI6_BASE+STM32_SPI_I2SPR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* SPI Control Register 1 */
 
@@ -141,6 +143,7 @@
 #  define SPI_CR1_FPCLCKd64       (5 << SPI_CR1_BR_SHIFT) /* 101: fPCLK/64 */
 #  define SPI_CR1_FPCLCKd128      (6 << SPI_CR1_BR_SHIFT) /* 110: fPCLK/128 */
 #  define SPI_CR1_FPCLCKd256      (7 << SPI_CR1_BR_SHIFT) /* 111: fPCLK/256 */
+
 #define SPI_CR1_SPE               (1 << 6)  /* Bit 6: SPI Enable */
 #define SPI_CR1_LSBFIRST          (1 << 7)  /* Bit 7: Frame Format */
 #define SPI_CR1_SSI               (1 << 8)  /* Bit 8: Internal slave select */
@@ -199,6 +202,7 @@
 #  define SPI_SR_FRLVL_QUARTER    (1 << SPI_SR_FRLVL_SHIFT) /* 1/4 FIFO */
 #  define SPI_SR_FRLVL_HALF       (2 << SPI_SR_FRLVL_SHIFT) /* 1/2 FIFO */
 #  define SPI_SR_FRLVL_FULL       (3 << SPI_SR_FRLVL_SHIFT) /* FIFO full */
+
 #define SPI_SR_FTLVL_SHIFT        (11)      /* Bits 11-12: FIFO transmission level */
 #define SPI_SR_FTLVL_MASK         (3 << SPI_SR_FTLVL_SHIFT)
 #  define SPI_SR_FTLVL_EMPTY      (0 << SPI_SR_FTLVL_SHIFT) /* FIFO empty */
@@ -214,6 +218,7 @@
 #  define SPI_I2SCFGR_DATLEN_16BIT (0 << SPI_I2SCFGR_DATLEN_SHIFT) /* 00: 16-bit data length */
 #  define SPI_I2SCFGR_DATLEN_8BIT  (1 << SPI_I2SCFGR_DATLEN_SHIFT) /* 01: 24-bit data length */
 #  define SPI_I2SCFGR_DATLEN_32BIT (2 << SPI_I2SCFGR_DATLEN_SHIFT) /* 10: 32-bit data length */
+
 #define SPI_I2SCFGR_CKPOL          (1 << 3)  /* Bit 3: Steady state clock polarity */
 #define SPI_I2SCFGR_I2SSTD_SHIFT   (4)       /* Bit 4-5: I2S standard selection */
 #define SPI_I2SCFGR_I2SSTD_MASK    (3 << SPI_I2SCFGR_I2SSTD_SHIFT)
@@ -221,6 +226,7 @@
 #  define SPI_I2SCFGR_I2SSTD_MSB      (1 << SPI_I2SCFGR_I2SSTD_SHIFT) /* 01: MSB justified standard (left justified) */
 #  define SPI_I2SCFGR_I2SSTD_LSB      (2 << SPI_I2SCFGR_I2SSTD_SHIFT) /* 10: LSB justified standard (right justified) */
 #  define SPI_I2SCFGR_I2SSTD_PCM      (3 << SPI_I2SCFGR_I2SSTD_SHIFT) /* 11: PCM standard */
+
 #define SPI_I2SCFGR_PCMSYNC        (1 << 7)  /* Bit 7: PCM frame synchronization */
 #define SPI_I2SCFGR_I2SCFG_SHIFT   (8)       /* Bit 8-9: I2S configuration mode */
 #define SPI_I2SCFGR_I2SCFG_MASK    (3 << SPI_I2SCFGR_I2SCFG_SHIFT)
@@ -228,6 +234,7 @@
 #  define SPI_I2SCFGR_I2SCFG_SRX   (1 << SPI_I2SCFGR_I2SCFG_SHIFT) /* 01: Slave - receive */
 #  define SPI_I2SCFGR_I2SCFG_MTX   (2 << SPI_I2SCFGR_I2SCFG_SHIFT) /* 10: Master - transmit */
 #  define SPI_I2SCFGR_I2SCFG_MRX   (3 << SPI_I2SCFGR_I2SCFG_SHIFT) /* 11: Master - receive */
+
 #define SPI_I2SCFGR_I2SE           (1 << 10) /* Bit 10: I2S Enable */
 #define SPI_I2SCFGR_I2SMOD         (1 << 11) /* Bit 11: I2S mode selection */
 #define SPI_I2SCFGR_ASTRTEN        (1 << 12) /* Bit 12: Asynchronous start enable */

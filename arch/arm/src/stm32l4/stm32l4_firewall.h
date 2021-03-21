@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_firewall.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_FIREWALL_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_FIREWALL_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
 
 #include "chip.h"
 
-/* Include the correct firewall register definitions for this STM32L4 family */
+/* Include the correct firewall register definitions for this STM32L4
+ * family
+ */
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
 #  include "hardware/stm32l4x3xx_firewall.h"
@@ -44,9 +46,9 @@
 #  error "Unsupported STM32L4 chip"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 struct stm32l4_firewall_t
 {
@@ -60,9 +62,9 @@ struct stm32l4_firewall_t
   uint8_t    dataexec   : 1;
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -75,9 +77,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32l4_firewallsetup
@@ -86,7 +88,8 @@ extern "C"
  *   Configure the STM32L4 firewall. After this, protected code will only
  *   be accessible via the "entry gate".
  *   Once enabled, the firewall cannot be enabled until the next reset.
- *   Returns 0 when OK, -1 when addresses and length are not properly aligned.
+ *   Returns 0 when OK, -1 when addresses and length are not properly
+ *   aligned.
  *
  ****************************************************************************/
 

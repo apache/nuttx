@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kl/hardware/kl_tsi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,38 +16,39 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_TSI_H
 #define __ARCH_ARM_SRC_KL_HARDWARE_KL_TSI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KL_TSI_GENCS_OFFSET            0x0000 /* General Control and Status Register */
 #define KL_TSI_DATA_OFFSET             0x0004 /* SCAN control register */
 #define KL_TSI_TSHD_OFFSET             0x0008 /* Pin enable register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KL_TSI_GENCS                   (KL_TSI_BASE+KL_TSI_GENCS_OFFSET)
 #define KL_TSI_DATA                    (KL_TSI_BASE+KL_TSI_DATA_OFFSET)
 #define KL_TSI_TSHD                    (KL_TSI_BASE+KL_TSI_TSHD_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* General Control and Status Register */
+
                                                  /* Bit 0: Reserved */
 #define TSI_GENCS_CURSW                (1 << 1)  /* Bit 1: Current sources for oscillators swapped */
 #define TSI_GENCS_EOSF                 (1 << 2)  /* Bit 2: End of scan flag */
@@ -59,6 +60,7 @@
 #define TSI_GENCS_NSCN_SHIFT           (8)       /* Bits 8-12: Electrode oscillator count used in a scan */
 #define TSI_GENCS_NSCN_MASK            (31 << TSI_GENCS_NSCN_SHIFT)
 #  define TSI_GENCS_NSCN_TIMES(n)      (((n)-1) << TSI_GENCS_NSCN_SHIFT) /* n times per electrode,n=1..32 */
+
 #define TSI_GENCS_PS_SHIFT             (13)      /* Bits 13-15: Prescaler value */
 #define TSI_GENCS_PS_MASK              (7 << TSI_GENCS_PS_SHIFT)
 #  define TSI_GENCS_PS_DIV1            (0 << TSI_GENCS_PS_SHIFT) /* Electrode oscillator / 1 */
@@ -69,6 +71,7 @@
 #  define TSI_GENCS_PS_DIV32           (5 << TSI_GENCS_PS_SHIFT) /* Electrode oscillator / 32 */
 #  define TSI_GENCS_PS_DIV64           (6 << TSI_GENCS_PS_SHIFT) /* Electrode oscillator / 64 */
 #  define TSI_GENCS_PS_DIV128          (7 << TSI_GENCS_PS_SHIFT) /* Electrode oscillator / 128 */
+
 #define TSI_GENCS_EXTCHRG_SHIFT        (16)      /* Bits 16-18: Electrode Osc charge/discharge value */
 #define TSI_GENCS_EXTCHRG_MASK         (7 << TSI_GENCS_EXTCHRG_SHIFT)
 #  define TSI_GENCS_EXTCHRG_500NA      (0 << TSI_GENCS_EXTCHRG_SHIFT)
@@ -124,16 +127,16 @@
 #define TSI_THRESHLD_LTHH_SHIFT        (16)      /* Bits 16-31: Low threshold value */
 #define TSI_THRESHLD_LTHH_MASK         (0xffff << TSI_THRESHLD_LTHH_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_TSI_H */

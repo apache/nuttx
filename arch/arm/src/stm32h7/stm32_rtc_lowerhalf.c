@@ -104,8 +104,9 @@ static bool stm32_havesettime(FAR struct rtc_lowerhalf_s *lower);
 #ifdef CONFIG_RTC_ALARM
 static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
                           FAR const struct lower_setalarm_s *alarminfo);
-static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setrelative_s *alarminfo);
+static int
+stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
+                  FAR const struct lower_setrelative_s *alarminfo);
 static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
                              int alarmid);
 static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
@@ -113,9 +114,11 @@ static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 #endif
 
 #ifdef CONFIG_RTC_PERIODIC
-static int stm32_setperiodic(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setperiodic_s *alarminfo);
-static int stm32_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id);
+static int
+stm32_setperiodic(FAR struct rtc_lowerhalf_s *lower,
+                  FAR const struct lower_setperiodic_s *alarminfo);
+static int
+stm32_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id);
 #endif
 
 /****************************************************************************

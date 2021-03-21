@@ -1,4 +1,4 @@
-/***************************************************************************************************
+/****************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_nvmc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ***************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_NVMC_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_NVMC_H
 
-/***************************************************************************************************
+/****************************************************************************
  * Included Files
- ***************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
-/***************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ***************************************************************************************************/
+ ****************************************************************************/
 
-/* NVMC Register Offsets ****************************************************************************/
+/* NVMC Register Offsets ****************************************************/
 
 /* Registers for the NVMC */
 
@@ -47,7 +47,7 @@
 #define NRF52_NVMC_IHIT_OFFSET           0x548  /* I-Code cache hit counter. */
 #define NRF52_NVMC_IMISS_OFFSET          0x54c  /* I-Code cache miss counter */
 
-/* NVMC Register Addresses **************************************************************************/
+/* NVMC Register Addresses **************************************************/
 
 #define NRF52_NVMC_READY                 (NRF52_NVMC_BASE + NRF52_NVMC_READY_OFFSET)
 #define NRF52_NVMC_CONFIG                (NRF52_NVMC_BASE + NRF52_NVMC_CONFIG_OFFSET)
@@ -60,7 +60,7 @@
 #define NRF52_NVMC_IHIT                  (NRF52_NVMC_BASE + NRF52_NVMC_IHIT_OFFSET)
 #define NRF52_NVMC_IMISS                 (NRF52_NVMC_BASE + NRF52_NVMC_IMISS_OFFSET)
 
-/* NVMC Register Bitfield Definitions **************************************************************/
+/* NVMC Register Bitfield Definitions ***************************************/
 
 /* READY Register */
 

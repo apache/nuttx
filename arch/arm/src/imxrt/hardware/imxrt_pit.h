@@ -85,6 +85,7 @@
                                              /* Bits 2-31: Reserved */
 
 /* Timer Load Value Register (32-bit Timer Start Value Bits) */
+
 /* Current Timer Value Register (32-bit Current Timer Value) */
 
 /* Timer Control Register */
@@ -109,7 +110,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_PIT_H */
