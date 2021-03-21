@@ -16586,7 +16586,7 @@ detailed bugfix information):
         script.  From Mateusz Szafoni.
       - Nucleo-F334R8:  Add missing ram_vectors configuration in linker
         script.  From Mateusz Szafoni.
-      - Nucleo-F334R8:  Add Missing ADC trigger configuration tot he highpri
+      - Nucleo-F334R8:  Add Missing ADC trigger configuration to the highpri
         configuration.  From Mateusz Szafoni.
       - STM3240G-EVAL:  The timer frequencies (BOARD_TIMx_FREQUENCY) are
         incorrectly defined in board.h.  Since the APB prescalers are set to

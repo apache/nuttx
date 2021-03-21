@@ -1016,7 +1016,7 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return ret;
     }
 
-  /* Handle the IOCTL according tot he command */
+  /* Handle the IOCTL according to the command */
 
   switch (cmd)
     {

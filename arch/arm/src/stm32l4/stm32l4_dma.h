@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_dma.h
  *
  *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
@@ -33,14 +33,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_DMA_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -62,8 +62,8 @@
 #  error "Unsupported STM32L4 chip"
 #endif
 
-/* These definitions provide the bit encoding of the 'status' parameter passed to the
- * DMA callback function (see dma_callback_t).
+/* These definitions provide the bit encoding of the 'status' parameter
+ * passed to the DMA callback function (see dma_callback_t).
  */
 
 #  define DMA_STATUS_TEIF         DMA_CHAN_TEIF_BIT     /* Channel Transfer Error */
@@ -73,12 +73,12 @@
 #define DMA_STATUS_ERROR          (DMA_STATUS_TEIF)
 #define DMA_STATUS_SUCCESS        (DMA_STATUS_TCIF|DMA_STATUS_HTIF)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* DMA_HANDLE provides an opaque are reference that can be used to represent a DMA
- * channel.
+/* DMA_HANDLE provides an opaque reference that can be used to represent a
+ * DMA channel.
  */
 
 typedef FAR void *DMA_HANDLE;
@@ -89,10 +89,10 @@ typedef FAR void *DMA_HANDLE;
  *
  * Input Parameters:
  *   handle - Refers to the DMA channel
- *   status - A bit encoded value that provides the completion status.  See the
- *            DMASTATUS_* definitions above.
- *   arg    - A user-provided value that was provided when stm32l4_dmastart() was
- *            called.
+ *   status - A bit encoded value that provides the completion status.  See
+ *            the DMASTATUS_* definitions above.
+ *   arg    - A user-provided value that was provided when
+ *            stm32l4_dmastart() was called.
  */
 
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
@@ -122,9 +122,9 @@ struct stm32l4_dmaregs_s
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -137,9 +137,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
     defined(CONFIG_STM32L4_STM32L4X6)
@@ -154,12 +154,12 @@ extern "C"
  *   channel cannot do DMA concurrently!  See the DMACHAN_* definitions in
  *   stm32l4_dma.h.
  *
- *   If the DMA channel is not available, then stm32l4_dmachannel() will wait
- *   until the holder of the channel relinquishes the channel by calling
- *   stm32l4_dmafree().  WARNING: If you have two devices sharing a DMA
- *   channel and the code never releases the channel, the stm32l4_dmachannel
- *   call for the other will hang forever in this function!  Don't let your
- *   design do that!
+ *   If the DMA channel is not available, then stm32l4_dmachannel() will
+ *   wait until the holder of the channel relinquishes the channel by
+ *   calling stm32l4_dmafree().  WARNING: If you have two devices sharing a
+ *   DMA channel and the code never releases the channel, the
+ *   stm32l4_dmachannel call for the other will hang forever in this
+ *   function!  Don't let your design do that!
  *
  *   Hmm.. I suppose this interface could be extended to make a non-blocking
  *   version.  Feel free to do that if that is what you need.
@@ -195,8 +195,8 @@ DMA_HANDLE stm32l4_dmachannel(unsigned int chan);
  *
  * Input Parameters:
  *   dmamap - Identifies the stream/channel resource. For the STM32L4+, this
- *     is a bit-encoded value as provided by the DMAMAP_* definitions
- *     in hardware/stm32l4xrxx_dmamux.h
+ *     is a bit-encoded value as provided by the DMAMAP_* definitions in
+ *     hardware/stm32l4xrxx_dmamux.h
  *
  * Returned Value:
  *   One success, this function returns a non-NULL, void* DMA channel
@@ -218,11 +218,13 @@ DMA_HANDLE stm32l4_dmachannel(unsigned int dmamap);
  * Name: stm32l4_dmafree
  *
  * Description:
- *   Release a DMA channel.  If another thread is waiting for this DMA channel
- *   in a call to stm32l4_dmachannel, then this function will re-assign the
- *   DMA channel to that thread and wake it up.  NOTE:  The 'handle' used
- *   in this argument must NEVER be used again until stm32l4_dmachannel() is
- *   called again to re-gain access to the channel.
+ *   Release a DMA channel.  If another thread is waiting for this DMA
+ *   channel in a call to stm32l4_dmachannel, then this function will
+ *   re-assign the DMA channel to that thread and wake it up.
+ *
+ *   NOTE:  The 'handle' used in this argument must NEVER be used again
+ *          until stm32l4_dmachannel() is called again to re-gain access to
+ *          the channel.
  *
  * Returned Value:
  *   None
@@ -266,8 +268,8 @@ void stm32l4_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
  *
  * Description:
  *   Cancel the DMA.  After stm32l4_dmastop() is called, the DMA channel is
- *   reset and stm32l4_dmasetup() must be called before stm32l4_dmastart() can be
- *   called again
+ *   reset and stm32l4_dmasetup() must be called before stm32l4_dmastart()
+ *   can be called again
  *
  * Assumptions:
  *   - DMA handle allocated by stm32l4_dmachannel()
@@ -296,8 +298,8 @@ size_t stm32l4_dmaresidual(DMA_HANDLE handle);
  *   Check if the DMA controller can transfer data to/from given memory
  *   address with the given configuration. This depends on the internal
  *   connections in the ARM bus matrix of the processor. Note that this
- *   only applies to memory addresses, it will return false for any peripheral
- *   address.
+ *   only applies to memory addresses, it will return false for any
+ *   peripheral address.
  *
  * Returned Value:
  *   True, if transfer is possible.

@@ -5,7 +5,7 @@
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This driver derives from the LPC1788 LCD driver.  The LPC1788 LCD is
- * identical tot he LPC54628 LCD other than some minor clocking differences.
+ * identical to the LPC54628 LCD other than some minor clocking differences.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
