@@ -93,10 +93,13 @@ void kl_pllconfig(void)
    * settings in the board.h header file.
    */
 
-  regval32 = (SIM_CLKDIV1_OUTDIV1(BOARD_OUTDIV1) | SIM_CLKDIV1_OUTDIV4(BOARD_OUTDIV4));
+  regval32 = (SIM_CLKDIV1_OUTDIV1(BOARD_OUTDIV1) |
+              SIM_CLKDIV1_OUTDIV4(BOARD_OUTDIV4));
   putreg32(regval32, KL_SIM_CLKDIV1);
 
-  /* System oscillator drives 32 kHz clock for various peripherals (OSC32KSEL=0) */
+  /* System oscillator drives 32 kHz clock for various peripherals
+   * (OSC32KSEL=0)
+   */
 
   regval32  = getreg32(KL_SIM_SOPT1);
   regval32 &= ~(SIM_SOPT1_OSC32KSEL_MASK);
@@ -110,10 +113,12 @@ void kl_pllconfig(void)
   regval32 |= SIM_SOPT2_PLLFLLSEL;
   putreg32(regval32, KL_SIM_SOPT2);
 
-  regval32  = (regval32 & ~(SIM_SOPT2_TPMSRC_OCSERCLK)) | SIM_SOPT2_TPMSRC_MCGCLK;
+  regval32  = (regval32 & ~(SIM_SOPT2_TPMSRC_OCSERCLK)) |
+               SIM_SOPT2_TPMSRC_MCGCLK;
   putreg32(regval32, KL_SIM_SOPT2);
 
   /* PORTA_PCR18: ISF=0, MUX=0 */
+
   /* PORTA_PCR19: ISF=0, MUX=0 */
 
   regval32  = getreg32(KL_PORTA_PCR18);
@@ -125,7 +130,10 @@ void kl_pllconfig(void)
   putreg32(regval32, KL_PORTA_PCR19);
 
   /* Switch to FBE Mode */
-  /* OSC0_CR: ERCLKEN=0, ??=0, EREFSTEN=0, ??=0, SC2P=0, SC4P=0, SC8P=0, SC16P=0 */
+
+  /* OSC0_CR: ERCLKEN=0,
+   * ??=0, EREFSTEN=0, ??=0, SC2P=0, SC4P=0, SC8P=0, SC16P=0
+   */
 
   putreg8(0, KL_OSC_CR);
 
@@ -191,8 +199,7 @@ void kl_pllconfig(void)
 
   /* Wait until PLL output */
 
-  while ((getreg8(KL_MCG_S) & MCG_S_CLKST_MASK) != 0x0C)
-    ;
+  while ((getreg8(KL_MCG_S) & MCG_S_CLKST_MASK) != 0x0c);
 }
 
 /****************************************************************************
@@ -223,6 +230,7 @@ void kl_clockconfig(void)
    * the FlexBus clock.
    */
 
-  //kl_traceconfig();
-  //kl_fbconfig();
+  /* kl_traceconfig(); */
+
+  /* kl_fbconfig(); */
 }

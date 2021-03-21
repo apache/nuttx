@@ -54,14 +54,15 @@
  *
  * Description:
  * Input Parameters:
- *   pwr_changed_handler: An interrupt handler that will be called on VBUS power
- *   state changes.
+ *   pwr_changed_handler: An interrupt handler that will be called on VBUS
+ *   power state changes.
  *
  ****************************************************************************/
 
 void stm32_usb_set_pwr_callback(xcpt_t pwr_changed_handler)
 {
-  stm32_gpiosetevent(GPIO_USB_VBUS, true, true, true, pwr_changed_handler, NULL);
+  stm32_gpiosetevent(GPIO_USB_VBUS, true, true, true,
+                     pwr_changed_handler, NULL);
 }
 
 /****************************************************************************
@@ -85,11 +86,12 @@ void stm32_usbinitialize(void)
  * Name:  stm32_usbpullup
  *
  * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide stm32_pullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
- *   NULL.
+ *   If USB is supported and the board supports a pullup via GPIO (for USB
+ *   software connect and disconnect), then the board software must provide
+ *   stm32_pullup.
+ *   See include/nuttx/usb/usbdev.h for additional description of this
+ *   method. Alternatively, if no pull-up GPIO the following EXTERN can
+ *   be redefined to be NULL.
  *
  ****************************************************************************/
 
@@ -104,10 +106,10 @@ int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
  * Name:  stm32_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV
+ *   driver is used.  This function is called whenever the USB enters or
+ *   leaves suspend mode. This is an opportunity for the board logic to
+ *   shutdown clocks, power, etc. while the USB is suspended.
  *
  ****************************************************************************/
 

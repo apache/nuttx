@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_axi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_AXI_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_AXI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_AXI_PERIPH_ID_4_OFFSET          0x01fd0  /* AXI interconnect peripheral ID4 register */
 #define STM32_AXI_PERIPH_ID_0_OFFSET          0x01fe0  /* AXI interconnect peripheral ID0 register */
@@ -82,7 +82,7 @@
 #define STM32_AXI_INI5_FN_MOD_OFFSET          0x46108  /* AXI interconnect INI 5 issuing functionality modification register */
 #define STM32_AXI_INI6_FN_MOD_OFFSET          0x47108  /* AXI interconnect INI 6 issuing functionality modification register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_AXI_PERIPH_ID_4                 (STM32_GPV_BASE + STM32_AXI_PERIPH_ID_4_OFFSET)
 #define STM32_AXI_PERIPH_ID_0                 (STM32_GPV_BASE + STM32_AXI_PERIPH_ID_0_OFFSET)
@@ -131,7 +131,7 @@
 #define STM32_AXI_INI5_FN_MOD                 (STM32_GPV_BASE + STM32_AXI_INI5_FN_MOD_OFFSET)
 #define STM32_AXI_INI6_FN_MOD                 (STM32_GPV_BASE + STM32_AXI_INI6_FN_MOD_OFFSET)
 
-/* AXI Register Bitfield Definitions *********************************************************/
+/* AXI Register Bitfield Definitions ****************************************/
 
 /* TARG x bus matrix issuing functionality Register */
 

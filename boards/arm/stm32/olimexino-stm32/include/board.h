@@ -53,7 +53,10 @@
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
 #define STM32_LSE_FREQUENCY     32768
 
-/* PLL source is HSE/1, PLL multipler is 9: PLL frequency is 8MHz (XTAL) x 9 = 72MHz */
+/* PLL source is HSE/1,
+ * PLL multipler is 9:
+ * PLL frequency is 8MHz (XTAL) x 9 = 72MHz
+ */
 
 #define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC
 #define STM32_CFGR_PLLXTPRE     0
@@ -102,7 +105,8 @@
 
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
  * otherwise frequency is 2xAPBx.
- * Note: TIM1,8 are on APB2, others on APB1 */
+ * Note: TIM1,8 are on APB2, others on APB1
+ */
 
 #define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM2_FREQUENCY    STM32_HCLK_FREQUENCY
@@ -113,12 +117,12 @@
 #define BOARD_TIM7_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
-/* Buttons *************************************************************************/
+/* Buttons ******************************************************************/
 
 #define BUTTON_BOOT0_BIT  (0)
 #define BUTTON_BOOT0_MASK (1<<BUTTON_BOOT0_BIT)
 
-/* Leds *************************************************************************/
+/* Leds *********************************************************************/
 
 /* LED index values for use with board_userled() */
 
@@ -138,7 +142,8 @@
  *
  *   SYMBOL                     Meaning                      LED state
  *                                                         Green  Yellow
- *   ------------------------  --------------------------  ------ ------ */
+ *   ------------------------  --------------------------  ------ ------
+ */
 
 #define LED_STARTED          0 /* NuttX has been started   OFF    OFF    */
 #define LED_HEAPALLOCATE     1 /* Heap has been allocated  OFF    OFF    */
@@ -148,7 +153,7 @@
 #define LED_SIGNAL           5 /* In a signal handler      N/C    ON     */
 #define LED_ASSERTION        6 /* An assertion failed      N/C    ON     */
 #define LED_PANIC            7 /* The system has crashed   N/C  Blinking */
-#define LED_IDLE             8  /* MCU is is sleep mode    OFF    N/C    */
+#define LED_IDLE             8 /* MCU is is sleep mode    OFF    N/C    */
 
 /* Thus if the Green is statically on, NuttX has successfully booted and is,
  * apparently, running normally.  If the YellowLED is flashing at

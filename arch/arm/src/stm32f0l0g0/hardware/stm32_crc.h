@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_crc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_CRC_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_CRC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_CRC_DR_OFFSET     0x0000  /* Data register */
 #define STM32_CRC_IDR_OFFSET    0x0004  /* Independent Data register */
@@ -40,7 +40,7 @@
 #define STM32_CRC_INIT_OFFSET   0x0010  /* Initial CRC value register */
 #define STM32_CRC_POL_OFFSET    0x0014  /* CRC polynomial register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_CRC_DR            (STM32_CRC_BASE + STM32_CRC_DR_OFFSET)
 #define STM32_CRC_IDR           (STM32_CRC_BASE + STM32_CRC_IDR_OFFSET)
@@ -48,7 +48,7 @@
 #define STM32_CRC_INIT          (STM32_CRC_BASE + STM32_CRC_INIT_OFFSET)
 #define STM32_CRC_POL           (STM32_CRC_BASE + STM32_CRC_POL_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* CRC independent data register */
 
@@ -63,12 +63,18 @@
 #  define CRC_CR_POLYSIZE_16    (1 << CRC_CR_POLYSIZE_SHIFT) /* 01: 16 bit polynomial */
 #  define CRC_CR_POLYSIZE_8     (2 << CRC_CR_POLYSIZE_SHIFT) /* 10: 8 bit polynomial */
 #  define CRC_CR_POLYSIZE_7     (3 << CRC_CR_POLYSIZE_SHIFT) /* 10: 8 bit polynomial */
+
 #define CRC_CR_REVIN_SHIFT      5         /* Bits 5-6: These bits ontrol the reversal of the bit order of the input data */
 #define CRC_CR_REVIN_MASK       (3 << CRC_CR_REVIN_SHIFT)
 #  define CRC_CR_REVIN_NONE     (0 << CRC_CR_REVIN_SHIFT) /* 00: bit order is not affected */
 #  define CRC_CR_REVIN_BYTE     (1 << CRC_CR_REVIN_SHIFT) /* 01: reversal done by byte */
 #  define CRC_CR_REVIN_HWORD    (2 << CRC_CR_REVIN_SHIFT) /* 10: reversal done by half-word */
 #  define CRC_CR_REVIN_WORD     (3 << CRC_CR_REVIN_SHIFT) /* 11: reversal done by word */
+
 #define CRC_CR_REVOUT           (1 << 7)  /* This bit controls the reversal of the bit order of the output data */
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_CRC_H */

@@ -28,15 +28,15 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* The STM32H7 family uses STM32 TIMER IP version 2 */
 
 #define HAVE_IP_TIMERS_V2 1
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 /* Basic Timers - TIM6 and TIM7 */
 
@@ -50,7 +50,8 @@
 #define STM32_BTIM_ARR_OFFSET     0x002c  /* Auto-reload register (16-bit) */
 
 /* 16-/32-bit General Timers with DMA: TIM2, TM3, TIM4, and TIM5
- * 16-bit General Timers without DMA: TIM9, TIM10, TIM11, TIM12, TIM13, and TIM14
+ * 16-bit General Timers without DMA: TIM9, TIM10, TIM11, TIM12, TIM13,
+ *                                    and TIM14
  * timers are 16-bit except for TIM2 and 5 are 32-bit
  * timers TIM9 and 12 are different then  TIM10, TIM11, TIM13, and TIM14
  */
@@ -103,7 +104,7 @@
 #define STM32_ATIM_AF2_OFFSET      0x0064  /* Alternate function option register 2 (16-bit) */
 #define STM32_ATIM_TISEL_OFFSET    0x0068  /* Timer input selection register (32-bit) */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 /* Advanced Timers - TIM1 and TIM8 */
 
@@ -371,7 +372,7 @@
 #  define STM32_TIM7_PSC          (STM32_TIM7_BASE+STM32_BTIM_PSC_OFFSET)
 #  define STM32_TIM7_ARR          (STM32_TIM7_BASE+STM32_BTIM_ARR_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Control register 1 */
 
@@ -386,12 +387,14 @@
 #  define ATIM_CR1_CENTER1        (1 << ATIM_CR1_CMS_SHIFT) /* 01: Center-aligned mode 1 */
 #  define ATIM_CR1_CENTER2        (2 << ATIM_CR1_CMS_SHIFT) /* 10: Center-aligned mode 2 */
 #  define ATIM_CR1_CENTER3        (3 << ATIM_CR1_CMS_SHIFT) /* 11: Center-aligned mode 3 */
+
 #define ATIM_CR1_ARPE             (1 << 7)  /* Bit 7: Auto-reload preload enable */
 #define ATIM_CR1_CKD_SHIFT        (8)       /* Bits 9-8: Clock division */
 #define ATIM_CR1_CKD_MASK         (3 << ATIM_CR1_CKD_SHIFT)
 #  define ATIM_CR1_TCKINT         (0 << ATIM_CR1_CKD_SHIFT) /* 00: tDTS=tCK_INT */
 #  define ATIM_CR1_2TCKINT        (1 << ATIM_CR1_CKD_SHIFT) /* 01: tDTS=2*tCK_INT */
 #  define ATIM_CR1_4TCKINT        (2 << ATIM_CR1_CKD_SHIFT) /* 10: tDTS=4*tCK_INT */
+
 #define ATIM_CR1_UIFREMAP         (1 << 11) /* Bit 11: UIF status bit remapping */
 
 /* Control register 2 */
@@ -409,6 +412,7 @@
 #  define ATIM_CR2_MMS_OC2REF     (5 << ATIM_CR2_MMS_SHIFT) /* 101: Compare OC2REF is TRGO */
 #  define ATIM_CR2_MMS_OC3REF     (6 << ATIM_CR2_MMS_SHIFT) /* 110: Compare OC3REF is TRGO */
 #  define ATIM_CR2_MMS_OC4REF     (7 << ATIM_CR2_MMS_SHIFT) /* 111: Compare OC4REF is TRGO */
+
 #define ATIM_CR2_TI1S             (1 << 7)  /* Bit 7: TI1 Selection */
 #define ATIM_CR2_OIS1             (1 << 8)  /* Bit 8:  Output Idle state 1 (OC1 output) */
 #define ATIM_CR2_OIS1N            (1 << 9)  /* Bit 9:  Output Idle state 1 (OC1N output) */
@@ -450,6 +454,7 @@
 #  define ATIM_SMCR_GATED         (5 << ATIM_SMCR_SMS_SHIFT) /* 101: Gated Mode */
 #  define ATIM_SMCR_TRIGGER       (6 << ATIM_SMCR_SMS_SHIFT) /* 110: Trigger Mode */
 #  define ATIM_SMCR_EXTCLK1       (7 << ATIM_SMCR_SMS_SHIFT) /* 111: External Clock Mode 1 */
+
 #define ATIM_SMCR_TS_SHIFT        (4)       /* Bits 4-6: Trigger selection */
 #define ATIM_SMCR_TS_MASK         (7 << ATIM_SMCR_TS_SHIFT)
 #  define ATIM_SMCR_ITR0          (0 << ATIM_SMCR_TS_SHIFT) /* 000: Internal trigger 0 (ITR0) */
@@ -460,31 +465,34 @@
 #  define ATIM_SMCR_TI1FP1        (5 << ATIM_SMCR_TS_SHIFT) /* 101: Filtered Timer Input 1 (TI1FP1) */
 #  define ATIM_SMCR_T12FP2        (6 << ATIM_SMCR_TS_SHIFT) /* 110: Filtered Timer Input 2 (TI2FP2) */
 #  define ATIM_SMCR_ETRF          (7 << ATIM_SMCR_TS_SHIFT) /* 111: External Trigger input (ETRF) */
+
 #define ATIM_SMCR_MSM             (1 << 7)  /* Bit 7: Master/slave mode */
 #define ATIM_SMCR_ETF_SHIFT       (8)       /* Bits 8-11: External trigger filter */
 #define ATIM_SMCR_ETF_MASK        (0x0f << ATIM_SMCR_ETF_SHIFT)
-#  define ATIM_SMCR_NOFILT        (0 << ATIM_SMCR_ETF_SHIFT) /* 0000: No filter, sampling is done at fDTS */
-#  define ATIM_SMCR_FCKINT2       (1 << ATIM_SMCR_ETF_SHIFT) /* 0001: fSAMPLING=fCK_INT, N=2 */
-#  define ATIM_SMCR_FCKINT4       (2 << ATIM_SMCR_ETF_SHIFT) /* 0010: fSAMPLING=fCK_INT, N=4 */
-#  define ATIM_SMCR_FCKINT8       (3 << ATIM_SMCR_ETF_SHIFT) /* 0011: fSAMPLING=fCK_INT, N=8 */
-#  define ATIM_SMCR_FDTSd26       (4 << ATIM_SMCR_ETF_SHIFT) /* 0100: fSAMPLING=fDTS/2, N=6 */
-#  define ATIM_SMCR_FDTSd28       (5 << ATIM_SMCR_ETF_SHIFT) /* 0101: fSAMPLING=fDTS/2, N=8 */
-#  define ATIM_SMCR_FDTSd46       (6 << ATIM_SMCR_ETF_SHIFT) /* 0110: fSAMPLING=fDTS/4, N=6 */
-#  define ATIM_SMCR_FDTSd48       (7 << ATIM_SMCR_ETF_SHIFT) /* 0111: fSAMPLING=fDTS/4, N=8 */
-#  define ATIM_SMCR_FDTSd86       (8 << ATIM_SMCR_ETF_SHIFT) /* 1000: fSAMPLING=fDTS/8, N=6 */
-#  define ATIM_SMCR_FDTSd88       (9 << ATIM_SMCR_ETF_SHIFT) /* 1001: fSAMPLING=fDTS/8, N=8 */
+#  define ATIM_SMCR_NOFILT        (0 << ATIM_SMCR_ETF_SHIFT)  /* 0000: No filter, sampling is done at fDTS */
+#  define ATIM_SMCR_FCKINT2       (1 << ATIM_SMCR_ETF_SHIFT)  /* 0001: fSAMPLING=fCK_INT, N=2 */
+#  define ATIM_SMCR_FCKINT4       (2 << ATIM_SMCR_ETF_SHIFT)  /* 0010: fSAMPLING=fCK_INT, N=4 */
+#  define ATIM_SMCR_FCKINT8       (3 << ATIM_SMCR_ETF_SHIFT)  /* 0011: fSAMPLING=fCK_INT, N=8 */
+#  define ATIM_SMCR_FDTSd26       (4 << ATIM_SMCR_ETF_SHIFT)  /* 0100: fSAMPLING=fDTS/2, N=6 */
+#  define ATIM_SMCR_FDTSd28       (5 << ATIM_SMCR_ETF_SHIFT)  /* 0101: fSAMPLING=fDTS/2, N=8 */
+#  define ATIM_SMCR_FDTSd46       (6 << ATIM_SMCR_ETF_SHIFT)  /* 0110: fSAMPLING=fDTS/4, N=6 */
+#  define ATIM_SMCR_FDTSd48       (7 << ATIM_SMCR_ETF_SHIFT)  /* 0111: fSAMPLING=fDTS/4, N=8 */
+#  define ATIM_SMCR_FDTSd86       (8 << ATIM_SMCR_ETF_SHIFT)  /* 1000: fSAMPLING=fDTS/8, N=6 */
+#  define ATIM_SMCR_FDTSd88       (9 << ATIM_SMCR_ETF_SHIFT)  /* 1001: fSAMPLING=fDTS/8, N=8 */
 #  define ATIM_SMCR_FDTSd165      (10 << ATIM_SMCR_ETF_SHIFT) /* 1010: fSAMPLING=fDTS/16, N=5 */
 #  define ATIM_SMCR_FDTSd166      (11 << ATIM_SMCR_ETF_SHIFT) /* 1011: fSAMPLING=fDTS/16, N=6 */
 #  define ATIM_SMCR_FDTSd168      (12 << ATIM_SMCR_ETF_SHIFT) /* 1100: fSAMPLING=fDTS/16, N=8 */
 #  define ATIM_SMCR_FDTSd325      (13 << ATIM_SMCR_ETF_SHIFT) /* 1101: fSAMPLING=fDTS/32, N=5 */
 #  define ATIM_SMCR_FDTSd326      (14 << ATIM_SMCR_ETF_SHIFT) /* 1110: fSAMPLING=fDTS/32, N=6 */
 #  define ATIM_SMCR_FDTSd328      (15 << ATIM_SMCR_ETF_SHIFT) /* 1111: fSAMPLING=fDTS/32, N=8 */
+
 #define ATIM_SMCR_ETPS_SHIFT      (12)      /* Bits 12-13: External trigger prescaler */
 #define ATIM_SMCR_ETPS_MASK       (3 << ATIM_SMCR_ETPS_SHIFT)
 #  define ATIM_SMCR_PSCOFF        (0 << ATIM_SMCR_ETPS_SHIFT) /* 00: Prescaler OFF */
 #  define ATIM_SMCR_ETRPd2        (1 << ATIM_SMCR_ETPS_SHIFT) /* 01: ETRP frequency divided by 2 */
 #  define ATIM_SMCR_ETRPd4        (2 << ATIM_SMCR_ETPS_SHIFT) /* 10: ETRP frequency divided by 4 */
 #  define ATIM_SMCR_ETRPd8        (3 << ATIM_SMCR_ETPS_SHIFT) /* 11: ETRP frequency divided by 8 */
+
 #define ATIM_SMCR_ECE             (1 << 14) /* Bit 14: External clock enable */
 #define ATIM_SMCR_ETP             (1 << 15) /* Bit 15: External trigger polarity */
 #define ATIM_SMCR_SMS             (1 << 16) /* Bit 16: Slave mode selection - bit 3 */
@@ -586,7 +594,10 @@
 
 /* Capture/compare mode register 1 -- Input capture mode */
 
-                                            /* Bits 1-0:(same as output compare mode) */
+/*                                            Bits 1-0:
+ *                                            (same as output compare mode)
+ */
+
 #define ATIM_CCMR1_IC1PSC_SHIFT   (2)       /* Bits 3-2: Input Capture 1 Prescaler */
 #define ATIM_CCMR1_IC1PSC_MASK    (3 << ATIM_CCMR1_IC1PSC_SHIFT)
                                             /* (See common (unshifted) bit field definitions below) */
@@ -652,7 +663,10 @@
 
 /* Capture/compare mode register 2 - Input Capture Mode */
 
-                                            /* Bits 1-0:(same as output compare mode) */
+/*                                             Bits 1-0:
+ *                                             (same as output compare mode)
+ */
+
 #define ATIM_CCMR2_IC3PSC_SHIFT   (2)       /* Bits 3-2: Input Capture 3 Prescaler */
 #define ATIM_CCMR1_IC3PSC_MASK    (3 << ATIM_CCMR2_IC3PSC_SHIFT)
                                             /* (See common (unshifted) bit field definitions above) */
@@ -742,12 +756,14 @@
 
 #define ATIM_BDTR_DTG_SHIFT       (0)       /* Bits 7:0 [7:0]: Dead-Time Generator set-up */
 #define ATIM_BDTR_DTG_MASK        (0xff << ATIM_BDTR_DTG_SHIFT)
+
 #define ATIM_BDTR_LOCK_SHIFT      (8)       /* Bits 9:8 [1:0]: Lock Configuration */
 #define ATIM_BDTR_LOCK_MASK       (3 << ATIM_BDTR_LOCK_SHIFT)
 #  define ATIM_BDTR_LOCKOFF       (0 << ATIM_BDTR_LOCK_SHIFT) /* 00: LOCK OFF - No bit is write protected */
 #  define ATIM_BDTR_LOCK1         (1 << ATIM_BDTR_LOCK_SHIFT) /* 01: LOCK Level 1 protection */
 #  define ATIM_BDTR_LOCK2         (2 << ATIM_BDTR_LOCK_SHIFT) /* 10: LOCK Level 2 protection */
 #  define ATIM_BDTR_LOCK3         (3 << ATIM_BDTR_LOCK_SHIFT) /* 11: LOCK Level 3 protection */ */
+
 #define ATIM_BDTR_OSSI            (1 << 10) /* Bit 10: Off-State Selection for Idle mode */
 #define ATIM_BDTR_OSSR            (1 << 11) /* Bit 11: Off-State Selection for Run mode */
 #define ATIM_BDTR_BKE             (1 << 12) /* Bit 12: Break enable */
@@ -772,6 +788,7 @@
 #  define ATIM_BDTR_BKF_FDTSd325  (13 << ATIM_BDTR_BKF_SHIFT)  /* 1101: fSAMPLING=fDTS/32, N=5 */
 #  define ATIM_BDTR_BKF_FDTSd326  (14 << ATIM_BDTR_BKF_SHIFT)  /* 1110: fSAMPLING=fDTS/32, N=6 */
 #  define ATIM_BDTR_BKF_FDTSd328  (15 << ATIM_BDTR_BKF_SHIFT)  /* 1111: fSAMPLING=fDTS/32, N=8 */
+
 #define ATIM_BDTR_BK2F_SHIFT      (20)      /* Bits 20-23: Break 2 filter */
 #define ATIM_BDTR_BK2F_MASK       (0xf << ATIM_BDTR_BK2F_SHIFT)
 #  define ATIM_BDTR_BK2F_NOFILT   (0 << ATIM_BDTR_BK2F_SHIFT)  /* 0000: No filter, BRK 2 acts asynchronously */
@@ -790,6 +807,7 @@
 #  define ATIM_BDTR_BK2F_FDTSd325 (13 << ATIM_BDTR_BK2F_SHIFT) /* 1101: fSAMPLING=fDTS/32, N=5 */
 #  define ATIM_BDTR_BK2F_FDTSd326 (14 << ATIM_BDTR_BK2F_SHIFT) /* 1110: fSAMPLING=fDTS/32, N=6 */
 #  define ATIM_BDTR_BK2F_FDTSd328 (15 << ATIM_BDTR_BK2F_SHIFT) /* 1111: fSAMPLING=fDTS/32, N=8 */
+
 #define ATIM_BDTR_BK2E            (1 << 24) /* Bit 24: Break 2 enable */
 #define ATIM_BDTR_BK2P            (1 << 25) /* Bit 25: Break 2 polarity */
 
@@ -814,12 +832,14 @@
 #  define GTIM_CR1_CENTER1        (1 << GTIM_CR1_CMS_SHIFT) /* 01: Center-aligned mode 1 */
 #  define GTIM_CR1_CENTER2        (2 << GTIM_CR1_CMS_SHIFT) /* 10: Center-aligned mode 2 */
 #  define GTIM_CR1_CENTER3        (3 << GTIM_CR1_CMS_SHIFT) /* 11: Center-aligned mode 3 */
+
 #define GTIM_CR1_ARPE             (1 << 7)  /* Bit 7: Auto-Reload Preload enable */
 #define GTIM_CR1_CKD_SHIFT        (8)       /* Bits 9-8: Clock Division */
 #define GTIM_CR1_CKD_MASK         (3 << GTIM_CR1_CKD_SHIFT)
 #  define GTIM_CR1_TCKINT         (0 << GTIM_CR1_CKD_SHIFT) /* 00: tDTS = tCK_INT */
 #  define GTIM_CR1_2TCKINT        (1 << GTIM_CR1_CKD_SHIFT) /* 01: tDTS = 2 x tCK_INT */
 #  define GTIM_CR1_4TCKINT        (2 << GTIM_CR1_CKD_SHIFT) /* 10: tDTS = 4 x tCK_INT */
+
 #define GTIM_CR1_UIFREMAP         (1 << 11) /* Bit 11: UIF status bit remapping */
 
 /* Control register 2 (TIM2-5, TIM9-12) */
@@ -837,6 +857,7 @@
 #  define GTIM_CR2_MMS_OC2REF     (5 << GTIM_CR2_MMS_SHIFT) /* 101: Compare - OC2REF signal is used as trigger output (TRGO) */
 #  define GTIM_CR2_MMS_OC3REF     (6 << GTIM_CR2_MMS_SHIFT) /* 110: Compare - OC3REF signal is used as trigger output (TRGO, TIM2-5 and TIM15 only) */
 #  define GTIM_CR2_MMS_OC4REF     (7 << GTIM_CR2_MMS_SHIFT) /* 111: Compare - OC4REF signal is used as trigger output (TRGO, TIM2-5 and TIM15 only) */
+
 #define GTIM_CR2_TI1S             (1 << 7)  /* Bit 7: TI1 Selection (not TIM16) */
 #define GTIM_CR2_OIS1             (1 << 8)  /* Bit 8: COutput Idle state 1 (OC1 output) (TIM15-17 only) */
 #define GTIM_CR2_OIS1N            (1 << 9)  /* Bit 9: Output Idle state 1 (OC1N output) (TIM15-17 only) */
@@ -854,6 +875,7 @@
 #  define GTIM_SMCR_GATED         (5 << GTIM_SMCR_SMS_SHIFT) /* 101: Gated Mode  */
 #  define GTIM_SMCR_TRIGGER       (6 << GTIM_SMCR_SMS_SHIFT) /* 110: Trigger Mode */
 #  define GTIM_SMCR_EXTCLK1       (7 << GTIM_SMCR_SMS_SHIFT) /* 111: External Clock Mode 1 */
+
 #define GTIM_SMCR_TS_SHIFT        (4)       /* Bits 6-4: Trigger Selection */
 #define GTIM_SMCR_TS_MASK         (7 << GTIM_SMCR_TS_SHIFT)
 #  define GTIM_SMCR_ITR0          (0 << GTIM_SMCR_TS_SHIFT) /* 000: Internal Trigger 0 (ITR0). TIM1 */
@@ -864,6 +886,7 @@
 #  define GTIM_SMCR_TI1FP1        (5 << GTIM_SMCR_TS_SHIFT) /* 101: Filtered Timer Input 1 (TI1FP1) */
 #  define GTIM_SMCR_TI2FP2        (6 << GTIM_SMCR_TS_SHIFT) /* 110: Filtered Timer Input 2 (TI2FP2) */
 #  define GTIM_SMCR_ETRF          (7 << GTIM_SMCR_TS_SHIFT) /* 111: External Trigger input (ETRF) */
+
 #define GTIM_SMCR_MSM             (1 << 7)  /* Bit 7: Master/Slave mode */
 #define GTIM_SMCR_ETF_SHIFT       (8)       /* Bits 11-8: External Trigger Filter (not TIM15) */
 #define GTIM_SMCR_ETF_MASK        (0x0f << GTIM_SMCR_ETF_SHIFT)
@@ -883,12 +906,14 @@
 #  define GTIM_SMCR_FDTSd325      (13 << GTIM_SMCR_ETF_SHIFT) /* 1101: fSAMPLING=fDTS/32, N=5 */
 #  define GTIM_SMCR_FDTSd326      (14 << GTIM_SMCR_ETF_SHIFT) /* 1110: fSAMPLING=fDTS/32, N=6 */
 #  define GTIM_SMCR_FDTSd328      (15 << GTIM_SMCR_ETF_SHIFT) /* 1111: fSAMPLING=fDTS/32, N=8 */
+
 #define GTIM_SMCR_ETPS_SHIFT      (12)      /* Bits 13-12: External Trigger Prescaler (not TIM15) */
 #define GTIM_SMCR_ETPS_MASK       (3 << GTIM_SMCR_ETPS_SHIFT)
 #  define GTIM_SMCR_PSCOFF        (0 << GTIM_SMCR_ETPS_SHIFT) /* 00: Prescaler OFF */
 #  define GTIM_SMCR_ETRPd2        (1 << GTIM_SMCR_ETPS_SHIFT) /* 01: ETRP frequency divided by 2 */
 #  define GTIM_SMCR_ETRPd4        (2 << GTIM_SMCR_ETPS_SHIFT) /* 10: ETRP frequency divided by 4 */
 #  define GTIM_SMCR_ETRPd8        (3 << GTIM_SMCR_ETPS_SHIFT) /* 11: ETRP frequency divided by 8 */
+
 #define GTIM_SMCR_ECE             (1 << 14) /* Bit 14: External Clock enable */
 #define GTIM_SMCR_ETP             (1 << 15) /* Bit 15: External Trigger Polarity */
 #define GTIM_SMCR_SMS             (1 << 16) /* Bit 16: Slave mode selection - bit 3 */
@@ -937,7 +962,9 @@
 #define GTIM_EGR_TG               (1 << 6)  /* Bit 6: Trigger generation (TIM2-5,9,12&16-17 only) */
 #define GTIM_EGR_BG               (1 << 7)  /* Bit 7: Break generation (TIM15-17 only) */
 
-/* Capture/compare mode register 1 - Output compare mode (TIM2-5 and TIM9-14) */
+/* Capture/compare mode register 1 -
+ * Output compare mode (TIM2-5 and TIM9-14)
+ */
 
 #define GTIM_CCMR1_CC1S_SHIFT     (0)       /* Bits 1-0: Capture/Compare 1 Selection */
 #define GTIM_CCMR1_CC1S_MASK      (3 << GTIM_CCMR1_CC1S_SHIFT)
@@ -978,9 +1005,14 @@
 #define GTIM_CCMR_MODE_PWM1       (6)       /* 110: PWM mode 1 */
 #define GTIM_CCMR_MODE_PWM2       (7)       /* 111: PWM mode 2 */
 
-/* Capture/compare mode register 1 - Input capture mode (TIM2-5 and TIM9-14) */
+/* Capture/compare mode register 1 -
+ * Input capture mode (TIM2-5 and TIM9-14)
+ */
 
-                                            /* Bits 1-0 (Same as Output Compare Mode) */
+/*                                             Bits 1-0
+ *                                            (Same as Output Compare Mode)
+ */
+
 #define GTIM_CCMR1_IC1PSC_SHIFT   (2)       /* Bits 3-2: Input Capture 1 Prescaler */
 #define GTIM_CCMR1_IC1PSC_MASK    (3 << GTIM_CCMR1_IC1PSC_SHIFT)
                                             /* (See common CCMR Input Capture Prescaler definitions below) */
@@ -1044,7 +1076,10 @@
 
 /* Capture/compare mode register 2 - Input capture mode (TIM2-5 only) */
 
-                                            /* Bits 1-0 (Same as Output Compare Mode) */
+/*                                              Bits 1-0
+ *                                             (Same as Output Compare Mode)
+ */
+
 #define GTIM_CCMR2_IC3PSC_SHIFT   (2)       /* Bits 3-2: Input Capture 3 Prescaler */
 #define GTIM_CCMR2_IC3PSC_MASK    (3 << GTIM_CCMR2_IC3PSC_SHIFT)
                                             /* (See common CCMR Input Capture Prescaler definitions below) */
@@ -1094,9 +1129,9 @@
 #define TIM2_OR_ITR1_RMP_SHIFT    (10)     /* Bits 10-11: Internal trigger 1 remap */
 #define TIM2_OR_ITR1_RMP_MASK     (3 << TIM2_OR_ITR1_RMP_SHIFT)
 #  define TIM2_OR_ITR1_TIM8_TRGOUT (0 << TIM2_OR_ITR1_RMP_SHIFT) /* 00: TIM2_ITR1 input connected to TIM8_TRGOUT */
-#  define TIM2_OR_ITR1_PTP        (1 << TIM2_OR_ITR1_RMP_SHIFT) /* 01: TIM2_ITR1 input connected to PTP trigger output */
-#  define TIM2_OR_ITR1_OTGFSSOF   (2 << TIM2_OR_ITR1_RMP_SHIFT) /* 10: TIM2_ITR1 input connected to OTG FS SOF */
-#  define TIM2_OR_ITR1_OTGHSSOF   (3 << TIM2_OR_ITR1_RMP_SHIFT) /* 11: TIM2_ITR1 input connected to OTG HS SOF */
+#  define TIM2_OR_ITR1_PTP        (1 << TIM2_OR_ITR1_RMP_SHIFT)  /* 01: TIM2_ITR1 input connected to PTP trigger output */
+#  define TIM2_OR_ITR1_OTGFSSOF   (2 << TIM2_OR_ITR1_RMP_SHIFT)  /* 10: TIM2_ITR1 input connected to OTG FS SOF */
+#  define TIM2_OR_ITR1_OTGHSSOF   (3 << TIM2_OR_ITR1_RMP_SHIFT)  /* 11: TIM2_ITR1 input connected to OTG HS SOF */
 
 #define TIM5_OR_TI4_RMP_SHIFT     (6)     /* Bits 6-7: Internal trigger 4 remap */
 #define TIM5_OR_TI4_RMP_MASK      (3 << TIM5_OR_TI4_RMP_SHIFT)

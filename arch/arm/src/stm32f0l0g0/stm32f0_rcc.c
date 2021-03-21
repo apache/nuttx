@@ -79,10 +79,11 @@ static inline void rcc_enableio(void)
   uint32_t regval = 0;
 
   /* Enable basic peripheral support */
+
   /* Enable all GPIO modules */
 
   regval  = getreg32(STM32_RCC_AHBENR);
-  regval |= RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPBEN | RCC_AHBENR_IOPCEN |\
+  regval |= RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPBEN | RCC_AHBENR_IOPCEN |
             RCC_AHBENR_IOPDEN | RCC_AHBENR_IOPEEN | RCC_AHBENR_IOPFEN;
   putreg32(regval, STM32_RCC_AHBENR);
 }
@@ -432,7 +433,8 @@ static void stm32_stdclockconfig(void)
       regval &= ~RCC_CFGR_SW_MASK;
       putreg32(regval, STM32_RCC_CFGR);
 
-      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_HSI);
+      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
+              RCC_CFGR_SWS_HSI);
     }
 
   /* Disable the PLL */
@@ -469,8 +471,10 @@ static void stm32_stdclockconfig(void)
    * 3. Use multiplier from board.h
    */
 
-  regval &= ~(RCC_CFGR_PLLSRC_MASK | RCC_CFGR_PLLXTPRE_MASK | RCC_CFGR_PLLMUL_MASK);
-  regval |= (RCC_CFGR_PLLSRC_HSId2 | RCC_CFGR_PLLXTPRE_DIV1 | STM32_CFGR_PLLMUL);
+  regval &= ~(RCC_CFGR_PLLSRC_MASK | RCC_CFGR_PLLXTPRE_MASK |
+              RCC_CFGR_PLLMUL_MASK);
+  regval |= (RCC_CFGR_PLLSRC_HSId2 | RCC_CFGR_PLLXTPRE_DIV1 |
+             STM32_CFGR_PLLMUL);
   putreg32(regval, STM32_RCC_CFGR);
 
   /* Enable the PLL */

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_uart_v1.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32F0_UART_V1_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32F0_UART_V1_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_USART_CR1_OFFSET    0x0000  /* Control register 1 */
 #define STM32_USART_CR2_OFFSET    0x0004  /* Control register 2 */
@@ -46,7 +46,7 @@
 #define STM32_USART_RDR_OFFSET    0x0024  /* Receive Data register */
 #define STM32_USART_TDR_OFFSET    0x0028  /* Transmit Data register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32_NUSART > 0
 #  define STM32_USART1_CR1        (STM32_USART1_BASE + STM32_USART_CR1_OFFSET)
@@ -118,7 +118,7 @@
 #  define STM32_USART5_TDR        (STM32_USART5_BASE + STM32_USART_TDR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Control register 1 */
 
@@ -216,6 +216,7 @@
 #define USART_CR3_WUS_ADDRESS     (0 << USART_CR3_WUS_SHIFT) /* 00: WUF active on address match */
 #define USART_CR3_WUS_START       (2 << USART_CR3_WUS_SHIFT) /* 10: WUF active on Start bit detection */
 #define USART_CR3_WUS_RXNE        (3 << USART_CR3_WUS_SHIFT) /* 11: WUF active on RXNE */
+
 #define USART_CR3_WUFIE           (1 << 22) /* Bit 22: Wakeup from Stop mode interrupt enable */
 
 /* Baud Rate Register */

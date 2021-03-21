@@ -47,6 +47,7 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* Base addresses for each GPIO block */
 
 const uint32_t g_gpiobase[STM32_NPORTS] =
@@ -58,7 +59,7 @@ const uint32_t g_gpiobase[STM32_NPORTS] =
   STM32_GPIOB_BASE,   /* Two GPIO ports, GPIOA-B */
 #endif
 #if STM32_NPORTS > 2
-  STM32_GPIOC_BASE,   /* Three GPIO ports, GPIOA-C*/
+  STM32_GPIOC_BASE,   /* Three GPIO ports, GPIOA-C */
 #endif
 #if STM32_NPORTS > 3
   STM32_GPIOD_BASE,   /* Four GPIO ports, GPIOA-D */
@@ -154,7 +155,8 @@ int stm32_configgpio(uint32_t cfgset)
         break;
 
       case GPIO_OUTPUT:     /* General purpose output mode */
-        stm32_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0); /* Set the initial output value */
+        stm32_gpiowrite(cfgset,
+                       (cfgset & GPIO_OUTPUT_SET) != 0); /* Set the initial output value */
         pinmode = GPIO_MODER_OUTPUT;
         break;
 
@@ -298,7 +300,9 @@ int stm32_configgpio(uint32_t cfgset)
 
   putreg32(regval, base + STM32_GPIO_OTYPER_OFFSET);
 
-  /* Otherwise, it is an input pin.  Should it configured as an EXTI interrupt? */
+  /* Otherwise, it is an input pin.
+   * Should it configured as an EXTI interrupt?
+   */
 
   if ((cfgset & GPIO_EXTI) != 0)
     {
@@ -338,14 +342,15 @@ int stm32_configgpio(uint32_t cfgset)
  * Name: stm32_unconfiggpio
  *
  * Description:
- *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set it
- *   into default HiZ state (and possibly mark it's unused) and unlock it whether
- *   it was previsouly selected as alternative function (GPIO_ALT|GPIO_CNF_AFPP|...).
+ *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set
+ *   it into default HiZ state (and possibly mark it's unused) and unlock it
+ *   whether it was previsouly selected as alternative function
+ *  (GPIO_ALT|GPIO_CNF_AFPP|...).
  *
- *   This is a safety function and prevents hardware from schocks, as unexpected
- *   write to the Timer Channel Output GPIO to fixed '1' or '0' while it should
- *   operate in PWM mode could produce excessive on-board currents and trigger
- *   over-current/alarm function.
+ *   This is a safety function and prevents hardware from schocks, as
+ *   unexpected write to the Timer Channel Output GPIO to fixed '1' or '0'
+ *   while it should operate in PWM mode could produce excessive on-board
+ *   currents and trigger over-current/alarm function.
  *
  * Returned Value:
  *  OK on success
@@ -404,7 +409,6 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
         }
 
       putreg32(bit, base + STM32_GPIO_BSRR_OFFSET);
-
     }
 }
 

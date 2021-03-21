@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_ADC_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_ADC_H
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -32,7 +32,8 @@
 /* STM32 M0 ADC driver:
  * - no injected channels
  * - no offset registers
- * - the F0/L0 family support one sampling time configuration for all channels
+ * - the F0/L0 family support one sampling time configuration for all
+ *   channels
  * - the G0 family support two sampling time configurations
  */
 
@@ -70,24 +71,24 @@
 
 #undef ADC_HAVE_INJECTED
 
-/********************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************/
+ ****************************************************************************/
 
-#define STM32_ADC1_OFFSET            0x0000
-#define STM32_ADC2_OFFSET            0x0100
-#define STM32_ADC3_OFFSET            0x0000
-#define STM32_ADC4_OFFSET            0x0100
-#define STM32_ADCCMN_OFFSET          0x0300
+#define STM32_ADC1_OFFSET           0x0000
+#define STM32_ADC2_OFFSET           0x0100
+#define STM32_ADC3_OFFSET           0x0000
+#define STM32_ADC4_OFFSET           0x0100
+#define STM32_ADCCMN_OFFSET         0x0300
 
-#define STM32_ADC1_BASE              (STM32_ADC1_OFFSET+STM32_ADC12_BASE) /* ADC1 Master ADC */
-#define STM32_ADC2_BASE              (STM32_ADC2_OFFSET+STM32_ADC12_BASE) /* ADC2 Slave ADC */
-#define STM32_ADC3_BASE              (STM32_ADC3_OFFSET+STM32_ADC34_BASE) /* ADC3 Master ADC */
-#define STM32_ADC4_BASE              (STM32_ADC4_OFFSET+STM32_ADC34_BASE) /* ADC4 Slave ADC */
-#define STM32_ADC12CMN_BASE          (STM32_ADCCMN_OFFSET+STM32_ADC12_BASE) /* ADC1, ADC2 common */
-#define STM32_ADC34CMN_BASE          (STM32_ADCCMN_OFFSET+STM32_ADC34_BASE) /* ADC3, ADC4 common */
+#define STM32_ADC1_BASE             (STM32_ADC1_OFFSET+STM32_ADC12_BASE)   /* ADC1 Master ADC */
+#define STM32_ADC2_BASE             (STM32_ADC2_OFFSET+STM32_ADC12_BASE)   /* ADC2 Slave ADC */
+#define STM32_ADC3_BASE             (STM32_ADC3_OFFSET+STM32_ADC34_BASE)   /* ADC3 Master ADC */
+#define STM32_ADC4_BASE             (STM32_ADC4_OFFSET+STM32_ADC34_BASE)   /* ADC4 Slave ADC */
+#define STM32_ADC12CMN_BASE         (STM32_ADCCMN_OFFSET+STM32_ADC12_BASE) /* ADC1, ADC2 common */
+#define STM32_ADC34CMN_BASE         (STM32_ADCCMN_OFFSET+STM32_ADC34_BASE) /* ADC3, ADC4 common */
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_ADC_ISR_OFFSET        0x0000  /* ADC interrupt and status register */
 #define STM32_ADC_IER_OFFSET        0x0004  /* ADC interrupt enable register */
@@ -103,7 +104,7 @@
 
 #define STM32_ADC_CCR_OFFSET         0x0008  /* Common control register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_ADC1_ISR              (STM32_ADC1_BASE + STM32_ADC_ISR_OFFSET)
 #define STM32_ADC1_IER              (STM32_ADC1_BASE + STM32_ADC_IER_OFFSET)
@@ -116,9 +117,11 @@
 #define STM32_ADC1_DR               (STM32_ADC1_BASE + STM32_ADC_DR_OFFSET)
 #define STM32_ADC1_CCR              (STM32_ADC1_BASE + STM32_ADC_CCR_OFFSET)
 
-/* Register Bitfield Definitions ************************************************/
+/* Register Bitfield Definitions ********************************************/
 
-/* ADC interrupt and status register (ISR) and ADC interrupt enable register (IER) */
+/* ADC interrupt and status register (ISR) and
+ * ADC interrupt enable register (IER)
+ */
 
 #define ADC_INT_ARDY                (1 << 0)  /* Bit 0:  ADC ready */
 #define ADC_INT_EOSMP               (1 << 1)  /* Bit 1:  End of sampling flag */
@@ -147,6 +150,7 @@
 #  define ADC_CFGR1_RES_10BIT       (1 << ADC_CFGR1_RES_SHIFT) /* 13 ADCCLK clyes */
 #  define ADC_CFGR1_RES_8BIT        (2 << ADC_CFGR1_RES_SHIFT) /* 11 ADCCLK clyes */
 #  define ADC_CFGR1_RES_6BIT        (3 << ADC_CFGR1_RES_SHIFT) /* 9 ADCCLK clyes */
+
 #define ADC_CFGR1_ALIGN             (1 << 5)  /* Bit 5:  Data Alignment */
 #define ADC_CFGR1_EXTSEL_SHIFT      (6)       /* Bits 6-8: External trigger selection */
 #define ADC_CFGR1_EXTSEL_MASK       (7 << ADC_CFGR1_EXTSEL_SHIFT)
@@ -164,6 +168,7 @@
 #  define ADC_CFGR1_EXTEN_RISING    (1 << ADC_CFGR1_EXTEN_SHIFT) /* Trigger detection on the rising edge */
 #  define ADC_CFGR1_EXTEN_FALLING   (2 << ADC_CFGR1_EXTEN_SHIFT) /* Trigger detection on the falling edge */
 #  define ADC_CFGR1_EXTEN_BOTH      (3 << ADC_CFGR1_EXTEN_SHIFT) /* Trigger detection on both edges */
+
 #define ADC_CFGR1_OVRMOD            (1 << 12) /* Bit 12: Overrun Mode */
 #define ADC_CFGR1_CONT              (1 << 13) /* Bit 13: Continuous mode for regular conversions */
 #define ADC_CFGR1_WAIT              (1 << 14) /* Bit 14: Wait conversion mode */

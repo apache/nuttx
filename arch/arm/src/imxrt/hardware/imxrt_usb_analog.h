@@ -1,4 +1,4 @@
-/************************************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_usb_analog.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USB_ANALOG_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USB_ANALOG_H
 
-/************************************************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/************************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define IMXRT_USB_ANALOG_USB1_VBUS_DETECT_OFFSET       0x01a0  /* USB VBUS Detect Register */
 #define IMXRT_USB_ANALOG_USB1_VBUS_DETECT_SET_OFFSET   0x01a4  /* USB VBUS Detect Set Register */
@@ -64,7 +64,7 @@
 #define IMXRT_USB_ANALOG_USB2_MISC_TOG_OFFSET          0x025c  /* USB Misc Toggle Register */
 #define IMXRT_USB_ANALOG_DIGPROG_OFFSET                0x0260  /* Chip Silicon Version */
 
-/* Register addresses ***********************************************************************************************************************/
+/* Register addresses *******************************************************/
 
 /* Analog USB1 Register Addresses */
 
@@ -130,7 +130,7 @@
 #define IMXRT_USB_ANALOG_USB2_MISC_TOG                 (IMXRT_ANATOP_BASE + IMXRT_USB_ANALOG_USB2_MISC_TOG_OFFSET)          /* USB_ANALOG2 USB Misc Toggle Register */
 #define IMXRT_USB_ANALOG_DIGPROG                       (IMXRT_ANATOP_BASE + IMXRT_USB_ANALOG_DIGPROG_OFFSET)                /* USB_ANALOG2 Chip Silicon Version */
 
-/* Register Bit Definitions *********************************************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* USB VBUS Detect Register */
 
@@ -145,7 +145,9 @@
 #  define USB_ANALOG_USB_VBUS_DETECT_VBUSVALID_THRESH_4V5  (5 << USB_ANALOG_USB_VBUS_DETECT_VBUSVALID_THRESH_SHIFT)  /* 4V5 — 4.5V           */
 #  define USB_ANALOG_USB_VBUS_DETECT_VBUSVALID_THRESH_4V6  (6 << USB_ANALOG_USB_VBUS_DETECT_VBUSVALID_THRESH_SHIFT)  /* 4V6 — 4.6V           */
 #  define USB_ANALOG_USB_VBUS_DETECT_VBUSVALID_THRESH_4V7  (7 << USB_ANALOG_USB_VBUS_DETECT_VBUSVALID_THRESH_SHIFT)  /* 4V7 — 4.7V           */
-                                                                      /* Bits: 3-19  Reserved */
+
+                                                  /* Bits: 3-19  Reserved */
+
 #define USB_ANALOG_USB_VBUS_DETECT_VBUSVALID_PWRUP_CMPS    (1 << 20)  /* Bit: 20 Powers up comparators for vbus_valid detector. */
                                                                       /* Bits: 21-25  Reserved */
 #define USB_ANALOG_USB_VBUS_DETECT_DISCHARGE_VBUS          (1 << 26)  /* Bit: 26 USB OTG discharge VBUS. */
@@ -154,7 +156,8 @@
 
 /* USB Charger Detect Register */
 
-                                                                      /* Bits: 0-17  Reserved */
+                                                  /* Bits: 0-17  Reserved */
+
 #define USB_ANALOG_USB_CHRG_DETECT_CHK_CONTACT             (1 << 18)  /* Bit: 18 Check the contact of USB plug */
 #define USB_ANALOG_USB_CHRG_DETECT_CHK_CHRG_B              (1 << 19)  /* Bit: 19 Check the charger connection */
 #define USB_ANALOG_USB_CHRG_DETECT_EN_B                    (1 << 20)  /* Bit: 20 Control the charger detector. */

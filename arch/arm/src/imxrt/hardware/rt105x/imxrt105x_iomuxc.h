@@ -77,6 +77,7 @@
 #define IMXRT_IOMUXC_SNVS_GPR_GPR3_OFFSET                      0x000c /* SNVC GPR3 General Purpose Register */
 
 /* Pad Mux Registers */
+
 /* Pad Mux Register Indices (used by software for table lookups) */
 
 #define IMXRT_PADMUX_GPIO_EMC_00_INDEX              0

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32f03x_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,16 +16,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_ST32F03X_MEMORYMAP_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_ST32F03X_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* ST32F05XF07X Address Blocks ******************************************************/
+/* ST32F05XF07X Address Blocks **********************************************/
 
 #define STM32_CODE_BASE      0x00000000     /* 0x00000000-0x1fffffff: 512Mb code block */
 #define STM32_SRAM_BASE      0x20000000     /* 0x20000000-0x3fffffff: 512Mb sram block */
@@ -36,7 +36,7 @@
 #define STM32_REGION_MASK    0xf0000000
 #define STM32_IS_SRAM(a)     ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_SRAM_BASE)
 
-/* Code Base Addresses **************************************************************/
+/* Code Base Addresses ******************************************************/
 
 #define STM32_BOOT_BASE      0x00000000     /* 0x00000000-0x000fffff: Aliased boot memory */
                                             /* 0x00100000-0x07ffffff: Reserved */
@@ -49,7 +49,7 @@
 #define STM32_OPTION_BASE    0x1ffff800     /* 0x1fffc000-0x1fffc007: Option bytes */
                                             /* 0x1fffc008-0x1fffffff: Reserved */
 
-/* System Memory Addresses **********************************************************/
+/* System Memory Addresses **************************************************/
 
 #define STM32_SYSMEM_UID     0x1ffff7ac     /* The 96-bit unique device identifier */
 #define STM32_SYSMEM_FSIZE   0x1ffff7cc     /* This bitfield indicates the size of
@@ -58,7 +58,7 @@
                                              * to 64 Kbytes
                                              */
 
-/* Peripheral Base Addresses ********************************************************/
+/* Peripheral Base Addresses ************************************************/
 
 #define STM32_APB1_BASE      0x40000000     /* 0x40000000-0x40009fff: APB1 */
                                             /* 0x4000a000-0x4000ffff: Reserved */
@@ -70,9 +70,10 @@
                                             /* 0x48001800-0x4fffFfff: Reserved */
 #define STM32_AHB3_BASE      0x50000000     /* 0x50000000-0x500007ff: AHB3 */
 
-/* APB1 Base Addresses **************************************************************/
+/* APB1 Base Addresses ******************************************************/
 
-                                            /* 0x40000000-0x400003ff Reserved */
+/*                                          0x40000000-0x400003ff Reserved */
+
 #define STM32_TIM3_BASE      0x40000400     /* 0x40000400-0x400007ff TIM3 */
 #define STM32_TIM6_BASE      0x40001000     /* 0x40001000-0x400013ff TIM6 */
 #define STM32_TIM7_BASE      0x40001400     /* 0x40001400-0x400017ff TIM7 */
@@ -91,7 +92,7 @@
 #define STM32_PWR_BASE       0x40007000     /* 0x40007000-0x400073ff PWR */
                                             /* 0x40007400-0x400077ff Reserved */
 
-/* APB2 Base Addresses **************************************************************/
+/* APB2 Base Addresses ******************************************************/
 
 #define STM32_SYSCFG_BASE    0x40010000     /* 0x40010000-0x400103ff SYSCFG + COMP + OPAMP */
 #define STM32_EXTI_BASE      0x40010400     /* 0x40010400-0x400107ff EXTI */
@@ -107,7 +108,7 @@
 #define STM32_TIM17_BASE     0x40014800     /* 0x40014800-0x40014bff TIM17 */
 #define STM32_DBGMCU_BASE    0x40015800     /* 0x40015800-0x40015bff DBGMCU */
 
-/* AHB1 Base Addresses **************************************************************/
+/* AHB1 Base Addresses ******************************************************/
 
 #define STM32_DMA1_BASE      0x40020000     /* 0x40020000-0x400203ff: DMA1  */
                                             /* 0x40020400-0x400207ff: Reserved  */
@@ -116,7 +117,7 @@
 #define STM32_CRC_BASE       0x40023000     /* 0x40023000-0x400233ff: CRC */
                                             /* 0x40024000-0x400243ff: Reserved */
 
-/* AHB2 Base Addresses **************************************************************/
+/* AHB2 Base Addresses ******************************************************/
 
 #define STM32_GPIOA_BASE     0x48000000     /* 0x48000000-0x480003ff: GPIO Port A */
 #define STM32_GPIOB_BASE     0x48000400     /* 0x48000400-0x480007ff: GPIO Port B */
@@ -125,9 +126,10 @@
                                             /* 0x48001000-0x480013ff: Reserved */
 #define STM32_GPIOF_BASE     0x48001400     /* 0x48001400-0x480017ff: GPIO Port F */
 
-/* Cortex-M4 Base Addresses *********************************************************/
-/* Other registers -- see armv7-m/nvic.h for standard Cortex-M4 registers in this
- * address range
+/* Cortex-M4 Base Addresses *************************************************/
+
+/* Other registers --
+ * see armv7-m/nvic.h for standard Cortex-M4 registers in this  address range
  */
 
 #define STM32_SCS_BASE       0xe000e000

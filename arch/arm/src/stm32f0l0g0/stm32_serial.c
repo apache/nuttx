@@ -25,10 +25,6 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
 /* This file is only a thin shell that includes the correct serial
  * implementation for the selected STM32 IP core:
  *   - STM32 UART IP version 1 - F0, L0
@@ -42,3 +38,7 @@
 #else
 #  error "Unsupported STM32 M0 serial"
 #endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

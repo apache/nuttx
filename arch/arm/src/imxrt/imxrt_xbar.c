@@ -89,14 +89,17 @@ int imxrt_xbar_connect(uint16_t mux_index_out, uint16_t mux_index_input)
    * 4) Input index is input.
    */
 
-  if (xbar_index < sizeof(g_xbars_addresses) / sizeof(g_xbars_addresses[0]) &&
+  if (xbar_index < sizeof(g_xbars_addresses) /
+      sizeof(g_xbars_addresses[0]) &&
       (mux_index_out & XBAR_OUTPUT) == XBAR_OUTPUT &&
       (mux_index_input & XBAR_INPUT) == XBAR_INPUT)
     {
       address = g_xbars_addresses[xbar_index];
       address += (mux_select / IMXRT_SEL_PER_REG) * sizeof(uint16_t);
 
-      /* There are 2 selects per Register LSB is even selects and MSB is odd */
+      /* There are 2 selects per Register LSB is even selects and
+       * MSB is odd
+       */
 
       if (mux_select & 1)
         {

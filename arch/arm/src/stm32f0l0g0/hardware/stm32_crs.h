@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_crs.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,30 +16,30 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_CRS_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_CRS_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_CRS_CR_OFFSET        0x0000  /* CRS control register */
 #define STM32_CRS_CFGR_OFFSET      0x0004  /* CRS configuration register */
 #define STM32_CRS_ISR_OFFSET       0x0008  /* CRS interrupt and status register */
 #define STM32_CRS_ICR_OFFSET       0x000c  /* CRS interrupt flag clear register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_CRS_CR               (STM32_CRS_BASE + STM32_CRS_CR_OFFSET)
 #define STM32_CRS_CFGR             (STM32_CRS_BASE + STM32_CRS_CFGR_OFFSET)
 #define STM32_CRS_ISR              (STM32_CRS_BASE + STM32_CRS_ISR_OFFSET)
 #define STM32_CRS_ICR              (STM32_CRS_BASE + STM32_CRS_ICR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* CRS control register */
 
@@ -69,11 +69,13 @@
 #  define CRS_CFGR_SYNCDIV_d32     (5 << CRS_CFGR_SYNCDIV_SHIFT) /* divided by 32 */
 #  define CRS_CFGR_SYNCDIV_d64     (6 << CRS_CFGR_SYNCDIV_SHIFT) /* divided by 64 */
 #  define CRS_CFGR_SYNCDIV_d128    (7 << CRS_CFGR_SYNCDIV_SHIFT) /* divided by 128 */
+
 #define CRS_CFGR_SYNCSRC_SHIFT     28        /* Bits 28-29: SYNC signal source selection */
 #define CRS_CFGR_SYNCSRC_MASK      (3 << CRS_CFGR_SYNCSRC_SHIFT)
 #  define CRS_CFGR_SYNCSRC_GPIO    (0 << CRS_CFGR_SYNCSRC_SHIFT) /* GPIO as SYNC signal source */
 #  define CRS_CFGR_SYNCSRC_LSE     (1 << CRS_CFGR_SYNCSRC_SHIFT) /* LSE as SYNC signal source */
 #  define CRS_CFGR_SYNCSRC_USBSOF  (2 << CRS_CFGR_SYNCSRC_SHIFT) /* USB SOF as SYNC signal source */
+
 #define CRS_CFGR_SYNCPOL           (1 << 31) /* SYNC polarity selection */
 
 /* CRS interrupt and status register */
