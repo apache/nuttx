@@ -253,7 +253,7 @@
 
 /* Flash ECC Register (ECCR) */
 
-#define FLASH_ECCR_ADDR_ECC_SHIFT   (0)                    /* Bits 8-15: Read protect */
+#define FLASH_ECCR_ADDR_ECC_SHIFT   (0)                    /* Bits 0-18: ECC fail address */
 #define FLASH_ECCR_ADDR_ECC_MASK    (0x07ffff << FLASH_ECCR_ADDR_ECC_SHIFT)
 #if defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6) || \
     defined(CONFIG_STM32L4_STM32L4XR)
