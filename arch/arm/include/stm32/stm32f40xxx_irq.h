@@ -1,7 +1,8 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32/stm32f40xxx_irq.h
  *
- *   Copyright (C) 2009, 2014-2015, 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2014-2015, 2017-2018 Gregory Nutt.
+ *   All rights reserved.
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           David Sidrane <david_s5@nscdg.com>
@@ -34,7 +35,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* This file should never be included directly but, rather,
  * only indirectly through nuttx/irq.h
@@ -43,23 +44,24 @@
 #ifndef __ARCH_ARM_INCLUDE_STM32_STM32F40XXX_IRQ_H
 #define __ARCH_ARM_INCLUDE_STM32_STM32F40XXX_IRQ_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-/****************************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
+/* IRQ numbers.
+ * The IRQ number corresponds vector number and hence map directly to
+ * bits in the NVIC.  This does, however, waste several words of memory in
+ * the IRQ to handle mapping tables.
  *
- * Processor Exceptions (vectors 0-15).  These common definitions can be found
- * in nuttx/arch/arm/include/stm32/irq.h
+ * Processor Exceptions (vectors 0-15). These common definitions can
+ * be found in nuttx/arch/arm/include/stm32/irq.h
  *
  * External interrupts (vectors >= 16)
  */
@@ -340,13 +342,13 @@
 #  define NR_IRQS                (STM32_IRQ_FIRST+93)
 #endif
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus

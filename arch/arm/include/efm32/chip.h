@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/efm32/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,29 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_EFM32_CHIP_H
 #define __ARCH_ARM_INCLUDE_EFM32_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* EFM32 EnergyMicro ****************************************************************/
+/* EFM32 EnergyMicro ********************************************************/
 
 /* Tiny Gecko with 32KiB FLASH and 4KiB RAM in a QFN64 package */
 
 #if defined(CONFIG_ARCH_CHIP_EFM32TG840F32)
 
-/* Gecko with 128KiB FLASH and 16KiB SRAM in LQFP100 (EFM32G880F128) or BGA112
- * (EFM32G890F128) package
+/* Gecko with 128KiB FLASH and 16KiB SRAM in LQFP100 (EFM32G880F128) or
+ * BGA112 (EFM32G890F128) package
  */
 
 #elif defined(CONFIG_ARCH_CHIP_EFM32G880F128) || \
@@ -55,7 +55,7 @@
 #  error "Unsupported EFM32 chip"
 #endif
 
-/* NVIC priority levels *************************************************************/
+/* NVIC priority levels *****************************************************/
 
 #define NVIC_SYSH_PRIORITY_MIN     0xe0 /* Bits [7:5] set in minimum priority */
 #define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */

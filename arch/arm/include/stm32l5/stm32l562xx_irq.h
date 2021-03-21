@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32l5/stm32l562xx_irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,29 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_STM32L5_STM32L562XX_IRQ_H
 #define __ARCH_ARM_INCLUDE_STM32L5_STM32L562XX_IRQ_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/stm32l5/stm32l5_irq.h>
 
-/*****************************************************************************
- * Pre-processor Definitions
- *****************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map
  * directly to bits in the NVIC.  This does, however, waste several words of
  * memory in the IRQ to handle mapping tables.
  *
- * Processor Exceptions (vectors 0-15).  These common definitions can be found
- * in the file nuttx/arch/arm/include/stm32l5/stm32l5_irq.h, which is included
- * above.
+ * Processor Exceptions (vectors 0-15). These common definitions can be found
+ * in the file nuttx/arch/arm/include/stm32l5/stm32l5_irq.h, which is
+ * included above.
  *
  * External interrupts (vectors >= 16)
  *

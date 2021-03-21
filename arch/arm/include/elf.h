@@ -26,14 +26,15 @@
 #define __ARCH_ARM_INCLUDE_ELF_H
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /* 4.3.1 ELF Identification.  Should have:
  *
  * e_machine         = EM_ARM
  * e_ident[EI_CLASS] = ELFCLASS32
- * e_ident[EI_DATA]  = ELFDATA2LSB (little endian) or ELFDATA2MSB (big endian)
+ * e_ident[EI_DATA]  = ELFDATA2LSB (little endian) or
+ *                     ELFDATA2MSB (big endian)
  */
 
 #if 0 /* Defined in include/elf32.h */
@@ -65,9 +66,10 @@
  * S (when used on its own) is the address of the symbol.
  * A is the addend for the relocation.
  * P is the address of the place being relocated (derived from r_offset).
- * Pa is the adjusted address of the place being relocated, defined as (P & 0xFFFFFFFC).
- * T is 1 if the target symbol S has type STT_FUNC and the symbol addresses a Thumb instruction;
- *   it is 0 otherwise.
+ * Pa is the adjusted address of the place being relocated, defined as
+ *    (P & 0xFFFFFFFC).
+ * T is 1 if the target symbol S has type STT_FUNC and the symbol addresses
+ *   a Thumb instruction; it is 0 otherwise.
  * B(S) is the addressing origin of the output segment defining the symbol S.
  * GOT_ORG is the addressing origin of the Global Offset Table
  * GOT(S) is the address of the GOT entry for the symbol S.

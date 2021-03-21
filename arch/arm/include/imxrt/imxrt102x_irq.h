@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/include/imxrt/imxrt102x_irq.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -32,24 +32,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through
- * nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_IMXRT_IMXRT102X_IRQ_H
 #define __ARCH_ARM_INCLUDE_IMXRT_IMXRT102X_IRQ_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* External interrupts (priority levels >= 256) *****************************************/
+/* External interrupts (priority levels >= 256) *****************************/
 
 #define IMXRT_IRQ_EDMA0_16     (IMXRT_IRQ_EXTINT + 0)   /* eDMA Channel 0/16 Transfer Complete */
 #define IMXRT_IRQ_EDMA1_17     (IMXRT_IRQ_EXTINT + 1)   /* eDMA Channel 1/17 Transfer Complete */
@@ -91,10 +91,14 @@
 #define IMXRT_IRQ_CAN2         (IMXRT_IRQ_EXTINT + 37)  /* CAN2 interrupt */
 #define IMXRT_IRQ_CM7FR        (IMXRT_IRQ_EXTINT + 38)  /* FlexRAM address fault */
 #define IMXRT_IRQ_KPP          (IMXRT_IRQ_EXTINT + 39)  /* Keypad Interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 40)  RESERVED */
 #define IMXRT_IRQ_GPRIRQ       (IMXRT_IRQ_EXTINT + 41)  /* Notify cores on exception while boot */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 42)  RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 43)  RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 44)  RESERVED */
 #define IMXRT_IRQ_WDOG2        (IMXRT_IRQ_EXTINT + 45)  /* Watchdog Timer reset */
 #define IMXRT_IRQ_SNVS         (IMXRT_IRQ_EXTINT + 46)  /* SNVS Functional Interrupt */
@@ -103,8 +107,10 @@
 #define IMXRT_IRQ_CSU          (IMXRT_IRQ_EXTINT + 49)  /* CSU Interrupt Request 1 */
 #define IMXRT_IRQ_DCP          (IMXRT_IRQ_EXTINT + 50)  /* DCP channel/CRC interrupts (channel != 0) */
 #define IMXRT_IRQ_DCP0         (IMXRT_IRQ_EXTINT + 51)  /* DCP channel 0 interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 52)  RESERVED */
 #define IMXRT_IRQ_TRNG         (IMXRT_IRQ_EXTINT + 53)  /* TRNG Interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 54)  RESERVED */
 #define IMXRT_IRQ_BEE          (IMXRT_IRQ_EXTINT + 55)  /* BEE IRQ */
 #define IMXRT_IRQ_SAI1         (IMXRT_IRQ_EXTINT + 56)  /* SAI1 interrupt (RX/TX) */
@@ -113,15 +119,19 @@
 #define IMXRT_IRQ_SAI3TX       (IMXRT_IRQ_EXTINT + 59)  /* SAI3 TX interrupt (RX/TX) */
 #define IMXRT_IRQ_SPDIF        (IMXRT_IRQ_EXTINT + 60)  /* SPDIF interrupt */
 #define IMXRT_IRQ_PMU          (IMXRT_IRQ_EXTINT + 61)  /* Brown-out event 1.1, 2.5 or 3.0 regulators */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 62)  RESERVED */
 #define IMXRT_IRQ_TEMP         (IMXRT_IRQ_EXTINT + 63)  /* Temperature Monitor */
 #define IMXRT_IRQ_TEMPPANIC    (IMXRT_IRQ_EXTINT + 64)  /* TempSensor panic */
 #define IMXRT_IRQ_USBPHY0      (IMXRT_IRQ_EXTINT + 65)  /* USBPHY (UTMI0) interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 66)  RESERVED */
 #define IMXRT_IRQ_ADC1         (IMXRT_IRQ_EXTINT + 67)  /* ADC1 interrupt */
 #define IMXRT_IRQ_ADC2         (IMXRT_IRQ_EXTINT + 68)  /* ADC2 interrupt */
 #define IMXRT_IRQ_DCDC         (IMXRT_IRQ_EXTINT + 69)  /* DCDC interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 70)  RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 71)  RESERVED */
 #define IMXRT_IRQ_GPIO1_0      (IMXRT_IRQ_EXTINT + 72)  /* GPIO1 INT0 interrupt */
 #define IMXRT_IRQ_GPIO1_1      (IMXRT_IRQ_EXTINT + 73)  /* GPIO1 INT1 interrupt */
@@ -137,11 +147,14 @@
 #define IMXRT_IRQ_GPIO2_16_31  (IMXRT_IRQ_EXTINT + 83)  /* GPIO2 INT16-31 interrupt */
 #define IMXRT_IRQ_GPIO3_0_15   (IMXRT_IRQ_EXTINT + 84)  /* GPIO3 INT0-15 interrupt */
 #define IMXRT_IRQ_GPIO3_16_31  (IMXRT_IRQ_EXTINT + 85)  /* GPIO3 INT16-31 interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 86)  RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 87)  RESERVED */
 #define IMXRT_IRQ_GPIO5_0_15   (IMXRT_IRQ_EXTINT + 88)  /* GPIO5 INT0-15 interrupt */
 #define IMXRT_IRQ_GPIO5_16_31  (IMXRT_IRQ_EXTINT + 89)  /* GPIO5 INT16-31 interrupt */
 #define IMXRT_IRQ_FLEXIO1      (IMXRT_IRQ_EXTINT + 90)  /* FlexIO Interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 91)  RESERVED */
 #define IMXRT_IRQ_WDOG1        (IMXRT_IRQ_EXTINT + 92)  /* Watchdog Timer reset */
 #define IMXRT_IRQ_RTWDOG       (IMXRT_IRQ_EXTINT + 93)  /* Watchdog Timer reset */
@@ -150,6 +163,7 @@
 #define IMXRT_IRQ_CCM_2        (IMXRT_IRQ_EXTINT + 96)  /* CCM interrupt 2 */
 #define IMXRT_IRQ_GPC          (IMXRT_IRQ_EXTINT + 97)  /* GPC interrupt 1 */
 #define IMXRT_IRQ_SRC          (IMXRT_IRQ_EXTINT + 98)  /* SRC interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 99)  RESERVED */
 #define IMXRT_IRQ_GPT1         (IMXRT_IRQ_EXTINT + 100) /* GPT1 interrupt */
 #define IMXRT_IRQ_GPT2         (IMXRT_IRQ_EXTINT + 101) /* GPT2 interrupt */
@@ -158,11 +172,13 @@
 #define IMXRT_IRQ_FLEXPWM1_2   (IMXRT_IRQ_EXTINT + 104) /* FLEXPWM1 capture/compare/reload 2 interrupt */
 #define IMXRT_IRQ_FLEXPWM1_3   (IMXRT_IRQ_EXTINT + 105) /* FLEXPWM1 capture/compare/reload 3 interrupt */
 #define IMXRT_IRQ_FLEXPWM1_F   (IMXRT_IRQ_EXTINT + 106) /* FLEXPWM1 fault interrupt OR reload error */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 107) RESERVED */
 #define IMXRT_IRQ_FLEXSPI      (IMXRT_IRQ_EXTINT + 108) /* FlexSPI interrupt */
 #define IMXRT_IRQ_SEMC         (IMXRT_IRQ_EXTINT + 109) /* SEMC interrupt */
 #define IMXRT_IRQ_USDHC1       (IMXRT_IRQ_EXTINT + 110) /* USDHC1 interrupt */
 #define IMXRT_IRQ_USDHC2       (IMXRT_IRQ_EXTINT + 111) /* USDHC2 interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 112) RESERVED */
 #define IMXRT_IRQ_USBOTG1      (IMXRT_IRQ_EXTINT + 113) /* USBO2 USB OTG1 interrupt */
 #define IMXRT_IRQ_ENET         (IMXRT_IRQ_EXTINT + 114) /* ENET MAC 0 interrupt */
@@ -178,49 +194,73 @@
 #define IMXRT_IRQ_ACMP2        (IMXRT_IRQ_EXTINT + 124) /* ACMP2 interrupt */
 #define IMXRT_IRQ_ACMP3        (IMXRT_IRQ_EXTINT + 125) /* ACMP3 interrupt */
 #define IMXRT_IRQ_ACMP4        (IMXRT_IRQ_EXTINT + 126) /* ACMP4 interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 127) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 128) RESERVED */
 #define IMXRT_IRQ_ENC1         (IMXRT_IRQ_EXTINT + 129) /* ENC1 interrupt */
 #define IMXRT_IRQ_ENC2         (IMXRT_IRQ_EXTINT + 130) /* ENC2 interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 131) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 132) RESERVED */
 #define IMXRT_IRQ_QTIMER1      (IMXRT_IRQ_EXTINT + 133) /* QTIMER1 timer 0-3 interrupt */
 #define IMXRT_IRQ_QTIMER2      (IMXRT_IRQ_EXTINT + 134) /* QTIMER2 timer 0-3 interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 135) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 136) RESERVED */
 #define IMXRT_IRQ_FLEXPWM2_0   (IMXRT_IRQ_EXTINT + 137) /* FLEXPWM2 capture/compare/reload 0 interrupt */
 #define IMXRT_IRQ_FLEXPWM2_1   (IMXRT_IRQ_EXTINT + 138) /* FLEXPWM2 capture/compare/reload 1 interrupt */
 #define IMXRT_IRQ_FLEXPWM2_2   (IMXRT_IRQ_EXTINT + 139) /* FLEXPWM2 capture/compare/reload 1 interrupt */
 #define IMXRT_IRQ_FLEXPWM2_3   (IMXRT_IRQ_EXTINT + 140) /* FLEXPWM2 capture/compare/reload 3 interrupt */
 #define IMXRT_IRQ_FLEXPWM2_F   (IMXRT_IRQ_EXTINT + 141) /* FLEXPWM2 fault interrupt */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 142) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 143) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 144) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 146) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 147) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 148) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 149) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 150) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 151) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 152) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 153) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 154) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 155) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 156) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 157) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 158) RESERVED */
+
 /* RESERVED                    (IMXRT_IRQ_EXTINT + 159) RESERVED */
 
 #define IMXRT_IRQ_NEXTINT      160
 
-/* GPIO second level interrupt **********************************************************/
+/* GPIO second level interrupt **********************************************/
 
 #define IMXRT_GPIO_IRQ_FIRST   (IMXRT_IRQ_EXTINT + IMXRT_IRQ_NEXTINT)
 #define _IMXRT_GPIO1_0_15_BASE IMXRT_GPIO_IRQ_FIRST
 
 #ifdef CONFIG_IMXRT_GPIO1_0_15_IRQ
   /* GPIO1 has dedicated interrupts for pins 0-7
-   * REVISIT:  I am assuming that you really cannot use the dedicated and the multiplex
+   * REVISIT:
+   * I am assuming that you really cannot use the dedicated and the multiplex
    * interrupts concurrently.
    */
 
@@ -431,25 +471,25 @@
                                 IMXRT_GPIO3_NIRQS + IMXRT_GPIO5_NIRQS)
 #define IMXRT_GPIO_IRQ_LAST    (_IMXRT_GPIO1_0_15_BASE + IMXRT_GPIO_NIRQS)
 
-/* Total number of IRQ numbers **********************************************************/
+/* Total number of IRQ numbers **********************************************/
 
 #define NR_IRQS                (IMXRT_IRQ_EXTINT + IMXRT_IRQ_NEXTINT + IMXRT_GPIO_NIRQS)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Inline functions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus

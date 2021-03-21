@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/include/max326xx/irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,29 +16,30 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through
- * nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_MAX326_IRQ_H
 #define __ARCH_ARM_INCLUDE_MAX326_IRQ_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/max326xx/chip.h>
 
-/****************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
+/* IRQ numbers.
+ * The IRQ number corresponds vector number and hence map directly to
+ * bits in the NVIC.  This does, however, waste several words of memory in
+ * the IRQ to handle mapping tables.
  */
 
 /* Common Processor Exceptions (vectors 0-15) */
@@ -70,15 +71,15 @@
 #  error "Unsupported MAX326XX family"
 #endif
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -88,9 +89,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

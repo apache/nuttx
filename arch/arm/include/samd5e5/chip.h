@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/samd5e5/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_SAMD5E5_CHIP_H
 #define __ARCH_ARM_INCLUDE_SAMD5E5_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* Get customizations for each supported chip.  Only sizes and numbers of things are
- * provided here.  See arch/arm/src/samd5e5/Kconfig for other, boolean configuration
+/* Get customizations for each supported chip.
+ * Only sizes and numbers of things are provided here.
+ * See arch/arm/src/samd5e5/Kconfig for other, boolean configuration
  * settings.
  */
 
@@ -612,10 +613,12 @@
 #  error Unrecognized SAMD5x/Ex chip
 #endif
 
-/* NVIC priority levels *************************************************************/
-/* Each priority field holds a priority value, 0x00-0xe0. The lower the value, the
- * greater the priority of the corresponding interrupt. The processor implements only
- * bits[7:4] of each field, bits[6:0] read as zero and ignore writes.
+/* NVIC priority levels *****************************************************/
+
+/* Each priority field holds a priority value, 0x00-0xe0. The lower the
+ * value, the greater the priority of the corresponding interrupt.
+ * The processor implements only bits[7:4] of each field, bits[6:0] read as
+ * zero and ignore writes.
  */
 
 #define NVIC_SYSH_PRIORITY_MIN      0xe0 /* All bits[7:5] set is minimum priority */
@@ -623,16 +626,16 @@
 #define NVIC_SYSH_PRIORITY_MAX      0x00 /* Zero is maximum priority */
 #define NVIC_SYSH_PRIORITY_STEP     0x20 /* Eight priority levels in steps 0x20 */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_INCLUDE_SAMD5E5_CHIP_H */

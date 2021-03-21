@@ -1,4 +1,4 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32f7/chip.h
  *
  *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
@@ -33,101 +33,171 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_STM32F7_CHIP_H
 #define __ARCH_ARM_INCLUDE_STM32F7_CHIP_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/********************************************************************************************************************
- * Pre-processor Definitions
- ********************************************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* STM32F722xx, STM32F723xx,
- * STM32F745xx, STM32F746xx, STM32F756xx, STM32F765xx, STM32F767xx, STM32F768xx,
- * STM32F769xx, STM32F777xx and STM32F779xx  Differences between family members:
+ * STM32F745xx, STM32F746xx, STM32F756xx, STM32F765xx, STM32F767xx,
+ * STM32F768xx, STM32F769xx, STM32F777xx and STM32F779xx
+ * Differences between family members:
  *
- *   ----------- ---------------- ----- ---- ----- ---- ---- ---- ---- ---- ----- ----- ---- ------------ ------
+ *   ----------- ---------------- ----- ---- ----- ---- ---- ---- ----
  *                                       SPI   ADC LCD
- *   PART        PACKAGE          GPIOs  I2S  CHAN TFT  MIPI JPEG CAN  ETH  DFSDM CRYPTO FPU      RAM      L1
- *   ----------- ---------------- ----- ---- ----- ---- ---- ---- ---- ---- ----- ----- ---- ------------ ------
- *   STM32F722Rx LQFP64             50   3/3   16   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
- *   STM32F722Vx LQFP100            82   4/3   16   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
- *   STM32F722Zx LQFP144           114   5/3   24   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
- *   STM32F722Ix UFBGA176/LQFP176  140   5/3   24   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
+ *   PART        PACKAGE          GPIOs  I2S  CHAN TFT  MIPI JPEG CAN
+ *   ----------- ---------------- ----- ---- ----- ---- ---- ---- ----
+ *   STM32F722Rx LQFP64             50   3/3   16   No   No   No   1
+ *   STM32F722Vx LQFP100            82   4/3   16   No   No   No   1
+ *   STM32F722Zx LQFP144           114   5/3   24   No   No   No   1
+ *   STM32F722Ix UFBGA176/LQFP176  140   5/3   24   No   No   No   1
  *
- *   STM32F723Vx WLCSP100           79   4/3   16   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
- *   STM32F723Zx UFBGA144/LQFP144  112   5/3   24   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
- *   STM32F723Ix UFBGA176/LQFP176  138   5/3   24   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
+ *   STM32F723Vx WLCSP100           79   4/3   16   No   No   No   1
+ *   STM32F723Zx UFBGA144/LQFP144  112   5/3   24   No   No   No   1
+ *   STM32F723Ix UFBGA176/LQFP176  138   5/3   24   No   No   No   1
  *
- *   STM32F745Vx LQFP100            82   4/3   16   No   No   No   2   Yes   No    No   SFPU (240+16+64)  4+4
- *   STM32F745Zx WLCSP143/LQFP144  114   6/3   24   No   No   No   2   Yes   No    No   SFPU (240+16+64)  4+4
- *   STM32F745Ix UFBGA176/LQFP176  140   6/3   24   No   No   No   2   Yes   No    No   SFPU (240+16+64)  4+4
- *   STM32F745Bx LQFP208           168   6/3   24   No   No   No   2   Yes   No    No   SFPU (240+16+64)  4+4
- *   STM32F745Nx TFBGA216           68   6/3   24   No   No   No   2   Yes   No    No   SFPU (240+16+64)  4+4
+ *   STM32F745Vx LQFP100            82   4/3   16   No   No   No   2
+ *   STM32F745Zx WLCSP143/LQFP144  114   6/3   24   No   No   No   2
+ *   STM32F745Ix UFBGA176/LQFP176  140   6/3   24   No   No   No   2
+ *   STM32F745Bx LQFP208           168   6/3   24   No   No   No   2
+ *   STM32F745Nx TFBGA216           68   6/3   24   No   No   No   2
  *
- *   STM32F746Vx LQFP100            82   4/3   16   Yes  No   No   2   Yes   No    No   SFPU (240+16+64)  4+4
- *   STM32F746Zx WLCSP143/LQFP144  114   6/3   24   Yes  No   No   2   Yes   No    No   SFPU (240+16+64)  4+4
- *   STM32F746Ix UFBGA176/LQFP176  140   6/3   24   Yes  No   No   2   Yes   No    No   SFPU (240+16+64)  4+4
- *   STM32F746Bx LQFP208           168   6/3   24   Yes  No   No   2   Yes   No    No   SFPU (240+16+64)  4+4
- *   STM32F746Nx TFBGA216          168   6/3   24   Yes  No   No   2   Yes   No    No   SFPU
+ *   STM32F746Vx LQFP100            82   4/3   16   Yes  No   No   2
+ *   STM32F746Zx WLCSP143/LQFP144  114   6/3   24   Yes  No   No   2
+ *   STM32F746Ix UFBGA176/LQFP176  140   6/3   24   Yes  No   No   2
+ *   STM32F746Bx LQFP208           168   6/3   24   Yes  No   No   2
+ *   STM32F746Nx TFBGA216          168   6/3   24   Yes  No   No   2
  *
- *   STM32F756Vx LQFP100            82   4/3   16   Yes  No   No   2   Yes   No   Yes   SFPU (240+16+64)  4+4
- *   STM32F756Zx WLCSP143/LQFP144  114   6/3   24   Yes  No   No   2   Yes   No   Yes   SFPU (240+16+64)  4+4
- *   STM32F756Ix UFBGA176/LQFP176  140   6/3   24   Yes  No   No   2   Yes   No   Yes   SFPU (240+16+64)  4+4
- *   STM32F756Bx LQFP208           168   6/3   24   Yes  No   No   2   Yes   No   Yes   SFPU (240+16+64)  4+4
- *   STM32F756Nx TFBGA216          168   6/3   24   Yes  No   No   2   Yes   No   Yes   SFPU (240+16+64)  4+4
+ *   STM32F756Vx LQFP100            82   4/3   16   Yes  No   No   2
+ *   STM32F756Zx WLCSP143/LQFP144  114   6/3   24   Yes  No   No   2
+ *   STM32F756Ix UFBGA176/LQFP176  140   6/3   24   Yes  No   No   2
+ *   STM32F756Bx LQFP208           168   6/3   24   Yes  No   No   2
+ *   STM32F756Nx TFBGA216          168   6/3   24   Yes  No   No   2
  *
- *   STM32F765Vx LQFP100            82   4/3   16   No   No   No   3   Yes   Yes   No   DFPU (368+16+128) 16+16
- *   STM32F765Zx WLCSP143/LQFP144  114   6/3   24   No   No   No   3   Yes   Yes   No   DFPU (368+16+128) 16+16
- *   STM32F765Ix UFBGA176/LQFP176  140   6/3   24   No   No   No   3   Yes   Yes   No   DFPU (368+16+128) 16+16
- *   STM32F765Bx LQFP208           168   6/3   24   No   No   No   3   Yes   Yes   No   DFPU (368+16+128) 16+16
- *   STM32F765Nx TFBGA216          168   6/3   24   No   No   No   3   Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F765Vx LQFP100            82   4/3   16   No   No   No   3
+ *   STM32F765Zx WLCSP143/LQFP144  114   6/3   24   No   No   No   3
+ *   STM32F765Ix UFBGA176/LQFP176  140   6/3   24   No   No   No   3
+ *   STM32F765Bx LQFP208           168   6/3   24   No   No   No   3
+ *   STM32F765Nx TFBGA216          168   6/3   24   No   No   No   3
  *
- *   STM32F767Vx LQFP100            82   4/3   16   Yes  No   Yes  3   Yes   Yes   No   DFPU (368+16+128) 16+16
- *   STM32F767Zx WLCSP143/LQFP144  114   6/3   24   Yes  No   Yes  3   Yes   Yes   No   DFPU (368+16+128) 16+16
- *   STM32F767Ix UFBGA176/LQFP176  132   6/3   24   Yes  Yes  Yes  3   Yes   Yes   No   DFPU (368+16+128) 16+16
- *   STM32F767Bx LQFP208           168   6/3   24   Yes  Yes  Yes  3   Yes   Yes   No   DFPU (368+16+128) 16+16
- *   STM32F767Nx TFBGA216          159   6/3   24   Yes  Yes  Yes  3   Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F767Vx LQFP100            82   4/3   16   Yes  No   Yes  3
+ *   STM32F767Zx WLCSP143/LQFP144  114   6/3   24   Yes  No   Yes  3
+ *   STM32F767Ix UFBGA176/LQFP176  132   6/3   24   Yes  Yes  Yes  3
+ *   STM32F767Bx LQFP208           168   6/3   24   Yes  Yes  Yes  3
+ *   STM32F767Nx TFBGA216          159   6/3   24   Yes  Yes  Yes  3
  *
- *   STM32F768Ax WLCSP180          129   6/3   24   Yes  Yes  Yes  3   No    Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F768Ax WLCSP180          129   6/3   24   Yes  Yes  Yes  3
  *
- *   STM32F769Vx LQFP100            82   4/3   16   Yes  No   Yes  3   Yes   Yes   No   DFPU (368+16+128) 16+16
- *   STM32F769Zx LQFP144           114   6/3   24   Yes  No   Yes  3   Yes   Yes   No   DFPU (368+16+128) 16+16
- *   STM32F769Ix UFBGA176/LQFP176  132   6/3   24   Yes  Yes  Yes  3   Yes   Yes   No   DFPU (368+16+128) 16+16
- *   STM32F769Bx LQFP208           168   6/3   24   Yes  Yes  Yes  3   Yes   Yes   No   DFPU (368+16+128) 16+16
- *   STM32F769Nx TFBGA216          159   6/3   24   Yes  Yes  Yes  3   Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F769Vx LQFP100            82   4/3   16   Yes  No   Yes  3
+ *   STM32F769Zx LQFP144           114   6/3   24   Yes  No   Yes  3
+ *   STM32F769Ix UFBGA176/LQFP176  132   6/3   24   Yes  Yes  Yes  3
+ *   STM32F769Bx LQFP208           168   6/3   24   Yes  Yes  Yes  3
+ *   STM32F769Nx TFBGA216          159   6/3   24   Yes  Yes  Yes  3
  *
- *   STM32F769Ax WLCSP180          129   6/3   24   Yes  Yes  Yes  3   No    Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F769Ax WLCSP180          129   6/3   24   Yes  Yes  Yes  3
  *
- *   STM32F777Vx LQFP100            82   4/3   16   Yes  No   Yes  3   Yes   Yes   Yes  DFPU (368+16+128) 16+16
- *   STM32F777Zx LQFP144           114   6/3   24   Yes  No   Yes  3   Yes   Yes   Yes  DFPU (368+16+128) 16+16
- *   STM32F777Ix UFBGA176/LQFP176  132   6/3   24   Yes  Yes  Yes  3   Yes   Yes   Yes  DFPU (368+16+128) 16+16
- *   STM32F777Bx LQFP208           159   6/3   24   Yes  Yes  Yes  3   Yes   Yes   Yes  DFPU (368+16+128) 16+16
- *   STM32F777Nx TFBGA216          159   6/3   24   Yes  Yes  Yes  3   Yes   Yes   Yes  DFPU (368+16+128) 16+16
+ *   STM32F777Vx LQFP100            82   4/3   16   Yes  No   Yes  3
+ *   STM32F777Zx LQFP144           114   6/3   24   Yes  No   Yes  3
+ *   STM32F777Ix UFBGA176/LQFP176  132   6/3   24   Yes  Yes  Yes  3
+ *   STM32F777Bx LQFP208           159   6/3   24   Yes  Yes  Yes  3
+ *   STM32F777Nx TFBGA216          159   6/3   24   Yes  Yes  Yes  3
  *
- *   STM32F778Ax WLCSP180          129   6/3   24   Yes  Yes  Yes  3   No    Yes   Yes  DFPU (368+16+128) 16+16
+ *   STM32F778Ax WLCSP180          129   6/3   24   Yes  Yes  Yes  3
  *
- *   STM32F779Ix UFBGA176/LQFP176  132   6/3   24   Yes  Yes  Yes  3   Yes   Yes   Yes  DFPU (368+16+128) 16+16
- *   STM32F779Bx LQFP208           159   6/3   24   Yes  Yes  Yes  3   Yes   Yes   Yes  DFPU (368+16+128) 16+16
- *   STM32F779Nx TFBGA216          159   6/3   24   Yes  Yes  Yes  3   Yes   Yes   Yes  DFPU (368+16+128) 16+16
+ *   STM32F779Ix UFBGA176/LQFP176  132   6/3   24   Yes  Yes  Yes  3
+ *   STM32F779Bx LQFP208           159   6/3   24   Yes  Yes  Yes  3
+ *   STM32F779Nx TFBGA216          159   6/3   24   Yes  Yes  Yes  3
 
- *   STM32F779Ax WLCSP180          129   6/3   24   Yes  Yes  Yes  3   No    Yes   Yes  DFPU (368+16+128) 16+16
- *   ----------- ---------------- ----- ---- ----- ---- ---- ---- ---- ---- ----- ----- ---- ------------ ------
+ *   STM32F779Ax WLCSP180          129   6/3   24   Yes  Yes  Yes  3
+ *   ----------- ---------------- ----- ---- ----- ---- ---- ---- ----
  *
+ *
+ *   -----------  ---- ----- ----- ---- ------------ ------
+ *
+ *   PART        ETH  DFSDM CRYPTO FPU      RAM      L1
+ *   ----------- ---- ----- ----- ---- ------------ ------
+ *   STM32F722Rx No    No    No   SFPU (176+16+64)  8+8
+ *   STM32F722Vx No    No    No   SFPU (176+16+64)  8+8
+ *   STM32F722Zx No    No    No   SFPU (176+16+64)  8+8
+ *   STM32F722Ix No    No    No   SFPU (176+16+64)  8+8
+ *
+ *   STM32F723Vx No    No    No   SFPU (176+16+64)  8+8
+ *   STM32F723Zx No    No    No   SFPU (176+16+64)  8+8
+ *   STM32F723Ix No    No    No   SFPU (176+16+64)  8+8
+ *
+ *   STM32F745Vx Yes   No    No   SFPU (240+16+64)  4+4
+ *   STM32F745Zx Yes   No    No   SFPU (240+16+64)  4+4
+ *   STM32F745Ix Yes   No    No   SFPU (240+16+64)  4+4
+ *   STM32F745Bx Yes   No    No   SFPU (240+16+64)  4+4
+ *   STM32F745Nx Yes   No    No   SFPU (240+16+64)  4+4
+ *
+ *   STM32F746Vx Yes   No    No   SFPU (240+16+64)  4+4
+ *   STM32F746Zx Yes   No    No   SFPU (240+16+64)  4+4
+ *   STM32F746Ix Yes   No    No   SFPU (240+16+64)  4+4
+ *   STM32F746Bx Yes   No    No   SFPU (240+16+64)  4+4
+ *   STM32F746Nx Yes   No    No   SFPU
+ *
+ *   STM32F756Vx Yes   No   Yes   SFPU (240+16+64)  4+4
+ *   STM32F756Zx Yes   No   Yes   SFPU (240+16+64)  4+4
+ *   STM32F756Ix Yes   No   Yes   SFPU (240+16+64)  4+4
+ *   STM32F756Bx Yes   No   Yes   SFPU (240+16+64)  4+4
+ *   STM32F756Nx Yes   No   Yes   SFPU (240+16+64)  4+4
+ *
+ *   STM32F765Vx Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F765Zx Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F765Ix Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F765Bx Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F765Nx Yes   Yes   No   DFPU (368+16+128) 16+16
+ *
+ *   STM32F767Vx Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F767Zx Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F767Ix Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F767Bx Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F767Nx Yes   Yes   No   DFPU (368+16+128) 16+16
+ *
+ *   STM32F768Ax No    Yes   No   DFPU (368+16+128) 16+16
+ *
+ *   STM32F769Vx Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F769Zx Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F769Ix Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F769Bx Yes   Yes   No   DFPU (368+16+128) 16+16
+ *   STM32F769Nx Yes   Yes   No   DFPU (368+16+128) 16+16
+ *
+ *   STM32F769Ax No    Yes   No   DFPU (368+16+128) 16+16
+ *
+ *   STM32F777Vx Yes   Yes   Yes  DFPU (368+16+128) 16+16
+ *   STM32F777Zx Yes   Yes   Yes  DFPU (368+16+128) 16+16
+ *   STM32F777Ix Yes   Yes   Yes  DFPU (368+16+128) 16+16
+ *   STM32F777Bx Yes   Yes   Yes  DFPU (368+16+128) 16+16
+ *   STM32F777Nx Yes   Yes   Yes  DFPU (368+16+128) 16+16
+ *
+ *   STM32F778Ax No    Yes   Yes  DFPU (368+16+128) 16+16
+ *
+ *   STM32F779Ix Yes   Yes   Yes  DFPU (368+16+128) 16+16
+ *   STM32F779Bx Yes   Yes   Yes  DFPU (368+16+128) 16+16
+ *   STM32F779Nx Yes   Yes   Yes  DFPU (368+16+128) 16+16
+
+ *   STM32F779Ax No    Yes   Yes  DFPU (368+16+128) 16+16
+ *   ----------- ---- ----- ---- ----- ------------ ------
+
  * Parts STM32F72xxC & STM32F73xxC have 256Kb of FLASH
  * Parts STM32F72xxE & STM32F73xxE have 512Kb of FLASH
  * Parts STM32F74xxE have 512Kb of FLASH
  * Parts STM32F74xxG have 1024Kb of FLASH
  * Parts STM32F74xxI have 2048Kb of FLASH
  *
- * The correct FLASH size will be set CONFIG_STM32F7_FLASH_CONFIG_x or overridden
- * with CONFIG_STM32F7_FLASH_OVERRIDE_x
+ * The correct FLASH size will be set CONFIG_STM32F7_FLASH_CONFIG_x
+ * or overridden with CONFIG_STM32F7_FLASH_OVERRIDE_x
  *
  */
 #if defined(CONFIG_ARCH_CHIP_STM32F722RC) || \
@@ -374,7 +444,7 @@
 #define STM32F7_NDFSDM                     0   /* No Digital filters */
 #endif
 
-/* NVIC priority levels *********************************************************************************************/
+/* NVIC priority levels *****************************************************/
 
 /* 16 Programmable interrupt levels */
 

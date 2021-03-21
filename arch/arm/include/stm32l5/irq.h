@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32l5/irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 /* This file should never be included directed but, rather,
  * only indirectly through nuttx/irq.h
@@ -25,9 +25,9 @@
 #ifndef __ARCH_ARM_INCLUDE_STM32L5_IRQ_H
 #define __ARCH_ARM_INCLUDE_STM32L5_IRQ_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 

@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32h7/stm32h7x3xx_irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,27 +16,33 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through arch/irq.h */
+/* This file should never be included directly but, rather,
+ * only indirectly through arch/irq.h
+ */
 
 #ifndef __ARCH_ARM_INCLUDE_STM32H7_STM32H7X3XX_IRQ_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to bits in the
- * NVIC.  This does, however, waste several words of memory in the IRQ to handle mapping tables.
+/* IRQ numbers.
+ * The IRQ number corresponds vector number and hence map directly to bits
+ * in the NVIC.
+ * This does, however, waste several words of memory in the IRQ to handle
+ * mapping tables.
  *
- * Processor Exceptions (vectors 0-15).  These common definitions can be found in the file
- * nuttx/arch/arm/include/stm32h7/irq.h which includes this file
+ * Processor Exceptions (vectors 0-15).  These common definitions can be
+ * found in the file nuttx/arch/arm/include/stm32h7/irq.h which includes
+ * this file
  *
  * External interrupts (vectors >= 16)
  */

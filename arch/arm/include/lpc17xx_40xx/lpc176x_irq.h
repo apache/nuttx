@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly
- * through nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_LPC17XX_40XX_LPC176X_IRQ_H
@@ -30,8 +30,9 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
+
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map
  * directly to bits in the NVIC.  This does, however, waste several words of
  * memory in the IRQ to handle mapping tables.
@@ -122,9 +123,9 @@
 #define LPC17_40_IRQ_NEXTINT        (35)
 #define LPC17_40_IRQ_NIRQS          (LPC17_40_IRQ_EXTINT+LPC17_40_IRQ_NEXTINT)
 
-/* GPIO interrupts.  The LPC17xx/LPC40xx supports several interrupts on ports 0 and
- * 2 (only).  We go through some special efforts to keep the number of IRQs
- * to a minimum in this sparse interrupt case.
+/* GPIO interrupts.  The LPC17xx/LPC40xx supports several interrupts on ports
+ * 0 and 2 (only).  We go through some special efforts to keep the number of
+ * IRQs to a minimum in this sparse interrupt case.
  *
  * 28 interrupts on Port 0:  p0.0 - p0.11, p0.15-p0.30
  * 14 interrupts on Port 2:  p2.0 - p2.13
@@ -136,7 +137,7 @@
 #  define LPC17_40_VALID_GPIOINT0  (0x7fff8ffful) /* GPIO port 0 interrupt set */
 #  define LPC17_40_VALID_GPIOINT2  (0x00003ffful) /* GPIO port 2 interrupt set */
 
-   /* Set 1: 12 interrupts p0.0-p0.11 */
+/* Set 1: 12 interrupts p0.0-p0.11 */
 
 #  define LPC17_40_VALID_GPIOINT0L  (0x00000ffful)
 #  define LPC17_40_VALID_SHIFT0L    (0)
@@ -156,7 +157,7 @@
 #  define LPC17_40_IRQ_P0p11        (LPC17_40_VALID_FIRST0L+11)
 #  define LPC17_40_VALID_NIRQS0L    (12)
 
-   /* Set 2: 16 interrupts p0.15-p0.30 */
+/* Set 2: 16 interrupts p0.15-p0.30 */
 
 #  define LPC17_40_VALID_GPIOINT0H  (0x7fff8000ull)
 #  define LPC17_40_VALID_SHIFT0H    (15)
@@ -180,7 +181,7 @@
 #  define LPC17_40_IRQ_P0p30        (LPC17_40_VALID_FIRST0H+15)
 #  define LPC17_40_VALID_NIRQS0H    (16)
 
-   /* Set 3: 14 interrupts p2.0-p2.13 */
+/* Set 3: 14 interrupts p2.0-p2.13 */
 
 #  define LPC17_40_VALID_GPIOINT2   (0x00003ffful)
 #  define LPC17_40_VALID_SHIFT2     (0)

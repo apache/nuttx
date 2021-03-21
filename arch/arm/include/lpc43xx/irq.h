@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/include/lpc43xx/irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* This file should never be included directly but, rather,
  * only indirectly through nuttx/irq.h
@@ -25,21 +25,22 @@
 #ifndef __ARCH_ARM_INCLUDE_LPC43XX_IRQ_H
 #define __ARCH_ARM_INCLUDE_LPC43XX_IRQ_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
 
-/********************************************************************************************
- * Pre-processor Definitions
- ********************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to bits in
- * the NVIC.  This does, however, waste several words of memory in the IRQ to handle mapping
- * tables.
+/* IRQ numbers.
+ * The IRQ number corresponds vector number and hence map directly to bits in
+ * the NVIC.  This does, however, waste several words of memory in the IRQ to
+ * handle mapping tables.
  */
 
 /* Processor Exceptions (vectors 0-15) */
@@ -114,8 +115,8 @@
 #define LPC43M4_IRQ_NEXTINT       (53)
 #define LPC43M4_IRQ_NIRQS         (LPC43_IRQ_EXTINT+LPC43M4_IRQ_NEXTINT)
 
-/* Total number of IRQ numbers (This will need to be revisited if/when the Cortex-M0 is
- * supported)
+/* Total number of IRQ numbers (This will need to be revisited
+ * if/when the Cortex-M0 is supported)
  */
 
 #define NR_IRQS                   LPC43M4_IRQ_NIRQS
@@ -163,33 +164,33 @@
 #define LPC43M0_IRQ_NEXTINT       (30)
 #define LPC43M0_IRQ_NIRQS         (LPC43_IRQ_EXTINT+LPC43M0_IRQ_NEXTINT)
 
-/* Total number of IRQ numbers (This will need to be revisited if/when the Cortex-M0 is
- * supported)
+/* Total number of IRQ numbers
+ * (This will need to be revisited if/when the Cortex-M0 is supported)
  */
 
 #if 0
 #define NR_IRQS                   LPC43M0_IRQ_NIRQS
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 typedef void (*vic_vector_t)(uint32_t *regs);
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Inline functions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus

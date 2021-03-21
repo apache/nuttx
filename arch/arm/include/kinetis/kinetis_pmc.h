@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/kinetis/kinetis_pmc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,34 +16,36 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_KINETIS_KINETIS_PMC_H
 #define __ARCH_ARM_INCLUDE_KINETIS_KINETIS_PMC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* Note: It is envisioned that in the long term as a chip is added. The author of
- * the new chip definitions will either find the exact configuration in an existing
- * chip define and add the new chip to it Or add the PMC feature configuration
- * #defines to the chip ifdef list below. In either case the author should mark
- * it as "Verified to Document Number:" taken from the reference manual.
+/* Note:
+ * It is envisioned that in the long term as a chip is added. The author of
+ * the new chip definitions will either find the exact configuration in an
+ * existing chip define and add the new chip to it Or add the PMC feature
+ * configuration #defines to the chip ifdef list below. In either case the
+ * author should mark it as "Verified to Document Number:" taken from the
+ * reference manual.
  *
  * To maintain backward compatibility to the version of NuttX prior to
  * 2/22/2017, the catch all KINETIS_PMC_VERSION_UKN configuration is assigned
  * to all the chips that did not have any conditional compilation based on
- * KINETIS_K64 or KINETIS_K66. This is  a "No worse" than the original code solution.
- * N.B. Each original chip "if"definitions have been left intact so that the
- * complete legacy definitions prior to 2/22/2017 may be filled in completely when
- * vetted.
+ * KINETIS_K64 or KINETIS_K66. This is  a "No worse" than the original code
+ * solution. N.B. Each original chip "if"definitions have been left intact so
+ * that the complete legacy definitions prior to 2/22/2017 may be filled in
+ * completely when vetted.
  */
 
 /* PMC Register Configuration
@@ -323,8 +325,8 @@
 #  error "Unsupported Kinetis chip"
 #endif
 
-/* Use the catch all configuration for the PMC based on the implementations in
- * NuttX prior to 2/3/2017
+/* Use the catch all configuration for the PMC based on
+ * the implementations in NuttX prior to 2/3/2017
  */
 
 #if KINETIS_PMC_VERSION == KINETIS_PMC_VERSION_UKN

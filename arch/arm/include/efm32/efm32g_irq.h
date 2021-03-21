@@ -30,7 +30,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map
@@ -42,7 +42,8 @@
  *
  * External interrupts (vectors >= 16)
  */
-                                                         /* IRQ# Source      */
+
+                                                         /* IRQ# Source     */
 #define EFM32_IRQ_DMA        (EFM32_IRQ_INTERRUPTS + 0)  /*  0   DMA         */
 #define EFM32_IRQ_GPIO_EVEN  (EFM32_IRQ_INTERRUPTS + 1)  /*  1   GPIO_EVEN   */
 #define EFM32_IRQ_TIMER0     (EFM32_IRQ_INTERRUPTS + 2)  /*  2   TIMER0      */
@@ -95,7 +96,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #undef EXTERN

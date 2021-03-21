@@ -36,7 +36,7 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /* This is the value used as the argument to the SVC instruction.  It is not

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/kinetis/kinetis_lpuart.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,36 +31,38 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_KINETIS_KINETIS_LPUART_H
 #define __ARCH_ARM_INCLUDE_KINETIS_KINETIS_LPUART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* Note: It is envisioned that in the long term as a chip is added. The author of
- * the new chip definitions will either find the exact configuration in an existing
- * chip define and add the new chip to it Or add the LPUART feature configuration
- * #defines to the chip ifdef list below. In either case the author should mark
- * it as "Verified to Document Number:" taken from the reference manual.
+/* Note:
+ * It is envisioned that in the long term as a chip is added. The author of
+ * the new chip definitions will either find the exact configuration in an
+ * existing chip define and add the new chip to it Or add the LPUART feature
+ * configuration #defines to the chip ifdef list below. In either case the
+ * author should mark it as "Verified to Document Number:" taken from the
+ * reference manual.
  *
  * To maintain backward compatibility to the version of NuttX prior to
- * 2/22/2017, the catch all KINETIS_LPUART_VERSION_UKN configuration is assigned
- * to all the chips that did not have any conditional compilation based on
- * KINETIS_K64 or KINETIS_K66. This is  a "No worse" than the original code solution.
- * N.B. Each original chip "if"definitions have been left intact so that the
- * complete legacy definitions prior to 2/22/2017 may be filled in completely when
- * vetted.
+ * 2/22/2017, the catch all KINETIS_LPUART_VERSION_UKN configuration is
+ * assigned to all the chips that did not have any conditional compilation
+ * based on KINETIS_K64 or KINETIS_K66. This is  a "No worse" than the
+ * original code solution. N.B. Each original chip "if"definitions have been
+ * left intact so that the complete legacy definitions prior to 2/22/2017 may
+ * be filled in completely when vetted.
  */
 
 /* LPUART Register Configuration
@@ -138,7 +140,9 @@
 #elif defined(CONFIG_ARCH_CHIP_MK28FN2M0VMI15) || \
       defined(CONFIG_ARCH_CHIP_MK28FN2M0CAU15R)
 
-/* Verified to Document Number: Verified to Document Number: K28P210M150SF5RM Rev. 4, August 2017 */
+/* Verified to Document Number:
+ * Verified to Document Number: K28P210M150SF5RM Rev. 4, August 2017
+ */
 
 #  define KINETIS_LPUART_VERSION KINETIS_LPUART_VERSION_01
 
@@ -256,7 +260,9 @@
 #  error "Unsupported Kinetis chip"
 #endif
 
-/* Use the catch all configuration for the LPUART based on the implementations in nuttx prior 2/3/2017 */
+/* Use the catch all configuration for the LPUART based on the
+ * implementations in nuttx prior 2/3/2017
+ */
 
 #if KINETIS_LPUART_VERSION == KINETIS_LPUART_VERSION_UKN
 

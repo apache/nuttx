@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/max326xx/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,27 +16,27 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_MAX326XX_CHIP_H
 #define __ARCH_ARM_INCLUDE_MAX326XX_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* Get customizations for each supported MAX326xx family.  Only sizes and numbers of
- * things are provided here.  See arch/arm/src/max326xx/Kconfig for other, boolean
- * configuration settings.
+/* Get customizations for each supported MAX326xx family.  Only sizes and
+ * numbers of things are provided here.  See arch/arm/src/max326xx/Kconfig
+ * for other, boolean configuration settings.
  *
- * MAX326xx Families are determined by sharing a common User Guide for the chip
- * specification:
+ * MAX326xx Families are determined by sharing a common User Guide for the
+ * chip specification:
  *
  *   MAX32620/32621 Family:  MAX32620 Rev C, User Guide, AN6242, Rev 2, 2/17
  *   MAX32630/32632 Family:  MAX32630 Rev B, User Guide, AN6349, Rev 0, 10/16
@@ -174,10 +174,12 @@
 #  error Unrecognized MAX326XX chip
 #endif
 
-/* NVIC priority levels *************************************************************/
-/* Each priority field holds a priority value, 0x00-0xe0. The lower the value, the
- * greater the priority of the corresponding interrupt. The processor implements only
- * bits[7:4] of each field, bits[6:0] read as zero and ignore writes.
+/* NVIC priority levels *****************************************************/
+
+/* Each priority field holds a priority value, 0x00-0xe0. The lower the
+ * value, the greater the priority of the corresponding interrupt. The
+ * processor implements only bits[7:4] of each field, bits[6:0] read as zero
+ * and ignore writes.
  */
 
 #define NVIC_SYSH_PRIORITY_MIN      0xe0 /* All bits[7:5] set is minimum priority */
@@ -185,16 +187,16 @@
 #define NVIC_SYSH_PRIORITY_MAX      0x00 /* Zero is maximum priority */
 #define NVIC_SYSH_PRIORITY_STEP     0x20 /* Eight priority levels in steps 0x20 */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_INCLUDE_MAX326XX_CHIP_H */
