@@ -81,7 +81,9 @@
 #define TPM0_C4V            (KL_TPM0_BASE + TPM_C4V_OFFSET)  /* TPM0 Channel 4 Value */
 #define TPM0_C5SC           (KL_TPM0_BASE + TPM_C5SC_OFFSET) /* TPM0 Channel 5 Status and Control */
 #define TPM0_C5V            (KL_TPM0_BASE + TPM_C5V_OFFSET)  /* TPM0 Channel 5 Value */
+
 #define TPM0_STATUS         (KL_TPM0_BASE + TPM_STATUS_OFFSET)  /* TPM0 Capture and Compare Status */
+
 #define TPM0_CONF           (KL_TPM0_BASE + TPM_CONF_OFFSET) /* TPM0 Configuration */
 
 #define TPM1_SC             (KL_TPM1_BASE + TPM_SC_OFFSET)   /* TPM1 Status and Control */
@@ -99,7 +101,9 @@
 #define TPM1_C4V            (KL_TPM1_BASE + TPM_C4V_OFFSET)  /* TPM1 Channel 4 Value */
 #define TPM1_C5SC           (KL_TPM1_BASE + TPM_C5SC_OFFSET) /* TPM1 Channel 5 Status and Control */
 #define TPM1_C5V            (KL_TPM1_BASE + TPM_C5V_OFFSET)  /* TPM1 Channel 5 Value */
+
 #define TPM1_STATUS         (KL_TPM1_BASE + TPM_STATUS_OFFSET)  /* TPM1 Capture and Compare Status */
+
 #define TPM1_CONF           (KL_TPM1_BASE + TPM_CONF_OFFSET) /* TPM1 Configuration */
 
 #define TPM2_SC             (KL_TPM2_BASE + TPM_SC_OFFSET)   /* TPM2 Status and Control */
@@ -117,7 +121,9 @@
 #define TPM2_C4V            (KL_TPM2_BASE + TPM_C4V_OFFSET)  /* TPM2 Channel 4 Value */
 #define TPM2_C5SC           (KL_TPM2_BASE + TPM_C5SC_OFFSET) /* TPM2 Channel 5 Status and Control */
 #define TPM2_C5V            (KL_TPM2_BASE + TPM_C5V_OFFSET)  /* TPM2 Channel 5 Value */
+
 #define TPM2_STATUS         (KL_TPM2_BASE + TPM_STATUS_OFFSET)  /* TPM2 Capture and Compare Status */
+
 #define TPM2_CONF           (KL_TPM2_BASE + TPM_CONF_OFFSET) /* TPM2 Configuration */
 
 #define TPM_SC_PS_SHIFT     0 /* Bits 0-2: Prescale Factor Selection */
@@ -145,14 +151,14 @@
 #define TPM_SC_TOF                (1 << 7) /* Bit 7: Timer Overflow Flag*/
 #define TPM_SC_DMA                (1 << 8) /* Bit 8: DMA Enable*/
 
-#define TPM_CnSC_DMA              (1 << 0) /* Bit 0: Enables DMA transfers for the channel */
-                                           /* Bit 1: Reserved*/
-#define TPM_CnSC_ELSA             (1 << 2) /* Bit 2: Edge or Level Select */
-#define TPM_CnSC_ELSB             (1 << 3) /* Bit 3: Edge or Level Select */
-#define TPM_CnSC_MSA              (1 << 4) /* Bit 4: Channel Mode Select */
-#define TPM_CnSC_MSB              (1 << 5) /* Bit 5: Channel Mode Select */
-#define TPM_CnSC_CHIE             (1 << 6) /* Bit 6: Channel Interrupt Enable */
-#define TPM_CnSC_CHF              (1 << 7) /* Bit 7: Channel Flag */
+#define TPM_CNSC_DMA              (1 << 0) /* Bit 0: Enables DMA transfers for the channel */
+                                           /* Bit 1: Reserved */
+#define TPM_CNSC_ELSA             (1 << 2) /* Bit 2: Edge or Level Select */
+#define TPM_CNSC_ELSB             (1 << 3) /* Bit 3: Edge or Level Select */
+#define TPM_CNSC_MSA              (1 << 4) /* Bit 4: Channel Mode Select */
+#define TPM_CNSC_MSB              (1 << 5) /* Bit 5: Channel Mode Select */
+#define TPM_CNSC_CHIE             (1 << 6) /* Bit 6: Channel Interrupt Enable */
+#define TPM_CNSC_CHF              (1 << 7) /* Bit 7: Channel Flag */
                                            /* Bits 8-31: Reserved */
 
 #define TPM_STATUS_CH0F           (1 << 0) /* Bit 0: Channel 0 Flag */
@@ -164,12 +170,12 @@
                                            /* Bits 6-7: Reserved */
 #define TPM_STATUS_TOF            (1 << 8) /* Bit 8: Timer Overflow Flag */
 
-
 #define TPM_CONF_DOZEEN           5 /* Bit 5: Doze Enable */
 #define TPM_CONF_DBGMODE_SHIFT    6 /* Bits 6-7: Debug Mode */
 #define TPM_CONF_DBGMODE_MASK     (3 << TPM_DBGMODE_SHIFT)
 # define TPM_CONF_DBGMODE_PAUSE   (0 << TPM_DBGMODE_SHIFT) /* TPM counter will pause during DEBUG mode */
 # define TPM_CONF_DBGMODE_CONT    (3 << TPM_DBGMODE_SHIFT) /* TPM counter continue working in DEBUG mode */
+
                                             /* Bit 8: Reserved */
 #define TPM_CONF_GTBEEN           (1 << 9)  /* Bit 9: Global Time Base Enable */
                                             /* Bits 10-15: Reserved */
@@ -181,20 +187,29 @@
 #define TPM_CONF_TRGSEL_MASK      (15 << TPM_CONF_TRGSEL_SHIFT)
 # define TPM_CONF_TRGSEL_EXTRG_IN (0 << TPM_CONF_TRGSEL_SHIFT) /* External trigger pin input */
 # define TPM_CONF_TRGSEL_CMP0     (1 << TPM_CONF_TRGSEL_SHIFT) /* CPM0 output */
-                                /*(2 << TPM_CONF_TRGSEL_SHIFT) Reserved */
-                                /*(3 << TPM_CONF_TRGSEL_SHIFT) Reserved */
+
+                                /* (2 << TPM_CONF_TRGSEL_SHIFT) Reserved */
+
+                                /* (3 << TPM_CONF_TRGSEL_SHIFT) Reserved */
+
 # define TPM_CONF_TRGSEL_PIT0     (4 << TPM_CONF_TRGSEL_SHIFT) /* PIT trigger 0 */
 # define TPM_CONF_TRGSEL_PIT1     (5 << TPM_CONF_TRGSEL_SHIFT) /* PIT trigger 1 */
-                                /*(6 << TPM_CONF_TRGSEL_SHIFT) Reserved */
-                                /*(7 << TPM_CONF_TRGSEL_SHIFT) Reserved */
+
+                                /* (6 << TPM_CONF_TRGSEL_SHIFT) Reserved */
+
+                                /* (7 << TPM_CONF_TRGSEL_SHIFT) Reserved */
+
 # define TPM_CONF_TRGSEL_TPM0     (8 << TPM_CONF_TRGSEL_SHIFT)  /* TPM0 Overflow */
 # define TPM_CONF_TRGSEL_TPM1     (9 << TPM_CONF_TRGSEL_SHIFT)  /* TPM1 Overflow */
 # define TPM_CONF_TRGSEL_TPM2     (10 << TPM_CONF_TRGSEL_SHIFT) /* TPM1 Overflow */
-                                /*(11 << TPM_CONF_TRGSEL_SHIFT) Reserved */
+
+                                /* (11 << TPM_CONF_TRGSEL_SHIFT) Reserved */
+
 # define TPM_CONF_TRGSEL_RTC_ALRM (12 << TPM_CONF_TRGSEL_SHIFT) /* RTC Alarm */
 # define TPM_CONF_TRGSEL_RTC_SECS (13 << TPM_CONF_TRGSEL_SHIFT) /* RTC Seconds */
 # define TPM_CONF_TRGSEL_LPTMR    (14 << TPM_CONF_TRGSEL_SHIFT) /* LPTMR trigger */
-                                /*(15 << TPM_CONF_TRGSEL_SHIFT) Reserved */
+
+                                /* (15 << TPM_CONF_TRGSEL_SHIFT) Reserved */
 
 /****************************************************************************
  * Public Data
