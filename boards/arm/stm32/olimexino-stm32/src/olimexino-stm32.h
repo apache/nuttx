@@ -99,7 +99,7 @@
  */
 
 #define GPIO_USB_VBUS    (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_PORTC | GPIO_PIN11)
-#define GPIO_USB_PULLUPn (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
+#define GPIO_USB_PULLUPN (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
                           GPIO_PORTC | GPIO_PIN12 | GPIO_OUTPUT_SET)
 
 /* SPI **********************************************************************
@@ -114,11 +114,11 @@
 
 #define GPIO_SPI1_SSn (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
                        GPIO_PORTC | GPIO_PIN9 | GPIO_OUTPUT_SET)
-#define USER_CSn      GPIO_SPI1_SSn
+#define USER_CSN      GPIO_SPI1_SSn
 
 #define GPIO_SPI2_SSn (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
                        GPIO_PORTD | GPIO_PIN2 | GPIO_OUTPUT_SET)
-#define MMCSD_CSn     GPIO_SPI2_SSn
+#define MMCSD_CSN     GPIO_SPI2_SSn
 
 /****************************************************************************
  * Public Types
