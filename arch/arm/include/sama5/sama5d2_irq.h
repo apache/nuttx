@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/include/sama5/sama5d2_irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through
- * nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_SAMA5_SAMA5D2_IRQ_H
 #define __ARCH_ARM_INCLUDE_SAMA5_SAMA5D2_IRQ_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* SAMA5D2 Peripheral Identifiers */
 
@@ -188,13 +188,14 @@
 #define SAM_IRQ_MCAN00         SAM_PID_MCAN00    /* MCAN controller 0, Interrupt 0 */
 #define SAM_IRQ_MCAN10         SAM_PID_MCAN10    /* MCAN controller 1, Interrupt 0 */
 #define SAM_IRQ_CLASSD         SAM_PID_CLASSD    /* Audio Class D Amplifier */
-
-                                                 /* Special Function Register (no interrupt) */
-
-                                                 /* Secured Advanced Interrupt Controller (no interrupt) */
-
-                                                 /* Advanced Interrupt Controller (no interrupt) */
-
+                                                 /* Special Function Register
+                                                  * (no interrupt) */
+                                                 /* Secured Advanced Interrupt
+                                                  * Controller
+                                                  * (no interrupt) */
+                                                 /* Advanced Interrupt
+                                                  * Controller
+                                                  * (no interrupt) */
 #define SAM_IRQ_L2CC           SAM_PID_L2CC      /* L2 Cache Controller */
 #define SAM_IRQ_MCAN01         SAM_PID_MCAN01    /* MCAN controller 0, Interrupt 1 */
 #define SAM_IRQ_MCAN11         SAM_PID_MCAN11    /* MCAN controller 1, Interrupt 1 */
@@ -209,9 +210,8 @@
 #define SAM_IRQ_SYS            SAM_PID_SYS       /* System Controller Interrupt PMC, RTC, RSTC */
 #define SAM_IRQ_ACC            SAM_PID_ACC       /* Analog Comparator */
 #define SAM_IRQ_RXLP           SAM_PID_RXLP      /* UART Low-Power */
-
-                                                 /* Special Function Register BackUp (no interrupt) */
-
+                                                 /* Special Function
+                                                  * Register BackUp (no interrupt) */
                                                  /* Chip ID (no interrupt) */
 
 #define SAM_IRQ_NINT           (SAM_PID_RXLP + 1)
@@ -381,21 +381,21 @@
                                SAM_NPIOAIRQS + SAM_NPIOBIRQS + SAM_NPIOCIRQS + \
                                SAM_NPIODIRQS)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Inline functions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus

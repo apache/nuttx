@@ -18,23 +18,33 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly
- * through nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_IMXRT_IRQ_H
 #define __ARCH_ARM_INCLUDE_IMXRT_IRQ_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/imxrt/chip.h>
 
-/*****************************************************************************
- * Pre-processor Definitions
- *****************************************************************************/
+#if defined(CONFIG_ARCH_FAMILY_IMXRT102x)
+#  include <arch/imxrt/imxrt102x_irq.h>
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT105x)
+#  include <arch/imxrt/imxrt105x_irq.h>
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
+#  include <arch/imxrt/imxrt106x_irq.h>
+#else
+#  error Unrecognized i.MX RT architecture
+#endif
+
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map
  * directly to bits in the NVIC.  This does, however, waste several words
@@ -44,11 +54,11 @@
 /* Common Processor Exceptions (vectors 0-15) */
 
 #define IMXRT_IRQ_RESERVED       (0) /* Reserved vector .. only used with
-                                        CONFIG_DEBUG_FEATURES */
+                                      * CONFIG_DEBUG_FEATURES */
 
-                                     /* Vector  0: Reset stack pointer value */
+                                     /* Vector 0: Reset stack pointer value */
 
-                                     /* Vector  1: Reset (not handled by IRQ) */
+                                     /* Vector 1: Reset(not handled by IRQ) */
 
 #define IMXRT_IRQ_NMI            (2) /* Vector  2: Non-Maskable Int (NMI) */
 #define IMXRT_IRQ_HARDFAULT      (3) /* Vector  3: Hard fault */
@@ -67,16 +77,6 @@
 /* Chip-Specific External interrupts */
 
 #define IMXRT_IRQ_EXTINT        (16) /* Vector number of the first ext int */
-
-#if defined(CONFIG_ARCH_FAMILY_IMXRT102x)
-#  include <arch/imxrt/imxrt102x_irq.h>
-#elif defined(CONFIG_ARCH_FAMILY_IMXRT105x)
-#  include <arch/imxrt/imxrt105x_irq.h>
-#elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
-#  include <arch/imxrt/imxrt106x_irq.h>
-#else
-#  error Unrecognized i.MX RT architecture
-#endif
 
 /****************************************************************************
  * Public Types

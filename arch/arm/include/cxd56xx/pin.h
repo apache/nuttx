@@ -28,10 +28,10 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
-/* Pin number Definitions */
+/* Pin number Prototypes */
 
 #define PIN_RTC_CLK_IN          (0)
 

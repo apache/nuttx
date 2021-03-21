@@ -22,7 +22,7 @@
 #define __ARCH_ARM_INCLUDE_CXD56XX_CHIP_H
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 #define CXD56M4_SYSH_PRIORITY_MIN     0xe0 /* All bits[7:5] set is minimum priority */

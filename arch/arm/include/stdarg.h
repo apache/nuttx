@@ -26,8 +26,9 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
+
 /* This should work with any modern gcc (newer than 3.4 or so) */
 
 #define va_start(v,l)   __builtin_va_start(v,l)

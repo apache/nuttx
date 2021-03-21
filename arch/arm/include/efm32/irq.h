@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/efm32/irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,30 +16,41 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through
- * nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_EFM32_IRQ_H
 #define __ARCH_ARM_INCLUDE_EFM32_IRQ_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <nuttx/irq.h>
 #include <arch/efm32/chip.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+#if defined(CONFIG_EFM32_EFM32TG)
+#  include <arch/efm32/efm32tg_irq.h>
+#elif defined(CONFIG_EFM32_EFM32G)
+#  include <arch/efm32/efm32g_irq.h>
+#elif defined(CONFIG_EFM32_EFM32GG)
+#  include <arch/efm32/efm32gg_irq.h>
+#else
+#  error "Unsupported EFM32 chip"
+#endif
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
+
+/* IRQ numbers.
+ * The IRQ number corresponds vector number and hence map directly to bits in
+ *  the NVIC.  This does, however, waste several words of memory in the IRQ
  * to handle mapping tables.
  */
 
@@ -59,25 +70,18 @@
 #define EFM32_IRQ_PENDSV      (14) /* Vector 14: Pendable system service request */
 #define EFM32_IRQ_SYSTICK     (15) /* Vector 15: System tick */
 
-/* External interrupts (vectors >= 16).  These definitions are chip-specific */
+/* External interrupts (vectors >= 16).
+ * These definitions are chip-specific
+ */
 
 #define EFM32_IRQ_INTERRUPTS  (16) /* Vector number of the first external interrupt */
 
-#if defined(CONFIG_EFM32_EFM32TG)
-#  include <arch/efm32/efm32tg_irq.h>
-#elif defined(CONFIG_EFM32_EFM32G)
-#  include <arch/efm32/efm32g_irq.h>
-#elif defined(CONFIG_EFM32_EFM32GG)
-#  include <arch/efm32/efm32gg_irq.h>
-#else
-#  error "Unsupported EFM32 chip"
-#endif
-
 #ifdef CONFIG_EFM32_GPIO_IRQ
-/* If GPIO interrupt support is enabled then up to 16 additional GPIO interrupt
- * sources are available.  There are actually only two physical interrupt lines:
- * GPIO_EVEN and GPIO_ODD.  However, from the software point of view, there are
- * 16-additional interrupts generated from a second level of decoding.
+/* If GPIO interrupt support is enabled then up to 16 additional GPIO
+ * interrupt sources are available.  There are actually only two physical
+ * interrupt lines: GPIO_EVEN and GPIO_ODD.  However, from the software point
+ * of view, there are 16-additional interrupts generated from a second level
+ * of decoding.
  */
 
 #  define EFM32_IRQ_EXTI0   (EFM32_IRQ_NVECTORS + 0)  /* Port[n], pin0 external interrupt */
@@ -102,13 +106,13 @@
 #  define NR_IRQS           EFM32_IRQ_NVECTORS        /* Total number of interrupts */
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -119,9 +123,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -45,7 +45,7 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /* Get customizations for each supported chip */

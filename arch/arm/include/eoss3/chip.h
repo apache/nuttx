@@ -28,7 +28,7 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /* EOS S3 Support 8 Levels of priority.

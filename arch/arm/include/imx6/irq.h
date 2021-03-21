@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly
- & through nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_IMX6_IRQ_H
@@ -30,7 +30,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /* The Global Interrupt Controller (GIC) collects up to 128 interrupt
@@ -47,6 +47,7 @@
  */
 
 /* Private Peripheral Interrupts (PPI) **************************************/
+
 /* Each Cortex-A9 processor has private interrupts, ID0-ID15, that can only
  * be triggered by software. These interrupts are aliased so that there is
  * no requirement for a requesting Cortex-A9 processor to determine its own

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/kinetis/kinetis_sim.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,34 +16,36 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_KINETIS_KINETIS_SIM_H
 #define __ARCH_ARM_INCLUDE_KINETIS_KINETIS_SIM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* Note: It is envisioned that in the long term as a chip is added. The author of
- * the new chip definitions will either find the exact configuration in an existing
- * chip define and add the new chip to it Or add the SIM feature configuration
- * #defines to the chip ifdef list below. In either case the author should mark
- * it as "Verified to Document Number:" taken from the reference manual.
+/* Note:
+ * It is envisioned that in the long term as a chip is added. The author of
+ * the new chip definitions will either find the exact configuration in an
+ * existing chip define and add the new chip to it Or add the SIM feature
+ * configuration #defines to the chip ifdef list below. In either case the
+ * author should mark it as "Verified to Document Number:" taken from the
+ * reference manual.
  *
  * To maintain backward compatibility to the version of NuttX prior to
- * 2/16/2017, the catch all KINETIS_SIM_VERSION_UKN configuration is assigned
- * to all the chips that did not have any conditional compilation based on
- * KINETIS_K64 or KINETIS_K66. This is  a "No worse" than the original code solution.
- * N.B. Each original chip "if"definitions have been left intact so that the
- * complete legacy definitions prior to 2/16/2017 may be filled in completely when
- * vetted.
+ * 2/16/2017, the catch all KINETIS_SIM_VERSION_UKN configuration is
+ * assigned to all the chips that did not have any conditional compilation
+ * based on KINETIS_K64 or KINETIS_K66. This is  a "No worse" than the
+ * original code solution. N.B. Each original chip "if"definitions have been
+ * left intact so that the complete legacy definitions prior to 2/16/2017 may
+ * be filled in completely when vetted.
  */
 
 /* SIM Register Configuration
@@ -95,7 +97,8 @@
  * KINETIS_SIM_HAS_SOPT4_FTM0FLT3          -  SoC has SOPT4[FTM0FLT3]
  * KINETIS_SIM_HAS_SOPT4_FTM0TRG0SRC       -  SoC has SOPT4[FTM0TRG0SRC]
  * KINETIS_SIM_HAS_SOPT4_FTM0TRG1SRC       -  SoC has SOPT4[FTM0TRG1SRC]
- * KINETIS_SIM_HAS_SOPT4_FTM1CH0SRC        -  SoC has SOPT4[FTM1CH0SRC] 1, 3 if SOF
+ * KINETIS_SIM_HAS_SOPT4_FTM1CH0SRC        -  SoC has SOPT4[FTM1CH0SRC]
+ *                                                 1, 3 if SOF
  * KINETIS_SIM_HAS_SOPT4_FTM1FLT0          -  SoC has SOPT4[FTM1FLT0]
  * KINETIS_SIM_HAS_SOPT4_FTM1FLT1          -  SoC has SOPT4[FTM1FLT1]
  * KINETIS_SIM_HAS_SOPT4_FTM1FLT2          -  SoC has SOPT4[FTM1FLT2]
@@ -143,10 +146,14 @@
  * KINETIS_SIM_HAS_SOPT7_ADC1TRGSEL        -  SoC has n SOPT7[ADC1TRGSEL]
  * KINETIS_SIM_HAS_SOPT7_ADC2TRGSEL        -  SoC has n SOPT7[ADC2TRGSEL]
  * KINETIS_SIM_HAS_SOPT7_ADC3TRGSEL        -  SoC has n SOPT7[ADC3TRGSEL]
- * KINETIS_SIM_SOPT7_ADC0ALTTRGEN          -  SoC has ADC0 alternate trigger enable
- * KINETIS_SIM_SOPT7_ADC1ALTTRGEN          -  SoC has ADC1 alternate trigger enable
- * KINETIS_SIM_SOPT7_ADC2ALTTRGEN          -  SoC has ADC2 alternate trigger enable
- * KINETIS_SIM_SOPT7_ADC3ALTTRGEN          -  SoC has ADC3 alternate trigger enable
+ * KINETIS_SIM_SOPT7_ADC0ALTTRGEN          -  SoC has ADC0
+ *                                            alternate trigger enable
+ * KINETIS_SIM_SOPT7_ADC1ALTTRGEN          -  SoC has ADC1
+ *                                            alternate trigger enable
+ * KINETIS_SIM_SOPT7_ADC2ALTTRGEN          -  SoC has ADC2
+ *                                            alternate trigger enable
+ * KINETIS_SIM_SOPT7_ADC3ALTTRGEN          -  SoC has ADC3
+ *                                            alternate trigger enable
  * KINETIS_SIM_HAS_SOPT8                   -  SoC has SOPT8 Register
  * KINETIS_SIM_HAS_SOPT8_FTM0SYNCBIT       -  SoC has SOPT8[FTM0SYNCBIT]
  * KINETIS_SIM_HAS_SOPT8_FTM1SYNCBIT       -  SoC has SOPT8[FTM1SYNCBIT]
@@ -260,8 +267,10 @@
  * KINETIS_SIM_HAS_FCFG1_FTFDIS            -  SoC has FCFG1[FTFDIS]
  * KINETIS_SIM_HAS_FCFG1_NVMSIZE           -  SoC has FCFG1[NVMSIZE]
  * KINETIS_SIM_HAS_FCFG2                   -  SoC has FCFG2 Register
- * KINETIS_SIM_HAS_FCFG2_MAXADDR0          -  SoC has n bit of FCFG2[MAXADDR0]
- * KINETIS_SIM_HAS_FCFG2_MAXADDR1          -  SoC has n bit of FCFG2[MAXADDR1]
+ * KINETIS_SIM_HAS_FCFG2_MAXADDR0          -  SoC has n bit of
+ *                                            FCFG2[MAXADDR0]
+ * KINETIS_SIM_HAS_FCFG2_MAXADDR1          -  SoC has n bit of
+ *                                            FCFG2[MAXADDR1]
  * KINETIS_SIM_HAS_FCFG2_PFLSH             -  SoC has FCFG2[PFLSH]
  * KINETIS_SIM_HAS_FCFG2_SWAPPFLSH         -  SoC has FCFG2[SWAPPFLSH]
  * KINETIS_SIM_HAS_UIDH                    -  SoC has UIDH Register

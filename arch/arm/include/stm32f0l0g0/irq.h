@@ -35,7 +35,7 @@
 #include <arch/stm32f0l0g0/chip.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map

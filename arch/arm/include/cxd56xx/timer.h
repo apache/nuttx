@@ -43,7 +43,7 @@
 #include <nuttx/timers/timer.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /* Set callback handler

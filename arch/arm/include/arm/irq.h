@@ -35,7 +35,7 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /* IRQ Stack Frame Format:
@@ -172,7 +172,7 @@ struct xcptcontext
  * leave_critical section(), are probably what you really want.
  */
 
- /* Save the current interrupt enable state & disable IRQs. */
+/* Save the current interrupt enable state & disable IRQs. */
 
 static inline irqstate_t up_irq_save(void)
 {

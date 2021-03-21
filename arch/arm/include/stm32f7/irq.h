@@ -48,7 +48,7 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map

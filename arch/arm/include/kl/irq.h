@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/kl/irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,41 +16,43 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through
- * nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_KL_IRQ_H
 #define __ARCH_ARM_INCLUDE_KL_IRQ_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-/* IRQ numbers **********************************************************************/
-/* The IRQ numbers corresponds directly to vector numbers and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
+
+/* IRQ numbers **************************************************************/
+
+/* The IRQ numbers corresponds directly to vector numbers and hence map
+ * directly to bits in the NVIC.  This does, however, waste several words of
+ * memory in the IRQ to handle mapping tables.
  */
 
 /* Processor Exceptions (vectors 0-15) */
 
 #define KL_IRQ_RESERVED      (0)   /* Reserved vector (only used with CONFIG_DEBUG_FEATURES) */
-                                        /* Vector  0: Reset stack pointer value */
-                                        /* Vector  1: Reset (not handler as an IRQ) */
+                                   /* Vector  0: Reset stack pointer value */
+                                   /* Vector  1: Reset (not handler as an IRQ) */
 #define KL_IRQ_NMI           (2)   /* Vector  2: Non-Maskable Interrupt (NMI) */
 #define KL_IRQ_HARDFAULT     (3)   /* Vector  3: Hard fault */
-                                        /* Vectors 4-10: Reserved */
+                                   /* Vectors 4-10: Reserved */
 #define KL_IRQ_SVCALL        (11)  /* Vector 11: SVC call */
-                                        /* Vector 12-13: Reserved */
+                                   /* Vector 12-13: Reserved */
 #define KL_IRQ_PENDSV        (14)  /* Vector 14: Pendable system service request */
 #define KL_IRQ_SYSTICK       (15)  /* Vector 15: System tick */
 
@@ -58,10 +60,10 @@
 
 #define KL_IRQ_EXTINT        (16)
 
-/* K40 Family ***********************************************************************
+/* K40 Family ***************************************************************
  *
- * The interrupt vectors  for the following parts is defined in Freescale document
- * K40P144M100SF2RM
+ * The interrupt vectors  for the following parts is defined in Freescale
+ * document K40P144M100SF2RM
  */
 
 #if defined(CONFIG_ARCH_CHIP_MKL25Z128) || defined(CONFIG_ARCH_CHIP_MKL25Z64)
@@ -99,12 +101,13 @@
 #  define KL_IRQ_PORTA         (46)  /* Vector 46: GPIO Port A */
 #  define KL_IRQ_PORTD         (47)  /* Vector 47: GPIO Port D */
 
-/* Note that the total number of IRQ numbers supported is equal to the number of
- * valid interrupt vectors.  This is wasteful in that certain tables are sized by
- * this value.  There are only 94 valid interrupts so, potentially the number of
- * IRQs to could be reduced to 94.  However, equating IRQ numbers with vector numbers
- * also simplifies operations on NVIC registers and (at least in my state of mind
- * now) seems to justify the waste.
+/* Note that the total number of IRQ numbers supported is equal to the
+ * number of valid interrupt vectors.  This is wasteful in that certain
+ * tables are sized by this value.  There are only 94 valid interrupts so,
+ * potentially the number of IRQs to could be reduced to 94.  However,
+ * equating IRQ numbers with vector numbers also simplifies operations on
+ * NVIC registers and (at least in my state of mind now) seems to justify
+ * the waste.
  */
 
 #  define NR_IRQS              (48) /* 64 interrupts but 48 IRQ numbers */
@@ -144,33 +147,34 @@
 #  define KL_IRQ_PORTA         (46)  /* Vector 46: GPIO Port A */
 #  define KL_IRQ_PORTD         (47)  /* Vector 47: GPIO Port D */
 
-/* Note that the total number of IRQ numbers supported is equal to the number of
- * valid interrupt vectors.  This is wasteful in that certain tables are sized by
- * this value.  There are only 94 valid interrupts so, potentially the number of
- * IRQs to could be reduced to 94.  However, equating IRQ numbers with vector numbers
- * also simplifies operations on NVIC registers and (at least in my state of mind
- * now) seems to justify the waste.
+/* Note that the total number of IRQ numbers supported is equal to the
+ * number of valid interrupt vectors.  This is wasteful in that certain
+ * tables are sized by this value.  There are only 94 valid interrupts so,
+ * potentially the number of IRQs to could be reduced to 94.  However,
+ * equating IRQ numbers with vector numbers also simplifies operations on
+ * NVIC registers and (at least in my state of mind now) seems to justify
+ * the waste.
  */
 
 #  define NR_IRQS              (48) /* 64 interrupts but 48 IRQ numbers */
 
 #else
-  /* The interrupt vectors for other parts are defined in other documents and may or
-   * may not be the same as above (the family members are all very similar)  This
-   * error just means that you have to look at the document and determine for yourself
-   * if the vectors are the same.
-   */
+/* The interrupt vectors for other parts are defined in other documents and
+ * may or may not be the same as above (the family members are all very
+ * similar)  This error just means that you have to look at the document and
+ * determine for yourself if the vectors are the same.
+ */
 
 #  error "No IRQ numbers for this Kinetis L part"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -181,9 +185,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

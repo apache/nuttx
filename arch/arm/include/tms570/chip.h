@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/include/tms570/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,20 +16,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_TMS570_CHIP_H
 #define __ARCH_ARM_INCLUDE_TMS570_CHIP_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /*                 TMS570LS0432PZ TMS570LS0332PZ TMS570LS0232PZ
  * Package         100 QFP        100 QFP        100 QFP
@@ -167,29 +167,53 @@
 #  undef  TMS570_RTP                     /* No RAM trace port (RTP) */
 #  undef  TMS570_DMM                     /* No DMM */
 
-/*                 TMS570LS1227ZWT TMS570LS0714ZWT TMS570LS0714PGE TMS570LS0714PZ
- * Package         337 BGA         337 BGA         144 QFP         100 QFP
- * CPU             ARM Cortex-R4F  ARM Cortex-R4F  ARM Cortex-R4F  ARM Cortex-R4F
- * Frequency (MHz) 180             180             160             100
- * Flash (KB)      1280            768             768             768
- * RAM (KB)        192             128             128             128
- * Data Flash (KB) 64              64              64              64
- * EMAC            10/100          –               –               –
- * FlexRay         2-ch            –               –               –
- * CAN             3               3               3               2
- * MibADC (CH)     2 (24)          2 (24)          2 (24)          2 (16)
- * N2HET (Ch)      2 (44)          2 (44)          2 (40)          2 (21)
- * ePWM Channels   14              14              14              8
- * eCAP Channels   6               6               6               4
- * eQEP Channels   2               2               2               1
- * MibSPI (CS)     3 (6+6+4)       3 (6+6+4)       3 (5+6+4)       2 (5+1)
- * SPI (CS)        2 (2+1)         2 (2+1)         1 (1)           1 (1)
- * SCI (LIN)       2 (1)           2 (1)           2 (1)           1 (1)
- * I2C             1               1               1               –
- * GPIO (INT)      101 (16)        101 (16)        64 (10)         45 (9)
- * EMIF            16-bit data     –               –               –
- * ETM (Trace)     –               –               –               –
- * RTP/DMM         –               –               –               –
+/*                 TMS570LS1227ZWT TMS570LS0714ZWT
+ * Package         337 BGA         337 BGA
+ * CPU             ARM Cortex-R4F  ARM Cortex-R4F
+ * Frequency (MHz) 180             180
+ * Flash (KB)      1280            768
+ * RAM (KB)        192             128
+ * Data Flash (KB) 64              64
+ * EMAC            10/100          –
+ * FlexRay         2-ch            –
+ * CAN             3               3
+ * MibADC (CH)     2 (24)          2 (24)
+ * N2HET (Ch)      2 (44)          2 (44)
+ * ePWM Channels   14              14
+ * eCAP Channels   6               6
+ * eQEP Channels   2               2
+ * MibSPI (CS)     3 (6+6+4)       3 (6+6+4)
+ * SPI (CS)        2 (2+1)         2 (2+1)
+ * SCI (LIN)       2 (1)           2 (1)
+ * I2C             1               1
+ * GPIO (INT)      101 (16)        101 (16)
+ * EMIF            16-bit data     –
+ * ETM (Trace)     –               –
+ * RTP/DMM         –               –
+ *
+ *                 TMS570LS0714PGE TMS570LS0714PZ
+ * Package         144 QFP         100 QFP
+ * CPU             ARM Cortex-R4F  ARM Cortex-R4F
+ * Frequency (MHz) 160             100
+ * Flash (KB)      768             768
+ * RAM (KB)        128             128
+ * Data Flash (KB) 64              64
+ * EMAC            –               –
+ * FlexRay         –               –
+ * CAN             3               2
+ * MibADC (CH)     2 (24)          2 (16)
+ * N2HET (Ch)      2 (40)          2 (21)
+ * ePWM Channels   14              8
+ * eCAP Channels   6               4
+ * eQEP Channels   2               1
+ * MibSPI (CS)     3 (5+6+4)       2 (5+1)
+ * SPI (CS)        1 (1)           1 (1)
+ * SCI (LIN)       2 (1)           1 (1)
+ * I2C             1               –
+ * GPIO (INT)      64 (10)         45 (9)
+ * EMIF            –               –
+ * ETM (Trace)     –               –
+ * RTP/DMM         –               –
  */
 
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS0714PZ)

@@ -28,8 +28,9 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
+
 /* The i.MX6 6Quad and 6Dual/DualLite are the only support i.MX6 family
  * members.  Individual differences between members of the families are not
  * accounted for.
@@ -108,7 +109,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_ARM_INCLUDE_IMX6_CHIP_H */

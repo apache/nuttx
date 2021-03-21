@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/kinetis/kinetis_k64irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,35 +16,35 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly
- * through nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_KINETIS_KINETIS_64KIRQ_H
 #define __ARCH_ARM_INCLUDE_KINETIS_KINETIS_64KIRQ_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map
  * directly to bits in the NVIC.  This does, however, waste several words of
  * memory in the IRQ to handle mapping tables.
  *
- * Processor Exceptions (vectors 0-15).  These common definitions can be found
+ * Processor Exceptions (vectors 0-15). These common definitions can be found
  * in the file nuttx/arch/arm/include/kinets/irq.h which includes this file
  *
  * External interrupts (vectors >= 16)
  *
- * K60 Family ************************************************************************
+ * K60 Family ***************************************************************
  *
  * The interrupt vectors  for the following parts is defined in Freescale
  * document K64P144M120SF5RM.pdf
@@ -138,19 +138,20 @@
 #define KINETIS_IRQ_EMACMISC (KINETIS_IRQ_FIRST + 85)  /* 85: Ethernet MAC error and misc interrupt */
 
 #define KINETIS_IRQ_NEXTINTS 86                        /* 86 Non core IRQs */
+
 #define KINETIS_IRQ_NVECTORS (KINETIS_IRQ_FIRST + KINETIS_IRQ_NEXTINTS) /* 102 vectors */
 
 /* EXTI interrupts (Do not use IRQ numbers) */
 
 #define NR_IRQS              KINETIS_IRQ_NVECTORS
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -161,9 +162,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

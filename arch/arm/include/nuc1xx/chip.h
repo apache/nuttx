@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/nuc1xx/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
-
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_NUC1XX_CHIP_H
 #define __ARCH_ARM_INCLUDE_NUC1XX_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-/* Chip capabilities ****************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
+
+/* Chip capabilities ********************************************************/
+
 /* NUC100 Advanced Line (Low Density) */
 
 #if defined(CONFIG_ARCH_CHIP_NUC100LC1BN) /* Flash 32K SRAM 4K, LQFP48 package */
@@ -620,10 +621,12 @@
 #  error "Unrecognized NUC1XX chip"
 #endif
 
-/* NVIC priority levels *************************************************************/
-/* Each priority field holds a priority value, 0-3. The lower the value, the greater
- * the priority of the corresponding interrupt. The processor implements only
- * bits[7:6] of each field, bits[5:0] read as zero and ignore writes.
+/* NVIC priority levels *****************************************************/
+
+/* Each priority field holds a priority value, 0-3. The lower the value, the
+ * greater the priority of the corresponding interrupt. The processor
+ * implements only bits[7:6] of each field, bits[5:0] read as zero and
+ * ignore writes.
  */
 
 #define NVIC_SYSH_PRIORITY_MIN     0xc0 /* All bits[7:6] set is minimum priority */
@@ -631,13 +634,13 @@
 #define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
 #define NVIC_SYSH_PRIORITY_STEP    0x40 /* Five bits of interrupt priority used */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -648,9 +651,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

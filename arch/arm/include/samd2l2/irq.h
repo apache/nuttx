@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/include/samd2l2/irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,29 +16,30 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through
- * nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_SAMD2L2_IRQ_H
 #define __ARCH_ARM_INCLUDE_SAMD2L2_IRQ_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/samd2l2/chip.h>
 
-/****************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
+/* IRQ numbers.
+ * The IRQ number corresponds vector number and hence map directly to
+ * bits in the NVIC.  This does, however, waste several words of memory in
+ * the IRQ to handle mapping tables.
  */
 
 /* Processor Exceptions (vectors 0-15) */
@@ -54,7 +55,9 @@
 #define SAM_IRQ_PENDSV        (14) /* Vector 14: Pendable system service request */
 #define SAM_IRQ_SYSTICK       (15) /* Vector 15: System tick */
 
-/* External interrupts (vectors >= 16).  These definitions are chip-specific */
+/* External interrupts (vectors >= 16).
+ * These definitions are chip-specific
+ */
 
 #define SAM_IRQ_INTERRUPT     (16) /* Vector number of the first external interrupt */
 
@@ -70,15 +73,15 @@
 #  error Unrecognized SAMD/L architecture
 #endif
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -88,9 +91,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

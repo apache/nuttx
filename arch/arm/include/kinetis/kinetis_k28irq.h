@@ -1,4 +1,4 @@
-/*********************************************************************************************
+/****************************************************************************
  * arch/arm/include/kinetis/kinetis_k28irq.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,35 +31,35 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly
- * through nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_KINETIS_KINETIS_K28IRQ_H
 #define __ARCH_ARM_INCLUDE_KINETIS_KINETIS_K28IRQ_H
 
-/*********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/*********************************************************************************************
- * Pre-processor Definitions
- ********************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map
  * directly to bits in the NVIC.  This does, however, waste several words of
  * memory in the IRQ to handle mapping tables.
  *
- * Processor Exceptions (vectors 0-15).  These common definitions can be found
+ * Processor Exceptions (vectors 0-15). These common definitions can be found
  * in the file nuttx/arch/arm/include/kinets/irq.h which includes this file
  *
  * External interrupts (vectors >= 16)
  *
- * K28 Family ********************************************************************************
+ * K28 Family ***************************************************************
  *
  * The interrupt vectors  for the following parts is defined in Freescale
  * document K28P210M150SF5RM
@@ -186,19 +186,20 @@
 #define KINETIS_IRQ_RESVD106 (KINETIS_IRQ_FIRST + 106) /* 106: Reserved */
 
 #define KINETIS_IRQ_NEXTINTS 107                       /* 107 Non core IRQs */
+
 #define KINETIS_IRQ_NVECTORS (KINETIS_IRQ_FIRST + KINETIS_IRQ_NEXTINTS) /* 123 vectors */
 
 /* EXTI interrupts (Do not use IRQ numbers) */
 
 #define NR_IRQS              KINETIS_IRQ_NVECTORS
 
-/*********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/*********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -209,9 +210,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/*********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

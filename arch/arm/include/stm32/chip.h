@@ -1,4 +1,4 @@
-/**************************************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,20 +16,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_STM32_CHIP_H
 #define __ARCH_ARM_INCLUDE_STM32_CHIP_H
 
-/**************************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/**************************************************************************************************
- * Pre-processor Definitions
- **************************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* Check the STM32 family configuration.
  * It must be done in arch/arm/src/stm32/Kconfig !
@@ -117,7 +117,7 @@
  * The chip-specific pin-mapping is defined in the chip datasheet.
  */
 
-/* STM32L EnergyLite Line *************************************************************************/
+/* STM32L EnergyLite Line ***************************************************/
 
 /* STM32L151XX -- No LCD
  * STM32L152XX -- With LCD
@@ -521,7 +521,7 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-/* STM32 F100 Value Line **************************************************************************/
+/* STM32 F100 Value Line ****************************************************/
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F100C8) || defined(CONFIG_ARCH_CHIP_STM32F100CB) \
  || defined(CONFIG_ARCH_CHIP_STM32F100R8) || defined(CONFIG_ARCH_CHIP_STM32F100RB)
@@ -531,7 +531,9 @@
 #  define STM32_NGTIMNDMA                0   /* No 16-bit general timers without DMA */
 #  define STM32_NBTIM                    2   /* 2 basic timers: TIM6, TIM7 */
 
-/* TODO: there are also 3 additional timers (15-17) that don't fit any existing category */
+/* TODO: there are also 3 additional timers (15-17)
+ * that don't fit any existing category
+ */
 
 #  define STM32_NDMA                     1   /* DMA1 */
 #  define STM32_NSPI                     2   /* SPI1-2 */
@@ -558,7 +560,9 @@
 #  define STM32_NGTIMNDMA                0   /* No 16-bit general timers without DMA */
 #  define STM32_NBTIM                    2   /* 2 basic timers: TIM6, TIM7 */
 
-/* TODO: there are also 3 additional timers (15-17) that don't fit any existing category */
+/* TODO: there are also 3 additional timers (15-17)
+ * that don't fit any existing category
+ */
 
 #  define STM32_NDMA                     1   /* DMA1 */
 #  define STM32_NSPI                     2   /* SPI1-2 */
@@ -578,7 +582,7 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-/* STM32 F100 High-density value Line *************************************************************/
+/* STM32 F100 High-density value Line ***************************************/
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F100RC) || defined(CONFIG_ARCH_CHIP_STM32F100RD) \
  || defined(CONFIG_ARCH_CHIP_STM32F100RE)
@@ -588,7 +592,9 @@
 #  define STM32_NGTIMNDMA                0   /* No 16-bit general timers without DMA */
 #  define STM32_NBTIM                    2   /* 2 basic timers: TIM6, TIM7 */
 
-/* TODO: there are also 6 additional timers (12-17) that don't fit any existing category */
+/* TODO: there are also 6 additional timers (12-17)
+ * that don't fit any existing category
+ */
 
 #  define STM32_NDMA                     2   /* DMA1-2 */
 #  define STM32_NSPI                     3   /* SPI1-3 */
@@ -616,7 +622,9 @@
 #  define STM32_NGTIMNDMA                0   /* No 16-bit general timers without DMA */
 #  define STM32_NBTIM                    2   /* 2 basic timers: TIM6, TIM7 */
 
-/* TODO: there are also 6 additional timers (12-17) that don't fit any existing category */
+/* TODO: there are also 6 additional timers (12-17)
+ * that don't fit any existing category
+ */
 
 #  define STM32_NDMA                     2   /* DMA1-2 */
 #  define STM32_NSPI                     3   /* SPI1-3 */
@@ -636,7 +644,7 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-/* STM32 F102x8/102xB Medium Density USB Access Family ********************************************/
+/* STM32 F102x8/102xB Medium Density USB Access Family **********************/
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F102CB)
 #  define STM32_NFSMC                    1   /* FSMC */
@@ -662,7 +670,7 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-/* STM32 F103 Low Density Family ******************************************************************/
+/* STM32 F103 Low Density Family ********************************************/
 
 /* STM32F103C4 & STM32F103C6 */
 
@@ -688,7 +696,7 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-/* STM32 F103 Medium Density Performance Line *****************************************************/
+/* STM32 F103 Medium Density Performance Line *******************************/
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103T8) || defined(CONFIG_ARCH_CHIP_STM32F103TB)
 #  define STM32_NFSMC                    0   /* No FSMC */
@@ -762,10 +770,10 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-/* STM32 F103 High Density Family *****************************************************************/
+/* STM32 F103 High Density Family *******************************************/
 
-/* STM32F103RC, STM32F103RD, and STM32F103RE are all provided in 64 pin packages and
- * differ only in the available FLASH and SRAM.
+/* STM32F103RC, STM32F103RD, and STM32F103RE are all provided in 64 pin
+ * packages and differ only in the available FLASH and SRAM.
  */
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103RC) || defined(CONFIG_ARCH_CHIP_STM32F103RD) || \
@@ -793,8 +801,8 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-/* STM32F103VC, STM32F103VD, and STM32F103VE are all provided in 100 pin packages and differ
- * only in the available FLASH and SRAM.
+/* STM32F103VC, STM32F103VD, and STM32F103VE are all provided in 100 pin
+ * packages and differ only in the available FLASH and SRAM.
  */
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103VC) || defined(CONFIG_ARCH_CHIP_STM32F103VE)
@@ -821,8 +829,8 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-/* STM32F103ZC, STM32F103ZD, and STM32F103ZE are all provided in 144 pin packages and differ
- * only in the available FLASH and SRAM.
+/* STM32F103ZC, STM32F103ZD, and STM32F103ZE are all provided in 144 pin
+ * packages and differ only in the available FLASH and SRAM.
  */
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103ZE)
@@ -849,7 +857,7 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-/* STM32 F105/F107 Connectivity Line **************************************************************/
+/* STM32 F105/F107 Connectivity Line ****************************************/
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F105VB)
 #  define STM32_NFSMC                    1   /* FSMC */
@@ -923,7 +931,7 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-/* STM32 F2 Family ********************************************************************************/
+/* STM32 F2 Family **********************************************************/
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F205RG)  /* UFBGA-176 1024Kb FLASH 128Kb SRAM */
 #  define STM32_NFSMC                    0   /* No FSMC */
@@ -1028,7 +1036,7 @@
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
 
-/* STM23 F3 Family ********************************************************************************/
+/* STM23 F3 Family **********************************************************/
 
 /* Part Numbering: STM32Fssscfxxx
  *
@@ -1553,7 +1561,7 @@
 #  define STM32_NRNG                     0   /* (0) No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* (0) No digital camera interface (DCMI) */
 
-/* STM23 F4 Family ********************************************************************************/
+/* STM23 F4 Family **********************************************************/
 
 /* STM32F01xB/C Family Differences:
  *
@@ -2606,7 +2614,7 @@
 #  error "Unsupported STM32 chip"
 #endif
 
-/* Peripheral IP versions *************************************************************************/
+/* Peripheral IP versions ***************************************************/
 
 /* Peripheral IP versions are invariant and should be decided here, not in
  * Kconfig.
@@ -2644,7 +2652,7 @@
 #  error "Did not resolve peripheral IP versions!"
 #endif
 
-/* NVIC priority levels ***************************************************************************/
+/* NVIC priority levels *****************************************************/
 
 #define NVIC_SYSH_PRIORITY_MIN     0xf0 /* All bits set in minimum priority */
 #define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */

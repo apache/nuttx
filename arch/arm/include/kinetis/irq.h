@@ -18,26 +18,27 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly
- * through nuttx/irq.h
+/* This file should never be included directly but, rather, only
+ * indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_KINETIS_IRQ_H
 #define __ARCH_ARM_INCLUDE_KINETIS_IRQ_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
+/* IRQ numbers.
+ * The IRQ number corresponds vector number and hence map directly to bits in
+ * the NVIC.  This does, however, waste several words of memory in the IRQ
  * to handle mapping tables.
  */
 
@@ -58,7 +59,9 @@
 #define KINETIS_IRQ_PENDSV        (14)  /* Vector 14: Pendable system service request */
 #define KINETIS_IRQ_SYSTICK       (15)  /* Vector 15: System tick */
 
-/* External interrupts (vectors >= 16).  These definitions are chip-specific */
+/* External interrupts (vectors >= 16).
+ * These definitions are chip-specific
+ */
 
 #define KINETIS_IRQ_FIRST        (16) /* Vector number of the first external interrupt */
 
@@ -75,22 +78,22 @@
 #elif defined(CONFIG_ARCH_FAMILY_K66)
 #  include <arch/kinetis/kinetis_k66irq.h>
 #else
-  /* The interrupt vectors for other parts are defined in other documents and may or
-   * may not be the same as above (the family members are all very similar)  This
-   * error just means that you have to look at the document and determine for yourself
-   * if the vectors are the same.
-   */
+/* The interrupt vectors for other parts are defined in other documents and
+ * may or may not be the same as above (the family members are all very
+ * similar)  This error just means that you have to look at the document and
+ * determine for yourself if the vectors are the same.
+ */
 
 #  error "No IRQ numbers for this Kinetis K part"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -101,9 +104,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/include/samv7/samv71_irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through
- * nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_SAMV7_SAMV71_IRQ_H
 #define __ARCH_ARM_INCLUDE_SAMV7_SAMV71_IRQ_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* SAMV71 Peripheral Identifiers */
 
@@ -107,7 +107,7 @@
 
 #define NR_PIDS               (69)  /* Number of peripheral identifiers */
 
-/* External interrupts (priority levels >= 256*/
+/* External interrupts (priority levels >= 256 */
 
 #define SAM_IRQ_SUPC          (SAM_IRQ_EXTINT+SAM_PID_SUPC)   /* Supply Controller */
 #define SAM_IRQ_RSTC          (SAM_IRQ_EXTINT+SAM_PID_RSTC)   /* Reset Controller */
@@ -164,7 +164,9 @@
 #define SAM_IRQ_TC11          (SAM_IRQ_EXTINT+SAM_PID_TC11)   /* Timer Counter 11 */
 #define SAM_IRQ_MLB0          (SAM_IRQ_EXTINT+SAM_PID_MLB0)   /* MediaLB IRQ 0 */
 #define SAM_IRQ_MLB1          (SAM_IRQ_EXTINT+SAM_PID_MLB1)   /* MediaLB IRQ 1 */
+
 #define SAM_IRQ_RESERVED55    (SAM_IRQ_EXTINT+SAM_PID_RESERVED55) /* Reserved */
+
 #define SAM_IRQ_AES           (SAM_IRQ_EXTINT+SAM_PID_AES)    /* AES */
 #define SAM_IRQ_TRNG          (SAM_IRQ_EXTINT+SAM_PID_TRNG)   /* True Random Number Generator */
 #define SAM_IRQ_XDMAC         (SAM_IRQ_EXTINT+SAM_PID_XDMAC)  /* Central DMA Controller */
@@ -388,21 +390,21 @@
                                SAM_NGPIOAIRQS + SAM_NGPIOBIRQS + SAM_NGPIOCIRQS + \
                                SAM_NGPIODIRQS + SAM_NGPIOEIRQS)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Inline functions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus

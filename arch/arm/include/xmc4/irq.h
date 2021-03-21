@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/include/xmc4/irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* This file should never be included directly but, rather, only indirectly
  * through nuttx/irq.h
@@ -25,20 +25,21 @@
 #ifndef __ARCH_ARM_INCLUDE_XMC4_IRQ_H
 #define __ARCH_ARM_INCLUDE_XMC4_IRQ_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-/********************************************************************************************
- * Pre-processor Definitions
- ********************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
+/* IRQ numbers.
+ * The IRQ number corresponds vector number and hence map directly to
+ * bits in the NVIC.  This does, however, waste several words of memory in
+ * the IRQ to handle mapping tables.
  */
 
 /* Processor Exceptions (vectors 0-15) */
@@ -58,7 +59,9 @@
 #define XMC4_IRQ_PENDSV        (14)  /* Vector 14: Pendable system service request */
 #define XMC4_IRQ_SYSTICK       (15)  /* Vector 15: System tick */
 
-/* External interrupts (vectors >= 16).  These definitions are chip-specific */
+/* External interrupts (vectors >= 16).
+ * These definitions are chip-specific
+ */
 
 #define XMC4_IRQ_FIRST         (16)  /* Vector number of the first external interrupt */
 
@@ -69,11 +72,12 @@
 #elif defined(CONFIG_ARCH_CHIP_XMC4800)
 #  include <arch/xmc4/xmc4800_irq.h>
 #else
-  /* The interrupt vectors for other parts are defined in other documents and may or
-   * may not be the same as above (the family members are all very similar)  This
-   * error just means that you have to look at the document and determine for yourself
-   * if the vectors are the same.
-   */
+/* The interrupt vectors for other parts are defined in other documents and
+ * may or may not be the same as above (the family members are all very
+ * similar).
+ * This error just means that you have to look at the document and determine
+ * for yourself if the vectors are the same.
+ */
 
 #  error "No IRQ numbers for this XMC4xxx part"
 #endif

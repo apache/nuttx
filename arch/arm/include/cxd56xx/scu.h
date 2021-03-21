@@ -45,7 +45,7 @@
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 #define _SCUIOCBASE   (0xa000)

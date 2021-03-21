@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/include/imxrt/imxrt106x_irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through
- * nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_IMXRT_IMXRT106X_IRQ_H
 #define __ARCH_ARM_INCLUDE_IMXRT_IMXRT106X_IRQ_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* External interrupts (priority levels >= 256) *****************************************/
+/* External interrupts (priority levels >= 256) *****************************/
 
 #define IMXRT_IRQ_EDMA0_16     (IMXRT_IRQ_EXTINT + 0)   /* eDMA Channel 0/16 Transfer Complete */
 #define IMXRT_IRQ_EDMA1_17     (IMXRT_IRQ_EXTINT + 1)   /* eDMA Channel 1/17 Transfer Complete */
@@ -190,21 +190,22 @@
 #define IMXRT_IRQ_ENET2_1588   (IMXRT_IRQ_EXTINT + 153) /* ENET2 MAC 0 1588 Timer Interrupt */
 #define IMXRT_IRQ_CAN3         (IMXRT_IRQ_EXTINT + 154) /* CAN3 interrupt */
 #define IMXRT_IRQ_RESERVED155  (IMXRT_IRQ_EXTINT + 155) /* Reserved */
-#define IMXRT_IRQ_FLEXIO3      (IMXRT_IRQ_EXTINT + 156)  /* IPI compare interrupt */
+#define IMXRT_IRQ_FLEXIO3      (IMXRT_IRQ_EXTINT + 156) /* IPI compare interrupt */
 #define IMXRT_IRQ_GPIO_6789    (IMXRT_IRQ_EXTINT + 157) /* GPIO {6789} or'ed Interrupt */
 #define IMXRT_IRQ_RESERVED158  (IMXRT_IRQ_EXTINT + 158) /* Reserved */
 #define IMXRT_IRQ_RESERVED159  (IMXRT_IRQ_EXTINT + 159) /* Reserved */
 
 #define IMXRT_IRQ_NEXTINT      160
 
-/* GPIO second level interrupt **********************************************************/
+/* GPIO second level interrupt **********************************************/
 
 #define IMXRT_GPIO_IRQ_FIRST   (IMXRT_IRQ_EXTINT + IMXRT_IRQ_NEXTINT)
 #define _IMXRT_GPIO1_0_15_BASE IMXRT_GPIO_IRQ_FIRST
 
 #ifdef CONFIG_IMXRT_GPIO1_0_15_IRQ
   /* GPIO1 has dedicated interrupts for pins 0-7
-   * REVISIT:  I am assuming that you really cannot use the dedicated and the multiplex
+   * REVISIT:
+   * I am assuming that you really cannot use the dedicated and the multiplex
    * interrupts concurrently.
    */
 
@@ -671,25 +672,25 @@
                                 IMXRT_GPIO9_NIRQS )
 #define IMXRT_GPIO_IRQ_LAST    (_IMXRT_GPIO1_0_15_BASE + IMXRT_GPIO_NIRQS)
 
-/* Total number of IRQ numbers **********************************************************/
+/* Total number of IRQ numbers **********************************************/
 
 #define NR_IRQS                (IMXRT_IRQ_EXTINT + IMXRT_IRQ_NEXTINT + IMXRT_GPIO_NIRQS)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Inline functions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
