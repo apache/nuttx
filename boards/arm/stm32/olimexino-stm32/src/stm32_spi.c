@@ -56,11 +56,11 @@ void weak_function stm32_spidev_initialize(void)
   /* Setup CS */
 
 #ifdef CONFIG_STM32_SPI1
-  stm32_configgpio(USER_CSn);
+  stm32_configgpio(USER_CSN);
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-  stm32_configgpio(MMCSD_CSn);
+  stm32_configgpio(MMCSD_CSN);
 #endif
 }
 
@@ -98,7 +98,7 @@ void stm32_spi1select(FAR struct spi_dev_s *dev,
           (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_USER(0))
     {
-      stm32_gpiowrite(USER_CSn, !selected);
+      stm32_gpiowrite(USER_CSN, !selected);
     }
 }
 
@@ -117,7 +117,7 @@ void stm32_spi2select(FAR struct spi_dev_s *dev,
 #if defined(CONFIG_MMCSD)
   if (devid == SPIDEV_MMCSD(0))
     {
-      stm32_gpiowrite(MMCSD_CSn, !selected);
+      stm32_gpiowrite(MMCSD_CSN, !selected);
     }
 #endif
 }
