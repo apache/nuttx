@@ -784,28 +784,12 @@ static void esp32_spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   spiinfo("nbits=%d\n", nbits);
 
-  /* Has the number of bits changed? */
+  priv->nbits = nbits;
 
-  if (nbits != priv->nbits)
-    {
-      /* Save the selection so that subsequent re-configurations
-       * will be faster.
-       */
-
-      priv->nbits = nbits;
-
-      /* Each DMA transmission will set these value according to
-       * calculated buffer length.
-       */
-
-      if (!priv->config->use_dma)
-        {
-          esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET,
-                            (priv->nbits - 1) << SPI_USR_MISO_DBITLEN_S);
-          esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET,
-                            (priv->nbits - 1) << SPI_USR_MOSI_DBITLEN_S);
-        }
-    }
+  esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET,
+                    (priv->nbits - 1) << SPI_USR_MISO_DBITLEN_S);
+  esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET,
+                    (priv->nbits - 1) << SPI_USR_MOSI_DBITLEN_S);
 }
 
 /****************************************************************************
