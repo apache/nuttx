@@ -678,7 +678,7 @@ int net_addcache_ipv6(FAR struct net_route_ipv6_s *route)
  *
  * Input Parameters:
  *   handler - Will be called for each route in the routing table cache.
- *   arg     - An arbitrary value that will be passed tot he handler.
+ *   arg     - An arbitrary value that will be passed to the handler.
  *
  * Returned Value:
  *   Zero (OK) returned if the entire table was searched.  A negated errno

@@ -72,8 +72,8 @@
  * Public Types
  ****************************************************************************/
 
-/* DMA_HANDLE provides an opaque are reference that can be used to represent
- * a DMA channel (F1) or a DMA stream (F4).
+/* DMA_HANDLE provides an opaque reference that can be used to represent a
+ * DMA channel (F1) or a DMA stream (F4).
  */
 
 typedef FAR void *DMA_HANDLE;
@@ -83,7 +83,7 @@ typedef FAR void *DMA_HANDLE;
  *   completion of the DMA.
  *
  * Input Parameters:
- *   handle - Refers tot he DMA channel or stream
+ *   handle - Refers to the DMA channel or stream
  *   status - A bit encoded value that provides the completion status.  See
  *            the DMASTATUS_* definitions above.
  *   arg    - A user-provided value that was provided when stm32_dmastart()

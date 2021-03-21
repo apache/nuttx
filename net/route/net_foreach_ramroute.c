@@ -48,7 +48,7 @@
  *
  * Input Parameters:
  *   handler - Will be called for each route in the routing table.
- *   arg     - An arbitrary value that will be passed tot he handler.
+ *   arg     - An arbitrary value that will be passed to the handler.
  *
  * Returned Value:
  *   Zero (OK) returned if the entire table was search.  A negated errno

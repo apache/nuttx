@@ -99,8 +99,8 @@ extern "C"
  * Public Types
  ****************************************************************************/
 
-/* DMA_HANDLE provides an opaque are reference that can be used to represent
- * a DMA channel.
+/* DMA_HANDLE provides an opaque reference that can be used to represent a
+ * DMA channel.
  */
 
 typedef FAR void *DMA_HANDLE;

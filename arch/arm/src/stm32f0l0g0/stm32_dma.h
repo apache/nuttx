@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_dma.h
  *
  *   Copyright (C) 2009, 2011-2013, 2018 Gregory Nutt. All rights reserved.
@@ -31,26 +31,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_STM32_DMA_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_STM32_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
 
 #include "hardware/stm32_dma_v1.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* These definitions provide the bit encoding of the 'status' parameter passed to the
- * DMA callback function (see dma_callback_t).
+/* These definitions provide the bit encoding of the 'status' parameter
+ * passed to the DMA callback function (see dma_callback_t).
  */
 
 #define DMA_STATUS_TEIF     DMA_CHAN_TEIF_BIT     /* Channel Transfer Error */
@@ -60,12 +60,12 @@
 #define DMA_STATUS_ERROR    (DMA_STATUS_TEIF)
 #define DMA_STATUS_SUCCESS  (DMA_STATUS_TCIF | DMA_STATUS_HTIF)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* DMA_HANDLE provides an opaque are reference that can be used to represent a DMA
- * channel (F1) or a DMA stream (F4).
+/* DMA_HANDLE provides an opaque reference that can be used to represent a
+ * DMA channel (F1) or a DMA stream (F4).
  */
 
 typedef FAR void *DMA_HANDLE;
@@ -75,11 +75,11 @@ typedef FAR void *DMA_HANDLE;
  *   completion of the DMA.
  *
  * Input Parameters:
- *   handle - Refers tot he DMA channel or stream
- *   status - A bit encoded value that provides the completion status.  See the
- *            DMASTATUS_* definitions above.
- *   arg    - A user-provided value that was provided when stm32_dmastart() was
- *            called.
+ *   handle - Refers to the DMA channel or stream
+ *   status - A bit encoded value that provides the completion status.  See
+ *            the DMASTATUS_* definitions above.
+ *   arg    - A user-provided value that was provided when stm32_dmastart()
+ *            was called.
  */
 
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
@@ -95,9 +95,9 @@ struct stm32_dmaregs_s
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -110,9 +110,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_dmachannel
@@ -159,11 +159,13 @@ DMA_HANDLE stm32_dmachannel(unsigned int chan);
  * Name: stm32_dmafree
  *
  * Description:
- *   Release a DMA channel.  If another thread is waiting for this DMA channel
- *   in a call to stm32_dmachannel, then this function will re-assign the
- *   DMA channel to that thread and wake it up.  NOTE:  The 'handle' used
- *   in this argument must NEVER be used again until stm32_dmachannel() is
- *   called again to re-gain access to the channel.
+ *   Release a DMA channel.  If another thread is waiting for this DMA
+ *   channel in a call to stm32_dmachannel, then this function will
+ *   re-assign the DMA channel to that thread and wake it up.
+ *
+ *   NOTE:  The 'handle' used in this argument must NEVER be used again
+ *          until stm32_dmachannel() is called again to re-gain access to
+ *          the channel.
  *
  * Returned Value:
  *   None
@@ -207,8 +209,8 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
  *
  * Description:
  *   Cancel the DMA.  After stm32_dmastop() is called, the DMA channel is
- *   reset and stm32_dmasetup() must be called before stm32_dmastart() can be
- *   called again
+ *   reset and stm32_dmasetup() must be called before stm32_dmastart() can
+ *   be called again
  *
  * Assumptions:
  *   - DMA handle allocated by stm32_dmachannel()
@@ -237,8 +239,8 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  *   Check if the DMA controller can transfer data to/from given memory
  *   address with the given configuration. This depends on the internal
  *   connections in the ARM bus matrix of the processor. Note that this
- *   only applies to memory addresses, it will return false for any peripheral
- *   address.
+ *   only applies to memory addresses, it will return false for any
+ *   peripheral address.
  *
  * Returned Value:
  *   True, if transfer is possible.
