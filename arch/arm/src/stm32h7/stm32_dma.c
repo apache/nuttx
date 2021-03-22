@@ -1841,6 +1841,10 @@ static void stm32_bdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
    * for the EN bit to be cleared before starting any stream configuration."
    */
 
+  regval =  dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET);
+  regval &= ~BDMA_CCR_EN;
+  dmachan_putreg(dmachan, STM32_BDMACH_CCR_OFFSET, regval);
+
   while ((dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET) &
           BDMA_CCR_EN) != 0);
 
