@@ -51,7 +51,7 @@
  *    verbose "informational" debug output.  If you enable CONFIG_DEBUG_INFO,
  *    then very chatty (and often annoying) output will be generated.
  *
- *    The first character of the macro name indicates the system system
+ *    The first character of the macro name indicates the system
  *    (e.g., n=network, f=filesystm, etc.).  If the first character is
  *    missing (i.e., _info()), then it is common.  The common _info() macro
  *    is enabled simply with CONFIG_DEBUG_INFO.  Subsystem debug requires an
@@ -71,8 +71,8 @@
  *
  * [a-z]err() -- Identical to [a-z]info() except that it also requires that
  *    CONFIG_DEBUG_ERROR be defined.  This is intended for important
- *    error-related information that you probably not want to suppress during
- *    normal debug general debugging.
+ *    error-related information that you probably don't want to suppress
+ *    during general debugging.
  *
  * _alert() - is a special, high-priority, unconditional version that is
  *    really intended only for crash error reporting.
@@ -92,6 +92,7 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 /* don't call syslog while performing the compiler's format check. */
+
 #  define _none(format, ...) \
     do { if (0) syslog(LOG_ERR, format, ##__VA_ARGS__); } while (0)
 #else
