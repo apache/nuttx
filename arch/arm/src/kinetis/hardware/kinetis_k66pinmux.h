@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_k66pinmux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K66PINMUX_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K66PINMUX_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,18 +31,20 @@
 
 #ifdef KINETIS_K66
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* In most cases, there are alternative configurations for various pins. Those alternative
- * pins are labeled with a suffix like _1, _2, etc. in order to distinguish them.  Logic in
- * the board.h file must select the correct pin configuration for the board by defining a pin
- * configuration (with no suffix) that maps to the correct alternative.
+ ****************************************************************************/
+
+/* In most cases, there are alternative configurations for various pins.
+ * Those alternative pins are labeled with a suffix like _1, _2, etc. in
+ * order to distinguish them.  Logic in the board.h file must select the
+ * correct pin configuration for the board by defining a pin configuration
+ * (with no suffix) that maps to the correct alternative.
  *
- * WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific GPIO options such as frequency,
- * open-drain/push-pull, and pull-up/down!  Just the basics are defined for most
- * pins in the initial version of this file.
+ * WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific GPIO options such as
+ * frequency, open-drain/push-pull, and pull-up/down!  Just the basics are
+ * defined for most pins in the initial version of this file.
  */
 
 /* ADC */
@@ -730,17 +732,17 @@
 #define PIN_EXTAL0                (PIN_ANALOG | PIN_PORTA | PIN18)
 #define PIN_XTAL0                 (PIN_ANALOG | PIN_PORTA | PIN19)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* KINETIS_K66 */
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K66PINMUX_H */

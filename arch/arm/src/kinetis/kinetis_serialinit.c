@@ -91,7 +91,7 @@ void arm_serialinit(void)
 #if defined(HAVE_LPUART_DEVICE) && defined(CONFIG_KINETS_LPUART_LOWEST)
   /* Register LPUART drivers in starting positions */
 
-   start = kinetis_lpuart_serialinit(start);
+  start = kinetis_lpuart_serialinit(start);
 #endif
 
 #if defined(HAVE_UART_DEVICE)
@@ -103,8 +103,7 @@ void arm_serialinit(void)
 #if defined(HAVE_LPUART_DEVICE) && !defined(CONFIG_KINETS_LPUART_LOWEST)
   /* Register LPUART drivers in last positions */
 
-   start = kinetis_lpuart_serialinit(start);
+  start = kinetis_lpuart_serialinit(start);
 #endif
-
 }
 #endif /* USE_SERIALDRIVER */

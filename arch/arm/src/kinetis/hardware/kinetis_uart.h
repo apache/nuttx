@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_uart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_UART_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/kinetis_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_UART_BDH_OFFSET      0x0000 /* UART Baud Rate Register High */
 #define KINETIS_UART_BDL_OFFSET      0x0001 /* UART Baud Rate Register Low */
@@ -67,7 +67,7 @@
 #define KINETIS_UART_ET7816_OFFSET   0x001e /* UART 7816 Error Threshold Register */
 #define KINETIS_UART_TL7816_OFFSET   0x001f /* UART 7816 Transmit Length Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if (KINETIS_NISO7816+KINETIS_NUART) > 0
 #  define KINETIS_UART0_BDH          (KINETIS_UART0_BASE+KINETIS_UART_BDH_OFFSET)
@@ -273,7 +273,8 @@
 #  define KINETIS_UART5_TL7816       (KINETIS_UART5_BASE+KINETIS_UART_TL7816_OFFSET)
 #endif
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
+
 /* UART Baud Rate Register High */
 
 #define UART_BDH_SBR_SHIFT           (0)       /* Bits 0-4: MS Bits 8-13 of the UART Baud Rate Bits */
@@ -341,6 +342,7 @@
 #define UART_C3_R8                   (1 << 7)  /* Bit 7: Received Bit 8 */
 
 /* UART Data Register: 8-bit data register. */
+
 /* UART Match Address Registers 1 & 2: 8-bit address registers */
 
 /* UART Control Register 4 */
@@ -382,6 +384,7 @@
 #  define UART_IR_TNP_16TH           (1 << UART_IR_TNP_SHIFT) /* 1/16 */
 #  define UART_IR_TNP_32ND           (2 << UART_IR_TNP_SHIFT) /* 1/32 */
 #  define UART_IR_TNP_4TH            (3 << UART_IR_TNP_SHIFT) /* 1/4 */
+
 #define UART_IR_IREN                 (1 << 2)  /* Bit 2: Infrared enable */
                                                /* Bits 3-7: Reserved */
 
@@ -396,6 +399,7 @@
 #  define UART_PFIFO_RXFIFOSIZE_32   (4 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 32 */
 #  define UART_PFIFO_RXFIFOSIZE_64   (5 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 64 */
 #  define UART_PFIFO_RXFIFOSIZE_128  (6 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 128 */
+
 #define UART_PFIFO_RXFE              (1 << 3)  /* Bit 3: Receive FIFO Enable */
 #define UART_PFIFO_TXFIFOSIZE_SHIFT  (4)       /* Bits 4-6: Transmit FIFO. Buffer Depth */
 #define UART_PFIFO_TXFIFOSIZE_MASK   (7 << UART_PFIFO_TXFIFOSIZE_SHIFT)
@@ -406,6 +410,7 @@
 #  define UART_PFIFO_TXFIFOSIZE_32   (4 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 32 */
 #  define UART_PFIFO_TXFIFOSIZE_64   (5 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 64 */
 #  define UART_PFIFO_TXFIFOSIZE_128  (6 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 128 */
+
 #define UART_PFIFO_TXFE              (1 << 7)  /* Bit 7: Transmit FIFO Enable */
 
 /* UART FIFO Control Register */
@@ -425,8 +430,11 @@
 #define UART_SFIFO_TXEMPT            (1 << 7)  /* Bit 7: Transmit Buffer/FIFO Empty */
 
 /* UART FIFO Transmit Watermark.  8-bit watermark value. */
+
 /* UART FIFO Transmit Count. 8-bit count value */
+
 /* UART FIFO Receive Watermark.  8-bit watermark value. */
+
 /* UART FIFO Receive Count. 8-bit count value */
 
 /* UART 7816 Control Register */
@@ -470,6 +478,7 @@
 #define UART_WP7816T1_CWI_MASK       (15 << UART_WP7816T1_CWI_SHIFT)
 
 /* UART 7816 Wait N Register.  8-bit Guard Band value. */
+
 /* UART 7816 Wait FD Register. 8-bit FD Multiplier value. */
 
 /* UART 7816 Error Threshold Register */
@@ -481,16 +490,16 @@
 
 /* UART 7816 Transmit Length Register. 8-bit Transmit Length value */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_UART_H */

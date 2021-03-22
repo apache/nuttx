@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_k20pinmux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,31 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20PINMUX_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20PINMUX_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Reference: Paragraph 10.3.1, p 207, of FreeScale document K20P64M72SF1RM
+ ****************************************************************************/
+
+/* Reference:
+ * Paragraph 10.3.1, p 207, of FreeScale document K20P64M72SF1RM
  *
- * In most cases, there are alternative configurations for various pins. Those alternative
- * pins are labelled with a suffix like _1, _2, etc. in order to distinguish them.  Logic in
- * the board.h file must select the correct pin configuration for the board by defining a pin
- * configuration (with no suffix) that maps to the correct alternative.
+ * In most cases, there are alternative configurations for various pins.
+ * Those alternative pins are labelled with a suffix like _1, _2, etc.
+ * in order to distinguish them.  Logic in the board.h file must select the
+ * correct pin configuration for the board by defining a pin configuration
+ * (with no suffix) that maps to the correct alternative.
  */
 
 #if defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
@@ -317,21 +320,21 @@
 #  define PIN_XTAL0           (PIN_ALT0 | PIN_PORTA | PIN19)
 
 #else
-  /* The pin muxing for other K20 parts is defined in other documents */
 
+/* The pin muxing for other K20 parts is defined in other documents */
 #  error "No pin multiplexing for this Kinetis K20 part"
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20PINMUX_H */
