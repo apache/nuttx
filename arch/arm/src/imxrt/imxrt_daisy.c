@@ -30,38 +30,6 @@
 #include "hardware/imxrt_daisy.h"
 #include "imxrt_iomuxc.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define DAISY_INDEX_INVALID     255
-#define DAISY_SEL_INVALID       255
-#define ALT0                    0
-#define ALT1                    1
-#define ALT2                    2
-#define ALT3                    3
-#define ALT4                    4
-#define ALT5                    5
-#define ALT6                    6
-#define ALT7                    7
-#define ALT8                    8
-#define ALT9                    9
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-struct imxrt_daisy_entry_t
-{
-  uint8_t   index;
-  uint8_t   sel;
-};
-
-struct imxrt_daisy_t
-{
-  struct imxrt_daisy_entry_t alts[10];
-};
-
 /* Include chip-specific daisy input selection */
 
 #if defined(CONFIG_ARCH_FAMILY_IMXRT102x)
@@ -73,6 +41,10 @@ struct imxrt_daisy_t
 #else
 #  error Unrecognized i.MX RT architecture
 #endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
