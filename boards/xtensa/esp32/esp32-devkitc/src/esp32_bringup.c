@@ -63,6 +63,10 @@
 #  include "esp32_aes.h"
 #endif
 
+#ifdef CONFIG_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
+
 #include "esp32-devkitc.h"
 
 /****************************************************************************
@@ -277,6 +281,16 @@ int esp32_bringup(void)
       syslog(LOG_ERR,
              "ERROR: Failed to initialize watchdog drivers: %d\n",
              ret);
+    }
+#endif
+
+#ifdef CONFIG_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
     }
 #endif
 

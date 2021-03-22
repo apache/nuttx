@@ -199,6 +199,8 @@ config ARCH_BOARD_ESP32_DEVKITC
 	bool "Espressif ESP32 DevkitC board V4"
 	depends on ARCH_CHIP_ESP32WROOM32 || ARCH_CHIP_ESP32WROOM32_8MB || ARCH_CHIP_ESP32WROOM32_16MB || ARCH_CHIP_ESP32WROVER || ARCH_CHIP_ESP32SOLO1
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		The ESP32 is a dual-core system from Espressif with two Harvard
 		architecture Xtensa LX6 CPUs. All embedded memory, external memory
