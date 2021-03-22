@@ -320,5 +320,9 @@ int stm32_bbsram_int(void);
 int stm32f7_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
+#ifdef CONFIG_CAN
+int stm32f7_can_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32F7_NUCLEO_144_SRC_NUCLEO_144_H */
