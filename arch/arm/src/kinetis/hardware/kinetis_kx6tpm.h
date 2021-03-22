@@ -103,15 +103,19 @@
                                              /* Bits 9-31: Reserved */
 
 #define TPM_CNT_SHIFT               0 /* Bits 0-15: Counter value */
+
 #define TPM_CNT_MASK                (0xffff << TPM_COUNT_SHIFT) /* Any write clears Count */
+
                                              /* Bits 16-31: Reserved */
 
 #define TPM_MOD_SHIFT               0 /* Bits 0-15: Mod value */
+
 #define TPM_MOD_MASK                (0xffff << TPM_MOD_SHIFT) /* This field must be written with single 16 or 32-bit access */
+
                                              /* Bits 16-31: Reserved */
 
 #define TPM_CnSC_DMA                (1 << 0) /* Bit 0: Enables DMA transfers for the channel */
-                                             /* Bit 1: Reserved*/
+                                             /* Bit 1: Reserved */
 #define TPM_CnSC_ELSA               (1 << 2) /* Bit 2: Edge or Level Select */
 #define TPM_CnSC_ELSB               (1 << 3) /* Bit 3: Edge or Level Select */
 #define TPM_CnSC_MSA                (1 << 4) /* Bit 4: Channel Mode Select */
@@ -121,9 +125,11 @@
                                              /* Bits 8-31: Reserved */
 
 #define TPM_VAL_SHIFT               0 /* Bits 0-15: Channel value */
+
 #define TPM_VAL_MASK                (0xffff << TPM_VAL_SHIFT) /* Captured TPM counter value of the input modes or
                                                                * the match value for the output modes. This field
-                                                               * must be written with single 16 or 32-bit access.*/
+                                                               * must be written with single 16 or 32-bit access. */
+
                                              /* Bits 16-31: Reserved */
 
 #define TPM_STATUS_CH0F             (1 << 0) /* Bit 0: Channel 0 Flag */
@@ -153,10 +159,12 @@
                                              /* Bits 4-31: Reserved */
 
 #define TPM_CONF_DOZEEN             (1 << 5) /* Bit 5: Doze Enable */
+
 #define TPM_CONF_DBGMODE_SHIFT      6 /* Bits 6-7: Debug Mode */
 #define TPM_CONF_DBGMODE_MASK       (3 << TPM_CONF_DBGMODE_SHIFT)
 # define TPM_CONF_DBGMODE_PAUSE     (0 << TPM_CONF_DBGMODE_SHIFT) /* TPM counter will pause during DEBUG mode */
 # define TPM_CONF_DBGMODE_CONT      (3 << TPM_CONF_DBGMODE_SHIFT) /* TPM counter continue working in DEBUG mode */
+
 #define TPM_CONF_GTBSYNC            (1 << 8)  /* Bit 8: Global Time Base Synchronization */
 #define TPM_CONF_GTBEEN             (1 << 9)  /* Bit 9: Global Time Base Enable */
                                               /* Bits 10-15: Reserved */

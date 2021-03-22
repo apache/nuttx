@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_k40pinmux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,30 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K40PINMUX_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K40PINMUX_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
+
 /* Reference: Paragraph 10.3.1, p 227, of FreeScale document K40P144M100SF2RM
  *
- * In most cases, there are alternative configurations for various pins. Those alternative
- * pins are labeled with a suffix like _1, _2, etc. in order to distinguish them.  Logic in
- * the board.h file must select the correct pin configuration for the board by defining a pin
- * configuration (with no suffix) that maps to the correct alternative.
+ * In most cases, there are alternative configurations for various pins.
+ * Those alternative pins are labeled with a suffix like _1, _2, etc. in
+ * order to distinguish them.  Logic in the board.h file must select the
+ * correct pin configuration for the board by defining a pin configuration
+ * (with no suffix) that maps to the correct alternative.
  */
 
 #if defined(CONFIG_ARCH_CHIP_MK40X128VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X128VMD100) || \
@@ -483,21 +485,21 @@
 #define PIN_FB_AD20              (PIN_ALT5   | PIN_PORTE | PIN28)
 
 #else
-  /* The pin muxing for other K40 parts is defined in other documents */
 
+  /* The pin muxing for other K40 parts is defined in other documents */
 #  error "No pin multiplexing for this Kinetis K40 part"
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K40PINMUX_H */

@@ -29,9 +29,9 @@
 
 #include "hardware/kinetis_dspi.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -44,9 +44,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 struct spi_dev_s;
 
@@ -54,7 +54,7 @@ struct spi_dev_s;
  * Public Function Prototypes
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_spibus_initialize
  *
  * Description:
@@ -66,54 +66,60 @@ struct spi_dev_s;
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct spi_dev_s *kinetis_spibus_initialize(int bus);
 
-/************************************************************************************
- * Name:  kinetis_spi[n]select, kinetis_spi[n]status, and kinetis_spi[n]cmddata
+/****************************************************************************
+ * Name:
+ *   kinetis_spi[n]select, kinetis_spi[n]status, and kinetis_spi[n]cmddata
  *
  * Description:
- *   These external functions must be provided by board-specific logic.  They are
- *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including kinetis_spibus_initialize()) are provided by common Kinetis logic.  To use
- *   this common SPI logic on your board:
+ *   These external functions must be provided by board-specific logic.
+ *   They are implementations of the select, status, and cmddata methods of
+ *   the SPI interface defined by struct spi_ops_s
+  *  (see include/nuttx/spi/spi.h). All other methods including
+ *   kinetis_spibus_initialize()) are provided by common Kinetis logic.
+ *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in kinetis_boardinitialize() to configure SPI chip select
- *      pins.
+ *   1. Provide logic in kinetis_boardinitialize() to configure SPI chip
+ *      select pins.
  *   2. Provide kinetis_spi[n]select() and kinetis_spi[n]status() functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
+ *      in your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
- *      kinetis_spi[n]cmddata() functions in your board-specific logic.  These
- *      functions will perform cmd/data selection operations using GPIOs in the way
- *      your board is configured.
- *   3. Add a call to kinetis_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by kinetis_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *      kinetis_spi[n]cmddata() functions in your board-specific logic.
+ *      These functions will perform cmd/data selection operations using
+ *      GPIOs in the way your board is configured.
+ *   3. Add a call to kinetis_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by kinetis_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_SPI0
-void  kinetis_spi0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void  kinetis_spi0select(FAR struct spi_dev_s *dev,
+                         uint32_t devid, bool selected);
 uint8_t kinetis_spi0status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
 int kinetis_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 #ifdef CONFIG_KINETIS_SPI1
-void  kinetis_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void  kinetis_spi1select(FAR struct spi_dev_s *dev,
+                         uint32_t devid, bool selected);
 uint8_t kinetis_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
 int kinetis_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 #ifdef CONFIG_KINETIS_SPI2
-void  kinetis_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void  kinetis_spi2select(FAR struct spi_dev_s *dev,
+                         uint32_t devid, bool selected);
 uint8_t kinetis_spi2status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
 int kinetis_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
@@ -144,7 +150,6 @@ int kinetis_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 struct spi_dev_s;
 void spi_flush(FAR struct spi_dev_s *dev);
 #endif
-
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_SPI_H */

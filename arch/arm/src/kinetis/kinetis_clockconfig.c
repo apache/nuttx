@@ -141,7 +141,8 @@
  ****************************************************************************/
 
 void __ramfunc__
-kinesis_setdividers(uint32_t div1, uint32_t div2, uint32_t div3, uint32_t div4);
+kinesis_setdividers(uint32_t div1, uint32_t div2,
+                    uint32_t div3, uint32_t div4);
 
 /****************************************************************************
  * Private Functions
@@ -310,7 +311,8 @@ void kinetis_pllconfig(void)
    * Flash clock = MCG / BOARD_OUTDIV4
    */
 
-  kinesis_setdividers(BOARD_OUTDIV1, BOARD_OUTDIV2, BOARD_OUTDIV3, BOARD_OUTDIV4);
+  kinesis_setdividers(BOARD_OUTDIV1, BOARD_OUTDIV2,
+                      BOARD_OUTDIV3, BOARD_OUTDIV4);
 
   /* Set the VCO divider, VDIV, is defined in the board.h file.  VDIV
    * selects the amount to divide the VCO output of the PLL. The VDIV bits
@@ -391,7 +393,9 @@ static inline void kinetis_traceconfig(void)
 {
   uint32_t regval;
 
-  /* Set the trace clock to the core clock frequency in the SIM SOPT2 register */
+  /* Set the trace clock to the core clock frequency in the SIM SOPT2
+   * register
+   */
 
   regval  = getreg32(KINETIS_SIM_SOPT2);
   regval |= SIM_SOPT2_TRACECLKSEL;
@@ -480,7 +484,8 @@ void kinetis_clockconfig(void)
  ****************************************************************************/
 
 void __ramfunc__
-kinesis_setdividers(uint32_t div1, uint32_t div2, uint32_t div3, uint32_t div4)
+kinesis_setdividers(uint32_t div1, uint32_t div2,
+                    uint32_t div3, uint32_t div4)
 {
   uint32_t regval;
   volatile int i;
