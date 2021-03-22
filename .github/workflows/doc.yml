@@ -29,8 +29,6 @@ jobs:
           pip3 install pipenv
           pipenv install
           pipenv run make html
-          # This step flakes frequently so still annotate errors but dont fail the build
-          pipenv run make linkcheck || true
       - uses: actions/upload-artifact@v2
         with:
           name: sphinx-docs
