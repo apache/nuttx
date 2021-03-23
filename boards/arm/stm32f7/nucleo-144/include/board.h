@@ -167,7 +167,6 @@
 #define STM32_RCC_DCKCFGR2_SDMMC2SRC  RCC_DCKCFGR2_SDMMC2SEL_48MHZ
 #define STM32_RCC_DCKCFGR2_DSISRC     RCC_DCKCFGR2_DSISEL_PHY
 
-
 /* Several prescalers allow the configuration of the two AHB buses, the
  * high-speed APB (APB2) and the low-speed APB (APB1) domains. The maximum
  * frequency of the two AHB buses is 216 MHz while the maximum frequency of
@@ -211,10 +210,10 @@
 #define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
-/* SDMMC dividers.  Note that slower clocking is required when DMA is disabled
- * in order to avoid RX overrun/TX underrun errors due to delayed responses
- * to service FIFOs in interrupt driven mode.  These values have not been
- * tuned!!!
+/* SDMMC dividers.  Note that slower clocking is required when DMA
+ * is disabledin order to avoid RX overrun/TX underrun errors due
+ * to delayed responses to service FIFOs in interrupt driven mode.
+ * These values have not been tuned!!!
  *
  * SDMMCCLK=48MHz, SDMMC_CK=SDMMCCLK/(118+2)=400 KHz
  */
@@ -248,7 +247,7 @@
 #  define GPIO_SDMMC2_D3 GPIO_SDMMC2_D3_1
 #endif
 
-/* DMA Channel/Stream Selections *********************************************/
+/* DMA Channel/Stream Selections ********************************************/
 
 /* Stream selections are arbitrary for now but might become important in the
  * future if we set aside more DMA channels/streams.
@@ -266,7 +265,6 @@
 
 #define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
 #define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
-
 
 /* FLASH wait states
  *
@@ -311,13 +309,14 @@
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
 
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c. The LEDs are used to encode
+ * OS-relatedevents as follows:
  *
  *
  *   SYMBOL                     Meaning                      LED state
  *                                                        Red   Green Blue
- *   ----------------------  --------------------------  ------ ------ ----*/
+ * ----------------------  --------------------------  ------ ------ ----
+ */
 
 #define LED_STARTED        0 /* NuttX has been started   OFF    OFF   OFF  */
 #define LED_HEAPALLOCATE   1 /* Heap has been allocated  OFF    OFF   ON   */
@@ -350,6 +349,22 @@
 
 /* TIM */
 
+/* Quadrature encoder
+ * Default is to use timer 8 (16-bit) and encoder on PC6/PC7
+ * We use here TIM2 with a 32-bit counter on PA15/PB3
+ */
+#define GPIO_TIM2_CH1IN GPIO_TIM2_CH1IN_2
+#define GPIO_TIM2_CH2IN GPIO_TIM2_CH2IN_2
+
+/* PWM
+ * Use Timer 3
+ */
+
+#define GPIO_TIM3_CH1OUT GPIO_TIM3_CH1OUT_1
+#define GPIO_TIM3_CH2OUT GPIO_TIM3_CH2OUT_1
+#define GPIO_TIM3_CH3OUT GPIO_TIM3_CH3OUT_1
+#define GPIO_TIM3_CH4OUT GPIO_TIM3_CH4OUT_1
+
 #define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_1
 #define GPIO_TIM2_CH1OUT GPIO_TIM2_CH1OUT_1
 #define GPIO_TIM3_CH1OUT GPIO_TIM3_CH1OUT_1
@@ -359,8 +374,8 @@
 
 /* USART6:
  *
- * These configurations assume that you are using a standard Arduio RS-232 shield
- * with the serial interface with RX on pin D0 and TX on pin D1:
+ * These configurations assume that you are using a standard Arduio RS-232
+ * shield with the serial interface with RX on pin D0 and TX on pin D1:
  *
  *   -------- ---------------
  *               STM32F7
@@ -508,5 +523,12 @@
 #define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
 #define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
 #define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_1
+#define GPIO_ETH_MII_COL      GPIO_ETH_COL_1
+
+/* CAN Bus
+ * CAN1 on pin PD0/PD1
+ */
+#define GPIO_CAN1_TX  GPIO_CAN1_TX_3
+#define GPIO_CAN1_RX  GPIO_CAN1_RX_3
 
 #endif /* __BOARDS_ARM_STM32F7_NUCLEO_144_INCLUDE_BOARD_H */

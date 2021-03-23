@@ -54,6 +54,7 @@
 #include "arm_internal.h"
 #include "arm_arch.h"
 
+#include "stm32_rcc.h"
 #include "chip.h"
 #include "stm32_pwm.h"
 #include "stm32_gpio.h"
@@ -1126,7 +1127,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   DEBUGASSERT(priv != NULL && info != NULL);
 
 #if defined(CONFIG_PWM_MULTICHAN)
-  pwminfo("TIM%u frequency: %u\n",
+  pwminfo("TIM%u frequency: %lu\n",
           priv->timid, info->frequency);
 #elif defined(CONFIG_PWM_PULSECOUNT)
   pwminfo("TIM%u channel: %u frequency: %u duty: %08x count: %u\n",
@@ -1209,8 +1210,8 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
       reload--;
     }
 
-  pwminfo("TIM%u PCLK: %u frequency: %u "
-          "TIMCLK: %u prescaler: %u reload: %u\n",
+  pwminfo("TIM%u PCLK: %lu frequency: %lu "
+          "TIMCLK: %lu prescaler: %lu reload: %lu\n",
           priv->timid, priv->pclk, info->frequency,
           timclk, prescaler, reload);
 
@@ -1413,7 +1414,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
       ccr = b16toi(duty * reload + b16HALF);
 
-      pwminfo("ccr: %u\n", ccr);
+      pwminfo("ccr: %lu\n", ccr);
 
       switch (mode)
         {
@@ -1675,7 +1676,7 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv,
 
   DEBUGASSERT(priv != NULL);
 
-  pwminfo("TIM%u channel: %u duty: %08x\n",
+  pwminfo("TIM%u channel: %u duty: %08lx\n",
           priv->timid, channel, duty);
 
 #ifndef CONFIG_PWM_MULTICHAN
@@ -1694,7 +1695,7 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv,
 
   ccr = b16toi(duty * reload + b16HALF);
 
-  pwminfo("ccr: %u\n", ccr);
+  pwminfo("ccr: %lu\n", ccr);
 
   switch (channel)
     {
@@ -2006,7 +2007,8 @@ static void pwm_set_apb_clock(FAR struct stm32_pwmtimer_s *priv, bool on)
 
   /* Enable/disable APB 1/2 clock for timer */
 
-  pwminfo("RCC_APBxENR base: %08x  bits: %04x\n", regaddr, en_bit);
+  pwminfo("RCC_APBxENR base: %08lx bits: %04lx\n",
+            regaddr, en_bit);
 
   if (on)
     {
@@ -2062,7 +2064,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
           continue;
         }
 
-      pwminfo("pincfg: %08x\n", pincfg);
+      pwminfo("pincfg: %08lx\n", pincfg);
 
       stm32_configgpio(pincfg);
       pwm_dumpgpio(pincfg, "PWM setup");
@@ -2113,7 +2115,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
           continue;
         }
 
-      pwminfo("pincfg: %08x\n", pincfg);
+      pwminfo("pincfg: %08lx\n", pincfg);
 
       pincfg &= (GPIO_PORT_MASK | GPIO_PIN_MASK);
       pincfg |= GPIO_INPUT | GPIO_FLOAT;
@@ -2373,7 +2375,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
   putreg32(regval, regaddr);
   leave_critical_section(flags);
 
-  pwminfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
+  pwminfo("regaddr: %08lx resetbit: %08lx\n", regaddr, resetbit);
   pwm_dumpregs(priv, "After stop");
   return OK;
 }

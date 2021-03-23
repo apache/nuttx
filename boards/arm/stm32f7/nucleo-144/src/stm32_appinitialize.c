@@ -44,12 +44,25 @@
 #include <sys/types.h>
 #include <debug.h>
 #include <syslog.h>
+#include <stdio.h>
 
 #include "nucleo-144.h"
 #include <nuttx/fs/fs.h>
 #include <nuttx/leds/userled.h>
 #ifdef CONFIG_STM32_ROMFS
 #include "stm32_romfs.h"
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+int stm32_gpio_initialize(void);
+#endif
+
+#ifdef CONFIG_SENSORS_QENCODER
+int stm32f7_qencoder_initialize(FAR const char *devpath, int timer);
+#endif
+
+#ifdef CONFIG_STM32F7_CAN
+int stm32f7_can_setup(void);
 #endif
 
 /****************************************************************************
@@ -181,6 +194,29 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_QENCODER
+  char buf[9];
+
+  sprintf(buf, "/dev/qe0");
+  ret = stm32f7_qencoder_initialize(buf, 2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_CAN
+  ret = stm32f7_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32f7_can_setup failed: %d\n", ret);
+      return ret;
     }
 #endif
 
