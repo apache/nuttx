@@ -61,7 +61,7 @@ checkgenromfs:
 	}
 
 romfs_zoneinfo.img : checkgenromfs .tzbuilt
-	@genromfs -f $@ -d $(TZBIN_PATH)/etc/zoneinfo -V "TZDatbase" || { echo "genromfs failed" ; exit 1 ; }
+	@genromfs -f $@ -d $(TZBIN_PATH)/usr/share/zoneinfo -V "TZDatbase" || { echo "genromfs failed" ; exit 1 ; }
 
 romfs_zoneinfo.h : romfs_zoneinfo.img
 	@xxd -i $< >$@ || { echo "xxd of $< failed" ; exit 1 ; }
