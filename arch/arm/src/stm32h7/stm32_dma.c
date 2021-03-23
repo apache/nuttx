@@ -267,89 +267,89 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
 #ifdef CONFIG_STM32H7_MDMA
   /* 0 - MDMA */
 
-  {
-    .dma_disable   = stm32_mdma_disable,
-    .dma_interrupt = stm32_mdma_interrupt,
-    .dma_setup     = stm32_mdma_setup,
-    .dma_start     = stm32_mdma_start,
-    .dma_residual  = stm32_mdma_residual,
+    {
+      .dma_disable   = stm32_mdma_disable,
+      .dma_interrupt = stm32_mdma_interrupt,
+      .dma_setup     = stm32_mdma_setup,
+      .dma_start     = stm32_mdma_start,
+      .dma_residual  = stm32_mdma_residual,
 #ifdef CONFIG_STM32H7_DMACAPABLE
-    .dma_capable   = stm32_mdma_capable,
+      .dma_capable   = stm32_mdma_capable,
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
-    .dma_dump      = stm32_mdma_dump,
+      .dma_dump      = stm32_mdma_dump,
 #endif
-  },
+    },
 #else
-  {
-    NULL
-  },
+    {
+      NULL
+    },
 #endif
 
 #ifdef CONFIG_STM32H7_DMA1
   /* 1 - DMA1 */
 
-  {
-    .dma_disable   = stm32_sdma_disable,
-    .dma_interrupt = stm32_sdma_interrupt,
-    .dma_setup     = stm32_sdma_setup,
-    .dma_start     = stm32_sdma_start,
-    .dma_residual  = stm32_sdma_residual,
+    {
+      .dma_disable   = stm32_sdma_disable,
+      .dma_interrupt = stm32_sdma_interrupt,
+      .dma_setup     = stm32_sdma_setup,
+      .dma_start     = stm32_sdma_start,
+      .dma_residual  = stm32_sdma_residual,
 #ifdef CONFIG_STM32H7_DMACAPABLE
-    .dma_capable   = stm32_sdma_capable,
+      .dma_capable   = stm32_sdma_capable,
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
-    .dma_dump      = stm32_sdma_dump,
+      .dma_dump      = stm32_sdma_dump,
 #endif
-  },
+    },
 #else
-  {
-    NULL
-  },
+    {
+      NULL
+    },
 #endif
 
 #ifdef CONFIG_STM32H7_DMA2
   /* 2 - DMA2 */
 
-  {
-    .dma_disable   = stm32_sdma_disable,
-    .dma_interrupt = stm32_sdma_interrupt,
-    .dma_setup     = stm32_sdma_setup,
-    .dma_start     = stm32_sdma_start,
-    .dma_residual  = stm32_sdma_residual,
+    {
+      .dma_disable   = stm32_sdma_disable,
+      .dma_interrupt = stm32_sdma_interrupt,
+      .dma_setup     = stm32_sdma_setup,
+      .dma_start     = stm32_sdma_start,
+      .dma_residual  = stm32_sdma_residual,
 #ifdef CONFIG_STM32H7_DMACAPABLE
-    .dma_capable   = stm32_sdma_capable,
+      .dma_capable   = stm32_sdma_capable,
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
-    .dma_dump      = stm32_sdma_dump,
+      .dma_dump      = stm32_sdma_dump,
 #endif
-  },
+    },
 #else
-  {
-    NULL
-  },
+    {
+      NULL
+    },
 #endif
 
 #ifdef CONFIG_STM32H7_BDMA
   /* 3 - BDMA */
 
-  {
-    .dma_disable   = stm32_bdma_disable,
-    .dma_interrupt = stm32_bdma_interrupt,
-    .dma_setup     = stm32_bdma_setup,
-    .dma_start     = stm32_bdma_start,
-    .dma_residual  = stm32_bdma_residual,
+    {
+      .dma_disable   = stm32_bdma_disable,
+      .dma_interrupt = stm32_bdma_interrupt,
+      .dma_setup     = stm32_bdma_setup,
+      .dma_start     = stm32_bdma_start,
+      .dma_residual  = stm32_bdma_residual,
 #ifdef CONFIG_STM32H7_DMACAPABLE
-    .dma_capable   = stm32_bdma_capable,
+      .dma_capable   = stm32_bdma_capable,
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
-    .dma_dump      = stm32_bdma_dump,
+      .dma_dump      = stm32_bdma_dump,
 #endif
-  }
+    }
 #else
-  {
-    NULL
-  }
+    {
+      NULL
+    }
 #endif
 };
 
@@ -357,17 +357,17 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
 
 struct stm32_dmamux_s g_dmamux[DMAMUX_NUM] =
 {
-  {
-    .id      = 1,
-    .nchan   = 16,              /* 0-7 - DMA1, 8-15 - DMA2 */
-    .base    = STM32_DMAMUX1_BASE
-  },
+    {
+      .id      = 1,
+      .nchan   = 16,              /* 0-7 - DMA1, 8-15 - DMA2 */
+      .base    = STM32_DMAMUX1_BASE
+    },
 
-  {
-    .id      = 2,
-    .nchan   = 8,               /* 0-7 - BDMA */
-    .base    = STM32_DMAMUX2_BASE
-  }
+    {
+      .id      = 2,
+      .nchan   = 8,               /* 0-7 - BDMA */
+      .base    = STM32_DMAMUX2_BASE
+    }
 };
 
 /* This array describes the state of each controller */
@@ -376,43 +376,43 @@ struct stm32_dma_s g_dma[DMA_NCHANNELS] =
 {
   /* 0 - MDMA */
 
-  {
-    .base   = STM32_MDMA_BASE,
-    .first  = MDMA_FIRST,
-    .nchan  = MDMA_NCHAN,
-    .dmamux = NULL,              /* No DMAMUX */
-    .dmamux_offset = 0
-  },
+    {
+      .base   = STM32_MDMA_BASE,
+      .first  = MDMA_FIRST,
+      .nchan  = MDMA_NCHAN,
+      .dmamux = NULL,              /* No DMAMUX */
+      .dmamux_offset = 0
+    },
 
   /* 1 - DMA1 */
 
-  {
-    .base   = STM32_DMA1_BASE,
-    .first  = DMA1_FIRST,
-    .nchan  = DMA1_NSTREAMS,
-    .dmamux = &g_dmamux[DMAMUX1], /* DMAMUX1 channels 0-7 */
-    .dmamux_offset = 0
-  },
+    {
+      .base   = STM32_DMA1_BASE,
+      .first  = DMA1_FIRST,
+      .nchan  = DMA1_NSTREAMS,
+      .dmamux = &g_dmamux[DMAMUX1], /* DMAMUX1 channels 0-7 */
+      .dmamux_offset = 0
+    },
 
   /* 2 - DMA2 */
 
-  {
-    .base   = STM32_DMA2_BASE,
-    .first  = DMA2_FIRST,
-    .nchan  = DMA2_NSTREAMS,
-    .dmamux = &g_dmamux[DMAMUX1], /* DMAMUX1 channels 8-15 */
-    .dmamux_offset = 8
-  },
+    {
+      .base   = STM32_DMA2_BASE,
+      .first  = DMA2_FIRST,
+      .nchan  = DMA2_NSTREAMS,
+      .dmamux = &g_dmamux[DMAMUX1], /* DMAMUX1 channels 8-15 */
+      .dmamux_offset = 8
+    },
 
   /* 3 - BDMA */
 
-  {
-    .base   = STM32_BDMA_BASE,
-    .first  = BDMA_FIRST,
-    .nchan  = BDMA_NCHAN,
-    .dmamux = &g_dmamux[DMAMUX2], /* DMAMUX2 channels 0-7 */
-    .dmamux_offset = 0
-  }
+    {
+      .base   = STM32_BDMA_BASE,
+      .first  = BDMA_FIRST,
+      .nchan  = BDMA_NCHAN,
+      .dmamux = &g_dmamux[DMAMUX2], /* DMAMUX2 channels 0-7 */
+      .dmamux_offset = 0
+    }
 };
 
 /* This array describes the state of each DMA channel.
@@ -425,337 +425,337 @@ static struct stm32_dmach_s g_dmach[DMA_NCHANNELS] =
 #ifdef CONFIG_STM32H7_MDMA
   /* MDMA */
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 0,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(0),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 0,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(0),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 1,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(1),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 1,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(1),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 2,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(2),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 2,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(2),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 3,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(3),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 3,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(3),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 4,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(4),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 4,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(4),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 5,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(5),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 5,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(5),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 6,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(6),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 6,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(6),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 7,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(7),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 7,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(7),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 8,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(8),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 8,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(8),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 9,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(9),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 9,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(9),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 10,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(10),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 10,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(10),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 11,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(11),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 11,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(11),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 12,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(12),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 12,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(12),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 13,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(13),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 13,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(13),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 14,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(15),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 14,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(15),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 15,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(15),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 15,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(15),
+    },
 #endif
 
 #ifdef CONFIG_STM32H7_DMA1
   /* DMA1 */
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 0,
-    .irq      = STM32_IRQ_DMA1S0,
-    .shift    = DMA_INT_STREAM0_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(0),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 0,
+      .irq      = STM32_IRQ_DMA1S0,
+      .shift    = DMA_INT_STREAM0_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(0),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 1,
-    .irq      = STM32_IRQ_DMA1S1,
-    .shift    = DMA_INT_STREAM1_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(1),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 1,
+      .irq      = STM32_IRQ_DMA1S1,
+      .shift    = DMA_INT_STREAM1_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(1),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 2,
-    .irq      = STM32_IRQ_DMA1S2,
-    .shift    = DMA_INT_STREAM2_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(2),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 2,
+      .irq      = STM32_IRQ_DMA1S2,
+      .shift    = DMA_INT_STREAM2_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(2),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 3,
-    .irq      = STM32_IRQ_DMA1S3,
-    .shift    = DMA_INT_STREAM3_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(3),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 3,
+      .irq      = STM32_IRQ_DMA1S3,
+      .shift    = DMA_INT_STREAM3_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(3),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 4,
-    .irq      = STM32_IRQ_DMA1S4,
-    .shift    = DMA_INT_STREAM4_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(4),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 4,
+      .irq      = STM32_IRQ_DMA1S4,
+      .shift    = DMA_INT_STREAM4_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(4),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 5,
-    .irq      = STM32_IRQ_DMA1S5,
-    .shift    = DMA_INT_STREAM5_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(5),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 5,
+      .irq      = STM32_IRQ_DMA1S5,
+      .shift    = DMA_INT_STREAM5_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(5),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 6,
-    .irq      = STM32_IRQ_DMA1S6,
-    .shift    = DMA_INT_STREAM6_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(6),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 6,
+      .irq      = STM32_IRQ_DMA1S6,
+      .shift    = DMA_INT_STREAM6_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(6),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 7,
-    .irq      = STM32_IRQ_DMA1S7,
-    .shift    = DMA_INT_STREAM7_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(7),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 7,
+      .irq      = STM32_IRQ_DMA1S7,
+      .shift    = DMA_INT_STREAM7_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(7),
+    },
 #endif
 
 #ifdef CONFIG_STM32H7_DMA2
   /* DMA2 */
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 0,
-    .irq      = STM32_IRQ_DMA2S0,
-    .shift    = DMA_INT_STREAM0_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(0),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 0,
+      .irq      = STM32_IRQ_DMA2S0,
+      .shift    = DMA_INT_STREAM0_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(0),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 1,
-    .irq      = STM32_IRQ_DMA2S1,
-    .shift    = DMA_INT_STREAM1_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(1),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 1,
+      .irq      = STM32_IRQ_DMA2S1,
+      .shift    = DMA_INT_STREAM1_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(1),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 2,
-    .irq      = STM32_IRQ_DMA2S2,
-    .shift    = DMA_INT_STREAM2_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(2),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 2,
+      .irq      = STM32_IRQ_DMA2S2,
+      .shift    = DMA_INT_STREAM2_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(2),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 3,
-    .irq      = STM32_IRQ_DMA2S3,
-    .shift    = DMA_INT_STREAM3_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(3),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 3,
+      .irq      = STM32_IRQ_DMA2S3,
+      .shift    = DMA_INT_STREAM3_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(3),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 4,
-    .irq      = STM32_IRQ_DMA2S4,
-    .shift    = DMA_INT_STREAM4_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(4),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 4,
+      .irq      = STM32_IRQ_DMA2S4,
+      .shift    = DMA_INT_STREAM4_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(4),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 5,
-    .irq      = STM32_IRQ_DMA2S5,
-    .shift    = DMA_INT_STREAM5_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(5),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 5,
+      .irq      = STM32_IRQ_DMA2S5,
+      .shift    = DMA_INT_STREAM5_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(5),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 6,
-    .irq      = STM32_IRQ_DMA2S6,
-    .shift    = DMA_INT_STREAM6_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(6),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 6,
+      .irq      = STM32_IRQ_DMA2S6,
+      .shift    = DMA_INT_STREAM6_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(6),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 7,
-    .irq      = STM32_IRQ_DMA2S7,
-    .shift    = DMA_INT_STREAM7_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(7),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 7,
+      .irq      = STM32_IRQ_DMA2S7,
+      .shift    = DMA_INT_STREAM7_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(7),
+    },
 #endif
 
 #ifdef CONFIG_STM32H7_BDMA
   /* BDMA */
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 0,
-    .irq      = STM32_IRQ_BDMACH1,
-    .shift    = BDMA_CHAN_SHIFT(0),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(0),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 0,
+      .irq      = STM32_IRQ_BDMACH1,
+      .shift    = BDMA_CHAN_SHIFT(0),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(0),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 1,
-    .irq      = STM32_IRQ_BDMACH2,
-    .shift    = BDMA_CHAN_SHIFT(1),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(1),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 1,
+      .irq      = STM32_IRQ_BDMACH2,
+      .shift    = BDMA_CHAN_SHIFT(1),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(1),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 2,
-    .irq      = STM32_IRQ_BDMACH3,
-    .shift    = BDMA_CHAN_SHIFT(2),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(2),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 2,
+      .irq      = STM32_IRQ_BDMACH3,
+      .shift    = BDMA_CHAN_SHIFT(2),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(2),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 3,
-    .irq      = STM32_IRQ_BDMACH4,
-    .shift    = BDMA_CHAN_SHIFT(3),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(3),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 3,
+      .irq      = STM32_IRQ_BDMACH4,
+      .shift    = BDMA_CHAN_SHIFT(3),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(3),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 4,
-    .irq      = STM32_IRQ_BDMACH5,
-    .shift    = BDMA_CHAN_SHIFT(4),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(4),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 4,
+      .irq      = STM32_IRQ_BDMACH5,
+      .shift    = BDMA_CHAN_SHIFT(4),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(4),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 5,
-    .irq      = STM32_IRQ_BDMACH6,
-    .shift    = BDMA_CHAN_SHIFT(5),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(5),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 5,
+      .irq      = STM32_IRQ_BDMACH6,
+      .shift    = BDMA_CHAN_SHIFT(5),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(5),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 6,
-    .irq      = STM32_IRQ_BDMACH7,
-    .shift    = BDMA_CHAN_SHIFT(6),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(6),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 6,
+      .irq      = STM32_IRQ_BDMACH7,
+      .shift    = BDMA_CHAN_SHIFT(6),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(6),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 7,
-    .irq      = STM32_IRQ_BDMACH8,
-    .shift    = BDMA_CHAN_SHIFT(7),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(7),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 7,
+      .irq      = STM32_IRQ_BDMACH8,
+      .shift    = BDMA_CHAN_SHIFT(7),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(7),
+    },
 #endif
 };
 
