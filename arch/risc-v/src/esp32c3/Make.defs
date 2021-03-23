@@ -117,7 +117,7 @@ clean_context::
 
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)include)
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)include$(DELIM)esp32c3)
-CHIP_CSRCS += esp32c3_wlan.c esp32c3_wifi_adapter.c
+CHIP_CSRCS += esp32c3_wlan.c esp32c3_wifi_utils.c esp32c3_wifi_adapter.c
 
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)libs$(DELIM)esp32c3
 EXTRA_LIBS += -lcore -lnet80211 -lpp -lsmartconfig -lcoexist -lespnow -lphy -lwpa_supplicant -lwapi
