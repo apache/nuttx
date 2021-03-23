@@ -140,5 +140,14 @@ void *host_calloc(size_t n, size_t elem_size)
 
 void *host_memalign(size_t alignment, size_t size)
 {
-  return aligned_alloc(alignment, size);
+  void *p;
+  int error;
+
+  error = posix_memalign(&p, alignment, size);
+  if (error != 0)
+    {
+      return NULL;
+    }
+
+  return p;
 }
