@@ -195,6 +195,7 @@ endif
 
 ifeq ($(CONFIG_SIM_SANITIZE),y)
   CCLINKFLAGS += -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
+  HOSTLDFLAGS += -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 endif
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
