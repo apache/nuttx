@@ -167,7 +167,6 @@
 #define STM32_RCC_DCKCFGR2_SDMMC2SRC  RCC_DCKCFGR2_SDMMC2SEL_48MHZ
 #define STM32_RCC_DCKCFGR2_DSISRC     RCC_DCKCFGR2_DSISEL_PHY
 
-
 /* Several prescalers allow the configuration of the two AHB buses, the
  * high-speed APB (APB2) and the low-speed APB (APB1) domains. The maximum
  * frequency of the two AHB buses is 216 MHz while the maximum frequency of
@@ -248,7 +247,7 @@
 #  define GPIO_SDMMC2_D3 GPIO_SDMMC2_D3_1
 #endif
 
-/* DMA Channel/Stream Selections *********************************************/
+/* DMA Channel/Stream Selections ********************************************/
 
 /* Stream selections are arbitrary for now but might become important in the
  * future if we set aside more DMA channels/streams.
@@ -266,7 +265,6 @@
 
 #define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
 #define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
-
 
 /* FLASH wait states
  *
@@ -359,12 +357,12 @@
 
 /* PWM
  * Use Timer 3
-*/
+ */
+
 #define GPIO_TIM3_CH1OUT GPIO_TIM3_CH1OUT_1
 #define GPIO_TIM3_CH2OUT GPIO_TIM3_CH2OUT_1
 #define GPIO_TIM3_CH3OUT GPIO_TIM3_CH3OUT_1
 #define GPIO_TIM3_CH4OUT GPIO_TIM3_CH4OUT_1
-
 
 #define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_1
 #define GPIO_TIM2_CH1OUT GPIO_TIM2_CH1OUT_1
@@ -375,8 +373,8 @@
 
 /* USART6:
  *
- * These configurations assume that you are using a standard Arduio RS-232 shield
- * with the serial interface with RX on pin D0 and TX on pin D1:
+ * These configurations assume that you are using a standard Arduio RS-232
+ * shield with the serial interface with RX on pin D0 and TX on pin D1:
  *
  *   -------- ---------------
  *               STM32F7
