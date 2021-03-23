@@ -394,12 +394,98 @@ int up_cpu_resume(int cpu)
 void sim_sigdeliver(void)
 {
   int cpu = this_cpu();
-  struct tcb_s *tcb = current_task(cpu);
+  struct tcb_s *rtcb = current_task(cpu);
 
-  if (tcb->xcp.sigdeliver)
+  if (NULL == (rtcb->xcp.sigdeliver))
     {
-      sinfo("Delivering signals TCB=%p\n", tcb);
-      ((sig_deliver_t)tcb->xcp.sigdeliver)(tcb);
-      tcb->xcp.sigdeliver = NULL;
+      return;
     }
+
+  /* NOTE: we enter critical section here for sim instead of
+   * up_irq_enable() up_irq_save() used in other architectures
+   */
+
+  irqstate_t flags = enter_critical_section();
+
+  /* Save the errno.  This must be preserved throughout the signal handling
+   * so that the user code final gets the correct errno value (probably
+   * EINTR).
+   */
+
+  int saved_errno = get_errno();
+
+#ifdef CONFIG_SMP
+  /* In the SMP case, we must terminate the critical section while the signal
+   * handler executes, but we also need to restore the irqcount when the
+   * we resume the main thread of the task.
+   */
+
+  int16_t saved_irqcount;
+#endif
+
+  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+
+  /* NOTE: we do not save the return state for sim */
+
+#ifdef CONFIG_SMP
+  /* In the SMP case, up_schedule_sigaction(0) will have incremented
+   * 'irqcount' in order to force us into a critical section.  Save the
+   * pre-incremented irqcount.
+   */
+
+  saved_irqcount = rtcb->irqcount;
+  DEBUGASSERT(saved_irqcount >= 0);
+
+  /* Now we need call leave_critical_section() repeatedly to get the irqcount
+   * to zero, freeing all global spinlocks that enforce the critical section.
+   */
+
+  do
+    {
+      leave_critical_section(flags);
+    }
+  while (rtcb->irqcount > 0);
+#endif /* CONFIG_SMP */
+
+  /* Deliver the signal */
+
+  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+
+  /* Output any debug messages BEFORE restoring errno (because they may
+   * alter errno), then disable interrupts again and restore the original
+   * errno that is needed by the user logic (it is probably EINTR).
+   *
+   * I would prefer that all interrupts are disabled when
+   * up_fullcontextrestore() is called, but that may not be necessary.
+   */
+
+  sinfo("Resuming\n");
+
+#ifdef CONFIG_SMP
+  /* Restore the saved 'irqcount' and recover the critical section
+   * spinlocks.
+   */
+
+  DEBUGASSERT(rtcb->irqcount == 0);
+  while (rtcb->irqcount < saved_irqcount)
+    {
+      enter_critical_section();
+    }
+#endif
+
+  /* Restore the saved errno value */
+
+  set_errno(saved_errno);
+
+  /* Allows next handler to be scheduled */
+
+  rtcb->xcp.sigdeliver = NULL;
+
+  /* NOTE: we leave a critical section here for sim */
+
+  leave_critical_section(flags);
+
+  /* NOTE: we do not restore the return state for sim */
 }
