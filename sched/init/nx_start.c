@@ -816,16 +816,29 @@ void nx_start(void)
   syslog(LOG_INFO, "CPU0: Beginning Idle Loop\n");
   for (; ; )
     {
-      /* Check heap & stack in idle thread */
-
-      kmm_checkcorruption();
-
 #if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_DEBUG_MM)
+      irqstate_t flags;
+
+      /* Check stack in idle thread */
+
+      flags = enter_critical_section();
+
       for (i = 0; i < CONFIG_MAX_TASKS && g_pidhash[i].tcb; i++)
         {
-          assert(up_check_tcbstack_remain(g_pidhash[i].tcb) > 0);
+          if (up_check_tcbstack_remain(g_pidhash[i].tcb) <= 0)
+            {
+              _alert("Stack check failed, pid %d, name %s\n",
+                      g_pidhash[i].tcb->pid, g_pidhash[i].tcb->name);
+              PANIC();
+            }
         }
+
+      leave_critical_section(flags);
 #endif
+
+      /* Check heap in idle thread */
+
+      kmm_checkcorruption();
 
       /* Perform any processor-specific idle state operations */
 
