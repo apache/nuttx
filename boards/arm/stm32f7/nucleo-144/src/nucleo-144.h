@@ -182,15 +182,9 @@
 
 /* GPIO pins used by the GPIO Subsystem */
 
-#define BOARD_NGPIOIN        4    /* Amount of GPIO Input pins */
-#define BOARD_NGPIOOUT    4    /* Amount of GPIO Output pins */
-#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
-
-/*
-#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN0)
-#define GPIO_OUT1         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
-                           GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN1)
-*/
+#define BOARD_NGPIOIN     4   /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    4   /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1   /* Amount of GPIO Input w/ Interruption pins */
 
 #define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
 
@@ -323,7 +317,7 @@ int stm32_bbsram_int(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_QENCODER
-int stm32F746_qencoder_initialize(FAR const char *devpath, int timer);
+int stm32f7_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */
