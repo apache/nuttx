@@ -72,4 +72,12 @@ ifeq ($(CONFIG_STM32_ROMFS),y)
 CSRCS += stm32_romfs_initialize.c
 endif
 
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
+CSRCS += stm32_qencoder.c
+endif
+
+ifeq ($(CONFIG_CAN),y)
+CSRCS += stm32_can.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

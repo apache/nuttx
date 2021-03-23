@@ -182,14 +182,31 @@
 
 /* GPIO pins used by the GPIO Subsystem */
 
-#define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
-#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOIN        4    /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    4    /* Amount of GPIO Output pins */
 #define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
 
+/*
 #define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN0)
 #define GPIO_OUT1         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
                            GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN1)
+*/
+
 #define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
+
+#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN8)
+#define GPIO_IN2          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN7)
+#define GPIO_IN3          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN10)
+#define GPIO_IN4          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN12)
+
+#define GPIO_OUT1         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
+                                          GPIO_OUTPUT_SET | GPIO_PORTF | GPIO_PIN13)
+#define GPIO_OUT2         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
+                                          GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN9)
+#define GPIO_OUT3         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
+                                          GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN11)
+#define GPIO_OUT4         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
+                                          GPIO_OUTPUT_SET | GPIO_PORTF | GPIO_PIN14)
 
 /****************************************************************************
  * Public Data
@@ -299,6 +316,14 @@ int stm32_adc_setup(void);
 
 #ifdef CONFIG_STM32F7_BBSRAM
 int stm32_bbsram_int(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32F746_qencoder_initialize
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_QENCODER
+int stm32F746_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */
