@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/esp32c3_wlan.h
+ * arch/risc-v/src/esp32c3/esp32c3_wifi_utils.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,16 +18,17 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WLAN_H
-#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WLAN_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_UTILS_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_UTILS_H
 
-#include "esp32c3_wifi_adapter.h"
+#include <nuttx/config.h>
+#include <nuttx/net/netdev.h>
+
+#include <stdint.h>
 
 #ifndef __ASSEMBLY__
 
@@ -40,53 +41,80 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_ESP32C3_WIRELESS
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_wlan_sta_initialize
+ * Name: esp_wifi_start_scan
  *
  * Description:
- *   Initialize the ESP32-C3 WLAN station netcard driver
+ *   Scan all available APs.
  *
  * Input Parameters:
- *   None
+ *   iwr - The argument of the ioctl cmd
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
-#ifdef ESP32C3_WLAN_HAS_STA
-int esp32c3_wlan_sta_initialize(void);
-#endif
+int esp_wifi_start_scan(struct iwreq *iwr);
 
 /****************************************************************************
- * Name: esp32c3_wlan_softap_initialize
+ * Name: esp_wifi_get_scan_results
  *
  * Description:
- *   Initialize the ESP32-C3 WLAN softAP netcard driver
+ *   Get scan result
+ *
+ * Input Parameters:
+ *   req      The argument of the ioctl cmd
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_get_scan_results(struct iwreq *iwr);
+
+/****************************************************************************
+ * Name: esp_wifi_scan_event_parse
+ *
+ * Description:
+ *   Parse scan information
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
+ *     None
  *
  ****************************************************************************/
 
-#ifdef ESP32C3_WLAN_HAS_SOFTAP
-int esp32c3_wlan_softap_initialize(void);
-#endif
+void esp_wifi_scan_event_parse(void);
 
-#endif /* CONFIG_ESP32C3_WIRELESS */
+/****************************************************************************
+ * Name: esp_wifi_scan_init
+ *
+ * Description:
+ *   Initialize Wi-Fi scan parameter.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK is returned on success. Otherwise, a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int esp_wifi_scan_init(void);
+
 #ifdef __cplusplus
 }
 #endif
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WLAN_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_UTILS_H */

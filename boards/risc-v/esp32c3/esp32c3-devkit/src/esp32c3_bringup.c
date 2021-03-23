@@ -38,7 +38,8 @@
 #include <nuttx/fs/fs.h>
 
 #include "esp32c3_wlan.h"
-
+#include "esp32c3_spiflash.h"
+#include "esp32c3_partition.h"
 #include "esp32c3-devkit.h"
 
 /****************************************************************************
@@ -48,6 +49,46 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32c3_init_wifi_storage
+ *
+ * Description:
+ *   Initialization of saved Wi-Fi parameters
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
+static int esp32c3_init_wifi_storage(void)
+{
+  int ret;
+  const char *path = "/dev/mtdblock1";
+  FAR struct mtd_dev_s *mtd_part;
+
+  mtd_part = esp32c3_spiflash_alloc_mtdpart();
+  if (!mtd_part)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to alloc MTD partition of SPI Flash\n");
+      return -1;
+    }
+
+  ret = register_mtddriver(path, mtd_part, 0777, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register MTD: %d\n", ret);
+      return -1;
+    }
+
+  ret = nx_mount(path, CONFIG_ESP32C3_WIFI_FS_MOUNTPT, "spiffs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n", ret);
+      return ret;
+    }
+
+  return 0;
+}
+#endif
 
 /****************************************************************************
  * Name: esp32c3_bringup
@@ -165,12 +206,36 @@ int esp32c3_bringup(void)
 #endif
 
 #ifdef CONFIG_ESP32C3_WIRELESS
+
+#ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
+  ret = esp32c3_init_wifi_storage();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi storage\n");
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_NET
+#ifdef ESP32C3_WLAN_HAS_STA
   ret = esp32c3_wlan_sta_initialize();
   if (ret)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi station\n");
       return ret;
     }
+#endif
+
+#ifdef ESP32C3_WLAN_HAS_SOFTAP
+  ret = esp32c3_wlan_softap_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi softAP\n");
+      return ret;
+    }
+#endif
+#endif
+
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
