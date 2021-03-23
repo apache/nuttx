@@ -32,10 +32,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/mm.h>
 
-#ifdef CONFIG_SMP
-#  include <nuttx/irq.h>
-#endif
-
 #include "mm_heap/mm.h"
 
 /****************************************************************************
@@ -105,9 +101,6 @@ void mm_seminitialize(FAR struct mm_heap_s *heap)
 int mm_trysemaphore(FAR struct mm_heap_s *heap)
 {
   FAR struct mm_heap_impl_s *heap_impl;
-#ifdef CONFIG_SMP
-  irqstate_t flags = enter_critical_section();
-#endif
   pid_t my_pid = getpid();
   int ret;
 
@@ -181,9 +174,6 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
     }
 
 errout:
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
   return ret;
 }
 
@@ -199,9 +189,6 @@ errout:
 void mm_takesemaphore(FAR struct mm_heap_s *heap)
 {
   FAR struct mm_heap_impl_s *heap_impl;
-#ifdef CONFIG_SMP
-  irqstate_t flags = enter_critical_section();
-#endif
   pid_t my_pid = getpid();
 
   DEBUGASSERT(MM_IS_VALID(heap));
@@ -248,9 +235,6 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
       heap_impl->mm_counts_held = 1;
     }
 
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
   mseminfo("Holder=%d count=%d\n", heap_impl->mm_holder,
             heap_impl->mm_counts_held);
 }
@@ -266,9 +250,6 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
 void mm_givesemaphore(FAR struct mm_heap_s *heap)
 {
   FAR struct mm_heap_impl_s *heap_impl;
-#ifdef CONFIG_SMP
-  irqstate_t flags = enter_critical_section();
-#endif
 
   DEBUGASSERT(MM_IS_VALID(heap));
   heap_impl = heap->mm_impl;
@@ -299,8 +280,4 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
       heap_impl->mm_counts_held = 0;
       DEBUGVERIFY(_SEM_POST(&heap_impl->mm_semaphore));
     }
-
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
 }
