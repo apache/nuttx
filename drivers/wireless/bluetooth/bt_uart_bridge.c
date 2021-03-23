@@ -177,7 +177,7 @@ static int bt_uart_bridge_open(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct bt_uart_bridge_device_s *device = inode->i_private;
 
-  if (filep->f_inode->i_crefs == 1)
+  if (inode->i_crefs == 1)
     {
       device->sendlen = 0;
       circbuf_reset(&device->recvbuf);
@@ -289,6 +289,12 @@ static ssize_t bt_uart_bridge_read(FAR struct file *filep,
             {
               bt_uart_circbuf_write(iterator, bridge->tmpbuf, ret);
             }
+        }
+
+      if (!circbuf_is_empty(&device->recvbuf))
+        {
+          nxsem_post(&bridge->recvlock);
+          break;
         }
 
       nxsem_post(&bridge->recvlock);
