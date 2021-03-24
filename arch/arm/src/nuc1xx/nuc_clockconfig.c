@@ -88,7 +88,7 @@ static inline void nuc_lock(void)
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: nuc_clockconfig
  *
  * Description:
@@ -100,7 +100,7 @@ static inline void nuc_lock(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void nuc_clockconfig(void)
 {
@@ -110,8 +110,8 @@ void nuc_clockconfig(void)
 
   nuc_unlock();
 
-  /* Enable External 4~24 mhz high speed crystal (And other clocks if needed by
-   * other drivers).
+  /* Enable External 4~24 mhz high speed crystal (And other clocks if needed
+   * by other drivers).
    */
 
   regval  = getreg32(NUC_CLK_PWRCON);

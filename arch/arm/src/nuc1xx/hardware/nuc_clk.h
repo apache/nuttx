@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/nuc1xx/hardware/nuc_clk.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_CLK_H
 #define __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_CLK_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Well-known clock frequencies *************************************************************/
+ ****************************************************************************/
+
+/* Well-known clock frequencies *********************************************/
 
 #define NUC_INTHI_FREQUENCY        22118400
 #define NUC_INTLO_FREQUENCY        10000
 
-/* Register offsets *************************************************************************/
+/* Register offsets *********************************************************/
 
 #define NUC_CLK_PWRCON_OFFSET      0x0000 /* System power down control register */
 #define NUC_CLK_AHBCLK_OFFSET      0x0004 /* AHB devices clock enable control register */
@@ -50,7 +51,7 @@
 #define NUC_CLK_PLLCON_OFFSET      0x0020 /* PLL control register */
 #define NUC_CLK_FRQDIV_OFFSET      0x0024 /* Frequency divider control register */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 #define NUC_CLK_PWRCON             (NUC_CLK_BASE+NUC_CLK_PWRCON_OFFSET)
 #define NUC_CLK_AHBCLK             (NUC_CLK_BASE+NUC_CLK_AHBCLK_OFFSET)
@@ -63,7 +64,7 @@
 #define NUC_CLK_PLLCON             (NUC_CLK_BASE+NUC_CLK_PLLCON_OFFSET)
 #define NUC_CLK_FRQDIV             (NUC_CLK_BASE+NUC_CLK_FRQDIV_OFFSET)
 
-/* Register bit-field definitions ***********************************************************/
+/* Register bit-field definitions *******************************************/
 
 /* System power down control register */
 
@@ -133,6 +134,7 @@
 #  define CLK_CLKSEL0_HCLK_S_PLL       (2 << CLK_CLKSEL0_HCLK_S_SHIFT) /* PLL clock */
 #  define CLK_CLKSEL0_HCLK_S_INTLO     (3 << CLK_CLKSEL0_HCLK_S_SHIFT) /* Internal low speed clock */
 #  define CLK_CLKSEL0_HCLK_S_INTHI     (7 << CLK_CLKSEL0_HCLK_S_SHIFT) /* Internal high speed clock */
+
 #define CLK_CLKSEL0_STCLK_S_SHIFT  (3)       /* Bits 3-5: Cortex M0 Systick clock source select */
 #define CLK_CLKSEL0_STCLK_S_MASK   (7 << CLK_CLKSEL0_STCLK_S_SHIFT)
 #  define CLK_CLKSEL0_STCLK_S_XTALHI   (0 << CLK_CLKSEL0_STCLK_S_SHIFT) /* High speed XTAL clock */
@@ -147,46 +149,54 @@
 #define CLK_CLKSEL1_WDT_S_MASK     (3 << CLK_CLKSEL1_WDT_S_SHIFT)
 #  define CLK_CLKSEL1_ADC_S_HCLKDIV    (2 << CLK_CLKSEL1_WDT_S_SHIFT) /* HCLK / 2048 */
 #  define CLK_CLKSEL1_ADC_S_INTLO      (3 << CLK_CLKSEL1_WDT_S_SHIFT) /* Internal low speed clock */
+
 #define CLK_CLKSEL1_ADC_S_SHIFT    (2)       /* Bits 2-3: ADC clock source select */
 #define CLK_CLKSEL1_ADC_S_MASK     (3 << CLK_CLKSEL1_ADC_S_SHIFT)
 #  define CLK_CLKSEL1_ADC_S_XTALHI     (0 << CLK_CLKSEL1_ADC_S_SHIFT) /* High speed XTAL clock */
 #  define CLK_CLKSEL1_ADC_S_PLL        (1 << CLK_CLKSEL1_ADC_S_SHIFT) /* PLL */
 #  define CLK_CLKSEL1_ADC_S_INTHI      (3 << CLK_CLKSEL1_ADC_S_SHIFT) /* Internal high speed clock */
+
 #define CLK_CLKSEL1_TMR0_S_SHIFT   (8)       /* Bits 8-10: Timer0 clock source select */
 #define CLK_CLKSEL1_TMR0_S_MASK    (7 << CLK_CLKSEL1_TMR0_S_SHIFT)
 #  define CLK_CLKSEL1_TMR0_S_XTALHI    (0 << CLK_CLKSEL1_TMR0_S_SHIFT) /* High speed XTAL clock */
 #  define CLK_CLKSEL1_TMR0_S_XTALLO    (1 << CLK_CLKSEL1_TMR0_S_SHIFT) /* Low speed XTAL clock */
 #  define CLK_CLKSEL1_TMR0_S_HCLK      (2 << CLK_CLKSEL1_TMR0_S_SHIFT) /* HCLK */
 #  define CLK_CLKSEL1_TMR0_S_INTHI     (7 << CLK_CLKSEL1_TMR0_S_SHIFT) /* Internal high speed clock */
+
 #define CLK_CLKSEL1_TMR1_S_SHIFT   (12)      /* Bits 12-14: Timer1 clock source select */
 #define CLK_CLKSEL1_TMR1_S_MASK    (7 << CLK_CLKSEL1_TMR1_S_SHIFT)
 #  define CLK_CLKSEL1_TMR1_S_XTALHI    (0 << CLK_CLKSEL1_TMR1_S_SHIFT) /* High speed XTAL clock */
 #  define CLK_CLKSEL1_TMR1_S_XTALLO    (1 << CLK_CLKSEL1_TMR1_S_SHIFT) /* Low speed XTAL clock */
 #  define CLK_CLKSEL1_TMR1_S_HCLK      (2 << CLK_CLKSEL1_TMR1_S_SHIFT) /* HCLK */
 #  define CLK_CLKSEL1_TMR1_S_INTHI     (7 << CLK_CLKSEL1_TMR1_S_SHIFT) /* Internal high speed clock */
+
 #define CLK_CLKSEL1_TMR2_S_SHIFT   (16)      /* Bits 16-18: Timer2 clock source select */
 #define CLK_CLKSEL1_TMR2_S_MASK    (7 << CLK_CLKSEL1_TMR2_S_SHIFT)
 #  define CLK_CLKSEL1_TMR2_S_XTALHI    (0 << CLK_CLKSEL1_TMR2_S_SHIFT) /* High speed XTAL clock */
 #  define CLK_CLKSEL1_TMR2_S_XTALLO    (1 << CLK_CLKSEL1_TMR2_S_SHIFT) /* Low speed XTAL clock */
 #  define CLK_CLKSEL1_TMR2_S_HCLK      (2 << CLK_CLKSEL1_TMR2_S_SHIFT) /* HCLK */
 #  define CLK_CLKSEL1_TMR2_S_INTHI     (7 << CLK_CLKSEL1_TMR2_S_SHIFT) /* Internal high speed clock */
+
 #define CLK_CLKSEL1_TMR3_S_SHIFT   (20)      /* Bits 20-22: Timer3 clock source select */
 #define CLK_CLKSEL1_TMR3_S_MASK    (7 << CLK_CLKSEL1_TMR3_S_SHIFT)
 #  define CLK_CLKSEL1_TMR3_S_XTALHI    (0 << CLK_CLKSEL1_TMR3_S_SHIFT) /* High speed XTAL clock */
 #  define CLK_CLKSEL1_TMR3_S_XTALLO    (1 << CLK_CLKSEL1_TMR3_S_SHIFT) /* Low speed XTAL clock */
 #  define CLK_CLKSEL1_TMR3_S_HCLK      (2 << CLK_CLKSEL1_TMR3_S_SHIFT) /* HCLK */
 #  define CLK_CLKSEL1_TMR3_S_INTHI     (7 << CLK_CLKSEL1_TMR3_S_SHIFT) /* Internal high speed clock */
+
 #define CLK_CLKSEL1_UART_S_SHIFT   (24)      /* Bits 24-25: UART clock source select */
 #define CLK_CLKSEL1_UART_S_MASK    (3 << CLK_CLKSEL1_UART_S_SHIFT)
 #  define CLK_CLKSEL1_UART_S_XTALHI    (0 << CLK_CLKSEL1_UART_S_SHIFT) /* High speed XTAL clock */
 #  define CLK_CLKSEL1_UART_S_PLL       (1 << CLK_CLKSEL1_UART_S_SHIFT) /* PLL */
 #  define CLK_CLKSEL1_UART_S_INTHI     (3 << CLK_CLKSEL1_UART_S_SHIFT) /* Internal high speed clock */
+
 #define CLK_CLKSEL1_PWM01_S_SHIFT  (28)      /* Bits 28-29: PWM0 and PWM1 clock source select */
 #define CLK_CLKSEL1_PWM01_S_MASK   (3 << CLK_CLKSEL1_PWM01_S_SHIFT)
 #  define CLK_CLKSEL1_PWM01_S_XTALHI   (0 << CLK_CLKSEL1_PWM01_S_SHIFT) /* High speed XTAL clock */
 #  define CLK_CLKSEL1_PWM01_S_XTALLO   (1 << CLK_CLKSEL1_PWM01_S_SHIFT) /* Low speed XTAL clock */
 #  define CLK_CLKSEL1_PWM01_S_HCLK     (2 << CLK_CLKSEL1_PWM01_S_SHIFT) /* HCLK */
 #  define CLK_CLKSEL1_PWM01_S_INTHI    (3 << CLK_CLKSEL1_PWM01_S_SHIFT) /* Internal high speed clock */
+
 #define CLK_CLKSEL1_PWM23_S_SHIFT  (30)      /* Bits 30-31: PWM2 and PWM3 clock source select */
 #define CLK_CLKSEL1_PWM23_S_MASK   (3 << CLK_CLKSEL1_PWM23_S_SHIFT)
 #  define CLK_CLKSEL1_PWM23_S_XTALHI   (0 << CLK_CLKSEL1_PWM23_S_SHIFT) /* High speed XTAL clock */
@@ -202,17 +212,20 @@
 #  define CLK_CLKSEL1_I2S_S_XTALLO     (1 << CLK_CLKSEL2_I2S_S_SHIFT) /* Low speed XTAL clock */
 #  define CLK_CLKSEL1_I2S_S_HCLK       (2 << CLK_CLKSEL2_I2S_S_SHIFT) /* HCLK */
 #  define CLK_CLKSEL1_I2S_S_INTHI      (3 << CLK_CLKSEL2_I2S_S_SHIFT) /* Internal high speed clock */
+
 #define CLK_CLKSEL2_FRQDIV_S_SHIFT (2)       /* Bits 2-3: Frequency divider clock source select */
 #define CLK_CLKSEL2_FRQDIV_S_MASK  (3 << CLK_CLKSEL2_FRQDIV_S_SHIFT)
 #  define CLK_CLKSEL1_FRQDIV_S_XTALHI  (0 << CLK_CLKSEL2_FRQDIV_S_SHIFT) /* High speed XTAL clock */
 #  define CLK_CLKSEL1_FRQDIV_S_XTALLO  (1 << CLK_CLKSEL2_FRQDIV_S_SHIFT) /* Low speed XTAL clock */
 #  define CLK_CLKSEL1_FRQDIV_S_HCLK    (2 << CLK_CLKSEL2_FRQDIV_S_SHIFT) /* HCLK */
+
 #define CLK_CLKSEL2_PWM45_S_SHIFT  (4)       /* Bits 4-5: PWM4 and PWM5 clock source select */
 #define CLK_CLKSEL2_PWM45_S_MASK   (3 << CLK_CLKSEL2_PWM45_S_SHIFT)
 #  define CLK_CLKSEL1_PWM45_S_XTALHI   (0 << CLK_CLKSEL2_PWM45_S_SHIFT) /* High speed XTAL clock */
 #  define CLK_CLKSEL1_PWM45_S_XTALLO   (1 << CLK_CLKSEL2_PWM45_S_SHIFT) /* Low speed XTAL clock */
 #  define CLK_CLKSEL1_PWM45_S_HCLK     (2 << CLK_CLKSEL2_PWM45_S_SHIFT) /* HCLK */
 #  define CLK_CLKSEL1_PWM45_S_INTHI    (3 << CLK_CLKSEL2_PWM45_S_SHIFT) /* Internal high speed clock */
+
 #define CLK_CLKSEL2_PWM67_S_SHIFT  (6)       /* Bits 6-7: PWM6 and PWM7 clock source select */
 #define CLK_CLKSEL2_PWM67_S_MASK   (3 << CLK_CLKSEL2_PWM67_S_SHIFT)
 #  define CLK_CLKSEL1_PWM67_S_XTALHI   (0 << CLK_CLKSEL2_PWM67_S_SHIFT) /* High speed XTAL clock */
@@ -225,12 +238,15 @@
 #define CLK_CLKDIV_HCLK_N_SHIFT    (0) /* Bits 0-3: HCLCK divide from clock source */
 #define CLK_CLKDIV_HCLK_N_MASK     (15 << CLK_CLKDIV_HCLK_N_SHIFT)
 #  define CLK_CLKDIV_HCLK_N(n)     (((n)-1) << CLK_CLKDIV_HCLK_N_SHIFT) /* n=1..16 */
+
 #define CLK_CLKDIV_USB_N_SHIFT     (4) /* Bits 4-7: USBD divide from clock source */
 #define CLK_CLKDIV_USB_N_MASK      (15 << CLK_CLKDIV_USB_N_SHIFT)
 #  define CLK_CLKDIV_USB_N(n)      (((n)-1) << CLK_CLKDIV_USB_N_SHIFT) /* n=1..16 */
+
 #define CLK_CLKDIV_UART_N_SHIFT    (8) /* Bits 8-11 UART divide from clock source */
 #define CLK_CLKDIV_UART_N_MASK     (15 << CLK_CLKDIV_UART_N_SHIFT)
 #  define CLK_CLKDIV_UART_N(n)     (((n)-1) << CLK_CLKDIV_UART_N_SHIFT) /* n=1..16 */
+
 #define CLK_CLKDIV_ADC_N_SHIFT     (16) /* Bits 16-23: ADC divide from clock source */
 #define CLK_CLKDIV_ADC_N_MASK      (255 << CLK_CLKDIV_ADC_N_SHIFT)
 #  define CLK_CLKDIV_ADC_N(n)      (((n)-1) << CLK_CLKDIV_UART_N_SHIFT) /* n=1..256 */
@@ -256,18 +272,19 @@
 #define CLK_FRQDIV_FSEL_SHIFT      (0)       /* Bits 0-3: Divider output frequency selection bits */
 #define CLK_FRQDIV_FSEL_MASK       (15 << CLK_FRQDIV_FSEL_SHIFT)
 #  define CLK_FRQDIV_FSEL(n)       ((n) << CLK_FRQDIV_FSEL_SHIFT) /* fout = fin / (2^(n+1)) */
+
 #define CLK_FRQDIV_DIVIDER_EN      (1 << 4)  /* Bit 4: Frequency divider enable bit */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_CLK_H */

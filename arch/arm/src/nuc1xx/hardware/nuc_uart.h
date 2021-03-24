@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/nuc1xx/hardware/nuc_uart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_UART_H
 #define __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_UART_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Register offsets *************************************************************************/
+ ****************************************************************************/
+
+/* Register offsets *********************************************************/
 
 #define NUC_UART_RBR_OFFSET        0x0000 /* UART receive buffer register */
 #define NUC_UART_THR_OFFSET        0x0000 /* UART transmit holding register */
@@ -49,7 +50,7 @@
 #define NUC_UART_ALT_CSR_OFFSET    0x002c /* UART alternate control/status register */
 #define NUC_UART_FUN_SEL_OFFSET    0x0030 /* UART function select register */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 #define NUC_UART0_RBR              (NUC_UART0_BASE+NUC_UART_RBR_OFFSET)
 #define NUC_UART0_THR              (NUC_UART0_BASE+NUC_UART_THR_OFFSET)
@@ -96,7 +97,7 @@
 #define NUC_UART2_ALT_CSR          (NUC_UART2_BASE+NUC_UART_ALT_CSR_OFFSET)
 #define NUC_UART2_FUN_SEL          (NUC_UART2_BASE+NUC_UART_FUN_SEL_OFFSET)
 
-/* Register bit-field definitions ***********************************************************/
+/* Register bit-field definitions *******************************************/
 
 /* UART receive buffer register */
 
@@ -137,6 +138,7 @@
 #  define UART_FCR_RFITL_30        (4 << UART_FCR_RFITL_SHIFT) /* High speed */
 #  define UART_FCR_RFITL_46        (5 << UART_FCR_RFITL_SHIFT) /* High speed */
 #  define UART_FCR_RFITL_62        (6 << UART_FCR_RFITL_SHIFT) /* High speed */
+
 #define UART_FCR_RX_DIS            (1 << 8)  /* Bit 8:  Receive disable register */
 #define UART_FCR_RTS_TRI_LEV_SHIFT (16)      /* Bits 16-19: RTS trigger level for auto flow control */
 #define UART_FCR_RTS_TRI_LEV_MASK  (15 << UART_FCR_RTS_TRI_LEV_SHIFT)
@@ -260,16 +262,16 @@
 #  define UART_FUN_SEL_IRDA        (2 << UART_FUN_SEL_SHIFT)
 #  define UART_FUN_SEL_RS485       (3 << UART_FUN_SEL_SHIFT) /* Low density only */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_UART_H */

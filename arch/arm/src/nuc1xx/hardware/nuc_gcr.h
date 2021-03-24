@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/nuc1xx/hardware/nuc_gcr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_GCR_H
 #define __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_GCR_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Register offsets *************************************************************************/
+ ****************************************************************************/
+
+/* Register offsets *********************************************************/
 
 #define NUC_GCR_PDID_OFFSET      0x0000  /* Part didentification number register */
 #define NUC_GCR_RSTSRC_OFFSET    0x0004  /* System reset source register */
@@ -50,7 +51,7 @@
 #define NUC_GCR_ALT_MFP_OFFSET   0x0050  /* Alternative multiple function pin control register */
 #define NUC_GCR_REGWRPROT_OFFSET 0x0100  /* Register write-protection control register */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 #define NUC_GCR_PDID             (NUC_GCR_BASE+NUC_GCR_PDID_OFFSET)
 #define NUC_GCR_RSTSRC           (NUC_GCR_BASE+NUC_GCR_RSTSRC_OFFSET)
@@ -68,7 +69,7 @@
 #define NUC_GCR_ALT_MFP          (NUC_GCR_BASE+NUC_GCR_ALT_MFP_OFFSET)
 #define NUC_GCR_REGWRPROT        (NUC_GCR_BASE+NUC_GCR_REGWRPROT_OFFSET)
 
-/* Register bit-field definitions ***********************************************************/
+/* Register bit-field definitions *******************************************/
 
 /* Part didentification number register (32-bit part ID number) */
 
@@ -120,12 +121,13 @@
 /* Brown-out detector control register */
 
 #define GCR_BODCR_BOD_EN         (1 << 0)  /* Bit 0:  Brown-ut detector enable */
-#define GCR_BODCR_BOD_VL_SHIFT   (1) /* Bits 1-2: Brown-out detector threshold voltage selection */
+#define GCR_BODCR_BOD_VL_SHIFT   (1)       /* Bits 1-2: Brown-out detector threshold voltage selection */
 #define GCR_BODCR_BOD_VL_MASK    (3 << GCR_BODCR_BOD_VL_SHIFT)
 #  define GCR_BODCR_BOD_VL_2p2V  (0 << GCR_BODCR_BOD_VL_SHIFT) /* 2.2V */
 #  define GCR_BODCR_BOD_VL_2p7V  (1 << GCR_BODCR_BOD_VL_SHIFT) /* 2.7V */
 #  define GCR_BODCR_BOD_VL_3p8V  (2 << GCR_BODCR_BOD_VL_SHIFT) /* 3.8V */
 #  define GCR_BODCR_BOD_VL_4p5V  (3 << GCR_BODCR_BOD_VL_SHIFT) /* 4.5V */
+
 #define GCR_BODCR_BOD_RSTEN      (1 << 3)  /* Bit 3:  Brown-out reset enable */
 #define GCR_BODCR_BOD_INTF       (1 << 4)  /* Bit 4:  Brown-out deletector interrupt flag */
 #define GCR_BODCR_BOD_LPM        (1 << 5)  /* Bit 5:  Brown-out detector low power mode */
@@ -343,16 +345,16 @@
                                            /* Read: */
 #define GCR_REGWRPROT_DIS        (1 << 0)  /* Bit 0: Register write protection disable index */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_GCR_H */
