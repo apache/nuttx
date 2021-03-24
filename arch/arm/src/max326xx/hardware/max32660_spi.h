@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max32660_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_SPI_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_SPI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define MAX326_SPI_FIFO_DEPTH       32
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define MAX326_SPI_DATA_OFFSET      0x0000  /* SPI FIFO Data Register */
 #define MAX326_SPI_CTRL0_OFFSET     0x0004  /* SPI Master Signals Control Register */
@@ -49,7 +49,7 @@
 #define MAX326_SPI_WAKEEN_OFFSET    0x002c  /* SPI Wakeup Enable Register */
 #define MAX326_SPI_STAT_OFFSET      0x0030  /* SPI Active Status Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define MAX326_SPI0_DATA            (MAX326_SPI0_BASE + MAX326_SPI_DATA_OFFSET)
 #define MAX326_SPI0_CTRL0           (MAX326_SPI0_BASE + MAX326_SPI_CTRL0_OFFSET)
@@ -64,7 +64,7 @@
 #define MAX326_SPI0_WAKEEN          (MAX326_SPI0_BASE + MAX326_SPI_WAKEEN_OFFSET)
 #define MAX326_SPI0_STAT            (MAX326_SPI0_BASE + MAX326_SPI_STAT_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* SPI FIFO Data Register (SPI data up to 32-bits wide) */
 
@@ -75,6 +75,7 @@
 #define SPI_CTRL0_SSIO              (1 << 4)  /* Bit 4:  Slave Select Output (master) */
 #define SPI_CTRL0_START             (1 << 5)  /* Bit 5:  Start Data Transmission (master) */
 #define SPI_CTRL0_SSCTRL            (1 << 8)  /* Bit 8:  Slave Select Control (master) */
+
 #define SPI_CTRL0_SSSEL(n)          (1 << ((n) + 16)) /* Bits 16-19: Slave Select n
                                                        *             Enable, n=0 */
 
@@ -98,6 +99,7 @@
 #define SPI_CTRL2_DATWIDTH_MASK     (3 << SPI_CTRL2_DATWIDTH_SHIFT)
 #  define SPI_CTRL2_DATWIDTH_SINGLE (0 << SPI_CTRL2_DATWIDTH_SHIFT) /* MOSI */
 #  define SPI_CTRL2_DATWIDTH_DUAL   (1 << SPI_CTRL2_DATWIDTH_SHIFT) /* MOSI/MISO */
+
 #define SPI_CTRL2_3WIRE             (1 << 15) /* Bit 15: Three-Wire Mode Enable */
 #define SPI_CTRL2_SSPOL             (1 << 16) /* Bit 16: Slave Select Polarity */
 

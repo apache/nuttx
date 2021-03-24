@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max32660_tmr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_TMR_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_TMR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define MAX326_TMR_CNT_OFFSET       0x0000  /* Timer Counter Register */
 #define MAX326_TMR_CMP_OFFSET       0x0004  /* Timer Compare Register */
@@ -40,7 +40,7 @@
 #define MAX326_TMR_INT_OFFSET       0x000c  /* Timer Interrupt Register */
 #define MAX326_TMR_CN_OFFSET        0x0010  /* Timer Control Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define MAX326_TMR0_CNT             (MAX326_TMR0_BASE + MAX326_TMR_CNT_OFFSET)
 #define MAX326_TMR0_CMP             (MAX326_TMR0_BASE + MAX326_TMR_CMP_OFFSET)
@@ -60,10 +60,12 @@
 #define MAX326_TMR2_INT             (MAX326_TMR2_BASE + MAX326_TMR_INT_OFFSET)
 #define MAX326_TMR2_CN              (MAX326_TMR2_BASE + MAX326_TMR_CN_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Timer Counter Register (32-bit count value) */
+
 /* Timer Compare Register (32-bit compare value) */
+
 /* Timer PWM Register (32-bit match or timer capture value) */
 
 /* Timer Interrupt Register */
@@ -99,6 +101,7 @@
 #  define TMR_CN_TMODE_COMPARE      (5 << TMR_CN_TMODE_SHIFT) /* Compare */
 #  define TMR_CN_TMODE_GATED        (6 << TMR_CN_TMODE_SHIFT) /* Gated */
 #  define TMR_CN_TMODE_CAPCOMP      (7 << TMR_CN_TMODE_SHIFT) /* Capture/Compare */
+
 #define TMR_CN_PRESL_SHIFT          (3)       /* Bits 3-5: Timer Prescaler Select LSBs */
 #define TMR_CN_PRESL_MASK           (7 << TMR_CN_PRESL_SHIFT)
 #  define TMR_CN_PRESL(n)           ((uint32_t)((n) & 7) << TMR_CN_PRESL_SHIFT)

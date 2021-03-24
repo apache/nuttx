@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max326_dma.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_DMA_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* DMA Channels */
 
@@ -65,7 +65,7 @@
 #define MAX326_DMATO_255to256       6  /* 255-256 prescaler clocks */
 #define MAX326_DMATO_511to512       7  /* 511-512 prescaler clocks */
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 /* DMA Control Registers */
 
@@ -89,7 +89,7 @@
 #define MAX326_DMACH_DSTRLD_OFFSET  0x0018  /* DMA Channel Destination Reload Register */
 #define MAX326_DMACH_CNTRLD_OFFSET  0x001c  /* DMA Channel Count Reload Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 /* DMA Control Registers */
 
@@ -113,7 +113,7 @@
 #define MAX326_DMACH_DSTRLD(n)      (MAX326_DMACH_BASE(n) + MAX326_DMACH_DSTRLD_OFFSET)
 #define MAX326_DMACH_CNTRLD(n)      (MAX326_DMACH_BASE(n) + MAX326_DMACH_CNTRLD_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* DMA Control register */
 
@@ -152,6 +152,7 @@
 #  define DMACH_CFG_TOSEL_127to128  (5 << DMACH_CFG_TOSEL_SHIFT) /* 127-128 */
 #  define DMACH_CFG_TOSEL_255to256  (6 << DMACH_CFG_TOSEL_SHIFT) /* 255-256 */
 #  define DMACH_CFG_TOSEL_511to512  (7 << DMACH_CFG_TOSEL_SHIFT) /* 511-512 */
+
 #define DMACH_CFG_PSSEL_SHIFT       (14)      /* Bits 14-15: Pre-Scale Select */
 #define DMACH_CFG_PSSEL_MASK        (3 << DMACH_CFG_PSSEL_SHIFT)
 #  define DMACH_CFG_PSSEL(n)        ((uint32_t)(n) << DMACH_CFG_PSSEL_SHIFT)
@@ -159,6 +160,7 @@
 #  define DMACH_CFG_PSSEL_DIV256    (1 << DMACH_CFG_PSSEL_SHIFT) /* fhclk / 256 */
 #  define DMACH_CFG_PSSEL_DIV64K    (2 << DMACH_CFG_PSSEL_SHIFT) /* fhclk / 64K */
 #  define DMACH_CFG_PSSEL_DIV16M    (3 << DMACH_CFG_PSSEL_SHIFT) /* fhclk / 16M */
+
 #define DMACH_CFG_SRCWD_SHIFT       (16)      /* Bits 16-17: Source Width */
 #define DMACH_CFG_SRCWD_MASK        (3 << DMACH_CFG_SRCWD_SHIFT)
 #  define DMACH_CFG_SRCWD_1BYTE     (0 << DMACH_CFG_SRCWD_SHIFT)
@@ -176,6 +178,7 @@
 #define DMACH_CFG_BRST_SHIFT        (24)      /* Bits 24-28: Burst Size */
 #define DMACH_CFG_BRST_MASK         (31 << DMACH_CFG_BRST_SHIFT)
 #  define DMACH_CFG_BRST(n)         ((uin32_t)((n) - 1) << DMACH_CFG_BRST_SHIFT) /* n=1..32 */
+
 #define DMACH_CFG_CHDIEN            (1 << 30) /* Bit 30: Channel Disable
                                                *         Interrupt Enable */
 #define DMACH_CFG_CTZIEN            (1 << 31) /* Bit 31: CTZ Interrupt Enable */
@@ -237,6 +240,7 @@
 #define DMACH_STAT_TOST             (1 << 6)  /* Bit 6:  Time-Out Status */
 
 /* DMA Channel Source Register (32-bit Source Device Address) */
+
 /* DMA Channel Destination Register (32-bit Destination Device Address) */
 
 /* DMA Channel Count Register */

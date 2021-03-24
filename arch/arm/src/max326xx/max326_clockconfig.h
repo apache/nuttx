@@ -27,12 +27,9 @@
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
 /* Include the MCU-specific structure can be used to define a clock
- * configuration. */
+ * configuration.
+ */
 
 #if defined(CONFIG_ARCH_FAMILY_MAX32620) || defined(CONFIG_ARCH_FAMILY_MAX32630)
 #  include "max32620_30/max32620_30_clockconfig.h"
@@ -41,6 +38,10 @@
 #else
 #  error "Unsupported MAX326XX family"
 #endif
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
 /****************************************************************************
  * Inline Functions

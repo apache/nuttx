@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max32660_i2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_I2C_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_I2C_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define MAX326_I2C_CTRL0_OFFSET     0x0000  /* I2C Control 0 Register */
 #define MAX326_I2C_STATUS_OFFSET    0x0004  /* I2C Status Register */
@@ -54,7 +54,7 @@
 #define MAX326_I2C_SLADDR_OFFSET    0x0044  /* I2C Slave Address Register */
 #define MAX326_I2C_DMA_OFFSET       0x0048  /* I2C DMA Enable Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define MAX326_I2C0_CTRL0           (MAX326_I2C0_BASE + MAX326_I2C_CTRL0_OFFSET)
 #define MAX326_I2C0_STATUS          (MAX326_I2C0_BASE + MAX326_I2C_STATUS_OFFSET)
@@ -96,7 +96,7 @@
 #define MAX326_I2C1_SLADDR          (MAX326_I2C1_BASE + MAX326_I2C_SLADDR_OFFSET)
 #define MAX326_I2C1_DMA             (MAX326_I2C1_BASE + MAX326_I2C_DMA_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* I2C Control 0 Register */
 

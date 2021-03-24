@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max32660_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,26 +16,26 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_GPIO_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define MAX326_GPIO0_NPINS             14      /* Pins 0-13 (max) */
 #define MAX326_GPIO0_ALLPINS           0x3fff  /* Set of all pins */
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define MAX326_GPIO_AF0SEL_OFFSET      0x0000  /* I/O and Alternate Function 1
                                                 * Select Register */
@@ -60,7 +60,7 @@
 #define MAX326_GPIO_DS1SEL_OFFSET      0x00b4  /* Drive Strength Select 1 Register */
 #define MAX326_GPIO_PULLSEL_OFFSET     0x00b8  /* Pullup/Pulldown Enable Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define MAX326_GPIO0_AF0SEL            (MAX326_GPIO_BASE + MAX326_GPIO_AF0SEL_OFFSET)
 #define MAX326_GPIO0_OUTEN             (MAX326_GPIO_BASE + MAX326_GPIO_OUTEN_OFFSET)
@@ -80,7 +80,7 @@
 #define MAX326_GPIO0_DS1SEL            (MAX326_GPIO_BASE + MAX326_GPIO_DS1SEL_OFFSET)
 #define MAX326_GPIO0_PULLSEL           (MAX326_GPIO_BASE + MAX326_GPIO_PULLSEL_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* I/O and Alternate Function 1 Select Register */
 

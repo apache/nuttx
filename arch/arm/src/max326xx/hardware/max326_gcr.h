@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max326_gcr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,30 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_GCR_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_GCR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define MAX326_GCR_SCON_OFFSET      0x0000  /* System Control Register */
 #define MAX326_GCR_RST0_OFFSET      0x0004  /* Reset Register 0 */
@@ -55,7 +54,7 @@
 #define MAX326_GCR_REV_OFFSET       0x0050  /* Revision Register */
 #define MAX326_GCR_SYSIE_OFFSET     0x0054  /* System Status Interrupt Enable */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define MAX326_GCR_SCON             (MAX326_GCR_BASE + MAX326_GCR_SCON_OFFSET)
 #define MAX326_GCR_RST0             (MAX326_GCR_BASE + MAX326_GCR_RST0_OFFSET)
@@ -71,7 +70,7 @@
 #define MAX326_GCR_REV              (MAX326_GCR_BASE + MAX326_GCR_REV_OFFSET)
 #define MAX326_GCR_SYSIE            (MAX326_GCR_BASE + MAX326_GCR_SYSIE_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* System Control Register */
 
@@ -107,6 +106,7 @@
 #  define GCR_CLKCTRL_CLKSEL_HIRC   (0 << GCR_CLKCTRL_CLKSEL_SHIFT) /* High-Frequency Internal Oscillator (HFIO) */
 #  define GCR_CLKCTRL_CLKSEL_LIRC8K (3 << GCR_CLKCTRL_CLKSEL_SHIFT) /* 8kHz Low-Frequency Internal Oscillator */
 #  define GCR_CLKCTRL_CLKSEL_X32K   (6 << GCR_CLKCTRL_CLKSEL_SHIFT) /* 32.768kHz External Oscillator */
+
 #define GCR_CLKCTRL_CLKRDY          (1 << 13) /* Bit 13: System Oscillator Clock Source Ready */
 #define GCR_CLKCTRL_X32KEN          (1 << 17) /* Bit 17: 32.768kHz External Oscillator Enable */
 #define GCR_CLKCTRL_HIRCEN          (1 << 18) /* Bit 18: High-Frequency Internal Oscillator (HFIO) Enable */
@@ -121,6 +121,7 @@
 #  define GCR_PM_MODE_ACTIVE        (0 << GCR_PM_MODE_SHIFT) /* Active mode */
 #  define GCR_PM_MODE_BACKUP        (4 << GCR_PM_MODE_SHIFT) /* Backup Low Power Mode */
 #  define GCR_PM_MODE_SHUTDOWN      (6 << GCR_PM_MODE_SHIFT) /* Shutdown Mode */
+
 #define GCR_PM_GPIOWKEN             (1 << 4)  /* Bit 4:  GPIO Wakeup Enable */
 #define GCR_PM_RTCWKEN              (1 << 5)  /* Bit 5:  RTC Alarm Wakeup Enable */
 #define GCR_PM_HFIOPD               (1 << 15) /* Bit 15: HFIO DEEPSLEEP Auto Off */
