@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am335x_lcd.h
  *
  *   Copyright (C) 2019 Petro Karashchenko. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_LCD_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_LCD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/am335x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AM335X_LCD_PID_OFFSET                   0x0000
 #define AM335X_LCD_CTRL_OFFSET                  0x0004
@@ -84,7 +84,7 @@
 #define AM335X_LCD_DMA_FB_BASE_OFFSET(n)        (0x0044 + (unsigned int)(n) * 0x08)
 #define AM335X_LCD_DMA_FB_CEIL_OFFSET(n)        (0x0048 + (unsigned int)(n) * 0x08)
 
-/* Register virtual addresses *******************************************************/
+/* Register virtual addresses ***********************************************/
 
 #define AM335X_LCD_PID                          (AM335X_LCD_VADDR + AM335X_LCD_PID_OFFSET)
 #define AM335X_LCD_CTRL                         (AM335X_LCD_VADDR + AM335X_LCD_CTRL_OFFSET)
@@ -121,7 +121,7 @@
 #define AM335X_LCD_DMA_FB_BASE(n)               (AM335X_LCD_VADDR + AM335X_LCD_DMA_FB_BASE_OFFSET(n))
 #define AM335X_LCD_DMA_FB_CEIL(n)               (AM335X_LCD_VADDR + AM335X_LCD_DMA_FB_CEIL_OFFSET(n))
 
-/* Register bit field definitions ***************************************************/
+/* Register bit field definitions *******************************************/
 
 #define LCD_CTRL_MODE_SEL                       (1 << 0)  /* Bit 0:  LCD Mode select */
 #  define LCD_CTRL_MODE_LIDD                    (0)
@@ -137,6 +137,7 @@
 #  define LCD_LIDD_CTRL_SYNC_MPU80              (2 << LCD_LIDD_CTRL_MODE_SEL_SHIFT) /* Sync MPU80 */
 #  define LCD_LIDD_CTRL_ASYNC_MPU80             (3 << LCD_LIDD_CTRL_MODE_SEL_SHIFT) /* Async MPU80 */
 #  define LCD_LIDD_CTRL_HITACHI                 (4 << LCD_LIDD_CTRL_MODE_SEL_SHIFT) /* Hitachi (Async) */
+
 #define LCD_LIDD_CTRL_ALEPOL                    (1 << 3)  /* Bit 3:  Address Latch Enable (ALE) Polarity Control */
 #define LCD_LIDD_CTRL_RS_EN_POL                 (1 << 4)  /* Bit 4:  Read Strobe/Direction Polarity Control */
 #define LCD_LIDD_CTRL_WS_DIR_POL                (1 << 5)  /* Bit 5:  Write Strobe/Direction Polarity Control */
@@ -171,6 +172,7 @@
 #define LCD_RASTER_CTRL_LCD_TFT                 (1 << 7)  /* Bit 7:  Active/Passive or display operation selection */
 #define LCD_RASTER_CTRL_RD_ORDER                (1 << 8)  /* Bit 8:  Raster Data Order Select */
 #define LCD_RASTER_CTRL_MONO_8B                 (1 << 9)  /* Bit 9:  Mono 8 bit */
+
 #define LCD_RASTER_CTRL_REQDLY_SHIFT            (12)  /* Bits 12-19:  Palette Loading Delay When loading the Palette from DDR */
 #define LCD_RASTER_CTRL_REQDLY_MASK             (255 << LCD_RASTER_CTRL_REQDLY_SHIFT)
 #define LCD_RASTER_CTRL_PALMODE_SHIFT           (20)  /* Bits 20-21:  Palette Loading Mode */
@@ -178,6 +180,7 @@
 #  define LCD_RASTER_CTRL_PALETTE_DATA          (0 << LCD_RASTER_CTRL_PALMODE_SHIFT) /* Palette and data loading */
 #  define LCD_RASTER_CTRL_PALETTE               (1 << LCD_RASTER_CTRL_PALMODE_SHIFT) /* Palette loading only */
 #  define LCD_RASTER_CTRL_DATA                  (2 << LCD_RASTER_CTRL_PALMODE_SHIFT) /* Data loading only For Raw Data (12/16/24 bpp) framebuffers, no palette lookup is employed */
+
 #define LCD_RASTER_CTRL_NIB_MODE                (1 << 22)  /* Bit 22:  Nibble Mode */
 #define LCD_RASTER_CTRL_TFT_MAP                 (1 << 23)  /* Bit 23:  TFT Mode Alternate Signal Mapping for Palettized framebuffer */
 #define LCD_RASTER_CTRL_STN565                  (1 << 24)  /* Bit 24:  Selects whether the framebuffer format is 16 bpp 565 or 12 bpp. */
@@ -185,7 +188,8 @@
 #define LCD_RASTER_CTRL_TFT24_UNPACKED          (1 << 26)  /* Bit 26:  24 bit Mode Packing */
 
 #define LCD_RASTER_TIMING_0_PPLMSB              (1 << 3)  /* Bit 3:  Pixels-per-line MSB[10] */
-#define LCD_RASTER_TIMING_0_PPLLSB_SHIFT        (4)  /* Bits 4-9:  Pixels-per-line LSB */
+
+#define LCD_RASTER_TIMING_0_PPLLSB_SHIFT        (4)   /* Bits 4-9:  Pixels-per-line LSB */
 #define LCD_RASTER_TIMING_0_PPLLSB_MASK         (63 << LCD_RASTER_TIMING_0_PPLLSB_SHIFT)
 #define LCD_RASTER_TIMING_0_HSW_SHIFT           (10)  /* Bits 10-15:  Horizontal Sync Pulse Width Lowbits*/
 #define LCD_RASTER_TIMING_0_HSW_MASK            (63 << LCD_RASTER_TIMING_0_HSW_SHIFT)
@@ -218,6 +222,7 @@
 #define LCD_RASTER_TIMING_2_PHSVS_RF            (1 << 24)  /* Bit 24:  Program HSYNC/VSYNC Rise or Fall */
 #define LCD_RASTER_TIMING_2_PHSVS_ON            (1 << 25)  /* Bit 25:  Hsync/Vsync Pixel Clock Control On/Off */
 #define LCD_RASTER_TIMING_2_LPP_B10_SHIFT       (26)       /* Bit 26:  Lines Per Panel Bit 10 */
+
 #define LCD_RASTER_TIMING_2_LPP_B10_MASK        (1 << LCD_RASTER_TIMING_2_LPP_B10_SHIFT)
 #define LCD_RASTER_TIMING_2_HSW_HBITS_SHIFT     (27)  /* Bits 27-30:  Bits 9 to 6 of the horizontal sync width field */
 #define LCD_RASTER_TIMING_2_HSW_HBITS_MASK      (15 << LCD_RASTER_TIMING_2_HSW_HBITS_SHITF)
@@ -236,6 +241,7 @@
 #define LCD_DMA_CTRL_FRAME_MODE                 (1 << 0)  /* Bit 0:  Frame Mode */
 #define LCD_DMA_CTRL_BE                         (1 << 1)  /* Bit 1:  Big Endian Enable */
 #define LCD_DMA_CTRL_BYTE_SWAP                  (1 << 3)  /* Bit 3:  Bytelane Ordering */
+
 #define LCD_DMA_CTRL_BURST_SIZE_SHIFT           (4)  /* Bits 4-6:  Burst Size setting for DMA transfers */
 #define LCD_DMA_CTRL_BURST_SIZE_MASK            (7 << LCD_DMA_CTRL_BURST_SIZE_SHIFT)
 #  define LCD_DMA_CTRL_BURST_SIZE_1             (0 << LCD_DMA_CTRL_BURST_SIZE_SHIFT) /* Burst size of 1 */
@@ -243,6 +249,7 @@
 #  define LCD_DMA_CTRL_BURST_SIZE_4             (2 << LCD_DMA_CTRL_BURST_SIZE_SHIFT) /* Burst size of 4 */
 #  define LCD_DMA_CTRL_BURST_SIZE_8             (3 << LCD_DMA_CTRL_BURST_SIZE_SHIFT) /* Burst size of 8 */
 #  define LCD_DMA_CTRL_BURST_SIZE_16            (4 << LCD_DMA_CTRL_BURST_SIZE_SHIFT) /* Burst size of 6 */
+
 #define LCD_DMA_CTRL_TH_FIFO_RDY_SHIFT          (8)  /* Bits 8-10:  DMA FIFO threshold */
 #define LCD_DMA_CTRL_TH_FIFO_RDY_MASK           (7 << LCD_DMA_CTRL_TH_FIFO_RDY_SHIFT)
 #  define LCD_DMA_CTRL_TH_FIFO_RDY_8            (0 << LCD_DMA_CTRL_TH_FIFO_RDY_MASK) /* 8 words have been loaded */
@@ -252,6 +259,7 @@
 #  define LCD_DMA_CTRL_TH_FIFO_RDY_128          (4 << LCD_DMA_CTRL_TH_FIFO_RDY_MASK) /* 128 words have been loaded */
 #  define LCD_DMA_CTRL_TH_FIFO_RDY_256          (5 << LCD_DMA_CTRL_TH_FIFO_RDY_MASK) /* 256 words have been loaded */
 #  define LCD_DMA_CTRL_TH_FIFO_RDY_512          (6 << LCD_DMA_CTRL_TH_FIFO_RDY_MASK) /* 512 words have been loaded */
+
 #define LCD_DMA_CTRL_MASTER_PRIO_SHIFT          (16)  /* Bits 16-18:  Priority for the L3 OCP Master Bus */
 #define LCD_DMA_CTRL_MASTER_PRIO_MASK           (7 << LCD_DMA_CTRL_MASTER_PRIO_SHIFT)
 
@@ -266,6 +274,7 @@
 #  define LCD_SYSC_IDLE_FORCE                   (0 << LCD_SYSC_IDLE_SHIFT) /* Force-idle mode */
 #  define LCD_SYSC_IDLE_NO                      (1 << LCD_SYSC_IDLE_SHIFT) /* No-idle mode */
 #  define LCD_SYSC_IDLE_SMART                   (2 << LCD_SYSC_IDLE_SHIFT) /* Smart-idle mode */
+
 #define LCD_SYSC_STANDBY_SHIFT                  (4)  /* Bits 4-5:  Configuration of the local initiator state management mode */
 #define LCD_SYSC_STANDBY_MASK                   (3 << LCD_SYSC_STANDBY_SHIFT)
 #  define LCD_SYSC_STANDBY_FORCE                (0 << LCD_SYSC_STANDBY_SHIFT) /* Force-standby mode */

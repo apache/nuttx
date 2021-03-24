@@ -73,7 +73,9 @@
 #  define CONFIG_AM335X_LCDC_BACKCOLOR 0  /* Initial background color */
 #endif
 
-/* Default characteristics (may be overridden via struct am335x_panel_info_s */
+/* Default characteristics
+ * (may be overridden via struct am335x_panel_info_s
+ */
 
 /* Bits per pixel / color format */
 
@@ -176,7 +178,7 @@ struct am335x_panel_info_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
