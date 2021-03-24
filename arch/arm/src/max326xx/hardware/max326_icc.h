@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max326_icc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,37 +16,37 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_ICC_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_ICC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define MAX326_ICC_ID_OFFSET          0x0000 /* Cache ID Register */
 #define MAX326_ICC_MEMCFG_OFFSET      0x0004 /* Memory Configuration Register */
 #define MAX326_ICC_CTRLSTAT_OFFSET    0x0100 /* Cache Control and Status Register */
 #define MAX326_ICC_INVDTALL_OFFSET    0x0700 /* Cache Invalidate Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define MAX326_ICC_ID                 (MAX326_ICC_BASE + MAX326_ICC_ID_OFFSET)
 #define MAX326_ICC_MEMCFG             (MAX326_ICC_BASE + MAX326_ICC_MEMCFG_OFFSET)
 #define MAX326_ICC_CTRLSTAT           (MAX326_ICC_BASE + MAX326_ICC_CTRLSTAT_OFFSET)
 #define MAX326_ICC_INVDTALL           (MAX326_ICC_BASE + MAX326_ICC_INVDTALL_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Cache ID Register */
 
@@ -73,8 +73,8 @@
 #define ICC_CTRLSTAT_ENABLE           (1 << 0)  /* Bit 0:  Cache enable */
 #define ICC_CTRLSTAT_READY            (1 << 16) /* Bit 16: Cache is ready */
 
-/* Cache Invalidate Register.  Any write to this register of any value invalidates
- * the cache
+/* Cache Invalidate Register.
+ * Any write to this register of any value invalidates the cache
  */
 
 #endif /* __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_ICC_H */

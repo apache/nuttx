@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max32660_spimss.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_SPIMSS_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_SPIMSS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define MAX326_SPIMSS_DATA_OFFSET     0x0000  /* SPIMSS Data Register */
 #define MAX326_SPIMSS_CTRL_OFFSET     0x0004  /* SPIMSS Control Register */
@@ -42,7 +42,7 @@
 #define MAX326_SPIMSS_DMA_OFFSET      0x0018  /* SPIMSS DMA Register */
 #define MAX326_SPIMSS_I2SCTRL_OFFSET  0x001c  /* SPIMSS I2S Control Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define MAX326_SPIMSS_DATA            (MAX326_SPIMSS_BASE + MAX326_SPIMSS_DATA_OFFSET)
 #define MAX326_SPIMSS_CTRL            (MAX326_SPIMSS_BASE + MAX326_SPIMSS_CTRL_OFFSET)
@@ -52,7 +52,7 @@
 #define MAX326_SPIMSS_DMA             (MAX326_SPIMSS_BASE + MAX326_SPIMSS_DMA_OFFSET)
 #define MAX326_SPIMSS_I2SCTRL         (MAX326_SPIMSS_BASE + MAX326_SPIMSS_I2SCTRL_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* SPIMSS Data Register */
 
@@ -100,7 +100,7 @@
 
 #define SPIMSS_DMA_TXFIFOLVL_SHIFT    (0)       /* Bits 0-2: Transmit FIFO Level */
 #define SPIMSS_DMA_TXFIFOLVL_MASK     (7 << SPIMSS_DMA_TXFIFOLVL_SHIFT)
-  #define SPIMSS_DMA_TXFIFOLVL(n)     ((uint32_t)((n) - 1) << SPIMSS_DMA_TXFIFOLVL_SHIFT)
+#  define SPIMSS_DMA_TXFIFOLVL(n)     ((uint32_t)((n) - 1) << SPIMSS_DMA_TXFIFOLVL_SHIFT)
 #define SPIMSS_DMA_TXFIFOCLR          (1 << 4)  /* Bit 4:  Transmit FIFO Clear */
 #define SPIMSS_DMA_TXFIFOCNT_SHIFT    (8)       /* Bits 8-11: Transmit FIFO Count */
 #define SPIMSS_DMA_TXFIFOCNT_MASK     (15 << SPIMSS_DMA_TXFIFOCNT_SHIFT)

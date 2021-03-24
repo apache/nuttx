@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/max326_start.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_MAX326_START_H
 #define __ARCH_ARM_SRC_MAX326XX_MAX326_START_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -37,20 +37,20 @@
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: max326_board_initialize
  *
  * Description:
- *   All MAX326xx architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after clocking and memory have
- *   been configured but before caches have been enabled and before any devices have
- *   been initialized.
+ *   All MAX326xx architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization -- after clocking and
+ *   memory have been configured but before caches have been enabled and
+ *   before any devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void max326_board_initialize(void);
 

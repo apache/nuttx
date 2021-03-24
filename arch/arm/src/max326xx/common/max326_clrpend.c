@@ -39,7 +39,7 @@
  * Name: max326_clrpend
  *
  * Description:
- *   Clear a pending interrupt at the NVIC.  This does not seem to be required
+ *   Clear a pending interrupt at the NVIC. This does not seem to be required
  *   for most interrupts.  Don't know why...
  *
  *   This function is logically a part of max326_irq.c, but I will keep it in
@@ -60,7 +60,8 @@ void max326_clrpend(int irq)
         }
       else if (irq < MAX326_IRQ_NVECTORS)
         {
-          putreg32(1 << (irq - MAX326_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
+          putreg32(1 << (irq - MAX326_IRQ_EXTINT - 32),
+                   NVIC_IRQ32_63_CLRPEND);
         }
     }
 }

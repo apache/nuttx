@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max32660_uart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,26 +16,26 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_UART_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define MAX326_UART_TXFIFO_DEPTH    32      /* 32 bytes */
 #define MAX326_UART_RXFIFO_DEPTH    32      /* 32 bytes */
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define MAX326_UART_CTRL0_OFFSET    0x0000  /* UART Control 0 Register */
 #define MAX326_UART_CTRL1_OFFSET    0x0004  /* UART Control 1 Register */
@@ -48,7 +48,7 @@
 #define MAX326_UART_DMA_OFFSET      0x0020  /* UART DMA Configuration Register */
 #define MAX326_UART_TXFIFO_OFFSET   0x0024  /* UART TX FIFO Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define MAX326_UART0_CTRL0          (MAX326_UART0_BASE + MAX326_UART_CTRL0_OFFSET)
 #define MAX326_UART0_CTRL1          (MAX326_UART0_BASE + MAX326_UART_CTRL1_OFFSET)
@@ -72,7 +72,7 @@
 #define MAX326_UART1_DMA            (MAX326_UART1_BASE + MAX326_UART_DMA_OFFSET)
 #define MAX326_UART1_TXFIFO         (MAX326_UART1_BASE + MAX326_UART_TXFIFO_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* UART Control 0 Register */
 
@@ -84,6 +84,7 @@
 #  define UART_CTRL0_PARITY_ODD     (1 << UART_CTRL0_PARITYMODE_SHIFT) /* Odd Parity */
 #  define UART_CTRL0_PARITY_MARK    (2 << UART_CTRL0_PARITYMODE_SHIFT) /* Mark parity */
 #  define UART_CTRL0_PARITY_SPACE   (3 << UART_CTRL0_PARITYMODE_SHIFT) /* Space parity */
+
 #define UART_CTRL0_PARITYLVL        (1 << 4)  /* Bit 4:  Parity Level Select */
 #define UART_CTRL0_TXFLUSH          (1 << 5)  /* Bit 5:  Transmit FIFO Flush */
 #define UART_CTRL0_RXFLUSH          (1 << 6)  /* Bit 6:  Receive FIFO Flush */
@@ -94,6 +95,7 @@
 #  define UART_CTRL0_SIZE_6BITS     (1 << UART_CTRL0_SIZE_SHIFT) /* 6 data bits */
 #  define UART_CTRL0_SIZE_7BITS     (2 << UART_CTRL0_SIZE_SHIFT) /* 7 data bits */
 #  define UART_CTRL0_SIZE_8BITS     (3 << UART_CTRL0_SIZE_SHIFT) /* 8 data bits */
+
 #define UART_CTRL0_STOP             (1 << 10) /* Bit 10: STOP Bit Mode Select */
 #define UART_CTRL0_FLOW             (1 << 11) /* Bit 11: Hardware Flow Control Enable */
 #define UART_CTRL0_FLOWPOL          (1 << 12) /* Bit 12: RTS/CTS Polarity */

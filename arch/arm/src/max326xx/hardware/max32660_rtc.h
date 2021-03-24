@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max32660_rtc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_RTC_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_RTC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define MAX326_RTC_SEC_OFFSET     0x0000  /* Seconds Counter Register */
 #define MAX326_RTC_SSEC_OFFSET    0x0004  /* Sub-Seconds Counter Register */
@@ -42,7 +42,7 @@
 #define MAX326_RTC_TRIM_OFFSET    0x0014  /* Trim Register */
 #define MAX326_RTC_OSCCTRL_OFFSET 0x0018  /* Oscillator Control Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define MAX326_RTC_SEC            (MAX326_RTC_BASE + MAX326_RTC_SEC_OFFSET)
 #define MAX326_RTC_SSEC           (MAX326_RTC_BASE + MAX326_RTC_SSEC_OFFSET)
@@ -52,9 +52,10 @@
 #define MAX326_RTC_TRIM           (MAX326_RTC_BASE + MAX326_RTC_TRIM_OFFSET)
 #define MAX326_RTC_OSCCTRL        (MAX326_RTC_BASE + MAX326_RTC_OSCCTRL_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Seconds Counter Register (32-bit seconds counter) */
+
 /* Sub-Seconds Counter Register */
 
 #define RTC_SSEC_MASK             (0xff)    /* Bits 0-7: Sub-second counter */
@@ -81,6 +82,7 @@
 #  define RTC_CTRL_FREQSEL_1HZ    (0 << RTC_CTRL_FREQSEL_SHIFT) /* 1Hz (Compensated) */
 #  define RTC_CTRL_FREQSEL_512HZ  (1 << RTC_CTRL_FREQSEL_SHIFT) /* 512Hz (Compensated) */
 #  define RTC_CTRL_FREQSEL_4KHZ   (2 << RTC_CTRL_FREQSEL_SHIFT) /* 4kHz */
+
 #define RTC_CTRL_X32KMODE_SHIFT   (11)       /* Bits 11-12: 32kHz Oscillator Mode Select */
 #define RTC_CTRL_X32KMODE_MASK    (3 << RTC_CTRL_X32KMODE_SHIFT)
 #  define RTC_CTRL_X32KMODE_NI       (0 << RTC_CTRL_X32KMODE_SHIFT) /* Noise immunity mode */
@@ -89,6 +91,7 @@
                                                                      * DEEPSLEEP: quiet mode */
 #  define RTC_CTRL_X32KMODE_STPQUIET (3 << RTC_CTRL_X32KMODE_SHIFT) /* Active: noise immunity mode
                                                                      * STOP: quiet mode */
+
 #define RTC_CTRL_WRITEEN          (1 << 15) /* Bit 15: Write Enable */
 
 /* Trim Register */

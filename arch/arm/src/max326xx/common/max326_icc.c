@@ -64,16 +64,16 @@ void max326_icc_enable(bool enable)
         }
       while ((regval & ICC_CTRLSTAT_READY) == 0);
     }
-   else
-     {
-       /* Disable the cache */
+  else
+    {
+      /* Disable the cache */
 
-       putreg32(0, MAX326_ICC_CTRLSTAT);
+      putreg32(0, MAX326_ICC_CTRLSTAT);
 
-       /* Disable clocking to the ICC peripheral */
+      /* Disable clocking to the ICC peripheral */
 
-       max326_icc_disableclk();
-     }
+      max326_icc_disableclk();
+    }
 }
 
 /****************************************************************************
