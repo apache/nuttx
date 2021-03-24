@@ -53,19 +53,19 @@
 
 uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 {
-   uint32_t *savestate;
+  uint32_t *savestate;
 
-  /* Save the saved processor context in CURRENT_REGS where it can be accessed
-   * for register dumps and possibly context switching.
+  /* Save the saved processor context in CURRENT_REGS where it can be
+   * accessed for register dumps and possibly context switching.
    */
 
   savestate    = (uint32_t *)CURRENT_REGS;
   CURRENT_REGS = regs;
 
-  /* Get the (virtual) address of instruction that caused the prefetch abort.
-   * When the exception occurred, this address was provided in the lr register
-   * and this value was saved in the context save area as the PC at the
-   * REG_R15 index.
+  /* Get the (virtual) address of instruction that caused the prefetch
+   * abort. When the exception occurred, this address was provided in the
+   * lr register and this value was saved in the context save area as the
+   * PC at the REG_R15 index.
    *
    * Check to see if this miss address is within the configured range of
    * virtual addresses.
@@ -76,10 +76,10 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 
   if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
     {
-      /* Save the offending PC as the fault address in the TCB of the currently
-       * executing task.  This value is, of course, already known in regs[REG_R15],
-       * but saving it in this location will allow common paging logic for both
-       * prefetch and data aborts.
+      /* Save the offending PC as the fault address in the TCB of the
+       * currently executing task.  This value is, of course, already known
+       * in regs[REG_R15], but saving it in this location will allow common
+       * paging logic for both prefetch and data aborts.
        */
 
       struct tcb_s *tcb = this_task();
@@ -99,9 +99,9 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 
       pg_miss();
 
-      /* Restore the previous value of CURRENT_REGS.  NULL would indicate that
-       * we are no longer in an interrupt handler.  It will be non-NULL if we
-       * are returning from a nested interrupt.
+      /* Restore the previous value of CURRENT_REGS.
+       * NULL would indicate thatwe are no longer in an interrupt handler.
+       *  It will be non-NULL if we are returning from a nested interrupt.
        */
 
       CURRENT_REGS = savestate;
@@ -120,8 +120,8 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 
 uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 {
-  /* Save the saved processor context in CURRENT_REGS where it can be accessed
-   * for register dumps and possibly context switching.
+  /* Save the saved processor context in CURRENT_REGS where it can be
+   * accessed for register dumps and possibly context switching.
    */
 
   CURRENT_REGS = regs;

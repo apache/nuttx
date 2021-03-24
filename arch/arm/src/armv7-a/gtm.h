@@ -39,6 +39,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* GTM Register Offsets *****************************************************/
 
 #define GTM_COUNT0_OFFSET      0x0000 /* Global Timer Counter Register 0 */
@@ -81,6 +82,7 @@
                                          /* Bits 1-31: Reserved */
 
 /* Comparator Value Register 0/1 -- 64-bit timer compare value */
+
 /* Auto-increment Register -- 32-bit auto-increment value */
 
 /****************************************************************************
