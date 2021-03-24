@@ -28,6 +28,8 @@
 
 #include "bt_uart_filter.h"
 
+#include <debug.h>
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -72,16 +74,16 @@ static const uint8_t g_bt_uart_filter_ble_evt_table[] =
  * Private Functions
  ****************************************************************************/
 
-static bool bt_uart_filter_set_handle(FAR struct bt_uart_filter_s *filter,
-                                      int old, int new)
+static bool bt_uart_filter_set(FAR uint16_t *array, int size, uint16_t old,
+                               uint16_t new, uint16_t mask)
 {
   int i;
 
-  for (i = 0; i < BT_UART_FILTER_CONN_COUNT; i++)
+  for (i = 0; i < size; i++)
     {
-      if (filter->handle[i] == old)
+      if (array[i] == old)
         {
-          filter->handle[i] = new & 0xfff;
+          array[i] = new & mask;
           return true;
         }
     }
@@ -89,22 +91,54 @@ static bool bt_uart_filter_set_handle(FAR struct bt_uart_filter_s *filter,
   return false;
 }
 
-static bool bt_uart_filter_alloc_handle(FAR struct bt_uart_filter_s *filter,
-                                        int handle)
+static bool bt_uart_filter_set_handle(FAR uint16_t *handle, int size,
+                                      uint16_t old, uint16_t new)
 {
-  return bt_uart_filter_set_handle(filter, 0, handle);
+  return bt_uart_filter_set(handle, size, old, new, 0xfff);
+}
+
+static bool bt_uart_filter_alloc_handle(FAR struct bt_uart_filter_s *filter,
+                                        uint16_t handle)
+{
+  return bt_uart_filter_set_handle(filter->handle,
+                                   BT_UART_FILTER_CONN_COUNT, 0, handle);
 }
 
 static bool bt_uart_filter_free_handle(FAR struct bt_uart_filter_s *filter,
-                                       int handle)
+                                       uint16_t handle)
 {
-  return bt_uart_filter_set_handle(filter, handle, 0);
+  return bt_uart_filter_set_handle(filter->handle,
+                                   BT_UART_FILTER_CONN_COUNT, handle, 0);
 }
 
 static bool bt_uart_filter_has_handle(FAR struct bt_uart_filter_s *filter,
-                                      int handle)
+                                      uint16_t handle)
 {
-  return bt_uart_filter_set_handle(filter, handle, handle);
+  return bt_uart_filter_set_handle(filter->handle,
+                                   BT_UART_FILTER_CONN_COUNT,
+                                   handle, handle);
+}
+
+static bool bt_uart_filter_set_opcode(FAR uint16_t *opcode, int size,
+                                      uint16_t old, uint16_t new)
+{
+  return bt_uart_filter_set(opcode, size, old, new, 0xffff);
+}
+
+static bool bt_uart_filter_alloc_opcode(FAR struct bt_uart_filter_s *filter,
+                                        uint16_t opcode)
+{
+  return bt_uart_filter_set_opcode(filter->opcode,
+                                   BT_UART_FILTER_OPCODE_COUNT,
+                                   0, opcode);
+}
+
+static bool bt_uart_filter_free_opcode(FAR struct bt_uart_filter_s *filter,
+                                       uint16_t opcode)
+{
+  return bt_uart_filter_set_opcode(filter->opcode,
+                                   BT_UART_FILTER_OPCODE_COUNT,
+                                   opcode, 0);
 }
 
 /****************************************************************************
@@ -214,6 +248,18 @@ bool bt_uart_filter_forward_recv(FAR struct bt_uart_filter_s *filter,
               return bt_uart_filter_free_handle(filter, evt->handle);
             }
             break;
+          case BT_HCI_EVT_CMD_COMPLETE:
+            {
+              FAR struct hci_evt_cmd_complete_s *evt;
+
+              evt = (FAR void *)&buffer[3];
+
+              if (BT_OGF_BASEBAND == (evt->opcode >> 10))
+                {
+                  return bt_uart_filter_free_opcode(filter, evt->opcode);
+                }
+            }
+            break;
           default:
             break;
         }
@@ -232,6 +278,8 @@ bool bt_uart_filter_forward_send(FAR struct bt_uart_filter_s *filter,
                                  FAR char *buffer, size_t buflen)
 {
   uint16_t opcode;
+  uint8_t ogf;
+  int i;
 
   if (buffer[0] == H4_CMD)
     {
@@ -253,6 +301,24 @@ bool bt_uart_filter_forward_send(FAR struct bt_uart_filter_s *filter,
           default:
             break;
         }
+
+      ogf = buffer[2] >> 2;
+      if (BT_OGF_BASEBAND == ogf)
+        {
+          if (!bt_uart_filter_alloc_opcode(filter, opcode))
+            {
+              nerr("Unable to set opcode 0x%04x.\n", opcode);
+
+              for (i = 0; i < BT_UART_FILTER_OPCODE_COUNT; i++)
+                {
+                  nerr("PENDING opcode: %04x.\n", filter->opcode[i]);
+                }
+
+              memset(filter->opcode, 0, sizeof(filter->opcode));
+
+              bt_uart_filter_alloc_opcode(filter, opcode);
+            }
+        }
     }
 
   return true;
@@ -260,6 +326,7 @@ bool bt_uart_filter_forward_send(FAR struct bt_uart_filter_s *filter,
 
 void bt_uart_filter_init(FAR struct bt_uart_filter_s *filter, int type)
 {
+  memset(filter->opcode, 0, sizeof(filter->opcode));
   memset(filter->handle, 0, sizeof(filter->handle));
   filter->type = type;
 }

@@ -31,11 +31,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BT_UART_FILTER_CONN_COUNT 4
+#define BT_UART_FILTER_CONN_COUNT   4
+#define BT_UART_FILTER_OPCODE_COUNT 16
 
-#define BT_UART_FILTER_TYPE_BT    0
-#define BT_UART_FILTER_TYPE_BLE   1
-#define BT_UART_FILTER_TYPE_COUNT 2
+#define BT_UART_FILTER_TYPE_BT      0
+#define BT_UART_FILTER_TYPE_BLE     1
+#define BT_UART_FILTER_TYPE_COUNT   2
 
 /****************************************************************************
  * Public Types
@@ -44,6 +45,7 @@
 struct bt_uart_filter_s
 {
   int      type;
+  uint16_t opcode[BT_UART_FILTER_OPCODE_COUNT];
   uint16_t handle[BT_UART_FILTER_CONN_COUNT];
 };
 
