@@ -872,7 +872,7 @@ typedef void     (*fptr_dacvref_t)            (uint8_t       /* signal */);
 struct hard_api_s
 {
   fptr_crc32_t               crc32;
-  fptr_getflsize_t           FlashGetSize;
+  fptr_getflsize_t           flashgetsize;
   fptr_getchipid_t           get_chipid;
   fptr_reserved1_t           reserved1;
   fptr_reserved2_t           reserved2;

@@ -364,38 +364,38 @@
 
 /* GPTM Timer A/B Mode (TAMR and TBMR) */
 
-#define TIMER_TnMR_TnMR_SHIFT          (0)       /* Bits 1-0:  Timer A/B Mode */
-#define TIMER_TnMR_TnMR_MASK           (3 << TIMER_TnMR_TnMR_SHIFT)
-#  define TIMER_TnMR_TnMR_ONESHOT      (1 << TIMER_TnMR_TnMR_SHIFT) /* One-Shot Timer mode */
-#  define TIMER_TnMR_TnMR_PERIODIC     (2 << TIMER_TnMR_TnMR_SHIFT) /* Periodic Timer mode */
-#  define TIMER_TnMR_TnMR_CAPTURE      (3 << TIMER_TnMR_TnMR_SHIFT) /* Capture mode */
+#define TIMER_TNMR_TNMR_SHIFT          (0)       /* Bits 1-0:  Timer A/B Mode */
+#define TIMER_TNMR_TNMR_MASK           (3 << TIMER_TNMR_TNMR_SHIFT)
+#  define TIMER_TNMR_TNMR_ONESHOT      (1 << TIMER_TNMR_TNMR_SHIFT) /* One-Shot Timer mode */
+#  define TIMER_TNMR_TNMR_PERIODIC     (2 << TIMER_TNMR_TNMR_SHIFT) /* Periodic Timer mode */
+#  define TIMER_TNMR_TNMR_CAPTURE      (3 << TIMER_TNMR_TNMR_SHIFT) /* Capture mode */
 
-#define TIMER_TnMR_TnCMR_SHIFT         (2)       /* Bit 2:  Timer A/B Capture Mode */
+#define TIMER_TNMR_TNCMR_SHIFT         (2)       /* Bit 2:  Timer A/B Capture Mode */
 
-#define TIMER_TnMR_TnCMR               (1 << TIMER_TnMR_TnCMR_SHIFT) /* Bit 2:  Timer A/B Capture Mode */
-#  define TIMER_TnMR_TnCMR_EDGECOUNT   (0 << TIMER_TnMR_TnCMR_SHIFT) /* Edge-Count mode */
-#  define TIMER_TnMR_TnCMR_EDGETIME    (1 << TIMER_TnMR_TnCMR_SHIFT) /* Edge-Time mode */
+#define TIMER_TNMR_TNCMR               (1 << TIMER_TNMR_TNCMR_SHIFT) /* Bit 2:  Timer A/B Capture Mode */
+#  define TIMER_TNMR_TNCMR_EDGECOUNT   (0 << TIMER_TNMR_TNCMR_SHIFT) /* Edge-Count mode */
+#  define TIMER_TNMR_TNCMR_EDGETIME    (1 << TIMER_TNMR_TNCMR_SHIFT) /* Edge-Time mode */
 
-#define TIMER_TnMR_TnAMS_SHIFT         (3)       /* Bit 3:  Timer A/B Alternate Mode Select */
+#define TIMER_TNMR_TNAMS_SHIFT         (3)       /* Bit 3:  Timer A/B Alternate Mode Select */
 
-#define TIMER_TnMR_TnAMS               (1 << TIMER_TnMR_TnAMS_SHIFT) /* Bit 3:  Timer A/B Alternate Mode Select */
-#  define TIMER_TnMR_TnAMS_CAPTURE     (0 << TIMER_TnMR_TnAMS_SHIFT) /* Capture mode is enabled */
-#  define TIMER_TnMR_TnAMS_PWM         (1 << TIMER_TnMR_TnAMS_SHIFT) /* PWM mode is enabled */
+#define TIMER_TNMR_TNAMS               (1 << TIMER_TNMR_TNAMS_SHIFT) /* Bit 3:  Timer A/B Alternate Mode Select */
+#  define TIMER_TNMR_TNAMS_CAPTURE     (0 << TIMER_TNMR_TNAMS_SHIFT) /* Capture mode is enabled */
+#  define TIMER_TNMR_TNAMS_PWM         (1 << TIMER_TNMR_TNAMS_SHIFT) /* PWM mode is enabled */
 
-#define TIMER_TnMR_TnCDIR_SHIFT        (4)       /* Bit 4:  Timer A/B Count Direction */
+#define TIMER_TNMR_TNCDIR_SHIFT        (4)       /* Bit 4:  Timer A/B Count Direction */
 
-#define TIMER_TnMR_TnCDIR              (1 << TIMER_TnMR_TnCDIR_SHIFT) /* Bit 4:  Timer A/B Count Direction */
-#  define TIMER_TnMR_TnCDIR_DOWN       (0 << TIMER_TnMR_TnCDIR_SHIFT) /* Timer counts down */
-#  define TIMER_TnMR_TnCDIR_UP         (1 << TIMER_TnMR_TnCDIR_SHIFT) /* Timer counts up (one-shot/periodic modes) */
+#define TIMER_TNMR_TNCDIR              (1 << TIMER_TNMR_TNCDIR_SHIFT) /* Bit 4:  Timer A/B Count Direction */
+#  define TIMER_TNMR_TNCDIR_DOWN       (0 << TIMER_TNMR_TNCDIR_SHIFT) /* Timer counts down */
+#  define TIMER_TNMR_TNCDIR_UP         (1 << TIMER_TNMR_TNCDIR_SHIFT) /* Timer counts up (one-shot/periodic modes) */
 
-#define TIMER_TnMR_TnMIE               (1 << 5)  /* Bit 5:  Timer A/B Match Interrupt Enable */
-#define TIMER_TnMR_TnWOT               (1 << 6)  /* Bit 6:  GPTM Timer A/B Wait-on-Trigger */
-#define TIMER_TnMR_TnSNAPS             (1 << 7)  /* Bit 7:  GPTM Timer A/B Snap-Shot Mode */
-#define TIMER_TnMR_TnILD               (1 << 8)  /* Bit 8:  GPTM Timer A/B Interval Load Write */
-#define TIMER_TnMR_TnPWMIE             (1 << 9)  /* Bit 9:  GPTM Timer A/B PWM Interrupt Enable */
-#define TIMER_TnMR_TnMRSU              (1 << 10) /* Bit 10: GPTM Timer A/B Match Register Update */
-#define TIMER_TnMR_TnPLO               (1 << 11) /* Bit 11: GPTM Timer A/B PWM Legacy Operation */
-#define TIMER_TnMR_TnCINTD             (1 << 12) /* Bit 12: One-shot/Periodic Interrupt Disable */
+#define TIMER_TNMR_TNMIE               (1 << 5)  /* Bit 5:  Timer A/B Match Interrupt Enable */
+#define TIMER_TNMR_TNWOT               (1 << 6)  /* Bit 6:  GPTM Timer A/B Wait-on-Trigger */
+#define TIMER_TNMR_TNSNAPS             (1 << 7)  /* Bit 7:  GPTM Timer A/B Snap-Shot Mode */
+#define TIMER_TNMR_TNILD               (1 << 8)  /* Bit 8:  GPTM Timer A/B Interval Load Write */
+#define TIMER_TNMR_TNPWMIE             (1 << 9)  /* Bit 9:  GPTM Timer A/B PWM Interrupt Enable */
+#define TIMER_TNMR_TNMRSU              (1 << 10) /* Bit 10: GPTM Timer A/B Match Register Update */
+#define TIMER_TNMR_TNPLO               (1 << 11) /* Bit 11: GPTM Timer A/B PWM Legacy Operation */
+#define TIMER_TNMR_TNCINTD             (1 << 12) /* Bit 12: One-shot/Periodic Interrupt Disable */
 #define TIMER_TnMR_TCACT_SHIFT         (13)      /* Bits 13-15: Timer Compare Action Select */
 #define TIMER_TnMR_TCACT_MASK          (7 << TIMER_TnMR_TCACT_SHIFT)
 #  define TIMER_TnMR_TCACT_NONE        (0 << TIMER_TnMR_TCACT_SHIFT) /* Disable compare operations */

@@ -95,7 +95,7 @@ enum cc13xx_package_e chipinfo_packagetype(void)
   pkgtype = (enum cc13xx_package_e)((regval & FCFG1_USER_ID_PKG_MASK) >>
                                     FCFG1_USER_ID_PKG_SHIFT);
 
-  if (pkgtype < PACKAGE_4x4 || pkgtype > PACKAGE_4x4)
+  if (pkgtype < PACKAGE_4X4 || pkgtype > PACKAGE_4X4)
     {
       pkgtype = PACKAGE_UNKNOWN;
     }
@@ -132,7 +132,7 @@ enum cc13xx_chiptype_e chipinfo_chiptype(void)
                  FCFG1_USER_ID_PROTOCOL_SHIFT);
 
 #if defined(CONFIG_ARCH_CHIP_CC13X0)
-  if (chipfamily == FAMILY_CC13x0)
+  if (chipfamily == FAMILY_CC13X0)
     {
       switch (protocol)
         {
@@ -151,7 +151,7 @@ enum cc13xx_chiptype_e chipinfo_chiptype(void)
   cc13 = ((userid & FCFG1_USER_ID_CC13) != 0); /*  CC13xx device type (vs CC26xx) */
   pa   = ((userid & FCFG1_USER_ID_PA) != 0);   /*  Supports 20dBM PA */
 
-  if (chipfamily == FAMILY_CC13x2_CC26x2)
+  if (chipfamily == FAMILY_CC13X2_CC26X2)
     {
       switch (protocol)
         {
@@ -220,13 +220,13 @@ enum cc13xx_chipfamily_e chipinfo_chipfamily(void)
 #if defined(CONFIG_ARCH_CHIP_CC13X0)
   if (waferid == 0xb9be)
     {
-      chipfamily = FAMILY_CC13x0;
+      chipfamily = FAMILY_CC13X0;
     }
 
 #elif defined(CONFIG_ARCH_CHIP_CC13X2)
   if (waferid == 0xbb41)
     {
-      chipfamily = FAMILY_CC13x2_CC26x2;
+      chipfamily = FAMILY_CC13X2_CC26X2;
     }
 #endif
 
@@ -259,15 +259,15 @@ enum cc13xx_revision_e chipinfo_hwrevision(void)
   hwminorrev = chipinfo_hwminorrev();
 
 #if defined(CONFIG_ARCH_CHIP_CC13X0)
-  if (chipfamily == FAMILY_CC13x0)
+  if (chipfamily == FAMILY_CC13X0)
     {
       switch (fcg1rev)
         {
-          case 0:  /* CC13x0 PG1.0 */
+          case 0:  /* CC13X0 PG1.0 */
             hwrev = HWREV_1_0;
             break;
 
-          case 2:  /* CC13x0 PG2.0 (or later) */
+          case 2:  /* CC13X0 PG2.0 (or later) */
             hwrev = (enum cc13xx_revision_e)(((uint32_t)HWREV_2_0) +
                      hwminorrev);
             break;
@@ -275,7 +275,7 @@ enum cc13xx_revision_e chipinfo_hwrevision(void)
     }
 
 #elif defined(CONFIG_ARCH_CHIP_CC13X2)
-  if (chipfamily == FAMILY_CC13x2_CC26x2)
+  if (chipfamily == FAMILY_CC13X2_CC26X2)
     {
       switch (fcg1rev)
         {
@@ -322,9 +322,9 @@ void chipinfo_verify(void)
   chip_family = chipinfo_chipfamily();
 
 #if defined(CONFIG_ARCH_CHIP_CC13X0)
-  DEBUGASSERT(chip_family == FAMILY_CC13x0);
+  DEBUGASSERT(chip_family == FAMILY_CC13X0);
 #elif defined(CONFIG_ARCH_CHIP_CC13X2)
-  DEBUGASSERT(chip_family == FAMILY_CC13x2_CC26x2);
+  DEBUGASSERT(chip_family == FAMILY_CC13X2_CC26X2);
 #else
   DEBUPANIC();
 #endif

@@ -263,24 +263,24 @@
 
 /* GPTM Timer A/B Mode (TAMR and TBMR) */
 
-#define TIMER_TnMR_TnMR_SHIFT          (0)       /* Bits 1-0:  Timer A/B Mode */
+#define TIMER_TNMR_TNMR_SHIFT          (0)       /* Bits 1-0:  Timer A/B Mode */
 
-#define TIMER_TnMR_TnMR_MASK           (3 << TIMER_TnMR_TnMR_SHIFT) /* Bits 1-0:  Timer A/B Mode */
-#  define TIMER_TnMR_TnMR_ONESHOT      (1 << TIMER_TnMR_TnMR_SHIFT) /* One-Shot Timer mode */
-#  define TIMER_TnMR_TnMR_PERIODIC     (2 << TIMER_TnMR_TnMR_SHIFT) /* Periodic Timer mode */
-#  define TIMER_TnMR_TnMR_CAPTURE      (3 << TIMER_TnMR_TnMR_SHIFT) /* Capture mode */
+#define TIMER_TNMR_TNMR_MASK           (3 << TIMER_TNMR_TNMR_SHIFT) /* Bits 1-0:  Timer A/B Mode */
+#  define TIMER_TNMR_TNMR_ONESHOT      (1 << TIMER_TNMR_TNMR_SHIFT) /* One-Shot Timer mode */
+#  define TIMER_TNMR_TNMR_PERIODIC     (2 << TIMER_TNMR_TNMR_SHIFT) /* Periodic Timer mode */
+#  define TIMER_TNMR_TNMR_CAPTURE      (3 << TIMER_TNMR_TNMR_SHIFT) /* Capture mode */
 
-#define TIMER_TnMR_TnCMR_SHIFT         (2)       /* Bit 2:  Timer A/B Capture Mode */
+#define TIMER_TNMR_TNCMR_SHIFT         (2)       /* Bit 2:  Timer A/B Capture Mode */
 
-#define TIMER_TnMR_TnCMR               (1 << TIMER_TnMR_TnCMR_SHIFT) /* Bit 2:  Timer A/B Capture Mode */
-#  define TIMER_TnMR_TnCMR_EDGECOUNT   (0 << TIMER_TnMR_TnCMR_SHIFT) /* Edge-Count mode */
-#  define TIMER_TnMR_TnCMR_EDGETIME    (1 << TIMER_TnMR_TnCMR_SHIFT) /* Edge-Time mode */
+#define TIMER_TNMR_TNCMR               (1 << TIMER_TNMR_TNCMR_SHIFT) /* Bit 2:  Timer A/B Capture Mode */
+#  define TIMER_TNMR_TNCMR_EDGECOUNT   (0 << TIMER_TNMR_TNCMR_SHIFT) /* Edge-Count mode */
+#  define TIMER_TNMR_TNCMR_EDGETIME    (1 << TIMER_TNMR_TNCMR_SHIFT) /* Edge-Time mode */
 
-#define TIMER_TnMR_TnAMS_SHIFT         (3)       /* Bit 3:  Timer A/B Alternate Mode Select */
+#define TIMER_TNMR_TNAMS_SHIFT         (3)       /* Bit 3:  Timer A/B Alternate Mode Select */
 
-#define TIMER_TnMR_TnAMS               (1 << TIMER_TnMR_TnAMS_SHIFT) /* Bit 3:  Timer A/B Alternate Mode Select */
-#  define TIMER_TnMR_TnAMS_CAPTURE     (0 << TIMER_TnMR_TnAMS_SHIFT) /* Capture mode is enabled */
-#  define TIMER_TnMR_TnAMS_PWM         (1 << TIMER_TnMR_TnAMS_SHIFT) /* PWM mode is enabled */
+#define TIMER_TNMR_TNAMS               (1 << TIMER_TNMR_TNAMS_SHIFT) /* Bit 3:  Timer A/B Alternate Mode Select */
+#  define TIMER_TNMR_TNAMS_CAPTURE     (0 << TIMER_TNMR_TNAMS_SHIFT) /* Capture mode is enabled */
+#  define TIMER_TNMR_TNAMS_PWM         (1 << TIMER_TNMR_TNAMS_SHIFT) /* PWM mode is enabled */
 
 /* GPTM Control (CTL) */
 

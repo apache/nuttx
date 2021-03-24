@@ -994,17 +994,17 @@ uint32_t rom_setup_get_trim_ampcompctrl(uint32_t fcfg1_revision)
 uint32_t
 rom_setup_get_trim_dblrloopfilter_resetvoltage(uint32_t fcfg1_revision)
 {
-  uint32_t dblrLoopFilterResetVoltageValue = 0; /* Reset value */
+  uint32_t dblr_loop_filter_reset_voltage_value = 0; /* Reset value */
 
   if (fcfg1_revision >= 0x00000020)
     {
-      dblrLoopFilterResetVoltageValue =
+      dblr_loop_filter_reset_voltage_value =
         (getreg32(TIVA_FCFG1_MISC_OTP_DATA_1) &
          FCFG1_MISC_OTP_DATA_1_DBLR_LOOP_FILTER_RESET_VOLTAGE_MASK) >>
         FCFG1_MISC_OTP_DATA_1_DBLR_LOOP_FILTER_RESET_VOLTAGE_SHIFT;
     }
 
-  return (dblrLoopFilterResetVoltageValue);
+  return (dblr_loop_filter_reset_voltage_value);
 }
 
 /****************************************************************************
@@ -1053,30 +1053,30 @@ uint32_t rom_setup_get_trim_adcshvbufen(uint32_t fcfg1_revision)
 
 uint32_t rom_setup_get_trim_xosc_hfctrl(uint32_t fcfg1_revision)
 {
-  uint32_t getTrimForXoschfCtlValue = 0;        /* Recommended default setting */
+  uint32_t get_trim_for_xoschf_ctl_value = 0;        /* Recommended default setting */
 
-  uint32_t fcfg1Data;
+  uint32_t f_cfg1_data;
 
   if (fcfg1_revision >= 0x00000020)
     {
-      fcfg1Data = getreg32(TIVA_FCFG1_MISC_OTP_DATA_1);
-      getTrimForXoschfCtlValue =
-        (((fcfg1Data & FCFG1_MISC_OTP_DATA_1_PEAK_DET_ITRIM_MASK) >>
+      f_cfg1_data = getreg32(TIVA_FCFG1_MISC_OTP_DATA_1);
+      get_trim_for_xoschf_ctl_value =
+        (((f_cfg1_data & FCFG1_MISC_OTP_DATA_1_PEAK_DET_ITRIM_MASK) >>
           FCFG1_MISC_OTP_DATA_1_PEAK_DET_ITRIM_SHIFT) <<
          DDI0_OSC_XOSCHFCTL_PEAK_DET_ITRIM_SHIFT);
 
-      getTrimForXoschfCtlValue |=
-        (((fcfg1Data & FCFG1_MISC_OTP_DATA_1_HP_BUF_ITRIM_MASK) >>
+      get_trim_for_xoschf_ctl_value |=
+        (((f_cfg1_data & FCFG1_MISC_OTP_DATA_1_HP_BUF_ITRIM_MASK) >>
           FCFG1_MISC_OTP_DATA_1_HP_BUF_ITRIM_SHIFT) <<
          DDI0_OSC_XOSCHFCTL_HP_BUF_ITRIM_SHIFT);
 
-      getTrimForXoschfCtlValue |=
-        (((fcfg1Data & FCFG1_MISC_OTP_DATA_1_LP_BUF_ITRIM_MASK) >>
+      get_trim_for_xoschf_ctl_value |=
+        (((f_cfg1_data & FCFG1_MISC_OTP_DATA_1_LP_BUF_ITRIM_MASK) >>
           FCFG1_MISC_OTP_DATA_1_LP_BUF_ITRIM_SHIFT) <<
          DDI0_OSC_XOSCHFCTL_LP_BUF_ITRIM_SHIFT);
     }
 
-  return (getTrimForXoschfCtlValue);
+  return (get_trim_for_xoschf_ctl_value);
 }
 
 /****************************************************************************
@@ -1085,15 +1085,15 @@ uint32_t rom_setup_get_trim_xosc_hfctrl(uint32_t fcfg1_revision)
 
 uint32_t rom_setup_get_trim_xosc_hffaststart(void)
 {
-  uint32_t ui32XoscHfFastStartValue;
+  uint32_t ui32_xoschf_fast_start_value;
 
   /* Get value from FCFG1 */
 
-  ui32XoscHfFastStartValue = (getreg32(TIVA_FCFG1_OSC_CONF) &
+  ui32_xoschf_fast_start_value = (getreg32(TIVA_FCFG1_OSC_CONF) &
                               FCFG1_OSC_CONF_XOSC_HF_FAST_START_MASK) >>
     FCFG1_OSC_CONF_XOSC_HF_FAST_START_SHIFT;
 
-  return (ui32XoscHfFastStartValue);
+  return (ui32_xoschf_fast_start_value);
 }
 
 /****************************************************************************
@@ -1102,31 +1102,31 @@ uint32_t rom_setup_get_trim_xosc_hffaststart(void)
 
 uint32_t rom_setup_get_trim_radc_extcfg(uint32_t fcfg1_revision)
 {
-  uint32_t getTrimForRadcExtCfgValue = 0x403f8000;      /* Recommended default
-                                                         * setting */
+  uint32_t get_trim_for_radc_ext_cfg_value = 0x403f8000; /* Recommended default
+                                                          * setting */
 
-  uint32_t fcfg1Data;
+  uint32_t f_cfg1_data;
 
   if (fcfg1_revision >= 0x00000020)
     {
-      fcfg1Data = getreg32(TIVA_FCFG1_MISC_OTP_DATA_1);
-      getTrimForRadcExtCfgValue =
-        (((fcfg1Data & FCFG1_MISC_OTP_DATA_1_HPM_IBIAS_WAIT_CNT_MASK) >>
+      f_cfg1_data = getreg32(TIVA_FCFG1_MISC_OTP_DATA_1);
+      get_trim_for_radc_ext_cfg_value =
+        (((f_cfg1_data & FCFG1_MISC_OTP_DATA_1_HPM_IBIAS_WAIT_CNT_MASK) >>
           FCFG1_MISC_OTP_DATA_1_HPM_IBIAS_WAIT_CNT_SHIFT) <<
          DDI0_OSC_RADCEXTCFG_HPM_IBIAS_WAIT_CNT_SHIFT);
 
-      getTrimForRadcExtCfgValue |=
-        (((fcfg1Data & FCFG1_MISC_OTP_DATA_1_LPM_IBIAS_WAIT_CNT_MASK) >>
+      get_trim_for_radc_ext_cfg_value |=
+        (((f_cfg1_data & FCFG1_MISC_OTP_DATA_1_LPM_IBIAS_WAIT_CNT_MASK) >>
           FCFG1_MISC_OTP_DATA_1_LPM_IBIAS_WAIT_CNT_SHIFT) <<
          DDI0_OSC_RADCEXTCFG_LPM_IBIAS_WAIT_CNT_SHIFT);
 
-      getTrimForRadcExtCfgValue |=
-        (((fcfg1Data & FCFG1_MISC_OTP_DATA_1_IDAC_STEP_MASK) >>
+      get_trim_for_radc_ext_cfg_value |=
+        (((f_cfg1_data & FCFG1_MISC_OTP_DATA_1_IDAC_STEP_MASK) >>
           FCFG1_MISC_OTP_DATA_1_IDAC_STEP_SHIFT) <<
          DDI0_OSC_RADCEXTCFG_IDAC_STEP_SHIFT);
     }
 
-  return (getTrimForRadcExtCfgValue);
+  return (get_trim_for_radc_ext_cfg_value);
 }
 
 /****************************************************************************
@@ -1158,18 +1158,18 @@ rom_setup_get_trim_lfregulator_cmirrwr_ratio(uint32_t fcfg1_revision)
 {
   /* Default value for both fields */
 
-  uint32_t trimForXoscLfRegulatorAndCmirrwrRatioValue = 0;
+  uint32_t trim_for_xosc_lf_regulator_and_cmirrwr_ratio_val = 0;
 
   if (fcfg1_revision >= 0x00000022)
     {
-      trimForXoscLfRegulatorAndCmirrwrRatioValue =
+      trim_for_xosc_lf_regulator_and_cmirrwr_ratio_val =
         (getreg32(TIVA_FCFG1_OSC_CONF) &
          (FCFG1_OSC_CONF_XOSCLF_REGULATOR_TRIM_MASK |
           FCFG1_OSC_CONF_XOSCLF_CMIRRWR_RATIO_MASK)) >>
         FCFG1_OSC_CONF_XOSCLF_CMIRRWR_RATIO_SHIFT;
     }
 
-  return (trimForXoscLfRegulatorAndCmirrwrRatioValue);
+  return (trim_for_xosc_lf_regulator_and_cmirrwr_ratio_val);
 }
 
 /****************************************************************************
