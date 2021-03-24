@@ -301,6 +301,12 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       goto errout_with_join;
     }
 
+#ifndef CONFIG_BUILD_KERNEL
+  /* Save the allocated task data in TLS */
+
+  tls_set_taskdata(&ptcb->cmn);
+#endif
+
   /* Should we use the priority and scheduler specified in the pthread
    * attributes?  Or should we use the current thread's priority and
    * scheduler?

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_getoptargp.c
+ * include/nuttx/lib/libvars.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,31 +18,59 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_LIB_LIBVARS_H
+#define __INCLUDE_NUTTX_LIB_LIBVARS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
+#include <stdbool.h>
 
-#include "unistd.h"
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+#include <nuttx/lib/getopt.h>
 
 /****************************************************************************
- * Name: getoptargp
- *
- * Description:
- *   Returns a pointer to optarg.  This function is only used for external
- *   modules that need to access the base, global variable, optarg.
- *
+ * Public Types
  ****************************************************************************/
 
-FAR char **getoptargp(void)
+#ifndef CONFIG_BUILD_KERNEL
+/* This structure encapsulates all task-specific variables needed by the C
+ * Library.  This structure is retained at the beginning of the main thread
+ * of and is accessed via a reference stored in the TLS of all threads in
+ * the task group.
+ *
+ * NOTE: task-specific variables are not needed in the KERNEL build.  In
+ * that build mode, all global variables are inherently process-specific.
+ */
+
+struct libvars_s
 {
-  FAR struct getopt_s *go = getoptvars();
-  return &go->go_optarg;
+  struct getopt_s lv_getopt; /* Globals used by getopt() */
+};
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __INCLUDE_NUTTX_LIB_LIBVARS_H */

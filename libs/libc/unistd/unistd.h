@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_getoptargp.c
+ * libs/libc/unistd/unistd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,31 +18,49 @@
  *
  ****************************************************************************/
 
+#ifndef __LIBC_UNISTD_UNISTD_H
+#define __LIBC_UNISTD_UNISTD_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
+#include <stdbool.h>
 
-#include "unistd.h"
+#include <nuttx/lib/getopt.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getoptargp
+ * Name: getoptvars
  *
  * Description:
- *   Returns a pointer to optarg.  This function is only used for external
- *   modules that need to access the base, global variable, optarg.
+ *   Returns a pointer to to the thread-specific getopt() data.
  *
  ****************************************************************************/
 
-FAR char **getoptargp(void)
-{
-  FAR struct getopt_s *go = getoptvars();
-  return &go->go_optarg;
+FAR struct getopt_s *getoptvars(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __LIBC_UNISTD_UNISTD_H */

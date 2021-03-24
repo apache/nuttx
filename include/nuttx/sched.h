@@ -38,6 +38,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
+#include <nuttx/lib/libvars.h>
 #include <nuttx/mm/shm.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
@@ -527,6 +528,12 @@ struct task_group_s
 
 #if CONFIG_TLS_NELEM > 0
   tls_ndxset_t tg_tlsset;           /* Set of TLS data indexes allocated        */
+#endif
+
+  /* Task-specific Data *********************************************************/
+
+#ifndef CONFIG_BUILD_KERNEL
+  FAR struct libvars_s *tg_libvars; /* C library global variables */
 #endif
 
   /* POSIX Signal Control Fields ************************************************/
