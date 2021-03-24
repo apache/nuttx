@@ -34,7 +34,7 @@
  * Name: arm_netinitialize (stub)
  *
  * Description:
- *   This is a stub version os arm_netinitialize.  Normally, arm_netinitialize
+ *   This is a stub version os arm_netinitialize. Normally, arm_netinitialize
  *   is defined in board/xyz_network.c for board-specific Ethernet
  *   implementations, or chip/xyx_ethernet.c for chip-specific Ethernet
  *   implementations.  The stub version here is used in the corner case where
