@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am335x_uart.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_UART_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/am335x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AM335X_UART_RBR_OFFSET       0x0000 /* UART Receive Buffer Register */
 #define AM335X_UART_THR_OFFSET       0x0000 /* UART Transmit Holding Register */
@@ -73,8 +73,7 @@
 #define AM335X_UART_RFL_OFFSET       0x0064 /* UART Received FIFO Level Register */
 #define AM335X_UART_TFL_OFFSET       0x0068 /* UART Transmit FIFO Level Register */
 
-
-/* Register virtual addresses *******************************************************/
+/* Register virtual addresses ***********************************************/
 
 #define AM335X_UART_RBR(n)           (AM335X_UART_VADDR(n) + AM335X_UART_RBR_OFFSET)
 #define AM335X_UART_THR(n)           (AM335X_UART_VADDR(n) + AM335X_UART_THR_OFFSET)
@@ -244,7 +243,7 @@
 #define AM335X_UART5_RFL             (AM335X_UART5_VADDR + AM335X_UART_RFL_OFFSET)
 #define AM335X_UART5_TFL             (AM335X_UART5_VADDR + AM335X_UART_TFL_OFFSET)
 
-/* Register bit field definitions ***************************************************/
+/* Register bit field definitions *******************************************/
 
 /* UART Receive Buffer Register */
 
@@ -295,12 +294,14 @@
 #define UART_FCR_RFIFO_CLEAR         (1 << 1)  /* Bit 1: Clear RX FIFO */
 #define UART_FCR_TFIFO_CLEAR         (1 << 2)  /* Bit 2: Clear TX FIFO */
 #define UART_FCR_DMA_MODE            (1 << 3)  /* Bit 3: DMA Mode */
+
 #define UART_FCR_TFT_SHIFT           (4)  /* Bits 4-5: TX FIFO Trigger Level */
 #define UART_FCR_TFT_MASK            (3 << UART_FCR_TFT_SHIFT)
 #  define UART_FCR_TFT_8CHAR         (0 << UART_FCR_TFT_SHIFT)  /* 8 Chars in FIFO */
 #  define UART_FCR_TFT_16CHAR        (1 << UART_FCR_TFT_SHIFT)  /* 16 Chars in FIFO */
 #  define UART_FCR_TFT_32CHAR        (2 << UART_FCR_TFT_SHIFT)  /* 32 Chars in FIFO */
 #  define UART_FCR_TFT_56CHAR        (3 << UART_FCR_TFT_SHIFT)  /* 56 Chars in FIFO */
+
 #define UART_FCR_RFT_SHIFT           (6)  /* Bits 6-7: RX FIFO Trigger Level */
 #define UART_FCR_RFT_MASK            (3 << UART_FCR_RFT_SHIFT)
 #  define UART_FCR_RFT_8CHAR         (0 << UART_FCR_RFT_SHIFT)  /* 8 Chars in FIFO */
@@ -316,14 +317,19 @@
 #  define UART_LCR_DLS_6BITS         (1 << UART_LCR_DLS_SHIFT)  /* 6 Bits */
 #  define UART_LCR_DLS_7BITS         (2 << UART_LCR_DLS_SHIFT)  /* 7 Bits */
 #  define UART_LCR_DLS_8BITS         (3 << UART_LCR_DLS_SHIFT)  /* 8 Bits */
+
 #define UART_LCR_STOP_SHIFT          (2)  /* Bit 2:  Number of Stop Bits */
+
 #  define UART_LCR_STOP_1BITS        (0 << UART_LCR_STOP_SHIFT)  /* 1 Stop Bit */
 #  define UART_LCR_STOP_2BITS        (1 << UART_LCR_STOP_SHIFT)  /* 2 Stop Bits */
+
 #define UART_LCR_PEN                 (1 << 3)  /* Bit 3:  Parity Enable */
-#define UART_LCR_PARITY_SHIFT        (3)  /* Bit 3-4:  Parity Enable and Parity Select */
+#define UART_LCR_PARITY_SHIFT        (3)       /* Bit 3-4:  Parity Enable and Parity Select */
+
 #  define UART_LCR_PARITY_NONE       (0 << UART_LCR_PARITY_SHIFT)  /* No Parity */
 #  define UART_LCR_PARITY_ODD        (1 << UART_LCR_PARITY_SHIFT)  /* Odd Parity Bit */
 #  define UART_LCR_PARITY_EVEN       (3 << UART_LCR_PARITY_SHIFT)  /* Even Parity Bit */
+
 #define UART_LCR_BC                  (1 << 6)  /* Bit 6:  Break Control Bit */
 #define UART_LCR_DLAB                (1 << 7)  /* Bit 7:  Divisor Latch Access Enable Bit */
 #define UART_LCR_CONFIG_MODE_A       (0x00000080)
@@ -377,6 +383,7 @@
 /* UART Mode Definition 1 Register */
 
 #define UART_MDR1_MODE_SHIFT         (0)  /* Bits 0-2: Operation Mode Selection */
+
 #  define UART_MDR1_MODE_16X         (0 << UART_MDR1_MODE_SHIFT)  /* UART 16x Mode. */
 #  define UART_MDR1_MODE_SIR         (1 << UART_MDR1_MODE_SHIFT)  /* SIR mode */
 #  define UART_MDR1_MODE_16XAUTO     (2 << UART_MDR1_MODE_SHIFT)  /* UART 16x Auto-Baud */

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am335x_wdog.h
  *
  *   Copyright (C) 2019 Petro Karashchenko. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_WDOG_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_WDOG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/am335x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AM335X_WDT_IDR_OFFSET           0x0000  /* Watchdog Identification Register */
 #define AM335X_WDT_DSC_OFFSET           0x0010  /* Watchdog System Control Register */
@@ -66,7 +66,7 @@
 #define AM335X_WDT_IRQ_EN_SET_OFFSET    0x005c  /* Watchdog Interrupt Enable Set Register */
 #define AM335X_WDT_IRQ_EN_CLR_OFFSET    0x0060  /* Watchdog Interrupt Enable Clear Register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define AM335X_WDT_IDR                  (AM335X_WDT1_VADDR + AM335X_WDT_IDR_OFFSET)
 #define AM335X_WDT_DSC                  (AM335X_WDT1_VADDR + AM335X_WDT_DSC_OFFSET)
@@ -85,16 +85,18 @@
 #define AM335X_WDT_IRQ_EN_SET           (AM335X_WDT1_VADDR + AM335X_WDT_IRQ_EN_SET_OFFSET)
 #define AM335X_WDT_IRQ_EN_CLR           (AM335X_WDT1_VADDR + AM335X_WDT_IRQ_EN_CLR_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* Watchdog System Control Register */
 
 #define WDT_DSC_SOFT_RST                (1 << 1)  /* Bit 1:  Watchdog Software Reset */
-#define WDT_DSC_IDLE_SHIFT              (3)  /* Bit 3-4:  Watchdog Idle Mode */
+#define WDT_DSC_IDLE_SHIFT              (3)       /* Bit 3-4:  Watchdog Idle Mode */
+
 #  define WDT_DSC_IDLE_FORCE            (0 << WDT_DSC_IDLE_SHIFT)  /* Force-idle Mode */
 #  define WDT_DSC_IDLE_NO               (1 << WDT_DSC_IDLE_SHIFT)  /* No-idle Mode */
 #  define WDT_DSC_IDLE_SMART            (2 << WDT_DSC_IDLE_SHIFT)  /* Smart-idle Mode */
 #  define WDT_DSC_IDLE_SMART_WKUP       (3 << WDT_DSC_IDLE_SHIFT)  /* Smart-idle Wakeup-capable Mode */
+
 #define WDT_DSC_EMU_FREE                (1 << 5)  /* Bit 5:  Watchdog DEBUG Disable */
 
 /* Watchdog Status Register */

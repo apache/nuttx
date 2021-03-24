@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am335x_intc.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_INTC_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_INTC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/am335x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AM335X_INTC_REVISION_OFFSET     0x0000 /* IP revision code */
 #define AM335X_INTC_SYSCONFIG_OFFSET    0x0010 /* Various parameters of the OCP interface */
@@ -111,7 +111,7 @@
 
 #define AM335X_INTC_ILR_OFFSET(n)       (0x0100 + ((n) * 0x04)) /* Priority for the interrupts and the FIQ/IRQ steering */
 
-/* Register virtual addresses *******************************************************/
+/* Register virtual addresses ***********************************************/
 
 #define AM335X_INTC_REVISION            (AM335X_INTC_VADDR + AM335X_INTC_REVISION_OFFSET)
 #define AM335X_INTC_SYSCONFIG           (AM335X_INTC_VADDR + AM335X_INTC_SYSCONFIG_OFFSET)
@@ -175,7 +175,7 @@
 
 #define AM335X_INTC_ILR(n)              (AM335X_INTC_VADDR + AM335X_INTC_ILR_OFFSET(n))
 
-/* Register bit field definitions ***************************************************/
+/* Register bit field definitions *******************************************/
 
 /* System Configuration */
 

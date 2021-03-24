@@ -198,28 +198,32 @@ static int am335x_gpio_interrupt(uint32_t base, int irq0, void *context)
 #ifdef CONFIG_AM335X_GPIO0_IRQ
 static int am335x_gpio0_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return am335x_gpio_interrupt(AM335X_GPIO0_VADDR, AM335X_IRQ_GPIO0P0, context);
+  return am335x_gpio_interrupt(AM335X_GPIO0_VADDR,
+                               AM335X_IRQ_GPIO0P0, context);
 }
 #endif
 
 #ifdef CONFIG_AM335X_GPIO1_IRQ
 static int am335x_gpio1_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return am335x_gpio_interrupt(AM335X_GPIO1_VADDR, AM335X_IRQ_GPIO1P0, context);
+  return am335x_gpio_interrupt(AM335X_GPIO1_VADDR,
+                               AM335X_IRQ_GPIO1P0, context);
 }
 #endif
 
 #ifdef CONFIG_AM335X_GPIO2_IRQ
 static int am335x_gpio2_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return am335x_gpio_interrupt(AM335X_GPIO2_VADDR, AM335X_IRQ_GPIO2P0, context);
+  return am335x_gpio_interrupt(AM335X_GPIO2_VADDR,
+                               AM335X_IRQ_GPIO2P0, context);
 }
 #endif
 
 #ifdef CONFIG_AM335X_GPIO3_IRQ
 static int am335x_gpio3_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return am335x_gpio_interrupt(AM335X_GPIO3_VADDR, AM335X_IRQ_GPIO3P0, context);
+  return am335x_gpio_interrupt(AM335X_GPIO3_VADDR,
+                               AM335X_IRQ_GPIO3P0, context);
 }
 #endif
 
@@ -243,7 +247,7 @@ void am335x_gpio_irqinitialize(void)
 #ifdef CONFIG_AM335X_GPIO0_IRQ
   /* Enable GPIO0 clocking */
 
-  //am335x_gpio0_enableclk();
+  /* am335x_gpio0_enableclk(); */
 
   /* Clear and disable all GPIO0 interrupts */
 
@@ -268,7 +272,7 @@ void am335x_gpio_irqinitialize(void)
 #ifdef CONFIG_AM335X_GPIO1_IRQ
   /* Enable GPIO1 clocking */
 
-  //am335x_gpio1_enableclk();
+  /* am335x_gpio1_enableclk(); */
 
   /* Clear and disable all GPIO1 interrupts */
 
@@ -293,7 +297,7 @@ void am335x_gpio_irqinitialize(void)
 #ifdef CONFIG_AM335X_GPIO2_IRQ
   /* Enable GPIO2 clocking */
 
-  //am335x_gpio2_enableclk();
+  /* am335x_gpio2_enableclk(); */
 
   /* Clear and disable all GPIO2 interrupts */
 
@@ -318,7 +322,7 @@ void am335x_gpio_irqinitialize(void)
 #ifdef CONFIG_AM335X_GPIO3_IRQ
   /* Enable GPIO3 clocking */
 
-  //am335x_gpio3_enableclk();
+  /* am335x_gpio3_enableclk(); */
 
   /* Clear and disable all GPIO3 interrupts */
 
@@ -357,13 +361,13 @@ void am335x_gpioirq(gpio_pinset_t pinset)
   am335x_gpio_lowlevel(pinset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_gpio_irqenable
  *
  * Description:
  *   Enable generation of interrupt from GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void am335x_gpio_irqenable(gpio_pinset_t pinset);
 {
@@ -376,13 +380,13 @@ void am335x_gpio_irqenable(gpio_pinset_t pinset);
   putreg32(GPIO_PIN(pin), AM335X_GPIO_ISSR0(am335x_gpion_vbase(port)));
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_gpio_irqdisable
  *
  * Description:
  *   Disable generation of interrupt from GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void am335x_gpio_irqdisable(gpio_pinset_t pinset);
 {

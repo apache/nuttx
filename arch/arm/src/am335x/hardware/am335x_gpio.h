@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am335x_gpio.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
@@ -31,21 +31,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_GPIO_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/am335x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define GPIO0                     0      /* Port 0 index */
 #define GPIO1                     1      /* Port 1 index */
@@ -55,7 +55,7 @@
 #define AM335X_GPIO_NPORTS        4      /* Seven total ports */
 #define AM335X_GPIO_NPINS        32      /* Up to 32 pins per port */
 
-/* GPIO Register Offsets ************************************************************/
+/* GPIO Register Offsets ****************************************************/
 
 #define AM335X_GPIO_REV_OFFSET   0x0000  /* Module Revision Register */
 #define AM335X_GPIO_SCR_OFFSET   0x0010  /* System Configuration Register */
@@ -84,7 +84,7 @@
 #define AM335X_GPIO_CDOR_OFFSET  0x0190  /* Clear Data Output Register */
 #define AM335X_GPIO_SDOR_OFFSET  0x0194  /* Set Data Output Register */
 
-/* GPIO Register Addresses **********************************************************/
+/* GPIO Register Addresses **************************************************/
 
 #define AM335X_GPIO_SCR(v)       ((v) + AM335X_GPIO_SCR_OFFSET)
 #define AM335X_GPIO_EOIR(v)      ((v) + AM335X_GPIO_EOIR_OFFSET)
@@ -216,7 +216,7 @@
 #define AM335X_GPIO3_CDOR        (AM335X_GPIO3_VADDR + AM335X_GPIO_CDOR_OFFSET)
 #define AM335X_GPIO3_SDOR        (AM335X_GPIO3_VADDR + AM335X_GPIO_SDOR_OFFSET)
 
-/* GPIO Register Bit Definitions ****************************************************/
+/* GPIO Register Bit Definitions ********************************************/
 
 /* Most registers are laid out simply with one bit per pin */
 

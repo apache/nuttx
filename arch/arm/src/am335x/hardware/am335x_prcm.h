@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am335x_prcm.h
  *
  *   Copyright (C) 2019 Petro Karashchenko. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_PRCM_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_PRCM_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/am335x_memorymap.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Clock Module Register Offsets ************************************************************/
+/* Clock Module Register Offsets ********************************************/
 
 #define AM335X_CM_PER_L4LS_CLKSTCTRL_OFFSET             0x0000
 #define AM335X_CM_PER_L3S_CLKSTCTRL_OFFSET              0x0004
@@ -197,7 +197,7 @@
 #define AM335X_CM_CEFUSE_CLKSTCTRL_OFFSET               0x0000
 #define AM335X_CM_CEFUSE_CLKCTRL_OFFSET                 0x0020
 
-/* Clock Module Register Addresses **********************************************************/
+/* Clock Module Register Addresses ******************************************/
 
 #define AM335X_CM_PER_L4LS_CLKSTCTRL                    (AM335X_CM_PER_VADDR + AM335X_CM_PER_L4LS_CLKSTCTRL_OFFSET)
 #define AM335X_CM_PER_L3S_CLKSTCTRL                     (AM335X_CM_PER_VADDR + AM335X_CM_PER_L3S_CLKSTCTRL_OFFSET)
@@ -347,7 +347,7 @@
 #define AM335X_CM_CEFUSE_CLKSTCTRL                      (AM335X_CM_CEFUSE_VADDR + AM335X_CM_CEFUSE_CLKSTCTRL_OFFSET)
 #define AM335X_CM_CEFUSE_CLKCTRL                        (AM335X_CM_CEFUSE_VADDR + AM335X_CM_CEFUSE_CLKCTRL_OFFSET)
 
-/* Clock Module Register Bit Definitions ****************************************************/
+/* Clock Module Register Bit Definitions ************************************/
 
 #define CM_CLKSTCTRL_CLKTRCTRL_SHIFT                    (0)  /* Bits 0-1: Controls the clock state transition of the clock domain */
 #define CM_CLKSTCTRL_CLKTRCTRL_MASK                     (3 << CM_CLKSTCTRL_CLKTRCTRL_SHIFT)
@@ -359,12 +359,14 @@
 #define CM_CLKCTRL_MODULEMODE_MASK                      (3 << CM_CLKCTRL_MODULEMODE_SHIFT)
 #  define CM_CLKCTRL_MODULEMODE_DISABLE                 (0 << CM_CLKCTRL_MODULEMODE_SHIFT)  /* Module is disable by SW */
 #  define CM_CLKCTRL_MODULEMODE_ENABLE                  (2 << CM_CLKCTRL_MODULEMODE_SHIFT)  /* Module is explicitly enabled */
+
 #define CM_CLKCTRL_IDLEST_SHIFT                         (16)  /* Bits 16-17: Module idle status. */
 #define CM_CLKCTRL_IDLEST_MASK                          (3 << CM_CLKCTRL_IDLEST_SHIFT)
 #  define CM_CLKCTRL_IDLEST_FUNC                        (0 << CM_CLKCTRL_IDLEST_SHIFT)  /* Module is fully functional, including OCP */
 #  define CM_CLKCTRL_IDLEST_TRANS                       (1 << CM_CLKCTRL_IDLEST_SHIFT)  /* Module is performing transition: wakeup, or sleep, or sleep abortion */
 #  define CM_CLKCTRL_IDLEST_IDLE                        (2 << CM_CLKCTRL_IDLEST_SHIFT)  /* Module is in Idle mode (only OCP part) */
 #  define CM_CLKCTRL_IDLEST_DISABLED                    (3 << CM_CLKCTRL_IDLEST_SHIFT)  /* Module is disabled and cannot be accessed */
+
 #define CM_CLKCTRL_STBYST                               (1 << 18) /* Bit 18: Module standby status. */
 
 #define CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT                 (0)  /* Bits 0-2: Mux select line for DMTIMER_1MS clock */
@@ -376,6 +378,7 @@
 #  define CM_DPLL_DMTIMER1_CLKSEL_CLK_32768             (4 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT)  /* Selects the CLK_32768 from 32KHz Crystal Osc */
 
 #define CM_PER_L4LS_CLKSTCTRL_L4LS_GCLK                 (1 << 8)  /* State of the L4LS_GCLK clock in the domain */
+
 #define CM_PER_L4LS_CLKSTCTRL_UART_GFCLK                (1 << 10)  /* State of the UART_GFCLK clock in the domain */
 #define CM_PER_L4LS_CLKSTCTRL_CAN_CLK                   (1 << 11)  /* State of the CAN_CLK clock in the domain */
 #define CM_PER_L4LS_CLKSTCTRL_TIMER7_GCLK               (1 << 13)  /* State of the TIMER7 CLKTIMER clock in the domain */
@@ -422,6 +425,7 @@
 #define CM_WKUP_CLKSTCTRL_SR_SYSCLK                     (1 << 3)  /* State of the SMARTREFGLEX SYSCLK clock in the domain */
 #define CM_WKUP_CLKSTCTRL_WDT1_GCLK                     (1 << 4)  /* State of the WDT1_GCLK clock in the domain */
 #define CM_WKUP_CLKSTCTRL_GPIO0_GDBCLK                  (1 << 8)  /* State of the WKUPGPIO_DBGICLK clock in the domain */
+
 #define CM_WKUP_CLKSTCTRL_TIMER0_GCLK                   (1 << 10)  /* State of the WKUPTIMER_GCLK clock in the domain */
 #define CM_WKUP_CLKSTCTRL_I2C0_GFCLK                    (1 << 11)  /* State of the I2C0 clock in the domain */
 #define CM_WKUP_CLKSTCTRL_UART0_GFCLK                   (1 << 12)  /* State of the UART0 clock in the domain */

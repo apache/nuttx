@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am335x_scm.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_SCM_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_SCM_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/am335x_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Control Module Register Offsets **********************************************************/
+/* Control Module Register Offsets ******************************************/
 
 #define AM335X_SCM_CTRL_SYS_CONF_OFFSET         0x0010
 #define AM335X_SCM_CTRL_STATUS_OFFSET           0x0040
@@ -140,6 +140,7 @@
 #define AM335X_SCM_DDR_DATA1_IOCTRL_OFFSET      0x1444
 
 /* Pad Control Registers */
+
 /* Pad Control Register Indices (used by software for table lookups) */
 
 #define AM335X_PADCTL_GPMC_AD0_INDEX            0
@@ -400,7 +401,7 @@
 #define AM335X_PADCTL_USB0_DRVVBUS_OFFSET       0x0a1c
 #define AM335X_PADCTL_USB1_DRVVBUS_OFFSET       0x0a34
 
-/* Control Module Register Addresses ********************************************************/
+/* Control Module Register Addresses ****************************************/
 
 #define AM335X_SCM_CTRL_SYS_CONF                (AM335X_CONTROL_MODULE_VADDR + AM335X_SCM_CTRL_SYS_CONF_OFFSET)
 #define AM335X_SCM_CTRL_STATUS                  (AM335X_CONTROL_MODULE_VADDR + AM335X_SCM_CTRL_STATUS_OFFSET)
@@ -622,7 +623,7 @@
 #define AM335X_PADCTL_USB0_DRVVBUS              (AM335X_CONTROL_MODULE_VADDR + AM335X_PADCTL_USB0_DRVVBUS_OFFSET)
 #define AM335X_PADCTL_USB1_DRVVBUS              (AM335X_CONTROL_MODULE_VADDR + AM335X_PADCTL_USB1_DRVVBUS_OFFSET)
 
-/* Control Module Register Bit Definitions **************************************************/
+/* Control Module Register Bit Definitions **********************************/
 
 /* Control Status Fields */
 #define SCM_CTRL_STATUS_SYSBOOT1_SHIFT          (22) /* Bits 22-23:  Crystal clock frequency selection */
@@ -631,7 +632,6 @@
 #  define SCM_CTRL_STATUS_SYSBOOT1_24MHZ        (1 << SCM_CTRL_STATUS_SYSBOOT1_SHIFT)
 #  define SCM_CTRL_STATUS_SYSBOOT1_25MHZ        (2 << SCM_CTRL_STATUS_SYSBOOT1_SHIFT)
 #  define SCM_CTRL_STATUS_SYSBOOT1_26MHZ        (3 << SCM_CTRL_STATUS_SYSBOOT1_SHIFT)
-
 
 /* PAD Control Fields */
 #define PADCTL_MUXMODE_SHIFT    (0)       /* Bits 0-2: Functional signal mux select */

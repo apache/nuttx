@@ -314,7 +314,8 @@ static int am335x_gpio_configinput(gpio_pinset_t pinset)
   /* Configure pin pad settings */
 
   regaddr = AM335X_PADCTL_ADDRESS(index);
-  muxset  = (pinmux_pinset_t)((pinset & GPIO_PINMUX_MASK) >> GPIO_PINMUX_SHIFT);
+  muxset  = (pinmux_pinset_t)((pinset & GPIO_PINMUX_MASK) >>
+                               GPIO_PINMUX_SHIFT);
   return am335x_pinmux_configure(regaddr, muxset);
 }
 
@@ -352,7 +353,8 @@ static inline int am335x_gpio_configperiph(gpio_pinset_t pinset)
 
   index   = ((pinset & GPIO_PADCTL_MASK) >> GPIO_PADCTL_SHIFT);
   regaddr = AM335X_PADCTL_ADDRESS(index);
-  muxset  = (pinmux_pinset_t)((pinset & GPIO_PINMUX_MASK) >> GPIO_PINMUX_SHIFT);
+  muxset  = (pinmux_pinset_t)((pinset & GPIO_PINMUX_MASK) >>
+                               GPIO_PINMUX_SHIFT);
   return am335x_pinmux_configure(regaddr, muxset);
 }
 
@@ -422,13 +424,13 @@ int am335x_gpio_config(gpio_pinset_t pinset)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_gpio_write
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void am335x_gpio_write(gpio_pinset_t pinset, bool value)
 {
@@ -441,13 +443,13 @@ void am335x_gpio_write(gpio_pinset_t pinset, bool value)
   leave_critical_section(flags);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_gpio_read
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool am335x_gpio_read(gpio_pinset_t pinset)
 {
@@ -462,13 +464,13 @@ bool am335x_gpio_read(gpio_pinset_t pinset)
   return value;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_periph_gpio
  *
  * Description:
  *   Return GPIO pinset that correspond to provided peripheral pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 gpio_pinset_t am335x_periph_gpio(gpio_pinset_t pinset)
 {
