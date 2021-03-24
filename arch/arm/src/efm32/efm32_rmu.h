@@ -48,6 +48,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_DEBUG_ERROR
@@ -73,18 +74,20 @@ extern uint32_t g_efm32_rstcause;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-/************************************************************************************
+
+/****************************************************************************
  * Name: efm32_rmu_initialize
  *
  * Description:
- *    Store reset cause into g_efm32_rstcause then clear reset cause register.
+ *    Store reset cause into g_efm32_rstcause then clear reset cause
+ *    register.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void efm32_rmu_initialize(void);
-const char* efm32_reset_cause_list_str(uint32_t reg, unsigned int *idx);
+const char *efm32_reset_cause_list_str(uint32_t reg, unsigned int *idx);
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_reset_cause_list_str
  *
  * Description:
@@ -95,7 +98,7 @@ const char* efm32_reset_cause_list_str(uint32_t reg, unsigned int *idx);
  *   idx: Use to keep in maind reset cause decoding position.
  *        set *idx to zero before first call.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_EFM32_RMU_DEBUG
 const char *efm32_reset_cause_list_str(uint32_t reg, unsigned int *idx);

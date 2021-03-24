@@ -71,7 +71,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* PWM/Timer Definitions ****************************************************/
+
 /* The following definitions are used to identify the various time types */
 
 /* Debug ********************************************************************/
@@ -85,6 +87,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure represents the state of one PWM timer */
 
 struct efm32_pwmtimer_s
@@ -111,6 +114,7 @@ struct efm32_pwmtimer_s
 /****************************************************************************
  * Static Function Prototypes
  ****************************************************************************/
+
 /* Register access */
 
 static uint32_t pwm_getreg(struct efm32_pwmtimer_s *priv, int offset);
@@ -159,7 +163,10 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* This is the list of lower half PWM driver methods used by the upper half driver */
+
+/* This is the list of lower half PWM driver methods used by the upper half
+ * driver
+ */
 
 static const struct pwm_ops_s g_pwmops =
 {
@@ -273,7 +280,8 @@ static uint32_t pwm_getreg(struct efm32_pwmtimer_s *priv, int offset)
  *
  ****************************************************************************/
 
-static void pwm_putreg(struct efm32_pwmtimer_s *priv, int offset, uint32_t value)
+static void pwm_putreg(struct efm32_pwmtimer_s *priv,
+                       int offset, uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
@@ -412,7 +420,8 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
 
   regval = (info->duty * pwm_getreg(priv, EFM32_TIMER_TOP_OFFSET)) >> 16;
   pwm_putreg(priv, cc_offet + EFM32_TIMER_CC_CCV_OFFSET, regval);
-  //pwm_putreg(priv, cc_offet + EFM32_TIMER_CC_CCVB_OFFSET, regval);
+
+  /* pwm_putreg(priv, cc_offet + EFM32_TIMER_CC_CCVB_OFFSET, regval); */
 
   regval = (_TIMER_CC_CTRL_MODE_PWM   << _TIMER_CC_CTRL_MODE_SHIFT)   | \
            (_TIMER_CC_CTRL_CMOA_CLEAR << _TIMER_CC_CTRL_CMOA_SHIFT)   | \
@@ -511,7 +520,9 @@ static int pwm_interrupt(int irq, void *context, FAR void *arg)
       pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, (uint32_t)priv->curr - 1);
     }
 
-  /* Now all of the time critical stuff is done so we can do some debug output */
+  /* Now all of the time critical stuff is done so we can do some debug
+   * output
+   */
 
   pwminfo("Update interrupt SR: %04x prev: %d curr: %d count: %d\n",
           regval, priv->prev, priv->curr, priv->count);
@@ -573,7 +584,6 @@ static uint8_t pwm_pulsecount(uint32_t count)
     }
 }
 #endif
-
 
 /****************************************************************************
  * Name: pwm_setup
@@ -771,7 +781,8 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
+static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+                     int cmd, unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
   FAR struct efm32_pwmtimer_s *priv = (FAR struct efm32_pwmtimer_s *)dev;

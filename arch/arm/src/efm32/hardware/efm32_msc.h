@@ -1,4 +1,4 @@
-/*******************************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/hardware/efm32_msc.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -56,22 +56,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_EFM32_EFM32_MSC_H
 #define __ARCH_ARM_SRC_EFM32_EFM32_EFM32_MSC_H
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #include "hardware/efm32_memorymap.h"
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
-/* MSC Register Offsets ********************************************************************************************************/
+/* MSC Register Offsets *****************************************************/
 
 #define EFM32_MSC_CTRL_OFFSET                   0x0000  /* Memory System Control Register */
 #define EFM32_MSC_READCTRL_OFFSET               0x0004  /* Read Control Register */
@@ -94,7 +94,7 @@
 #  define EFM32_MSC_MASSLOCK_OFFSET             0x0054  /* Mass Erase Lock Register */
 #endif
 
-/* MSC Register Addresses ******************************************************************************************************/
+/* MSC Register Addresses ***************************************************/
 
 #define EFM32_MSC_CTRL                          (EFM32_MSC_BASE+EFM32_MSC_CTRL_OFFSET)
 #define EFM32_MSC_READCTRL                      (EFM32_MSC_BASE+EFM32_MSC_READCTRL_OFFSET)
@@ -117,7 +117,7 @@
 #  define EFM32_MSC_MASSLOCK                    (EFM32_MSC_BASE+EFM32_MSC_MASSLOCK_OFFSET)
 #endif
 
-/* MSC Register Bit Field Definitions ******************************************************************************************/
+/* MSC Register Bit Field Definitions ***************************************/
 
 /* Bit fields for MSC CTRL */
 

@@ -1,4 +1,4 @@
-/*******************************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/hardware/efm32_letimer.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -56,14 +56,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LETIMER_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LETIMER_H
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/efm32_memorymap.h"
@@ -72,10 +72,11 @@
 #  warning This is the EFM32GG header file; Review/modification needed for this architecture
 #endif
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************************************************/
-/* LETIMER Register Offsets ****************************************************************************************************/
+ ****************************************************************************/
+
+/* LETIMER Register Offsets *************************************************/
 
 #define EFM32_LETIMER_CTRL_OFFSET            0x0000  /* Control Register */
 #define EFM32_LETIMER_CMD_OFFSET             0x0004  /* Command Register */
@@ -93,7 +94,7 @@
 #define EFM32_LETIMER_SYNCBUSY_OFFSET        0x0034  /* Synchronization Busy Register */
 #define EFM32_LETIMER_ROUTE_OFFSET           0x0040  /* I/O Routing Register */
 
-/* LETIMER Register Addresses **************************************************************************************************/
+/* LETIMER Register Addresses ***********************************************/
 
 #define EFM32_LETIMER0_CTRL                  (EFM32_LETIMER0_BASE+EFM32_LETIMER0_CTRL_OFFSET)
 #define EFM32_LETIMER0_CMD                   (EFM32_LETIMER0_BASE+EFM32_LETIMER0_CMD_OFFSET)
@@ -111,7 +112,7 @@
 #define EFM32_LETIMER0_SYNCBUSY              (EFM32_LETIMER0_BASE+EFM32_LETIMER0_SYNCBUSY_OFFSET)
 #define EFM32_LETIMER0_ROUTE                 (EFM32_LETIMER0_BASE+EFM32_LETIMER0_ROUTE_OFFSET)
 
-/* LETIMER Register Bit Field Definitions **************************************************************************************/
+/* LETIMER Register Bit Field Definitions ***********************************/
 
 /* Bit fields for LETIMER CTRL */
 

@@ -39,7 +39,7 @@ typedef void (*alarmcb_t)(void);
  * Pre-processor Definitions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_rtc_setalarm
  *
  * Description:
@@ -52,14 +52,14 @@ typedef void (*alarmcb_t)(void);
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 struct timespec;
 int efm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_rtc_cancelalarm
  *
  * Description:
@@ -71,7 +71,7 @@ int efm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 int efm32_rtc_cancelalarm(void);

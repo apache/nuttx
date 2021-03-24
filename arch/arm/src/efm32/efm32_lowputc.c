@@ -181,7 +181,8 @@ static void efm32_uart_setbaud(uintptr_t base,  uint32_t baud)
    *   CLKDIV = (256 * fHFPERCLK) / (oversample * baud) - 256
    */
 
-  clkdiv = ((uint64_t)BOARD_HFPERCLK_FREQUENCY << 8) / ((uint64_t)baud * oversample);
+  clkdiv = ((uint64_t)BOARD_HFPERCLK_FREQUENCY << 8) /
+           ((uint64_t)baud * oversample);
   if (clkdiv > 256)
     {
       clkdiv -= 256;
@@ -490,7 +491,8 @@ void efm32_lowputc(uint32_t ch)
    * buffer is half-full or empty.
    */
 
-  while ((getreg32(CONSOLE_BASE + EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) == 0);
+  while ((getreg32(CONSOLE_BASE + EFM32_USART_STATUS_OFFSET) &
+         USART_STATUS_TXBL) == 0);
 
   /* Then send the character */
 
@@ -505,7 +507,8 @@ void efm32_lowputc(uint32_t ch)
    * buffer is half-full or empty.
    */
 
-  while ((getreg32(CONSOLE_BASE + EFM32_LEUART_STATUS_OFFSET) & LEUART_STATUS_TXBL) == 0);
+  while ((getreg32(CONSOLE_BASE + EFM32_LEUART_STATUS_OFFSET) &
+          LEUART_STATUS_TXBL) == 0);
 
   /* Then send the character */
 
@@ -628,7 +631,8 @@ void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
 
   /* Enable the U[S]ART */
 
-  putreg32(USART_CMD_RXEN | USART_CMD_TXEN, base + EFM32_USART_CMD_OFFSET);
+  putreg32(USART_CMD_RXEN | USART_CMD_TXEN,
+           base + EFM32_USART_CMD_OFFSET);
 }
 #endif
 
@@ -641,7 +645,8 @@ void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
  ****************************************************************************/
 
 #ifdef HAVE_LEUART_DEVICE
-void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
+void efm32_leuartconfigure(uintptr_t base,
+                           uint32_t baud, unsigned int parity,
                            unsigned int nbits, bool stop2)
 {
   uint32_t regval = 0;
@@ -682,7 +687,6 @@ void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
     case 2:
       regval |= LEUART_CTRL_PARITY_EVEN;
       break;
-
     }
 
   /* Configure stop bits */
@@ -704,7 +708,8 @@ void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
 
   /* Enable the LEUART */
 
-  putreg32(LEUART_CMD_RXEN | LEUART_CMD_TXEN, base + EFM32_LEUART_CMD_OFFSET);
+  putreg32(LEUART_CMD_RXEN | LEUART_CMD_TXEN,
+           base + EFM32_LEUART_CMD_OFFSET);
 }
 #endif
 
@@ -759,11 +764,14 @@ void efm32_leuart_reset(uintptr_t base)
            base + EFM32_LEUART_CMD_OFFSET);
   putreg32(_LEUART_CTRL_RESETVALUE, base + EFM32_LEUART_CTRL_OFFSET);
   putreg32(_LEUART_CLKDIV_RESETVALUE, base + EFM32_LEUART_CLKDIV_OFFSET);
-  putreg32(_LEUART_STARTFRAME_RESETVALUE, base + EFM32_LEUART_STARTFRAME_OFFSET);
-  putreg32(_LEUART_SIGFRAME_RESETVALUE, base + EFM32_LEUART_SIGFRAME_OFFSET);
+  putreg32(_LEUART_STARTFRAME_RESETVALUE,
+           base + EFM32_LEUART_STARTFRAME_OFFSET);
+  putreg32(_LEUART_SIGFRAME_RESETVALUE,
+           base + EFM32_LEUART_SIGFRAME_OFFSET);
   putreg32(_LEUART_IEN_RESETVALUE, base + EFM32_LEUART_IEN_OFFSET);
   putreg32(_LEUART_IFC_MASK, base + EFM32_LEUART_IFC_OFFSET);
-  putreg32(_LEUART_PULSECTRL_RESETVALUE, base + EFM32_LEUART_PULSECTRL_OFFSET);
+  putreg32(_LEUART_PULSECTRL_RESETVALUE,
+           base + EFM32_LEUART_PULSECTRL_OFFSET);
 #if defined(EFM32_LEUART_INPUT_OFFSET)
   putreg32(_LEUART_INPUT_RESETVALUE, base + EFM32_LEUART_INPUT_OFFSET);
 #endif
