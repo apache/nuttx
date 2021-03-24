@@ -20,8 +20,9 @@
 
 /* References:
  *
- *  "ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition", Copyright
- *   1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM DDI 0406C.c (ID051414)
+ *  "ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
+ *   Copyright 1996-1998, 2000, 2004-2012 ARM.
+ *   All rights reserved. ARM DDI 0406C.c (ID051414)
  */
 
 #ifndef __ARCH_ARM_SRC_ARMV7_R_CPSR_H
@@ -52,6 +53,7 @@
 #  define PSR_MODE_ABT    (23 << PSR_MODE_SHIFT) /* Abort mode */
 #  define PSR_MODE_UND    (27 << PSR_MODE_SHIFT) /* Undefined mode */
 #  define PSR_MODE_SYS    (31 << PSR_MODE_SHIFT) /* System mode */
+
 #define PSR_T_BIT         (1 << 5)  /* Bit 5: Thumb execution state bit */
 #define PSR_MASK_SHIFT    (6)       /* Bits 6-8: Mask Bits */
 #define PSR_MASK_MASK     (7 << PSR_GE_SHIFT)
@@ -116,7 +118,7 @@ extern "C"
  *       memory resources!  We need to be very careful in this case.  This
  *       function will perform MCU- and board-specific initialization which,
  *       among other things, must initialize memories.  After initializatino
- (       of the memories, this function will call arm_data_initialize() to
+ *       of the memories, this function will call arm_data_initialize() to
  *       initialize the memory resources
  *   4.  This function will then branch to nx_start() to start the operating
  *       system.

@@ -33,6 +33,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_ARM_MPU_NREGIONS
@@ -121,7 +122,7 @@ static inline uint32_t mpu_subregion_ms(size_t size, uint8_t l2size)
     }
 
   asize = (size + mask) & ~mask; /* Adjusted size */
-  nsrs  = asize >> (l2size-3);   /* Number of subregions */
+  nsrs  = asize >> (l2size - 3); /* Number of subregions */
   return g_ms_regionmask[nsrs];
 }
 
@@ -171,8 +172,8 @@ static inline uint32_t mpu_subregion_ls(size_t offset, uint8_t l2size)
       mask = 0x1fffffff;           /* Shifted mask */
     }
 
-  aoffset = offset & ~mask;        /* Adjusted offset */
-  nsrs    = aoffset >> (l2size-3); /* Number of subregions */
+  aoffset = offset & ~mask;          /* Adjusted offset */
+  nsrs    = aoffset >> (l2size - 3); /* Number of subregions */
   return g_ls_regionmask[nsrs];
 }
 
