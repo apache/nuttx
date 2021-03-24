@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_opamp.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_OPAMP_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_OPAMP_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,10 +36,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* OPAMP register offsets ********************************************************************/
+ ****************************************************************************/
+
+/* OPAMP register offsets ***************************************************/
 
 #define SAM_OPAMP_CTRLA_OFFSET     0x0000  /* Control A Register */
 #define SAM_OPAMP_STATUS_OFFSET    0x0002  /* Status Register */
@@ -47,7 +48,7 @@
 #define SAM_OPAMP_CTRL1_OFFSET     0x0008  /* OPAMP Control 1 Register */
 #define SAM_OPAMP_CTRL2_OFFSET     0x000c  /* OPAMP Control 2 Register */
 
-/* OPAMP register addresses ******************************************************************/
+/* OPAMP register addresses *************************************************/
 
 #define SAM_OPAMP_CTRLA            (SAM_OPAMP_BASE+SAM_OPAMP_CTRLA_OFFSET)
 #define SAM_OPAMP_STATUS           (SAM_OPAMP_BASE+SAM_OPAMP_STATUS_OFFSET)
@@ -55,7 +56,7 @@
 #define SAM_OPAMP_CTRL1            (SAM_OPAMP_BASE+SAM_OPAMP_CTRL1_OFFSET)
 #define SAM_OPAMP_CTRL2            (SAM_OPAMP_BASE+SAM_OPAMP_CTRL2_OFFSET)
 
-/* OPAMP register bit definitions ************************************************************/
+/* OPAMP register bit definitions *******************************************/
 
 /* Control A Register */
 
@@ -73,17 +74,19 @@
 
 #define OPAMP_CTRL_ENABLE            (1 << 1)  /* Bit 1:  Operation amplifier enable */
 #define OPAMP_CTRL_ANAOUT            (1 << 2)  /* Bit 2:  Analog output */
-#define OPAMP_CTRL_BIAS_SHIFT        (3)  /* Bits 3-5: Bias selection */
+#define OPAMP_CTRL_BIAS_SHIFT        (3)       /* Bits 3-5: Bias selection */
 #define OPAMP_CTRL_BIAS_MASK         (7 << OPAMP_CTRL_BIAS_SHIFT)
 #  define OPAMP_CTRL_BIAS_MODE0      (0 << OPAMP_CTRL_BIAS_SHIFT) /* Minimum current, slowest mode */
 #  define OPAMP_CTRL_BIAS_MODE1      (1 << OPAMP_CTRL_BIAS_SHIFT) /* Low current, slow */
 #  define OPAMP_CTRL_BIAS_MODE2      (2 << OPAMP_CTRL_BIAS_SHIFT) /* High current, fast */
 #  define OPAMP_CTRL_BIAS_MODE3      (3 << OPAMP_CTRL_BIAS_SHIFT) /* Maximum current, fastest mode */
-#define OPAMP_CTRL_RUNSTDBY          (1 << 6)  /* Bit 6:  Run in standby */
-#define OPAMP_CTRL_ONDEMAND          (1 << 7)  /* Bit 7:  On demand control */
-#define OPAMP_CTRL_RES2OUT           (1 << 8)  /* Bit 8:  Resistor ladder to output */
-#define OPAMP_CTRL_RES2VCC           (1 << 9)  /* Bit 9:  Resistor ladder to VCC */
+
+#define OPAMP_CTRL_RUNSTDBY          (1 << 6)   /* Bit 6:  Run in standby */
+#define OPAMP_CTRL_ONDEMAND          (1 << 7)   /* Bit 7:  On demand control */
+#define OPAMP_CTRL_RES2OUT           (1 << 8)   /* Bit 8:  Resistor ladder to output */
+#define OPAMP_CTRL_RES2VCC           (1 << 9)   /* Bit 9:  Resistor ladder to VCC */
 #define OPAMP_CTRL_RES1EN            (1 << 10)  /* Bit 10:  Resistor 1 enable */
+
 #define OPAMP_CTRL_RES1MUX_SHIFT     (11)  /* Bits 11-12: Resistor 1 mux */
 #define OPAMP_CTRL_RES1MUX_MASK      (3 << OPAMP_CTRL_RES1MUX_MASK)
 #  define OPAMP_CTRL_RES1MUX_OAxPOS   (0 << OPAMP_CTRL_RES1MUX_MASK) /* Positive input of OPAMPn, n=0,1,2 */
@@ -92,6 +95,7 @@
 #  define OPAMP_CTRL_RES1MUX_OA0OUT_1 (2 << OPAMP_CTRL_RES1MUX_MASK) /* OPAMP0 output, OPAMP1 */
 #  define OPAMP_CTRL_RES1MUX_OA1OUT_2 (2 << OPAMP_CTRL_RES1MUX_MASK) /* OPAMP1 output, OPAMP2 */
 #  define OPAMP_CTRL_RES1MUX_GND      (3 << OPAMP_CTRL_RES1MUX_MASK) /* Ground, OPAMPn, n=0,1,2 */
+
 #define OPAMP_CTRL_POTMUX_SHIFT      (13)  /* Bits 13-15: Potentiometer selection */
 #define OPAMP_CTRL_POTMUX_MASK       (7 << OPAMP_CTRL_POTMUX_SHIFT)
 #  define OPAMP_CTRL_POTMUX_14R_2R   (0 << OPAMP_CTRL_POTMUX_SHIFT) /* Gain 1/7 */
@@ -102,6 +106,7 @@
 #  define OPAMP_CTRL_POTMUX_3R_13R   (5 << OPAMP_CTRL_POTMUX_SHIFT) /* Gain 4+1/3 */
 #  define OPAMP_CTRL_POTMUX_2R_14R   (6 << OPAMP_CTRL_POTMUX_SHIFT) /* Gain 7 */
 #  define OPAMP_CTRL_POTMUX_R_15R    (7 << OPAMP_CTRL_POTMUX_SHIFT) /* Gain 15 */
+
 #define OPAMP_CTRL_MUXPOS_SHIFT      (16)  /* Bits 16-18: Positive input mux selection */
 #define OPAMP_CTRL_MUXPOS_MASK       (7 << OPAMP_CTRL_MUXPOS_SHIFT)
 #  define OPAMP_CTRL_MUXPOS_OAxPOS   (0 << OPAMP_CTRL_MUXPOS_SHIFT) /* Positive I/O pin, OPAMPn, n=0,1,2 */
@@ -113,6 +118,7 @@
 #  define OPAMP_CTRL_MUXPOS_OA0POS_2 (4 << OPAMP_CTRL_MUXPOS_SHIFT) /* Positive I/O pin OPA0, OPAMP2 */
 #  define OPAMP_CTRL_MUXPOS_OA1POS_2 (5 << OPAMP_CTRL_MUXPOS_SHIFT) /* Positive I/O pin OPA1, OPAMP2 */
 #  define OPAMP_CTRL_MUXPOS_OA0TAP_2 (6 << OPAMP_CTRL_MUXPOS_SHIFT) /* Resistor ladder 0 taps, OPAMP2 */
+
 #define OPAMP_CTRL_MUXNEG_SHIFT      (20)  /* Bits 20-22: Negative input mux selection */
 #define OPAMP_CTRL_MUXNEG_MASK       (7 << OPAMP_CTRL_MUXNEG_SHIFT)
 #  define OPAMP_CTRL_MUXNEG_OAxNEG   (0 << OPAMP_CTRL_MUXNEG_SHIFT) /* Negative I/O pin OPAMP n, n=0,1,2 */
@@ -123,17 +129,17 @@
 #  define OPAMP_CTRL_MUXNEG_OA1NEG_2 (4 << OPAMP_CTRL_MUXNEG_SHIFT) /* Negative I/O OPA1, OPAMP2 */
 #  define OPAMP_CTRL_MUXNEG_DAC_2    (5 << OPAMP_CTRL_MUXNEG_SHIFT) /* DAC output, OPAMP2 */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_OPAMP_H */

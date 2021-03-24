@@ -228,8 +228,9 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
 
   DEBUGASSERT(freerun && freerun->tch && ts);
 
-  /* Temporarily disable the overflow counter.  NOTE that we have to be careful
-   * here because  sam_tc_getpending() will reset the pending interrupt status.
+  /* Temporarily disable the overflow counter.
+   * NOTE that we have to be careful here because  sam_tc_getpending() will
+   * reset the pending interrupt status.
    * If we do not handle the overflow here then, it will be lost.
    */
 

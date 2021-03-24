@@ -561,8 +561,9 @@ void sam_lowsetup(void)
    * This may limit BAUD rates for lower USART clocks.
    */
 
-  putreg32(((SAM_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) / (SAM_CONSOLE_BAUD << 4)),
-           SAM_CONSOLE_VBASE + SAM_UART_BRGR_OFFSET);
+  putreg32(((SAM_USART_CLOCK +
+            (SAM_CONSOLE_BAUD << 3)) / (SAM_CONSOLE_BAUD << 4)),
+             SAM_CONSOLE_VBASE + SAM_UART_BRGR_OFFSET);
 
   /* Enable receiver & transmitter */
 
@@ -576,7 +577,8 @@ void sam_lowsetup(void)
 
   /* Reset and disable receiver and transmitter */
 
-  putreg32((FLEXUS_CR_RSTRX | FLEXUS_CR_RSTTX | FLEXUS_CR_RXDIS | FLEXUS_CR_TXDIS),
+  putreg32((FLEXUS_CR_RSTRX | FLEXUS_CR_RSTTX |
+            FLEXUS_CR_RXDIS | FLEXUS_CR_TXDIS),
            SAM_CONSOLE_VBASE + SAM_FLEXUS_CR_OFFSET);
 
   /* Disable all interrupts */
@@ -591,7 +593,8 @@ void sam_lowsetup(void)
    * This may limit BAUD rates for lower USART clocks.
    */
 
-  putreg32(((SAM_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) / (SAM_CONSOLE_BAUD << 4)),
+  putreg32(((SAM_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) /
+            (SAM_CONSOLE_BAUD << 4)),
            SAM_CONSOLE_VBASE + SAM_FLEXUS_BRGR_OFFSET);
 
   /* Enable receiver & transmitter */

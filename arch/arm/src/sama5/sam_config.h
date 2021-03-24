@@ -31,7 +31,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration **********************************************************/
+/* Configuration ************************************************************/
 
 /* If the USART is not being used as a UART, then it really isn't enabled
  * for our purposes.

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/sam_start.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_SAM_START_H
 #define __ARCH_ARM_SRC_SAMV7_SAM_START_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -46,32 +46,33 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_lowsetup
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level initialization
- *   including setup of the console UART.  This UART done early so that the serial
- *   console is available for debugging very early in the boot sequence.
+ *   Called at the very beginning of _start.  Performs low level
+ *   initialization including setup of the console UART.  This UART done
+ *   early so that the serial console is available for debugging very early
+ *   in the boot sequence.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_lowsetup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_boardinitialize
  *
  * Description:
- *   All SAMV7 architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after clocking and memory have
- *   been configured but before caches have been enabled and before any devices have
- *   been initialized.
+ *   All SAMV7 architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization -- after clocking and
+ *   memory have been configured but before caches have been enabled and
+ *   before any devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_boardinitialize(void);
 

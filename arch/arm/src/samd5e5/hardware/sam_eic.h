@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_eic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_EIC_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_EIC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* EIC register offsets *********************************************************************/
+/* EIC register offsets *****************************************************/
 
 #define SAM_EIC_CTRLA_OFFSET         0x0000  /* Control A register */
 #define SAM_EIC_NMICTRL_OFFSET       0x0001  /* Non-maskable interrupt control register */
@@ -50,7 +50,7 @@
 #define SAM_EIC_DPRESCALER_OFFSET    0x0034  /* Debouncer prescaler */
 #define SAM_EIC_PINSTATE_OFFSET      0x0038  /* Pin state */
 
-/* EIC register addresses *******************************************************************/
+/* EIC register addresses ***************************************************/
 
 #define SAM_EIC_CTRLA                (SAM_EIC_BASE + SAM_EIC_CTRLA_OFFSET)
 #define SAM_EIC_NMICTRL              (SAM_EIC_BASE + SAM_EIC_NMICTRL_OFFSET)
@@ -67,7 +67,7 @@
 #define SAM_EIC_DPRESCALER           (SAM_EIC_BASE + SAM_EIC_DPRESCALER_OFFSET)
 #define SAM_EIC_PINSTATE             (SAM_EIC_BASE + SAM_EIC_PINSTATE_OFFSET)
 
-/* EIC register bit definitions *************************************************************/
+/* EIC register bit definitions *********************************************/
 
 /* Control A register */
 
@@ -99,8 +99,9 @@
 #define EIC_SYNCBUSY_SWRST           (1 << 0)  /* Bit 0:  Software reset syncrhonization busy */
 #define EIC_SYNCBUSY_ENABLE          (1 << 1)  /* Bit 1:  Enable synchronization busy */
 
-/* Event control, Interrupt enable clear, interrupt enable set register, interrupt flag
- * status and clear, and External interrupt asynchronous mode registers.
+/* Event control, Interrupt enable clear, interrupt enable set register,
+ * interrupt flag status and clear, and External interrupt asynchronous mode
+ * registers.
  */
 
 #define EIC_EXTINT_SHIFT             (0)       /* Bits 0-15: External interrupt n */
@@ -225,16 +226,16 @@
 #  define EIC_PINSTATE_14               (1 << 14) /* Bit 14: EXTINT 14 pin state */
 #  define EIC_PINSTATE_15               (1 << 15) /* Bit 15: EXTINT 15 pin state */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Functions Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_EIC_H */

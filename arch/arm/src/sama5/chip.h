@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_CHIP_H
 #define __ARCH_ARM_SRC_SAMA5_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -33,12 +33,12 @@
 
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* arch/arm/src/armv7-a/l2cc_pl310.h includes this file and expects it to provide the
- * address of the L2CC-PL310 implementation.
+/* arch/arm/src/armv7-a/l2cc_pl310.h includes this file and expects it to
+ * provide the address of the L2CC-PL310 implementation.
  */
 
 #define L2CC_VBASE SAM_L2CC_VSECTION

@@ -43,7 +43,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Terminology.  In the flat build (CONFIG_BUILD_FLAT=y), there is only a
  * single heap access with the standard allocations (malloc/free).  This
  * heap is referred to as the user heap.  In the protected build
@@ -67,6 +69,7 @@
 #endif
 
 /* The Primary Heap *********************************************************/
+
 /* The physical address of the primary heap is defined by CONFIG_RAM_START,
  * CONFIG_RAM_SIZE, and CONFIG_RAM_END where:
  *
@@ -110,6 +113,7 @@
  */
 
 /* Memory Regions ***********************************************************/
+
 /* Check if we have been asked to reserve memory at the end of the primary
  * memory region.  This option is only available if we are executing from
  * DRAM and only if CONFIG_SAMA5_DDRCS_RESERVE is selected.
@@ -181,8 +185,8 @@
 #endif
 
 /* The heap space in the primary memory region is added automatically when
- * up_allocate_heap is called.  So if the memory region is the primary region,
- * it should not be added to the heap (again).
+ * up_allocate_heap is called.  So if the memory region is the primary
+ * region, it should not be added to the heap (again).
  */
 
 #if (CONFIG_RAM_VSTART & 0xfff00000) == SAM_ISRAM0_VADDR
@@ -383,8 +387,9 @@ void arm_addregion(void)
 
   if (nregions > 0)
     {
-      serr("ERROR: Not all regions added to heap: %d added, but CONFIG_MM_NREGIONS=%d\n",
-           CONFIG_MM_REGIONS - nregions, CONFIG_MM_REGIONS);
+      serr("ERROR: Not all regions added to heap: %d added,",
+           CONFIG_MM_REGIONS - nregions);
+      serr(" but CONFIG_MM_NREGIONS=%d\n", CONFIG_MM_REGIONS);
       serr("       Decrease the size of CONFIG_MM_NREGIONS\n");
     }
 }

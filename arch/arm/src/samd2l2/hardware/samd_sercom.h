@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_sercom.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
@@ -26,26 +26,29 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_SERCOM_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_SERCOM_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Two generic clocks are used by the SERCOM: GCLK_SERCOMx_CORE and GCLK_SERCOMx_SLOW.  The
- * core clock (GCLK_SERCOMx_CORE) is required to clock the SERCOM while operating as a
- * master, while the slow clock (GCLK_SERCOM_SLOW) is only required for certain functions.
+ ****************************************************************************/
+
+/* Two generic clocks are used by the SERCOM: GCLK_SERCOMx_CORE and
+ * GCLK_SERCOMx_SLOW.  The core clock (GCLK_SERCOMx_CORE) is required to
+ * clock the SERCOM while operating as a master, while the slow clock
+ * (GCLK_SERCOM_SLOW) is only required for certain functions.
  * SERCOM modules must share the same slow GCLK channel ID.
  *
- * The baud-rate generator runs off the GCLK_SERCOMx_CORE clock (or, optionally, external
- * clock).
+ * The baud-rate generator runs off the GCLK_SERCOMx_CORE clock
+ * (or, optionally, external clock).
  *
- * These definitions must match the GCLK_CLKCTRL_ID_* values defined in samd_gclk.c.
+ * These definitions must match the GCLK_CLKCTRL_ID_* values defined in
+ * samd_gclk.c.
  */
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD20
@@ -70,16 +73,16 @@
 #    define SERCOM5_GCLK_ID_CORE       25
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_SERCOM_H */

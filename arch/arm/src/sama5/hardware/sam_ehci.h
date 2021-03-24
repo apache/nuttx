@@ -34,11 +34,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The SAMA5 supports 3 root hub ports */
 
 #define SAM_EHCI_NRHPORT 3
 
 /* Registers ****************************************************************/
+
 /* Traditionally, NuttX specifies register locations using individual
  * register offsets from a base address.  That tradition is broken here and,
  * instead, register blocks are represented as structures.  This is done here
@@ -75,7 +77,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_EHCI_H */

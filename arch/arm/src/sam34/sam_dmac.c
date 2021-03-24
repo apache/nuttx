@@ -1206,7 +1206,9 @@ static inline int sam_multiple(struct sam_dma_s *dmach)
 
   putreg32(dmach->cfg, dmach->base + SAM_DMACHAN_CFG_OFFSET);
 
-  /* Program the DSCR register with the pointer to the firstlink list entry. */
+  /* Program the DSCR register with the pointer to the firstlink
+   * list entry.
+   */
 
   putreg32((uint32_t)llhead, dmach->base + SAM_DMACHAN_DSCR_OFFSET);
 
@@ -1245,7 +1247,9 @@ static void sam_dmaterminate(struct sam_dma_s *dmach, int result)
 
   putreg32(DMAC_EBC_CHANINTS(dmach->chan), SAM_DMAC_EBCIDR);
 
-  /* Disable the channel by writing one to the write-only channel disable register */
+  /* Disable the channel by writing one to the write-only channel
+   * disable register
+   */
 
   putreg32(DMAC_CHDR_DIS(dmach->chan), SAM_DMAC_CHDR);
 
@@ -1680,7 +1684,9 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
   if (dmach->llhead)
     {
-      /* Save the callback info.  This will be invoked when the DMA completes */
+      /* Save the callback info.
+       * This will be invoked when the DMA completes
+       */
 
       dmach->callback = callback;
       dmach->arg      = arg;

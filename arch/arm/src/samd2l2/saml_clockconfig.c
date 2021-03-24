@@ -144,7 +144,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true,
 #endif
     .prescaler  = BOARD_GCLK0_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK0_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK0_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 
   /* GCLK generator 1 */
@@ -160,7 +161,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true;
 #endif
     .prescaler  = BOARD_GCLK1_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK1_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK1_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -177,7 +179,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true;
 #endif
     .prescaler  = BOARD_GCLK2_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK2_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK2_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -194,7 +197,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true;
 #endif
     .prescaler  = BOARD_GCLK3_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK3_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK3_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -211,7 +215,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true;
 #endif
     .prescaler  = BOARD_GCLK4_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK4_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK4_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -228,7 +233,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true;
 #endif
     .prescaler  = BOARD_GCLK5_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK5_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK5_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -245,7 +251,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true;
 #endif
     .prescaler  = BOARD_GCLK6_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK6_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK6_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -262,7 +269,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true;
 #endif
     .prescaler  = BOARD_GCLK7_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK7_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK7_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -279,7 +287,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true;
 #endif
     .prescaler  = BOARD_GCLK8_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK8_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK8_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 };
@@ -287,20 +296,24 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
 #define NGCLKS_ENABLED (sizeof(g_gclkconfig) / sizeof(struct sam_gclkconfig_s))
 #endif
 
-/* These are temporary GLCK0 configuration that may be needed at power up */
+/* These are temporary GLCK0 configuration that may be needed at
+ * power up
+ */
 
 static const struct sam_gclkconfig_s g_gclk0_default =
 {
   .gclk       = 0,
   .prescaler  = 1,
-  .clksrc     = (uint8_t)(GCLK_GENCTRL_SRC_OSC16M >> GCLK_GENCTRL_SRC_SHIFT),
+  .clksrc     = (uint8_t)(GCLK_GENCTRL_SRC_OSC16M >>
+                          GCLK_GENCTRL_SRC_SHIFT),
 };
 
 static const struct sam_gclkconfig_s g_gclk0_ulp32kconfig =
 {
   .gclk       = 0,
   .prescaler  = 1,
-  .clksrc     = (uint8_t)(GCLK_GENCTRL_SRC_OSCULP32K >> GCLK_GENCTRL_SRC_SHIFT),
+  .clksrc     = (uint8_t)(GCLK_GENCTRL_SRC_OSCULP32K >>
+                          GCLK_GENCTRL_SRC_SHIFT),
 };
 
 /****************************************************************************
@@ -471,7 +484,8 @@ static inline void sam_xosc_config(void)
  *
  *     BOARD_XOSC32K_ENABLE       - Boolean (defined / not defined)
  *     BOARD_XOSC32K_FREQUENCY    - In Hz
- *     BOARD_XOSC32K_STARTUPTIME  - See OSC32KCTRL_XOSC32K_STARTUP_* definitions
+ *     BOARD_XOSC32K_STARTUPTIME  - See OSC32KCTRL_XOSC32K_STARTUP_*
+ *                                    definitions
  *     BOARD_XOSC32K_ISCRYSTAL    - Boolean (defined / not defined)
  *     BOARD_XOSC32K_AAMPEN       - Boolean (defined / not defined)
  *     BOARD_XOSC32K_EN1KHZ       - Boolean (defined / not defined)
@@ -556,7 +570,8 @@ static inline void sam_xosc32k_config(void)
  *
  *     BOARD_OSC32K_ENABLE       - Boolean (defined / not defined)
  *     BOARD_OSC32K_FREQUENCY    - In Hz
- *     BOARD_OSC32K_STARTUPTIME  - See OSC32KCTRL_OSC32K_STARTUP_* definitions
+ *     BOARD_OSC32K_STARTUPTIME  - See OSC32KCTRL_OSC32K_STARTUP_*
+ *                                  definitions
  *     BOARD_OSC32K_EN1KHZ       - Boolean (defined / not defined)
  *     BOARD_OSC32K_EN32KHZ      - Boolean (defined / not defined)
  *     BOARD_OSC32K_ONDEMAND     - Boolean (defined / not defined)
@@ -692,9 +707,11 @@ static inline void sam_osc16m_config(void)
    */
 
   enabled = ((regval & OSCCTRL_OSC16MCTRL_ENABLE) !=  0);
-  if (enabled && (regval & OSCCTRL_OSC16MCTRL_FSEL_MASK) == BOARD_OSC16M_FSEL)
+  if (enabled && (regval & OSCCTRL_OSC16MCTRL_FSEL_MASK) ==
+       BOARD_OSC16M_FSEL)
     {
-      regval &= ~(OSCCTRL_OSC16MCTRL_ONDEMAND | OSCCTRL_OSC16MCTRL_RUNSTDBY);
+      regval &= ~(OSCCTRL_OSC16MCTRL_ONDEMAND |
+                  OSCCTRL_OSC16MCTRL_RUNSTDBY);
 
 #ifdef BOARD_OSC16M_ONDEMAND
       /* Select on-demand oscillator controls */
@@ -736,7 +753,8 @@ static inline void sam_osc16m_config(void)
 
       /* Set the new OSC16M configuration */
 
-      regval &= ~(OSCCTRL_OSC16MCTRL_FSEL_MASK | OSCCTRL_OSC16MCTRL_RUNSTDBY |
+      regval &= ~(OSCCTRL_OSC16MCTRL_FSEL_MASK |
+                  OSCCTRL_OSC16MCTRL_RUNSTDBY |
                   OSCCTRL_OSC16MCTRL_ONDEMAND);
       regval |= BOARD_OSC16M_FSEL;
 
@@ -979,9 +997,12 @@ static inline void sam_dfll48m_refclk(void)
  *     BOARD_FDPLL96M_LBYPASS         - Boolean (defined / not defined)
  *     BOARD_FDPLL96M_WUF             - Boolean (defined / not defined)
  *     BOARD_FDPLL96M_LPEN            - Boolean (defined / not defined)
- *     BOARD_FDPLL96M_FILTER          - See OSCCTRL_DPLLCTRLB_FILTER_* definitions
- *     BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
- *     BOARD_FDPLL96M_LOCKTIME        - See OSCCTRL_DPLLCTRLB_LTIME_* definitions
+ *     BOARD_FDPLL96M_FILTER          - See OSCCTRL_DPLLCTRLB_FILTER_*
+ *                                            definitions
+ *     BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_*
+ *                                            definitions
+ *     BOARD_FDPLL96M_LOCKTIME        - See OSCCTRL_DPLLCTRLB_LTIME_*
+ *                                            definitions
  *     BOARD_FDPLL96M_REFDIV          - Numeric value, 1 - 2047
  *     BOARD_FDPLL96M_PRESCALER       - See OSCCTRL_DPLLPRESC_* definitions
  *     BOARD_FDPLL96M_REFFREQ         - Numeric value
@@ -1037,7 +1058,8 @@ static inline void sam_fdpll96m_config(void)
 
   /* Wait for synchronization */
 
-  while ((getreg8(SAM_OSCCTRL_DPLLSYNCBUSY) & OSCCTRL_DPLLSYNCBUSY_DPLLRATIO) != 0);
+  while ((getreg8(SAM_OSCCTRL_DPLLSYNCBUSY) &
+          OSCCTRL_DPLLSYNCBUSY_DPLLRATIO) != 0);
 
   /* Set DPLLCTRLB configuration */
 
@@ -1063,7 +1085,8 @@ static inline void sam_fdpll96m_config(void)
 
   /* Wait for synchronization */
 
-  while ((getreg8(SAM_OSCCTRL_DPLLSYNCBUSY) & OSCCTRL_DPLLSYNCBUSY_DPLLPRESC) != 0);
+  while ((getreg8(SAM_OSCCTRL_DPLLSYNCBUSY) &
+          OSCCTRL_DPLLSYNCBUSY_DPLLPRESC) != 0);
 
   /* Enable the FDPLL96M output */
 
@@ -1072,7 +1095,8 @@ static inline void sam_fdpll96m_config(void)
 
   /* Wait for synchronization */
 
-  while ((getreg8(SAM_OSCCTRL_DPLLSYNCBUSY) & OSCCTRL_DPLLSYNCBUSY_ENABLE) != 0);
+  while ((getreg8(SAM_OSCCTRL_DPLLSYNCBUSY) &
+          OSCCTRL_DPLLSYNCBUSY_ENABLE) != 0);
 
   /* Wait for the FPDLL96M to become locked and ready */
 
@@ -1099,7 +1123,8 @@ static inline void sam_fdpll96m_config(void)
  *   Depends on:
  *
  *     BOARD_FDPLL96M_ENABLE          - Boolean (defined / not defined)
- *     BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
+ *     BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_*
+ *                                            definitions
  *     BOARD_FDPLL96M_REFCLK_CLKGEN   - GCLK index in the range {0..8}
  *     BOARD_FDPLL96M_LOCKTIME_ENABLE - Boolean (defined / not defined)
  *     BOARD_FDPLL96M_LOCKTIME_CLKGEN - GCLK index in the range {0..8}

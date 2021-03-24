@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_aic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_AIC_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_AIC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* AIC Register Offsets *************************************************************/
+ ****************************************************************************/
+
+/* AIC Register Offsets *****************************************************/
 
 #define SAM_AIC_SSR_OFFSET     0x0000 /* Source Select Register */
 #define SAM_AIC_SMR_OFFSET     0x0004 /* Source Mode Register */
@@ -62,7 +63,7 @@
 #define SAM_AIC_WPMR_OFFSET    0x00e4 /* Write Protect Mode Register */
 #define SAM_AIC_WPSR_OFFSET    0x00e8 /* Write Protect Status Register */
 
-/* AIC Register Addresses ***********************************************************/
+/* AIC Register Addresses ***************************************************/
 
 #define SAM_AIC_SSR            (SAM_AIC_VBASE+SAM_AIC_SSR_OFFSET)
 #define SAM_AIC_SMR            (SAM_AIC_VBASE+SAM_AIC_SMR_OFFSET)
@@ -117,7 +118,7 @@
 #  define SAM_SAIC_WPSR        (SAM_SAIC_VBASE+SAM_AIC_WPSR_OFFSET)
 #endif
 
-/* AIC Register Bit Definitions *****************************************************/
+/* AIC Register Bit Definitions *********************************************/
 
 /* Source Select Register */
 
@@ -139,7 +140,9 @@
 #  define AIC_SMR_SRCTYPE_XRISING  (3 << AIC_SMR_SRCTYPE_SHIFT) /* External rising edge */
 
 /* Source Vector Register (32-bit address) */
+
 /* Interrupt Vector Register (32-bit address) */
+
 /* FIQ Interrupt Vector Register (32-bit address) */
 
 /* Interrupt Status Register */

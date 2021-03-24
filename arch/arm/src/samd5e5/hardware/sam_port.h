@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_port.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PORT_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PORT_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* PORT register offsets ********************************************************************/
+/* PORT register offsets ****************************************************/
 
 #define SAM_PORTA                   (0)
 #define SAM_PORTB                   (1)
@@ -112,7 +112,7 @@
 #  define SAM_PORT_PINCFG30_OFFSET  0x005e /* Pin configuration register 30 */
 #  define SAM_PORT_PINCFG31_OFFSET  0x005f /* Pin configuration register 31 */
 
-/* PORT register addresses ******************************************************************/
+/* PORT register addresses **************************************************/
 
 #define SAM_PORTN_BASE(n)           (SAM_PORT_BASE + SAM_PORTN_OFFSET(n))
 #  define SAM_PORTA_BASE            (SAM_PORT_BASE + SAM_PORTA_OFFSET)
@@ -377,16 +377,16 @@
 #  define SAM_PORTD_PINCFG30        (SAM_PORTD_BASE + SAM_PORT_PINCFG30_OFFSET)
 #  define SAM_PORTD_PINCFG31        (SAM_PORTD_BASE + SAM_PORT_PINCFG31_OFFSET)
 
-/* PORT register bit definitions ************************************************************/
+/* PORT register bit definitions ********************************************/
 
-/* Data direction, data direction clear,  data direction set, and data direction toggle
- * registers
+/* Data direction, data direction clear,  data direction set, and data
+ * direction toggle registers
  */
 
 #define PORT_DIR(n)                 (1 << n) /* Port data n, direction, n=0-31 */
 
-/* Data output value, data output value clear, data output value set, and data output
- * value toggle registers
+/* Data output value, data output value clear, data output value set, and
+ * data output value toggle registers
  */
 
 #define PORT_OUT(n)                 (1 << n) /* Port data n output value, n=0-31 */
@@ -472,6 +472,7 @@
 #  define PORT_PMUXE_PERIPHL        (11 << PORT_PMUXE_SHIFT) /* Peripheral function L */
 #  define PORT_PMUXE_PERIPHM        (12 << PORT_PMUXE_SHIFT) /* Peripheral function M */
 #  define PORT_PMUXE_PERIPHN        (13 << PORT_PMUXE_SHIFT) /* Peripheral function N */
+
 #define PORT_PMUXO_SHIFT            (4)       /* Bits 4-7: Peripheral multiplexing odd */
 #define PORT_PMUXO_MASK             (15 << PORT_PMUXO_SHIFT)
 #  define PORT_PMUXO_PERIPHA        (0  << PORT_PMUXO_SHIFT) /* Peripheral function A */
@@ -496,16 +497,16 @@
 #define PORT_PINCFG_PULLEN          (1 << 2)  /* Bit 2: Pull Enable */
 #define PORT_PINCFG_DRVSTR          (1 << 6)  /* Bit 6: Output Driver Strength Selection */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PORT_H */

@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_udphs.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_UDPHS_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_UDPHS_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* UDPHS register offsets ***************************************************************/
+/* UDPHS register offsets ***************************************************/
 
 #define SAM_UDPHS_CTRL_OFFSET                 0x00 /* UDPHS Control Register */
 #define SAM_UDPHS_FNUM_OFFSET                 0x04 /* UDPHS Frame Number Register */
@@ -50,7 +50,8 @@
 #define SAM_UDPHS_IPNAME2_OFFSET              0xf4 /* UDPHS Name2 Register */
 #define SAM_UDPHS_IPFEATURES_OFFSET           0xf8 /* UDPHS Features Register */
 
-/* Endpoint registers:  Offsets for Endpoints 0-6: 0x100, 0x120, 0x140, 0x160, 0x180,
+/* Endpoint registers:
+ * Offsets for Endpoints 0-6: 0x100, 0x120, 0x140, 0x160, 0x180,
  * 0x1a0, and 0x1c0
  */
 
@@ -65,8 +66,10 @@
 #define SAM_UDPHSEP_STA_OFFSET                0x1c /* UDPHS Endpoint Status Register */
                                                    /* 0x1e0-0x300: Reserved */
                                                    /* 0x300-0x30c: Reserved */
-/* DMA Channel Registers:  Offsets for DMA channels 1-6 0x320, 0x330, 0x340, 0x350, and
- * 0x360.  NOTE that there is no DMA channel 0.
+
+/* DMA Channel Registers:
+ * Offsets for DMA channels 1-6 0x320, 0x330, 0x340, 0x350, and 0x360.
+ * NOTE that there is no DMA channel 0.
  */
 
 #define SAM_UDPHSDMA_OFFSET(n)                (0x310+((n)<<4))
@@ -75,7 +78,7 @@
 #define SAM_UDPHSDMA_CONTROL_OFFSET           0x08 /* UDPHS DMA Channel Control Register */
 #define SAM_UDPHSDMA_STATUS_OFFSET            0x0c /* UDPHS DMA Channel Status Register */
 
-/* UDPHS register addresses *************************************************************/
+/* UDPHS register addresses *************************************************/
 
 #define SAM_UDPHS_CTRL                        (SAM_UDPHS_BASE+SAM_UDPHS_CTRL_OFFSET)
 #define SAM_UDPHS_FNUM                        (SAM_UDPHS_BASE+SAM_UDPHS_FNUM_OFFSET)
@@ -99,7 +102,7 @@
 #define SAM_UDPHSEP_CLRSTA(n)                 (SAM_UDPHSEP_BASE(n)+SAM_UDPHSEP_CLRSTA_OFFSET)
 #define SAM_UDPHSEP_STA(n)                    (SAM_UDPHSEP_BASE(n)+SAM_UDPHSEP_STA_OFFSET)
 
-/* DMA Channel Registers*/
+/* DMA Channel Registers */
 
 #define SAM_UDPHSDMA_BASE(n)                  (SAM_UDPHS_BASE+SAM_UDPHSDMA_OFFSET(n))
 #define SAM_UDPHSDMA_NXTDSC(n)                (SAM_UDPHSDMA_BASE(n)+SAM_UDPHSDMA_NXTDSC_OFFSET)
@@ -107,7 +110,8 @@
 #define SAM_UDPHSDMA_CONTROL(n)               (SAM_UDPHSDMA_BASE(n)+SAM_UDPHSDMA_CONTROL_OFFSET)
 #define SAM_UDPHSDMA_STATUS(n)                (SAM_UDPHSDMA_BASE(n)+SAM_UDPHSDMA_STATUS_OFFSET)
 
-/* UDPHS register bit definitions *******************************************************/
+/* UDPHS register bit definitions *******************************************/
+
 /* UDPHS Control Register */
 
 #define UDPHS_CTRL_DEVADDR_SHIFT              (0)       /* Bits 0-6: UDPHS Address */
@@ -127,8 +131,8 @@
 #define UDPHS_FNUM_FNUMERR_SHIFT              (8)      /* Bits 8-13: Frame Number CRC Error */
 #define UDPHS_FNUM_FNUMERR_MASK               (63 << UDPHS_FNUM_FNUMERR_SHIFT)
 
-/* UDPHS Interrupt Enable Register, UDPHS Interrupt Status Register, and UDPHS Clear
- * Interrupt Register common bit-field definitions
+/* UDPHS Interrupt Enable Register, UDPHS Interrupt Status Register,
+ * and UDPHS Clear Interrupt Register common bit-field definitions
  */
 
 #define USBPHS_INT_DETSUSPD                   (1 << 1)  /* Bit 1:  Suspend Interrupt (Common) */
@@ -165,6 +169,7 @@
 #  define UDPHS_TST_SPEEDCFG_NORMAL           (0 << UDPHS_TST_SPEEDCFG_SHIFT) /* Normal Mode */
 #  define UDPHS_TST_SPEEDCFG_HIGH             (2 << UDPHS_TST_SPEEDCFG_SHIFT) /* Force High Speed */
 #  define UDPHS_TST_SPEEDCFG_FULL             (3 << UDPHS_TST_SPEEDCFG_SHIFT) /* Force Full Speed */
+
 #define UDPHS_TST_TSTJ                        (1 << 2)  /* Bit 2:  Test J Mode */
 #define UDPHS_TST_TSTK                        (1 << 3)  /* Bit 3:  Test K Mode */
 #define UDPHS_TST_TSTPKT                      (1 << 4)  /* Bit 4:  Test Packet Mo */
@@ -190,6 +195,7 @@
 #  define UDPHS_IPFEATURES_FIFOMAXSIZE_4Kb    (5 << UDPHS_IPFEATURES_FIFOMAXSIZE_SHIFT) /* DPRAM 4096 bytes */
 #  define UDPHS_IPFEATURES_FIFOMAXSIZE_8Kb    (6 << UDPHS_IPFEATURES_FIFOMAXSIZE_SHIFT) /* DPRAM 8192 bytes */
 #  define UDPHS_IPFEATURES_FIFOMAXSIZE_16Kb   (7 << UDPHS_IPFEATURES_FIFOMAXSIZE_SHIFT) /* DPRAM 16384 bytes */
+
 #define UDPHS_IPFEATURES_BWDPRAM              (1 << 15) /* Bit 15: DPRAM Byte Write Capability */
 #define UDPHS_IPFEATURES_DATAB168             (1 << 15) /* Bit 15: UTMI DataBus16_8 */
 #define UDPHS_IPFEATURES_ISOEPT(n)            (1<<((n)+16)
@@ -221,6 +227,7 @@
 #  define UDPHSEP_CFG_SIZE_256b               (5 << UDPHSEP_CFG_SIZE_SHIFT) /* 256 bytes */
 #  define UDPHSEP_CFG_SIZE_512b               (6 << UDPHSEP_CFG_SIZE_SHIFT) /* 512 bytes */
 #  define UDPHSEP_CFG_SIZE_1Kb                (7 << UDPHSEP_CFG_SIZE_SHIFT) /* 1024 bytes */
+
 #define UDPHSEP_CFG_DIR                       (1 << 3)  /* Bit 3:  Endpoint Direction */
 #define UDPHSEP_CFG_TYPE_SHIFT                (4)       /* Bits 4-5: Endpoint Type */
 #define UDPHSEP_CFG_TYPE_MASK                 (3 << UDPHSEP_CFG_TYPE_SHIFT)
@@ -228,18 +235,21 @@
 #  define UDPHSEP_CFG_TYPE_ISOC               (1 << UDPHSEP_CFG_TYPE_SHIFT) /* Isochronous endpoint */
 #  define UDPHSEP_CFG_TYPE_BULK               (2 << UDPHSEP_CFG_TYPE_SHIFT) /* Bulk endpoint */
 #  define UDPHSEP_CFG_TYPE_INTR               (3 << UDPHSEP_CFG_TYPE_SHIFT) /* Interrupt endpoint */
+
 #define UDPHSEP_CFG_BKNUMBER_SHIFT            (6)       /* Bits 6-7:  Number of Banks */
 #define UDPHSEP_CFG_BKNUMBER_MASK             (3 << UDPHSEP_CFG_BKNUMBER_SHIFT)
 #  define UDPHSEP_CFG_BKNUMBER_0BANK          (0 << UDPHSEP_CFG_BKNUMBER_SHIFT) /* Zero bank (unmapped) */
 #  define UDPHSEP_CFG_BKNUMBER_1BANK          (1 << UDPHSEP_CFG_BKNUMBER_SHIFT) /* One bank (bank 0) */
 #  define UDPHSEP_CFG_BKNUMBER_2BANK          (2 << UDPHSEP_CFG_BKNUMBER_SHIFT) /* Double bank (bank 0-1) */
 #  define UDPHSEP_CFG_BKNUMBER_3BANK          (3 << UDPHSEP_CFG_BKNUMBER_SHIFT) /* Triple bank (bank 0-2) */
-#define UDPHSEP_CFG_NBTRANS_SHIFT             (8)      /* Bits 8-9:  Number Of Transaction per Microframe */
-#define UDPHSEP_CFG_NBTRANS_MASK              (3 << UDPHSEP_CFG_NBTRANS_SHIFT)
-#define UDPHSEP_CFG_MAPD                      (1 << 31)  /*Bit 31: Endpoint Mapped */
 
-/* UDPHS Endpoint Control Enable Register, UDPHS Endpoint Control Disable Register,
- * and UDPHS Endpoint Control Register common bit-field definitions
+#define UDPHSEP_CFG_NBTRANS_SHIFT             (8)        /* Bits 8-9:  Number Of Transaction per Microframe */
+#define UDPHSEP_CFG_NBTRANS_MASK              (3 << UDPHSEP_CFG_NBTRANS_SHIFT)
+#define UDPHSEP_CFG_MAPD                      (1 << 31)  /* Bit 31: Endpoint Mapped */
+
+/* UDPHS Endpoint Control Enable Register, UDPHS Endpoint Control
+ * Disable Register, and UDPHS Endpoint Control Register common
+ * bit-field definitions
  */
 
 #define UDPHSEP_INT_EPT                       (1 << 0)  /* Bit 0:  Endpoint Enable/Disable */
@@ -293,6 +303,7 @@
 #  define UDPHSEP_STA_TOGGLESQSTA_DATA1       (1 << UDPHSEP_STA_TOGGLESQSTA_SHIFT) /* Data1 */
 #  define UDPHSEP_STA_TOGGLESQSTA_DATA2       (2 << UDPHSEP_STA_TOGGLESQSTA_SHIFT) /* Data2 (High B/W Isoc EP) */
 #  define UDPHSEP_STA_TOGGLESQSTA_MDATA       (3 << UDPHSEP_STA_TOGGLESQSTA_SHIFT) /* MData (High B/W Isoc EP) */
+
 #define UDPHSEP_STA_ERROVFLW                  (1 << 8)  /* Bit 8:  Overflow Error */
 #define UDPHSEP_STA_RXBKRDY                   (1 << 9)  /* Bit 9:  Received OUT Data */
 #define UDPHSEP_STA_KILLBANK                  (1 << 9)  /* Bit 9:  KILL Bank */
@@ -340,16 +351,16 @@
 #define UDPHSDMA_STATUS_BUFFCOUNT_SHIFT       (16)      /* Bits 16-31: Buffer Byte Count */
 #define UDPHSDMA_STATUS_BUFFCOUNT_MASK        (0xffff << UDPHSDMA_STATUS_BUFFCOUNT_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_UDPHS_H */

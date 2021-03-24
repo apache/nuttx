@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_cmcc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_CMCC_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_CMCC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
-/* This information is available in the Cache Type Register.  How every, it is more
- * efficient if we do not to do the decoding on each cache access.
+ ****************************************************************************/
+
+/* This information is available in the Cache Type Register.  How every, it
+ * is more efficient if we do not to do the decoding on each cache access.
  *
  *  CacheSize = CacheLineSize * NCacheLines * NWays
  *  CacheAddressRange = CacheLineSize * NCacheLines = CacheSize / NWays
@@ -43,7 +44,7 @@
 #define CMCC_CACHE_LINE_SIZE         16   /* 16 byte cache line size */
 #define CMCC_NWAYS                   4    /* 4 ways */
 
-/* CMCC register offsets ****************************************************************/
+/* CMCC register offsets ****************************************************/
 
 #define SAM_CMCC_TYPE_OFFSET         0x0000 /* Cache Type Register */
 #define SAM_CMCC_CFG_OFFSET          0x0004 /* Cache Configuration Register */
@@ -59,7 +60,7 @@
 #define SAM_CMCC_MSR_OFFSET          0x0034 /* Cache Monitor Status Register */
                                             /* 0x0038-0x00fc Reserved */
 
-/* CMCC register addresses **************************************************************/
+/* CMCC register addresses **************************************************/
 
 #define SAM_CMCC_TYPE                (SAM_CMCC_BASE + SAM_CMCC_TYPE_OFFSET)
 #define SAM_CMCC_CFG                 (SAM_CMCC_BASE + SAM_CMCC_CFG_OFFSET)
@@ -72,7 +73,7 @@
 #define SAM_CMCC_MCTRL               (SAM_CMCC_BASE + SAM_CMCC_MCTRL_OFFSET)
 #define SAM_CMCC_MSR                 (SAM_CMCC_BASE + SAM_CMCC_MSR_OFFSET)
 
-/* CMCC register bit definitions ********************************************************/
+/* CMCC register bit definitions ********************************************/
 
 /* Cache Type Register */
 
@@ -87,6 +88,7 @@
 #  define CMCC_TYPE_WAYNUM_ARCH2WAY  (1 << CMCC_TYPE_WAYNUM_SHIFT) /* 2-WAY set associative */
 #  define CMCC_TYPE_WAYNUM_ARCH4WAY  (2 << CMCC_TYPE_WAYNUM_SHIFT) /* 4-WAY set associative */
 #  define CMCC_TYPE_WAYNUM_ARCH8WAY  (3 << CMCC_TYPE_WAYNUM_SHIFT) /* 8-WAY set associative */
+
 #define CMCC_TYPE_LCKDOWN            (1 << 7)  /* Bit 7:  Lock Down Supported */
 #define CMCC_TYPE_CSIZE_SHIFT        (8)       /* Bits 8-10: Cache Size */
 #define CMCC_TYPE_CSIZE_MASK         (7 << CMCC_TYPE_CSIZE_SHIFT)
@@ -94,6 +96,7 @@
 #  define CMCC_TYPE_CSIZE_2KB        (1 << CMCC_TYPE_CSIZE_SHIFT) /* Cache Size 2 Kbytes */
 #  define CMCC_TYPE_CSIZE_4KB        (2 << CMCC_TYPE_CSIZE_SHIFT) /* Cache Size 4 Kbytes */
 #  define CMCC_TYPE_CSIZE_8KB        (3 << CMCC_TYPE_CSIZE_SHIFT) /* Cache Size 8 Kbytes */
+
 #define CMCC_TYPE_CLSIZE_SHIFT       (11)      /* Bits 11-13: Cache Line Size */
 #define CMCC_TYPE_CLSIZE_MASK        (7 << CMCC_TYPE_CLSIZE_SHIFT)
 #  define CMCC_TYPE_CLSIZE_4B        (0 << CMCC_TYPE_CLSIZE_SHIFT) /* 4 Bytes */
@@ -165,16 +168,16 @@
 
 /* Cache Monitor Status Register -- 32-bit event count */
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_CMCC_H */

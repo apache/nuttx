@@ -104,15 +104,16 @@ struct spi_dev_s *sam_spibus_initialize(int port);
  *      pins.
  *   2. Provide sam_spi[n]select() and sam_spi[n]status() functions in your
  *      board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
+ *      and status operations using GPIOs in the way your board is
+ *      configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spi[n]cmddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using GPIOs in
  *      the way your board is configured.
  *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by sam_spibus_initialize() may then be used to bind
- *      the  SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by sam_spibus_initialize() may then be used
+ *      to bind the  SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

@@ -36,8 +36,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The SPI port number used as an input to sam_spibus_initialize encodes information
- * about the SPI controller (0 or 1) and the SPI chip select (0-3)
+/* The SPI port number used as an input to sam_spibus_initialize encodes
+ * information about the SPI controller (0 or 1) and the SPI chip select
+ * (0-3)
  */
 
 #define __SPI_CS_SHIFT  (0)      /* Bits 0-1: SPI chip select number */
@@ -113,27 +114,29 @@ struct spi_dev_s *sam_spibus_initialize(int port);
  *   These external functions must be provided by board-specific logic.  They
  *   include:
  *
- *   o sam_spi[0|1]select is a functions tomanage the board-specific chip selects
- *   o sam_spi[0|1]status and sam_spi[0|1]cmddata:  Implementations of the status
- *     and cmddata methods of the SPI interface defined by struct spi_ops_
- *     (see include/nuttx/spi/spi.h). All other methods including
+ *   o sam_spi[0|1]select is a functions tomanage the board-specific chip
+ *     selects
+ *   o sam_spi[0|1]status and sam_spi[0|1]cmddata:  Implementations of the
+ *     status and cmddata methods of the SPI interface defined by struct
+ *     spi_ops_ (see include/nuttx/spi/spi.h). All other methods including
  *     sam_spibus_initialize()) are provided by common SAM3/4 logic.
  *
  *  To use this common SPI logic on your board:
  *
  *   1. Provide logic in sam_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide sam_spi[0|1]select() and sam_spi[0|1]status() functions in your board-
- *      specific logic.  These functions will perform chip selection and
- *      status operations using PIOs in the way your board is configured.
+ *   2. Provide sam_spi[0|1]select() and sam_spi[0|1]status() functions in
+ *      your board- specific logic.  These functions will perform chip
+ *      selection and status operations using PIOs in the way your board is
+ *      configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spi[0|1]cmddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using PIOs in
  *      the way your board is configured.
  *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by sam_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by sam_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

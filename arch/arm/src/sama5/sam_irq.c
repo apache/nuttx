@@ -191,9 +191,9 @@ static inline size_t sam_vectorsize(void)
  *
  *   Paragraph 17.8.6, Spurious Interrupt: "The Advanced Interrupt Controller
  *   features protection against spurious interrupts. A spurious interrupt is
- *   defined as being the assertion of an interrupt source long enough for the
- *   AIC to assert the nIRQ, but no longer present when AIC_IVR is read. This
- *   is most prone to occur when:
+ *   defined as being the assertion of an interrupt source long enough for
+ *   the AIC to assert the nIRQ, but no longer present when AIC_IVR is read.
+ *   This is most prone to occur when:
  *
  *     o An external interrupt source is programmed in level-sensitive mode
  *       and an active level occurs for only a short time.
@@ -459,9 +459,10 @@ void up_irqinitialize(void)
    *      This is the method used when booting from SDRAM.
    *
    * - When executing from NOR FLASH, the first level bootloader is supposed
-   *   to provide the AXI MATRIX mapping for us at boot time base on the state
-   *   of the BMS pin.  However, I have found that in the test environments
-   *   that I use, I cannot always be assured of that physical address mapping.
+   *   to provide the AXI MATRIX mapping for us at boot time base on the
+   *   state of the BMS pin.  However, I have found that in the test
+   *   environments that I use, I cannot always be assured of that physical
+   *   address mapping.
    *
    * - If we are executing out of ISRAM, then the SAMA5 primary bootloader
    *   probably copied us into ISRAM and set the AXI REMAP bit for us.
@@ -577,18 +578,18 @@ static uint32_t *sam_decodeirq(uintptr_t base, uint32_t *regs)
 
   /* Paragraph 17.8.5 Protect Mode: "The Protect Mode permits reading the
    *   Interrupt Vector Register without performing the associated automatic
-   *   operations. ... Writing PROT in AIC_DCR (Debug Control Register) at 0x1
-   *   enables the Protect Mode.
+   *   operations. ... Writing PROT in AIC_DCR (Debug Control Register) at
+   *   0x1 enables the Protect Mode.
    *
    *  "When the Protect Mode is enabled, the AIC performs interrupt stacking
    *    only when a write access is performed on the AIC_IVR. Therefore, the
    *    Interrupt Service Routines must write (arbitrary data) to the AIC_IVR
-   *    just after reading it. The new context of the AIC, including the value
-   *    of the Interrupt Status Register (AIC_ISR), is updated with the current
-   *    interrupt only when AIC_IVR is written. ..."
+   *    just after reading it. The new context of the AIC, including the
+   *    value of the Interrupt Status Register (AIC_ISR), is updated with the
+   *    current interrupt only when AIC_IVR is written. ..."
    *
-   *  "To summarize, in normal operating mode, the read of AIC_IVR performs the
-   *   following operations within the AIC:
+   *  "To summarize, in normal operating mode, the read of AIC_IVR performs
+   *   the following operations within the AIC:
    *
    *   1. Calculates active interrupt (higher than current or spurious).
    *   2. Determines and returns the vector of the active interrupt.
@@ -596,13 +597,14 @@ static uint32_t *sam_decodeirq(uintptr_t base, uint32_t *regs)
    *   4. Pushes the current priority level onto the internal stack.
    *   5. Acknowledges the interrupt.
    *
-   * "However, while the Protect Mode is activated, only operations 1 to 3 are
-   *  performed when AIC_IVR is read.  Operations 4 and 5 are only performed by
-   *  the AIC when AIC_IVR is written.
+   * "However, while the Protect Mode is activated, only operations 1 to 3
+   *  are performed when AIC_IVR is read.  Operations 4 and 5 are only
+   *  performed by the AIC when AIC_IVR is written.
    *
-   * "Software that has been written and debugged using the Protect Mode runs
-   *  correctly in Normal Mode without modification. However, in Normal Mode the
-   *  AIC_IVR write has no effect and can be removed to optimize the code.
+   * "Software that has been written and debugged using the Protect Mode
+   *  runs correctly in Normal Mode without modification. However, in Normal
+   *  Mode the AIC_IVR write has no effect and can be removed to optimize the
+   *  code.
    */
 
   /* Write in the IVR to support Protect Mode */
@@ -786,7 +788,8 @@ static int sam_prioritize_irq(uint32_t base, int irq, int priority)
   irqstate_t flags;
   uint32_t regval;
 
-  DEBUGASSERT(irq < SAM_IRQ_NINT && (unsigned)priority <= AIC_SMR_PRIOR_MASK);
+  DEBUGASSERT(irq < SAM_IRQ_NINT &&
+             (unsigned)priority <= AIC_SMR_PRIOR_MASK);
   if (irq < SAM_IRQ_NINT)
     {
       /* These operations must be atomic */

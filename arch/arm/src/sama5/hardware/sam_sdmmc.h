@@ -189,6 +189,7 @@
 #  define SDMMC_XFERTYP_RSPTYP_LEN136    (1 << SDMMC_XFERTYP_RSPTYP_SHIFT) /* Response length 136 */
 #  define SDMMC_XFERTYP_RSPTYP_LEN48     (2 << SDMMC_XFERTYP_RSPTYP_SHIFT) /* Response length 48 */
 #  define SDMMC_XFERTYP_RSPTYP_LEN48BSY  (3 << SDMMC_XFERTYP_RSPTYP_SHIFT) /* Response length 48, check busy */
+
                                                        /* Bit 18: Reserved */
 #define SDMMC_XFERTYP_CCCEN              (1 << 19)     /* Bit 19: Command CRC Check Enable */
 #define SDMMC_XFERTYP_CICEN              (1 << 20)     /* Bit 20: Command Index Check Enable */
@@ -199,6 +200,7 @@
 #  define SDMMC_XFERTYP_CMDTYP_SUSPEND   (1 << SDMMC_XFERTYP_CMDTYP_SHIFT) /* Suspend CMD52 for writing bus suspend in CCCR */
 #  define SDMMC_XFERTYP_CMDTYP_RESUME    (2 << SDMMC_XFERTYP_CMDTYP_SHIFT) /* Resume CMD52 for writing function select in CCCR */
 #  define SDMMC_XFERTYP_CMDTYP_ABORT     (3 << SDMMC_XFERTYP_CMDTYP_SHIFT) /* Abort CMD12, CMD52 for writing I/O abort in CCCR */
+
 #define SDMMC_XFERTYP_CMDINX_SHIFT       (24)          /* Bits 24-29: Command Index */
 #define SDMMC_XFERTYP_CMDINX_MASK        (0x3f << SDMMC_XFERTYP_CMDINX_SHIFT)
                                                        /* Bits 30-31: Reserved */
@@ -244,6 +246,7 @@
 #define SDMMC_PROCTL_DTW_MASK            (1 << SDMMC_PROCTL_DTW_SHIFT)
 #  define SDMMC_PROCTL_DTW_1BIT          (0 << SDMMC_PROCTL_DTW_SHIFT) /* 1-bit mode */
 #  define SDMMC_PROCTL_DTW_4BIT          (1 << SDMMC_PROCTL_DTW_SHIFT) /* 4-bit mode */
+
 #define SDMMC_PROCTL_HSEN                (1 << 2)     /* Bit 2: High Speed Enable */
 #define SDMMC_PROCTL_DMAS_SHIFT          (3)          /* Bits 3-4: DMA Select */
 #define SDMMC_PROCTL_DMAS_MASK           (3 << SDMMC_PROCTL_DMAS_SHIFT)
@@ -251,6 +254,7 @@
 #  define SDMMC_PROCTL_DMAS_RES1         (1 << SDMMC_PROCTL_DMAS_SHIFT) /* Reserved */
 #  define SDMMC_PROCTL_DMAS_ADMA         (2 << SDMMC_PROCTL_DMAS_SHIFT) /* ADMA is selected */
 #  define SDMMC_PROCTL_DMAS_RES2         (1 << SDMMC_PROCTL_DMAS_SHIFT) /* Reserved */
+
 #define SDMMC_PROCTL_EXTDW_SHIFT         (5)          /* Bits 3-4: DMA Select */
 #define SDMMC_PROCTL_EXTDW_MASK          (1 << SDMMC_PROCTL_EXTDW_SHIFT)
                                                       /* Bits 6-7: Reserved */
@@ -271,6 +275,7 @@
 #  define SDMMC_PROCTL_BURST_INCR        (1 << SDMMC_PROCTL_BURST_SHIFT) /* Burst for Incr */
 #  define SDMMC_PROCTL_BURST_4816        (2 << SDMMC_PROCTL_BURST_SHIFT) /* Burst for 4/8/16 */
 #  define SDMMC_PROCTL_BURST_4W8W16W     (4 << SDMMC_PROCTL_BURST_SHIFT) /* Burst for 4w/8w/16w */
+
 #define SDMMC_PROTCTL_NEBLKRD            (1 << 30)    /* Bit 30: Non-exect block read */
                                                       /* Bit 31: Reserved */
 
@@ -289,12 +294,13 @@
 #define SDMMC_SYSCTL_CLKGSEL             (1 << 5)     /* Bit 5: Clock Generator Select */
 #define SDMMC_SYSCTL_USDCLKFSEL          (3 << 6)     /* Bit 0: Upper bits of SDCLK Frequency Select */
 #define SDMMC_SYSCTL_CLKFSEL             (0xf0)       /* Bit 0: SDCLK Frequency Select */
-#define SDMMC_CLOCK_MUL_MASK	         (0x00ff0000)
-#define SDMMC_CLOCK_MUL_SHIFT	         (16)
+#define SDMMC_CLOCK_MUL_MASK             (0x00ff0000)
+#define SDMMC_CLOCK_MUL_SHIFT            (16)
 
 #define SDMMC_SYSCTL_DVS_SHIFT           (4)          /* Bits 4-7: Divisor */
 #define SDMMC_SYSCTL_DVS_MASK            (0x0f << SDMMC_SYSCTL_DVS_SHIFT)
 #  define SDMMC_SYSCTL_DVS_DIV(n)        (((n) - 1) << SDMMC_SYSCTL_DVS_SHIFT) /* Divide by n, n=1..16 */
+
 #define SDMMC_SYSCTL_SDCLKFS_SHIFT       (8)          /* Bits 8-15: SDCLK Frequency Select */
 #define SDMMC_SYSCTL_SDCLKFS_MASK        (0xff << SDMMC_SYSCTL_SDCLKFS_SHIFT)
 #  define SDMMC_SYSCTL_SDCLKFS_BYPASS    (0x00 << SDMMC_SYSCTL_SDCLKFS_SHIFT) /* Bypass the prescaler */
@@ -306,10 +312,12 @@
 #  define SDMMC_SYSCTL_SDCLKFS_DIV64     (0x20 << SDMMC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 64 */
 #  define SDMMC_SYSCTL_SDCLKFS_DIV128    (0x40 << SDMMC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 128 */
 #  define SDMMC_SYSCTL_SDCLKFS_DIV256    (0x80 << SDMMC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 256 */
+
 #define SDMMC_SYSCTL_DTOCV_SHIFT         (16)         /* Bits 16-19: Data Timeout Counter Value */
 #define SDMMC_SYSCTL_DTOCV_MASK          (0x0f << SDMMC_SYSCTL_DTOCV_SHIFT)
 #  define SDMMC_SYSCTL_DTOCV_MUL(n)      (((n) - 213) << SDMMC_SYSCTL_DTOCV_SHIFT) /* SDCLK x n, n=213..227 */
-                                                      /* Bits 20-22: Reserved */
+
+                                          /* Bits 20-22: Reserved */
 #define SDMMC_SYSCTL_IPPRSTN             (1 << 23)    /* Bit 23: Card /reset (default 1) */
 #define SDMMC_SYSCTL_RSTA                (1 << 24)    /* Bit 24: Software Reset For ALL */
 #define SDMMC_SYSCTL_RSTC                (1 << 25)    /* Bit 25: Software Reset For CMD Line */
@@ -444,9 +452,11 @@
 #  define SDMMC_ADMAES_FDS               (1 << SDMMC_ADMAES_ADMAES_SHIFT) /* Fetch descriptor */
 #  define SDMMC_ADMAES_CADR              (2 << SDMMC_ADMAES_ADMAES_SHIFT) /* Change address */
 #  define SDMMC_ADMAES_TFR               (3 << SDMMC_ADMAES_ADMAES_SHIFT) /* Transfer data */
+
 #define SDMMC_ADMAES_LME                 (1 << 2)     /* Bit 2:  ADMA Length Mismatch Error */
 #define SDMMC_ADMAES_DCE                 (1 << 3)     /* Bit 3:  ADMA Descriptor Error */
                                                       /* Bits 4-31: Reserved */
+
 /* ADMA System Address Register */
 
 #define SDMMC_ADSADDR_SHIFT              (0)          /* Bits 1-31: ADMA System Address */

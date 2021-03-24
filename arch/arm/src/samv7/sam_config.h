@@ -33,6 +33,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* GPIO IRQs ****************************************************************/
 
 #ifndef CONFIG_SAMV7_GPIO_IRQ
@@ -60,6 +61,7 @@
 #endif
 
 /* UARTs ********************************************************************/
+
 /* Don't enable UARTs not supported by the chip. */
 
 #if SAMV7_NUART < 1
@@ -94,6 +96,7 @@
 #endif
 
 /* USARTs *******************************************************************/
+
 /* If the USART is not being used as a UART or for SPI, then it really isn't
  * enabled for our purposes.
  */
@@ -142,6 +145,7 @@
 #endif
 
 /* UART Flow Control ********************************************************/
+
 /* UARTs do not support flow control */
 
 #undef CONFIG_UART0_IFLOWCONTROL
@@ -161,6 +165,7 @@
 #endif
 
 /* Serial Console ***********************************************************/
+
 /* Is there a serial console?  There should be no more than one defined.  It
  * could be on any UARTn, n=1,..,SAMV7_NUART, or USARTn, n=1,.., SAMV7_NUSART
  */
@@ -249,7 +254,8 @@
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #endif
 
-/* SPI ******************************************************************************/
+/* SPI **********************************************************************/
+
 /* Don't enable SPI peripherals not supported by the chip. */
 
 #if SAMV7_NSPI < 1
@@ -321,7 +327,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMV7_SAMV7_CONFIG_H */

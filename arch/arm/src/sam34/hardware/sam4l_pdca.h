@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4l_pdca.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PDCA_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PDCA_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* PDCA channel offsets *****************************************************************/
+/* PDCA channel offsets *****************************************************/
 
 #define SAM_PDCA_CHAN_OFFSET(n) ((n) << 6)
 #define SAM_PDCA_CHAN0_OFFSET    0x0000
@@ -54,7 +54,8 @@
 #define SAM_PDCA_CHAN14_OFFSET   0x0380
 #define SAM_PDCA_CHAN15_OFFSET   0x03c0
 
-/* PDCA register offsets ****************************************************************/
+/* PDCA register offsets ****************************************************/
+
 /* Channel register offsets */
 
 #define SAM_PDCA_MAR_OFFSET      0x0000 /* Memory Address Register */
@@ -74,7 +75,8 @@
 
 #define SAM_PDCA_VERSION_OFFSET  0x834 /* Version Register */
 
-/* PDCA channel addresses ***************************************************************/
+/* PDCA channel addresses ***************************************************/
+
 /* Channel register base addresses */
 
 #define SAM_PDCA_CHAN(n)         (SAM_PDCA_BASE+SAM_PDCA_CHAN_OFFSET(n))
@@ -95,7 +97,8 @@
 #define SAM_PDCA_CHAN14          (SAM_PDCA_BASE+SAM_PDCA_CHAN14_OFFSET)
 #define SAM_PDCA_CHAN15          (SAM_PDCA_BASE+SAM_PDCA_CHAN15_OFFSET)
 
-/* PDCA register addresses **************************************************************/
+/* PDCA register addresses **************************************************/
+
 /* Channel register addresses */
 
 #define SAM_PDCA_MAR(n)          (SAM_PDCA_CHAN(n)+SAM_PDCA_MAR_OFFSET)
@@ -115,7 +118,7 @@
 
 #define SAM_PDCA_VERSION         (SAM_PDCA_BASE+SAM_PDCA_VERSION_OFFSET)
 
-/* PDCA register bit definitions ********************************************************/
+/* PDCA register bit definitions ********************************************/
 
 /* Memory Address Register (32-bit address) */
 
@@ -125,7 +128,7 @@
 
 /* Transfer Counter Register */
 
-#define PDCA_TCR_MASK            0xffff /* Bits 0-15: Transfer Counter Value
+#define PDCA_TCR_MASK            0xffff /* Bits 0-15: Transfer Counter Value */
 
 /* Memory Address Reload Register (32-bit address) */
 
@@ -158,7 +161,9 @@
 #define PDCA_IER_
 
 /* Interrupt Disable Register */
+
 /* Interrupt Mask Register */
+
 /* Interrupt Status Register */
 
 #define PDCA_INT_RCZ             (1 << 2)  /* Bit 0:  Reload Counter Zero */
@@ -174,16 +179,16 @@
 #define PDCA_VARIANT_SHIFT       (16)       /* Bits 16-19: Variant Number */
 #define PDCA_VARIANT_MASK        (15 << PDCA_VARIANT_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PDCA_H */

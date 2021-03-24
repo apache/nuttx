@@ -49,6 +49,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_DEBUG_PWM_INFO
@@ -246,6 +247,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* Channel clock sources */
 
 enum pwm_clksrc_e
@@ -294,20 +296,24 @@ struct sam_pwm_s
 /****************************************************************************
  * Static Function Prototypes
  ****************************************************************************/
+
 /* Register access */
 
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
-static bool pwm_checkreg(FAR struct sam_pwm_s *chan, bool wr, uint32_t regval,
+static bool pwm_checkreg(FAR struct sam_pwm_s *chan,
+                         bool wr, uint32_t regval,
                          uintptr_t regaddr);
 #else
 # define pwm_checkreg(chan,wr,regval,regaddr) (false)
 #endif
 
 static uint32_t pwm_getreg(FAR struct sam_pwm_chan_s *chan, int offset);
-static void pwm_putreg(FAR struct sam_pwm_chan_s *chan, int offset, uint32_t regval);
+static void pwm_putreg(FAR struct sam_pwm_chan_s *chan,
+                       int offset, uint32_t regval);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(FAR struct sam_pwm_chan_s *chan, FAR const char *msg);
+static void pwm_dumpregs(FAR struct sam_pwm_chan_s *chan,
+                         FAR const char *msg);
 #else
 #  define pwm_dumpregs(chan,msg)
 #endif
@@ -340,6 +346,7 @@ static void pwm_resetpins(FAR struct sam_pwm_chan_s *chan);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This is the list of lower half PWM driver methods used by the upper
  * half driver
  */
@@ -953,8 +960,10 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
     case PWM_CLKSRC_CLKA:
       {
         regval  = pwm_getreg(chan, SAM_PWM_CLK_OFFSET);
-        prelog2 = (unsigned int)((regval & PWM_CLK_PREA_MASK) >> PWM_CLK_PREA_SHIFT);
-        div     = (unsigned int)((regval & PWM_CLK_DIVA_MASK) >> PWM_CLK_DIVA_SHIFT);
+        prelog2 = (unsigned int)((regval & PWM_CLK_PREA_MASK) >>
+                                  PWM_CLK_PREA_SHIFT);
+        div     = (unsigned int)((regval & PWM_CLK_DIVA_MASK) >>
+                                  PWM_CLK_DIVA_SHIFT);
         mck     = BOARD_MCK_FREQUENCY;
         fsrc    = pwm_clk_frequency(mck, prelog2, div);
         regval  = PWM_CMR_CPRE_CLKA;
@@ -966,8 +975,10 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
     case PWM_CLKSRC_CLKB:
       {
         regval  = pwm_getreg(chan, SAM_PWM_CLK_OFFSET);
-        prelog2 = (unsigned int)((regval & PWM_CLK_PREB_MASK) >> PWM_CLK_PREB_SHIFT);
-        div     = (unsigned int)((regval & PWM_CLK_DIVB_MASK) >> PWM_CLK_DIVB_SHIFT);
+        prelog2 = (unsigned int)((regval & PWM_CLK_PREB_MASK) >>
+                                  PWM_CLK_PREB_SHIFT);
+        div     = (unsigned int)((regval & PWM_CLK_DIVB_MASK) >>
+                                  PWM_CLK_DIVB_SHIFT);
         mck     = BOARD_MCK_FREQUENCY;
         fsrc    = pwm_clk_frequency(mck, prelog2, div);
         regval  = PWM_CMR_CPRE_CLKB;
@@ -976,7 +987,8 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 #endif
 
     default:
-      pwmerr("ERROR: Invalid or unsupported clock source value: %d\n", chan->clksrc);
+      pwmerr("ERROR: Invalid or unsupported clock source value: %d\n",
+             chan->clksrc);
       return -EINVAL;
     }
 
@@ -1081,7 +1093,8 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
+static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+                     int cmd, unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
   FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
@@ -1296,6 +1309,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
     {
 #ifdef CONFIG_SAMA5_PWM_CHAN0
       case 0:
+
         /* Select the Channel 0 interface */
 
         chan = &g_pwm_chan0;
@@ -1304,6 +1318,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
 
 #ifdef CONFIG_SAMA5_PWM_CHAN1
       case 1:
+
         /* Select the Channel 1 interface */
 
         chan = &g_pwm_chan1;
@@ -1312,6 +1327,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
 
 #ifdef CONFIG_SAMA5_PWM_CHAN2
       case 2:
+
         /* Select the Channel 2 interface */
 
         chan = &g_pwm_chan2;
@@ -1320,6 +1336,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
 
 #ifdef CONFIG_SAMA5_PWM_CHAN3
       case 3:
+
         /* Select the Channel 3 interface */
 
         chan = &g_pwm_chan3;
@@ -1353,8 +1370,10 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
 #ifdef CONFIG_SAMA5_PWM_CLKA
       /* Set clock A configuration */
 
-      prelog2  = pwm_clk_prescaler_log2(mck, CONFIG_SAMA5_PWM_CLKA_FREQUENCY);
-      div      = pwm_clk_divider(mck, CONFIG_SAMA5_PWM_CLKA_FREQUENCY, prelog2);
+      prelog2  = pwm_clk_prescaler_log2(mck,
+                                        CONFIG_SAMA5_PWM_CLKA_FREQUENCY);
+      div      = pwm_clk_divider(mck,
+                                 CONFIG_SAMA5_PWM_CLKA_FREQUENCY, prelog2);
       regval   = (PWM_CLK_DIVA(div) | PWM_CLK_PREA_DIV(prelog2));
 #else
       regval   = 0;
@@ -1363,8 +1382,10 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
 #ifdef CONFIG_SAMA5_PWM_CLKB
       /* Set clock B configuration */
 
-      prelog2  = pwm_clk_prescaler_log2(mck, CONFIG_SAMA5_PWM_CLKB_FREQUENCY);
-      div      = pwm_clk_divider(mck, CONFIG_SAMA5_PWM_CLKA_FREQUENCY, prelog2);
+      prelog2  = pwm_clk_prescaler_log2(mck,
+                                        CONFIG_SAMA5_PWM_CLKB_FREQUENCY);
+      div      = pwm_clk_divider(mck,
+                                 CONFIG_SAMA5_PWM_CLKA_FREQUENCY, prelog2);
       regval  |= (PWM_CLK_DIVB(div) | PWM_CLK_PREB_DIV(prelog2));
 #endif
 
@@ -1383,7 +1404,6 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
         {
           pwmerr("ERROR: Failed to attach IRQ%d\n", channel);
           return NULL;
-
         }
 #endif
 

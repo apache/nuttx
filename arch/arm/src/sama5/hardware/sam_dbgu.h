@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_dbgu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_DBGU_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_DBGU_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* DBGU register offsets ************************************************************************/
+/* DBGU register offsets ****************************************************/
 
 #define SAM_DBGU_CR_OFFSET           0x0000 /* Control Register */
 #define SAM_DBGU_MR_OFFSET           0x0004 /* Mode Register */
@@ -51,7 +51,7 @@
 #define SAM_DBGU_FNR_OFFSET          0x0048 /* Force NTRST Register */
                                             /* 0x004c-0x00fc: Reserved */
 
-/* DBGU register addresses **********************************************************************/
+/* DBGU register addresses **************************************************/
 
 #define SAM_DBGU_CR                  (SAM_DBGU_VBASE+SAM_DBGU_CR_OFFSET)
 #define SAM_DBGU_MR                  (SAM_DBGU_VBASE+SAM_DBGU_MR_OFFSET)
@@ -66,7 +66,7 @@
 #define SAM_DBGU_EXID                (SAM_DBGU_VBASE+SAM_DBGU_EXID_OFFSET)
 #define SAM_DBGU_FNR                 (SAM_DBGU_VBASE+SAM_DBGU_FNR_OFFSET)
 
-/* DBGU register bit definitions ****************************************************************/
+/* DBGU register bit definitions ********************************************/
 
 /* DBGU Control Register */
 
@@ -91,6 +91,7 @@
 #  define DBGU_MR_PAR_SPACE          (2 << DBGU_MR_PAR_SHIFT) /* Space: parity forced to 0 */
 #  define DBGU_MR_PAR_MARK           (3 << DBGU_MR_PAR_SHIFT) /* Mark: parity forced to 1 */
 #  define DBGU_MR_PAR_NONE           (4 << DBGU_MR_PAR_SHIFT) /* No parity */
+
 #define DBGU_MR_CHMODE_SHIFT         (14)      /* Bits 14-15: Channel Mode */
 #define DBGU_MR_CHMODE_MASK          (3 << DBGU_MR_CHMODE_SHIFT)
 #  define DBGU_MR_CHMODE_NORMAL      (0 << DBGU_MR_CHMODE_SHIFT) /* Normal Mode */
@@ -98,7 +99,8 @@
 #  define DBGU_MR_CHMODE_LLPBK       (2 << DBGU_MR_CHMODE_SHIFT) /* Local Loopback */
 #  define DBGU_MR_CHMODE_RLPBK       (3 << DBGU_MR_CHMODE_SHIFT) /* Remote Loopback */
 
-/* DBGU Interrupt Enable Register, DBGU Interrupt Disable Register, DBGU Interrupt Mask
+/* DBGU Interrupt Enable Register,
+ * DBGU Interrupt Disable Register, DBGU Interrupt Mask
  * Register, and DBGU Status Register common bit field definitions
  */
 
@@ -142,6 +144,7 @@
 #  define DBGU_CIDR_EPROC_ARM920T    (4 << DBGU_CIDR_EPROC_SHIFT) /* ARM920T */
 #  define DBGU_CIDR_EPROC_ARM926EJS  (5 << DBGU_CIDR_EPROC_SHIFT) /* ARM926EJS */
 #  define DBGU_CIDR_EPROC_CA5        (6 << DBGU_CIDR_EPROC_SHIFT) /* Cortex-A5 */
+
 #define DBGU_CIDR_NVPSIZ_SHIFT       (8)      /* Bits 8-11: Nonvolatile Program Memory Size */
 #define DBGU_CIDR_NVPSIZ_MASK        (15 << DBGU_CIDR_NVPSIZ_SHIFT)
 #  define DBGU_CIDR_NVPSIZ_NONE      (0 << DBGU_CIDR_NVPSIZ_SHIFT)  /* None */
@@ -154,6 +157,7 @@
 #  define DBGU_CIDR_NVPSIZ_512K      (10 << DBGU_CIDR_NVPSIZ_SHIFT) /* 512 Kbytes */
 #  define DBGU_CIDR_NVPSIZ_1M        (12 << DBGU_CIDR_NVPSIZ_SHIFT) /* 1024 Kbytes */
 #  define DBGU_CIDR_NVPSIZ_2M        (14 << DBGU_CIDR_NVPSIZ_SHIFT) /* 2048 Kbytes */
+
 #define DBGU_CIDR_NVPSIZ2_SHIFT      (12)     /* Bits 12-15: Second Nonvolatile Program Memory Size */
 #define DBGU_CIDR_NVPSIZ2_MASK       (15 << DBGU_CIDR_NVPSIZ2_SHIFT)
 #  define DBGU_CIDR_NVPSIZ2_NONE     (0 << DBGU_CIDR_NVPSIZ2_SHIFT)  /* None */
@@ -166,6 +170,7 @@
 #  define DBGU_CIDR_NVPSIZ2_512K     (10 << DBGU_CIDR_NVPSIZ2_SHIFT) /* 512 Kbytes */
 #  define DBGU_CIDR_NVPSIZ2_1M       (12 << DBGU_CIDR_NVPSIZ2_SHIFT) /* 1024 Kbytes */
 #  define DBGU_CIDR_NVPSIZ2_2M       (14 << DBGU_CIDR_NVPSIZ2_SHIFT) /* 2048 Kbytes */
+
 #define DBGU_CIDR_SRAMSIZ_SHIFT      (16)     /* Bits 16-19: Internal SRAM Size */
 #define DBGU_CIDR_SRAMSIZ_MASK       (15 << DBGU_CIDR_SRAMSIZ_SHIFT)
 #  define DBGU_CIDR_SRAMSIZ_1K       (1 << DBGU_CIDR_SRAMSIZ_SHIFT)  /* 1 Kbytes */
@@ -183,6 +188,7 @@
 #  define DBGU_CIDR_SRAMSIZ_256K     (13 << DBGU_CIDR_SRAMSIZ_SHIFT) /* 256 Kbytes */
 #  define DBGU_CIDR_SRAMSIZ_96K      (14 << DBGU_CIDR_SRAMSIZ_SHIFT) /* 96 Kbytes */
 #  define DBGU_CIDR_SRAMSIZ_512K     (15 << DBGU_CIDR_SRAMSIZ_SHIFT) /* 512 Kbytes */
+
 #define DBGU_CIDR_ARCH_SHIFT         (20)     /* Bits 20-23: Architecture Identifier */
 #define DBGU_CIDR_ARCH_MASK          (15 << DBGU_CIDR_ARCH_SHIFT)
 #  define DBGU_CIDR_ARCH_AT91SAM9xx    (0x19 << DBGU_CIDR_ARCH_SHIFT) /* AT91SAM9xx Series */
@@ -221,6 +227,7 @@
 #  define DBGU_CIDR_ARCH_ATSAM3SDxC    (0x9a << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3SDxC Series (100-pin) */
 #  define DBGU_CIDR_ARCH_ATSAMA5xx     (0xa5 << DBGU_CIDR_ARCH_SHIFT) /* ATSAMA5xx Series */
 #  define DBGU_CIDR_ARCH_AT75Cxx       (0xf0 << DBGU_CIDR_ARCH_SHIFT) /* AT75Cxx Series */
+
 #define DBGU_CIDR_NVPTYP_SHIFT       (28)     /* Bits 28-30: Nonvolatile Program Memory Type */
 #define DBGU_CIDR_NVPTYP_MASK        (7 << DBGU_CIDR_NVPTYP_SHIFT)
 #  define DBGU_CIDR_NVPTYP_ROM       (0 << DBGU_CIDR_NVPTYP_SHIFT) /* ROM */
@@ -228,6 +235,7 @@
 #  define DBGU_CIDR_NVPTYP_SRAM      (4 << DBGU_CIDR_NVPTYP_SHIFT) /* SRAM emulating ROM */
 #  define DBGU_CIDR_NVPTYP_FLASH     (2 << DBGU_CIDR_NVPTYP_SHIFT) /* Embedded Flash Memory */
 #  define DBGU_CIDR_NVPTYP_ROMFLASH  (3 << DBGU_CIDR_NVPTYP_SHIFT) /* ROM and Embedded Flash Memory */
+
 #define DBGU_CIDR_EXT                (1 << 31) /* Bit 31:  Extension Flag */
 
 /* Chip ID Extension Register (32-bit ID */
@@ -236,16 +244,16 @@
 
 #define DBGU_FNR_FNTRST              (1 << 0)  /* Bit 0:  Force NTRST */
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_DBGU_H */

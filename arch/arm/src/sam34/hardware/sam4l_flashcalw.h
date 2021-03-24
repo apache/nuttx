@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4l_flashcalw.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,26 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_FLASHCALW_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_FLASHCALW_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
+
 /* Relative to SAM_FLASHCALW_BASE */
 
 #define SAM_FLASHCALW_FCR_OFFSET     0x0000 /* Flash Control Register */
@@ -57,7 +58,7 @@
 #define SAM_PICOCACHE_MSR_OFFSET    0x0034 /* PicoCache Monitor Status Register */
 #define SAM_PICOCACHE_PVR_OFFSET    0x00fc /* Version Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define SAM_FLASHCALW_FCR           (SAM_FLASHCALW_BASE+SAM_FLASHCALW_FCR_OFFSET)
 #define SAM_FLASHCALW_FCMD          (SAM_FLASHCALW_BASE+SAM_FLASHCALW_FCMD_OFFSET)
@@ -77,7 +78,7 @@
 #define SAM_PICOCACHE_MSR           (SAM_PICOCACHE_BASE+SAM_PICOCACHE_MSR_OFFSET)
 #define SAM_PICOCACHE_PVR           (SAM_PICOCACHE_BASE+SAM_PICOCACHE_PVR_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Flash Control Register */
 
@@ -110,6 +111,7 @@
 #  define FLASHCALW_FCMD_CMD_QPRUP     (15 << FLASHCALW_FCMD_CMD_SHIFT) /* Quick Page Read User Page */
 #  define FLASHCALW_FCMD_CMD_HSEN      (16 << FLASHCALW_FCMD_CMD_SHIFT) /* High Speed Mode Enable */
 #  define FLASHCALW_FCMD_CMD_HSDIS     (17 << FLASHCALW_FCMD_CMD_SHIFT) /* High Speed Mode Disable */
+
 #define FLASHCALW_FCMD_PAGEN_SHIFT     (8)       /* Bits 8-23: Page number */
 #define FLASHCALW_FCMD_PAGEN_MASK      (0xffff << FLASHCALW_FCMD_PAGEN_SHIFT)
 #define FLASHCALW_FCMD_KEY_SHIFT       (14)      /* Bits 24-31: Write protection key */
@@ -163,6 +165,7 @@
 #  define FLASHCALW_FPR_FSZ_768KB      (12 << FLASHCALW_FPR_FSZ_SHIFT) /* 768 Kbytes */
 #  define FLASHCALW_FPR_FSZ_1MB        (13 << FLASHCALW_FPR_FSZ_SHIFT) /* 1024 Kbytes */
 #  define FLASHCALW_FPR_FSZ_2MB        (14 << FLASHCALW_FPR_FSZ_SHIFT) /* 2048 Kbytes */
+
 #define FLASHCALW_FPR_PSZ_SHIFT        (8)       /* Bits 8-9: Page Size */
 #define FLASHCALW_FPR_PSZ_MASK         (7 << FLASHCALW_FPR_PSZ_SHIFT)
 #  define FLASHCALW_FPR_PSZ_32KB       (0 << FLASHCALW_FPR_PSZ_SHIFT)  /* 32 Kbytes */
@@ -295,7 +298,7 @@
 #define PICOCACHE_PVR_MFN_SHIFT       (16)       /* Bits 16-19: MFN */
 #define PICOCACHE_PVR_MFN_MASK        (15 << PICOCACHE_PVR_FVR_MFN_SHIFT)
 
-/* Flash Command Set ****************************************************************/
+/* Flash Command Set ********************************************************/
 
 #define FLASH_CMD_NOP                0 /* No operation */
 #define FLASH_CMD_WP                 1 /* Write Page */
@@ -346,16 +349,16 @@
 #define FLASH_MAXFREQ_PS2_HSEN_FWS0           (24000000ul)
 #define FLASH_MAXFREQ_PS2_HSEN_FWS1           (48000000ul)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_FLASHCALW_H */

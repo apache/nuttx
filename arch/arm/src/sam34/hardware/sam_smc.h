@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_smc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_SMC_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_SMC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* SMC register offsets *****************************************************************/
+/* SMC register offsets *****************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)
@@ -107,7 +107,7 @@
 #  error Unrecognized SAM architecture
 #endif
 
-/* SMC register addresses ***************************************************************/
+/* SMC register addresses ***************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)
@@ -208,7 +208,7 @@
 #define SAM_SMC_WPCR                   (SAM_SMC_BASE+SAM_SMC_WPCR_OFFSET)
 #define SAM_SMC_WPSR                   (SAM_SMC_BASE+SAM_SMC_WPSR_OFFSET)
 
-/* SMC register bit definitions *********************************************************/
+/* SMC register bit definitions *********************************************/
 
 /* SMC NFC Configuration Register */
 
@@ -220,6 +220,7 @@
 #    define SMC_CFG_PAGESIZE_1056      (1 << SMC_CFG_PAGESIZE_SHIFT) /* 1024 Bytes + 32 bytes spare */
 #    define SMC_CFG_PAGESIZE_2122      (2 << SMC_CFG_PAGESIZE_SHIFT) /* 2048 Bytes + 64 bytes spare */
 #    define SMC_CFG_PAGESIZE_4224      (3 << SMC_CFG_PAGESIZE_SHIFT) /* 4096 Bytes + 128 bytes spare */
+
 #  define SMC_CFG_WSPARE               (1 << 8)  /* Bit 8:  Write Spare Area */
 #  define SMC_CFG_RSPARE               (1 << 9)  /* Bit 9:  Read Spare Area */
 #  define SMC_CFG_EDGECTRL             (1 << 12) /* Bit 12: Rising/Falling Edge Detection Control */
@@ -246,8 +247,9 @@
 #  define SMC_CTRL_NFCDIS              (1 << 1)  /* Bit 1:  NAND Flash Controller Disable */
 #endif
 
-/* SMC NFC Status Register, SMC NFC Interrupt Enable Register, SMC NFC Interrupt
- * Disable Register, and SMC NFC Interrupt Mask Register common bit-field definitions
+/* SMC NFC Status Register, SMC NFC Interrupt Enable Register,
+ * SMC NFC Interrupt Disable Register, and SMC NFC Interrupt Mask Register
+ * common bit-field definitions
  */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
@@ -314,6 +316,7 @@
 #    define SMC_ECCMD_ECC_PAGESIZE_1056 (1 << SMC_ECCMD_ECC_PAGESIZE_SHIFT) /* 1024 Bytes + 32 bytes spare */
 #    define SMC_ECCMD_ECC_PAGESIZE_2112 (2 << SMC_ECCMD_ECC_PAGESIZE_SHIFT) /* 2048 Bytes + 64 bytes spare */
 #    define SMC_ECCMD_ECC_PAGESIZE_4224 (3 << SMC_ECCMD_ECC_PAGESIZE_SHIFT) /* 4096 Bytes + 128 bytes spare */
+
 #  define SMC_ECCMD_TYPCORREC_SHIFT     (4)      /* Bits 4-5: type of correction */
 #  define SMC_ECCMD_TYPCORREC_MASK      (3 << SMC_ECCMD_TYPCORREC_SHIFT)
 #    define SMC_ECCMD_TYPCORREC_PAGE    (0 << SMC_ECCMD_TYPCORREC_SHIFT) /* 1 bit correction for a page */
@@ -394,6 +397,7 @@
 #endif
 
 /* Registers for 1 ECC for a page of 512/1024/2048/4096 bytes */
+
 /* SMC_ECC_PR0 */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
@@ -409,7 +413,9 @@
 #endif
 #endif
 
-/* Registers for 1 ECC per 512 bytes for a page of 512/2048/4096 bytes, 8-bit word */
+/* Registers for 1 ECC per 512 bytes for a page of
+ * 512/2048/4096 bytes, 8-bit word
+ */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)
@@ -421,7 +427,9 @@
 #  define SMC_ECCPR512_NPARITY_MASK    (0xfff << SMC_ECCPR512_NPARITY_SHIFT)
 #endif
 
-/* Registers for 1 ECC per 256 bytes for a page of 512/2048/4096 bytes, 8-bit word */
+/* Registers for 1 ECC per 256 bytes for a page of
+ * 512/2048/4096 bytes, 8-bit word
+ */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)
@@ -535,7 +543,7 @@
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM4S) || \
     defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SMCCS_MODE_PMEN              (1 << 24) /* Bit 24: Page Mode Enabled */
-#  define SMCCS_MODE_PS_SHIFT          (28) /* Bits 28-29: Page Size */
+#  define SMCCS_MODE_PS_SHIFT          (28)      /* Bits 28-29: Page Size */
 #  define SMCCS_MODE_PS_MASK           (3 << SMCCS_MODE_PS_SHIFT)
 #    define SMCCS_MODE_PS_SIZE_4BYTES  (0 << SMCCS_MODE_PS_SHIFT) /* 4 bytes */
 #    define SMCCS_MODE_PS_SIZE_8BYTES  (1 << SMCCS_MODE_PS_SHIFT) /* 8 bytes */
@@ -553,6 +561,7 @@
 
 #if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SMC_OCMS_CSSE(n)             (1 << ((n)+16)) /* Chip Select (n=0-3) Scrambling Enable */
+
 #  define SMC_OCMS_CS0SE               (1 << 16) /* Bit 16: Chip Select 0 Scrambling Enable */
 #  define SMC_OCMS_CS1SE               (1 << 17) /* Bit 17: Chip Select 1 Scrambling Enable */
 #  define SMC_OCMS_CS2SE               (1 << 18) /* Bit 18: Chip Select 2 Scrambling Enable */
@@ -585,16 +594,16 @@
 #define SMC_WPSR_WPVSRC_SHIFT          (8)       /* Bits 8-23: Write Protection Violation Source */
 #define SMC_WPSR_WPVSRC_MASK           (0xffff << SMC_WPSR_WPVSRC_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_SMC_H */

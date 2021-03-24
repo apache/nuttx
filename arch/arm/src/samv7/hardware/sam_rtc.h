@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_rtc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_RTC_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_RTC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* RTC register offsets *****************************************************************/
+/* RTC register offsets *****************************************************/
 
 #define SAM_RTC_CR_OFFSET            0x0000 /* Control Register */
 #define SAM_RTC_MR_OFFSET            0x0004 /* Mode Register */
@@ -49,7 +49,7 @@
 #define SAM_RTC_IMR_OFFSET           0x0028 /* Interrupt Mask Register */
 #define SAM_RTC_VER_OFFSET           0x002c /* Valid Entry Register */
 
-/* RTC register addresses ***************************************************************/
+/* RTC register addresses ***************************************************/
 
 #define SAM_RTC_CR                   (SAM_RTCC_VBASE+SAM_RTC_CR_OFFSET)
 #define SAM_RTC_MR                   (SAM_RTCC_VBASE+SAM_RTC_MR_OFFSET)
@@ -64,7 +64,7 @@
 #define SAM_RTC_IMR                  (SAM_RTCC_VBASE+SAM_RTC_IMR_OFFSET)
 #define SAM_RTC_VER                  (SAM_RTCC_VBASE+SAM_RTC_VER_OFFSET)
 
-/* RTC register bit definitions *********************************************************/
+/* RTC register bit definitions *********************************************/
 
 /* RTC Control Register */
 
@@ -102,6 +102,7 @@
 #  define RTC_MR_OUT0_ALARM_TOGGLE   (5 << RTC_MR_OUT0_SHIFT) /* Output toggles when alarm flag rises */
 #  define RTC_MR_OUT0_ALARM_FLAG     (6 << RTC_MR_OUT0_SHIFT) /* Output is a copy of the alarm flag */
 #  define RTC_MR_OUT0_PROG_PULSE     (7 << RTC_MR_OUT0_SHIFT) /* Duty cycle programmable pulse */
+
 #define RTC_MR_OUT1_SHIFT            (10)      /* Bits 20-22: RTCOUT1 Output Source Selection */
 #define RTC_MR_OUT1_MASK             (7 << RTC_MR_OUT1_SHIFT)
 #  define RTC_MR_OUT1_NO_WAVE        (0 << RTC_MR_OUT1_SHIFT) /* No waveform, stuck at 0 */
@@ -112,6 +113,7 @@
 #  define RTC_MR_OUT1_ALARM_TOGGLE   (5 << RTC_MR_OUT1_SHIFT) /* Output toggles when alarm flag rises */
 #  define RTC_MR_OUT1_ALARM_FLAG     (6 << RTC_MR_OUT1_SHIFT) /* Output is a copy of the alarm flag */
 #  define RTC_MR_OUT1_PROG_PULSE     (7 << RTC_MR_OUT1_SHIFT) /* Duty cycle programmable pulse */
+
 #define RTC_MR_THIGH_SHIFT           (24)       /* Bits 24-16: High Duration of the Output Pulse */
 #define RTC_MR_THIGH_MASK            (7 << RTC_MR_THIGH_SHIFT)
 #  define RTC_MR_THIGH_31MS          (0 << RTC_MR_THIGH_SHIFT) /* 31.2 ms */
@@ -122,6 +124,7 @@
 #  define RTC_MR_THIGH_122US         (5 << RTC_MR_THIGH_SHIFT) /* 122 μs */
 #  define RTC_MR_THIGH_30US          (6 << RTC_MR_THIGH_SHIFT) /* 30.5 μs */
 #  define RTC_MR_THIGH_15US          (7 << RTC_MR_THIGH_SHIFT) /* 15.2 μs */
+
 #define RTC_MR_TPERIOD_SHIFT         (28)      /* Bits 28-29: Period of the Output Pulse */
 #define RTC_MR_TPERIOD_MASK          (3 << RTC_MR_TPERIOD_SHIFT)
 #  define RTC_MR_TPERIOD_ 1S         (0 << RTC_MR_TPERIOD_SHIFT) /* 1 second */
@@ -239,16 +242,16 @@
 #define RTC_VER_NVTIMALR             (1 << 2)  /* Bit 2:  Non-valid Time Alarm */
 #define RTC_VER_NVCALALR             (1 << 3)  /* Bit 3:  Non-valid Calendar Alarm */
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_RTC_H */

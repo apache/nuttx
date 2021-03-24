@@ -113,6 +113,7 @@ const uintptr_t g_portbase[SAMV7_NPIO] =
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_configinput
  *
@@ -577,13 +578,14 @@ bool sam_gpioread(gpio_pinset_t pinset)
   return (regval & pin) != 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Function:  sam_dumpgpio
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Dump all GPIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int sam_dumpgpio(uint32_t pinset, const char *msg)
@@ -604,37 +606,57 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
   gpioinfo("PIO%c pinset: %08x base: %08x -- %s\n",
            g_portchar[port], pinset, base, msg);
   gpioinfo("    PSR: %08x    OSR: %08x   IFSR: %08x   ODSR: %08x\n",
-           getreg32(base + SAM_PIO_PSR_OFFSET), getreg32(base + SAM_PIO_OSR_OFFSET),
-           getreg32(base + SAM_PIO_IFSR_OFFSET), getreg32(base + SAM_PIO_ODSR_OFFSET));
+           getreg32(base + SAM_PIO_PSR_OFFSET),
+           getreg32(base + SAM_PIO_OSR_OFFSET),
+           getreg32(base + SAM_PIO_IFSR_OFFSET),
+           getreg32(base + SAM_PIO_ODSR_OFFSET));
   gpioinfo("   PDSR: %08x    IMR: %08x    ISR: %08x   MDSR: %08x\n",
-           getreg32(base + SAM_PIO_PDSR_OFFSET), getreg32(base + SAM_PIO_IMR_OFFSET),
-           getreg32(base + SAM_PIO_ISR_OFFSET), getreg32(base + SAM_PIO_MDSR_OFFSET));
+           getreg32(base + SAM_PIO_PDSR_OFFSET),
+           getreg32(base + SAM_PIO_IMR_OFFSET),
+           getreg32(base + SAM_PIO_ISR_OFFSET),
+           getreg32(base + SAM_PIO_MDSR_OFFSET));
   gpioinfo(" ABCDSR: %08x %08x         IFSCSR: %08x  PPDSR: %08x\n",
-           getreg32(base + SAM_PIO_ABCDSR1_OFFSET), getreg32(base + SAM_PIO_ABCDSR2_OFFSET),
-           getreg32(base + SAM_PIO_IFSCSR_OFFSET), getreg32(base + SAM_PIO_PPDSR_OFFSET));
+           getreg32(base + SAM_PIO_ABCDSR1_OFFSET),
+           getreg32(base + SAM_PIO_ABCDSR2_OFFSET),
+           getreg32(base + SAM_PIO_IFSCSR_OFFSET),
+           getreg32(base + SAM_PIO_PPDSR_OFFSET));
   gpioinfo("   PUSR: %08x   SCDR: %08x   OWSR: %08x  AIMMR: %08x\n",
-           getreg32(base + SAM_PIO_PUSR_OFFSET), getreg32(base + SAM_PIO_SCDR_OFFSET),
-           getreg32(base + SAM_PIO_OWSR_OFFSET), getreg32(base + SAM_PIO_AIMMR_OFFSET));
+           getreg32(base + SAM_PIO_PUSR_OFFSET),
+           getreg32(base + SAM_PIO_SCDR_OFFSET),
+           getreg32(base + SAM_PIO_OWSR_OFFSET),
+           getreg32(base + SAM_PIO_AIMMR_OFFSET));
   gpioinfo("    ESR: %08x    LSR: %08x   ELSR: %08x FELLSR: %08x\n",
-           getreg32(base + SAM_PIO_ESR_OFFSET), getreg32(base + SAM_PIO_LSR_OFFSET),
-           getreg32(base + SAM_PIO_ELSR_OFFSET), getreg32(base + SAM_PIO_FELLSR_OFFSET));
+           getreg32(base + SAM_PIO_ESR_OFFSET),
+           getreg32(base + SAM_PIO_LSR_OFFSET),
+           getreg32(base + SAM_PIO_ELSR_OFFSET),
+           getreg32(base + SAM_PIO_FELLSR_OFFSET));
   gpioinfo(" FRLHSR: %08x LOCKSR: %08x   WPMR: %08x   WPSR: %08x\n",
-           getreg32(base + SAM_PIO_FRLHSR_OFFSET), getreg32(base + SAM_PIO_LOCKSR_OFFSET),
-           getreg32(base + SAM_PIO_WPMR_OFFSET), getreg32(base + SAM_PIO_WPSR_OFFSET));
+           getreg32(base + SAM_PIO_FRLHSR_OFFSET),
+           getreg32(base + SAM_PIO_LOCKSR_OFFSET),
+           getreg32(base + SAM_PIO_WPMR_OFFSET),
+           getreg32(base + SAM_PIO_WPSR_OFFSET));
   gpioinfo("   PCMR: %08x  PCIMR: %08x  PCISR: %08x   PCRHR: %08x\n",
-           getreg32(base + SAM_PIO_PCMR_OFFSET), getreg32(base + SAM_PIO_PCIMR_OFFSET),
-           getreg32(base + SAM_PIO_PCISR_OFFSET), getreg32(base + SAM_PIO_PCRHR_OFFSET));
+           getreg32(base + SAM_PIO_PCMR_OFFSET),
+           getreg32(base + SAM_PIO_PCIMR_OFFSET),
+           getreg32(base + SAM_PIO_PCISR_OFFSET),
+           getreg32(base + SAM_PIO_PCRHR_OFFSET));
   gpioinfo("SCHMITT: %08x DRIVER:%08x\n",
-           getreg32(base + SAM_PIO_SCHMITT_OFFSET), getreg32(base + SAM_PIO_DRIVER_OFFSET));
+           getreg32(base + SAM_PIO_SCHMITT_OFFSET),
+           getreg32(base + SAM_PIO_DRIVER_OFFSET));
   gpioinfo("    KER: %08x   KRCR: %08x    KDR: %08x   KIMR: %08x\n",
-           getreg32(base + SAM_PIO_KER_OFFSET), getreg32(base + SAM_PIO_KRCR_OFFSET),
-           getreg32(base + SAM_PIO_KDR_OFFSET), getreg32(base + SAM_PIO_KIMR_OFFSET));
+           getreg32(base + SAM_PIO_KER_OFFSET),
+           getreg32(base + SAM_PIO_KRCR_OFFSET),
+           getreg32(base + SAM_PIO_KDR_OFFSET),
+           getreg32(base + SAM_PIO_KIMR_OFFSET));
   gpioinfo("    KSR: %08x   KKPR: %08x    KKRR: %08x\n",
-           getreg32(base + SAM_PIO_KSR_OFFSET), getreg32(base + SAM_PIO_KKPR_OFFSET),
+           getreg32(base + SAM_PIO_KSR_OFFSET),
+           getreg32(base + SAM_PIO_KKPR_OFFSET),
            getreg32(base + SAM_PIO_KKRR_OFFSET));
   gpioinfo("   PCMR: %08x  PCIMR: %08x  PCISR: %08x  PCRHR: %08x\n",
-           getreg32(base + SAM_PIO_PCMR_OFFSET), getreg32(base + SAM_PIO_PCIMR_OFFSET),
-           getreg32(base + SAM_PIO_PCISR_OFFSET), getreg32(base + SAM_PIO_PCRHR_OFFSET));
+           getreg32(base + SAM_PIO_PCMR_OFFSET),
+           getreg32(base + SAM_PIO_PCIMR_OFFSET),
+           getreg32(base + SAM_PIO_PCISR_OFFSET),
+           getreg32(base + SAM_PIO_PCRHR_OFFSET));
 
   leave_critical_section(flags);
   return OK;

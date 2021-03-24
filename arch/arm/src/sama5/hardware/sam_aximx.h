@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_aximx.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,39 +16,42 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_AXIMX_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_AXIMX_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <arch/sama5/chip.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* AXIMX Register Offsets ***********************************************************/
+ ****************************************************************************/
+
+/* AXIMX Register Offsets ***************************************************/
 
 #define SAM_AXIMX_REMAP_OFFSET 0x0000 /* Remap Register */
 
-/* AXIMX Register Addresses *********************************************************/
+/* AXIMX Register Addresses *************************************************/
 
 #define SAM_AXIMX_REMAP        (SAM_AXIMX_VSECTION+SAM_AXIMX_REMAP_OFFSET)
 
-/* AXIMX Register Bit Definitions ***************************************************/
+/* AXIMX Register Bit Definitions *******************************************/
 
 /* Remap Register
  *
  * Boot state:    ROM is seen at address 0x00000000
- * Remap State 0: SRAM is seen at address 0x00000000 (through AHB slave interface)
+ * Remap State 0: SRAM is seen at address 0x00000000
+ *                (through AHB slave interface)
  *                instead of ROM.
- * Remap State 1: HEBI is seen at address 0x00000000 (through AHB slave interface)
+ * Remap State 1: HEBI is seen at address 0x00000000
+ *                (through AHB slave interface)
  *                instead of ROM for external boot.
  */
 

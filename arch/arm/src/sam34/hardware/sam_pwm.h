@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_pwm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_PWM_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_PWM_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* PWM register offsets *****************************************************************/
+/* PWM register offsets *****************************************************/
 
 #define SAM_PWM_CLK_OFFSET           0x000 /* PWM Clock Register */
 #define SAM_PWM_ENA_OFFSET           0x004 /* PWM Enable Register */
@@ -91,6 +91,7 @@
 #define SAM_PWM_WPSR_OFFSET          0x0e8 /* PWM Write Protect Status Register */
                                            /* 0x100-0x128: Reserved for PDC registers */
                                            /* 0x12c: Reserved */
+
 /* PWM Comparison Registers */
 
 #define SAM_PWMCMP_OFFSET(n)         (0x130+((n)<<4))
@@ -138,7 +139,8 @@
 #define SAM_PWMCMP7_VUPD_OFFSET      0x1a4 /* PWM Comparison 7 Value Update Register */
 #define SAM_PWMCMP7_M_OFFSET         0x1a8 /* PWM Comparison 7 Mode Register */
 #define SAM_PWMCMP7_MUPD_OFFSET      0x1ac /* PWM Comparison 7 Mode Update Register */
-                                             /* 0x1b0-0x1fc: Reserved */
+                                           /* 0x1b0-0x1fc: Reserved */
+
 /* PWM Channel Registers */
 
 #define SAM_PWMCH_OFFSET(n)          (0x200+((n)<< 5))
@@ -210,7 +212,7 @@
 #  define SAM_PWMCH3_CAEUPD_OFFSET   0x0468 /* PWM Channel 3 Additional Edge Update Register */
 #endif
 
-/* PWM register addresses ***************************************************************/
+/* PWM register addresses ***************************************************/
 
 #define SAM_PWM_CLK                  (SAM_PWM_BASE+SAM_PWM_CLK_OFFSET)
 #define SAM_PWM_ENA                  (SAM_PWM_BASE+SAM_PWM_ENA_OFFSET)
@@ -388,7 +390,7 @@
 #  define SAM_PWMCH3_CAEUPD          (SAM_PWMCH3_BASE2+SAM_PWMCH0_CAEUPD_OFFSET)
 #endif
 
-/* PWM register bit definitions *********************************************************/
+/* PWM register bit definitions *********************************************/
 
 /* PWM Clock Register */
 
@@ -410,6 +412,7 @@
 #  define PWM_CLK_PREA_MCKDIV256     (8  << PWM_CLK_PREA_SHIFT) /* MCK/256 */
 #  define PWM_CLK_PREA_MCKDIV512     (9  << PWM_CLK_PREA_SHIFT) /* MCK/512 */
 #  define PWM_CLK_PREA_MCKDIV1024    (10 << PWM_CLK_PREA_SHIFT) /* MCK/1024 */
+
 #define PWM_CLK_DIVB_SHIFT           (16)      /* Bits 16-23: CLKB Divide Factor */
 #define PWM_CLK_DIVB_MASK            (0xff << PWM_CLK_DIVB_SHIFT)
 #  define PWM_CLK_DIVB_OFF           (0 << PWM_CLK_DIVB_SHIFT)
@@ -429,7 +432,9 @@
 #  define PWM_CLK_PREB_MCKDIV512     (9  << PWM_CLK_PREB_SHIFT) /* MCK/512 */
 #  define PWM_CLK_PREB_MCKDIV1024    (10 << PWM_CLK_PREB_SHIFT) /* MCK/1024 */
 
-/* PWM Enable Register, PWM Disable Register, and PWM Status Register common bit-field definitions */
+/* PWM Enable Register, PWM Disable Register, and
+ * PWM Status Register common bit-field definitions
+ */
 
 #define SAM_ENAB_CHID(n)             (1 << ((n))
 #  define SAM_ENAB_CHID0             (1 << 0)  /* Bit 0:  Counter Event Channel 0 Interrupt */
@@ -437,8 +442,9 @@
 #  define SAM_ENAB_CHID2             (1 << 2)  /* Bit 2:  Counter Event Channel 2 Interrupt */
 #  define SAM_ENAB_CHID3             (1 << 3)  /* Bit 3:  Counter Event Channel 3 Interrupt */
 
-/* PWM Interrupt Enable Register 1, PWM Interrupt Disable Register 1, PWM Interrupt
- * Mask Register 1, and PWM Interrupt Status Register 1 common bit definitions
+/* PWM Interrupt Enable Register 1, PWM Interrupt Disable Register 1,
+ * PWM Interrupt Mask Register 1, and PWM Interrupt Status Register 1
+ * common bit definitions
  */
 
 #define SAM_INT_CHID(n)              (1 << (n))
@@ -464,6 +470,7 @@
 #  define PWM_SCM_UPDM_MANMAN        (0 << PWM_SCM_UPDM_SHIFT) /* Manual write/manual update */
 #  define PWM_SCM_UPDM_MANAUTO       (1 << PWM_SCM_UPDM_SHIFT) /* Manual write/automatic update */
 #  define PWM_SCM_UPDM_AUTOAUTO      (2 << PWM_SCM_UPDM_SHIFT) /* Auto write/automatic update */
+
 #define PWM_SCM_PTRM                 (1 << 20) /* Bit 20: PDC Transfer Request Mode */
 #define PWM_SCM_PTRCS_SHIFT          (21)      /* Bits 21-23: PDC Transfer Request Comparison Selection */
 #define PWM_SCM_PTRCS_MASK           (7 << PWM_SCM_PTRCS_SHIFT)
@@ -488,7 +495,10 @@
 #define PWM_SCUPUPD_MASK             (15 << PWM_SCUPUPD_SHIFT)
 #  define PWM_SCUPUPD(n)             ((uint32_t)(n) << PWM_SCUPUPD_SHIFT)
 
-/* PWM Interrupt Enable Register 2, PWM Interrupt Disable Register 2, PWM Interrupt Mask Register 2, and PWM Interrupt Status Register 2 common bit-field definitions */
+/* PWM Interrupt Enable Register 2, PWM Interrupt Disable Register 2,
+ * PWM Interrupt Mask Register 2, and PWM Interrupt Status Register 2
+ * common bit-field definitions
+ */
 
 #define SAM_INT_WRDY                 (1 << 0)  /* Bit 0:  Write Ready Update Interrupt */
 #define SAM_INT_ENDTX                (1 << 1)  /* Bit 1:  PDC End of TX Buffer Interrupt */
@@ -513,10 +523,10 @@
 #  define SAM_INT_CMPU6              (1 << 22) /* Bit 22: Comparison 6 Update Interrupt */
 #  define SAM_INT_CMPU7              (1 << 23) /* Bit 23: Comparison 7 Update Interrupt */
 
-/* PWM Output Override Value Register, PWM Output Selection Register, PWM Output
- * Selection Set Register, PWM Output Selection Clear Register, PWM Output Selection
- * Set Update Register,  and PWM Output Selection Clear Update Register common bit-field
- * definitions
+/* PWM Output Override Value Register, PWM Output Selection Register,
+ * PWM Output Selection Set Register, PWM Output Selection Clear Register,
+ * PWM Output Selection Set Update Register, and PWM Output Selection Clear
+ * Update Register common bit-field definitions
  */
 
 #define PWM_OUT_OH(n)                (1 << (n))
@@ -720,13 +730,17 @@
 #define PWM_WPSR_WPVSRC_SHIFT        (16)      /* Bits 16-31: Write Protect Violation Source */
 #define PWM_WPSR_WPVSRC_MASK         (0xffff << PWM_WPSR_WPVSRC_SHIFT)
 
-/* PWM Comparison x Value Register and PWM Comparison x Value Update Register */
+/* PWM Comparison x Value Register and
+ * PWM Comparison x Value Update Register
+ */
 
 #define PWMCMP_CV_SHIFT              (0)       /* Bits 0-23: Comparison x Value */
 #define PWMCMP_CV_MASK               (0x00ffffff << PWMCMP_CV_SHIFT)
 #define PWMCMP_CVM                   (1 << 24) /* Bit 24: Comparison x Value Mode */
 
-/* PWM Comparison x Mode Register  and PWM Comparison x Mode Update Register */
+/* PWM Comparison x Mode Register and
+ * PWM Comparison x Mode Update Register
+ */
 
 #define PWMCMP_CEN                   (1 << 0)  /* Bit 0:  Comparison x Enable */
 #define PWMCMP_CTR_SHIFT             (4)       /* Bits 4-7: Comparison x Trigger */
@@ -760,8 +774,9 @@
 #  define PWMCH_MR_CPRE_MCKDIV256    (8  << PWMCH_MR_CPRE_SHIFT) /* MCK/256 */
 #  define PWMCH_MR_CPRE_MCKDIV512    (9  << PWMCH_MR_CPRE_SHIFT) /* MCK/512 */
 #  define PWMCH_MR_CPRE_MCKDIV1024   (10 << PWMCH_MR_CPRE_SHIFT) /* MCK/1024 */
-#  define PWMCH_MR_CPRE_CLKA         (11 << PWMCH_MR_CPRE_SHIFT) /*CLKA */
+#  define PWMCH_MR_CPRE_CLKA         (11 << PWMCH_MR_CPRE_SHIFT) /* CLKA */
 #  define PWMCH_MR_CPRE_CLKB         (12 << PWMCH_MR_CPRE_SHIFT) /* CLKB */
+
 #define PWMCH_MR_CALG                (1 << 8)  /* Bit 8:  Channel Alignment */
 #define PWMCH_MR_CPOL                (1 << 9)  /* Bit 9:  Channel Polarity */
 #define PWMCH_MR_CES                 (1 << 10) /* Bit 10:  Counter Event Selection */
@@ -774,12 +789,16 @@
 #define PWMCH_MR_DTHI                (1 << 17) /* Bit 17: Dead-Time PWMHx Output Inverted */
 #define PWMCH_MR_DTLI                (1 << 18) /* Bit 18: Dead-Time PWMLx Output Inverted */
 
-/* PWM Channel Duty Cycle Register and PWM Channel Duty Cycle Update Register common bit-field definitions */
+/* PWM Channel Duty Cycle Register and
+ * PWM Channel Duty Cycle Update Register common bit-field definitions
+ */
 
 #define PWMCH_DTY_SHIFT              (0)       /* Bits 0-23: Channel Duty-Cycle */
 #define PWMCH_DTY_MASK               (0x00ffffff << PWMCH_DTY_SHIFT)
 
-/* PWM Channel Period Register and PWM Channel Period Update Register common bit-field definitions */
+/* PWM Channel Period Register and
+ * PWM Channel Period Update Register common bit-field definitions
+ */
 
 #define PWMCH_PRD_SHIFT              (0)       /* Bits 0-23: Channel Period */
 #define PWMCH_PRD_MASK               (0x00ffffff << PWMCH_PRD_SHIFT)
@@ -789,7 +808,9 @@
 #define PWMCH_CCNT_SHIFT             (0)       /* Bits 0-23: Channel Counter Register */
 #define PWMCH_CCNT_MASK              (0x00ffffff << PWMCH_CCNT_SHIFT)
 
-/* PWM Channel Dead Time Register and PWM Channel Dead Time Update Register common bit-field definitions */
+/* PWM Channel Dead Time Register and
+ * PWM Channel Dead Time Update Register common bit-field definitions
+ */
 
 #define PWMCH_DTH_SHIFT              (0)       /* Bits 0-15: Dead-Time Value for PWMHx Output */
 #define PWMCH_DTH_MASK               (0xffff << PWMCH_DTH_SHIFT)
@@ -805,7 +826,9 @@
 #  define PWMCH_CMUPD_CPOLINVUP      (1 << 13) /* Bit 13: Channel Polarity Inversion Update */
 #endif
 
-/* PWM Channel Additional Edge Register and PWM Channel Additional Edge Update Register */
+/* PWM Channel Additional Edge Register and
+ * PWM Channel Additional Edge Update Register
+ */
 
 #if defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define PWMCH_CAE_ADEDGV_SHIFT     (0)       /* Bits 0-23: Channel Additional Edge Value */
@@ -818,16 +841,16 @@
 #    define PWMCH_CAE_ADEDGM_BOTH    (2 << PWMCH_CAE_ADEDGM_SHIFT)
 #endif
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_PWM_H */

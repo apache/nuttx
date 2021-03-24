@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_pwm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_PWM_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_PWM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define SAM_PWM_NCHANNELS          4      /* Four channels numbered 0..3 */
 
-/* PWM Register Offsets *************************************************************/
+/* PWM Register Offsets *****************************************************/
 
 #define SAM_PWM_CLK_OFFSET         0x0000 /* PWM Clock Register */
 #define SAM_PWM_ENA_OFFSET         0x0004 /* PWM Enable Register */
@@ -132,7 +132,9 @@
 #define SAM_PWM_CMPM7_OFFSET       0x01a8 /* PWM Comparison 7 Mode Register */
 #define SAM_PWM_CMPMUPD7_OFFSET    0x01ac /* PWM Comparison 7 Mode Update Register */
                                           /* 0x01b0 - 0x01fc Reserved */
+
 #define SAM_PWM_CHANA_OFFSET(n)    (0x0200 + ((int)(n) << 5)) /* n=0..3 */
+
 #define SAM_PWM_CMR_OFFSET         0x0000 /* PWM Channel Mode Register */
 #define SAM_PWM_CDTY_OFFSET        0x0004 /* PWM Channel Duty Cycle Register */
 #define SAM_PWM_CDTYUPD_OFFSET     0x0008 /* PWM Channel Duty Cycle Update Register */
@@ -146,10 +148,11 @@
 
 #ifdef ATSAMA5D4
 #  define SAM_PWM_CHANB_OFFSET(n)  (0x0400 + ((int)(n) << 5)) /* n=0..3 */
+
 #  define SAM_PWM_CMUPD_OFFSET     0x0000 /* PWM Channel Mode Update Register */
 #endif
 
-/* PWM Register Addresses ***********************************************************/
+/* PWM Register Addresses ***************************************************/
 
 #define SAM_PWM_CLK                (SAM_PWMC_VBASE+SAM_PWM_CLK_OFFSET)
 #define SAM_PWM_ENA                (SAM_PWMC_VBASE+SAM_PWM_ENA_OFFSET)
@@ -260,7 +263,7 @@
 #  define SAM_PWM_CMUPD(n)         (SAM_PWM_CHANB_BASE(n)+SAM_PWM_CMUPD_OFFSET)
 #endif
 
-/* PWM Register Bit Definitions *****************************************************/
+/* PWM Register Bit Definitions *********************************************/
 
 /* PWM Clock Register */
 
@@ -269,6 +272,7 @@
 #  define PWM_CLK_DIVA_OFF         (0 << PWM_CLK_DIVA_SHIFT)             /* CLKA clock = off */
 #  define PWM_CLK_DIVA_PREA        (1 << PWM_CLK_DIVA_SHIFT)             /* CLKA clock = clock selected by PREA  */
 #  define PWM_CLK_DIVA(n)          ((uint32_t)(n) << PWM_CLK_DIVA_SHIFT) /* CLKA clock = clock selected by PREA / DIVA */
+
 #define PWM_CLK_PREA_SHIFT         (8)       /* Bits 8-11: CLKA Source Clock Selection */
 #define PWM_CLK_PREA_MASK          (15 << PWM_CLK_PREA_SHIFT)
 #  define PWM_CLK_PREA_DIV(n)      ((uint32_t)(n) << PWM_CLK_PREA_SHIFT)
@@ -283,11 +287,13 @@
 #  define PWM_CLK_PREA_DIV256      (8 << PWM_CLK_PREA_SHIFT)  /* MCK/256 */
 #  define PWM_CLK_PREA_DIV512      (9 << PWM_CLK_PREA_SHIFT)  /* MCK/512 */
 #  define PWM_CLK_PREA_DIV1024     (10 << PWM_CLK_PREA_SHIFT) /* MCK/1024 */
+
 #define PWM_CLK_DIVB_SHIFT         (16)      /* Bits 16-23: CLKB Divide Factor */
 #define PWM_CLK_DIVB_MASK          (0xff << PWM_CLK_DIVB_SHIFT)
 #  define PWM_CLK_DIVB_OFF         (0 << PWM_CLK_DIVB_SHIFT)             /* CLKB clock = off */
 #  define PWM_CLK_DIVB_PREB        (1 << PWM_CLK_DIVB_SHIFT)             /* CLKB clock = clock selected by PREB  */
 #  define PWM_CLK_DIVB(n)          ((uint32_t)(n) << PWM_CLK_DIVB_SHIFT) /* CLKB clock = clock selected by PREB / DIVB */
+
 #define PWM_CLK_PREB_SHIFT         (24)      /* Bits 24-27: CLKB Source Clock Selection */
 #define PWM_CLK_PREB_MASK          (15 << PWM_CLK_PREB_SHIFT)
 #  define PWM_CLK_PREB_DIV(n)      ((uint32_t)(n) << PWM_CLK_PREB_SHIFT)
@@ -307,8 +313,8 @@
 
 #define PWM_CHID(n)                (1 << (n))      /* Bits 0-3: Channel ID n, n=0..3 */
 
-/* PWM Interrupt Enable Register 1, PWM Interrupt Disable Register 1, PWM Interrupt
- * Mask Register 1, and PWM Interrupt Status Register 1
+/* PWM Interrupt Enable Register 1, PWM Interrupt Disable Register 1,
+ * PWM Interrupt Mask Register 1, and PWM Interrupt Status Register 1
  */
 
 #define PWM_INT1_CHID(n)           (1 << (n))      /* Bits 0-3: Counter Event on Channel n Interrupt, n=0..3 */
@@ -361,13 +367,15 @@
 #define PWM_SCUPUPD_UPRUPD_MASK    (15 << PWM_SCUPUPD_UPRUPD_SHIFT)
 #  define PWM_SCUPUPD_UPRUPD(n)    ((uint32_t)(n) << PWM_SCUPUPD_UPRUPD_SHIFT)
 
-/* PWM Interrupt Enable Register 2, PWM Interrupt Disable Register 2, PWM Interrupt
- * Mask Register 2, and PWM Interrupt Status Register 2.
+/* PWM Interrupt Enable Register 2, PWM Interrupt Disable Register 2,
+ * PWM Interrupt Mask Register 2, and PWM Interrupt Status Register 2.
  */
 
 #define PWM_INT2_WRDY              (1 << 0)  /* Bit 0:  Write Ready for Synchronous Channels Update Interrupt Enable */
 #define PWM_INT2_UNRE              (1 << 3)  /* Bit 3:  Synchronous Channels Update Underrun Error Interrupt Enable */
+
 #define PWM_INT2_CMPM(n)           (1 << ((n)+8))  /* Bits 8-15:  Comparison n Match Interrupt Enable, n=0..7 */
+
 #  define PWM_INT2_CMPM0           (1 << 8)  /* Bit 8:  Comparison 0 Match Interrupt Enable */
 #  define PWM_INT2_CMPM1           (1 << 9)  /* Bit 9:  Comparison 1 Match Interrupt Enable */
 #  define PWM_INT2_CMPM2           (1 << 10) /* Bit 10: Comparison 2 Match Interrupt Enable */
@@ -376,7 +384,9 @@
 #  define PWM_INT2_CMPM5           (1 << 13) /* Bit 13: Comparison 5 Match Interrupt Enable */
 #  define PWM_INT2_CMPM6           (1 << 14) /* Bit 14: Comparison 6 Match Interrupt Enable */
 #  define PWM_INT2_CMPM7           (1 << 15) /* Bit 15: Comparison 7 Match Interrupt Enable */
+
 #define PWM_INT2_CMPU(n)           (1 << ((n)+16)) /* Bits 16-23:  Comparison n Update Interrupt Enable, n=0..7 */
+
 #  define PWM_INT2_CMPU0           (1 << 16) /* Bit 16:  Comparison 0 Update Interrupt Enable */
 #  define PWM_INT2_CMPU1           (1 << 17) /* Bit 17:  Comparison 1 Update Interrupt Enable */
 #  define PWM_INT2_CMPU2           (1 << 18) /* Bit 18:  Comparison 2 Update Interrupt Enable */
@@ -390,11 +400,14 @@
 /* PWM Output Override Value Register */
 
 #define PWM_OOV_H(n)               (1 << (n))      /* Bits 0-3: Output Override PWMH channel n, n=0..3 */
+
 #  define PWM_OOV_H0               (1 << 0)  /* Bit 0:  Output Override PWMH channel 0 */
 #  define PWM_OOV_H1               (1 << 1)  /* Bit 1:  Output Override PWMH channel 1 */
 #  define PWM_OOV_H2               (1 << 2)  /* Bit 2:  Output Override PWMH channel 2 */
 #  define PWM_OOV_H3               (1 << 3)  /* Bit 3:  Output Override PWMH channel 3 */
+
 #define PWM_OOV_L(n)               (1 << ((n)+16)) /* Bits 16-19: Output Override PWML channel n, n=0..3 */
+
 #  define PWM_OOV_L0               (1 << 16) /* Bit 16: Output Override PWML channel 0 */
 #  define PWM_OOV_L1               (1 << 17) /* Bit 17: Output Override PWML channel 1 */
 #  define PWM_OOV_L2               (1 << 18) /* Bit 18: Output Override PWML channel 2 */
@@ -403,11 +416,14 @@
 /* PWM Output Selection Register */
 
 #define PWM_OS_H(n)                (1 << (n))      /* Bits 0-3: Output Selection for PWMH channel n, n=0..3 */
+
 #  define PWM_OS_H0                (1 << 0)  /* Bit 0:  Output Selection for PWMH channel 0 */
 #  define PWM_OS_H1                (1 << 1)  /* Bit 0:  Output Selection for PWMH channel 0 */
 #  define PWM_OS_H2                (1 << 2)  /* Bit 0:  Output Selection for PWMH channel 0 */
 #  define PWM_OS_H3                (1 << 3)  /* Bit 0:  Output Selection for PWMH channel 0 */
+
 #define PWM_OS_L(n)                (1 << ((n)+16)) /* Bits 16-19: Output Selection for PWML channel n, n=0..3 */
+
 #  define PWM_OS_L0                (1 << 16) /* Bit 16: Output Selection for PWML channel 0 */
 #  define PWM_OS_L1                (1 << 17) /* Bit 17: Output Selection for PWML channel 1 */
 #  define PWM_OS_L2                (1 << 18) /* Bit 18: Output Selection for PWML channel 2 */
@@ -416,11 +432,14 @@
 /* PWM Output Selection Set Register */
 
 #define PWM_OSS_H(n)               (1 << (n))      /* Bits 0-3: Output Selection Set for PWMH channel n, n=0..3 */
+
 #  define PWM_OSS_H0               (1 << 0)  /* Bit 0:  Output Selection Set for PWMH channel 0 */
 #  define PWM_OSS_H1               (1 << 1)  /* Bit 1:  Output Selection Set for PWMH channel 1 */
 #  define PWM_OSS_H2               (1 << 2)  /* Bit 2:  Output Selection Set for PWMH channel 2 */
 #  define PWM_OSS_H3               (1 << 3)  /* Bit 3:  Output Selection Set for PWMH channel 3 */
+
 #define PWM_OSS_L(n)               (1 << ((n)+16)) /* Bits 16-19: Output Selection Set for PWML channel n, n=0..3 */
+
 #  define PWM_OSS_L0               (1 << 16) /* Bit 16: Output Selection Set for PWML channel 0 */
 #  define PWM_OSS_L1               (1 << 17) /* Bit 17: Output Selection Set for PWML channel 1 */
 #  define PWM_OSS_L2               (1 << 18) /* Bit 18: Output Selection Set for PWML channel 2 */
@@ -429,11 +448,14 @@
 /* PWM Output Selection Clear Register */
 
 #define PWM_OSC_H(n)               (1 << (n))      /* Bits 0-3: Output Selection Clear for PWMH channel n, n=0..3 */
+
 #  define PWM_OSC_H0               (1 << 0)  /* Bit 0:  Output Selection Clear for PWMH channel 0 */
 #  define PWM_OSC_H1               (1 << 1)  /* Bit 1:  Output Selection Clear for PWMH channel 1 */
 #  define PWM_OSC_H2               (1 << 2)  /* Bit 2:  Output Selection Clear for PWMH channel 2 */
 #  define PWM_OSC_H3               (1 << 3)  /* Bit 3:  Output Selection Clear for PWMH channel 3 */
+
 #define PWM_OSC_L(n)               (1 << ((n)+16)) /* Bits 16-19: Output Selection Clear for PWML channel n, n=0..3 */
+
 #  define PWM_OSC_L0               (1 << 16) /* Bit 16: Output Selection Clear for PWML channel 0 */
 #  define PWM_OSC_L1               (1 << 17) /* Bit 17: Output Selection Clear for PWML channel 1 */
 #  define PWM_OSC_L2               (1 << 18) /* Bit 18: Output Selection Clear for PWML channel 2 */
@@ -442,11 +464,14 @@
 /* PWM Output Selection Set Update Register */
 
 #define PWM_OSSUPD_H(n)            (1 << (n))      /* Bits 0-3: Output Selection Set for PWMH channel n, n=0..3 */
+
 #  define PWM_OSSUPD_H0            (1 << 0)  /* Bit 0:  Output Selection Set for PWMH channel 0 */
 #  define PWM_OSSUPD_H1            (1 << 1)  /* Bit 1:  Output Selection Set for PWMH channel 1 */
 #  define PWM_OSSUPD_H2            (1 << 2)  /* Bit 2:  Output Selection Set for PWMH channel 2 */
 #  define PWM_OSSUPD_H3            (1 << 3)  /* Bit 3:  Output Selection Set for PWMH channel 3 */
+
 #define PWM_OSSUPD_L(n)            (1 << ((n)+16)) /* Bits 16-19: Output Selection Set for PWML channel n, n=0..3 */
+
 #  define PWM_OSSUPD_L0            (1 << 16) /* Bit 16: Output Selection Set for PWML channel 0 */
 #  define PWM_OSSUPD_L1            (1 << 17) /* Bit 17: Output Selection Set for PWML channel 1 */
 #  define PWM_OSSUPD_L2            (1 << 18) /* Bit 18: Output Selection Set for PWML channel 2 */
@@ -455,11 +480,14 @@
 /* PWM Output Selection Clear Update Register */
 
 #define PWM_OSCUPD_H(n)            (1 << (n))      /* Bits 0-3: Output Selection Clear for PWMH channel n, n=0..3 */
+
 #  define PWM_OSCUPD_H0            (1 << 0)  /* Bit 0:  Output Selection Clear for PWMH channel 0 */
 #  define PWM_OSCUPD_H1            (1 << 1)  /* Bit 1:  Output Selection Clear for PWMH channel 1 */
 #  define PWM_OSCUPD_H2            (1 << 2)  /* Bit 2:  Output Selection Clear for PWMH channel 2 */
 #  define PWM_OSCUPD_H3            (1 << 3)  /* Bit 3:  Output Selection Clear for PWMH channel 3 */
+
 #define PWM_OSCUPD_L(n)            (1 << ((n)+16)) /* Bits 16-19: Output Selection Clear for PWML channel n, n=0..3 */
+
 #  define PWM_OSCUPD_L0            (1 << 16) /* Bit 16: Output Selection Clear for PWML channel 0 */
 #  define PWM_OSCUPD_L1            (1 << 17) /* Bit 17: Output Selection Clear for PWML channel 1 */
 #  define PWM_OSCUPD_L2            (1 << 18) /* Bit 18: Output Selection Clear for PWML channel 2 */
@@ -495,11 +523,14 @@
 /* PWM Fault Protection Value Register 1 */
 
 #define PWM_FPV_H(n)               (1 << (n))      /* Bits 0-3: Fault Protection PWMH output on channel n, n=0..3 */
+
 #  define PWM_FPV_H0               (1 << 0)  /* Bit 0:  Fault Protection PWMH output on channel 0 */
 #  define PWM_FPV_H1               (1 << 1)  /* Bit 1:  Fault Protection PWMH output on channel 1 */
 #  define PWM_FPV_H2               (1 << 2)  /* Bit 2:  Fault Protection PWMH output on channel 2 */
 #  define PWM_FPV_H3               (1 << 3)  /* Bit 3:  Fault Protection PWMH output on channel 3 */
+
 #define PWM_FPV_L(n)               (1 << ((n)+16)) /* Bits 16-19: Fault Protection PWML output on channel n, n=0..3 */
+
 #  define PWM_FPV_L0               (1 << 16) /* Bit 16: Fault Protection PWML output on channel 0 */
 #  define PWM_FPV_L1               (1 << 17) /* Bit 17: Fault Protection PWML output on channel 1 */
 #  define PWM_FPV_L2               (1 << 18) /* Bit 18: Fault Protection PWML output on channel 2 */
@@ -526,6 +557,7 @@
 /* PWM Event Line 0/1 Mode Register */
 
 #define PWM_ELMR_CSEL(n)           (1 << (n))      /* Bits 0-7: Comparison n Selection, n=0..7 */
+
 #  define PWM_ELMR_CSEL0           (1 << 0)  /* Bit 0:  Comparison 0 Selection */
 #  define PWM_ELMR_CSEL1           (1 << 1)  /* Bit 1:  Comparison 1 Selection */
 #  define PWM_ELMR_CSEL2           (1 << 2)  /* Bit 2:  Comparison 2 Selection */
@@ -565,11 +597,14 @@
 /* PWM Fault Protection Value Register 2 */
 
 #define PWM_FPV2_FPZH(n)           (1 << (n)) /* Bits 0-3: Fault Protection Hi-Z for PWMH channel n, n=0..3 */
+
 #  define PWM_FPV2_FPZH0           (1 << 0)   /* Bit 0:  Fault Protection Hi-Z for PWMH channel 0 */
 #  define PWM_FPV2_FPZH1           (1 << 1)   /* Bit 1:  Fault Protection Hi-Z for PWMH channel 1 */
 #  define PWM_FPV2_FPZH2           (1 << 2)   /* Bit 2:  Fault Protection Hi-Z for PWMH channel 2 */
 #  define PWM_FPV2_FPZH3           (1 << 3)   /* Bit 3:  Fault Protection Hi-Z for PWMH channel 3 */
+
 #define PWM_FPV2_L(n)              (1 << ((n)+16)) /* Bits 16-19: Fault Protection Hi-Z for PWML channel n, n=0..3 */
+
 #  define PWM_FPV2_FPZL0           (1 << 16)  /* Bit 16: Fault Protection Hi-Z for PWML channel 0 */
 #  define PWM_FPV2_FPZL1           (1 << 17)  /* Bit 17: Fault Protection Hi-Z for PWML channel 1 */
 #  define PWM_FPV2_FPZL2           (1 << 18)  /* Bit 18: Fault Protection Hi-Z for PWML channel 2 */
@@ -583,7 +618,9 @@
 #  define PWM_WPCR_WPCMD_DSWPROT   (0 << PWM_WPCR_WPCMD_SHIFT) /* Disable software write protection */
 #  define PWM_WPCR_WPCMD_ESWPROT   (1 << PWM_WPCR_WPCMD_SHIFT) /* Enable software write protection */
 #  define PWM_WPCR_WPCMD_EHWPROT   (2 << PWM_WPCR_WPCMD_SHIFT) /* Enable hardware write protection */
+
 #define PWM_WPCR_WPRG(n)           (1 << ((n)+2)) /* Bits 2-7: Write Protect Register Group n, n=0..5 */
+
 #  define PWM_WPCR_WPRG0           (1 << 2)  /* Bit 2:  Write Protect Register Group 0 */
 #  define PWM_WPCR_WPRG1           (1 << 3)  /* Bit 3:  Write Protect Register Group 1 */
 #  define PWM_WPCR_WPRG2           (1 << 4)  /* Bit 4:  Write Protect Register Group 2 */
@@ -597,6 +634,7 @@
 /* PWM Write Protect Status Register */
 
 #define PWM_WPSR_WPSWS(n)          (1 << (n))      /* Bits 0-5: Write Protect SW Status, n=0..5 */
+
 #  define PWM_WPSR_WPSWS0          (1 << 0)  /* Bit 0:  Write Protect SW Status 0 */
 #  define PWM_WPSR_WPSWS1          (1 << 1)  /* Bit 1:  Write Protect SW Status 1 */
 #  define PWM_WPSR_WPSWS2          (1 << 2)  /* Bit 2:  Write Protect SW Status 2 */
@@ -604,7 +642,9 @@
 #  define PWM_WPSR_WPSWS4          (1 << 4)  /* Bit 4:  Write Protect SW Status 4 */
 #  define PWM_WPSR_WPSWS5          (1 << 5)  /* Bit 5:  Write Protect SW Status 5 */
 #define PWM_WPSR_WPVS              (1 << 7)  /* Bit 7:  Write Protect Violation Status */
+
 #define PWM_WPSR_WPHWS(n)          (1 << ((n)+8)) /* Bits 8-13: Write Protect HW Status, n=0..5 */
+
 #  define PWM_WPSR_WPHWS0          (1 << 8)  /* Bit 8:  Write Protect HW Status 0 */
 #  define PWM_WPSR_WPHWS1          (1 << 9)  /* Bit 9:  Write Protect HW Status 1 */
 #  define PWM_WPSR_WPHWS2          (1 << 10) /* Bit 10: Write Protect HW Status 2 */
@@ -665,6 +705,7 @@
 #define PWM_CMR_CPRE_SHIFT         (0)       /* Bits 0-3: Channel Pre-scaler */
 #define PWM_CMR_CPRE_MASK          (15 << PWM_CMR_CPRE_SHIFT)
 #  define PWM_CMR_CPRE_MCKDIV(n)   ((uint32_t)(n) << PWM_CMR_CPRE_SHIFT)  /* Master clock */
+
 #  define PWM_CMR_CPRE_MCKDIV1     (0 << PWM_CMR_CPRE_SHIFT)  /* Master clock/2 */
 #  define PWM_CMR_CPRE_MCKDIV2     (1 << PWM_CMR_CPRE_SHIFT)  /* Master clock/2 */
 #  define PWM_CMR_CPRE_MCKDIV4     (2 << PWM_CMR_CPRE_SHIFT)  /* Master clock/4 */
@@ -678,6 +719,7 @@
 #  define PWM_CMR_CPRE_MCKDIV1024  (10 << PWM_CMR_CPRE_SHIFT) /* Master clock/1024 */
 #  define PWM_CMR_CPRE_CLKA        (11 << PWM_CMR_CPRE_SHIFT) /* Clock A */
 #  define PWM_CMR_CPRE_CLKB        (12 << PWM_CMR_CPRE_SHIFT) /* Clock B */
+
 #define PWM_CMR_CALG               (1 << 8)  /* Bit 8:  Channel Alignment */
 #define PWM_CMR_CPOL               (1 << 9)  /* Bit 9:  Channel Polarity */
 #define PWM_CMR_CES                (1 << 10) /* Bit 10: Counter Event Selection */

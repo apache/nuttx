@@ -44,7 +44,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Board Settings **********************************************************/
+
+/* Board Settings ***********************************************************/
+
 /* PMC register settings based on the board configuration values defined
  * in board.h
  */
@@ -128,7 +130,8 @@ static inline void sam_supcsetup(void)
 
       putreg32((SUPC_CR_XTALSEL | SUPR_CR_KEY), SAM_SUPC_CR);
       for (delay = 0;
-           (getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0 && delay < UINT32_MAX;
+           (getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0 &&
+            delay < UINT32_MAX;
            delay++);
     }
 #endif
@@ -169,10 +172,10 @@ static inline void sam_pmcsetup(void)
     {
       /* "When the MOSCXTEN bit and the MOSCXTCNT are written in CKGR_MOR to
        *  enable the main oscillator, the MOSCXTS bit in the Power Management
-       *  Controller Status Register (PMC_SR) is cleared and the counter starts
-       *  counting down on the slow clock divided by 8 from the MOSCXTCNT
-       *  value. ... When the counter reaches 0, the MOSCXTS bit is set,
-       *  indicating that the main clock is valid."
+       *  Controller Status Register (PMC_SR) is cleared and the counter
+       *  starts counting down on the slow clock divided by 8 from the
+       *  MOSCXTCNT value. ... When the counter reaches 0, the MOSCXTS bit
+       *  is set, indicating that the main clock is valid."
        */
 
       putreg32(BOARD_CKGR_MOR, SAM_PMC_CKGR_MOR);
@@ -182,9 +185,9 @@ static inline void sam_pmcsetup(void)
   /* "Switch to the main oscillator.  The selection is made by writing the
    *  MOSCSEL bit in the Main Oscillator Register (CKGR_MOR). The switch of
    *  the Main Clock source is glitch free, so there is no need to run out
-   *  of SLCK, PLLACK or UPLLCK in order to change the selection. The MOSCSELS
-   *  bit of the power Management Controller Status Register (PMC_SR) allows
-   *  knowing when the switch sequence is done."
+   *  of SLCK, PLLACK or UPLLCK in order to change the selection. The
+   *  MOSCSELS bit of the power Management Controller Status Register
+   *  (PMC_SR) allows knowing when the switch sequence is done."
    *
    *   MOSCSELS: Main Oscillator Selection Status
    *             0 = Selection is done
@@ -195,12 +198,12 @@ static inline void sam_pmcsetup(void)
   sam_pmcwait(PMC_INT_MOSCSELS);
 
   /* "Select the master clock. "The Master Clock selection is made by writing
-   *  the CSS field (Clock Source Selection) in PMC_MCKR (Master Clock Register).
-   *  The prescaler supports the division by a power of 2 of the selected clock
-   *  between 1 and 64, and the division by 3. The PRES field in PMC_MCKR programs
-   *  the prescaler. Each time PMC_MCKR is written to define a new Master Clock,
-   *  the MCKRDY bit is cleared in PMC_SR. It reads 0 until the Master Clock is
-   *  established.
+   *  the CSS field (Clock Source Selection) in PMC_MCKR (Master Clock
+   *  Register). The prescaler supports the division by a power of 2 of the
+   *  selected clock between 1 and 64, and the division by 3. The PRES field
+   *  in PMC_MCKR programs the prescaler. Each time PMC_MCKR is written to
+   *  define a new Master Clock, the MCKRDY bit is cleared in PMC_SR.
+   *  It reads 0 until the Master Clock is established.
    */
 
   regval  = getreg32(SAM_PMC_MCKR);
@@ -215,7 +218,9 @@ static inline void sam_pmcsetup(void)
   sam_pmcwait(PMC_INT_LOCKA);
 
 #ifdef CONFIG_SAMV7_USBDEVHS
-  /* UTMI configuration: Enable port0, select 12/16 MHz MAINOSC crystal source */
+  /* UTMI configuration:
+   * Enable port0, select 12/16 MHz MAINOSC crystal source
+   */
 
 #if BOARD_MAINOSC_FREQUENCY == 12000000
   putreg32(UTMI_CKTRIM_FREQ_XTAL12, SAM_UTMI_CKTRIM);

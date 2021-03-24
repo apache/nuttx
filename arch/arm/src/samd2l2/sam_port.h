@@ -50,9 +50,9 @@
 
 /* Bit-encoded input to sam_configport() */
 
-/* 24-bit Encoding.  This could be compacted into 16-bits by making the bit usage
- * mode specific.  However, by giving each bit field a unique position, we handle
- * bad combinations of properties safely.
+/* 24-bit Encoding.  This could be compacted into 16-bits by making the bit
+ * usage mode specific.  However, by giving each bit field a unique position,
+ * we handle bad combinations of properties safely.
  *
  *   MODE         BITFIELDS
  *   ------------ -----------------------------
@@ -198,7 +198,8 @@
 #  define PORT_SYNCHRONIZER_OFF    (0 << PORT_SYNCHRONIZER_SHIFT)
 #  define PORT_SYNCHRONIZER_ON     (1 << PORT_SYNCHRONIZER_SHIFT)
 
-/* If the pin is an PORT output, then this identifies the initial output value:
+/* If the pin is an PORT output, then this identifies the initial output
+ * value:
  *
  *   MODE         BITFIELDS
  *   ------------ -----------------------------

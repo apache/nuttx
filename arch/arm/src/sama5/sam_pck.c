@@ -99,7 +99,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
    * MAINCK,or SCK are supported here.
    */
 
-   switch (clksrc)
+  switch (clksrc)
     {
     case PCKSRC_MCK: /* Source clock = MCK or PLLACK */
       {
@@ -141,7 +141,9 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
     }
 
 #ifdef SAMA5_HAVE_PCK_INT_PRES
-  /* Programmable Clock frequency is selected clock frequency divided by PRES + 1 */
+  /* Programmable Clock frequency is selected clock frequency divided by
+   * PRES + 1
+   */
 
   pres = clkin / frequency;
   if (pres < 1)

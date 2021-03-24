@@ -41,6 +41,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_DEBUG_WATCHDOG_INFO
@@ -73,6 +74,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure provides the private representation of the "lower-half"
  * driver state structure.  This structure must be cast-compatible with the
  * well-known watchdog_lowerhalf_s structure.
@@ -92,6 +94,7 @@ struct sam_lowerhalf_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Register operations ******************************************************/
 
 #ifdef CONFIG_SAMV7_RSWDT_REGDEBUG
@@ -125,6 +128,7 @@ static int      sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* "Lower half" driver methods */
 
 static const struct watchdog_ops_s g_wdgops =
@@ -165,8 +169,8 @@ static uint32_t sam_getreg(uintptr_t regaddr)
 
   uint32_t regval = getreg32(regaddr);
 
-  /* Is this the same value that we read from the same register last time?  Are
-   * we polling the register?  If so, suppress some of the output.
+  /* Is this the same value that we read from the same register last time?
+   *  Are we polling the register?  If so, suppress some of the output.
    */
 
   if (regaddr == prevaddr && regval == preval)
@@ -192,7 +196,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          wdinfo("[repeats %d more times]\n", count-3);
+          wdinfo("[repeats %d more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -272,8 +276,8 @@ static int sam_interrupt(int irq, FAR void *context, FAR void *arg)
  *   Start the watchdog timer, resetting the time to the current timeout,
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -286,9 +290,10 @@ static int sam_start(FAR struct watchdog_lowerhalf_s *lower)
 
   /* The watchdog timer is enabled or disabled by writing to the MR register.
    *
-   * NOTE: The Watchdog Mode Register (RSWDT_MR) can be written only once.  Only
-   * a processor reset resets it.  Writing the RSWDT_MR register reloads the
-   * timer with the newly programmed mode parameters.
+   * NOTE:
+   * The Watchdog Mode Register (RSWDT_MR) can be written only once.  Only
+   * a processor reset resets it.  Writing the RSWDT_MR register reloads
+   * the timer with the newly programmed mode parameters.
    */
 
   wdinfo("Entry\n");
@@ -302,8 +307,8 @@ static int sam_start(FAR struct watchdog_lowerhalf_s *lower)
  *   Stop the watchdog timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -314,9 +319,10 @@ static int sam_stop(FAR struct watchdog_lowerhalf_s *lower)
 {
   /* The watchdog timer is enabled or disabled by writing to the MR register.
    *
-   * NOTE: The Watchdog Mode Register (RSWDT_MR) can be written only once.  Only
-   * a processor reset resets it.  Writing the RSWDT_MR register reloads the
-   * timer with the newly programmed mode parameters.
+   * NOTE:
+   * The Watchdog Mode Register (RSWDT_MR) can be written only once.  Only
+   * a processor reset resets it.  Writing the RSWDT_MR register reloads
+   * the timer with the newly programmed mode parameters.
    */
 
   wdinfo("Entry\n");
@@ -332,8 +338,8 @@ static int sam_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   the atchdog timer or "petting the dog".
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -344,7 +350,8 @@ static int sam_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
   wdinfo("Entry\n");
 
-  /* Write RSWDT_CR_WDRSTT to the RSWDT CR register (along with the KEY value)
+  /* Write RSWDT_CR_WDRSTT to the RSWDT CR register
+   * (along with the KEY value)
    * will restart the watchdog timer.
    */
 
@@ -359,8 +366,8 @@ static int sam_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *   Get the current watchdog timer status
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of the
+ *             "lower-half"  driver state structure.
  *   stawtus - The location to return the watchdog status information.
  *
  * Returned Value:
@@ -416,8 +423,8 @@ static int sam_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *   Set a new timeout value (and reset the watchdog timer)
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of the
+ *             "lower-half" driver state structure.
  *   timeout - The new timeout value in millisecnds.
  *
  * Returned Value:
@@ -466,7 +473,7 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
    * timeout =  1000 * (reload + 1) / Fwwdg
    */
 
-  priv->timeout = (1000 * reload + RSWDT_FREQUENCY/2) / RSWDT_FREQUENCY;
+  priv->timeout = (1000 * reload + RSWDT_FREQUENCY / 2) / RSWDT_FREQUENCY;
 
   /* Remember the selected values */
 
@@ -477,9 +484,9 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Set the RSWDT_MR according to calculated value
    *
-   * NOTE: The Watchdog Mode Register (RSWDT_MR) can be written only once.  Only
-   * a processor reset resets it.  Writing the RSWDT_MR register reloads the
-   * timer with the newly programmed mode parameters.
+   * NOTE: The Watchdog Mode Register (RSWDT_MR) can be written only once.
+   * Only a processor reset resets it.  Writing the RSWDT_MR register
+   * reloads the timer with the newly programmed mode parameters.
    */
 
   regval = WDT_MR_WDV(reload) | RSWDT_MR_WDD_ALLONES;
@@ -533,8 +540,8 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *   behavior.
  *
  * Input Parameters:
- *   lower      - A pointer the publicly visible representation of the "lower-half"
- *                driver state structure.
+ *   lower      - A pointer the publicly visible representation of the
+ *                "lower-half" driver state structure.
  *   newhandler - The new watchdog expiration function pointer.  If this
  *                function pointer is NULL, then the reset-on-expiration
  *                behavior is restored,
@@ -567,7 +574,7 @@ static xcpt_t sam_capture(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Save the new handler */
 
-   priv->handler = handler;
+  priv->handler = handler;
 
   /* Are we attaching or detaching the handler? */
 
@@ -597,8 +604,8 @@ static xcpt_t sam_capture(FAR struct watchdog_lowerhalf_s *lower,
  *   are forwarded to the lower half driver through this method.
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *   cmd   - The ioctol command value
  *   arg   - The optional argument that accompanies the 'cmd'.  The
  *           interpretation of this argument depends on the particular
@@ -627,8 +634,8 @@ static int sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  * Name: sam_rswdt_initialize
  *
  * Description:
- *   Initialize the RSWDT watchdog time.  The watchdog timer is initialized and
- *   registered as 'devpath.  The initial state of the watchdog time is
+ *   Initialize the RSWDT watchdog time.  The watchdog timer is initialized
+ *   and registered as 'devpath.  The initial state of the watchdog time is
  *   disabled.
  *
  * Input Parameters:

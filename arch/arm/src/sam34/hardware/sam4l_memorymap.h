@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4l_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_MEMORYMAP_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_MEMORYMAP_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
 /* Global Memory Space */
 
@@ -45,12 +45,14 @@
 
 #define SAM_INTFLASH_BASE    0x00000000 /* 0x00000000-0x003fffff: Internal FLASH */
                                         /* 0x00400000-0x1fffffff: Reserved */
+
 /* Internal SRAM Space */
 
 #define SAM_INTSRAM0_BASE    0x20000000 /* 0x20000000-0x2007ffff: HRAMC0 (see chip.h) */
                                         /* 0x20008000-0x20ffffff: Reserved */
 #define SAM_INTSRAM1_BASE    0x21000000 /* 0x21000000-0x210007ff: HRAMC1 (see chip.h) */
                                         /* 0x21000800-0x21ffffff: Reserved */
+
 /* Peripherals Space */
 
 #define SAM_PERIPHA_BASE     0x40000000 /* 0x40000000-0x4009ffff: Peripheral Bridge A */
@@ -60,7 +62,9 @@
 #define SAM_PERIPHC_BASE     0x400e0000 /* 0x400e0000-0x400effff: Peripheral Bridge C */
 #define SAM_PERIPHD_BASE     0x400e0000 /* 0x400f0000-0x400fffff: Peripheral Bridge D */
                                         /* 0x40100000-0x5fffffff: Reserved */
+
 /* Peripheral Bridge A */
+
                                         /* 0x40000000-0x40003fff: Reserved */
 #define SAM_I2SC_BASE        0x40004000 /* 0x40004000-0x40007fff: I2S Controller */
 #define SAM_SPI0_BASE        0x40008000 /* 0x40008000-0x4000bfff: Serial Peripheral Interface */
@@ -93,6 +97,7 @@
 #define SAM_TWIM3_BASE       0x4007c000 /* 0x4007c000-0x4007ffff: Two-wire Master Interface 3 */
 #define SAM_LCDCA_BASE       0x40080000 /* 0x40080000-0x40083fff: LCD Controller A */
                                         /* 0x40084000-0x4009ffff: Reserved */
+
 /* Peripheral Bridge B */
 
 #define SAM_FLASHCALW_BASE   0x400a0000 /* 0x400a0000-0x400a03ff: FLASHCALW */
@@ -104,6 +109,7 @@
 #define SAM_USBC_BASE        0x400a5000 /* 0x400a5000-0x400a5fff: USB 2.0 Interface */
 #define SAM_PEVC_BASE        0x400a6000 /* 0x400a6000-0x400a63ff: Peripheral Event Controller */
                                         /* 0x400a6400-0x400affff: Reserved */
+
 /* Peripheral Bridge C */
 
 #define SAM_PM_BASE          0x400e0000 /* 0x400e0000-0x400e073f: Power Manager */
@@ -112,6 +118,7 @@
 #define SAM_FREQM_BASE       0x400e0c00 /* 0x400e0c00-0x400e0fff: Frequency Meter */
 #define SAM_GPIO_BASE        0x400e1000 /* 0x400e1000-0x400e17ff: GPIO */
                                         /* 0x400e1800-0x400effff: Reserved */
+
 /* Peripheral Bridge D */
 
 #define SAM_BPM_BASE         0x400f0000 /* 0x400f0000-0x400f03ff: Backup Power Manager */
@@ -121,6 +128,7 @@
 #define SAM_EIC_BASE         0x400f1000 /* 0x400f1000-0x400f13ff: External Interrupt Controller */
 #define SAM_PICOUART_BASE    0x400f1400 /* 0x400f1400-0x400f17ff: PICOUART */
                                         /* 0x400f1800-0x400fffff: Reserved */
+
 /* System Space */
 
 #define SAM_ITM_BASE         0xe0000000 /* 0xe0000000-0xe0000fff: ITM */
@@ -135,16 +143,16 @@
 #define SAM_ROMTAB_BASE      0xe00ff000 /* 0xe00ff000-0xe00fffff: ROM Table */
                                         /* 0xe0100000-0xffffffff: Reserved */
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_MEMORYMAP_H */

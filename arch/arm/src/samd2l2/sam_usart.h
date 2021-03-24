@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/sam_usart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_SAM_USART_H
 #define __ARCH_ARM_SRC_SAMD2L2_SAM_USART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -43,9 +43,10 @@
 #include "sam_config.h"
 #include "sam_port.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Pick the console USART configuration */
 
 #if defined(CONFIG_USART0_SERIAL_CONSOLE)
@@ -78,9 +79,10 @@
 #  define USART_TX_INTS    (USART_INT_DRE)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
+
 /* This structure describes the static configuration of a USART */
 
 struct sam_usart_config_s
@@ -102,25 +104,30 @@ struct sam_usart_config_s
   uintptr_t base;     /* SERCOM base address */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
-/************************************************************************************
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: sam_wait_synchronization
  *
  * Description:
- *   Return true is the SERCOM USART reports that it is synchronizing.  This inline
- *   function hides register differences between the SAMD20 and SAML21.
+ *   Return true is the SERCOM USART reports that it is synchronizing.
+ *   This inline function hides register differences between the SAMD20
+ *   and SAML21.
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #ifdef SAMD2L2_HAVE_USART
-static inline bool usart_syncbusy(const struct sam_usart_config_s * const config)
+static inline
+bool usart_syncbusy(const struct sam_usart_config_s * const config)
 {
 #if defined(CONFIG_ARCH_FAMILY_SAMD20)
-  return ((getreg16(config->base + SAM_USART_STATUS_OFFSET) & USART_STATUS_SYNCBUSY) != 0);
+  return ((getreg16(config->base + SAM_USART_STATUS_OFFSET) &
+           USART_STATUS_SYNCBUSY) != 0);
 #elif defined(CONFIG_ARCH_FAMILY_SAMD21) || defined(CONFIG_ARCH_FAMILY_SAML21)
-  return ((getreg16(config->base + SAM_USART_SYNCBUSY_OFFSET) & USART_SYNCBUSY_ALL) != 0);
+  return ((getreg16(config->base + SAM_USART_SYNCBUSY_OFFSET) &
+           USART_SYNCBUSY_ALL) != 0);
 #else
 #  error Unrecognized SAMD/L family
   return false;
@@ -128,9 +135,9 @@ static inline bool usart_syncbusy(const struct sam_usart_config_s * const config
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -169,9 +176,9 @@ EXTERN const struct sam_usart_config_s g_usart5config;
 
 EXTERN const struct sam_usart_config_s *g_usartconfig[SAMD2L2_NSERCOM];
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

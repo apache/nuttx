@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_emac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_EMAC_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_EMAC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/* These two EMAC implementations differ in naming and in register layout but are
- * functionally equivalent.  Here they are distinguished as 'A' and 'B'.  For now,
- * the 'A' and 'B' drivers are kept separate (mostly because the 'B' driver needs
- * to support two EMAC blocks.  But the 'B' driver should replace the 'A' driver
- * someday.
+/* These two EMAC implementations differ in naming and in register layout but
+ * are functionally equivalent.  Here they are distinguished as 'A' and 'B'.
+ * For now, the 'A' and 'B' drivers are kept separate (mostly because the 'B'
+ * driver needs to support two EMAC blocks.
+ * But the 'B' driver should replace the 'A' driver someday.
  */
 
 #if defined(CONFIG_SAMA5_EMACA)

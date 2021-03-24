@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_supc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_SUPC_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_SUPC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,10 +36,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* SUPC register offsets *********************************************************************/
+ ****************************************************************************/
+
+/* SUPC register offsets ****************************************************/
 
 #define SAM_SUPC_INTENCLR_OFFSET   0x0000  /* Interrupt enable clear */
 #define SAM_SUPC_INTENSET_OFFSET   0x0004  /* Interrupt enable set */
@@ -56,7 +57,7 @@
 #define SAM_SUPC_BKOUT_OFFSET      0x0024  /* Backup output control */
 #define SAM_SUPC_BKIN_OFFSET       0x0028  /* Backup input value */
 
-/* SUPC register addresses *******************************************************************/
+/* SUPC register addresses **************************************************/
 
 #define SAM_SUPC_INTENCLR          (SAM_SUPC_BASE+SAM_SUPC_INTENCLR_OFFSET)
 #define SAM_SUPC_INTENSET          (SAM_SUPC_BASE+SAM_SUPC_INTENSET_OFFSET)
@@ -70,10 +71,10 @@
 #define SAM_SUPC_BKOUT             (SAM_SUPC_BASE+SAM_SUPC_BKOUT_OFFSET)
 #define SAM_SUPC_BKIN              (SAM_SUPC_BASE+SAM_SUPC_BKIN_OFFSET)
 
-/* SUPC register bit definitions *************************************************************/
+/* SUPC register bit definitions ********************************************/
 
-/* Interrupt enable clear, Interrupt enable set, Interrupt flag status and clear, and
- * Status registers.
+/* Interrupt enable clear, Interrupt enable set, Interrupt flag status and
+ * clear, and Status registers.
  */
 
 #define SUPC_INT_BOD33RDY          (1 << 0)  /* Bit 0:  BOD33 ready interrupt */
@@ -99,6 +100,7 @@
 #  define SUPC_BOD33_ACTION_RESET  (1 << SUPC_BOD33_ACTION_SHIFT) /* BOD33 generates reset */
 #  define SUPC_BOD33_ACTION_INTR   (2 << SUPC_BOD33_ACTION_SHIFT) /* BOD33 generates interrupt */
 #  define SUPC_BOD33_ACTION_BKUP   (3 << SUPC_BOD33_ACTION_SHIFT) /* BOD33 backup sleep mode */
+
 #define SUPC_BOD33_STDBYCFG        (1 << 5)  /* Bit 5:  BOD33 configuration in standby sleep mode */
 #define SUPC_BOD33_RUNSTDBY        (1 << 6)  /* Bit 6:  Run in standby */
 #define SUPC_BOD33_RUNBKUP         (1 << 7)  /* Bit 7:  BOD33 configuration in backup sleep */
@@ -123,6 +125,7 @@
 #  define SUPC_BOD33_PSEL_DIV16K   (13 << SUPC_BOD33_PSEL_SHIFT) /* Divide clock by 16384 */
 #  define SUPC_BOD33_PSEL_DIV32K   (14 << SUPC_BOD33_PSEL_SHIFT) /* Divide clock by 32768 */
 #  define SUPC_BOD33_PSEL_DIV64K   (15 << SUPC_BOD33_PSEL_SHIFT) /* Divide clock by 65536 */
+
 #define SUPC_BOD33_LEVEL_SHIFT     (16)      /* Bits 16-21: BOD33 threshold level VDD */
 #define SUPC_BOD33_LEVEL_MASK      (0x3f << SUPC_BOD33_LEVEL_SHIFT)
 #  define SUPC_BOD33_LEVEL(n)      ((uint32_t)(n) << SUPC_BOD33_LEVEL_SHIFT)
@@ -140,6 +143,7 @@
 #  define SUPC_BOD12_ACTION_NONE   (0 << SUPC_BOD12_ACTION_SHIFT) /* No action */
 #  define SUPC_BOD12_ACTION_RESET  (1 << SUPC_BOD12_ACTION_SHIFT) /* BOD12 generates reset */
 #  define SUPC_BOD12_ACTION_INTR   (2 << SUPC_BOD12_ACTION_SHIFT) /* BOD12 generates interrupt */
+
 #define SUPC_BOD12_STDBYCFG        (1 << 5)  /* Bit 5:  BOD12 configuration in standby sleep mode */
 #define SUPC_BOD12_RUNSTDBY        (1 << 6)  /* Bit 6:  Run in standby */
 #define SUPC_BOD12_ACTCFG          (1 << 8)  /* Bit 8:  BOD12 configuration in active sleep */
@@ -162,6 +166,7 @@
 #  define SUPC_BOD12_PSEL_DIV16K   (13 << SUPC_BOD12_PSEL_SHIFT) /* Divide clock by 16384 */
 #  define SUPC_BOD12_PSEL_DIV32K   (14 << SUPC_BOD12_PSEL_SHIFT) /* Divide clock by 32768 */
 #  define SUPC_BOD12_PSEL_DIV64K   (15 << SUPC_BOD12_PSEL_SHIFT) /* Divide clock by 65536 */
+
 #define SUPC_BOD12_LEVEL_SHIFT     (16)      /* Bits 16-21: BOD12 threshold level */
 #define SUPC_BOD12_LEVEL_MASK      (0x3f << SUPC_BOD12_LEVEL_SHIFT)
 #  define SUPC_BOD12_LEVEL(n)      ((uint32_t)(n) << SUPC_BOD12_LEVEL_SHIFT)
@@ -196,7 +201,6 @@
 #  define SUPC_VREF_SEL_2V4        (6 << SUPC_VREF_SEL_SHIFT) /* 2.4V voltage reference typical value */
 #  define SUPC_VREF_SEL_2V5        (7 << SUPC_VREF_SEL_SHIFT) /* 5.5V voltage reference typical value */
 
-
 /* Battery backup power switch control */
 
 #define SUPC_BBPS_CONFIG_SHIFT     (0)        /* Bits 0-1: Battery backup power switch configuration */
@@ -205,6 +209,7 @@
 #  define SUPC_BBPS_CONFIG_APWS    (1 << SUPC_BBPS_CONFIG_SHIFT) /* Automatic power switch */
 #  define SUPC_BBPS_CONFIG_FORCED  (2 << SUPC_BBPS_CONFIG_SHIFT) /* Backup domain from batter backup power */
 #  define SUPC_BBPS_CONFIG_BOD33   (3 << SUPC_BBPS_CONFIG_SHIFT) /* Power switch handled by BOD33 */
+
 #define SUPC_BBPS_WAKEEN           (1 << 2)  /* Bit 2: Wake enable */
 #define SUPC_BBPS_PSOKEN           (1 << 3)  /* Bit 3: Power supply OK enable */
 
@@ -233,17 +238,17 @@
 #  define SUPC_BKIN_OUT0           (2 << SUPC_BKIN_SHIFT) /* Input value of OUT[0] pin */
 #  define SUPC_BKIN_OUT1           (4 << SUPC_BKIN_SHIFT) /* Input value of OUT[1] pin */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_SUPC_H */

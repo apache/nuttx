@@ -81,10 +81,10 @@ const struct section_mapping_s g_section_mapping[] =
    * If we are executing out of ISRAM, then the SAMA5 primary bootloader
    * probably copied us into ISRAM and set the AXI REMAP0 bit for us.
    *
-   * If we are executing from external SDRAM, then a secondary bootloader must
-   * have loaded us into SDRAM.  In this case, simply set the VBAR register
-   * to the address of the vector table (not necessary at the beginning
-   * or SDRAM).
+   * If we are executing from external SDRAM, then a secondary bootloader
+   * must have loaded us into SDRAM.  In this case, simply set the VBAR
+   * register to the address of the vector table (not necessary at the
+   * beginning or SDRAM).
    */
 
 #ifdef CONFIG_ARCH_LOWVECTORS
@@ -142,18 +142,19 @@ const struct section_mapping_s g_section_mapping[] =
 #endif
 
   /* SAMA5 External SDRAM Memory.  The SDRAM is not usable until it has been
-   * initialized.  If we are running out of SDRAM now, we can assume that some
-   * second level boot loader has properly configured SRAM for us.  In that
-   * case, we set the MMU flags for the final, fully cache-able state.
+   * initialized.  If we are running out of SDRAM now, we can assume that
+   * some second level boot loader has properly configured SRAM for us.
+   * In that case, we set the MMU flags for the final, fully cache-able
+   * state.
    *
    * Also, in this case, the mapping for the SDRAM was done in arm_head.S and
    * need not be repeated here.
    *
-   * If we are running from ISRAM or NOR flash, then we will need to configure
-   * the SDRAM ourselves.  In this case, we set the MMU flags to the strongly
-   * ordered, non-cacheable state.  We need this direct access to SDRAM in
-   * order to configure it.  Once SDRAM has been initialized, it will be re-
-   * configured in its final state.
+   * If we are running from ISRAM or NOR flash, then we will need to
+   * configure the SDRAM ourselves.  In this case, we set the MMU flags to
+   * the strongly ordered, non-cacheable state.  We need this direct access
+   * to SDRAM in order to configure it.  Once SDRAM has been initialized, it
+   * will be re- configured in its final state.
    */
 
 #ifdef NEED_SDRAM_MAPPING
@@ -239,9 +240,9 @@ const struct section_mapping_s g_section_mapping[] =
   /* LCDC Framebuffer.  This entry reprograms a part of one of the above
    * regions, making it non-cacheable and non-buffereable.
    *
-   * If SDRAM will be reconfigured, then we will defer setup of the framebuffer
-   * until after the SDRAM remapping since the framebuffer probablyresides in
-   * SDRAM.
+   * If SDRAM will be reconfigured, then we will defer setup of the
+   * framebuffer until after the SDRAM remapping since the framebuffer
+   * probablyresides in SDRAM.
    */
 
 #if defined(CONFIG_SAMA5_LCDC) && !defined(NEED_SDRAM_REMAPPING)
@@ -299,3 +300,7 @@ const struct section_mapping_s g_operational_mapping[] =
 const size_t g_num_opmappings = NREMAPPINGS;
 
 #endif /* NEED_SDRAM_REMAPPING */
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

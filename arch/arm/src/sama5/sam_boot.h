@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/sam_boot.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,31 +16,31 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_SAM_BOOT_H
 #define __ARCH_ARM_SRC_SAMA5_SAM_BOOT_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_boardinitialize
  *
  * Description:
- *   All SAMA5 architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after clocking and memory have
- *   been configured but before caches have been enabled and before any devices have
- *   been initialized.
+ *   All SAMA5 architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after
+ *   clocking and memory have been configured but before caches have been
+ *   enabled and before any devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_boardinitialize(void);
 

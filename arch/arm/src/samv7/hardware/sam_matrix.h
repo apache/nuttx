@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_matrix.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_MATRIX_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_MATRIX_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* MATRIX register offsets **************************************************************/
+/* MATRIX register offsets **************************************************/
 
 #define SAM_MATRIX_MCFG_OFFSET(n)        ((n)<<2)
 #  define SAM_MATRIX_MCFG0_OFFSET        0x0000 /* Master Configuration Register 0 */
@@ -94,7 +94,7 @@
 #define SAM_MATRIX_WPSR_OFFSET           0x01e8 /* Write Protect Status Register */
                                                 /* 0x0110-0x01fc: Reserved */
 
-/* MATRIX register addresses ************************************************************/
+/* MATRIX register addresses ************************************************/
 
 #define SAM_MATRIX_MCFG(n))              (SAM_MATRIX_BASE+SAM_MATRIX_MCFG_OFFSET(n))
 #  define SAM_MATRIX_MCFG0               (SAM_MATRIX_BASE+SAM_MATRIX_MCFG0_OFFSET)
@@ -150,7 +150,8 @@
 #define SAM_MATRIX_WPMR                  (SAM_MATRIX_BASE+SAM_MATRIX_WPMR_OFFSET)
 #define SAM_MATRIX_WPSR                  (SAM_MATRIX_BASE+SAM_MATRIX_WPSR_OFFSET)
 
-/* MATRIX register bit definitions ******************************************************/
+/* MATRIX register bit definitions ******************************************/
+
 /* Master Configuration Registers */
 
 #define MATRIX_MCFG_ULBT_SHIFT           (0)       /* Bits 0-2:  Undefined Length Burst Type */
@@ -211,6 +212,7 @@
 
 #define MATRIX_PRBS_MPR_SHIFT(x)         (((n)-8) << 2) /* n = 8-11 */
 #define MATRIX_PRBS_MPR_MASK(x)          (3 << MATRIX_PRBS_MPR_SHIFT(x))
+
 #  define MATRIX_PRBS_M8PR_SHIFT         (0)       /* Bits 0-1:  Master 8 Priority */
 #  define MATRIX_PRBS_M8PR_MASK          (3 << MATRIX_PRBS_M8PR_SHIFT)
 #    define MATRIX_PRBS_M8PR(n)          ((uint32_t)(n) << MATRIX_PRBS_M8PR_SHIFT)
@@ -227,6 +229,7 @@
 /* Master Remap Control Register */
 
 #define MATRIX_MRCR_RCB(n)               (1 << (n)) /* n=0-11 */
+
 #  define MATRIX_MRCR_RCB0               (1 << 0)  /* Bit 0:  Remap Command Bit for AHB Master 0 */
 #  define MATRIX_MRCR_RCB1               (1 << 1)  /* Bit 1:  Remap Command Bit for AHB Master 1 */
 #  define MATRIX_MRCR_RCB2               (1 << 2)  /* Bit 2:  Remap Command Bit for AHB Master 2 */
@@ -253,6 +256,7 @@
 #  define MATRIX_CCFG_SYSIO_SYSIO6       (1 << 6)  /* Bit 6:  PB6 or TMS/SWDIO Assignment */
 #  define MATRIX_CCFG_SYSIO_SYSIO7       (1 << 7)  /* Bit 7:  PB7 or TCK/SWCLK Assignment */
 #  define MATRIX_CCFG_SYSIO_SYSIO12      (1 << 12) /* Bit 12: PB12 or ERASE Assignment */
+
 #define MATRIX_CCFG_CAN1DMABA_MASK       0xffff0000 /* Bits 16-31: CAN1 DMA Base Address */
 
 /* SMC Chip Select NAND Flash Assignment Register */
@@ -277,7 +281,7 @@
 #define MATRIX_WPSR_WPVSRC_SHIFT         (8)       /* Bits 8-23:  Write Protect Violation Source */
 #define MATRIX_WPSR_WPVSRC_MASK          (0xffff << MATRIX_WPSR_WPVSRC_SHIFT)
 
-/* Masters ******************************************************************************/
+/* Masters ******************************************************************/
 
 #define MATRIX_MSTR_CORTEXM7_1           0         /* Cortex-M7 */
 #define MATRIX_MSTR_CORTEXM7_2           1         /* Cortex-M7 */
@@ -292,7 +296,7 @@
 #define MATRIX_MSTR_CAN0                 10        /* CAN0 DMA */
 #define MATRIX_MSTR_CAN1                 11        /* CAN1 DMA */
 
-/* Slaves *******************************************************************************/
+/* Slaves *******************************************************************/
 
 #define MATRIX_SLAVE_ISRAM_1             0         /* Internal SRAM */
 #define MATRIX_SLAVE_ISRAM_2             1         /* Internal SRAM */
@@ -304,16 +308,16 @@
 #define MATRIX_SLAVE_PB                  7         /* Peripheral Bridge */
 #define MATRIX_SLAVE_AHB                 8         /* AHB Slave */
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_MATRIX_H */

@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_eic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Microchip SAMD21 datasheet"
@@ -25,9 +25,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_EIC_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_EIC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -35,10 +35,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* EIC register offsets *********************************************************************/
+ ****************************************************************************/
+
+/* EIC register offsets *****************************************************/
 
 #define SAM_EIC_CTRLA_OFFSET         0x0000  /* Control A register */
 #define SAM_EIC_STATUS_OFFSET        0x0001  /* Status register */
@@ -53,7 +54,7 @@
 #define SAM_EIC_CONFIG1_OFFSET       0x001c  /* Configuration 1 register */
 #define SAM_EIC_CONFIG2_OFFSET       0x0020  /* Configuration 2 register */
 
-/* EIC register addresses *******************************************************************/
+/* EIC register addresses ***************************************************/
 
 #define SAM_EIC_CTRLA                (SAM_EIC_BASE+SAM_EIC_CTRLA_OFFSET)
 #define SAM_EIC_STATUS               (SAM_EIC_BASE+SAM_EIC_STATUS_OFFSET)
@@ -68,7 +69,7 @@
 #define SAM_EIC_CONFIG1              (SAM_EIC_BASE+SAM_EIC_CONFIG1_OFFSET)
 #define SAM_EIC_CONFIG2              (SAM_EIC_BASE+SAM_EIC_CONFIG2_OFFSET)
 
-/* EIC register bit definitions *************************************************************/
+/* EIC register bit definitions *********************************************/
 
 /* Control A register */
 
@@ -89,14 +90,16 @@
 #  define EIC_NMICTRL_NMISENSE_BOTH (3 << EIC_NVMICTRL_NMISENSE_SHIFT) /* Both edge detection */
 #  define EIC_NMICTRL_NMISENSE_HIGH (4 << EIC_NVMICTRL_NMISENSE_SHIFT) /* High level detection */
 #  define EIC_NMICTRL_NMISENSE_LOW  (5 << EIC_NVMICTRL_NMISENSE_SHIFT) /* Low level detection */
+
 #define EIC_NMICTRL_NMIFLTEN        (1 << 3)  /* Bit 3: Non-maskable interrupt filter enable */
 
 /* Non-maskable interrupt flas status and clear register */
 
 #define EIC_NMIFLAG_NMI              (1 << 0)  /* Non-maskable interrupt */
 
-/* Event control, Interrupt enable clear, interrupt enable set register, interrupt flag
- * status and clear, and external interrupt wakeup registers.
+/* Event control, Interrupt enable clear, interrupt enable set register,
+ * interrupt flag status and clear, and external interrupt wakeup
+ * registers.
  */
 
 #define EIC_EXTINT_SHIFT             (0)       /* Bits 0-15: External interrupt n */
@@ -159,17 +162,17 @@
 #  define EIC_CONFIG2_SENSE_HIGH(n)  (4 << EIC_CONFIG2_SENSE_SHIFT(n)) /* High level detection */
 #  define EIC_CONFIG2_SENSE_LOW(n)   (5 << EIC_CONFIG2_SENSE_SHIFT(n)) /* Low level detection */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_EIC_H */

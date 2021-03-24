@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_supc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_SUPC_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_SUPC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* SUPC register offsets *********************************************************************/
+ ****************************************************************************/
+
+/* SUPC register offsets ****************************************************/
 
 #define SAM_SUPC_INTENCLR_OFFSET   0x0000  /* Interrupt enable clear */
 #define SAM_SUPC_INTENSET_OFFSET   0x0004  /* Interrupt enable set */
@@ -46,7 +47,7 @@
 #define SAM_SUPC_BKOUT_OFFSET      0x0024  /* Backup output control */
 #define SAM_SUPC_BKIN_OFFSET       0x0028  /* Backup input value */
 
-/* SUPC register addresses *******************************************************************/
+/* SUPC register addresses **************************************************/
 
 #define SAM_SUPC_INTENCLR          (SAM_SUPC_BASE + SAM_SUPC_INTENCLR_OFFSET)
 #define SAM_SUPC_INTENSET          (SAM_SUPC_BASE + SAM_SUPC_INTENSET_OFFSET)
@@ -60,10 +61,10 @@
 #define SAM_SUPC_BKOUT             (SAM_SUPC_BASE + SAM_SUPC_BKOUT_OFFSET)
 #define SAM_SUPC_BKIN              (SAM_SUPC_BASE + SAM_SUPC_BKIN_OFFSET)
 
-/* SUPC register bit definitions *************************************************************/
+/* SUPC register bit definitions ********************************************/
 
-/* Interrupt enable clear, Interrupt enable set, Interrupt flag status and clear, and
- * Status registers.
+/* Interrupt enable clear, Interrupt enable set, Interrupt flag status and
+ * clear, and Status registers.
  */
 
 #define SUPC_INT_BOD33RDY          (1 << 0)  /* Bit 0:  BOD33 ready interrupt */
@@ -87,6 +88,7 @@
 #  define SUPC_BOD33_ACTION_RESET  (1 << SUPC_BOD33_ACTION_SHIFT) /* BOD33 generates reset */
 #  define SUPC_BOD33_ACTION_INTR   (2 << SUPC_BOD33_ACTION_SHIFT) /* BOD33 generates interrupt */
 #  define SUPC_BOD33_ACTION_BKUP   (3 << SUPC_BOD33_ACTION_SHIFT) /* BOD33 backup sleep mode */
+
 #define SUPC_BOD33_STDBYCFG        (1 << 4)  /* Bit 4:  BOD33 configuration in standby sleep mode */
 #define SUPC_BOD33_RUNSTDBY        (1 << 5)  /* Bit 5:  Run in standby */
 #define SUPC_BOD33_RUNHIB          (1 << 6)  /* Bit 6:  BOD33 configuration in hibernate sleep mode */
@@ -106,6 +108,7 @@
 #  define SUPC_BOD33_PSEL_DIV64    (5 << SUPC_BOD33_PSEL_SHIFT)  /* Divide clock by 64 */
 #  define SUPC_BOD33_PSEL_DIV128   (6 << SUPC_BOD33_PSEL_SHIFT)  /* Divide clock by 128 */
 #  define SUPC_BOD33_PSEL_DIV256   (7 << SUPC_BOD33_PSEL_SHIFT)  /* Divide clock by 256 */
+
 #define SUPC_BOD33_LEVEL_SHIFT     (16)      /* Bits 16-23: BOD33 threshold level VDD */
 #define SUPC_BOD33_LEVEL_MASK      (0xff << SUPC_BOD33_LEVEL_SHIFT)
 #  define SUPC_BOD33_LEVEL(n)      ((uint32_t)(n) << SUPC_BOD33_LEVEL_SHIFT)
@@ -123,6 +126,7 @@
 #  define SUPC_BOD12_ACTION_NONE   (0 << SUPC_BOD12_ACTION_SHIFT) /* No action */
 #  define SUPC_BOD12_ACTION_RESET  (1 << SUPC_BOD12_ACTION_SHIFT) /* BOD12 generates reset */
 #  define SUPC_BOD12_ACTION_INTR   (2 << SUPC_BOD12_ACTION_SHIFT) /* BOD12 generates interrupt */
+
 #define SUPC_BOD12_STDBYCFG        (1 << 5)  /* Bit 5:  BOD12 configuration in standby sleep mode */
 #define SUPC_BOD12_RUNSTDBY        (1 << 6)  /* Bit 6:  Run in standby */
 #define SUPC_BOD12_ACTCFG          (1 << 8)  /* Bit 8:  BOD12 configuration in active sleep */
@@ -201,16 +205,16 @@
 #  define SUPC_BKIN_OUT0           (1 << SUPC_BKIN_SHIFT) /* Input value of OUT[0] pin */
 #  define SUPC_BKIN_OUT1           (2 << SUPC_BKIN_SHIFT) /* Input value of OUT[1] pin */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_SUPC_H */

@@ -47,9 +47,9 @@
  * prescaler output (i.e., the MDIV output divider is not applied so that
  * the driving frequency is the same as the CPU frequency).
  *
- * The SysTick calibration value is fixed to 37500 which allows the generation
- * of a time base of 1 ms with SysTick clock to the maximum frequency on
- * MCK divided by 8. (?)
+ * The SysTick calibration value is fixed to 37500 which allows the
+ * generation of a time base of 1 ms with SysTick clock to the maximum
+ * frequency on MCK divided by 8. (?)
  */
 
 #define SAM_SYSTICK_CLOCK  BOARD_CPU_FREQUENCY

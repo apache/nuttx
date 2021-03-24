@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_ac.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -35,14 +35,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_AC_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_AC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,10 +50,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* AC register offsets **********************************************************************/
+ ****************************************************************************/
+
+/* AC register offsets ******************************************************/
 
 #define SAM_AC_CTRLA_OFFSET          0x0000 /* Control A Register */
 #define SAM_AC_CTRLB_OFFSET          0x0001 /* Control B Register */
@@ -70,7 +71,7 @@
 #define SAM_AC_SCALER0_OFFSET        0x0020 /* Scaler 0 Register */
 #define SAM_AC_SCALER1_OFFSET        0x0021 /* Scaler 1 Register */
 
-/* AC register addresses *******************************************************************/
+/* AC register addresses ****************************************************/
 
 #define SAM_AC_CTRLA                 (SAM_AC_BASE+SAM_AC_CTRLA_OFFSET)
 #define SAM_AC_CTRLB                 (SAM_AC_BASE+SAM_AC_CTRLB_OFFSET)
@@ -87,7 +88,7 @@
 #define SAM_AC_SCALER0               (SAM_AC_BASE+SAM_AC_SCALER0_OFFSET)
 #define SAM_AC_SCALER1               (SAM_AC_BASE+SAM_AC_SCALER1_OFFSET)
 
-/* AC register bit definitions ************************************************************/
+/* AC register bit definitions **********************************************/
 
 /* Control A Register */
 
@@ -109,8 +110,8 @@
 #define AC_EVCTRL_COMPEI0            (1 << 8)  /* Bit 8:  Comparator 0 Event Input enable */
 #define AC_EVCTRL_COMPEI1            (1 << 9)  /* Bit 9:  Comparator 1 Event Input enable */
 
-/* Common bit definitions for Interrupt Enable Clear Register, Interrupt Enable Set
- * Register, and Interrupt Flag Status and Clear Register
+/* Common bit definitions for Interrupt Enable Clear Register, Interrupt
+ * Enable Set Register, and Interrupt Flag Status and Clear Register
  */
 
 #define AC_INT_COMP0                 (1 << 0)  /* Bit 0:  Comparator 0 */
@@ -193,17 +194,17 @@
 
 #define AC_COMPCTRL_SCALER_MASK      (0x3f)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_AC_H */

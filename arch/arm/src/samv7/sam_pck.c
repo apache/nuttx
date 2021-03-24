@@ -76,7 +76,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
    * MAINCK,or SCK are supported here.
    */
 
-   switch (clksrc)
+  switch (clksrc)
     {
     case PCKSRC_MCK: /* Source clock = MCK or PLLACK */
       {
@@ -117,7 +117,9 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
       return 0;
     }
 
-  /* Programmable Clock frequency is selected clock frequency divided by PRES + 1 */
+  /* Programmable Clock frequency is selected clock frequency divided by
+   * PRES + 1
+   */
 
   pres = clkin / frequency;
   if (pres < 1)
@@ -320,7 +322,9 @@ bool sam_pck_isenabled(enum pckid_e pckid)
 {
   uint32_t  mask;
 
-  /* Select the bit in the PMC_SCSR corresponding to the programmable clock. */
+  /* Select the bit in the PMC_SCSR corresponding to the programmable
+   * clock.
+   */
 
   mask = PMC_PCK(pckid);
 

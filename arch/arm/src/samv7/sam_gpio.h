@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/sam_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_SAM_GPIO_H
 #define __ARCH_ARM_SRC_SAMV7_SAM_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -33,11 +33,11 @@
 
 #include <arch/samv7/chip.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Bit-encoded input to sam_configgpio() ********************************************/
+/* Bit-encoded input to sam_configgpio() ************************************/
 
 /* 32-bit Encoding:
  *
@@ -93,7 +93,8 @@
 #  define GPIO_INT_FALLING         (_GIO_INT_AIM | _GPIO_INT_EDGE  | _GPIO_INT_FL)
 #  define GPIO_INT_BOTHEDGES       (0)
 
-/* If the pin is an GPIO output, then this identifies the initial output value:
+/* If the pin is an GPIO output, then this identifies the initial output
+ * value:
  *
  *   .... .... .... .... ...V .... .... ....
  */
@@ -101,14 +102,15 @@
 #define GPIO_OUTPUT_SET            (1 << 12)   /* Bit 12: Initial value of output */
 #define GPIO_OUTPUT_CLEAR          (0)
 
-/* If the pin is an GPIO output, then this identifies the output drive strength:
+/* If the pin is an GPIO output, then this identifies the output drive
+ * strength:
  *
  *   .... .... .... .... .... D... .... ....
  */
 
 #define GPIO_OUTPUT_DRIVE          (1 << 11)   /* Bit 11: Initial value of output */
 #  define GPIO_OUTPUT_HIGH_DRIVE   (1 << 11)
-  #define GPIO_OUTPUT_LOW_DRIVE    (0)
+#  define GPIO_OUTPUT_LOW_DRIVE    (0)
 
 /* This identifies the GPIO port:
  *
@@ -163,9 +165,9 @@
 #define GPIO_PIN30                 (30 << GPIO_PIN_SHIFT)
 #define GPIO_PIN31                 (31 << GPIO_PIN_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -173,9 +175,9 @@
 
 typedef uint32_t gpio_pinset_t;
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -188,9 +190,9 @@ extern "C"
 
 EXTERN const uintptr_t g_portbase[SAMV7_NPIO];
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: sam_gpio_base
@@ -203,7 +205,7 @@ EXTERN const uintptr_t g_portbase[SAMV7_NPIO];
 static inline uintptr_t sam_gpio_base(gpio_pinset_t cfgset)
 {
   int port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  DEBUGASSERT(port <SAMV7_NPIO);
+  DEBUGASSERT(port < SAMV7_NPIO);
   return g_portbase[port];
 }
 
@@ -246,11 +248,11 @@ static inline int sam_gpio_pinmask(gpio_pinset_t cfgset)
   return 1 << ((cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Function:  sam_gpioinit
  *
  * Description:
@@ -259,7 +261,7 @@ static inline int sam_gpio_pinmask(gpio_pinset_t cfgset)
  *
  *   Typically called from sam_start().
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_SAMV7_ERASE_ENABLE) || \
     !defined(CONFIG_SAMV7_JTAG_FULL_ENABLE)
@@ -268,13 +270,14 @@ void sam_gpioinit(void);
 #  define sam_gpioinit()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_gpioirqinitialize
  *
  * Description:
- *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_GPIO_IRQ
 void sam_gpioirqinitialize(void);
@@ -282,43 +285,43 @@ void sam_gpioirqinitialize(void);
 #  define sam_gpioirqinitialize()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int sam_configgpio(gpio_pinset_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_gpiowrite(gpio_pinset_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool sam_gpioread(gpio_pinset_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_gpioirq
  *
  * Description:
  *   Configure an interrupt for the specified GPIO pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_GPIO_IRQ
 void sam_gpioirq(gpio_pinset_t pinset);
@@ -326,13 +329,13 @@ void sam_gpioirq(gpio_pinset_t pinset);
 #  define sam_gpioirq(pinset)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_GPIO_IRQ
 void sam_gpioirqenable(int irq);
@@ -340,13 +343,13 @@ void sam_gpioirqenable(int irq);
 #  define sam_gpioirqenable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_GPIO_IRQ
 void sam_gpioirqdisable(int irq);
@@ -354,13 +357,14 @@ void sam_gpioirqdisable(int irq);
 #  define sam_gpioirqdisable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function:  sam_dumpgpio
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Dump all GPIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int sam_dumpgpio(uint32_t pinset, const char *msg);

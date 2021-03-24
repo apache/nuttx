@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/sam_dmac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_SAM_DMAC_H
 #define __ARCH_ARM_SRC_SAM34_SAM_DMAC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,15 +31,16 @@
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* DMA ******************************************************************************/
+/* DMA **********************************************************************/
 
-/* Flags used to characterize the desired DMA channel.  The naming convention is that
- * one side is the peripheral and the other is memory (however, the interface could still
- * be used if, for example, both sides were memory although the naming would be awkward)
+/* Flags used to characterize the desired DMA channel.  The naming convention
+ * is that one side is the peripheral and the other is memory (however, the
+ * interface could still be used if, for example, both sides were memory
+ * although the naming would be awkward)
  */
 
 /* Unchange-able properties of the channel */
@@ -73,8 +74,10 @@
 #  define DMACH_FLAG_PERIPHWIDTH_8BITS        (0 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 8 bits */
 #  define DMACH_FLAG_PERIPHWIDTH_16BITS       (1 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 16 bits */
 #  define DMACH_FLAG_PERIPHWIDTH_32BITS       (2 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 32 bits */
+
 #define DMACH_FLAG_PERIPHINCREMENT            (1 << 12) /* Bit 12: Autoincrement peripheral address */
 #define DMACH_FLAG_PERIPHCHUNKSIZE            (1 << 13) /* Bit 13: Peripheral chunk size */
+
 #  define DMACH_FLAG_PERIPHCHUNKSIZE_1        (0)                        /* Peripheral chunksize = 1 */
 #  define DMACH_FLAG_PERIPHCHUNKSIZE_4        DMACH_FLAG_PERIPHCHUNKSIZE /* Peripheral chunksize = 4 */
 
@@ -89,20 +92,25 @@
 #  define DMACH_FLAG_MEMWIDTH_8BITS           (0 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 8 bits */
 #  define DMACH_FLAG_MEMWIDTH_16BITS          (1 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 16 bits */
 #  define DMACH_FLAG_MEMWIDTH_32BITS          (2 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 32 bits */
+
 #define DMACH_FLAG_MEMINCREMENT               (1 << 22) /* Bit 22: Autoincrement memory address */
 #define DMACH_FLAG_MEMCHUNKSIZE               (1 << 23) /* Bit 23: Memory chunk size */
+
 #  define DMACH_FLAG_MEMCHUNKSIZE_1           (0)                     /* Memory chunksize = 1 */
 #  define DMACH_FLAG_MEMCHUNKSIZE_4           DMACH_FLAG_MEMCHUNKSIZE /* Memory chunksize = 4 */
-                                                        /* Bits 24-31: Not used */
 
-/************************************************************************************
+                                                /* Bits 24-31: Not used */
+
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 typedef FAR void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 
-/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
+/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA
+ * is selected
+ */
 
 #ifdef CONFIG_DEBUG_DMA_INFO
 struct sam_dmaregs_s
@@ -128,15 +136,15 @@ struct sam_dmaregs_s
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -147,9 +155,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: sam_dmachannel
@@ -249,8 +257,8 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
  *
  * Description:
  *   Cancel the DMA.  After sam_dmastop() is called, the DMA channel is
- *   reset and sam_dmarx/txsetup() must be called before sam_dmastart() can be
- *   called again
+ *   reset and sam_dmarx/txsetup() must be called before sam_dmastart() can
+ *   be called again
  *
  ****************************************************************************/
 

@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_matrix.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_MATRIX_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_MATRIX_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* MATRIX register offsets **************************************************************/
+/* MATRIX register offsets **************************************************/
 
 #define SAM_MATRIX_MCFG_OFFSET(n)        ((n)<<2)
 #define SAM_MATRIX_MCFG0_OFFSET          0x0000 /* Master Configuration Register 0 */
@@ -110,7 +110,7 @@
 #define SAM_MATRIX_WPSR_OFFSET           0x01e8 /* Write Protect Status Register */
                                                 /* 0x0110 - 0x01fc: Reserved */
 
-/* MATRIX register addresses ************************************************************/
+/* MATRIX register addresses ************************************************/
 
 #define SAM_MATRIX_MCFG(n)               (SAM_MATRIX_BASE+SAM_MATRIX_MCFG_OFFSET(n))
 #define SAM_MATRIX_MCFG0                 (SAM_MATRIX_BASE+SAM_MATRIX_MCFG0_OFFSET)
@@ -183,7 +183,7 @@
 #define SAM_MATRIX_WPMR                  (SAM_MATRIX_BASE+SAM_MATRIX_WPMR_OFFSET)
 #define SAM_MATRIX_WPSR                  (SAM_MATRIX_BASE+SAM_MATRIX_WPSR_OFFSET)
 
-/* MATRIX register bit definitions ******************************************************/
+/* MATRIX register bit definitions ******************************************/
 
 /* Master Configuration Registers */
 
@@ -342,12 +342,12 @@
 #define MATRIX_WPSR_WPVSRC_SHIFT         (8)       /* Bits 8-23:  Write Protect Violation Source */
 #define MATRIX_WPSR_WPVSRC_MASK          (0xffff << MATRIX_WPSR_WPVSRC_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_MATRIX_H */

@@ -562,7 +562,9 @@ static struct sam_tc_s g_tc678;
 static struct sam_tc_s g_tc901;
 #endif
 
-/* TC frequency data.  This table provides the frequency for each selection of TCCLK */
+/* TC frequency data.  This table provides the frequency for each
+ * selection of TCCLK
+ */
 
 #define TC_NDIVIDERS   3
 #define TC_NDIVOPTIONS 4

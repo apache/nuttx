@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_SPI_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_SPI_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -37,10 +37,11 @@
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* SPI register offsets *********************************************************************/
+ ****************************************************************************/
+
+/* SPI register offsets *****************************************************/
 
 #define SAM_SPI_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_SPI_CTRLB_OFFSET       0x0004  /* Control B register */
@@ -66,7 +67,7 @@
 #  define SAM_SPI_DBGCTRL_OFFSET   0x0030  /* Debug control register */
 #endif
 
-/* SPI register addresses *******************************************************************/
+/* SPI register addresses ***************************************************/
 
 #define SAM_SPI0_CTRLA             (SAM_SERCOM0_BASE+SAM_SPI_CTRLA_OFFSET)
 #define SAM_SPI0_CTRLB             (SAM_SERCOM0_BASE+SAM_SPI_CTRLB_OFFSET)
@@ -164,7 +165,7 @@
 #define SAM_SPI5_DATA              (SAM_SERCOM5_BASE+SAM_SPI_DATA_OFFSET)
 #define SAM_SPI4_DBGCTRL           (SAM_SERCOM4_BASE+SAM_SPI_DBGCTRL_OFFSET)
 
-/* SPI register bit definitions *************************************************************/
+/* SPI register bit definitions *********************************************/
 
 /* Control A register */
 
@@ -174,24 +175,29 @@
 #define SPI_CTRLA_MODE_MASK        (7 << SPI_CTRLA_MODE_SHIFT)
 #  define SPI_CTRLA_MODE_SLAVE     (2 << SPI_CTRLA_MODE_SHIFT) /* SPI slave operation */
 #  define SPI_CTRLA_MODE_MASTER    (3 << SPI_CTRLA_MODE_SHIFT) /* SPI master operation */
+
 #define SPI_CTRLA_RUNSTDBY         (1 << 7)  /* Bit 7:  Run in standby */
 #define SPI_CTRLA_IBON             (1 << 8)  /* Bit 8:  Immediate BUFOVF notification */
 #define SPI_CTRLA_DOPO_SHIFT       (16)      /* Bit 16-17: Data out pinout */
+
 #define SPI_CTRLA_DOPO_MASK        (3 << SPI_CTRLA_DOPO_SHIFT) /* Bit 16-17: Data out pinout */
 #  define SPI_CTRLA_DOPO_DOPAD012  (0 << SPI_CTRLA_DOPO_SHIFT) /* D0=PAD0 SCK=PAD1 SS=PAD2 */
 #  define SPI_CTRLA_DOPO_DOPAD231  (1 << SPI_CTRLA_DOPO_SHIFT) /* D0=PAD2 SCK=PAD3 SS=PAD1 */
 #  define SPI_CTRLA_DOPO_DOPAD312  (2 << SPI_CTRLA_DOPO_SHIFT) /* D0=PAD3 SCK=PAD1 SS=PAD2 */
 #  define SPI_CTRLA_DOPO_DOPAD031  (3 << SPI_CTRLA_DOPO_SHIFT) /* D0=PAD0 SCK=PAD3 SS=PAD1 */
+
 #define SPI_CTRLA_DIPO_SHIFT       (20)      /* Bits 20-21: Data in pinout */
 #define SPI_CTRLA_DIPO_MASK        (3 << SPI_CTRLA_DIPO_SHIFT)
 #  define SPI_CTRLA_DIPAD0         (0 << SPI_CTRLA_DIPO_SHIFT) /* SERCOM PAD0 for DI */
 #  define SPI_CTRLA_DIPAD1         (1 << SPI_CTRLA_DIPO_SHIFT) /* SERCOM PAD1 for DI */
 #  define SPI_CTRLA_DIPAD2         (2 << SPI_CTRLA_DIPO_SHIFT) /* SERCOM PAD2 for DI */
 #  define SPI_CTRLA_DIPAD3         (3 << SPI_CTRLA_DIPO_SHIFT) /* SERCOM PAD3 for DI */
+
 #define SPI_CTRLA_FORM_SHIFT       (24)      /* Bits 24-27: Frame format */
 #define SPI_CTRLA_FORM_MASK        (7 << SPI_CTRLA_FORM_SHIFT)
 #  define SPI_CTRLA_FORM_SPI       (0 << SPI_CTRLA_FORM_SHIFT) /* SPI frame (no address) */
 #  define SPI_CTRLA_FORM_ADDR      (2 << SPI_CTRLA_FORM_SHIFT) /* SPI frame (w/address) */
+
 #define SPI_CTRLA_CPHA             (1 << 28)  /* Bit 28: Clock phase */
 #define SPI_CTRLA_CPOL             (1 << 29)  /* Bit 29: Clock polarity */
 #define SPI_CTRLA_DORD             (1 << 30)  /* Bit 30: Data order */
@@ -204,6 +210,7 @@
 #define SPI_CTRLB_CHSIZE_MASK      (7 << SPI_CTRLB_CHSIZE_SHIFT)
 #  define SPI_CTRLB_CHSIZE_8BITS   (0 << SPI_CTRLB_CHSIZE_SHIFT) /* 8 bits */
 #  define SPI_CTRLB_CHSIZE_9BITS   (1 << SPI_CTRLB_CHSIZE_SHIFT) /* 9 bits */
+
 #define SPI_CTRLB_PLOADEN          (1 << 6)  /* Bit 6:  Slave Data Preload Enable */
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
@@ -216,12 +223,13 @@
 #  define SPI_CTRLB_AMODE_ADDRMASK (0 << SPI_CTRLB_AMODE_SHIFT) /* ADDRMASK used to mask ADDR */
 #  define SPI_CTRLB_AMODE_2ADDRS   (1 << SPI_CTRLB_AMODE_SHIFT) /* Slave 2 addresses: ADDR & ADDRMASK */
 #  define SPI_CTRLB_AMODE_RANGE    (2 << SPI_CTRLB_AMODE_SHIFT) /* Slave range of addresses: ADDRMASK-ADDR */
+
 #define SPI_CTRLB_RXEN             (1 << 17)  /* Bit 17: Receiver enable */
 
 /* Baud register (8-bit baud value) */
 
-/* Interrupt enable clear, interrupt enable set, interrupt enable set, interrupt flag and
- * status clear registers.
+/* Interrupt enable clear, interrupt enable set, interrupt enable set,
+ * interrupt flag and status clear registers.
  */
 
 #define SPI_INT_DRE                (1 << 0)  /* Bit 0:  Data register empty interrupt */
@@ -276,17 +284,17 @@
 
 #define SPI_DBGCTRL_DBGSTOP        (1 << 0)  /* Bit 0: Debug stop mode */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_SPI_H */

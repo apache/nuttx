@@ -278,7 +278,9 @@ static void __ramfunc__ sam_plladivider(void)
 
   putreg32(regval, SAM_PMC_MCKR);
 
-  /* We changed the PLLA divider.  Wait for the main clock to be ready again */
+  /* We changed the PLLA divider.
+   * Wait for the main clock to be ready again
+   */
 
   sam_pmcwait(PMC_INT_MCKRDY);
 }

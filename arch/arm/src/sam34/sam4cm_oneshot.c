@@ -193,10 +193,12 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
    *   TC_CMR_BSWTRG_NONE  - No software trigger effect on TIOB
    */
 
-  cmr |= (TC_CMR_BURST_NOTGATED | TC_CMR_CPCSTOP       | TC_CMR_EEVTEDG_NONE |
-          TC_CMR_EEVT_TIOB      | TC_CMR_WAVSEL_UPAUTO | TC_CMR_WAVE         |
-          TC_CMR_ACPA_NONE      | TC_CMR_ACPC_NONE     | TC_CMR_AEEVT_NONE   |
-          TC_CMR_ASWTRG_NONE    | TC_CMR_BCPB_NONE     | TC_CMR_BCPC_NONE    |
+  cmr |= (TC_CMR_BURST_NOTGATED | TC_CMR_CPCSTOP      |
+          TC_CMR_EEVTEDG_NONE   | TC_CMR_EEVT_TIOB    |
+          TC_CMR_WAVSEL_UPAUTO  | TC_CMR_WAVE         |
+          TC_CMR_ACPA_NONE      | TC_CMR_ACPC_NONE    |
+          TC_CMR_AEEVT_NONE     | TC_CMR_ASWTRG_NONE  |
+          TC_CMR_BCPB_NONE      | TC_CMR_BCPC_NONE    |
           TC_CMR_BEEVT_NONE     | TC_CMR_BSWTRG_NONE);
 
   oneshot->tch = sam_tc_allocate(chan, cmr);
@@ -232,7 +234,8 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
 int sam_oneshot_max_delay(struct sam_oneshot_s *oneshot, uint64_t *usec)
 {
   DEBUGASSERT(oneshot && usec);
-  *usec = (0xffffull * USEC_PER_SEC) / (uint64_t)sam_tc_divfreq(oneshot->tch);
+  *usec = (0xffffull * USEC_PER_SEC) /
+          (uint64_t)sam_tc_divfreq(oneshot->tch);
   return OK;
 }
 
@@ -266,7 +269,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
   irqstate_t flags;
 
   tmrinfo("handler=%p arg=%p, ts=(%lu, %lu)\n",
-          handler, arg, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+          handler, arg, (unsigned long)ts->tv_sec,
+         (unsigned long)ts->tv_nsec);
   DEBUGASSERT(oneshot && handler && ts);
 
   /* Was the oneshot already running? */
@@ -287,9 +291,11 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
 
   /* Express the delay in microseconds */
 
-  usec = (uint64_t)ts->tv_sec * USEC_PER_SEC + (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
+  usec = (uint64_t)ts->tv_sec * USEC_PER_SEC +
+         (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
 
-  /* Get the timer counter frequency and determine the number of counts need to achieve the requested delay.
+  /* Get the timer counter frequency and determine the number of counts need
+   * to achieve the requested delay.
    *
    *   frequency = ticks / second
    *   ticks     = seconds * frequency
@@ -331,8 +337,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
    * of the oneshot timer/counter.
    *
    * The function up_timer_gettime() could also be used for this but it takes
-   * too long. If up_timer_gettime() is called within this function the problem
-   * vanishes at least if compiled with no optimisation.
+   * too long. If up_timer_gettime() is called within this function the
+   * problem vanishes at least if compiled with no optimisation.
    */
 
   if (freerun != NULL)

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/sama5d3x4x_pio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,19 +16,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_SAMA5D3X4X_PIO_H
 #define __ARCH_ARM_SRC_SAMA5_SAMA5D3X4X_PIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 #if !defined(CONFIG_SAMA5_PIOA_IRQ) && !defined(CONFIG_SAMA5_PIOB_IRQ) && \
     !defined(CONFIG_SAMA5_PIOC_IRQ) && !defined(CONFIG_SAMA5_PIOD_IRQ) && \
@@ -43,7 +44,7 @@
 
 #define SAM_NPIO                  5 /* (5) PIOA-E */
 
-/* Bit-encoded input to sam_configpio() ********************************************/
+/* Bit-encoded input to sam_configpio() *************************************/
 
 /* 32-bit Encoding:
  *
@@ -109,7 +110,8 @@
 #  define PIO_INT_FALLING         (_PIO_INT_AIM | _PIO_INT_EDGE  | _PIO_INT_FL)
 #  define PIO_INT_BOTHEDGES       (0)
 
-/* If the pin is an interrupt, then this determines if the pin is a secure interrupt:
+/* If the pin is an interrupt, then this determines if the pin is a secure
+ * interrupt:
  *
  *   .... .... .... .... .... ..S. .... ....
  */
@@ -121,7 +123,8 @@
 #endif
 #define PIO_INT_UNSECURE          (0)
 
-/* If the pin is an PIO output, then this identifies the initial output value:
+/* If the pin is an PIO output, then this identifies the initial output
+ * value:
  *
  *   .... .... .... .... .... ...V .... ....
  */
@@ -182,9 +185,9 @@
 #define PIO_PIN30                 (30 << PIO_PIN_SHIFT)
 #define PIO_PIN31                 (31 << PIO_PIN_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Must be big enough to hold the 32-bit encoding */
 

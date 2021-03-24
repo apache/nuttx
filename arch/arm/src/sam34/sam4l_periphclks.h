@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/sam4l_periphclks.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_SAM4L_PERIPHCLKS_H
 #define __ARCH_ARM_SRC_SAM34_SAM4L_PERIPHCLKS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,9 +31,9 @@
 
 #ifdef CONFIG_ARCH_CHIP_SAM4L
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* SAM4L helper macros */
 
@@ -212,19 +212,19 @@
 #define sam_eic_disableclk()          sam_pbd_disableperipheral(PM_PBDMASK_EIC)
 #define sam_picouart_disableclk()     sam_pbd_disableperipheral(PM_PBDMASK_PICOUART)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -235,87 +235,93 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_init_periphclks
  *
  * Description:
  *   Called during boot to enable clocking on all selected peripherals.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_init_periphclks(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_modifyperipheral
  *
  * Description:
- *   This is a convenience function that is intended to be used to enable or disable
- *   module clocking.
+ *   This is a convenience function that is intended to be used to enable or
+ *   disable module clocking.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-void sam_modifyperipheral(uintptr_t regaddr, uint32_t clrbits, uint32_t setbits);
+void sam_modifyperipheral(uintptr_t regaddr,
+                          uint32_t clrbits, uint32_t setbits);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pba_modifydivmask
  *
  * Description:
- *   This is a convenience function that is intended to be used to modify bits in
- *   the PBA divided clock (DIVMASK) register.
+ *   This is a convenience function that is intended to be used to modify
+ *   bits in the PBA divided clock (DIVMASK) register.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_pba_modifydivmask(uint32_t clrbits, uint32_t setbits);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pba_enableperipheral
  *
  * Description:
- *   This is a convenience function to enable a peripheral on the APBA bridge.
+ *   This is a convenience function to enable a peripheral on the APBA
+ *   bridge.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_pba_enableperipheral(uint32_t bitset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pba_disableperipheral
  *
  * Description:
- *   This is a convenience function to disable a peripheral on the APBA bridge.
+ *   This is a convenience function to disable a peripheral on the APBA
+ *   bridge.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_pba_disableperipheral(uint32_t bitset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pbb_enableperipheral
  *
  * Description:
- *   This is a convenience function to enable a peripheral on the APBB bridge.
+ *   This is a convenience function to enable a peripheral on the APBB
+ *   bridge.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_pbb_enableperipheral(uint32_t bitset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pbb_disableperipheral
  *
  * Description:
- *   This is a convenience function to disable a peripheral on the APBA bridge.
+ *   This is a convenience function to disable a peripheral on the APBA
+ *   bridge.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_pbb_disableperipheral(uint32_t bitset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_usbc_enableclk
  *
  * Description:
- *   Enable clocking for the USBC using settings from the board.h header files.
+ *   Enable clocking for the USBC using settings from the board.h header
+ *   files.
  *
  *  "The USBC has two bus clocks connected: One High Speed Bus clock
  *   (CLK_USBC_AHB) and one Peripheral Bus clock (CLK_USBC_APB). These clocks
@@ -331,19 +337,19 @@ void sam_pbb_disableperipheral(uint32_t bitset);
  *   the SCIF module. Before using the USB, the user must ensure that the
  *   USB generic clock (GCLK_USBC) is enabled at 48MHz in the SCIF module."
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAM34_USBC
 void sam_usbc_enableclk(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_usbc_disableclk
  *
  * Description:
  *   Disable clocking to the USBC.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAM34_USBC
 void sam_usbc_disableclk(void);

@@ -193,12 +193,14 @@ uint32_t sam_pck_frequency(uint32_t mainclk)
   switch (regval & PMC_MCKR_CSS_MASK)
     {
     case PMC_MCKR_CSS_MAIN: /* Main Clock */
+
       /* Use the Main Clock frequency */
 
       pck = mainclk;
       break;
 
     case PMC_MCKR_CSS_PLLA: /* PLLA Clock */
+
       /* Use the PLLA output clock */
 
       pck = sam_plladiv2_frequency(mainclk);
@@ -254,7 +256,9 @@ uint32_t sam_mck_frequency(uint32_t mainclk)
       return 0;
     }
 
-  /* MDIV = n: Master Clock is Prescaler Output Clock divided by encoded value */
+  /* MDIV = n:
+   * Master Clock is Prescaler Output Clock divided by encoded value
+   */
 
   regval = getreg32(SAM_PMC_MCKR);
   switch (regval & PMC_MCKR_MDIV_MASK)

@@ -41,7 +41,9 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure describes the state of the oneshot timer lower-half driver */
+/* This structure describes the state of the oneshot timer lower-half
+ * driver
+ */
 
 struct sam_oneshot_lowerhalf_s
 {

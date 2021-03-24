@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_sysctrl.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
@@ -28,9 +28,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_SYSCTRL_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_SYSCTRL_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -38,10 +38,11 @@
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* SYSCTRL register offsets *****************************************************************/
+ ****************************************************************************/
+
+/* SYSCTRL register offsets *************************************************/
 
 #define SAM_SYSCTRL_INTENCLR_OFFSET     0x0000  /* Interrupt enable clear */
 #define SAM_SYSCTRL_INTENSET_OFFSET     0x0004  /* Interrupt enable set */
@@ -71,7 +72,7 @@
 #  define SAM_SYSCTRL_DPLLSTATUS_OFFSET 0x0050  /* DPLL status */
 #endif
 
-/* SYSCTRL register addresses ***************************************************************/
+/* SYSCTRL register addresses ***********************************************/
 
 #define SAM_SYSCTRL_INTENCLR            (SAM_SYSCTRL_BASE+SAM_SYSCTRL_INTENCLR_OFFSET)
 #define SAM_SYSCTRL_INTENSET            (SAM_SYSCTRL_BASE+SAM_SYSCTRL_INTENSET_OFFSET)
@@ -101,10 +102,10 @@
 #  define SAM_SYSCTRL_DPLLSTATUS        (SAM_SYSCTRL_BASE+SAM_SYSCTRL_DPLLSTATUS_OFFSET)
 #endif
 
-/* SYSCTRL register bit definitions *********************************************************/
+/* SYSCTRL register bit definitions *****************************************/
 
-/* Interrupt enable clear, Interrupt enable set, Interrupt flag status and clear, and
- * Power and clocks status registers.
+/* Interrupt enable clear, Interrupt enable set, Interrupt flag status and
+ * clear, and Power and clocks status registers.
  */
 
 #define SYSCTRL_INT_XOSCRDY             (1 << 0)  /* Bit 0:  XOSC ready interrupt */
@@ -148,6 +149,7 @@
 #  define SYSCTRL_XOSC_GAIN_8MHZ        (2 << SYSCTRL_XOSC_GAIN_SHIFT) /* 8MHz */
 #  define SYSCTRL_XOSC_GAIN_16MHZ       (3 << SYSCTRL_XOSC_GAIN_SHIFT) /* 16MHz */
 #  define SYSCTRL_XOSC_GAIN_30MHZ       (4 << SYSCTRL_XOSC_GAIN_SHIFT) /* 30MHz */
+
 #define SYSCTRL_XOSC_AMPGC              (1 << 11) /* Bit 11: Automatic amplitude gain control */
 #define SYSCTRL_XOSC_STARTUP_SHIFT      (12)      /* Bits 12-15: Start-up time */
 #define SYSCTRL_XOSC_STARTUP_MASK       (15 << SYSCTRL_XOSC_STARTUP_SHIFT)
@@ -189,6 +191,7 @@
 #  define SYSCTRL_XOSC32K_STARTUP_1S    (5 << SYSCTRL_XOSC32K_STARTUP_SHIFT) /* 1000092탎 */
 #  define SYSCTRL_XOSC32K_STARTUP_2S    (6 << SYSCTRL_XOSC32K_STARTUP_SHIFT) /* 2000092탎 */
 #  define SYSCTRL_XOSC32K_STARTUP_4S    (7 << SYSCTRL_XOSC32K_STARTUP_SHIFT) /* 4000092탎 */
+
 #define SYSCTRL_XOSC32K_WRTLOCK         (1 << 12)  /* Bit 12: Write lock */
 
 /* 32kHz internal oscillator control register */
@@ -213,6 +216,7 @@
 #  define SYSCTRL_OSC32K_STARTUP_1MS    (5 << SYSCTRL_OSC32K_STARTUP_SHIFT) /* 1038탎 */
 #  define SYSCTRL_OSC32K_STARTUP_2MS    (6 << SYSCTRL_OSC32K_STARTUP_SHIFT) /* 2014탎 */
 #  define SYSCTRL_OSC32K_STARTUP_4MS    (7 << SYSCTRL_OSC32K_STARTUP_SHIFT) /* 3967탎 */
+
 #define SYSCTRL_OSC32K_WRTLOCK          (1 << 12)  /* Bit 12: Write lock */
 #define SYSCTRL_OSC32K_CALIB_SHIFT      (16)       /* Bits 16-22: Oscillator calibration */
 #define SYSCTRL_OSC32K_CALIB_MASK       (0x7f << SYSCTRL_OSC32K_CALIB_SHIFT)
@@ -237,6 +241,7 @@
 #  define SYSCTRL_OSC8M_PRESC_DIV2      (1 << SYSCTRL_OSC8M_PRESC_SHIFT) /* 2 */
 #  define SYSCTRL_OSC8M_PRESC_DIV3      (2 << SYSCTRL_OSC8M_PRESC_SHIFT) /* 4 */
 #  define SYSCTRL_OSC8M_PRESC_DIV8      (3 << SYSCTRL_OSC8M_PRESC_SHIFT) /* 8 */
+
 #define SYSCTRL_OSC8M_CALIB_SHIFT       (16)      /* Bits 16-27: Oscillator calibration */
 #define SYSCTRL_OSC8M_CALIB_MASK        (0xfff << SYSCTRL_OSC8M_CALIB_SHIFT)
 #  define SYSCTRL_OSC8M_CALIB(n)        ((n) << SYSCTRL_OSC8M_CALIB_SHIFT)
@@ -307,6 +312,7 @@
 #  define SYSCTRL_BOD33_ACTION_NONE     (0 << SYSCTRL_BOD33_ACTION_SHIFT) /* No action */
 #  define SYSCTRL_BOD33_ACTION_RESET    (1 << SYSCTRL_BOD33_ACTION_SHIFT) /* BOD33 generates reset */
 #  define SYSCTRL_BOD33_ACTION_INTR     (2 << SYSCTRL_BOD33_ACTION_SHIFT) /* BOD33 generates interrupt */
+
 #define SYSCTRL_BOD33_RUNSTDBY          (1 << 6)  /* Bit 6: Run in standby */
 #define SYSCTRL_BOD33_MODE              (1 << 8)  /* Bit 8: Operation mode */
 #define SYSCTRL_BOD33_CEN               (1 << 9)  /* Bit 9: Clock enable */
@@ -329,6 +335,7 @@
 #  define SYSCTRL_BOD33_PSEL_DIV16K     (13 << SYSCTRL_BOD33_PSEL_SHIFT) /* Divide clock by 16384 */
 #  define SYSCTRL_BOD33_PSEL_DIV32K     (14 << SYSCTRL_BOD33_PSEL_SHIFT) /* Divide clock by 32768 */
 #  define SYSCTRL_BOD33_PSEL_DIV64K     (15 << SYSCTRL_BOD33_PSEL_SHIFT) /* Divide clock by 65536 */
+
 #define SYSCTRL_BOD33_LEVEL_SHIFT       (16)      /* Bits 16-21: BOD33 threshold level */
 #define SYSCTRL_BOD33_LEVEL_MASK        (0x3f << SYSCTRL_BOD33_LEVEL_SHIFT)
 #  define SYSCTRL_BOD33_LEVEL(n)        ((n) << SYSCTRL_BOD33_LEVEL_SHIFT)
@@ -376,6 +383,7 @@
 #    define SYSCTRL_DPLLCTRLB_FILTER_LBFILT   (1 << SYSCTRL_DPLLCTRLB_FILTER_SHIFT) /* Low bandwidth filter */
 #    define SYSCTRL_DPLLCTRLB_FILTER_HBFILT   (2 << SYSCTRL_DPLLCTRLB_FILTER_SHIFT) /* High bandwidth filter */
 #    define SYSCTRL_DPLLCTRLB_FILTER_HDFILT   (3 << SYSCTRL_DPLLCTRLB_FILTER_SHIFT) /* High damping filter */
+
 #  define SYSCTRL_DPLLCTRLB_LPEN              (1 << 2)  /* Bit 2:  Low-Power Enable */
 #  define SYSCTRL_DPLLCTRLB_WUF               (1 << 3)  /* Bit 3:  Wake Up Fast */
 #  define SYSCTRL_DPLLCTRLB_REFCLK_SHIFT      (4)       /* Bits 4-5: Reference Clock Selection */
@@ -383,6 +391,7 @@
 #    define SYSCTRL_DPLLCTRLB_REFCLK_XOSC32   (0 << SYSCTRL_DPLLCTRLB_REFCLK_SHIFT) /* XOSC32 clock reference */
 #    define SYSCTRL_DPLLCTRLB_REFCLK_XOSC     (1 << SYSCTRL_DPLLCTRLB_REFCLK_SHIFT) /* XOSC clock reference */
 #    define SYSCTRL_DPLLCTRLB_REFCLK_GCLKDPLL (2 << SYSCTRL_DPLLCTRLB_REFCLK_SHIFT) /* GCLK_DPLL clock reference */
+
 #  define SYSCTRL_DPLLCTRLB_LTIME_SHIFT       (8)    /* Bits 8-10: Lock Time */
 #  define SYSCTRL_DPLLCTRLB_LTIME_MASK        (7 << SYSCTRL_DPLLCTRLB_LTIME_SHIFT)
 #    define SYSCTRL_DPLLCTRLB_LTIME_DEFAULT   (0 << SYSCTRL_DPLLCTRLB_LTIME_SHIFT) /* No time-out */
@@ -390,6 +399,7 @@
 #    define SYSCTRL_DPLLCTRLB_LTIME_9MS       (5 << SYSCTRL_DPLLCTRLB_LTIME_SHIFT) /* Time-out if no lock within 9 ms */
 #    define SYSCTRL_DPLLCTRLB_LTIME_10MS      (6 << SYSCTRL_DPLLCTRLB_LTIME_SHIFT) /* Time-out if no lock within 10 ms */
 #    define SYSCTRL_DPLLCTRLB_LTIME_11MS      (7 << SYSCTRL_DPLLCTRLB_LTIME_SHIFT) /* Time-out if no lock within 11 ms */
+
 #  define SYSCTRL_DPLLCTRLB_LBYPASS           (1 << 12)  /* Bit 12:  Lock Bypass */
 #  define SYSCTRL_DPLLCTRLB_DIV_SHIFT         (16)       /* Bits 16-26:  */
 #  define SYSCTRL_DPLLCTRLB_DIV_MASK          (0x7ff << SYSCTRL_DPLLCTRLB_DIV_SHIFT)
@@ -405,17 +415,17 @@
 #  define SYSCTRL_DPLLSTATUS_DIV        (1 << 3)  /* Bit 3:  Divider Enable */
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_SYSCTRL_H */

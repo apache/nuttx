@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4l_bpm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_BPM_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_BPM_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* BPM register offsets ****************************************************************/
+/* BPM register offsets *****************************************************/
 
 #define SAM_BPM_IER_OFFSET           0x0000 /* Interrupt Enable Register */
 #define SAM_BPM_IDR_OFFSET           0x0004 /* Interrupt Disable Register */
@@ -50,7 +50,7 @@
 #define SAM_BPM_IORET_OFFSET         0x0034 /* Input Output Retention Register */
 #define SAM_BPM_VERSION_OFFSET       0x00fc /* Version Register */
 
-/* BPM register addresses **************************************************************/
+/* BPM register addresses ***************************************************/
 
 #define SAM_BPM_IER                  (SAM_BPM_BASE+SAM_BPM_IER_OFFSET)
 #define SAM_BPM_IDR                  (SAM_BPM_BASE+SAM_BPM_IDR_OFFSET)
@@ -66,13 +66,18 @@
 #define SAM_BPM_IORET                (SAM_BPM_BASE+SAM_BPM_IORET_OFFSET)
 #define SAM_BPM_VERSION              (SAM_BPM_BASE+SAM_BPM_VERSION_OFFSET)
 
-/* BPM register bit definitions ********************************************************/
+/* BPM register bit definitions *********************************************/
 
 /* Interrupt Enable Register */
+
 /* Interrupt Disable Register */
+
 /* Interrupt Mask Register */
+
 /* Interrupt Status Register */
+
 /* Interrupt Clear Register */
+
 /* Status Register */
 
 #define BPM_INT_PSOK                 (1 << 0)  /* Bit 0:  Power Scaling OK */
@@ -104,6 +109,7 @@
 # define BPM_PMCON_SLEEP_SLEEP1      (1 << BPM_PMCON_SLEEP_SHIFT) /* CPU+AHB clocks stopped */
 # define BPM_PMCON_SLEEP_SLEEP2      (2 << BPM_PMCON_SLEEP_SHIFT) /* CPU+AHB+PB+GCLK clocks stopped */
 # define BPM_PMCON_SLEEP_SLEEP3      (3 << BPM_PMCON_SLEEP_SHIFT) /* CPU+AHB+PB+GCLK+sources stopped */
+
 #define BPM_PMCON_CK32S              (1 << 16) /* Bit 16: 32kHz-1kHz Clock Source Selection */
 #define BPM_PMCON_FASTWKUP           (1 << 24) /* Bit 24: Fast Wakeup */
 
@@ -148,16 +154,16 @@
 #define BPM_VERSION_VARIANT_SHIFT    (16)       /* Bits 16-19: Variant Number */
 #define BPM_VERSION_VARIANT_MASK     (15 << BPM_VERSION_VARIANT_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_BPM_H */

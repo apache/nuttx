@@ -44,7 +44,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* DMA.  DMA support requires that DMAC0 be enabled.  According to
  * "Table 15-2. SAMA5 Master to Slave Access", DMAC1 does not have access
  * to NFC SRAM.
@@ -76,7 +78,6 @@
 #  endif
 #endif
 
-
 /* Hardware ECC types.  These are extensions to the NANDECC_HWECC value
  * defined in include/nuttx/mtd/nand_raw.h.
  *
@@ -88,6 +89,7 @@
 #define NANDECC_PMECC   (NANDECC_HWECC + 1)
 
 /* Per NAND bank ECC selections */
+
 /* Only CS3 can support NAND.  The rest is a fantasy */
 
 # undef CONFIG_SAMA5_EBICS0_NAND
@@ -278,6 +280,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This type represents the state of a raw NAND MTD device on a single chip
  * select.  The struct nand_raw_s must appear at the beginning of the
  * definition so that you can freely cast between pointers to struct
@@ -343,10 +346,10 @@ struct sam_nand_s
 #ifdef CONFIG_SAMA5_NAND_REGDEBUG
   /* Register debug state */
 
-   bool wr;                 /* Last was a write */
-   uint32_t regadddr;       /* Last address */
-   uint32_t regval;         /* Last value */
-   int ntimes;              /* Number of times */
+  bool wr;                 /* Last was a write */
+  uint32_t regadddr;       /* Last address */
+  uint32_t regval;         /* Last value */
+  int ntimes;              /* Number of times */
 #endif
 };
 
@@ -370,7 +373,7 @@ extern "C"
 EXTERN struct sam_nand_s g_nand;
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -471,7 +474,8 @@ void board_nand_ce(int cs, bool enable);
  * Name: nand_checkreg
  *
  * Description:
- *   Check if the current HSMC register access is a duplicate of the preceding.
+ *   Check if the current HSMC register access is a duplicate of the
+ *   preceding.
  *
  * Input Parameters:
  *   regval   - The value to be written
@@ -543,7 +547,8 @@ static inline void nand_putreg(uintptr_t regaddr, uint32_t regval)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
-static inline void nand_trimffs_enable(struct sam_nandcs_s *priv, bool enable)
+static inline void nand_trimffs_enable(struct sam_nandcs_s *priv,
+                                       bool enable)
 {
   priv->dropjss = enable;
 }
@@ -588,7 +593,8 @@ static inline bool nand_trrimffs(struct sam_nandcs_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
-static inline void nand_set_trimpage(struct sam_nandcs_s *priv, uint16_t page)
+static inline void nand_set_trimpage(struct sam_nandcs_s *priv,
+                                     uint16_t page)
 {
   priv->trimpage = page;
 }

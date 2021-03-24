@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_smc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_SMC_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_SMC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/samv7/chip.h>
 
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* SMC register offsets *****************************************************************/
+/* SMC register offsets *****************************************************/
 
 #define SAM_SMCCS_OFFSET(n)            ((n) << 4)
 #  define SAM_SMCCS0_OFFSET            0x0000 /* SMC CS0 offset */
@@ -53,7 +53,7 @@
 #define SAM_SMC_WPCR_OFFSET            0x00e4 /* Write Protection Control Register */
 #define SAM_SMC_WPSR_OFFSET            0x00e8 /* Write Protection Status Register */
 
-/* SMC register addresses ***************************************************************/
+/* SMC register addresses ***************************************************/
 
 #define SAM_SMCCS_BASE(n)              (SAM_SMC_BASE+SAM_SMCCS_OFFSET(n))
 #  define SAM_SMC_CS0_BASE             (SAM_SMC_BASE+SAM_SMCCS0_OFFSET)
@@ -92,7 +92,7 @@
 #define SAM_SMC_WPCR                   (SAM_SMC_BASE+SAM_SMC_WPCR_OFFSET)
 #define SAM_SMC_WPSR                   (SAM_SMC_BASE+SAM_SMC_WPSR_OFFSET)
 
-/* SMC register bit definitions *********************************************************/
+/* SMC register bit definitions *********************************************/
 
 /* SMC Setup Register */
 
@@ -151,6 +151,7 @@
 #  define SMCCS_MODE_TDFCYCLES(n)      ((uint32_t)(n) << SMCCS_MODE_TDFCYCLES_SHIFT)
 #define SMCCS_MODE_TDFMODE             (1 << 20) /* Bit 20: TDF Optimization */
 #define SMCCS_MODE_PMEN                (1 << 24) /* Bit 24: Page Mode Enabled */
+
 #define SMCCS_MODE_PS_SHIFT            (28) /* Bits 28-29: Page Size */
 #define SMCCS_MODE_PS_MASK             (3 << SMCCS_MODE_PS_SHIFT)
 #  define SMCCS_MODE_PS_SIZE_4BYTES    (0 << SMCCS_MODE_PS_SHIFT) /* 4 bytes */
@@ -161,7 +162,9 @@
 /* SMC OCMS Mode Register */
 
 #define SMC_OCMS_SMSE                  (1 << 0)  /* Bit 0:  Static Memory Controller Scrambling Enable */
+
 #define SMC_OCMS_CSSE(n)               (1 << ((n)+16)) /* Chip Select (n=0-3) Scrambling Enable */
+
 #  define SMC_OCMS_CS0SE               (1 << 16) /* Bit 16: Chip Select 0 Scrambling Enable */
 #  define SMC_OCMS_CS1SE               (1 << 17) /* Bit 17: Chip Select 1 Scrambling Enable */
 #  define SMC_OCMS_CS2SE               (1 << 18) /* Bit 18: Chip Select 2 Scrambling Enable */
@@ -182,16 +185,16 @@
 #define SMC_WPSR_WPVSRC_SHIFT          (8)       /* Bits 8-23: Write Protection Violation Source */
 #define SMC_WPSR_WPVSRC_MASK           (0xffff << SMC_WPSR_WPVSRC_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_SMC_H */

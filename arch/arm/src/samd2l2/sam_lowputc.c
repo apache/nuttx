@@ -196,6 +196,7 @@ sam_usart_configure(const struct sam_usart_config_s *const config)
 
       case 1: /* Odd */
         ctrlb |= USART_CTRLB_PODD;
+
         /* Fall through */
 
       case 2: /* Even */

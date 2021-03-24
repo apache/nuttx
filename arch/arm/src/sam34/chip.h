@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,19 +16,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_CHIP_H
 #define __ARCH_ARM_SRC_SAM34_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/* Include the memory map and the chip definitions file.  Other chip hardware files
- * should then include this file for the proper setup.
+/* Include the memory map and the chip definitions file.
+ * Other chip hardware files should then include this file for the proper
+ * setup.
  */
 
 #include <arch/sam34/chip.h>
@@ -38,13 +39,13 @@
 
 #include <arch/sam34/irq.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Provide the required number of peripheral interrupt vector definitions as well.
- * The definition SAM_IRQ_NEXTINT simply comes from the chip-specific IRQ header
- * file included by arch/sam34/irq.h.
+/* Provide the required number of peripheral interrupt vector definitions as
+ * well. The definition SAM_IRQ_NEXTINT simply comes from the chip-specific
+ * IRQ header file included by arch/sam34/irq.h.
  */
 
 #define ARMV7M_PERIPHERAL_INTERRUPTS  SAM_IRQ_NEXTINT

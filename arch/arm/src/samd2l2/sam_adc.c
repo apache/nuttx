@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/sam_adc.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -32,7 +32,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -99,16 +99,16 @@ static int  sam_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
 
 struct sam_adc_priv
 {
-  int                    genclk;       /* clock generator */
+  int                    genclk;             /* clock generator */
   const struct adc_callback_s *adc_callback; /* callback for upper driver */
-  int                    cur_channel;  /* current channel in progress */
-  int                    num_channels; /* number of channels */
-  int                   *channels;     /* channels to process */
-  uint8_t                ref;          /* reference selection */
-  uint32_t               neg;          /* negative input selection */
-  uint8_t                samplen;      /* sampling time length */
-  uint32_t               prescaler;    /* prescaler configuration */
-  uint8_t                averaging;    /* number of samples to be collected */
+  int                    cur_channel;        /* current channel in progress */
+  int                    num_channels;       /* number of channels */
+  int                   *channels;           /* channels to process */
+  uint8_t                ref;                /* reference selection */
+  uint32_t               neg;                /* negative input selection */
+  uint8_t                samplen;            /* sampling time length */
+  uint32_t               prescaler;          /* prescaler configuration */
+  uint8_t                averaging;          /* number of samples to be collected */
 };
 
 /****************************************************************************
@@ -127,9 +127,9 @@ static const struct adc_ops_s sam_adc_ops =
 
 static struct adc_dev_s g_sam_adc_dev;
 
-/*******************************************************************************
+/****************************************************************************
  * Private Functions
- *******************************************************************************/
+ ****************************************************************************/
 
 static void sam_adc_synchronization(void)
 {
@@ -147,7 +147,8 @@ static int sam_adc_interrupt(int irq, FAR void *context, FAR void *arg)
 
   ainfo("ADC Result = %d:\n", result);
 
-  priv->adc_callback->au_receive(dev, priv->channels[priv->cur_channel], result);
+  priv->adc_callback->au_receive(dev, priv->channels[priv->cur_channel],
+                                 result);
 
   putreg8(ADC_INT_RESRDY, SAM_ADC_INTFLAG);
 
@@ -216,8 +217,8 @@ static int sam_adc_calibrate(struct adc_dev_s *dev)
   return 0;
 }
 
-/* Bind the upper-half driver callbacks to the lower-half implementation.  This
- * must be called early in order to receive ADC event notifications.
+/* Bind the upper-half driver callbacks to the lower-half implementation.
+ * This must be called early in order to receive ADC event notifications.
  */
 
 static int sam_adc_bind(FAR struct adc_dev_s *dev,
@@ -394,7 +395,8 @@ static void sam_adc_rxint(FAR struct adc_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int sam_adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
+static int sam_adc_ioctl(FAR struct adc_dev_s *dev,
+                         int cmd, unsigned long arg)
 {
   int ret = 0;
   struct sam_adc_priv    *priv = (struct sam_adc_priv *)dev->ad_priv;
@@ -434,9 +436,9 @@ static int sam_adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
   return ret;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- *******************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: sam_adcinitialize

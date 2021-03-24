@@ -208,8 +208,8 @@ static void sam_vectormapping(void)
  * Description:
  *   Copy the interrupt block to its final destination.  Vectors are already
  *   positioned at the beginning of the text region and only need to be
- *   copied in the case where we are using high vectors or where the beginning
- *   of the text region cannot be remapped to address zero.
+ *   copied in the case where we are using high vectors or where the
+ *   beginning of the text region cannot be remapped to address zero.
  *
  ****************************************************************************/
 
@@ -228,8 +228,8 @@ static void sam_copyvectorblock(void)
   sam_vectorpermissions(MMU_L2_VECTRWFLAGS);
 #endif
 
-  /* Copy the vectors into ISRAM at the address that will be mapped to the vector
-   * address:
+  /* Copy the vectors into ISRAM at the address that will be mapped to the
+   * vector address:
    *
    *   SAM_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
    *   SAM_VECTOR_VSRAM - Virtual address of vector table in SRAM
@@ -252,7 +252,9 @@ static void sam_copyvectorblock(void)
   sam_vectorpermissions(MMU_L2_VECTORFLAGS);
 
 #else
-  /* Flush the DCache to assure that the vector data is in physical in ISRAM */
+  /* Flush the DCache to assure that the vector data is in physical in
+   * ISRAM
+   */
 
   up_clean_dcache((uintptr_t)SAM_VECTOR_VSRAM,
                   (uintptr_t)SAM_VECTOR_VSRAM + sam_vectorsize());

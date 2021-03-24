@@ -37,6 +37,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* USBC source clock selection */
 
 #ifdef CONFIG_SAM34_USBC
@@ -594,7 +595,8 @@ void sam_pbb_disableperipheral(uint32_t bitset)
  * Name: sam_usbc_enableclk
  *
  * Description:
- *   Enable clocking for the USBC using settings from the board.h header files.
+ *   Enable clocking for the USBC using settings from the board.h header
+ *   files.
  *
  *  "The USBC has two bus clocks connected: One High Speed Bus clock
  *   (CLK_USBC_AHB) and one Peripheral Bus clock (CLK_USBC_APB). These clocks

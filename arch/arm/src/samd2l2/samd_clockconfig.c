@@ -67,6 +67,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This structure describes the configuration of every enabled GCLK */
 
 #ifdef BOARD_GCLK_ENABLE
@@ -83,7 +84,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true,
 #endif
     .prescaler  = BOARD_GCLK0_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK0_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK0_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 
   /* GCLK generator 1 */
@@ -99,7 +101,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true,
 #endif
     .prescaler  = BOARD_GCLK1_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK1_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK1_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -116,7 +119,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true,
 #endif
     .prescaler  = BOARD_GCLK2_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK2_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK2_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -133,7 +137,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true,
 #endif
     .prescaler  = BOARD_GCLK3_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK3_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK3_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -150,7 +155,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true,
 #endif
     .prescaler  = BOARD_GCLK4_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK4_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK4_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -167,7 +173,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true,
 #endif
     .prescaler  = BOARD_GCLK5_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK5_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK5_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -184,7 +191,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true,
 #endif
     .prescaler  = BOARD_GCLK6_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK6_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK6_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -201,7 +209,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true,
 #endif
     .prescaler  = BOARD_GCLK7_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK7_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK7_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 
@@ -218,7 +227,8 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .output     = true,
 #endif
     .prescaler  = BOARD_GCLK8_PRESCALER,
-    .clksrc     = (uint8_t)(BOARD_GCLK8_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+    .clksrc     = (uint8_t)(BOARD_GCLK8_CLOCK_SOURCE >>
+                            GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 };
@@ -438,7 +448,8 @@ static inline void sam_osc32k_config(void)
   /* Recover OSC32K calibration data from OTP "fuse" memory */
 
   regval  = getreg32(SYSCTRL_FUSES_OSC32KCAL_ADDR);
-  calib   = (regval & SYSCTRL_FUSES_OSC32KCAL_MASK) >> SYSCTRL_FUSES_OSC32KCAL_SHIFT;
+  calib   = (regval & SYSCTRL_FUSES_OSC32KCAL_MASK) >>
+             SYSCTRL_FUSES_OSC32KCAL_SHIFT;
 
   /* Configure OSC32K */
 
@@ -595,7 +606,8 @@ static inline void sam_dpll_config(void)
 
   if (BOARD_DPLL_REFCLK == SYSCTRL_DPLLCTRLB_REFCLK_GCLKDPLL)
     {
-      putreg16(GCLK_CLKCTRL_ID_DPLL | GCLK_CLKCTRL_GEN(2) | GCLK_CLKCTRL_CLKEN, SAM_GCLK_CLKCTRL);
+      putreg16(GCLK_CLKCTRL_ID_DPLL | GCLK_CLKCTRL_GEN(2) |
+               GCLK_CLKCTRL_CLKEN, SAM_GCLK_CLKCTRL);
     }
 
   putreg32(ratio, SAM_SYSCTRL_DPLLRATIO);
@@ -896,7 +908,9 @@ static inline void sam_dividers(void)
   uint8_t regval;
 #endif
 
-  /* Set the CPU divider using the divider value from the board.h header file */
+  /* Set the CPU divider using the divider value from the board.h header
+   * file
+   */
 
   putreg8(BOARD_CPU_DIVIDER, SAM_PM_CPUSEL);
 

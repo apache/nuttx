@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/sam_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_SAM_MEMORYMAP_H
 #define __ARCH_ARM_SRC_SAMA5_SAM_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/sama5/chip.h>
 
 #include "mmu.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* The vectors are, by default, positioned at the beginning of the text
  * section.  Under what conditions do we have to remap these vectors?
@@ -48,8 +48,8 @@
  *    is required because the vectors are position at the beginning of the
  *    boot memory at link time and no additional MMU mapping required.
  *
- * 2) We are not using a ROM page table.  We cannot set any custom mappings in
- *    the case and the build must conform to the ROM page table properties
+ * 2) We are not using a ROM page table.  We cannot set any custom mappings
+ *    in the case and the build must conform to the ROM page table properties
  */
 
 #if !defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_ARCH_ROMPGTABLE)
@@ -74,11 +74,11 @@
 #  define NEED_SDRAM_REMAPPING 1
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
- /* This table describes how to map a set of 1Mb pages to space the physical
+/* This table describes how to map a set of 1Mb pages to space the physical
  * address space of the SAMA5.
  */
 

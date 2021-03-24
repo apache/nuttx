@@ -34,8 +34,9 @@
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
-/* Default configuration settings may be overridden in the board configuration
- * file.
+
+/* Default configuration settings may be overridden in the board
+ * configuration file.
  */
 
 #if !defined(CONFIG_SAMV7_DAC_DMA_BUFFER_SIZE)

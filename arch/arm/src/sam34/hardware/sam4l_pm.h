@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4l_pm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PM_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define SAM_PM_MCCTRL_OFFSET       0x0000 /* Main Clock Control Register */
 #define SAM_PM_CPUSEL_OFFSET       0x0004 /* CPU Clock Select Register */
@@ -66,7 +66,7 @@
 #define SAM_PM_CONFIG_OFFSET       0x03f8 /* Configuration Register */
 #define SAM_PM_VERSION_OFFSET      0x03fc /* Version Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define SAM_PM_MCCTRL              (SAM_PM_BASE+SAM_PM_MCCTRL_OFFSET)
 #define SAM_PM_CPUSEL              (SAM_PM_BASE+SAM_PM_CPUSEL_OFFSET)
@@ -98,7 +98,7 @@
 #define SAM_PM_CONFIG              (SAM_PM_BASE+SAM_PM_CONFIG_OFFSET)
 #define SAM_PM_VERSION             (SAM_PM_BASE+SAM_PM_VERSION_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Main Clock Control Register Bit-field Definitions */
 
@@ -231,10 +231,15 @@
 #  define PM_UNLOCK_KEY(n)         ((n) << PM_UNLOCK_KEY_SHIFT)
 
 /* Interrupt Enable Register Bit-field Definitions */
+
 /* Interrupt Disable Register Bit-field Definitions */
+
 /* Interrupt Mask Register Bit-field Definitions */
+
 /* Interrupt Status Register Bit-field Definitions */
+
 /* Interrupt Clear Register Bit-field Definitions */
+
 /* Status Register Register */
 
 #define PM_INT_CFD                (1 << 0)  /* Bit 0:  CFD */
@@ -318,16 +323,16 @@
 #define PM_VERSION_VARIANT_SHIFT      (16)       /* Bits 16-19: Variant Number */
 #define PM_VERSION_VARIANT_MASK       (15 << PM_VERSION_VARIANT_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PM_H */
