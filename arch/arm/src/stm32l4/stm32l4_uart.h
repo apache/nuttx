@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_uart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_STC_STM32L4_STM32L4_UART_H
 #define __ARCH_ARM_STC_STM32L4_STM32L4_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/serial/serial.h>
@@ -37,11 +37,12 @@
 #  error "Unsupported STM32L4 chip"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Make sure that we have not enabled more U[S]ARTs than are supported by the
- * device.
+ ****************************************************************************/
+
+/* Make sure that we have not enabled more U[S]ARTs than are supported by
+ * the device.
  */
 
 #if !defined(CONFIG_STM32L4_HAVE_UART5)
@@ -138,7 +139,9 @@
 #  undef HAVE_CONSOLE
 #endif
 
-/* DMA support is only provided if CONFIG_ARCH_DMA is in the NuttX configuration */
+/* DMA support is only provided if CONFIG_ARCH_DMA is in the NuttX
+ * configuration
+ */
 
 #if !defined(HAVE_UART) || !defined(CONFIG_ARCH_DMA)
 #  undef CONFIG_USART1_RXDMA
@@ -223,13 +226,13 @@
 #  define USART_CR1_USED_INTS    (USART_CR1_RXNEIE | USART_CR1_TXEIE | USART_CR1_PEIE)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -242,22 +245,22 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_serial_dma_poll
  *
  * Description:
- *   Must be called periodically if any STM32 UART is configured for DMA.  The DMA
- *   callback is triggered for each fifo size/2 bytes, but this can result in some
- *   bytes being transferred but not collected if the incoming data is not a whole
- *   multiple of half the FIFO size.
+ *   Must be called periodically if any STM32 UART is configured for DMA.
+ *   The DMA callback is triggered for each fifo size/2 bytes, but this can
+ *   result in some bytes being transferred but not collected if the incoming
+ *   data is not a whole multiple of half the FIFO size.
  *
  *   May be safely called from either interrupt or thread context.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
 void stm32l4_serial_dma_poll(void);

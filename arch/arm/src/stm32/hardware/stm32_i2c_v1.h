@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_i2c_v1.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,18 +16,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_I2C_V1_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_I2C_V1_H
 
-/* This file provide definitions for the STM32 I2C IP core 1 (F1, F2, F4 and L1) */
+/* This file provide definitions for the STM32 I2C IP core 1
+ *(F1, F2, F4 and L1)
+ */
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_I2C_CR1_OFFSET    0x0000  /* Control register 1 (16-bit) */
 #define STM32_I2C_CR2_OFFSET    0x0004  /* Control register 2 (16-bit) */
@@ -43,7 +45,7 @@
 #  define STM32_I2C_FLTR_OFFSET   0x0024  /* FLTR Register (16-bit) */
 #endif
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32_NI2C > 0
 #  define STM32_I2C1_CR1        (STM32_I2C1_BASE+STM32_I2C_CR1_OFFSET)
@@ -90,7 +92,7 @@
 #  endif
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Control register 1 */
 

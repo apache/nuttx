@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32g4xxm_pinmap.h
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXM_PINMAP_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXM_PINMAP_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* Alternate Pin Functions.  All members of the STM32G4xxxx family share the
  * same pin multiplexing (although they differ in the pins physically
@@ -40,13 +40,13 @@
  * The driver will then automatically configure PA11 as the CAN1 RX pin.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
  * Additional effort is required to select specific GPIO options such as
  * frequency, open-drain/push-pull, and pull-up/down!  Just the basics are
  * defined for most pins in this file.
  */
 
-/* ADC - Analog Digital Converter *******************************************************************/
+/* ADC - Analog Digital Converter *******************************************/
 
 #define GPIO_ADC1_IN1                  (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN0)
 #define GPIO_ADC1_IN10                 (GPIO_ANALOG | GPIO_PORTF | GPIO_PIN0)
@@ -118,7 +118,7 @@
 #define GPIO_ADC5_IN7                  (GPIO_ANALOG | GPIO_PORTD | GPIO_PIN10)
 #define GPIO_ADC5_IN8                  (GPIO_ANALOG | GPIO_PORTD | GPIO_PIN11)
 
-/* COMP - Comparator ********************************************************************************/
+/* COMP - Comparator ********************************************************/
 
 #define GPIO_COMP1_OUT_1               (GPIO_ALT | GPIO_AF8 | GPIO_PORTA | GPIO_PIN0)
 #define GPIO_COMP1_OUT_2               (GPIO_ALT | GPIO_AF8 | GPIO_PORTA | GPIO_PIN6)
@@ -147,7 +147,7 @@
 #define GPIO_COMP7_OUT_1               (GPIO_ALT | GPIO_AF8 | GPIO_PORTA | GPIO_PIN8)
 #define GPIO_COMP7_OUT_2               (GPIO_ALT | GPIO_AF7 | GPIO_PORTC | GPIO_PIN8)
 
-/* CRS **********************************************************************************************/
+/* CRS **********************************************************************/
 
 /* REVISIT: Clock Recovery System (CRS_SYNC signal exposed to pin(s)?)
  * Before using the following defines, make sure they are correct!
@@ -158,20 +158,20 @@
 #  define GPIO_UCPD1_CRS_SYNC          (GPIO_ALT | GPIO_AF3 | GPIO_PORTB | GPIO_PIN3)
 #endif
 
-/* DAC **********************************************************************************************/
+/* DAC **********************************************************************/
 
 #define GPIO_DAC1_OUT1                 (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN4)
 #define GPIO_DAC1_OUT2                 (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN5)
 #define GPIO_DAC2_OUT1                 (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN6)
 
-/* Clocks outputs ***********************************************************************************/
+/* Clocks outputs ***********************************************************/
 
 /* MCU clock output */
 
 #define GPIO_MCO_1                     (GPIO_ALT | GPIO_AF0 | GPIO_PORTA | GPIO_PIN8)
 #define GPIO_MCO_2                     (GPIO_ALT | GPIO_AF0 | GPIO_PORTG | GPIO_PIN10)
 
-/* Event outputs ************************************************************************************/
+/* Event outputs ************************************************************/
 
 #define GPIO_PA0_EVENTOUT              (GPIO_ALT | GPIO_AF15 | GPIO_PORTA | GPIO_PIN0)
 #define GPIO_PA1_EVENTOUT              (GPIO_ALT | GPIO_AF15 | GPIO_PORTA | GPIO_PIN1)
@@ -247,7 +247,7 @@
 
 #define GPIO_PG10_EVENTOUT             (GPIO_ALT | GPIO_AF15 | GPIO_PORTG | GPIO_PIN10)
 
-/* FDCAN ********************************************************************************************/
+/* FDCAN ********************************************************************/
 
 #define GPIO_FDCAN1_RX_1               (GPIO_ALT | GPIO_AF9 | GPIO_SPEED_50MHz | GPIO_PUSHPULL | GPIO_PORTA | GPIO_PIN11)
 #define GPIO_FDCAN1_RX_2               (GPIO_ALT | GPIO_AF9 | GPIO_SPEED_50MHz | GPIO_PUSHPULL | GPIO_PORTB | GPIO_PIN8)
@@ -266,7 +266,7 @@
 #define GPIO_FDCAN3_TX_1               (GPIO_ALT | GPIO_AF11 | GPIO_SPEED_50MHz | GPIO_PUSHPULL | GPIO_PORTA | GPIO_PIN15)
 #define GPIO_FDCAN3_TX_2               (GPIO_ALT | GPIO_AF11 | GPIO_SPEED_50MHz | GPIO_PUSHPULL | GPIO_PORTB | GPIO_PIN4)
 
-/* HRTIM - High-Resolution Timer ********************************************************************/
+/* HRTIM - High-Resolution Timer ********************************************/
 
 #define GPIO_HRTIM1_CHA1               (GPIO_ALT | GPIO_AF13 | GPIO_PORTA | GPIO_PIN8)
 #define GPIO_HRTIM1_CHA2               (GPIO_ALT | GPIO_AF13 | GPIO_PORTA | GPIO_PIN9)
@@ -303,7 +303,7 @@
 #define GPIO_HRTIM1_SCOUT_1            (GPIO_ALT | GPIO_AF13 | GPIO_PORTB | GPIO_PIN1)
 #define GPIO_HRTIM1_SCOUT_2            (GPIO_ALT | GPIO_AF12 | GPIO_PORTB | GPIO_PIN3)
 
-/* I2C **********************************************************************************************/
+/* I2C **********************************************************************/
 
 #define GPIO_I2C1_SCL_1                (GPIO_ALT | GPIO_AF4 | GPIO_SPEED_50MHz | GPIO_OPENDRAIN | GPIO_PORTA | GPIO_PIN13)
 #define GPIO_I2C1_SCL_2                (GPIO_ALT | GPIO_AF4 | GPIO_SPEED_50MHz | GPIO_OPENDRAIN | GPIO_PORTA | GPIO_PIN15)
@@ -335,7 +335,7 @@
 #define GPIO_I2C4_SMBA_1               (GPIO_ALT | GPIO_AF3 | GPIO_SPEED_50MHz | GPIO_PUSHPULL | GPIO_PORTA | GPIO_PIN14)
 #define GPIO_I2C4_SMBA_2               (GPIO_ALT | GPIO_AF4 | GPIO_SPEED_50MHz | GPIO_PUSHPULL | GPIO_PORTD | GPIO_PIN11)
 
-/* I2S **********************************************************************************************/
+/* I2S **********************************************************************/
 
 #define GPIO_I2S_CKIN_1                (GPIO_ALT | GPIO_AF5 | GPIO_PORTA | GPIO_PIN12)
 #define GPIO_I2S_CKIN_2                (GPIO_ALT | GPIO_AF5 | GPIO_PORTC | GPIO_PIN9)
@@ -358,12 +358,12 @@
 #define GPIO_I2S3_WS_1                 (GPIO_ALT | GPIO_AF6 | GPIO_PORTA | GPIO_PIN4)
 #define GPIO_I2S3_WS_2                 (GPIO_ALT | GPIO_AF6 | GPIO_PORTA | GPIO_PIN15)
 
-/* IR - Infrared with TIM16 channel 1 and TIM17 channel 1 *******************************************/
+/* IR - Infrared with TIM16 channel 1 and TIM17 channel 1 *******************/
 
 #define GPIO_IR_OUT_1                  (GPIO_ALT | GPIO_AF5 | GPIO_PORTA | GPIO_PIN13)
 #define GPIO_IR_OUT_2                  (GPIO_ALT | GPIO_AF6 | GPIO_PORTB | GPIO_PIN9)
 
-/* LPTIM - Low Power Timer **************************************************************************/
+/* LPTIM - Low Power Timer **************************************************/
 
 #define GPIO_LPTIM1_ETR_1              (GPIO_ALT | GPIO_AF11 | GPIO_PORTB | GPIO_PIN6)
 #define GPIO_LPTIM1_ETR_2              (GPIO_ALT | GPIO_AF1 | GPIO_PORTC | GPIO_PIN3)
@@ -375,7 +375,7 @@
 #define GPIO_LPTIM1_OUT_2              (GPIO_ALT | GPIO_AF1 | GPIO_PORTB | GPIO_PIN2)
 #define GPIO_LPTIM1_OUT_3              (GPIO_ALT | GPIO_AF1 | GPIO_PORTC | GPIO_PIN1)
 
-/* LPUART - Low-Power Universal Asynchronous Receiver Transmitter ***********************************/
+/* LPUART - Low-Power Universal Asynchronous Receiver Transmitter ***********/
 
 #define GPIO_LPUART1_CTS_1             (GPIO_ALT | GPIO_AF12 | GPIO_PORTA | GPIO_PIN6)
 #define GPIO_LPUART1_CTS_2             (GPIO_ALT | GPIO_AF8 | GPIO_PORTB | GPIO_PIN13)
@@ -390,7 +390,7 @@
 #define GPIO_LPUART1_TX_2              (GPIO_ALT | GPIO_AF8 | GPIO_PORTB | GPIO_PIN11)
 #define GPIO_LPUART1_TX_3              (GPIO_ALT | GPIO_AF8 | GPIO_PORTC | GPIO_PIN1)
 
-/* JTAG *********************************************************************************************/
+/* JTAG *********************************************************************/
 
 #define GPIO_JTCK                      (GPIO_ALT | GPIO_AF0 | GPIO_PORTA | GPIO_PIN14)
 #define GPIO_JTDI                      (GPIO_ALT | GPIO_AF0 | GPIO_PORTA | GPIO_PIN15)
@@ -400,7 +400,7 @@
 #define GPIO_SWCLK                     (GPIO_ALT | GPIO_AF0 | GPIO_PORTA | GPIO_PIN14)
 #define GPIO_SWDIO                     (GPIO_ALT | GPIO_AF0 | GPIO_PORTA | GPIO_PIN13)
 
-/* OPAMP ********************************************************************************************/
+/* OPAMP ********************************************************************/
 
 #define GPIO_OPAMP1_VINM0_1            (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN3)
 #define GPIO_OPAMP1_VINM0_2            (GPIO_ANALOG | GPIO_PORTC | GPIO_PIN5)
@@ -496,7 +496,7 @@
 #define GPIO_OPAMP6_VINP_SEC_3         (GPIO_ANALOG | GPIO_PORTD | GPIO_PIN9)
 #define GPIO_OPAMP6_VOUT               (GPIO_ANALOG | GPIO_PORTB | GPIO_PIN11)
 
-/* QUADSPI ******************************************************************************************/
+/* QUADSPI ******************************************************************/
 
 #define GPIO_QUADSPI1_BK1_IO0_1        (GPIO_ALT | GPIO_AF10 | GPIO_PORTB | GPIO_PIN1)
 #define GPIO_QUADSPI1_BK1_IO0_2        (GPIO_ALT | GPIO_AF10 | GPIO_PORTE | GPIO_PIN12)
@@ -518,7 +518,7 @@
 #define GPIO_QUADSPI1_CLK_2            (GPIO_ALT | GPIO_AF10 | GPIO_PORTB | GPIO_PIN10)
 #define GPIO_QUADSPI1_CLK_3            (GPIO_ALT | GPIO_AF10 | GPIO_PORTE | GPIO_PIN10)
 
-/* RTC **********************************************************************************************/
+/* RTC **********************************************************************/
 
 #define GPIO_RTC_OUT2                  (GPIO_ALT | GPIO_AF0 | GPIO_PORTB | GPIO_PIN2)
 #define GPIO_RTC_REFIN_1               (GPIO_ALT | GPIO_AF0 | GPIO_PORTA | GPIO_PIN1)
@@ -530,8 +530,8 @@
  * (DS12288 Rev 2, page 54) shows OUT1, TS, and TAMP1 as "additional
  * functions" for PC13 on all STM32G474(C-M-Q-R-V)xxx P/Ns, but the alternate
  * function table (on page 72) makes no mention of these. Meanwhile, page 56
- * shows TAMP2 as an "additional function" but the same conundrum applies (for
- * now). Granted, these are in the "additional function" column, not the
+ * shows TAMP2 as an "additional function" but the same conundrum applies
+ * (for now). Granted, these are in the "additional function" column, not the
  * "alternate function" column.
  */
 
@@ -542,7 +542,7 @@
 
 #endif
 
-/* SAI - Serial Audio Interface *********************************************************************/
+/* SAI - Serial Audio Interface *********************************************/
 
 #define GPIO_SAI1_CK1_1                (GPIO_ALT | GPIO_AF3 | GPIO_PORTA | GPIO_PIN3)
 #define GPIO_SAI1_CK1_2                (GPIO_ALT | GPIO_AF3 | GPIO_PORTB | GPIO_PIN8)
@@ -572,7 +572,7 @@
 #define GPIO_SAI1_SD_B_2               (GPIO_ALT | GPIO_AF12 | GPIO_PORTB | GPIO_PIN5)
 #define GPIO_SAI1_SD_B_3               (GPIO_ALT | GPIO_AF13 | GPIO_PORTE | GPIO_PIN7)
 
-/* SPI - Serial Peripheral Interface ****************************************************************/
+/* SPI - Serial Peripheral Interface ****************************************/
 
 #define GPIO_SPI1_MISO_1               (GPIO_ALT | GPIO_AF5 | GPIO_SPEED_50MHz | GPIO_PORTA | GPIO_PIN6)
 #define GPIO_SPI1_MISO_2               (GPIO_ALT | GPIO_AF5 | GPIO_SPEED_50MHz | GPIO_PORTB | GPIO_PIN4)
@@ -606,7 +606,7 @@
 #define GPIO_SPI4_NSS                  (GPIO_ALT | GPIO_AF5 | GPIO_SPEED_50MHz | GPIO_PORTE | GPIO_PIN11)
 #define GPIO_SPI4_SCK                  (GPIO_ALT | GPIO_AF5 | GPIO_SPEED_50MHz | GPIO_PORTE | GPIO_PIN12)
 
-/* TIM - Timers *************************************************************************************/
+/* TIM - Timers *************************************************************/
 
 #define GPIO_TIM1_BKIN2_1              (GPIO_ALT | GPIO_AF12 | GPIO_PORTA | GPIO_PIN11)
 #define GPIO_TIM1_BKIN2_2              (GPIO_ALT | GPIO_AF6 | GPIO_PORTC | GPIO_PIN3)
@@ -870,7 +870,7 @@
 #define GPIO_TIM20_CH3IN               (GPIO_ALT | GPIO_AF6 | GPIO_SPEED_50MHz | GPIO_FLOAT | GPIO_PORTC | GPIO_PIN8)
 #define GPIO_TIM20_CH3OUT              (GPIO_ALT | GPIO_AF6 | GPIO_SPEED_50MHz | GPIO_PUSHPULL | GPIO_PORTC | GPIO_PIN8)
 
-/* UARTs/USARTs *************************************************************************************/
+/* UARTs/USARTs *************************************************************/
 
 #define GPIO_USART1_CK                 (GPIO_ALT | GPIO_AF7 | GPIO_PORTA | GPIO_PIN8)
 #define GPIO_USART1_CTS                (GPIO_ALT | GPIO_AF7 | GPIO_PORTA | GPIO_PIN11)
@@ -930,6 +930,6 @@
 #define GPIO_UART5_RX                  (GPIO_ALT | GPIO_AF5 | GPIO_PORTD | GPIO_PIN2)
 #define GPIO_UART5_TX                  (GPIO_ALT | GPIO_AF5 | GPIO_PORTC | GPIO_PIN12)
 
-/* USB Device Full Speed ****************************************************************************/
+/* USB Device Full Speed ****************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXM_PINMAP_H */

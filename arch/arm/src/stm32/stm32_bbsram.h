@@ -121,22 +121,22 @@ extern "C"
 int stm32_bbsraminitialize(char *devpath, int *sizes);
 
 /****************************************************************************
-* Function: stm32_bbsram_savepanic
-*
-* Description:
-*   Saves the panic context in a previously allocated BBSRAM file
-*
-* Parameters:
-*   fileno  - the value returned by the ioctl STM32_BBSRAM_GETDESC_IOCTL
-*   context - Pointer to a any array of bytes to save
-*   length  - The length of the data pointed to byt context
-*
-* Returned Value:
-*   Length saved or negated errno.
-*
-* Assumptions:
-*
-*****************************************************************************/
+ * Function: stm32_bbsram_savepanic
+ *
+ * Description:
+ *   Saves the panic context in a previously allocated BBSRAM file
+ *
+ * Parameters:
+ *   fileno  - the value returned by the ioctl STM32_BBSRAM_GETDESC_IOCTL
+ *   context - Pointer to a any array of bytes to save
+ *   length  - The length of the data pointed to byt context
+ *
+ * Returned Value:
+ *   Length saved or negated errno.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_SAVE_CRASHDUMP)
 int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length);

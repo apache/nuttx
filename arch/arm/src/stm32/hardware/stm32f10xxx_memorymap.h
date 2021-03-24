@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f10xxx_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,16 +16,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F10XXX_MEMORYMAP_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F10XXX_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* FLASH and SRAM *******************************************************************/
+/* FLASH and SRAM ***********************************************************/
 
 #define STM32_CODE_BASE      0x00000000     /* 0x00000000-0x1fffffff: 512Mb code block */
 #define STM32_FLASH_BASE     0x08000000     /* 0x08000000 - Up to 512Kb */
@@ -36,7 +36,7 @@
 #define STM32_REGION_MASK    0xf0000000
 #define STM32_IS_SRAM(a)     ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_SRAM_BASE)
 
-/* System Memory Addresses **********************************************************/
+/* System Memory Addresses **************************************************/
 
 #define STM32_SYSMEM_UID     0x1ffff7e8     /* The 96-bit unique device identifier */
 #define STM32_SYSMEM_FSIZE   0x1ffff7e0     /* This bitfield indicates the size of
@@ -45,7 +45,7 @@
                                              * Kbytes
                                              */
 
-/* Register Base Address ************************************************************/
+/* Register Base Address ****************************************************/
 
 /* APB1 bus */
 
@@ -83,6 +83,7 @@
 #define STM32_DAC1_BASE      0x40007400     /* 0x40007400 - 0x400077ff: DAC1 */
 #define STM32_CEC_BASE       0x40007800     /* 0x40007800 - 0x40007bff: CEC */
                                             /* 0x40007c00 - 0x4000ffff: Reserved */
+
 /* APB2 bus */
 
 #define STM32_AFIO_BASE      0x40010000     /* 0x40010000 - 0x400103ff: AFIO */
@@ -138,8 +139,8 @@
 
 #define STM32_FSMC_BASE      0xa0000000     /* 0xa0000000-0xbfffffff: 512Mb FSMC register block */
 
-/* Other registers -- see armv7-m/nvic.h for standard Cortex-M3 registers in this
- * address range
+/* Other registers -- see armv7-m/nvic.h for standard Cortex-M3 registers in
+ * this address range
  */
 
 #define STM32_SCS_BASE       0xe000e000

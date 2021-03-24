@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f40xxx_syscfg.h
  *
  *   Copyright (C) 2011, 2013, 2014-2015 Gregory Nutt. All rights reserved.
@@ -34,23 +34,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F40XXX_SYSCFG_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F40XXX_SYSCFG_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_SYSCFG_MEMRMP_OFFSET    0x0000                    /* SYSCFG memory remap register */
 #define STM32_SYSCFG_PMC_OFFSET       0x0004                    /* SYSCFG peripheral mode configuration register */
@@ -66,7 +66,7 @@
 #  define STM32_SYSCFG_CFGR_OFFSET    0x002c                    /* SYSCFG configuration register */
 #endif
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_SYSCFG_MEMRMP           (STM32_SYSCFG_BASE+STM32_SYSCFG_MEMRMP_OFFSET)
 #define STM32_SYSCFG_PMC              (STM32_SYSCFG_BASE+STM32_SYSCFG_PMC_OFFSET)
@@ -82,7 +82,7 @@
 #  define STM32_SYSCFG_CFGR           (STM32_SYSCFG_BASE+STM32_SYSCFG_CFGR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* SYSCFG memory remap register */
 

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4x6xx_pinmap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,39 +16,41 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X6XX_PINMAP_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X6XX_PINMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Alternate Pin Functions.  All members of the STM32L4xxx family share the same
- * pin multiplexing (although they may differ in the pins physically available).
+/* Alternate Pin Functions.
+ * All members of the STM32L4xxx family share the same pin multiplexing
+ * (although they may differ in the pins physically available).
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
- * Drivers, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.  For example, if
- * CAN1_RX connects vis PA11 on some board, then the following definitions should
- * appear in the board.h header file for that board:
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc. Drivers, however, will use the pin selection without the numeric
+ * suffix. Additional definitions are required in the board.h file.
+ * For example, if CAN1_RX connects vis PA11 on some board, then the
+ * following definitions should appear in the board.h header file for that
+ * board:
  *
  * #define GPIO_CAN1_RX GPIO_CAN1_RX_1
  *
  * The driver will then automatically configure PA11 as the CAN1 RX pin.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific GPIO options such as frequency,
- * open-drain/push-pull, and pull-up/down!  Just the basics are defined for most
- * pins in this file.
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific GPIO options such as
+ * frequency, open-drain/push-pull, and pull-up/down!
+ * Just the basics are defined for most pins in this file.
  */
 
 /* ADC */

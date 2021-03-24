@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_dmamux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_DMAMUX_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_DMAMUX_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* DMAMUX1 mapping ******************************************************************/
+/* DMAMUX1 mapping **********************************************************/
 
 /* NOTE: DMAMUX1 channels 0 to 7 are connected to DMA1 channels 0 to 7.
  *       DMAMUX1 channels 8 to 15 are connected to DMA2 channels 0 to 7.
@@ -90,6 +90,7 @@
 #define DMAMUX1_TIM8_UP        (51)
 #define DMAMUX1_TIM8_TRIG      (52)
 #define DMAMUX1_TIM8_COM       (53)
+
 /* DMAMUX1 54: Reserved */
 #define DMAMUX1_TIM5_CH1       (55)
 #define DMAMUX1_TIM5_CH2       (56)
@@ -152,9 +153,10 @@
 #define DMAMUX1_SAI3A          (113)
 #define DMAMUX1_SAI3B          (114)
 #define DMAMUX1_ADC3           (115)
+
 /* DMAMUX1 116-127: Reserved */
 
-/* DMAMUX2 mapping ******************************************************************/
+/* DMAMUX2 mapping **********************************************************/
 
 /* NOTE: DMAMUX2 channels 0 to 7 are connected to BDMA channels 0 to 7 */
 

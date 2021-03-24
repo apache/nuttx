@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/stm32_start.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_SAM_START_H
 #define __ARCH_ARM_SRC_SAMV7_SAM_START_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -46,20 +46,20 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_boardinitialize
  *
  * Description:
- *   All SAMV7 architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after clocking and memory have
- *   been configured but before caches have been enabled and before any devices have
- *   been initialized.
+ *   All SAMV7 architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after
+ *   clocking and memory have been configured but before caches have been
+ *   enabled and before any devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_boardinitialize(void);
 

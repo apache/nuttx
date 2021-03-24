@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32g0_exti.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32G0_EXTI_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32G0_EXTI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define STM32_NEXTI              18
 #define STM32_EXTI_MASK          0xffffffff
 
 #define STM32_EXTI_BIT(n)        (1 << (n))
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_EXTI_RTSR1_OFFSET     0x0000                    /* Rising Trigger selection register 1 */
 #define STM32_EXTI_FTSR1_OFFSET     0x0004                    /* Falling Trigger selection register 1 */
@@ -55,7 +55,7 @@
 #define STM32_EXTI_IMR2_OFFSET      0x0090                    /* CPU wakeup with interrupt mask register 2 */
 #define STM32_EXTI_EMR2_OFFSET      0x0094                    /* CPU wakeup with event mask register 2 */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_EXTI_RTSR1            (STM32_EXTI_BASE + STM32_EXTI_RTSR1_OFFSET)
 #define STM32_EXTI_FTSR1            (STM32_EXTI_BASE + STM32_EXTI_FTSR1_OFFSET)
@@ -68,7 +68,7 @@
 #define STM32_EXTI_IMR2             (STM32_EXTI_BASE + STM32_EXTI_IMR2_OFFSET)
 #define STM32_EXTI_EMR2             (STM32_EXTI_BASE + STM32_EXTI_EMR2_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* EXTI external interrupt configuration register 1-4 */
 

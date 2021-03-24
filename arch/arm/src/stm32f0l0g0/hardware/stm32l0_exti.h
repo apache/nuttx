@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32l0_exti.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32L0_EXTI_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32L0_EXTI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define STM32_NEXTI              29
 #define STM32_EXTI_MASK          0xffffffff
 
 #define STM32_EXTI_BIT(n)        (1 << (n))
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_EXTI_IMR_OFFSET    0x0000  /* Interrupt mask register */
 #define STM32_EXTI_EMR_OFFSET    0x0004  /* Event mask register */
@@ -46,7 +46,7 @@
 #define STM32_EXTI_SWIER_OFFSET  0x0010  /* Software interrupt event register */
 #define STM32_EXTI_PR_OFFSET     0x0014  /* Pending register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_EXTI_IMR           (STM32_EXTI_BASE + STM32_EXTI_IMR_OFFSET)
 #define STM32_EXTI_EMR           (STM32_EXTI_BASE + STM32_EXTI_EMR_OFFSET)
@@ -55,9 +55,10 @@
 #define STM32_EXTI_SWIER         (STM32_EXTI_BASE + STM32_EXTI_SWIER_OFFSET)
 #define STM32_EXTI_PR            (STM32_EXTI_BASE + STM32_EXTI_PR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* EXTI lines > 15 are associated with internal devices: */
+
 /* REVISIT: Taken from the F0, probably incorrect */
 
 #define EXTI_PVD_LINE            (1 << 16) /* EXTI line 16 is connected to the PVD output */
@@ -78,12 +79,14 @@
 /* Interrupt mask register */
 
 #define EXTI_IMR_BIT(n)          STM32_EXTI_BIT(n) /* 1=Interrupt request from line x is not masked */
+
 #define EXTI_IMR_SHIFT           (0)                 /* Bits 0-X: Interrupt Mask for all lines */
 #define EXTI_IMR_MASK            STM32_EXTI_MASK
 
 /* Event mask register */
 
 #define EXTI_EMR_BIT(n)          STM32_EXTI_BIT(n) /* 1=Event request from line x is not mask */
+
 #define EXTI_EMR_SHIFT           (0)                 /* Bits Bits 0-X:  Event Mask for all lines */
 #define EXTI_EMR_MASK            STM32_EXTI_MASK
 

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_exti.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_EXTI_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_EXTI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32F10XX)
 #  ifdef CONFIG_STM32_CONNECTIVITYLINE
@@ -60,7 +60,7 @@
 
 #define STM32_EXTI_BIT(n)        (1 << (n))
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
 #  define STM32_EXTI1_OFFSET     0x0000  /* Offset to EXTI1 registers */
@@ -74,7 +74,7 @@
 #define STM32_EXTI_SWIER_OFFSET  0x0010  /* Software interrupt event register */
 #define STM32_EXTI_PR_OFFSET     0x0014  /* Pending register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
 #  define STM32_EXTI1_BASE       (STM32_EXTI_BASE+STM32_EXTI1_OFFSET)
@@ -110,7 +110,7 @@
 #  define STM32_EXTI_PR          (STM32_EXTI_BASE+STM32_EXTI_PR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* EXTI lines > 15 are associated with internal devices: */
 
@@ -185,7 +185,7 @@
 #define EXTI_PR_SHIFT            (0)                /* Bits 0-X: Pending bit for all lines */
 #define EXTI_PR_MASK             STM32_EXTI_MASK
 
-/* Compatibility Definitions ********************************************************/
+/* Compatibility Definitions ************************************************/
 
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
 #  define STM32_NEXTI            STM32_NEXTI1

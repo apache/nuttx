@@ -1,7 +1,8 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f40xxx_rcc.h
  *
- *   Copyright (C) 2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2014-2015 Gregory Nutt.
+ *   All rights reserved.
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           David Sidrane <david_s5@nscdg.com>
@@ -34,16 +35,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F40XXX_RCC_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F40XXX_RCC_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_RCC_CR_OFFSET         0x0000  /* Clock control register */
 #define STM32_RCC_PLLCFG_OFFSET     0x0004  /* PLL configuration register */
@@ -79,7 +80,7 @@
 #  define STM32_RCC_DCKCFGR2_OFFSET 0x0094  /* Dedicated clocks configuration register */
 #endif
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_RCC_CR                (STM32_RCC_BASE+STM32_RCC_CR_OFFSET)
 #define STM32_RCC_PLLCFG            (STM32_RCC_BASE+STM32_RCC_PLLCFG_OFFSET)
@@ -114,7 +115,7 @@
 #  define STM32_RCC_DCKCFGR2        (STM32_RCC_BASE+STM32_RCC_DCKCFGR2_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Clock control register */
 
@@ -182,13 +183,13 @@
 #  define RCC_CFGR_SW_HSE           (1 << RCC_CFGR_SW_SHIFT) /* 01: HSE selected as system clock */
 #  define RCC_CFGR_SW_PLL           (2 << RCC_CFGR_SW_SHIFT) /* 10: PLL selected as system clock */
 
-#define RCC_CFGR_SWS_SHIFT          (2)       				 /* Bits 2-3: System Clock Switch Status */
+#define RCC_CFGR_SWS_SHIFT          (2)       /* Bits 2-3: System Clock Switch Status */
 #define RCC_CFGR_SWS_MASK           (3 << RCC_CFGR_SWS_SHIFT)
 #  define RCC_CFGR_SWS_HSI          (0 << RCC_CFGR_SWS_SHIFT) /* 00: HSI oscillator used as system clock */
 #  define RCC_CFGR_SWS_HSE          (1 << RCC_CFGR_SWS_SHIFT) /* 01: HSE oscillator used as system clock */
 #  define RCC_CFGR_SWS_PLL          (2 << RCC_CFGR_SWS_SHIFT) /* 10: PLL used as system clock */
 
-#define RCC_CFGR_HPRE_SHIFT         (4)       				  /* Bits 4-7: AHB prescaler */
+#define RCC_CFGR_HPRE_SHIFT         (4)        /* Bits 4-7: AHB prescaler */
 #define RCC_CFGR_HPRE_MASK          (0x0f << RCC_CFGR_HPRE_SHIFT)
 #  define RCC_CFGR_HPRE_SYSCLK      (0 << RCC_CFGR_HPRE_SHIFT)  /* 0xxx: SYSCLK not divided */
 #  define RCC_CFGR_HPRE_SYSCLKd2    (8 << RCC_CFGR_HPRE_SHIFT)  /* 1000: SYSCLK divided by 2 */
@@ -200,7 +201,7 @@
 #  define RCC_CFGR_HPRE_SYSCLKd256  (14 << RCC_CFGR_HPRE_SHIFT) /* 1110: SYSCLK divided by 256 */
 #  define RCC_CFGR_HPRE_SYSCLKd512  (15 << RCC_CFGR_HPRE_SHIFT) /* 1111: SYSCLK divided by 512 */
 
-#define RCC_CFGR_PPRE1_SHIFT        (10)      					/* Bits 10-12: APB Low speed prescaler (APB1) */
+#define RCC_CFGR_PPRE1_SHIFT        (10)      /* Bits 10-12: APB Low speed prescaler (APB1) */
 #define RCC_CFGR_PPRE1_MASK         (7 << RCC_CFGR_PPRE1_SHIFT)
 #  define RCC_CFGR_PPRE1_HCLK       (0 << RCC_CFGR_PPRE1_SHIFT) /* 0xx: HCLK not divided */
 #  define RCC_CFGR_PPRE1_HCLKd2     (4 << RCC_CFGR_PPRE1_SHIFT) /* 100: HCLK divided by 2 */
@@ -208,7 +209,7 @@
 #  define RCC_CFGR_PPRE1_HCLKd8     (6 << RCC_CFGR_PPRE1_SHIFT) /* 110: HCLK divided by 8 */
 #  define RCC_CFGR_PPRE1_HCLKd16    (7 << RCC_CFGR_PPRE1_SHIFT) /* 111: HCLK divided by 16 */
 
-#define RCC_CFGR_PPRE2_SHIFT        (13)      					/* Bits 13-15: APB High speed prescaler (APB2) */
+#define RCC_CFGR_PPRE2_SHIFT        (13)      /* Bits 13-15: APB High speed prescaler (APB2) */
 #define RCC_CFGR_PPRE2_MASK         (7 << RCC_CFGR_PPRE2_SHIFT)
 #  define RCC_CFGR_PPRE2_HCLK       (0 << RCC_CFGR_PPRE2_SHIFT) /* 0xx: HCLK not divided */
 #  define RCC_CFGR_PPRE2_HCLKd2     (4 << RCC_CFGR_PPRE2_SHIFT) /* 100: HCLK divided by 2 */
@@ -740,9 +741,9 @@
 #  define RCC_BDCR_RTCSEL_LSI       (2 << RCC_BDCR_RTCSEL_SHIFT) /* 10: LSI oscillator clock used as RTC clock */
 #  define RCC_BDCR_RTCSEL_HSE       (3 << RCC_BDCR_RTCSEL_SHIFT) /* 11: HSE oscillator clock divided by 128 used as RTC clock */
 
-#define RCC_BDCR_RTCEN              (1 << 15) 				     /* Bit 15: RTC clock enable */
+#define RCC_BDCR_RTCEN              (1 << 15) /* Bit 15: RTC clock enable */
 
-#define RCC_BDCR_BDRST              (1 << 16) 					 /* Bit 16: Backup domain software reset */
+#define RCC_BDCR_BDRST              (1 << 16) /* Bit 16: Backup domain software reset */
 
 /* Control/status register */
 
@@ -926,28 +927,28 @@
 /* Dedicated clocks configuration register 2 */
 
 #if defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F412)
-#  define RCC_DCKCFGR2_FMPI2C1SEL_SHIFT    (22)      							/* Bits 22-23: I2C4 clock source selection */
+#  define RCC_DCKCFGR2_FMPI2C1SEL_SHIFT    (22)      /* Bits 22-23: I2C4 clock source selection */
 #  define RCC_DCKCFGR2_FMPI2C1SEL_MASK     (3 << RCC_DCKCFGR2_FMPI2C1SEL_SHIFT)
 #    define RCC_DCKCFGR2_FMPI2C1SEL_APB    (0 << RCC_DCKCFGR2_FMPI2C1SEL_SHIFT) /* APB1 clock (PCLK1) is selected as I2C 4 clock */
 #    define RCC_DCKCFGR2_FMPI2C1SEL_SYSCLK (1 << RCC_DCKCFGR2_FMPI2C1SEL_SHIFT) /* System clock is selected as I2C 4 clock */
 #    define RCC_DCKCFGR2_FMPI2C1SEL_HSI    (2 << RCC_DCKCFGR2_FMPI2C1SEL_SHIFT) /* HSI clock is selected as I2C 4 clock */
 
-#  define RCC_DCKCFGR2_CECSEL_SHIFT        (26)      							/* Bit 26: HDMI-CEC clock source selection */
+#  define RCC_DCKCFGR2_CECSEL_SHIFT        (26)      /* Bit 26: HDMI-CEC clock source selection */
 #  define RCC_DCKCFGR2_CECSEL_MASK         (1 << RCC_DCKCFGR2_CECSEL_SHIFT)
-#    define RCC_DCKCFGR2_CECSEL_LSE        (0 << RCC_DCKCFGR2_CECSEL_SHIFT) 	/* LSE clock is selected as HDMI-CEC clock */
-#    define RCC_DCKCFGR2_CECSEL_HSI        (1 << RCC_DCKCFGR2_CECSEL_SHIFT) 	/* HSI clock is selected as HDMI-CEC clock */
+#    define RCC_DCKCFGR2_CECSEL_LSE        (0 << RCC_DCKCFGR2_CECSEL_SHIFT) /* LSE clock is selected as HDMI-CEC clock */
+#    define RCC_DCKCFGR2_CECSEL_HSI        (1 << RCC_DCKCFGR2_CECSEL_SHIFT) /* HSI clock is selected as HDMI-CEC clock */
 
-#  define RCC_DCKCFGR2_CK48MSEL_SHIFT      (27)      							/* Bit 27: 48 MHz clock source selection */
+#  define RCC_DCKCFGR2_CK48MSEL_SHIFT      (27)      /* Bit 27: 48 MHz clock source selection */
 #  define RCC_DCKCFGR2_CK48MSEL_MASK       (1 << RCC_DCKCFGR2_CK48MSEL_SHIFT)
-#    define RCC_DCKCFGR2_CK48MSEL_PLL      (0 << RCC_DCKCFGR2_CK48MSEL_SHIFT) 	/* 48 MHz clock from PLL is selected */
-#    define RCC_DCKCFGR2_CK48MSEL_PLLSAI   (1 << RCC_DCKCFGR2_CK48MSEL_SHIFT) 	/* 48 MHz clock from PLLSAI is selected */
+#    define RCC_DCKCFGR2_CK48MSEL_PLL      (0 << RCC_DCKCFGR2_CK48MSEL_SHIFT) /* 48 MHz clock from PLL is selected */
+#    define RCC_DCKCFGR2_CK48MSEL_PLLSAI   (1 << RCC_DCKCFGR2_CK48MSEL_SHIFT) /* 48 MHz clock from PLLSAI is selected */
 
-#  define RCC_DCKCFGR2_SDIOSEL_SHIFT       (28)      						  	/* Bit 28: SDIO clock source selection */
+#  define RCC_DCKCFGR2_SDIOSEL_SHIFT       (28)      /* Bit 28: SDIO clock source selection */
 #  define RCC_DCKCFGR2_SDIOSEL_MASK        (1 << RCC_DCKCFGR2_SDIOSEL_SHIFT)
-#    define RCC_DCKCFGR2_SDIOSEL_48MHZ     (0 << RCC_DCKCFGR2_SDIOSEL_SHIFT) 	/* 48 MHz clock is selected as SDMMC clock */
-#    define RCC_DCKCFGR2_SDIOSEL_SYSCLK    (1 << RCC_DCKCFGR2_SDIOSEL_SHIFT) 	/* System clock is selected as SDMMC clock */
+#    define RCC_DCKCFGR2_SDIOSEL_48MHZ     (0 << RCC_DCKCFGR2_SDIOSEL_SHIFT) /* 48 MHz clock is selected as SDMMC clock */
+#    define RCC_DCKCFGR2_SDIOSEL_SYSCLK    (1 << RCC_DCKCFGR2_SDIOSEL_SHIFT) /* System clock is selected as SDMMC clock */
 
-#  define RCC_DCKCFGR2_SPDIFRXSEL_SHIFT    (29)      						 	/* Bit 29: SPDIF-Rx clock selection */
+#  define RCC_DCKCFGR2_SPDIFRXSEL_SHIFT    (29)      /* Bit 29: SPDIF-Rx clock selection */
 #  define RCC_DCKCFGR2_SPDIFRXSEL_MASK     (1 << RCC_DCKCFGR2_SPDIFRXSEL_SHIFT)
 #    define RCC_DCKCFGR2_SPDIFRXSEL_PLL    (0 << RCC_DCKCFGR2_SPDIFRXSEL_SHIFT) /* PLL clock is selected as SPDIF-Rx clock */
 #    define RCC_DCKCFGR2_SPDIFRXSEL_PLLI2S (1 << RCC_DCKCFGR2_SPDIFRXSEL_SHIFT) /* PLLI2S clock is selected as SPDIF-Rx clock */

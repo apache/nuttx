@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f102_pinmap.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -32,20 +32,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F102_PINMAP_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F102_PINMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Alternate Pin Functions: */
 
@@ -140,7 +140,6 @@
 #  define GPIO_TIM2_CH4OUT      (GPIO_ALT|GPIO_CNF_AFPP|GPIO_MODE_50MHz|GPIO_PORTA|GPIO_PIN3)
 #endif
 
-
 #if defined(CONFIG_STM32_TIM3_FULL_REMAP)
 #  define GPIO_TIM3_CH1IN       (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|GPIO_PORTC|GPIO_PIN6)
 #  define GPIO_TIM3_CH1OUT      (GPIO_ALT|GPIO_CNF_AFPP|GPIO_MODE_50MHz|GPIO_PORTC|GPIO_PIN6)
@@ -170,7 +169,6 @@
 #  define GPIO_TIM3_CH4OUT      (GPIO_ALT|GPIO_CNF_AFPP|GPIO_MODE_50MHz|GPIO_PORTB|GPIO_PIN1)
 #endif
 #define GPIO_TIM3_ETR           (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|GPIO_PORTD|GPIO_PIN2)
-
 
 #if defined(CONFIG_STM32_TIM4_FULL_REMAP)
 #  define GPIO_TIM4_CH1IN         (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|GPIO_PORTD|GPIO_PIN12)

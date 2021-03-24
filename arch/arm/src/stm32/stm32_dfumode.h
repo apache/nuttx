@@ -37,7 +37,8 @@
  * Description:
  *   Reboot the part in DFU mode.
  *
- *   https://community.st.com/s/question/0D50X00009XkhAzSAJ/calling-stm32429ieval-bootloader
+ *   https://community.st.com/s/question/0D50X00009XkhAzSAJ/
+ *              calling-stm32429ieval-bootloader
  *
  ****************************************************************************/
 

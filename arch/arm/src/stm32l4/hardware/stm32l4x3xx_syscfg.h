@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4x3xx_syscfg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,29 +16,31 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X3XX_SYSCFG_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X3XX_SYSCFG_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L4_SYSCFG_MEMRMP_OFFSET    0x0000 /* SYSCFG memory remap register */
 #define STM32L4_SYSCFG_CFGR1_OFFSET     0x0004 /* SYSCFG configuration register 1 */
+
 #define STM32L4_SYSCFG_EXTICR_OFFSET(p) (0x0008 + ((p) & 0x000c)) /* Registers are displaced by 4! */
+
 #define STM32L4_SYSCFG_EXTICR1_OFFSET   0x0008 /* SYSCFG external interrupt configuration register 1 */
 #define STM32L4_SYSCFG_EXTICR2_OFFSET   0x000c /* SYSCFG external interrupt configuration register 2 */
 #define STM32L4_SYSCFG_EXTICR3_OFFSET   0x0010 /* SYSCFG external interrupt configuration register 3 */
@@ -48,7 +50,7 @@
 #define STM32L4_SYSCFG_SWPR_OFFSET      0x0020 /* SYSCFG SRAM2 write protection register */
 #define STM32L4_SYSCFG_SKR_OFFSET       0x0024 /* SYSCFG SRAM2 key register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32L4_SYSCFG_MEMRMP           (STM32L4_SYSCFG_BASE+STM32L4_SYSCFG_MEMRMP_OFFSET)
 #define STM32L4_SYSCFG_CFGR1            (STM32L4_SYSCFG_BASE+STM32L4_SYSCFG_CFGR1_OFFSET)
@@ -62,7 +64,7 @@
 #define STM32L4_SYSCFG_SWPR             (STM32L4_SYSCFG_BASE+STM32L4_SYSCFG_SWPR_OFFSET)
 #define STM32L4_SYSCFG_SKR              (STM32L4_SYSCFG_BASE+STM32L4_SYSCFG_SKR_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* SYSCFG memory remap register */
 
@@ -99,6 +101,7 @@
 #define SYSCFG_EXTICR_PORTC           (2)       /* 0010: PC[x] pin */
 #define SYSCFG_EXTICR_PORTD           (3)       /* 0011: PD[x] pin */
 #define SYSCFG_EXTICR_PORTE           (4)       /* 0100: PE[x] pin */
+
 /* No PORTF or PORTG on these chips */
 #define SYSCFG_EXTICR_PORTH           (7)       /* 0111: PH[x] pin */
 
@@ -156,6 +159,7 @@
 #define SYSCFG_CFGR2_SPF              (1 <<  8) /* Bit  8: SRAM2 parity error flag */
 
 /* SYSCFG SRAM2 write protection register */
+
 /* There is one bit per SRAM2 page (0 to 31) */
 
 /* SYSCFG SRAM2 key register */

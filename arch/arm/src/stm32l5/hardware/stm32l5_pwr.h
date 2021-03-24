@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l5/hardware/stm32l5_pwr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L5_PWR_H
 #define __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L5_PWR_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets **********************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L5_PWR_CR1_OFFSET      0x0000  /* Power control register 1 */
 #define STM32L5_PWR_CR2_OFFSET      0x0004  /* Power control register 2 */
@@ -60,7 +60,7 @@
 #define STM32L5_PWR_SECCFGR_OFFSET  0x0078  /* Power secure configuration register */
 #define STM32L5_PWR_PRIVCFGR_OFFSET 0x0078  /* Power privilege configuration register */
 
-/* Register Addresses ********************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32L5_PWR_CR1          (STM32L5_PWR_BASE + STM32L5_PWR_CR1_OFFSET)
 #define STM32L5_PWR_CR2          (STM32L5_PWR_BASE + STM32L5_PWR_CR2_OFFSET)
@@ -88,7 +88,7 @@
 #define STM32L5_PWR_SECCFGR      (STM32L5_PWR_BASE + STM32L5_PWR_SECCFGR_OFFSET)
 #define STM32L5_PWR_PRIVCFGR     (STM32L5_PWR_BASE + STM32L5_PWR_PRIVCFGR_OFFSET)
 
-/* Register Bitfield Definitions *********************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Power control register 1 */
 

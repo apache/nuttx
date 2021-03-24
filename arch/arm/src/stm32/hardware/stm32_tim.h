@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_tim.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,16 +16,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_TIM_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_TIM_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* TIM version **************************************************************************************/
+/* TIM version **************************************************************/
 
 /* Chip has extended version of ADV Timers (F3/F7/H7/L4/L4+):
  *   - CCMR3, CCR5 and CCR6 registers
@@ -62,7 +62,7 @@
 #  define HAVE_GTIM_CCXNP
 #endif
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 /* Basic Timers - TIM6 and TIM7 */
 
@@ -76,13 +76,14 @@
 #define STM32_BTIM_ARR_OFFSET     0x002c  /* Auto-reload register (16-bit) */
 
 /* 16-/32-bit General Timers with DMA: TIM2, TM3, TIM4, and TIM5
- * 16-bit General Timers without DMA: TIM9, TIM10, TIM11, TIM12, TIM13, and TIM14
+ * 16-bit General Timers without DMA: TIM9, TIM10, TIM11, TIM12, TIM13,
+ *                                    and TIM14
  * For the STM32F10xx all timers are 16-bit.
  * For the STM32F20xx and STM32F40xx, TIM2 and 5 are 32-bit
- * The STM32 F1 Value Line and the STM32 F3 have variant general purpose registers
- *   that are not yet fully covered in this header file.
- * The STM32 G47x also have variant registers that are not yet covered. Check
- *   whether those are similar to the F1 and F3 mentioned above. In
+ * The STM32 F1 Value Line and the STM32 F3 have variant general purpose
+ *   registers that are not yet fully covered in this header file.
+ * The STM32 G47x also have variant registers that are not yet covered.
+ *   Check whether those are similar to the F1 and F3 mentioned above. In
  *   particular, the DCR and DMAR offsets are 0x3dc and 0x3e0, respectively,
  *   as opposed to the values below:
  */
@@ -151,7 +152,7 @@
 #  define STM32_ATIM_CCR6_OFFSET   0x005c  /* Capture/compare register 4 (32-bit) */
 #endif
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 /* Advanced Timers - TIM1 and TIM8 */
 
@@ -471,7 +472,7 @@
 #  define STM32_TIM7_ARR          (STM32_TIM7_BASE+STM32_BTIM_ARR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Control register 1 */
 
@@ -701,7 +702,10 @@
 
 /* Capture/compare mode register 1 -- Input capture mode */
 
-                                            /* Bits 1-0:(same as output compare mode) */
+/*                                             Bits 1-0:
+ *                                             (same as output compare mode)
+ */
+
 #define ATIM_CCMR1_IC1PSC_SHIFT   (2)       /* Bits 3-2: Input Capture 1 Prescaler */
 #define ATIM_CCMR1_IC1PSC_MASK    (3 << ATIM_CCMR1_IC1PSC_SHIFT)
                                             /* (See common (unshifted) bit field definitions below) */
@@ -769,7 +773,10 @@
 
 /* Capture/compare mode register 2 - Input Capture Mode */
 
-                                            /* Bits 1-0:(same as output compare mode) */
+/*                                             Bits 1-0:
+ *                                           (same as output compare mode)
+ */
+
 #define ATIM_CCMR2_IC3PSC_SHIFT   (2)       /* Bits 3-2: Input Capture 3 Prescaler */
 #define ATIM_CCMR1_IC3PSC_MASK    (3 << ATIM_CCMR2_IC3PSC_SHIFT)
                                             /* (See common (unshifted) bit field definitions above) */
@@ -1065,7 +1072,9 @@
 #define GTIM_EGR_TG               (1 << 6)  /* Bit 6: Trigger generation (TIM2-5,9,12&16-17 only) */
 #define GTIM_EGR_BG               (1 << 7)  /* Bit 7: Break generation (TIM15-17 only) */
 
-/* Capture/compare mode register 1 - Output compare mode (TIM2-5 and TIM9-14) */
+/* Capture/compare mode register 1 - Output compare mode
+ * (TIM2-5 and TIM9-14)
+ */
 
 #define GTIM_CCMR1_CC1S_SHIFT     (0)       /* Bits 1-0: Capture/Compare 1 Selection */
 #define GTIM_CCMR1_CC1S_MASK      (3 << GTIM_CCMR1_CC1S_SHIFT)
@@ -1108,9 +1117,13 @@
 #define GTIM_CCMR_MODE_PWM1       (6)       /* 110: PWM mode 1 */
 #define GTIM_CCMR_MODE_PWM2       (7)       /* 111: PWM mode 2 */
 
-/* Capture/compare mode register 1 - Input capture mode (TIM2-5 and TIM9-14) */
+/* Capture/compare mode register 1 - Input capture mode
+ * (TIM2-5 and TIM9-14)
+ */
 
-                                            /* Bits 1-0 (Same as Output Compare Mode) */
+/*                                             Bits 1-0
+ *                                             (Same as Output Compare Mode)
+ */
 #define GTIM_CCMR1_IC1PSC_SHIFT   (2)       /* Bits 3-2: Input Capture 1 Prescaler */
 #define GTIM_CCMR1_IC1PSC_MASK    (3 << GTIM_CCMR1_IC1PSC_SHIFT)
                                             /* (See common CCMR Input Capture Prescaler definitions below) */
@@ -1174,7 +1187,9 @@
 
 /* Capture/compare mode register 2 - Input capture mode (TIM2-5 only) */
 
-                                            /* Bits 1-0 (Same as Output Compare Mode) */
+/*                                             Bits 1-0
+ *                                              (Same as Output Compare Mode)
+ */
 #define GTIM_CCMR2_IC3PSC_SHIFT   (2)       /* Bits 3-2: Input Capture 3 Prescaler */
 #define GTIM_CCMR2_IC3PSC_MASK    (3 << GTIM_CCMR2_IC3PSC_SHIFT)
                                             /* (See common CCMR Input Capture Prescaler definitions below) */

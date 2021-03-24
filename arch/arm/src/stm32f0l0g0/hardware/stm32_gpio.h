@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_GPIO_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_STM32F0)
 #  undef STM32_GPIO_VERY_LOW_SPEED          /* No very low speed operation */
@@ -35,7 +35,7 @@
 #  error "Unsupported STM32 M0 family"
 #endif
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_GPIO_MODER_OFFSET    0x0000 /* GPIO port mode register */
 #define STM32_GPIO_OTYPER_OFFSET   0x0004 /* GPIO port output type register */
@@ -49,7 +49,7 @@
 #define STM32_GPIO_AFRH_OFFSET     0x0024 /* GPIO alternate function high register */
 #define STM32_GPIO_BRR_OFFSET      0x0028 /* GPIO port bit reset register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32_NPORTS > 0
 #  define STM32_GPIOA_MODER        (STM32_GPIOA_BASE+STM32_GPIO_MODER_OFFSET)
@@ -155,7 +155,7 @@
 #  define STM32_GPIOG_AFRH         (STM32_GPIOG_BASE+STM32_GPIO_AFRH_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* GPIO port mode register */
 

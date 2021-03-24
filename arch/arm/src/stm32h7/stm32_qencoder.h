@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/stm32_qencoder.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_STM32_QENCODER_H
 #define __ARCH_ARM_SRC_STM32H7_STM32_QENCODER_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,14 +31,14 @@
 
 #ifdef CONFIG_SENSORS_QENCODER
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Timer devices may be used for different purposes.  One special purpose is as
- * a quadrature encoder input device.  If CONFIG_STM32H7_TIMn is defined then the
- * CONFIG_STM32H7_TIMn_QE must also be defined to indicate that timer "n" is intended
- * to be used for as a quadrature encoder.
+/* Timer devices may be used for different purposes.  One special purpose is
+ * as a quadrature encoder input device.  If CONFIG_STM32H7_TIMn is defined
+ * then the CONFIG_STM32H7_TIMn_QE must also be defined to indicate that
+ * timer "n" is intended to be used for as a quadrature encoder.
  */
 
 #ifndef CONFIG_STM32H7_TIM1
@@ -60,8 +60,8 @@
 #  undef CONFIG_STM32H7_TIM8_QE
 #endif
 
-/* Only timers 2-5, and 1 & 8 can be used as a quadrature encoder (at least for the
- * STM32 H7)
+/* Only timers 2-5, and 1 & 8 can be used as a quadrature encoder
+ * (at least for the STM32 H7)
  */
 
 #undef CONFIG_STM32H7_TIM6_QE
@@ -101,25 +101,26 @@
 #  define CONFIG_STM32H7_TIM8_QECLKOUT 28000000
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_qeinitialize
  *
  * Description:
- *   Initialize a quadrature encoder interface.  This function must be called from
- *   board-specific logic..
+ *   Initialize a quadrature encoder interface.  This function must be
+ *   called from board-specific logic..
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/qe0"
- *   tim     - The timer number to used.  'tim' must be an element of {1,2,3,4,5,8}
+ *   tim     - The timer number to used.  'tim' must be an element of
+ *             {1,2,3,4,5,8}
  *
  * Returned Value:
  *   Zero on success; A negated errno value is returned on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_qeinitialize(FAR const char *devpath, int tim);
 

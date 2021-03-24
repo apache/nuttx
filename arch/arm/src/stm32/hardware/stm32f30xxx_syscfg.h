@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f30xxx_syscfg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F30XXX_SYSCFG_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F30XXX_SYSCFG_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_SYSCFG_CFGR1_OFFSET      0x0000                    /* SYSCFG configuration register 1 */
 #define STM32_SYSCFG_RCR_OFFSET        0x0004                    /* SYSCFG CCM SRAM protection register */
@@ -45,7 +45,7 @@
 
 #define STM32_SYSCFG_CFGR2_OFFSET      0x0018                    /* SYSCFG configuration register 2 */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_SYSCFG_CFGR1             (STM32_SYSCFG_BASE+STM32_SYSCFG_CFGR1_OFFSET)
 #define STM32_SYSCFG_RCR               (STM32_SYSCFG_BASE+STM32_SYSCFG_RCR_OFFSET)
@@ -58,7 +58,7 @@
 
 #define STM32_SYSCFG_CFGR2             (STM32_SYSCFG_BASE+STM32_SYSCFG_CFGR2_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* SYSCFG memory remap register */
 

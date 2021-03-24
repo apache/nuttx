@@ -45,6 +45,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Internal SRAM is available in all members of the STM32L4 family. The
  * following definitions must be provided to specify the size and
  * location of internal (system) SRAM1 and SRAM2:
@@ -54,9 +55,9 @@
  * SRAM2_START   0x10000000
  * SRAM2_END
  *
- * In addition to internal SRAM, memory may also be available through the FSMC.
- * In order to use FSMC SRAM, the following additional things need to be
- * present in the NuttX configuration file:
+ * In addition to internal SRAM, memory may also be available through the
+ * FSMC. In order to use FSMC SRAM, the following additional things need to
+ * be present in the NuttX configuration file:
  *
  * CONFIG_STM32L4_FSMC=y      : Enables the FSMC
  * CONFIG_STM32L4_FSMC_SRAM=y : Indicates that SRAM is available via the
@@ -191,7 +192,8 @@ static inline void up_heap_color(FAR void *start, size_t size)
  *
  *     Kernel .data region.  Size determined at link time.
  *     Kernel .bss  region  Size determined at link time.
- *     Kernel IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
+ *     Kernel IDLE thread stack.  Size determined by
+ *                                    CONFIG_IDLETHREAD_STACKSIZE.
  *     Padding for alignment
  *     User .data region.  Size determined at link time.
  *     User .bss region  Size determined at link time.
@@ -208,7 +210,8 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+                               CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = SRAM1_END - ubase;
   int       log2;
 
@@ -270,7 +273,8 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+                               CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = SRAM1_END - ubase;
   int       log2;
 
@@ -308,24 +312,22 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void arm_addregion(void)
 {
-
 #ifdef CONFIG_STM32L4_SRAM2_HEAP
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
   /* Allow user-mode access to the SRAM2 heap */
 
-  stm32l4_mpu_uheap((uintptr_t)SRAM2_START, SRAM2_END-SRAM2_START);
-
+  stm32l4_mpu_uheap((uintptr_t)SRAM2_START, SRAM2_END - SRAM2_START);
 #endif
 
   /* Colorize the heap for debug */
 
-  up_heap_color((FAR void *)SRAM2_START, SRAM2_END-SRAM2_START);
+  up_heap_color((FAR void *)SRAM2_START, SRAM2_END - SRAM2_START);
 
   /* Add the SRAM2 user heap region. */
 
-  kumm_addregion((FAR void *)SRAM2_START, SRAM2_END-SRAM2_START);
+  kumm_addregion((FAR void *)SRAM2_START, SRAM2_END - SRAM2_START);
 
 #endif /* SRAM2 */
 
@@ -335,17 +337,17 @@ void arm_addregion(void)
 
   /* Allow user-mode access to the SRAM3 heap */
 
-  stm32l4_mpu_uheap((uintptr_t)SRAM3_START, SRAM3_END-SRAM3_START);
+  stm32l4_mpu_uheap((uintptr_t)SRAM3_START, SRAM3_END - SRAM3_START);
 
 #endif
 
   /* Colorize the heap for debug */
 
-  up_heap_color((FAR void *)SRAM3_START, SRAM3_END-SRAM3_START);
+  up_heap_color((FAR void *)SRAM3_START, SRAM3_END - SRAM3_START);
 
   /* Add the SRAM3 user heap region. */
 
-  kumm_addregion((FAR void *)SRAM3_START, SRAM3_END-SRAM3_START);
+  kumm_addregion((FAR void *)SRAM3_START, SRAM3_END - SRAM3_START);
 
 #endif /* SRAM3 */
 
@@ -354,7 +356,7 @@ void arm_addregion(void)
 
   /* Allow user-mode access to the FSMC SRAM user heap memory */
 
-   stm32l4_mpu_uheap((uintptr_t)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+  stm32l4_mpu_uheap((uintptr_t)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 
 #endif
 

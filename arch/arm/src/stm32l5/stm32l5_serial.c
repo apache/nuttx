@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l5/stm32l5_serial.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -6,7 +6,8 @@
  *
  * Based on arch/arm/src/stm32l4/stm32l4_serial.c
  *
- *   Copyright (C) 2009-2014,2016-2017,2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014,2016-2017,2019 Gregory Nutt.
+ *   All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david.sidrane@nscdg.com>
  *
@@ -37,11 +38,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -76,11 +77,11 @@
 #include "arm_arch.h"
 #include "arm_internal.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Some sanity checks ********************************************************/
+/* Some sanity checks *******************************************************/
 
 /* DMA configuration */
 
@@ -229,9 +230,9 @@
 #ifdef USE_SERIALDRIVER
 #ifdef HAVE_UART
 
-/*****************************************************************************
+/****************************************************************************
  * Private Types
- *****************************************************************************/
+ ****************************************************************************/
 
 struct stm32l5_serial_s
 {
@@ -313,9 +314,9 @@ struct stm32l5_serial_s
 #endif
 };
 
-/*****************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
 static void stm32l5serial_setformat(FAR struct uart_dev_s *dev);
@@ -367,9 +368,9 @@ static int  stm32l5serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
                                     enum pm_state_e pmstate);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Private Data
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef SERIAL_HAVE_ONLY_DMA
 static const struct uart_ops_s g_uart_ops =
@@ -867,37 +868,38 @@ static struct serialpm_s g_serialpm =
 };
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Private Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_getreg
- *****************************************************************************/
+ ****************************************************************************/
 
-static inline uint32_t stm32l5serial_getreg(FAR struct stm32l5_serial_s *priv,
-                                            int offset)
+static inline
+uint32_t stm32l5serial_getreg(FAR struct stm32l5_serial_s *priv, int offset)
 {
   return getreg32(priv->usartbase + offset);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_putreg
- *****************************************************************************/
+ ****************************************************************************/
 
-static inline void stm32l5serial_putreg(FAR struct stm32l5_serial_s *priv,
-                                        int offset, uint32_t value)
+static inline
+void stm32l5serial_putreg(FAR struct stm32l5_serial_s *priv,
+                          int offset, uint32_t value)
 {
   putreg32(value, priv->usartbase + offset);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_setusartint
- *****************************************************************************/
+ ****************************************************************************/
 
-static inline void stm32l5serial_setusartint(
-                                            FAR struct stm32l5_serial_s *priv,
-                                            uint16_t ie)
+static inline
+void stm32l5serial_setusartint(FAR struct stm32l5_serial_s *priv,
+                               uint16_t ie)
 {
   uint32_t cr;
 
@@ -920,9 +922,9 @@ static inline void stm32l5serial_setusartint(
   stm32l5serial_putreg(priv, STM32L5_USART_CR3_OFFSET, cr);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: up_restoreusartint
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5serial_restoreusartint(FAR struct stm32l5_serial_s *priv,
                                           uint16_t ie)
@@ -936,9 +938,9 @@ static void stm32l5serial_restoreusartint(FAR struct stm32l5_serial_s *priv,
   leave_critical_section(flags);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_disableusartint
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5serial_disableusartint(FAR struct stm32l5_serial_s *priv,
                                           FAR uint16_t *ie)
@@ -991,14 +993,14 @@ static void stm32l5serial_disableusartint(FAR struct stm32l5_serial_s *priv,
   leave_critical_section(flags);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_dmanextrx
  *
  * Description:
  *   Returns the index into the RX FIFO where the DMA will place the next
  *   byte that it receives.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
 static int stm32l5serial_dmanextrx(FAR struct stm32l5_serial_s *priv)
@@ -1011,13 +1013,13 @@ static int stm32l5serial_dmanextrx(FAR struct stm32l5_serial_s *priv)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_setformat
  *
  * Description:
  *   Set the serial line format and speed.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
 static void stm32l5serial_setformat(FAR struct uart_dev_s *dev)
@@ -1156,13 +1158,13 @@ static void stm32l5serial_setformat(FAR struct uart_dev_s *dev)
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_setsuspend
  *
  * Description:
  *   Suspend or resume serial peripheral.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 static void stm32l5serial_setsuspend(struct uart_dev_s *dev, bool suspend)
@@ -1283,13 +1285,13 @@ static void stm32l5serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_pm_setsuspend
  *
  * Description:
  *   Suspend or resume serial peripherals for/from deep-sleep/stop modes.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 static void stm32l5serial_pm_setsuspend(bool suspend)
@@ -1317,7 +1319,7 @@ static void stm32l5serial_pm_setsuspend(bool suspend)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_setapbclock
  *
  * Description:
@@ -1327,7 +1329,7 @@ static void stm32l5serial_pm_setsuspend(bool suspend)
  *   dev - A reference to the UART driver state structure
  *   on  - Enable clock if 'on' is 'true' and disable if 'false'
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5serial_setapbclock(FAR struct uart_dev_s *dev, bool on)
 {
@@ -1392,14 +1394,14 @@ static void stm32l5serial_setapbclock(FAR struct uart_dev_s *dev, bool on)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_setup
  *
  * Description:
  *   Configure the USART baud, bits, parity, etc. This method is called the
  *   first time that the serial port is opened.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5serial_setup(FAR struct uart_dev_s *dev)
 {
@@ -1510,14 +1512,14 @@ static int stm32l5serial_setup(FAR struct uart_dev_s *dev)
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_dmasetup
  *
  * Description:
  *   Configure the USART baud, bits, parity, etc. This method is called the
  *   first time that the serial port is opened.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
 static int stm32l5serial_dmasetup(FAR struct uart_dev_s *dev)
@@ -1604,14 +1606,14 @@ static int stm32l5serial_dmasetup(FAR struct uart_dev_s *dev)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_shutdown
  *
  * Description:
  *   Disable the USART.  This method is called when the serial
  *   port is closed
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5serial_shutdown(FAR struct uart_dev_s *dev)
 {
@@ -1670,14 +1672,14 @@ static void stm32l5serial_shutdown(FAR struct uart_dev_s *dev)
 #endif
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_dmashutdown
  *
  * Description:
  *   Disable the USART.  This method is called when the serial
  *   port is closed
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
 static void stm32l5serial_dmashutdown(FAR struct uart_dev_s *dev)
@@ -1700,7 +1702,7 @@ static void stm32l5serial_dmashutdown(FAR struct uart_dev_s *dev)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_attach
  *
  * Description:
@@ -1710,11 +1712,11 @@ static void stm32l5serial_dmashutdown(FAR struct uart_dev_s *dev)
  *   a non-interrupt driven mode during the boot phase.
  *
  *   RX and TX interrupts are not enabled when by the attach method (unless
- *   the hardware supports multiple levels of interrupt enabling).  The RX and
- *   TX interrupts are not enabled until the txint() and rxint() methods are
- *   called.
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5serial_attach(FAR struct uart_dev_s *dev)
 {
@@ -1738,15 +1740,15 @@ static int stm32l5serial_attach(FAR struct uart_dev_s *dev)
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_detach
  *
  * Description:
  *   Detach USART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5serial_detach(FAR struct uart_dev_s *dev)
 {
@@ -1756,7 +1758,7 @@ static void stm32l5serial_detach(FAR struct uart_dev_s *dev)
   irq_detach(priv->irq);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_interrupt
  *
  * Description:
@@ -1766,7 +1768,7 @@ static void stm32l5serial_detach(FAR struct uart_dev_s *dev)
  *   interrupt handling logic must be able to map the 'irq' number into the
  *   appropriate uart_dev_s structure in order to call these functions.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5serial_interrupt(int irq, FAR void *context, FAR void *arg)
 {
@@ -1880,13 +1882,13 @@ static int stm32l5serial_interrupt(int irq, FAR void *context, FAR void *arg)
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_ioctl
  *
  * Description:
  *   All ioctl calls will be routed through this method
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5serial_ioctl(FAR struct file *filep, int cmd,
                                unsigned long arg)
@@ -2262,7 +2264,7 @@ static int stm32l5serial_ioctl(FAR struct file *filep, int cmd,
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_receive
  *
  * Description:
@@ -2270,7 +2272,7 @@ static int stm32l5serial_ioctl(FAR struct file *filep, int cmd,
  *   character from the USART.  Error bits associated with the
  *   receipt are provided in the return 'status'.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef SERIAL_HAVE_ONLY_DMA
 static int stm32l5serial_receive(FAR struct uart_dev_s *dev,
@@ -2295,13 +2297,13 @@ static int stm32l5serial_receive(FAR struct uart_dev_s *dev,
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef SERIAL_HAVE_ONLY_DMA
 static void stm32l5serial_rxint(FAR struct uart_dev_s *dev, bool enable)
@@ -2313,14 +2315,15 @@ static void stm32l5serial_rxint(FAR struct uart_dev_s *dev, bool enable)
 
   /* USART receive interrupts:
    *
-   * Enable           Status         Meaning                        Usage
-   * ---------------- -------------- ------------------------------ ----------
-   * USART_CR1_IDLEIE USART_ISR_IDLE Idle Line Detected             (not used)
-   * USART_CR1_RXNEIE USART_ISR_RXNE Received Data Ready to be Read
+   * Enable           Status         Meaning                  Usage
+   * ---------------- -------------- ---------------------- ----------
+   * USART_CR1_IDLEIE USART_ISR_IDLE Idle Line Detected     (not used)
+   * USART_CR1_RXNEIE USART_ISR_RXNE Received Data Ready
+   *                                    to be Read
    * "              " USART_ISR_ORE  Overrun Error Detected
    * USART_CR1_PEIE   USART_ISR_PE   Parity Error
    *
-   * USART_CR2_LBDIE  USART_ISR_LBD  Break Flag                     (not used)
+   * USART_CR2_LBDIE  USART_ISR_LBD  Break Flag              (not used)
    * USART_CR3_EIE    USART_ISR_FE   Framing Error
    * "           "    USART_ISR_NF   Noise Flag
    * "           "    USART_ISR_ORE  Overrun Error Detected
@@ -2330,8 +2333,8 @@ static void stm32l5serial_rxint(FAR struct uart_dev_s *dev, bool enable)
   ie = priv->ie;
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx data register
-       * (or an Rx timeout occurs).
+      /* Receive an interrupt when their is anything in the Rx data
+       * register (or an Rx timeout occurs).
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -2354,13 +2357,13 @@ static void stm32l5serial_rxint(FAR struct uart_dev_s *dev, bool enable)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_rxavailable
  *
  * Description:
  *   Return true if the receive register is not empty
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef SERIAL_HAVE_ONLY_DMA
 static bool stm32l5serial_rxavailable(FAR struct uart_dev_s *dev)
@@ -2373,7 +2376,7 @@ static bool stm32l5serial_rxavailable(FAR struct uart_dev_s *dev)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_rxflowcontrol
  *
  * Description:
@@ -2394,7 +2397,7 @@ static bool stm32l5serial_rxavailable(FAR struct uart_dev_s *dev)
  * Returned Value:
  *   true if RX flow control activated.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 static bool stm32l5serial_rxflowcontrol(FAR struct uart_dev_s *dev,
@@ -2470,7 +2473,7 @@ static bool stm32l5serial_rxflowcontrol(FAR struct uart_dev_s *dev,
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_dmareceive
  *
  * Description:
@@ -2478,7 +2481,7 @@ static bool stm32l5serial_rxflowcontrol(FAR struct uart_dev_s *dev,
  *   character from the USART.  Error bits associated with the
  *   receipt are provided in the return 'status'.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
 static int stm32l5serial_dmareceive(FAR struct uart_dev_s *dev,
@@ -2514,13 +2517,13 @@ static int stm32l5serial_dmareceive(FAR struct uart_dev_s *dev,
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_dmareenable
  *
  * Description:
  *   Call to re-enable RX DMA.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #if defined(SERIAL_HAVE_DMA)
 static void stm32l5serial_dmareenable(FAR struct stm32l5_serial_s *priv)
@@ -2562,8 +2565,8 @@ static void stm32l5serial_dmareenable(FAR struct stm32l5_serial_s *priv)
        * in and DMA transfer is stopped.
        */
 
-      stm32l5_dmastart(priv->rxdma, stm32l5serial_dmarxcallback, (void *)priv,
-                       false);
+      stm32l5_dmastart(priv->rxdma, stm32l5serial_dmarxcallback,
+                      (void *)priv, false);
     }
   else
 #endif
@@ -2573,8 +2576,8 @@ static void stm32l5serial_dmareenable(FAR struct stm32l5_serial_s *priv)
        * worth of time to claim bytes before they are overwritten.
        */
 
-      stm32l5_dmastart(priv->rxdma, stm32l5serial_dmarxcallback, (void *)priv,
-                       true);
+      stm32l5_dmastart(priv->rxdma, stm32l5serial_dmarxcallback,
+                      (void *)priv, true);
     }
 
 #ifdef CONFIG_PM
@@ -2585,13 +2588,13 @@ static void stm32l5serial_dmareenable(FAR struct stm32l5_serial_s *priv)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_dmaiflowrestart
  *
  * Description:
  *   Call to restart RX DMA for input flow-controlled USART
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #if defined(SERIAL_HAVE_DMA) && defined(CONFIG_SERIAL_IFLOWCONTROL)
 static bool stm32l5serial_dmaiflowrestart(struct stm32l5_serial_s *priv)
@@ -2634,13 +2637,13 @@ static bool stm32l5serial_dmaiflowrestart(struct stm32l5_serial_s *priv)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_dmarxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
 static void stm32l5serial_dmarxint(FAR struct uart_dev_s *dev, bool enable)
@@ -2669,13 +2672,13 @@ static void stm32l5serial_dmarxint(FAR struct uart_dev_s *dev, bool enable)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_dmarxavailable
  *
  * Description:
  *   Return true if the receive register is not empty
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
 static bool stm32l5serial_dmarxavailable(FAR struct uart_dev_s *dev)
@@ -2691,13 +2694,13 @@ static bool stm32l5serial_dmarxavailable(FAR struct uart_dev_s *dev)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_send
  *
  * Description:
  *   This method will send one byte on the USART
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5serial_send(FAR struct uart_dev_s *dev, int ch)
 {
@@ -2714,13 +2717,13 @@ static void stm32l5serial_send(FAR struct uart_dev_s *dev, int ch)
   stm32l5serial_putreg(priv, STM32L5_USART_TDR_OFFSET, (uint32_t)ch);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5serial_txint(FAR struct uart_dev_s *dev, bool enable)
 {
@@ -2782,13 +2785,13 @@ static void stm32l5serial_txint(FAR struct uart_dev_s *dev, bool enable)
   leave_critical_section(flags);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_txready
  *
  * Description:
  *   Return true if the transmit data register is empty
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static bool stm32l5serial_txready(FAR struct uart_dev_s *dev)
 {
@@ -2799,14 +2802,14 @@ static bool stm32l5serial_txready(FAR struct uart_dev_s *dev)
            USART_ISR_TXE) != 0);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_dmarxcallback
  *
  * Description:
  *   This function checks the current DMA state and calls the generic
  *   serial stack when bytes appear to be available.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
 static void stm32l5serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
@@ -2830,10 +2833,9 @@ static void stm32l5serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
 
   /* Get the masked USART status word to check and clear error flags.
    *
-   * When wake-up from low power mode was not fast enough, UART is resumed too
-   * late and sometimes exactly when character was coming over UART, resulting
-   * to frame error.
-
+   * When wake-up from low power mode was not fast enough, UART is resumed
+   * too late and sometimes exactly when character was coming over UART,
+   * resulting to frame error.
    * If error flag is not cleared, Rx DMA will be stuck. Clearing errors
    * will release Rx DMA.
    */
@@ -2849,7 +2851,7 @@ static void stm32l5serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_pmnotify
  *
  * Description:
@@ -2869,7 +2871,7 @@ static void stm32l5serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
  *   consumption state when when it returned OK to the prepare() call.
  *
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 static void stm32l5serial_pmnotify(FAR struct pm_callback_s *cb, int domain,
@@ -2916,7 +2918,7 @@ static void stm32l5serial_pmnotify(FAR struct pm_callback_s *cb, int domain,
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5serial_pmprepare
  *
  * Description:
@@ -2947,7 +2949,7 @@ static void stm32l5serial_pmnotify(FAR struct pm_callback_s *cb, int domain,
  *              return non-zero values when reverting back to higher power
  *              consumption modes!
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 static int stm32l5serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
@@ -3024,13 +3026,13 @@ static int stm32l5serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
 #endif /* HAVE_UART */
 #endif /* USE_SERIALDRIVER */
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef USE_SERIALDRIVER
 
-/*****************************************************************************
+/****************************************************************************
  * Name: arm_earlyserialinit
  *
  * Description:
@@ -3038,7 +3040,7 @@ static int stm32l5serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
  *   serial console will be available during bootup.  This must be called
  *   before arm_serialinit.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
 void arm_earlyserialinit(void)
@@ -3065,14 +3067,14 @@ void arm_earlyserialinit(void)
 }
 #endif /* USE_EARLYSERIALINIT */
 
-/*****************************************************************************
+/****************************************************************************
  * Name: arm_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
  *   that arm_earlyserialinit was called previously.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void arm_serialinit(void)
 {
@@ -3143,7 +3145,7 @@ void arm_serialinit(void)
 #endif /* HAVE UART */
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_serial_dma_poll
  *
  * Description:
@@ -3152,7 +3154,7 @@ void arm_serialinit(void)
  *
  *   This function should be called from a timer or other periodic context.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
 void stm32l5_serial_dma_poll(void)
@@ -3207,13 +3209,13 @@ void stm32l5_serial_dma_poll(void)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: up_putc
  *
  * Description:
  *   Provide priority, low-level access to support OS debug writes
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int up_putc(int ch)
 {
@@ -3240,13 +3242,13 @@ int up_putc(int ch)
 
 #else /* USE_SERIALDRIVER */
 
-/*****************************************************************************
+/****************************************************************************
  * Name: up_putc
  *
  * Description:
  *   Provide priority, low-level access to support OS debug writes
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int up_putc(int ch)
 {

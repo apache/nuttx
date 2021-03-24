@@ -1,4 +1,5 @@
- /* arch/arm/src/stm32f7/hardware/stm32f72xx73xx_sdmmc.h
+/****************************************************************************
+ * arch/arm/src/stm32f7/hardware/stm32f72xx73xx_sdmmc.h
  *
  *   Copyright (C) 2009, 2011-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,16 +33,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_SDMMC_H
 #define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_SDMMC_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_SDMMC_POWER_OFFSET              0x0000 /* SDMMC power control register */
 #define STM32_SDMMC_CLKCR_OFFSET              0x0004 /* SDMMC clock control register */
@@ -63,8 +64,7 @@
 #define STM32_SDMMC_FIFOCNT_OFFSET            0x0048 /* SDMMC FIFO counter register */
 #define STM32_SDMMC_FIFO_OFFSET               0x0080 /* SDMMC data FIFO register */
 
-
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 #define STM32_SDMMC_POWER_PWRCTRL_SHIFT       (0)       /* Bits 0-1: Power supply control bits */
 #define STM32_SDMMC_POWER_PWRCTRL_MASK        (3 << STM32_SDMMC_POWER_PWRCTRL_SHIFT)
@@ -84,6 +84,7 @@
 #  define STM32_SDMMC_CLKCR_WIDBUS_D1         (0 << STM32_SDMMC_CLKCR_WIDBUS_SHIFT) /* 00: Default (STM32_SDMMC_D0) */
 #  define STM32_SDMMC_CLKCR_WIDBUS_D4         (1 << STM32_SDMMC_CLKCR_WIDBUS_SHIFT) /* 01: 4-wide (STM32_SDMMC_D[3:0]) */
 #  define STM32_SDMMC_CLKCR_WIDBUS_D8         (2 << STM32_SDMMC_CLKCR_WIDBUS_SHIFT) /* 10: 8-wide (STM32_SDMMC_D[7:0]) */
+
 #define STM32_SDMMC_CLKCR_NEGEDGE             (1 << 13) /* Bit 13: STM32_SDMMC_CK dephasing selection bit */
 #define STM32_SDMMC_CLKCR_HWFC_EN             (1 << 14) /* Bit 14: HW Flow Control enable */
 
@@ -98,6 +99,7 @@
 #  define STM32_SDMMC_CMD_NORESPONSE          (0 << STM32_SDMMC_CMD_WAITRESP_SHIFT) /* 00/10: No response */
 #  define STM32_SDMMC_CMD_SHORTRESPONSE       (1 << STM32_SDMMC_CMD_WAITRESP_SHIFT) /* 01: Short response */
 #  define STM32_SDMMC_CMD_LONGRESPONSE        (3 << STM32_SDMMC_CMD_WAITRESP_SHIFT) /* 11: Long response */
+
 #define STM32_SDMMC_CMD_WAITINT               (1 << 8)  /* Bit 8: CPSM waits for interrupt request */
 #define STM32_SDMMC_CMD_WAITPEND              (1 << 9)  /* Bit 9: CPSM Waits for ends of data transfer */
 #define STM32_SDMMC_CMD_CPSMEN                (1 << 10) /* Bit 10: Command path state machine enable */

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4_adc.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
@@ -32,27 +32,27 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_ADC_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
-/* Register Offsets for each ADC (ADC1-3).  At offset 0x0000 for master and offset
- * 0x0100 for slave.
+/* Register Offsets for each ADC (ADC1-3).  At offset 0x0000 for master and
+ * offset 0x0100 for slave.
  */
 
 #define STM32L4_ADC_ISR_OFFSET         0x0000  /* ADC interrupt and status register */
@@ -92,7 +92,7 @@
 #  define STM32L4_ADC_CDR_OFFSET       0x000c  /* Common regular data register for dual mode */
 #endif
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32L4_ADC1_ISR               (STM32L4_ADC1_BASE+STM32L4_ADC_ISR_OFFSET)
 #define STM32L4_ADC1_IER               (STM32L4_ADC1_BASE+STM32L4_ADC_IER_OFFSET)
@@ -187,9 +187,11 @@
 #  define STM32L4_ADC_CDR              (STM32L4_ADCCMN_BASE+STM32L4_ADC_CDR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
-/* ADC interrupt and status register (ISR) and ADC interrupt enable register (IER) */
+/* ADC interrupt and status register (ISR) and
+ * ADC interrupt enable register (IER)
+ */
 
 #define ADC_INT_ADRDY                (1 << 0)  /* Bit 0:  ADC ready */
 #define ADC_INT_EOSMP                (1 << 1)  /* Bit 1:  End of sampling flag */

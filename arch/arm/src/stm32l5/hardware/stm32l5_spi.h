@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l5/hardware/stm32l5_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L5_SPI_H
 #define __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L5_SPI_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
 /* Maximum allowed speed as per specifications for all SPIs */
 
@@ -40,7 +40,7 @@
 #  error "Unsupported STM32 L5 chip"
 #endif
 
-/* Register Offsets **********************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L5_SPI_CR1_OFFSET       0x0000  /* SPI Control Register 1 (16-bit) */
 #define STM32L5_SPI_CR2_OFFSET       0x0004  /* SPI control register 2 (16-bit) */
@@ -50,7 +50,7 @@
 #define STM32L5_SPI_RXCRCR_OFFSET    0x0014  /* SPI Rx CRC register (16-bit) */
 #define STM32L5_SPI_TXCRCR_OFFSET    0x0018  /* SPI Tx CRC register (16-bit) */
 
-/* Register Addresses ********************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32L5_NSPI > 0
 #  define STM32L5_SPI1_CR1          (STM32L5_SPI1_BASE + STM32L5_SPI_CR1_OFFSET)
@@ -82,7 +82,7 @@
 #  define STM32L5_SPI3_TXCRCR       (STM32L5_SPI3_BASE + STM32L5_SPI_TXCRCR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions *********************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* SPI Control Register 1 */
 

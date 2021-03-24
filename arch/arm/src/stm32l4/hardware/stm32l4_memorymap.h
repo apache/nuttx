@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,16 +16,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_MEMORYMAP_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* STM32L4XXX Address Blocks ********************************************************/
+/* STM32L4XXX Address Blocks ************************************************/
 
 #define STM32L4_CODE_BASE      0x00000000     /* 0x00000000-0x1fffffff: 512Mb code block */
 #define STM32L4_SRAM_BASE      0x20000000     /* 0x20000000-0x3fffffff: 512Mb sram block (48k to 256k) */
@@ -47,7 +47,7 @@
 #define STM32L4_IS_SRAM(a)     ((((uint32_t)(a)) & STM32L4_REGION_MASK) == STM32L4_SRAM_BASE)
 #define STM32L4_IS_EXTSRAM(a)  ((((uint32_t)(a)) & STM32L4_REGION_MASK) == STM32L4_FSMC_BANK1)
 
-/* Code Base Addresses **************************************************************/
+/* Code Base Addresses ******************************************************/
 
 #define STM32L4_BOOT_BASE      0x00000000     /* 0x00000000-0x000fffff: Aliased boot memory */
                                               /* 0x00100000-0x07ffffff: Reserved */
@@ -65,7 +65,7 @@
 #define STM32L4_OPTION2_BASE   0x1ffff800     /* 0x1ffff800-0x1ffff80f: Option bytes 2 */
                                               /* 0x1ffff810-0x1fffffff: Reserved */
 
-/* System Memory Addresses **********************************************************/
+/* System Memory Addresses **************************************************/
 
 #define STM32L4_SYSMEM_UID     0x1fff7590     /* The 96-bit unique device identifier */
 #define STM32L4_SYSMEM_FSIZE   0x1fff75E0     /* This bitfield indicates the size of
@@ -87,13 +87,18 @@
                                                * 17: WLCSP100
                                                */
 
-/* SRAM Base Addresses **************************************************************/
+/* SRAM Base Addresses ******************************************************/
 
-                                            /* 0x20000000-0x2000ffff: 64k aliased by bit-banding */
-                                            /* 0x2001c000-0x2001ffff: 16Kb aliased by bit-banding */
+/*                                             0x20000000-0x2000ffff:
+ *                                              64k aliased by bit-banding
+ */
+
+/*                                             0x2001c000-0x2001ffff:
+ *                                                16Kb aliased by bit-banding
+ */
 #define STM32L4_SRAMBB_BASE    0x22000000     /* 0x22000000-          : SRAM bit-band region */
 
-/* Peripheral Base Addresses ********************************************************/
+/* Peripheral Base Addresses ************************************************/
 
 #define STM32L4_APB1_BASE      0x40000000     /* 0x40000000-0x400097ff: APB1 */
                                               /* 0x40009800-0x4000ffff: Reserved */
@@ -104,13 +109,13 @@
 #define STM32L4_AHB2_BASE      0x48000000     /* 0x48000000-0x50060bff: AHB2 */
                                               /* 0x50060c00-0x5fffffff: Reserved */
 
-/* FSMC/QSPI Base Addresses **************************************************************/
+/* FSMC/QSPI Base Addresses *************************************************/
 
 #define STM32L4_AHB3_BASE      0x60000000     /* 0x60000000-0xa0000fff: AHB3 */
 
 /* in datasheet order */
 
-/* APB1 Base Addresses **************************************************************/
+/* APB1 Base Addresses ******************************************************/
 
 #define STM32L4_LPTIM2_BASE     0x40009400
 #define STM32L4_SWPMI1_BASE     0x40008800
@@ -148,7 +153,7 @@
 #define STM32L4_TIM3_BASE       0x40000400
 #define STM32L4_TIM2_BASE       0x40000000
 
-/* APB2 Base Addresses **************************************************************/
+/* APB2 Base Addresses ******************************************************/
 
 #define STM32L4_DSI_BASE        0x40016c00
 #define STM32L4_LTDC_BASE       0x40016800
@@ -171,7 +176,7 @@
 #define STM32L4_VREFBUF_BASE    0x40010030
 #define STM32L4_SYSCFG_BASE     0x40010000
 
-/* AHB1 Base Addresses **************************************************************/
+/* AHB1 Base Addresses ******************************************************/
 
 #define STM32L4_GFXMMU_BASE     0x4002c000
 #define STM32L4_DMA2D_BASE      0x4002b000
@@ -183,7 +188,7 @@
 #define STM32L4_DMA2_BASE       0x40020400
 #define STM32L4_DMA1_BASE       0x40020000
 
-/* AHB2 Base Addresses **************************************************************/
+/* AHB2 Base Addresses ******************************************************/
 
 #ifdef CONFIG_STM32L4_STM32L4XR
 #  define STM32L4_SDMMC1_BASE   0x50062400
@@ -209,9 +214,10 @@
 #define STM32L4_GPIOB_BASE      0x48000400
 #define STM32L4_GPIOA_BASE      0x48000000
 
-/* Cortex-M4 Base Addresses *********************************************************/
-/* Other registers -- see armv7-m/nvic.h for standard Cortex-M3 registers in this
- * address range
+/* Cortex-M4 Base Addresses *************************************************/
+
+/* Other registers -- see armv7-m/nvic.h for standard Cortex-M3 registers in
+ * this address range
  */
 
 #define STM32L4_SCS_BASE      0xe000e000

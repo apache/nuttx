@@ -43,25 +43,25 @@
  * include/nuttx/timers/pwm.h.
  */
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
 /* Timer devices may be used for different purposes.  One special purpose is
  * to generate modulated outputs for such things as motor control.  If
- * CONFIG_STM32F0L0G0_TIMn is defined then the CONFIG_STM32F0L0G0_TIMn_PWM must also
- * be defined to indicate that timer "n" is intended to be used for pulsed output
- * signal generation.
+ * CONFIG_STM32F0L0G0_TIMn is defined then the CONFIG_STM32F0L0G0_TIMn_PWM
+ * must also be defined to indicate that timer "n" is intended to be used for
+ * pulsed output signal generation.
  */
 
 #ifndef CONFIG_STM32F0L0G0_TIM1
@@ -86,7 +86,9 @@
 #  undef CONFIG_STM32F0L0G0_TIM17_PWM
 #endif
 
-/* The basic timers (timer 6 and 7) are not capable of generating output pulses */
+/* The basic timers (timer 6 and 7)
+ * are not capable of generating output pulses
+ */
 
 #undef CONFIG_STM32F0L0G0_TIM6_PWM
 #undef CONFIG_STM32F0L0G0_TIM7_PWM
@@ -337,13 +339,14 @@
 
 #else  /* !CONFIG_PWM_MULTICHAN */
 
-/* For each timer that is enabled for PWM usage, we need the following additional
- * configuration settings:
+/* For each timer that is enabled for PWM usage, we need the following
+ * additional configuration settings:
  *
- * CONFIG_STM32F0L0G0_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
- * PWM_TIMx_CHn - One of the values defined in chip/stm32*_pinmap.h.  In the
- * case where there are multiple pin selections, the correct setting must be
- * provided in the arch/board/board.h file.
+ * CONFIG_STM32F0L0G0_TIMx_CHANNEL - Specifies the timer output channel
+ * {1,..,4} PWM_TIMx_CHn - One of the values defined in
+ * chip/stm32*_pinmap.h.  In the case where there are multiple pin
+ * selections, the correct setting must be provided in the arch/board/board.h
+ * file.
  *
  * NOTE: The STM32 timers are each capable of generating different signals on
  * each of the four channels with different duty cycles.  That capability is
@@ -506,13 +509,13 @@
 #  define HAVE_PWM_COMPLEMENTARY
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -525,11 +528,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwminitialize
  *
  * Description:
@@ -544,7 +547,7 @@ extern "C"
  *   On success, a pointer to the STM32 lower half PWM driver is returned.
  *   NULL is returned on any failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer);
 

@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_adc_v1.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -32,24 +32,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_ADC_V1_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_ADC_V1_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ************************************************************************************/
+/* Configuration ************************************************************/
 
 /* This is implementation for STM32 ADC IPv1 - F1, F2, F37x, F4, F7.
  * NOTE: L1 use modified IPv1 (look at chip/stm32_adc_v1l1.h).
@@ -82,9 +82,11 @@
 #  undef HAVE_ADC_VBAT
 #endif
 
-/* Base addresses ***********************************************************************************/
+/* Base addresses ***********************************************************/
 
-/* For the basic ADC IPv1, the ADCx_BASE definitions are defined in chip/stm32xxx_memorymap.h files */
+/* For the basic ADC IPv1,
+ * the ADCx_BASE definitions are defined in chip/stm32xxx_memorymap.h files
+ */
 
 #ifndef HAVE_BASIC_ADC
 #  define STM32_ADC1_OFFSET          0x0000
@@ -95,10 +97,11 @@
 #  define STM32_ADC1_BASE            (STM32_ADC1_OFFSET + STM32_ADC_BASE) /* ADC1 ADC */
 #  define STM32_ADC2_BASE            (STM32_ADC2_OFFSET + STM32_ADC_BASE) /* ADC2 ADC */
 #  define STM32_ADC3_BASE            (STM32_ADC3_OFFSET + STM32_ADC_BASE) /* ADC3 ADC */
+
 #  define STM32_ADCCMN_BASE          (STM32_ADC_CMN_OFFSET + STM32_ADC_BASE) /* ADC1, ADC2, ADC3 common */
 #endif
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_ADC_SR_OFFSET          0x0000  /* ADC status register (32-bit) */
 #define STM32_ADC_CR1_OFFSET         0x0004  /* ADC control register 1 (32-bit) */
@@ -127,7 +130,7 @@
 #  define STM32_ADC_CDR_OFFSET       0x0008  /* Data register for dual and triple modes */
 #endif
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32_NADC > 0
 #  define STM32_ADC1_SR              (STM32_ADC1_BASE + STM32_ADC_SR_OFFSET)
@@ -204,7 +207,7 @@
 #  define STM32_ADC_CDR              (STM32_ADCCMN_BASE + STM32_ADC_CDR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* ADC status register */
 
@@ -259,6 +262,7 @@
 #    define ADC_CR1_RES_10BIT        (1 << ADC_CR1_RES_SHIFT) /* 13 ADCCLK cycles */
 #    define ADC_CR1_RES_8BIT         (2 << ADC_CR1_RES_SHIFT) /* 11 ADCCLK cycles */
 #    define ADC_CR1_RES_6BIT         (3 << ADC_CR1_RES_SHIFT) /* 9 ADCCLK cycles */
+
 #  define ADC_CR1_OVRIE              (1 << 26) /* Bit 26: Overrun interrupt enable */
 #  define ADC_CR1_RESERVED           (0xfb3f0000)
 #endif
@@ -299,6 +303,7 @@
 #    define ADC_CR2_JEXTSEL_T8CC3    (0x0D << ADC_CR2_JEXTSEL_SHIFT) /* 1101: Timer 8 CC3 event */
 #    define ADC_CR2_JEXTSEL_T8CC4    (0x0E << ADC_CR2_JEXTSEL_SHIFT) /* 1110: Timer 8 CC4 event */
 #    define ADC_CR2_JEXTSEL_EXTI15   (0x0F << ADC_CR2_JEXTSEL_SHIFT) /* 1111: EXTI line 15 */
+
 #  define ADC_CR2_JEXTEN_SHIFT       (20)      /* Bits 20-21: External trigger enable for injected channels */
 #  define ADC_CR2_JEXTEN_MASK        (3 << ADC_CR2_JEXTEN_SHIFT)
 #    define ADC_CR2_JEXTEN_NONE      (0 << ADC_CR2_JEXTEN_SHIFT) /* 00: Trigger detection disabled */
@@ -326,6 +331,7 @@
 #    define ADC_CR2_EXTSEL_T8CC1     (0x0D << ADC_CR2_EXTSEL_SHIFT) /* 1101: Timer 8 CC1 event */
 #    define ADC_CR2_EXTSEL_T8TRGO    (0x0E << ADC_CR2_EXTSEL_SHIFT) /* 1110: Timer 8 TRGO event */
 #    define ADC_CR2_EXTSEL_EXTI11    (0x0F << ADC_CR2_EXTSEL_SHIFT) /* 1111: EXTI line 11 */
+
 #  define ADC_CR2_EXTEN_SHIFT        (28)      /* Bits 28-29: External trigger enable for regular channels */
 #  define ADC_CR2_EXTEN_MASK         (3 << ADC_CR2_EXTEN_SHIFT)
 #    define ADC_CR2_EXTEN_NONE       (0 << ADC_CR2_EXTEN_SHIFT) /* 00: Trigger detection disabled */
@@ -351,6 +357,7 @@
 #    define ADC_CR2_JEXTSEL_T4TRGO   (5 << ADC_CR2_JEXTSEL_SHIFT) /* 101: Timer 4 TRGO event */
 #    define ADC_CR2_JEXTSEL_EXTI15   (6 << ADC_CR2_JEXTSEL_SHIFT) /* 110: EXTI line 15 */
 #    define ADC_CR2_JEXTSEL_JSWSTART (7 << ADC_CR2_JEXTSEL_SHIFT) /* 111: JSWSTART */
+
 #  define ADC_CR2_JEXTTRIG           (1 << 15) /* Bit 15: External Trigger Conversion mode for injected channels */
 #  define ADC_CR2_EXTSEL_SHIFT       (17)      /* Bits 19-17: External Event Select for regular group */
 #  define ADC_CR2_EXTSEL_MASK        (7 << ADC_CR2_EXTSEL_SHIFT)
@@ -368,6 +375,7 @@
 #    define ADC_CR2_EXTSEL_T4CC4     (5 << ADC_CR2_EXTSEL_SHIFT) /* 101: Timer 4 CC4 event */
 #    define ADC_CR2_EXTSEL_EXTI11    (6 << ADC_CR2_EXTSEL_SHIFT) /* 110: EXTI line 11 */
 #    define ADC_CR2_EXTSEL_SWSTART   (7 << ADC_CR2_EXTSEL_SHIFT) /* 111: SWSTART */
+
 #  define ADC_CR2_EXTTRIG            (1 << 20) /* Bit 20: External Trigger Conversion mode for regular channels */
 #  define ADC_CR2_JSWSTART           (1 << 21) /* Bit 21: Start Conversion of injected channels */
 #  define ADC_CR2_SWSTART            (1 << 22) /* Bit 22: Start Conversion of regular channels */
@@ -590,11 +598,19 @@
 #    define ADC_CCR_MULTI_RSM3       (22 << ADC_CCR_MULTI_SHIFT) /* 10110: Regular simultaneous mode only */
 #    define ADC_CCR_MULTI_IM3        (23 << ADC_CCR_MULTI_SHIFT) /* 10111: interleaved mode only */
 #    define ADC_CCR_MULTI_ATM3       (25 << ADC_CCR_MULTI_SHIFT) /* 11001: Alternate trigger mode only */
-                                               /* Bits 5-7: Reserved, must be kept at reset value. */
+
+/*                                                Bits 5-7: Reserved,
+ *                                               must be kept at reset value.
+ */
+
 #  define ADC_CCR_DELAY_SHIFT        (8)       /* Bits 8-11: Delay between 2 sampling phases */
 #  define ADC_CCR_DELAY_MASK         (15 << ADC_CCR_DELAY_SHIFT)
 #    define ADC_CCR_DELAY(n)         (((n)-5) << ADC_CCR_DELAY_SHIFT) /* n * TADCCLK, n=5-20 */
-                                               /* Bit 12 Reserved, must be kept at reset value. */
+
+/*                                                Bit 12 Reserved,
+ *                                               must be kept at reset value.
+ */
+
 #  define ADC_CCR_DDS                (1 << 13) /* Bit 13: DMA disable selection (for multi-ADC mode) */
 
 #  define ADC_CCR_DMA_SHIFT          (14)      /* Bits 14-15: Direct memory access mode for multi ADC mode */
@@ -610,24 +626,29 @@
 #    define ADC_CCR_ADCPRE_DIV4      (1 << ADC_CCR_ADCPRE_SHIFT) /* 01: PCLK2 divided by 4 */
 #    define ADC_CCR_ADCPRE_DIV6      (2 << ADC_CCR_ADCPRE_SHIFT) /* 10: PCLK2 divided by 6 */
 #    define ADC_CCR_ADCPRE_DIV8      (3 << ADC_CCR_ADCPRE_SHIFT) /* 11: PCLK2 divided by 8 */
-                                               /* Bits 18-21: Reserved, must be kept at reset value. */
+
+/*                                                Bits 18-21: Reserved,
+ *                                               must be kept at reset value.
+ */
 #  define ADC_CCR_VBATEN             (1 << 22) /* Bit 22: VBAT enable */
 #  define ADC_CCR_TSVREFE            (1 << 23) /* Bit 23: Temperature sensor and VREFINT enable */
                                                /* Bits 24-31 Reserved, must be kept at reset value. */
 #endif
 
-/* Data register for dual and triple modes (32-bit data with no named fields) */
+/* Data register for dual and triple modes
+ * (32-bit data with no named fields)
+ */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_ADC_V1_H */

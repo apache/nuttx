@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f20xxx_rcc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,16 +16,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F20XXX_RCC_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F20XXX_RCC_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_RCC_CR_OFFSET         0x0000  /* Clock control register */
 #define STM32_RCC_PLLCFG_OFFSET     0x0004  /* PLL configuration register */
@@ -51,7 +51,7 @@
 #define STM32_RCC_SSCGR_OFFSET      0x0080  /* Spread spectrum clock generation register */
 #define STM32_RCC_PLLI2SCFGR_OFFSET 0x0084  /* PLLI2S configuration register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_RCC_CR                (STM32_RCC_BASE+STM32_RCC_CR_OFFSET)
 #define STM32_RCC_PLLCFG            (STM32_RCC_BASE+STM32_RCC_PLLCFG_OFFSET)
@@ -77,7 +77,7 @@
 #define STM32_RCC_SSCGR             (STM32_RCC_BASE+STM32_RCC_SSCGR_OFFSET)
 #define STM32_RCC_PLLI2SCFGR        (STM32_RCC_BASE+STM32_RCC_PLLI2SCFGR_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Clock control register */
 
@@ -102,16 +102,20 @@
                                               * input clock divider */
 #define RCC_PLLCFG_PLLM_MASK        (0x3f << RCC_PLLCFG_PLLM_SHIFT)
 #  define RCC_PLLCFG_PLLM(n)        ((n) << RCC_PLLCFG_PLLM_SHIFT) /* n = 2..63 */
+
 #define RCC_PLLCFG_PLLN_SHIFT       (6)      /* Bits 6-14: Main PLL (PLL) VCO multiplier */
 #define RCC_PLLCFG_PLLN_MASK        (0x1ff << RCC_PLLCFG_PLLN_SHIFT)
 #  define RCC_PLLCFG_PLLN(n)        ((n) << RCC_PLLCFG_PLLN_SHIFT) /* n = 2..432 */
+
 #define RCC_PLLCFG_PLLP_SHIFT       (16)      /* Bits 16-17: Main PLL (PLL) main system clock divider */
 #define RCC_PLLCFG_PLLP_MASK        (3 << RCC_PLLCFG_PLLP_SHIFT)
 #  define RCC_PLLCFG_PLLP(n)        ((((n)>>1)-1)<< RCC_PLLCFG_PLLP_SHIFT) /* n=2,4,6,8 */
+
 #  define RCC_PLLCFG_PLLP_2         (0 << RCC_PLLCFG_PLLP_SHIFT) /* 00: PLLP = 2 */
 #  define RCC_PLLCFG_PLLP_4         (1 << RCC_PLLCFG_PLLP_SHIFT) /* 01: PLLP = 4 */
 #  define RCC_PLLCFG_PLLP_6         (2 << RCC_PLLCFG_PLLP_SHIFT) /* 10: PLLP = 6 */
 #  define RCC_PLLCFG_PLLP_8         (3 << RCC_PLLCFG_PLLP_SHIFT) /* 11: PLLP = 8 */
+
 #define RCC_PLLCFG_PLLSRC           (1 << 22) /* Bit 22: Main PLL(PLL) and audio PLL (PLLI2S)
                                                * entry clock source */
 #  define RCC_PLLCFG_PLLSRC_HSI     (0)
@@ -130,22 +134,25 @@
 #  define RCC_CFGR_SW_HSI           (0 << RCC_CFGR_SW_SHIFT) /* 00: HSI selected as system clock */
 #  define RCC_CFGR_SW_HSE           (1 << RCC_CFGR_SW_SHIFT) /* 01: HSE selected as system clock */
 #  define RCC_CFGR_SW_PLL           (2 << RCC_CFGR_SW_SHIFT) /* 10: PLL selected as system clock */
+
 #define RCC_CFGR_SWS_SHIFT          (2)       /* Bits 2-3: System Clock Switch Status */
 #define RCC_CFGR_SWS_MASK           (3 << RCC_CFGR_SWS_SHIFT)
 #  define RCC_CFGR_SWS_HSI          (0 << RCC_CFGR_SWS_SHIFT) /* 00: HSI oscillator used as system clock */
 #  define RCC_CFGR_SWS_HSE          (1 << RCC_CFGR_SWS_SHIFT) /* 01: HSE oscillator used as system clock */
 #  define RCC_CFGR_SWS_PLL          (2 << RCC_CFGR_SWS_SHIFT) /* 10: PLL used as system clock */
+
 #define RCC_CFGR_HPRE_SHIFT         (4)       /* Bits 4-7: AHB prescaler */
 #define RCC_CFGR_HPRE_MASK          (0x0f << RCC_CFGR_HPRE_SHIFT)
-#  define RCC_CFGR_HPRE_SYSCLK      (0 << RCC_CFGR_HPRE_SHIFT) /* 0xxx: SYSCLK not divided */
-#  define RCC_CFGR_HPRE_SYSCLKd2    (8 << RCC_CFGR_HPRE_SHIFT) /* 1000: SYSCLK divided by 2 */
-#  define RCC_CFGR_HPRE_SYSCLKd4    (9 << RCC_CFGR_HPRE_SHIFT) /* 1001: SYSCLK divided by 4 */
+#  define RCC_CFGR_HPRE_SYSCLK      (0 << RCC_CFGR_HPRE_SHIFT)  /* 0xxx: SYSCLK not divided */
+#  define RCC_CFGR_HPRE_SYSCLKd2    (8 << RCC_CFGR_HPRE_SHIFT)  /* 1000: SYSCLK divided by 2 */
+#  define RCC_CFGR_HPRE_SYSCLKd4    (9 << RCC_CFGR_HPRE_SHIFT)  /* 1001: SYSCLK divided by 4 */
 #  define RCC_CFGR_HPRE_SYSCLKd8    (10 << RCC_CFGR_HPRE_SHIFT) /* 1010: SYSCLK divided by 8 */
 #  define RCC_CFGR_HPRE_SYSCLKd16   (11 << RCC_CFGR_HPRE_SHIFT) /* 1011: SYSCLK divided by 16 */
 #  define RCC_CFGR_HPRE_SYSCLKd64   (12 << RCC_CFGR_HPRE_SHIFT) /* 1100: SYSCLK divided by 64 */
 #  define RCC_CFGR_HPRE_SYSCLKd128  (13 << RCC_CFGR_HPRE_SHIFT) /* 1101: SYSCLK divided by 128 */
 #  define RCC_CFGR_HPRE_SYSCLKd256  (14 << RCC_CFGR_HPRE_SHIFT) /* 1110: SYSCLK divided by 256 */
 #  define RCC_CFGR_HPRE_SYSCLKd512  (15 << RCC_CFGR_HPRE_SHIFT) /* 1111: SYSCLK divided by 512 */
+
 #define RCC_CFGR_PPRE1_SHIFT        (10)      /* Bits 10-12: APB Low speed prescaler (APB1) */
 #define RCC_CFGR_PPRE1_MASK         (7 << RCC_CFGR_PPRE1_SHIFT)
 #  define RCC_CFGR_PPRE1_HCLK       (0 << RCC_CFGR_PPRE1_SHIFT) /* 0xx: HCLK not divided */
@@ -153,6 +160,7 @@
 #  define RCC_CFGR_PPRE1_HCLKd4     (5 << RCC_CFGR_PPRE1_SHIFT) /* 101: HCLK divided by 4 */
 #  define RCC_CFGR_PPRE1_HCLKd8     (6 << RCC_CFGR_PPRE1_SHIFT) /* 110: HCLK divided by 8 */
 #  define RCC_CFGR_PPRE1_HCLKd16    (7 << RCC_CFGR_PPRE1_SHIFT) /* 111: HCLK divided by 16 */
+
 #define RCC_CFGR_PPRE2_SHIFT        (13)      /* Bits 13-15: APB High speed prescaler (APB2) */
 #define RCC_CFGR_PPRE2_MASK         (7 << RCC_CFGR_PPRE2_SHIFT)
 #  define RCC_CFGR_PPRE2_HCLK       (0 << RCC_CFGR_PPRE2_SHIFT) /* 0xx: HCLK not divided */
@@ -160,15 +168,18 @@
 #  define RCC_CFGR_PPRE2_HCLKd4     (5 << RCC_CFGR_PPRE2_SHIFT) /* 101: HCLK divided by 4 */
 #  define RCC_CFGR_PPRE2_HCLKd8     (6 << RCC_CFGR_PPRE2_SHIFT) /* 110: HCLK divided by 8 */
 #  define RCC_CFGR_PPRE2_HCLKd16    (7 << RCC_CFGR_PPRE2_SHIFT) /* 111: HCLK divided by 16 */
+
 #define RCC_CFGR_RTCPRE_SHIFT       (16)      /* Bits 16-20: APB High speed prescaler (APB2) */
 #define RCC_CFGR_RTCPRE_MASK        (31 << RCC_CFGR_RTCPRE_SHIFT)
 #  define RCC_CFGR_RTCPRE(n)        ((n) << RCC_CFGR_RTCPRE_SHIFT) /* HSE/n, n=1..31 */
+
 #define RCC_CFGR_MCO1_SHIFT         (21)      /* Bits 21-22: Microcontroller Clock Output */
 #define RCC_CFGR_MCO1_MASK          (3 << RCC_CFGR_MCO1_SHIFT)
 #  define RCC_CFGR_MCO1_HSI         (0 << RCC_CFGR_MCO1_SHIFT) /* 00: HSI clock selected */
 #  define RCC_CFGR_MCO1_LSE         (1 << RCC_CFGR_MCO1_SHIFT) /* 01: LSE oscillator selected */
 #  define RCC_CFGR_MCO1_HSE         (2 << RCC_CFGR_MCO1_SHIFT) /* 10: HSE oscillator clock selected */
 #  define RCC_CFGR_MCO1_PLL         (3 << RCC_CFGR_MCO1_SHIFT) /* 11: PLL clock selected */
+
 #define RCC_CFGR_I2SSRC             (1 << 23) /* Bit 23: I2S clock selection */
 #define RCC_CFGR_MCO1PRE_SHIFT      (24)      /* Bits 24-26: MCO1 prescaler */
 #define RCC_CFGR_MCO1PRE_MASK       (7 << RCC_CFGR_MCO1PRE_SHIFT)
@@ -177,6 +188,7 @@
 #  define RCC_CFGR_MCO1PRE_DIV3     (5 << RCC_CFGR_MCO1PRE_SHIFT) /* 101: division by 3 */
 #  define RCC_CFGR_MCO1PRE_DIV4     (6 << RCC_CFGR_MCO1PRE_SHIFT) /* 110: division by 4 */
 #  define RCC_CFGR_MCO1PRE_DIV5     (7 << RCC_CFGR_MCO1PRE_SHIFT) /* 111: division by 5 */
+
 #define RCC_CFGR_MCO2PRE_SHIFT      (27)      /* Bits 27-29: MCO2 prescaler */
 #define RCC_CFGR_MCO2PRE_MASK       (7 << RCC_CFGR_MCO2PRE_SHIFT)
 #  define RCC_CFGR_MCO2PRE_NONE     (0 << RCC_CFGR_MCO2PRE_SHIFT) /* 0xx: no division */
@@ -184,6 +196,7 @@
 #  define RCC_CFGR_MCO2PRE_DIV3     (5 << RCC_CFGR_MCO2PRE_SHIFT) /* 101: division by 3 */
 #  define RCC_CFGR_MCO2PRE_DIV4     (6 << RCC_CFGR_MCO2PRE_SHIFT) /* 110: division by 4 */
 #  define RCC_CFGR_MCO2PRE_DIV5     (7 << RCC_CFGR_MCO2PRE_SHIFT) /* 111: division by 5 */
+
 #define RCC_CFGR_MCO2_SHIFT         (30)      /* Bits 30-31: Microcontroller clock output 2 */
 #define RCC_CFGR_MCO2_MASK          (3 << RCC_CFGR_MCO2_SHIFT)
 #  define RCC_CFGR_MCO2_SYSCLK      (0 << RCC_CFGR_MCO2_SHIFT) /* 00: System clock (SYSCLK) selected */
@@ -453,6 +466,7 @@
 #  define RCC_BDCR_RTCSEL_LSE        (1 << RCC_BDCR_RTCSEL_SHIFT) /* 01: LSE oscillator clock used as RTC clock */
 #  define RCC_BDCR_RTCSEL_LSI        (2 << RCC_BDCR_RTCSEL_SHIFT) /* 10: LSI oscillator clock used as RTC clock */
 #  define RCC_BDCR_RTCSEL_HSE        (3 << RCC_BDCR_RTCSEL_SHIFT) /* 11: HSE oscillator clock divided by 128 used as RTC clock */
+
 #define RCC_BDCR_RTCEN               (1 << 15) /* Bit 15: RTC clock enable */
 #define RCC_BDCR_BDRST               (1 << 16) /* Bit 16: Backup domain software reset */
 
@@ -474,7 +488,7 @@
 #define RCC_SSCGR_MODPER_SHIFT      (0)        /* Bit 0-12: Modulation period */
 #define RCC_SSCGR_MODPER_MASK       (0x1fff << RCC_SSCGR_MODPER_SHIFT)
 #  define RCC_SSCGR_MODPER(n)       ((n) << RCC_SSCGR_MODPER_SHIFT)
-#define RCC_SSCGR_INCSTEP_SHIFT     (13)        /* Bit 13-27: Incrementation step */
+#define RCC_SSCGR_INCSTEP_SHIFT     (13)       /* Bit 13-27: Incrementation step */
 #define RCC_SSCGR_INCSTEP_MASK      (0x7fff << RCC_SSCGR_INCSTEP_SHIFT)
 #  define RCC_SSCGR_INCSTEP(n)      ((n) << RCC_SSCGR_INCSTEP_SHIFT)
 #define RCC_SSCGR_SPREADSEL         (1 << 30)  /* Bit 30: Spread Select */
@@ -482,7 +496,7 @@
 
 /* PLLI2S configuration register */
 
-#define RCC_PLLI2SCFGR_PLLI2SN_SHIFT (6)      /* Bits 6-14: PLLI2S multiplication factor for VCO */
+#define RCC_PLLI2SCFGR_PLLI2SN_SHIFT (6)       /* Bits 6-14: PLLI2S multiplication factor for VCO */
 #define RCC_PLLI2SCFGR_PLLI2SN_MASK  (0x1ff << RCC_PLLI2SCFGR_PLLI2SN_SHIFT)
 #define RCC_PLLI2SCFGR_PLLI2SR_SHIFT (28)      /* Bits 28-30: PLLI2S division factor for I2S clocks */
 #define RCC_PLLI2SCFGR_PLLI2SR_MASK  (7 << RCC_PLLI2SCFGR_PLLI2SR_SHIFT)

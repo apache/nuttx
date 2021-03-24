@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_uart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_STC_STM32_STM32_UART_H
 #define __ARCH_ARM_STC_STM32_STM32_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/serial/serial.h>
@@ -47,9 +47,9 @@
 #  error "Unsupported STM32 UART"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Make sure that we have not enabled more U[S]ARTs than are supported by the
  * device.
@@ -263,7 +263,9 @@
 #  undef HAVE_CONSOLE
 #endif
 
-/* DMA support is only provided if CONFIG_ARCH_DMA is in the NuttX configuration */
+/* DMA support is only provided if CONFIG_ARCH_DMA is in the
+ * NuttX configuration
+ */
 
 #if !defined(HAVE_SERIALDRIVER) || !defined(CONFIG_ARCH_DMA)
 #  undef CONFIG_USART1_RXDMA
@@ -377,13 +379,13 @@
 #  define USART_CR1_USED_INTS    (USART_CR1_RXNEIE | USART_CR1_TXEIE | USART_CR1_PEIE)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -396,32 +398,32 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_serial_get_uart
  *
  * Description:
  *   Get serial driver structure for STM32 USART
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR uart_dev_t *stm32_serial_get_uart(int uart_num);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_serial_dma_poll
  *
  * Description:
- *   Must be called periodically if any STM32 UART is configured for DMA.  The DMA
- *   callback is triggered for each fifo size/2 bytes, but this can result in some
- *   bytes being transferred but not collected if the incoming data is not a whole
- *   multiple of half the FIFO size.
+ *   Must be called periodically if any STM32 UART is configured for DMA.
+ *   The DMA callback is triggered for each fifo size/2 bytes, but this can
+ *   result in some bytes being transferred but not collected if the incoming
+ *   data is not a whole multiple of half the FIFO size.
  *
  *   May be safely called from either interrupt or thread context.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
 void stm32_serial_dma_poll(void);

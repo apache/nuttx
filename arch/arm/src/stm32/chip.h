@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_CHIP_H
 #define __ARCH_ARM_SRC_STM32_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -43,13 +43,13 @@
 
 #include "hardware/stm32_pinmap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Provide the required number of peripheral interrupt vector definitions as well.
- * The definition STM32_IRQ_NEXTINT simply comes from the chip-specific IRQ header
- * file included by arch/stm32/irq.h.
+/* Provide the required number of peripheral interrupt vector definitions as
+ * well. The definition STM32_IRQ_NEXTINT simply comes from the chip-specific
+ * IRQ header file included by arch/stm32/irq.h.
  */
 
 #define ARMV7M_PERIPHERAL_INTERRUPTS  STM32_IRQ_NEXTINT

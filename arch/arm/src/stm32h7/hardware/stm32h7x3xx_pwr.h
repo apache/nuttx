@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_pwr.h
  *
  *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
@@ -32,16 +32,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_PWR_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_PWR_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_PWR_CR1_OFFSET        0x0000  /* Power control register 1 */
 #define STM32_PWR_CSR1_OFFSET       0x0004  /* Power control/status register 1 */
@@ -53,9 +53,9 @@
 #define STM32_PWR_WKUPCR_OFFSET     0x0020  /* Power wakeup clear register */
 #define STM32_PWR_WKUPFR_OFFSET     0x0024  /* Power wakeup flag register */
 #define STM32_PWR_WKUPEPR_OFFSET    0x0028  /* Power wakeup enable and polarity register*/
-                                          /* 0x030: Reserved */
+                                            /* 0x030: Reserved */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_PWR_CR1               (STM32_PWR_BASE+STM32_PWR_CR1_OFFSET)
 #define STM32_PWR_CSR1              (STM32_PWR_BASE+STM32_PWR_CSR1_OFFSET)
@@ -67,7 +67,7 @@
 #define STM32_PWR_WKUPFR            (STM32_PWR_BASE+STM32_PWR_WKUPFR_OFFSET)
 #define STM32_PWR_WKUPEOR           (STM32_PWR_BASE+STM32_PWR_WKUPEOR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Power control register 1 (CR1) */
 
@@ -85,6 +85,7 @@
 #  define PWR_CR1_PLS_2V7           (5 << PWR_CR1_PLS_SHIFT) /* 101: */
 #  define PWR_CR1_PLS_2V85          (6 << PWR_CR1_PLS_SHIFT) /* 110: */
 #  define PWR_CR1_PLS_EXT           (7 << PWR_CR1_PLS_SHIFT) /* 111: */
+
 #define PWR_CR1_DBP                 (1 << 8)   /* Bit 8: Disable backup domain write protection */
 #define PWR_CR1_FLPS                (1 << 9)   /* Bit 9: */
                                                /* Bits 10-13: Reserved */
@@ -94,6 +95,7 @@
 #  define PWR_CR1_SVOS_S5           (1 << PWR_CR1_SVOS_SHIFT) /* 01:  */
 #  define PWR_CR1_SVOS_S4           (2 << PWR_CR1_SVOS_SHIFT) /* 10: */
 #  define PWR_CR1_SVOS_S3           (3 << PWR_CR1_SVOS_SHIFT) /* 11: */
+
 #define PWR_CR1_AVDEN               (1 << 16)  /* Bit 16: */
 #define PWR_CR1_ALS_SHIFT           (17)       /* Bits 17-18: Analog voltage detector level selection */
 #define PWR_CR1_ALS_MASK            (3 << PWR_CR1_ALS_SHIFT)
@@ -101,6 +103,7 @@
 #  define PWR_CR1_ALS_2V1           (1 << PWR_CR1_ALS_SHIFT) /* 01 */
 #  define PWR_CR1_ALS_2V5           (2 << PWR_CR1_ALS_SHIFT) /* 10: */
 #  define PWR_CR1_ALS_2V8           (3 << PWR_CR1_ALS_SHIFT) /* 11: */
+
                                               /* Bits 19-31: Reserved */
 
 /* Power control/status register 1 (CSR1) */
@@ -117,6 +120,7 @@
 #  define PWR_CSR1_VOS_SCALE_0      (3 << PWR_CSR1_ACTVOS_SHIFT)
 #define PWR_CSR1_AVDO               (1 << 16) /* Bit 16: Analog voltage detector output */
                                               /* Bits 17-31: Reserved */
+
 /* Power control register 2 (CR2) */
 
 #define PWR_CR2_BREN                (1 << 0)   /* Bit 0: Backup regulator enable */
@@ -170,6 +174,7 @@
 #  define PWR_D3CR_VOS_SCALE_2      (2 << STM32_PWR_D3CR_VOS_SHIFT) /* Fmax = 300MHz */
 #  define PWR_D3CR_VOS_SCALE_1      (3 << STM32_PWR_D3CR_VOS_SHIFT) /* Fmax = 400MHz */
 #  define PWR_D3CR_VOS_SCALE_0      (3 << STM32_PWR_D3CR_VOS_SHIFT) /* Fmax = 480MHz with ODN */
+
                                               /* Bits 15-31: Reserved */
 
 /* Power wakeup clear register (WKUPCR) */
@@ -217,6 +222,7 @@
 #define STM32_PWR_WKUPPUPD4_SHIFT   (22)      /* Bits 22-23: Wakeup pin pull config for WKUP4 */
 #define STM32_PWR_WKUPPUPD5_SHIFT   (24)      /* Bits 24-25: Wakeup pin pull config for WKUP5 */
 #define STM32_PWR_WKUPPUPD6_SHIFT   (26)      /* Bits 26-27: Wakeup pin pull config for WKUP6 */
+
 # define STM32_PWR_WKUPPUPD_NONE    (0)      /* No pull-up */
 # define STM32_PWR_WKUPPUPD_PULLUP  (1)      /* Pull-up enabled */
 # define STM32_PWR_WKUPPUPD_PULLDN  (2)      /* Pull-down enabled */

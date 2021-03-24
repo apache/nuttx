@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4x6xx_dma.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,20 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X6XX_DMA_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X6XX_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* 14 Channels Total: 7 DMA1 Channels(1-7) and 7 DMA2 channels (1-7) */
 
 #define DMA1 0
 #define DMA2 1
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L4_DMA_ISR_OFFSET       0x0000 /* DMA interrupt status register */
 #define STM32L4_DMA_IFCR_OFFSET      0x0004 /* DMA interrupt flag clear register */
@@ -87,7 +88,7 @@
 
 #define STM32L4_DMA_CSELR_OFFSET    0x00a8 /* DMA channel selection register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32L4_DMA1_ISRC           (STM32L4_DMA1_BASE+STM32L4_DMA_ISR_OFFSET)
 #define STM32L4_DMA1_IFCR           (STM32L4_DMA1_BASE+STM32L4_DMA_IFCR_OFFSET)
@@ -167,7 +168,7 @@
 #define STM32L4_DMA2_CMAR6          (STM32L4_DMA2_BASE+STM32L4_DMA_CMAR6_OFFSET)
 #define STM32L4_DMA2_CMAR7          (STM32L4_DMA2_BASE+STM32L4_DMA_CMAR7_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 #define DMA_CHAN_SHIFT(n)         ((n) << 2)
 #define DMA_CHAN_MASK             0x0f
@@ -240,17 +241,20 @@
 #  define DMA_CCR_PSIZE_8BITS     (0 << DMA_CCR_PSIZE_SHIFT) /* 00: 8-bits */
 #  define DMA_CCR_PSIZE_16BITS    (1 << DMA_CCR_PSIZE_SHIFT) /* 01: 16-bits */
 #  define DMA_CCR_PSIZE_32BITS    (2 << DMA_CCR_PSIZE_SHIFT) /* 10: 32-bits */
+
 #define DMA_CCR_MSIZE_SHIFT       (10)      /* Bits 10-11: Memory size */
 #define DMA_CCR_MSIZE_MASK        (3 << DMA_CCR_MSIZE_SHIFT)
 #  define DMA_CCR_MSIZE_8BITS     (0 << DMA_CCR_MSIZE_SHIFT) /* 00: 8-bits */
 #  define DMA_CCR_MSIZE_16BITS    (1 << DMA_CCR_MSIZE_SHIFT) /* 01: 16-bits */
 #  define DMA_CCR_MSIZE_32BITS    (2 << DMA_CCR_MSIZE_SHIFT) /* 10: 32-bits */
+
 #define DMA_CCR_PL_SHIFT          (12)      /* Bits 12-13: Channel Priority level */
 #define DMA_CCR_PL_MASK           (3 << DMA_CCR_PL_SHIFT)
 #  define DMA_CCR_PRILO           (0 << DMA_CCR_PL_SHIFT) /* 00: Low */
 #  define DMA_CCR_PRIMED          (1 << DMA_CCR_PL_SHIFT) /* 01: Medium */
 #  define DMA_CCR_PRIHI           (2 << DMA_CCR_PL_SHIFT) /* 10: High */
 #  define DMA_CCR_PRIVERYHI       (3 << DMA_CCR_PL_SHIFT) /* 11: Very high */
+
 #define DMA_CCR_MEM2MEM           (1 << 14) /* Bit 14: Memory to memory mode */
 
 #define DMA_CCR_ALLINTS           (DMA_CCR_TEIE|DMA_CCR_HTIE|DMA_CCR_TCIE)
@@ -261,13 +265,13 @@
 #define DMA_CNDTR_NDT_MASK        (0xffff << DMA_CNDTR_NDT_SHIFT)
 
 /* DMA Channel mapping.  Each DMA channel has a mapping to one of several
- * possible sources/sinks of data.  The requests from peripherals assigned to a
- * channel are multiplexed together before entering the DMA block. This means
- * that only one request on a given channel can be enabled at once.
+ * possible sources/sinks of data.  The requests from peripherals assigned to
+ * a channel are multiplexed together before entering the DMA block. This
+ * means that only one request on a given channel can be enabled at once.
  *
- * Alternative DMA channel selections are provided with a numeric suffix like _1,
- * _2, etc.  Drivers, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.
+ * Alternative DMA channel selections are provided with a numeric suffix like
+ * _1, _2, etc.  Drivers, however, will use the pin selection without the
+ * numeric suffix. Additional definitions are required in the board.h file.
  */
 
 #define STM32L4_DMA1_CHAN1          (0)

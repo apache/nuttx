@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_rcc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_STM32_RCC_H
 #define __ARCH_ARM_SRC_STM32_STM32_RCC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,9 +50,9 @@
 #  error "Unsupported STM32 chip"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -65,15 +65,16 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This symbol references the Cortex-M3/4 vector table (as positioned by the linker
- * script, ld.script or ld.script.dfu.  The standard location for the vector table is
- * at the beginning of FLASH at address 0x0800:0000.  If we are using the STMicro DFU
- * bootloader, then the vector table will be offset to a different location in FLASH
- * and we will need to set the NVIC vector location to this alternative location.
+/* This symbol references the Cortex-M3/4 vector table (as positioned by the
+ * linker script, ld.script or ld.script.dfu.  The standard location for the
+ * vector table is at the beginning of FLASH at address 0x0800:0000.  If we
+ * are using the STMicro DFU bootloader, then the vector table will be offset
+ * to a different location in FLASH and we will need to set the NVIC vector
+ * location to this alternative location.
  */
 
 #if defined(__ICCARM__)
@@ -84,11 +85,11 @@ extern uint32_t __vector_table[];
 extern uint32_t _vectors[];
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_mco1config
  *
  * Description:
@@ -106,7 +107,7 @@ extern uint32_t _vectors[];
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 static inline void stm32_mco1config(uint32_t source, uint32_t div)
@@ -120,7 +121,7 @@ static inline void stm32_mco1config(uint32_t source, uint32_t div)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_mcoconfig
  *
  * Description:
@@ -129,14 +130,14 @@ static inline void stm32_mco1config(uint32_t source, uint32_t div)
  *
  * Input Parameters:
  *   source - One of the definitions for the RCC_CFGR_MCO definitions from
- *     chip/stm32f10xxx_rcc.h {RCC_CFGR_SYSCLK, RCC_CFGR_INTCLK, RCC_CFGR_EXTCLK,
- *     RCC_CFGR_PLLCLKd2, RCC_CFGR_PLL2CLK, RCC_CFGR_PLL3CLKd2, RCC_CFGR_XT1,
- *     RCC_CFGR_PLL3CLK}
+ *     chip/stm32f10xxx_rcc.h {RCC_CFGR_SYSCLK, RCC_CFGR_INTCLK,
+ *    RCC_CFGR_EXTCLK,  RCC_CFGR_PLLCLKd2, RCC_CFGR_PLL2CLK,
+ *     RCC_CFGR_PLL3CLKd2, RCC_CFGR_XT1, RCC_CFGR_PLL3CLK}
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_CONNECTIVITYLINE)
 static inline void stm32_mcoconfig(uint32_t source)
@@ -152,7 +153,7 @@ static inline void stm32_mcoconfig(uint32_t source)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_mcodivconfig
  *
  * Description:
@@ -160,18 +161,21 @@ static inline void stm32_mcoconfig(uint32_t source)
  *   stm32l1xxx. PA4 should be configured in alternate function mode.
  *
  * Input Parameters:
- *   source - One of the definitions for the RCC_CFGR_MCOSEL definitions from
- *     chip/stm32l15xxx_rcc.h {RCC_CFGR_MCOSEL_DISABLED, RCC_CFGR_MCOSEL_SYSCLK,
- *     RCC_CFGR_MCOSEL_HSICLK, RCC_CFGR_MCOSEL_MSICLK, RCC_CFGR_MCOSEL_HSECLK,
- *     RCC_CFGR_MCOSEL_PLLCLK, RCC_CFGR_MCOSEL_LSICLK, RCC_CFGR_MCOSEL_LSECLK}
- *   divider - One of the definitions for the RCC_CFGR_MCOPRE definitions from
- *     chip/stm32l15xxx_rcc.h {RCC_CFGR_MCOPRE_DIV1, RCC_CFGR_MCOPRE_DIV2,
+ *   source - One of the definitions for the RCC_CFGR_MCOSEL definitions
+ *     from chip/stm32l15xxx_rcc.h
+ *    {RCC_CFGR_MCOSEL_DISABLED, RCC_CFGR_MCOSEL_SYSCLK,
+ *     RCC_CFGR_MCOSEL_HSICLK, RCC_CFGR_MCOSEL_MSICLK,
+ *     RCC_CFGR_MCOSEL_HSECLK, RCC_CFGR_MCOSEL_PLLCLK,
+ *     RCC_CFGR_MCOSEL_LSICLK, RCC_CFGR_MCOSEL_LSECLK}
+ *   divider - One of the definitions for the RCC_CFGR_MCOPRE definitions
+ *     from chip/stm32l15xxx_rcc.h
+ *    {RCC_CFGR_MCOPRE_DIV1, RCC_CFGR_MCOPRE_DIV2,
  *     RCC_CFGR_MCOPRE_DIV4, RCC_CFGR_MCOPRE_DIV8, RCC_CFGR_MCOPRE_DIV16}
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32L15XX)
 static inline void stm32_mcodivconfig(uint32_t source, uint32_t divider)
@@ -189,7 +193,7 @@ static inline void stm32_mcodivconfig(uint32_t source, uint32_t divider)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_mco2config
  *
  * Description:
@@ -207,7 +211,7 @@ static inline void stm32_mcodivconfig(uint32_t source, uint32_t divider)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 static inline void stm32_mco2config(uint32_t source, uint32_t div)
@@ -221,22 +225,22 @@ static inline void stm32_mco2config(uint32_t source, uint32_t div)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_clockconfig
  *
  * Description:
- *   Called to establish the clock settings based on the values in board.h.  This
- *   function (by default) will reset most everything, enable the PLL, and enable
- *   peripheral clocking for all periperipherals enabled in the NuttX configuration
- *   file.
+ *   Called to establish the clock settings based on the values in board.h.
+ *   This function (by default) will reset most everything, enable the PLL,
+ *   and enable peripheral clocking for all periperipherals enabled in the
+ *   NuttX configuration file.
  *
- *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then clocking will
- *   be enabled by an externally provided, board-specific function called
- *   stm32_board_clockconfig().
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then clocking
+ *   will be enabled by an externally provided, board-specific function
+ *   called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -244,39 +248,40 @@ static inline void stm32_mco2config(uint32_t source, uint32_t div)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_clockconfig(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_board_clockconfig
  *
  * Description:
- *   Any STM32 board may replace the "standard" board clock configuration logic with
- *   its own, custom clock configuration logic.
+ *   Any STM32 board may replace the "standard" board clock configuration
+ *   logic with its own, custom clock configuration logic.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 void stm32_board_clockconfig(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_clockenable
  *
  * Description:
- *   Re-enable the clock and restore the clock settings based on settings in board.h.
- *   This function is only available to support low-power modes of operation:  When
- *   re-awakening from deep-sleep modes, it is necessary to re-enable/re-start the
- *   PLL
+ *   Re-enable the clock and restore the clock settings based on settings in
+ *   board.h.
+ *   This function is only available to support low-power modes of operation:
+ *   When re-awakening from deep-sleep modes, it is necessary to re-enable/
+ *   re-start the PLL
  *
  *   This functional performs a subset of the operations performed by
- *   stm32_clockconfig():  It does not reset any devices, and it does not reset the
- *   currently enabled peripheral clocks.
+ *   stm32_clockconfig():  It does not reset any devices, and it does not
+ *   reset the currently enabled peripheral clocks.
  *
- *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then clocking will
- *   be enabled by an externally provided, board-specific function called
- *   stm32_board_clockconfig().
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then clocking
+ *   will be enabled by an externally provided, board-specific function
+ *   called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -284,13 +289,13 @@ void stm32_board_clockconfig(void);
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 void stm32_clockenable(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rcc_enablelse
  *
  * Description:
@@ -302,27 +307,27 @@ void stm32_clockenable(void);
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_rcc_enablelse(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rcc_enablelsi
  *
  * Description:
  *   Enable the Internal Low-Speed (LSI) RC Oscillator.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_rcc_enablelsi(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rcc_disablelsi
  *
  * Description:
  *   Disable the Internal Low-Speed (LSI) RC Oscillator.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_rcc_disablelsi(void);
 

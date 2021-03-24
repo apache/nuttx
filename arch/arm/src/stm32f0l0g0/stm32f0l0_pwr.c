@@ -98,8 +98,8 @@ static inline void stm32_pwr_modifyreg32(uint8_t offset, uint32_t clearbits,
  *
  * Description:
  *   Insures the referenced count access to the backup domain (RTC registers,
- *   RTC backup data registers and backup SRAM is consistent with the HW state
- *   without relying on a variable.
+ *   RTC backup data registers and backup SRAM is consistent with the HW
+ *   state without relying on a variable.
  *
  *   NOTE: This function should only be called by SoC Start up code.
  *
@@ -135,8 +135,8 @@ void stm32_pwr_initbkp(bool writable)
  *   registers and backup SRAM).
  *
  *   NOTE: Reference counting is used in order to supported nested calls to
- *   this function.  As a consequence, every call to stm32_pwr_enablebkp(true)
- *   must be followed by a matching call to stm32_pwr_enablebkp(false).
+ *   this function.  As a consequence, every call to stm32_pwr_enablebkp
+ *  (true) must be followed by a matching call to stm32_pwr_enablebkp(false).
  *
  * Input Parameters:
  *   writable - True: enable ability to write to backup domain registers

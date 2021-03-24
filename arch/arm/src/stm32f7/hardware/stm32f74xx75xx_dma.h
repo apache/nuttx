@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/hardware/stm32f74xx75xx_dma.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XXX75XX_DMA_H
 #define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XXX75XX_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* 2 DMA controllers */
 
@@ -60,7 +60,7 @@
 #define DMA_CHAN6                 (6)
 #define DMA_CHAN7                 (7)
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_DMA_LISR_OFFSET     0x0000 /* DMA low interrupt status register */
 #define STM32_DMA_HISR_OFFSET     0x0004 /* DMA high interrupt status register */
@@ -129,7 +129,7 @@
 #define STM32_DMA_S6FCR_OFFSET    0x00b4 /* DMA stream 6 FIFO control register */
 #define STM32_DMA_S7FCR_OFFSET    0x00cc /* DMA stream 7 FIFO control register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_DMA1_LISRC          (STM32_DMA1_BASE+STM32_DMA_LISR_OFFSET)
 #define STM32_DMA1_HISRC          (STM32_DMA1_BASE+STM32_DMA_HISR_OFFSET)
@@ -261,7 +261,7 @@
 #define STM32_DMA2_S6FCR          (STM32_DMA2_BASE+STM32_DMA_S6FCR_OFFSET)
 #define STM32_DMA2_S7FCR          (STM32_DMA2_BASE+STM32_DMA_S7FCR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 #define DMA_STREAM_MASK           0x3f
 #define DMA_STREAM_FEIF_BIT       (1 << 0)  /* Bit 0: Stream FIFO error interrupt flag */
@@ -270,7 +270,9 @@
 #define DMA_STREAM_HTIF_BIT       (1 << 4)  /* Bit 4: Stream Half Transfer flag */
 #define DMA_STREAM_TCIF_BIT       (1 << 5)  /* Bit 5: Stream Transfer Complete flag */
 
-/* DMA interrupt status register and interrupt flag clear register field definitions */
+/* DMA interrupt status register and interrupt flag clear register field
+ * definitions
+ */
 
 #define DMA_INT_STREAM0_SHIFT     (0)       /* Bits 0-5:   DMA Stream 0 interrupt */
 #define DMA_INT_STREAM0_MASK      (DMA_STREAM_MASK <<  DMA_INT_STREAM0_SHIFT)
@@ -303,6 +305,7 @@
 #  define DMA_SCR_DIR_P2M         (0 << DMA_SCR_DIR_SHIFT) /* 00: Peripheral-to-memory */
 #  define DMA_SCR_DIR_M2P         (1 << DMA_SCR_DIR_SHIFT) /* 01: Memory-to-peripheral */
 #  define DMA_SCR_DIR_M2M         (2 << DMA_SCR_DIR_SHIFT) /* 10: Memory-to-memory */
+
 #define DMA_SCR_CIRC              (1 << 8)  /* Bit 8:  Circular mode */
 #define DMA_SCR_PINC              (1 << 9)  /* Bit 9:  Peripheral increment mode */
 #define DMA_SCR_MINC              (1 << 10) /* Bit 10: Memory increment mode */
@@ -311,11 +314,13 @@
 #  define DMA_SCR_PSIZE_8BITS     (0 << DMA_SCR_PSIZE_SHIFT) /* 00: 8-bits */
 #  define DMA_SCR_PSIZE_16BITS    (1 << DMA_SCR_PSIZE_SHIFT) /* 01: 16-bits */
 #  define DMA_SCR_PSIZE_32BITS    (2 << DMA_SCR_PSIZE_SHIFT) /* 10: 32-bits */
+
 #define DMA_SCR_MSIZE_SHIFT       (13)      /* Bits 13-14: Memory size */
 #define DMA_SCR_MSIZE_MASK        (3 << DMA_SCR_MSIZE_SHIFT)
 #  define DMA_SCR_MSIZE_8BITS     (0 << DMA_SCR_MSIZE_SHIFT) /* 00: 8-bits */
 #  define DMA_SCR_MSIZE_16BITS    (1 << DMA_SCR_MSIZE_SHIFT) /* 01: 16-bits */
 #  define DMA_SCR_MSIZE_32BITS    (2 << DMA_SCR_MSIZE_SHIFT) /* 10: 32-bits */
+
 #define DMA_SCR_PINCOS            (1 << 15) /* Bit 15: Peripheral increment offset size */
 #define DMA_SCR_PL_SHIFT          (16)      /* Bits 16-17: Stream Priority level */
 #define DMA_SCR_PL_MASK           (3 << DMA_SCR_PL_SHIFT)
@@ -323,6 +328,7 @@
 #  define DMA_SCR_PRIMED          (1 << DMA_SCR_PL_SHIFT) /* 01: Medium */
 #  define DMA_SCR_PRIHI           (2 << DMA_SCR_PL_SHIFT) /* 10: High */
 #  define DMA_SCR_PRIVERYHI       (3 << DMA_SCR_PL_SHIFT) /* 11: Very high */
+
 #define DMA_SCR_DBM               (1 << 18) /* Bit 15: Double buffer mode */
 #define DMA_SCR_CT                (1 << 19) /* Bit 19: Current target */
 #define DMA_SCR_PBURST_SHIFT      (21)      /* Bits 21-22: Peripheral burst transfer configuration */
@@ -331,12 +337,14 @@
 #  define DMA_SCR_PBURST_INCR4    (1 << DMA_SCR_PBURST_SHIFT) /* 01: Incremental burst of 4 beats */
 #  define DMA_SCR_PBURST_INCR8    (2 << DMA_SCR_PBURST_SHIFT) /* 10: Incremental burst of 8 beats */
 #  define DMA_SCR_PBURST_INCR16   (3 << DMA_SCR_PBURST_SHIFT) /* 11: Incremental burst of 16 beats */
+
 #define DMA_SCR_MBURST_SHIFT      (23)      /* Bits 23-24: Memory burst transfer configuration */
 #define DMA_SCR_MBURST_MASK       (3 << DMA_SCR_MBURST_SHIFT)
 #  define DMA_SCR_MBURST_SINGLE   (0 << DMA_SCR_MBURST_SHIFT) /* 00: Single transfer */
 #  define DMA_SCR_MBURST_INCR4    (1 << DMA_SCR_MBURST_SHIFT) /* 01: Incremental burst of 4 beats */
 #  define DMA_SCR_MBURST_INCR8    (2 << DMA_SCR_MBURST_SHIFT) /* 10: Incremental burst of 8 beats */
 #  define DMA_SCR_MBURST_INCR16   (3 << DMA_SCR_MBURST_SHIFT) /* 11: Incremental burst of 16 beats */
+
 #define DMA_SCR_CHSEL_SHIFT       (25)      /* Bits 25-27:  Channel selection */
 #define DMA_SCR_CHSEL_MASK        (7 << DMA_SCR_CHSEL_SHIFT)
 #  define DMA_SCR_CHSEL(n)        ((n) << DMA_SCR_CHSEL_SHIFT)
@@ -356,6 +364,7 @@
 #  define DMA_SFCR_FTH_HALF       (1 << DMA_SFCR_FTH_SHIFT) /* 1/2 full FIFO */
 #  define DMA_SFCR_FTH_3QUARTER   (2 << DMA_SFCR_FTH_SHIFT) /* 3/4 full FIFO */
 #  define DMA_SFCR_FTH_FULL       (3 << DMA_SFCR_FTH_SHIFT) /* full FIFO */
+
 #define DMA_SFCR_DMDIS            (1 << 2)  /* Bit 2:  Direct mode disable */
 #define DMA_SFCR_FS_SHIFT         (3)       /* Bits 3-5: FIFO status */
 #define DMA_SFCR_FS_MASK          (7 << DMA_SFCR_FS_SHIFT)
@@ -365,20 +374,22 @@
 #  define DMA_SFCR_FS_ALMOSTFULL  (3 << DMA_SFCR_FS_SHIFT) /* 3/4 = fifo_level < full */
 #  define DMA_SFCR_FS_EMPTY       (4 << DMA_SFCR_FS_SHIFT) /* FIFO is empty */
 #  define DMA_SFCR_FS_FULL        (5 << DMA_SFCR_FS_SHIFT) /* FIFO is full */
+
                                             /* Bit 6:  Reserved */
 #define DMA_SFCR_FEIE             (1 << 7)  /* Bit 7:  FIFO error interrupt enable */
                                             /* Bits 8-31: Reserved */
 
-/* DMA Stream mapping.  Each DMA stream has a mapping to several possible
- * sources/sinks of data.  The requests from peripherals assigned to a stream
- * are simply OR'ed together before entering the DMA block.  This means that only
- * one request on a given stream can be enabled at once.
+/* DMA Stream mapping.
+ * Each DMA stream has a mapping to several possible sources/sinks of data.
+ * The requests from peripherals assigned to a stream are simply OR'ed
+ * together before entering the DMA block.  This means that only one request
+ *  on a given stream can be enabled at once.
  *
- * Alternative stream selections are provided with a numeric suffix like _1, _2, etc.
- * The DMA driver, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.  For example, if
- * SPI3_RX connects via DMA STREAM0, then following should be application-specific
- * mapping should be used:
+ * Alternative stream selections are provided with a numeric suffix like _1,
+ * _2, etc. The DMA driver, however, will use the pin selection without the
+ * numeric suffix. Additional definitions are required in the board.h file.
+ * For example, if SPI3_RX connects via DMA STREAM0, then following should
+ * be application-specific mapping should be used:
  *
  * #define DMAMAP_SPI3_RX DMAMAP_SPI3_RX_1
  */

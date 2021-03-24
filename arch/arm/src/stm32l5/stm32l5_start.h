@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l5/stm32l5_start.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L5_STM32L5_START_H
 #define __ARCH_ARM_SRC_STM32L5_STM32L5_START_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_board_initialize
  *
  * Description:
  *   All STM32L5 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory has
- *   been configured and mapped but before any devices have been initialized.
+ *   entry point is called early in the initialization -- after all memory
+ *   has been configured and mapped but before any devices have been
+ *   initialized.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void stm32l5_board_initialize(void);
 

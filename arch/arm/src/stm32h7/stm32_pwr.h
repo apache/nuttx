@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/stm32_pwr.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_STM32_PWR_H
 #define __ARCH_ARM_SRC_STM32H7_STM32_PWR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,9 +47,9 @@
 #include "chip.h"
 #include "hardware/stm32_pwr.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -62,17 +62,17 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_initbkp
  *
  * Description:
  *   Insures the referenced count access to the backup domain (RTC registers,
- *   RTC backup data registers and backup SRAM is consistent with the HW state
- *   without relying on a variable.
+ *   RTC backup data registers and backup SRAM is consistent with the HW
+ *   state without relying on a variable.
  *
  *   NOTE: This function should only be called by SoC Start up code.
  *
@@ -83,16 +83,16 @@ extern "C"
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_initbkp(bool writable);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_enablebkp
  *
  * Description:
- *   Enables access to the backup domain (RTC registers, RTC backup data registers
- *   and backup SRAM).
+ *   Enables access to the backup domain (RTC registers, RTC backup data
+ *   registers and backup SRAM).
  *
  * Input Parameters:
  *   writable - True: enable ability to write to backup domain registers
@@ -100,23 +100,24 @@ void stm32_pwr_initbkp(bool writable);
  * Returned Value:
  *   none
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_enablebkp(bool writable);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_enablebreg
  *
  * Description:
- *   Enables the Backup regulator, the Backup regulator (used to maintain backup
- *   SRAM content in Standby and VBAT modes) is enabled. If BRE is reset, the backup
- *   regulator is switched off. The backup SRAM can still be used but its content
- *   will be lost in the Standby and VBAT modes. Once set, the application must wait
- *   that the Backup Regulator Ready flag (BRR) is set to indicate that the data
- *   written into the RAM will be maintained in the Standby and VBAT modes.
+ *   Enables the Backup regulator, the Backup regulator (used to maintain
+ *   backup SRAM content in Standby and VBAT modes) is enabled. If BRE is
+ *   reset, the backup regulator is switched off. The backup SRAM can still
+ *   be used but its content will be lost in the Standby and VBAT modes. Once
+ *   set, the application must wait that the Backup Regulator Ready flag
+ *   (BRR) is set to indicate that the data written into the RAM will be
+ *   maintained in the Standby and VBAT modes.
  *
- *   This function needs to be called after stm32_pwr_enablebkp(true) has been
- *   called.
+ *   This function needs to be called after stm32_pwr_enablebkp(true) has
+ *   been called.
  *
  * Input Parameters:
  *   region - state to set it to
@@ -124,15 +125,16 @@ void stm32_pwr_enablebkp(bool writable);
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_enablebreg(bool region);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_configurewkup
  *
  * Description:
- *   Configures the external wakeup (WKUP) signals for wakeup from standby mode.
+ *   Configures the external wakeup (WKUP) signals for wakeup from standby
+ *   mode.
  *   Sets rising/falling edge sensitivity and pull state.
  *
  *
@@ -147,16 +149,17 @@ void stm32_pwr_enablebreg(bool region);
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-void stm32_pwr_configurewkup(uint32_t pin, bool en, bool rising, uint32_t pull);
+void stm32_pwr_configurewkup(uint32_t pin, bool en,
+                             bool rising, uint32_t pull);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_setvbatcharge
  *
  * Description:
- *   Configures the internal charge resistor to charge a battery attached to
- *   the VBAT pin.
+ *   Configures the internal charge resistor to charge a battery attached
+ *   to the VBAT pin.
  *
  *
  * Input Parameters:
@@ -167,7 +170,7 @@ void stm32_pwr_configurewkup(uint32_t pin, bool en, bool rising, uint32_t pull);
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_setvbatcharge(bool enable, bool resistor);
 
