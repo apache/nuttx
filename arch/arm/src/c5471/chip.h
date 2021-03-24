@@ -148,6 +148,7 @@
 #define UART_IRDA_XMIT_FIFO_SIZE 64
 
 /* UART_LCR Register */
+
                                         /* Bits 31-7: Reserved */
 #define UART_LCR_BOC         0x00000040 /* Bit 6: Break Control */
                                         /* Bit 5: Parity Type 2 */
@@ -203,39 +204,39 @@
 #define GIO_REGISTER_BASE    0xffff2800
 
 #define GPIO_IO              0xffff2800 /* Writeable when I/O is configured
-					 * as an output; reads value on I/O
-					 * pin when I/O is configured as an
-					 * input */
+                                         * as an output; reads value on I/O
+                                         * pin when I/O is configured as an
+                                         * input */
 #define GPIO_CIO             0xffff2804 /* GPIO configuration register */
 #define GPIO_IRQA            0xffff2808 /* In conjunction with GPIO_IRQB
-					 * determines the behavior when GPIO
-					 * pins configured as input IRQ */
+                                         * determines the behavior when GPIO
+                                         * pins configured as input IRQ */
 #define GPIO_IRQB            0xffff280c /* Determines the behavior when GPIO
-					 * pins configured as input IRQ */
+                                         * pins configured as input IRQ */
 #define GPIO_DDIO            0xffff2810 /* Delta Detect Register
-					 * (detects changes in the I/O pins) */
+                                         * (detects changes in the I/O pins) */
 #define GPIO_EN              0xffff2814 /* Selects register for muxed GPIOs */
 
 #define KGIO_REGISTER_BASE   0xffff2900
 
 #define KBGPIO_IO            0xffff2900 /* Keyboard I/O bits: Writeable
-					 * when KBGPIO is configured as an
-					 * output; reads value on I/O pin
-					 * when KBGPIO is configured as an
-					 * input */
+                                         * when KBGPIO is configured as an
+                                         * output; reads value on I/O pin
+                                         * when KBGPIO is configured as an
+                                         * input */
 #define KBGPIO_CIO           0xffff2904 /* KBGPIO configuration register */
 #define KBGPIO_IRQA          0xffff2908 /* In conjunction with KBGPIO_IRQB
-					 * determines the behavior when
-					 * KBGPIO pins configured as input
-					 * IRQ */
+                                         * determines the behavior when
+                                         * KBGPIO pins configured as input
+                                         * IRQ */
 #define KBGPIO_IRQB          0xffff290c /* In conjunction with KBGPIO_IRQA
-					 * determines the behavior when
-					 * KBGPIO pins configured as input
-					 * IRQ */
+                                         * determines the behavior when
+                                         * KBGPIO pins configured as input
+                                         * IRQ */
 #define KBGPIO_DDIO          0xffff2910 /* Delta Detect Register (detects
-					 * changes in the KBGPIO pins) */
+                                         * changes in the KBGPIO pins) */
 #define KBGPIO_EN            0xffff2914 /* Selects register for muxed
-					 * KBGPIOs */
+                                         * KBGPIOs */
 
 /* Timers *******************************************************************/
 
