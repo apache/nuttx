@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/efm32_pm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_EFM32_PM_H
 #define __ARCH_ARM_SRC_EFM32_EFM32_PM_H
@@ -119,8 +119,8 @@ int efm32_pmstandby(void);
  *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
  *                        executed, the MCU enters Sleep mode as soon as it
  *                        exits the lowest priority ISR.
- *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep mode
- *                        as soon as WFI or WFE instruction is executed.
+ *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep
+ *                        mode as soon as WFI or WFE instruction is executed.
  * Returned Value:
  *   Zero means that the STOP was successfully entered and the system has
  *   been re-awakened.  The internal voltage regulator is back to its

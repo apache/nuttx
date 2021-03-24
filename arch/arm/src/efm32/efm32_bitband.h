@@ -47,8 +47,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
 
+/* Configuration ************************************************************/
 
 /****************************************************************************
  * Public Data
@@ -59,7 +59,8 @@
  ****************************************************************************/
 
 #if defined(CONFIG_EFM32_BITBAND)
-inline void bitband_set_peripheral(uint32_t addr, uint32_t bit, uint32_t val);
+inline void bitband_set_peripheral(uint32_t addr,
+                                   uint32_t bit, uint32_t val);
 inline uint32_t bitband_get_peripheral(uint32_t addr, uint32_t bit);
 inline void bitband_set_sram(uint32_t addr, uint32_t bit, uint32_t val);
 inline uint32_t bitband_get_sram(uint32_t addr, uint32_t bit);

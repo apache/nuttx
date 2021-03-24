@@ -79,6 +79,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* ADC interrupts ***********************************************************/
 
 /* The maximum number of channels that can be sampled.  If dma support is
@@ -117,12 +118,14 @@ struct efm32_dev_s
 /* ADC Register access */
 
 static uint32_t adc_getreg(struct efm32_dev_s *priv, int offset);
-static void     adc_putreg(struct efm32_dev_s *priv, int offset, uint32_t value);
+static void     adc_putreg(struct efm32_dev_s *priv, int offset,
+                           uint32_t value);
 static void     adc_hw_reset(struct efm32_dev_s *priv, bool reset);
 
 /* ADC Interrupt Handler */
 
-static int adc_interrupt(int irq, FAR void *context, FAR struct adc_dev_s *dev);
+static int adc_interrupt(int irq,
+                         FAR void *context, FAR struct adc_dev_s *dev);
 
 /* ADC Driver Methods */
 
@@ -227,9 +230,9 @@ static void adc_putreg(struct efm32_dev_s *priv, int offset, uint32_t value)
  *   reference.
  *
  *   During production, calibration values are made and stored in the device
- *   information page for known references. Notice that for external references,
- *   calibration values must be determined explicitly, and this function
- *   will not modify the calibration register.
+ *   information page for known references. Notice that for external
+ *   references, calibration values must be determined explicitly, and this
+ *   function will not modify the calibration register.
  *
  * Input Parameters:
  *   adc - Pointer to ADC peripheral register block.
@@ -254,7 +257,8 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_GAIN_MASK) >>
             _DEVINFO_ADC0CAL0_1V25_GAIN_SHIFT) << _ADC_CAL_SCANGAIN_SHIFT;
     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_OFFSET_MASK) >>
-            _DEVINFO_ADC0CAL0_1V25_OFFSET_SHIFT) << _ADC_CAL_SCANOFFSET_SHIFT;
+            _DEVINFO_ADC0CAL0_1V25_OFFSET_SHIFT) <<
+             _ADC_CAL_SCANOFFSET_SHIFT;
     adc->CAL = cal;
     break;
 
@@ -263,7 +267,8 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_GAIN_MASK) >>
             _DEVINFO_ADC0CAL0_2V5_GAIN_SHIFT) << _ADC_CAL_SCANGAIN_SHIFT;
     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_OFFSET_MASK) >>
-            _DEVINFO_ADC0CAL0_2V5_OFFSET_SHIFT) << _ADC_CAL_SCANOFFSET_SHIFT;
+            _DEVINFO_ADC0CAL0_2V5_OFFSET_SHIFT) <<
+            _ADC_CAL_SCANOFFSET_SHIFT;
     adc->CAL = cal;
     break;
 
@@ -272,7 +277,8 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_GAIN_MASK) >>
             _DEVINFO_ADC0CAL1_VDD_GAIN_SHIFT) << _ADC_CAL_SCANGAIN_SHIFT;
     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_OFFSET_MASK) >>
-            _DEVINFO_ADC0CAL1_VDD_OFFSET_SHIFT) << _ADC_CAL_SCANOFFSET_SHIFT;
+            _DEVINFO_ADC0CAL1_VDD_OFFSET_SHIFT) <<
+            _ADC_CAL_SCANOFFSET_SHIFT;
     adc->CAL = cal;
     break;
 
@@ -281,16 +287,19 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_GAIN_MASK) >>
             _DEVINFO_ADC0CAL1_5VDIFF_GAIN_SHIFT) << _ADC_CAL_SCANGAIN_SHIFT;
     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_OFFSET_MASK) >>
-            _DEVINFO_ADC0CAL1_5VDIFF_OFFSET_SHIFT) << _ADC_CAL_SCANOFFSET_SHIFT;
+            _DEVINFO_ADC0CAL1_5VDIFF_OFFSET_SHIFT) <<
+            _ADC_CAL_SCANOFFSET_SHIFT;
     adc->CAL = cal;
     break;
 
   case adcRef2xVDD:
+
     /* Gain value not of relevance for this reference, leave as is */
 
     cal  = adc->CAL & ~_ADC_CAL_SCANOFFSET_MASK;
     cal |= ((DEVINFO->ADC0CAL2 & _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_MASK) >>
-            _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_SHIFT) << _ADC_CAL_SCANOFFSET_SHIFT;
+            _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_SHIFT) <<
+            _ADC_CAL_SCANOFFSET_SHIFT;
     adc->CAL = cal;
     break;
 
@@ -311,9 +320,9 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
  *   reference.
  *
  *   During production, calibration values are made and stored in the device
- *   information page for known references. Notice that for external references,
- *   calibration values must be determined explicitly, and this function
- *   will not modify the calibration register.
+ *   information page for known references. Notice that for external
+ *   references, calibration values must be determined explicitly, and this
+ *   function will not modify the calibration register.
  *
  * Input Parameters:
  *   adc - Pointer to ADC peripheral register block.
@@ -334,47 +343,58 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
   switch (ref)
   {
   case adcRef1V25:
-    cal  = adc->CAL & ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
+    cal  = adc->CAL &
+           ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_GAIN_MASK) >>
             _DEVINFO_ADC0CAL0_1V25_GAIN_SHIFT) << _ADC_CAL_SINGLEGAIN_SHIFT;
     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_OFFSET_MASK) >>
-            _DEVINFO_ADC0CAL0_1V25_OFFSET_SHIFT) << _ADC_CAL_SINGLEOFFSET_SHIFT;
+            _DEVINFO_ADC0CAL0_1V25_OFFSET_SHIFT) <<
+            _ADC_CAL_SINGLEOFFSET_SHIFT;
     adc->CAL = cal;
     break;
 
   case adcRef2V5:
-    cal  = adc->CAL & ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
+    cal  = adc->CAL &
+           ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_GAIN_MASK) >>
             _DEVINFO_ADC0CAL0_2V5_GAIN_SHIFT) << _ADC_CAL_SINGLEGAIN_SHIFT;
     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_OFFSET_MASK) >>
-            _DEVINFO_ADC0CAL0_2V5_OFFSET_SHIFT) << _ADC_CAL_SINGLEOFFSET_SHIFT;
+            _DEVINFO_ADC0CAL0_2V5_OFFSET_SHIFT) <<
+            _ADC_CAL_SINGLEOFFSET_SHIFT;
     adc->CAL = cal;
     break;
 
   case adcRefVDD:
-    cal  = adc->CAL & ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
+    cal  = adc->CAL &
+          ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_GAIN_MASK) >>
             _DEVINFO_ADC0CAL1_VDD_GAIN_SHIFT) << _ADC_CAL_SINGLEGAIN_SHIFT;
     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_OFFSET_MASK) >>
-            _DEVINFO_ADC0CAL1_VDD_OFFSET_SHIFT) << _ADC_CAL_SINGLEOFFSET_SHIFT;
+            _DEVINFO_ADC0CAL1_VDD_OFFSET_SHIFT) <<
+            _ADC_CAL_SINGLEOFFSET_SHIFT;
     adc->CAL = cal;
     break;
 
   case adcRef5VDIFF:
-    cal  = adc->CAL & ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
+    cal  = adc->CAL &
+           ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_GAIN_MASK) >>
-            _DEVINFO_ADC0CAL1_5VDIFF_GAIN_SHIFT) << _ADC_CAL_SINGLEGAIN_SHIFT;
+            _DEVINFO_ADC0CAL1_5VDIFF_GAIN_SHIFT) <<
+            _ADC_CAL_SINGLEGAIN_SHIFT;
     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_OFFSET_MASK) >>
-            _DEVINFO_ADC0CAL1_5VDIFF_OFFSET_SHIFT) << _ADC_CAL_SINGLEOFFSET_SHIFT;
+            _DEVINFO_ADC0CAL1_5VDIFF_OFFSET_SHIFT) <<
+            _ADC_CAL_SINGLEOFFSET_SHIFT;
     adc->CAL = cal;
     break;
 
   case adcRef2xVDD:
+
     /* Gain value not of relevance for this reference, leave as is */
 
     cal  = adc->CAL & ~_ADC_CAL_SINGLEOFFSET_MASK;
     cal |= ((DEVINFO->ADC0CAL2 & _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_MASK) >>
-            _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_SHIFT) << _ADC_CAL_SINGLEOFFSET_SHIFT;
+            _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_SHIFT) <<
+            _ADC_CAL_SINGLEOFFSET_SHIFT;
     adc->CAL = cal;
     break;
 
@@ -397,8 +417,8 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
  *
  * Description:
  *   Initializes common parts for both single conversion and scan sequence.
- *   In addition, single and/or scan control configuration must be done, please
- *   refer to ADC_InitSingle() and ADC_InitScan() respectively.
+ *   In addition, single and/or scan control configuration must be done,
+ *   please refer to ADC_InitSingle() and ADC_InitScan() respectively.
  *
  *   NOTE: This function will stop any ongoing conversion.
  *
@@ -419,8 +439,10 @@ void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
   adc->CMD = ADC_CMD_SINGLESTOP | ADC_CMD_SCANSTOP;
 
   tmp = ((uint32_t)(init->ovsRateSel) << _ADC_CTRL_OVSRSEL_SHIFT) |
-        (((uint32_t)(init->timebase) << _ADC_CTRL_TIMEBASE_SHIFT) & _ADC_CTRL_TIMEBASE_MASK) |
-        (((uint32_t)(init->prescale) << _ADC_CTRL_PRESC_SHIFT) & _ADC_CTRL_PRESC_MASK) |
+        (((uint32_t)(init->timebase) << _ADC_CTRL_TIMEBASE_SHIFT) &
+          _ADC_CTRL_TIMEBASE_MASK) |
+        (((uint32_t)(init->prescale) << _ADC_CTRL_PRESC_SHIFT) &
+           _ADC_CTRL_PRESC_MASK) |
         ((uint32_t)(init->lpfMode) << _ADC_CTRL_LPFMODE_SHIFT) |
         ((uint32_t)(init->warmUpMode) << _ADC_CTRL_WARMUPMODE_SHIFT);
 
@@ -568,7 +590,8 @@ void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
  *
  * Input Parameters:
  *   adcFreq  ADC frequency wanted. The frequency will automatically
- *            be adjusted to be within valid range according to reference manual.
+ *            be adjusted to be within valid range according to reference
+ *            manual.
  *  hfperFreq Frequency in Hz of reference HFPER clock. Set to 0 to
  *            use currently defined HFPER clock setting.
  *
@@ -648,7 +671,8 @@ void ADC_Reset(ADC_TypeDef *adc)
  * Name: ADC_TimebaseCalc
  *
  * Description:
- *   Calculate timebase value in order to get a timebase providing at least 1us.
+ *   Calculate timebase value in order to get a timebase providing at least
+ *   1us.
  *
  * Input Parameters:
  *   hfperFreq Frequency in Hz of reference HFPER clock. Set to 0 to
@@ -696,6 +720,7 @@ uint8_t ADC_TimebaseCalc(uint32_t hfperFreq)
 
   return (uint8_t)(hfperFreq - 1);
 }
+
 endif /* defined(ADC_COUNT) && (ADC_COUNT > 0) */
 
 /****************************************************************************
@@ -882,8 +907,8 @@ static void adc_enable(FAR struct efm32_dev_s *priv, bool enable)
  * Name: adc_bind
  *
  * Description:
- *   Bind the upper-half driver callbacks to the lower-half implementation.  This
- *   must be called early in order to receive ADC event notifications.
+ *   Bind the upper-half driver callbacks to the lower-half implementation.
+ *   This must be called early in order to receive ADC event notifications.
  *
  ****************************************************************************/
 
@@ -1015,16 +1040,18 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   /* ADC CCR configuration */
 
   regval  = getreg32(EFM32_ADC_CCR);
-  regval &= ~(ADC_CCR_MULTI_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DDS | ADC_CCR_DMA_MASK |
+  regval &= ~(ADC_CCR_MULTI_MASK | ADC_CCR_DELAY_MASK |
+              ADC_CCR_DDS | ADC_CCR_DMA_MASK |
               ADC_CCR_ADCPRE_MASK | ADC_CCR_VBATE | ADC_CCR_TSVREFE);
-  regval |=  (ADC_CCR_MULTI_NONE | ADC_CCR_DMA_DISABLED | ADC_CCR_ADCPRE_DIV2);
+  regval |=  (ADC_CCR_MULTI_NONE | ADC_CCR_DMA_DISABLED |
+              ADC_CCR_ADCPRE_DIV2);
   putreg32(regval, EFM32_ADC_CCR);
 
   /* Set the number of conversions */
 
   DEBUGASSERT(priv->nchannels <= ADC_MAX_SAMPLES);
 
-  regval |= (((uint32_t)priv->nchannels-1) << ADC_SQR1_L_SHIFT);
+  regval |= (((uint32_t)priv->nchannels - 1) << ADC_SQR1_L_SHIFT);
   adc_putreg(priv, EFM32_ADC_SQR1_OFFSET, regval);
 
   /* Set the channel index of the first conversion */
@@ -1055,8 +1082,8 @@ static void adc_reset(FAR struct adc_dev_s *dev)
  * Description:
  *   Configure the ADC. This method is called the first time that the ADC
  *   device is opened.  This will occur when the port is first opened.
- *   This setup includes configuring and attaching ADC interrupts.  Interrupts
- *   are all disabled upon return.
+ *   This setup includes configuring and attaching ADC interrupts.
+ *    Interrupts are all disabled upon return.
  *
  * Input Parameters:
  *
@@ -1179,7 +1206,8 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int adc_interrupt(int irq, FAR void *context, FAR struct adc_dev_s *dev)
+static int adc_interrupt(int irq,
+                         FAR void *context, FAR struct adc_dev_s *dev)
 {
   FAR struct efm32_dev_s *priv = (FAR struct efm32_dev_s *)dev->ad_priv;
   uint32_t adcsr;
@@ -1220,7 +1248,9 @@ static int adc_interrupt(int irq, FAR void *context, FAR struct adc_dev_s *dev)
           priv->cb->au_receive(dev, priv->chanlist[priv->current], value);
         }
 
-      /* Set the channel number of the next channel that will complete conversion */
+      /* Set the channel number of the next channel that will complete
+       * conversion
+       */
 
       priv->current++;
 
@@ -1245,7 +1275,8 @@ static int adc_interrupt(int irq, FAR void *context, FAR struct adc_dev_s *dev)
  * Description:
  *   Initialize the ADC.
  *
- *   The logic is, save nchannels : # of channels (conversions) in ADC_SQR1_L
+ *   The logic is, save nchannels :
+ *   # of channels (conversions) in ADC_SQR1_L
  *   Then, take the chanlist array and store it in the SQR Regs,
  *     chanlist[0] -> ADC_SQR3_SQ1
  *     chanlist[1] -> ADC_SQR3_SQ2
@@ -1265,7 +1296,8 @@ static int adc_interrupt(int irq, FAR void *context, FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-struct adc_dev_s *efm32_adcinitialize(int intf, const uint8_t *chanlist, int nchannels)
+struct adc_dev_s *efm32_adcinitialize(int intf,
+                                      const uint8_t *chanlist, int nchannels)
 {
   FAR struct adc_dev_s   *dev;
   FAR struct efm32_dev_s *priv;

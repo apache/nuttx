@@ -32,7 +32,7 @@
 #include "efm32_config.h"
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -82,7 +82,8 @@ void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
  ****************************************************************************/
 
 #ifdef HAVE_LEUART_DEVICE
-void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
+void efm32_leuartconfigure(uintptr_t base, uint32_t baud,
+                           unsigned int parity,
                            unsigned int nbits, bool stop2);
 #endif
 

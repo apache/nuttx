@@ -1,4 +1,4 @@
-/********************************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/hardware/efm32_cmu.h
  *
  *    (C) Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -56,14 +56,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_CMU_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_CMU_H
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/efm32_memorymap.h"
@@ -72,9 +72,10 @@
 #  warning This is the EFM32GG/G header file; Review/modification needed for this architecture
 #endif
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************************************************/
+ ****************************************************************************/
+
 /* Maximum allowed core frequency when using 0 wait states on flash access */
 
 #define CMU_MAX_FREQ_0WS                           16000000
@@ -87,13 +88,15 @@
 
 #define CMU_MAX_FREQ_2WS                           48000000
 
-/* Maximum frequency that HFLE needs to be enabled on Giant, Leopard and Wonder parts. */
+/* Maximum frequency that HFLE needs to be enabled on Giant,
+ * Leopard and Wonder parts.
+ */
 
 #if defined(CONFIG_EFM32_EFM32GG)
 #  define CMU_MAX_FREQ_HFLE                        32000000
 #endif
 
-/* CMU Register Offsets ********************************************************************************************************/
+/* CMU Register Offsets *****************************************************/
 
 #define EFM32_CMU_CTRL_OFFSET                      0x0000  /* CMU Control Register */
 #define EFM32_CMU_HFCORECLKDIV_OFFSET              0x0004  /* High Frequency Core Clock Division Register */
@@ -124,7 +127,7 @@
 #define EFM32_CMU_ROUTE_OFFSET                     0x0080  /* I/O Routing Register */
 #define EFM32_CMU_LOCK_OFFSET                      0x0084  /* Configuration Lock Register */
 
-/* CMU Register Addresses ******************************************************************************************************/
+/* CMU Register Addresses ***************************************************/
 
 #define EFM32_CMU_CTRL                             (EFM32_CMU_BASE+EFM32_CMU_CTRL_OFFSET)
 #define EFM32_CMU_HFCORECLKDIV                     (EFM32_CMU_BASE+EFM32_CMU_HFCORECLKDIV_OFFSET)
@@ -155,7 +158,7 @@
 #define EFM32_CMU_ROUTE                            (EFM32_CMU_BASE+EFM32_CMU_ROUTE_OFFSET)
 #define EFM32_CMU_LOCK                             (EFM32_CMU_BASE+EFM32_CMU_LOCK_OFFSET)
 
-/* CMU Register Bit Definitions ************************************************************************************************/
+/* CMU Register Bit Definitions *********************************************/
 
 /* Bit fields for CMU CTRL */
 
@@ -1022,7 +1025,7 @@
 #  define CMU_HFCORECLKEN0_LE_DEFAULT              (_CMU_HFCORECLKEN0_LE_DEFAULT << 2)   /* Shifted mode DEFAULT for CMU_HFCORECLKEN0 */
 #  define CMU_HFCORECLKEN0_EBI                     (0x1UL << 3)                          /* External Bus Interface Clock Enable */
 #  define _CMU_HFCORECLKEN0_EBI_SHIFT              3                                     /* Shift value for CMU_EBI */
-#  define _CMU_HFCORECLKEN0_EBI_MASK               0x8UL                                /* Bit mask for CMU_EBI */
+#  define _CMU_HFCORECLKEN0_EBI_MASK               0x8UL                                 /* Bit mask for CMU_EBI */
 #  define _CMU_HFCORECLKEN0_EBI_DEFAULT            0x00000000UL                          /* Mode DEFAULT for CMU_HFCORECLKEN0 */
 #  define CMU_HFCORECLKEN0_EBI_DEFAULT             (_CMU_HFCORECLKEN0_EBI_DEFAULT << 3)  /* Shifted mode DEFAULT for CMU_HFCORECLKEN0 */
 #elif defined(CONFIG_EFM32_EFM32GG)

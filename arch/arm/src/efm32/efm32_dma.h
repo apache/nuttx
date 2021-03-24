@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/efm32_dma.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_EFM32_DMA_H
 #define __ARCH_ARM_SRC_EFM32_EFM32_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -34,12 +34,12 @@
 #include "chip.h"
 #include "hardware/efm32_dma.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Bit encoded input parameter to efm32_channel().  These encodings must fit in the
- * an unsigned integer of type dma_config_t.
+/* Bit encoded input parameter to efm32_channel().
+ * These encodings must fit in the an unsigned integer of type dma_config_t.
  *
  * Current limitations/assumptions in the encoding:
  *
@@ -70,12 +70,12 @@
 #  define EFM32_DMA_MEMINCR              (1 << 13) /*         1=Increment memory address */
 #  define EFM32_DMA_NOINCR               (0)       /*         0=No memory address increment */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* DMA_HANDLE provides an opaque reference that can be used to represent a DMA
- * channel.
+/* DMA_HANDLE provides an opaque reference that can be used to represent a
+ * DMA channel.
  */
 
 typedef FAR void *DMA_HANDLE;
@@ -122,16 +122,17 @@ struct efm32_dmaregs_s
 };
 #endif
 
-/* Type of 'config' argument passed to efm32_rxdmasetup() and efm32_txdmasetup.
- * See EFM32_DMA_* encodings above.  If these encodings exceed 16-bits, then this
- * should be changed to a uint32_t.
+/* Type of 'config' argument passed to efm32_rxdmasetup() and
+ * efm32_txdmasetup. See EFM32_DMA_* encodings above.
+ * If these encodings exceed 16-bits, then this should be changed to a
+ * uint32_t.
  */
 
 typedef uint16_t dma_config_t;
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -144,19 +145,21 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_dmachannel
  *
  * Description:
- *   Allocate a DMA channel.  This function gives the caller mutually exclusive
- *   access to a DMA channel.
+ *   Allocate a DMA channel.
+ *  This function gives the caller mutually exclusive access to a DMA
+ *  channel.
  *
- *   If no DMA channel is available, then efm32_dmachannel() will wait until the
- *   holder of a channel relinquishes the channel by calling efm32_dmafree().
+ *   If no DMA channel is available, then efm32_dmachannel() will wait until
+ *   the holder of a channel relinquishes the channel by calling
+ *   efm32_dmafree().
  *
  * Input Parameters:
  *   None
@@ -165,21 +168,23 @@ extern "C"
  *   This function ALWAYS returns a non-NULL, void* DMA channel handle.
  *
  * Assumptions:
- *   - The caller can wait for a DMA channel to be freed if it is not available.
+ *   - The caller can wait for a DMA channel to be freed if it is not
+ *     available.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 DMA_HANDLE efm32_dmachannel(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_dmafree
  *
  * Description:
- *   Release a DMA channel.  If another thread is waiting for this DMA channel in a
- *   call to efm32_dmachannel, then this function will re-assign the DMA channel to
- *   that thread and wake it up.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until efm32_dmachannel() is called again to re-gain access
- *   to the channel.
+ *   Release a DMA channel.
+ *   If another thread is waiting for this DMA channel in a call to
+ *   efm32_dmachannel, then this function will re-assign the DMA channel to
+ *   that thread and wake it up.  NOTE:  The 'handle' used in this argument
+ *   must NEVER be used again until efm32_dmachannel() is called again to
+ *   re-gain access to the channel.
  *
  * Returned Value:
  *   None
@@ -188,11 +193,11 @@ DMA_HANDLE efm32_dmachannel(void);
  *   - The caller holds the DMA channel.
  *   - There is no DMA in progress
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void efm32_dmafree(DMA_HANDLE handle);
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_rxdmasetup
  *
  * Description:
@@ -205,12 +210,12 @@ void efm32_dmafree(DMA_HANDLE handle);
  *            configured transfer size.
  *   config - Channel configuration selections
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
                       size_t nbytes, dma_config_t config);
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_txdmasetup
  *
  * Description:
@@ -223,12 +228,12 @@ void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
  *            configured transfer size.
  *   config - Channel configuration selections
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
                       size_t nbytes, dma_config_t config);
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_dmastart
  *
  * Description:
@@ -238,25 +243,27 @@ void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
  *   - DMA handle allocated by efm32_dmachannel()
  *   - No DMA in progress
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_dmastop
  *
  * Description:
- *   Cancel the DMA.  After efm32_dmastop() is called, the DMA channel is reset and
- *   efm32_dmasetup() must be called before efm32_dmastart() can be  called again
+ *   Cancel the DMA.
+ *   After efm32_dmastop() is called, the DMA channel is reset and
+ *   efm32_dmasetup() must be called before efm32_dmastart() can be called
+ *   again
  *
  * Assumptions:
  *   - DMA handle allocated by efm32_dmachannel()
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void efm32_dmastop(DMA_HANDLE handle);
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_dmasample
  *
  * Description:
@@ -265,7 +272,7 @@ void efm32_dmastop(DMA_HANDLE handle);
  * Assumptions:
  *   - DMA handle allocated by efm32_dmachannel()
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
 void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs);
@@ -273,7 +280,7 @@ void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs);
 #  define efm32_dmasample(handle,regs)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_dmadump
  *
  * Description:
@@ -282,7 +289,7 @@ void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs);
  * Assumptions:
  *   - DMA handle allocated by efm32_dmachannel()
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
 void efm32_dmadump(DMA_HANDLE handle, const struct efm32_dmaregs_s *regs,

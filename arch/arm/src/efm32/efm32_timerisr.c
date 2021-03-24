@@ -119,6 +119,7 @@ void up_timer_initialize(void)
   putreg32(regval, NVIC_SYSH12_15_PRIORITY);
 
   /* Make sure that the SYSTICK clock source is set correctly */
+
   /* Configure SysTick to interrupt at the requested rate */
 
   putreg32(SYSTICK_RELOAD, NVIC_SYSTICK_RELOAD);

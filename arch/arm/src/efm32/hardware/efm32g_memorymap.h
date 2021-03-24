@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/hardware/efm32g_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,16 +16,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Reference: "EFM32G Reference Manual, Gecko Series", Energy Micro */
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32G_MEMORYMAP_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_EFM32G_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Memory Base Addresses */
 

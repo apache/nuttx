@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/efm32_usb.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_EFM32_OTGFS_H
 #define __ARCH_ARM_SRC_EFM32_EFM32_OTGFS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -33,9 +33,9 @@
 
 #if defined(CONFIG_EFM32_OTGFS)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(HAVE_USBHOST_TRACE) && defined(CONFIG_EFM32_OTGFS)
 enum usbhost_trace1codes_e
@@ -59,7 +59,7 @@ enum usbhost_trace1codes_e
   USBHOST_VTRACE1_GINT_PTXFE,          /* OTGFS Handle the periodic TxFIFO empty interrupt */
   USBHOST_VTRACE1_GINT_HC,             /* OTGFS Handle the host channels interrupt */
   USBHOST_VTRACE1_GINT_HPRT,           /* OTGFS Handle the host port interrupt */
-  USBHOST_VTRACE1_GINT_HPRT_POCCHNG,   /* OTGFS  HPRT: Port Over-Current Change*/
+  USBHOST_VTRACE1_GINT_HPRT_POCCHNG,   /* OTGFS  HPRT: Port Over-Current Change */
   USBHOST_VTRACE1_GINT_HPRT_PCDET,     /* OTGFS  HPRT: Port Connect Detect */
   USBHOST_VTRACE1_GINT_HPRT_PENCHNG,   /* OTGFS  HPRT: Port Enable Changed */
   USBHOST_VTRACE1_GINT_HPRT_LSDEV,     /* OTGFS  HPRT: Low Speed Device Connected */
@@ -110,9 +110,9 @@ enum usbhost_trace1codes_e
 
 #endif /* HAVE_USBHOST_TRACE && CONFIG_EFM32_OTGFS */
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -133,8 +133,8 @@ extern "C"
  *
  * Input Parameters:
  *   controller -- If the device supports more than USB host controller, then
- *     this identifies which controller is being initializeed.  Normally, this
- *     is just zero.
+ *     this identifies which controller is being initializeed.
+ *     Normally, this is just zero.
  *
  * Returned Value:
  *   And instance of the USB host interface.  The controlling task should
@@ -155,36 +155,38 @@ struct usbhost_connection_s;
 FAR struct usbhost_connection_s *efm32_usbhost_initialize(int controller);
 #endif
 
-/***********************************************************************************
+/****************************************************************************
  * Name: efm32_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided be
- *   each platform that implements the EFM32 OTG FS host interface
+ *   Enable/disable driving of VBUS 5V output.  This function must be
+ *   provided be each platform that implements the EFM32 OTG FS host
+ *   interface
  *
  * Input Parameters:
- *   iface - For future growth to handle multiple USB host interface.  Should be zero.
+ *   iface - For future growth to handle multiple USB host interface.
+ *           Should be zero.
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:
  *   None
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 void efm32_usbhost_vbusdrive(int iface, bool enable);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  efm32_usbsuspend
  *
  * Description:
- *   Board logic must provide the efm32_usbsuspend logic if the OTG FS device driver
- *   is used.  This function is called whenever the USB enters or leaves suspend
- *   mode. This is an opportunity for the board logic to shutdown clocks, power,
- *   etc. while the USB is suspended.
+ *   Board logic must provide the efm32_usbsuspend logic if the OTG FS
+ *   device driver is used.  This function is called whenever the USB enters
+ *   or leaves suspend mode. This is an opportunity for the board logic to
+ *   shutdown clocks, power, etc. while the USB is suspended.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV
 struct usbdev_s;

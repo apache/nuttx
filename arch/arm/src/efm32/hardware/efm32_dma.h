@@ -1,4 +1,4 @@
-/*******************************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/hardware/efm32_dma.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -56,14 +56,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_DMA_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_DMA_H
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/efm32_memorymap.h"
@@ -72,9 +72,9 @@
 #  warning This is the EFM32GG/G header file; Review/modification needed for this architecture
 #endif
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_EFM32_EFM32GG)
 #  define EFM32_DMA_NCHANNELS            12
@@ -82,7 +82,7 @@
 #  define EFM32_DMA_NCHANNELS            8
 #endif
 
-/* DMA Register Offsets ********************************************************************************************************/
+/* DMA Register Offsets *****************************************************/
 
 #define EFM32_DMA_STATUS_OFFSET          0x0000  /* DMA Status Registers */
 #define EFM32_DMA_CONFIG_OFFSET          0x0004  /* DMA Configuration Register */
@@ -116,6 +116,7 @@
 #endif
 
 #define EFM32_DMA_CHn_CTRL_OFFSET(n)     (0x1100+((n)<<2))  /* Channel n Control Register */
+
 #define EFM32_DMA_CH0_CTRL_OFFSET        0x1100  /* Channel 0 Control Register */
 #define EFM32_DMA_CH1_CTRL_OFFSET        0x1104  /* Channel 1 Control Register */
 #define EFM32_DMA_CH2_CTRL_OFFSET        0x1108  /* Channel 2 Control Register */
@@ -131,7 +132,7 @@
 #  define EFM32_DMA_CH11_CTRL_OFFSET     0x112c  /* Channel 11 Control Register */
 #endif
 
-/* DMA Register Addresses ******************************************************************************************************/
+/* DMA Register Addresses ***************************************************/
 
 #define EFM32_DMA_STATUS                 (EFM32_DMA_BASE+EFM32_DMA_STATUS_OFFSET)
 #define EFM32_DMA_CONFIG                 (EFM32_DMA_BASE+EFM32_DMA_CONFIG_OFFSET)
@@ -180,7 +181,7 @@
 #  define EFM32_DMA_CH11_CTRL            (EFM32_DMA_BASE+EFM32_DMA_CH11_CTRL_OFFSET)
 #endif
 
-/* DMA Register Bit Field Definitions ******************************************************************************************/
+/* DMA Register Bit Field Definitions ***************************************/
 
 /* Bit fields for DMA STATUS */
 
@@ -2067,7 +2068,7 @@
 
 #endif
 
-/* DMA Descriptor Bit Field Definitions ****************************************************************************************/
+/* DMA Descriptor Bit Field Definitions *************************************/
 
 #define _DMA_CTRL_DST_INC_MASK                         0xC0000000UL  /* Data increment for destination, bit mask */
 #define _DMA_CTRL_DST_INC_SHIFT                        30            /* Data increment for destination, shift value */
@@ -2166,7 +2167,7 @@
 #define DMA_CTRL_CYCLE_CTRL_PER_SCATTER_GATHER         0x000000006UL /* Peripheral scatter gather cycle type */
 #define DMA_CTRL_CYCLE_CTRL_PER_SCATTER_GATHER_ALT     0x000000007UL /* Peripheral scatter gather cycle type using alternate structure */
 
-/* DMA Request Bit Definitions *************************************************************************************************/
+/* DMA Request Bit Definitions **********************************************/
 
 #if defined(CONFIG_EFM32_EFM32GG)
 #  define DMAREQ_ADC0_SINGLE            ((8 << 16) + 0)  /* DMA channel select for ADC0_SINGLE */
@@ -2272,9 +2273,9 @@
 #  define DMAREQ_AES_KEYWR              ((49 << 16) + 3) /* DMA channel select for AES_KEYWR */
 #endif
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Public Types
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 struct dma_descriptor_s
 {

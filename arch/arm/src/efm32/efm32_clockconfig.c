@@ -42,6 +42,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* BOARD Configuration ******************************************************/
 
 /* Pre-scalers not currently implemented */
@@ -207,7 +208,6 @@ static void efm32_enable_leclocking(void)
   putreg32(regval, EFM32_CMU_HFCORECLKEN0);
 }
 
-
 /****************************************************************************
  * Name: efm32_maxwaitstates
  *
@@ -241,7 +241,7 @@ static void efm32_maxwaitstates(void)
 
       regval |= MSC_READCTRL_MODE_WSMAXSCBTP;
     }
-   else
+  else
     {
       /* No.. select the mximum number of wait states without SCBTP */
 
@@ -353,7 +353,8 @@ static void efm32_setwaitstates(uint32_t hfcoreclk)
  *
  ****************************************************************************/
 
-static inline uint32_t efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
+static inline uint32_t efm32_hfclk_config(uint32_t hfclksel,
+                                          uint32_t hfclkdiv)
 {
   uint32_t frequency;
 #ifdef CMU_CTRL_HFLE
@@ -399,10 +400,11 @@ static inline uint32_t efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
 
 #ifdef CMU_CTRL_HFLE
 #if BOARD_HFXO_FREQUENCY > CMU_MAX_FREQ_HFLE
-        /* Adjust HFXO buffer current for high crystal frequencies, enable HFLE
-         * for frequencies above CMU_MAX_FREQ_HFLE.
+        /* Adjust HFXO buffer current for high crystal frequencies,
+         * enable HFLE for frequencies above CMU_MAX_FREQ_HFLE.
          *
-         * We must also have HFLE enabled to access some LE peripherals >= 32MHz.
+         * We must also have HFLE enabled to access some LE peripherals
+         * >= 32MHz.
          */
 
         regval = getreg32(EFM32_CMU_CTRL);
@@ -556,6 +558,7 @@ static inline uint32_t efm32_hfcoreclk_config(uint32_t hfcoreclkdiv,
                                               uint32_t hfclk)
 {
   /* REVISIT:  Divider not currently used */
+
   return hfclk;
 }
 
@@ -883,7 +886,8 @@ static inline void efm32_itm_syslog(void)
   regval  = getreg32(EFM32_GPIO_ROUTE);
   regval &= ~_GPIO_ROUTE_SWLOCATION_MASK;
   regval |= GPIO_ROUTE_SWOPEN;
-  regval |= ((uint32_t)BOARD_SWOPORT_LOCATION << _GPIO_ROUTE_SWLOCATION_SHIFT);
+  regval |= ((uint32_t)BOARD_SWOPORT_LOCATION <<
+             _GPIO_ROUTE_SWLOCATION_SHIFT);
   putreg32(regval, EFM32_GPIO_ROUTE);
 
   /* Enable output on pin */
@@ -893,7 +897,6 @@ static inline void efm32_itm_syslog(void)
   /* Enable debug clock AUXHFRCO */
 
   efm32_enable_auxhfrco();
-
 }
 #else
 #  define efm32_itm_syslog()
@@ -922,14 +925,18 @@ void efm32_clockconfig(void)
   uint32_t lfaclk;
   uint32_t lfbclk;
 
-  /* Enable clocks and set dividers as determined by the board.h header file */
+  /* Enable clocks and set dividers as determined by the board.h header
+   * file
+   */
 
   hfclk     = efm32_hfclk_config(BOARD_HFCLKSEL, BOARD_HFCLKDIV);
   hfcoreclk = efm32_hfcoreclk_config(BOARD_HFCORECLKDIV, hfclk);
   hfperclk  = efm32_hfperclk_config(BOARD_HFPERCLKDIV, hfclk);
   coreleclk = efm32_coreleclk_config(hfclk);
-  lfaclk    = efm32_lfaclk_config(BOARD_LFACLKSEL, BOARD_LFA_ULFCO_ENABLE, hfcoreclk);
-  lfbclk    = efm32_lfbclk_config(BOARD_LFBCLKSEL, BOARD_LFB_ULFCO_ENABLE, hfcoreclk);
+  lfaclk    = efm32_lfaclk_config(BOARD_LFACLKSEL,
+                                  BOARD_LFA_ULFCO_ENABLE, hfcoreclk);
+  lfbclk    = efm32_lfbclk_config(BOARD_LFBCLKSEL,
+                                  BOARD_LFB_ULFCO_ENABLE, hfcoreclk);
 
   efm32_pcntclk_config();
   efm32_wdogclk_config();

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/efm32_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_EFM32_ADC_H
 #define __ARCH_ARM_SRC_EFM32_EFM32_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -33,18 +33,20 @@
 
 #include <nuttx/analog/adc.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
-/* Timer devices may be used for different purposes.  One special purpose is to
- * control periodic ADC sampling.  If CONFIG_EFM32_TIMn is defined then
- * CONFIG_EFM32_TIMn_ADC must also be defined to indicate that timer "n" is intended
- * to be used for that purpose.
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* Timer devices may be used for different purposes.  One special purpose is
+ * to control periodic ADC sampling.  If CONFIG_EFM32_TIMn is defined then
+ * CONFIG_EFM32_TIMn_ADC must also be defined to indicate that timer "n" is
+ * intended to be used for that purpose.
  */
 
-/* For the EFM32 F1 line, timers 1-4 may be used.  For EFM32 F4 line, timers 1-5 and
- * 8 may be used.
+/* For the EFM32 F1 line, timers 1-4 may be used.
+ *  For EFM32 F4 line, timers 1-5 and 8 may be used.
  */
 
 #ifndef CONFIG_EFM32_TIM1
@@ -84,7 +86,9 @@
 #  undef CONFIG_EFM32_TIM8_ADC3
 #endif
 
-/* Timers 6, 7, and 10-14 are not used with the ADC by any supported family */
+/* Timers 6, 7,
+ * and 10-14 are not used with the ADC by any supported family
+ */
 
 #undef CONFIG_EFM32_TIM6_ADC
 #undef CONFIG_EFM32_TIM6_ADC1
@@ -141,8 +145,8 @@
 #  warning "DMA is not supported by the current driver"
 #endif
 
-/* Timer configuration:  If a timer trigger is specified, then get information
- * about the timer.
+/* Timer configuration:
+ * If a timer trigger is specified, then get information about the timer.
  */
 
 #if defined(CONFIG_EFM32_TIM1_ADC1)
@@ -268,11 +272,13 @@
 #  undef ADC_HAVE_TIMER
 #endif
 
-/* NOTE:  The following assumes that all possible combinations of timers and
- * values are support EXTSEL.  That is not so and it varies from one EFM32 to another.
- * But this (wrong) assumptions keeps the logic as simple as possible.  If un
- * unsupported combination is used, an error will show up later during compilation
- * although it may be difficult to track it back to this simplification.
+/* NOTE:
+ * The following assumes that all possible combinations of timers and values
+ * are support EXTSEL.  That is not so and it varies from one EFM32 to
+ * another. But this (wrong) assumptions keeps the logic as simple as
+ * possible.  If un unsupported combination is used, an error will show
+ * up later during compilation although it may be difficult to track it back
+ * to this simplification.
  */
 
 #if defined(CONFIG_EFM32_TIM1_ADC1)
@@ -533,14 +539,15 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
