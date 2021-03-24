@@ -46,6 +46,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifdef IMX_HAVE_UART_CONSOLE
@@ -83,6 +84,7 @@
 #endif
 
 /* Clocking *****************************************************************/
+
 /* the UART module receives two clocks, a peripheral_clock (ipg_clk) and the
  * module_clock (ipg_perclk).   The peripheral_clock is used as write clock
  * of the TxFIFO, read clock of the RxFIFO and synchronization of the modem
@@ -280,13 +282,13 @@ void imx_lowsetup(void)
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: imx_uart_configure
  *
  * Description:
  *   Configure a UART for non-interrupt driven operation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef IMX_HAVE_UART
 int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
@@ -400,7 +402,7 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
    */
 
   tmp   = ((uint64_t)refclk << (16 - 4)) / config->baud;
-  DEBUGASSERT(tmp < 0x0000000100000000LL);
+  DEBUGASSERT(tmp < 0x0000000100000000ll);
   ratio = (b16_t)tmp;
 
   /* Pick a scale factor that gives us about 14 bits of accuracy.
@@ -559,26 +561,29 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 }
 #endif /* IMX_HAVE_UART */
 
-/************************************************************************************
+/****************************************************************************
  * Name: imx_lowputc
  *
  * Description:
- *   Output a byte with as few system dependencies as possible.  This will even work
- *   BEFORE the console is initialized if we are booting from U-Boot (and the same
- *   UART is used for the console, of course.)
+ *   Output a byte with as few system dependencies as possible.  This will
+ *   even work BEFORE the console is initialized if we are booting from
+ *   U-Boot (and the same UART is used for the console, of course.)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(IMX_HAVE_UART) && defined(CONFIG_DEBUG_FEATURES)
 void imx_lowputc(int ch)
 {
-  /* Poll the TX fifo trigger level bit of the UART status register. When the TXFE
-   * bit is non-zero, the TX Buffer FIFO is empty.
+  /* Poll the TX fifo trigger level bit of the UART status register. When the
+   * TXFE bit is non-zero, the TX Buffer FIFO is empty.
    */
 
-  while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) & UART_USR2_TXFE) == 0);
+  while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) &
+          UART_USR2_TXFE) == 0);
 
-  /* If the character to output is a newline, then pre-pend a carriage return */
+  /* If the character to output is a newline, then pre-pend a carriage
+   * return
+   */
 
   if (ch == '\n')
     {
@@ -586,21 +591,23 @@ void imx_lowputc(int ch)
 
       putreg32((uint32_t)'\r', IMX_CONSOLE_VBASE + UART_TXD_OFFSET);
 
-      /* Wait for the tranmsit register to be emptied. When the TXFE bit is non-zero,
-       * the TX Buffer FIFO is empty.
+      /* Wait for the tranmsit register to be emptied. When the TXFE bit is
+       * non-zero, the TX Buffer FIFO is empty.
        */
 
-      while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) & UART_USR2_TXFE) == 0);
+      while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) &
+              UART_USR2_TXFE) == 0);
     }
 
   /* Send the character by writing it into the UART_TXD register. */
 
   putreg32((uint32_t)ch, IMX_CONSOLE_VBASE + UART_TXD_OFFSET);
 
-  /* Wait for the tranmsit register to be emptied. When the TXFE bit is non-zero,
-   * the TX Buffer FIFO is empty.
+  /* Wait for the tranmsit register to be emptied. When the TXFE bit is
+   * non-zero, the TX Buffer FIFO is empty.
    */
 
-  while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) & UART_USR2_TXFE) == 0);
+  while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) &
+          UART_USR2_TXFE) == 0);
 }
 #endif

@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx6/hardware/imx_src.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* Reference:
- *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual," Document Number
- *   IMX6DQRM, Rev. 3, 07/2015, FreeScale.
+ *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual,"
+ *   Document Number IMX6DQRM, Rev. 3, 07/2015, FreeScale.
  */
 
 #ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_SRC_H
 #define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_SRC_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imx_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* SRC Register Offsets *****************************************************************************/
+/* SRC Register Offsets *****************************************************/
 
 #define IMX_SRC_SCR_OFFSET         0x0000 /* SRC Control Register */
 #define IMX_SRC_SBMR1_OFFSET       0x0004 /* SRC Boot Mode Register 1 */
@@ -56,7 +56,7 @@
 #define IMX_SRC_GPR9_OFFSET        0x0040 /* SRC General Purpose Register 9 */
 #define IMX_SRC_GPR10_OFFSET       0x0044 /* SRC General Purpose Register 10 */
 
-/* SRC Register Addresses ***************************************************************************/
+/* SRC Register Addresses ***************************************************/
 
 #define IMX_SRC_SCR                (IMX_SRC_VBASE+IMX_SRC_SCR_OFFSET)
 #define IMX_SRC_SBMR1              (IMX_SRC_VBASE+IMX_SRC_SBMR1_OFFSET)
@@ -75,41 +75,43 @@
 #define IMX_SRC_GPR9               (IMX_SRC_VBASE+IMX_SRC_GPR9_OFFSET)
 #define IMX_SRC_GPR10              (IMX_SRC_VBASE+IMX_SRC_GPR10_OFFSET)
 
-/* SRC Register Bit Definitions *********************************************************************/
+/* SRC Register Bit Definitions *********************************************/
 
 /* SRC Control Register: Reset value 0x00000521 */
 
-#define SRC_SCR_WARM_RESET_ENABLE  (1 << 0)  /* Bit 0:  WARM reset enable bit */
-#define SRC_SCR_SW_GPU_RST         (1 << 1)  /* Bit 1:  Software reset for GPU */
-#define SRC_SCR_SW_VPU_RST         (1 << 2)  /* Bit 2:  Software reset for VPU */
-#define SRC_SCR_SW_IPU1_RST        (1 << 3)  /* Bit 3:  Software reset for IPU1 */
-#define SRC_SCR_SW_OPEN_VG_RST     (1 << 4)  /* Bit 4:  Software reset for open_vg */
+#define SRC_SCR_WARM_RESET_ENABLE  (1 << 0)      /* Bit 0:  WARM reset enable bit */
+#define SRC_SCR_SW_GPU_RST         (1 << 1)      /* Bit 1:  Software reset for GPU */
+#define SRC_SCR_SW_VPU_RST         (1 << 2)      /* Bit 2:  Software reset for VPU */
+#define SRC_SCR_SW_IPU1_RST        (1 << 3)      /* Bit 3:  Software reset for IPU1 */
+#define SRC_SCR_SW_OPEN_VG_RST     (1 << 4)      /* Bit 4:  Software reset for open_vg */
 #define SRC_SCR_WARM_RST_BYPASS_COUNT_SHIFT  (5) /* Bits 5-6: XTALI cycles before bypassing the MMDC ack */
 #define SRC_SCR_WARM_RST_BYPASS_COUNT_MASK   (3 << SRC_SCR_WARM_RST_BYPASS_COUNT_SHIFT)
 #  define SRC_SCR_WARM_RST_BYPASS_COUNT_NONE (0 << SRC_SCR_WARM_RST_BYPASS_COUNT_SHIFT) /* Counter not used */
 #  define SRC_SCR_WARM_RST_BYPASS_COUNT_16   (1 << SRC_SCR_WARM_RST_BYPASS_COUNT_SHIFT) /* 16 XTALI cycles before WARM to COLD reset */
 #  define SRC_SCR_WARM_RST_BYPASS_COUNT_32   (2 << SRC_SCR_WARM_RST_BYPASS_COUNT_SHIFT) /* 32 XTALI cycles before WARM to COLD reset */
 #  define SRC_SCR_WARM_RST_BYPASS_COUNT_64   (3 << SRC_SCR_WARM_RST_BYPASS_COUNT_SHIFT) /* 64 XTALI cycles before WARM to COLD reset */
+
 #define SRC_SCR_MASK_WDOG_RST_SHIFT          (7) /* Bits 7-10: Mask wdog_rst_b source */
 #define SRC_SCR_MASK_WDOG_RST_MASK           (15 << SRC_SCR_MASK_WDOG_RST_SHIFT)
 #  define SRC_SCR_MASK_WDOG_RST_MASKED       (15 << SRC_SCR_MASK_WDOG_RST_SHIFT) /* wdog_rst_b is masked */
 #  define SRC_SCR_MASK_WDOG_RST_UNMASKED     (15 << SRC_SCR_MASK_WDOG_RST_SHIFT) /* wdog_rst_b is not masked */
-#define SRC_SCR_EIM_RST            (1 << 11) /* Bit 11: EIM reset is needed in order to reconfigure the eim chip select */
-#define SRC_SCR_SW_IPU2_RST        (1 << 12) /* Bit 12: Software reset for ipu2 */
-#define SRC_SCR_CORE0_RST          (1 << 13) /* Bit 13: Software reset for core0 */
-#define SRC_SCR_CORE1_RST          (1 << 14) /* Bit 14: Software reset for core1 */
-#define SRC_SCR_CORE2_RST          (1 << 15) /* Bit 15: Software reset for core2 */
-#define SRC_SCR_CORE3_RST          (1 << 16) /* Bit 16: Software reset for core3 */
-#define SRC_SCR_CORE0_DBG_RST      (1 << 17) /* Bit 17: Software reset for core0 debug */
-#define SRC_SCR_CORE1_DBG_RST      (1 << 18) /* Bit 18: Software reset for core1 debug */
-#define SRC_SCR_CORE2_DBG_RST      (1 << 19) /* Bit 19: Software reset for core2 debug */
-#define SRC_SCR_CORE3_DBG_RST      (1 << 20) /* Bit 20: Software reset for core3 debug */
-#define SRC_SCR_CORES_DBG_RST      (1 << 21) /* Bit 21: Software reset for debug of arm platform */
-#define SRC_SCR_CORE1_ENABLE       (1 << 22) /* Bit 22: core1 enable */
-#define SRC_SCR_CORE2_ENABLE       (1 << 23) /* Bit 23: core2 enable */
-#define SRC_SCR_CORE3_ENABLE       (1 << 24) /* Bit 24: core3 enable */
-#define SRC_SCR_DBG_RST_MSK_PG     (1 << 25) /* Bit 25: No debug resets after core power gating event */
-                                             /* Bits 26-31: Reserved */
+
+#define SRC_SCR_EIM_RST            (1 << 11)      /* Bit 11: EIM reset is needed in order to reconfigure the eim chip select */
+#define SRC_SCR_SW_IPU2_RST        (1 << 12)      /* Bit 12: Software reset for ipu2 */
+#define SRC_SCR_CORE0_RST          (1 << 13)      /* Bit 13: Software reset for core0 */
+#define SRC_SCR_CORE1_RST          (1 << 14)      /* Bit 14: Software reset for core1 */
+#define SRC_SCR_CORE2_RST          (1 << 15)      /* Bit 15: Software reset for core2 */
+#define SRC_SCR_CORE3_RST          (1 << 16)      /* Bit 16: Software reset for core3 */
+#define SRC_SCR_CORE0_DBG_RST      (1 << 17)      /* Bit 17: Software reset for core0 debug */
+#define SRC_SCR_CORE1_DBG_RST      (1 << 18)      /* Bit 18: Software reset for core1 debug */
+#define SRC_SCR_CORE2_DBG_RST      (1 << 19)      /* Bit 19: Software reset for core2 debug */
+#define SRC_SCR_CORE3_DBG_RST      (1 << 20)      /* Bit 20: Software reset for core3 debug */
+#define SRC_SCR_CORES_DBG_RST      (1 << 21)      /* Bit 21: Software reset for debug of arm platform */
+#define SRC_SCR_CORE1_ENABLE       (1 << 22)      /* Bit 22: core1 enable */
+#define SRC_SCR_CORE2_ENABLE       (1 << 23)      /* Bit 23: core2 enable */
+#define SRC_SCR_CORE3_ENABLE       (1 << 24)      /* Bit 24: core3 enable */
+#define SRC_SCR_DBG_RST_MSK_PG     (1 << 25)      /* Bit 25: No debug resets after core power gating event */
+                                                  /* Bits 26-31: Reserved */
 
 /* SRC Boot Mode Register 1 */
 
@@ -173,15 +175,41 @@
 #define SRC_SBMR2_BMOD_MASK        (3 << SRC_SBMR2_BMOD_SHIFT)
                                              /* Bits 26-31: Reserved */
 
-/* SRC General Purpose Register 1:  32-bit PERSISTENT_ENTRY0: core0 entry function for waking-up from low power mode */
-/* SRC General Purpose Register 2:  32-bit PERSISTENT_ARG0:  core0 entry function argument */
-/* SRC General Purpose Register 3:  32-bit PERSISTENT_ENTRY1: core1 entry function for waking-up from low power mode */
-/* SRC General Purpose Register 4:  32-bit PERSISTENT_ARG1:  core1 entry function argument */
-/* SRC General Purpose Register 5:  32-bit PERSISTENT_ENTRY2: core2 entry function for waking-up from low power mode */
-/* SRC General Purpose Register 6:  32-bit PERSISTENT_ARG2:  core1 entry function argument */
-/* SRC General Purpose Register 7:  32-bit PERSISTENT_ENTRY3: core3 entry function for waking-up from low power mode */
-/* SRC General Purpose Register 8:  32-bit PERSISTENT_ARG3:  core3 entry function argument */
-/* SRC General Purpose Register 9:  Reserved */
+/* SRC General Purpose Register 1:  32-bit PERSISTENT_ENTRY0:
+ * core0 entry function for waking-up from low power mode
+ */
+
+/* SRC General Purpose Register 2:  32-bit PERSISTENT_ARG0:
+ * core0 entry function argument
+ */
+
+/* SRC General Purpose Register 3:  32-bit PERSISTENT_ENTRY1:
+ * core1 entry function for waking-up from low power mode
+ */
+
+/* SRC General Purpose Register 4:  32-bit PERSISTENT_ARG1:
+ * core1 entry function argument
+ */
+
+/* SRC General Purpose Register 5:  32-bit PERSISTENT_ENTRY2:
+ * core2 entry function for waking-up from low power mode
+ */
+
+/* SRC General Purpose Register 6:  32-bit PERSISTENT_ARG2:
+ *  core1 entry function argument
+ */
+
+/* SRC General Purpose Register 7:  32-bit PERSISTENT_ENTRY3:
+ * core3 entry function for waking-up from low power mode
+ */
+
+/* SRC General Purpose Register 8:  32-bit PERSISTENT_ARG3:
+ *  core3 entry function argument
+ */
+
+/* SRC General Purpose Register 9:
+ *  Reserved
+ */
 
 /* SRC General Purpose Register 10 */
 

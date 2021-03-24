@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/imxrt_periphclks.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,26 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_PERIPHCLKS_H
 #define __ARCH_ARM_SRC_IMXRT_IMXRT_PERIPHCLKS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
 #include "hardware/imxrt_ccm.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clock is off during all modes. Stop enter hardware handshake is disabled. */
+/* Clock is off during all modes.
+ * Stop enter hardware handshake is disabled.
+ */
 
 #define imxrt_clockoff_acmp1()            imxrt_periphclk_configure(CCM_CCGR_ACMP1, CCM_CG_OFF)
 #define imxrt_clockoff_acmp2()            imxrt_periphclk_configure(CCM_CCGR_ACMP2, CCM_CG_OFF)
@@ -375,7 +377,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_periphclk_configure
  *
  * Description:
@@ -390,7 +392,7 @@ extern "C"
  * Returned Value:
  *  None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void imxrt_periphclk_configure(uintptr_t regaddr, unsigned int index,
                                unsigned int value);

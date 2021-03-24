@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx6/hardware/imx_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,19 +16,19 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Reference:
- *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual," Document Number
- *   IMX6DQRM, Rev. 3, 07/2015, FreeScale.
+ *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual",
+ *   Document Number IMX6DQRM, Rev. 3, 07/2015, FreeScale.
  */
 
 #ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_MEMORYMAP_H
 #define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/imx6/chip.h>
@@ -36,24 +36,24 @@
 /* i.MX6 Virtual (mapped) Memory Map
  *
  * board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location because it depends
- * on some the virtual address definitions provided above.
+ * memory map is used.  It is included in this odd location because it
+ * depends on some the virtual address definitions provided above.
  */
 
 #include <arch/board/board_memorymap.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Decimal configuration values may exceed 2Gb and, hence, overflow to negative
- * values unless we force them to unsigned long:
+/* Decimal configuration values may exceed 2Gb and, hence, overflow to
+ * negative values unless we force them to unsigned long:
  */
 
 #define __CONCAT(a,b) a ## b
 #define MKULONG(a) __CONCAT(a,ul)
 
-/* Overview *************************************************************************
+/* Overview *****************************************************************
  *
  *  i.MX6 Physical (unmapped) Memory Map
  *  - i.MX6 System 1MB PSECTIONS
@@ -90,9 +90,9 @@
  *  Page table start addresses
  *  Base address of the interrupt vector table
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* i.MX6 Physical (unmapped) Memory Map *********************************************/
+/* i.MX6 Physical (unmapped) Memory Map *************************************/
 
 /* i.MX6 System PSECTIONS */
 
@@ -755,7 +755,12 @@
 #  define NUTTX_RAM_SIZE         (NUTTX_RAM_PEND - NUTTX_RAM_PADDR)
 
 #else /* CONFIG_IMX6_BOOT_NOR */
-  /* Must be CONFIG_IMX6_BOOT_OCRAM || CONFIG_IMX6_BOOT_SDRAM || CONFIG_IMX6_BOOT_SRAM */
+
+  /* Must be
+   * CONFIG_IMX6_BOOT_OCRAM ||
+   * CONFIG_IMX6_BOOT_SDRAM ||
+   * CONFIG_IMX6_BOOT_SRAM
+   */
 
   /* Otherwise we are running from some kind of RAM (OCRAM, SRAM, or SDRAM).
    * Setup the RAM region as the NUTTX .txt, .bss, and .data region.
@@ -894,11 +899,11 @@
  *
  *  (4GB address range / 4 KB per page ) * 4 bytes per entry = 4MB
  *
- * 16KB of memory is reserved hold the page table for the virtual mappings.  A
- * portion of this table is not accessible in the virtual address space (for
- * normal operation with a one-to-one address mapping).   There is this large
- * hole in the physcal address space for which there will never be level 1
- * mappings:
+ * 16KB of memory is reserved hold the page table for the virtual mappings.
+ * A portion of this table is not accessible in the virtual address space
+ * (for normal operation with a one-to-one address mapping).   There is this
+ * large hole in the physcal address space for which there will never be
+ * level 1 mappings:
  *
  *   0x80000000-0xefffffff: Undefined (1.75 GB)
  *
@@ -985,7 +990,8 @@
  *
  *   IMX_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
  *   IMX_VECTOR_VSRAM - Virtual address of vector table in SRAM
- *   IMX_VECTOR_VADDR - Virtual address of vector table (0x00000000 or 0xffff0000)
+ *   IMX_VECTOR_VADDR - Virtual address of vector table
+ *                      (0x00000000 or 0xffff0000)
  */
 
 #define VECTOR_TABLE_SIZE         0x00010000

@@ -1,4 +1,4 @@
-/*****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx6/hardware/imx_pinmux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,35 +16,40 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************************************/
+ ****************************************************************************/
 
 /* Reference:
- *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual," Document Number
- *   IMX6DQRM, Rev. 3, 07/2015, FreeScale.
+ *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual,"
+ *   Document Number IMX6DQRM, Rev. 3, 07/2015, FreeScale.
  */
 
 #ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_PINMUX_H
 #define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_PINMUX_H
 
-/*****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************************************/
+ ****************************************************************************/
+
 /* Alternate Pin Functions.
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.  Drivers, however,
- * will use the pin selection without the numeric suffix.  Additional definitions are required in the
- * board.h file.  For example, if UART1 RXD connects via the SD3_DATA6 pin, then the following
- * definition should appear in the board.h header file for that board:
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc.  Drivers, however, will use the pin selection without the numeric
+ * suffix.  Additional definitions are required in the board.h file.
+ * For example, if UART1 RXD connects via the SD3_DATA6 pin, then the
+ * following definition should appear in the board.h header file for that
+ * board:
  *
  *   #define GPIO_UART1_RX_DATA GPIO_UART1_RX_DATA_1
  *
- * The driver will then automatically configere to use the SD3_DATA6 pin for UART RXD.
+ * The driver will then automatically configere to use the SD3_DATA6 pin for
+ * UART RXD.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific IOMUX options such as frequency, open-drain,
- * push-pull, and pull-up/down!  Just the basics are defined for most pins in this file.  See the
- * upper imx_gpio.h and imx_iomuxc.h header files for available definitions.
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific IOMUX options such as
+ * frequency, open-drain, push-pull, and pull-up/down!  Just the basics are
+ * defined for most pins in this file.  See the upper imx_gpio.h and
+ * imx_iomuxc.h header files for available definitions.
  */
 
 /* ARM */
@@ -661,7 +666,7 @@
 #define GPIO_KEY_ROW7_2               (GPIO_PERIPH | GPIO_ALT3 | GPIO_PADMUX(IMX_PADMUX_CSI0_DATA09_INDEX))
 #define GPIO_KEY_ROW7_3               (GPIO_PERIPH | GPIO_ALT4 | GPIO_PADMUX(IMX_PADMUX_SD2_DATA0_INDEX))
 
-/* MediaLB (MLB)*/
+/* MediaLB (MLB) */
 
 #define GPIO_MLB_CLK_1                (GPIO_PERIPH | GPIO_ALT0 | GPIO_PADMUX(IMX_PADMUX_ENET_TX_DATA1_INDEX))
 #define GPIO_MLB_CLK_2                (GPIO_PERIPH | GPIO_ALT7 | GPIO_PADMUX(IMX_PADMUX_GPIO03_INDEX))

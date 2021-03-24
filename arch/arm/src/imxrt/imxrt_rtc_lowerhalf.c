@@ -87,7 +87,7 @@ static bool imxrt_havesettime(FAR struct rtc_lowerhalf_s *lower);
 static int imxrt_setalarm(FAR struct rtc_lowerhalf_s *lower,
                           FAR const struct lower_setalarm_s *alarminfo);
 static int imxrt_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setrelative_s *alarminfo);
+                            FAR const struct lower_setrelative_s *alarminfo);
 static int imxrt_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
                              int alarmid);
 static int imxrt_rdalarm(FAR struct rtc_lowerhalf_s *lower,
@@ -97,6 +97,7 @@ static int imxrt_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* i.MXRT RTC driver operations */
 
 static const struct rtc_ops_s g_rtc_ops =
@@ -374,6 +375,7 @@ static int imxrt_setrelative(FAR struct rtc_lowerhalf_s *lower,
   if (alarminfo->id == 0 && alarminfo->reltime > 0)
     {
       /* Get the current time in seconds */
+
       /* The resolution of time is only 1 second */
 
       ts.tv_sec  = up_rtc_time();

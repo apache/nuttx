@@ -54,7 +54,9 @@
 #if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x))
 static const uint8_t g_mux2ctl_map[IMXRT_PADMUX_NREGISTERS] =
 {
-  /* The first mappings are simple 1-to-1 mappings.  This may be a little wasteful */
+  /* The first mappings are simple 1-to-1 mappings.
+   *  This may be a little wasteful
+   */
 
   IMXRT_PADCTL_GPIO_EMC_00_INDEX,
   IMXRT_PADCTL_GPIO_EMC_01_INDEX,
@@ -187,7 +189,9 @@ static const uint8_t g_mux2ctl_map[IMXRT_PADMUX_NREGISTERS] =
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT102x)
 static const uint8_t g_mux2ctl_map[IMXRT_PADMUX_NREGISTERS] =
 {
-  /* The first mappings are simple 1-to-1 mappings.  This may be a little wasteful */
+  /* The first mappings are simple 1-to-1 mappings.
+   *  This may be a little wasteful
+   */
 
   IMXRT_PADCTL_GPIO_EMC_00_INDEX,
   IMXRT_PADCTL_GPIO_EMC_01_INDEX,

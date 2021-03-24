@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx6/imx_enet.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMX6_IMX_ENET_H
 #define __ARCH_ARM_SRC_IMX6_IMX_ENET_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,17 +31,17 @@
 
 #ifdef CONFIG_IMX_ENET
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Definitions for use with imx_phy_boardinitialize */
 
 #define EMAC_INTF 0
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -54,7 +54,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function: up_netinitialize
  *
  * Description:
@@ -72,19 +72,20 @@ extern "C"
  * Assumptions:
  *   Called very early in the initialization sequence.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void up_netinitialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Function: imx_phy_boardinitialize
  *
  * Description:
- *   Some boards require specialized initialization of the PHY before it can be
- *   used.  This may include such things as configuring GPIOs, resetting the PHY,
- *   etc.  If CONFIG_IMX_ENET_PHYINIT is defined in the configuration then the
- *   board specific logic must provide imx_phyinitialize();  The i.MX RT Ethernet
- *   driver will call this function one time before it first uses the PHY.
+ *   Some boards require specialized initialization of the PHY before it can
+ *   be used.  This may include such things as configuring GPIOs, resetting
+ *   the PHY, etc.  If CONFIG_IMX_ENET_PHYINIT is defined in the
+ *   configuration then the board specific logic must provide
+ *   imx_phyinitialize();  The i.MX RT Ethernet driver will call this
+ *   function one time before it first uses the PHY.
  *
  * Input Parameters:
  *   intf - Always zero for now.
@@ -92,7 +93,7 @@ void up_netinitialize(void);
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_IMX_ENET_PHYINIT
 int imx_phy_boardinitialize(int intf);

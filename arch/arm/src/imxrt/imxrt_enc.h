@@ -65,12 +65,13 @@
  * Name: imxrt_qeinitialize
  *
  * Description:
- *   Initialize a quadrature encoder interface.  This function must be called from
- *   board-specific logic..
+ *   Initialize a quadrature encoder interface.  This function must be called
+ *   from board-specific logic..
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/qe0"
- *   enc     - The encoder peripheral to use.  'enc' must be an element of {1,2,3,4}
+ *   enc     - The encoder peripheral to use.
+ *             'enc' must be an element of {1,2,3,4}
  *
  * Returned Value:
  *   Zero on success; A negated errno value is returned on failure.

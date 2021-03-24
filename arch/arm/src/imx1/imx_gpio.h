@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx1/imx_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMX1_IMX_GPIO_H
 #define __ARCH_ARM_SRC_IMX1_IMX_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
 #include "arm_arch.h"                     /* getreg32(), putreg32() */
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* GPIO Register Offsets ************************************************************/
+/* GPIO Register Offsets ****************************************************/
 
 #define GPIO_DDIR_OFFSET         0x0000  /* Data Direction Register */
 #define GPIO_OCR1_OFFSET         0x0004  /* Output Configuration Register 1 */
@@ -65,7 +65,7 @@
 #define GPIOD                    3       /* Port D index */
 #define GPIO_PT_OFFSET(n)        (GPIO_PTA_OFFSET + (n)*0x0100)
 
-/* GPIO Register Addresses **********************************************************/
+/* GPIO Register Addresses **************************************************/
 
 #define IMX_PTA_VBASE            (IMX_GPIO_VBASE + GPIO_PTA_OFFSET)
 #define IMX_PTB_VBASE            (IMX_GPIO_VBASE + GPIO_PTB_OFFSET)
@@ -163,18 +163,18 @@
 #define IMX_GPIO_SWR(n)          (IMX_PT_VBASE(n) + GPIO_SWR_OFFSET)
 #define IMX_GPIO_PUEN(n)         (IMX_PT_VBASE(n) + GPIO_PUEN_OFFSET)
 
-/* GPIO Register Bit Definitions ****************************************************/
+/* GPIO Register Bit Definitions ********************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_IMX1_IMX_GPIO_H */
 
 #ifndef __ASSEMBLY__
 
-/* Handler circular include... This file includes arm_arch.h, but this file is
- * included by arm_arch.h (via chip.h) BEFORE getreg32 is defined.
+/* Handler circular include... This file includes arm_arch.h, but this file
+ * is included by arm_arch.h (via chip.h) BEFORE getreg32 is defined.
  */
 
 #if !defined(__ARCH_ARM_IMX_GPIOHELPERS_H) && defined(getreg32)

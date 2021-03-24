@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx6/hardware/imx_ccm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Reference:
- *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual," Document Number
- *   IMX6DQRM, Rev. 3, 07/2015, FreeScale.
+ *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual",
+ *   Document Number IMX6DQRM, Rev. 3, 07/2015, FreeScale.
  */
 
 #ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_CCM_H
 #define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_CCM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imx_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* CCM Register Offsets *************************************************************/
+/* CCM Register Offsets *****************************************************/
 
 #define IMX_CCM_CCR_OFFSET         0x0000  /* CCM Control Register */
 #define IMX_CCM_CCDR_OFFSET        0x0004  /* CCM Control Divider Register */
@@ -71,7 +71,7 @@
 #define IMX_CCM_CCGR6_OFFSET       0x0080  /* CCM Clock Gating Register 6 */
 #define IMX_CCM_CMEOR_OFFSET       0x0088  /* CCM Module Enable Override Register */
 
-/* CCM Register Addresses ***********************************************************/
+/* CCM Register Addresses ***************************************************/
 
 #define IMX_CCM_CCR                (IMX_CCM_VBASE+IMX_CCM_CCR_OFFSET)
 #define IMX_CCM_CCDR               (IMX_CCM_VBASE+IMX_CCM_CCDR_OFFSET)
@@ -105,7 +105,7 @@
 #define IMX_CCM_CCGR6              (IMX_CCM_VBASE+IMX_CCM_CCGR6_OFFSET)
 #define IMX_CCM_CMEOR              (IMX_CCM_VBASE+IMX_CCM_CMEOR_OFFSET)
 
-/* CCM Register Bit Definitions *****************************************************/
+/* CCM Register Bit Definitions *********************************************/
 
 /* CCM Control Register */
 
@@ -188,12 +188,14 @@
 #  define CCM_CBCMR_GPU3D_CORE_CLK_SEL_PLL3_SWCLK     (1 << CCM_CBCMR_GPU3D_CORE_CLK_SEL_SHIFT) /* Derive clock from pll3_sw_clk */
 #  define CCM_CBCMR_GPU3D_CORE_CLK_SEL_PLL2_PFD1      (2 << CCM_CBCMR_GPU3D_CORE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD1 */
 #  define CCM_CBCMR_GPU3D_CORE_CLK_SEL_PLL2_PFD2      (3 << CCM_CBCMR_GPU3D_CORE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
+
 #define CCM_CBCMR_GPU3D_SHADER_CLK_SEL_SHIFT          (8)       /* Bits 8-9: Selector for gpu3d_shader clock multiplexer */
 #define CCM_CBCMR_GPU3D_SHADER_CLK_SEL_MASK           (3 << CCM_CBCMR_GPU3D_SHADER_CLK_SEL_SHIFT)
 #  define CCM_CBCMR_GPU3D_SHADER_CLK_SEL_MMDC_CH0     (0 << CCM_CBCMR_GPU3D_SHADER_CLK_SEL_SHIFT) /* Derive clock from mmdc_ch0 clk */
 #  define CCM_CBCMR_GPU3D_SHADER_CLK_SEL_PLL3_SWCLK   (1 << CCM_CBCMR_GPU3D_SHADER_CLK_SEL_SHIFT) /* Derive clock from pll3_sw_clk */
 #  define CCM_CBCMR_GPU3D_SHADER_CLK_SEL_PLL2_PFD1    (2 << CCM_CBCMR_GPU3D_SHADER_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD1 */
 #  define CCM_CBCMR_GPU3D_SHADER_CLK_SEL_PLL3_PFD0    (3 << CCM_CBCMR_GPU3D_SHADER_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD0 */
+
 #define CCM_CBCMR_PCIE_AXI_CLK_SEL                    (1 << 10) /* Bit 10: Selector for pcie_axi clock multiplexer */
 #define CCM_CBCMR_VDOAXI_CLK_SEL                      (1 << 11) /* Bit 11: Selector for vdoaxi clock multiplexer */
 #define CCM_CBCMR_PERIPH_CLK2_SEL_SHIFT               (12)      /* Bits 12-13: Selector for peripheral clk2 clock multiplexer */
@@ -201,23 +203,27 @@
 #  define CCM_CBCMR_PERIPH_CLK2_SEL_PLL3_SWCLK        (0 << CCM_CBCMR_PERIPH_CLK2_SEL_SHIFT) /* Derive clock from pll3_sw_clk */
 #  define CCM_CBCMR_PERIPH_CLK2_SEL_OSC_CLK           (1 << CCM_CBCMR_PERIPH_CLK2_SEL_SHIFT) /* Derive clock from osc_clk (pll1_ref_clk) */
 #  define CCM_CBCMR_PERIPH_CLK2_SEL_PLL2_BYPASS       (2 << CCM_CBCMR_PERIPH_CLK2_SEL_SHIFT) /* Derive clock from pll2_bypass_clk */
+
 #define CCM_CBCMR_VPU_AXI_CLK_SEL_SHIFT               (14)      /* Bits 14-15: Selector for VPU axi clock multiplexer */
 #define CCM_CBCMR_VPU_AXI_CLK_SEL_MASK                (3 << CCM_CBCMR_VPU_AXI_CLK_SEL_SHIFT)
 #  define CCM_CBCMR_VPU_AXI_CLK_SEL_AXI               (0 << CCM_CBCMR_VPU_AXI_CLK_SEL_SHIFT) /* Derive clock from AXI */
 #  define CCM_CBCMR_VPU_AXI_CLK_SEL_PLL2_PFD2         (1 << CCM_CBCMR_VPU_AXI_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
 #  define CCM_CBCMR_VPU_AXI_CLK_SEL_PLL2_PFD0         (2 << CCM_CBCMR_VPU_AXI_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD0 */
+
 #define CCM_CBCMR_GPU2D_CORE_CLK_SEL_SHIFT            (16)      /* Bits 16-17: Selector for open vg (GPU2D Core) clock multiplexer */
 #define CCM_CBCMR_GPU2D_CORE_CLK_SEL_MASK             (3 << CCM_CBCMR_GPU2D_CORE_CLK_SEL_SHIFT)
 #  define CCM_CBCMR_GPU2D_CORE_CLK_SEL_AXI            (0 << CCM_CBCMR_GPU2D_CORE_CLK_SEL_SHIFT) /* Derive clock from AXI */
 #  define CCM_CBCMR_GPU2D_CORE_CLK_SEL_PLL3_SWCLK     (1 << CCM_CBCMR_GPU2D_CORE_CLK_SEL_SHIFT) /* Derive clock from pll3_sw_clk */
 #  define CCM_CBCMR_GPU2D_CORE_CLK_SEL_PLL2_PFD0      (2 << CCM_CBCMR_GPU2D_CORE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD0 */
 #  define CCM_CBCMR_GPU2D_CORE_CLK_SEL_PLL2_PFD2      (3 << CCM_CBCMR_GPU2D_CORE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
+
 #define CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT            (18)      /* Bits 18-19: Selector for pre_periph clock multiplexer */
 #define CCM_CBCMR_PRE_PERIPH_CLK_SEL_MASK             (3 << CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT)
 #  define CCM_CBCMR_PRE_PERIPH_CLK_SEL_PLL2           (0 << CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT) /* Derive clock from PLL2 */
 #  define CCM_CBCMR_PRE_PERIPH_CLK_SEL_PLL2_PFD2      (1 << CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
 #  define CCM_CBCMR_PRE_PERIPH_CLK_SEL_PLL2_PFD0      (2 << CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD0 */
 #  define CCM_CBCMR_PRE_PERIPH_CLK_SEL_DIV_PLL2_PFD2  (3 << CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT) /* Derive clock from divided (/2) PLL2 PFD2 */
+
 #define CCM_CBCMR_PERIPH2_CLK2_SEL                    (1 << 20) /* Bit 20: Selector for periph2_clk2 clock multiplexer */
 #define CCM_CBCMR_PRE_PERIPH2_CLK_SEL_SHIFT           (21)      /* Bits 21-22: Selector for pre_periph2 clock multiplexer */
 #define CCM_CBCMR_PRE_PERIPH2_CLK_SEL_MASK            (3 << CCM_CBCMR_PRE_PERIPH2_CLK_SEL_SHIFT)
@@ -225,6 +231,7 @@
 #  define CCM_CBCMR_PRE_PERIPH2_CLK_SEL_PLL2_PFD2     (1 << CCM_CBCMR_PRE_PERIPH2_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
 #  define CCM_CBCMR_PRE_PERIPH2_CLK_SEL_PLL2_PFD0     (2 << CCM_CBCMR_PRE_PERIPH2_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD0 */
 #  define CCM_CBCMR_PRE_PERIPH2_CLK_SEL_DIV_PLL2_PFD2 (3 << CCM_CBCMR_PRE_PERIPH2_CLK_SEL_SHIFT) /* Derive clock from divided (/2) PLL2 PFD2 */
+
 #define CCM_CBCMR_GPU2D_CORE_CLK_PODF_SHIFT           (23)      /* Bits 23-25: Divider for gpu2d_core clock */
 #define CCM_CBCMR_GPU2D_CORE_CLK_PODF_MASK            (7 << CCM_CBCMR_GPU2D_CORE_CLK_PODF_SHIFT)
 #  define CCM_CBCMR_GPU2D_CORE_CLK_PODF(n)            ((uint32_t)(n) << CCM_CBCMR_GPU2D_CORE_CLK_PODF_SHIFT)
@@ -240,21 +247,25 @@
 #define CCM_CSCMR1_PERCLK_PODF_SHIFT         (0)       /* Bits 0-5: Divider for perclk podf */
 #define CCM_CSCMR1_PERCLK_PODF_MASK          (0x3f << CCM_CSCMR1_PERCLK_PODF_SHIFT)
 #  define CCM_CSCMR1_PERCLK_PODF(n)          ((uint32_t)(n) << CCM_CSCMR1_PERCLK_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CSCMR1_SSI1_CLK_SEL_SHIFT        (10)       /* Bits 10-11: Selector for ssi1 clock multiplexer */
 #define CCM_CSCMR1_SSI1_CLK_SEL_MASK         (3 << CCM_CSCMR1_SSI1_CLK_SEL_SHIFT)
 #  define CCM_CSCMR1_SSI1_CLK_SEL_PLL3_PFD2  (0 << CCM_CSCMR1_SSI1_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD2 */
 #  define CCM_CSCMR1_SSI1_CLK_SEL_PLL3_PFD3  (1 << CCM_CSCMR1_SSI1_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD3 */
 #  define CCM_CSCMR1_SSI1_CLK_SEL_PLL4       (2 << CCM_CSCMR1_SSI1_CLK_SEL_SHIFT) /* Derive clock from PLL4 */
+
 #define CCM_CSCMR1_SSI2_CLK_SEL_SHIFT        (12)       /* Bits 12-13: Selector for ssi2 clock multiplexer */
 #define CCM_CSCMR1_SSI2_CLK_SEL_MASK         (3 << CCM_CSCMR1_SSI2_CLK_SEL_SHIFT)
 #  define CCM_CSCMR1_SSI2_CLK_SEL_PLL3_PFD2  (0 << CCM_CSCMR1_SSI2_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD2 */
 #  define CCM_CSCMR1_SSI2_CLK_SEL_PLL3_PFD3  (1 << CCM_CSCMR1_SSI2_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD3 */
 #  define CCM_CSCMR1_SSI2_CLK_SEL_PLL4       (2 << CCM_CSCMR1_SSI2_CLK_SEL_SHIFT) /* Derive clock from PLL4 */
+
 #define CCM_CSCMR1_SSI3_CLK_SEL_SHIFT        (14)       /* Bits 14-15: Selector for ssi3 clock multiplexer */
 #define CCM_CSCMR1_SSI3_CLK_SEL_MASK         (3 << CCM_CSCMR1_SSI3_CLK_SEL_SHIFT)
 #  define CCM_CSCMR1_SSI3_CLK_SEL_PLL3_PFD2  (0 << CCM_CSCMR1_SSI3_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD2 */
 #  define CCM_CSCMR1_SSI3_CLK_SEL_PLL3_PFD3  (1 << CCM_CSCMR1_SSI3_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD3 */
 #  define CCM_CSCMR1_SSI3_CLK_SEL_PLL4       (2 << CCM_CSCMR1_SSI3_CLK_SEL_SHIFT) /* Derive clock from PLL4 */
+
 #define CCM_CSCMR1_USDHC1_CLK_SEL            (1 << 16)  /* Bit 16:  Selector for usdhc1 clock multiplexer */
 #define CCM_CSCMR1_USDHC2_CLK_SEL            (1 << 17)  /* Bit 17:  Selector for usdhc2 clock multiplexer */
 #define CCM_CSCMR1_USDHC3_CLK_SEL            (1 << 18)  /* Bit 18:  Selector for usdhc3 clock multiplexer */
@@ -280,12 +291,14 @@
 #define CCM_CSCMR1_ACLK_EIM_SLOW_PODF_SHIFT  (23)       /* Bits 23-25: Divider for aclk_eim_slow clock root */
 #define CCM_CSCMR1_ACLK_EIM_SLOW_PODF_MASK   (7 << CCM_CSCMR1_ACLK_EIM_SLOW_PODF_SHIFT)
 #  define CCM_CSCMR1_ACLK_EIM_SLOW_PODF(n)   ((uint32_t)(n) << CCM_CSCMR1_ACLK_EIM_SLOW_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CSCMR1_ACLK_SEL_SHIFT            (27)       /* Bits 27-28: Selector for aclk root clock multiplexer */
 #define CCM_CSCMR1_ACLK_SEL_MASK             (3 << CCM_CSCMR1_ACLK_SEL_SHIFT)
 #  define CCM_CSCMR1_ACLK_SEL_PLL2_PFD2      (0 << CCM_CSCMR1_ACLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
 #  define CCM_CSCMR1_ACLK_SEL_PLL3_SWCLK     (1 << CCM_CSCMR1_ACLK_SEL_SHIFT) /* Derive clock from pll3_sw_clk */
 #  define CCM_CSCMR1_ACLK_SEL_AXI            (2 << CCM_CSCMR1_ACLK_SEL_SHIFT) /* Derive clock from AXI */
 #  define CCM_CSCMR1_ACLK_SEL_PLL2_PFD0      (3 << CCM_CSCMR1_ACLK_SEL_SHIFT) /* Derive clock from PLL2 PFD0 */
+
 #define CCM_CSCMR1_ACLK_EIM_SLOW_SEL_SHIFT   (29)       /* Bits 29-30: Selector for aclk_eim_slow root clock multiplexer */
 #define CCM_CSCMR1_ACLK_EIM_SLOW_SEL_MASK    (3 << CCM_CSCMR1_ACLK_EIM_SLOW_SEL_SHIFT)
 #  define CCM_CSCMR1_ACLK_EIM_SLOW_SEL_AXI        (0 << CCM_CSCMR1_ACLK_EIM_SLOW_SEL_SHIFT) /* Derive clock from AXI */
@@ -298,6 +311,7 @@
 #define CCM_CSCMR2_CAN_CLK_PODF_SHIFT        (2)       /* Bits 2-7: Divider for can clock podf */
 #define CCM_CSCMR2_CAN_CLK_PODF_MASK         (0x3f << CCM_CSCMR2_CAN_CLK_PODF_SHIFT)
 #  define CCM_CSCMR2_CAN_CLK_PODF(n)         ((uint32_t)(n) << CCM_CSCMR2_CAN_CLK_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CSCMR2_LDB_DI0_IPU_DIV           (1 << 10)  /* Bit 10:  Control for divider of ldb clock for IPU di0 */
 #define CCM_CSCMR2_LDB_DI1_IPU_DIV           (1 << 11)  /* Bit 11:  Control for divider of ldb clock for IPU di1 */
 #define CCM_CSCMR2_ESAI_CLK_SEL_SHIFT        (19)       /* Bits 19-20: Selector for esai clock multiplexer */
@@ -312,18 +326,23 @@
 #define CCM_CSCDR1_UART_CLK_PODF_SHIFT    (0)        /* Bits 0-5: Divider for uart clock podf */
 #define CCM_CSCDR1_UART_CLK_PODF_MASK     (0x3f << CCM_CSCDR1_UART_CLK_PODF_SHIFT)
 #  define CCM_CSCDR1_UART_CLK_PODF(n)     ((uint32_t)(n) << CCM_CSCDR1_UART_CLK_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CSCDR1_USDHC1_PODF_SHIFT      (11)       /* Bits 11-13: Divider for usdhc1 clock podf */
 #define CCM_CSCDR1_USDHC1_PODF_MASK       (7 << CCM_CSCDR1_USDHC1_PODF_SHIFT)
 #  define CCM_CSCDR1_USDHC1_PODF(n)       ((uint32_t)(n) << CCM_CSCDR1_USDHC1_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CSCDR1_USDHC2_PODF_SHIFT      (16)       /* Bits 16-18: Divider for usdhc2 clock */
 #define CCM_CSCDR1_USDHC2_PODF_MASK       (7 << CCM_CSCDR1_USDHC2_PODF_SHIFT)
 #  define CCM_CSCDR1_USDHC2_PODF(n)       ((uint32_t)(n) << CCM_CSCDR1_USDHC2_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CSCDR1_USDHC3_PODF_SHIFT      (19)       /* Bits 19-21: Divider for usdhc3 clock podf */
 #define CCM_CSCDR1_USDHC3_PODF_MASK       (7 << CCM_CSCDR1_USDHC3_PODF_SHIFT)
 #  define CCM_CSCDR1_USDHC3_PODF(n)       ((uint32_t)(n) << CCM_CSCDR1_USDHC3_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CSCDR1_USDHC4_PODF_SHIFT      (22)       /* Bits 22-24: Divider for usdhc4 clock pred */
 #define CCM_CSCDR1_USDHC4_PODF_MASK       (7 << CCM_CSCDR1_USDHC4_PODF_SHIFT)
 #  define CCM_CSCDR1_USDHC4_PODF(n)       ((uint32_t)(n) << CCM_CSCDR1_USDHC4_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CSCDR1_VPU_AXI_PODF_SHIFT     (25)       /* Bits 25-27: Divider for vpu axi clock podf */
 #define CCM_CSCDR1_VPU_AXI_PODF_MASK      (7 << CCM_CSCDR1_VPU_AXI_PODF_SHIFT)
 #  define CCM_CSCDR1_VPU_AXI_PODF(n)      ((uint32_t)(n) << CCM_CSCDR1_VPU_AXI_PODF_SHIFT) /* n=(divisor-1) */
@@ -336,15 +355,18 @@
 #define CCM_CS1CDR_SSI1_CLK_PRED_SHIFT    (6)        /* Bits 6-8: Divider for ssi1 clock pred */
 #define CCM_CS1CDR_SSI1_CLK_PRED_MASK     (7 << CCM_CS1CDR_SSI1_CLK_PRED_SHIFT)
 #  define CCM_CS1CDR_SSI1_CLK_PRED(n)     ((uint32_t)(n) << CCM_CS1CDR_SSI1_CLK_PRED_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CS1CDR_ESAI_CLK_PRED_SHIFT    (9)        /* Bits 9-11: Divider for esai clock pred */
 #define CCM_CS1CDR_ESAI_CLK_PRED_MASK     (7 << CCM_CS1CDR_ESAI_CLK_PRED_SHIFT)
 #  define CCM_CS1CDR_ESAI_CLK_PRED(n)     ((uint32_t)(n) << CCM_CS1CDR_ESAI_CLK_PRED_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CS1CDR_SSI3_CLK_PODF_SHIFT    (16)       /* Bits 16-21: Divider for ssi3 clock podf */
 #define CCM_CS1CDR_SSI3_CLK_PODF_MASK     (0x3f << CCM_CS1CDR_SSI3_CLK_PODF_SHIFT)
 #  define CCM_CS1CDR_SSI3_CLK_PODF(n)     ((uint32_t)(n) << CCM_CS1CDR_SSI3_CLK_PODF_SHIFT)
 #define CCM_CS1CDR_SSI3_CLK_PRED_SHIFT    (22)       /* Bits 22-24: Divider for ssi3 clock pred */
 #define CCM_CS1CDR_SSI3_CLK_PRED_MASK     (7 << CCM_CS1CDR_SSI3_CLK_PRED_SHIFT)
 #  define CCM_CS1CDR_SSI3_CLK_PRED(n)     ((uint32_t)(n) << CCM_CS1CDR_SSI3_CLK_PRED_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CS1CDR_ESAI_CLK_PODF_SHIFT    (25)       /* Bits 25-27: Divider for esai clock podf */
 #define CCM_CS1CDR_ESAI_CLK_PODF_MASK     (7 << CCM_CS1CDR_ESAI_CLK_PODF_SHIFT)
 #  define CCM_CS1CDR_ESAI_CLK_PODF(n)     ((uint32_t)(n) << CCM_CS1CDR_ESAI_CLK_PODF_SHIFT) /* n=(divisor-1) */
@@ -354,9 +376,11 @@
 #define CCM_CS2CDR_SSI2_CLK_PODF_SHIFT          (0)        /* Bits 0-5: Divider for ssi2 clock podf */
 #define CCM_CS2CDR_SSI2_CLK_PODF_MASK           (0x3f << CCM_CS2CDR_SSI2_CLK_PODF_SHIFT)
 #  define CCM_CS2CDR_SSI2_CLK_PODF(n)           ((uint32_t)(n) << CCM_CS2CDR_SSI2_CLK_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CS2CDR_SSI2_CLK_PRED_SHIFT          (6)        /* Bits 6-8: Divider for ssi2 clock pred */
 #define CCM_CS2CDR_SSI2_CLK_PRED_MASK           (7 << CCM_CS2CDR_SSI2_CLK_PRED_SHIFT)
 #  define CCM_CS2CDR_SSI2_CLK_PRED(n)           ((uint32_t)(n) << CCM_CS2CDR_SSI2_CLK_PRED_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CS2CDR_LDB_DI0_CLK_SEL_SHIFT        (9)        /* Bits 9-11: Selector for ldb_di1 clock multiplexer */
 #define CCM_CS2CDR_LDB_DI0_CLK_SEL_MASK         (7 << CCM_CS2CDR_LDB_DI0_CLK_SEL_SHIFT)
 #  define CCM_CS2CDR_LDB_DI0_CLK_SEL_PLL5       (0 << CCM_CS2CDR_LDB_DI0_CLK_SEL_SHIFT) /* Derive from PLL5 clock */
@@ -364,6 +388,7 @@
 #  define CCM_CS2CDR_LDB_DI0_CLK_SEL_PLL2_PFD2  (2 << CCM_CS2CDR_LDB_DI0_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
 #  define CCM_CS2CDR_LDB_DI0_CLK_SEL_MMDC_CH1   (3 << CCM_CS2CDR_LDB_DI0_CLK_SEL_SHIFT) /* Derive clock from mmdc_ch1 clock */
 #  define CCM_CS2CDR_LDB_DI0_CLK_SEL_PLL3_SWCLK (4 << CCM_CS2CDR_LDB_DI0_CLK_SEL_SHIFT) /* Derive clock from pll3_sw_clk */
+
 #define CCM_CS2CDR_LDB_DI1_CLK_SEL_SHIFT        (12)       /* Bits 12-14: Selector for ldb_di1 clock multiplexer */
 #define CCM_CS2CDR_LDB_DI1_CLK_SEL_MASK         (7 << CCM_CS2CDR_LDB_DI1_CLK_SEL_SHIFT)
 #  define CCM_CS2CDR_LDB_DI1_CLK_SEL_PLL5       (0 << CCM_CS2CDR_LDB_DI1_CLK_SEL_SHIFT) /* Derive PLL5 clock */
@@ -371,15 +396,18 @@
 #  define CCM_CS2CDR_LDB_DI1_CLK_SEL_PLL2_PFD2  (2 << CCM_CS2CDR_LDB_DI1_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
 #  define CCM_CS2CDR_LDB_DI1_CLK_SEL_MMDC_CH1   (3 << CCM_CS2CDR_LDB_DI1_CLK_SEL_SHIFT) /* Derive clock from mmdc_ch1 clock */
 #  define CCM_CS2CDR_LDB_DI1_CLK_SEL_PLL3_SWCLK (4 << CCM_CS2CDR_LDB_DI1_CLK_SEL_SHIFT) /* Derive clock from pll3_sw_clk */
+
 #define CCM_CS2CDR_ENFC_CLK_SEL_SHIFT           (16)       /* Bits 16-17: Selector for enfc clock multiplexer */
 #define CCM_CS2CDR_ENFC_CLK_SEL_MASK            (3 << CCM_CS2CDR_ENFC_CLK_SEL_SHIFT)
 #  define CCM_CS2CDR_ENFC_CLK_SEL_PLL2_PFD0     (0 << CCM_CS2CDR_ENFC_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD0 */
 #  define CCM_CS2CDR_ENFC_CLK_SEL_PLL2          (1 << CCM_CS2CDR_ENFC_CLK_SEL_SHIFT) /* Derive clock from PLL2 */
 #  define CCM_CS2CDR_ENFC_CLK_SEL_PLL3_SWCLK    (2 << CCM_CS2CDR_ENFC_CLK_SEL_SHIFT) /* Derive clock from pll3_sw_clk */
 #  define CCM_CS2CDR_ENFC_CLK_SEL_PLL2_PFD2     (3 << CCM_CS2CDR_ENFC_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
+
 #define CCM_CS2CDR_ENFC_CLK_PRED_SHIFT          (18)       /* Bits 18-20: Divider for enfc clock pred divider */
 #define CCM_CS2CDR_ENFC_CLK_PRED_MASK           (7 << CCM_CS2CDR_ENFC_CLK_PRED_SHIFT)
 #  define CCM_CS2CDR_ENFC_CLK_PRED(n)           ((uint32_t)(n) << CCM_CS2CDR_ENFC_CLK_PRED_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CS2CDR_ENFC_CLK_PODF_SHIFT          (21)       /* Bits 21-26: Divider for enfc clock divider */
 #define CCM_CS2CDR_ENFC_CLK_PODF_MASK           (0x3f << CCM_CS2CDR_ENFC_CLK_PODF_SHIFT)
 #  define CCM_CS2CDR_ENFC_CLK_PODF(n)           ((uint32_t)(n) << CCM_CS2CDR_ENFC_CLK_PODF_SHIFT)
@@ -392,24 +420,30 @@
 #  define CCM_CDCDR_SPDIF1_CLK_SEL_PLL3_PFD2  (1 << CCM_CDCDR_SPDIF1_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD2 */
 #  define CCM_CDCDR_SPDIF1_CLK_SEL_PLL3_PFD3  (2 << CCM_CDCDR_SPDIF1_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD3 */
 #  define CCM_CDCDR_SPDIF1_CLK_SEL_PLL3_SWCLK (3 << CCM_CDCDR_SPDIF1_CLK_SEL_SHIFT) /* Derive clock from pll3_sw_clk */
+
 #define CCM_CDCDR_SPDIF1_CLK_PODF_SHIFT       (9)        /* Bits 9-11: Divider for spdif1 clock podf */
 #define CCM_CDCDR_SPDIF1_CLK_PODF_MASK        (7 << CCM_CDCDR_SPDIF1_CLK_PODF_SHIFT)
 #  define CCM_CDCDR_SPDIF1_CLK_PODF(n)        ((uint32_t)(n) << CCM_CDCDR_SPDIF1_CLK_PODF_SHIFT) /* n=0,7 (divisor-1) */
+
 #define CCM_CDCDR_SPDIF1_CLK_PRED_SHIFT       (12)       /* Bits 12-14: Divider for spdif1 clock pred */
 #define CCM_CDCDR_SPDIF1_CLK_PRED_MASK        (7 << CCM_CDCDR_SPDIF1_CLK_PRED_SHIFT)
 #  define CCM_CDCDR_SPDIF1_CLK_PRED(n)        ((uint32_t)(n) << CCM_CDCDR_SPDIF1_CLK_PRED_SHIFT) /* n=0,1,2,7 (divisor-1) */
+
 #define CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT        (20)       /* Bits 20-21: Selector for spdif0 clock multiplexer */
 #define CCM_CDCDR_SPDIF0_CLK_SEL_MASK         (3 << CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT)
 #  define CCM_CDCDR_SPDIF0_CLK_SEL_DIV_PLL4   (0 << CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT) /* Derive clock from PLL4 divided clock */
 #  define CCM_CDCDR_SPDIF0_CLK_SEL_PLL3_PFD2  (1 << CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD2 */
 #  define CCM_CDCDR_SPDIF0_CLK_SEL_PLL3_PFD3  (2 << CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD3 */
 #  define CCM_CDCDR_SPDIF0_CLK_SEL_PLL3_SWCLK (3 << CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT) /* Derive clock from pll3_sw_clk */
+
 #define CCM_CDCDR_SPDIF0_CLK_PODF_SHIFT       (22)       /* Bits 22-24: Divider for spdif0 clock podf */
 #define CCM_CDCDR_SPDIF0_CLK_PODF_MASK        (7 << CCM_CDCDR_SPDIF0_CLK_PODF_SHIFT)
 #  define CCM_CDCDR_SPDIF0_CLK_PODF(n)        ((uint32_t)(n) << CCM_CDCDR_SPDIF0_CLK_PODF_SHIFT) /* n=0,7 (divisor-1) */
+
 #define CCM_CDCDR_SPDIF0_CLK_PRED_SHIFT       (25)       /* Bits 25-27: Divider for spdif0 clock pred */
 #define CCM_CDCDR_SPDIF0_CLK_PRED_MASK        (7 << CCM_CDCDR_SPDIF0_CLK_PRED_SHIFT)
 #  define CCM_CDCDR_SPDIF0_CLK_PRED(n)        ((uint32_t)(n) << CCM_CDCDR_SPDIF0_CLK_PRED_SHIFT) /* n=0,1,2,7 (divisor-1) */
+
 #define CCM_CDCDR_HSI_TX_CLK_SEL              (1 << 28)  /* Bit 28:  Selector for hsi_tx clock multiplexer */
 #define CCM_CDCDR_HSI_TX_PODF_SHIFT           (29)       /* Bits 29-31: Divider for hsi_tx clock podf */
 #define CCM_CDCDR_HSI_TX_PODF_MASK            (7 << CCM_CDCDR_HSI_TX_PODF_SHIFT)
@@ -424,9 +458,11 @@
 #  define CCM_CHSCCDR_IPU1_DI0_CLK_SEL_IPP_DI1_CLK    (2 << CCM_CHSCCDR_IPU1_DI0_CLK_SEL_SHIFT) /* Derive clock from ipp_di1_clk */
 #  define CCM_CHSCCDR_IPU1_DI0_CLK_SEL_LDB_DI0_CLK    (3 << CCM_CHSCCDR_IPU1_DI0_CLK_SEL_SHIFT) /* Derive clock from ldb_di0_clk */
 #  define CCM_CHSCCDR_IPU1_DI0_CLK_SEL_LDB_DI1_CLK    (4 << CCM_CHSCCDR_IPU1_DI0_CLK_SEL_SHIFT) /* Derive clock from ldb_di1_clk */
+
 #define CCM_CHSCCDR_IPU1_DI0_PODF_SHIFT               (3)       /* Bits 3-5: Divider for ipu1_di0 clock divider */
 #define CCM_CHSCCDR_IPU1_DI0_PODF_MASK                (7 << CCM_CHSCCDR_IPU1_DI0_PODF_SHIFT)
 #  define CCM_CHSCCDR_IPU1_DI0_PODF(n)                ((uint32_t)(n) << CCM_CHSCCDR_IPU1_DI0_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_SHIFT        (6)        /* Bits 6-8: Selector for ipu1 di0 root clock pre-multiplexer */
 #define CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_MASK         (7 << CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_SHIFT)
 #  define CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_MMDC_CH0   (0 << CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_SHIFT) /* Derive clock from mmdc_ch0 clock */
@@ -435,6 +471,7 @@
 #  define CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_PLL2_PFD0  (3 << CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD0 */
 #  define CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_PLL2_PFD2  (4 << CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
 #  define CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_PLL3_PFD1  (5 << CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD1 */
+
 #define CCM_CHSCCDR_IPU1_DI1_CLK_SEL_SHIFT            (9)        /* Bits 9-11: Selector for ipu1 di1 root clock multiplexer */
 #define CCM_CHSCCDR_IPU1_DI1_CLK_SEL_MASK             (7 << CCM_CHSCCDR_IPU1_DI1_CLK_SEL_SHIFT)
 #  define CCM_CHSCCDR_IPU1_DI1_CLK_SEL_DIV_IPU1       (0 << CCM_CHSCCDR_IPU1_DI1_CLK_SEL_SHIFT) /* Derive clock from divided pre-muxed ipu1 di1 clock */
@@ -442,9 +479,11 @@
 #  define CCM_CHSCCDR_IPU1_DI1_CLK_SEL_IPP_DI1_CLK    (2 << CCM_CHSCCDR_IPU1_DI1_CLK_SEL_SHIFT) /* Derive clock from ipp_di1_clk */
 #  define CCM_CHSCCDR_IPU1_DI1_CLK_SEL_LDB_DI0_CLK    (3 << CCM_CHSCCDR_IPU1_DI1_CLK_SEL_SHIFT) /* Derive clock from ldb_di0_clk */
 #  define CCM_CHSCCDR_IPU1_DI1_CLK_SEL_LDB_DI1_CLK    (4 << CCM_CHSCCDR_IPU1_DI1_CLK_SEL_SHIFT) /* Derive clock from ldb_di1_clk */
+
 #define CCM_CHSCCDR_IPU1_DI1_PODF_SHIFT               (12)       /* Bits 12-14: Divider for ipu1_di clock divider */
 #define CCM_CHSCCDR_IPU1_DI1_PODF_MASK                (7 << CCM_CHSCCDR_IPU1_DI1_PODF_SHIFT)
 #  define CCM_CHSCCDR_IPU1_DI1_PODF(n)                ((uint32_t)(n) << CCM_CHSCCDR_IPU1_DI1_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CHSCCDR_IPU1_DI1_PRE_CLK_SEL_SHIFT        (15)       /* Bits 15-17: Selector for ipu1 di1 root clock pre-multiplexer */
 #define CCM_CHSCCDR_IPU1_DI1_PRE_CLK_SEL_MASK         (7 << CCM_CHSCCDR_IPU1_DI1_PRE_CLK_SEL_SHIFT)
 #  define CCM_CHSCCDR_IPU1_DI1_PRE_CLK_SEL_MMDC_CH0   (0 << CCM_CHSCCDR_IPU1_DI1_PRE_CLK_SEL_SHIFT) /* Derive clock from mmdc_ch0 clock */
@@ -463,9 +502,11 @@
 #  define CCM_CSCDR2_IPU2_DI0_CLK_SEL_IPP_DI1_CLK    (2 << CCM_CSCDR2_IPU2_DI0_CLK_SEL_SHIFT) /* Derive clock from ipp_di1_clk */
 #  define CCM_CSCDR2_IPU2_DI0_CLK_SEL_LDB_DI0_CLK    (3 << CCM_CSCDR2_IPU2_DI0_CLK_SEL_SHIFT) /* Derive clock from ldb_di0_clk */
 #  define CCM_CSCDR2_IPU2_DI0_CLK_SEL_LDB_DI1_CLK    (4 << CCM_CSCDR2_IPU2_DI0_CLK_SEL_SHIFT) /* Derive clock from ldb_di1_clk */
+
 #define CCM_CSCDR2_IPU2_DI0_PODF_SHIFT               (3)        /* Bits 3-5: Divider for ipu2_di0 clock divider */
 #define CCM_CSCDR2_IPU2_DI0_PODF_MASK                (7 << CCM_CSCDR2_IPU2_DI0_PODF_SHIFT)
 #  define CCM_CSCDR2_IPU2_DI0_PODF(n)                ((uint32_t)(n) << CCM_CSCDR2_IPU2_DI0_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CSCDR2_IPU2_DI0_PRE_CLK_SEL_SHIFT        (6)        /* Bits 6-8: Selector for ipu2 di0 root clock pre-multiplexer */
 #define CCM_CSCDR2_IPU2_DI0_PRE_CLK_SEL_MASK         (7 << CCM_CSCDR2_IPU2_DI0_PRE_CLK_SEL_SHIFT)
 #define CCM_CSCDR2_IPU2_DI0_PRE_CLK_SEL_MMDC_CH0     (0 << CCM_CSCDR2_IPU2_DI0_PRE_CLK_SEL_SHIFT) /* Derive clock from mmdc_ch0 clock */
@@ -474,6 +515,7 @@
 #define CCM_CSCDR2_IPU2_DI0_PRE_CLK_SEL_PLL2_PFD     (3 << CCM_CSCDR2_IPU2_DI0_PRE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD0 */
 #define CCM_CSCDR2_IPU2_DI0_PRE_CLK_SEL_PLL2_PFD2    (4 << CCM_CSCDR2_IPU2_DI0_PRE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
 #define CCM_CSCDR2_IPU2_DI0_PRE_CLK_SEL_PLL3_PFD1    (5 << CCM_CSCDR2_IPU2_DI0_PRE_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD1 */
+
 #define CCM_CSCDR2_IPU2_DI1_CLK_SEL_SHIFT            (9)        /* Bits 9-11: Selector for ipu1 di2 root clock multiplexer */
 #define CCM_CSCDR2_IPU2_DI1_CLK_SEL_MASK             (7 << CCM_CSCDR2_IPU2_DI1_CLK_SEL_SHIFT)
 #  define CCM_CSCDR2_IPU2_DI1_CLK_SEL_DIV_IPU1       (0 << CCM_CSCDR2_IPU2_DI1_CLK_SEL_SHIFT) /* Derive clock from divided pre-muxed ipu1 di1 clock */
@@ -481,9 +523,11 @@
 #  define CCM_CSCDR2_IPU2_DI1_CLK_SEL_IPP_DI1_CLK    (2 << CCM_CSCDR2_IPU2_DI1_CLK_SEL_SHIFT) /* Derive clock from ipp_di1_clk */
 #  define CCM_CSCDR2_IPU2_DI1_CLK_SEL_LDB_DI0_CLK    (3 << CCM_CSCDR2_IPU2_DI1_CLK_SEL_SHIFT) /* Derive clock from ldb_di0_clk */
 #  define CCM_CSCDR2_IPU2_DI1_CLK_SEL_LDB_DI1_CLK    (4 << CCM_CSCDR2_IPU2_DI1_CLK_SEL_SHIFT) /* Derive clock from ldb_di1_clk */
+
 #define CCM_CSCDR2_IPU2_DI1_PODF_SHIFT               (12)       /* Bits 12-14: Divider for ipu2_di1 clock divider */
 #define CCM_CSCDR2_IPU2_DI1_PODF_MASK                (7 << CCM_CSCDR2_IPU2_DI1_PODF_SHIFT)
 #  define CCM_CSCDR2_IPU2_DI1_PODF(n)                ((uint32_t)(n) << CCM_CSCDR2_IPU2_DI1_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CSCDR2_IPU2_DI1_PRE_CLK_SEL_SHIFT        (15)       /* Bits 15-17: Selector for ipu2 di1 root clock pre-multiplexer */
 #define CCM_CSCDR2_IPU2_DI1_PRE_CLK_SEL_MASK         (7 << CCM_CSCDR2_IPU2_DI1_PRE_CLK_SEL_SHIFT)
 #  define CCM_CSCDR2_IPU2_DI1_PRE_CLK_SEL_MMDC_CH0   (0 << CCM_CSCDR2_IPU2_DI1_PRE_CLK_SEL_SHIFT) /* Derive clock from mmdc_ch0 clock */
@@ -492,6 +536,7 @@
 #  define CCM_CSCDR2_IPU2_DI1_PRE_CLK_SEL_PLL2_PFD0  (3 << CCM_CSCDR2_IPU2_DI1_PRE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD0 */
 #  define CCM_CSCDR2_IPU2_DI1_PRE_CLK_SEL_PLL2_PFD2  (4 << CCM_CSCDR2_IPU2_DI1_PRE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
 #  define CCM_CSCDR2_IPU2_DI1_PRE_CLK_SEL_PLL3_PFD1  (5 << CCM_CSCDR2_IPU2_DI1_PRE_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD1 */
+
 #define CCM_CSCDR2_ECSPI_CLK_PODF_SHIFT              (19)       /* Bits 19-24: Divider for ecspi clock podf */
 #define CCM_CSCDR2_ECSPI_CLK_PODF_MASK               (0x3f << CCM_CSCDR2_ECSPI_CLK_PODF_SHIFT)
 #  define CCM_CSCDR2_ECSPI_CLK_PODF(n)               ((uint32_t)(n) << CCM_CSCDR2_ECSPI_CLK_PODF_SHIFT) /* n=(divisor-1) */
@@ -504,15 +549,18 @@
 #  define CCM_CSCDR3_IPU1_HSP_CLK_SEL_PLL2_PFD2  (1 << CCM_CSCDR3_IPU1_HSP_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
 #  define CCM_CSCDR3_IPU1_HSP_CLK_SEL_PLL3_120M  (2 << CCM_CSCDR3_IPU1_HSP_CLK_SEL_SHIFT) /* Derive clock from pll3_120M */
 #  define CCM_CSCDR3_IPU1_HSP_CLK_SEL_PLL3_PFD1  (3 << CCM_CSCDR3_IPU1_HSP_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD1 */
+
 #define CCM_CSCDR3_IPU1_HSP_PODF_SHIFT           (11)       /* Bits 11-13: Divider for ipu1_hsp clock */
 #define CCM_CSCDR3_IPU1_HSP_PODF_MASK            (7 << CCM_CSCDR3_IPU1_HSP_PODF_SHIFT)
 #  define CCM_CSCDR3_IPU1_HSP_PODF(n)            ((uint32_t)(n) << CCM_CSCDR3_IPU1_HSP_PODF_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CSCDR3_IPU2_HSP_CLK_SEL_SHIFT        (14)       /* Bits 14-15: Selector for ipu2_hsp clock multiplexer */
 #define CCM_CSCDR3_IPU2_HSP_CLK_SEL_MASK         (3 << CCM_CSCDR3_IPU2_HSP_CLK_SEL_SHIFT)
 #  define CCM_CSCDR3_IPU2_HSP_CLK_SEL_MMDC_CH0   (0 << CCM_CSCDR3_IPU2_HSP_CLK_SEL_SHIFT) /* Derive clock from mmdc_ch0 clock */
 #  define CCM_CSCDR3_IPU2_HSP_CLK_SEL_PLL2_PFD2  (1 << CCM_CSCDR3_IPU2_HSP_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
 #  define CCM_CSCDR3_IPU2_HSP_CLK_SEL_PLL3_120M  (2 << CCM_CSCDR3_IPU2_HSP_CLK_SEL_SHIFT) /* Derive clock from pll3_120M */
 #  define CCM_CSCDR3_IPU2_HSP_CLK_SEL_PLL3_PFD1  (3 << CCM_CSCDR3_IPU2_HSP_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD1 */
+
 #define CCM_CSCDR3_IPU2_HSP_PODF_SHIFT           (16)       /* Bits 16-18: Divider for ipu2_hsp clock */
 #define CCM_CSCDR3_IPU2_HSP_PODF_MASK            (7 << CCM_CSCDR3_IPU2_HSP_PODF_SHIFT)
 #  define CCM_CSCDR3_IPU2_HSP_PODF(n)            ((uint32_t)(n) << CCM_CSCDR3_IPU2_HSP_PODF_SHIFT) /* n=(divisor-1) */
@@ -536,6 +584,7 @@
 #  define CCM_CLPCR_LPM_RUNMODE          (0 << CCM_CLPCR_LPM_SHIFT) /* Remain in run mode */
 #  define CCM_CLPCR_LPM_WAITMODE         (1 << CCM_CLPCR_LPM_SHIFT) /* Transfer to wait mode */
 #  define CCM_CLPCR_LPM_STOPMODE         (2 << CCM_CLPCR_LPM_SHIFT) /* Transfer to stop mode */
+
 #define CCM_CLPCR_ARM_CLK_DIS_ON_LPM     (1 << 5)  /* Bit 5:  ARM clocks disabled on wait mode */
 #define CCM_CLPCR_SBYOS                  (1 << 6)  /* Bit 6:  Standby clock oscillator bit */
 #define CCM_CLPCR_DIS_REF_OSC            (1 << 7)  /* Bit 7:  Control closing of external reference oscillator clock */
@@ -546,6 +595,7 @@
 #  define CCM_CLPCR_STBY_COUNT_3         (1 << CCM_CLPCR_STBY_COUNT_SHIFT) /* Wait (3*pmic_delay_scaler)+1 ckil clocks */
 #  define CCM_CLPCR_STBY_COUNT_7         (2 << CCM_CLPCR_STBY_COUNT_SHIFT) /* Wait (7*pmic_delay_scaler)+1 ckil clocks */
 #  define CCM_CLPCR_STBY_COUNT_15        (3 << CCM_CLPCR_STBY_COUNT_SHIFT) /* Wait (15*pmic_delay_scaler)+1 ckil clocks */
+
 #define CCM_CLPCR_COSC_PWRDOWN           (1 << 11) /* Bit 11: Control powering down of on chip oscillator */
 #define CCM_CLPCR_WB_PER_AT_LPM          (1 << 16) /* Bit 16: Enable periphery charge pump for well biasing at low power mode */
 #define CCM_CLPCR_BYPASS_MMDC_CH0_LPM_HS (1 << 19) /* Bit 19: Bypass handshake with mmdc_ch0 on next entrance to low power mode */
@@ -574,39 +624,41 @@
 
 #define CCM_CCOSR_CLKO1_SEL_SHIFT                (0)       /* Bits 0-3: Selection of the clock to be generated on CCM_CLKO1 */
 #define CCM_CCOSR_CLKO1_SEL_MASK                 (15 << CCM_CCOSR_CLKO1_SEL_SHIFT)
-#  define CCM_CCOSR_CLKO1_SEL_PLL3_SW_CLK        (0 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* pll3_sw_clk (/2) */
-#  define CCM_CCOSR_CLKO1_SEL_PLL2_MAIN_CLK      (1 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* pll2_main_clk (/2) */
-#  define CCM_CCOSR_CLKO1_SEL_PLL1_MAIN_CLK      (2 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* pll1_main_clk (/2) */
-#  define CCM_CCOSR_CLKO1_SEL_PLL5_MAIN_CLK      (3 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* pll5_main_clk (/2) */
-#  define CCM_CCOSR_CLKO1_SEL_VIDEO_27M_CLK_ROOT (4 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* video_27M_clk_root */
-#  define CCM_CCOSR_CLKO1_SEL_AXI_CLK_ROOT       (5 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* axi_clk_root */
-#  define CCM_CCOSR_CLKO1_SEL_ENFC_CLK_ROOT      (6 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* enfc_clk_root */
-#  define CCM_CCOSR_CLKO1_SEL_IPU1_DI0_CLK_ROOT  (7 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* ipu1_di0_clk_root */
-#  define CCM_CCOSR_CLKO1_SEL_IPU1_DI1_CLK_ROOT  (8 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* ipu1_di1_clk_root */
-#  define CCM_CCOSR_CLKO1_SEL_IPU2_DI0_CLK_ROOT  (9 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* ipu2_di0_clk_root */
+#  define CCM_CCOSR_CLKO1_SEL_PLL3_SW_CLK        (0 << CCM_CCOSR_CLKO1_SEL_SHIFT)  /* pll3_sw_clk (/2) */
+#  define CCM_CCOSR_CLKO1_SEL_PLL2_MAIN_CLK      (1 << CCM_CCOSR_CLKO1_SEL_SHIFT)  /* pll2_main_clk (/2) */
+#  define CCM_CCOSR_CLKO1_SEL_PLL1_MAIN_CLK      (2 << CCM_CCOSR_CLKO1_SEL_SHIFT)  /* pll1_main_clk (/2) */
+#  define CCM_CCOSR_CLKO1_SEL_PLL5_MAIN_CLK      (3 << CCM_CCOSR_CLKO1_SEL_SHIFT)  /* pll5_main_clk (/2) */
+#  define CCM_CCOSR_CLKO1_SEL_VIDEO_27M_CLK_ROOT (4 << CCM_CCOSR_CLKO1_SEL_SHIFT)  /* video_27M_clk_root */
+#  define CCM_CCOSR_CLKO1_SEL_AXI_CLK_ROOT       (5 << CCM_CCOSR_CLKO1_SEL_SHIFT)  /* axi_clk_root */
+#  define CCM_CCOSR_CLKO1_SEL_ENFC_CLK_ROOT      (6 << CCM_CCOSR_CLKO1_SEL_SHIFT)  /* enfc_clk_root */
+#  define CCM_CCOSR_CLKO1_SEL_IPU1_DI0_CLK_ROOT  (7 << CCM_CCOSR_CLKO1_SEL_SHIFT)  /* ipu1_di0_clk_root */
+#  define CCM_CCOSR_CLKO1_SEL_IPU1_DI1_CLK_ROOT  (8 << CCM_CCOSR_CLKO1_SEL_SHIFT)  /* ipu1_di1_clk_root */
+#  define CCM_CCOSR_CLKO1_SEL_IPU2_DI0_CLK_ROOT  (9 << CCM_CCOSR_CLKO1_SEL_SHIFT)  /* ipu2_di0_clk_root */
 #  define CCM_CCOSR_CLKO1_SEL_IPU2_DI1_CLK_ROOT  (10 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* ipu2_di1_clk_root */
 #  define CCM_CCOSR_CLKO1_SEL_AHB_CLK_ROOT       (11 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* ahb_clk_root */
 #  define CCM_CCOSR_CLKO1_SEL_IPG_CLK_ROOT       (12 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* ipg_clk_root */
 #  define CCM_CCOSR_CLKO1_SEL_PERCLK_ROOT        (13 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* perclk_root */
 #  define CCM_CCOSR_CLKO1_SEL_CKIL_SYNC_CLK_ROOT (14 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* ckil_sync_clk_root */
 #  define CCM_CCOSR_CLKO1_SEL_PLL4_MAIN_CLK      (15 << CCM_CCOSR_CLKO1_SEL_SHIFT) /* pll4_main_clk */
+
 #define CCM_CCOSR_CLKO1_DIV_SHIFT                (4)       /* Bits 4-6: Setting the divider of CCM_CLKO1 */
 #define CCM_CCOSR_CLKO1_DIV_MASK                 (7 << CCM_CCOSR_CLKO1_DIV_SHIFT)
 #  define CCM_CCOSR_CLKO1_DIV(n)                 ((uint32_t)(n) << CCM_CCOSR_CLKO1_DIV_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CCOSR_CLKO1_EN                       (1 << 7)  /* Bit 7:  Enable of CCM_CLKO1 clock */
 #define CCM_CCOSR_CLK_OUT_SEL                    (1 << 8)  /* Bit 8:  CCM_CLKO1 output to reflect CCM_CLKO1 or CCM_CLKO2 clocks */
-#define CCM_CCOSR_CLKO2_SEL_SHIFT                (16)       /* Bits 16-20: Selection of the clock to be generated on CCM_CLKO2 */
+#define CCM_CCOSR_CLKO2_SEL_SHIFT                (16)      /* Bits 16-20: Selection of the clock to be generated on CCM_CLKO2 */
 #define CCM_CCOSR_CLKO2_SEL_MASK                 (0x1f << CCM_CCOSR_CLKO2_SEL_SHIFT)
-#  define CCM_CCOSR_CLKO2_SEL_MMDC_CH0_CLK_ROOT       (0 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* mmdc_ch0_clk_root */
-#  define CCM_CCOSR_CLKO2_SEL_MMDC_CH1_CLK_ROOT       (1 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* mmdc_ch1_clk_root */
-#  define CCM_CCOSR_CLKO2_SEL_USDHC4_CLK_ROOT         (2 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* usdhc4_clk_root */
-#  define CCM_CCOSR_CLKO2_SEL_USDHC1_CLK_ROOT         (3 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* usdhc1_clk_root */
-#  define CCM_CCOSR_CLKO2_SEL_GPU2D_AXI_CLK_ROOT      (4 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* gpu2d_axi_clk_root */
-#  define CCM_CCOSR_CLKO2_SEL_WRCK_CLK_ROOT           (5 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* wrck_clk_root */
-#  define CCM_CCOSR_CLKO2_SEL_ECSPI_CLK_ROOT          (6 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* ecspi_clk_root */
-#  define CCM_CCOSR_CLKO2_SEL_GPU3D_AXI_CLK_ROOT      (7 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* gpu3d_axi_clk_root */
-#  define CCM_CCOSR_CLKO2_SEL_USDHC3_CLK_ROOT         (8 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* usdhc3_clk_root */
-#  define CCM_CCOSR_CLKO2_SEL_125M_CLK_ROOT           (9 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* 125M_clk_root */
+#  define CCM_CCOSR_CLKO2_SEL_MMDC_CH0_CLK_ROOT       (0 << CCM_CCOSR_CLKO2_SEL_SHIFT)  /* mmdc_ch0_clk_root */
+#  define CCM_CCOSR_CLKO2_SEL_MMDC_CH1_CLK_ROOT       (1 << CCM_CCOSR_CLKO2_SEL_SHIFT)  /* mmdc_ch1_clk_root */
+#  define CCM_CCOSR_CLKO2_SEL_USDHC4_CLK_ROOT         (2 << CCM_CCOSR_CLKO2_SEL_SHIFT)  /* usdhc4_clk_root */
+#  define CCM_CCOSR_CLKO2_SEL_USDHC1_CLK_ROOT         (3 << CCM_CCOSR_CLKO2_SEL_SHIFT)  /* usdhc1_clk_root */
+#  define CCM_CCOSR_CLKO2_SEL_GPU2D_AXI_CLK_ROOT      (4 << CCM_CCOSR_CLKO2_SEL_SHIFT)  /* gpu2d_axi_clk_root */
+#  define CCM_CCOSR_CLKO2_SEL_WRCK_CLK_ROOT           (5 << CCM_CCOSR_CLKO2_SEL_SHIFT)  /* wrck_clk_root */
+#  define CCM_CCOSR_CLKO2_SEL_ECSPI_CLK_ROOT          (6 << CCM_CCOSR_CLKO2_SEL_SHIFT)  /* ecspi_clk_root */
+#  define CCM_CCOSR_CLKO2_SEL_GPU3D_AXI_CLK_ROOT      (7 << CCM_CCOSR_CLKO2_SEL_SHIFT)  /* gpu3d_axi_clk_root */
+#  define CCM_CCOSR_CLKO2_SEL_USDHC3_CLK_ROOT         (8 << CCM_CCOSR_CLKO2_SEL_SHIFT)  /* usdhc3_clk_root */
+#  define CCM_CCOSR_CLKO2_SEL_125M_CLK_ROOT           (9 << CCM_CCOSR_CLKO2_SEL_SHIFT)  /* 125M_clk_root */
 #  define CCM_CCOSR_CLKO2_SEL_ARM_CLK_ROOT            (10 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* arm_clk_root */
 #  define CCM_CCOSR_CLKO2_SEL_IPU1_HSP_CLK_ROOT       (11 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* ipu1_hsp_clk_root */
 #  define CCM_CCOSR_CLKO2_SEL_IPU2_HSP_CLK_ROOT       (12 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* ipu2_hsp_clk_root */
@@ -629,9 +681,11 @@
 #  define CCM_CCOSR_CLKO2_SEL_SPDIF0_CLK_ROOT         (29 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* spdif0_clk_root */
 #  define CCM_CCOSR_CLKO2_SEL_SPDIF1_CLK_ROOT         (30 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* spdif1_clk_root */
 #  define CCM_CCOSR_CLKO2_SEL_HSI_TX_CLK_ROOT         (31 << CCM_CCOSR_CLKO2_SEL_SHIFT) /* hsi_tx_clk_root */
+
 #define CCM_CCOSR_CLKO2_DIV_SHIFT                (21)       /* Bits 21-23: Setting the divider of CCM_CLKO2 */
 #define CCM_CCOSR_CLKO2_DIV_MASK                 (7 << CCM_CCOSR_CLKO2_DIV_SHIFT)
 #  define CCM_CCOSR_CLKO2_DIV(n)                 ((uint32_t)(n) << CCM_CCOSR_CLKO2_DIV_SHIFT) /* n=(divisor-1) */
+
 #define CCM_CCOSR_CLKO2_EN                       (1 << 24)  /* Bit 24:  Enable of CCM_CLKO2 clock */
 
 /* CCM General Purpose Register */

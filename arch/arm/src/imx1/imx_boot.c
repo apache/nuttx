@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx1/imx_boot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
@@ -31,13 +31,13 @@
 
 #include <nuttx/board.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 struct section_mapping_s
 {
@@ -47,16 +47,16 @@ struct section_mapping_s
   uint32_t nsections;  /* Number of mappings in the region */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 extern uint32_t _vector_start; /* Beginning of vector block */
 extern uint32_t _vector_end;   /* End+1 of vector block */
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Mapping of the external memory regions will probably have to be made board
  * specific.
@@ -82,26 +82,28 @@ static const struct section_mapping_s section_mapping[] =
 
 #define NMAPPINGS (sizeof(section_mapping) / sizeof(struct section_mapping_s))
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/* All i.MX architectures must provide the following entry point.  This entry point
- * is called early in the initialization -- after all memory has been configured
- * and mapped but before any devices have been initialized.
+/* All i.MX architectures must provide the following entry point.
+ * This entry point is called early in the initialization -- after all memory
+ * has been configured and mapped but before any devices have been
+ * initialized.
  */
 
 void imx_board_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_setlevel1entry
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
+static inline void up_setlevel1entry(uint32_t paddr,
+                                     uint32_t vaddr, uint32_t mmuflags)
 {
   uint32_t *pgtable = (uint32_t *)PGTABLE_BASE_VADDR;
   uint32_t  index   = vaddr >> 20;
@@ -111,13 +113,14 @@ static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mm
   pgtable[index]  = (paddr | mmuflags);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_setupmappings
- ************************************************************************************/
+ ****************************************************************************/
 
 static void up_setupmappings(void)
 {
-  int i, j;
+  int i;
+  int j;
 
   for (i = 0; i < NMAPPINGS; i++)
     {
@@ -134,30 +137,34 @@ static void up_setupmappings(void)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_copyvectorblock
- ************************************************************************************/
+ ****************************************************************************/
 
 static void up_copyvectorblock(void)
 {
   /* There are three operational memory configurations:
    *
-   * 1. We execute in place in FLASH (CONFIG_BOOT_RUNFROMFLASH=y).  In this case:
+   * 1. We execute in place in FLASH (CONFIG_BOOT_RUNFROMFLASH=y).
+   *    In this case:
    *
    *    - Our vectors must be located at the beginning of FLASH and will
-   *      also be mapped to address zero (because of the i.MX's "double map image."
+   *      also be mapped to address zero (because of the i.MX's
+   *     "double map image."
    *    - There is nothing to be done here in this case.
    *
    * 2. We boot in FLASH but copy ourselves to DRAM from better performance.
-   *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=y).  In this case:
+   *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=y).
+   *    In this case:
    *
-   *    - Our code image is in FLASH and we boot to FLASH initially, then copy
-   *      ourself to DRAM, and
+   *    - Our code image is in FLASH and we boot to FLASH initially,
+   *      then copy ourself to DRAM, and
    *    - DRAM will be mapped to address zero.
    *    - There is nothing to be done here in this case.
    *
-   * 3. There is bootloader that copies us to DRAM, but probably not to the beginning
-   *    of DRAM (say to 0x0900:0000) (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=n).
+   * 3. There is bootloader that copies us to DRAM, but probably not to the
+   *    beginning of DRAM (say to 0x0900:0000)
+   *   (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=n).
    *    In this case:
    *
    *    - DRAM will be mapped to address zero.
@@ -176,14 +183,14 @@ static void up_copyvectorblock(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 void arm_boot(void)
 {
-  /* __start provided the basic MMU mappings for SDRAM.  Now provide mappings for all
-   * IO regions (Including the vector region).
+  /* __start provided the basic MMU mappings for SDRAM.  Now provide
+   * mappings for all IO regions (Including the vector region).
    */
 
   up_setupmappings();

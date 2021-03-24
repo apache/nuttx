@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/imxrt_lpsrtc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,11 +46,11 @@
 
 #ifdef CONFIG_IMXRT_SNVS_LPSRTC
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_lpsrtc_enable
  *
  * Description:
@@ -62,7 +62,7 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void imxrt_lpsrtc_enable(void)
 {
@@ -79,20 +79,20 @@ static void imxrt_lpsrtc_enable(void)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_lpsrtc_initialize
  *
  * Description:
- *   Initialize the LPSRTC per the selected configuration.  This function is called
- *   via up_rtc_initialize (see imxrt_hprtc.c).
+ *   Initialize the LPSRTC per the selected configuration.
+ *    This function is called via up_rtc_initialize (see imxrt_hprtc.c).
  *
- *   NOTE that the LPSRTC is always configured synchronized with the HPRTC.  This
- *   means that the time is set via the LPSRTC but read via the HPRTC.  Also, only
- *   the alarms from the HPRTC are used.
+ *   NOTE that the LPSRTC is always configured synchronized with the HPRTC.
+ *    This means that the time is set via the LPSRTC but read via the HPRTC.
+ *    Also, only the alarms from the HPRTC are used.
  *
  * Input Parameters:
  *   None
@@ -100,7 +100,7 @@ static void imxrt_lpsrtc_enable(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int imxrt_lpsrtc_initialize(void)
 {
@@ -142,15 +142,15 @@ int imxrt_lpsrtc_initialize(void)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_time
  *
  * Description:
  *   Get the current time in seconds.  This is similar to the standard time()
- *   function.  This interface is only required if the low-resolution RTC/counter
- *   hardware implementation selected.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC is set but neither
- *   CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
+ *   function.  This interface is only required if the low-resolution
+ *   RTC/counter hardware implementation selected.  It is only used by the
+ *   RTOS during initialization to set up the system time when CONFIG_RTC is
+ *   set but neither CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
  *
  * Input Parameters:
  *   None
@@ -158,7 +158,7 @@ int imxrt_lpsrtc_initialize(void)
  * Returned Value:
  *   The current time in seconds
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_RTC_HIRES
 time_t up_rtc_time(void)
@@ -169,12 +169,12 @@ time_t up_rtc_time(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
- *   Set the RTC to the provided time.  All RTC implementations must be able to
- *   set their time based on a standard timespec.
+ *   Set the RTC to the provided time.  All RTC implementations must be able
+ *   to set their time based on a standard timespec.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -182,7 +182,7 @@ time_t up_rtc_time(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_settime(FAR const struct timespec *ts)
 {

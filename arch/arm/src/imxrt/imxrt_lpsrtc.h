@@ -66,16 +66,16 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_lpsrtc_initialize
  *
  * Description:
- *   Initialize the LPSRTC per the selected configuration.  This function is called
- *   via up_rtc_initialize (see imxrt_hprtc.c).
+ *   Initialize the LPSRTC per the selected configuration.
+ *   This function is called via up_rtc_initialize (see imxrt_hprtc.c).
  *
- *   NOTE that the LPSRTC is always configured synchronized with the HPRTC.  This
- *   means that the time is set via the LPSRTC but read via the HPRTC.  Also, only
- *   the alarms from the HPRTC are used.
+ *   NOTE that the LPSRTC is always configured synchronized with the HPRTC.
+ *   This means that the time is set via the LPSRTC but read via the HPRTC.
+ *   Also, only the alarms from the HPRTC are used.
  *
  * Input Parameters:
  *   None
@@ -83,7 +83,7 @@ extern "C"
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int imxrt_lpsrtc_initialize(void);
 

@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_dcdc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,37 +31,37 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_DCDC_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_DCDC_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *********************************************************************************/
+/* Register offsets *********************************************************/
 
 #define IMXRT_DCDC_REG0_OFFSET              0x0000  /* DCDC Register 0 */
 #define IMXRT_DCDC_REG1_OFFSET              0x0004  /* DCDC Register 1 */
 #define IMXRT_DCDC_REG2_OFFSET              0x0008  /* DCDC Register 2 */
 #define IMXRT_DCDC_REG3_OFFSET              0x000c  /* DCDC Register 3 */
 
-/* Register addresses *******************************************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_DCDC_REG0                     (IMXRT_DCDC_BASE + IMXRT_DCDC_REG0_OFFSET)
 #define IMXRT_DCDC_REG1                     (IMXRT_DCDC_BASE + IMXRT_DCDC_REG1_OFFSET)
 #define IMXRT_DCDC_REG2                     (IMXRT_DCDC_BASE + IMXRT_DCDC_REG2_OFFSET)
 #define IMXRT_DCDC_REG3                     (IMXRT_DCDC_BASE + IMXRT_DCDC_REG3_OFFSET)
 
-/* Register bit definitions *************************************************************************/
+/* Register bit definitions *************************************************/
 
 /* Register 0 */
 

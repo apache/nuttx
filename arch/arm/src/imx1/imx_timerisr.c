@@ -118,7 +118,7 @@ void up_timer_initialize(void)
    * (defined in board.h) is the number of counts in millisecond, so:
    */
 
-   putreg32(MSEC2TICK(IMX_PERCLK1_FREQ / 1000), IMX_TIMER1_TCMP);
+  putreg32(MSEC2TICK(IMX_PERCLK1_FREQ / 1000), IMX_TIMER1_TCMP);
 
   /* Configure to provide timer COMP interrupts when TCN increments
    * to TCMP.

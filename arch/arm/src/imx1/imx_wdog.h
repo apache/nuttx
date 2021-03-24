@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx1/imx_wdog.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,32 +16,32 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_IMX_WDOG_H
 #define __ARCH_ARM_IMX_WDOG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* WDOG Register Offsets ************************************************************/
+/* WDOG Register Offsets ****************************************************/
 
 #define WDOG_WCR_OFFSET     0x0000 /* Watchdog Control Register */
 #define WDOG_WSR_OFFSET     0x0004 /* Watchdog Service Register */
 #define WDOG_WSTR_OFFSET    0x0008 /* Watchdog Status Register */
 
-/* WDOG Register Addresses **********************************************************/
+/* WDOG Register Addresses **************************************************/
 
 #define IMX_WDOG_WCR        (IMX_WDOG_VBASE + WDOG_WCR_OFFSET)
 #define IMX_WDOG_WSR        (IMX_WDOG_VBASE + WDOG_WSR_OFFSET)
 #define IMX_WDOG_WSTRT      (IMX_WDOG_VBASE + WDOG_WSTR_OFFSET)
 
-/* WDOG Register Bit Definitions ****************************************************/
+/* WDOG Register Bit Definitions ********************************************/
 
 /* Watchdog Control Register */
 
@@ -50,6 +50,7 @@
 #define WDOG_WCR_SWR        (1 << 2)  /* Bit 2: Software Reset Enable */
 #define WDOG_WCR_TMD        (1 << 3)  /* Bit 3: Test Mode Enable */
 #define WDOG_WCR_WIE        (1 << 4)  /* Bit 4: Watchdog Interrupt Enable */
+
 #define WDOG_WCR_WT_SHIFT   8 /* Bit 8-14: Watchdog Timeout */
 #define WDOG_WCR_WT_MASK    (0x7f << WDOG_WCR_WT_SHIFT)
 #define WDOG_WCR_WHALT      (1 << 15) /* Bit 15: Watchdog Halt */
@@ -59,8 +60,8 @@
 #define WDOG_WSR_SHIFT      0 /* Bit 0-15: Watchdog Service Register */
 #define WDOG_WT_MASK        (0xffff << WDOG_WSR_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_IMX_WDOG_H */
