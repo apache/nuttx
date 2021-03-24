@@ -98,7 +98,7 @@ void up_timer_initialize(void)
    * so that an interrupt is generated at the rate USEC_PER_TICK.
    */
 
-  val = ((CLKS_PER_INT-1) << CLKS_PER_INT_SHIFT) | AR | ST | PTV;
+  val = ((CLKS_PER_INT - 1) << CLKS_PER_INT_SHIFT) | AR | ST | PTV;
   putreg32(val, C5471_TIMER2_CTRL);
 
   /* Attach and enable the timer interrupt */

@@ -71,7 +71,9 @@ struct up_dev_s
   unsigned int         uartbase;    /* Base address of UART registers */
   unsigned int         baud_base;   /* Base baud for conversions */
   unsigned int         baud;        /* Configured baud */
+
   uint8_t              xmit_fifo_size; /* Size of transmit FIFO */
+
   uint8_t              irq;         /* IRQ associated with this UART */
   uint8_t              parity;      /* 0=none, 1=odd, 2=even */
   uint8_t              bits;        /* Number of bits (7 or 8) */
@@ -160,7 +162,7 @@ static uart_dev_t g_irdaport =
   {
     .size   = CONFIG_UART_IRDA_TXBUFSIZE,
     .buffer = g_irdatxbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_irdapriv,
 };
@@ -227,7 +229,8 @@ static inline uint32_t up_inserial(struct up_dev_s *priv, uint32_t offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, uint32_t offset, uint32_t value)
+static inline void up_serialout(struct up_dev_s *priv,
+                                uint32_t offset, uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -242,6 +245,7 @@ static inline void up_disableuartint(struct up_dev_s *priv, uint16_t *ier)
     {
       *ier = priv->regs.ier & UART_IER_INTMASK;
     }
+
   priv->regs.ier &= ~UART_IER_INTMASK;
   up_serialout(priv, UART_IER_OFFS, priv->regs.ier);
 }
@@ -272,6 +276,7 @@ static inline void up_waittxready(struct up_dev_s *priv)
         }
     }
 }
+
 /****************************************************************************
  * Name: up_disablebreaks
  ****************************************************************************/
@@ -408,7 +413,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   up_setrate(priv, priv->baud);
 
-  priv->regs.lcr &= 0xffffffe0;      /* clear original field, and... */
+  priv->regs.lcr &= 0xffffffe0;        /* clear original field, and... */
   priv->regs.lcr |= (uint32_t)cval;    /* Set new bits in that field. */
   up_serialout(priv, UART_LCR_OFFS, priv->regs.lcr);
 
@@ -436,6 +441,7 @@ static int up_setup(struct uart_dev_s *dev)
     }
 #endif
 #endif
+
   return OK;
 }
 
@@ -457,14 +463,15 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
+ *   Configure the UART to operation in interrupt driven mode. This method is
  *   called when the serial port is opened.  Normally, this is just after the
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling). The RX and
+ *   TX interrupts are not enabled until the txint() and rxint() methods are
+ *   called.
  *
  ****************************************************************************/
 
@@ -493,8 +500,8 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called. The exception
+ *   is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
