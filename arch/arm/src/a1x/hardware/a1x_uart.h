@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/a1x/hardware/a1x_uart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A1X_UART_H
 #define __ARCH_ARM_SRC_A1X_HARDWARE_A1X_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/a1x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define A1X_UART_RBR_OFFSET       0x0000 /* UART Receive Buffer Register */
 #define A1X_UART_THR_OFFSET       0x0000 /* UART Transmit Holding Register */
@@ -51,7 +51,7 @@
 #define A1X_UART_RFL_OFFSET       0x0084 /* UART Receive FIFO Level */
 #define A1X_UART_HALT_OFFSET      0x00a4 /* UART Halt TX Register */
 
-/* Register virtual addresses *******************************************************/
+/* Register virtual addresses ***********************************************/
 
 #define A1X_UART_RBR(n)           (A1X_UART_VADDR(n)+A1X_UART_RBR_OFFSET)
 #define A1X_UART_THR(n)           (A1X_UART_VADDR(n)+A1X_UART_THR_OFFSET)
@@ -206,7 +206,7 @@
 #define A1X_UART7_RFL             (A1X_UART7_VADDR+A1X_UART_RFL_OFFSET)
 #define A1X_UART7_HALT            (A1X_UART7_VADDR+A1X_UART_HALT_OFFSET)
 
-/* Register bit field definitions ***************************************************/
+/* Register bit field definitions *******************************************/
 
 /* UART Receive Buffer Register */
 
@@ -244,6 +244,7 @@
 #  define UART_IIR_IID_LINESTATUS (6 << UART_IIR_IID_SHIFT)  /* Receiver line status */
 #  define UART_IIR_IID_BUSY       (7 << UART_IIR_IID_SHIFT)  /* Busy detect */
 #  define UART_IIR_IID_TIMEOUT    (12 << UART_IIR_IID_SHIFT) /* Character timeout */
+
 #define UART_IIR_FEFLAG_SHIFT     (6) /* Bits 6-7: FIFOs Enable Flag */
 #define UART_IIR_FEFLAG_MASK      (3 << UART_IIR_FEFLAG_SHIFT)
 #  define UART_IIR_FEFLAG_DISABLE (0 << UART_IIR_FEFLAG_SHIFT)
@@ -261,6 +262,7 @@
 #  define UART_FCR_TFT_TWO        (1 << UART_FCR_TFT_SHIFT) /* 2 characters in the FIFO */
 #  define UART_FCR_TFT_QUARTER    (2 << UART_FCR_TFT_SHIFT) /* FIFO 1/4 full */
 #  define UART_FCR_TFT_HALF       (3 << UART_FCR_TFT_SHIFT) /* FIFO 1/2 full */
+
 #define UART_FCR_RT_SHIFT         (6)       /* Bits 6-7: RCVR Trigger */
 #define UART_FCR_RT_MASK          (3 << UART_FCR_RT_SHIFT)
 #  define UART_FCR_RT_ONE         (0 << UART_FCR_RT_SHIFT) /* 1 character in the FIFO */
@@ -276,6 +278,7 @@
 #  define UART_LCR_DLS_6BITS      (1 << UART_LCR_DLS_SHIFT) /* 6 bits */
 #  define UART_LCR_DLS_7BITS      (2 << UART_LCR_DLS_SHIFT) /* 7 bits */
 #  define UART_LCR_DLS_8BITS      (3 << UART_LCR_DLS_SHIFT) /* 8 bits */
+
 #define UART_LCR_STOP             (1 << 2)  /* Bit 2:  Number of stop bits */
 #define UART_LCR_PEN              (1 << 3)  /* Bit 3:  Parity Enable */
 #define UART_LCR_EPS              (1 << 4)  /* Bit 4:  Even Parity Select */
