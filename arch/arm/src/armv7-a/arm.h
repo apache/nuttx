@@ -48,6 +48,7 @@
 #  define PSR_MODE_HYP    (26 << PSR_MODE_SHIFT) /* Hyp mode */
 #  define PSR_MODE_UND    (27 << PSR_MODE_SHIFT) /* Undefined mode */
 #  define PSR_MODE_SYS    (31 << PSR_MODE_SHIFT) /* System mode */
+
 #define PSR_T_BIT         (1 << 5)  /* Bit 5: Thumb execution state bit */
 #define PSR_MASK_SHIFT    (6)       /* Bits 6-8: Mask Bits */
 #define PSR_MASK_MASK     (7 << PSR_GE_SHIFT)

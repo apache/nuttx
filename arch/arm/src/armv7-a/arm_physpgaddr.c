@@ -89,22 +89,25 @@ uintptr_t arm_physpgaddr(uintptr_t vaddr)
           /* Temporarily map the page into the virtual address space */
 
           l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
-          mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
-          l2table = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
+          mmu_l1_setentry(paddr & ~SECTION_MASK,
+                          ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
+          l2table = (FAR uint32_t *)(ARCH_SCRATCH_VBASE |
+                                    (paddr & SECTION_MASK));
 #endif
           if (l2table)
             {
-              /* Invalidate D-Cache line containing this virtual address so that
-               * we re-read from physical memory
+              /* Invalidate D-Cache line containing this virtual address so
+               * that we re-read from physical memory
                */
 
               index = (vaddr & SECTION_MASK) >> MM_PGSHIFT;
               up_invalidate_dcache((uintptr_t)&l2table[index],
-                                   (uintptr_t)&l2table[index] + sizeof(uint32_t));
+                                   (uintptr_t)&l2table[index] +
+                                    sizeof(uint32_t));
 
-              /* Get the Level 2 page table entry corresponding to this virtual
-               * address.  Extract the physical address of the page containing
-               * the mapping of the virtual address.
+              /* Get the Level 2 page table entry corresponding to this
+               * virtual address.  Extract the physical address of the page
+               * containing the mapping of the virtual address.
                */
 
               paddr = ((uintptr_t)l2table[index] & PTE_SMALL_PADDR_MASK);

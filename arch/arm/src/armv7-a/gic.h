@@ -48,7 +48,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Generic indexing helpers *************************************************/
+
 /* 1x32 bit field per register */
 
 #define GIC_INDEX1(n)              (n)                       /* 1 field per word */
@@ -92,6 +94,7 @@
 #define GIC_MASK32(n)              (1 << GIC_SHIFT32(n))     /* 1-bit mask */
 
 /* GIC Register Offsets *****************************************************/
+
 /* CPU Interface registers */
 
 #define GIC_ICCICR_OFFSET          0x0000    /* CPU Interface Control Register */
@@ -127,6 +130,7 @@
                                              /* 0x000c-0x001c: Reserved */
                                              /* 0x0020-0x003c: Implementation defined */
                                              /* 0x0040-0x007c: Reserved */
+
 /* Interrupt Security Registers: 0x0080-0x009c */
 
 #define GIC_ICDISR_OFFSET(n)       (0x0080 + GIC_OFFSET32(n))
@@ -160,23 +164,28 @@
 #define GIC_ICDIPR_OFFSET(n)       (0x0400 + GIC_OFFSET4(n))
 
 /* 0x0500-0x07fc: Reserved */
+
 /* Interrupt Processor Target Registers: 0x0800-0x08fc */
 
 #define GIC_ICDIPTR_OFFSET(n)      (0x0800 + GIC_OFFSET4(n))
 
 /* 0x0900-0x0bfc: Reserved */
+
 /* Interrupt Configuration Registers: 0x0c00-0x0c3c */
 
 #define GIC_ICDICFR_OFFSET(n)      (0x0c00 + GIC_OFFSET16(n))
 
 /* 0x0d00-0x0dfc: Implementation defined */
+
 /* PPI Status Register: 0x0d00 */
+
 /* SPI Status Registers: 0x0d04-0x0d1c */
 
 #define GIC_ICDPPISR_OFFSET        0x0d00    /* PPI Status Register */
 #define GIC_ICDSPISR_OFFSET(n)     (0x0d00 + GIC_OFFSET32(n))
 
 /* 0x0d80-0x0dfc: Reserved */
+
 /* Non-secure Access Control Registers, optional: 00xe00-0x0efc */
 
 #define GIC_ICDNSACR_OFFSET(n)     (0x0e00 + GIC_OFFSET32(n))
@@ -186,6 +195,7 @@
 #define GIC_ICDSGIR_OFFSET         0x0f00    /* Software Generated Interrupt Register */
 
 /* 0x0f0c-0x0f0c: Reserved */
+
 /* Peripheral Identification Registers: 0x0fd0-0xfe8 */
 
 #define GIC_ICDPIDR_OFFSET(n)      (0x0fd0 + ((n) << 2))
@@ -199,7 +209,9 @@
 #define GIC_ICDSSPR_OFFSET(n)      (0x0f20 + GIC_OFFSET8(n))
 
 /* 0x0f30-0x0fcc: Reserved */
+
 /* 0x0fd0-0x0ffc: Implementation defined */
+
 /* Component Identification Registers: 0x0ff0-0x0ffc */
 
 #define GIC_ICDCIDR_OFFSET(n)      (0x0ff0 + ((n) << 2))
@@ -207,6 +219,7 @@
 /* 0x0f04-0x0ffc: Reserved */
 
 /* GIC Register Addresses ***************************************************/
+
 /* The Interrupt Controller is a single functional unit that is located in a
  * Cortex-A9 MPCore design.  There is one interrupt interface per Cortex-A9
  * processor.  Registers are memory mapped and accessed through a chip-
@@ -264,11 +277,15 @@
 /* GIC Register Bit Definitions *********************************************/
 
 /* CPU Interface registers */
+
 /* CPU Interface Control Register -- without security extensions */
 
 #define GIC_ICCICR_ENABLE          (1 << 0)  /* Bit 0:  Enable the CPU interface for this GIC */
                                              /* Bits 1-31: Reserved */
-/* CPU Interface Control Register -- with security extensions, non-secure copy */
+
+/* CPU Interface Control Register -- with security extensions,
+ * non-secure copy
+ */
 
 #define GIC_ICCICRU_ENABLEGRP1     (1 << 0)  /* Bit 0:  Enable Group 1 interrupts for the CPU */
                                              /* Bits 1-4: Reserved */
@@ -277,7 +294,10 @@
                                              /* Bits 7-8: Reserved */
 #define GIC_ICCICRU_EOIMODENS      (1 << 9)  /* Bit 9:  Control EIOIR access (non-secure) */
                                              /* Bits 10-31: Reserved */
-/* CPU Interface Control Register -- with security extensions, secure copy */
+
+/* CPU Interface Control Register -- with security extensions,
+ * secure copy
+ */
 
 #define GIC_ICCICRS_ENABLEGRP0     (1 << 0)  /* Bit 0:  Enable Group 0 interrupts for the CPU */
 #define GIC_ICCICRS_ENABLEGRP1     (1 << 1)  /* Bit 1:  Enable Group 1 interrupts for the CPU */
@@ -291,6 +311,7 @@
 #define GIC_ICCICRS_EOIMODES       (1 << 9)  /* Bit 6:  Control EIOIR access (secure) */
 #define GIC_ICCICRS_EOIMODENS      (1 << 10) /* Bit 10: Control EIOIR access (non-secure) */
                                              /* Bits 11-31: Reserved */
+
 /* Interrupt Priority Mask Register.  Priority values are 8-bit unsigned
  * binary. A GIC supports a minimum of 16 and a maximum of 256 priority
  * levels.  As a result, PMR settings make sense.
@@ -300,6 +321,7 @@
 #define GIC_ICCPMR_MASK            (0xff << GIC_ICCPMR_SHIFT)
 #  define GIC_ICCPMR_VALUE(n)      ((uint32_t)(n) << GIC_ICCPMR_SHIFT)
                                              /* Bits 8-31: Reserved */
+
 /* Binary point Register and Aliased Non-secure Binary Point Register.
  * Priority values are 8-bit unsigned binary. A GIC supports a minimum of
  * 16 and a maximum of 256 priority levels.  As a result, not all binary
@@ -316,7 +338,9 @@
 #  define GIC_ICCBPR_6_7           (5 << GIC_ICCBPR_SHIFT) /* Priority bits [7:6] compared for pre-emption */
 #  define GIC_ICCBPR_7_7           (6 << GIC_ICCBPR_SHIFT) /* Priority bit [7] compared for pre-emption */
 #  define GIC_ICCBPR_NOPREMPT      (7 << GIC_ICCBPR_SHIFT) /* No pre-emption is performed */
+
                                              /* Bits 3-31: Reserved */
+
 /* Interrupt Acknowledge Register */
 
 #define GIC_ICCIAR_INTID_SHIFT     (0)       /* Bits 0-9: Interrupt ID */
@@ -325,7 +349,9 @@
 #define GIC_ICCIAR_CPUSRC_SHIFT    (10)      /* Bits 10-12: CPU source ID */
 #define GIC_ICCIAR_CPUSRC_MASK     (7 << GIC_ICCIAR_CPUSRC_SHIFT)
 #  define GIC_ICCIAR_CPUSRC(n)     ((uint32_t)(n) << GIC_ICCIAR_CPUSRC_SHIFT)
+
                                              /* Bits 13-31: Reserved */
+
 /* End of Interrupt Register */
 
 #define GIC_ICCEOIR_SPURIOUS       (0x3ff)
@@ -336,14 +362,18 @@
 #define GIC_ICCEOIR_CPUSRC_SHIFT   (10)      /* Bits 10-12: CPU source ID */
 #define GIC_ICCEOIR_CPUSRC_MASK    (7 << GIC_ICCEOIR_CPUSRC_SHIFT)
 #  define GIC_ICCEOIR_CPUSRC(n)    ((uint32_t)(n) << GIC_ICCEOIR_CPUSRC_SHIFT)
+
                                              /* Bits 13-31: Reserved */
+
 /* Running Interrupt Register */
 
                                              /* Bits 0-3: Reserved */
 #define GIC_ICCRPR_PRIO_SHIFT      (4)       /* Bits 4-7: Priority mask */
 #define GIC_ICCRPR_PRIO_MASK       (15 << GIC_ICCRPR_PRIO_SHIFT)
 #  define GIC_ICCRPR_PRIO_VALUE(n) ((uint32_t)(n) << GIC_ICCRPR_PRIO_SHIFT)
+
                                              /* Bits 8-31: Reserved */
+
 /* Highest Pending Interrupt Register */
 
 #define GIC_ICCHPIR_INTID_SHIFT    (0)       /* Bits 0-9: Interrupt ID */
@@ -352,28 +382,39 @@
 #define GIC_ICCHPIR_CPUSRC_SHIFT   (10)      /* Bits 10-12: CPU source ID */
 #define GIC_ICCHPIR_CPUSRC_MASK    (7 << GIC_ICCHPIR_CPUSRC_SHIFT)
 #  define GIC_ICCHPIR_CPUSRC(n)    ((uint32_t)(n) << GIC_ICCHPIR_CPUSRC_SHIFT)
+
                                              /* Bits 13-31: Reserved */
 
 /* Aliased Interrupt Acknowledge Register */
 #define GIC_ICCAIAR_
+
 /* Aliased End of Interrupt Register */
 #define GIC_ICCAEOIR_
+
 /* Aliased Highest Priority Pending Interrupt Register */
 #define GIC_ICCAHPIR_
+
 /* Active Priorities Register 1 */
 #define GIC_ICCAPR1_
+
 /* Active Priorities Register 2 */
 #define GIC_ICCAPR2_
+
 /* Active Priorities Register 3 */
 #define GIC_ICCAPR3_
+
 /* Active Priorities Register 4 */
 #define GIC_ICCAPR4_
+
 /* Non-secure Active Priorities Register 1 */
 #define GIC_ICCNSAPR1_
+
 /* Non-secure Active Priorities Register 2 */
 #define GIC_ICCNSAPR2_
+
 /* Non-secure Active Priorities Register 3 */
 #define GIC_ICCNSAPR3_
+
 /* Non-secure Active Priorities Register 4 */
 #define GIC_ICCNSAPR4_
 
@@ -392,15 +433,18 @@
 #define GIC_ICCDIR_
 
 /* Distributor Registers */
+
 /* Distributor Control Register -- without security extensions */
 
 #define GIC_ICDDCR_ENABLE          (1 << 0)  /* Bit 0: Enable forwarding of interrupts */
                                              /* Bits 1-31: Reserved */
+
 /* Distributor Control Register -- with security extensions */
 
 #define GIC_ICDDCR_ENABLEGRP0      (1 << 0)  /* Bit 0: Enable forwarding of Group 0 interrupts */
 #define GIC_ICDDCR_ENABLEGRP1      (1 << 1)  /* Bit 1: Enable forwarding of Group 1 interrupts */
                                              /* Bits 2-31: Reserved */
+
 /* Interrupt Controller Type Register */
 
 #define GIC_ICDICTR_ITLINES_SHIFT  (0)       /* Bits 0-4: It lines number */
@@ -412,6 +456,7 @@
 #define GIC_ICDICTR_LSPI_SHIFT     (11)      /* Bits 11-15: Number of Lockable Shared Peripheral Interrupts */
 #define GIC_ICDICTR_LSPI_MASK      (0x1f << GIC_ICDICTR_LSPI_SHIFT)
                                              /* Bits 16-31: Reserved */
+
 /* Distributor Implementer ID Register */
 
 #define GIC_ICDIIDR_IMPL_SHIFT      (0)      /* Bits 0-11: Implementer */
@@ -427,7 +472,8 @@
 
 /* Interrupt Set-Enable.
  *
- * NOTE: In the Cortex-A9 MPCore, SGIs are always enabled. The corresponding bits
+ * NOTE:
+ * In the Cortex-A9 MPCore, SGIs are always enabled. The corresponding bits
  * in the ICDISERn are read as one, write ignored
  */
 
@@ -435,7 +481,8 @@
 
 /* Interrupt Clear-Enable.
  *
- * NOTE: In the Cortex-A9 MPCore, SGIs are always enabled. The corresponding bits
+ * NOTE:
+ * In the Cortex-A9 MPCore, SGIs are always enabled. The corresponding bits
  * in the ICDICERn are read as one, write ignored
  */
 
@@ -488,6 +535,7 @@
 /* PPI Status Register */
 
 #define GIC_ICDPPISR_PPI(n)        (1 << ((n) + 11)) /* Bits 11-15:  PPI(n) status, n=0-4 */
+
 #  define GIC_ICDPPISR_GTM         (1 << 11) /* Bit 11:  PPI[0], Global Timer */
 #  define GIC_ICDPPISR_NFIQ        (1 << 12) /* Bit 12:  PPI[1], FIQ, active low */
 #  define GIC_ICDPPISR_PTM         (1 << 13) /* Bit 13:  PPI[2], Private Timer */
@@ -520,10 +568,12 @@
 
 /* SGI Clear-Pending Registers */
 #define GIC_ICDSCPR_
+
 /* SGI Set-Pending Registers */
 #define GIC_ICDSSPR_
 
 /* Interrupt IDs ************************************************************/
+
 /* The Global Interrupt Controller (GIC) collects up to 224 interrupt
  * requests and provides a memory mapped interface to each of the CPU core.
  *
@@ -539,6 +589,7 @@
  */
 
 /* Private Peripheral Interrupts (PPI) **************************************/
+
 /* Each Cortex-A9 processor has private interrupts, ID0-ID15, that can only
  * be triggered by software. These interrupts are aliased so that there is
  * no requirement for a requesting Cortex-A9 processor to determine its own

@@ -51,8 +51,8 @@
  *   initialization
  *
  * Assumptions:
- *   - Called early in the platform initialization sequence so that no special
- *     concurrency protection is required.
+ *   - Called early in the platform initialization sequence so that no
+ *     special concurrency protection is required.
  *
  ****************************************************************************/
 

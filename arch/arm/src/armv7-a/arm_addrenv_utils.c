@@ -204,7 +204,9 @@ void arm_addrenv_destroy_region(FAR uintptr_t **list, unsigned int listlen,
           flags = enter_critical_section();
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
-          /* Get the virtual address corresponding to the physical page address */
+          /* Get the virtual address corresponding to the physical page
+           * address
+           */
 
           l2table = (FAR uint32_t *)arm_pgvaddr(paddr);
 #else
