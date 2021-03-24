@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_dac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_DAC_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_DAC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_DAC_DATL_OFFSET(n) (0x0000+((n)<<1))
 #define KINETIS_DAC_DATH_OFFSET(n) (0x0001+((n)<<1))
@@ -75,7 +75,7 @@
 #define KINETIS_DAC_C1_OFFSET      0x0022 /* DAC Control Register 1 */
 #define KINETIS_DAC_C2_OFFSET      0x0023 /* DAC Control Register 2 */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_DAC0_DATL(n)        (KINETIS_DAC0_BASE+KINETIS_DAC_DATL_OFFSET(n))
 #define KINETIS_DAC0_DATH(n)        (KINETIS_DAC0_BASE+KINETIS_DAC_DATH_OFFSET(n))
@@ -157,9 +157,10 @@
 #define KINETIS_DAC1_C1             (KINETIS_DAC1_BASE+KINETIS_DAC_C1_OFFSET)
 #define KINETIS_DAC1_C2             (KINETIS_DAC1_BASE+KINETIS_DAC_C2_OFFSET)
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* DAC Data Low Register (8-bits of data DATA[7:0]) */
+
 /* DAC Data High Register */
 
 #define DAC_DAT0H_MASK              (0x0f)   /* Bits 0-3: DATA[11:8] */
@@ -168,8 +169,9 @@
 
 #define DAC_SR_DACBFRPBF            (1 << 0)  /* Bit 0:  DAC buffer read pointer bottom position flag */
 #define DAC_SR_DACBFRPTF            (1 << 1)  /* Bit 1:  DAC buffer read pointer top position flag */
-#define DAC_SR_DACBFWMF             (1 << 2)  /* Bit 2:  DAC buffer watermark flag
+#define DAC_SR_DACBFWMF             (1 << 2)  /* Bit 2:  DAC buffer watermark flag */
                                               /* Bits 3-7: Reserved */
+
 /* DAC Control Register */
 
 #define DAC_C0_DACBBIEN             (1 << 0)  /* Bit 0:  DAC buffer read pointer bottom flag interrupt enable */
@@ -189,6 +191,7 @@
 #  define DAC_C1_DACBFMD_NORMAL     (0 << DAC_C1_DACBFMD_SHIFT) /* Normal Mode */
 #  define DAC_C1_DACBFMD_SWING      (1 << DAC_C1_DACBFMD_SHIFT) /* Swing Mode */
 #  define DAC_C1_DACBFMD_OTSCAN     (2 << DAC_C1_DACBFMD_SHIFT) /* One-Time Scan Mode */
+
 #define DAC_C1_DACBFWM_SHIFT        (3)       /* Bits 3-4: DAC buffer watermark select */
 #define DAC_C1_DACBFWM_MASK         (3 << DAC_C1_DACBFWM_SHIFT)
 #  define DAC_C1_DACBFWM_1WORD      (0 << DAC_C1_DACBFWM_SHIFT)
@@ -205,16 +208,16 @@
 #define DAC_C2_DACBFUP_SHIFT        (0)       /* Bits 0-3: DAC buffer upper limit */
 #define DAC_C2_DACBFUP_MASK         (15 << DAC_C2_DACBFUP_SHIFT)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_DAC_H */

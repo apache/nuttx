@@ -1,4 +1,5 @@
 /****************************************************************************
+ * arch/arm/src/kinetis/kinetis_i2c.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors:  Matias v01d <phreakuencies@gmail.com>

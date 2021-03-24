@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_flexbus.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_FLEXBUS_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_FLEXBUS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_FB_CS_OFFSET(n)    (0x0000+(12*(n)))
 #define KINETIS_FB_CSAR_OFFSET     0x0000 /* Chip select n address register */
@@ -66,7 +66,8 @@
 
 #define KINETIS_FB_CSPMCR_OFFSET   0x0060 /* Chip select port multiplexing control register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
+
 # define    0x4000c000 /* FlexBus */
 
 #define KINETIS_FB_CS_BASE(n)      (KINETIS_FLEXBUSC_BASE+KINETIS_FB_CS_OFFSET(n))
@@ -100,7 +101,7 @@
 
 #define KINETIS_FB_CSPMCR          (KINETIS_FLEXBUSC_BASE+KINETIS_FB_CSPMCR_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Chip select address register (32-bit) */
 
@@ -112,12 +113,13 @@
 
 #define FB_CSMR_V                  (1 << 0)  /* Bit 0:  Valid */
                                              /* Bits 1-7: Reserved */
-#define FB_CSMR_WP                 (1 << 8)  /* Bit 8:  Write protect
+#define FB_CSMR_WP                 (1 << 8)  /* Bit 8:  Write protect */
                                              /* Bits 9-15: Reserved */
 #define FB_CSMR_BAM_SHIFT          (16)      /* Bits 16-31: Base address mask */
 #define FB_CSMR_BAM_MASK           (0xffff << FB_CSMR_BAM_SHIFT)
 
 /* Chip select control register (32-bit) */
+
                                              /* Bits 0-1: Reserved */
 #define FB_CSCR_BSTW               (1 << 3)  /* Bit 3:  Burst-write enable */
 #define FB_CSCR_BSTR               (1 << 4)  /* Bit 4:  Burst-read enable */
@@ -127,6 +129,7 @@
 #  define FB_CSCR_PS_32BIT         (0 << FB_CSCR_PS_SHIFT) /* 32-bit port size */
 #  define FB_CSCR_PS_8BIT          (1 << FB_CSCR_PS_SHIFT) /* 8-bit port size */
 #  define FB_CSCR_PS_16BIT         (2 << FB_CSCR_PS_SHIFT) /* 16-bit port size */
+
 #define FB_CSCR_AA                 (1 << 8)  /* Bit 8:  Auto-acknowledge enable */
 #define FB_CSCR_BLS                (1 << 9)  /* Bit 9:  Byte-lane shift */
 #define FB_CSCR_WS_SHIFT           (10)      /* Bits 19-15: Wait states */
@@ -137,18 +140,21 @@
 #  define FB_CSCR_WRAH_HOLD2       (1 << FB_CSCR_WRAH_SHIFT) /* Hold two cycles after FB_CSn */
 #  define FB_CSCR_WRAH_HOLD3       (2 << FB_CSCR_WRAH_SHIFT) /* Hold three cycles after FB_CSn */
 #  define FB_CSCR_WRAH_HOLD4       (3 << FB_CSCR_WRAH_SHIFT) /* Hold four cycles after FB_CSn */
+
 #define FB_CSCR_RDAH_SHIFT         (18)      /* Bits 18-19: Read address hold or deselect */
 #define FB_CSCR_RDAH_MASK          (3 << FB_CSCR_RDAH_SHIFT)
 #  define FB_CSCR_RDAH_10CYCLES    (0 << FB_CSCR_RDAH_SHIFT) /* AA=0:1 cycle else 0 cycles */
 #  define FB_CSCR_RDAH_21CYCLES    (1 << FB_CSCR_RDAH_SHIFT) /* AA=0:2 cycles else 1 cycle */
 #  define FB_CSCR_RDAH_32CYCLES    (2 << FB_CSCR_RDAH_SHIFT) /* AA=0:3 cycles else 2 cycles */
 #  define FB_CSCR_RDAH_43CYCLES    (3 << FB_CSCR_RDAH_SHIFT) /* AA=0:4 cycles else 3 cycles */
+
 #define FB_CSCR_ASET_SHIFT         (20)      /* Bits 20-21: Address setup */
 #define FB_CSCR_ASET_MASK          (3 << FB_CSCR_ASET_SHIFT)
 #  define FB_CSCR_ASET_1STRISING   (0 << FB_CSCR_ASET_SHIFT) /* Assert CR on first rising clock edge */
 #  define FB_CSCR_ASET_2NDRISING   (1 << FB_CSCR_ASET_SHIFT) /* Assert CR on second rising clock edge */
 #  define FB_CSCR_ASET_3RDRISING   (2 << FB_CSCR_ASET_SHIFT) /* Assert CR on third rising clock edge */
 #  define FB_CSCR_ASET_4thRISING   (3 << FB_CSCR_ASET_SHIFT) /* Assert CR on fourth rising clock edge */
+
 #define FB_CSCR_EXTS               (1 << 22) /* Bit 22: Extended address latch enable */
 #define FB_CSCR_SWSEN              (1 << 23) /* Bit 23: Secondary wait state enable */
                                              /* Bits 24-25: Reserved */
@@ -156,43 +162,48 @@
 #define FB_CSCR_SWS_MASK           (0x3f << FB_CSCR_SWS_SHIFT)
 
 /* Chip select port multiplexing control register (32-bit) */
+
                                              /* Bits 0-11: Reserved */
 #define FB_CSPMCR_GROUP5_SHIFT     (12)      /* Bits 12-15: FlexBus signal group 5 multiplex control */
 #define FB_CSPMCR_GROUP5_MASK      (15 << FB_CSPMCR_GROUP5_SHIFT)
 #  define FB_CSPMCR_GROUP5_TA      (0 << FB_CSPMCR_GROUP5_SHIFT) /* FB_TA */
 #  define FB_CSPMCR_GROUP5_CS3     (1 << FB_CSPMCR_GROUP5_SHIFT) /* FB_CS3 */
 #  define FB_CSPMCR_GROUP5_BE70    (2 << FB_CSPMCR_GROUP5_SHIFT) /* FB_BE_7_0 */
+
 #define FB_CSPMCR_GROUP4_SHIFT     (16)      /* Bits 16-19: FlexBus signal group 4 multiplex control */
 #define FB_CSPMCR_GROUP4_MASK      (15 << FB_CSPMCR_GROUP4_SHIFT)
 #  define FB_CSPMCR_GROUP4_TBST    (0 << FB_CSPMCR_GROUP4_SHIFT) /* FB_TBST */
 #  define FB_CSPMCR_GROUP4_CS2     (1 << FB_CSPMCR_GROUP4_SHIFT) /* FB_CS2 */
 #  define FB_CSPMCR_GROUP4_BE158   (2 << FB_CSPMCR_GROUP4_SHIFT) /* FB_BE_15_8 */
+
 #define FB_CSPMCR_GROUP3_SHIFT     (20)      /* Bits 29-23: FlexBus signal group 3 multiplex control */
 #define FB_CSPMCR_GROUP3_MASK      (15 << FB_CSPMCR_GROUP3_SHIFT)
 #  define FB_CSPMCR_GROUP3_CS5     (0 << FB_CSPMCR_GROUP3_SHIFT) /* FB_CS5 */
 #  define FB_CSPMCR_GROUP3_TSIZ1   (1 << FB_CSPMCR_GROUP3_SHIFT) /* FB_TSIZ1 */
 #  define FB_CSPMCR_GROUP3_BE2316  (2 << FB_CSPMCR_GROUP3_SHIFT) /* FB_BE_23_16 */
+
 #define FB_CSPMCR_GROUP2_SHIFT     (24)      /* Bits 24-27: FlexBus signal group 2 multiplex control */
 #define FB_CSPMCR_GROUP2_MASK      (15 << FB_CSPMCR_GROUP2_SHIFT)
 #  define FB_CSPMCR_GROUP2_CS4     (0 << FB_CSPMCR_GROUP2_SHIFT) /* FB_CS4 */
 #  define FB_CSPMCR_GROUP2_TSIZ0   (1 << FB_CSPMCR_GROUP2_SHIFT) /* FB_TSIZ0 */
 #  define FB_CSPMCR_GROUP2_BE3124  (2 << FB_CSPMCR_GROUP2_SHIFT) /* FB_BE_31_24 */
+
 #define FB_CSPMCR_GROUP1_SHIFT     (28)      /* Bits 28-31: FlexBus signal group 1 multiplex control */
 #define FB_CSPMCR_GROUP1_MASK      (15 << FB_CSPMCR_GROUP1_MASK)
 #  define FB_CSPMCR_GROUP1_ALE     (0 << FB_CSPMCR_GROUP1_MASK) /* FB_ALE */
 #  define FB_CSPMCR_GROUP1_CS1     (1 << FB_CSPMCR_GROUP1_MASK) /* FB_CS1 */
 #  define FB_CSPMCR_GROUP1_TS      (2 << FB_CSPMCR_GROUP1_MASK) /* FB_TS */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_FLEXBUS_H */

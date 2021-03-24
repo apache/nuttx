@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/kinetis_usbhshost.h
  *
  *   Copyright (C) 2012, 2015, 2019 Gregory Nutt. All rights reserved.
@@ -32,31 +32,31 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_USBHSHOST_H
 #define __ARCH_ARM_SRC_KINETIS_KINETIS_USBHSHOST_H
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Public Types
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/******************************************************************************
+/****************************************************************************
  * Public Data
- ******************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -67,16 +67,17 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: kinetis_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided
- *   by each platform that implements the OHCI or EHCI host interface
+ *   Enable/disable driving of VBUS 5V output.  This function must be
+ *   provided by each platform that implements the OHCI or EHCI host
+ *   interface
  *
  * Input Parameters:
  *   rhport - Selects root hub port to be powered host interface. Since the
@@ -87,16 +88,16 @@ extern "C"
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 extern void kinetis_usbhost_vbusdrive(int rhport, bool enable);
 
-/******************************************************************************
+/****************************************************************************
  * Name: kinetis_setup_overcurrent
  *
  * Description:
- *   Setup to receive an interrupt-level callback if an over-current condition
- *   is detected.
+ *   Setup to receive an interrupt-level callback if an over-current
+ *   condition is detected.
  *
  * Input Parameters:
  *   handler - New over-current interrupt handler
@@ -106,11 +107,11 @@ extern void kinetis_usbhost_vbusdrive(int rhport, bool enable);
  *   Zero (OK) returned on success; a negated errno value is returned on
  *   failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 extern int kinetis_setup_overcurrent(xcpt_t handler, void *arg);
 
-/******************************************************************************
+/****************************************************************************
  * Name: kinetis_ehci_initialize
  *
  * Description:
@@ -133,7 +134,7 @@ extern int kinetis_setup_overcurrent(xcpt_t handler, void *arg);
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_KINETIS_USBHS) && defined(CONFIG_USBHOST)
 struct usbhost_connection_s;

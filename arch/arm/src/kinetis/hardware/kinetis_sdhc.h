@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_sdhc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_SDHC_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_SDHC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_SDHC_DSADDR_OFFSET     0x0000 /* DMA System Address Register */
 #define KINETIS_SDHC_BLKATTR_OFFSET    0x0004 /* Block Attributes Register */
@@ -60,7 +60,7 @@
 #define KINETIS_SDHC_MMCBOOT_OFFSET    0x00c4 /* MMC Boot Register */
 #define KINETIS_SDHC_HOSTVER_OFFSET    0x00fc /* Host Controller Version */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_SDHC_DSADDR            (KINETIS_SDHC_BASE+KINETIS_SDHC_DSADDR_OFFSET)
 #define KINETIS_SDHC_BLKATTR           (KINETIS_SDHC_BASE+KINETIS_SDHC_BLKATTR_OFFSET)
@@ -87,13 +87,14 @@
 #define KINETIS_SDHC_MMCBOOT           (KINETIS_SDHC_BASE+KINETIS_SDHC_MMCBOOT_OFFSET)
 #define KINETIS_SDHC_HOSTVER           (KINETIS_SDHC_BASE+KINETIS_SDHC_HOSTVER_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* DMA System Address Register */
 
 #define SDHC_DSADDR_SHIFT               (1)       /* Bits 1-31: DMA System Address */
 #define SDHC_DSADDR_MASK                (0xfffffffe)
                                                   /* Bits 0-1: Reserved */
+
 /* Block Attributes Register */
 
 #define SDHC_BLKATTR_SIZE_SHIFT         (0)       /* Bits 0-12: Transfer Block Size */
@@ -119,6 +120,7 @@
 #  define SDHC_XFERTYP_RSPTYP_LEN136    (1 << SDHC_XFERTYP_RSPTYP_SHIFT) /* Response length 136 */
 #  define SDHC_XFERTYP_RSPTYP_LEN48     (2 << SDHC_XFERTYP_RSPTYP_SHIFT) /* Response length 48 */
 #  define SDHC_XFERTYP_RSPTYP_LEN48BSY  (3 << SDHC_XFERTYP_RSPTYP_SHIFT) /* Response length 48, check busy */
+
                                                   /* Bit 18: Reserved */
 #define SDHC_XFERTYP_CCCEN              (1 << 19) /* Bit 19: Command CRC Check Enable */
 #define SDHC_XFERTYP_CICEN              (1 << 20) /* Bit 20: Command Index Check Enable */
@@ -129,9 +131,11 @@
 #  define SDHC_XFERTYP_CMDTYP_SUSPEND   (1 << SDHC_XFERTYP_CMDTYP_SHIFT) /* Suspend CMD52 for writing bus suspend in CCCR */
 #  define SDHC_XFERTYP_CMDTYP_RESUME    (2 << SDHC_XFERTYP_CMDTYP_SHIFT) /* Resume CMD52 for writing function select in CCCR */
 #  define SDHC_XFERTYP_CMDTYP_ABORT     (3 << SDHC_XFERTYP_CMDTYP_SHIFT) /* Abort CMD12, CMD52 for writing I/O abort in CCCR */
+
 #define SDHC_XFERTYP_CMDINX_SHIFT       (24)      /* Bits 24-29: Command Index */
 #define SDHC_XFERTYP_CMDINX_MASK        (63 << SDHC_XFERTYP_CMDINX_SHIFT)
                                                   /* Bits 30-31: Reserved */
+
 /* Command Response 0-3 (32-bit response data) */
 
 /* Buffer Data Port Register (32-bit data content) */
@@ -173,12 +177,14 @@
 #  define SDHC_PROCTL_DTW_1BIT          (0 << SDHC_PROCTL_DTW_SHIFT) /* 1-bit mode */
 #  define SDHC_PROCTL_DTW_4BIT          (1 << SDHC_PROCTL_DTW_SHIFT) /* 4-bit mode */
 #  define SDHC_PROCTL_DTW_8BIT          (2 << SDHC_PROCTL_DTW_SHIFT) /* 8-bit mode */
+
 #define SDHC_PROCTL_D3CD                (1 << 3)  /* Bit nn: DAT3 as Card Detection Pin */
 #define SDHC_PROCTL_EMODE_SHIFT         (4)       /* Bits 4-5: Endian mode */
 #define SDHC_PROCTL_EMODE_MASK          (3 << SDHC_PROCTL_EMODE_SHIFT)
 #  define SDHC_PROCTL_EMODE_BE          (0 << SDHC_PROCTL_EMODE_SHIFT) /* Big endian mode */
 #  define SDHC_PROCTL_EMODE_HWBE        (1 << SDHC_PROCTL_EMODE_SHIFT) /* Half word big endian mode */
 #  define SDHC_PROCTL_EMODE_LE          (2 << SDHC_PROCTL_EMODE_SHIFT) /* Little endian mode */
+
 #define SDHC_PROCTL_CDTL                (1 << 6)  /* Bit 6:  Card Detect Test Level */
 #define SDHC_PROCTL_CDSS                (1 << 7)  /* Bit 7:  Card Detect Signal Selection */
 #define SDHC_PROCTL_DMAS_SHIFT          (8)       /* Bits 8-9: DMA Select */
@@ -186,6 +192,7 @@
 #  define SDHC_PROCTL_DMAS_NODMA        (0 << SDHC_PROCTL_DMAS_SHIFT) /* No DMA or simple DMA is selected */
 #  define SDHC_PROCTL_DMAS_ADMA1        (1 << SDHC_PROCTL_DMAS_SHIFT) /* ADMA1 is selected */
 #  define SDHC_PROCTL_DMAS_ADMA2        (2 << SDHC_PROCTL_DMAS_SHIFT) /* ADMA2 is selected */
+
                                                   /* Bits 10-15: Reserved */
 #define SDHC_PROCTL_SABGREQ             (1 << 16) /* Bit 16: Stop At Block Gap Request */
 #define SDHC_PROCTL_CREQ                (1 << 17) /* Bit 17: Continue Request */
@@ -196,6 +203,7 @@
 #define SDHC_PROCTL_WECINS              (1 << 25) /* Bit 25: Wakeup Event Enable On SD Card Insertion */
 #define SDHC_PROCTL_WECRM               (1 << 26) /* Bit 26: Wakeup Event Enable On SD Card Removal */
                                                   /* Bits 27-31: Reserved */
+
 /* System Control Register */
 
 #define SDHC_SYSCTL_IPGEN               (1 << 0)  /* Bit 0:  IPG Clock Enable */
@@ -205,6 +213,7 @@
 #define SDHC_SYSCTL_DVS_SHIFT           (4)       /* Bits 4-7: Divisor */
 #define SDHC_SYSCTL_DVS_MASK            (15 << SDHC_SYSCTL_DVS_SHIFT)
 #  define SDHC_SYSCTL_DVS_DIV(n)        (((n)-1) << SDHC_SYSCTL_DVS_SHIFT) /* Divide by n, n=1..16 */
+
 #define SDHC_SYSCTL_SDCLKFS_SHIFT       (8)       /* Bits 8-15: SDCLK Frequency Select */
 #define SDHC_SYSCTL_SDCLKFS_MASK        (0xff << SDHC_SYSCTL_SDCLKFS_SHIFT)
 #  define SDHC_SYSCTL_SDCLKFS_BYPASS    (0x00 << SDHC_SYSCTL_SDCLKFS_SHIFT) /* Bypass the prescaler */
@@ -216,16 +225,20 @@
 #  define SDHC_SYSCTL_SDCLKFS_DIV64     (0x20 << SDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 64 */
 #  define SDHC_SYSCTL_SDCLKFS_DIV128    (0x40 << SDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 128 */
 #  define SDHC_SYSCTL_SDCLKFS_DIV256    (0x80 << SDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 256 */
+
 #define SDHC_SYSCTL_DTOCV_SHIFT         (16)      /* Bits 16-19: Data Timeout Counter Value */
 #define SDHC_SYSCTL_DTOCV_MASK          (15 << SDHC_SYSCTL_DTOCV_SHIFT)
 #  define SDHC_SYSCTL_DTOCV_MUL(n)      (((n)-213) << SDHC_SYSCTL_DTOCV_SHIFT) /* SDCLK x n, n=213..227 */
+
                                                   /* Bits 20-23: Reserved */
 #define SDHC_SYSCTL_RSTA                (1 << 24) /* Bit 24: Software Reset For ALL */
 #define SDHC_SYSCTL_RSTC                (1 << 25) /* Bit 25: Software Reset For CMD Line */
 #define SDHC_SYSCTL_RSTD                (1 << 26) /* Bit 26: Software Reset For DAT Line */
 #define SDHC_SYSCTL_INITA               (1 << 27) /* Bit 27: Initialization Active */
                                                   /* Bits 28-31: Reserved */
-/* Interrupt Status Register, Interrupt Status Enable Register, and Interrupt Signal Enable Register
+
+/* Interrupt Status Register, Interrupt Status Enable Register,
+ * and Interrupt Signal Enable Register
  * Common interrupt bit definitions
  */
 
@@ -263,7 +276,9 @@
                                                   /* Bits 5-6: Reserved */
 #define SDHC_AC12ERR_CNI                (1 << 7)  /* Bit 7: Command Not Issued By Auto CMD12 Error */
                                                   /* Bits 8-31: Reserved */
+
 /* Host Controller Capabilities */
+
                                                   /* Bits 0-15: Reserved */
 #define SDHC_HTCAPBLT_MBL_SHIFT         (16)      /* Bits 16-18: Max Block Length */
 #define SDHC_HTCAPBLT_MBL_MASK          (7 << SDHC_HTCAPBLT_MBL_SHIFT)
@@ -280,6 +295,7 @@
 #define SDHC_HTCAPBLT_VS30              (1 << 25) /* Bit 25: Voltage Support 3.0 V */
 #define SDHC_HTCAPBLT_VS18              (1 << 26) /* Bit 26: Voltage Support 1.8 */
                                                   /* Bits 27-31: Reserved */
+
 /* Watermark Level Register */
 
 #define SDHC_WML_RD_SHIFT               (0)       /* Bits 0-7: Read Watermark Level */
@@ -288,6 +304,7 @@
 #define SDHC_WML_WR_SHIFT               (16)      /* Bits 16-23: Write Watermark Level */
 #define SDHC_WML_WR_MASK                (0xff << SDHC_WML_WRWML_SHIFT)
                                                   /* Bits 24-31: Reserved */
+
 /* Force Event Register */
 
 #define SDHC_FEVT_AC12NE                (1 << 0)  /* Bit 0:  Force Event Auto Command 12 Not Executed */
@@ -320,9 +337,11 @@
 #  define SDHC_ADMAES_FDS               (1 << SDHC_ADMAES_ADMAES_SHIFT) /* Fetch descriptor */
 #  define SDHC_ADMAES_CADR              (2 << SDHC_ADMAES_ADMAES_SHIFT) /* Change address */
 #  define SDHC_ADMAES_TFR               (3 << SDHC_ADMAES_ADMAES_SHIFT) /* Transfer data */
+
 #define SDHC_ADMAES_LME                 (1 << 2)  /* Bit 2:  ADMA Length Mismatch Error */
 #define SDHC_ADMAES_DCE                 (1 << 3)  /* Bit 3:  ADMA Descriptor Error */
                                                   /* Bits 4-31: Reserved */
+
 /* ADMA System Address Register */
 
 #define SDHC_ADSADDR_SHIFT              (1)       /* Bits 1-31: ADMA System Address */
@@ -337,11 +356,13 @@
 #define SDHC_VENDOR_INTSTVAL_SHIFT      (16)      /* Bits 16-23: Internal State Value */
 #define SDHC_VENDOR_INTSTVAL_MASK       (0xff << SDHC_VENDOR_INTSTVAL_SHIFT)
                                                   /* Bits 24-31: Reserved */
+
 /* MMC Boot Register */
 
 #define SDHC_MMCBOOT_DTOCVACK_SHIFT     (0)       /* Bits 0-3: Boot ACK time out counter value */
 #define SDHC_MMCBOOT_DTOCVACK_MASK      (15 << SDHC_MMCBOOT_DTOCVACK_SHIFT)
 #  define SDHC_MMCBOOT_DTOCVACK_MUL(n)  ((n-8) << SDHC_MMCBOOT_DTOCVACK_SHIFT) /* SDCLK x 2^n, n=8..22 */
+
 #define SDHC_MMCBOOT_BOOTACK            (1 << 4)  /* Bit 4:  Boot ack mode select */
 #define SDHC_MMCBOOT_BOOTMODE           (1 << 5)  /* Bit 5:  Boot mode select */
 #define SDHC_MMCBOOT_BOOTEN             (1 << 6)  /* Bit 6:  Boot mode enable */
@@ -358,16 +379,16 @@
 #define SDHC_HOSTVER_VVN_MASK           (0xff << SDHC_HOSTVER_VVN_SHIFT)
                                                   /* Bits 16-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_SDHC_H */

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_aips.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_AIPS_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_AIPS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Register Offsets *****************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define KINETIS_AIPS_MPRA_OFFSET    0x0000 /* Master Privilege Register A */
 
@@ -57,7 +58,7 @@
 #  define KINETIS_AIPS_PACRU_OFFSET 0x0080 /* Peripheral Access Control Register */
 #endif
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_AIPS0_MPRA          (KINETIS_AIPS0_BASE+KINETIS_AIPS_MPRA_OFFSET)
 #define KINETIS_AIPS0_PACRA         (KINETIS_AIPS0_BASE+KINETIS_AIPS_PACRA_OFFSET)
@@ -101,7 +102,7 @@
 #  define KINETIS_AIPS1_PACRU       (KINETIS_AIPS1_BASE+KINETIS_AIPS_PACRU_OFFSET)
 #endif
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Master Privilege Register A */
 
@@ -131,7 +132,8 @@
 #define AIPS_MPRA_MTR0              (1 << 30) /* Bit 30: Master trusted for read */
                                               /* Bit 31: Reserved */
 
-/* Peripheral Access Control Register.  Naming here is only accurate for PACRA.
+/* Peripheral Access Control Register.
+ * Naming here is only accurate for PACRA.
  * PACRA: PACR0   PACR1   PACR2   PACR3   PACR4   PACR5   PACR6   PACR7
  * PACRB: PACR8   PACR9   PACR10  PACR11  PACR12  PACR13  PACR14  PACR15
  * PACRC: PACR16  PACR17  PACR18  PACR19  PACR20  PACR21  PACR22  PACR23
@@ -187,16 +189,16 @@
 #define AIPS_PACR_SP0               (1 << 30) /* Bit 30: Supervisor protect */
                                               /* Bit 31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_AIPS_H */

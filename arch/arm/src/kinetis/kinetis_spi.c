@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/kinetis_spi.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,9 +16,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * The external functions, kinetis_spi0/1/2select and kinetis_spi0/1/26status
  * must be provided by board-specific logic.  They are implementations of
  * the select and status methods of the SPI interface defined by structure
@@ -35,16 +35,16 @@
  *      configured.
  *   3. Add a calls to kinetis_spibus_initialize() in your low level
  *      application initialization logic.
- *   4. The handle returned by kinetis_spibus_initialize() may then be used to
- *      bind the SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by kinetis_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -75,16 +75,16 @@
 #if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI1) || \
     defined(CONFIG_KINETIS_SPI2)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define KINETIS_SPI_CLK_MAX    (BOARD_BUS_FREQ / 2)
 #define KINETIS_SPI_CLK_INIT   400000
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 struct kinetis_spidev_s
 {
@@ -98,9 +98,9 @@ struct kinetis_spidev_s
   uint8_t          ctarsel;    /* Which CTAR */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Helpers */
 
@@ -120,7 +120,8 @@ static inline uint16_t spi_readword(FAR struct kinetis_spidev_s *priv);
 static inline void     spi_writeword(FAR struct kinetis_spidev_s *priv,
                                      uint16_t word);
 
-static inline void     spi_run(FAR struct kinetis_spidev_s *priv, bool enable);
+static inline void     spi_run(FAR struct kinetis_spidev_s *priv,
+                               bool enable);
 static inline void     spi_write_control(FAR struct kinetis_spidev_s *priv,
                                          uint32_t control);
 static inline void     spi_write_status(FAR struct kinetis_spidev_s *priv,
@@ -149,13 +150,14 @@ static void        spi_exchange(FAR struct spi_dev_s *dev,
 #ifndef CONFIG_SPI_EXCHANGE
 static void        spi_sndblock(FAR struct spi_dev_s *dev,
                                 FAR const void *txbuffer, size_t nwords);
-static void        spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
+static void        spi_recvblock(FAR struct spi_dev_s *dev,
+                                 FAR void *rxbuffer,
                                  size_t nwords);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_SPI0
 static const struct spi_ops_s g_spi0ops =
@@ -277,11 +279,11 @@ static struct kinetis_spidev_s g_spi2dev =
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_getreg
  *
  * Description:
@@ -294,14 +296,15 @@ static struct kinetis_spidev_s g_spi2dev =
  * Returned Value:
  *   The contents of the 32-bit register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline uint32_t spi_getreg(FAR struct kinetis_spidev_s *priv, uint8_t offset)
+static inline uint32_t spi_getreg(FAR struct kinetis_spidev_s *priv,
+                                  uint8_t offset)
 {
   return getreg32(priv->spibase + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_putreg
  *
  * Description:
@@ -315,15 +318,16 @@ static inline uint32_t spi_getreg(FAR struct kinetis_spidev_s *priv, uint8_t off
  * Returned Value:
  *   Nothing
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void spi_putreg(FAR struct kinetis_spidev_s *priv, uint8_t offset,
+static inline void spi_putreg(FAR struct kinetis_spidev_s *priv,
+                              uint8_t offset,
                               uint32_t value)
 {
   putreg32(value, priv->spibase + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_getreg16
  *
  * Description:
@@ -336,7 +340,7 @@ static inline void spi_putreg(FAR struct kinetis_spidev_s *priv, uint8_t offset,
  * Returned Value:
  *   The contents of the 16-bit register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t spi_getreg16(FAR struct kinetis_spidev_s *priv,
                                     uint8_t offset)
@@ -344,7 +348,7 @@ static inline uint16_t spi_getreg16(FAR struct kinetis_spidev_s *priv,
   return getreg16(priv->spibase + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_putreg16
  *
  * Description:
@@ -358,15 +362,16 @@ static inline uint16_t spi_getreg16(FAR struct kinetis_spidev_s *priv,
  * Returned Value:
  *   Nothing
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void spi_putreg16(FAR struct kinetis_spidev_s *priv, uint8_t offset,
-                              uint16_t value)
+static inline void spi_putreg16(FAR struct kinetis_spidev_s *priv,
+                                uint8_t offset,
+                                uint16_t value)
 {
   putreg16(value, priv->spibase + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_getreg8
  *
  * Description:
@@ -379,14 +384,15 @@ static inline void spi_putreg16(FAR struct kinetis_spidev_s *priv, uint8_t offse
  * Returned Value:
  *   The contents of the 8-bit register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline uint8_t spi_getreg8(FAR struct kinetis_spidev_s *priv, uint8_t offset)
+static inline uint8_t spi_getreg8(FAR struct kinetis_spidev_s *priv,
+                                  uint8_t offset)
 {
   return getreg8(priv->spibase + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_putreg8
  *
  * Description:
@@ -400,15 +406,16 @@ static inline uint8_t spi_getreg8(FAR struct kinetis_spidev_s *priv, uint8_t off
  * Returned Value:
  *   Nothing
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void spi_putreg8(FAR struct kinetis_spidev_s *priv, uint8_t offset,
-                              uint8_t value)
+static inline void spi_putreg8(FAR struct kinetis_spidev_s *priv,
+                               uint8_t offset,
+                               uint8_t value)
 {
   putreg8(value, priv->spibase + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_write_status
  *
  * Description:
@@ -421,7 +428,7 @@ static inline void spi_putreg8(FAR struct kinetis_spidev_s *priv, uint8_t offset
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void spi_write_status(FAR struct kinetis_spidev_s *priv,
                                     uint32_t status)
@@ -431,7 +438,7 @@ static inline void spi_write_status(FAR struct kinetis_spidev_s *priv,
   spi_putreg(priv, KINETIS_SPI_SR_OFFSET, status);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_wait_status
  *
  * Description:
@@ -444,7 +451,7 @@ static inline void spi_write_status(FAR struct kinetis_spidev_s *priv,
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void spi_wait_status(FAR struct kinetis_spidev_s *priv,
                                    uint32_t status)
@@ -452,7 +459,7 @@ static inline void spi_wait_status(FAR struct kinetis_spidev_s *priv,
   while (status != (spi_getreg(priv, KINETIS_SPI_SR_OFFSET) & status));
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_write_control
  *
  * Description:
@@ -465,17 +472,18 @@ static inline void spi_wait_status(FAR struct kinetis_spidev_s *priv,
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void spi_write_control(FAR struct kinetis_spidev_s *priv,
                                      uint32_t control)
 {
   /* Write the control word to the SPI Data Register */
 
-  spi_putreg16(priv, KINETIS_SPI_PUSHR_OFFSET + 2, (uint16_t) (control >> 16));
+  spi_putreg16(priv, KINETIS_SPI_PUSHR_OFFSET + 2,
+              (uint16_t) (control >> 16));
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_writeword
  *
  * Description:
@@ -488,9 +496,10 @@ static inline void spi_write_control(FAR struct kinetis_spidev_s *priv,
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void spi_writeword(FAR struct kinetis_spidev_s *priv, uint16_t word)
+static inline void spi_writeword(FAR struct kinetis_spidev_s *priv,
+                                 uint16_t word)
 {
   /* Wait until there is space in the fifo */
 
@@ -501,7 +510,7 @@ static inline void spi_writeword(FAR struct kinetis_spidev_s *priv, uint16_t wor
   spi_putreg16(priv, KINETIS_SPI_PUSHR_OFFSET, SPI_PUSHR_TXDATA(word));
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_readword
  *
  * Description:
@@ -513,7 +522,7 @@ static inline void spi_writeword(FAR struct kinetis_spidev_s *priv, uint16_t wor
  * Returned Value:
  *   The 8-bit value from the FIFO
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t spi_readword(FAR struct kinetis_spidev_s *priv)
 {
@@ -526,7 +535,7 @@ static inline uint16_t spi_readword(FAR struct kinetis_spidev_s *priv)
   return spi_getreg16(priv, KINETIS_SPI_POPR_OFFSET);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_run
  *
  * Description:
@@ -539,7 +548,7 @@ static inline uint16_t spi_readword(FAR struct kinetis_spidev_s *priv)
  * Returned Value:
  *   Last enable setting
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void inline spi_run(FAR struct kinetis_spidev_s *priv, bool enable)
 {
@@ -551,7 +560,7 @@ void inline spi_run(FAR struct kinetis_spidev_s *priv, bool enable)
   spi_putreg(priv, KINETIS_SPI_MCR_OFFSET, regval);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_lock
  *
  * Description:
@@ -570,7 +579,7 @@ void inline spi_run(FAR struct kinetis_spidev_s *priv, bool enable)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
@@ -589,7 +598,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_setfrequency
  *
  * Description:
@@ -602,9 +611,10 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  * Returned Value:
  *   Returns the actual frequency selected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency)
 {
   FAR struct kinetis_spidev_s *priv = (FAR struct kinetis_spidev_s *)dev;
 
@@ -633,7 +643,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
       frequency = KINETIS_SPI_CLK_INIT;
     }
 
-  /* Check if the requested frequency is the same as the frequency selection */
+  /* Check if the requested frequency is the same as the frequency
+   * selection
+   */
 
   if (priv->frequency == frequency)
     {
@@ -703,7 +715,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   return priv->actual;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_setmode
  *
  * Description:
@@ -716,7 +728,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
  * Returned Value:
  *   Returns the actual frequency selected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
@@ -764,7 +776,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_setbits
  *
  * Description:
@@ -777,7 +789,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
@@ -798,13 +810,15 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       regval |= SPI_CTARM_FMSZ(nbits - 1);
       spi_putreg(priv, priv->ctarsel, regval);
 
-      /* Save the selection so that subsequent re-configurations will be faster. */
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
+       */
 
       priv->nbits = nbits;
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_hwfeatures
  *
  * Description:
@@ -818,10 +832,11 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *   Zero (OK) if the selected H/W features are enabled; A negated errno
  *   value if any H/W feature is not supportable.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SPI_HWFEATURES
-static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
+static int spi_hwfeatures(FAR struct spi_dev_s *dev,
+                          spi_hwfeatures_t features)
 {
 #ifdef CONFIG_SPI_BITORDER
   FAR struct kinetis_spidev_s *priv = (FAR struct spi_dev_s *)dev;
@@ -857,7 +872,7 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_send_data
  *
  * Description:
@@ -871,7 +886,7 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
  * Returned Value:
  *   response
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint16_t spi_send_data(FAR struct kinetis_spidev_s *priv, uint16_t wd,
                               bool last)
@@ -906,7 +921,7 @@ static uint16_t spi_send_data(FAR struct kinetis_spidev_s *priv, uint16_t wd,
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_send
  *
  * Description:
@@ -920,7 +935,7 @@ static uint16_t spi_send_data(FAR struct kinetis_spidev_s *priv, uint16_t wd,
  * Returned Value:
  *   response
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
@@ -929,7 +944,7 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
   return (uint32_t)spi_send_data(priv, (uint16_t)wd, true);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_exchange
  *
  * Description:
@@ -948,7 +963,7 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
@@ -1024,7 +1039,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:
@@ -1033,19 +1048,20 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  * Input Parameters:
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
- *   nwords   - the length of data to send from the buffer in number of words.
- *              The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into
- *              uint16_t's
+ *   nwords   - the length of data to send from the buffer in number of
+ *              words. The wordsize is determined by the number of
+ *              bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *              the data is packed into uint8_t's; if nbits >8, the data is
+ *              packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+static void spi_sndblock(FAR struct spi_dev_s *dev,
+                         FAR const void *txbuffer,
                          size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
@@ -1053,7 +1069,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_recvblock
  *
  * Description:
@@ -1062,16 +1078,16 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  * Input Parameters:
  *   dev      - Device-specific state data
  *   rxbuffer - A pointer to the buffer in which to receive data
- *   nwords   - the length of data that can be received in the buffer in number
- *              of words.  The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into
- *              uint16_t's
+ *   nwords   - the length of data that can be received in the buffer in
+ *              number of words.  The wordsize is determined by the number of
+ *              bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *              the data is packed into uint8_t's; if nbits >8, the data is
+ *              packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
@@ -1082,11 +1098,11 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_spibus_initialize
  *
  * Description:
@@ -1098,7 +1114,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct spi_dev_s *kinetis_spibus_initialize(int port)
 {

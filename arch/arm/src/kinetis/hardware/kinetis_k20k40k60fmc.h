@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_k20k40k60fmc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20K40K60FMC_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20K40K60FMC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_FMC_PFAPR_OFFSET        0x0000 /* Flash Access Protection Register */
 #define KINETIS_FMC_PFB0CR_OFFSET       0x0004 /* Flash Bank 0 Control Register */
@@ -152,7 +152,7 @@
 #define KINETIS_FMC_DATAW3S7U_OFFSET    0x02f8 /* Cache Data Storage (upper word) */
 #define KINETIS_FMC_DATAW3S7L_OFFSET    0x02fc /* Cache Data Storage (lower word) */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_FMC_PFAPR               (KINETIS_FMC_BASE+KINETIS_FMC_PFAPR_OFFSET)
 #define KINETIS_FMC_PFB0CR              (KINETIS_FMC_BASE+KINETIS_FMC_PFB0CR_OFFSET)
@@ -271,9 +271,10 @@
 #define KINETIS_FMC_DATAW3S7U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S7U_OFFSET)
 #define KINETIS_FMC_DATAW3S7L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S7L_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Flash Access Protection Register */
+
 /* Access protection bits (all masters) */
 
 #define FMC_PFAPR_NONE                  0 /* No access may be performed by this master */
@@ -305,7 +306,9 @@
 #define FMC_PFAPR_M5PFD                 (1 << 21) /* Bit 21: Master 5 Prefetch Disable */
 #define FMC_PFAPR_M6PFD                 (1 << 22) /* Bit 22: Master 6 Prefetch Disable */
 #define FMC_PFAPR_M7PFD                 (1 << 23) /* Bit 23: Master 7 Prefetch Disable */
+
                                                   /* Bits 24-31: Reserved */
+
 /* Flash Bank 0 Control Register */
 
 #define FMC_PFB0CR_B0SEBE               (1 << 0)  /* Bit 0:  Bank 0 Single Entry Buffer Enable */
@@ -318,11 +321,13 @@
 #  define FMC_PFB0CR_CRC_ALL            (0 << FMC_PFB0CR_CRC_SHIFT) /* LRU all four ways */
 #  define FMC_PFB0CR_CRC_I01D23         (2 << FMC_PFB0CR_CRC_SHIFT) /* LRU ifetches 0-1 data 2-3 */
 #  define FMC_PFB0CR_CRC_I012D3         (3 << FMC_PFB0CR_CRC_SHIFT) /* LRU ifetches 0-3 data 3 */
+
                                                   /* Bits 8-16: Reserved */
 #define FMC_PFB0CR_B0MW_SHIFT           (17)      /* Bits 17-18: Bank 0 Memory Width */
 #define FMC_PFB0CR_B0MW_MASK            (3 << FMC_PFB0CR_B0MW_SHIFT)
 #  define FMC_PFB0CR_B0MW_32BITS        (0 << FMC_PFB0CR_B0MW_SHIFT) /* 32 bits */
 #  define FMC_PFB0CR_B0MW_64BITS        (1 << FMC_PFB0CR_B0MW_SHIFT) /* 64 bits */
+
 #define FMC_PFB0CR_S_B_INV              (1 << 19) /* Bit 19:  Invalidate Prefetch Speculation Buffer */
 #define FMC_PFB0CR_CINV_WAY_SHIFT       (20)      /* Bits 20-23: Cache Invalidate Way x */
 #define FMC_PFB0CR_CINV_WAY_MASK        (15 << FMC_PFB0CR_CINV_WAY_SHIFT)
@@ -343,6 +348,7 @@
 #define FMC_PFB1CR_B1MW_MASK            (3 << FMC_PFB1CR_B1MW_SHIFT)
 #  define FMC_PFB1CR_B1MW_32BITS        (0 << FMC_PFB1CR_B1MW_SHIFT) /* 32 bits */
 #  define FMC_PFB1CR_B1MW_64BITS        (1 << FMC_PFB1CR_B1MW_SHIFT) /* 64 bits */
+
                                                   /* Bits 19-27: Reserved */
 #define FMC_PFB1CR_B1RWSC_SHIFT         (28)      /* Bits 28-31: Bank 1 Read Wait State Control */
 #define FMC_PFB1CR_B1RWSC_MASK          (15 << FMC_PFB1CR_B0RWSC_SHIFT)
@@ -353,22 +359,23 @@
                                                   /* Bits 1-5: Reserved */
 #define FMC_TAGVD_TAG_SHIFT             (6)       /* Bits 6-18: 13-bit tag for cache entry */
 #define FMC_TAGVD_TAG_MASK              (0x1fff << FMC_TAGVD_TAG_SHIFT)
+
                                                   /* Bits 19-31: Reserved */
 
 /* Cache Data Storage (upper and lower) for way=w and set=s, w=0..3, s=0..7.
  * 64-bit data in two 32-bit registers.
  */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20K40K60FMC_H */

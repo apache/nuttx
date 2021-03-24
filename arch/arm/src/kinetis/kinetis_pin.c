@@ -93,6 +93,7 @@ int kinetis_pinconfig(uint32_t cfgset)
           if ((cfgset & _PIN_IO_MASK) == _PIN_INPUT)
             {
               /* Handle input-only digital options */
+
               /* Check for pull-up or pull-down */
 
               if ((cfgset & _PIN_INPUT_PULLMASK) == _PIN_INPUT_PULLDOWN)
@@ -107,6 +108,7 @@ int kinetis_pinconfig(uint32_t cfgset)
           else
             {
               /* Handle output-only digital options */
+
               /* Check for slow slew rate setting */
 
               if ((cfgset & _PIN_OUTPUT_SLEW_MASK) == _PIN_OUTPUT_SLOW)
@@ -155,9 +157,12 @@ int kinetis_pinconfig(uint32_t cfgset)
             {
               regval &= ~(1 << pin);
             }
+
           putreg32(regval, base + KINETIS_PORT_DFER_OFFSET);
 
-          /* Additional configuration for the case of Alternative 1 (GPIO) modes */
+          /* Additional configuration for the case of Alternative 1 (GPIO)
+           * modes
+           */
 
           if (mode == PIN_MODE_GPIO)
             {
@@ -181,7 +186,8 @@ int kinetis_pinconfig(uint32_t cfgset)
 
                   /* Set the initial value of the GPIO output */
 
-                  kinetis_gpiowrite(cfgset, ((cfgset & GPIO_OUTPUT_ONE) != 0));
+                  kinetis_gpiowrite(cfgset,
+                                   ((cfgset & GPIO_OUTPUT_ONE) != 0));
                 }
             }
         }
@@ -192,12 +198,13 @@ int kinetis_pinconfig(uint32_t cfgset)
   return -EINVAL;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_pinfilter
  *
  * Description:
  *   Configure the digital filter associated with a port. The digital filter
- *   capabilities of the PORT module are available in all digital pin muxing modes.
+ *   capabilities of the PORT module are available in all digital pin muxing
+ *   modes.
  *
  * Input Parameters:
  *   port  - Port number.  See KINETIS_PORTn definitions in kinetis_port.h
@@ -205,7 +212,7 @@ int kinetis_pinconfig(uint32_t cfgset)
  *           false: Digital Filters are clocked by the 1 kHz LPO clock
  *   width - Filter Length
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int kinetis_pinfilter(unsigned int port, bool lpo, unsigned int width)
 {
@@ -230,5 +237,6 @@ int kinetis_pinfilter(unsigned int port, bool lpo, unsigned int width)
       putreg32(width, base + KINETIS_PORT_DFWR_OFFSET);
       return OK;
     }
+
   return -EINVAL;
 }

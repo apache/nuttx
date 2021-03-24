@@ -43,10 +43,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
-/* The Kinetis port interrupt logic is very flexible and will program interrupts on
- * most all pin events.  In order to keep the memory usage to a minimum, the NuttX
- * port supports enabling interrupts on a per-port basis.
+
+/* The Kinetis port interrupt logic is very flexible and will program
+ * interrupts on most all pin events.  In order to keep the memory usage to
+ * a minimum, the NuttX port supports enabling interrupts on a per-port
+ * basis.
  */
 
 #if defined (CONFIG_KINETIS_PORTAINTS) || defined (CONFIG_KINETIS_PORTBINTS) || \
@@ -61,13 +64,14 @@
 
 struct kinetis_pinirq_s
 {
-   xcpt_t handler;
-   void *arg;
+  xcpt_t handler;
+  void *arg;
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Per pin port interrupt vectors.  NOTE:  Not all pins in each port
  * correspond to externally available GPIOs.  However, I believe that the
  * Kinesis will support interrupts even if the pin is not available as
@@ -105,7 +109,8 @@ static struct kinetis_pinirq_s g_porteisrs[32];
 
 #ifdef HAVE_PORTINTS
 static int kinetis_portinterrupt(int irq, FAR void *context,
-                                uintptr_t addr, struct kinetis_pinirq_s *isrtab)
+                                 uintptr_t addr,
+                                 struct kinetis_pinirq_s *isrtab)
 {
   uint32_t isfr = getreg32(addr);
   int i;
@@ -166,31 +171,40 @@ static int kinetis_portinterrupt(int irq, FAR void *context,
 #ifdef CONFIG_KINETIS_PORTAINTS
 static int kinetis_portainterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return kinetis_portinterrupt(irq, context, KINETIS_PORTA_ISFR, g_portaisrs);
+  return kinetis_portinterrupt(irq, context,
+                               KINETIS_PORTA_ISFR, g_portaisrs);
 }
 #endif
+
 #ifdef CONFIG_KINETIS_PORTBINTS
 static int kinetis_portbinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return kinetis_portinterrupt(irq, context, KINETIS_PORTB_ISFR, g_portbisrs);
+  return kinetis_portinterrupt(irq, context,
+                               KINETIS_PORTB_ISFR, g_portbisrs);
 }
 #endif
+
 #ifdef CONFIG_KINETIS_PORTCINTS
 static int kinetis_portcinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return kinetis_portinterrupt(irq, context, KINETIS_PORTC_ISFR, g_portcisrs);
+  return kinetis_portinterrupt(irq, context,
+                               KINETIS_PORTC_ISFR, g_portcisrs);
 }
 #endif
+
 #ifdef CONFIG_KINETIS_PORTDINTS
 static int kinetis_portdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return kinetis_portinterrupt(irq, context, KINETIS_PORTD_ISFR, g_portdisrs);
+  return kinetis_portinterrupt(irq, context,
+                                   KINETIS_PORTD_ISFR, g_portdisrs);
 }
 #endif
+
 #ifdef CONFIG_KINETIS_PORTEINTS
 static int kinetis_porteinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return kinetis_portinterrupt(irq, context, KINETIS_PORTE_ISFR, g_porteisrs);
+  return kinetis_portinterrupt(irq, context,
+                               KINETIS_PORTE_ISFR, g_porteisrs);
 }
 #endif
 
@@ -242,21 +256,23 @@ void kinetis_pinirqinitialize(void)
  * Description:
  *   Attach a pin interrupt handler.  The normal initialization sequence is:
  *
- *   1. Call kinetis_pinconfig() to configure the interrupting pin (pin interrupts
- *      will be disabled.
- *   2. Call kinetis_pinirqattach() to attach the pin interrupt handling function.
+ *   1. Call kinetis_pinconfig() to configure the interrupting pin (pin
+ *      interrupts will be disabled.
+ *   2. Call kinetis_pinirqattach() to attach the pin interrupt handling
+ *      function.
  *   3. Call kinetis_pinirqenable() to enable interrupts on the pin.
  *
  * Input Parameters:
  *   pinset - Pin configuration
  *   pinisr - Pin interrupt service routine
- *   arg    - An argument that will be provided to the interrupt service routine.
+ *   arg    - An argument that will be provided to the interrupt service
+ *            routine.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on any
- *   failure to indicate the nature of the failure.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 {
@@ -266,8 +282,8 @@ int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
   unsigned int port;
   unsigned int pin;
 
-  /* It only makes sense to call this function for input pins that are configured
-   * as interrupts.
+  /* It only makes sense to call this function for input pins that are
+   * configured as interrupts.
    */
 
   DEBUGASSERT((pinset & _PIN_INTDMA_MASK) == _PIN_INTERRUPT);
@@ -314,27 +330,27 @@ int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
         return -EINVAL;
     }
 
-   /* Get the old PIN ISR and set the new PIN ISR */
+  /* Get the old PIN ISR and set the new PIN ISR */
 
-   isrtab[pin].handler = pinisr;
-   isrtab[pin].arg     = arg;
+  isrtab[pin].handler = pinisr;
+  isrtab[pin].arg     = arg;
 
-   /* And return the old PIN isr address */
+  /* And return the old PIN isr address */
 
-   leave_critical_section(flags);
-   return OK;
+  leave_critical_section(flags);
+  return OK;
 #else
-   return -ENOSYS;
+  return -ENOSYS;
 #endif /* HAVE_PORTINTS */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_pinirqenable
  *
  * Description:
  *   Enable the interrupt for specified pin IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kinetis_pinirqenable(uint32_t pinset)
 {
@@ -406,13 +422,13 @@ void kinetis_pinirqenable(uint32_t pinset)
 #endif /* HAVE_PORTINTS */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_pinirqdisable
  *
  * Description:
  *   Disable the interrupt for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kinetis_pinirqdisable(uint32_t pinset)
 {

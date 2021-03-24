@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_llwu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_LLWU_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_LLWU_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_LLWU_PE1_OFFSET    0x0000 /* LLWU Pin Enable 1 Register */
 #define KINETIS_LLWU_PE2_OFFSET    0x0001 /* LLWU Pin Enable 2 Register */
@@ -45,7 +45,7 @@
 #define KINETIS_LLWU_F3_OFFSET     0x0007 /* LLWU Flag 3 Register */
 #define KINETIS_LLWU_CS_OFFSET     0x0008 /* LLWU Control and Status Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_LLWU_PE1           (KINETIS_LLWU_BASE+KINETIS_LLWU_PE1_OFFSET)
 #define KINETIS_LLWU_PE2           (KINETIS_LLWU_BASE+KINETIS_LLWU_PE2_OFFSET)
@@ -57,7 +57,7 @@
 #define KINETIS_LLWU_F3            (KINETIS_LLWU_BASE+KINETIS_LLWU_F3_OFFSET)
 #define KINETIS_LLWU_CS            (KINETIS_LLWU_BASE+KINETIS_LLWU_CS_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* LLWU Pin Enable 1 Register */
 
@@ -67,18 +67,21 @@
 #  define LLWU_PE1_WUPE0_RISING    (1 << LLWU_PE1_WUPE0_SHIFT) /* Ext input enabled for rising edge */
 #  define LLWU_PE1_WUPE0_FALLING   (2 << LLWU_PE1_WUPE0_SHIFT) /* Ext input enabled for falling edge */
 #  define LLWU_PE1_WUPE0_BOTH      (3 << LLWU_PE1_WUPE0_SHIFT) /* Ext input enabled for any change */
+
 #define LLWU_PE1_WUPE1_SHIFT       (2)       /* Bits 2-3: Wakeup Pin Enable for LLWU_P1 */
 #define LLWU_PE1_WUPE1_MASK        (3 << LLWU_PE1_WUPE1_SHIFT)
 #  define LLWU_PE1_WUPE1_DISABLED  (0 << LLWU_PE1_WUPE1_SHIFT) /* Ext input disabled as wakeup input */
 #  define LLWU_PE1_WUPE1_RISING    (1 << LLWU_PE1_WUPE1_SHIFT) /* Ext input enabled for rising edge */
 #  define LLWU_PE1_WUPE1_FALLING   (2 << LLWU_PE1_WUPE1_SHIFT) /* Ext input enabled for falling edge */
 #  define LLWU_PE1_WUPE1_BOTH      (3 << LLWU_PE1_WUPE1_SHIFT) /* Ext input enabled for any change */
+
 #define LLWU_PE1_WUPE2_SHIFT       (4)       /* Bits 4-5: Wakeup Pin Enable for LLWU_P2 */
 #define LLWU_PE1_WUPE2_MASK        (3 << LLWU_PE1_WUPE2_SHIFT)
 #  define LLWU_PE1_WUPE2_DISABLED  (0 << LLWU_PE1_WUPE2_SHIFT) /* Ext input disabled as wakeup input */
 #  define LLWU_PE1_WUPE2_RISING    (1 << LLWU_PE1_WUPE2_SHIFT) /* Ext input enabled for rising edge */
 #  define LLWU_PE1_WUPE2_FALLING   (2 << LLWU_PE1_WUPE2_SHIFT) /* Ext input enabled for falling edge */
 #  define LLWU_PE1_WUPE2_BOTH      (3 << LLWU_PE1_WUPE2_SHIFT) /* Ext input enabled for any change */
+
 #define LLWU_PE1_WUPE3_SHIFT       (6)       /* Bits 6-7: Wakeup Pin Enable for LLWU_P3 */
 #define LLWU_PE1_WUPE3_MASK        (3 << LLWU_PE1_WUPE3_SHIFT)
 #  define LLWU_PE1_WUPE3_DISABLED  (0 << LLWU_PE1_WUPE3_SHIFT) /* Ext input disabled as wakeup input */
@@ -94,18 +97,21 @@
 #  define LLWU_PE2_WUPE4_RISING    (1 << LLWU_PE2_WUPE4_SHIFT) /* Ext input enabled for rising edge */
 #  define LLWU_PE2_WUPE4_FALLING   (2 << LLWU_PE2_WUPE4_SHIFT) /* Ext input enabled for falling edge */
 #  define LLWU_PE2_WUPE4_BOTH      (3 << LLWU_PE2_WUPE4_SHIFT) /* Ext input enabled for any change */
+
 #define LLWU_PE2_WUPE5_SHIFT       (2)       /* Bits 2-3: Wakeup Pin Enable for LLWU_P5 */
 #define LLWU_PE2_WUPE5_MASK        (3 << LLWU_PE2_WUPE5_SHIFT)
 #  define LLWU_PE2_WUPE5_DISABLED  (0 << LLWU_PE2_WUPE5_SHIFT) /* Ext input disabled as wakeup input */
 #  define LLWU_PE2_WUPE5_RISING    (1 << LLWU_PE2_WUPE5_SHIFT) /* Ext input enabled for rising edge */
 #  define LLWU_PE2_WUPE5_FALLING   (2 << LLWU_PE2_WUPE5_SHIFT) /* Ext input enabled for falling edge */
 #  define LLWU_PE2_WUPE5_BOTH      (3 << LLWU_PE2_WUPE5_SHIFT) /* Ext input enabled for any change */
+
 #define LLWU_PE2_WUPE6_SHIFT       (4)       /* Bits 4-5: Wakeup Pin Enable for LLWU_P6 */
 #define LLWU_PE2_WUPE6_MASK        (3 << LLWU_PE2_WUPE6_SHIFT)
 #  define LLWU_PE2_WUPE6_DISABLED  (0 << LLWU_PE2_WUPE6_SHIFT) /* Ext input disabled as wakeup input */
 #  define LLWU_PE2_WUPE6_RISING    (1 << LLWU_PE2_WUPE6_SHIFT) /* Ext input enabled for rising edge */
 #  define LLWU_PE2_WUPE6_FALLING   (2 << LLWU_PE2_WUPE6_SHIFT) /* Ext input enabled for falling edge */
 #  define LLWU_PE2_WUPE6_BOTH      (3 << LLWU_PE2_WUPE6_SHIFT) /* Ext input enabled for any change */
+
 #define LLWU_PE2_WUPE7_SHIFT       (6)       /* Bits 6-7: Wakeup Pin Enable for LLWU_P7 */
 #define LLWU_PE2_WUPE7_MASK        (3 << LLWU_PE2_WUPE7_SHIFT)
 #  define LLWU_PE2_WUPE7_DISABLED  (0 << LLWU_PE2_WUPE7_SHIFT) /* Ext input disabled as wakeup input */
@@ -121,18 +127,21 @@
 #  define LLWU_PE3_WUPE8_RISING    (1 << LLWU_PE3_WUPE8_SHIFT) /* Ext input enabled for rising edge */
 #  define LLWU_PE3_WUPE8_FALLING   (2 << LLWU_PE3_WUPE8_SHIFT) /* Ext input enabled for falling edge */
 #  define LLWU_PE3_WUPE8_BOTH      (3 << LLWU_PE3_WUPE8_SHIFT) /* Ext input enabled for any change */
+
 #define LLWU_PE3_WUPE9_SHIFT       (2)       /* Bits 2-3: Wakeup Pin Enable for LLWU_P9 */
 #define LLWU_PE3_WUPE9_MASK        (3 << LLWU_PE3_WUPE9_SHIFT)
 #  define LLWU_PE3_WUPE9_DISABLED  (0 << LLWU_PE3_WUPE9_SHIFT) /* Ext input disabled as wakeup input */
 #  define LLWU_PE3_WUPE9_RISING    (1 << LLWU_PE3_WUPE9_SHIFT) /* Ext input enabled for rising edge */
 #  define LLWU_PE3_WUPE9_FALLING   (2 << LLWU_PE3_WUPE9_SHIFT) /* Ext input enabled for falling edge */
 #  define LLWU_PE3_WUPE9_BOTH      (3 << LLWU_PE3_WUPE9_SHIFT) /* Ext input enabled for any change */
+
 #define LLWU_PE3_WUPE10_SHIFT      (4)       /* Bits 4-5: Wakeup Pin Enable for LLWU_P10 */
 #define LLWU_PE3_WUPE10_MASK       (3 << LLWU_PE3_WUPE10_SHIFT)
 #  define LLWU_PE3_WUPE10_DISABLED (0 << LLWU_PE3_WUPE10_SHIFT) /* Ext input disabled as wakeup input */
 #  define LLWU_PE3_WUPE10_RISING   (1 << LLWU_PE3_WUPE10_SHIFT) /* Ext input enabled for rising edge */
 #  define LLWU_PE3_WUPE10_FALLING  (2 << LLWU_PE3_WUPE10_SHIFT) /* Ext input enabled for falling edge */
 #  define LLWU_PE3_WUPE10_BOTH     (3 << LLWU_PE3_WUPE10_SHIFT) /* Ext input enabled for any change */
+
 #define LLWU_PE3_WUPE11_SHIFT      (6)       /* Bits 6-7: Wakeup Pin Enable for LLWU_P11 */
 #define LLWU_PE3_WUPE11_MASK       (3 << LLWU_PE3_WUPE11_SHIFT)
 #  define LLWU_PE3_WUPE11_DISABLED (0 << LLWU_PE3_WUPE11_SHIFT) /* Ext input disabled as wakeup input */
@@ -148,18 +157,21 @@
 #  define LLWU_PE4_WUPE12_RISING   (1 << LLWU_PE4_WUPE12_SHIFT) /* Ext input enabled for rising edge */
 #  define LLWU_PE4_WUPE12_FALLING  (2 << LLWU_PE4_WUPE12_SHIFT) /* Ext input enabled for falling edge */
 #  define LLWU_PE4_WUPE12_BOTH     (3 << LLWU_PE4_WUPE12_SHIFT) /* Ext input enabled for any change */
+
 #define LLWU_PE4_WUPE13_SHIFT      (2)       /* Bits 2-3: Wakeup Pin Enable for LLWU_P13 */
 #define LLWU_PE4_WUPE13_MASK       (3 << LLWU_PE4_WUPE13_SHIFT)
 #  define LLWU_PE4_WUPE13_DISABLED (0 << LLWU_PE4_WUPE13_SHIFT) /* Ext input disabled as wakeup input */
 #  define LLWU_PE4_WUPE13_RISING   (1 << LLWU_PE4_WUPE13_SHIFT) /* Ext input enabled for rising edge */
 #  define LLWU_PE4_WUPE13_FALLING  (2 << LLWU_PE4_WUPE13_SHIFT) /* Ext input enabled for falling edge */
 #  define LLWU_PE4_WUPE13_BOTH     (3 << LLWU_PE4_WUPE13_SHIFT) /* Ext input enabled for any change */
+
 #define LLWU_PE4_WUPE14_SHIFT      (4)       /* Bits 4-5: Wakeup Pin Enable for LLWU_P14 */
 #define LLWU_PE4_WUPE14_MASK       (3 << LLWU_PE4_WUPE14_SHIFT)
 #  define LLWU_PE4_WUPE14_DISABLED (0 << LLWU_PE4_WUPE14_SHIFT) /* Ext input disabled as wakeup input */
 #  define LLWU_PE4_WUPE14_RISING   (1 << LLWU_PE4_WUPE14_SHIFT) /* Ext input enabled for rising edge */
 #  define LLWU_PE4_WUPE14_FALLING  (2 << LLWU_PE4_WUPE14_SHIFT) /* Ext input enabled for falling edge */
 #  define LLWU_PE4_WUPE14_BOTH     (3 << LLWU_PE4_WUPE14_SHIFT) /* Ext input enabled for any change */
+
 #define LLWU_PE4_WUPE15_SHIFT      (6)       /* Bits 6-7: Wakeup Pin Enable for LLWU_P15 */
 #define LLWU_PE4_WUPE15_MASK       (3 << LLWU_PE4_WUPE15_SHIFT)
 #  define LLWU_PE4_WUPE15_DISABLED (0 << LLWU_PE4_WUPE15_SHIFT) /* Ext input disabled as wakeup input */
@@ -224,16 +236,16 @@
 #define LLWU_CS_FLTEP              (1 << 1)  /* Bit 1:  Digital Filter on External Pin */
 #define LLWU_CS_FLTR               (1 << 0)  /* Bit 0:  Digital Filter on RESET Pin */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_LLWU_H */

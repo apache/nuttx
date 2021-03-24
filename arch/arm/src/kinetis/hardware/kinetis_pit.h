@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_pit.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,29 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_PIT_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_PIT_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(KINETIS_K66)
 #  define KINETIS_PIT_HAS_CHAIN
 #  define KINETIS_PIT_HAS_LIFETIME
 #endif
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_PIT_MCR_OFFSET       0x0000 /* PIT Module Control Register */
 #if defined(KINETIS_PIT_HAS_LIFETIME)
@@ -62,7 +62,7 @@
 #define KINETIS_PIT_TCTRL3_OFFSET    0x0138 /* Timer Control Register */
 #define KINETIS_PIT_TFLG3_OFFSET     0x013c /* Timer Flag Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_PIT_MCR              (KINETIS_PIT_BASE+KINETIS_PIT_MCR_OFFSET)
 #if defined(KINETIS_PIT_HAS_LIFETIME)
@@ -86,7 +86,7 @@
 #define KINETIS_PIT_TCTRL3           (KINETIS_PIT_BASE+KINETIS_PIT_TCTRL3_OFFSET)
 #define KINETIS_PIT_TFLG3            (KINETIS_PIT_BASE+KINETIS_PIT_TFLG3_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* PIT Module Control Register */
 
@@ -95,6 +95,7 @@
                                              /* Bits 2-31: Reserved */
 
 /* Timer Load Value Register (32-bit Timer Start Value Bits) */
+
 /* Current Timer Value Register (32-bit Current Timer Value) */
 
 /* Timer Control Register */
@@ -111,16 +112,16 @@
 #define PIT_TFLG_TIF               (1 << 0)  /* Bit 0:  Timer Interrupt Flag */
                                              /* Bits 1-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_PIT_H */

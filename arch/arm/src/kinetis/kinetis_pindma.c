@@ -58,13 +58,13 @@
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_pindmaenable
  *
  * Description:
  *   Enable DMA for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kinetis_pindmaenable(uint32_t pinset)
 {
@@ -85,7 +85,9 @@ void kinetis_pindmaenable(uint32_t pinset)
 
       base =  KINETIS_PORT_BASE(port);
 
-      /* Modify the IRQC field of the port PCR register in order to enable DMA. */
+      /* Modify the IRQC field of the port PCR register in order to
+       * enable DMA.
+       */
 
       regval = getreg32(base + KINETIS_PORT_PCR_OFFSET(pin));
       regval &= ~PORT_PCR_IRQC_MASK;
@@ -112,13 +114,13 @@ void kinetis_pindmaenable(uint32_t pinset)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_pindmadisable
  *
  * Description:
  *   Disable DMA for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kinetis_pindmadisable(uint32_t pinset)
 {
@@ -139,7 +141,9 @@ void kinetis_pindmadisable(uint32_t pinset)
 
       base =  KINETIS_PORT_BASE(port);
 
-      /* Clear the IRQC field of the port PCR register in order to disable DMA. */
+      /* Clear the IRQC field of the port PCR register in order to disable
+       * DMA.
+       */
 
       regval = getreg32(base + KINETIS_PORT_PCR_OFFSET(pin));
       regval &= ~PORT_PCR_IRQC_MASK;

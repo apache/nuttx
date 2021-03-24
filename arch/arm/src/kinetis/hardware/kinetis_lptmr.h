@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_lptmr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,31 +16,31 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_LPTMR_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_LPTMR_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_LPTMR_CSR_OFFSET    0x0000 /* Low Power Timer Control Status Register */
 #define KINETIS_LPTMR_PSR_OFFSET    0x0004 /* Low Power Timer Prescale Register */
 #define KINETIS_LPTMR_CMR_OFFSET    0x0008 /* Low Power Timer Compare Register */
 #define KINETIS_LPTMR_CNR_OFFSET    0x000c /* Low Power Timer Counter Register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_LPTMR0_CSR          (KINETIS_LPTMR0_BASE+KINETIS_LPTMR_CSR_OFFSET)
 #define KINETIS_LPTMR0_PSR          (KINETIS_LPTMR0_BASE+KINETIS_LPTMR_PSR_OFFSET)
@@ -52,7 +52,7 @@
 #define KINETIS_LPTMR1_CMR          (KINETIS_LPTMR1_BASE+KINETIS_LPTMR_CMR_OFFSET)
 #define KINETIS_LPTMR1_CNR          (KINETIS_LPTMR1_BASE+KINETIS_LPTMR_CNR_OFFSET)
 
-/* Register Bit Definitions *************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Low Power Timer Control Status Register (32-bit) */
 
@@ -66,6 +66,7 @@
 #  define LPTMR_CSR_TPS_INPUT1      (1 << LPTMR_CSR_TPS_SHIFT) /* Pulse counter input 1 selected */
 #  define LPTMR_CSR_TPS_INPUT2      (2 << LPTMR_CSR_TPS_SHIFT) /* Pulse counter input 2 selected */
 #  define LPTMR_CSR_TPS_INPUT3      (3 << LPTMR_CSR_TPS_SHIFT) /* Pulse counter input 3 selected */
+
 #define LPTMR_CSR_TIE               (1 << 6)  /* Bit 6:  Timer Interrupt Enable */
 #define LPTMR_CSR_TCF               (1 << 7)  /* Bit 7:  Timer Compare Flag */
 
@@ -77,8 +78,10 @@
 #  define LPTMR_PSR_PCS_CLOCK       (1 << LPTMR_PSR_PCS_SHIFT) /* Prescaler/glitch filter clock 1 */
 #  define LPTMR_PSR_PCS_CLOCK       (2 << LPTMR_PSR_PCS_SHIFT) /* Prescaler/glitch filter clock 2 */
 #  define LPTMR_PSR_PCS_CLOCK       (3 << LPTMR_PSR_PCS_SHIFT) /* Prescaler/glitch filter clock 3 */
+
 #define LPTMR_PSR_PBYP              (1 << 2)  /* Bit 2:  Prescaler Bypass */
 #define LPTMR_PSR_PRESCALE_SHIFT    (6)       /* Bits 3-6: Prescale Value */
+
 #define LPTMR_PSR_PRESCALE_MASK     (15 << LPTMR_PSR_PRESCALE_SHIFT) /* Prescale divider: Glitch filter after: */
 #  define LPTMR_PSR_PRESCALE_DIV2   (0 << LPTMR_PSR_PRESCALE_SHIFT)  /* Divider=2         N/S */
 #  define LPTMR_PSR_PRESCALE_DIV4   (1 << LPTMR_PSR_PRESCALE_SHIFT)  /* Divider=4         2 edges */
@@ -96,28 +99,31 @@
 #  define LPTMR_PSR_PRESCALE_DIV16K (13 << LPTMR_PSR_PRESCALE_SHIFT) /* Divider=16384     8192 edges */
 #  define LPTMR_PSR_PRESCALE_DIV32K (14 << LPTMR_PSR_PRESCALE_SHIFT) /* Divider=32768     16384 edges */
 #  define LPTMR_PSR_PRESCALE_DIV64K (15 << LPTMR_PSR_PRESCALE_SHIFT) /* Divider=65536     32768 edges */
+
                                               /* Bits 7-31: Reserved */
+
 /* Low Power Timer Compare Register */
 
 #define LPTMR_CMR_SHIFT             (0)       /* Bits 0-15: Compare Value */
 #define LPTMR_CMR_MASK              (0xffff << LPTMR_CMR_COMPARE_SHIFT)
                                               /* Bits 16-31: Reserved */
+
 /* Low Power Timer Counter Register */
 
 #define LPTMR_CNR_SHIFT             (0)       /* Bits 0-15: Counter Value */
 #define LPTMR_CNR_MASK              (0xffff << LPTMR_CNR_COMPARE_SHIFT)
                                               /* Bits 16-31: Reserved */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_LPTMR_H */

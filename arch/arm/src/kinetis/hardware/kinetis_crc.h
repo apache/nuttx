@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_crc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_CRC_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_CRC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,23 +31,23 @@
 
 #if defined(KINETIS_NCRC) && KINETIS_NCRC > 0
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_CRC_DATA_OFFSET   0x0000 /* CRC Data Register */
 #define KINETIS_CRC_GPOLY_OFFSET  0x0004 /* CRC Polynomial Register */
 #define KINETIS_CRC_CTRL_OFFSET   0x0008 /* CRC Control Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_CRC_DATA          (KINETIS_CRC_BASE+KINETIS_CRC_DATA_OFFSET)
 #define KINETIS_CRC_GPOLY         (KINETIS_CRC_BASE+KINETIS_CRC_GPOLY_OFFSET)
 #define KINETIS_CRC_CTRL          (KINETIS_CRC_BASE+KINETIS_CRC_CTRL_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* CRC Data Register (32-bit) */
 
@@ -68,6 +68,7 @@
 #define CRC_GPOLY_HIGH_MASK       (0xffff << CRC_GPOLY_HIGH_SHIFT)
 
 /* CRC Control Register */
+
                                             /* Bits 0-23: Reserved */
 #define CRC_CTRL_TCRC             (1 << 24) /* Bit 24: Width of CRC protocol */
 #define CRC_CTRL_WAS              (1 << 25) /* Bit 25: Write CRC data register as seed */
@@ -79,6 +80,7 @@
 #  define CRC_CTRL_TOTR_BITS      (1 << CRC_CTRL_TOTR_SHIFT) /* Bits transposed; bytes are not */
 #  define CRC_CTRL_TOTR_BOTH      (2 << CRC_CTRL_TOTR_SHIFT) /* Both bits bytes and bytes transposed */
 #  define CRC_CTRL_TOTR_BYTES     (3 << CRC_CTRL_TOTR_SHIFT) /* Bytes transposed; bits in byte are not */
+
 #define CRC_CTRL_TOT_SHIFT        (30)      /* Bits 30-31: Type of Transpose for Writes */
 #define CRC_CTRL_TOT_MASK         (3 << CRC_CTRL_TOT_SHIFT)
 #  define CRC_CTRL_TOT_NONE       (0 << CRC_CTRL_TOT_SHIFT) /* No transposition */
@@ -86,17 +88,17 @@
 #  define CRC_CTRL_TOT_BOTH       (2 << CRC_CTRL_TOT_SHIFT) /* Both bits bytes and bytes transposed */
 #  define CRC_CTRL_TOT_BYTES      (3 << CRC_CTRL_TOT_SHIFT) /* Bytes transposed; bits in byte are not */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* KINETIS_NCRC && KINETIS_NCRC > 0 */
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_CRC_H */

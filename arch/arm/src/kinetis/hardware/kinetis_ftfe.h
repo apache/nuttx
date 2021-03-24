@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_ftfe.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_FTFE_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_FTFE_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_FTFE_FSTAT_OFFSET   0x0000 /* Flash Status Register */
 #define KINETIS_FTFE_FCNFG_OFFSET   0x0001 /* Flash Configuration Register */
@@ -59,7 +59,7 @@
 #define KINETIS_FTFE_FEPROT_OFFSET  0x0016 /* EEPROM Protection Register */
 #define KINETIS_FTFE_FDPROT_OFFSET  0x0017 /* Data Flash Protection Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_FTFE_FSTAT          (KINETIS_FTFE_BASE+KINETIS_FTFE_FSTAT_OFFSET)
 #define KINETIS_FTFE_FCNFG          (KINETIS_FTFE_BASE+KINETIS_FTFE_FCNFG_OFFSET)
@@ -84,7 +84,7 @@
 #define KINETIS_FTFE_FEPROT         (KINETIS_FTFE_BASE+KINETIS_FTFE_FEPROT_OFFSET)
 #define KINETIS_FTFE_FDPROT         (KINETIS_FTFE_BASE+KINETIS_FTFE_FDPROT_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Flash Status Register */
 
@@ -112,33 +112,40 @@
 #define FTFE_FSEC_SEC_MASK          (3 << FTFE_FSEC_SEC_SHIFT)
 #  define FTFE_FSEC_SEC_SECURE      (0 << FTFE_FSEC_SEC_SHIFT) /* 00,01,11: status is secure */
 #  define FTFE_FSEC_SEC_UNSECURE    (2 << FTFE_FSEC_SEC_SHIFT) /* 10: status is insecure */
+
 #define FTFE_FSEC_FSLACC_SHIFT      (2)       /* Bits 2-3: Freescale Failure Analysis Access Code */
 #define FTFE_FSEC_FSLACC_MASK       (3 << FTFE_FSEC_FSLACC_SHIFT)
 #  define FTFE_FSEC_FSLACC_GRANTED  (0 << FTFE_FSEC_FSLACC_SHIFT) /* 00 or 11: Access granted */
 #  define FTFE_FSEC_FSLACC_DENIED   (1 << FTFE_FSEC_FSLACC_SHIFT) /* 01 or 10: Access denied */
+
 #define FTFE_FSEC_MEEN_SHIFT        (4)       /* Bits 4-5: Mass Erase Enable Bits */
 #define FTFE_FSEC_MEEN_MASK         (3 << FTFE_FSEC_MEEN_SHIFT)
 #  define FTFE_FSEC_MEEN_ENABLED    (0 << FTFE_FSEC_MEEN_SHIFT) /* All values are enabled */
+
 #define FTFE_FSEC_KEYEN_SHIFT       (6)       /* Bits 6-7: Backdoor Key Security Enable */
 #define FTFE_FSEC_KEYEN_MASK        (3 << FTFE_FSEC_KEYEN_SHIFT)
 #  define FTFE_FSEC_KEYEN_DISABLED  (1 << FTFE_FSEC_KEYEN_SHIFT) /* All values are disabled */
 
 /* Flash Option Register (32-bits, see Chip Configuration details) */
+
 /* Flash Common Command Object Registers (8-bit flash command data) */
+
 /* Program Flash Protection Registers (8-bit flash protection data) */
+
 /* EEPROM Protection Register (8-bit eeprom protection data) */
+
 /* Data Flash Protection Register (8-bit data flash protection data) */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_FTFE_H */

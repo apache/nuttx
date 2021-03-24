@@ -63,7 +63,7 @@ void kinetis_get_uniqueid(uint8_t *uniqueid)
 
   for (i = 0; i < (KINETIS_UID_SIZE / sizeof(uint32_t)); i++)
     {
-      unique_u32[i] = *((uint32_t*)(KINETIS_SIM_UIDL) - i);
+      unique_u32[i] = *((uint32_t *)(KINETIS_SIM_UIDL) - i);
     }
 }
 

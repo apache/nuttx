@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_dspi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_DSPI_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_DSPI_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_SPI_MCR_OFFSET     0x0000 /* DSPI Module Configuration Register */
 #define KINETIS_SPI_TCR_OFFSET     0x0008 /* DSPI Transfer Count Register */
@@ -52,7 +52,7 @@
 #define KINETIS_SPI_RXFR2_OFFSET   0x0084 /* DSPI Receive FIFO Registers */
 #define KINETIS_SPI_RXFR3_OFFSET   0x0088 /* DSPI Receive FIFO Registers */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_SPI0_MCR           (KINETIS_SPI0_BASE+KINETIS_SPI_MCR_OFFSET)
 #define KINETIS_SPI0_TCR           (KINETIS_SPI0_BASE+KINETIS_SPI_TCR_OFFSET)
@@ -105,7 +105,7 @@
 #define KINETIS_SPI2_RXFR2         (KINETIS_SPI2_BASE+KINETIS_SPI_RXFR2_OFFSET)
 #define KINETIS_SPI2_RXFR3         (KINETIS_SPI2_BASE+KINETIS_SPI_RXFR3_OFFSET)
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* DSPI Module Configuration Register */
 
@@ -116,6 +116,7 @@
 #  define SPI_MCR_SMPL_PT_0CLKS    (0 << SPI_MCR_SMPL_PT_SHIFT) /* 0 clocks between edge and sample */
 #  define SPI_MCR_SMPL_PT_1CLKS    (1 << SPI_MCR_SMPL_PT_SHIFT) /* 1 clock between edge and sample */
 #  define SPI_MCR_SMPL_PT_2CLKS    (2 << SPI_MCR_SMPL_PT_SHIFT) /* 2 clocks between edge and sample */
+
 #define SPI_MCR_CLR_RXF            (1 << 10) /* Bit 10: Clear RX FIFO */
 #define SPI_MCR_CLR_TXF            (1 << 11) /* Bit 11: Clear TX FIFO */
 #define SPI_MCR_DIS_RXF            (1 << 12) /* Bit 12: Disable Receive FIFO */
@@ -137,6 +138,7 @@
 #define SPI_MCR_MSTR               (1 << 31) /* Bit 31: Master/Slave Mode Select */
 
 /* DSPI Transfer Count Register */
+
                                              /* Bits 0-15: Reserved */
 #define SPI_TCR_SPI_TCNT_SHIFT     (16)      /* Bits 16-31: SPI Transfer Counter */
 #define SPI_TCR_SPI_TCNT_MASK      (0xffff << SPI_TCR_SPI_TCNT_SHIFT)
@@ -222,8 +224,12 @@
 #define SPI_CTARM_DBR              (1 << 31) /* Bit 31:  Double Baud Rate */
 
 /* DSPI Clock and Transfer Attributes Register (Slave Mode) */
+
                                              /* Bits 0-24: Reserved */
-                                             /* Bits 25-26:  See common bits above */
+
+/*                                              Bits 25-26:
+ *                                                      See common bits above
+ */
 #define SPI_CTARS_FMSZ_SHIFT       (27)      /* Bits 27-31: Frame Size */
 #define SPI_CTARS_FMSZ_MASK        (31 << SPI_CTARS_FMSZ_SHIFT)
 
@@ -251,6 +257,7 @@
 #define SPI_SR_TCF                 (1 << 31) /* Bit 31: Transfer Complete Flag */
 
 /* DSPI DMA/Interrupt Request Select and Enable Register */
+
                                              /* Bits 0-15: Reserved */
 #define SPI_RSER_RFDF_DIRS         (1 << 16) /* Bit 16: Receive FIFO Drain DMA or Interrupt Request Select */
 #define SPI_RSER_RFDF_RE           (1 << 17) /* Bit 17: Receive FIFO Drain Request Enable */
@@ -265,7 +272,7 @@
                                              /* Bits 29-30: Reserved */
 #define SPI_RSER_TCF_RE            (1 << 31) /* Bit 31: Transmission Complete Request Enable */
 
-/* DSPI PUSH TX FIFO Register (Master Mode)*/
+/* DSPI PUSH TX FIFO Register (Master Mode) */
 
 #define SPI_PUSHR_TXDATA_SHIFT     (0)       /* Bits 0-15: Transmit Data */
 #define SPI_PUSHR_TXDATA_MASK      (0xffff << SPI_PUSHR_TXDATA_SHIFT)
@@ -282,7 +289,7 @@
 #  define SPI_PUSHR_CTAS_CTAR1     (1 << SPI_PUSHR_CTAS_SHIFT)
 #define SPI_PUSHR_CONT             (1 << 31) /* Bit 31: Continuous Peripheral Chip Select Enable */
 
-/* DSPI PUSH TX FIFO Register (Slave Mode, 32-bits of RXDATA)*/
+/* DSPI PUSH TX FIFO Register (Slave Mode, 32-bits of RXDATA) */
 
 /* DSPI POP RX FIFO Register (32-bits of RXDATA) */
 
@@ -295,16 +302,16 @@
 
 /* DSPI Receive FIFO Registers (32-bits of RXDATA) */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_DSPI_H */
