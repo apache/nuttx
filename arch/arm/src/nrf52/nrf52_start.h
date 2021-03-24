@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/nrf52/nrf52_start.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_NRF52_START_H
 #define __ARCH_ARM_SRC_NRF52_NRF52_START_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -52,20 +52,20 @@
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: nrf52_board_initialize
  *
  * Description:
- *   All NRF52xxx architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after clocking and memory have
- *   been configured but before caches have been enabled and before any devices have
- *   been initialized.
+ *   All NRF52xxx architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after clocking
+ *   and memory have been configured but before caches have been enabled and
+ *   before any devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void nrf52_board_initialize(void);
 
