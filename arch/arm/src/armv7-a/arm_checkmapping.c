@@ -51,9 +51,9 @@
  *   tcb - A reference to the task control block of the task that we believe
  *         needs to have a page fill.  Architecture-specific logic can
  *         retrieve page fault information from the architecture-specific
- *         context information in this TCB and can consult processor resources
- *         (page tables or TLBs or ???) to determine if the fill still needs
- *         to be performed or not.
+ *         context information in this TCB and can consult processor
+ *         resources (page tables or TLBs or ???) to determine if the fill
+ *         still needs to be performed or not.
  *
  * Returned Value:
  *   This function will return true if the mapping is in place and false

@@ -117,7 +117,9 @@ void _start(int argc, FAR char *argv[])
   ARCH_DATA_RESERVE->ar_sigtramp = (addrenv_sigtramp_t)sig_trampoline;
 
   /* Call C++ constructors */
+
   /* Setup so that C++ destructors called on task exit */
+
   /* REVISIT: Missing logic */
 
   /* Call the main() entry point passing argc and argv. */

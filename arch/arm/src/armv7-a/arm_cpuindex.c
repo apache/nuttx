@@ -59,7 +59,7 @@
 
 int up_cpu_index(void)
 {
-   /* Read the Multiprocessor Affinity Register (MPIDR) */
+  /* Read the Multiprocessor Affinity Register (MPIDR) */
 
   uint32_t mpidr = cp15_rdmpidr();
 

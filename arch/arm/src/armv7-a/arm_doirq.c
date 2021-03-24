@@ -213,7 +213,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   /* Dispatch the interrupt to its attached handler */
 
-   regs = _arm_doirq(irq, regs);
+  regs = _arm_doirq(irq, regs);
 
   /* Then loop dispatching any pending SGI interrupts that occcurred during
    * processing of the interrupts.

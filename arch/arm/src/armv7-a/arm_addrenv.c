@@ -157,7 +157,9 @@ static int up_addrenv_initdata(uintptr_t l2table)
   flags = enter_critical_section();
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
-  /* Get the virtual address corresponding to the physical page table address */
+  /* Get the virtual address corresponding to the physical page table
+   * address
+   */
 
   virtptr = (FAR uint32_t *)arm_pgvaddr(l2table);
 #else
