@@ -1366,6 +1366,12 @@ rndis_prepare_response(FAR struct rndis_dev_s *priv, size_t size,
   FAR struct rndis_response_header *hdr =
     (FAR struct rndis_response_header *)buf;
 
+  if (priv->response_queue_bytes + size > RNDIS_RESP_QUEUE_LEN)
+    {
+      uerr("RNDIS response queue full, dropping command %08x", request_hdr->msgtype);
+      return NULL;
+    }
+
   hdr->msgtype = request_hdr->msgtype | RNDIS_MSG_COMPLETE;
   hdr->msglen  = size;
   hdr->reqid   = request_hdr->reqid;
@@ -1439,6 +1445,10 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
           resp = rndis_prepare_response(priv,
                                         sizeof(struct rndis_initialize_cmplt),
                                         cmd_hdr);
+          if (!resp)
+            {
+              return -ENOMEM;
+            }
 
           resp->major      = RNDIS_MAJOR_VERSION;
           resp->minor      = RNDIS_MINOR_VERSION;
@@ -1454,6 +1464,7 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
 
       case RNDIS_HALT_MSG:
         {
+          priv->response_queue_bytes = 0;
           priv->connected = false;
         }
         break;
@@ -1468,6 +1479,10 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
             (FAR struct rndis_query_msg *)dataout;
 
           resp = rndis_prepare_response(priv, max_reply_size, cmd_hdr);
+          if (!resp)
+            {
+              return -ENOMEM;
+            }
 
           resp->hdr.msglen = sizeof(struct rndis_query_cmplt);
           resp->bufoffset  = 0;
@@ -1555,6 +1570,11 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
                                         cmd_hdr);
           req  = (FAR struct rndis_set_msg *)dataout;
 
+          if (!resp)
+            {
+              return -ENOMEM;
+            }
+
           uinfo("RNDIS SET RID=%08x OID=%08x LEN=%d DAT=%08x",
                 (unsigned)req->hdr.reqid, (unsigned)req->objid,
                 (int)req->buflen, (unsigned)req->buffer[0]);
@@ -1591,8 +1611,15 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
         {
           FAR struct rndis_reset_cmplt *resp;
 
+          priv->response_queue_bytes = 0;
           resp = rndis_prepare_response(priv, sizeof(struct rndis_reset_cmplt),
                                         cmd_hdr);
+
+          if (!resp)
+            {
+              return -ENOMEM;
+            }
+
           resp->addreset  = 0;
           priv->connected = false;
           rndis_send_encapsulated_response(priv, resp->hdr.msglen);
@@ -1601,9 +1628,15 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
 
       case RNDIS_KEEPALIVE_MSG:
         {
-          rndis_prepare_response(priv, sizeof(struct rndis_response_header),
-                                 cmd_hdr);
-          rndis_send_encapsulated_response(priv, sizeof(struct rndis_response_header));
+          FAR struct rndis_response_header *resp;
+          resp = rndis_prepare_response(priv, sizeof(struct rndis_response_header),
+                                        cmd_hdr);
+          if (!resp)
+            {
+              return -ENOMEM;
+            }
+
+          rndis_send_encapsulated_response(priv, resp->msglen);
         }
         break;
 
