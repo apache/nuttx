@@ -38,7 +38,6 @@
  *   TTTT TMPD DDCC VO...  .... .... PPPP BBBB
  */
 
-
 /* This identifies the GPIO pint type:
  *
  *   TTTT T... .... ....  .... .... .... ....
@@ -48,6 +47,7 @@
 #define GPIO_PINTYPE_MASK          (31                  << GPIO_PINTYPE_SHIFT)
 
 /* See chip/xmc4_ports.h for the IOCR definitions */
+
 /* Direct input */
 
 #  define GPIO_INPUT               (IOCR_INPUT_NOPULL   << GPIO_PINTYPE_SHIFT)
@@ -97,6 +97,7 @@
 #define GPIO_PADTYPE_MASK          (7                      << GPIO_PADTYPE_SHIFT)
 
 /* See chip/xmc4_ports.h for the PDR definitions */
+
 /* Pad class A1: */
 
 #  define GPIO_PADA1_MEDIUM        (PDR_PADA1_MEDIUM       << GPIO_PADTYPE_SHIFT)
@@ -131,7 +132,8 @@
 #  define GPIO_PINCTRL_HW0         (HWSEL_HW0              << GPIO_PINCTRL_SHIFT)
 #  define GPIO_PINCTRL_HW1         (HWSEL_HW1              << GPIO_PINCTRL_SHIFT)
 
-/* If the pin is an GPIO output, then this identifies the initial output value:
+/* If the pin is an GPIO output, then this identifies the initial output
+ * value:
  *
  *   .... .... .... V....  .... .... PPPP BBBB
  */
@@ -183,7 +185,6 @@
 #define GPIO_PIN14                 (14 << GPIO_PIN_SHIFT)
 #define GPIO_PIN15                 (15 << GPIO_PIN_SHIFT)
 
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -193,7 +194,7 @@
 typedef uint32_t gpioconfig_t;
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************

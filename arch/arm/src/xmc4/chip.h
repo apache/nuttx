@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/xmc4/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,33 +16,34 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_XMC4_CHIP_H
 #define __ARCH_ARM_SRC_XMC4_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/* Include the memory map and the chip definitions file.  Other chip hardware files
- * should then include this file for the proper setup.
+/* Include the memory map and the chip definitions file.
+ * Other chip hardware files should then include this file for the proper
+ * setup.
  */
 
 #include <arch/irq.h>
 #include <arch/xmc4/chip.h>
 #include "hardware/xmc4_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* If the common ARMv7-M vector handling logic is used, then it expects the
- * following definition in this file that provides the number of supported external
- * interrupts which, for this architecture, is provided in the arch/xmc4/chip.h
- * header file.
+ * following definition in this file that provides the number of supported
+ * external interrupts which, for this architecture, is provided in the
+ * arch/xmc4/chip.h header file.
  */
 
 #define ARMV7M_PERIPHERAL_INTERRUPTS XMC4_IRQ_NEXTINTS
