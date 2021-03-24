@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_rtcounter.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -36,7 +36,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* The STM32 RTC Driver offers standard precision of 1 Hz or High Resolution
  * operating at rate up to 16384 Hz. It provides UTC time and alarm interface
@@ -44,19 +44,21 @@
  *
  * RTC is based on hardware RTC module which is located in a separate power
  * domain. The 32-bit counter is extended by 16-bit registers in BKP domain
- * STM32_BKP_DR1 to provide system equiv. function to the: time_t time(time_t *).
+ * STM32_BKP_DR1 to provide system equiv. function to the: time_t time
+ * (time_t *).
  *
  * Notation:
  *  - clock refers to 32-bit hardware counter
  *  - time is a combination of clock and upper bits stored in backuped domain
  *    with unit of 1 [s]
  *
- * TODO: Error Handling in case LSE fails during start-up or during operation.
+ * TODO:
+ * Error Handling in case LSE fails during start-up or during operation.
  */
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -77,23 +79,25 @@
 #include "stm32_rtc.h"
 #include "stm32_waste.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
-/* In hi-res mode, the RTC operates at 16384Hz.  Overflow interrupts are handled
- * when the 32-bit RTC counter overflows every 3 days and 43 minutes.  A BKP register
- * is incremented on each overflow interrupt creating, effectively, a 48-bit RTC
- * counter.
+/* In hi-res mode, the RTC operates at 16384Hz.  Overflow interrupts are
+ * handled when the 32-bit RTC counter overflows every 3 days and 43 minutes.
+ * A BKP register is incremented on each overflow interrupt creating,
+ * effectively, a 48-bit RTC counter.
  *
- * In the lo-res mode, the RTC operates at 1Hz.  Overflow interrupts are not handled
- * (because the next overflow is not expected until the year 2106.
+ * In the lo-res mode, the RTC operates at 1Hz.  Overflow interrupts are not
+ * handled (because the next overflow is not expected until the year 2106).
  *
- * WARNING:  Overflow interrupts are lost whenever the STM32 is powered down.  The
- * overflow interrupt may be lost even if the STM32 is powered down only momentarily.
- * Therefore hi-res solution is only useful in systems where the power is always on.
+ * WARNING:
+ * Overflow interrupts are lost whenever the STM32 is powered down.  The
+ * overflow interrupt may be lost even if the STM32 is powered down only
+ * momentarily. Therefore hi-res solution is only useful in systems where
+ * the power is always on.
  */
 
 #ifdef CONFIG_RTC_HIRES
@@ -127,17 +131,18 @@
 #  endif
 #endif
 
-/* RTC/BKP Definitions **************************************************************/
+/* RTC/BKP Definitions ******************************************************/
 
 /* STM32_RTC_PRESCALAR_VALUE
- *   RTC pre-scalar value.  The RTC is driven by a 32,768Hz input clock.  This input
- *   value is divided by this value (plus one) to generate the RTC frequency.
+ *   RTC pre-scalar value.  The RTC is driven by a 32,768Hz input clock.
+ *   This input value is divided by this value (plus one) to generate the
+ *   RTC frequency.
  * RTC_TIMEMSB_REG
- *   The BKP module register used to hold the RTC overflow value.  Overflows are
- *   only handled in hi-res mode.
+ *   The BKP module register used to hold the RTC overflow value.
+ *   Overflows are only handled in hi-res mode.
  * RTC_CLOCKS_SHIFT
- *   The shift used to convert the hi-res timer LSB to one second.  Not used with
- *   the lo-res timer.
+ *   The shift used to convert the hi-res timer LSB to one second.
+ *   Not used with the lo-res timer.
  */
 
 #ifdef CONFIG_RTC_HIRES
@@ -148,9 +153,9 @@
 #  define STM32_RTC_PRESCALAR_VALUE STM32_RTC_PRESCALER_SECOND
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 struct rtc_regvals_s
 {
@@ -161,9 +166,9 @@ struct rtc_regvals_s
 #endif
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Callback to use when the alarm expires */
 
@@ -171,9 +176,9 @@ struct rtc_regvals_s
 static alarmcb_t g_alarmcb;
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Variable determines the state of the LSE oscillator.
  * Possible errors:
@@ -183,11 +188,11 @@ static alarmcb_t g_alarmcb;
 
 volatile bool g_rtc_enabled = false;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_beginwr
  *
  * Description:
@@ -199,7 +204,7 @@ volatile bool g_rtc_enabled = false;
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_rtc_beginwr(void)
 {
@@ -215,7 +220,7 @@ static inline void stm32_rtc_beginwr(void)
   modifyreg16(STM32_RTC_CRL, 0, RTC_CRL_CNF);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_endwr
  *
  * Description:
@@ -227,7 +232,7 @@ static inline void stm32_rtc_beginwr(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_rtc_endwr(void)
 {
@@ -241,11 +246,12 @@ static inline void stm32_rtc_endwr(void)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_wait4rsf
  *
  * Description:
- *   Wait for registers to synchronise with RTC module, call after power-up only
+ *   Wait for registers to synchronise with RTC module, call after power-up
+ *   only
  *
  * Input Parameters:
  *   None
@@ -253,7 +259,7 @@ static inline void stm32_rtc_endwr(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_rtc_wait4rsf(void)
 {
@@ -264,7 +270,7 @@ static inline void stm32_rtc_wait4rsf(void)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_breakout
  *
  * Description:
@@ -276,7 +282,7 @@ static inline void stm32_rtc_wait4rsf(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
 static void stm32_rtc_breakout(FAR const struct timespec *tp,
@@ -286,7 +292,9 @@ static void stm32_rtc_breakout(FAR const struct timespec *tp,
   uint32_t cnt;
   uint16_t ovf;
 
-  /* Break up the time in seconds + milleconds into the correct values for our use */
+  /* Break up the time in seconds + milleconds into the correct values for
+   * our use
+   */
 
   frac = ((uint64_t)tp->tv_nsec * CONFIG_RTC_FREQUENCY) / 1000000000;
   cnt  = (tp->tv_sec << RTC_CLOCKS_SHIFT) |
@@ -303,8 +311,8 @@ static void stm32_rtc_breakout(FAR const struct timespec *tp,
 static inline void stm32_rtc_breakout(FAR const struct timespec *tp,
                                       FAR struct rtc_regvals_s *regvals)
 {
-  /* The low-res timer is easy... tv_sec holds exactly the value needed by the
-   * CNTH/CNTL registers.
+  /* The low-res timer is easy... tv_sec holds exactly the value needed
+   * by the CNTH/CNTL registers.
    */
 
   regvals->cnth = (uint16_t)((uint32_t)tp->tv_sec >> 16);
@@ -312,7 +320,7 @@ static inline void stm32_rtc_breakout(FAR const struct timespec *tp,
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_interrupt
  *
  * Description:
@@ -325,7 +333,7 @@ static inline void stm32_rtc_breakout(FAR const struct timespec *tp,
  * Returned Value:
  *   Zero (OK) on success; A negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC_HIRES) || defined(CONFIG_RTC_ALARM)
 static int stm32_rtc_interrupt(int irq, void *context, FAR void *arg)
@@ -358,16 +366,16 @@ static int stm32_rtc_interrupt(int irq, void *context, FAR void *arg)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_initialize
  *
  * Description:
- *   Initialize the hardware RTC per the selected configuration.  This function is
- *   called once during the OS initialization sequence
+ *   Initialize the hardware RTC per the selected configuration.
+ *   This function is called once during the OS initialization sequence
  *
  * Input Parameters:
  *   None
@@ -375,7 +383,7 @@ static int stm32_rtc_interrupt(int irq, void *context, FAR void *arg)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_initialize(void)
 {
@@ -397,8 +405,8 @@ int up_rtc_initialize(void)
       putreg16(RTC_MAGIC, RTC_MAGIC_REG);
     }
 
-  /* Select the lower power external 32,768Hz (Low-Speed External, LSE) oscillator
-   * as RTC Clock Source and enable the Clock.
+  /* Select the lower power external 32,768Hz (Low-Speed External, LSE)
+   * oscillator as RTC Clock Source and enable the Clock.
    */
 
   modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
@@ -407,7 +415,9 @@ int up_rtc_initialize(void)
 
   modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
 
-  /* TODO: Possible stall? should we set the timeout period? and return with -1 */
+  /* TODO: Possible stall?
+   * should we set the timeout period? and return with -1
+   */
 
   stm32_rtc_wait4rsf();
 
@@ -439,8 +449,8 @@ int up_rtc_initialize(void)
 
   /* STM32_IRQ_RTCALRM  41: RTC alarm through EXTI line interrupt */
 
-  /* Disable write access to the backup domain (RTC registers, RTC backup data
-   * registers and backup SRAM).
+  /* Disable write access to the backup domain
+   * (RTC registers, RTC backup data registers and backup SRAM).
    */
 
   stm32_pwr_enablebkp(false);
@@ -448,7 +458,7 @@ int up_rtc_initialize(void)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_irqinitialize
  *
  * Description:
@@ -461,7 +471,7 @@ int up_rtc_initialize(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_rtc_irqinitialize(void)
 {
@@ -475,15 +485,16 @@ int stm32_rtc_irqinitialize(void)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_time
  *
  * Description:
- *   Get the current time in seconds.  This is similar to the standard time()
- *   function.  This interface is only required if the low-resolution RTC/counter
+ *   Get the current time in seconds.
+ *   This is similar to the standard time() function.
+ *   This interface is only required if the low-resolution RTC/counter
  *   hardware implementation selected.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC is set but neither
- *   CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
+ *   initialization to set up the system time when CONFIG_RTC is set but
+ *   neither CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
  *
  * Input Parameters:
  *   None
@@ -491,7 +502,7 @@ int stm32_rtc_irqinitialize(void)
  * Returned Value:
  *   The current time in seconds
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_RTC_HIRES
 time_t up_rtc_time(void)
@@ -542,12 +553,13 @@ time_t up_rtc_time(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_gettime
  *
  * Description:
- *   Get the current time from the high resolution RTC clock/counter.  This interface
- *   is only supported by the high-resolution RTC/counter hardware implementation.
+ *   Get the current time from the high resolution RTC clock/counter.  This
+ *   interface is only supported by the high-resolution RTC/counter hardware
+ *   implementation.
  *   It is used to replace the system timer.
  *
  * Input Parameters:
@@ -556,7 +568,7 @@ time_t up_rtc_time(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
 int up_rtc_gettime(FAR struct timespec *tp)
@@ -621,12 +633,12 @@ int up_rtc_gettime(FAR struct timespec *tp)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
- *   Set the RTC to the provided time.  All RTC implementations must be able to
- *   set their time based on a standard timespec.
+ *   Set the RTC to the provided time.  All RTC implementations must be able
+ *   to set their time based on a standard timespec.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -634,7 +646,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_settime(FAR const struct timespec *tp)
 {
@@ -651,8 +663,8 @@ int up_rtc_settime(FAR const struct timespec *tp)
   flags = enter_critical_section();
   stm32_pwr_enablebkp(true);
 
-  /* Then write the broken out values to the RTC counter and BKP overflow register
-   * (hi-res mode only)
+  /* Then write the broken out values to the RTC counter and BKP overflow
+   * register (hi-res mode only)
    */
 
   do
@@ -675,7 +687,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_setalarm
  *
  * Description:
@@ -688,7 +700,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
@@ -738,7 +750,7 @@ int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_cancelalarm
  *
  * Description:
@@ -750,7 +762,7 @@ int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 int stm32_rtc_cancelalarm(void)

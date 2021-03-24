@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_rtc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,16 +16,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_RTC_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_RTC_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_RTC_CRH_OFFSET    0x0000    /* RTC control register High (16-bit) */
 #define STM32_RTC_CRL_OFFSET    0x0004    /* RTC control register low (16-bit) */
@@ -38,7 +38,7 @@
 #define STM32_RTC_ALRH_OFFSET   0x0020    /* RTC alarm register high (16-bit) */
 #define STM32_RTC_ALRL_OFFSET   0x0024    /* RTC alarm register low (16-bit) */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_RTC_CRH           (STM32_RTC_BASE+STM32_RTC_CRH_OFFSET)
 #define STM32_RTC_CRL           (STM32_RTC_BASE+STM32_RTC_CRL_OFFSET)
@@ -51,7 +51,7 @@
 #define STM32_RTC_ALRH          (STM32_RTC_BASE+STM32_RTC_ALRH_OFFSET)
 #define STM32_RTC_ALRL          (STM32_RTC_BASE+STM32_RTC_ALRL_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* RTC control register High (16-bit) */
 

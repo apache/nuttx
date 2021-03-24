@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32l0_pwr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,36 +16,36 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32L0_PWR_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32L0_PWR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define HAVE_PWR_WKUP2         1
 #define HAVE_PWR_WKUP3         1
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_PWR_CR_OFFSET    0x0000  /* Power control register */
 #define STM32_PWR_CSR_OFFSET   0x0004  /* Power control/status register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_PWR_CR           (STM32_PWR_BASE+STM32_PWR_CR_OFFSET)
 #define STM32_PWR_CSR          (STM32_PWR_BASE+STM32_PWR_CSR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Power control register */
 
@@ -65,6 +65,7 @@
 #  define PWR_CR_2p7V          (5 << PWR_CR_PLS_SHIFT) /* 101: 2.7V */
 #  define PWR_CR_2p8V          (6 << PWR_CR_PLS_SHIFT) /* 110: 2.8V */
 #  define PWR_CR_2p9V          (7 << PWR_CR_PLS_SHIFT) /* 111: 2.9V */
+
 #define PWR_CR_DBP             (1 << 8)  /* Bit 8:  Disable Backup Domain write protection */
 #define PWR_CR_ULP             (1 << 9)  /* Bit 9:  Ultralow power mode */
 #define PWR_CR_FWU             (1 << 10) /* Bit 10: Fast wake-up */

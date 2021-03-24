@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f20xxx_uart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F20XXX_UART_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F20XXX_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_USART_SR_OFFSET     0x0000  /* Status register (32-bits) */
 #define STM32_USART_DR_OFFSET     0x0004  /* Data register (32-bits) */
@@ -43,7 +43,7 @@
 #define STM32_USART_CR3_OFFSET    0x0014  /* Control register 3 (32-bits) */
 #define STM32_USART_GTPR_OFFSET   0x0018  /* Guard time and prescaler register (32-bits) */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32_NUSART > 0
 #  define STM32_USART1_SR         (STM32_USART1_BASE+STM32_USART_SR_OFFSET)
@@ -103,7 +103,7 @@
 #  define STM32_USART6_GTPR       (STM32_USART6_BASE+STM32_USART_GTPR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Status register */
 
@@ -169,6 +169,7 @@
 #  define USART_CR2_STOP0p5       (1 << USART_CR2_STOP_SHIFT) /* 01: 0.5 Stop bit */
 #  define USART_CR2_STOP2         (2 << USART_CR2_STOP_SHIFT) /* 10: 2 Stop bits */
 #  define USART_CR2_STOP1p5       (3 << USART_CR2_STOP_SHIFT) /* 11: 1.5 Stop bit */
+
 #define USART_CR2_LINEN           (1 << 14) /* Bit 14: LIN mode enable */
 
 /* Control register 3 */
@@ -193,22 +194,23 @@
 #define USART_GTPR_GT_SHIFT       (8) /* Bits 8-15: Guard time value */
 #define USART_GTPR_GT_MASK        (0xff <<  USART_GTPR_GT_SHIFT)
 
-/* Compatibility definitions ********************************************************/
+/* Compatibility definitions ************************************************/
+
 /* F3 Transmit/Read registers */
 
 #define STM32_USART_RDR_OFFSET    STM32_USART_DR_OFFSET  /* Receive data register */
 #define STM32_USART_TDR_OFFSET    STM32_USART_DR_OFFSET  /* Transmit data register */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F20XXX_UART_H */

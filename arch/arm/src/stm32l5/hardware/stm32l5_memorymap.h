@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l5/hardware/stm32l5_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,16 +16,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L5_STM32L5_MEMORYMAP_H
 #define __ARCH_ARM_SRC_STM32L5_STM32L5_MEMORYMAP_H
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* STM32L5XXX Address Blocks *************************************************/
+/* STM32L5XXX Address Blocks ************************************************/
 
 #define STM32L5_CODE_BASE       0x00000000    /* 0x00000000-0x1fffffff: 512Mb code block */
 #define STM32L5_SRAM_BASE       0x20000000    /* 0x20000000-0x3fffffff: 512Mb sram block (48k to 256k) */
@@ -41,20 +41,20 @@
 #define STM32L5_IS_SRAM(a)      ((((uint32_t)(a)) & STM32L5_REGION_MASK) == STM32L5_SRAM_BASE)
 #define STM32L5_IS_EXTSRAM(a)   ((((uint32_t)(a)) & STM32L5_REGION_MASK) == STM32L5_FMC_BANK1)
 
-/* Code Base Addresses *******************************************************/
+/* Code Base Addresses ******************************************************/
 
 #define STM32L5_BOOT_BASE      0x00000000     /* 0x00000000-0x000fffff: Aliased boot memory */
 #define STM32L5_FLASH_BASE     0x08000000     /* 0x08000000-0x0807ffff: FLASH memory */
 #define STM32L5_SRAM1_BASE     0x20000000     /* 0x20000000-0x2002ffff: 192k SRAM1 */
 #define STM32L5_SRAM2_BASE     0x20030000     /* 0x20030000-0x2003ffff:  64k SRAM2 */
 
-/* System Memory Addresses ***************************************************/
+/* System Memory Addresses **************************************************/
 
 #define STM32L5_SYSMEM_UID     0x0BFA0590     /* The 96-bit unique device identifier */
 #define STM32L5_SYSMEM_FSIZE   0x0BFA05E0     /* Size of Flash memory in Kbytes. */
 #define STM32L5_SYSMEM_PACKAGE 0x0BFA0500     /* Indicates the device's package type. */
 
-/* Peripheral Base Addresses *************************************************/
+/* Peripheral Base Addresses ************************************************/
 
 #define STM32L5_APB1_BASE      0x40000000     /* 0x40000000-0x4000dfff: APB1 */
 #define STM32L5_APB2_BASE      0x40010000     /* 0x40010000-0x400167ff: APB2 */
@@ -62,7 +62,7 @@
 #define STM32L5_AHB2_BASE      0x42020000     /* 0x42020000-0x420c83ff: AHB2 */
 #define STM32L5_AHB3_BASE      0x44020000     /* 0x44020000-0x440213ff: AHB3 */
 
-/* APB1 Base Addresses *******************************************************/
+/* APB1 Base Addresses ******************************************************/
 
 #define STM32L5_UCPD1_BASE      0x4000DC00
 #define STM32L5_USB_SRAM_BASE   0x4000D800
@@ -98,7 +98,7 @@
 #define STM32L5_TIM3_BASE       0x40000400
 #define STM32L5_TIM2_BASE       0x40000000
 
-/* APB2 Base Addresses *******************************************************/
+/* APB2 Base Addresses ******************************************************/
 
 #define STM32L5_DFSDM1_BASE     0x40016000
 #define STM32L5_SAI2_BASE       0x40015800
@@ -114,7 +114,7 @@
 #define STM32L5_VREFBUF_BASE    0x40010100
 #define STM32L5_SYSCFG_BASE     0x40010000
 
-/* AHB1 Base Addresses *******************************************************/
+/* AHB1 Base Addresses ******************************************************/
 
 #define STM32L5_GTZC_BASE       0x40032400
 #define STM32L5_ICACHE_BASE     0x40030400
@@ -127,7 +127,7 @@
 #define STM32L5_DMA2_BASE       0x40020400
 #define STM32L5_DMA1_BASE       0x40020000
 
-/* AHB2 Base Addresses *******************************************************/
+/* AHB2 Base Addresses ******************************************************/
 
 #define STM32L5_SDMMC1_BASE     0x420C8000
 #define STM32L5_OTFDEC1_BASE    0x420C5000
@@ -145,7 +145,7 @@
 #define STM32L5_GPIOB_BASE      0x42020400
 #define STM32L5_GPIOA_BASE      0x42020000
 
-/* AHB2 Base Addresses *******************************************************/
+/* AHB2 Base Addresses ******************************************************/
 
 #define STM32L5_OCTOSPI1_BASE   0x44021000
 #define STM32L5_FMC_BASE        0x44020000

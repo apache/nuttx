@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f33xxx_pinmap.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
@@ -32,41 +32,43 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F33XXX_PINMAP_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F33XXX_PINMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "stm32_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Alternate Pin Functions.  All members of the STM32F33xxx family share the same
- * pin multiplexing (although they may differ in the pins physically available).
+/* Alternate Pin Functions.
+ * All members of the STM32F33xxx family share the same  pin multiplexing
+ * (although they may differ in the pins physically available).
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
- * Drivers, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.  For example, if
- * CAN1_RX connects vis PA11 on some board, then the following definitions should
- * appear in the board.h header file for that board:
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc. Drivers, however, will use the pin selection without the numeric
+ * suffix. Additional definitions are required in the board.h file.
+ * For example, if CAN1_RX connects vis PA11 on some board, then the
+ * following definitions should appear in the board.h header file for that
+ * board:
  *
  * #define GPIO_CAN1_RX GPIO_CAN1_RX_1
  *
  * The driver will then automatically configure PA11 as the CAN1 RX pin.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific GPIO options such as frequency,
- * open-drain/push-pull, and pull-up/down!  Just the basics are defined for most
- * pins in this file.
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific GPIO options such as
+ * frequency, open-drain/push-pull, and pull-up/down!  Just the basics are
+ * defined for most pins in this file.
  */
 
 /* ADC */
@@ -110,7 +112,6 @@
 #define GPIO_CAN_TX_2       (GPIO_ALT|GPIO_AF9|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN9)
 #undef GPIO_CAN_TX_3
 
-
 /* Comparator Outputs */
 
 #define GPIO_COMP2_OUT_1    (GPIO_ALT|GPIO_AF8|GPIO_PORTA|GPIO_PIN2)
@@ -120,13 +121,13 @@
 #define GPIO_COMP6_OUT_1    (GPIO_ALT|GPIO_AF8|GPIO_PORTA|GPIO_PIN10)
 #define GPIO_COMP6_OUT_2    (GPIO_ALT|GPIO_AF7|GPIO_PORTC|GPIO_PIN6)
 
-/* Comparator Inputs non inverting*/
+/* Comparator Inputs non inverting */
 
 #define GPIO_COMP2_INP     (GPIO_ALT|GPIO_AF8|GPIO_PORTA|GPIO_PIN7)
 #define GPIO_COMP4_INP     (GPIO_ALT|GPIO_AF8|GPIO_PORTB|GPIO_PIN0)
 #define GPIO_COMP6_INP     (GPIO_ALT|GPIO_AF8|GPIO_PORTB|GPIO_PIN11)
 
-/* Comparator Inputs inverting*/
+/* Comparator Inputs inverting */
 
 #define GPIO_COMP2_INM_1    (GPIO_ALT|GPIO_AF8|GPIO_PORTA|GPIO_PIN2)
 #define GPIO_COMP2_INM_2    (GPIO_ALT|GPIO_AF8|GPIO_PORTA|GPIO_PIN4)
@@ -134,7 +135,6 @@
 #define GPIO_COMP4_INM_2    (GPIO_ALT|GPIO_AF8|GPIO_PORTA|GPIO_PIN4)
 #define GPIO_COMP6_INM_1    (GPIO_ALT|GPIO_AF8|GPIO_PORTA|GPIO_PIN4)
 #define GPIO_COMP6_INM_2    (GPIO_ALT|GPIO_AF8|GPIO_PORTB|GPIO_PIN15)
-
 
 /* DAC -" Once the DAC channelx is enabled, the corresponding GPIO pin
  * (PA4 or PA5) is automatically connected to the analog converter output

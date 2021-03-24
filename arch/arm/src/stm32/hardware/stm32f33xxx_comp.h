@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f33xxx_comp.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,36 +16,36 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_COMP_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_COMP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_COMP2_CSR_OFFSET      0x0020      /* COMP2 Control register */
 #define STM32_COMP4_CSR_OFFSET      0x0028      /* COMP4 Control register */
 #define STM32_COMP6_CSR_OFFSET      0x0030      /* COMP6 Control register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_COMP2_CSR             (STM32_COMP_BASE+STM32_COMP2_CSR_OFFSET)
 #define STM32_COMP4_CSR             (STM32_COMP_BASE+STM32_COMP4_CSR_OFFSET)
 #define STM32_COMP6_CSR             (STM32_COMP_BASE+STM32_COMP6_CSR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* COMP control and status register */
 

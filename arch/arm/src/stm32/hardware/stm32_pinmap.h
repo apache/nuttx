@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_pinmap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,18 +16,18 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_PINMAP_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_PINMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/* STM32L EnergyLite Line ***********************************************************/
+/* STM32L EnergyLite Line ***************************************************/
 
 #if defined(CONFIG_STM32_ENERGYLITE)
 
@@ -39,7 +39,7 @@
 #    error "Unsupported EnergyLite chip"
 #  endif
 
-/* STM32 F1 Family ******************************************************************/
+/* STM32 F1 Family **********************************************************/
 
 #elif defined(CONFIG_STM32_STM32F10XX)
 
@@ -98,12 +98,12 @@
 #    error "Unsupported STM32F10XXX chip"
 #  endif
 
-/* STM32 F2 Family ******************************************************************/
+/* STM32 F2 Family **********************************************************/
 
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "hardware/stm32f20xxx_pinmap.h"
 
-/* STM32 F3 Family ******************************************************************/
+/* STM32 F3 Family **********************************************************/
 
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  include "hardware/stm32f30xxx_pinmap.h"
@@ -112,17 +112,17 @@
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include "hardware/stm32f37xxx_pinmap.h"
 
-/* STM32 F412 Family ****************************************************************/
+/* STM32 F412 Family ********************************************************/
 
 #elif defined(CONFIG_STM32_STM32F412)
 #  include "hardware/stm32f412xx_pinmap.h"
 
-/* STM32 F4 Family ******************************************************************/
+/* STM32 F4 Family **********************************************************/
 
 #elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "hardware/stm32f40xxx_pinmap.h"
 
-/* STM32 G4 Family ******************************************************************/
+/* STM32 G4 Family **********************************************************/
 
 #elif defined(CONFIG_STM32_STM32G4XXX)
 #  include "hardware/stm32g4xxxx_pinmap.h"

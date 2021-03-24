@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4_lptim.h
  *
  *   Copyright (C) 2016 Motorola Mobility, LLC. All rights reserved.
@@ -32,16 +32,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_LPTIM_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_LPTIM_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 /* Basic Timers - TIM6 and TIM7 */
 
@@ -54,7 +54,7 @@
 #define STM32L4_LPTIM_ARR_OFFSET  0x0018  /* Autoreload Register */
 #define STM32L4_LPTIM_CNT_OFFSET  0x001c  /* Counter Register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 /* Low-Power Timers - LPTIM1 and LPTIM2 */
 
@@ -76,7 +76,7 @@
 #define STM32L4_LPTIM2_ARR        (STM32L4_LPTIM2_BASE+STM32L4_LPTIM_ARR_OFFSET)
 #define STM32L4_LPTIM2_CNT        (STM32L4_LPTIM2_BASE+STM32L4_LPTIM_CNT_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 #define LPTIM_CFGR_CKSEL          (1 << 0)   /* Bit   0: Clock selector */
 #define LPTIM_CFGR_CKSEL_SHIFT    (0)

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_dac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_DAC_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_DAC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -32,15 +32,16 @@
 
 #include <nuttx/analog/dac.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
-/* Timer devices may be used for different purposes.  One special purpose is to
- * control periodic DAC outputs.  If CONFIG_STM32L4_TIMn is defined then
- * CONFIG_STM32L4_TIMn_DAC must also be defined to indicate that timer "n" is
- * intended to be used for that purpose.
+/* Configuration ************************************************************/
+
+/* Timer devices may be used for different purposes.  One special purpose is
+ * to control periodic DAC outputs.  If CONFIG_STM32L4_TIMn is defined then
+ * CONFIG_STM32L4_TIMn_DAC must also be defined to indicate that timer "n"
+ * is intended to be used for that purpose.
  */
 
 #ifndef CONFIG_STM32L4_TIM1
@@ -77,9 +78,9 @@
 #  undef CONFIG_STM32L4_TIM17_DAC
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_DAC1_DMA
 extern uint16_t stm32l4_dac1_dmabuffer[];
@@ -88,9 +89,9 @@ extern uint16_t stm32l4_dac1_dmabuffer[];
 extern uint16_t stm32l4_dac2_dmabuffer[];
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus

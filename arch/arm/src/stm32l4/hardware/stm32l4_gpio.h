@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_GPIO_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/stm32l4/chip.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L4_GPIO_MODER_OFFSET    0x0000 /* GPIO port mode register */
 #define STM32L4_GPIO_OTYPER_OFFSET   0x0004 /* GPIO port output type register */
@@ -47,7 +47,7 @@
 #define STM32L4_GPIO_BRR_OFFSET      0x0028 /* GPIO port bit reset register */
 #define STM32L4_GPIO_ASCR_OFFSET     0x002c /* GPIO port analog switch control register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32L4_NPORTS > 0
 #  define STM32L4_GPIOA_MODER        (STM32L4_GPIOA_BASE+STM32L4_GPIO_MODER_OFFSET)
@@ -184,7 +184,7 @@
 #  define STM32L4_GPIOI_ASCR         (STM32L4_GPIOI_BASE+STM32L4_GPIO_ASCR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* GPIO port mode register */
 

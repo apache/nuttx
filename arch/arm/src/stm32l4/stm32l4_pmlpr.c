@@ -62,9 +62,9 @@
  *   None
  *
  * Returned Value:
- *   Zero means that LPR was successfully entered. Otherwise, LPR mode was not
- *   entered and a negated errno value is returned to indicate the cause of the
- *   failure.
+ *   Zero means that LPR was successfully entered. Otherwise, LPR mode was
+ *   not entered and a negated errno value is returned to indicate the cause
+ *   of the failure.
  *
  ****************************************************************************/
 
@@ -93,7 +93,8 @@ int stm32l4_pmlpr(void)
 
   /* Wait until the MSI source is used as the system clock source */
 
-  while ((getreg32(STM32L4_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_MSI)
+  while ((getreg32(STM32L4_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
+          RCC_CFGR_SWS_MSI)
     {
     }
 

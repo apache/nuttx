@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_CHIP_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "nvic.h"
@@ -34,8 +34,9 @@
 
 #define ARMV6M_PERIPHERAL_INTERRUPTS 32
 
-/* Include the memory map file.  Other chip hardware files should then include
- * this file for the proper setup.
+/* Include the memory map file.
+ * Other chip hardware files should then include this file for the proper
+ * setup.
  */
 
 #include "hardware/stm32_memorymap.h"

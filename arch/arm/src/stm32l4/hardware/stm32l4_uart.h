@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4_uart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_UART_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L4_USART_CR1_OFFSET    0x0000  /* Control register 1 */
 #define STM32L4_USART_CR2_OFFSET    0x0004  /* Control register 2 */
@@ -47,7 +47,7 @@
 #define STM32L4_USART_RDR_OFFSET    0x0024  /* Receive Data register */
 #define STM32L4_USART_TDR_OFFSET    0x0028  /* Transmit Data register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32L4_NUSART > 0
 #  define STM32L4_USART1_CR1        (STM32L4_USART1_BASE+STM32L4_USART_CR1_OFFSET)
@@ -119,7 +119,7 @@
 #  define STM32L4_UART5_TDR         (STM32L4_UART5_BASE+STM32L4_USART_TDR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Control register 1 */
 
@@ -151,8 +151,8 @@
 #define USART_CR1_M1              (1 << 28) /* Bit 28: Word length */
 
 #define USART_CR1_ALLINTS         (USART_CR1_IDLEIE|USART_CR1_RXNEIE| \
-	USART_CR1_TCIE|USART_CR1_TXEIE|USART_CR1_PEIE|USART_CR1_CMIE| \
-    USART_CR1_RTOIE|USART_CR1_EOBIE)
+        USART_CR1_TCIE|USART_CR1_TXEIE|USART_CR1_PEIE|USART_CR1_CMIE| \
+        USART_CR1_RTOIE|USART_CR1_EOBIE)
 
 /* Control register 2 */
 
@@ -216,6 +216,7 @@
 #define USART_CR3_WUS_ADDRESS     (0 << USART_CR3_WUS_SHIFT) /* 00: WUF active on address match */
 #define USART_CR3_WUS_START       (2 << USART_CR3_WUS_SHIFT) /* 10: WUF active on Start bit detection */
 #define USART_CR3_WUS_RXNE        (3 << USART_CR3_WUS_SHIFT) /* 11: WUF active on RXNE */
+
 #define USART_CR3_WUFIE           (1 << 22) /* Bit 22: Wakeup from Stop mode interrupt enable */
 
 /* Baud Rate Register */
@@ -287,16 +288,16 @@
 #define USART_TDR_SHIFT           (0)       /* Bits 8:0: Data value */
 #define USART_TDR_MASK            (0xff << USART_TDR_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_UART_H */

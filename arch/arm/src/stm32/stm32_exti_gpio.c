@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_exti_gpio.c
  *
- *   Copyright (C) 2009, 2011-2012, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2015, 2017 Gregory Nutt.
+ *   All rights reserved.
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Uros Platise <uros.platise@isotel.eu>

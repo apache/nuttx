@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,27 +16,27 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_SPI_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_SPI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Maximum allowed speed as per specifications for all SPIs */
 
 #define STM32L4_SPI_CLK_MAX      40000000UL
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L4_SPI_CR1_OFFSET       0x0000  /* SPI Control Register 1 (16-bit) */
 #define STM32L4_SPI_CR2_OFFSET       0x0004  /* SPI control register 2 (16-bit) */
@@ -46,7 +46,7 @@
 #define STM32L4_SPI_RXCRCR_OFFSET    0x0014  /* SPI Rx CRC register (16-bit) */
 #define STM32L4_SPI_TXCRCR_OFFSET    0x0018  /* SPI Tx CRC register (16-bit) */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32L4_NSPI > 0
 #  define STM32L4_SPI1_CR1          (STM32L4_SPI1_BASE+STM32L4_SPI_CR1_OFFSET)
@@ -78,7 +78,7 @@
 #  define STM32L4_SPI3_TXCRCR       (STM32L4_SPI3_BASE+STM32L4_SPI_TXCRCR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* SPI Control Register 1 */
 
@@ -95,6 +95,7 @@
 #  define SPI_CR1_FPCLCKd64       (5 << SPI_CR1_BR_SHIFT) /* 101: fPCLK/64 */
 #  define SPI_CR1_FPCLCKd128      (6 << SPI_CR1_BR_SHIFT) /* 110: fPCLK/128 */
 #  define SPI_CR1_FPCLCKd256      (7 << SPI_CR1_BR_SHIFT) /* 111: fPCLK/256 */
+
 #define SPI_CR1_SPE               (1 << 6)  /* Bit 6: SPI Enable */
 #define SPI_CR1_LSBFIRST          (1 << 7)  /* Bit 7: Frame Format */
 #define SPI_CR1_SSI               (1 << 8)  /* Bit 8: Internal slave select */
@@ -145,12 +146,13 @@
 #define SPI_SR_OVR                (1 << 6)  /* Bit 6: Overrun flag */
 #define SPI_SR_BSY                (1 << 7)  /* Bit 7: Busy flag */
 #define SPI_SR_FRE                (1 << 8)  /* Bit 8: Frame format error */
-#define SPI_SR_FRLVL_SHIFT       (9)       /* Bits 9-10: FIFO reception level */
+#define SPI_SR_FRLVL_SHIFT       (9)        /* Bits 9-10: FIFO reception level */
 #define SPI_SR_FRLVL_MASK        (3 << SPI_SR_FRLVL_SHIFT)
 #  define SPI_SR_FRLVL_EMPTY     (0 << SPI_SR_FRLVL_SHIFT) /* FIFO empty */
 #  define SPI_SR_FRLVL_QUARTER   (1 << SPI_SR_FRLVL_SHIFT) /* 1/4 FIFO */
 #  define SPI_SR_FRLVL_HALF      (2 << SPI_SR_FRLVL_SHIFT) /* 1/2 FIFO */
 #  define SPI_SR_FRLVL_FULL      (3 << SPI_SR_FRLVL_SHIFT) /* FIFO full */
+
 #define SPI_SR_FTLVL_SHIFT       (11)      /* Bits 11-12: FIFO transmission level */
 #define SPI_SR_FTLVL_MASK        (3 << SPI_SR_FTLVL_SHIFT)
 #  define SPI_SR_FTLVL_EMPTY     (0 << SPI_SR_FTLVL_SHIFT) /* FIFO empty */

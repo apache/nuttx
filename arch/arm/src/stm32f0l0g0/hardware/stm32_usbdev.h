@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_usbdev.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,29 +16,30 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_USBDEV_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_USBDEV_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <chip.h>
 
 #ifdef CONFIG_STM32F0L0G0_HAVE_USBDEV
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 /* Endpoint Registers */
 
 #define STM32_USB_EPR_OFFSET(n)      ((n) << 2) /* USB endpoint n register (16-bits) */
+
 #define STM32_USB_EP0R_OFFSET        0x0000  /* USB endpoint 0 register (16-bits) */
 #define STM32_USB_EP1R_OFFSET        0x0004  /* USB endpoint 1 register (16-bits) */
 #define STM32_USB_EP2R_OFFSET        0x0008  /* USB endpoint 2 register (16-bits) */
@@ -71,7 +72,7 @@
 #define STM32_USB_ADDR_RX_OFFSET(ep)  STM32_USB_BTABLE_RADDR(ep,STM32_USB_ADDR_RX_WOFFSET)
 #define STM32_USB_COUNT_RX_OFFSET(ep) STM32_USB_BTABLE_RADDR(ep,STM32_USB_COUNT_RX_WOFFSET)
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 /* Endpoint Registers */
 
@@ -103,7 +104,7 @@
 #define STM32_USB_ADDR_RX(ep)        STM32_USB_BTABLE_ADDR(ep,STM32_USB_ADDR_RX_WOFFSET)
 #define STM32_USB_COUNT_RX(ep)       STM32_USB_BTABLE_ADDR(ep,STM32_USB_COUNT_RX_WOFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* USB endpoint register */
 
@@ -117,6 +118,7 @@
 #  define USB_EPR_STATTX_VALID         (3 << USB_EPR_STATTX_SHIFT) /* EndPoint TX VALID */
 #  define USB_EPR_STATTX_DTOG1         (1 << USB_EPR_STATTX_SHIFT) /* EndPoint TX Data Toggle bit1 */
 #  define USB_EPR_STATTX_DTOG2         (2 << USB_EPR_STATTX_SHIFT) /* EndPoint TX Data Toggle bit2 */
+
 #define USB_EPR_DTOG_TX                (1 << 6)  /* Bit 6: Data Toggle, for transmission transfers */
 #define USB_EPR_CTR_TX                 (1 << 7)  /* Bit 7: Correct Transfer for transmission */
 #define USB_EPR_EP_KIND                (1 << 8)  /* Bit 8: Endpoint Kind */
@@ -126,6 +128,7 @@
 #  define USB_EPR_EPTYPE_CONTROL       (1 << USB_EPR_EPTYPE_SHIFT) /* EndPoint CONTROL */
 #  define USB_EPR_EPTYPE_ISOC          (2 << USB_EPR_EPTYPE_SHIFT) /* EndPoint ISOCHRONOUS */
 #  define USB_EPR_EPTYPE_INTERRUPT     (3 << USB_EPR_EPTYPE_SHIFT) /* EndPoint INTERRUPT */
+
 #define USB_EPR_SETUP                  (1 << 11) /* Bit 11: Setup transaction completed */
 #define USB_EPR_STATRX_SHIFT           (12)      /* Bits 13-12: Status bits, for reception transfers */
 #define USB_EPR_STATRX_MASK            (3 << USB_EPR_STATRX_SHIFT)
@@ -135,6 +138,7 @@
 #  define USB_EPR_STATRX_VALID         (3 << USB_EPR_STATRX_SHIFT) /* EndPoint RX VALID */
 #  define USB_EPR_STATRX_DTOG1         (1 << USB_EPR_STATRX_SHIFT) /* EndPoint RX Data TOGgle bit1 */
 #  define USB_EPR_STATRX_DTOG2         (2 << USB_EPR_STATRX_SHIFT) /* EndPoint RX Data TOGgle bit1 */
+
 #define USB_EPR_DTOG_RX                (1 << 14) /* Bit 14: Data Toggle, for reception transfers */
 #define USB_EPR_CTR_RX                 (1 << 15) /* Bit 15: Correct Transfer for reception */
 

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_dma.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_DMA_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* 2 DMA controllers + 1 MDMA + 1 BDMA */
 
@@ -50,7 +50,7 @@
 #define DMA_STREAM6               (6)
 #define DMA_STREAM7               (7)
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_DMA_LISR_OFFSET     0x0000 /* DMA low interrupt status register */
 #define STM32_DMA_HISR_OFFSET     0x0004 /* DMA high interrupt status register */
@@ -119,7 +119,7 @@
 #define STM32_DMA_S6FCR_OFFSET    0x00b4 /* DMA stream 6 FIFO control register */
 #define STM32_DMA_S7FCR_OFFSET    0x00cc /* DMA stream 7 FIFO control register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_DMA1_LISRC          (STM32_DMA1_BASE+STM32_DMA_LISR_OFFSET)
 #define STM32_DMA1_HISRC          (STM32_DMA1_BASE+STM32_DMA_HISR_OFFSET)
@@ -251,7 +251,7 @@
 #define STM32_DMA2_S6FCR          (STM32_DMA2_BASE+STM32_DMA_S6FCR_OFFSET)
 #define STM32_DMA2_S7FCR          (STM32_DMA2_BASE+STM32_DMA_S7FCR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 #define DMA_STREAM_MASK           0x3f
 #define DMA_STREAM_FEIF_BIT       (1 << 0)  /* Bit 0: Stream FIFO error interrupt flag */

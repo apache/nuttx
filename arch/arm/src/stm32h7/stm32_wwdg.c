@@ -83,12 +83,12 @@
 struct stm32_lowerhalf_s
 {
   FAR const struct watchdog_ops_s  *ops;  /* Lower half operations */
-  xcpt_t   handler;  /* Current EWI interrupt handler */
-  uint32_t timeout;  /* The actual timeout value */
-  uint32_t fwwdg;    /* WWDG clock frequency */
-  bool     started;  /* The timer has been started */
-  uint8_t  reload;   /* The 7-bit reload field reset value */
-  uint8_t  window;   /* The 7-bit window (W) field value */
+  xcpt_t   handler;                       /* Current EWI interrupt handler */
+  uint32_t timeout;                       /* The actual timeout value */
+  uint32_t fwwdg;                         /* WWDG clock frequency */
+  bool     started;                       /* The timer has been started */
+  uint8_t  reload;                        /* The 7-bit reload field reset value */
+  uint8_t  window;                        /* The 7-bit window (W) field value */
 };
 
 /****************************************************************************
@@ -245,7 +245,8 @@ static void stm32_putreg(uint16_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static void stm32_setwindow(FAR struct stm32_lowerhalf_s *priv, uint8_t window)
+static void stm32_setwindow(FAR struct stm32_lowerhalf_s *priv,
+                            uint8_t window)
 {
   uint16_t regval;
 
@@ -705,7 +706,8 @@ static int stm32_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
       ret = -EINVAL;
       if (mintime < priv->timeout)
         {
-          uint32_t window = (priv->timeout - mintime) * priv->fwwdg / 1000 - 1;
+          uint32_t window = (priv->timeout - mintime) *
+                             priv->fwwdg / 1000 - 1;
           DEBUGASSERT(window < priv->reload);
           stm32_setwindow(priv, window | WWDG_CR_T_RESET);
           ret = OK;

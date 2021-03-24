@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_ADC_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_ADC_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/analog/adc.h>
 #include "chip.h"
 #include "hardware/stm32l4_adc.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Configuration *************************************************************/
+/* Configuration ************************************************************/
 
 /* Timer devices may be used for different purposes.  One special purpose is
  * to control periodic ADC sampling.  If CONFIG_STM32L4_TIMn is defined then
@@ -453,7 +453,7 @@
 #define ADC3_EXTSEL_T15CC4     ADC_CFGR_EXTSEL_T15CC4
 #define ADC3_EXTSEL_T15TRGO    ADC_CFGR_EXTSEL_T15TRGO
 
-/* EXTSEL configuration ******************************************************/
+/* EXTSEL configuration *****************************************************/
 
 /* ADCx_EXTSEL_VALUE can be set by this driver or by board specific logic in
  * board.h file.
@@ -799,7 +799,7 @@
 #  define ADC_HAVE_EXTCFG
 #endif
 
-/* JEXTSEL configuration *****************************************************/
+/* JEXTSEL configuration ****************************************************/
 
 #ifndef ADC_JEXTREG_JEXTEN_DEFAULT
 #  define ADC_JEXTREG_JEXTEN_DEFAULT   ADC_JSQR_JEXTEN_RISING
@@ -1069,7 +1069,7 @@
 #  define ADC_HAVE_JEXTCFG
 #endif
 
-/* ADC interrupts ************************************************************/
+/* ADC interrupts ***********************************************************/
 
 #define ADC_ISR_EOC                  ADC_INT_EOC
 #define ADC_IER_EOC                  ADC_INT_EOC
@@ -1089,7 +1089,7 @@
 #define ADC_IER_ALLINTS (ADC_IER_EOC | ADC_IER_EOS | ADC_IER_AWD | \
                          ADC_IER_JEOC | ADC_IER_JEOS | ADC_IER_OVR)
 
-/* Low-level ops helpers *****************************************************/
+/* Low-level ops helpers ****************************************************/
 
 #define ADC_INT_ACK(adc, source)                     \
         (adc)->llops->int_ack(adc, source)
@@ -1116,7 +1116,7 @@
 #define ADC_DUMP_REGS(adc)                           \
         (adc)->llops->dump_regs(adc)
 
-/* IOCTL Commands ************************************************************
+/* IOCTL Commands ***********************************************************
  *
  * Cmd: ANIOC_STM32L4_TRIGGER_REG           Arg:
  * Cmd: ANIOC_STM32L4_TRIGGER_INJ           Arg:
@@ -1126,9 +1126,9 @@
 #define ANIOC_STM32L4_TRIGGER_REG           _ANIOC(AN_STM32L4_FIRST + 0)
 #define ANIOC_STM32L4_TRIGGER_INJ           _ANIOC(AN_STM32L4_FIRST + 1)
 
-/*****************************************************************************
+/****************************************************************************
  * Public Types
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_ADC_LL_OPS
 
@@ -1210,9 +1210,9 @@ struct stm32_adc_ops_s
 
 #endif  /* CONFIG_STM32L4_ADC_LL_OPS */
 
-/*****************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -1223,7 +1223,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l4_adc_initialize
  *
  * Description:
@@ -1237,7 +1237,7 @@ extern "C"
  * Returned Value:
  *   Valid ADC device structure reference on success; a NULL on failure
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 struct adc_dev_s;
 struct adc_dev_s *stm32l4_adc_initialize(int intf,

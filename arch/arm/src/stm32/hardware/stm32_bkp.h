@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_bkp.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_BKP_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_BKP_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_HIGHDENSITY) || defined(CONFIG_STM32_CONNECTIVITYLINE)
 #  define CONFIG_STM32_NBKP_BYTES 84
@@ -33,7 +33,7 @@
 #  define CONFIG_STM32_NBKP_REGS  10
 #endif
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #if defined(CONFIG_STM32_HIGHDENSITY) || defined(CONFIG_STM32_CONNECTIVITYLINE)
 #  define STM32_BKP_DR_OFFSET(n) ((n) > 10 ? 0x0040+4*((n)-10) : 0x0004+4*(n))
@@ -91,7 +91,7 @@
 #  define STM32_BKP_DR42_OFFSET  0x00bc  /* Backup data register 42 */
 #endif
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_BKP_RTCCR          (STM32_BKP_BASE+STM32_BKP_RTCCR_OFFSET)
 #define STM32_BKP_CR             (STM32_BKP_BASE+STM32_BKP_CR_OFFSET)
@@ -144,7 +144,7 @@
 #  define STM32_BKP_DR42         (STM32_BKP_BASE+STM32_BKP_DR42_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* RTC clock calibration register */
 

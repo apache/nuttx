@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_rng.h
  *
  *   Copyright (C) 2012 Max Holtzberg. All rights reserved.
@@ -31,35 +31,35 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_RNG_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_RNG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_RNG_CR_OFFSET       0x0000  /* RNG Control Register */
 #define STM32_RNG_SR_OFFSET       0x0004  /* RNG Status Register */
 #define STM32_RNG_DR_OFFSET       0x0008  /* RNG Data Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_RNG_CR              (STM32_RNG_BASE+STM32_RNG_CR_OFFSET)
 #define STM32_RNG_SR              (STM32_RNG_BASE+STM32_RNG_SR_OFFSET)
 #define STM32_RNG_DR              (STM32_RNG_BASE+STM32_RNG_DR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* RNG Control Register */
 
@@ -75,4 +75,4 @@
 #define RNG_SR_CEIS               (1 << 5) /* Bit 5: Clock error interrupt status */
 #define RNG_SR_SEIS               (1 << 6) /* Bit 6: Seed error interrupt status */
 
-#endif	/* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_RNG_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_RNG_H */

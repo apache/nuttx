@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l5/stm32l5_tim.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -42,11 +42,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -69,11 +69,11 @@
 #include "stm32l5_gpio.h"
 #include "stm32l5_tim.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Configuration *************************************************************/
+/* Configuration ************************************************************/
 
 /* Timer devices may be used for different purposes.  Such special purposes
  * include:
@@ -84,16 +84,16 @@
  *   output modulation.
  *
  * - To control periodic ADC input sampling.  If CONFIG_STM32L5_TIMn is
- *   defined then CONFIG_STM32L5_TIMn_ADC may also be defined to indicate that
- *   timer "n" is intended to be used for that purpose.
+ *   defined then CONFIG_STM32L5_TIMn_ADC may also be defined to indicate
+ *   that timer "n" is intended to be used for that purpose.
  *
  * - To control periodic DAC outputs.  If CONFIG_STM32L5_TIMn is defined then
- *   CONFIG_STM32L5_TIMn_DAC may also be defined to indicate that timer "n" is
- *   intended to be used for that purpose.
+ *   CONFIG_STM32L5_TIMn_DAC may also be defined to indicate that timer "n"
+ *   is intended to be used for that purpose.
  *
  * - To use a Quadrature Encoder.  If CONFIG_STM32L5_TIMn is defined then
- *   CONFIG_STM32L5_TIMn_QE may also be defined to indicate that timer "n" is
- *   intended to be used for that purpose.
+ *   CONFIG_STM32L5_TIMn_QE may also be defined to indicate that timer "n"
+ *   is intended to be used for that purpose.
  *
  * In any of these cases, the timer will not be used by this timer module.
  */
@@ -227,9 +227,9 @@
     defined(CONFIG_STM32L5_TIM15) || defined(CONFIG_STM32L5_TIM16) || \
     defined(CONFIG_STM32L5_TIM17)
 
-/*****************************************************************************
+/****************************************************************************
  * Private Types
- *****************************************************************************/
+ ****************************************************************************/
 
 /* TIM Device Structure */
 
@@ -240,9 +240,9 @@ struct stm32l5_tim_priv_s
   uint32_t base;                      /* TIMn base address */
 };
 
-/*****************************************************************************
+/****************************************************************************
  * Private Function prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
 /* Register helpers */
 
@@ -297,13 +297,14 @@ static void stm32l5_tim_enableint(FAR struct stm32l5_tim_dev_s *dev,
                                   int source);
 static void stm32l5_tim_disableint(FAR struct stm32l5_tim_dev_s *dev,
                                    int source);
-static void stm32l5_tim_ackint(FAR struct stm32l5_tim_dev_s *dev, int source);
+static void stm32l5_tim_ackint(FAR struct stm32l5_tim_dev_s *dev,
+                               int source);
 static int stm32l5_tim_checkint(FAR struct stm32l5_tim_dev_s *dev,
                                 int source);
 
-/*****************************************************************************
+/****************************************************************************
  * Private Data
- *****************************************************************************/
+ ****************************************************************************/
 
 static const struct stm32l5_tim_ops_s stm32l5_tim_ops =
 {
@@ -421,17 +422,17 @@ struct stm32l5_tim_priv_s stm32l5_tim17_priv =
 };
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Private Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_getreg16
  *
  * Description:
  *   Get a 16-bit register value by offset
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t stm32l5_getreg16(FAR struct stm32l5_tim_dev_s *dev,
                                         uint8_t offset)
@@ -439,13 +440,13 @@ static inline uint16_t stm32l5_getreg16(FAR struct stm32l5_tim_dev_s *dev,
   return getreg16(((struct stm32l5_tim_priv_s *)dev)->base + offset);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_putreg16
  *
  * Description:
  *   Put a 16-bit register value by offset
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32l5_putreg16(FAR struct stm32l5_tim_dev_s *dev,
                                     uint8_t offset, uint16_t value)
@@ -453,13 +454,13 @@ static inline void stm32l5_putreg16(FAR struct stm32l5_tim_dev_s *dev,
   putreg16(value, ((struct stm32l5_tim_priv_s *)dev)->base + offset);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_modifyreg16
  *
  * Description:
  *   Modify a 16-bit register value by offset
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32l5_modifyreg16(FAR struct stm32l5_tim_dev_s *dev,
                                        uint8_t offset, uint16_t clearbits,
@@ -469,14 +470,14 @@ static inline void stm32l5_modifyreg16(FAR struct stm32l5_tim_dev_s *dev,
               setbits);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_getreg32
  *
  * Description:
- *   Get a 32-bit register value by offset.  This applies only for the STM32L5
- *   32-bit registers (CNT, ARR, CRR1-4) in the 32-bit timers TIM2-5.
+ *   Get a 32-bit register value by offset.  This applies only for the
+ *   STM32L5 32-bit registers (CNT, ARR, CRR1-4) in the 32-bit timers TIM2-5.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t stm32l5_getreg32(FAR struct stm32l5_tim_dev_s *dev,
                                         uint8_t offset)
@@ -484,14 +485,14 @@ static inline uint32_t stm32l5_getreg32(FAR struct stm32l5_tim_dev_s *dev,
   return getreg32(((struct stm32l5_tim_priv_s *)dev)->base + offset);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_putreg32
  *
  * Description:
- *   Put a 32-bit register value by offset.  This applies only for the STM32L5
- *   32-bit registers (CNT, ARR, CRR1-4) in the 32-bit timers TIM2-5.
+ *   Put a 32-bit register value by offset.  This applies only for the
+ *   STM32L5 32-bit registers (CNT, ARR, CRR1-4) in the 32-bit timers TIM2-5.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32l5_putreg32(FAR struct stm32l5_tim_dev_s *dev,
                                     uint8_t offset, uint32_t value)
@@ -499,9 +500,9 @@ static inline void stm32l5_putreg32(FAR struct stm32l5_tim_dev_s *dev,
   putreg32(value, ((struct stm32l5_tim_priv_s *)dev)->base + offset);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_reload_counter
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5_tim_reload_counter(FAR struct stm32l5_tim_dev_s *dev)
 {
@@ -510,9 +511,9 @@ static void stm32l5_tim_reload_counter(FAR struct stm32l5_tim_dev_s *dev)
   stm32l5_putreg16(dev, STM32L5_BTIM_EGR_OFFSET, val);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_enable
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5_tim_enable(FAR struct stm32l5_tim_dev_s *dev)
 {
@@ -522,9 +523,9 @@ static void stm32l5_tim_enable(FAR struct stm32l5_tim_dev_s *dev)
   stm32l5_putreg16(dev, STM32L5_BTIM_CR1_OFFSET, val);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_disable
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5_tim_disable(FAR struct stm32l5_tim_dev_s *dev)
 {
@@ -533,14 +534,14 @@ static void stm32l5_tim_disable(FAR struct stm32l5_tim_dev_s *dev)
   stm32l5_putreg16(dev, STM32L5_BTIM_CR1_OFFSET, val);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_reset
  *
  * Description:
  *   Reset timer into system default state, but do not affect output/input
  *   pins
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5_tim_reset(FAR struct stm32l5_tim_dev_s *dev)
 {
@@ -548,9 +549,9 @@ static void stm32l5_tim_reset(FAR struct stm32l5_tim_dev_s *dev)
   stm32l5_tim_disable(dev);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_gpioconfig
- *****************************************************************************/
+ ****************************************************************************/
 
 #if defined(HAVE_TIM1_GPIOCONFIG) || defined(HAVE_TIM2_GPIOCONFIG) || \
     defined(HAVE_TIM3_GPIOCONFIG) || defined(HAVE_TIM4_GPIOCONFIG) || \
@@ -573,9 +574,9 @@ static void stm32l5_tim_gpioconfig(uint32_t cfg,
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_setmode
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5_tim_setmode(FAR struct stm32l5_tim_dev_s *dev,
                                enum stm32l5_tim_mode_e mode)
@@ -648,9 +649,9 @@ static int stm32l5_tim_setmode(FAR struct stm32l5_tim_dev_s *dev,
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_setclock
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5_tim_setclock(FAR struct stm32l5_tim_dev_s *dev,
                                 uint32_t freq)
@@ -773,9 +774,9 @@ static int stm32l5_tim_setclock(FAR struct stm32l5_tim_dev_s *dev,
   return prescaler;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_getclock
- *****************************************************************************/
+ ****************************************************************************/
 
 static uint32_t stm32l5_tim_getclock(FAR struct stm32l5_tim_dev_s *dev)
 {
@@ -863,9 +864,9 @@ static uint32_t stm32l5_tim_getclock(FAR struct stm32l5_tim_dev_s *dev)
   return clock;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_setperiod
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5_tim_setperiod(FAR struct stm32l5_tim_dev_s *dev,
                                 uint32_t period)
@@ -874,9 +875,9 @@ static void stm32l5_tim_setperiod(FAR struct stm32l5_tim_dev_s *dev,
   stm32l5_putreg32(dev, STM32L5_BTIM_ARR_OFFSET, period);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_getperiod
- *****************************************************************************/
+ ****************************************************************************/
 
 static uint32_t stm32l5_tim_getperiod (FAR struct stm32l5_tim_dev_s *dev)
 {
@@ -884,9 +885,9 @@ static uint32_t stm32l5_tim_getperiod (FAR struct stm32l5_tim_dev_s *dev)
   return stm32l5_getreg32 (dev, STM32L5_BTIM_ARR_OFFSET);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_getcounter
- *****************************************************************************/
+ ****************************************************************************/
 
 static uint32_t stm32l5_tim_getcounter(FAR struct stm32l5_tim_dev_s *dev)
 {
@@ -916,9 +917,9 @@ static uint32_t stm32l5_tim_getcounter(FAR struct stm32l5_tim_dev_s *dev)
 #endif
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_setchannel
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5_tim_setchannel(FAR struct stm32l5_tim_dev_s *dev,
                                   uint8_t channel,
@@ -1312,9 +1313,9 @@ static int stm32l5_tim_setchannel(FAR struct stm32l5_tim_dev_s *dev,
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_setcompare
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5_tim_setcompare(FAR struct stm32l5_tim_dev_s *dev,
                                   uint8_t channel, uint32_t compare)
@@ -1346,9 +1347,9 @@ static int stm32l5_tim_setcompare(FAR struct stm32l5_tim_dev_s *dev,
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_getcapture
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5_tim_getcapture(FAR struct stm32l5_tim_dev_s *dev,
                                   uint8_t channel)
@@ -1373,9 +1374,9 @@ static int stm32l5_tim_getcapture(FAR struct stm32l5_tim_dev_s *dev,
   return -EINVAL;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_setisr
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5_tim_setisr(FAR struct stm32l5_tim_dev_s *dev,
                               xcpt_t handler, void *arg, int source)
@@ -1472,9 +1473,9 @@ static int stm32l5_tim_setisr(FAR struct stm32l5_tim_dev_s *dev,
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_enableint
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5_tim_enableint(FAR struct stm32l5_tim_dev_s *dev,
                                   int source)
@@ -1483,9 +1484,9 @@ static void stm32l5_tim_enableint(FAR struct stm32l5_tim_dev_s *dev,
   stm32l5_modifyreg16(dev, STM32L5_BTIM_DIER_OFFSET, 0, ATIM_DIER_UIE);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_disableint
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5_tim_disableint(FAR struct stm32l5_tim_dev_s *dev,
                                    int source)
@@ -1494,32 +1495,33 @@ static void stm32l5_tim_disableint(FAR struct stm32l5_tim_dev_s *dev,
   stm32l5_modifyreg16(dev, STM32L5_BTIM_DIER_OFFSET, ATIM_DIER_UIE, 0);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_ackint
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5_tim_ackint(FAR struct stm32l5_tim_dev_s *dev, int source)
 {
   stm32l5_putreg16(dev, STM32L5_BTIM_SR_OFFSET, ~ATIM_SR_UIF);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_checkint
- *****************************************************************************/
+ ****************************************************************************/
 
-static int stm32l5_tim_checkint(FAR struct stm32l5_tim_dev_s *dev, int source)
+static int stm32l5_tim_checkint(FAR struct stm32l5_tim_dev_s *dev,
+                                int source)
 {
   uint16_t regval = stm32l5_getreg16(dev, STM32L5_BTIM_SR_OFFSET);
   return (regval & ATIM_SR_UIF) ? 1 : 0;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Pubic Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_init
- *****************************************************************************/
+ ****************************************************************************/
 
 FAR struct stm32l5_tim_dev_s *stm32l5_tim_init(int timer)
 {
@@ -1621,12 +1623,12 @@ FAR struct stm32l5_tim_dev_s *stm32l5_tim_init(int timer)
   return dev;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_tim_deinit
  *
  * TODO: Detach interrupts, and close down all TIM Channels
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int stm32l5_tim_deinit(FAR struct stm32l5_tim_dev_s *dev)
 {

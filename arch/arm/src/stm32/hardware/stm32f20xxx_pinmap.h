@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f20xxx_pinmap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,41 +16,42 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F20XXX_PINMAP_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F20XXX_PINMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "stm32_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Alternate Pin Functions.  All members of the STM32F20xxx family share the same
- * pin multiplexing (although they may differ in the pins physically available).
+/* Alternate Pin Functions.  All members of the STM32F20xxx family share the
+ * same pin multiplexing (although they may differ in the pins physically
+ * available).
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
- * Drivers, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.  For example, if
- * CAN1_RX connects vis PA11 on some board, then the following definitions should
- * appear in the board.h header file for that board:
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc. Drivers, however, will use the pin selection without the numeric
+ * suffix. Additional definitions are required in the board.h file.  For
+ * example, if CAN1_RX connects vis PA11 on some board, then the following
+ * definitions should appear in the board.h header file for that board:
  *
  * #define GPIO_CAN1_RX GPIO_CAN1_RX_1
  *
  * The driver will then automatically configure PA11 as the CAN1 RX pin.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific GPIO options such as frequency,
- * open-drain/push-pull, and pull-up/down!  Just the basics are defined for most
- * pins in this file.
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific GPIO options such as
+ * frequency, open-drain/push-pull, and pull-up/down!  Just the basics are
+ * defined for most pins in this file.
  */
 
 /* ADC */
@@ -389,8 +390,8 @@
 /* SDIO
  *
  * Note that the below configures GPIO_SPEED_50MHz I/O, that means for using
- * the SDIO that you must enable I/O Compensation via the configuration option
- * CONFIG_STM32_SYSCFG_IOCOMPENSATION=y.
+ * the SDIO that you must enable I/O Compensation via the configuration
+ * option CONFIG_STM32_SYSCFG_IOCOMPENSATION=y.
  */
 
 #define GPIO_SDIO_CK          (GPIO_ALT|GPIO_AF12|GPIO_SPEED_50MHz|GPIO_PORTC|GPIO_PIN12)

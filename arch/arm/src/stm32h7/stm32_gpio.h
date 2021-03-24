@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/stm32_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_STM32_GPIO_H
 #define __ARCH_ARM_SRC_STM32H7_STM32_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -37,9 +37,9 @@
 #include "chip.h"
 #include "hardware/stm32_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-Processor Declarations
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Bit-encoded input to stm32_configgpio() */
 
@@ -147,11 +147,11 @@
 #define GPIO_OPENDRAIN                (1 << 9)                   /* Bit9: 1=Open-drain output */
 #define GPIO_PUSHPULL                 (0)                        /* Bit9: 0=Push-pull output */
 
-/* If the pin is a GPIO digital output, then this identifies the initial output
- * value.
+/* If the pin is a GPIO digital output, then this identifies the initial
+ * output value.
  *
- * If the pin is an input, this bit is overloaded to provide the qualifier to
- * distinguish input pull-up and -down:
+ * If the pin is an input, this bit is overloaded to provide the
+ * qualifier to distinguish input pull-up and -down:
  *
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210
@@ -243,9 +243,9 @@
 #  define GPIO_PIN14                  (14 << GPIO_PIN_SHIFT)
 #  define GPIO_PIN15                  (15 << GPIO_PIN_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -262,11 +262,11 @@ extern "C"
 
 EXTERN const uint32_t g_gpiobase[STM32H7_NGPIO];
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_configgpio
  *
  * Description:
@@ -279,52 +279,53 @@ EXTERN const uint32_t g_gpiobase[STM32H7_NGPIO];
  *   OK on success
  *   ERROR on invalid port, or when pin is locked as ALT function.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_configgpio(uint32_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_unconfiggpio
  *
  * Description:
- *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set it
- *   into default HiZ state (and possibly mark it's unused) and unlock it whether
- *   it was previously selected as alternative function (GPIO_ALT|GPIO_CNF_AFPP|...).
+ *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set
+ *   it into default HiZ state (and possibly mark it's unused) and unlock it
+ *   whether it was previously selected as alternative function
+ *   (GPIO_ALT|GPIO_CNF_AFPP|...).
  *
- *   This is a safety function and prevents hardware from schocks, as unexpected
- *   write to the Timer Channel Output GPIO to fixed '1' or '0' while it should
- *   operate in PWM mode could produce excessive on-board currents and trigger
- *   over-current/alarm function.
+ *   This is a safety function and prevents hardware from schocks, as
+ *   unexpected write to the Timer Channel Output GPIO to fixed '1' or '0'
+ *   while it should operate in PWM mode could produce excessive on-board
+ *   currents and trigger over-current/alarm function.
  *
  * Returned Value:
  *  OK on success
  *  ERROR on invalid port
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_unconfiggpio(uint32_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_gpiowrite(uint32_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool stm32_gpioread(uint32_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_gpiosetevent
  *
  * Description:
@@ -342,18 +343,18 @@ bool stm32_gpioread(uint32_t pinset);
  *   Zero (OK) on success; a negated errno value on failure indicating the
  *   nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
                        bool event, xcpt_t func, void *arg);
 
-/************************************************************************************
+/****************************************************************************
  * Function:  stm32_dumpgpio
  *
  * Description:
  *   Dump all GPIO registers associated with the provided base address
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int stm32_dumpgpio(uint32_t pinset, const char *msg);
@@ -361,7 +362,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg);
 #  define stm32_dumpgpio(p,m)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function:  stm32_gpioinit
  *
  * Description:
@@ -370,7 +371,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg);
  *
  *   Typically called from stm32_start().
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_gpioinit(void);
 

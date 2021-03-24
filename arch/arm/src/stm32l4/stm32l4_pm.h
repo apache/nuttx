@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_pm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_PM_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_PM_H
@@ -113,8 +113,8 @@ int stm32l4_pmstandby(void);
  *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
  *                        executed, the MCU enters Sleep mode as soon as it
  *                        exits the lowest priority ISR.
- *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep mode
- *                        as soon as WFI or WFE instruction is executed.
+ *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep
+ *                        mode as soon as WFI or WFE instruction is executed.
  * Returned Value:
  *   None
  *
@@ -132,9 +132,9 @@ void stm32l4_pmsleep(bool sleeponexit);
  *   None
  *
  * Returned Value:
- *   Zero means that LPR was successfully entered. Otherwise, LPR mode was not
- *   entered and a negated errno value is returned to indicate the cause of the
- *   failure.
+ *   Zero means that LPR was successfully entered. Otherwise, LPR mode was
+ *   not entered and a negated errno value is returned to indicate the cause
+ *   of the failure.
  *
  ****************************************************************************/
 

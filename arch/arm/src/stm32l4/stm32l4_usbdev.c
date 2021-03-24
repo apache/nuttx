@@ -2033,7 +2033,9 @@ static void stm32l4_ep0setup(struct stm32l4_usbdev_s *priv)
         usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_GETSETDESC),
                  priv->ctrl.type);
 
-        /* The request seems valid... let the class implementation handle it */
+        /* The request seems valid...
+         * let the class implementation handle it
+         */
 
         stm32l4_dispatchrequest(priv);
         handled = true;
@@ -2054,7 +2056,9 @@ static void stm32l4_ep0setup(struct stm32l4_usbdev_s *priv)
             USB_REQ_RECIPIENT_DEVICE &&
             value.w == 0 && index.w == 0 && len.w == 1)
           {
-            /* The request seems valid... let the class implementation handle it */
+            /* The request seems valid...
+             * let the class implementation handle it
+             */
 
             stm32l4_dispatchrequest(priv);
             handled = true;
@@ -2080,7 +2084,9 @@ static void stm32l4_ep0setup(struct stm32l4_usbdev_s *priv)
         if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) ==
             USB_REQ_RECIPIENT_DEVICE && index.w == 0 && len.w == 0)
           {
-             /* The request seems valid... let the class implementation handle it */
+             /* The request seems valid...
+              * let the class implementation handle it
+              */
 
              stm32l4_dispatchrequest(priv);
              handled = true;
@@ -3230,7 +3236,9 @@ static int stm32l4_epstall(struct usbdev_ep_s *ep, bool resume)
             {
               if (epno == EP0)
                 {
-                  /* After clear the STALL, enable the default endpoint receiver */
+                  /* After clear the STALL,
+                   * enable the default endpoint receiver
+                   */
 
                   stm32l4_seteprxcount(epno, ep->maxpacket);
                 }
@@ -3852,7 +3860,9 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
     }
   else
     {
-      /* Setup the USB controller -- enabling interrupts at the USB controller */
+      /* Setup the USB controller -- enabling interrupts at
+       * the USB controller
+       */
 
       stm32l4_hwreset(priv);
 
@@ -3860,8 +3870,8 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       up_enable_irq(STM32L4_IRQ_USB_FS);
 
-      /* Enable pull-up to connect the device.  The host should enumerate us
-       * some time after this
+      /* Enable pull-up to connect the device.
+       * The host should enumerate us some time after this
        */
 
       stm32l4_pullup(&priv->usbdev, true);

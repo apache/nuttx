@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_flash.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_FLASH_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_FLASH_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define _K(x) ((x)*1024)
 
@@ -66,7 +66,7 @@
 #      define STM32_FLASH_PAGESIZE      256
 #    endif
 
-     /* Maximum EEPROM size on Cat.5 MCU. TODO: this should be in chip config. */
+/* Maximum EEPROM size on Cat.5 MCU. TODO: this should be in chip config. */
 
 #    ifndef STM32_EEPROM_SIZE
 #      define STM32_EEPROM_SIZE         (16 * 1024)
@@ -243,7 +243,7 @@
       (STM32_FLASH_BASE + STM32_FLASH_PAGESIZE * STM32_FLASH_BANK0_NPAGES)
 #endif
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_FLASH_ACR_OFFSET       0x0000
 #if defined(CONFIG_STM32_STM32L15XX)
@@ -306,7 +306,7 @@
 #  define STM32_FLASH_AR2_OFFSET     0x0054
 #endif
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_FLASH_ACR              (STM32_FLASHIF_BASE+STM32_FLASH_ACR_OFFSET)
 #if defined(CONFIG_STM32_STM32L15XX)
@@ -366,7 +366,7 @@
 #  define STM32_FLASH_AR2            (STM32_FLASHIF_BASE+STM32_FLASH_AR1_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Flash Access Control Register (ACR) */
 
@@ -740,9 +740,9 @@
 #    define FLASH_SEC2R_SEC_SIZE2(n)             (((n) << FLASH_SEC2R_SEC_SIZE2_SHIFT) & FLASH_SEC2R_SEC_SIZE2_MASK)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_flash_lock(void);
 int stm32_flash_unlock(void);

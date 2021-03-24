@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_allocateheap.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -45,9 +45,9 @@
 
 #include "stm32_mpuinit.h"
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Internal SRAM is available in all members of the STM32 family. The
  * following definitions must be provided to specify the size and
@@ -596,17 +596,17 @@
 #  endif
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_heap_color
  *
  * Description:
  *   Set heap memory to a known, non-zero state to checking heap usage.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_HEAP_COLORATION
 static inline void up_heap_color(FAR void *start, size_t size)
@@ -617,11 +617,11 @@ static inline void up_heap_color(FAR void *start, size_t size)
 #  define up_heap_color(start,size)
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_allocate_heap
  *
  * Description:
@@ -645,14 +645,16 @@ static inline void up_heap_color(FAR void *start, size_t size)
  *
  *     Kernel .data region       Size determined at link time
  *     Kernel .bss  region       Size determined at link time
- *     Kernel IDLE thread stack  Size determined by CONFIG_IDLETHREAD_STACKSIZE
+ *     Kernel IDLE thread stack  Size determined by
+ *                                CONFIG_IDLETHREAD_STACKSIZE
  *     Padding for alignment
  *     User .data region         Size determined at link time
  *     User .bss region          Size determined at link time
- *     Kernel heap               Size determined by CONFIG_MM_KERNEL_HEAPSIZE
+ *     Kernel heap               Size determined by
+ *                                CONFIG_MM_KERNEL_HEAPSIZE
  *     User heap                 Extends to the end of SRAM
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
@@ -707,7 +709,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #endif
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_allocate_kheap
  *
  * Description:
@@ -715,7 +717,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
  *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
  *   (and protects) the kernel-space heap.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
@@ -752,14 +754,14 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: arm_addregion
  *
  * Description:
  *   Memory may be added in non-contiguous chunks.  Additional chunks are
  *   added by calling this function.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #if CONFIG_MM_REGIONS > 1
 void arm_addregion(void)

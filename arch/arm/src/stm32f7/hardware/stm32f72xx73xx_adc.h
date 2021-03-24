@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/hardware/stm32f72xx73xx_adc.h
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
@@ -33,24 +33,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_ADC_H
 #define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_ADC_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_ADC_SR_OFFSET          0x0000  /* ADC status register (32-bit) */
 #define STM32_ADC_CR1_OFFSET         0x0004  /* ADC control register 1 (32-bit) */
@@ -73,12 +73,11 @@
 #define STM32_ADC_JDR4_OFFSET        0x0048  /* ADC injected data register 1 (32-bit) */
 #define STM32_ADC_DR_OFFSET          0x004c  /* ADC regular data register (32-bit) */
 
-
 #define STM32_ADC_CSR_OFFSET         0x0000  /* Common status register */
 #define STM32_ADC_CCR_OFFSET         0x0004  /* Common control register */
 #define STM32_ADC_CDR_OFFSET         0x0008  /* Data register for dual and triple modes */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32F7_NADC > 0
 #  define STM32_ADC1_SR              (STM32_ADC1_BASE+STM32_ADC_SR_OFFSET)
@@ -153,7 +152,7 @@
 #define STM32_ADC_CCR                (STM32_ADCCMN_BASE+STM32_ADC_CCR_OFFSET)
 #define STM32_ADC_CDR                (STM32_ADCCMN_BASE+STM32_ADC_CDR_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* ADC status register */
 
@@ -186,6 +185,7 @@
 #define ADC_CR1_RES_10BIT            (1 << ADC_CR1_RES_SHIFT) /* 13 ADCCLK cycles. For STM32L15XX: 11 ADCCLK cycles */
 #define ADC_CR1_RES_8BIT             (2 << ADC_CR1_RES_SHIFT) /* 11 ADCCLK cycles. For STM32L15XX: 9 ADCCLK cycles */
 #define ADC_CR1_RES_6BIT             (3 << ADC_CR1_RES_SHIFT) /* 9 ADCCLK cycles. For STM32L15XX: 7 ADCCLK cycles */
+
 #define ADC_CR1_OVRIE                (1 << 26) /* Bit 26: Overrun interrupt enable */
 
 /* ADC control register 2 */
@@ -215,12 +215,14 @@
 #define ADC_CR2_JEXTSEL_T3CC1        (0x0d << ADC_CR2_JEXTSEL_SHIFT) /* 1101: Timer 3 CC1 event */
 #define ADC_CR2_JEXTSEL_T6TRGO       (0x0e << ADC_CR2_JEXTSEL_SHIFT) /* 1110: Timer 6 TRGO event */
                                                                      /* 1111: Reserved */
+
 #define ADC_CR2_JEXTEN_SHIFT         (20)      /* Bits 20-21: External trigger enable for injected channels */
 #define ADC_CR2_JEXTEN_MASK          (3 << ADC_CR2_JEXTEN_SHIFT)
 #define ADC_CR2_JEXTEN_NONE          (0 << ADC_CR2_JEXTEN_SHIFT) /* 00: Trigger detection disabled */
 #define ADC_CR2_JEXTEN_RISING        (1 << ADC_CR2_JEXTEN_SHIFT) /* 01: Trigger detection on the rising edge */
 #define ADC_CR2_JEXTEN_FALLING       (2 << ADC_CR2_JEXTEN_SHIFT) /* 10: Trigger detection on the falling edge */
 #define ADC_CR2_JEXTEN_BOTH          (3 << ADC_CR2_JEXTEN_SHIFT) /* 11: Trigger detection on both the rising and falling edges */
+
 #define ADC_CR2_JSWSTART             (1 << 22) /* Bit 22: Start Conversion of injected channels */
                                                /* Bit 23: Reserved, must be kept at reset value. */
 #define ADC_CR2_EXTSEL_SHIFT         (24)      /* Bits 24-27: External Event Select for regular group */
@@ -241,6 +243,7 @@
 #define ADC_CR2_EXTSEL_T6TRGO        (0x0d << ADC_CR2_EXTSEL_SHIFT) /* 1101: Timer 6 TRGO event */
                                                                     /* 1110: NA */
 #define ADC_CR2_EXTSEL_EXTI11        (0x0f << ADC_CR2_EXTSEL_SHIFT) /* 1111: EXTI line 11 */
+
 #define ADC_CR2_EXTEN_SHIFT          (28)      /* Bits 28-29: External trigger enable for regular channels */
 #define ADC_CR2_EXTEN_MASK           (3 << ADC_CR2_EXTEN_SHIFT)
 #define ADC_CR2_EXTEN_NONE           (0 << ADC_CR2_EXTEN_SHIFT) /* 00: Trigger detection disabled */
@@ -279,7 +282,6 @@
 #define ADC_SMPR1_SMP18_SHIFT        (24)      /* Bits 24-26: Channel 18 Sample time selection */
 #define ADC_SMPR1_SMP18_MASK         (7 << ADC_SMPR1_SMP18_SHIFT)
 
-
 /* ADC sample time register 2 */
 
 #define ADC_SMPR2_SMP0_SHIFT         (0)       /* Bits 2-0: Channel 0 Sample time selection */
@@ -302,7 +304,6 @@
 #define ADC_SMPR2_SMP8_MASK          (7 << ADC_SMPR2_SMP8_SHIFT)
 #define ADC_SMPR2_SMP9_SHIFT         (27)      /* Bits 29-27: Channel 9 Sample time selection */
 #define ADC_SMPR2_SMP9_MASK          (7 << ADC_SMPR2_SMP9_SHIFT)
-
 
 /* ADC injected channel data offset register 1-4 */
 
@@ -443,11 +444,17 @@
 #    define ADC_CCR_MULTI_RSM3       (22 << ADC_CCR_MULTI_SHIFT) /* 10110: Regular simultaneous mode only */
 #    define ADC_CCR_MULTI_IM3        (23 << ADC_CCR_MULTI_SHIFT) /* 10111: interleaved mode only */
 #    define ADC_CCR_MULTI_ATM3       (25 << ADC_CCR_MULTI_SHIFT) /* 11001: Alternate trigger mode only */
-                                               /* Bits 5-7: Reserved, must be kept at reset value. */
+
+/*                                                Bits 5-7: Reserved,
+ *                                               must be kept at reset value.
+ */
 #  define ADC_CCR_DELAY_SHIFT        (8)       /* Bits 8-11: Delay between 2 sampling phases */
 #  define ADC_CCR_DELAY_MASK         (0xf << ADC_CCR_DELAY_SHIFT)
 #    define ADC_CCR_DELAY(n)         (((n)-5) << ADC_CCR_DELAY_SHIFT) /* n * TADCCLK, n=5-20 */
-                                               /* Bit 12 Reserved, must be kept at reset value. */
+
+/*                                                Bits 12: Reserved,
+ *                                               must be kept at reset value.
+ */
 #  define ADC_CCR_DDS                (1 << 13) /* Bit 13: DMA disable selection (for multi-ADC mode) */
 
 #  define ADC_CCR_DMA_SHIFT          (14)      /* Bits 14-15: Direct memory access mode for multi ADC mode */
@@ -463,23 +470,31 @@
 #    define ADC_CCR_ADCPRE_DIV4      (1 << ADC_CCR_ADCPRE_SHIFT) /* 01: PCLK2 divided by 4 */
 #    define ADC_CCR_ADCPRE_DIV6      (2 << ADC_CCR_ADCPRE_SHIFT) /* 10: PCLK2 divided by 6 */
 #    define ADC_CCR_ADCPRE_DIV8      (3 << ADC_CCR_ADCPRE_SHIFT) /* 11: PCLK2 divided by 8 */
-                                               /* Bits 18-21: Reserved, must be kept at reset value. */
+
+/*                                                Bits 18-21: Reserved,
+ *                                               must be kept at reset value.
+ */
 #  define ADC_CCR_VBATE              (1 << 22) /* Bit 22: VBAT enable */
 #  define ADC_CCR_TSVREFE            (1 << 23) /* Bit 23: Temperature sensor and VREFINT enable */
-                                               /* Bits 24-31 Reserved, must be kept at reset value. */
 
-/* Data register for dual and triple modes (32-bit data with no named fields) */
+/*                                                Bits 24-31: Reserved,
+ *                                               must be kept at reset value.
+ */
 
-/****************************************************************************************************
+/* Data register for dual and triple modes
+ * (32-bit data with no named fields)
+ */
+
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_ADC_H */

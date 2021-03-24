@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32g0_pwr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32G0_PWR_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32G0_PWR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_PWR_CR1_OFFSET   0x0000  /* Power control register 1 */
 #define STM32_PWR_CR2_OFFSET   0x0004  /* Power control register 2 */
@@ -58,7 +58,7 @@
 #define STM32_PWR_PUCRI_OFFSET 0x0060  /* Power Port I pull-up control register */
 #define STM32_PWR_PDCRI_OFFSET 0x0064  /* Power Port I pull-down control register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_PWR_CR1          (STM32_PWR_BASE+STM32_PWR_CR1_OFFSET)
 #define STM32_PWR_CR2          (STM32_PWR_BASE+STM32_PWR_CR2_OFFSET)
@@ -86,7 +86,7 @@
 #define STM32_PWR_PUCRI        (STM32_PWR_BASE+STM32_PWR_PUCRI_OFFSET)
 #define STM32_PWR_PDCRI        (STM32_PWR_BASE+STM32_PWR_PDCRI_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Power control register 1 */
 
@@ -97,6 +97,7 @@
 #  define PWR_CR1_LPMS_STOP2     (2 << PWR_CR1_LPMS_SHIFT) /* 010: Stop 2 mode */
 #  define PWR_CR1_LPMS_STANDBY   (3 << PWR_CR1_LPMS_SHIFT) /* 011: Standby mode */
 #  define PWR_CR1_LPMS_SHUTDOWN  (4 << PWR_CR1_LPMS_SHIFT) /* 1xx: Shutdown mode */
+
 #define PWR_CR1_FPDSTOP          (1 << 3) /* Bit 3: Flash memory powered down during Stop mode */
 #define PWR_CR1_FPDLPRUN         (1 << 4) /* Bit 4: Flash memory powered down during Low-power run mode */
 #define PWR_CR1_FPDLPSLP         (1 << 5) /* Bit 5: Flash memory powered down during Low-power sleep mode */
@@ -105,6 +106,7 @@
 #define PWR_CR1_VOS_MASK         (3 << PWR_CR1_VOS_SHIFT)
 #  define PWR_CR1_VOS_RANGE1     (1 << PWR_CR1_VOS_SHIFT) /* 01: Range 1 */
 #  define PWR_CR1_VOS_RANGE2     (2 << PWR_CR1_VOS_SHIFT) /* 10: Range 2 */
+
 #define PWR_CR1_LPR              (1 << 14) /* Bit 14: Low-power run */
 
 /* Power control register 2 */
@@ -137,6 +139,7 @@
 #define PWR_CR4_WP5              (1 << 4) /* Bit 4: Wakeup pin WKUP5 polarity */
 #define PWR_CR4_VBE              (1 << 8) /* Bit 8: Vbat battery charging enable */
 #define PWR_CR4_VBRS             (1 << 9) /* Bit 9: Vbat battery charging resistor selection */
+
 #  define PWR_CR4_VBRS_5k        0            /* 0: 5k  resistor */
 #  define PWR_CR4_VBRS_1k5       PWR_CR4_VBRS /* 1: 1k5 resistor */
 

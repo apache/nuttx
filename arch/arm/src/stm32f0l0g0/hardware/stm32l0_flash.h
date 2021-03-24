@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32l0_flash.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32L0_FLASH_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32L0_FLASH_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_FLASH_ACR_OFFSET      0x0000
 #define STM32_FLASH_PECR_OFFSET     0x0004
@@ -47,7 +47,7 @@
 #define STM32_FLASH_WRPR3_OFFSET    0x0084
 #define STM32_FLASH_WRPR4_OFFSET    0x0088
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_FLASH_ACR             (STM32_FLASHIF_BASE + STM32_FLASH_ACR_OFFSET)
 #define STM32_FLASH_PECR            (STM32_FLASHIF_BASE + STM32_FLASH_PECR_OFFSET)
@@ -62,7 +62,8 @@
 #define STM32_FLASH_WRPR3           (STM32_FLASHIF_BASE + STM32_FLASH_WRPR3_OFFSET)
 #define STM32_FLASH_WRPR4           (STM32_FLASHIF_BASE + STM32_FLASH_WRPR4_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
+
 /* Flash Access Control Register (ACR) */
 
 #define FLASH_ACR_LATENCY           (1 << 0)  /* Bit 0: Latency */

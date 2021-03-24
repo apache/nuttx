@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l5/stm32l5_tim_lowerhalf.c
  *
  *   Copyright (C) 2020 Gregory Nutt. All rights reserverd.
@@ -41,11 +41,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -70,9 +70,9 @@
      defined(CONFIG_STM32L5_TIM15) || defined(CONFIG_STM32L5_TIM16) || \
      defined(CONFIG_STM32L5_TIM17))
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
 #define STM32L5_TIM1_RES   16
 #define STM32L5_TIM2_RES   32
@@ -86,9 +86,9 @@
 #define STM32L5_TIM16_RES  16
 #define STM32L5_TIM17_RES  16
 
-/*****************************************************************************
+/****************************************************************************
  * Private Types
- *****************************************************************************/
+ ****************************************************************************/
 
 /* This structure provides the private representation of the "lower-half"
  * driver state structure.  This structure must be cast-compatible with the
@@ -105,15 +105,15 @@ struct stm32l5_lowerhalf_s
   const uint8_t                 resolution; /* Number of bits in the timer (16 or 32 bits) */
 };
 
-/*****************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Interrupt handling ********************************************************/
+/* Interrupt handling *******************************************************/
 
 static int stm32l5_timer_handler(int irq, void *context, void *arg);
 
-/* "Lower half" driver methods ***********************************************/
+/* "Lower half" driver methods **********************************************/
 
 static int stm32l5_start(FAR struct timer_lowerhalf_s *lower);
 static int stm32l5_stop(FAR struct timer_lowerhalf_s *lower);
@@ -124,9 +124,9 @@ static int stm32l5_settimeout(FAR struct timer_lowerhalf_s *lower,
 static void stm32l5_setcallback(FAR struct timer_lowerhalf_s *lower,
                                 tccb_t callback, FAR void *arg);
 
-/*****************************************************************************
+/****************************************************************************
  * Private Data
- *****************************************************************************/
+ ****************************************************************************/
 
 /* "Lower half" driver methods */
 
@@ -228,11 +228,11 @@ static struct stm32l5_lowerhalf_s g_tim17_lowerhalf =
 };
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Private Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_timer_handler
  *
  * Description:
@@ -242,7 +242,7 @@ static struct stm32l5_lowerhalf_s g_tim17_lowerhalf =
  *
  * Returned Value:
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5_timer_handler(int irq, void *context, void *arg)
 {
@@ -267,20 +267,20 @@ static int stm32l5_timer_handler(int irq, void *context, void *arg)
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_start
  *
  * Description:
  *   Start the timer, resetting the time to the current timeout,
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5_start(FAR struct timer_lowerhalf_s *lower)
 {
@@ -306,20 +306,20 @@ static int stm32l5_start(FAR struct timer_lowerhalf_s *lower)
   return -EBUSY;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_stop
  *
  * Description:
  *   Stop the timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5_stop(FAR struct timer_lowerhalf_s *lower)
 {
@@ -340,7 +340,7 @@ static int stm32l5_stop(FAR struct timer_lowerhalf_s *lower)
   return -ENODEV;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_getstatus
  *
  * Description:
@@ -354,7 +354,7 @@ static int stm32l5_stop(FAR struct timer_lowerhalf_s *lower)
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5_getstatus(FAR struct timer_lowerhalf_s *lower,
                              FAR struct timer_status_s *status)
@@ -407,7 +407,7 @@ static int stm32l5_getstatus(FAR struct timer_lowerhalf_s *lower,
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_settimeout
  *
  * Description:
@@ -421,7 +421,7 @@ static int stm32l5_getstatus(FAR struct timer_lowerhalf_s *lower,
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32l5_settimeout(FAR struct timer_lowerhalf_s *lower,
                               uint32_t timeout)
@@ -451,7 +451,7 @@ static int stm32l5_settimeout(FAR struct timer_lowerhalf_s *lower,
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_sethandler
  *
  * Description:
@@ -469,7 +469,7 @@ static int stm32l5_settimeout(FAR struct timer_lowerhalf_s *lower,
  *   The previous timer expiration function pointer or NULL is there was
  *   no previous function pointer.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32l5_setcallback(FAR struct timer_lowerhalf_s *lower,
                                 tccb_t callback, FAR void *arg)
@@ -497,11 +497,11 @@ static void stm32l5_setcallback(FAR struct timer_lowerhalf_s *lower,
   leave_critical_section(flags);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_timer_initialize
  *
  * Description:
@@ -517,7 +517,7 @@ static void stm32l5_setcallback(FAR struct timer_lowerhalf_s *lower,
  *   Zero (OK) is returned on success; A negated errno value is returned
  *   to indicate the nature of any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int stm32l5_timer_initialize(FAR const char *devpath, int timer)
 {

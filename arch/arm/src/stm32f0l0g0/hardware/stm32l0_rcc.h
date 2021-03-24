@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32l0_rcc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,16 +16,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32L0_RCC_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32L0_RCC_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_RCC_CR_OFFSET             0x0000  /* Clock control register */
 #define STM32_RCC_ICSCR_OFFSET          0x0004  /* Internal clock sources calibration register */
@@ -49,7 +49,7 @@
 #define STM32_RCC_CCIPR_OFFSET          0x004C  /* Clock configuration register */
 #define STM32_RCC_CSR_OFFSET            0x0050  /* Control/status register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_RCC_CR                (STM32_RCC_BASE+STM32_RCC_CR_OFFSET)
 #define STM32_RCC_ICSCR             (STM32_RCC_BASE+STM32_RCC_ICSCR_OFFSET)
@@ -73,7 +73,7 @@
 #define STM32_RCC_CCIPR             (STM32_RCC_BASE+STM32_RCC_CCIPR_OFFSET)
 #define STM32_RCC_CSR               (STM32_RCC_BASE+STM32_RCC_CSR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Clock control register */
 

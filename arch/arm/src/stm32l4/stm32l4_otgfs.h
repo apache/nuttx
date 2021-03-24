@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_otgfs.h
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_OTGFS_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_OTGFS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -57,9 +57,9 @@
 #  error "Unsupported STM32L4 chip"
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -99,19 +99,20 @@ extern "C"
 
 #ifdef CONFIG_USBHOST
 struct usbhost_connection_s;
-FAR struct usbhost_connection_s *stm32l4_otgfshost_initialize(int controller);
+FAR struct
+usbhost_connection_s *stm32l4_otgfshost_initialize(int controller);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32l4_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32l4_usbsuspend logic if the OTG FS device driver
- *   is used.  This function is called whenever the USB enters or leaves suspend
- *   mode. This is an opportunity for the board logic to shutdown clocks, power,
- *   etc. while the USB is suspended.
+ *   Board logic must provide the stm32l4_usbsuspend logic if the OTG FS
+ *   device driver is used.  This function is called whenever the USB enters
+ *   or leaves suspend mode. This is an opportunity for the board logic to
+ *   shutdown clocks, power, etc. while the USB is suspended.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32l4_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 

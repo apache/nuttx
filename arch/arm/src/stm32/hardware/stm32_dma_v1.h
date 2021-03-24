@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_dma_v1.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,16 +16,18 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V1_DMA_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V1_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This is implementation for STM32 DMA IP version 1 - F0, F1, F3, G4, L0, L1, L4 */
+/* This is implementation for STM32 DMA IP
+ * version 1 -  F0, F1, F3, G4, L0, L1, L4
+ */
 
 #define HAVE_IP_DMA_V1 1
 #undef  HAVE_IP_DMA_V2
@@ -57,7 +59,7 @@
 #define DMA_CHAN7                  (6)
 #define DMA_CHAN8                  (7)
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_DMA_ISR_OFFSET       0x0000 /* DMA interrupt status register */
 #define STM32_DMA_IFCR_OFFSET      0x0004 /* DMA interrupt flag clear register */
@@ -122,7 +124,7 @@
 #  define STM32_DMA_CSELR_OFFSET  0x00a8 /* DMA channel selection register */
 #endif
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_DMA1_ISRC           (STM32_DMA1_BASE+STM32_DMA_ISR_OFFSET)
 #define STM32_DMA1_IFCR           (STM32_DMA1_BASE+STM32_DMA_IFCR_OFFSET)
@@ -226,7 +228,7 @@
 #  define STM32_DMA2_CMAR8        (STM32_DMA2_BASE+STM32_DMA_CMAR8_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 #define DMA_CHAN_SHIFT(n)         ((n) << 2)
 #define DMA_CHAN_MASK             0x0f
@@ -328,14 +330,15 @@
 #define DMA_CNDTR_NDT_SHIFT       (0)       /* Bits 15-0: Number of data to Transfer */
 #define DMA_CNDTR_NDT_MASK        (0xffff << DMA_CNDTR_NDT_SHIFT)
 
-/* DMA Channel mapping.  Each DMA channel has a mapping to several possible
- * sources/sinks of data.  The requests from peripherals assigned to a channel
- * are simply OR'ed together before entering the DMA block.  This means that only
- * one request on a given channel can be enabled at once.
+/* DMA Channel mapping.
+ * Each DMA channel has a mapping to several possible  sources/sinks of data.
+ * The requests from peripherals assigned to a channel are simply OR'ed
+ * together before entering the DMA block.  This means that onlyone request
+ * on a given channel can be enabled at once.
  *
- * Alternative DMA channel selections are provided with a numeric suffix like _1,
- * _2, etc.  Drivers, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.
+ * Alternative DMA channel selections are provided with a numeric suffix like
+ * _1, _2, etc.  Drivers, however, will use the pin selection without the
+ * numeric suffix. Additional definitions are required in the board.h file.
  */
 
 #define STM32_DMA1_CHAN1          (0)
@@ -757,9 +760,9 @@
 
 #elif defined(CONFIG_STM32_STM32G4XXX)
 
-  /* This family uses a DMAMUX. The code to support this needs to be ported
-   * to this family from STM32L4R.
-   */
+/* This family uses a DMAMUX. The code to support this needs to be ported
+ * to this family from STM32L4R.
+ */
 
 #else
 #  error "Unknown DMA channel assignments"

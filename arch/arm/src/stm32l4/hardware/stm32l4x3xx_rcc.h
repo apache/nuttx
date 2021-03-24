@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4x3xx_rcc.h
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
@@ -34,24 +34,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X3XX_RCC_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X3XX_RCC_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L4_RCC_CR_OFFSET         0x0000  /* Clock control register */
 #define STM32L4_RCC_ICSCR_OFFSET      0x0004  /* Internal clock sources calibration register */
@@ -86,7 +86,7 @@
 #define STM32L4_RCC_CRRCR_OFFSET      0x0098  /* Clock recovery RC register */
 #define STM32L4_RCC_CCIPR2_OFFSET     0x009c  /* Peripherals independent clock configuration register 2 */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32L4_RCC_CR                (STM32L4_RCC_BASE+STM32L4_RCC_CR_OFFSET)
 #define STM32L4_RCC_ICSCR             (STM32L4_RCC_BASE+STM32L4_RCC_ICSCR_OFFSET)
@@ -121,7 +121,7 @@
 #define STM32L4_RCC_CRRCR             (STM32L4_RCC_BASE+STM32L4_RCC_CRRCR_OFFSET)
 #define STM32L4_RCC_CCIPR2            (STM32L4_RCC_BASE+STM32L4_RCC_CCIPR2_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Clock control register */
 
@@ -189,9 +189,9 @@
 
 #define RCC_CFGR_HPRE_SHIFT         (4)       /* Bits 4-7: AHB prescaler */
 #define RCC_CFGR_HPRE_MASK          (0x0f << RCC_CFGR_HPRE_SHIFT)
-#  define RCC_CFGR_HPRE_SYSCLK      (0 << RCC_CFGR_HPRE_SHIFT) /* 0xxx: SYSCLK not divided */
-#  define RCC_CFGR_HPRE_SYSCLKd2    (8 << RCC_CFGR_HPRE_SHIFT) /* 1000: SYSCLK divided by 2 */
-#  define RCC_CFGR_HPRE_SYSCLKd4    (9 << RCC_CFGR_HPRE_SHIFT) /* 1001: SYSCLK divided by 4 */
+#  define RCC_CFGR_HPRE_SYSCLK      (0 << RCC_CFGR_HPRE_SHIFT)  /* 0xxx: SYSCLK not divided */
+#  define RCC_CFGR_HPRE_SYSCLKd2    (8 << RCC_CFGR_HPRE_SHIFT)  /* 1000: SYSCLK divided by 2 */
+#  define RCC_CFGR_HPRE_SYSCLKd4    (9 << RCC_CFGR_HPRE_SHIFT)  /* 1001: SYSCLK divided by 4 */
 #  define RCC_CFGR_HPRE_SYSCLKd8    (10 << RCC_CFGR_HPRE_SHIFT) /* 1010: SYSCLK divided by 8 */
 #  define RCC_CFGR_HPRE_SYSCLKd16   (11 << RCC_CFGR_HPRE_SHIFT) /* 1011: SYSCLK divided by 16 */
 #  define RCC_CFGR_HPRE_SYSCLKd64   (12 << RCC_CFGR_HPRE_SHIFT) /* 1100: SYSCLK divided by 64 */
@@ -259,6 +259,7 @@
 #define RCC_PLLCFG_PLLPEN           (1 << 16) /* Bit 16: Main PLL PLLSAI3CLK output enable */
 
 #define RCC_PLLCFG_PLLP             (1 << 17) /* Bit 17: Main PLL div factor for PLLSAI3CLK */
+
 #  define RCC_PLLCFG_PLLP_7         0               /* 0: PLLP = 7 */
 #  define RCC_PLLCFG_PLLP_17        RCC_PLLCFG_PLLP /* 1: PLLP = 17 */
 
@@ -267,6 +268,7 @@
 #define RCC_PLLCFG_PLLQ_SHIFT       (21)      /* Bits 21-22: Main PLL division factor for PLL48M1CLK (48 MHz clock) */
 #define RCC_PLLCFG_PLLQ_MASK        (3 << RCC_PLLCFG_PLLQ_SHIFT)
 #  define RCC_PLLCFG_PLLQ(n)        ((((n)>>1)-1)<< RCC_PLLCFG_PLLQ_SHIFT) /* n=2,4,6,8 */
+
 #  define RCC_PLLCFG_PLLQ_2         (0 << RCC_PLLCFG_PLLQ_SHIFT) /* 00: PLLQ = 2 */
 #  define RCC_PLLCFG_PLLQ_4         (1 << RCC_PLLCFG_PLLQ_SHIFT) /* 01: PLLQ = 4 */
 #  define RCC_PLLCFG_PLLQ_6         (2 << RCC_PLLCFG_PLLQ_SHIFT) /* 10: PLLQ = 6 */
@@ -277,6 +279,7 @@
 #define RCC_PLLCFG_PLLR_SHIFT       (25)      /* Bits 25-26: Main PLL division factor for PLLCLK (system clock) */
 #define RCC_PLLCFG_PLLR_MASK        (3 << RCC_PLLCFG_PLLR_SHIFT)
 #  define RCC_PLLCFG_PLLR(n)        ((((n)>>1)-1)<< RCC_PLLCFG_PLLR_SHIFT) /* n=2,4,6,8 */
+
 #  define RCC_PLLCFG_PLLR_2         (0 << RCC_PLLCFG_PLLR_SHIFT) /* 00: PLLR = 2 */
 #  define RCC_PLLCFG_PLLR_4         (1 << RCC_PLLCFG_PLLR_SHIFT) /* 01: PLLR = 4 */
 #  define RCC_PLLCFG_PLLR_6         (2 << RCC_PLLCFG_PLLR_SHIFT) /* 10: PLLR = 6 */
@@ -293,7 +296,8 @@
 #define RCC_PLLSAI1CFG_PLLPEN       (1 << 16) /* Bit 16: SAI1 PLL PLLSAI1CLK output enable */
 
 #define RCC_PLLSAI1CFG_PLLP         (1 << 17) /* Bit 17: Main PLL div factor for PLLSAI1CLK */
-#  define RCC_PLLSAI1CFG_PLLP_7     0               /* 0: PLLP = 7 */
+
+#  define RCC_PLLSAI1CFG_PLLP_7     0                   /* 0: PLLP = 7 */
 #  define RCC_PLLSAI1CFG_PLLP_17    RCC_PLLSAI1CFG_PLLP /* 1: PLLP = 17 */
 
 #define RCC_PLLSAI1CFG_PLLQEN       (1 << 20) /* Bit 20: Main PLL PLL48M2CLK output enable */
@@ -301,6 +305,7 @@
 #define RCC_PLLSAI1CFG_PLLQ_SHIFT   (21)
 #define RCC_PLLSAI1CFG_PLLQ_MASK    (3 << RCC_PLLSAI1CFG_PLLQ_SHIFT)
 #  define RCC_PLLSAI1CFG_PLLQ(n)    ((((n)>>1)-1)<< RCC_PLLSAI1CFG_PLLQ_SHIFT) /* n=2,4,6,8 */
+
 #  define RCC_PLLSAI1CFG_PLLQ_2     (0 << RCC_PLLSAI1CFG_PLLQ_SHIFT) /* 00: PLLQ = 2 */
 #  define RCC_PLLSAI1CFG_PLLQ_4     (1 << RCC_PLLSAI1CFG_PLLQ_SHIFT) /* 01: PLLQ = 4 */
 #  define RCC_PLLSAI1CFG_PLLQ_6     (2 << RCC_PLLSAI1CFG_PLLQ_SHIFT) /* 10: PLLQ = 6 */
@@ -311,6 +316,7 @@
 #define RCC_PLLSAI1CFG_PLLR_SHIFT   (25)
 #define RCC_PLLSAI1CFG_PLLR_MASK    (3 << RCC_PLLSAI1CFG_PLLR_SHIFT)
 #  define RCC_PLLSAI1CFG_PLLR(n)    ((((n)>>1)-1)<< RCC_PLLSAI1CFG_PLLR_SHIFT) /* n=2,4,6,8 */
+
 #  define RCC_PLLSAI1CFG_PLLR_2     (0 << RCC_PLLSAI1CFG_PLLR_SHIFT) /* 00: PLLR = 2 */
 #  define RCC_PLLSAI1CFG_PLLR_4     (1 << RCC_PLLSAI1CFG_PLLR_SHIFT) /* 01: PLLR = 4 */
 #  define RCC_PLLSAI1CFG_PLLR_6     (2 << RCC_PLLSAI1CFG_PLLR_SHIFT) /* 10: PLLR = 6 */
@@ -325,7 +331,8 @@
 #define RCC_PLLSAI2CFG_PLLPEN       (1 << 16) /* Bit 16: SAI1 PLL PLLSAI2CLK output enable */
 
 #define RCC_PLLSAI2CFG_PLLP         (1 << 17) /* Bit 17: Main PLL div factor for PLLSAI2CLK */
-#  define RCC_PLLSAI2CFG_PLLP_7     0               /* 0: PLLP = 7 */
+
+#  define RCC_PLLSAI2CFG_PLLP_7     0                   /* 0: PLLP = 7 */
 #  define RCC_PLLSAI2CFG_PLLP_17    RCC_PLLSAI2CFG_PLLP /* 1: PLLP = 17 */
 
 #define RCC_PLLSAI2CFG_PLLREN       (1 << 24) /* Bit 24: SAI2 PLL PLLADC2CLK output enable */
@@ -333,6 +340,7 @@
 #define RCC_PLLSAI2CFG_PLLR_SHIFT   (25)
 #define RCC_PLLSAI2CFG_PLLR_MASK    (3 << RCC_PLLSAI2CFG_PLLR_SHIFT)
 #  define RCC_PLLSAI2CFG_PLLR(n)    ((((n)>>1)-1)<< RCC_PLLSAI2CFG_PLLR_SHIFT) /* n=2,4,6,8 */
+
 #  define RCC_PLLSAI2CFG_PLLR_2     (0 << RCC_PLLSAI2CFG_PLLR_SHIFT) /* 00: PLLR = 2 */
 #  define RCC_PLLSAI2CFG_PLLR_4     (1 << RCC_PLLSAI2CFG_PLLR_SHIFT) /* 01: PLLR = 4 */
 #  define RCC_PLLSAI2CFG_PLLR_6     (2 << RCC_PLLSAI2CFG_PLLR_SHIFT) /* 10: PLLR = 6 */
@@ -755,7 +763,8 @@
 #define RCC_BDCR_BDRST              (1 << 16) /* Bit 16: Backup domain software reset */
 #define RCC_BDCR_LSCOEN             (1 << 24) /* Bit 24: Low speed clock output enable */
 #define RCC_BDCR_LSCOSEL            (1 << 25) /* Bit 25: Low speed clock output selection */
-#  define RCC_BCDR_LSCOSEL_LSI      0         /*         LSI selected */
+
+#  define RCC_BCDR_LSCOSEL_LSI      0                 /* LSI selected */
 #  define RCC_BDCR_LSCOSEL_LSE      RCC_BDCR_LSCOSEL  /* LSE selected */
 
 /* Control/status register */
@@ -788,7 +797,9 @@
 #define RCC_CRRCR_HSI48ON           (1 << 0)  /* Bit 0: HSI48 clock enable */
 #define RCC_CRRCR_HSI48RDY          (1 << 1)  /* Bit 1: HSI48 clock ready flag */
 
-/* Peripheral Independent Clock Configuration 2 register (only on STM32L45x and STM32L46x) */
+/* Peripheral Independent Clock Configuration 2 register
+ * (only on STM32L45x and STM32L46x)
+ */
 
 #define RCC_CCIPR2_I2C4SEL_SHIFT    (0)    /* Bits 0-1: I2C4 clock source selection */
 #define RCC_CCIPR2_I2C4SEL_MASK     (3 << RCC_CCIPR2_I2C4SEL_SHIFT)
