@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/str71x/str71x_usb.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STR71X_STR71X_USB_H
 #define __ARCH_ARM_SRC_STR71X_STR71X_USB_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "str71x_map.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* USB registers ********************************************************************/
+/* USB registers ************************************************************/
 
 #define STR71X_USB_NENDPNTS     (16)
 #define STR71X_USB_EPR(ep)      (STR71X_USB_BASE + ((ep) << 4))
@@ -59,7 +59,7 @@
 #define STR71X_USB_DADDR        (STR71X_USB_BASE + 0x004C)  /* Device address register */
 #define STR71X_USB_BTABLE       (STR71X_USB_BASE + 0x0050)  /* Buffer Table address register */
 
-/* Register bit settings ***********************************************************/
+/* Register bit settings ****************************************************/
 
 /* Control Register (CNTR) */
 
@@ -119,6 +119,7 @@
 #  define USB_EPR_TXVALID       (3 << USB_EPR_TXSTAT_SHIFT) /* Endpoint TX valid */
 #  define USB_EPR_TXDTOG1       (1 << USB_EPR_TXSTAT_SHIFT) /* Bit : Endpoint TX data toggle bit1 */
 #  define USB_EPR_TXDTOG2       (2 << USB_EPR_TXSTAT_SHIFT) /* Bit : Endpoint TX data toggle bit2 */
+
 #define USB_EPR_DTOGTX          (1 << 6)  /* Bit 6:  Endpoint data toggle TX */
 #define USB_EPR_CTRTX           (1 << 7)  /* Bit 7:  Endpoint correct transfer TX */
 #define USB_EPR_KIND            (1 << 8)  /* Bit 8:  Endpoint kind */
@@ -128,6 +129,7 @@
 #  define USB_EPR_CONTROL       (1 << USB_EPR_EPTYPE_SHIFT)  /* Endpoint CONTROL */
 #  define USB_EPR_ISOC          (2 << USB_EPR_EPTYPE_SHIFT)) /* Endpoint ISOCHRONOUS */
 #  define USB_EPR_INTERRUPT     (3 << USB_EPR_EPTYPE_SHIFT)  /* Endpoint INTERRUPT */
+
 #define USB_EPR_SETUP           (1 << 11) /* Bit 11: Endpoint setup */
 #define USB_EPR_RXSTAT_SHIFT    12        /* Bits 12-13: Endpoint RX status bit */
 #define USB_EPR_RXSTAT_MASK     (3 << USB_EPR_RXSTAT_SHIFT)
@@ -137,6 +139,7 @@
 #  define USB_EPR_RXVALID       (3 << USB_EPR_RXSTAT_SHIFT) /* Endpoint RX valid */
 #  define USB_EPR_RXDTOG1       (1 << USB_EPR_RXSTAT_SHIFT) /* Endpoint RX data toggle bit1 */
 #  define USB_EPR_RXDTOG2       (2 << USB_EPR_RXSTAT_SHIFT) /* Endpoint RX data toggle bit2 */
+
 #define USB_EPR_DTOGRX          (1 << 14) /* Bit 14: Endpoint data toggle RX */
 #define USB_EPR_CTRRX           (1 << 15) /* Bit 15: Endpoint correct transfer RX   */
 
@@ -150,16 +153,16 @@
 #define USB_EPR_TXDTOG_MASK     (USB_EPR_TXSTAT_MASK|USB_EPR_NOTOGGLE_MASK)
 #define USB_EPR_RXDTOG_MASK     (USB_EPR_RXSTAT_MASK|USB_EPR_NOTOGGLE_MASK)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STR71X_STR71X_USB_H */

@@ -35,7 +35,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration **********************************************************/
+/* Configuration ************************************************************/
 
 /* Is there a UART enabled? */
 
@@ -245,7 +245,8 @@ void arm_lowputc(char ch)
 #ifdef HAVE_CONSOLE
   /* Wait until the TX FIFO is not full */
 
-  while ((getreg16(STR71X_UART_SR(STR71X_UART_BASE)) & STR71X_UARTSR_TF) != 0);
+  while ((getreg16(STR71X_UART_SR(STR71X_UART_BASE)) &
+          STR71X_UARTSR_TF) != 0);
 
   /* Then send the character */
 
@@ -270,6 +271,7 @@ void up_lowsetup(void)
   uint16_t reg16;
 
   /* Enable the selected console device */
+
   /* Set the UART baud rate */
 
   putreg16((uint16_t)UART_BAUDRATE, STR71X_UART_BR(STR71X_UART_BASE));
