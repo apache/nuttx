@@ -1590,7 +1590,9 @@ static inline void stm32_ep0out_receive(FAR struct stm32_ep_s *privep,
       if (priv->ep0datlen < CONFIG_USBDEV_SETUP_MAXDATASIZE)
         {
           /* Read the data into our special buffer for SETUP data */
-          int readlen = MIN(CONFIG_USBDEV_SETUP_MAXDATASIZE - priv->ep0datlen, bcnt);
+
+          int bufspace = CONFIG_USBDEV_SETUP_MAXDATASIZE - priv->ep0datlen;
+          int readlen = MIN(bufspace, bcnt);
           stm32_rxfifo_read(privep, priv->ep0data, readlen);
           priv->ep0datlen += readlen;
           bcnt -= readlen;
@@ -1612,13 +1614,15 @@ static inline void stm32_ep0out_receive(FAR struct stm32_ep_s *privep,
 
           privep->active  = false;
           priv->ep0state  = EP0STATE_SETUP_READY;
-          priv->ep0datlen = MIN(CONFIG_USBDEV_SETUP_MAXDATASIZE, priv->ep0datlen);
+          priv->ep0datlen = MIN(CONFIG_USBDEV_SETUP_MAXDATASIZE,
+                                priv->ep0datlen);
 
           stm32_ep0out_setup(priv);
         }
       else
         {
           /* More data to come, clear NAKSTS */
+
           uint32_t regval  = stm32_getreg(STM32_OTGFS_DOEPCTL0);
           regval |= OTGFS_DOEPCTL0_CNAK;
           stm32_putreg(regval, STM32_OTGFS_DOEPCTL0);
