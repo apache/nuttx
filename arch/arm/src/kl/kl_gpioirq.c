@@ -41,7 +41,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* The Kinetis port interrupt logic is very flexible and will program
  * interrupts on most all pin events.  In order to keep the memory usage to
  * a minimum, the NuttX port supports enabling interrupts on a per-port
@@ -70,6 +72,7 @@ struct g_portisrs_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Per pin port interrupt vectors.  NOTE:  Not all pins in each port
  * correspond to externally available GPIOs.  However, I believe that the
  * Kinetis will support interrupts even if the pin is not available as
@@ -203,11 +206,13 @@ void kl_gpioirqinitialize(void)
  * Name: kl_gpioirqattach
  *
  * Description:
- *   Attach a pin interrupt handler.  The normal initialization sequence is:
+ *   Attach a pin interrupt handler.
+ *   The normal initialization sequence is:
  *
- *   1. Call kl_gpioconfig() to configure the interrupting pin (pin interrupts
- *      will be disabled.
- *   2. Call kl_gpioirqattach() to attach the pin interrupt handling function.
+ *   1. Call kl_gpioconfig() to configure the interrupting pin (pin
+ *      interrupts will be disabled.
+ *   2. Call kl_gpioirqattach() to attach the pin interrupt handling
+ *      function.
  *   3. Call kl_gpioirqenable() to enable interrupts on the pin.
  *
  * Input Parameters:
@@ -216,11 +221,11 @@ void kl_gpioirqinitialize(void)
  *  - pinarg:  The argument that will accompany the pin interrupt
  *
  * Returned Value:
- * Returned Value:
- *   Zero (OK) is returned on success; On any failure, a negated errno value is
- *   returned to indicate the nature of the failure.
+ *   Zero (OK) is returned on success;
+ *   On any failure, a negated errno value is returned to indicate the nature
+ *   of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr, void *pinarg)
 {
@@ -263,28 +268,28 @@ int kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr, void *pinarg)
         return NULL;
     }
 
-   /* Get the old PIN ISR and set the new PIN ISR */
+  /* Get the old PIN ISR and set the new PIN ISR */
 
-   isrtab[pin].handler = pinisr;
-   isrtab[pin].arg     = pinarg;
+  isrtab[pin].handler = pinisr;
+  isrtab[pin].arg     = pinarg;
 
-   /* And return the old PIN isr address */
+  /* And return the old PIN isr address */
 
-   leave_critical_section(flags);
-   return OK;
+  leave_critical_section(flags);
+  return OK;
 
 #else
-   return -ENOSYS;
+  return -ENOSYS;
 #endif /* HAVE_PORTINTS */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified pin IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kl_gpioirqenable(uint32_t pinset)
 {
@@ -352,13 +357,13 @@ void kl_gpioirqenable(uint32_t pinset)
 #endif /* HAVE_PORTINTS */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kl_gpioirqdisable(uint32_t pinset)
 {

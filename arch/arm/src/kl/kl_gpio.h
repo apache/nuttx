@@ -38,7 +38,9 @@
 /****************************************************************************
  * Pre-processor Declarations
  ****************************************************************************/
-/* Bit-encoded input to kl_pinconfig() *****************************************/
+
+/* Bit-encoded input to kl_pinconfig() **************************************/
+
 /* General form (32-bits, only 22 bits are unused in the encoding):
  *
  * oooo mmmv iiii ifd- ---- -ppp ---b bbbb
@@ -97,9 +99,11 @@
 #define _PIN_OUTPUT_LOWDRIVE   (1 << _PIN_OPTIONS_SHIFT) /* 0xx1 Output with low drive strength */
 #define _PIN_OUTPUT_HIGHDRIVE  (9 << _PIN_OPTIONS_SHIFT) /* 1xx1 Output with high drive strength */
 
-/* End-user pin modes and configurations.  Notes:  (1) None of the digital options
- * are available for the analog mode, (2) digital settings may be combined (OR'ed)
- * provided that input-only and output-only options are not intermixed.
+/* End-user pin modes and configurations.
+ * Notes:
+ *  (1) None of the digital options are available for the analog mode,
+ *  (2) digital settings may be combined (OR'ed) provided that input-only and
+ *      output-only options are not intermixed.
  */
 
 #define PIN_ANALOG             _PIN_MODE_ANALOG
@@ -339,15 +343,16 @@ void kl_gpiowrite(uint32_t pinset, bool value);
 
 bool kl_gpioread(uint32_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_gpioirqattach
  *
  * Description:
  *   Attach a pin interrupt handler.  The normal initialization sequence is:
  *
- *   1. Call kl_configgpio() to configure the interrupting pin (pin interrupts
- *      will be disabled.
- *   2. Call kl_gpioirqattach() to attach the pin interrupt handling function.
+ *   1. Call kl_configgpio() to configure the interrupting pin (pin
+ *     interrupts will be disabled.
+ *   2. Call kl_gpioirqattach() to attach the pin interrupt handling
+ *      function.
  *   3. Call kl_gpioirqenable() to enable interrupts on the pin.
  *
  * Input Parameters:
@@ -356,20 +361,21 @@ bool kl_gpioread(uint32_t pinset);
  *  - pinarg:  The argument that will accompany the pin interrupt
  *
  * Returned Value:
- *   Zero (OK) is returned on success; On any failure, a negated errno value is
- *   returned to indicate the nature of the failure.
+ *   Zero (OK) is returned on success;
+ *   On any failure, a negated errno value is returned to indicate the nature
+ *   of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr, void *pinarg);
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified pin IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_KL_GPIOIRQ
 void kl_gpioirqenable(uint32_t pinset);
@@ -377,13 +383,13 @@ void kl_gpioirqenable(uint32_t pinset);
 #  define kl_gpioirqenable(pinset)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_KL_GPIOIRQ
 void kl_gpioirqdisable(uint32_t pinset);
