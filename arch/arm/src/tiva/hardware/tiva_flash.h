@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/tiva_flash.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_FLASH_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_FLASH_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #if defined(CONFIG_ARCH_CHIP_LM) || defined(CONFIG_ARCH_CHIP_TM4C)
 
-/* The TM4C129 family has a different FLASH register layout.  Others (including LM4F
- * and TM4C123) are similar to the LM3S family
+/* The TM4C129 family has a different FLASH register layout.
+ * Others (including LM4F and TM4C123) are similar to the LM3S family
  */
 
 #  if defined(CONFIG_ARCH_CHIP_TM4C129)

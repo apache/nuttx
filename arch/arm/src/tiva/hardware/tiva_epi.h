@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/tiva_epi.h
  *
  *   Copyright (C) 2009-2013 Max Neklyudov. All rights reserved.
@@ -31,20 +31,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_EPI_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_EPI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* External Peripheral Interface Register Offsets ***********************************/
+/* External Peripheral Interface Register Offsets ***************************/
 
 #define TIVA_EPI_CFG_OFFSET           0x000
 #define TIVA_EPI_SDRAMCFG_OFFSET      0x010
@@ -52,7 +52,7 @@
 #define TIVA_EPI_STAT_OFFSET          0x060
 #define TIVA_EPI_BAUD_OFFSET          0x004
 
-/* External Peripheral Interface Register Addresses *********************************/
+/* External Peripheral Interface Register Addresses *************************/
 
 #define TIVA_EPI0_CFG                 (TIVA_EPI0_BASE + TIVA_EPI_CFG_OFFSET)
 #define TIVA_EPI0_SDRAMCFG            (TIVA_EPI0_BASE + TIVA_EPI_SDRAMCFG_OFFSET)
@@ -60,7 +60,7 @@
 #define TIVA_EPI0_STAT                (TIVA_EPI0_BASE + TIVA_EPI_STAT_OFFSET)
 #define TIVA_EPI0_BAUD                (TIVA_EPI0_BASE + TIVA_EPI_BAUD_OFFSET)
 
-/* External Peripheral Interface Register Bit Definitions ***************************/
+/* External Peripheral Interface Register Bit Definitions *******************/
 
 /* EPI Configuration (EPICFG), offset 0x000 */
 

@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x0/cc13x0_fcfg1.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a
+ * compatible BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,23 +37,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_FCFG1_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_FCFG1_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* FCFG1 Register Offsets *******************************************************************************************/
+/* FCFG1 Register Offsets ***************************************************/
 
 #define TIVA_FCFG1_MISC_CONF_1_OFFSET                      0x00a0  /* Misc configurations */
 #define TIVA_FCFG1_MISC_CONF_2_OFFSET                      0x00a4
@@ -137,7 +138,7 @@
 #define TIVA_FCFG1_PWD_CURR_110C_OFFSET                    0x03b4  /* Power Down Current Control 110C */
 #define TIVA_FCFG1_PWD_CURR_125C_OFFSET                    0x03b8  /* Power Down Current Control 125C */
 
-/* FCFG1 Register Register Addresses ********************************************************************************/
+/* FCFG1 Register Register Addresses ****************************************/
 
 #define TIVA_FCFG1_MISC_CONF_1                             (TIVA_FCFG1_BASE + TIVA_FCFG1_MISC_CONF_1_OFFSET)
 #define TIVA_FCFG1_MISC_CONF_2                             (TIVA_FCFG1_BASE + TIVA_FCFG1_MISC_CONF_2_OFFSET)
@@ -222,7 +223,7 @@
 #define TIVA_FCFG1_PWD_CURR_110C                           (TIVA_FCFG1_BASE + TIVA_FCFG1_PWD_CURR_110C_OFFSET)
 #define TIVA_FCFG1_PWD_CURR_125C                           (TIVA_FCFG1_BASE + TIVA_FCFG1_PWD_CURR_125C_OFFSET)
 
-/* FCFG1 Bitfield Definitions ***************************************************************************************/
+/* FCFG1 Bitfield Definitions ***********************************************/
 
 /* TIVA_FCFG1_MISC_CONF_1 */
 
@@ -512,10 +513,21 @@
 #define FCFG1_CONFIG_MISC_ADC_DIV30_MIN_ALLOWED_RTRIM_MASK  (15 << FCFG1_CONFIG_MISC_ADC_DIV30_MIN_ALLOWED_RTRIM_SHIFT)
 #  define FCFG1_CONFIG_MISC_ADC_DIV30_MIN_ALLOWED_RTRIM(n)   ((uint32_t)(n) << FCFG1_CONFIG_MISC_ADC_DIV30_MIN_ALLOWED_RTRIM_SHIFT)
 
-/* TIVA_FCFG1_SHDW_DIE_ID_0 (32-bit value, Shadow of the DIE_ID_0 register in eFuse row number 3) */
-/* TIVA_FCFG1_SHDW_DIE_ID_1 (32-bit value, Shadow of the DIE_ID_1 register in eFuse row number 4) */
-/* TIVA_FCFG1_SHDW_DIE_ID_2 (32-bit value, Shadow of the DIE_ID_2 register in eFuse row number 5) */
-/* TIVA_FCFG1_SHDW_DIE_ID_3 (32-bit value,  Shadow of the DIE_ID_3 register in eFuse row number 6) */
+/* TIVA_FCFG1_SHDW_DIE_ID_0 (32-bit value,
+ * Shadow of the DIE_ID_0 register in eFuse row number 3)
+ */
+
+/* TIVA_FCFG1_SHDW_DIE_ID_1 (32-bit value,
+ * Shadow of the DIE_ID_1 register in eFuse row number 4)
+ */
+
+/* TIVA_FCFG1_SHDW_DIE_ID_2 (32-bit value,
+ * Shadow of the DIE_ID_2 register in eFuse row number 5)
+ */
+
+/* TIVA_FCFG1_SHDW_DIE_ID_3 (32-bit value,
+ * Shadow of the DIE_ID_3 register in eFuse row number 6)
+ */
 
 /* TIVA_FCFG1_SHDW_OSC_BIAS_LDO_TRIM */
 
@@ -716,6 +728,7 @@
 #  define FCFG1_USER_ID_PROTOCOL_RF4CE                     (2 << FCFG1_USER_ID_PROTOCOL_SHIFT) /* RF4CE */
 #  define FCFG1_USER_ID_PROTOCOL_802154                    (4 << FCFG1_USER_ID_PROTOCOL_SHIFT) /* Zigbee/6lowpan */
 #  define FCFG1_USER_ID_PROTOCOL_PROP                      (8 << FCFG1_USER_ID_PROTOCOL_SHIFT) /* Proprietary */
+
 #define FCFG1_USER_ID_PKG_SHIFT                            (16)      /* Bits 16-18: Package type */
 #define FCFG1_USER_ID_PKG_MASK                             (7 << FCFG1_USER_ID_PKG_SHIFT)
 #  define FCFG1_USER_ID_PKG_RHG                            (0 << FCFG1_USER_ID_PKG_SHIFT) /* 4x4mm QFN (RHB) package */
@@ -723,6 +736,7 @@
 #  define FCFG1_USER_ID_PKG_RGZ                            (2 << FCFG1_USER_ID_PKG_SHIFT) /* 7x7mm QFN (RGZ) package */
 #  define FCFG1_USER_ID_PKG_WSP                            (3 << FCFG1_USER_ID_PKG_SHIFT) /* Wafer sale package (naked die) */
 #  define FCFG1_USER_ID_PKG_QFNWF                          (5 << FCFG1_USER_ID_PKG_SHIFT) /* 7x7mm QFN package with Wettable Flanks */
+
 #define FCFG1_USER_ID_SEQUENCE_SHIFT                       (19)      /* Bits 19-22: Sequence */
 #define FCFG1_USER_ID_SEQUENCE_MASK                        (15 << FCFG1_USER_ID_SEQUENCE_SHIFT)
 #  define FCFG1_USER_ID_SEQUENCE(n)                        ((uint32_t)(n) << FCFG1_USER_ID_SEQUENCE_SHIFT)
@@ -812,10 +826,21 @@
 #define FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD_MASK               (15 << FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD_SHIFT)
 #  define FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD(n)               ((uint32_t)(n) << FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD_SHIFT)
 
-/* TIVA_FCFG1_MAC_BLE_0 (32-bit value, The first 32-bits of the 64-bit MAC BLE address) */
-/* TIVA_FCFG1_MAC_BLE_1 (32-bit value,  The last 32-bits of the 64-bit MAC BLE address) */
-/* TIVA_FCFG1_MAC_15_4_0 (32-bit value, The first 32-bits of the 64-bit MAC 15.4 address) */
-/* TIVA_FCFG1_MAC_15_4_1 (32-bit value, The last 32-bits of the 64-bit MAC 15.4 address) */
+/* TIVA_FCFG1_MAC_BLE_0
+ * (32-bit value, The first 32-bits of the 64-bit MAC BLE address)
+ */
+
+/* TIVA_FCFG1_MAC_BLE_1
+ * (32-bit value,  The last 32-bits of the 64-bit MAC BLE address)
+ */
+
+/* TIVA_FCFG1_MAC_15_4_0
+ * (32-bit value, The first 32-bits of the 64-bit MAC 15.4 address)
+ */
+
+/* TIVA_FCFG1_MAC_15_4_1
+ * (32-bit value, The last 32-bits of the 64-bit MAC 15.4 address)
+ */
 
 /* TIVA_FCFG1_FLASH_OTP_DATA4 */
 
@@ -858,8 +883,8 @@
 
 /* TIVA_FCFG1_MISC_TRIM */
 
-#define FCFG1_MISC_TRIM_TEMPVSLOPE_SHIFT                   (0)       /* Bits 0-7: TEMP slope with battery voltage, in
-degrees C */
+#define FCFG1_MISC_TRIM_TEMPVSLOPE_SHIFT                   (0)       /* Bits 0-7: TEMP slope with battery voltage,
+                                                                      * degrees in C */
 #define FCFG1_MISC_TRIM_TEMPVSLOPE_MASK                    (0xff << FCFG1_MISC_TRIM_TEMPVSLOPE_SHIFT)
 #  define FCFG1_MISC_TRIM_TEMPVSLOPE(n)                    ((uint32_t)(n) << FCFG1_MISC_TRIM_TEMPVSLOPE_SHIFT)
 
@@ -899,7 +924,9 @@ degrees C */
 #define FCFG1_ICEPICK_DEVICE_ID_PG_REV_MASK                (15 << FCFG1_ICEPICK_DEVICE_ID_PG_REV_SHIFT)
 #  define FCFG1_ICEPICK_DEVICE_ID_PG_REV(n)                ((uint32_t)(n) << FCFG1_ICEPICK_DEVICE_ID_PG_REV_SHIFT)
 
-/* TIVA_FCFG1_FCFG1_REVISION (32-bit value,  The revision number of the FCFG1 layout) */
+/* TIVA_FCFG1_FCFG1_REVISION
+ * (32-bit value,  The revision number of the FCFG1 layout)
+ */
 
 /* TIVA_FCFG1_MISC_OTP_DATA */
 
@@ -1100,7 +1127,7 @@ degrees C */
 #define FCFG1_CONFIG_MISC_ADC_RSSITRIMCOMPLETE_N           (1 << 17) /* Bit 17 */
 #define FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM_SHIFT      (18)      /* Bits 18-21 */
 #define FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM_MASK       (15 << FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM_SHIFT)
-#  define FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM(n)       ((uint32_t)(n) << FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM_SHIFT)
+#  define FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM(n)       ((uint32_t)(n) << FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM_SHIFT)
 
 /* TIVA_FCFG1_VOLT_TRIM */
 

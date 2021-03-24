@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/tiva_timer.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,18 +16,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_TIMER_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_TIMER_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/* Include the timer header file for the specific Tiva/Stellaris/SimpleLink chip */
+/* Include the timer header file for the specific Tiva/Stellaris/SimpleLink
+ * chip
+ */
 
 #if defined(CONFIG_ARCH_CHIP_LM3S)
 #  include "hardware/lm/lm3s_timer.h"

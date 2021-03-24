@@ -25,17 +25,17 @@
  *    to endorse or promote products derived from this software without
  *    specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -224,8 +224,9 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
     {
       /* ADI3_REFSYS:DCDCCTL5[3] (=DITHER_EN) = CCFG_MODE_CONF_1[19]
        * (=ALT_DCDC_DITHER_EN) ADI3_REFSYS:DCDCCTL5[2:0](=IPEAK ) =
-       * CCFG_MODE_CONF_1[18:16](=ALT_DCDC_IPEAK ) Using a single 4-bit masked
-       * write since layout is equal for both source and destination
+       * CCFG_MODE_CONF_1[18:16](=ALT_DCDC_IPEAK ) Using a single 4-bit
+       * masked write since layout is equal for both source and
+       * destination
        */
 
       regval = getreg32(TIVA_CCFG_MODE_CONF_1);
@@ -237,8 +238,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   /* TBD - Temporarily removed for CC13x2 / CC26x2 */
 
-  /* Force DCDC to use RCOSC before starting up XOSC. Clock loss detector does
-   * not use XOSC until SCLK_HF actually switches and thus DCDC is not
+  /* Force DCDC to use RCOSC before starting up XOSC. Clock loss detector
+   * does not use XOSC until SCLK_HF actually switches and thus DCDC is not
    * protected from clock loss on XOSC in that time frame. The force must be
    * released when the switch to XOSC has happened. This is done in
    * OSCHfSourceSwitch().
@@ -292,7 +293,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
              (((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_DIG_MASK) >>
                FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_DIG_SHIFT) <<
               ADI2_REFSYS_SOCLDOCTL1_VTRIM_DIG_SHIFT));
-  putreg8(regval8, TIVA_ADI2_REFSYS_DIR + TIVA_ADI2_REFSYS_SOCLDOCTL1_OFFSET);
+  putreg8(regval8,
+          TIVA_ADI2_REFSYS_DIR + TIVA_ADI2_REFSYS_SOCLDOCTL1_OFFSET);
 
   /* Write to register CTLSOCREFSYS0 (addr offset 0) bits[4:0] (TRIMIREF) in
    * ADI2_REFSYS. Avoid using masked write access since bit field spans
@@ -303,7 +305,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
   regval8 = (((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMIREF_MASK) >>
               FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMIREF_SHIFT) <<
              ADI2_REFSYS_REFSYSCTL0_TRIM_IREF_SHIFT);
-  putreg8(regval8, TIVA_ADI2_REFSYS_DIR + TIVA_ADI2_REFSYS_REFSYSCTL0_OFFSET);
+  putreg8(regval8,
+          TIVA_ADI2_REFSYS_DIR + TIVA_ADI2_REFSYS_REFSYSCTL0_OFFSET);
 
   /* Write to register CTLSOCREFSYS2 (addr offset 4) bits[7:4] (TRIMMAG) in
    * ADI3_REFSYS
@@ -485,8 +488,8 @@ static void trim_coldreset(void)
  *   Perform the necessary trim of the device which is not done in boot code
  *
  *   This function should only execute coming from ROM boot. The current
- *   implementation does not take soft reset into account. However, it does no
- *   damage to execute it again. It only consumes time.
+ *   implementation does not take soft reset into account. However, it does
+ *   no damage to execute it again. It only consumes time.
  *
  ****************************************************************************/
 
@@ -577,8 +580,8 @@ void cc13xx_trim_device(void)
 
   putreg32(0, TIVA_PRCM_PDCTL1VIMS);
 
-  /* Configure optimal wait time for flash FSM in cases where flash pump wakes
-   * up from sleep
+  /* Configure optimal wait time for flash FSM in cases where flash pump
+   * wakes up from sleep
    */
 
   regval  = getreg32(TIVA_FLASH_FPAC1);
@@ -587,8 +590,8 @@ void cc13xx_trim_device(void)
   putreg32(regval, TIVA_FLASH_FPAC1);
 
   /* And finally at the end of the flash boot process: SET BOOT_DET bits in
-   * AON_PMCTL to 3 if already found to be 1 Note: The BOOT_DET_x_CLR/SET bits
-   * must be manually cleared
+   * AON_PMCTL to 3 if already found to be 1 Note: The BOOT_DET_x_CLR/SET
+   * bits must be manually cleared
    */
 
   if ((getreg32(TIVA_AON_PMCTL_RESETCTL) &
@@ -608,8 +611,8 @@ void cc13xx_trim_device(void)
     }
 
   /* Make sure there are no ongoing VIMS mode change when leaving
-   * cc13x2_cc26x2_trim_device() (There should typically be no wait time here,
-   * but need to be sure)
+   * cc13x2_cc26x2_trim_device() (There should typically be no wait time
+   * here, but need to be sure)
    */
 
   while ((getreg32(TIVA_VIMS_STAT) & VIMS_STAT_MODE_CHANGING) != 0)

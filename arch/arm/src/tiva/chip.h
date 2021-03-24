@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_CHIP_H
 #define __ARCH_ARM_SRC_TIVA_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/tiva/chip.h>
@@ -43,13 +43,13 @@
 #include "hardware/tiva_timer.h"      /* Timer */
 #include "hardware/tiva_adc.h"        /* ADC */
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Provide the required number of peripheral interrupt vector definitions as well.
- * The definition TIVA_IRQ_NEXTINT simply comes from the chip-specific IRQ header
- * file included by arch/tiva/irq.h.
+/* Provide the required number of peripheral interrupt vector definitions as
+ * well. The definition TIVA_IRQ_NEXTINT simply comes from the chip-specific
+ * IRQ header file included by arch/tiva/irq.h.
  */
 
 #define ARMV7M_PERIPHERAL_INTERRUPTS  TIVA_IRQ_NEXTINT

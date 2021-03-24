@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x0/cc13x0_aon_ioc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a
+ * compatible BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,23 +37,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_AON_IOC_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_AON_IOC_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* AON IOC Register Offsets *****************************************************************************************/
+/* AON IOC Register Offsets *************************************************/
 
 #define TIVA_AON_IOC_IOSTRMIN_OFFSET      0x0000
 #define TIVA_AON_IOC_IOSTRMED_OFFSET      0x0004
@@ -61,7 +62,7 @@
 #define TIVA_AON_IOC_CLK32KCTL_OFFSET     0x0010  /* SCLK_LF External Output Control */
 #define TIVA_AON_IOC_TCKCTL_OFFSET        0x0014  /* TCK IO Pin Control */
 
-/* AON IOC Register Addresses ***************************************************************************************/
+/* AON IOC Register Addresses ***********************************************/
 
 #define TIVA_AON_IOC_IOSTRMIN             (TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOSTRMIN_OFFSET)
 #define TIVA_AON_IOC_IOSTRMED             (TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOSTRMED_OFFSET)
@@ -69,7 +70,7 @@
 #define TIVA_AON_IOC_IOCLATCH             (TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOCLATCH_OFFSET)
 #define TIVA_AON_IOC_CLK32KCTL            (TIVA_AON_IOC_BASE + TIVA_AON_IOC_CLK32KCTL_OFFSET)
 
-/* AON IOC Bitfield Definitions *************************************************************************************/
+/* AON IOC Bitfield Definitions *********************************************/
 
 /* TIVA_AON_IOC_IOSTRMIN */
 

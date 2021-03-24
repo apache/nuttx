@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/tiva_chipinfo.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -37,14 +37,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_TIVA_CHIPINFO_H
 #define __ARCH_ARM_SRC_TIVA_TIVA_CHIPINFO_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
@@ -56,9 +56,9 @@
 
 #if defined(CONFIG_ARCH_CHIP_CC13X0) || defined(CONFIG_ARCH_CHIP_CC13X2)
 
-/*****************************************************************************
+/****************************************************************************
  * Public Types
- *****************************************************************************/
+ ****************************************************************************/
 
 enum cc13xx_protocol_e
 {
@@ -121,11 +121,11 @@ enum cc13xx_revision_e
   HWREV_2_4              =  24   /* 24 The chip's HW revision is 2.4 */
 };
 
-/*****************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_protocols
  *
  * Description:
@@ -134,11 +134,11 @@ enum cc13xx_revision_e
  * Returned Value:
  *    Returns a bit set indicating supported protocols.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 enum cc13xx_protocol_e chipinfo_protocols(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_packagetype
  *
  * Description:
@@ -147,11 +147,11 @@ enum cc13xx_protocol_e chipinfo_protocols(void);
  * Returned Value:
  *   Returns an enumeration value indicating the package type.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 enum cc13xx_package_e chipinfo_packagetype(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_hwrevcode
  *
  * Description:
@@ -160,7 +160,7 @@ enum cc13xx_package_e chipinfo_packagetype(void);
  * Returned Value:
  *   Returns the internal chip HW revision code (in range 0-15)
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t chipinfo_hwrevcode(void)
 {
@@ -172,7 +172,7 @@ static inline uint32_t chipinfo_hwrevcode(void)
           FCFG1_ICEPICK_DEVICE_ID_PG_REV_SHIFT;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_hwminorrev
  *
  * Description:
@@ -184,7 +184,7 @@ static inline uint32_t chipinfo_hwrevcode(void)
  * Returned Value:
  *   Returns the minor hardware revision number (in range 0-127)
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t chipinfo_hwminorrev(void)
 {
@@ -192,15 +192,15 @@ static inline uint32_t chipinfo_hwminorrev(void)
   uint32_t minorrev = (regval & FCFG1_MISC_CONF_1_DEVICE_MINOR_REV_MASK) >>
                        FCFG1_MISC_CONF_1_DEVICE_MINOR_REV_SHIFT;
 
-   if (minorrev >= 0x80)
-     {
+  if (minorrev >= 0x80)
+    {
        minorrev = 0;
-     }
+    }
 
-   return minorrev;
+  return minorrev;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_userid
  *
  * Description:
@@ -212,14 +212,14 @@ static inline uint32_t chipinfo_hwminorrev(void)
  * Returned Value:
  *   Returns the 32 bits USER_ID field
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t chipinfo_userid(void)
 {
   return getreg32(TIVA_FCFG1_USER_ID);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_chiptype
  *
  * Description:
@@ -228,11 +228,11 @@ static inline uint32_t chipinfo_userid(void)
  * Returned Value:
  *   Returns an enumeration value indicating the chip type
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 enum cc13xx_chiptype_e chipinfo_chiptype(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_chipfamily
  *
  * Description:
@@ -241,34 +241,37 @@ enum cc13xx_chiptype_e chipinfo_chiptype(void);
  * Returned Value:
  *   Returns an enumeration value indicating the chip family
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 enum cc13xx_chipfamily_e chipinfo_chipfamily(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_hwrevision
  *
  * Description:
- *   Returns an enumeration value indicating the hardware revision of the chip
+ *   Returns an enumeration value indicating the hardware revision of the
+ *   chip
  *
  * Returned Value:
- *   Returns an enumeration value indicating the hardware revision of the chip
+ *   Returns an enumeration value indicating the hardware revision of the
+ *   chip
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 enum cc13xx_revision_e chipinfo_hwrevision(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_verify
  *
  * Description:
- *   Verifies that system is correctly configured for the current chip.  This
- *   function will assert if that the system is NOT correctly configured.
+ *   Verifies that system is correctly configured for the current chip.
+ *   This function will assert if that the system is NOT correctly
+ *   configured.
  *
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_ASSERTIONS
 void chipinfo_verify(void);

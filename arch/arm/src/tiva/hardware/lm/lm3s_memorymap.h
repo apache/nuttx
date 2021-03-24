@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/lm/lm3s_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_MEMORYMAP_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Memory map ***********************************************************************/
+/* Memory map ***************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_LM3S6918) || defined(CONFIG_ARCH_CHIP_LM3S6432) || \
     defined(CONFIG_ARCH_CHIP_LM3S6965) || defined(CONFIG_ARCH_CHIP_LM3S8962)
@@ -68,7 +68,7 @@
 #  define TIVA_ITM_BASE       0xe0000000 /* -0xe0000fff: Instrumentation Trace Macrocell */
 #  define TIVA_DWT_BASE       0xe0001000 /* -0xe0001fff: Data Watchpoint and Trace */
 #  define TIVA_FPB_BASE       0xe0002000 /* -0xe0002fff: Flash Patch and Breakpoint */
-                                        /* -0xe000dfff: Reserved */
+                                         /* -0xe000dfff: Reserved */
 #  define TIVA_NVIC_BASE      0xe000e000 /* -0xe000efff: Nested Vectored Interrupt Controller */
                                          /* -0xe003ffff: Reserved */
 #  define TIVA_TPIU_BASE      0xe0040000 /* -0xe0040fff: Trace Port Interface Unit */
@@ -77,11 +77,13 @@
 #  error "Memory map not specified for this LM3S chip"
 #endif
 
-/* Peripheral base addresses ********************************************************/
-/* The LM3S6918 and LM3S6965 differ by only the presence or absence of a few different
- * peripheral modules.  They could probably be combined into one peripheral memory
- * map.  However, keeping them separate does also provide so early, compile-time
- * error detection that makes the duplication worthwhile.
+/* Peripheral base addresses ************************************************/
+
+/* The LM3S6918 and LM3S6965 differ by only the presence or absence of a few
+ * different peripheral modules.  They could probably be combined into one
+ * peripheral memory map.  However, keeping them separate does also provide
+ * so early, compile-time error detection that makes the duplication
+ * worthwhile.
  */
 
 #if defined(CONFIG_ARCH_CHIP_LM3S6918)
@@ -99,6 +101,7 @@
 #  define TIVA_UART0_BASE     (TIVA_PERIPH_BASE + 0x0c000) /* -0x0cfff: UART0 */
 #  define TIVA_UART1_BASE     (TIVA_PERIPH_BASE + 0x0d000) /* -0x0dfff: UART1 */
                                                            /* -0x1ffff: Reserved */
+
 /* Peripheral Base Addresses */
 
 #  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x20fff: I2C0 */
@@ -138,6 +141,7 @@
 #  define TIVA_UART0_BASE     (TIVA_PERIPH_BASE + 0x0c000) /* -0x0cfff: UART0 */
 #  define TIVA_UART1_BASE     (TIVA_PERIPH_BASE + 0x0d000) /* -0x0dfff: UART1 */
                                                            /* -0x1ffff: Reserved */
+
 /* Peripheral Base Addresses */
 
 #  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x20fff: I2C0 */
@@ -178,6 +182,7 @@
 #  define TIVA_UART1_BASE     (TIVA_PERIPH_BASE + 0x0d000) /* -0x0dfff: UART1 */
 #  define TIVA_UART2_BASE     (TIVA_PERIPH_BASE + 0x0e000) /* -0x0dfff: UART2 */
                                                            /* -0x1ffff: Reserved */
+
 /* Peripheral Base Addresses */
 
 #  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x20fff: I2C0 */
@@ -221,6 +226,7 @@
 #  define TIVA_UART0_BASE     (TIVA_PERIPH_BASE + 0x0c000) /* -0x0cfff: UART0 */
 #  define TIVA_UART1_BASE     (TIVA_PERIPH_BASE + 0x0d000) /* -0x0dfff: UART1 */
                                                            /* -0x1ffff: Reserved */
+
 /* Peripheral Base Addresses */
 
 #  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x20fff: I2C0 */
@@ -267,6 +273,7 @@
 #  define TIVA_UART1_BASE     (TIVA_PERIPH_BASE + 0x0d000) /* -0x0dfff: UART1 */
 #  define TIVA_UART2_BASE     (TIVA_PERIPH_BASE + 0x0e000) /* -0x0dfff: UART2 */
                                                            /* -0x1ffff: Reserved */
+
 /* Peripheral Base Addresses */
 
 #  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x207ff: I2C0 */
@@ -322,16 +329,16 @@
 #  error "Peripheral base addresses not specified for this Stellaris chip"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_MEMORYMAP_H */

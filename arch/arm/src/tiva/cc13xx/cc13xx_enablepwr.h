@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/cc13xx/cc13xx_enablepwr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_CC13XX_CC13XX_ENABLEPWR_H
 #define __ARCH_ARM_SRC_TIVA_CC13XX_CC13XX_ENABLEPWR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "cc13xx/cc13xx_prcm.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* CC13xx Power Domains:
  *
  * 1) PRCM_DOMAIN_RFCORE : RF Core
  * 2) PRCM_DOMAIN_SERIAL : SSI0, UART0, I2C0
- * 3) PRCM_DOMAIN_PERIPH : GPT0, GPT1, GPT2, GPT3, GPIO, SSI1, I2S, DMA, UART1
+ * 3) PRCM_DOMAIN_PERIPH : GPT0, GPT1, GPT2, GPT3, GPIO, SSI1,
+ *                         I2S, DMA, UART1
  * 4) PRCM_DOMAIN_VIMS   : SRAM, FLASH, ROM
  * 5) PRCM_DOMAIN_SYSBUS
  * 6) PRCM_DOMAIN_CPU
@@ -121,28 +122,28 @@
 #define tiva_trng_enablepwr()      cc13xx_periph_enablepwr(PRCM_PERIPH_TRNG)
 #define tiva_trng_disablepwr()     cc13xx_periph_disablepwr(PRCM_PERIPH_TRNG)
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  cc13xx_periph_enablepwr
  *
  * Description:
  *   Enable the power domain associated with the peripheral.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void cc13xx_periph_enablepwr(uint32_t peripheral);
 
-/************************************************************************************
+/****************************************************************************
  * Name:  cc13xx_periph_disablepwr
  *
  * Description:
- *   Disable the power domain associated with the peripheral if and only if all
- *   peripherals using that power domain no longer need power.
+ *   Disable the power domain associated with the peripheral if and only if
+ *   all peripherals using that power domain no longer need power.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void cc13xx_periph_disablepwr(uint32_t peripheral);
 
