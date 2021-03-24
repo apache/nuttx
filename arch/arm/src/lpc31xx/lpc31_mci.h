@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_mci.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_MCI_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_MCI_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* MCI register base address offset into the MCI domain *****************************************/
+/* MCI register base address offset into the MCI domain *********************/
 
 #define LPC31_MCI_VBASE                (LPC31_MCI_VSECTION)
 #define LPC31_MCI_PBASE                (LPC31_MCI_PSECTION)
 
-/* MCI register offsets (with respect to the MCI base) ******************************************/
+/* MCI register offsets (with respect to the MCI base) **********************/
 
 #define LPC31_MCI_CTRL_OFFSET          0x000 /* Control register */
 #define LPC31_MCI_PWREN_OFFSET         0x004 /* Reserved */
@@ -61,13 +61,13 @@
 #define LPC31_MCI_FIFOTH_OFFSET        0x04c /* FIFO threshold register */
 #define LPC31_MCI_CDETECT_OFFSET       0x050 /* Card-detect register value */
 #define LPC31_MCI_WRTPRT_OFFSET        0x054 /* Write-protect register */
-                                               /* 0x58: Reserved */
+                                             /* 0x58: Reserved */
 #define LPC31_MCI_TCBCNT_OFFSET        0x05c /* Transferred CIU card byte count */
 #define LPC31_MCI_TBBCNT_OFFSET        0x060 /* Transferred cpu/DMA to/from BIU-FIFO byte count */
-                                               /* 0x064-0x0ff: Reserved */
+                                             /* 0x064-0x0ff: Reserved */
 #define LPC31_MCI_DATA_OFFSET          0x100 /* Data FIFO read/write (>=) */
 
-/* MCI register (virtual) addresses *************************************************************/
+/* MCI register (virtual) addresses *****************************************/
 
 #define LPC31_MCI_CTRL                 (LPC31_MCI_VBASE+LPC31_MCI_CTRL_OFFSET)
 #define LPC31_MCI_PWREN                (LPC31_MCI_VBASE+LPC31_MCI_PWREN_OFFSET)
@@ -95,7 +95,7 @@
 #define LPC31_MCI_TBBCNT               (LPC31_MCI_VBASE+LPC31_MCI_TBBCNT_OFFSET)
 #define LPC31_MCI_DATA                 (LPC31_MCI_VBASE+LPC31_MCI_DATA_OFFSET)
 
-/* MCI register bit definitions *****************************************************************/
+/* MCI register bit definitions *********************************************/
 
 /* Control register CTRL, address 0x18000000 */
 
@@ -126,7 +126,7 @@
 #define MCI_CLKENA_LOWPOWER              (1 << 16) /* Bit 16: Low-power mode */
 #define MCI_CLKENA_EMABLE                (1 << 0)  /* Bit 0:  Clock enable */
 
-/*Timeout register TMOUT, address 0x18000014 */
+/* Timeout register TMOUT, address 0x18000014 */
 
 #define MCI_TMOUT_DATA_SHIFT             (8)       /* Bits 8-31: Data Read Timeout value */
 #define MCI_TMOUT_DATA_MASK              (0x00ffffff << MCI_TMOUT_DATA_SHIFT)
@@ -215,6 +215,7 @@
 #  define MCI_STATUS_FSMSTATE_RXEND      (13 << MCI_STATUS_FSMSTATE_SHIFT) /* Rx resp end bit */
 #  define MCI_STATUS_FSMSTATE_WAITNCC    (14 << MCI_STATUS_FSMSTATE_SHIFT) /* Cmd path wait NCC */
 #  define MCI_STATUS_FSMSTATE_WAITTURN   (15 << MCI_STATUS_FSMSTATE_SHIFT) /* Wait; CMD-to-response turnaround */
+
 #define MCI_STATUS_FIFOFULL              (1 << 3)  /* Bit 3:  FIFO is full */
 #define MCI_STATUS_FIFOEMPTY             (1 << 2)  /* Bit 2:  FIFO is empty */
 #define MCI_STATUS_TXWMARK               (1 << 1)  /* Bit 1:  FIFO reached Transmit watermark level */
@@ -224,9 +225,10 @@
 
 #define MCI_FIFOTH_DMABURST_SHIFT        (28)      /* Bits 28-30: Burst size for multiple transaction */
 #define MCI_FIFOTH_DMABURST_MASK         (7 << MCI_FIFOTH_DMABURST_SHIFT)
-  define MCI_FIFOTH_DMABURST_1XFR        (0 << MCI_FIFOTH_DMABURST_SHIFT) /* 1 transfer */
+#  define MCI_FIFOTH_DMABURST_1XFR       (0 << MCI_FIFOTH_DMABURST_SHIFT) /* 1 transfer */
 #  define MCI_FIFOTH_DMABURST_4XFRS      (1 << MCI_FIFOTH_DMABURST_SHIFT) /* 4 transfers */
 #  define MCI_FIFOTH_DMABURST_8XFRS      (2 << MCI_FIFOTH_DMABURST_SHIFT) /* 8 transfers */
+
 #define MCI_FIFOTH_RXWMARK_SHIFT         (16)      /* Bits 16-27: FIFO threshold level when receiving */
 #define MCI_FIFOTH_RXWMARK_MASK          (0xfff << MCI_FIFOTH_RXWMARK_SHIFT)
 #define MCI_FIFOTH_TXWMARK_SHIFT         (0)       /* Bits 0-11: FIFO threshold level when transmitting */
@@ -240,16 +242,16 @@
 
 #define MCI_WRTPRT_PROTECTED             (1 << 0)
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_MCI_H */

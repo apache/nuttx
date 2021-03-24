@@ -82,8 +82,9 @@ uint32_t lpc31_clkfreq(enum lpc31_clockid_e clkid,
       return freq;
     }
 
-  /* Read fractional divider control (FDC) register value and double check that
-   * it is enabled (not necessary since lpc31_fdcndx() also does this check
+  /* Read fractional divider control (FDC) register value and double check
+   * that it is enabled (not necessary since lpc31_fdcndx() also does this
+   * check
    */
 
   regval = getreg32(LPC31_CGU_FDC(fdcndx));
@@ -103,14 +104,16 @@ uint32_t lpc31_clkfreq(enum lpc31_clockid_e clkid,
         {
           /* Range is 0-0x1fff for both */
 
-          msub = ((regval & CGU_FDC17_MSUB_MASK) >> CGU_FDC17_MSUB_SHIFT) | CGU_FDC17_MSUB_EXTEND;
+          msub = ((regval & CGU_FDC17_MSUB_MASK) >> CGU_FDC17_MSUB_SHIFT) |
+                   CGU_FDC17_MSUB_EXTEND;
           madd = (regval & CGU_FDC17_MADD_MASK) >> CGU_FDC17_MADD_SHIFT;
         }
       else
         {
           /* Range is 0-255 for both */
 
-          msub = ((regval & CGU_FDC_MSUB_MASK) >> CGU_FDC_MSUB_SHIFT) | CGU_FDC_MSUB_EXTEND;
+          msub = ((regval & CGU_FDC_MSUB_MASK) >> CGU_FDC_MSUB_SHIFT) |
+                   CGU_FDC_MSUB_EXTEND;
           madd = (regval & CGU_FDC_MADD_MASK) >> CGU_FDC_MADD_SHIFT;
         }
 
@@ -122,9 +125,9 @@ uint32_t lpc31_clkfreq(enum lpc31_clockid_e clkid,
         }
 
       /* Reduce to the greatest common power-of-2 denominator.  To minimize
-       * power consumption, the lpc313x user manual recommends that madd and msub
-       * be shifted right to have as many trailing zero's as possible.  The
-       * following undoes that shift.
+       * power consumption, the lpc313x user manual recommends that madd and
+       * msub be shifted right to have as many trailing zero's as possible.
+       * The following undoes that shift.
        */
 
       while ((msub & 1) == 0 && (madd & 1) == 0)

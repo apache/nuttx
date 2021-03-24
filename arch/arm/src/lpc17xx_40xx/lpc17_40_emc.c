@@ -106,7 +106,7 @@ static const lpc17_40_pinset_t g_emcaddr[] =
  * Private Functions
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name:
  *   lpc17_40_running_from_sdram
  *
@@ -191,6 +191,7 @@ void lpc17_40_emcinitialize(void)
   putreg32(0, LPC17_40_EMC_CONFIG);
 
   /* Configure EMC pins */
+
   /* Control signals */
 
   for (i = 0; i < EMC_NCTRL; i++)

@@ -54,7 +54,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* PWM/Timer Definitions ****************************************************/
+
 /* The following definitions are used to identify the various time types */
 
 #define TIMTYPE_BASIC      0  /* Basic timers: TIM6-7 */
@@ -64,7 +66,6 @@
 #define TIMTYPE_ADVANCED   4  /* Advanced timers:  TIM1-8 */
 
 #define TIMTYPE_TIM1       TIMTYPE_ADVANCED
-
 
 #define LER0_EN            (1 << 0)
 #define LER1_EN            (1 << 1)
@@ -94,6 +95,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure represents the state of one PWM timer */
 
 struct lpc17_40_pwmtimer_s
@@ -111,13 +113,16 @@ struct lpc17_40_pwmtimer_s
 /****************************************************************************
  * Static Function Prototypes
  ****************************************************************************/
+
 /* Register access */
 
 static uint32_t pwm_getreg(struct lpc17_40_pwmtimer_s *priv, int offset);
-static void pwm_putreg(struct lpc17_40_pwmtimer_s *priv, int offset, uint32_t value);
+static void pwm_putreg(struct lpc17_40_pwmtimer_s *priv,
+                       int offset, uint32_t value);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(struct lpc17_40_pwmtimer_s *priv, FAR const char *msg);
+static void pwm_dumpregs(struct lpc17_40_pwmtimer_s *priv,
+                         FAR const char *msg);
 #else
 #  define pwm_dumpregs(priv,msg)
 #endif
@@ -142,7 +147,10 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* This is the list of lower half PWM driver methods used by the upper half driver */
+
+/* This is the list of lower half PWM driver methods used by the upper half
+ * driver
+ */
 
 static const struct pwm_ops_s g_pwmops =
 {
@@ -205,7 +213,8 @@ static uint32_t pwm_getreg(struct lpc17_40_pwmtimer_s *priv, int offset)
  *
  ****************************************************************************/
 
-static void pwm_putreg(struct lpc17_40_pwmtimer_s *priv, int offset, uint32_t value)
+static void pwm_putreg(struct lpc17_40_pwmtimer_s *priv,
+                       int offset, uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
@@ -225,7 +234,8 @@ static void pwm_putreg(struct lpc17_40_pwmtimer_s *priv, int offset, uint32_t va
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(struct lpc17_40_pwmtimer_s *priv, FAR const char *msg)
+static void pwm_dumpregs(struct lpc17_40_pwmtimer_s *priv,
+                         FAR const char *msg)
 {
   pwminfo("%s:\n", msg);
   pwminfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
@@ -404,7 +414,8 @@ static void pwm_set_apb_clock(FAR struct lpc17_40_pwmtimer_s *priv, bool on)
 
 static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 {
-  FAR struct lpc17_40_pwmtimer_s *priv = (FAR struct lpc17_40_pwmtimer_s *)dev;
+  FAR struct lpc17_40_pwmtimer_s *priv =
+                             (FAR struct lpc17_40_pwmtimer_s *)dev;
   irqstate_t flags;
   uint32_t regval;
 
@@ -454,7 +465,8 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
 static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 {
-  FAR struct lpc17_40_pwmtimer_s *priv = (FAR struct lpc17_40_pwmtimer_s *)dev;
+  FAR struct lpc17_40_pwmtimer_s *priv =
+                              (FAR struct lpc17_40_pwmtimer_s *)dev;
   uint32_t pincfg;
 
   pwminfo("TIM%d pincfg: %08x\n", priv->timid, priv->pincfg);
@@ -482,7 +494,8 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info)
 {
-  FAR struct lpc17_40_pwmtimer_s *priv = (FAR struct lpc17_40_pwmtimer_s *)dev;
+  FAR struct lpc17_40_pwmtimer_s *priv =
+                          (FAR struct lpc17_40_pwmtimer_s *)dev;
   return pwm_timer(priv, info);
 }
 
@@ -507,7 +520,8 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
 static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 {
-  FAR struct lpc17_40_pwmtimer_s *priv = (FAR struct lpc17_40_pwmtimer_s *)dev;
+  FAR struct lpc17_40_pwmtimer_s *priv =
+                            (FAR struct lpc17_40_pwmtimer_s *)dev;
   uint32_t resetbit;
   uint32_t regaddr;
   uint32_t regval;
@@ -517,7 +531,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
   /* Disable interrupts momentary to stop any ongoing timer processing and
    * to prevent any concurrent access to the reset register.
-  */
+   */
 
   flags = enter_critical_section();
 
@@ -560,10 +574,12 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
+static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+                     int cmd, unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
-  FAR struct lpc17_40_pwmtimer_s *priv = (FAR struct lpc17_40_pwmtimer_s *)dev;
+  FAR struct lpc17_40_pwmtimer_s *priv =
+                                 (FAR struct lpc17_40_pwmtimer_s *)dev;
 
   /* There are no platform-specific ioctl commands */
 

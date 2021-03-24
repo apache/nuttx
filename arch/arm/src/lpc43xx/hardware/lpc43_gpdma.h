@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_gpdma.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_GPDMA_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_GPDMA_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
-/* Register Offsets *********************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define LPC43_GPDMA_INTSTAT_OFFSET        0x0000 /* DMA Interrupt Status Register */
 #define LPC43_GPDMA_INTTCSTAT_OFFSET      0x0004 /* DMA Interrupt Terminal Count Request Status Register */
@@ -110,7 +111,7 @@
 #define LPC43_GPDMA_CONTROL7_OFFSET       0x01ec /* DMA Channel 7 Control Register */
 #define LPC43_GPDMA_CONFIG7_OFFSET        0x01f0 /* DMA Channel 7 Configuration Register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define LPC43_GPDMA_INTSTAT               (LPC43_DMA_BASE+LPC43_GPDMA_INTSTAT_OFFSET)
 #define LPC43_GPDMA_INTTCSTAT             (LPC43_DMA_BASE+LPC43_GPDMA_INTTCSTAT_OFFSET)
@@ -184,7 +185,7 @@
 #define LPC43_GPDMA_CONTROL7              (LPC43_DMA_BASE+LPC43_GPDMA_CONTROL7_OFFSET)
 #define LPC43_GPDMA_CONFIG7               (LPC43_DMA_BASE+LPC43_GPDMA_CONFIG7_OFFSET)
 
-/* Register Bit Definitions *************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Common macros for DMA channel and source bit settings */
 
@@ -199,34 +200,42 @@
 
 #define GPDMA_INTSTAT(n)                  (1 << (n)) /* Bits 0-7: Status of DMA channel n interrupts after masking */
                                                      /* Bits 8-31: Reserved */
+
 /* DMA Interrupt Terminal Count Request Status Register */
 
 #define GPDMA_INTTCSTAT(n)                (1 << (n)) /* Bits 0-7: Terminal count interrupt request status for DMA channel n */
                                                      /* Bits 8-31: Reserved */
+
 /* DMA Interrupt Terminal Count Request Clear Register */
 
 #define GPDMA_INTTCCLEAR(n)               (1 << (n)) /* Bits 0-7: Clear terminal count interrupt request for DMA channel n */
                                                      /* Bits 8-31: Reserved */
+
 /* DMA Interrupt Error Status Register */
 
 #define GPDMA_INTERRSTAT(n)               (1 << (n)) /* Bits 0-7: Interrupt error status for DMA channel n */
                                                      /* Bits 8-31: Reserved */
+
 /* DMA Interrupt Error Clear Register */
 
 #define GPDMA_INTERRCLR(n)                (1 << (n)) /* Bits 0-7: Clear nterrupt error status for DMA channel n */
                                                      /* Bits 8-31: Reserved */
+
 /* DMA Raw Interrupt Terminal Count Status Register */
 
 #define GPDMA_RAWINTTCSTAT(n)             (1 << (n)) /* Bits 0-7: Terminal count interrupt request status for DMA channel n */
                                                      /* Bits 8-31: Reserved */
+
 /* DMA Raw Error Interrupt Status Register */
 
 #define GPDMA_RAWINTERRSTAT(n)            (1 << (n)) /* Bits 0-7: Interrupt error status for DMA channel n */
                                                      /* Bits 8-31: Reserved */
+
 /* DMA Enabled Channel Register */
 
 #define GPDMA_ENBLDCHNS(n)                (1 << (n)) /* Bits 0-7: Enabled status for DMA channel n */
                                                      /* Bits 8-31: Reserved */
+
 /* DMA Software Burst Request Register */
 
 #define GPDMA_SOFTBREQ(n)                 (1 << (n)) /* Bits 0-15: Software burst request flags for source n */
@@ -236,25 +245,31 @@
 
 #define GPDMA_SOFTSREQ(n)                 (1 << (n)) /* Bits 0-15: Software single burst request flags for source n */
                                                      /* Bits 16-31: Reserved */
+
 /* DMA Software Last Burst Request Register */
 
 #define GPDMA_SOFTLBREQ(n)                (1 << (n)) /* Bits 0-15: Software last burst request flags for source n */
                                                      /* Bits 16-31: Reserved */
+
 /* DMA Software Last Single Request Register */
 
 #define GPDMA_SOFTLSREQ(n)                (1 << (n)) /* Bits 0-15: Software last single burst request flags for source n */
                                                      /* Bits 16-31: Reserved */
+
 /* DMA Configuration Register */
 
 #define GPDMA_GLOBAL_CONFIG_ENA           (1 << 0)  /* Bit 0:  DMA Controller enable */
 #define GPDMA_GLOBAL_CONFIG_M0            (1 << 1)  /* Bit 1:  AHB Master 0 endianness configuration */
 #define GPDMA_GLOBAL_CONFIG_M1            (1 << 2)  /* Bit 2:  M1 AHB Master 1 endianness configuration */
                                                     /* Bits 3-31: Reserved */
+
 /* DMA Synchronization Register */
 
 #define GPDMA_SYNC(n)                     (1 << (n)) /* Bits 0-15: Control synchrononization for DMA request n */
                                                      /* Bits 16-31: Reserved */
+
 /* DMA Channel Source Address Register (32-bit address) */
+
 /* DMA Channel Destination Address Register (32-bit address) */
 
 /* DMA Channel Linked List Item Register */
@@ -277,6 +292,7 @@
 #  define GPDMA_CONTROL_SBSIZE_64        (5 << GPDMA_CONTROL_SBSIZE_SHIFT) /* Source burst size = 64 */
 #  define GPDMA_CONTROL_SBSIZE_128       (6 << GPDMA_CONTROL_SBSIZE_SHIFT) /* Source burst size = 128 */
 #  define GPDMA_CONTROL_SBSIZE_256       (7 << GPDMA_CONTROL_SBSIZE_SHIFT) /* Source burst size = 256 */
+
 #define GPDMA_CONTROL_DBSIZE_SHIFT       (15)      /* Bits 15-17: Destination burst size */
 #define GPDMA_CONTROL_DBSIZE_MASK        (7 << GPDMA_CONTROL_DBSIZE_SHIFT)
 #  define GPDMA_CONTROL_DBSIZE_1         (0 << GPDMA_CONTROL_DBSIZE_SHIFT) /* Destination burst size = 1 */
@@ -287,22 +303,29 @@
 #  define GPDMA_CONTROL_DBSIZE_64        (5 << GPDMA_CONTROL_DBSIZE_SHIFT) /* Destination burst size = 64 */
 #  define GPDMA_CONTROL_DBSIZE_128       (6 << GPDMA_CONTROL_DBSIZE_SHIFT) /* Destination burst size = 128 */
 #  define GPDMA_CONTROL_DBSIZE_256       (7 << GPDMA_CONTROL_DBSIZE_SHIFT) /* Destination burst size = 256 */
+
 #define GPDMA_CONTROL_SWIDTH_SHIFT       (18)       /* Bits 18-20: Source transfer width */
 #define GPDMA_CONTROL_SWIDTH_MASK        (7 << GPDMA_CONTROL_SWIDTH_SHIFT)
 #  define GPDMA_CONTROL_SWIDTH_BYTE      (0 << GPDMA_CONTROL_SWIDTH_SHIFT) /* Byte (8-bit) */
 #  define GPDMA_CONTROL_SWIDTH_HWORD     (1 << GPDMA_CONTROL_SWIDTH_SHIFT) /* Halfword (16-bit) */
 #  define GPDMA_CONTROL_SWIDTH_WORD      (2 << GPDMA_CONTROL_SWIDTH_SHIFT) /* Word (32-bit) */
+
 #define GPDMA_CONTROL_DWIDTH_SHIFT       (21)       /* Bits 21-23: Destination transfer width */
 #define GPDMA_CONTROL_DWIDTH_MASK        (7 << GPDMA_CONTROL_DWIDTH_SHIFT)
 #  define GPDMA_CONTROL_DWIDTH_BYTE      (0 << GPDMA_CONTROL_DWIDTH_SHIFT) /* Byte (8-bit) */
 #  define GPDMA_CONTROL_DWIDTH_HWORD     (1 << GPDMA_CONTROL_DWIDTH_SHIFT) /* Halfword (16-bit) */
 #  define GPDMA_CONTROL_DWIDTH_WORD      (2 << GPDMA_CONTROL_DWIDTH_SHIFT) /* Word (32-bit) */
+
 #define GPDMA_CONTROL_S_SHIFT            (24) /* Bit 24: Source AHB master select */
+
 # define GPDMA_CONTROL_S0                (0 << GPDMA_CONTROL_S_SHIFT) /* AHB Master 0 selected for source transfer. */
 # define GPDMA_CONTROL_S1                (1 << GPDMA_CONTROL_S_SHIFT) /* AHB Master 1 selected for source transfer. */
+
 #define GPDMA_CONTROL_D_SHIFT            (25) /* Bit 25: Destination AHB master select */
+
 # define GPDMA_CONTROL_D0                (0 << GPDMA_CONTROL_D_SHIFT) /* AHB Master 0 selected for destination transfer. */
 # define GPDMA_CONTROL_D1                (1 << GPDMA_CONTROL_D_SHIFT) /* AHB Master 1 selected for destination transfer. */
+
 #define GPDMA_CONTROL_SI                 (1 << 26) /* Bit 26: Source increment */
 #define GPDMA_CONTROL_DI                 (1 << 27) /* Bit 27: Destination increment */
 #define GPDMA_CONTROL_PROT1              (1 << 28) /* Bit 28: Privileged mode */
@@ -369,6 +392,7 @@
 #  define GPDMA_CONFIG_SRCPER_SCTM3_2    (15 << GPDMA_CONFIG_SRCPER_SHIFT) /* SCT match 3 */
 #  define GPDMA_CONFIG_SRCPER_SGPIO15_3  (15 << GPDMA_CONFIG_SRCPER_SHIFT) /* SGPIO15 */
 #  define GPDMA_CONFIG_SRCPER_T3MAT0_2   (15 << GPDMA_CONFIG_SRCPER_SHIFT) /* Timer3 match 0 */
+
 #define GPDMA_CONFIG_DESTPER_SHIFT       (6)       /* Bits 6-10: Destination peripheral */
 #define GPDMA_CONFIG_DESTPER_MASK        (31 << GPDMA_CONFIG_DESTPER_SHIFT)
 #  define GPDMA_CONFIG_DESTPER_SPIFI     (0 << GPDMA_CONFIG_DESTPER_SHIFT)  /* SPIFI */
@@ -425,6 +449,7 @@
 #  define GPDMA_CONFIG_DESTPER_SCTM3_2   (15 << GPDMA_CONFIG_DESTPER_SHIFT) /* SCT match 3 */
 #  define GPDMA_CONFIG_DESTPER_SGPIO15_3 (15 << GPDMA_CONFIG_DESTPER_SHIFT) /* SGPIO15 */
 #  define GPDMA_CONFIG_DESTPER_T3MAT0_2  (15 << GPDMA_CONFIG_DESTPER_SHIFT) /* Timer3 match 0 */
+
 #define GPDMA_CONFIG_FCNTRL_SHIFT        (11)       /* Bits 11-13: Flow control and transfer type */
 #define GPDMA_CONFIG_FCNTRL_MASK         (7 << GPDMA_CONFIG_FCNTRL_SHIFT)
 #  define GPDMA_CONFIG_FCNTRL_M2M_DMA    (0 << GPDMA_CONFIG_FCNTRL_SHIFT) /* Memory to memory (DMA control) */
@@ -435,6 +460,7 @@
 #  define GPDMA_CONFIG_FCNTRL_M2P_PER    (5 << GPDMA_CONFIG_FCNTRL_SHIFT) /* Memory to peripheral (peripheral control) */
 #  define GPDMA_CONFIG_FCNTRL_P2M_PER    (6 << GPDMA_CONFIG_FCNTRL_SHIFT) /* Peripheral to memory (peripheral control) */
 #  define GPDMA_CONFIG_FCNTRL_P2P_SRC    (7 << GPDMA_CONFIG_FCNTRL_SHIFT) /* SRC peripheral to DEST peripheral (SRC control) */
+
 #define GPDMA_CONFIG_IE                  (1 << 14) /* Bit 14: Interrupt error mask */
 #define GPDMA_CONFIG_ITC                 (1 << 15) /* Bit 15: Terminal count interrupt mask */
 #define GPDMA_CONFIG_LOCK                (1 << 16) /* Bit 16: Lock */
@@ -442,16 +468,16 @@
 #define GPDMA_CONFIG_HALT                (1 << 18) /* Bit 18: Halt */
                                                    /* Bits 19-31: Reserved */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_GPDMA_H */

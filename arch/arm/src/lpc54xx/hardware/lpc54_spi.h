@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_SPI_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_SPI_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *********************************************************************************/
+/* Register offsets *********************************************************/
 
 /* Registers for the SPI function */
 
@@ -60,7 +60,7 @@
 
 #define LPC54_SPI_ID_OFFSET           0x0ffc  /* SPI module Identification */
 
-/* Register addresses *******************************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC54_SPI0_CFG                (LPC54_FLEXCOMM0_BASE + LPC54_SPI_CFG_OFFSET)
 #define LPC54_SPI0_DLY                (LPC54_FLEXCOMM0_BASE + LPC54_SPI_DLY_OFFSET)
@@ -242,7 +242,7 @@
 #define LPC54_SPI9_FIFORDNOPOP        (LPC54_FLEXCOMM9_BASE + LPC54_SPI_FIFORDNOPOP_OFFSET)
 #define LPC54_SPI9_ID                 (LPC54_FLEXCOMM9_BASE + LPC54_SPI_ID_OFFSET)
 
-/* Register bit definitions *************************************************************************/
+/* Register bit definitions *************************************************/
 
 /* SPI Configuration register */
 
@@ -280,7 +280,9 @@
 #define SPI_STAT_ENDTRANSFER          (1 << 7)  /* Bit 7:  End Transfer control bit */
 #define SPI_STAT_MSTIDLE              (1 << 8)  /* Bit 8:  Master idle status flag */
 
-/* SPI Interrupt Enable read and set, SPI Interrupt Enable Clear, and SPI Interrupt Status */
+/* SPI Interrupt Enable read and set, SPI Interrupt Enable Clear,
+ * and SPI Interrupt Status
+ */
 
 #define SPI_INT_SSA                   (1 << 4)  /* Bit 4:  Slave select assert interrupt */
 #define SPI_INT_SSD                   (1 << 5)  /* Bit 5:  Slave select deassert interrupt */
@@ -299,6 +301,7 @@
 #define SPI_FIFOCFG_SIZE_SHIFT        (4)       /* Bits 4-5:  FIFO size configuration (read-only) */
 #define SPI_FIFOCFG_SIZE_MASK         (3 << SPI_FIFOCFG_SIZE_SHIFT)
 #  define SPI_FIFOCFG_SIZE_8x16       (1 << SPI_FIFOCFG_SIZE_SHIFT) /* FIFO is configured as 8 entries of 16 bits */
+
 #define SPI_FIFOCFG_DMATX             (1 << 12) /* Bit 12: DMA configuration for transmit */
 #define SPI_FIFOCFG_DMARX             (1 << 13) /* Bit 13: DMA configuration for receive */
 #define SPI_FIFOCFG_WAKETX            (1 << 14) /* Bit 14: Wake-up for transmit FIFO level */
@@ -335,8 +338,9 @@
 #  define SPI_FIFOTRIG_RXLVL_NOTEMPTY (0 << SPI_FIFOTRIG_RXLVL_SHIFT)
 #  define SPI_FIFOTRIG_RXLVL_FULL     (7 << SPI_FIFOTRIG_RXLVL_SHIFT)
 
-/* FIFO interrupt enable set (enable) and read register, FIFO interrupt enable clear (disable)
- * and read register, and FIFO interrupt status register
+/* FIFO interrupt enable set (enable) and read register,
+ * FIFO interrupt enable clear (disable) and read register,
+ * and FIFO interrupt status register
  */
 
 #define SPI_FIFOINT_TXERR             (1 << 0)  /* Bit 0:  Transmit error interrupt */

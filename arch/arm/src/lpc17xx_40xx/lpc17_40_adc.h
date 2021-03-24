@@ -31,9 +31,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
-/* If CONFIG_LPC17_40_ADC_CHANLIST is enabled, then the platform specific code
- * must do two things:  (1) define CONFIG_LPC17_40_ADC_NCHANNELS in the
+
+/* If CONFIG_LPC17_40_ADC_CHANLIST is enabled, then the platform specific
+ * code must do two things:  (1) define CONFIG_LPC17_40_ADC_NCHANNELS in the
  * configuration file and (2) provide an array g_adc_chanlist[] with the
  * channel numbers matching the ADC0_MASK within the board-specific library.
  */
@@ -63,18 +65,18 @@ extern "C"
 #define EXTERN extern
 #endif
 
-
 /* The errata that states: "A/D Global Data register should not be used with
  * burst mode or hardware triggering".  The configuration option
- * CONFIG_LPC17_40_ADC_CHANLIST is a workaround for this errata.  If this option
- * is selected, then the ADC driver will grab from the individual channel
- * registers rather than from the global data register as this is the stated
- * workaround in the errata.
+ * CONFIG_LPC17_40_ADC_CHANLIST is a workaround for this errata.  If this
+ * option is selected, then the ADC driver will grab from the individual
+ * channel registers rather than from the global data register as this is the
+ * stated workaround in the errata.
  *
  * If this option is enabled, then the platform specific code must do two
- * things:  (1) define CONFIG_LPC17_40_ADC_NCHANNELS in the configuration file
- * and (2) provide an array g_adc_chanlist[] with the channel numbers
- * matching the ADC0_MASK within the board-specific library.
+ * things:
+ * (1) define CONFIG_LPC17_40_ADC_NCHANNELS in the configuration file
+ * (2) provide an array g_adc_chanlist[] with the channel numbers
+ *     matching the ADC0_MASK within the board-specific library.
  */
 
 #ifdef CONFIG_LPC17_40_ADC_CHANLIST
@@ -82,7 +84,7 @@ EXTERN uint8_t g_adc_chanlist[CONFIG_LPC17_40_ADC_NCHANNELS];
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************

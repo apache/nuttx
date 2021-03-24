@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_uart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_UART_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_UART_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* UART register base address offset into the APB2 domain ***************************************/
+/* UART register base address offset into the APB2 domain *******************/
 
 #define LPC31_UART_VBASE                (LPC31_APB2_VSECTION+LPC31_APB2_UART_OFFSET)
 #define LPC31_UART_PBASE                (LPC31_APB2_PSECTION+LPC31_APB2_UART_OFFSET)
 
-/* UART register offsets (with respect to the UART base) ****************************************/
+/* UART register offsets (with respect to the UART base) ********************/
 
 #define LPC31_UART_RBR_OFFSET           0x000 /* Receiver Buffer Register */
 #define LPC31_UART_THR_OFFSET           0x000 /* Transmitter Holding Register */
@@ -51,22 +51,22 @@
 #define LPC31_UART_LSR_OFFSET           0x014 /* Line Status Register */
 #define LPC31_UART_MSR_OFFSET           0x018 /* Modem status Register */
 #define LPC31_UART_SCR_OFFSET           0x01c /* Scratch Register */
-                                                /* 0x020: Reserved */
+                                              /* 0x020: Reserved */
 #define LPC31_UART_ICR_OFFSET           0x024 /* IrDA Control Register */
 #define LPC31_UART_FDR_OFFSET           0x028 /* Fractional Divider Register */
-                                                /* 0x02c: Reserved */
+                                              /* 0x02c: Reserved */
 #define LPC31_UART_POP_OFFSET           0x030 /* NHP Pop Register */
 #define LPC31_UART_MODE_OFFSET          0x034 /* NHP Mode Selection Register */
-                                                /* 0x038-0xfd4: Reserved */
+                                              /* 0x038-0xfd4: Reserved */
 #define LPC31_UART_INTCE_OFFSET         0xfd8 /* Interrupt Clear Enable Register */
 #define LPC31_UART_INTSE_OFFSET         0xfdc /* Interrupt Set Enable Register */
 #define LPC31_UART_INTS_OFFSET          0xfe0 /* Interrupt Status Register */
 #define LPC31_UART_INTE_OFFSET          0xfe4 /* Interrupt Enable Register */
 #define LPC31_UART_INTCS_OFFSET         0xfe8 /* Interrupt Clear Status Register */
 #define LPC31_UART_INTSS_OFFSET         0xfec /* Interrupt Set Status Register */
-                                                /* 0xff0-0xff8: Reserved */
+                                              /* 0xff0-0xff8: Reserved */
 
-/* UART register (virtual) addresses ************************************************************/
+/* UART register (virtual) addresses ****************************************/
 
 #define LPC31_UART_RBR                  (LPC31_UART_VBASE+LPC31_UART_RBR_OFFSET)
 #define LPC31_UART_THR                  (LPC31_UART_VBASE+LPC31_UART_THR_OFFSET)
@@ -91,7 +91,8 @@
 #define LPC31_UART_INTCS                (LPC31_UART_VBASE+LPC31_UART_INTCS_OFFSET)
 #define LPC31_UART_INTSS                (LPC31_UART_VBASE+LPC31_UART_INTSS_OFFSET)
 
-/* UART register bit definitions ****************************************************************/
+/* UART register bit definitions ********************************************/
+
 /* Receive Buffer Register RBR, address 0x15001000 */
 
 #define UART_RBR_SHIFT                    (0)       /* Bits 0-7 */
@@ -132,6 +133,7 @@
 #  define UART_IIR_INTID_RDA              (2 << UART_IIR_INTID_SHIFT) /* Received Data Available */
 #  define UART_IIR_INTID_RLS              (3 << UART_IIR_INTID_SHIFT) /* Receiver Line Status */
 #  define UART_IIR_INTID_TIMEOUT          (6 << UART_IIR_INTID_SHIFT) /* Character time-out */
+
 #define UART_IIR_NOINT                    (1 << 0)  /* Bit 0:  Interrupt status, 1=no interrupt */
 
 /* FIFO Control Register FCR, address 0x15001008 */
@@ -142,6 +144,7 @@
 #  define UART_FCR_RXTRIGLEVEL_16         (1 << UART_FCR_RXTRIGLEVEL_SHIFT) /* Rx trigger at character 16 */
 #  define UART_FCR_RXTRIGLEVEL_32         (2 << UART_FCR_RXTRIGLEVEL_SHIFT) /* Rx trigger at character 32 */
 #  define UART_FCR_RXTRIGLEVEL_56         (3 << UART_FCR_RXTRIGLEVEL_SHIFT) /* Rx trigger at character 56 */
+
 #define UART_FCR_DMAMODE                  (1 << 3)  /* Bit 3:  DMA mode select */
 #define UART_FCR_TXFIFORST                (1 << 2)  /* Bit 2:  Transmitter FIFO reset */
 #define UART_FCR_RXFIFORST                (1 << 1)  /* Bit 1:  Receiver FIFO reset */
@@ -232,17 +235,16 @@
 #define UART_THREINT                      (1 << 4)  /* Bit 4:  Transmitter Holding Register Empty Interrupt */
 #define UART_DCTSINT                      (1 << 0)  /* Bit 0:  Delta Clear To Send Interrupt */
 
-
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_UART_H */

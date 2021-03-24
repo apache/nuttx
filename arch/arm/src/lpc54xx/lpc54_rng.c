@@ -101,7 +101,9 @@ static ssize_t lpc54_read(struct file *filep, char *buffer, size_t buflen)
 
   /* Copy the requested number of randome bytes. */
 
-  for (remaining = buflen; remaining > 0;)
+  for (remaining = buflen;
+       remaining > 0;
+      )
     {
       /* Read the next 32-bit random value */
 

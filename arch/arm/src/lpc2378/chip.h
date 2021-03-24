@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc2378/chip.h
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
@@ -36,22 +36,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC2378_CHIP_H
 #define __ARCH_ARM_SRC_LPC2378_CHIP_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Memory Map ***************************************************************************************/
+/* Memory Map ***************************************************************/
 
 #define LPC23XX_FLASH_BASE          0x00000000
 #define LPC23XX_FIO_BASE            0x3fffc000
@@ -63,7 +63,7 @@
 #define LPC23XX_APB_BASE            0xe0000000
 #define LPC23XX_AHB_BASE            0xf0000000
 
-/* Peripheral Registers ****************************************************************************/
+/* Peripheral Registers *****************************************************/
 
 /* APB Register block base addresses */
 
@@ -81,7 +81,10 @@
 #define LPC23XX_PINSEL_BASE         0xe002c000  /* Pin function select registers */
 #define LPC23XX_SSP1_BASE           0xe0030000  /* Synchronous Serial Port 1 base address */
 #define LPC23XX_AD0_BASE            0xe0034000  /* Analog to Digital Converter 0 base address*/
-//~ #define LPC23XX_CAN_ACCEPT_RAM_BASE 0xe0038000  /* CAN Acceptance Filter RAM base address*/
+
+/* #define LPC23XX_CAN_ACCEPT_RAM_BASE 0xe0038000
+ * CAN Acceptance Filter RAM base address
+ */
 #define LPC23XX_CAN_ACCEPT_BASE     0xE003C000  /* CAN Acceptance Filter Register base address*/
 #define LPC23XX_CAN_COMMON_BASE     0xe0040000  /* CAN Common Register base address*/
 #define LPC23XX_CAN1_BASE           0xe0044000  /* CAN 1 Controller base address*/
@@ -97,7 +100,10 @@
 #define LPC23XX_BATT_RAM_BASE       0xE0084000  /* Battery RAM base address */
 #define LPC23XX_I2S_BASE            0xE0088000  /* I2S base address */
 #define LPC23XX_MCI_BASE            0xE008C000  /* SD/MMC Card Interface base address */
-//~ #define LPC23XX_SPI1_BASE       0xe0068000  /* Serial Peripheral Interface 1 (SPI1) base */
+
+/* #define LPC23XX_SPI1_BASE       0xe0068000
+ * Serial Peripheral Interface 1 (SPI1) base
+ */
 #define LPC23XX_EMAC_BASE           0xFFE00000  /* Ethernet MAC base address */
 #define LPC23XX_USB_BASE            0xFFE0C200  /* USB base address */
 #define LPC23XX_SCB_BASE            0xE01FC000  /* System Control Block (SBC) base address */
@@ -108,7 +114,6 @@
 #define LPC23XX_EMC_BASE            0xFFE08000  /* External Memory Controller (EMC) base address */
 #define LPC23XX_VIC_BASE            0xFFFFF000  /* Vectored Interrupt Controller (VIC) Base */
 #define LPC23XX_GPDMA_BASE          0xFFE04000  /* General Purpose DMA */
-
 
 /* Watchdog Register Offsets */
 #define WD_MOD_OFFSET               0x00  /* Watchdog Mode Register */
@@ -234,7 +239,8 @@
 
 #define AD_ADCR_OFFSET              0x00  /* A/D Control Register */
 #define AD_ADGDR_OFFSET             0x04  /* A/D Global Data Register (only one common register!) */
-//~ #define AD_ADGSR_OFFSET         0x08  /* A/D Global Start Register */
+
+/* #define AD_ADGSR_OFFSET         0x08      A/D Global Start Register */
 #define AD_ADINTEN_OFFSET           0x0c  /* A/D Interrupt Enable Register */
 #define AD_ADDR0_OFFSET             0x10  /* A/D Channel 0 Data Register */
 #define AD_ADDR1_OFFSET             0x14  /* A/D Channel 0 Data Register */
@@ -252,7 +258,7 @@
 
 /* Digital to Analog  (DAC) register offset */
 
-//#define DACR_OFFSET               0x00
+/* #define DACR_OFFSET               0x00 */
 
 /* SPI0 register offsets */
 
@@ -266,15 +272,25 @@
 
 /* SPI1 register offsets */
 
-//~ #define SPI1_CR0_OFFSET         0x00  /* Control Register 0 */
-//~ #define SPI1_CR1_OFFSET         0x04  /* Control Register 1 */
-//~ #define SPI1_DR_OFFSET          0x08  /* Data Register */
-//~ #define SPI1_SR_OFFSET          0x0c  /* Status Register */
-//~ #define SPI1_CPSR_OFFSET        0x10  /* Clock Pre-Scale Regisrer */
-//~ #define SPI1_IMSC_OFFSET        0x14  /* Interrupt Mask Set and Clear Register */
-//~ #define SPI1_RIS_OFFSET         0x18  /* Raw Interrupt Status Register */
-//~ #define SPI1_MIS_OFFSET         0x1c  /* Masked Interrupt Status Register */
-//~ #define SPI1_ICR_OFFSET         0x20  /* Interrupt Clear Register */
+/* #define SPI1_CR0_OFFSET         0x00   Control Register 0 */
+
+/* #define SPI1_CR1_OFFSET         0x04   Control Register 1 */
+
+/* #define SPI1_DR_OFFSET          0x08   Data Register */
+
+/* #define SPI1_SR_OFFSET          0x0c   Status Register */
+
+/* #define SPI1_CPSR_OFFSET        0x10   Clock Pre-Scale Regisrer */
+
+/* #define SPI1_IMSC_OFFSET        0x14   Interrupt Mask Set and Clear
+ *                                        Register
+ */
+
+/* #define SPI1_RIS_OFFSET         0x18   Raw Interrupt Status Register */
+
+/* #define SPI1_MIS_OFFSET         0x1c   Masked Interrupt Status Register */
+
+/* #define SPI1_ICR_OFFSET         0x20   Interrupt Clear Register */
 
 /* SSP Base Addresses */
 
@@ -329,8 +345,8 @@
 #define RTC_PREFRAC_OFFSET          0x84  /* Prescale Value Register (fraction) */
 
 /* Watchdog */
-//~ WDG_BASE_ADDR                   0xE0000000
 
+/* WDG_BASE_ADDR                   0xE0000000 */
 #define WDMOD_OFFSET                0x00
 #define WDTC_OFFSET                 0x04
 #define WDFEED_OFFSET               0x08
@@ -338,8 +354,8 @@
 #define WDCLKSEL_OFFSET             0x10
 
 /* CAN CONTROLLERS AND ACCEPTANCE FILTER */
-//~ CAN_ACCEPT_BASE_ADDR            0xE003C000
 
+/* CAN_ACCEPT_BASE_ADDR            0xE003C000 */
 #define CAN_AFMR_OFFSET             0x00
 #define CAN_SFF_SA_OFFSET           0x04
 #define CAN_SFF_GRP_SA_OFFSET       0x08
@@ -349,12 +365,12 @@
 #define CAN_LUT_ERR_ADR_OFFSET      0x18
 #define CAN_LUT_ERR_OFFSET          0x1C
 
-//~ CAN_COMMON_BASE_ADDR            0xE0040000
+/* CAN_COMMON_BASE_ADDR            0xE0040000 */
 #define CAN_TX_SR_OFFSET            0x00
 #define CAN_RX_SR_OFFSET            0x04
 #define CAN_MSR_OFFSET              0x08
 
-//~ CAN1_BASE_ADDR                  0xE0044000
+/* CAN1_BASE_ADDR                  0xE0044000 */
 #define CAN1MOD_OFFSET              0x00
 #define CAN1CMR_OFFSET              0x04
 #define CAN1GSR_OFFSET              0x08
@@ -381,7 +397,7 @@
 #define CAN1TDA3_OFFSET             0x58
 #define CAN1TDB3_OFFSET             0x5C
 
-//~ CAN2_BASE_ADDR                  0xE0048000
+/* CAN2_BASE_ADDR                  0xE0048000 */
 #define CAN2MOD_OFFSET              0x00
 #define CAN2CMR_OFFSET              0x04
 #define CAN2GSR_OFFSET              0x08
@@ -408,10 +424,9 @@
 #define CAN2TDA3_OFFSET             0x58
 #define CAN2TDB3_OFFSET             0x5C
 
-
 /* MultiMedia Card Interface(MCI) ontroller */
-//~ MCI_BASE_ADDR                   0xE008C000
 
+/* MCI_BASE_ADDR                   0xE008C000 */
 #define MCI_POWER_OFFSET            0x00
 #define MCI_CLOCK_OFFSET            0x04
 #define MCI_ARGUMENT_OFFSET         0x08
@@ -432,9 +447,9 @@
 #define MCI_FIFO_CNT_OFFSET         0x48
 #define MCI_FIFO_OFFSET             0x80
 
-
 /* I2S Interface Controller (I2S) */
-//~ I2S_BASE_ADDR                   0xE0088000
+
+/* I2S_BASE_ADDR                   0xE0088000 */
 #define I2S_DAO_OFFSET              0x00
 #define I2S_DAI_OFFSET              0x04
 #define I2S_TX_FIFO_OFFSET          0x08
@@ -447,8 +462,8 @@
 #define I2S_RXRATE_OFFSET           0x24
 
 /* General-purpose DMA Controller */
-/* DMA_BASE_ADDR        0xFFE04000 */
 
+/* DMA_BASE_ADDR                    0xFFE04000 */
 #define GPDMA_INT_STAT_OFFSET           0x4000
 #define GPDMA_INT_TCSTAT_OFFSET         0x4004
 #define GPDMA_INT_TCCLR_OFFSET          0x4008
@@ -598,10 +613,13 @@
 
 #define SCB_SCS                     (*(volatile uint32_t*)(0xE01FC1A0))
 
-//~ /* External Memory Controller (EMC) definitions */
+/* External Memory Controller (EMC) definitions */
 
-/* MPMC(EMC) registers, note: all the external memory controller(EMC) registers
-are for LPC24xx only. */
+/* MPMC(EMC) registers, note:
+ * all the external memory controller(EMC) registers
+ * are for LPC24xx only.
+ */
+
 #define STATIC_MEM0_BASE            0x80000000
 #define STATIC_MEM1_BASE            0x81000000
 #define STATIC_MEM2_BASE            0x82000000
@@ -613,7 +631,8 @@ are for LPC24xx only. */
 #define DYNAMIC_MEM3_BASE           0xD0000000
 
 /* External Memory Controller (EMC) */
-//~ #define EMC_BASE_ADDR           0xFFE08000
+
+/* #define EMC_BASE_ADDR           0xFFE08000 */
 
 #define EMC_CTRL_OFFSET             0x000
 #define EMC_STAT_OFFSET             0x004
@@ -922,9 +941,12 @@ are for LPC24xx only. */
 #define VIC_SOFTINT_OFFSET          0x018  /* RW: Software Interrupt Register */
 #define VIC_SOFTINTCLEAR_OFFSET     0x01c  /* W: Software Interrupt Clear Register */
 #define VIC_PROTECTION_OFFSET       0x020  /* Protection Enable Register */
-#define VIC_PRIORITY_MASK_OFFSET    0x024 /* Priority Mask Register */
+#define VIC_PRIORITY_MASK_OFFSET    0x024  /* Priority Mask Register */
 
-//~ #define LPC23XX_VIC_BASE        0xfffff000  /* Vectored Interrupt Controller (VIC) Base */
+/* #define LPC23XX_VIC_BASE        0xfffff000
+ * Vectored Interrupt Controller (VIC) Base
+ */
+
 #define VIC_ADDRESS_OFFSET          0xF00  /* RW: Vector Address Register */
 
 #define VIC_VECTADDR0_OFFSET        0x100  /* RW: Vector Address 0 Register */
@@ -960,7 +982,7 @@ are for LPC24xx only. */
 #define VIC_VECTADDR30_OFFSET       0x178  /* RW: Vector Address 30 Register */
 #define VIC_VECTADDR31_OFFSET       0x17c  /* RW: Vector Address 31 Register */
 
-/*VICVectPriority */
+/* VICVectPriority */
 
 #define VIC_VECTPRIORITY0_OFFSET    0x200  /* RW: Vector Control 0 Register */
 #define VIC_VECTPRIORITY1_OFFSET    0x204  /* RW: Vector Control 1 Register */
@@ -995,12 +1017,12 @@ are for LPC24xx only. */
 #define VIC_VECTPRIORITY30_OFFSET   0x278  /* RW: Vector Control 30 Register */
 #define VIC_VECTPRIORITY31_OFFSET   0x27c  /* RW: Vector Control 31 Register */
 
-/****************************************************************************************************
+/****************************************************************************
  * Inline Functions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC2378_CHIP_H */

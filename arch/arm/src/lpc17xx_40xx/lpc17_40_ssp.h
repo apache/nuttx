@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_ssp.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_SSP_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_SSP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -33,13 +33,13 @@
 
 #if defined(CONFIG_LPC17_40_SSP0) || defined(CONFIG_LPC17_40_SSP1)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -47,11 +47,11 @@ extern "C"
 {
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_sspbus_initialize
  *
  * Description:
@@ -63,49 +63,59 @@ extern "C"
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct spi_dev_s *lpc17_40_sspbus_initialize(int port);
 
-/************************************************************************************
- * Name:  lpc17_40_ssp0/ssp1select, lpc17_40_ssp0/ssp1status, and lpc17_40_ssp0/ssp1cmddata
+/****************************************************************************
+ * Name:
+ * lpc17_40_ssp0/ssp1select, lpc17_40_ssp0/ssp1status, and
+ * lpc17_40_ssp0/ssp1cmddata
  *
  * Description:
- *   These external functions must be provided by board-specific logic.  They are
- *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including lpc17_40_sspbus_initialize()) are provided by common LPC17xx/LPC40xx logic.  To use
- *   this common SPI logic on your board:
+ *   These external functions must be provided by board-specific logic.  They
+ *   are implementations of the select, status, and cmddata methods of the
+ *   SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods including lpc17_40_sspbus_initialize()) are provided
+ *   by common LPC17xx/LPC40xx logic.  To use this common SPI logic on your
+ *   board:
  *
- *   1. Provide logic in lpc17_40_boardinitialize() to configure SSP chip select pins.
- *   2. Provide lpc17_40_ssp0/ssp1select() and lpc17_40_ssp0/ssp1status() functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
+ *   1. Provide logic in lpc17_40_boardinitialize() to configure SSP chip
+ *      select pins.
+ *   2. Provide lpc17_40_ssp0/ssp1select() and lpc17_40_ssp0/ssp1status()
+ *      functions in your board-specific logic.  These functions will perform
+ *      chip selection and status operations using GPIOs in the way your
+ *      board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
- *      lpc17_40_ssp0/ssp1cmddata() functions in your board-specific logic.  These
- *      functions will perform cmd/data selection operations using GPIOs in the way
- *      your board is configured.
- *   3. Add a call to lpc17_40_sspbus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by lpc17_40_sspbus_initialize() may then be used to bind the
- *      SSP driver to higher level logic (e.g., calling mmcsd_spislotinitialize(),
- *      for example, will bind the SSP driver to the SPI MMC/SD driver).
+ *      lpc17_40_ssp0/ssp1cmddata() functions in your board-specific logic.
+ *      These functions will perform cmd/data selection operations using
+ *      GPIOs in the way your board is configured.
+ *   3. Add a call to lpc17_40_sspbus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by lpc17_40_sspbus_initialize() may then be used
+ *      to bind the SSP driver to higher level logic (e.g., calling
+ *      mmcsd_spislotinitialize(), for example, will bind the SSP driver to
+ *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_40_SSP0
-void lpc17_40_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void lpc17_40_ssp0select(FAR struct spi_dev_s *dev,
+                         uint32_t devid, bool selected);
 uint8_t lpc17_40_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc17_40_ssp0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc17_40_ssp0cmddata(FAR struct spi_dev_s *dev,
+                         uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC17_40_SSP1
-void lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void lpc17_40_ssp1select(FAR struct spi_dev_s *dev,
+                         uint32_t devid, bool selected);
 uint8_t lpc17_40_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc17_40_ssp1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc17_40_ssp1cmddata(FAR struct spi_dev_s *dev,
+                         uint32_t devid, bool cmd);
 #endif
 #endif
 
@@ -151,13 +161,15 @@ void ssp_flush(FAR struct spi_dev_s *dev);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_LPC17_40_SSP0
-int lpc17_40_ssp0register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int lpc17_40_ssp0register(FAR struct spi_dev_s *dev,
+                          spi_mediachange_t callback,
+                          FAR void *arg);
 #endif
 
 #ifdef CONFIG_LPC17_40_SSP1
-int lpc17_40_ssp1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int lpc17_40_ssp1register(FAR struct spi_dev_s *dev,
+                          spi_mediachange_t callback,
+                          FAR void *arg);
 #endif
 #endif
 

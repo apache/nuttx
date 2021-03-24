@@ -41,9 +41,10 @@
 #include <nuttx/config.h>
 
 /* This file is only a thin shell that includes the correct GPIO logic for
- * the selected LPC17xx/LPC40xx family.  The correct file cannot be selected by the
- * make system because it needs the intelligence that only exists in chip.h
- * that can associate an LPC17xx/LPC40xx part number with an LPC17xx/LPC40xx family.
+ * the selected LPC17xx/LPC40xx family.  The correct file cannot be selected
+ * by the make system because it needs the intelligence that only exists in
+ * chip.h that can associate an LPC17xx/LPC40xx part number with an
+ * LPC17xx/LPC40xx family.
  */
 
 #include <arch/lpc17xx_40xx/chip.h>

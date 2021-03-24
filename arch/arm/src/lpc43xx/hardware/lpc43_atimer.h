@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_atimer.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_ATIMER_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_ATIMER_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Register Offsets *****************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define LPC43_ATIMER_COUNT_OFFSET    0x0000 /* Downcounter register */
 #define LPC43_ATIMER_PRESET_OFFSET   0x0004 /* Preset value register */
@@ -41,7 +42,7 @@
 #define LPC43_ATIMER_CLRSTAT_OFFSET  0x0fe8 /* Clear register */
 #define LPC43_ATIMER_SETSTAT_OFFSET  0x0fec /* Set register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define LPC43_ATIMER_COUNT           (LPC43_ATIMER_BASE+LPC43_ATIMER_COUNT_OFFSET)
 #define LPC43_ATIMER_PRESET          (LPC43_ATIMER_BASE+LPC43_ATIMER_PRESET_OFFSET)
@@ -52,51 +53,58 @@
 #define LPC43_ATIMER_CLRSTAT         (LPC43_ATIMER_BASE+LPC43_ATIMER_CLRSTAT_OFFSET)
 #define LPC43_ATIMER_SETSTAT         (LPC43_ATIMER_BASE+LPC43_ATIMER_SETSTAT_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Downcounter register */
 
 #define ATIMER_COUNT_MASK            0xffff    /* Bits 0-15: Down counter */
                                                /* Bits 16-31: Reserved */
+
 /* Preset value register */
 
 #define ATIMER_PRESET_MASK           0xffff    /* Bits 0-15: Counter reload value */
                                                /* Bits 16-31: Reserved */
+
 /* Interrupt clear enable register */
 
 #define ATIMER_CLREN                 (1 << 0)  /* Bit 0:  Clear interrupt enable */
                                                /* Bits 1-31: Reserved */
+
 /* Interrupt set enable register */
 
 #define ATIMER_SETEN                 (1 << 0)  /* Bit 0:  Set interrupt enable */
                                                /* Bits 1-31: Reserved */
+
 /* Status register */
 
 #define ATIMER_STATUS                (1 << 0)  /* Bit 0:  Interrupt status */
                                                /* Bits 1-31: Reserved */
+
 /* Enable register */
 
 #define ATIMER_ENABLE                (1 << 0)  /* Bit 0:  Interrupt enable status */
                                                /* Bits 1-31: Reserved */
+
 /* Clear register */
 
 #define ATIMER_CLRSTAT               (1 << 0)  /* Bit 0:  Clear interrupt status */
                                                /* Bits 1-31: Reserved */
+
 /* Set register */
 
 #define ATIMER_SETSTAT               (1 << 0)  /* Bit 0:  Set interrupt status */
                                                /* Bits 1-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_ATIMER_H */

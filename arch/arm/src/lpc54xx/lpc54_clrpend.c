@@ -39,9 +39,9 @@
  * Name: lpc54_clrpend
  *
  * Description:
- *   Clear a pending interrupt at the NVIC.  This does not seem to be required
- *   for most interrupts.  Don't know why... but the LPC54xx Ethernet EMAC
- *   interrupt definitely needs it!
+ *   Clear a pending interrupt at the NVIC.  This does not seem to be
+ *   required for most interrupts.  Don't know why... but the LPC54xx
+ *   Ethernet EMAC interrupt definitely needs it!
  *
  *   This function is logically a part of lpc54_irq.c, but I will keep it in
  *   a separate file so that it will not increase the footprint on LPC54xx
@@ -61,7 +61,8 @@ void lpc54_clrpend(int irq)
         }
       else if (irq < LPC54_IRQ_NIRQS)
         {
-          putreg32(1 << (irq - LPC54_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
+          putreg32(1 << (irq - LPC54_IRQ_EXTINT - 32),
+                   NVIC_IRQ32_63_CLRPEND);
         }
     }
 }

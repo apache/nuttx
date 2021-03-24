@@ -54,9 +54,9 @@
  * Name: lpc17_40_clrpend
  *
  * Description:
- *   Clear a pending interrupt at the NVIC.  This does not seem to be required
- *   for most interrupts.  Don't know why... but the LPC1766 Ethernet EMAC
- *   interrupt definitely needs it!
+ *   Clear a pending interrupt at the NVIC.  This does not seem to be
+ *   required for most interrupts.  Don't know why... but the LPC1766
+ *   Ethernet EMAC interrupt definitely needs it!
  *
  *   I keep it in a separate file so that it will not increase the footprint
  *   on LPC17xx/LPC40xx platforms that do not need this function.
@@ -69,13 +69,14 @@ void lpc17_40_clrpend(int irq)
 
   if (irq >= LPC17_40_IRQ_EXTINT)
     {
-      if (irq < (LPC17_40_IRQ_EXTINT+32))
+      if (irq < (LPC17_40_IRQ_EXTINT + 32))
         {
           putreg32(1 << (irq - LPC17_40_IRQ_EXTINT), NVIC_IRQ0_31_CLRPEND);
         }
       else if (irq < LPC17_40_IRQ_NIRQS)
         {
-          putreg32(1 << (irq - LPC17_40_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
+          putreg32(1 << (irq - LPC17_40_IRQ_EXTINT - 32),
+                   NVIC_IRQ32_63_CLRPEND);
         }
     }
 }

@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc214x/lpc214x_decodeirq.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,9 +36,9 @@
 
 #include "lpc214x_vic.h"
 
-/********************************************************************************
+/****************************************************************************
  * Private Data
- ********************************************************************************/
+ ****************************************************************************/
 
 /* This array maps 4 bits into the bit number of the lowest bit that it set */
 
@@ -49,32 +49,33 @@ static uint8_t g_nibblemap[16] =
 };
 #endif
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * arm_decodeirq() and/or lpc214x_decodeirq()
  *
  * Description:
- *   The vectored interrupt controller (VIC) takes 32 interrupt request inputs
- *   and pro grammatically assigns them into 3 categories:  FIQ, vectored IRQ,
- *   and non-vectored IRQ.
+ *   The vectored interrupt controller (VIC) takes 32 interrupt request
+ *   inputs and pro grammatically assigns them into 3 categories:  FIQ,
+ *   vectored IRQ, and non-vectored IRQ.
  *
- *   - FIQs have the highest priority.  There is a single FIQ vector, but multiple
- *     interrupt sources can be ORed to this FIQ vector.
+ *   - FIQs have the highest priority.  There is a single FIQ vector, but
+ *     multiple interrupt sources can be ORed to this FIQ vector.
  *
- *   - Vectored IRQs have the middle priority.  Any 16 of the 32 interrupt sources
- *     can be assigned to vectored IRQs.
+ *   - Vectored IRQs have the middle priority.  Any 16 of the 32 interrupt
+ *     sources can be assigned to vectored IRQs.
  *
  *   - Non-vectored IRQs have the lowest priority.
  *
- *   The general flow of IRQ processing is to simply read the VIC vector address
- *   and jump to the address of the vector provided in the register.  The VIC will
- *   provide the address of the highest priority vectored IRQ.  If a non-vectored
- *   IRQ is requesting, the address of a default handler is provided.
+ *   The general flow of IRQ processing is to simply read the VIC vector
+ *   address and jump to the address of the vector provided in the register.
+ *   The VIC will provide the address of the highest priority vectored IRQ.
+ *   If a non-vectored IRQ is requesting, the address of a default handler
+ *   is provided.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_VECTORED_INTERRUPTS
 uint32_t *arm_decodeirq(uint32_t *regs)
@@ -89,8 +90,8 @@ static uint32_t *lpc214x_decodeirq(uint32_t *regs)
   return NULL;
 #else
 
-  /* Decode the interrupt. We have to do this by search for the lowest numbered
-   * non-zero bit in the interrupt status register.
+  /* Decode the interrupt. We have to do this by search for the lowest
+   * numbered non-zero bit in the interrupt status register.
    */
 
   uint32_t pending = vic_getreg(LPC214X_VIC_IRQSTATUS_OFFSET) & 0x007fffff;
@@ -120,7 +121,8 @@ static uint32_t *lpc214x_decodeirq(uint32_t *regs)
       uint32_t *savestate;
 
       /* Current regs non-zero indicates that we are processing an interrupt;
-       * CURRENT_REGS is also used to manage interrupt level context switches.
+       * CURRENT_REGS is also used to manage interrupt level context
+       * switches.
        */
 
       savestate    = (uint32_t *)CURRENT_REGS;
@@ -130,9 +132,9 @@ static uint32_t *lpc214x_decodeirq(uint32_t *regs)
 
       irq_dispatch(irq, regs);
 
-      /* Restore the previous value of CURRENT_REGS.  NULL would indicate that
-       * we are no longer in an interrupt handler.  It will be non-NULL if we
-       * are returning from a nested interrupt.
+      /* Restore the previous value of CURRENT_REGS.  NULL would indicate
+       * that we are no longer in an interrupt handler.  It will be non-NULL
+       * if we are returning from a nested interrupt.
        */
 
       CURRENT_REGS = savestate;
@@ -145,7 +147,8 @@ static uint32_t *lpc214x_decodeirq(uint32_t *regs)
 #ifdef CONFIG_VECTORED_INTERRUPTS
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
-  vic_vector_t vector = (vic_vector_t)vic_getreg(LPC214X_VIC_VECTADDR_OFFSET);
+  vic_vector_t vector =
+               (vic_vector_t)vic_getreg(LPC214X_VIC_VECTADDR_OFFSET);
   vector(regs);
   return NULL;  /* Return not used in this architecture */
 }

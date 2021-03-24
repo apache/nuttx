@@ -71,7 +71,7 @@ extern SPIFI_ERR_T spifiDevRegister(SPIFI_FAM_NODE_T *pFamily, SPIFI_DEV_NODE_T 
  * @}
  */
 
-/*****************************************************************************
+/****************************************************************************
  * Private types/enumerations/variables
  ****************************************************************************/
 /**
@@ -304,11 +304,11 @@ extern SPIFI_ERR_T spifiDevRegister(SPIFI_FAM_NODE_T *pFamily, SPIFI_DEV_NODE_T 
 												  SPIFI_DEVICE_MX25L3235E |	\
 												  SPIFI_DEVICE_MX25L6435E)
 
-/*****************************************************************************
+/****************************************************************************
  * Public types/enumerations/variables
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Private functions
  ****************************************************************************/
 
@@ -368,7 +368,7 @@ static SPIFI_ERR_T spifiPrvCheckWriteState(const SPIFI_HANDLE_T *pHandle)
 	return SPIFI_ERR_NONE;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Semi-Private functions
  * Functions may be assigned to SPIFI_DEVICE_DATA_T function pointers.
  ****************************************************************************/
@@ -932,7 +932,7 @@ static devGetWriteCmdFx spifiDeviceAssignFxWriteCmd(SPIFI_HANDLE_T *pHandle)
 	return (devGetWriteCmdFx) spifiDeviceFxError;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Semi-Private family functions
  * Functions may be assigned to SPIFI_FAM_FX_T function pointers.
  ****************************************************************************/
@@ -1301,7 +1301,7 @@ static SPIFI_ERR_T spifiFamFxDeviceSetup(SPIFI_HANDLE_T *pHandle, uint32_t spifi
 	return SPIFI_ERR_NONE;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Public functions
  ****************************************************************************/
 SPIFI_FAM_NODE_T *spifi_REG_FAMILY_CommonCommandSet(void)
@@ -1309,6 +1309,7 @@ SPIFI_FAM_NODE_T *spifi_REG_FAMILY_CommonCommandSet(void)
 	/* Variables declared static so they will persist after function returns. */
 	/* All members are assigned at run-time so that position independent code
 	   will know the address */
+
 	static SPIFI_DEV_NODE_T devListBase = {0};	/* List base to hold devices */
 	static SPIFI_FAM_NODE_T devFamily;			/* Family node to hold family descriptor */
 	static SPIFI_FAM_DESC_T famDesc;			/* Family descriptor (holds all info about family) */

@@ -76,7 +76,9 @@ void lpc31_selectfreqin(enum lpc31_domainid_e dmnid, uint32_t finsel)
 
   scrbits = getreg32(scraddr) & ~(CGU_SCR_ENF1 | CGU_SCR_ENF2);
 
-  /* If FS1 is currently enabled set the reference clock to FS2 and enable FS2 */
+  /* If FS1 is currently enabled set the reference clock to FS2 and
+   * enable FS2
+   */
 
   if ((getreg32(LPC31_CGU_SSR(dmnid)) & CGU_SSR_FS1STAT) != 0)
     {

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/lpc546x_power.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,26 +16,26 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_LPC546X_PERIPHPOWER_H
 #define __ARCH_ARM_SRC_LPC54XX_LPC546X_PERIPHPOWER_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "arm_arch.h"
 #include "hardware/lpc54_syscon.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Setting the bit corresponding in the PDRUNCFGSET0/1 register powers down the
- * selected component;  clearing the bit enables it.
+/* Setting the bit corresponding in the PDRUNCFGSET0/1 register powers down
+ * the selected component;  clearing the bit enables it.
  */
 
 #define lpc54_powerup0(s)          putreg32((s), LPC54_SYSCON_PDRUNCFGCLR0)

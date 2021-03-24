@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Included files
+ * Included Files
  ****************************************************************************/
 
 #include "arm_arch.h"
@@ -79,7 +79,8 @@ void IO_Init(void)
   pinsel_putreg(0, PINSEL10_OFFSET);
 
 #if 0
-  regval = scb_getreg(SCB_PCONP_OFFSET) & ~(PCSDC | PCUART1 | PCI2C0 | PCSSP1 | PCEMC);
+  regval = scb_getreg(SCB_PCONP_OFFSET) &
+           ~(PCSDC | PCUART1 | PCI2C0 | PCSSP1 | PCEMC);
   scb_getreg(regval, SCB_PCONP_OFFSET);
 #endif
 
@@ -88,6 +89,7 @@ void IO_Init(void)
   scb_putreg(0, SCB_PCONP_OFFSET);
 
   /* Turn on UART0/2 / Timer0 */
+
   /* regval = PCUART0 | PCUART2 | PCTIM0 | PCRTC ; */
 
   regval = PCUART0 | PCUART2 | PCTIM0 ;
@@ -101,3 +103,7 @@ void IO_Init(void)
 
   return;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

@@ -73,12 +73,16 @@ lpc31_switchdomains(const struct lpc31_pllconfig_s * const cfg)
 
   for (i = 0; i < CGU_NDOMAINS; i++)
     {
-      /* Get the switch status registers (SSR) for this frequency input domain */
+      /* Get the switch status registers (SSR) for this frequency input
+       * domain
+       */
 
       address = LPC31_CGU_SSR(i);
       regval  = getreg32(address);
 
-      /* Check if the current frequency selection is the PLL-to-be-configured */
+      /* Check if the current frequency selection is the
+       * PLL-to-be-configured
+       */
 
       if ((regval & CGU_SSR_FS_MASK) == hppll)
         {
@@ -86,7 +90,9 @@ lpc31_switchdomains(const struct lpc31_pllconfig_s * const cfg)
 
           lpc31_selectfreqin((enum lpc31_domainid_e)i, CGU_FS_FFAST);
 
-          /* Add the domain to the set to be restored after the PLL is configured */
+          /* Add the domain to the set to be restored after the PLL is
+           * configured
+           */
 
           dmnset |= (1 << i);
         }
@@ -152,8 +158,8 @@ void lpc31_pllconfig(const struct lpc31_pllconfig_s * const cfg)
   pllbase = LPC313x_CGU_HPPLL(cfg->hppll);
 
   /* Disable clock, disable skew enable, power down pll, (dis/en)able post
-   * divider, (dis/en)able pre-divider, disable free running mode, disable bandsel,
-   * enable up limmiter, disable bypass
+   * divider, (dis/en)able pre-divider, disable free running mode, disable
+   * bandsel, enable up limmiter, disable bypass
    */
 
   putreg32(CGU_HPMODE_PD, pllbase + LPC31_CGU_HPMODE_OFFSET);
@@ -182,7 +188,8 @@ void lpc31_pllconfig(const struct lpc31_pllconfig_s * const cfg)
 
   /* Power up pll */
 
-  putreg32((cfg->mode & ~CGU_HPMODE_PD) | CGU_HPMODE_CLKEN, pllbase + LPC31_CGU_HPMODE_OFFSET);
+  putreg32((cfg->mode & ~CGU_HPMODE_PD) | CGU_HPMODE_CLKEN,
+            pllbase + LPC31_CGU_HPMODE_OFFSET);
 
   /* Save the estimated freq in driver data for future clk calcs */
 
@@ -190,9 +197,12 @@ void lpc31_pllconfig(const struct lpc31_pllconfig_s * const cfg)
 
   /* Wait for PLL to lock */
 
-  while ((getreg32(pllbase + LPC31_CGU_HPSTATUS_OFFSET) & CGU_HPSTATUS_LOCK) == 0);
+  while ((getreg32(pllbase + LPC31_CGU_HPSTATUS_OFFSET) &
+                   CGU_HPSTATUS_LOCK) == 0);
 
-  /* Switch the domains that were temporarily switched to FFAST back to the HPPLL */
+  /* Switch the domains that were temporarily switched to FFAST back to
+   * the HPPLL
+   */
 
   lpc31_restoredomains(cfg, dmnset);
 }

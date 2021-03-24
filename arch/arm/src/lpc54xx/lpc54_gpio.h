@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_GPIO_H
 #define __ARCH_ARM_SRC_LPC54XX_LPC54_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -37,10 +37,11 @@
 #include "hardware/lpc54_gpio.h"
 #include "hardware/lpc54_iocon.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Bit-encoded input to lpc54_gpio_config() ******************************************/
+ ****************************************************************************/
+
+/* Bit-encoded input to lpc54_gpio_config() *********************************/
 
 /* 32-Bit Encoding: .... .... TTTT TTTT  FFFF FMMV PPPN NNNN
  *
@@ -217,15 +218,15 @@
 #  define GPIO_PIN30            (30 << GPIO_PIN_SHIFT)
 #  define GPIO_PIN31            (31 << GPIO_PIN_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 typedef uint32_t lpc54_pinset_t;
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #undef EXTERN
@@ -237,18 +238,19 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_gpio_irqinitialize
  *
  * Description:
- *   Initialize logic to support interrupting GPIO pins.  This function is called by
- *   the OS inialization logic and is not a user interface.
+ *   Initialize logic to support interrupting GPIO pins.
+ *   This function is called by the OS inialization logic and is not a
+ *   user interface.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC54_GPIOIRQ
 void lpc54_gpio_irqinitialize(void);
@@ -256,84 +258,85 @@ void lpc54_gpio_irqinitialize(void);
 #  define lpc54_gpio_irqinitialize()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_gpio_config
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lpc54_gpio_config(lpc54_pinset_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_gpio_interrupt
  *
  * Description:
- *   Configure a GPIO interrupt pin based on bit-encoded description of the pin.
- *   This function is called by lpc54_gpio_config to setup interrupting pins.  It is
- *   not a user interface.
+ *   Configure a GPIO interrupt pin based on bit-encoded description of the
+ *   pin. This function is called by lpc54_gpio_config to setup interrupting
+ *   pins.  It is not a user interface.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC54_GPIOIRQ
 int lpc54_gpio_interrupt(lpc54_pinset_t pinset);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_gpio_irqno
  *
  * Description:
- *   Returns the IRQ number that was associated with an interrupt pin after it was
- *   configured.
+ *   Returns the IRQ number that was associated with an interrupt pin after
+ *   it was configured.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC54_GPIOIRQ
 int lpc54_gpio_irqno(lpc54_pinset_t pinset);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_gpio_ackedge
  *
  * Description:
- *   Acknowledge edge interrupts by clearing the associated bits in the rising and
- *   falling registers.  This acknowledgemment is, of course, not needed for level
- *   interrupts.
+ *   Acknowledge edge interrupts by clearing the associated bits in the
+ *   rising and falling registers.  This acknowledgemment is, of course,
+ *   not needed for level interrupts.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC54_GPIOIRQ
 int lpc54_gpio_ackedge(int irq);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_gpio_write
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc54_gpio_write(lpc54_pinset_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_gpio_read
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool lpc54_gpio_read(lpc54_pinset_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Function:  lpc54_gpio_dump
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Dump all GPIO registers associated with the base address of the
+ *   provided pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int lpc54_gpio_dump(lpc54_pinset_t pinset, const char *msg);

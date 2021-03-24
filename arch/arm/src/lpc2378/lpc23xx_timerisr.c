@@ -113,6 +113,7 @@ static int lpc23xx_timerisr(int irq, uint32_t * regs, FAR void *arg)
 
 #ifdef CONFIG_VECTORED_INTERRUPTS
   /* write any value to VICAddress to acknowledge the interrupt */
+
   vic_putreg(0, VIC_ADDRESS_OFFSET);
 #endif
 
@@ -180,6 +181,7 @@ void up_timer_initialize(void)
   tmr_putreg16(mcr, TMR_MCR_OFFSET);    /* -- bit 0=1 -int on MR0, bit 1=1 - Reset on MR0 */
 
   /* Enable counting */
+
   /* ~ tmr_putreg32(1, TMR_TCR_OFFSET); */
 
   tmr_putreg8(TMR_CR_ENABLE, TMR_TCR_OFFSET);

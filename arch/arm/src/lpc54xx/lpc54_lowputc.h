@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_lowputc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_LOWPUTC_H
 #define __ARCH_ARM_SRC_LPC54XX_LPC54_LOWPUTC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <stdint.h>
 #include <stdbool.h>
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USART_DEVICE
 /* This structure describes the configuration of an UART */
@@ -55,33 +55,34 @@ struct uart_config_s
 };
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_lowsetup
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level initialization
- *   including setup of the console USART.  This USART initialization is done
- *   early so that the serial console is available for debugging very early in
- *   the boot sequence.
+ *   Called at the very beginning of _start.
+ *   Performs low level initialization including setup of the console USART.
+ *   This USART initialization is done early so that the serial console is
+ *   available for debugging very early in the boot sequence.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc54_lowsetup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_usart_configure
  *
  * Description:
  *   Configure a UART for non-interrupt driven operation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USART_DEVICE
-void lpc54_usart_configure(uintptr_t base, FAR const struct uart_config_s *config);
+void lpc54_usart_configure(uintptr_t base,
+                           FAR const struct uart_config_s *config);
 #endif
 
 /****************************************************************************

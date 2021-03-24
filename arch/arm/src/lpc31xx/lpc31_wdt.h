@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_wdt.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_WDT_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_WDT_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* WDT register base address offset into the APB0 domain ****************************************/
+/* WDT register base address offset into the APB0 domain ********************/
 
 #define LPC31_WDT_VBASE                (LPC31_APB0_VADDR+LPC31_APB0_WDT_OFFSET)
 #define LPC31_WDT_PBASE                (LPC31_APB0_PADDR+LPC31_APB0_WDT_OFFSET)
 
-/* WDT register offsets (with respect to the WDT base) ******************************************/
+/* WDT register offsets (with respect to the WDT base) **********************/
 
 #define LPC31_WDT_IR_OFFSET            0x000 /* Interrupt Register */
 #define LPC31_WDT_TCR_OFFSET           0x004 /* Timer Control Register */
@@ -47,10 +47,10 @@
 #define LPC31_WDT_MCR_OFFSET           0x014 /* Match Control Register */
 #define LPC31_WDT_MR0_OFFSET           0x018 /* Match Register 0 */
 #define LPC31_WDT_MR1_OFFSET           0x01c /* Match Register 1 */
-                                               /* 0x020-0x038: Reserved */
+                                             /* 0x020-0x038: Reserved */
 #define LPC31_WDT_EMR_OFFSET           0x03c /* External Match Register */
 
-/* WDT register (virtual) addresses *************************************************************/
+/* WDT register (virtual) addresses *****************************************/
 
 #define LPC31_WDT_IR                   (LPC31_WDT_VBASE+LPC31_WDT_IR_OFFSET)
 #define LPC31_WDT_TCR                  (LPC31_WDT_VBASE+LPC31_WDT_TCR_OFFSET)
@@ -62,7 +62,7 @@
 #define LPC31_WDT_MR1                  (LPC31_WDT_VBASE+LPC31_WDT_MR1_OFFSET)
 #define LPC31_WDT_EMR                  (LPC31_WDT_VBASE+LPC31_WDT_EMR_OFFSET)
 
-/* WDT register bit definitions *****************************************************************/
+/* WDT register bit definitions *********************************************/
 
 /* Interrupt Register (IR), address 0x13002400 */
 
@@ -91,25 +91,27 @@
 #  define WDT_EMR_EXTMATCHCTRL1_SETLOW   (1 << WDT_EMR_EXTMATCHCTRL1_SHIFT) /* Set LOW */
 #  define WDT_EMR_EXTMATCHCTRL1_SETHIGH  (2 << WDT_EMR_EXTMATCHCTRL1_SHIFT) /* Set HIGH */
 #  define WDT_EMR_EXTMATCHCTRL1_TOGGLE   (3 << WDT_EMR_EXTMATCHCTRL1_SHIFT) /* Toggle */
+
 #define WDT_EMR_EXTMATCHCTRL0_SHIFT      (4)       /* Bits 4-5: Controls EXTMATCH0 when MR0=TC */
 #define WDT_EMR_EXTMATCHCTRL0_MASK       (3 << WDT_EMR_EXTMATCHCTRL0_SHIFT)
 #  define WDT_EMR_EXTMATCHCTRL0_NOTHING  (0 << WDT_EMR_EXTMATCHCTRL0_SHIFT) /* Do Nothing */
 #  define WDT_EMR_EXTMATCHCTRL0_SETLOW   (1 << WDT_EMR_EXTMATCHCTRL0_SHIFT) /* Set LOW */
 #  define WDT_EMR_EXTMATCHCTRL0_SETHIGH  (2 << WDT_EMR_EXTMATCHCTRL0_SHIFT) /* Set HIGH */
 #  define WDT_EMR_EXTMATCHCTRL0_TOGGLE   (3 << WDT_EMR_EXTMATCHCTRL0_SHIFT) /* Toggle */
+
 #define WDT_EMR_EXTMATCH1                (1 << 1)  /* Bit 1:  EXTMATCHCTRL1 controls behavior */
 #define WDT_EMR_EXTMATCH0                (1 << 0)  /* Bit 0:  EXTMATCHCTRL1 controls behavior */
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_WDT_H */

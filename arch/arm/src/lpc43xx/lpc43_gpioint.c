@@ -171,7 +171,8 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
   uint32_t     einr;
   uint32_t     einf;
 
-  DEBUGASSERT(port < NUM_GPIO_PORTS && pin < NUM_GPIO_PINS && GPIO_IS_PININT(gpiocfg));
+  DEBUGASSERT(port < NUM_GPIO_PORTS &&
+              pin < NUM_GPIO_PINS && GPIO_IS_PININT(gpiocfg));
 
   /* Make sure that pin interrupts are initially disabled at the NVIC.
    * After the pin is configured, the caller will need to manually enable
@@ -180,8 +181,8 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
 
   up_disable_irq(LPC43M4_IRQ_PININT0 + pinint);
 
-  /* Select the pin as the input in the SCU PINTSELn register (overwriting any
-   * previous selection).
+  /* Select the pin as the input in the SCU PINTSELn register
+   * (overwriting any previous selection).
    */
 
   if (pinint < 4)
@@ -323,9 +324,9 @@ int lpc43_gpioint_grpconfig(uint16_t gpiocfg)
  *
  * Description:
  *   Acknowledge the interrupt for a given pint interrupt number. Call this
- *   inside the interrupt handler. For edge sensitive interrupts, the interrupt
- *   status is cleared. For level sensitive interrupts, the active-high/-low
- *   sensitivity is inverted.
+ *   inside the interrupt handler. For edge sensitive interrupts, the
+ *   interrupt status is cleared. For level sensitive interrupts, the
+ *   active-high/-low sensitivity is inverted.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.

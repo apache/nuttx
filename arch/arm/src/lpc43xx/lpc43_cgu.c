@@ -34,6 +34,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Maximum/Threshold Frequencies ********************************************/
 
 #define LOW_XTAL_FREQUENCY     15000000
@@ -44,6 +45,7 @@
 #define MAX_FCCO_FRQUENCY     320000000
 
 /* Configuration ************************************************************/
+
 /* This supports configuration of CGU clocking from board-specific parameters
  * that must be provided in the board.h header file.
  *
@@ -68,7 +70,9 @@
 #  error "BOARD_FCCO_FREQUENCY exceed the maximum"
 #endif
 
-/* Convert the user-friendly definitions in board.h to register bit settings */
+/* Convert the user-friendly definitions in board.h to register bit
+ * settings
+ */
 
 /* Check if we are using a RAMP */
 
@@ -78,12 +82,12 @@
 
 #  define PLL_RAMP 1
 
-   /* Get initial PLL values */
+/* Get initial PLL values */
 
 #  define INIT_MSEL_VALUE PLL1_CTRL_MSEL(1)
 #  define INIT_NSEL_VALUE PLL1_CTRL_NSEL_DIV1
 
-   /* Pick the initial PSEL value (integer mode) */
+/* Pick the initial PSEL value (integer mode) */
 
 #  ifndef BOARD_XTAL_FREQUENCY
 #    error "BOARD_XTAL_FREQUENCY is not defined in board.h"
@@ -105,17 +109,17 @@
 #    define INIT_PSEL_VALUE PLL1_CTRL_PSEL_DIV8
 #  endif
 
-   /* Select initial integer mode controls */
+/* Select initial integer mode controls */
 
 #  define INIT_PLL_CONTROLS \
    (PLL1_CTRL_FBSEL | INIT_PSEL_VALUE  | INIT_NSEL_VALUE | INIT_MSEL_VALUE)
 
-   /* Select a value close to a 10 millisecond delay */
+/* Select a value close to a 10 millisecond delay */
 
 #  define XTAL_DELAY \
    (10 * BOARD_XTAL_FREQUENCY + (LPC43_CCLK - 1)) / LPC43_CCLK
 
-   /* Check the ramp-up MSEL value */
+/* Check the ramp-up MSEL value */
 
 #  if (BOARD_PLL_RAMP_MSEL > 0) && (BOARD_PLL_RAMP_MSEL < 256)
 #    define RAMP_MSEL_VALUE PLL1_CTRL_MSEL(BOARD_PLL_RAMP_MSEL)
@@ -123,7 +127,7 @@
 #    error "Unsupported value of BOARD_PLL_RAMP_NSEL"
 #  endif
 
-   /* Check the ramp-up NSEL value */
+/* Check the ramp-up NSEL value */
 
 #  ifndef BOARD_PLL_RAMP_NSEL
 #    error "BOARD_PLL_RAMP_NSEL is not defined in board.h"
@@ -141,7 +145,7 @@
 #    error "Unsupported value of BOARD_PLL_RAMP_NSEL"
 #  endif
 
-   /* Check for direct mode */
+/* Check for direct mode */
 
 #  ifndef BOARD_RAMP_FCLKOUT
 #    error "BOARD_RAMP_FCLKOUT is not defined in board.h"
@@ -149,14 +153,14 @@
 
 #  if BOARD_RAMP_FCLKOUT >= MAX_FCLKOUT_DIRECT
 
-     /* Select direct mode controls */
+/* Select direct mode controls */
 
 #    define RAMP_PLL_CONTROLS \
     (PLL1_CTRL_FBSEL | PLL1_CTRL_DIRECT  | RAMP_NSEL_VALUE | RAMP_MSEL_VALUE)
 
 #  else
 
-   /* Check the ramp-up PSEL value */
+/* Check the ramp-up PSEL value */
 
 #    ifndef BOARD_PLL_RAMP_PSEL
 #     error "BOARD_PLL_RAMP_PSEL is not defined in board.h"
@@ -175,16 +179,16 @@
 #    endif
 #  endif
 
-     /* Select integer mode controls */
+/* Select integer mode controls */
 
 #    define RAMP_PLL_CONTROLS \
      (PLL1_CTRL_FBSEL | RAMP_PSEL_VALUE  | RAMP_NSEL_VALUE | RAMP_MSEL_VALUE)
 
-   /* Select a value close to a 10 millisecond delay */
+/* Select a value close to a 10 millisecond delay */
 
 #endif
 
-   /* Check the Final MSEL value */
+/* Check the Final MSEL value */
 
 #ifndef BOARD_PLL_MSEL
 #  error "BOARD_PLL_MSEL is not defined in board.h"
@@ -196,7 +200,7 @@
 #  error "Unsupported value of BOARD_PLL_MSEL"
 #endif
 
-   /* Check the Final NSEL value */
+/* Check the Final NSEL value */
 
 #ifndef BOARD_PLL_NSEL
 #  error "BOARD_PLL_NSEL is not defined in board.h"
@@ -214,7 +218,7 @@
 #  error "Unsupported value of BOARD_PLL_NSEL"
 #endif
 
-   /* Check for direct mode */
+/* Check for direct mode */
 
 #ifndef BOARD_FCLKOUT_FREQUENCY
 #  error "BOARD_FCLKOUT_FREQUENCY is not defined in board.h"
@@ -222,14 +226,14 @@
 
 #if BOARD_FCLKOUT_FREQUENCY >= MAX_FCLKOUT_DIRECT
 
-     /* Select direct mode controls */
+/* Select direct mode controls */
 
 #    define PLL_CONTROLS \
      (PLL1_CTRL_FBSEL | PLL1_CTRL_DIRECT | CTRL_NSEL_VALUE | CTRL_MSEL_VALUE)
 
 #  else
 
-   /* Check the Final PSEL value */
+/* Check the Final PSEL value */
 
 #  ifndef BOARD_PLL_PSEL
 #    error "BOARD_PLL_PSEL is not defined in board.h"
@@ -247,7 +251,7 @@
 #    error "Unsupported value of BOARD_PLL_PSEL"
 #  endif
 
-     /* Select integer mode controls */
+/* Select integer mode controls */
 
 #    define PLL_CONTROLS \
      (PLL1_CTRL_FBSEL | CTRL_PSEL_VALUE  | CTRL_NSEL_VALUE | CTRL_MSEL_VALUE)
@@ -280,7 +284,8 @@ static inline void lpc43_xtalconfig(void)
   /* Set/clear the HF bit in the crystal oscillator control register.
    * - The bit must be cleared if low-frequency oscillators (<=15MHz)
    * - The HF bit must be set for high-frequency osciallators (>20MHz)
-   * - For oscillators in the range 15-20 MHz, the HF setting does not matter.
+   * - For oscillators in the range 15-20 MHz,
+   *   the HF setting does not matter.
    */
 
   regval = getreg32(LPC43_XTAL_OSC_CTRL);
@@ -340,7 +345,8 @@ static inline void lpc43_pll1config(uint32_t ctrlvalue)
    *
    *   - PLL1_CTRL_FBSEL:     Set in both integer and direct modes
    *   - PLL1_CTRL_DIRECT:    Set in direct mode
-   *   - PLL1_CTRL_PSEL:      Set to the value from board.h (integer mode only)
+   *   - PLL1_CTRL_PSEL:      Set to the value from board.h
+   *                          (integer mode only)
    *   - PLL1_CTRL_NSEL:      Set to the value from board.h
    *   - PLL1_CTRL_MSEL:      Set to the value from board.h
    */
@@ -406,7 +412,8 @@ static inline void lpc43_m4clkselect(uint32_t clksel)
  * Name: lpc43_pll0usbconfig
  *
  * Description:
- *   Configure PLL0USB dividers and multipliers per the settings in the board.h
+ *   Configure PLL0USB dividers and multipliers per the settings in the
+ *   board.h
  *   file to generate the desired Fclkcout and Fcco frequencies.
  *
  ****************************************************************************/
@@ -415,7 +422,9 @@ void lpc43_pll0usbconfig(void)
 {
   /* Power down, no bypass, direct i-o, */
 
-  putreg32((PLL0USB_CTRL_PD | PLL0USB_CTRL_DIRECTI | PLL0USB_CTRL_DIRECTO | PLL0USB_CTRL_CLKEN | PLL0USB_CTRL_AUTOBLOCK | BOARD_USB0_CLKSRC), LPC43_PLL0USB_CTRL);
+  putreg32((PLL0USB_CTRL_PD | PLL0USB_CTRL_DIRECTI | PLL0USB_CTRL_DIRECTO |
+            PLL0USB_CTRL_CLKEN | PLL0USB_CTRL_AUTOBLOCK | BOARD_USB0_CLKSRC),
+            LPC43_PLL0USB_CTRL);
 
   putreg32(BOARD_USB0_MDIV, LPC43_PLL0USB_MDIV);
   putreg32(BOARD_USB0_NP_DIV, LPC43_PLL0USB_NP_DIV);
@@ -431,7 +440,6 @@ void lpc43_pll0usbconfig(void)
 
 #if defined(CONFIG_LPC43_ETHERNET)
 void lpc43_enetclkconfig(void)
-
 {
   /* Note that using TXCLK for RX implies use of RMII */
 
@@ -508,7 +516,8 @@ void lpc43_idiva(void)
 
   regval  = getreg32(LPC43_IDIVA_CTRL);
   regval &= ~(IDIVA_CTRL_CLKSEL_MASK | IDIVA_CTRL_IDIV_MASK);
-  regval |= BOARD_IDIVA_CLKSRC | IDIVA_CTRL_AUTOBLOCK | IDIVA_CTRL_IDIV(BOARD_IDIVA_DIVIDER);
+  regval |= BOARD_IDIVA_CLKSRC | IDIVA_CTRL_AUTOBLOCK |
+            IDIVA_CTRL_IDIV(BOARD_IDIVA_DIVIDER);
   putreg32(regval, LPC43_IDIVA_CTRL);
 }
 #endif
@@ -522,7 +531,8 @@ void lpc43_idivb(void)
 
   regval  = getreg32(LPC43_IDIVB_CTRL);
   regval &= ~(IDIVBCD_CTRL_CLKSEL_MASK | IDIVBCD_CTRL_IDIV_MASK);
-  regval |= BOARD_IDIVB_CLKSRC | IDIVBCD_CTRL_AUTOBLOCK | IDIVBCD_CTRL_IDIV(BOARD_IDIVB_DIVIDER);
+  regval |= BOARD_IDIVB_CLKSRC | IDIVBCD_CTRL_AUTOBLOCK |
+            IDIVBCD_CTRL_IDIV(BOARD_IDIVB_DIVIDER);
   putreg32(regval, LPC43_IDIVB_CTRL);
 }
 #endif
@@ -536,7 +546,8 @@ void lpc43_idivc(void)
 
   regval  = getreg32(LPC43_IDIVC_CTRL);
   regval &= ~(IDIVBCD_CTRL_CLKSEL_MASK | IDIVBCD_CTRL_IDIV_MASK);
-  regval |= BOARD_IDIVC_CLKSRC | IDIVBCD_CTRL_AUTOBLOCK | IDIVBCD_CTRL_IDIV(BOARD_IDIVC_DIVIDER);
+  regval |= BOARD_IDIVC_CLKSRC | IDIVBCD_CTRL_AUTOBLOCK |
+            IDIVBCD_CTRL_IDIV(BOARD_IDIVC_DIVIDER);
   putreg32(regval, LPC43_IDIVC_CTRL);
 }
 #endif
@@ -550,7 +561,8 @@ void lpc43_idivd(void)
 
   regval  = getreg32(LPC43_IDIVD_CTRL);
   regval &= ~(IDIVBCD_CTRL_CLKSEL_MASK | IDIVBCD_CTRL_IDIV_MASK);
-  regval |= BOARD_IDIVD_CLKSRC | IDIVBCD_CTRL_AUTOBLOCK | IDIVBCD_CTRL_IDIV(BOARD_IDIVD_DIVIDER);
+  regval |= BOARD_IDIVD_CLKSRC | IDIVBCD_CTRL_AUTOBLOCK |
+            IDIVBCD_CTRL_IDIV(BOARD_IDIVD_DIVIDER);
   putreg32(regval, LPC43_IDIVD_CTRL);
 }
 #endif
@@ -564,7 +576,8 @@ void lpc43_idive(void)
 
   regval  = getreg32(LPC43_IDIVE_CTRL);
   regval &= ~(IDIVE_CTRL_CLKSEL_MASK | IDIVE_CTRL_IDIV_MASK);
-  regval |= BOARD_IDIVE_CLKSRC | IDIVE_CTRL_AUTOBLOCK | IDIVE_CTRL_IDIV(BOARD_IDIVE_DIVIDER);
+  regval |= BOARD_IDIVE_CLKSRC | IDIVE_CTRL_AUTOBLOCK |
+            IDIVE_CTRL_IDIV(BOARD_IDIVE_DIVIDER);
   putreg32(regval, LPC43_IDIVE_CTRL);
 }
 #endif
@@ -596,7 +609,6 @@ void lpc43_abp3(void)
   putreg32(regval, LPC43_BASE_APB3_CLK);
 }
 #endif
-
 
 /****************************************************************************
  * Name: lpc43_clockconfig

@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_otp.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_OTP_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_OTP_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* Virtual and physical base address of the OTG register group **********************************/
+/* Virtual and physical base address of the OTG register group **************/
 
 #define LPC31_OTG_VBASE                (LPC31_APB0_VADDR+LPC31_APB0_OTP_OFFSET)
 #define LPC31_OTG_PBASE                (LPC31_APB0_PADDR+LPC31_APB0_OTP_OFFSET)
 
-/* OTP register offsets (with respect to the RNG base) ******************************************/
+/* OTP register offsets (with respect to the RNG base) **********************/
 
 #define LPC31_OTP_CON_OFFSET     0x000 /* Control Register */
 #define LPC31_OTP_RPROT_OFFSET   0x004 /* Read-protect Register */
@@ -60,7 +60,7 @@
 #define LPC31_OTP_DATA14_OFFSET  0x044 /* Fuse-output data register 14 */
 #define LPC31_OTP_DATA15_OFFSET  0x048 /* Fuse-output data register 15 */
 
-/* OTP register (virtual) addresses *************************************************************/
+/* OTP register (virtual) addresses *****************************************/
 
 #define LPC31_OTP_CON            (LPC31_OTG_VBASE+LPC31_OTP_CON_OFFSET)
 #define LPC31_OTP_RPROT          (LPC31_OTG_VBASE+LPC31_OTP_RPROT_OFFSET)
@@ -83,7 +83,7 @@
 #define LPC31_OTP_DATA14         (LPC31_OTG_VBASE+LPC31_OTP_DATA14_OFFSET)
 #define LPC31_OTP_DATA15         (LPC31_OTG_VBASE+LPC31_OTP_DATA15_OFFSET)
 
-/* RNG register bit definitions *****************************************************************/
+/* RNG register bit definitions *********************************************/
 
 /* Control Register */
 
@@ -107,18 +107,20 @@
 #  define OTP_WPROT_PROT(n)      ((1 << (n)) << TP_RPROT_PROT_SHIFT)
 #define OTP_WPROT_LOCK           (1 << 31) /* Bit 31: Register values are 'sticky' */
 
-/* Fuse-output data register 0-15: Fuse output 0-511 (32 per data register, 32*16 = 512) */
+/* Fuse-output data register 0-15: Fuse output 0-511
+ * (32 per data register, 32*16 = 512)
+ */
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_OTP_H */

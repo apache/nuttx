@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_config.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,27 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_CONFIG_H
 #define __ARCH_ARM_SRC_LPC54XX_LPC54_CONFIG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration *********************************************************************/
-/* Make sure that no unsupported USART, I2C master, or SPI master peripherals are
- * enabled.
+/* Configuration ************************************************************/
+
+/* Make sure that no unsupported USART, I2C master, or SPI master peripherals
+ * are enabled.
  */
 
 #ifndef CONFIG_LPC54_FLEXCOMM0
@@ -244,8 +245,8 @@
 #  define HAVE_USART_DEVICE 1
 #endif
 
-/* Is there a serial console? There should be at most one defined.  It could be on
- * any USARTn, n=0,1,2,3,4,5
+/* Is there a serial console? There should be at most one defined.
+ *  It could be on any USARTn, n=0,1,2,3,4,5
  */
 
 #undef HAVE_USART_CONSOLE
@@ -389,8 +390,8 @@
 # undef CONFIG_USART8_FLOWCONTROL
 # undef CONFIG_USART9_FLOWCONTROL
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_CONFIG_H */

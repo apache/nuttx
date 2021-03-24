@@ -1,4 +1,4 @@
-/**********************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_cgudrvr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   - NXP UM10314 LPC3130/31 User manual Rev. 1.01 — 9 September 2009
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_CGUDRVR_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_CGUDRVR_H
 
-/**********************************************************************************************
+/****************************************************************************
  * Included Files
- **********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -38,15 +38,17 @@
 #include "arm_arch.h"
 #include "lpc31_cgu.h"
 
-/**********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **********************************************************************************************/
+ ****************************************************************************/
 
-/* Maps a valid, x, relative to a base value, b, and converts that to a bit position */
+/* Maps a valid, x, relative to a base value, b,
+ * and converts that to a bit position
+ */
 
 #define _RBIT(x,b)                        (1<<((x)-(b)))
 
-/* Clock ID ranges (see enum lpc31_clockid_e) *************************************************/
+/* Clock ID ranges (see enum lpc31_clockid_e) *******************************/
 
 #define CLKID_FIRST                       CLKID_APB0CLK
 #define CLKID_SYSBASE_FIRST               CLKID_APB0CLK           /* Domain 0: SYS_BASE */
@@ -104,10 +106,10 @@
 #define ESRNDX_INVALID                    -1 /* Indicates an invalid ESR register index */
 #define BCRNDX_INVALID                    -1 /* Indicates an invalid BCR register index */
 
-/* There are 24 fractional dividers, indexed 0 to 23.  The following definitions
- * provide (1) the number of fractional dividers available for each base frequency,
- * (2) start and end indices, and (3) extraction info for sub elements from the
- * fractional divider configuration register
+/* There are 24 fractional dividers, indexed 0 to 23.  The following
+ * definitions provide (1) the number of fractional dividers available
+ * for each base frequency, (2) start and end indices, and (3) extraction
+ * info for sub elements from the fractional divider configuration register
  */
 
 #define FRACDIV_BASE0_CNT                 7  /* 7 fractional dividers available */
@@ -165,9 +167,9 @@
 #define FDCNDX_INVALID                   -1  /* Indicates an invalid fractional
                                               * divider index */
 
-/**********************************************************************************************
+/****************************************************************************
  * Public Types
- **********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -273,6 +275,7 @@ enum lpc31_clockid_e
   CLKID_SPIPCLKGATED,     /* 57 SPI_PCLK_GATED */
 
   /* Domain 4: AHB0APB3BASE */
+
   CLKID_AHB2APB3PCLK,     /* 58 AHB_TO_APB3_PCLK */
   CLKID_I2SCFGPCLK,       /* 59 I2S_CFG_PCLK */
   CLKID_EDGEDETPCLK,      /* 60 EDGE_DET_PCLK */
@@ -406,7 +409,7 @@ struct lpc31_fdivconfig_s
 struct lpc31_subdomainconfig_s
 {
   struct lpc31_fdivconfig_s fdiv; /* Fractional divider settings */
-  uint32_t clkset;                  /* Bitset of all clocks in the sub-domain */
+  uint32_t clkset;                /* Bitset of all clocks in the sub-domain */
 };
 
 /* CGU clock initialization structure.  Describes the platform-specific
@@ -511,35 +514,35 @@ struct lpc31_pllconfig_s
   uint32_t mdec;          /* PLL M-divider value: 0-0x1ffff */
 };
 
-/**********************************************************************************************
+/****************************************************************************
  * Public Data
- **********************************************************************************************/
+ ****************************************************************************/
 
-/* This array is managed by the chip-specific logic and provides the programmed frequency of
- * every input source
+/* This array is managed by the chip-specific logic and provides the
+ * programmed frequency of every input source
  */
 
 EXTERN uint32_t g_boardfreqin[CGU_NFREQIN];
 
-/* This instance of the lpc31_clkinit_s structure provides the initial, default clock
- * configuration for the board.  Every board must provide an implementation of g_boardclks.
- * This rather complex structure is used by the boot-up logic to configure initial lpc31xx
- * clocking.
+/* This instance of the lpc31_clkinit_s structure provides the initial,
+ * default clock configuration for the board.  Every board must provide an
+ * implementation of g_boardclks. This rather complex structure is used by
+ * the boot-up logic to configure initial lpc31xx clocking.
  */
 
 EXTERN const struct lpc31_clkinit_s g_boardclks;
 
-/**********************************************************************************************
+/****************************************************************************
  * Inline Functions
- **********************************************************************************************/
+ ****************************************************************************/
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_getbasefreq
  *
  * Description:
  *   Return the base frequency associated with a clock domain
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t lpc31_getbasefreq(enum lpc31_domainid_e dmnid)
 {
@@ -559,13 +562,13 @@ static inline uint32_t lpc31_getbasefreq(enum lpc31_domainid_e dmnid)
   return g_boardfreqin[ndx];
 }
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_enableclock
  *
  * Description:
  *   Enable the specified clock
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc31_enableclock(enum lpc31_clockid_e clkid)
 {
@@ -576,13 +579,13 @@ static inline void lpc31_enableclock(enum lpc31_clockid_e clkid)
   putreg32(regval, address);
 }
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_disableclock
  *
  * Description:
  *   Disable the specified clock
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 static inline void lpc31_disableclock(enum lpc31_clockid_e clkid)
 {
@@ -593,120 +596,125 @@ static inline void lpc31_disableclock(enum lpc31_clockid_e clkid)
   putreg32(regval, address);
 }
 
-/**********************************************************************************************
- * Public Functions
- **********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: lpc31_defclk
  *
  * Description:
- *   Enable the specified clock if it is one of the default clocks needed by the board.
+ *   Enable the specified clock if it is one of the default clocks needed by
+ *   the board.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 bool lpc31_defclk(enum lpc31_clockid_e clkid);
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: lpc31_resetclks
  *
  * Description:
  *   Put all clocks into a known, initial state
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_resetclks(void);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_clkinit
  *
  * Description:
- *   Initialize all clock domains based on board-specific clock  configuration data
+ *   Initialize all clock domains based on board-specific clock configuration
+ *   data
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
-void lpc31_clkinit(const struct lpc31_clkinit_s* cfg);
+void lpc31_clkinit(const struct lpc31_clkinit_s *cfg);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_fdivinit
  *
  * Description:
- *   Enable and configure (or disable) a fractional divider.  For internal us only... see
- *   lpc31_setfdiv() the externally usable function.
+ *   Enable and configure (or disable) a fractional divider.  For internal
+ *   us only... see lpc31_setfdiv() the externally usable function.
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
-uint32_t lpc31_fdivinit(int fdcndx, const struct lpc31_fdivconfig_s *fdiv, bool enable);
+uint32_t lpc31_fdivinit(int fdcndx,
+                        const struct lpc31_fdivconfig_s *fdiv, bool enable);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_setfdiv
  *
  * Description:
- *   Set/reset subdomain frequency containing the specified clock using the provided divider
- *   settings
+ *   Set/reset subdomain frequency containing the specified clock using the
+ *   provided divider settings
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_setfdiv(enum lpc31_domainid_e dmnid, enum lpc31_clockid_e clkid,
                    const struct lpc31_fdivconfig_s *fdiv);
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: lpc31_pllconfig
  *
  * Description:
  *   Re-onfigure the PLL according to the provided selections.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_pllconfig(const struct lpc31_pllconfig_s *const cfg);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_hp0pllconfig
  *
  * Description:
  *   Configure the HP0 PLL according to the board.h default selections.
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_hp0pllconfig(void);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_hp1pllconfig
  *
  * Description:
  *   Configure the HP1 PLL according to the board.h default selections.
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_hp1pllconfig(void);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_softreset
  *
  * Description:
  *   Perform a soft reset on the specified module.
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_softreset(enum lpc31_resetid_e resetid);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_clkdomain
  *
  * Description:
- *   Given a clock ID, return the ID of the domain in which the clock resides.
+ *   Given a clock ID, return the ID of the domain in which the clock
+ *   resides.
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 enum lpc31_domainid_e lpc31_clkdomain(enum lpc31_clockid_e clkid);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_esrndx
  *
  * Description:
- *   Given a clock ID, return the index of the corresponding ESR register (or ESRNDX_INVALID
- *   if there is no ESR associated with this clock ID).  Indexing of ESRs differs slightly
- *   from the clock ID:  There are 92 clock IDs but only 89 ESR regisers. There are no ESR
+ *   Given a clock ID, return the index of the corresponding ESR register
+ *   (or ESRNDX_INVALID if there is no ESR associated with this clock ID).
+ *   Indexing of ESRs differs slightly from the clock ID:
+ *   There are 92 clock IDs but only 89 ESR regisers. There are no ESR
  *   registers for :
  *
  *
@@ -717,70 +725,72 @@ enum lpc31_domainid_e lpc31_clkdomain(enum lpc31_clockid_e clkid);
  *
  *  CLKID_SYSCLKO           Clock ID 91: SYSCLK_O
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 int lpc31_esrndx(enum lpc31_clockid_e clkid);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_bcrndx
  *
  * Description:
- *   Only 5 of the 12 domains have an associated BCR register.  This function returns the
- *   index to the associated BCR register (if any) or BCRNDX_INVALID otherwise.
+ *   Only 5 of the 12 domains have an associated BCR register.  This
+ *   function returns the index to the associated BCR register (if any)
+ *   or BCRNDX_INVALID otherwise.
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 int lpc31_bcrndx(enum lpc31_domainid_e dmnid);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_fdcndx
  *
  * Description:
- *   Given a clock ID and its domain ID, return the index of the corresponding fractional
- *   divider register (or FDCNDX_INVALID if there is no fractional divider associated with
- *   this clock).
+ *   Given a clock ID and its domain ID, return the index of the
+ *   corresponding fractional divider register (or FDCNDX_INVALID if there
+ *   is no fractional divider associated with this clock).
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 int lpc31_fdcndx(enum lpc31_clockid_e clkid, enum lpc31_domainid_e dmnid);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_selectfreqin
  *
  * Description:
  *   Set the base frequency source selection for with a clock domain
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_selectfreqin(enum lpc31_domainid_e dmnid, uint32_t finsel);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_clkfreq
  *
  * Description:
  *   Given a clock ID and its domain ID, return the frequency of the clock.
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
-uint32_t lpc31_clkfreq(enum lpc31_clockid_e clkid, enum lpc31_domainid_e dmnid);
+uint32_t lpc31_clkfreq(enum lpc31_clockid_e clkid,
+                       enum lpc31_domainid_e dmnid);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_enableexten
  *
  * Description:
  *   Enable external enabling for the specified possible clocks.
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_enableexten(enum lpc31_clockid_e clkid);
 
-/**********************************************************************************************
+/****************************************************************************
  * Name: lpc31_disableexten
  *
  * Description:
  *   Disable external enabling for the specified possible clocks.
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_disableexten(enum lpc31_clockid_e clkid);
 

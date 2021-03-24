@@ -1,4 +1,4 @@
-/************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_ethernet.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_ETHERNET_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_ETHERNET_H
 
-/************************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC54_ETH_MAC_CONFIG_OFFSET                      0x0000  /* MAC configuration */
 #define LPC54_ETH_MAC_EXT_CONFIG_OFFSET                  0x0004  /* MAC extended configuration */
@@ -127,7 +127,7 @@
 #define LPC54_ETH_DMACH_STAT_OFFSET                      0x0060  /* DMA channel n DMA status */
 #define LPC54_ETH_DMACH_MISS_FRAME_CNT_OFFSET            0x006c  /* DMA channel n missed frame count */
 
-/* Register addresses ***************************************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC54_ETH_MAC_CONFIG                             (LPC54_ETHERNET_BASE + LPC54_ETH_MAC_CONFIG_OFFSET)
 #define LPC54_ETH_MAC_EXT_CONFIG                         (LPC54_ETHERNET_BASE + LPC54_ETH_MAC_EXT_CONFIG_OFFSET)
@@ -222,7 +222,7 @@
 #define LPC54_ETH_DMACH_STAT(n)                          (LPC54_ETH_DMACH_BASE(n) + LPC54_ETH_DMACH_STAT_OFFSET)
 #define LPC54_ETH_DMACH_MISS_FRAME_CNT(n)                (LPC54_ETH_DMACH_BASE(n) + LPC54_ETH_DMACH_MISS_FRAME_CNT_OFFSET)
 
-/* Register bit definitions *********************************************************************************/
+/* Register bit definitions *************************************************/
 
 /* MAC configuration */
 
@@ -674,7 +674,7 @@
 /* DMA channel n missed frame count */
 #define ETH_DMACH_MISS_FRAME_CNT_
 
-/* DMA descriptors ******************************************************************************************/
+/* DMA descriptors **********************************************************/
 
 /* Receive descriptor (read-format) */
 
@@ -834,9 +834,9 @@
                                                                    /* Bit 30: (see read format) */
                                                                    /* Bit 31: (see read format) */
 
-/************************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************************/
+ ****************************************************************************/
 
 /* Receive descriptor structure (read format) */
 

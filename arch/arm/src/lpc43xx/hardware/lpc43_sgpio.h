@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_sgpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SGPIO_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SGPIO_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #define LPC43_SGPIO_SLICES_MASK 0x0000FFFF
 #define LPC43_SGPIO_NUM_SLICES 16
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define LPC43_SGPIO_OUT_MUXCFG_OFFSET(n)   (0x0000 + ((n) << 2))
 #define LPC43_SGPIO_OUT_MUXCFG0_OFFSET     0x0000 /* Pin multiplexer configuration register 0 */
@@ -233,7 +233,7 @@
 #define LPC43_SGPIO_CLRSTAT3_OFFSET        0x0f70 /* Input bit match interrupt clear status */
 #define LPC43_SGPIO_SETSTAT3_OFFSET        0x0f74 /* Input bit match interrupt set status */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define LPC43_SGPIO_OUT_MUXCFG(n)          (LPC43_SGPIO_BASE+LPC43_SGPIO_OUT_MUXCFG_OFFSET(n))
 #define LPC43_SGPIO_OUT_MUXCFG0            (LPC43_SGPIO_BASE+LPC43_SGPIO_OUT_MUXCFG0_OFFSET)
@@ -425,7 +425,7 @@
 #define LPC43_SGPIO_CLRSTAT3               (LPC43_SGPIO_BASE+LPC43_SGPIO_CLRSTAT3_OFFSET)
 #define LPC43_SGPIO_SETSTAT3               (LPC43_SGPIO_BASE+LPC43_SGPIO_SETSTAT3_OFFSET)
 
-/* Register Bit Definitions *************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Pin multiplexer configuration registers */
 
@@ -443,6 +443,7 @@
 #  define SGPIO_OUT_MUXCFG_OUTCFG_DOUTM8A  (9 << SGPIO_OUT_MUXCFG_OUTCFG_SHIFT)  /* dout_doutm8a (8-bit mode 8a) */
 #  define SGPIO_OUT_MUXCFG_OUTCFG_DOUTM8B  (10 << SGPIO_OUT_MUXCFG_OUTCFG_SHIFT) /* dout_doutm8b (8-bit mode 8b) */
 #  define SGPIO_OUT_MUXCFG_OUTCFG_DOUTM8C  (11 << SGPIO_OUT_MUXCFG_OUTCFG_SHIFT) /* dout_doutm8c (8-bit mode 8c) */
+
 #define SGPIO_OUT_MUXCFG_OECFG_SHIFT       (4)       /* Bits 4-6: P_OE_CFG Output enable source */
 #define SGPIO_OUT_MUXCFG_OECFG_MASK        (7 << SGPIO_OUT_MUXCFG_OECFG_SHIFT)
 #  define SGPIO_OUT_MUXCFG_OECFG_GPIOOE    (0 << SGPIO_OUT_MUXCFG_OECFG_SHIFT) /* gpio_oe (state set by GPIO_OEREG) */
@@ -450,7 +451,9 @@
 #  define SGPIO_OUT_MUXCFG_OECFG_OEM2      (5 << SGPIO_OUT_MUXCFG_OECFG_SHIFT) /* dout_oem2 (2-bit mode) */
 #  define SGPIO_OUT_MUXCFG_OECFG_OEM4      (6 << SGPIO_OUT_MUXCFG_OECFG_SHIFT) /* dout_oem4 (4-bit mode) */
 #  define SGPIO_OUT_MUXCFG_OECFG_OEM8      (7 << SGPIO_OUT_MUXCFG_OECFG_SHIFT) /* dout_oem8 (8-bit mode) */
-                                                     /* Bits 7-31:  Reserved */
+
+                                             /* Bits 7-31:  Reserved */
+
 /* SGPIO multiplexer configuration registers */
 
 #define SGPIO_MUXCFG_EXTCLK                (1 << 9)  /* Bit 9:  Select clock signal */
@@ -460,30 +463,35 @@
 #  define SGPIO_MUXCFG_CS_PMODE_SGPIO9     (1 << SGPIO_MUXCFG_CS_PMODE_SHIFT)
 #  define SGPIO_MUXCFG_CS_PMODE_SGPIO10    (2 << SGPIO_MUXCFG_CS_PMODE_SHIFT)
 #  define SGPIO_MUXCFG_CS_PMODE_SGPIO11    (3 << SGPIO_MUXCFG_CS_PMODE_SHIFT)
+
 #define SGPIO_MUXCFG_CS_SMODE_SHIFT        (3)       /* Bits 3-4: CLK_SOURCE_SLICE_MODE Select clock source slice */
 #define SGPIO_MUXCFG_CS_SMODE_MASK         (3 << SGPIO_MUXCFG_CS_SMODE_SHIFT)
 #  define SGPIO_MUXCFG_CS_SMODE_SLICED     (0 << SGPIO_MUXCFG_CS_SMODE_SHIFT)
 #  define SGPIO_MUXCFG_CS_SMODE_SLICEH     (1 << SGPIO_MUXCFG_CS_SMODE_SHIFT)
 #  define SGPIO_MUXCFG_CS_SMODE_SLICEO     (2 << SGPIO_MUXCFG_CS_SMODE_SHIFT)
 #  define SGPIO_MUXCFG_CS_SMODE_SLICEP     (3 << SGPIO_MUXCFG_CS_SMODE_SHIFT)
+
 #define SGPIO_MUXCFG_QUAL_MODE_SHIFT       (5)       /* Bits 5-6: Select qualifier mode */
 #define SGPIO_MUXCFG_QUAL_MODE_MASK        (3 << SGPIO_MUXCFG_QUAL_MODE_SHIFT)
 #  define SGPIO_MUXCFG_QUAL_MODE_ENABLE    (0 << SGPIO_MUXCFG_QUAL_MODE_SHIFT) /* Enable */
 #  define SGPIO_MUXCFG_QUAL_MODE_DISABLE   (1 << SGPIO_MUXCFG_QUAL_MODE_SHIFT) /* Disable */
 #  define SGPIO_MUXCFG_QUAL_MODE_SLICE     (2 << SGPIO_MUXCFG_QUAL_MODE_SHIFT) /* Slice */
 #  define SGPIO_MUXCFG_QUAL_MODE_SGPIO     (3 << SGPIO_MUXCFG_QUAL_MODE_SHIFT) /* External SGPIO pin (8, 9, 10, or 11) */
+
 #define SGPIO_MUXCFG_QUAL_PMODE_SHIFT      (7)       /* Bits 7-8: Select qualifier pin */
 #define SGPIO_MUXCFG_QUAL_PMODE_MASK       (3 << SGPIO_MUXCFG_QUAL_PMODE_SHIFT)
 #  define SGPIO_MUXCFG_QUAL_PMODE_SGPIO8   (0 << SGPIO_MUXCFG_QUAL_PMODE_SHIFT)
 #  define SGPIO_MUXCFG_QUAL_PMODE_SGPIO9   (1 << SGPIO_MUXCFG_QUAL_PMODE_SHIFT)
 #  define SGPIO_MUXCFG_QUAL_PMODE_SGPIO10  (2 << SGPIO_MUXCFG_QUAL_PMODE_SHIFT)
 #  define SGPIO_MUXCFG_QUAL_PMODE_SGPIO11  (3 << SGPIO_MUXCFG_QUAL_PMODE_SHIFT)
+
 #define SGPIO_MUXCFG_QUAL_SMODE_SHIFT      (9)       /* Bits 9-10: Select qualifier slice */
 #define SGPIO_MUXCFG_QUAL_SMODE_MASK       (3 << SGPIO_MUXCFG_QUAL_SMODE_SHIFT)
 #  define SGPIO_MUXCFG_QUAL_SMODE_SLICEA   (0 << SGPIO_MUXCFG_QUAL_SMODE_SHIFT) /* Slice A, but for slice A slice D is used */
 #  define SGPIO_MUXCFG_QUAL_SMODE_SLICEH   (1 << SGPIO_MUXCFG_QUAL_SMODE_SHIFT) /* Slice H, but for slice H slice O is used */
 #  define SGPIO_MUXCFG_QUAL_SMODE_SLICEI   (2 << SGPIO_MUXCFG_QUAL_SMODE_SHIFT) /* Slice I, but for slice I slice D is used */
 #  define SGPIO_MUXCFG_QUAL_SMODE_SLICEP   (3 << SGPIO_MUXCFG_QUAL_SMODE_SHIFT) /* Slice P, but for slice P slice O is used */
+
 #define SGPIO_MUXCFG_CONCAT                (1 << 11) /* Bit 11: Enable concatenation */
 #define SGPIO_MUXCFG_CONCAT_ORDER_SHIFT    (12)      /* Bits 12-13: CONCAT_ORDER Select concatenation order */
 #define SGPIO_MUXCFG_CONCAT_ORDER_MASK     (3 << SGPIO_MUXCFG_CONCAT_ORDER_SHIFT)
@@ -491,7 +499,9 @@
 #  define SGPIO_MUXCFG_CONCAT_ORDER_S2     (1 << SGPIO_MUXCFG_CONCAT_ORDER_SHIFT) /* 2 slices */
 #  define SGPIO_MUXCFG_CONCAT_ORDER_S4     (2 << SGPIO_MUXCFG_CONCAT_ORDER_SHIFT) /* 4 slices */
 #  define SGPIO_MUXCFG_CONCAT_ORDER_S8     (3 << SGPIO_MUXCFG_CONCAT_ORDER_SHIFT) /* 8 slices */
-                                                     /* Bits 14-31:  Reserved */
+
+                                             /* Bits 14-31:  Reserved */
+
 /* Slice multiplexer configuration register 0 */
 
 #define SGPIO_SLICE_MUXCFG_MATCH           (1 << 0)  /* Bit 0:  Match mode */
@@ -504,25 +514,31 @@
 #  define SGPIO_SLICE_MUXCFG_CAPMODE_FALLING (1 << SGPIO_SLICE_MUXCFG_CAPMODE_SHIFT) /* Detect falling edge */
 #  define SGPIO_SLICE_MUXCFG_CAPMODE_LOW     (2 << SGPIO_SLICE_MUXCFG_CAPMODE_SHIFT) /* Detect LOW level */
 #  define SGPIO_SLICE_MUXCFG_CAPMODE_HIGH    (3 << SGPIO_SLICE_MUXCFG_CAPMODE_SHIFT) /* Detect HIGH level */
+
 #define SGPIO_SLICE_MUXCFG_PARMODE_SHIFT   (6)       /* Bits 6-7: Parallel mode */
 #define SGPIO_SLICE_MUXCFG_PARMODE_MASK    (3 << SGPIO_SLICE_MUXCFG_PARMODE_SHIFT)
 #  define SGPIO_SLICE_MUXCFG_PARMODE_SHIFT1  (0 << SGPIO_SLICE_MUXCFG_PARMODE_SHIFT) /* Shift 1 bit per clock */
 #  define SGPIO_SLICE_MUXCFG_PARMODE_SHIFT2  (1 << SGPIO_SLICE_MUXCFG_PARMODE_SHIFT) /* Shift 2 bits per clock */
 #  define SGPIO_SLICE_MUXCFG_PARMODE_SHIFT4  (2 << SGPIO_SLICE_MUXCFG_PARMODE_SHIFT) /* Shift 4 bits per clock */
 #  define SGPIO_SLICE_MUXCFG_PARMODE_SHIFT8  (3 << SGPIO_SLICE_MUXCFG_PARMODE_SHIFT) /* Shift 1 byte per clock */
+
 #define SGPIO_SLICE_MUXCFG_INVQUAL         (1 << 8)  /* Bit 8:  Inversion qualifier */
                                                      /* Bits 9-31: Reserved */
+
 /* Slice data registers (32-bit data) */
+
 /* Slice data shadow registers (32-bit data) */
 
 /* COUNTn reload value (32-bit data) */
 
 #define SGPIO_PRESET_MASK                  (0xfff)   /* Bits 0-11: Counter reload value */
                                                      /* Bits 12-31: Reserved */
+
 /* Down counter registers */
 
 #define SGPIO_COUNT_MASK                   (0xfff)   /* Bits 0-11: Down counter */
                                                      /* Bits 12-31: Reserved */
+
 /* Position registers */
 
 #define SGPIO_POS_POS_SHIFT                (0)       /* Bits 0-7: Each time COUNT reaches zero POS counts down */
@@ -530,145 +546,178 @@
 #define SGPIO_POS_RESET_SHIFT              (8)       /* Bits 8-15: Reload value for POS after POS reaches zero */
 #define SGPIO_POS_RESET_MASK               (0xffff << SGPIO_POS_RESET_SHIFT)
                                                      /* Bits 16-31: Reserved */
+
 /* Mask for pattern match function of slice A (32-bit bit mask) */
+
 /* Mask for pattern match function of slice H (32-bit bit mask) */
+
 /* Mask for pattern match function of slice I (32-bit bit mask) */
+
 /* Mask for pattern match function of slice P (32-bit bit mask) */
 
 /* Common bit mask that can be used in all interrupt registers */
 
 #define SGPIO_SLICE(n)                     (1 << (n)) /* Bits 0-15: Bit n corresponids to slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* GPIO input status register */
 
 #define SGPIO_GPIO_INREG(n)                (1 << (n)) /* Bits 0-15: Bit i reflects the input state of SGPIO pin  */
                                                       /* Bits 16-31: Reserved */
+
 /* GPIO output control register */
 
 #define SGPIO_GPIO_OUTREG(n)               (1 << (n)) /* Bits 0-15: Bit i sets the output of SGPIO pin i */
 #define SGPIO_GPIO_OUTREG_SHIFT(n)         (n)
                                                       /* Bits 16-31: Reserved */
+
 /* GPIO output enable register */
 
 #define SGPIO_GPIO_OENREG(n)               (1 << (n)) /* Bits 0-15: Bit i selects the output enable state of SGPIO pin i */
 #define SGPIO_GPIO_OENREG_SHIFT(n)         (n)
                                                       /* Bits 16-31: Reserved */
+
 /* Slice count enable register */
 
 #define SGPIO_CTRL_ENABLE(n)               (1 << (n)) /* Bits 0-15: Bit n controls slice n */
 #define SGPIO_CTRL_ENABLE_SHIFT(n)         (n)
                                                       /* Bits 16-31: Reserved */
+
 /* Slice count disable register */
 
 #define SGPIO_CTRL_DISABLE(n)              (1 << (n)) /* Bits 0-15: Bit n controls slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Shift clock interrupt clear mask */
 
 #define SGPIO_CLREN0(n)                    (1 << (n)) /* Bits 0-15: Bit n shift clock interrupt clear mask of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Shift clock interrupt set mask */
 
 #define SGPIO_SETEN0(n)                    (1 << (n)) /* Bits 0-15: Bit n shift clock interrupt clear mask of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Shift clock interrupt enable */
 
 #define SGPIO_ENABLE0(n)                   (1 << (n)) /* Bits 0-15: Bit n shift clock interrupt enable of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Shift clock interrupt status */
 
 #define SGPIO_STATUS0(n)                   (1 << (n)) /* Bits 0-15: Bit n shift clock interrupt status of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Shift clock interrupt clear status */
 
 #define SGPIO_CLRSTAT0(n)                  (1 << (n)) /* Bits 0-15: Bit n shift clears interrupt status of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Shift clock interrupt set status */
 
 #define SGPIO_SETSTAT0(n)                  (1 << (n)) /* Bits 0-15: Bit n shift sets interrupt status of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Exchange clock interrupt clear mask */
 
 #define SGPIO_CLREN1(n)                    (1 << (n)) /* Bits 0-15: Bit n clears exchange clock interrupt mask of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Exchange clock interrupt set mask */
 
 #define SGPIO_SETEN1(n)                    (1 << (n)) /* Bits 0-15: Bit n sets exchange clock interrupt mask of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Exchange clock interrupt enable */
 
 #define SGPIO_ENABLE1(n)                   (1 << (n)) /* Bits 0-15: Bit n enables exchange clock interrupt of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Exchange clock interrupt status */
 
 #define SGPIO_STATUS1(n)                   (1 << (n)) /* Bits 0-15: Bit n status of exchange clock interrupt of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Exchange clock interrupt clear status */
 
 #define SGPIO_CLRSTAT1(n)                  (1 << (n)) /* Bits 0-15: Bit n clears exchange clock interrupt status of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Exchange clock interrupt set status */
 
 #define SGPIO_SETSTAT1(n)                  (1 << (n)) /* Bits 0-15: Bit n sets exchange clock interrupt status of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Pattern match interrupt clear mask */
 
 #define SGPIO_CLREN2(n)                    (1 << (n)) /* Bits 0-15: Bit n clears match interrupt mask of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Pattern match interrupt set mask */
 
 #define SGPIO_SETEN2(n)                    (1 << (n)) /* Bits 0-15: Bit n sets match interrupt mask of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Pattern match interrupt enable */
 
 #define SGPIO_ENABLE2(n)                   (1 << (n)) /* Bits 0-15: Bit n enables match interrupt of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Pattern match interrupt status */
 
 #define SGPIO_STATUS2(n)                   (1 << (n)) /* Bits 0-15: Bit n is match interrupt status of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Pattern match interrupt clear status */
 
 #define SGPIO_CLRSTAT2(n)                  (1 << (n)) /* Bits 0-15: Bit n sets match interrupt status of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Pattern match interrupt set status */
 
 #define SGPIO_SETSTAT2(n)                  (1 << (n)) /* Bits 0-15: Bit n sets match interrupt status of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Input interrupt clear mask */
 
 #define SGPIO_CLREN3(n)                    (1 << (n)) /* Bits 0-15: Bit n clears input interrupt mask of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Input bit match interrupt set mask */
 
 #define SGPIO_SETEN3(n)                    (1 << (n)) /* Bits 0-15: Bit n sets input interrupt mask of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Input bit match interrupt enable */
 
 #define SGPIO_ENABLE3(n)                   (1 << (n)) /* Bits 0-15: Bit n enables input interrupt of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Input bit match interrupt status */
 
 #define SGPIO_STATUS3(n)                   (1 << (n)) /* Bits 0-15: Bit n is input interrupt status of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Input bit match interrupt clear status */
 
 #define SGPIO_CLRSTAT3(n)                  (1 << (n)) /* Bits 0-15: Bit n clears input interrupt status of slice n */
                                                       /* Bits 16-31: Reserved */
+
 /* Input bit match interrupt set status */
 
 #define SGPIO_SETSTAT3(n)                  (1 << (n)) /* Bits 0-15: Bit n sets match interrupt status of slice n */
                                                       /* Bits 16-31: Reserved */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SGPIO_H */

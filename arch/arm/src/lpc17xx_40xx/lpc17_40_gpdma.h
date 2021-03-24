@@ -51,7 +51,9 @@ typedef FAR void *DMA_HANDLE;
 
 typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 
-/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
+/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA
+ * is selected
+ */
 
 #ifdef CONFIG__DEBUG_DMA_INFO
 struct lpc17_40_dmaglobalregs_s
@@ -122,7 +124,7 @@ extern "C"
 EXTERN volatile uint8_t g_dma_inprogress;
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -160,8 +162,8 @@ DMA_HANDLE lpc17_40_dmachannel(void);
  *
  * Description:
  *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until lpc17_40_dmachannel() is called again to re-gain
- *   a valid handle.
+ *   NEVER be used again until lpc17_40_dmachannel() is called again to
+ *   re-gain a valid handle.
  *
  * Returned Value:
  *   None
@@ -196,8 +198,8 @@ int lpc17_40_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
  *
  * Description:
  *   Cancel the DMA.  After lpc17_40_dmastop() is called, the DMA channel is
- *   reset and lpc17_40_dmasetup() must be called before lpc17_40_dmastart() can be
- *   called again
+ *   reset and lpc17_40_dmasetup() must be called before lpc17_40_dmastart()
+ *   can be called again
  *
  ****************************************************************************/
 
@@ -226,8 +228,9 @@ void lpc17_40_dmasample(DMA_HANDLE handle, struct lpc17_40_dmaregs_s *regs);
  ****************************************************************************/
 
 #ifdef CONFIG__DEBUG_DMA_INFO
-void lpc17_40_dmadump(DMA_HANDLE handle, const struct lpc17_40_dmaregs_s *regs,
-                   const char *msg);
+void lpc17_40_dmadump(DMA_HANDLE handle,
+                      const struct lpc17_40_dmaregs_s *regs,
+                      const char *msg);
 #else
 #  define lpc17_40_dmadump(handle,regs,msg)
 #endif

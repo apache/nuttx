@@ -46,8 +46,8 @@
  *   MEMAP register is set override the settings of the CPU configuration
  *   pins.
  *
- *  CONFIG_LPC2378_EXTMEM_MODE: Code executes from external memory starting at
- *    address 0x8000:0000.
+ *  CONFIG_LPC2378_EXTMEM_MODE: Code executes from external memory starting
+ *    at address 0x8000:0000.
  *
  *  CONFIG_LPC2378_RAM_MODE: Code executes from on-chip RAM at address
  *     0x4000:0000.
@@ -158,7 +158,7 @@ void IO_Init(void);
 
 static inline void up_scbpllfeed(void)
 {
-  SCB_PLLFEED = 0xAA;
+  SCB_PLLFEED = 0xaa;
   SCB_PLLFEED = 0x55;
 }
 
@@ -168,7 +168,8 @@ static inline void up_scbpllfeed(void)
 
 void ConfigurePLL(void)
 {
-  uint32_t MSel, NSel;
+  uint32_t MSel;
+  uint32_t NSel;
 
   /* LPC2378 Rev.'-' errata Enable the Ethernet block to enable 16k EnetRAM */
 
@@ -231,8 +232,8 @@ void ConfigurePLL(void)
 
   while ((SCB_PLLSTAT & (1 << 26)) == 0);
 
-  MSel = SCB_PLLSTAT & 0x00007FFF;
-  NSel = (SCB_PLLSTAT & 0x00FF0000) >> 16;
+  MSel = SCB_PLLSTAT & 0x00007fff;
+  NSel = (SCB_PLLSTAT & 0x00ff0000) >> 16;
   while ((MSel != PLL_M) && (NSel != PLL_N));
 
   /* Enable and connect */

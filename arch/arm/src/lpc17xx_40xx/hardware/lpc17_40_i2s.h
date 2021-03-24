@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_i2s.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_I2S_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_I2S_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC17_40_I2S_DAO_OFFSET         0x0000 /* Digital Audio Output Register */
 #define LPC17_40_I2S_DAI_OFFSET         0x0004 /* Digital Audio Input Register */
@@ -51,7 +51,7 @@
 #define LPC17_40_I2S_TXMODE_OFFSET      0x0030 /* Transmit mode control */
 #define LPC17_40_I2S_RXMODE_OFFSET      0x0034 /* Receive mode control */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC17_40_I2S_DAO                (LPC17_40_I2S_BASE+LPC17_40_I2S_DAO_OFFSET)
 #define LPC17_40_I2S_DAI                (LPC17_40_I2S_BASE+LPC17_40_I2S_DAI_OFFSET)
@@ -68,7 +68,7 @@
 #define LPC17_40_I2S_TXMODE             (LPC17_40_I2S_BASE+LPC17_40_I2S_TXMODE_OFFSET)
 #define LPC17_40_I2S_RXMODE             (LPC17_40_I2S_BASE+LPC17_40_I2S_RXMODE_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* Digital Audio Output Register */
 

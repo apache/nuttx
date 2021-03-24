@@ -53,13 +53,14 @@ int lpc43_pin_dump(uint32_t pinconf, const char *msg)
   return -ENOSYS;
 }
 
-/********************************************************************************************
+/****************************************************************************
  * Function:  lpc43_gpio_dump
  *
  * Description:
- *   Dump all pin configuration registers associated with the provided base address
+ *   Dump all pin configuration registers associated with the provided base
+ *   address
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int lpc43_gpio_dump(uint16_t gpiocfg, const char *msg)
 {

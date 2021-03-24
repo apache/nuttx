@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_flexcomm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_FLEXCOMM_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_FLEXCOMM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC54_FLEXCOMM_PSELID_OFFSET   0x0ff8  /* Peripheral Select /Flexcomm Interface ID */
 #define LPC54_FLEXCOMM_PID_OFFSET      0x0ffc  /* Peripheral identification register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC54_FLEXCOMM0_PSELID         (LPC54_FLEXCOMM0_BASE+LPC54_FLEXCOMM_PSELID_OFFSET)
 #define LPC54_FLEXCOMM0_PID            (LPC54_FLEXCOMM0_BASE+LPC54_FLEXCOMM_PID_OFFSET)
@@ -69,7 +69,7 @@
 #define LPC54_FLEXCOMM9_PSELID         (LPC54_FLEXCOMM9_BASE+LPC54_FLEXCOMM_PSELID_OFFSET)
 #define LPC54_FLEXCOMM9_PID            (LPC54_FLEXCOMM9_BASE+LPC54_FLEXCOMM_PID_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* Peripheral Select /Flexcomm Interface ID */
 
@@ -81,6 +81,7 @@
 #  define FLEXCOMM_PSELID_PERSEL_I2C   (3 << FLEXCOMM_PSELID_PERSEL_SHIFT) /* I2C function selected */
 #  define FLEXCOMM_PSELID_PERSEL_I2STX (4 << FLEXCOMM_PSELID_PERSEL_SHIFT) /* I2S transmit function */
 #  define FLEXCOMM_PSELID_PERSEL_I2SRX (5 << FLEXCOMM_PSELID_PERSEL_SHIFT) /* I2S receive function */
+
 #define FLEXCOMM_PSELID_LOCK           (1 << 3)  /* Bit 3:  Lock the peripheral select */
 #define FLEXCOMM_PSELID_USARTPRESENT   (1 << 4)  /* Bit 4:  USART present indicator */
 #define FLEXCOMM_PSELID_SPIPRESENT     (1 << 5)  /* Bit 5:  SPI present indicator */

@@ -83,8 +83,8 @@ void lpc31_enableexten(enum lpc31_clockid_e clkid)
         putreg32(regval, regaddr);
         break;
 
-      /* Otherwise, force disable for the clocks.  NOTE that a larger set will
-       * be disabled than will be enabled.
+      /* Otherwise, force disable for the clocks.
+       * NOTE that a larger set will be disabled than will be enabled.
        */
 
       default:

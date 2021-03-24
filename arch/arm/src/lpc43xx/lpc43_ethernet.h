@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_ethernet.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_ETH_H
 #define __ARCH_ARM_SRC_LPC43XX_LPC43_ETH_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -33,9 +33,9 @@
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -46,15 +46,16 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function: lpc43_phy_boardinitialize
  *
  * Description:
- *   Some boards require specialized initialization of the PHY before it can be used.
- *   This may include such things as configuring GPIOs, resetting the PHY, etc.  If
- *   CONFIG_LPC43_PHYINIT is defined in the configuration then the board specific
- *   logic must provide lpc43_phyinitialize();  The LPC43 Ethernet driver will call
- *   this function one time before it first uses the PHY.
+ *   Some boards require specialized initialization of the PHY before it can
+ *   be used. This may include such things as configuring GPIOs, resetting
+ *   the PHY, etc.  If CONFIG_LPC43_PHYINIT is defined in the configuration
+ *   then the board specific logic must provide lpc43_phyinitialize();
+ *   The LPC43 Ethernet driver will call this function one time before it
+ *   first uses the PHY.
  *
  * Input Parameters:
  *   intf - Always zero for now.
@@ -64,7 +65,7 @@ extern "C"
  *
  * Assumptions:
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC43_PHYINIT
 int lpc43_phy_boardinitialize(int intf);

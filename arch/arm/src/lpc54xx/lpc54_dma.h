@@ -42,7 +42,9 @@
 
 typedef void (*dma_callback_t)(int ch, void *arg, int result);
 
-/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
+/* The following is used for sampling DMA registers when
+ * CONFIG DEBUG_DMA is selected
+ */
 
 #ifdef CONFIG_DEBUG_DMA
 struct lpc54_dmaglobalregs_s
@@ -96,7 +98,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************

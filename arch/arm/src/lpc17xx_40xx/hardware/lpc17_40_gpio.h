@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,26 +16,27 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_GPIO_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
-/* GPIO block register offsets ******************************************************/
+/* Register offsets *********************************************************/
+
+/* GPIO block register offsets **********************************************/
 
 #define LPC17_40_FIO0_OFFSET                0x0000
 #define LPC17_40_FIO1_OFFSET                0x0020
@@ -52,7 +53,7 @@
 #define LPC17_40_FIO_SET_OFFSET             0x0018  /* Fast Port Output Set registers */
 #define LPC17_40_FIO_CLR_OFFSET             0x001c  /* Fast Port Output Clear register */
 
-/* GPIO interrupt block register offsets ********************************************/
+/* GPIO interrupt block register offsets ************************************/
 
 #define LPC17_40_GPIOINT_OFFSET(n)          (0x10*(n) + 0x80)
 #define LPC17_40_GPIOINT0_OFFSET            0x0080
@@ -65,8 +66,9 @@
 #define LPC17_40_GPIOINT_INTENR_OFFSET      0x0010  /* GPIO Interrupt Enable Rising edge */
 #define LPC17_40_GPIOINT_INTENF_OFFSET      0x0014  /* GPIO Interrupt Enable Falling edge */
 
-/* Register addresses ***************************************************************/
-/* GPIO block register addresses ****************************************************/
+/* Register addresses *******************************************************/
+
+/* GPIO block register addresses ********************************************/
 
 #define LPC17_40_FIO_BASE(n)                (LPC17_40_GPIO_BASE+LPC17_40_GPIOINT_OFFSET(n))
 #define LPC17_40_FIO0_BASE                  (LPC17_40_GPIO_BASE+LPC17_40_FIO0_OFFSET)
@@ -122,7 +124,7 @@
 #  define LPC17_40_FIO5_CLR                 (LPC17_40_FIO5_BASE+LPC17_40_FIO_CLR_OFFSET)
 #endif
 
-/* GPIO interrupt block register addresses ******************************************/
+/* GPIO interrupt block register addresses **********************************/
 
 #define LPC17_40_GPIOINTn_BASE(n)           (LPC17_40_GPIOINT_BASE+LPC17_40_GPIOINT_OFFSET(n))
 #define LPC17_40_GPIOINT0_BASE              (LPC17_40_GPIOINT_BASE+LPC17_40_GPIOINT0_OFFSET)
@@ -152,18 +154,23 @@
 #define LPC17_40_GPIOINT2_INTENR            (LPC17_40_GPIOINT2_BASE+LPC17_40_GPIOINT_INTENR_OFFSET)
 #define LPC17_40_GPIOINT2_INTENF            (LPC17_40_GPIOINT2_BASE+LPC17_40_GPIOINT_INTENF_OFFSET)
 
-/* Register bit definitions *********************************************************/
-/* GPIO block register bit definitions **********************************************/
+/* Register bit definitions *************************************************/
+
+/* GPIO block register bit definitions **************************************/
 
 /* Fast GPIO Port Direction control registers (FIODIR) */
+
 /* Fast Mask register for ports (FIOMASK) */
+
 /* Fast Port Pin value registers using FIOMASK (FIOPIN) */
+
 /* Fast Port Output Set registers using FIOMASK (FIOSET) */
+
 /* Fast Port Output Clear register using FIOMASK (FIOCLR) */
 
 #define FIO(n)                              (1 << (n)) /* n=0,1,..31 */
 
-/* GPIO interrupt block register bit definitions ************************************/
+/* GPIO interrupt block register bit definitions ****************************/
 
 /* GPIO overall Interrupt Status (IOINTSTATUS) */
 #define GPIOINT_IOINTSTATUS_P0INT           (1 << 0)  /* Bit 0: Port 0 GPIO interrupt pending */
@@ -180,16 +187,16 @@
 
 #define GPIOINT(n)                          (1 << (n)) /* n=0,1,..31 */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_GPIO_H */

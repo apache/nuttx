@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_usb.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_USB_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_USB_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/usb/ohci.h>
@@ -31,17 +31,20 @@
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
-/* USB Host Controller (OHCI) *******************************************************/
+/* Register offsets *********************************************************/
+
+/* USB Host Controller (OHCI) ***********************************************/
+
 /* See include/nuttx/usb/ohci.h */
 
 #define LPC17_40_USBHOST_MODID_OFFSET       0x00fc /* Module ID/Revision ID */
 
-/* USB OTG Controller ***************************************************************/
+/* USB OTG Controller *******************************************************/
+
 /* OTG registers */
 
 #define LPC17_40_USBOTG_INTST_OFFSET        0x0100 /* OTG Interrupt Status */
@@ -51,8 +54,11 @@
 #define LPC17_40_USBOTG_STCTRL_OFFSET       0x0110 /* OTG Status and Control */
 #define LPC17_40_USBOTG_TMR_OFFSET          0x0114 /* OTG Timer */
 
-/* USB Device Controller ************************************************************/
-/* Device interrupt registers.  See also SYSCON_USBINTST in lpc17_40_syscon.h */
+/* USB Device Controller ****************************************************/
+
+/* Device interrupt registers.
+ * See also SYSCON_USBINTST in lpc17_40_syscon.h
+ */
 
 #define LPC17_40_USBDEV_INTST_OFFSET        0x0200 /* USB Device Interrupt Status */
 #define LPC17_40_USBDEV_INTEN_OFFSET        0x0204 /* USB Device Interrupt Enable */
@@ -111,7 +117,7 @@
 #define LPC17_40_USBDEV_SYSERRINTCLR_OFFSET 0x02bc /* USB System Error Interrupt Clear */
 #define LPC17_40_USBDEV_SYSERRINTSET_OFFSET 0x02c0 /* USB System Error Interrupt Set */
 
-/* OTG I2C registers ****************************************************************/
+/* OTG I2C registers ********************************************************/
 
 #define LPC17_40_OTGI2C_RX_OFFSET           0x0300 /* I2C Receive */
 #define LPC17_40_OTGI2C_TX_OFFSET           0x0300 /* I2C Transmit */
@@ -120,7 +126,7 @@
 #define LPC17_40_OTGI2C_CLKHI_OFFSET        0x030c /* I2C Clock High */
 #define LPC17_40_OTGI2C_CLKLO_OFFSET        0x0310 /* I2C Clock Low */
 
-/* Clock control registers ***********************************************************/
+/* Clock control registers **************************************************/
 
 #define LPC17_40_USBOTG_CLKCTRL_OFFSET      0x0ff4 /* OTG clock controller */
 #define LPC17_40_USBOTG_CLKST_OFFSET        0x0ff8 /* OTG clock status */
@@ -128,8 +134,10 @@
 #define LPC17_40_USBDEV_CLKCTRL_OFFSET      0x0ff4 /* USB Clock Control */
 #define LPC17_40_USBDEV_CLKST_OFFSET        0x0ff8 /* USB Clock Status */
 
-/* Register addresses ***************************************************************/
-/* USB Host Controller (OHCI) *******************************************************/
+/* Register addresses *******************************************************/
+
+/* USB Host Controller (OHCI) ***********************************************/
+
 /* Control and status registers (section 7.1) */
 
 #define LPC17_40_USBHOST_HCIREV             (LPC17_40_USB_BASE+OHCI_HCIREV_OFFSET)
@@ -166,7 +174,8 @@
 #define LPC17_40_USBHOST_RHPORTST2          (LPC17_40_USB_BASE+OHCI_RHPORTST2_OFFSET)
 #define LPC17_40_USBHOST_MODID              (LPC17_40_USB_BASE+LPC17_40_USBHOST_MODID_OFFSET)
 
-/* USB OTG Controller ***************************************************************/
+/* USB OTG Controller *******************************************************/
+
 /* OTG registers */
 
 #define LPC17_40_USBOTG_INTST               (LPC17_40_USB_BASE+LPC17_40_USBOTG_INTST_OFFSET)
@@ -176,8 +185,11 @@
 #define LPC17_40_USBOTG_STCTRL              (LPC17_40_USB_BASE+LPC17_40_USBOTG_STCTRL_OFFSET)
 #define LPC17_40_USBOTG_TMR                 (LPC17_40_USB_BASE+LPC17_40_USBOTG_TMR_OFFSET)
 
-/* USB Device Controller ************************************************************/
-/* Device interrupt registers.  See also SYSCON_USBINTST in lpc17_40_syscon.h */
+/* USB Device Controller ****************************************************/
+
+/* Device interrupt registers.
+ * See also SYSCON_USBINTST in lpc17_40_syscon.h
+ */
 
 #define LPC17_40_USBDEV_INTST               (LPC17_40_USB_BASE+LPC17_40_USBDEV_INTST_OFFSET)
 #define LPC17_40_USBDEV_INTEN               (LPC17_40_USB_BASE+LPC17_40_USBDEV_INTEN_OFFSET)
@@ -236,7 +248,7 @@
 #define LPC17_40_USBDEV_SYSERRINTCLR        (LPC17_40_USB_BASE+LPC17_40_USBDEV_SYSERRINTCLR_OFFSET)
 #define LPC17_40_USBDEV_SYSERRINTSET        (LPC17_40_USB_BASE+LPC17_40_USBDEV_SYSERRINTSET_OFFSET)
 
-/* OTG I2C registers ****************************************************************/
+/* OTG I2C registers ********************************************************/
 
 #define LPC17_40_OTGI2C_RX                  (LPC17_40_USB_BASE+LPC17_40_OTGI2C_RX_OFFSET)
 #define LPC17_40_OTGI2C_TX                  (LPC17_40_USB_BASE+LPC17_40_OTGI2C_TX_OFFSET)
@@ -245,7 +257,7 @@
 #define LPC17_40_OTGI2C_CLKHI               (LPC17_40_USB_BASE+LPC17_40_OTGI2C_CLKHI_OFFSET)
 #define LPC17_40_OTGI2C_CLKLO               (LPC17_40_USB_BASE+LPC17_40_OTGI2C_CLKLO_OFFSET)
 
-/* Clock control registers ***********************************************************/
+/* Clock control registers **************************************************/
 
 #define LPC17_40_USBOTG_CLKCTRL             (LPC17_40_USB_BASE+LPC17_40_USBOTG_CLKCTRL_OFFSET)
 #define LPC17_40_USBOTG_CLKST               (LPC17_40_USB_BASE+LPC17_40_USBOTG_CLKST_OFFSET)
@@ -253,8 +265,10 @@
 #define LPC17_40_USBDEV_CLKCTRL             (LPC17_40_USB_BASE+LPC17_40_USBDEV_CLKCTRL_OFFSET)
 #define LPC17_40_USBDEV_CLKST               (LPC17_40_USB_BASE+LPC17_40_USBDEV_CLKST_OFFSET)
 
-/* Register bit definitions *********************************************************/
-/* USB Host Controller (OHCI) *******************************************************/
+/* Register bit definitions *************************************************/
+
+/* USB Host Controller (OHCI) ***********************************************/
+
 /* See include/nuttx/usb/ohci.h */
 
 /* Module ID/Revision ID */
@@ -267,11 +281,12 @@
 #define USBHOST_MODID_3505_MASK             (0xffff << USBHOST_MODID_3505_SHIFT)
 #  define USBHOST_MODID_3505                (0x3505 << USBHOST_MODID_3505_SHIFT)
 
-/* USB OTG Controller ***************************************************************/
+/* USB OTG Controller *******************************************************/
+
 /* OTG registers:
  *
- * OTG Interrupt Status, OTG Interrupt Enable, OTG Interrupt Set, AND OTG Interrupt
- * Clear
+ * OTG Interrupt Status, OTG Interrupt Enable, OTG Interrupt Set,
+ * AND OTG Interrupt Clear
  */
 
 #define USBOTG_INT_TMR                      (1 << 0)  /* Bit 0:  Timer time-out */
@@ -279,16 +294,19 @@
 #define USBOTG_INT_HNP_FAILURE              (1 << 2)  /* Bit 2:  HNP failed */
 #define USBOTG_INT_HNP_SUCCESS              (1 << 3)  /* Bit 3:  HNP succeeded */
                                                       /* Bits 4-31: Reserved */
+
 /* OTG Status and Control */
 
 #define USBOTG_STCTRL_PORTFUNC_SHIFT        (0)       /* Bits 0-1: Controls port function */
 #define USBOTG_STCTRL_PORTFUNC_MASK         (3 << USBOTG_STCTRL_PORTFUNC_SHIFT)
 #  define USBOTG_STCTRL_PORTFUNC_HNPOK      (1 << USBOTG_STCTRL_PORTFUNC_SHIFT) /* HNP succeeded */
+
 #define USBOTG_STCTRL_TMRSCALE_SHIFT        (2)       /* Bits 2-3: Timer scale selection */
 #define USBOTG_STCTRL_TMRSCALE_MASK         (3 << USBOTG_STCTRL_TMR_SCALE_SHIFT)
 #  define USBOTG_STCTRL_TMRSCALE_10US       (0 << USBOTG_STCTRL_TMR_SCALE_SHIFT) /* 10uS (100 KHz) */
 #  define USBOTG_STCTRL_TMRSCALE_100US      (1 << USBOTG_STCTRL_TMR_SCALE_SHIFT) /* 100uS (10 KHz) */
 #  define USBOTG_STCTRL_TMRSCALE_1000US     (2 << USBOTG_STCTRL_TMR_SCALE_SHIFT) /* 1000uS (1 KHz) */
+
 #define USBOTG_STCTRL_TMRMODE               (1 << 4)  /* Bit 4:  Timer mode selection */
 #define USBOTG_STCTRL_TMREN                 (1 << 5)  /* Bit 5:  Timer enable */
 #define USBOTG_STCTRL_TMRRST                (1 << 6)  /* Bit 6:  TTimer reset */
@@ -306,10 +324,17 @@
 #define USBOTG_TMR_TIMEOUTCNT_MASK          (0xffff << USBOTG_TMR_TIMEOUTCNT_SHIFT)
                                                       /* Bits 16-31: Reserved */
 
-/* USB Device Controller ************************************************************/
-/* Device interrupt registers.  See also SYSCON_USBINTST in lpc17_40_syscon.h */
-/* USB Device Interrupt Status, USB Device Interrupt Enable, USB Device Interrupt
- * Clear, USB Device Interrupt Set, and USB Device Interrupt Priority
+/* USB Device Controller ****************************************************/
+
+/* Device interrupt registers.
+ * See also SYSCON_USBINTST in lpc17_40_syscon.h
+ */
+
+/* USB Device Interrupt Status,
+ * USB Device Interrupt Enable,
+ * USB Device Interrupt Clear,
+ * USB Device Interrupt Set,
+ * and USB Device Interrupt Priority
  */
 
 #define USBDEV_INT_FRAME                    (1 << 0)  /* Bit 0:  frame interrupt (every 1 ms) */
@@ -323,10 +348,12 @@
 #define USBDEV_INT_EPRLZED                  (1 << 8)  /* Bit 8:  Endpoints realized */
 #define USBDEV_INT_ERRINT                   (1 << 9)  /* Bit 9:  Error Interrupt */
                                                       /* Bits 10-31: Reserved */
+
 /* SIE Command registers:
  *
  * USB Command Code
  */
+
                                                       /* Bits 0-7: Reserved */
 #define USBDEV_CMDCODE_PHASE_SHIFT          (8)       /* Bits 8-15: Command phase */
 #define USBDEV_CMDCODE_PHASE_MASK           (0xff << USBDEV_CMDCODE_PHASE_SHIFT)
@@ -338,11 +365,13 @@
 #define USBDEV_CMDCODE_WDATA_SHIFT          (16)     /* Bits 15-23: Write dagta (WRITE phase) */
 #define USBDEV_CMDCODE_WDATA_MASK           (0xff << USBDEV_CMDCODE_CMD_SHIFT)
                                                       /* Bits 24-31: Reserved */
+
 /* USB Command Data */
 
 #define USBDEV_CMDDATA_SHIFT                (0)       /* Bits 0-7: Command read data */
 #define USBDEV_CMDDATA_MASK                 (0xff << USBDEV_CMDDATA_SHIFT)
                                                       /* Bits 8-31: Reserved */
+
 /* USB transfer registers:
  *
  * USB Receive Data (Bits 0-31: Received data)
@@ -355,6 +384,7 @@
 #define USBDEV_RXPLEN_DV                    (1 << 10) /* Bit 10: DV Data valid */
 #define USBDEV_RXPLEN_PKTRDY                (1 << 11) /* Bit 11: Packet ready for reading */
                                                       /* Bits 12-31: Reserved */
+
 /* USB Transmit Data (Bits 0-31: Transmit data) */
 
 /* USB Transmit Packet Length */
@@ -362,6 +392,7 @@
 #define USBDEV_TXPLEN_SHIFT                 (0)       /* Bits 0-9: Bytes remaining to be written */
 #define USBDEV_TXPLEN_MASK                  (0x3ff << USBDEV_TXPLEN_SHIFT)
                                                       /* Bits 10-31: Reserved */
+
 /* USB Control */
 
 #define USBDEV_CTRL_RDEN                    (1 << 0)  /* Bit 0:  Read mode control */
@@ -369,10 +400,12 @@
 #define USBDEV_CTRL_LOGEP_SHIFT             (2)       /* Bits 2-5: Logical Endpoint number */
 #define USBDEV_CTRL_LOGEP_MASK              (15 << USBDEV_CTRL_LOGEP_SHIFT)
                                                       /* Bits 6-31: Reserved */
+
 /* Endpoint interrupt registers:
  *
- * USB Endpoint Interrupt Status, USB Endpoint Interrupt Enable, USB Endpoint Interrupt
- * Clear, USB Endpoint Interrupt Set, and USB Endpoint Priority.  Bits correspond
+ * USB Endpoint Interrupt Status, USB Endpoint Interrupt Enable,
+ * USB Endpoint Interrupt Clear, USB Endpoint Interrupt Set,
+ * and USB Endpoint Priority.  Bits correspond
  * to on RX or TX value for any of 15 logical endpoints).
  */
 
@@ -455,26 +488,32 @@
 #define USBDEV_EPIND_SHIFT                  (0)       /* Bits 0-4: Physical endpoint number (0-31) */
 #define USBDEV_EPIND_MASK                   (31 << USBDEV_EPIND_SHIFT)
                                                       /* Bits 5-31: Reserved */
+
 /* USB MaxPacketSize */
 
 #define USBDEV_MAXPSIZE_SHIFT               (0)       /* Bits 0-9: Maximum packet size value */
 #define USBDEV_MAXPSIZE_MASK                (0x3ff << USBDEV_MAXPSIZE_SHIFT)
                                                       /* Bits 10-31: Reserved */
+
 /* DMA registers:
  *
- * USB DMA Request Status, USB DMA Request Clear, and USB DMA Request Set.  Registers
- * contain bits for each of 32 physical endpoints.  Use the USBDEV_PHYEP* definitions
- * above.  PHYEP0-1 (bits 0-1) must be zero.
+ * USB DMA Request Status, USB DMA Request Clear, and USB DMA Request Set.
+ * Registers contain bits for each of 32 physical endpoints.
+ * Use the USBDEV_PHYEP* definitions above.
+ * PHYEP0-1 (bits 0-1) must be zero.
  */
 
 /* USB UDCA Head */
+
                                                      /* Bits 0-6: Reserved */
 #define USBDEV_UDCAH_SHIFT                  (7)      /* Bits 7-31: UDCA start address */
 #define USBDEV_UDCAH_MASK                   (0x01ffffff << USBDEV_UDCAH_SHIFT)
 
-/* USB Endpoint DMA Status, USB Endpoint DMA Enable, and USB Endpoint DMA Disable.
- * Registers contain bits for physical endpoints 2-31. Use the USBDEV_PHYEP*
- * definitions above.  PHYEP0-1 (bits 0-1) must be zero.
+/* USB Endpoint DMA Status, USB Endpoint DMA Enable,
+ * and USB Endpoint DMA Disable.
+ * Registers contain bits for physical endpoints 2-31.
+ * Use the USBDEV_PHYEP* definitions above.
+ * PHYEP0-1 (bits 0-1) must be zero.
  */
 
 /* USB DMA Interrupt Status and USB DMA Interrupt Enable */
@@ -483,28 +522,39 @@
 #define USBDEV_DMAINT_NDDR                  (1 << 1)  /* Bit 1:  New DD Request Interrupt */
 #define USBDEV_DMAINT_ERR                   (1 << 2)  /* Bit 2:  System Error Interrupt */
                                                       /* Bits 3-31: Reserved */
-/* USB End of Transfer Interrupt Status, USB End of Transfer Interrupt Clear, and USB
- * End of Transfer Interrupt Set.  Registers contain bits for physical endpoints 2-31.
- * Use the USBDEV_PHYEP* definitions above.  PHYEP0-1 (bits 0-1) must be zero.
+
+/* USB End of Transfer Interrupt Status,
+ * USB End of Transfer Interrupt Clear,
+ * and USB End of Transfer Interrupt Set.
+ * Registers contain bits for physical endpoints 2-31.
+ * Use the USBDEV_PHYEP* definitions above.
+ *  PHYEP0-1 (bits 0-1) must be zero.
  */
 
-/* USB New DD Request Interrupt Status, USB New DD Request Interrupt Clear, and USB
- * New DD Request Interrupt Set.  Registers contain bits for physical endpoints 2-31.
- * Use the USBDEV_PHYEP* definitions above.  PHYEP0-1 (bits 0-1) must be zero.
+/* USB New DD Request Interrupt Status,
+ * USB New DD Request Interrupt Clear, and
+ * USB New DD Request Interrupt Set.
+ * Registers contain bits for physical endpoints 2-31.
+ * Use the USBDEV_PHYEP* definitions above.
+ * PHYEP0-1 (bits 0-1) must be zero.
  */
 
-/* USB System Error Interrupt Status, USB System Error Interrupt Clear, USB System
- * Error Interrupt Set.  Registers contain bits for  physical endpoints 2-31.  Use
- * the USBDEV_PHYEP* definitions above.  PHYEP0-1 (bits 0-1) must be zero.
+/* USB System Error Interrupt Status,
+ * USB System Error Interrupt Clear,
+ * USB System Error Interrupt Set.
+ * Registers contain bits for physical endpoints 2-31.
+ * Use the USBDEV_PHYEP* definitions above.
+ * PHYEP0-1 (bits 0-1) must be zero.
  */
 
-/* OTG I2C registers ****************************************************************/
+/* OTG I2C registers ********************************************************/
 
 /* I2C Receive */
 
 #define OTGI2C_RX_DATA_SHIFT                (0)       /* Bits 0-7: RX data */
 #define OTGI2C_RX_DATA_MASK                 (0xff << OTGI2C_RX_SHIFT)
                                                       /* Bits 8-31: Reserved */
+
 /* I2C Transmit */
 
 #define OTGI2C_TX_DATA_SHIFT                (0)       /* Bits 0-7: TX data */
@@ -512,6 +562,7 @@
 #define OTGI2C_TX_DATA_START                (1 << 8)  /* Bit 8:  Issue START before transmit */
 #define OTGI2C_TX_DATA_STOP                 (1 << 9)  /* Bit 9:  Issue STOP before transmit */
                                                       /* Bits 3-31: Reserved */
+
 /* I2C Status */
 
 #define OTGI2C_STS_TDI                      (1 << 0)  /* Bit 0:  Transaction Done Interrupt */
@@ -527,6 +578,7 @@
 #define OTGI2C_STS_TFF                      (1 << 10) /* Bit 10: Transmit FIFO Full */
 #define OTGI2C_STS_TFE                      (1 << 11) /* Bit 11: Transmit FIFO Empty */
                                                       /* Bits 12-31: Reserved */
+
 /* I2C Control */
 
 #define OTGI2C_CTL_TDIE                     (1 << 0)  /* Bit 0:  Transmit Done Interrupt Enable */
@@ -539,19 +591,24 @@
 #define OTGI2C_CTL_TFFIE                    (1 << 7)  /* Bit 7:  Transmit FIFO Not Full Interrupt Enable */
 #define OTGI2C_CTL_SRST                     (1 << 8)  /* Bit 8:  Soft reset */
                                                       /* Bits 9-31: Reserved */
+
 /* I2C Clock High */
 
 #define OTGI2C_CLKHI_SHIFT                  (0)       /* Bits 0-7: Clock divisor high */
 #define OTGI2C_CLKHI_MASK                   (0xff << OTGI2C_CLKHI_SHIFT)
                                                       /* Bits 8-31: Reserved */
+
 /* I2C Clock Low */
 
 #define OTGI2C_CLKLO_SHIFT                  (0)       /* Bits 0-7: Clock divisor high */
 #define OTGI2C_CLLO_MASK                    (0xff << OTGI2C_CLKLO_SHIFT)
                                                       /* Bits 8-31: Reserved */
-/* Clock control registers ***********************************************************/
 
-/* USB Clock Control (OTG clock controller) and USB Clock Status (OTG clock status) */
+/* Clock control registers **************************************************/
+
+/* USB Clock Control (OTG clock controller) and USB Clock Status
+ * (OTG clock status)
+ */
 
 #define USBDEV_CLK_HOSTCLK                  (1 << 0)  /* Bit 1:  Host clock (OTG only) */
 #define USBDEV_CLK_DEVCLK                   (1 << 1)  /* Bit 1:  Device clock */
@@ -560,6 +617,7 @@
 #define USBDEV_CLK_OTGCLK                   (1 << 3)  /* Bit 3:  OTG clock (OTG only) */
 #define USBDEV_CLK_AHBCLK                   (1 << 4)  /* Bit 4:  AHB clock */
                                                       /* Bits 5-31: Reserved */
+
 /* Alternate naming */
 
 #define USBOTG_CLK_HOSTCLK                  USBDEV_CLK_HOSTCLK
@@ -569,7 +627,7 @@
 #define USBOTG_CLK_OTGCLK                   USBDEV_CLK_OTGCLK
 #define USBOTG_CLK_AHBCLK                   USBDEV_CLK_AHBCLK
 
-/* Endpoints *************************************************************************/
+/* Endpoints ****************************************************************/
 
 #define LPC17_40_EP0_OUT                    0
 #define LPC17_40_EP0_IN                     1
@@ -607,7 +665,7 @@
 #define LPC17_40_EP15_IN                    31
 #define LPC17_40_NUMEPS                     32
 
-/* Commands *************************************************************************/
+/* Commands *****************************************************************/
 
 /* USB Command Code Register */
 
@@ -641,7 +699,8 @@
 #define CMD_USBDEV_EPCLRBUFFER              (0x00f2)
 #define CMD_USBDEV_EPVALIDATEBUFFER         (0x00fa)
 
-/* Command/response bit definitions ********************************************/
+/* Command/response bit definitions *****************************************/
+
 /* SETADDRESS (0xd0) command definitions */
 
 #define CMD_USBDEV_SETADDRESS_MASK          (0x7f)    /* Bits 0-6: Device address */
@@ -665,6 +724,7 @@
 #define CMD_EPSELECT_B1FULL                 (1 << 5)  /* Bit 5:  Buffer 1 full */
 #define CMD_EPSELECT_B2FULL                 (1 << 6)  /* Bit 6:  Buffer 2 full */
                                                       /* Bit 7:  Reserved */
+
 /* EPSETSTATUS (0x40) command */
 
 #define CMD_SETSTAUS_ST                     (1 << 0)  /* Bit 0:  Stalled endpoint bit */
@@ -699,7 +759,8 @@
 #define CMD_READERRORSTATUS_TGLERR          (1 << 7) /* Bit 7: Wrong toggle in data PID */
 #define CMD_READERRORSTATUS_ALLERRS         (0xff)
 
-/* DMA ******************************************************************************/
+/* DMA **********************************************************************/
+
 /* The DMA descriptor */
 
 #define USB_DMADESC_NEXTDDPTR               0 /* Offset 0: Next USB descriptor in RAM */
@@ -708,12 +769,13 @@
 #define USB_DMADESC_STATUS                  3 /* Offset 3: DMA status info (read only) */
 #define USB_DMADESC_ISOCSIZEADDR            4 /* Offset 4: Isoc. packet size address */
 
-/* Bit settings for CONFIG (offset 1 )*/
+/* Bit settings for CONFIG (offset 1) */
 
 #define USB_DMADESC_MODE_SHIFT              (0)  /* Bits 0-1: DMA mode */
 #define USB_DMADESC_MODE_MASK               (3 << USB_DMADESC_MODE_SHIFT)
 #  define USB_DMADESC_MODENORMAL            (0 << USB_DMADESC_MODE_SHIFT) /* Mode normal */
 #  define USB_DMADESC_MODEATLE              (1 << USB_DMADESC_MODE_SHIFT) /* ATLE normal */
+
 #define USB_DMADESC_NEXTDDVALID             (1 << 2)  /* Bit 2:  Next descriptor valid */
                                                       /* Bit 3:  Reserved */
 #define USB_DMADESC_ISCOEP                  (1 << 4)  /* Bit 4:  ISOC endpoint */
@@ -748,16 +810,16 @@
 #define USB_DMAPKTSIZE_FRAMENO_SHIFT        (17)      /* Bit 17-31: Frame number */
 #define USB_DMAPKTSIZE_FRAMENO_MASK         (0x7fff << USB_DMAPKTSIZE_FRAMENO_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_USB_H */

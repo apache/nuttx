@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_ssp.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_SSP_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_SSP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* 8 frame FIFOs for both transmit and receive */
 
 #define LPC17_40_SSP_FIFOSZ         8
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC17_40_SSP_CR0_OFFSET     0x0000 /* Control Register 0 */
 #define LPC17_40_SSP_CR1_OFFSET     0x0004 /* Control Register 1 */
@@ -50,7 +51,7 @@
 #define LPC17_40_SSP_ICR_OFFSET     0x0020 /* Interrupt Clear Register */
 #define LPC17_40_SSP_DMACR_OFFSET   0x0024 /* DMA Control Register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC17_40_SSP0_CR0          (LPC17_40_SSP0_BASE+LPC17_40_SSP_CR0_OFFSET)
 #define LPC17_40_SSP0_CR1          (LPC17_40_SSP0_BASE+LPC17_40_SSP_CR1_OFFSET)
@@ -85,7 +86,8 @@
 #define LPC17_40_SSP2_ICR          (LPC17_40_SSP2_BASE+LPC17_40_SSP_ICR_OFFSET)
 #define LPC17_40_SSP2_DMACR        (LPC17_40_SSP2_BASE+LPC17_40_SSP_DMACR_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
+
 /* Control Register 0 */
 
 #define SSP_CR0_DSS_SHIFT           (0)       /* Bits 0-3: DSS Data Size Select */
@@ -113,6 +115,7 @@
 #define SSP_CR0_SCR_SHIFT           (8)       /* Bits 8-15: Serial Clock Rate */
 #define SSP_CR0_SCR_MASK            (0xff << SSP_CR0_SCR_SHIFT)
                                               /* Bits 8-31: Reserved */
+
 /* Control Register 1 */
 
 #define SSP_CR1_LBM                 (1 << 0)  /* Bit 0:  Loop Back Mode */
@@ -120,10 +123,12 @@
 #define SSP_CR1_MS                  (1 << 2)  /* Bit 2:  Master/Slave Mode */
 #define SSP_CR1_SOD                 (1 << 3)  /* Bit 3:  Slave Output Disable */
                                               /* Bits 4-31: Reserved */
+
 /* Data Register */
 
 #define SSP_DR_MASK                 (0xffff)  /* Bits 0-15: Data */
                                               /* Bits 16-31: Reserved */
+
 /* Status Register */
 
 #define SSP_SR_TFE                  (1 << 0)  /* Bit 0:  Transmit FIFO Empty */
@@ -132,10 +137,12 @@
 #define SSP_SR_RFF                  (1 << 3)  /* Bit 3:  Receive FIFO Full */
 #define SSP_SR_BSY                  (1 << 4)  /* Bit 4:  Busy */
                                               /* Bits 5-31: Reserved */
+
 /* Clock Prescale Register */
 
 #define SSP_CPSR_DVSR_MASK          (0xff)    /* Bits 0-7: clock = SSP_PCLK/DVSR */
                                               /* Bits 8-31: Reserved */
+
 /* Common format for interrupt control registers:
  *
  *   Interrupt Mask Set and Clear Register (IMSC)
@@ -149,22 +156,23 @@
 #define SSP_INT_RX                  (1 << 2)  /* Bit 2: RX FIFO at least half full (not ICR) */
 #define SSP_INT_TX                  (1 << 3 ) /* Bit 3: TX FIFO at least half empty (not ICR) */
                                               /* Bits 4-31: Reserved */
+
 /* DMA Control Register */
 
 #define SSP_DMACR_RXDMAE            (1 << 0)  /* Bit 0:  Receive DMA Enable */
 #define SSP_DMACR_TXDMAE            (1 << 1)  /* Bit 1:  Transmit DMA Enable */
                                               /* Bits 2-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_SSP_H */

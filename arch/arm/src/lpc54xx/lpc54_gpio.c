@@ -100,9 +100,9 @@ static const uint32_t g_typea_mask[LPC54_GPIO_NPORTS] =
  * Description:
  *   Get the LPC548x IOCON register mask.
  *
- *   Type D: FUNC MODE         INVERT DIGIMODE FILTEROFF SLEW     ON
- *   Type I: FUNC      I2CSLEW INVERT DIGIMODE FILTEROFF I2CDRIVE I2CFILTEROFF
- *   Type A: FUNC MODE         INVERT DIGIMODE FILTEROFF          ON
+ *  Type D: FUNC MODE         INVERT DIGIMODE FILTEROFF SLEW     ON
+ *  Type I: FUNC      I2CSLEW INVERT DIGIMODE FILTEROFF I2CDRIVE I2CFILTEROFF
+ *  Type A: FUNC MODE         INVERT DIGIMODE FILTEROFF          ON
  *
  ****************************************************************************/
 
@@ -239,9 +239,9 @@ static void lpc54_gpio_iocon(lpc54_pinset_t cfgset, unsigned int port,
 
   /* Configure pins for supported pin type(s):
    *
-   *   Type D: FUNC MODE         INVERT DIGIMODE FILTEROFF SLEW     ON
-   *   Type I: FUNC      I2CSLEW INVERT DIGIMODE FILTEROFF I2CDRIVE I2CFILTEROFF
-   *   Type A: FUNC MODE         INVERT DIGIMODE FILTEROFF          ON
+   * Type D: FUNC MODE        INVERT DIGIMODE FILTEROFF SLEW     ON
+   * Type I: FUNC     I2CSLEW INVERT DIGIMODE FILTEROFF I2CDRIVE I2CFILTEROFF
+   * Type A: FUNC MODE        INVERT DIGIMODE FILTEROFF          ON
    */
 
   pintype = lpc54_pintype(port, pin);

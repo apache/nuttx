@@ -80,7 +80,9 @@ void up_irqinitialize(void)
   lpc31_enableclock(CLKID_AHB2INTCCLK);  /*  AHB_TO_INTC_CLK */
   lpc31_enableclock(CLKID_INTCCLK);      /*  INTC_CLK */
 
-  /* Set the vector base. We don't use direct vectoring, so these are set to 0. */
+  /* Set the vector base. We don't use direct vectoring,
+   * so these are set to 0.
+   */
 
   putreg32(0, LPC31_INTC_VECTOR0);
   putreg32(0, LPC31_INTC_VECTOR1);
@@ -100,11 +102,10 @@ void up_irqinitialize(void)
        * Set priority level to 1 (= lowest) for all the interrupt lines
        */
 
-      uint32_t address = LPC31_INTC_REQUEST(irq+1);
+      uint32_t address = LPC31_INTC_REQUEST(irq + 1);
       putreg32(INTC_REQUEST_WEACTLOW | INTC_REQUEST_WEENABLE |
                INTC_REQUEST_TARGET_IRQ | INTC_REQUEST_PRIOLEVEL(1) |
                INTC_REQUEST_WEPRIO, address);
-
     }
 
   /* currents_regs is non-NULL only while processing an interrupt */
@@ -132,7 +133,7 @@ void up_disable_irq(int irq)
    * interrupt source
    */
 
-  uint32_t address = LPC31_INTC_REQUEST(irq+1);
+  uint32_t address = LPC31_INTC_REQUEST(irq + 1);
 
   /* Clear the ENABLE bit with WE_ENABLE=1.  Configuration settings will be
    * preserved because WE_TARGET is zero.
@@ -155,7 +156,7 @@ void up_enable_irq(int irq)
    * interrupt source
    */
 
-  uint32_t address = LPC31_INTC_REQUEST(irq+1);
+  uint32_t address = LPC31_INTC_REQUEST(irq + 1);
 
   /* Set the ENABLE bit with WE_ENABLE=1.  Configuration settings will be
    * preserved because WE_TARGET is zero.
@@ -178,7 +179,7 @@ void arm_ack_irq(int irq)
    * interrupt source
    */
 
-  uint32_t address = LPC31_INTC_REQUEST(irq+1);
+  uint32_t address = LPC31_INTC_REQUEST(irq + 1);
 
   /* Clear the pending interrupt (INTC_REQUEST_CLRSWINT=1) while keeping
    * interrupts enabled (ENABLE=1 && WE_ENABLE=1). Configuration settings

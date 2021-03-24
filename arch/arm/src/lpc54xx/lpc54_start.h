@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_start.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_START_H
 #define __ARCH_ARM_SRC_LPC54XX_LPC54_START_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -37,20 +37,20 @@
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_board_initialize
  *
  * Description:
- *   All LPC54xx architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after clocking and memory have
- *   been configured but before caches have been enabled and before any devices have
- *   been initialized.
+ *   All LPC54xx architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after
+ *   clocking and memory have been configured but before caches have been
+ *   enabled and before any devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc54_board_initialize(void);
 

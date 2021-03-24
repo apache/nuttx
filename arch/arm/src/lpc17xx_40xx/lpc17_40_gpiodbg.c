@@ -136,7 +136,7 @@ int lpc17_40_dumpgpio(lpc17_40_pinset_t pinset, const char *msg)
            port + '0', pin, pinset, msg);
 
 #if defined(LPC176x)
-  gpioinfo("  PINSEL[%08x]: %08x PINMODE[%08x]: %08x ODMODE[%08x]: %08x\n",
+  gpioinfo("PINSEL[%08x]: %08x PINMODE[%08x]: %08x ODMODE[%08x]: %08x\n",
            pinsel,  pinsel  ? getreg32(pinsel) : 0,
            pinmode, pinmode ? getreg32(pinmode) : 0,
            g_odmode[port],    getreg32(g_odmode[port]));
@@ -145,19 +145,28 @@ int lpc17_40_dumpgpio(lpc17_40_pinset_t pinset, const char *msg)
 #endif
 
   base = g_fiobase[port];
-  gpioinfo("  FIODIR[%08x]: %08x FIOMASK[%08x]: %08x FIOPIN[%08x]: %08x\n",
-           base+LPC17_40_FIO_DIR_OFFSET,  getreg32(base+LPC17_40_FIO_DIR_OFFSET),
-           base+LPC17_40_FIO_MASK_OFFSET, getreg32(base+LPC17_40_FIO_MASK_OFFSET),
-           base+LPC17_40_FIO_PIN_OFFSET,  getreg32(base+LPC17_40_FIO_PIN_OFFSET));
+  gpioinfo("FIODIR[%08x]: %08x FIOMASK[%08x]: %08x FIOPIN[%08x]: %08x\n",
+           base + LPC17_40_FIO_DIR_OFFSET,
+           getreg32(base + LPC17_40_FIO_DIR_OFFSET),
+           base + LPC17_40_FIO_MASK_OFFSET,
+           getreg32(base + LPC17_40_FIO_MASK_OFFSET),
+           base + LPC17_40_FIO_PIN_OFFSET,
+           getreg32(base + LPC17_40_FIO_PIN_OFFSET));
 
   base = g_intbase[port];
-  gpioinfo("  IOINTSTATUS[%08x]: %08x INTSTATR[%08x]: %08x INSTATF[%08x]: %08x\n",
-           LPC17_40_GPIOINT_IOINTSTATUS,          getreg32(LPC17_40_GPIOINT_IOINTSTATUS),
-           base+LPC17_40_GPIOINT_INTSTATR_OFFSET, getreg32(base+LPC17_40_GPIOINT_INTSTATR_OFFSET),
-           base+LPC17_40_GPIOINT_INTSTATF_OFFSET, getreg32(base+LPC17_40_GPIOINT_INTSTATF_OFFSET));
-  gpioinfo("  INTENR[%08x]: %08x INTENF[%08x]: %08x\n",
-           base+LPC17_40_GPIOINT_INTENR_OFFSET,   getreg32(base+LPC17_40_GPIOINT_INTENR_OFFSET),
-           base+LPC17_40_GPIOINT_INTENF_OFFSET,   getreg32(base+LPC17_40_GPIOINT_INTENF_OFFSET));
+  gpioinfo(
+          "IOINTSTAT[%08x]: %08x INTSTATR[%08x]: %08x INSTATF[%08x]: %08x\n",
+           LPC17_40_GPIOINT_IOINTSTATUS,
+           getreg32(LPC17_40_GPIOINT_IOINTSTATUS),
+           base + LPC17_40_GPIOINT_INTSTATR_OFFSET,
+           getreg32(base + LPC17_40_GPIOINT_INTSTATR_OFFSET),
+           base + LPC17_40_GPIOINT_INTSTATF_OFFSET,
+           getreg32(base + LPC17_40_GPIOINT_INTSTATF_OFFSET));
+  gpioinfo("INTENR[%08x]: %08x INTENF[%08x]: %08x\n",
+           base + LPC17_40_GPIOINT_INTENR_OFFSET,
+           getreg32(base + LPC17_40_GPIOINT_INTENR_OFFSET),
+           base + LPC17_40_GPIOINT_INTENF_OFFSET,
+           getreg32(base + LPC17_40_GPIOINT_INTENF_OFFSET));
 
   leave_critical_section(flags);
   return OK;

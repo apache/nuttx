@@ -82,5 +82,6 @@ int lpc31_bcrndx(enum lpc31_domainid_e dmnid)
                                 * domains. */
         break;
     }
+
   return BCRNDX_INVALID;
 }

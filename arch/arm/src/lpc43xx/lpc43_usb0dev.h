@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_usb0dev.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_USB0DEV_H
 #define __ARCH_ARM_SRC_LPC43XX_LPC43_USB0DEV_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/usb/usbdev.h>
@@ -32,9 +32,9 @@
 #include "chip.h"
 #include "hardware/lpc43_usb0.h"
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -47,28 +47,30 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc43_usbpullup
  *
  * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide lpc43_pullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
+ *   If USB is supported and the board supports a pullup via GPIO (for USB
+ *   software connect and disconnect), then the board software must provide
+ *   lpc43_pullup.
+ *   See include/nuttx/usb/usbdev.h for additional description of this
+ *   method.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lpc43_usbpullup(FAR struct usbdev_s *dev,  bool enable);
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc43_usbsuspend
  *
  * Description:
- *   Board logic must provide the lpc43_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   Board logic must provide the lpc43_usbsuspend logic if the USBDEV driver
+ *   is used.  This function is called whenever the USB enters or leaves
+ *   suspend mode. This is an opportunity for the board logic to shutdown
+ *   clocks, power, etc. while the USB is suspended.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc43_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 

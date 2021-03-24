@@ -54,7 +54,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* PWM/Timer Definitions ****************************************************/
+
 /* The following definitions are used to identify the various time types */
 
 #define TIMTYPE_BASIC      0  /* Basic timers: TIM6-7 */
@@ -64,7 +66,6 @@
 #define TIMTYPE_ADVANCED   4  /* Advanced timers:  TIM1-8 */
 
 #define TIMTYPE_TIM1       TIMTYPE_ADVANCED
-
 
 /* Debug ********************************************************************/
 
@@ -77,6 +78,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure represents the state of one PWM timer */
 
 struct lpc17_40_timer_s
@@ -94,13 +96,16 @@ struct lpc17_40_timer_s
 /****************************************************************************
  * Static Function Prototypes
  ****************************************************************************/
+
 /* Register access */
 
 static uint32_t timer_getreg(struct lpc17_40_timer_s *priv, int offset);
-static void timer_putreg(struct lpc17_40_timer_s *priv, int offset, uint32_t value);
+static void timer_putreg(struct lpc17_40_timer_s *priv,
+                         int offset, uint32_t value);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void timer_dumpregs(struct lpc17_40_timer_s *priv, FAR const char *msg);
+static void timer_dumpregs(struct lpc17_40_timer_s *priv,
+                           FAR const char *msg);
 #else
 #  define timer_dumpregs(priv,msg)
 #endif
@@ -125,7 +130,10 @@ static int timer_ioctl(FAR struct pwm_lowerhalf_s *dev,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* This is the list of lower half PWM driver methods used by the upper half driver */
+
+/* This is the list of lower half PWM driver methods used by the upper half
+ * driver
+ */
 
 static const struct pwm_ops_s g_pwmops =
 {
@@ -209,7 +217,8 @@ static void timer_putreg(struct lpc17_40_timer_s *priv, int offset,
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void timer_dumpregs(struct lpc17_40_timer_s *priv, FAR const char *msg)
+static void timer_dumpregs(struct lpc17_40_timer_s *priv,
+                           FAR const char *msg)
 {
   pwminfo("%s:\n", msg);
   pwminfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
@@ -403,11 +412,16 @@ static int timer_setup(FAR struct pwm_lowerhalf_s *dev)
   putreg32(~(0x3 << 0), LPC17_40_TMR1_CCR);  /* Prescaler count frequency:Fpclk/1 */
   putreg32(~(0x3 << 0), LPC17_40_TMR1_CTCR); /* Prescaler count frequency:Fpclk/1 */
   putreg32((2 << 0), LPC17_40_TMR1_MCR);     /* Reset on match register MR0 */
-//  putreg32(((1 << 0 )| (3 << 4)), LPC17_40_TMR1_EMR); /* Output bit toggle on external match event MAT0 */
+
+  /*  putreg32(((1 << 0 )| (3 << 4)), LPC17_40_TMR1_EMR);
+   * Output bit toggle on external match event MAT0
+   */
+
   putreg32((1 << 0), LPC17_40_TMR1_TCR);     /* Start timer1 */
 
   /* configure the output pins GPIO3.26 */
-//  lpc17_40_configgpio(GPIO_MAT0p1_2);
+
+  /* lpc17_40_configgpio(GPIO_MAT0p1_2); */
 
   leave_critical_section(flags);
   pwm_dumpgpio(priv->pincfg, "TIMER setup");
@@ -495,7 +509,7 @@ static int timer_stop(FAR struct pwm_lowerhalf_s *dev)
 
   /* Disable interrupts momentary to stop any ongoing timer processing and
    * to prevent any concurrent access to the reset register.
-  */
+   */
 
   flags = enter_critical_section();
 
@@ -538,7 +552,8 @@ static int timer_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int timer_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
+static int timer_ioctl(FAR struct pwm_lowerhalf_s *dev,
+                       int cmd, unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
   FAR struct lpc17_40_timer_s *priv = (FAR struct lpc17_40_timer_s *)dev;

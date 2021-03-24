@@ -144,7 +144,8 @@ void arm_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait for the transmitter to be available */
 
-  while ((getreg32(CONSOLE_BASE + LPC43_UART_LSR_OFFSET) & UART_LSR_THRE) == 0);
+  while ((getreg32(CONSOLE_BASE + LPC43_UART_LSR_OFFSET) &
+          UART_LSR_THRE) == 0);
 
   /* Send the character */
 
@@ -687,6 +688,7 @@ void lpc43_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
 
   /* Then save the fractional divider values */
 
-  putreg32((mul << UART_FDR_MULVAL_SHIFT) | (divadd << UART_FDR_DIVADDVAL_SHIFT),
-           uartbase + LPC43_UART_FDR_OFFSET);
+  putreg32((mul << UART_FDR_MULVAL_SHIFT) |
+           (divadd << UART_FDR_DIVADDVAL_SHIFT),
+            uartbase + LPC43_UART_FDR_OFFSET);
 }
