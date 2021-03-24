@@ -40,6 +40,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* "The CLKSOURCE bit in SysTick Control and Status register selects either
  * the core clock (when CLKSOURCE = 1) or a divide-by-16 of the core clock
  * (when CLKSOURCE = 0). ..."
@@ -136,7 +137,8 @@ void up_timer_initialize(void)
    */
 
 #ifdef CONFIG_KL_SYSTICK_CORECLK
-  putreg32((SYSTICK_CSR_CLKSOURCE | SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE),
+  putreg32((SYSTICK_CSR_CLKSOURCE |
+            SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE),
            ARMV6M_SYSTICK_CSR);
 #else
   putreg32((SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE), ARMV6M_SYSTICK_CSR);

@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kl/hardware/kl_i2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_I2C_H
 #define __ARCH_ARM_SRC_KL_HARDWARE_KL_I2C_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KL_I2C_A1_OFFSET       0x0000 /* I2C Address Register 1 */
 #define KL_I2C_F_OFFSET        0x0001 /* I2C Frequency Divider register */
@@ -48,7 +48,7 @@
 #define KL_I2C_SLTH_OFFSET     0x000a /* I2C SCL Low Timeout Register High */
 #define KL_I2C_SLTL_OFFSET     0x000b /* I2C SCL Low Timeout Register Low */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KL_I2C0_A1             (KL_I2C0_BASE+KL_I2C_A1_OFFSET)
 #define KL_I2C0_F              (KL_I2C0_BASE+KL_I2C_F_OFFSET)
@@ -76,9 +76,10 @@
 #define KL_I2C1_SLTH           (KL_I2C1_BASE+KL_I2C_SLTH_OFFSET)
 #define KL_I2C1_SLTL           (KL_I2C1_BASE+KL_I2C_SLTL_OFFSET)
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* I2C Address Register 1 (8-bit) */
+
                                          /* Bit 0: Reserved */
 #define I2C_A1_SHIFT           (1)       /* Bits 1-7: Address */
 #define I2C_A1_MASK            (0x7f << I2C_A1_SHIFT)
@@ -128,6 +129,7 @@
 #define I2C_C2_GCAEN           (1 << 7)  /* Bit 7:  General call address enable */
 
 /* I2C Programmable Input Glitch Filter register (8-bit) */
+
                                          /* Bits 5-7: Reserved */
 #define I2C_FLT_SHIFT          (0)       /* Bits 0-4: I2C programmable filter factor */
 #define I2C_FLT_MASK           (0x1f << I2C_FLT_SHIFT)
@@ -136,6 +138,7 @@
 #define I2C_FLT_SHEN           (1 << 7)  /* Bit 7:  Stop hold enable */
 
 /* I2C Range Address register (8-bit) */
+
                                          /* Bit 0: Reserved */
 #define I2C_RA_SHIFT           (1)       /* Bits 1-7: Range slave address */
 #define I2C_RA_MASK            (0x7f << I2C_RA_SHIFT)
@@ -152,22 +155,25 @@
 #define I2C_SMB_FACK           (1 << 7)  /* Bit 7:  Fast NACK/ACK enable */
 
 /* I2C Address Register 2 (8-bit) */
+
                                          /* Bit 0: Reserved */
 #define I2C_A2_SAD_SHIFT       (1)       /* Bits 1-7: SMBus address */
 #define I2C_A2_SAD_MASK        (0x7f << I2C_A2_SHIFT)
 
-/* I2C SCL Low Timeout Register High/Low (16-bit data in two 8-bit registers) */
+/* I2C SCL Low Timeout Register High/Low
+ *(16-bit data in two 8-bit registers)
+ */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_I2C_H */

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kl/hardware/kl_port.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_PORT_H
 #define __ARCH_ARM_SRC_KL_HARDWARE_KL_PORT_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* General Definitions **************************************************************/
+ ****************************************************************************/
+
+/* General Definitions ******************************************************/
 
 #define KL_PORTA                   (0)
 #define KL_PORTB                   (1)
@@ -41,9 +42,10 @@
 #define KL_PORTE                   (4)
 #define KL_NPORTS                  (5)
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KL_PORT_PCR_OFFSET(n)      ((n) << 2) /* Pin Control Register n, n=0..31 */
+
 #define KL_PORT_PCR0_OFFSET        0x0000 /* Pin Control Register 0 */
 #define KL_PORT_PCR1_OFFSET        0x0004 /* Pin Control Register 1 */
 #define KL_PORT_PCR2_OFFSET        0x0008 /* Pin Control Register 2 */
@@ -83,7 +85,7 @@
 #define KL_PORT_DFCR_OFFSET        0x00c4 /* Digital Filter Clock Register */
 #define KL_PORT_DFWR_OFFSET        0x00c8 /* Digital Filter Width Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KL_PORT_PCR(p,n)           (KL_PORT_BASE(p)+KL_PORT_PCR_OFFSET(n)
 #define KL_PORT_PCR0(p)            (KL_PORT_BASE(p)+KL_PORT_PCR0_OFFSET)
@@ -325,7 +327,8 @@
 #define KL_PORTE_DFCR              (KL_PORTE_BASE+KL_PORT_DFCR_OFFSET)
 #define KL_PORTE_DFWR              (KL_PORTE_BASE+KL_PORT_DFWR_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
+
 /* Pin Control Register n, n=0..31 */
 
 #define PORT_PCR_PS                (1 << 0)  /* Bit 0: Pull Select */
@@ -347,6 +350,7 @@
 #  define PORT_PCR_MUX_ALT5        (5 << PORT_PCR_MUX_SHIFT)  /* Alternative 5 (chip specific) */
 #  define PORT_PCR_MUX_ALT6        (6 << PORT_PCR_MUX_SHIFT)  /* Alternative 6 (chip specific) */
 #  define PORT_PCR_MUX_ALT7        (7 << PORT_PCR_MUX_SHIFT)  /* Alternative 7 (chip specific / JTAG / NMI) */
+
                                              /* Bits 11-14: Reserved */
 #define PORT_PCR_LK                (1 << 15) /* Bit 15: Lock Register */
 #define PORT_PCR_IRQC_SHIFT        (16)      /* Bits 16-19: Interrupt Configuration */
@@ -360,6 +364,7 @@
 #  define PORT_PCR_IRQC_FALLING    (10 << PORT_PCR_IRQC_SHIFT) /* Interrupt on falling edge */
 #  define PORT_PCR_IRQC_BOTH       (11 << PORT_PCR_IRQC_SHIFT) /* Interrupt on either edge */
 #  define PORT_PCR_IRQC_ONE        (12 << PORT_PCR_IRQC_SHIFT) /* Interrupt when logic one */
+
                                              /* Bits 20-23: Reserved */
 #define PORT_PCR_ISF               (1 << 24) /* Bit 24: Interrupt Status Flag */
                                              /* Bits 25-31: Reserved */
@@ -401,16 +406,16 @@
 #define PORT_DFWR_FILT_SHIFT       (0)       /* Bits 0-4: Filter Length */
 #define PORT_DFWR_FILT_MASK        (31 << PORT_DFWR_FILT_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_PORT_H */

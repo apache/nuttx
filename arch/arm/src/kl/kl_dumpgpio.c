@@ -43,6 +43,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Port letters for prettier debug output */
 
 static const char g_portchar[KL_GPIO_NPORTS] =

@@ -103,6 +103,7 @@ int kl_configgpio(uint32_t cfgset)
           if ((cfgset & _PIN_IO_MASK) == _PIN_INPUT)
             {
               /* Handle input-only digital options */
+
               /* Check for pull-up or pull-down */
 
               if ((cfgset & _PIN_INPUT_PULLMASK) == _PIN_INPUT_PULLDOWN)
@@ -117,6 +118,7 @@ int kl_configgpio(uint32_t cfgset)
           else
             {
               /* Handle output-only digital options */
+
               /* Check for slow slew rate setting */
 
               if ((cfgset & _PIN_OUTPUT_SLEW_MASK) == _PIN_OUTPUT_SLOW)
@@ -165,9 +167,12 @@ int kl_configgpio(uint32_t cfgset)
             {
               regval &= ~(1 << pin);
             }
+
           putreg32(regval, base + KL_PORT_DFER_OFFSET);
 
-          /* Additional configuration for the case of Alternative 1 (GPIO) modes */
+          /* Additional configuration for the case of
+           * Alternative 1 (GPIO) modes
+           */
 
           if (mode == PIN_MODE_GPIO)
             {
@@ -280,5 +285,6 @@ bool kl_gpioread(uint32_t pinset)
       regval = getreg32(base + KL_GPIO_PDIR_OFFSET);
       ret    = ((regval & (1 << pin)) != 0);
     }
+
   return ret;
 }

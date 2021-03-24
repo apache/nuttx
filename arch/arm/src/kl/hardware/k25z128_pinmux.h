@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kl/hardware/k25z128_pinmux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,31 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_KL25PINMUX_H
 #define __ARCH_ARM_SRC_KINETIS_KINETIS_KL25PINMUX_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Reference: Paragraph 10.3.1, p 227, of FreeScale document K40P144M100SF2RM
+ ****************************************************************************/
+
+/* Reference:
+ * Paragraph 10.3.1, p 227, of FreeScale document K40P144M100SF2RM
  *
- * In most cases, there are alternative configurations for various pins. Those alternative
- * pins are labeled with a suffix like _1, _2, etc. in order to distinguish them.  Logic in
- * the board.h file must select the correct pin configuration for the board by defining a pin
- * configuration (with no suffix) that maps to the correct alternative.
+ * In most cases, there are alternative configurations for various pins.
+ * Those alternative pins are labeled with a suffix like _1, _2, etc. in
+ * order to distinguish them.  Logic in the board.h file must select the
+ *  correct pin configuration for the board by defining a pin configuration
+ * (with no suffix) that maps to the correct alternative.
  */
 
 #define PIN_TSI0_CH1             (PIN_ANALOG | PIN_PORTA | PIN0)
@@ -309,16 +312,16 @@
 
 #define PIN_TPM0_CH4_3           (PIN_ALT3   | PIN_PORTE | PIN31)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KL_HARDWARE_K25PINMUX_H */

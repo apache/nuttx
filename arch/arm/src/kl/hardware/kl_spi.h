@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kl/hardware/kl_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_SPI_H
 #define __ARCH_ARM_SRC_KL_HARDWARE_KL_SPI_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KL_SPI_C1_OFFSET    0x0000 /* SPI control register 1 */
 #define KL_SPI_C2_OFFSET    0x0001 /* SPI control register 2 */
@@ -42,7 +42,7 @@
 #define KL_SPI_D_OFFSET     0x0005 /* SPI data register */
 #define KL_SPI_M_OFFSET     0x0007 /* SPI match register */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KL_SPI0_C1          (KL_SPI0_BASE+KL_SPI_C1_OFFSET)
 #define KL_SPI0_C2          (KL_SPI0_BASE+KL_SPI_C2_OFFSET)
@@ -58,7 +58,7 @@
 #define KL_SPI1_D           (KL_SPI1_BASE+KL_SPI_D_OFFSET)
 #define KL_SPI1_M           (KL_SPI1_BASE+KL_SPI_M_OFFSET)
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* SPI control register 1 */
 
@@ -86,6 +86,7 @@
 #define SPI_BR_SPR_SHIFT    (0)       /* Bits 0-3: SPI baud rate divisor */
 #define SPI_BR_SPR_MASK     (15 << SPI_BR_SPR_SHIFT)
 #  define SPI_BR_SPR_DIV(n) (((n)-1) << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 2^(n-1) */
+
 #  define SPI_BR_SPR_DIV2   (0 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 2 */
 #  define SPI_BR_SPR_DIV4   (1 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 4 */
 #  define SPI_BR_SPR_DIV8   (2 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 8 */
@@ -95,11 +96,15 @@
 #  define SPI_BR_SPR_DIV128 (6 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 128 */
 #  define SPI_BR_SPR_DIV256 (7 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 256 */
 #  define SPI_BR_SPR_DIV512 (8 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 512 */
+
 #define SPI_BR_SPPR_SHIFT   (4)       /* Bits 4-6: SPI baud rate prescale divisor */
 #define SPI_BR_SPPR_MASK    (7 << SPI_BR_SPPR_SHIFT)
 #  define SPI_BR_SPPR(n)    (((n)-1) << SPI_BR_SPPR_SHIFT) /* Prescaler=n, n=1-8 */
+
                                       /* Bit 7:  Reserved */
+
 /* SPI status register */
+
                                       /* Bits 0-3: Reserved */
 #define SPI_S_MODF          (1 << 4)  /* Bit 4:  Master mode fault flag */
 #define SPI_S_SPTEF         (1 << 5)  /* Bit 5:  SPI transmit buffer empty flag */
@@ -107,18 +112,19 @@
 #define SPI_S_SPRF          (1 << 7)  /* Bit 7:  SPI read buffer full flag */
 
 /* SPI data register (8-bit data, low byte) */
+
 /* SPI match register (8-bit match value) */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_SPI_H */
