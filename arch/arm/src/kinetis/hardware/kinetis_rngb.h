@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_rngb.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_RNGB_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_RNGB_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,11 +31,11 @@
 
 #if defined(KINETIS_NRNG) && KINETIS_NRNG > 0
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_RNG_VER_OFFSET  0x0000 /* RNGB Version ID Register */
 #define KINETIS_RNG_CMD_OFFSET  0x0004 /* RNGB Command Register */
@@ -44,7 +44,7 @@
 #define KINETIS_RNG_ESR_OFFSET  0x0010 /* RNGB Error Status Register */
 #define KINETIS_RNG_OUT_OFFSET  0x0014 /* RNGB Output FIFO */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_RNG_VER         (KINETIS_RNGB_BASE+KINETIS_RNG_VER_OFFSET)
 #define KINETIS_RNG_CMD         (KINETIS_RNGB_BASE+KINETIS_RNG_CMD_OFFSET)
@@ -53,7 +53,7 @@
 #define KINETIS_RNG_ESR         (KINETIS_RNGB_BASE+KINETIS_RNG_ESR_OFFSET)
 #define KINETIS_RNG_OUT         (KINETIS_RNGB_BASE+KINETIS_RNG_OUT_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* RNGB Version ID Register */
 
@@ -77,6 +77,7 @@
 #define RNG_CMD_CE              (1 << 5)  /* Bit 5:  Clear error */
 #define RNG_CMD_SR              (1 << 6)  /* Bit 6:  Software reset */
                                           /* Bits 7-31: Reserved */
+
 /* RNGB Control Register */
 
 #define RNG_CR_FUFMOD_SHIFT     (0)       /* Bits 0-1: FIFO underflow response mode */
@@ -84,12 +85,15 @@
 #  define RNG_CR_FUFMOD_ZEROS   (0 << RNG_CR_FUFMOD_SHIFT) /* Return zeros, set RNG_ESR[FUFE] */
 #  define RNG_CR_FUFMOD_ERROR   (2 << RNG_CR_FUFMOD_SHIFT) /* Generate bus transfer error */
 #  define RNG_CR_FUFMOD_INT     (3 << RNG_CR_FUFMOD_SHIFT) /* Generate interrupt, return zeros */
+
                                           /* Bits 2-3: Reserved */
 #define RNG_CR_AR               (1 << 4)  /* Bit 4:  Auto-reseed */
 #define RNG_CR_MASKDONE         (1 << 5)  /* Bit 5:  Mask done interrupt */
 #define RNG_CR_MASKERR          (1 << 6)  /* Bit 6:  Mask error interrupt */
                                           /* Bits 7-31: Reserved */
+
 /* RNGB Status Register */
+
                                           /* Bit 0: Reserved */
 #define RNG_SR_BUSY             (1 << 1)  /* Bit 1:  Busy */
 #define RNG_SR_SLP              (1 << 2)  /* Bit 2:  Sleep */
@@ -109,6 +113,7 @@
 #  define RNG_SR_ST_PF_TRNG     (4 << RNG_SR_ST_PF_SHIFT) /* TRNG self test pass/fail */
 #  define RNG_SR_ST_PF_PRNG     (2 << RNG_SR_ST_PF_SHIFT) /* PRNG self test pass/fail */
 #  define RNG_SR_ST_PF_RESEED   (1 << RNG_SR_ST_PF_SHIFT) /* RESEED self test pass/fail */
+
 #define RNG_SR_STATPF_SHIFT     (24)      /* Bits 24-31: Statistics test pass fail */
 #define RNG_SR_STATPF_MASK      (0xff << RNG_SR_STATPF_SHIFT)
 #  define RNG_SR_STATPF_LONG    (0x80 << RNG_SR_STATPF_SHIFT) /* Long run test (>34) */
@@ -128,19 +133,20 @@
 #define RNG_ESR_SATE            (1 << 3)  /* Bit 3:  Statistical test error */
 #define RNG_ESR_FUFE            (1 << 4)  /* Bit 4:  FIFO underflow error */
                                           /* Bits 5-31: Reserved */
+
 /* RNGB Output FIFO (32-bit random output) */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* KINETIS_NRNG && KINETIS_NRNG > 0 */
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_RNGB_H */

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_k60memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K60MEMORYMAP_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K60MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,11 +31,12 @@
 
 #ifdef KINETIS_K60
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Memory Map ***********************************************************************/
+/* Memory Map ***************************************************************/
+
 /* K60 Family
  *
  * The memory map for the following parts is defined in Freescale document
@@ -53,25 +54,30 @@
                                             *             (ICODE/DCODE) */
 #define KINETIS_SRAMU_BASE     0x20000000  /* -0x200fffff SRAM_U: Upper SRAM bitband
                                             *             region */
+
                              /* 0x20100000  * -0x21ffffff Reserved */
 #define KINETIS_SALIAS_BASE    0x22000000  /* -0x23ffffff Aliased to SRAM_U bitband */
+
                              /* 0x24000000  * -0x3fffffff Reserved */
 #define KINETIS_BRIDGE0_BASE   0x40000000  /* -0x4007ffff Bitband region for peripheral
                                             *             bridge 0 (AIPS-Lite0) */
-#define KINETIS_BRIDGE1_BASE   0x40080000   /* -0x400fffff Bitband region for peripheral
+#define KINETIS_BRIDGE1_BASE   0x40080000  /* -0x400fffff Bitband region for peripheral
                                             *             bridge 1 (AIPS-Lite1) */
 #define KINETIS_GPIOBB_BASE    0x400ff000  /* -0x400fffff Bitband region for general
                                             *             purpose input/output (GPIO) */
+
                              /* 0x40100000  * -0x41ffffff Reserved */
 #define KINETIS_PALIAS_BASE    0x42000000  /* -0x43ffffff Aliased to peripheral bridge
                                             *             (AIPS-Lite) and general purpose
                                             *             input/output (GPIO) bitband */
+
                              /* 0x44000000  * -0x5fffffff Reserved */
 #define KINETIS_FLEXBUS_BASE   0x60000000  /* -0x7fffffff FlexBus */
 #define KINETIS_PERIPH_BASE    0xe0000000  /* -0xe00fffff Private peripherals */
+
                              /* 0xe0100000  * -0xffffffff Reserved */
 
-/* Peripheral Bridge 0 Memory Map ***************************************************/
+/* Peripheral Bridge 0 Memory Map *******************************************/
 
 #define KINETIS_AIPS0_BASE     0x40000000  /* Peripheral bridge 0 (AIPS-Lite 0) */
 #define KINETIS_XBAR_BASE      0x40004000  /* Crossbar switch */
@@ -126,7 +132,7 @@
 #define KINETIS_PMC_BASE       0x4007d000  /* Power management controller (PMC) */
 #define KINETIS_SMC_BASE       0x4007e000  /* System Mode controller (SMC) */
 
-/* Peripheral Bridge 1 Memory Map ***************************************************/
+/* Peripheral Bridge 1 Memory Map *******************************************/
 
 #define KINETIS_AIPS1_BASE     0x40080000  /* Peripheral bridge 1 (AIPS-Lite 1) */
 #define KINETIS_RNGB_BASE      0x400a0000  /* Random number generator (RNGB) */
@@ -151,7 +157,7 @@
 #define KINETIS_GPIOD_BASE     0x400ff0c0  /* GPIO PORTD registers */
 #define KINETIS_GPIOE_BASE     0x400ff100  /* GPIO PORTE registers */
 
-/* Private Peripheral Bus (PPB) Memory Map ******************************************/
+/* Private Peripheral Bus (PPB) Memory Map **********************************/
 
 #define KINETIS_ITM_BASE       0xe0000000  /* Instrumentation Trace Macrocell (ITM) */
 #define KINETIS_DWT_BASE       0xe0001000  /* Data Watchpoint and Trace (DWT) */
@@ -165,17 +171,17 @@
 #define KINETIS_MMCAU_BASE     0xe0081000  /* Memory Mapped Cryptographic Acceleration Unit (MMCAU) */
 #define KINETIS_ROMTAB_BASE    0xe00ff000  /* ROM Table - allows auto-detection of debug components */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* KINETIS_K60 */
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K60MEMORYMAP_H */

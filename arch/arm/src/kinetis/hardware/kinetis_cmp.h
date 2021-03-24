@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_cmp.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_CMP_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_CMP_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINESIS_CMP_OFFSET(n)     ((n) << 3)
 #define KINESIS_CMP0_OFFSET       0x0000
@@ -47,7 +47,7 @@
 #define KINETIS_CMP_DACCR_OFFSET  0x0004 /* DAC Control Register */
 #define KINETIS_CMP_MUXCR_OFFSET  0x0005 /* MUX Control Register */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINESIS_CMP_BASE(n)       (KINETIS_CMP_BASE+KINESIS_CMP_OFFSET(n))
 #define KINESIS_CMP0_BASE         (KINETIS_CMP_BASE+KINESIS_CMP0_OFFSET)
@@ -82,7 +82,7 @@
 #define KINETIS_CMP2_DACCR        (KINETIS_CMP2_BASE+KINETIS_CMP_DACCR_OFFSET)
 #define KINETIS_CMP2_MUXCR        (KINETIS_CMP2_BASE+KINETIS_CMP_MUXCR_OFFSET)
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* CMP Control Register 0 (8-bit) */
 
@@ -103,7 +103,9 @@
 #  define CMP_CR0_FILTER_CNT5     (5 << CMP_CR0_FILTER_CNT_SHIFT) /* 5 consecutive samples must agree */
 #  define CMP_CR0_FILTER_CNT6     (6 << CMP_CR0_FILTER_CNT_SHIFT) /* 6 consecutive samples must agree */
 #  define CMP_CR0_FILTER_CNT7     (7 << CMP_CR0_FILTER_CNT_SHIFT) /* 7 consecutive samples must agree */
+
                                             /* Bit 7:  Reserved */
+
 /* CMP Control Register 1 (8-bit) */
 
 #define CMP_CR1_EN                (1 << 0)  /* Bit 0:  Comparator Module Enable */
@@ -117,7 +119,6 @@
 
 /* CMP Filter Period Register (8-bit Filter Sample Period) */
 
-
 /* CMP Status and Control Register (8-bit) */
 
 #define CMP_SCR_COUT              (1 << 0)  /* Bit 0:  Analog Comparator Output */
@@ -128,6 +129,7 @@
 #define CMP_SCR_SMELB             (1 << 5)  /* Bit 5:  Stop Mode Edge/Level Interrupt Control */
 #define CMP_SCR_DMAEN             (1 << 6)  /* Bit 6:  DMA Enable Control */
                                             /* Bit 7:  Reserved */
+
 /* DAC Control Register (8-bit) */
 
 #define CMP_DACCR_VOSEL_SHIFT     (0)       /* Bits 0-5: DAC Output Voltage Select */
@@ -162,16 +164,16 @@
 #endif
 #define CMP_MUXCR_PEN             (1 << 7)  /* Bit 7:  PMUX Enable */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_CMP_H */

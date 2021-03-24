@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_rtc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_RTC_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_RTC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,16 +31,17 @@
 
 #if defined(KINETIS_NRTC) && KINETIS_NRTC > 0
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
-/* NXP/Freescale has families and technology generations (sometimes seen as processor
- * speed).  These are organized into feature families, and faster speeds sometimes
- * have extended features.  Families are K02 K10 K20 K22  K24 K30 K40 K50 K60 K64 K65
- * K66 K70 K80
+/* NXP/Freescale has families and technology generations
+ * (sometimes seen as processor speed).
+ * These are organized into feature families, and faster speeds sometimes
+ * have extended features.
+ * Families are K02 K10 K20 K22  K24 K30 K40 K50 K60 K64 K65 K66 K70 K80
  *
  * So far only two variations/generations on the RTC have been discovered.
  * GEN1    RTC_TSR TPR TAR TCR CR SR LR IER                      WAR RAR
@@ -68,9 +69,10 @@
 #define KINETIS_RTC_IER_OFFSET    0x001c /* RTC Interrupt Enable Register (K40) */
 
 #ifdef KINETIS_K60
- /* Haven't found a processor or nuttx file where KINETIS_RTC_CCR is in it
-  * from K60P100M100SF2V2RM this would be called  KINETIS_RTC_IER_OFFSET.
-  */
+
+/* Haven't found a processor or nuttx file where KINETIS_RTC_CCR is in it
+ * from K60P100M100SF2V2RM this would be called  KINETIS_RTC_IER_OFFSET.
+ */
 
 #  define KINETIS_RTC_CCR_OFFSET  0x001c /* RTC Chip Configuration Register (K60) */
 #endif
@@ -85,7 +87,7 @@
 #define KINETIS_RTC_WAR_OFFSET    0x0800 /* RTC Write Access Register */
 #define KINETIS_RTC_RAR_OFFSET    0x0804 /* RTC Read Access Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_RTC_TSR           (KINETIS_RTC_BASE+KINETIS_RTC_TSR_OFFSET)
 #define KINETIS_RTC_TPR           (KINETIS_RTC_BASE+KINETIS_RTC_TPR_OFFSET)
@@ -112,7 +114,7 @@
 #define KINETIS_RTC_WAR           (KINETIS_RTC_BASE+KINETIS_RTC_WAR_OFFSET)
 #define KINETIS_RTC_RAR           (KINETIS_RTC_BASE+KINETIS_RTC_RAR_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* RTC Time Seconds Register (32-bits of time in seconds) */
 
@@ -121,6 +123,7 @@
 #define RTC_TPR_SHIFT             (0)       /* Bits 0-15: Time Prescaler Register */
 #define RTC_TPR_MASK              (0xffff << RTC_TPR_SHIFT)
                                            /* Bits 16-31: Reserved */
+
 /* RTC Time Alarm Register (32-bits of time alarm) */
 
 /* RTC Time Compensation Register (32-bits) */
@@ -148,6 +151,7 @@
 #define RTC_CR_SC4P               (1 << 12) /* Bit 12: Oscillator 4pF load configure */
 #define RTC_CR_SC2P               (1 << 13) /* Bit 13: Oscillator 2pF load configure */
                                             /* Bits 14-31: Reserved */
+
 /* RTC Status Register (32-bits) */
 
 #define RTC_SR_TIF                (1 << 0)  /* Bit 0:  Time Invalid Flag */
@@ -160,7 +164,9 @@
                                             /* Bit 3: Reserved RTC_GEN1 */
 #define RTC_SR_TCE                (1 << 4)  /* Bit 4:  Time Counter Enable */
                                             /* Bits 5-31: Reserved */
+
 /* RTC Lock Register (32-bits) */
+
                                             /* Bits 0-2: Reserved */
 #define RTC_LR_TCL                (1 << 3)  /* Bit 3:  Time Compensation Lock */
 #define RTC_LR_CRL                (1 << 4)  /* Bit 4:  Control Register Lock */
@@ -174,6 +180,7 @@
 #  define RTC_LR_MCHL             (1 << 11) /* Bit 10: Monotoic Counter High Lock */
 #endif
                                             /* Bits 12-31: Reserved */
+
 /* RTC Interrupt Enable Register (32-bits, K40) */
 
 #  define RTC_IER_TIIE            (1 << 0)  /* Bit 0:  Time Invalid Interrupt Enable */
@@ -189,7 +196,9 @@
 #  define RTC_IER_WPON            (1 << 7)  /* Bit 7:  Wakeup Pin On */
 
 #ifdef KINETIS_K60
+
 /* RTC Chip Configuration Register (32-bits,K60) */
+
 /* Haven't found this in K60P100M100SF2V2RM */
 
 #  define RTC_CCR_CONFIG_SHIFT    (0)       /* Bits 0-7: Chip Configuration */
@@ -209,11 +218,14 @@
 #define RTC_WAR_IERW              (1 << 7)  /* Bit 7:  Interrupt Enable Register Write */
 
 #ifdef KINETIS_K60
-/* This looks like old name, from K60P100M100SF2V2RM bit 7 would be called RTC_RAR_IERW */
+/* This looks like old name,
+ * from K60P100M100SF2V2RM bit 7 would be called RTC_RAR_IERW
+ */
 
 #  define RTC_WAR_CCRW            (1 << 7)  /* Bit 7:  Chip Config Register Write */
 #endif
                                             /* Bits 8-31: Reserved */
+
 /* RTC Read Access Register */
 
 #define RTC_RAR_TSRR              (1 << 0)  /* Bit 0:  Time Seconds Register Read */
@@ -226,8 +238,8 @@
 #define RTC_RAR_IERR              (1 << 7)  /* Bit 7:  Interrupt Enable Register Read */
 
 #ifdef KINETIS_K60
-/* This is possibly an old name, from K60P100M100SF2V2RM bit 7 would be called
- * RTC_RAR_IERR.
+/* This is possibly an old name,
+ * from K60P100M100SF2V2RM bit 7 would be called RTC_RAR_IERR.
  */
 
 #  define RTC_RAR_CCRR            (1 << 7)  /* Bit 7:  Chip Config Register Read */
@@ -246,17 +258,17 @@
 #  define CONFIG_RTC_MAGICH   0xef32a141
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* KINETIS_NRTC && KINETIS_NRTC > 0 */
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_RTC_H */

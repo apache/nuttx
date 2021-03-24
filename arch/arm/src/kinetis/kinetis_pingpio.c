@@ -118,5 +118,6 @@ bool kinetis_gpioread(uint32_t pinset)
       regval = getreg32(base + KINETIS_GPIO_PDIR_OFFSET);
       ret    = ((regval & (1 << pin)) != 0);
     }
+
   return ret;
 }

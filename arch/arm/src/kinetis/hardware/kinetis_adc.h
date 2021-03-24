@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_ADC_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_ADC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_ADC_SC1A_OFFSET  0x0000 /* ADC status and control registers 1 */
 #define KINETIS_ADC_SC1B_OFFSET  0x0004 /* ADC status and control registers 1 */
@@ -66,7 +66,7 @@
 #define KINETIS_ADC_CLM1_OFFSET  0x0068 /* ADC minus-side general calibration value register */
 #define KINETIS_ADC_CLM0_OFFSET  0x006c /* ADC minus-side general calibration value register */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_ADC0_SC1A        (KINETIS_ADC0_BASE+KINETIS_ADC_SC1A_OFFSET)
 #define KINETIS_ADC0_SC1B        (KINETIS_ADC0_BASE+KINETIS_ADC_SC1B_OFFSET)
@@ -130,7 +130,7 @@
 #define KINETIS_ADC1_CLM1        (KINETIS_ADC1_BASE+KINETIS_ADC_CLM1_OFFSET)
 #define KINETIS_ADC1_CLM0        (KINETIS_ADC1_BASE+KINETIS_ADC_CLM0_OFFSET)
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* ADC status and control registers 1 */
 
@@ -166,10 +166,12 @@
 #  define ADC_SC1_ADCH_VREFSH     (29 << ADC_SC1_ADCH_SHIFT) /* VREFSH */
 #  define ADC_SC1_ADCH_VREFSL     (30 << ADC_SC1_ADCH_SHIFT) /* DIFF=0 VREFSL; DIFF=1 reserved */
 #  define ADC_SC1_ADCH_DISABLED   (31 << ADC_SC1_ADCH_SHIFT) /* Module disabled */
+
 #define ADC_SC1_DIFF              (1 << 5)  /* Bit 5:  Differential mode enable */
 #define ADC_SC1_AIEN              (1 << 6)  /* Bit 6:  Interrupt enable */
 #define ADC_SC1_COCO              (1 << 7)  /* Bit 7:  Conversion complete flag */
                                             /* Bits 8-31: Reserved */
+
 /* ADC configuration register 1 */
 
 #define ADC_CFG1_ADICLK_SHIFT     (0)       /* Bits 0-1: Input clock select */
@@ -178,12 +180,14 @@
 #  define ADC_CFG1_ADICLK_BUSDIV2 (1 << ADC_CFG1_ADICLK_SHIFT) /* Bus clock/ 2 */
 #  define ADC_CFG1_ADICLK_ALTCLK  (2 << ADC_CFG1_ADICLK_SHIFT) /* Alternate clock */
 #  define ADC_CFG1_ADICLK_ADACK   (3 << ADC_CFG1_ADICLK_SHIFT) /* Asynchronous clock */
+
 #define ADC_CFG1_MODE_SHIFT       (2)       /* Bits 2-3: Conversion mode selection */
 #define ADC_CFG1_MODE_MASK        (3 << ADC_CFG1_MODE_SHIFT)
 # define ADC_CFG1_MODE_89BIT      (0 << ADC_CFG1_MODE_SHIFT) /* DIFF=0 8-bit; DIFF=1 9-bit */
 # define ADC_CFG1_MODE_1213BIT    (1 << ADC_CFG1_MODE_SHIFT) /* DIFF=0 12-bit; DIFF=1 13-bit */
 # define ADC_CFG1_MODE_1011BIT    (2 << ADC_CFG1_MODE_SHIFT) /* DIFF=0 10-bit; DIFF=1 11-bit */
 # define ADC_CFG1_MODE_1616BIT    (3 << ADC_CFG1_MODE_SHIFT) /*  DIFF=0 16-bit; DIFF=1 16-bit */
+
 #define ADC_CFG1_ADLSMP           (1 << 4)  /* Bit 4:  Sample time configuration */
 #define ADC_CFG1_ADIV_SHIFT       (5)       /* Bits 5-6: Clock divide select */
 #define ADC_CFG1_ADIV_MASK        (3 << ADC_CFG1_ADIV_SHIFT)
@@ -191,8 +195,10 @@
 #  define ADC_CFG1_ADIV_DIV2      (1 << ADC_CFG1_ADIV_SHIFT) /* Divider=2 rate=input clock/2 */
 #  define ADC_CFG1_ADIV_DIV4      (2 << ADC_CFG1_ADIV_SHIFT) /* Divider=4 rate=input clock/4 */
 #  define ADC_CFG1_ADIV_DIV8      (3 << ADC_CFG1_ADIV_SHIFT) /* Divider=8 rate=input clock/8 */
+
 #define ADC_CFG1_ADLPC            (1 << 7)  /* Bit 7:  Low-power configuration */
                                             /* Bits 8-31: Reserved */
+
 /* Configuration register 2 */
 
 #define ADC_CFG2_ADLSTS_SHIFT     (0)       /* Bits 0-1: Long sample time select */
@@ -201,10 +207,12 @@
 #  define ADC_CFG2_ADLSTS_PLUS12  (1 << ADC_CFG2_ADLSTS_SHIFT) /* 12 extra ADCK cycles */
 #  define ADC_CFG2_ADLSTS_PLUS6   (2 << ADC_CFG2_ADLSTS_SHIFT) /* 6 extra ADCK cycles */
 #  define ADC_CFG2_ADLSTS_PLUS2   (3 << ADC_CFG2_ADLSTS_SHIFT) /* 2 extra ADCK cycles */
+
 #define ADC_CFG2_ADHSC            (1 << 2)  /* Bit 2:  High speed configuration */
 #define ADC_CFG2_ADACKEN          (1 << 3)  /* Bit 3:  Asynchronous clock output enable */
 #define ADC_CFG2_MUXSEL           (1 << 4)  /* Bit 4:  ADC Mux select */
                                             /* Bits 5-31: Reserved */
+
 /* ADC data result register */
 
 #define ADC_R_MASK                (0xffff)  /* 16-bit signed or unsigned data */
@@ -219,6 +227,7 @@
 #define ADC_SC2_REFSEL_MASK       (3 << ADC_SC2_REFSEL_SHIFT)
 #  define ADC_SC2_REFSEL_DEFAULT  (0 << ADC_SC2_REFSEL_SHIFT) /* Default reference: V REFH and V REFL */
 #  define ADC_SC2_REFSEL_ALT      (1 << ADC_SC2_REFSEL_SHIFT) /* Alternate reference: V ALTH and V ALTL */
+
 #define ADC_SC2_DMAEN             (1 << 2)  /* Bit 2:  DMA enable */
 #define ADC_SC2_ACREN             (1 << 3)  /* Bit 3:  Compare function range enable */
 #define ADC_SC2_ACFGT             (1 << 4)  /* Bit 4:  Compare function greater than enable */
@@ -226,6 +235,7 @@
 #define ADC_SC2_ADTRG             (1 << 6)  /* Bit 6:  Conversion trigger select */
 #define ADC_SC2_ADACT             (1 << 7)  /* Bit 7:  Conversion active */
                                             /* Bits 8-31: Reserved */
+
 /* Status and control register 3 */
 
 #define ADC_SC3_AVGS_SHIFT        (0)       /* Bits 0-1: Hardware average select */
@@ -234,12 +244,14 @@
 #  define ADC_SC3_AVGS_8SMPLS     (1 << ADC_SC3_AVGS_SHIFT) /* 8 samples averaged */
 #  define ADC_SC3_AVGS_16SMPLS    (2 << ADC_SC3_AVGS_SHIFT) /* 18 samples averaged */
 #  define ADC_SC3_AVGS_32SMPLS    (3 << ADC_SC3_AVGS_SHIFT) /* 32 samples averaged */
+
 #define ADC_SC3_AVGE              (1 << 2)  /* Bit 2:  Hardware average enable */
 #define ADC_SC3_ADCO              (1 << 3)  /* Bit 3:  Continuous conversion enable */
                                             /* Bits 4-5: Reserved */
 #define ADC_SC3_CALF              (1 << 6)  /* Bit 6:  Calibration failed flag */
 #define ADC_SC3_CAL               (1 << 7)  /* Bit 7:  Calibration */
                                             /* Bits 8-31: Reserved */
+
 /* ADC offset correction register */
 
 #define ADC_OFS_MASK              (0xffff)  /* Bits 0-15: Offset error correction value */
@@ -293,16 +305,16 @@
 #define ADC_CLM1_MASK             (0x7f)    /* Bits 0-6: Calibration value */
 #define ADC_CLM0_MASK             (0x3f)    /* Bits 0-5: Calibration value */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_ADC_H */

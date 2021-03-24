@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_ftm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_FTM_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_FTM_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_FTM_SC_OFFSET       0x0000 /* Status and Control */
 #define KINETIS_FTM_CNT_OFFSET      0x0004 /* Counter */
@@ -41,6 +41,7 @@
 
 #define KINETIS_FTM_CSC_OFFSET(n)   (0x000c+((n)<<3)) /* Channel (n) Status and Control */
 #define KINETIS_FTM_CV_OFFSET(n)    (0x0010+((n)<<3)) /* Channel (n) Value */
+
 #define KINETIS_FTM_C0SC_OFFSET     0x000c /* Channel 0 Status and Control */
 #define KINETIS_FTM_C0V_OFFSET      0x0010 /* Channel 0 Value */
 #define KINETIS_FTM_C1SC_OFFSET     0x0014 /* Channel 1 Status and Control */
@@ -79,7 +80,7 @@
 #define KINETIS_FTM_SWOCTRL_OFFSET  0x0094 /* FTM Software Output Control */
 #define KINETIS_FTM_PWMLOAD_OFFSET  0x0098 /* FTM PWM Load */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_FTM0_SC              (KINETIS_FTM0_BASE+KINETIS_FTM_SC_OFFSET)
 #define KINETIS_FTM0_CNT             (KINETIS_FTM0_BASE+KINETIS_FTM_CNT_OFFSET)
@@ -257,7 +258,7 @@
 #define KINETIS_FTM3_SWOCTRL         (KINETIS_FTM3_BASE+KINETIS_FTM_SWOCTRL_OFFSET)
 #define KINETIS_FTM3_PWMLOAD         (KINETIS_FTM3_BASE+KINETIS_FTM_PWMLOAD_OFFSET)
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Status and Control */
 
@@ -277,10 +278,12 @@
 #  define FTM_SC_CLKS_SYSCLK         (1 << FTM_SC_CLKS_SHIFT) /* System clock */
 #  define FTM_SC_CLKS_FIXED          (2 << FTM_SC_CLKS_SHIFT) /* Fixed frequency clock */
 #  define FTM_SC_CLKS_EXTCLK         (3 << FTM_SC_CLKS_SHIFT) /* External clock */
+
 #define FTM_SC_CPWMS                 (1 << 5)  /* Bit 5:  Center-aligned PWM Select */
 #define FTM_SC_TOIE                  (1 << 6)  /* Bit 6:  Timer Overflow Interrupt Enable */
 #define FTM_SC_TOF                   (1 << 7)  /* Bit 7:  Timer Overflow Flag */
                                                /* Bits 8-31: Reserved */
+
 /* Counter */
 
 #define FTM_CNT_SHIFT                (0)       /* Bits 0-15: Counter value */
@@ -304,20 +307,23 @@
 #define FTM_CSC_CHIE                 (1 << 6)  /* Bit 6:  Channel Interrupt Enable */
 #define FTM_CSC_CHF                  (1 << 7)  /* Bit 7:  Channel Flag */
                                                /* Bits 8-31: Reserved */
+
 /* Channel (n) Value */
 
 #define FTM_CV_SHIFT                 (0)       /* Bits 0-15: Channel Value */
 #define FTM_CV_MASK                  (0xffff << FTM_CV_SHIFT)
                                                /* Bits 16-31: Reserved */
+
 /* Counter Initial Value */
 
 #define FTM_CNTIN_SHIFT              (0)       /* Bits 0-15: Initial Value of the FTM Counter */
 #define FTM_CNTIN_MASK               (0xffff << FTM_CNTIN_SHIFT)
                                                /* Bits 16-31: Reserved */
+
 /* Capture and Compare Status */
 
 #define FTM_STATUS(n)                (1 << (n)) /* Channel (n) Flag, n=0..7 */
-                                               /* Bits 8-31: Reserved */
+                                                /* Bits 8-31: Reserved */
 
 /* Features Mode Selection */
 
@@ -332,8 +338,10 @@
 #  define FTM_MODE_FAULTM_EVEN       (1 << FTM_MODE_FAULTM_SHIFT) /* Enable even channels, manual fault clearing */
 #  define FTM_MODE_FAULTM_MANUAL     (2 << FTM_MODE_FAULTM_SHIFT) /* Enable all channels, manual fault clearing */
 #  define FTM_MODE_FAULTM_AUTO       (3 << FTM_MODE_FAULTM_SHIFT) /* Enable all channels, automatic fault clearing */
+
 #define FTM_MODE_FAULTIE             (1 << 7)  /* Bit 7:  Fault Interrupt Enable */
                                                /* Bits 8-31: Reserved */
+
 /* Synchronization */
 
 #define FTM_SYNC_CNTMIN              (1 << 0)  /* Bit 0:  Minimum loading point enable */
@@ -345,14 +353,17 @@
 #define FTM_SYNC_TRIG2               (1 << 6)  /* Bit 6:  PWM Synchronization Hardware Trigger 2 */
 #define FTM_SYNC_SWSYNC              (1 << 7)  /* Bit 7:  PWM Synchronization Software Trigger */
                                                /* Bits 8-31: Reserved */
+
 /* Initial State for Channels Output */
 
 #define FTM_OUTINIT(n)               (1 << (n)) /* Channel (n) Output Initialization Value, n=0..7 */
-                                               /* Bits 8-31: Reserved */
+                                                /* Bits 8-31: Reserved */
+
 /* Output Mask */
 
 #define FTM_OUTMASK(n)               (1 << (n)) /* Channel (n) Output Mask, n=0..7 */
-                                               /* Bits 8-31: Reserved */
+                                                /* Bits 8-31: Reserved */
+
 /* Function for Linked Channels */
 
 #define FTM_COMBINE_COMBINE0         (1 << 0)  /* Bit 0:  Combine Channels for n = 0 */
@@ -387,6 +398,7 @@
 #define FTM_COMBINE_SYNCEN3          (1 << 29) /* Bit 29: Synchronization Enable for n = 6 */
 #define FTM_COMBINE_FAULTEN3         (1 << 30) /* Bit 30: Fault Control Enable for n = 6 */
                                                /* Bit 31: Reserved */
+
 /* Deadtime Insertion Control */
 
 #define FTM_DEADTIME_DTVAL_SHIFT     (0)       /* Bits 0-5: Deadtime Value */
@@ -397,6 +409,7 @@
 #  define FTM_DEADTIME_DTPS_DIV4     (2 << FTM_DEADTIME_DTPS_SHIFT)
 #  define FTM_DEADTIME_DTPS_DIV16    (3 << FTM_DEADTIME_DTPS_SHIFT)
                                                /* Bits 8-31: Reserved */
+
 /* FTM External Trigger */
 
 #define FTM_EXTTRIG_CH2TRIG          (1 << 0)  /* Bit 0:  Channel 2 Trigger Enable */
@@ -408,10 +421,11 @@
 #define FTM_EXTTRIG_INITTRIGEN       (1 << 6)  /* Bit 6:  Initialization Trigger Enable */
 #define FTM_EXTTRIG_TRIGF            (1 << 7)  /* Bit 7:  Channel Trigger Flag */
                                                /* Bits 8-31: Reserved */
+
 /* Channels Polarity */
 
 #define FTM_POL(n)                   (1 << (n)) /* Channel (n) Polarity, n=0..7 */
-                                               /* Bits 8-31: Reserved */
+                                                /* Bits 8-31: Reserved */
 
 /* Fault Mode Status */
 
@@ -424,6 +438,7 @@
 #define FTM_FMS_WPEN                 (1 << 6)  /* Bit 6:  Write Protection Enable */
 #define FTM_FMS_FAULTF               (1 << 7)  /* Bit 7:  Fault Detection Flag */
                                                /* Bits 8-31: Reserved */
+
 /* Input Capture Filter Control */
 
 #define FTM_FILTER_CH0FVAL_SHIFT     (0)       /* Bits 0-3: Channel 0 Input Filter */
@@ -435,6 +450,7 @@
 #define FTM_FILTER_CH3FVAL_SHIFT     (12)      /* Bits 12-15: Channel 3 Input Filter */
 #define FTM_FILTER_CH3FVAL_MASK      (15 << FTM_FILTER_CH3FVAL_SHIFT)
                                                /* Bits 16-31: Reserved */
+
 /* Fault Control */
 
 #define FTM_FLTCTRL_FAULT0EN         (1 << 0)  /* Bit 0:  Fault Input 0 Enable */
@@ -448,6 +464,7 @@
 #define FTM_FLTCTRL_FFVAL_SHIFT      (8)       /* Bits 8-11: Fault Input Filter */
 #define FTM_FLTCTRL_FFVAL_MASK       (15 << FTM_FLTCTRL_FFVAL_SHIFT)
                                                /* Bits 12-31: Reserved */
+
 /* Quadrature Decoder Control and Status */
 
 #define FTM_QDCTRL_QUADEN            (1 << 0)  /* Bit 0:  Quadrature Decoder Mode Enable */
@@ -459,6 +476,7 @@
 #define FTM_QDCTRL_PHBFLTREN         (1 << 6)  /* Bit 6:  Phase B Input Filter Enable */
 #define FTM_QDCTRL_PHAFLTREN         (1 << 7)  /* Bit 7:  Phase A Input Filter Enable */
                                                /* Bits 8-31: Reserved */
+
 /* Configuration */
 
 #define FTM_CONF_NUMTOF_SHIFT        (0)       /* Bits 0-4: TOF Frequency */
@@ -470,6 +488,7 @@
 #define FTM_CONF_GTBEEN              (1 << 9)  /* Bit 9:  Global time base enable */
 #define FTM_CONF_GTBEOUT             (1 << 10) /* Bit 10: Global time base output */
                                                /* Bits 11-31: Reserved */
+
 /* FTM Fault Input Polarity */
 
 #define FTM_FLTPOL_FLT0POL           (1 << 0)  /* Bit 0:  Fault Input 0 Polarity */
@@ -477,6 +496,7 @@
 #define FTM_FLTPOL_FLT2POL           (1 << 2)  /* Bit 2:  Fault Input 2 Polarity */
 #define FTM_FLTPOL_FLT3POL           (1 << 3)  /* Bit 3:  Fault Input 3 Polarity */
                                                /* Bits 4-31: Reserved */
+
 /* Synchronization Configuration */
 
 #define FTM_SYNCONF_HWTRIGMODE       (1 << 0)  /* Bit 0:  Hardware Trigger Mode */
@@ -499,6 +519,7 @@
 #define FTM_SYNCONF_HWINVC           (1 << 19) /* Bit 19: Inverting control synchronization (H/W) */
 #define FTM_SYNCONF_HWSOC            (1 << 20) /* Bit 20: Software output control synchronization (H/W) */
                                                /* Bits 21-31: Reserved */
+
 /* FTM Inverting Control */
 
 #define FTM_INVCTRL_INV0EN           (1 << 0)  /* Bit 0:  Pair Channels 0 Inverting Enable */
@@ -506,9 +527,11 @@
 #define FTM_INVCTRL_INV2EN           (1 << 2)  /* Bit 2:  Pair Channels 2 Inverting Enable */
 #define FTM_INVCTRL_INV3EN           (1 << 3)  /* Bit 3:  Pair Channels 3 Inverting Enable */
                                                /* Bits 4-31: Reserved */
+
 /* FTM Software Output Control */
 
 #define FTM_SWOCTRL_CHOC(n)         (1 << (n)) /* Bits 0-7: Channel (n) Software Output Control Enable */
+
 #define FTM_SWOCTRL_CH0OC            (1 << 0)  /* Bit 0:  Channel 0 Software Output Control Enable */
 #define FTM_SWOCTRL_CH1OC            (1 << 1)  /* Bit 1:  Channel 1 Software Output Control Enable */
 #define FTM_SWOCTRL_CH2OC            (1 << 2)  /* Bit 2:  Channel 2 Software Output Control Enable */
@@ -517,7 +540,9 @@
 #define FTM_SWOCTRL_CH5OC            (1 << 5)  /* Bit 5:  Channel 5 Software Output Control Enable */
 #define FTM_SWOCTRL_CH6OC            (1 << 6)  /* Bit 6:  Channel 6 Software Output Control Enable */
 #define FTM_SWOCTRL_CH7OC            (1 << 7)  /* Bit 7:  Channel 7 Software Output Control Enable */
+
 #define FTM_SWOCTRL_CHOCV(n)         (1 << ((n)+8)) /* Bits 8-15: Channel (n) Software Output Control Value */
+
 #define FTM_SWOCTRL_CH0OCV           (1 << 8)  /* Bit 8:  Channel 0 Software Output Control Value */
 #define FTM_SWOCTRL_CH1OCV           (1 << 9)  /* Bit 9:  Channel 1 Software Output Control Value */
 #define FTM_SWOCTRL_CH2OCV           (1 << 10) /* Bit 10: Channel 2 Software Output Control Value */
@@ -527,6 +552,7 @@
 #define FTM_SWOCTRL_CH6OCV           (1 << 14) /* Bit 14: Channel 6 Software Output Control Value */
 #define FTM_SWOCTRL_CH7OCV           (1 << 15) /* Bit 15: Channel 7 Software Output Control Value */
                                                /* Bits 16-31: Reserved */
+
 /* FTM PWM Load */
 
 #define FTM_PWMLOAD_CHSEL(n)        (1 << (n)) /* Bits 0-7: Channel (n) Select */
@@ -542,16 +568,16 @@
 #define FTM_PWMLOAD_LDOK             (1 << 9)  /* Bit 9: Load Enable */
                                                /* Bits 10-31: Reserved */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_FTM_H */

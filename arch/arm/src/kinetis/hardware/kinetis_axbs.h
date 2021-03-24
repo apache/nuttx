@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_axbs.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_AXBS_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_AXBS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_AXBS_PRS_OFFSET(n)   (0x0000 + ((n) << 8))
 #define KINETIS_AXBS_CRS_OFFSET(n)   (0x0010 + ((n) << 8))
@@ -64,7 +64,7 @@
 #define KINETIS_AXBS_MGPCR6_OFFSET   0x0e00 /* Master General Purpose Control Register */
 #define KINETIS_AXBS_MGPCR7_OFFSET   0x0f00 /* Master General Purpose Control Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_AXBS_PRS(n)          (KINETIS_XBAR_BASE+KINETIS_AXBS_PRS_OFFSET(n))
 #define KINETIS_AXBS_CRS(n)          (KINETIS_XBAR_BASE+KINETIS_AXBS_CRS_OFFSET(n))
@@ -95,7 +95,7 @@
 #define KINETIS_AXBS_MGPCR6          (KINETIS_XBAR_BASE+KINETIS_AXBS_MGPCR6_OFFSET)
 #define KINETIS_AXBS_MGPCR7          (KINETIS_XBAR_BASE+KINETIS_AXBS_MGPCR7_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Priority Registers Slave */
 
@@ -109,6 +109,7 @@
 #  define AXBS_PRS_M0_PRI6            (5 << AXBS_PRS_M0_SHIFT) /* Master has pri 6 access to slave port */
 #  define AXBS_PRS_M0_PRI7            (6 << AXBS_PRS_M0_SHIFT) /* Master has pri 7 access to slave port */
 #  define AXBS_PRS_M0_PRI8            (7 << AXBS_PRS_M0_SHIFT) /* Master has pri 8 (lowest) access to slave port */
+
                                                /* Bit 3:  Reserved */
 #define AXBS_PRS_M1_SHIFT             (4)      /* Bits 4-6: Master 1 priority */
 #define AXBS_PRS_M1_MASK              (7 << AXBS_PRS_M1_SHIFT)
@@ -120,6 +121,7 @@
 #  define AXBS_PRS_M1_PRI6            (5 << AXBS_PRS_M1_SHIFT) /* Master has pri 6 access to slave port */
 #  define AXBS_PRS_M1_PRI7            (6 << AXBS_PRS_M1_SHIFT) /* Master has pri 7 access to slave port */
 #  define AXBS_PRS_M1_PRI8            (7 << AXBS_PRS_M1_SHIFT) /* Master has pri 8 (lowest) access to slave port */
+
                                                /* Bit 7:  Reserved */
 #define AXBS_PRS_M2_SHIFT             (8)      /* Bits 8-10: Master 2 priority */
 #define AXBS_PRS_M2_MASK              (7 << AXBS_PRS_M2_SHIFT)
@@ -131,6 +133,7 @@
 #  define AXBS_PRS_M2_PRI6            (5 << AXBS_PRS_M2_SHIFT) /* Master has pri 6 access to slave port */
 #  define AXBS_PRS_M2_PRI7            (6 << AXBS_PRS_M2_SHIFT) /* Master has pri 7 access to slave port */
 #  define AXBS_PRS_M2_PRI8            (7 << AXBS_PRS_M2_SHIFT) /* Master has pri 8 (lowest) access to slave port */
+
                                                /* Bit 11:  Reserved */
 #define AXBS_PRS_M3_SHIFT             (12)     /* Bits 12-14: Master 3 priority */
 #define AXBS_PRS_M3_MASK              (7 << AXBS_PRS_M3_SHIFT)
@@ -142,6 +145,7 @@
 #  define AXBS_PRS_M3_PRI6            (5 << AXBS_PRS_M3_SHIFT) /* Master has pri 6 access to slave port */
 #  define AXBS_PRS_M3_PRI7            (6 << AXBS_PRS_M3_SHIFT) /* Master has pri 7 access to slave port */
 #  define AXBS_PRS_M3_PRI8            (7 << AXBS_PRS_M3_SHIFT) /* Master has pri 8 (lowest) access to slave port */
+
                                                /* Bit 15:  Reserved */
 #define AXBS_PRS_M4_SHIFT             (16)     /* Bits 16-18: Master 4 priority */
 #define AXBS_PRS_M4_MASK              (7 << AXBS_PRS_M4_SHIFT)
@@ -153,6 +157,7 @@
 #  define AXBS_PRS_M4_PRI6            (5 << AXBS_PRS_M4_SHIFT) /* Master has pri 6 access to slave port */
 #  define AXBS_PRS_M4_PRI7            (6 << AXBS_PRS_M4_SHIFT) /* Master has pri 7 access to slave port */
 #  define AXBS_PRS_M4_PRI8            (7 << AXBS_PRS_M4_SHIFT) /* Master has pri 8 (lowest) access to slave port */
+
                                                /* Bit 19:  Reserved */
 #define AXBS_PRS_M5_SHIFT             (20)     /* Bits 20-22: Master 5 priority */
 #define AXBS_PRS_M5_MASK              (7 << AXBS_PRS_M5_SHIFT)
@@ -164,6 +169,7 @@
 #  define AXBS_PRS_M5_PRI6            (5 << AXBS_PRS_M5_SHIFT) /* Master has pri 6 access to slave port */
 #  define AXBS_PRS_M5_PRI7            (6 << AXBS_PRS_M5_SHIFT) /* Master has pri 7 access to slave port */
 #  define AXBS_PRS_M5_PRI8            (7 << AXBS_PRS_M5_SHIFT) /* Master has pri 8 (lowest) access to slave port */
+
                                                /* Bit 23:  Reserved */
 #define AXBS_PRS_M6_SHIFT             (24)     /* Bits 24-26: Master 6 priority */
 #define AXBS_PRS_M6_MASK              (7 << AXBS_PRS_M6_SHIFT)
@@ -175,6 +181,7 @@
 #  define AXBS_PRS_M6_PRI6            (5 << AXBS_PRS_M6_SHIFT) /* Master has pri 6 access to slave port */
 #  define AXBS_PRS_M6_PRI7            (6 << AXBS_PRS_M6_SHIFT) /* Master has pri 7 access to slave port */
 #  define AXBS_PRS_M6_PRI8            (7 << AXBS_PRS_M6_SHIFT) /* Master has pri 8 (lowest) access to slave port */
+
                                                /* Bit 27:  Reserved */
 #define AXBS_PRS_M7_SHIFT             (28)     /* Bits 28-30: Master 7 priority */
 #define AXBS_PRS_M7_MASK              (7 << AXBS_PRS_M7_SHIFT)
@@ -186,7 +193,9 @@
 #  define AXBS_PRS_M7_PRI6            (5 << AXBS_PRS_M7_SHIFT) /* Master has pri 6 access to slave port */
 #  define AXBS_PRS_M7_PRI7            (6 << AXBS_PRS_M7_SHIFT) /* Master has pri 7 access to slave port */
 #  define AXBS_PRS_M7_PRI8            (7 << AXBS_PRS_M7_SHIFT) /* Master has pri 8 (lowest) access to slave port */
+
                                                /* Bit 31:  Reserved */
+
 /* Control Register */
 
 #define AXBS_CRS_PARK_SHIFT           (0)     /* Bits 0-2: Park */
@@ -197,15 +206,18 @@
 #  define AXBS_CRS_PARK_M3            (3 << AXBS_CRS_PARK_SHIFT) /* Park on master port M3 */
 #  define AXBS_CRS_PARK_M4            (4 << AXBS_CRS_PARK_SHIFT) /* Park on master port M4 */
 #  define AXBS_CRS_PARK_M5            (5 << AXBS_CRS_PARK_SHIFT) /* Park on master port M5 */
+
 #define AXBS_CRS_PCTL_SHIFT           (4)      /* Bits 4-5: Parking control */
 #define AXBS_CRS_PCTL_MASK            (2 << AXBS_CRS_PCTL_SHIFT)
 #  define AXBS_CRS_PCTL_PARK          (0 << AXBS_CRS_PCTL_SHIFT) /* Defined by the PARK bit field */
 #  define AXBS_CRS_PCTL_LAST          (1 << AXBS_CRS_PCTL_SHIFT) /* Last master in control of slave port */
 #  define AXBS_CRS_PCTL_NOT           (2 << AXBS_CRS_PCTL_SHIFT) /* Not parked on a master */
+
 #define AXBS_CRS_ARB_SHIFT            (8)      /* Bits 8-9: Arbitration mode */
 #define AXBS_CRS_ARB_MASK             (3 << AXBS_CRS_ARB_SHIFT)
 #  define AXBS_CRS_ARB_FIXED          (0 << AXBS_CRS_ARB_SHIFT) /* Fixed priority */
 #  define AXBS_CRS_ARB_MASK           (1 << AXBS_CRS_ARB_SHIFT) /* Round-robin (rotating) priority */
+
                                                /* Bits 10-29:  Reserved */
 #define AXBS_CRS_HLP                  (1 < 30) /* Bit 30: Halt low priority */
 #define AXBS_CRS_RO                   (1 < 31) /* Bit 31: Read only */
@@ -219,18 +231,19 @@
 #  define AXBS_MGPCR_AULB_4BEATS      (2 << AXBS_MGPCR_AULB_SHIFT) /* Arbitration allowed after four beats */
 #  define AXBS_MGPCR_AULB_8BEATS      (3 << AXBS_MGPCR_AULB_SHIFT) /* Arbitration allowed after eight beats */
 #  define AXBS_MGPCR_AULB_16BEATS     (4 << AXBS_MGPCR_AULB_SHIFT) /* Arbitration allowed after 16 beats */
+
                                                /* Bits 3-31:  Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_AXBS_H */

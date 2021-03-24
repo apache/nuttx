@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_smc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,38 +16,38 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_SMC_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_SMC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_SMC_SRSH_OFFSET    0x0000 /* System Reset Status Register High */
 #define KINETIS_SMC_SRSL_OFFSET    0x0001 /* System Reset Status Register Low */
 #define KINETIS_SMC_PMPROT_OFFSET  0x0002 /* Power Mode Protection Register */
 #define KINETIS_SMC_PMCTRL_OFFSET  0x0003 /* Power Mode Control Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_SMC_SRSH           (KINETIS_SMC_BASE+KINETIS_SMC_SRSH_OFFSET)
 #define KINETIS_SMC_SRSL           (KINETIS_SMC_BASE+KINETIS_SMC_SRSL_OFFSET)
 #define KINETIS_SMC_PMPROT         (KINETIS_SMC_BASE+KINETIS_SMC_PMPROT_OFFSET)
 #define KINETIS_SMC_PMCTRL         (KINETIS_SMC_BASE+KINETIS_SMC_PMCTRL_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* System Reset Status Register High */
 
@@ -75,6 +75,7 @@
 #define SMC_PMPROT_ALLS            (1 << 4)  /* Bit 4:  Allow low leakage stop mode */
 #define SMC_PMPROT_AVLP            (1 << 5)  /* Bit 5:  Allow very low power modes */
                                              /* Bits 6-7: Reserved */
+
 /* Power Mode Control Register */
 
 #define SMC_PMCTRL_LPLLSM_SHIFT    (0)       /* Bits 0-2: Low Power, Low Leakage Stop Mode */
@@ -85,23 +86,25 @@
 #  define SMC_PMCTRL_LPLLSM_VLLS3  (5 << SMC_PMCTRL_LPLLSM_SHIFT) /* Very low leakage stop 3 */
 #  define SMC_PMCTRL_LPLLSM_VLLS2  (6 << SMC_PMCTRL_LPLLSM_SHIFT) /* Very low leakage stop 2 */
 #  define SMC_PMCTRL_LPLLSM_VLLS1  (7 << SMC_PMCTRL_LPLLSM_SHIFT) /* Very low leakage stop 1 */
+
                                              /* Bits 3-4: Reserved */
 #define SMC_PMCTRL_RUNM_SHIFT      (5)       /* Bits 5-6: Run Mode Enable */
 #define SMC_PMCTRL_RUNM_MASK       (3 << SMC_PMCTRL_RUNM_SHIFT)
 #  define SMC_PMCTRL_RUNM_NORMAL   (0 << SMC_PMCTRL_RUNM_SHIFT) /* Normal run mode */
 #  define SMC_PMCTRL_RUNM_VLP      (2 << SMC_PMCTRL_RUNM_SHIFT) /* Very low power run mode */
+
 #define SMC_PMCTRL_LPWUI           (1 << 7)  /* Bit 7:  Low Power Wake Up on Interrupt */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_SMC_H */

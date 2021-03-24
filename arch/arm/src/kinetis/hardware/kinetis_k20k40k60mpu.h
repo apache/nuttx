@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_k20k40k60mpu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20K40K60MPU_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20K40K60MPU_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_MPU_CESR_OFFSET         0x0000 /* Control/Error Status Register */
 
@@ -137,7 +137,7 @@
 #define KINETIS_MPU_RGDAAC14_OFFSET    0x0838 /* Region Descriptor Alternate Access Control 14 */
 #define KINETIS_MPU_RGDAAC15_OFFSET    0x083c /* Region Descriptor Alternate Access Control 15 */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_MPU_CESR               (KINETIS_MPU_BASE+KINETIS_MPU_CESR_OFFSET)
 
@@ -241,7 +241,7 @@
 #define KINETIS_MPU_RGDAAC14           (KINETIS_MPU_BASE+KINETIS_MPU_RGDAAC14_OFFSET)
 #define KINETIS_MPU_RGDAAC15           (KINETIS_MPU_BASE+KINETIS_MPU_RGDAAC15_OFFSET)
 
-/* Register Bit Definitions *************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Control/Error Status Register */
 
@@ -252,6 +252,7 @@
 #  define MPU_CESR_NRGD_8DESC          (0 << MPU_CESR_NRGD_SHIFT) /* 8 region descriptors */
 #  define MPU_CESR_NRGD_12DESC         (1 << MPU_CESR_NRGD_SHIFT) /* 12 region descriptors */
 #  define MPU_CESR_NRGD_16DESC         (2 << MPU_CESR_NRGD_SHIFT) /* 16 region descriptors */
+
 #define MPU_CESR_NSP_SHIFT             (12)      /* Bits 12-15: Number of slave ports */
 #define MPU_CESR_NSP_MASK              (15 << MPU_CESR_NSP_SHIFT)
 #define MPU_CESR_HRL_SHIFT             (16)      /* Bits 16-19: Hardware revision level */
@@ -260,6 +261,7 @@
 #define MPU_CESR_SPERR_SHIFT           (27)      /* Bits 27-31: Slave port n error */
 #define MPU_CESR_SPERR_MASK            (31 << MPU_CESR_SPERR_SHIFT)
 #  define MPU_CESR_SPERR_SPORT(n)      ((1 << (4-(n))) << MPU_CESR_SPERR_SHIFT) /* Slave port nn */
+
 #  define MPU_CESR_SPERR_SPORT0        (16 << MPU_CESR_SPERR_SHIFT) /* Slave port 0 */
 #  define MPU_CESR_SPERR_SPORT1        (8 << MPU_CESR_SPERR_SHIFT)  /* Slave port 1 */
 #  define MPU_CESR_SPERR_SPORT2        (4 << MPU_CESR_SPERR_SHIFT)  /* Slave port 2 */
@@ -277,6 +279,7 @@
 #  define MPU_EDR_EATTR_USRDATA        (1 << MPU_EDR_EATTR_SHIFT) /* User mode, data access */
 #  define MPU_EDR_EATTR_SUPINST        (2 << MPU_EDR_EATTR_SHIFT) /* Supervisor mode, instruction access */
 #  define MPU_EDR_EATTR_SUPDATA        (3 << MPU_EDR_EATTR_SHIFT) /* Supervisor mode, data access */
+
 #define MPU_EDR_EMN_SHIFT              (4)       /* Bits 4-7: Error master number */
 #define MPU_EDR_EMN_MASK               (15 << MPU_EDR_EMN_SHIFT)
                                                  /* Bits 8-15: Reserved */
@@ -284,11 +287,13 @@
 #define MPU_EDR_EACD_MASK              (0xffff << MPU_EDR_EACD_SHIFT)
 
 /* Region Descriptor n, Word 0 */
+
                                                  /* Bits 0-4: Reserved */
 #define MPU_RGD_WORD0_SRTADDR_SHIFT    (5)       /* Bits 5-31: Start address */
 #define MPU_RGD_WORD0_SRTADDR_MASK     (0xffffffe0)
 
 /* Region Descriptor n, Word 1 */
+
                                                  /* Bits 0-4: Reserved */
 #define MPU_RGD_WORD1_ENDADDR_SHIFT    (5)       /* Bits 5-31: End address */
 #define MPU_RGD_WORD1_ENDADDR_MASK     (0xffffffe0)
@@ -337,6 +342,7 @@
 
 #define MPU_RGD_WORD3_VLD              (1 << 0)  /* Bit 0:  Valid */
                                                  /* Bits 1-31: Reserved */
+
 /* Region Descriptor Alternate Access Control n */
 
 #define MPU_RGD_RBDACC_M0UM_SHIFT      (0)       /* Bits 0-2: Bus master 0 user mode access control */
@@ -368,16 +374,16 @@
 #define MPU_RGD_RBDACC_M7WE            (1 << 30) /* Bit 30: Bus master 7 write enable */
 #define MPU_RGD_RBDACC_M7RE            (1 << 31) /* Bit 31: Bus master 7 read enable */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20K40K60MPU_H */
