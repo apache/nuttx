@@ -89,7 +89,9 @@ int tms570_gio_initialize(void)
 
   putreg32(GIO_GCR0_RESET, TMS570_GIO_GCR0);
 
-  /* Disable all pin interrupts on the pin.  Make sure they are all level 0. */
+  /* Disable all pin interrupts on the pin.
+   * Make sure they are all level 0.
+   */
 
   putreg32(0xffffffff, TMS570_GIO_ENACLR);
   putreg32(0xffffffff, TMS570_GIO_LVLCLR);
@@ -129,6 +131,7 @@ int tms570_configgio(gio_pinset_t cfgset)
   putreg32(GIO_LVLCLR_PORT_PIN(port, pin), TMS570_GIO_LVLCLR);
 
   /* Setup settings common to both input and output pins */
+
   /* Enable/disable the pull-up/down as requested */
 
   switch (cfgset & GIO_CFG_MASK)
@@ -266,13 +269,14 @@ bool tms570_gioread(gio_pinset_t pinset)
   return (regval & pinmask) != 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Function:  tms570_dumpgio
  *
  * Description:
- *   Dump all GIO registers associated with the base address of the provided pinset.
+ *   Dump all GIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int tms570_dumpgio(uint32_t pinset, const char *msg)
@@ -305,10 +309,13 @@ int tms570_dumpgio(uint32_t pinset, const char *msg)
   /* Port specific registers */
 
   _info("    DIR: %08x    DIN: %08x   DOUT: %08x    PDR: %08x\n",
-        getreg32(base + TMS570_GIO_DIR_OFFSET), getreg32(base + TMS570_GIO_DIN_OFFSET),
-        getreg32(base + TMS570_GIO_DOUT_OFFSET), getreg32(base + TMS570_GIO_PDR_OFFSET));
+        getreg32(base + TMS570_GIO_DIR_OFFSET),
+        getreg32(base + TMS570_GIO_DIN_OFFSET),
+        getreg32(base + TMS570_GIO_DOUT_OFFSET),
+        getreg32(base + TMS570_GIO_PDR_OFFSET));
   _info(" PULDIS: %08x    PSL: %08x\n",
-        getreg32(base + TMS570_GIO_PULDIS_OFFSET), getreg32(base + TMS570_GIO_PSL_OFFSET));
+        getreg32(base + TMS570_GIO_PULDIS_OFFSET),
+        getreg32(base + TMS570_GIO_PSL_OFFSET));
 
   leave_critical_section(flags);
   return OK;

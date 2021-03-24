@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_sys2.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
@@ -27,18 +27,18 @@
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_SYS2_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_SYS2_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TMS570_SYS2_STCCLKDIV_OFFSET    0x0008  /* CPU Logic BIST Clock Divider */
 #define TMS570_SYS2_CLKSLIP_OFFSET      0x0070  /* Clock Slip Register */
@@ -50,7 +50,7 @@
 #define TMS570_SYS2_CLK2CNTRL_OFFSET    0x003c
 #define TMS570_SYS2_VCLKACON1_OFFSET    0x0040
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TMS570_SYS2_STCCLKDIV           (TMS570_SYS2_BASE+TMS570_SYS2_STCCLKDIV_OFFSET)
 #define TMS570_SYS2_CLKSLIP             (TMS570_SYS2_BASE+TMS570_SYS2_CLKSLIP_OFFSET)
@@ -62,21 +62,34 @@
 #define TMS570_SYS2_CLK2CNTRL           (TMS570_SYS2_BASE+TMS570_SYS2_CLK2CNTRL_OFFSET)
 #define TMS570_SYS2_VCLKACON1           (TMS570_SYS2_BASE+TMS570_SYS2_VCLKACON1_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* CPU Logic BIST Clock Divider */
+
 #define SYS2_STCCLKDIV_
+
 /* Clock Slip Register */
+
 #define SYS2_CLKSLIP_
+
 /* EFUSE Controller Control Register */
+
 #define SYS2_EFC_CTLREG_
+
 /* Die Identification Register Lower Word */
+
 #define SYS2_DIEDL_REG0_
+
 /* Die Identification Register Upper Word */
+
 #define SYS2_DIEDH_REG1_
+
 /* Die Identification Register Lower Word */
+
 #define SYS2_DIEDL_REG2_
+
 /* Die Identification Register Upper Word */
+
 #define SYS2_DIEDH_REG3_
 
 #if defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)

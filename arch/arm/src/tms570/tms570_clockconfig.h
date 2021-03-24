@@ -50,9 +50,10 @@ extern "C"
  * Name: tms570_clockconfig
  *
  * Description:
- *   Called to initialize TMS570 clocking.  This does whatever setup is needed to
- *   put the SoC in a usable state.  This includes, but is not limited to, the
- *   initialization of clocking using the settings in the board.h header file.
+ *   Called to initialize TMS570 clocking.
+ *   This does whatever setup is needed to put the SoC in a usable state.
+ *   This includes, but is not limited to, theinitialization of clocking
+ *   using the settings in the board.h header file.
  *
  ****************************************************************************/
 

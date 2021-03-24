@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_pcr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
@@ -27,18 +27,18 @@
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_PCR_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_PCR_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TMS570_PCR_PMPROTSET0_OFFSET    0x0000  /* Peripheral Memory Protection Set Register 0 */
 #define TMS570_PCR_PMPROTSET1_OFFSET    0x0004  /* Peripheral Memory Protection Set Register 1 */
@@ -65,7 +65,7 @@
 #define TMS570_PCR_PSPWRDWNCLR2_OFFSET  0x00a8  /* Peripheral Power-Down Clear Register 2 */
 #define TMS570_PCR_PSPWRDWNCLR3_OFFSET  0x00ac  /* Peripheral Power-Down Clear Register 3 */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TMS570_PCR_PMPROTSET0           (TMS570_PCR_BASE+TMS570_PCR_PMPROTSET0_OFFSET)
 #define TMS570_PCR_PMPROTSET1           (TMS570_PCR_BASE+TMS570_PCR_PMPROTSET1_OFFSET)
@@ -92,7 +92,7 @@
 #define TMS570_PCR_PSPWRDWNCLR2         (TMS570_PCR_BASE+TMS570_PCR_PSPWRDWNCLR2_OFFSET)
 #define TMS570_PCR_PSPWRDWNCLR3         (TMS570_PCR_BASE+TMS570_PCR_PSPWRDWNCLR3_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Peripheral Memory Protection Set Register 0 */
 #define PCR_PMPROTSET0_
@@ -142,7 +142,9 @@
 /* Peripheral Memory Power-Down Clear Register 1 */
 #define PCR_PCSPWRDWNCLR1_
 
-/* Peripheral Power-Down Set Register 0 and Peripheral Power-Down Clear Register 0 */
+/* Peripheral Power-Down Set Register 0 and
+ * Peripheral Power-Down Clear Register 0
+ */
 
 #define PCR_PSPWERDWN0_PS0_SHIFT        (0)       /* Bits 0-3: Quadrants for PS0 */
 #define PCR_PSPWERDWN0_PS0_MASK         (15 << PCR_PSPWERDWN0_PS0_SHIFT)
@@ -201,7 +203,9 @@
 #  define PCR_PSPWERDWN0_PS7_Q4         (8 << PCR_PSPWERDWN0_PS7_SHIFT)
 #  define PCR_PSPWERDWN0_PS7_QALL       (15 << PCR_PSPWERDWN0_PS7_SHIFT)
 
-/* Peripheral Power-Down Set Register 1 and Peripheral Power-Down Clear Register 1 */
+/* Peripheral Power-Down Set Register 1
+ * and Peripheral Power-Down Clear Register 1
+ */
 
 #define PCR_PSPWERDWN1_PS8_SHIFT        (0)       /* Bits 0-3: Quadrants for PS8 */
 #define PCR_PSPWERDWN1_PS8_MASK         (15 << PCR_PSPWERDWN1_PS8_SHIFT)
@@ -260,7 +264,9 @@
 #  define PCR_PSPWERDWN1_PS15_Q4        (8 << PCR_PSPWERDWN1_PS15_SHIFT)
 #  define PCR_PSPWERDWN1_PS15_QALL      (15 << PCR_PSPWERDWN1_PS15_SHIFT)
 
-/* Peripheral Power-Down Set Register 2 and Peripheral Power-Down Clear Register 2*/
+/* Peripheral Power-Down Set Register 2
+ * and Peripheral Power-Down Clear Register 2
+ */
 
 #define PCR_PSPWERDWN2_PS16_SHIFT       (0)       /* Bits 0-3: Quadrants for PS16 */
 #define PCR_PSPWERDWN2_PS16_MASK        (15 << PCR_PSPWERDWN2_PS16_SHIFT)
@@ -319,7 +325,9 @@
 #  define PCR_PSPWERDWN2_PS23_Q4        (8 << PCR_PSPWERDWN2_PS23_SHIFT)
 #  define PCR_PSPWERDWN2_PS23_QALL      (15 << PCR_PSPWERDWN2_PS23_SHIFT)
 
-/* Peripheral Power-Down Set Register 3 and Peripheral Power-Down Clear Register 3 */
+/* Peripheral Power-Down Set Register 3
+ * and Peripheral Power-Down Clear Register 3
+ */
 
 #define PCR_PSPWERDWN3_PS24_SHIFT       (0)       /* Bits 0-3: Quadrants for PS24 */
 #define PCR_PSPWERDWN3_PS24_MASK        (15 << PCR_PSPWERDWN3_PS24_SHIFT)

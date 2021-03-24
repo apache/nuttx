@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_sys.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
@@ -27,16 +27,16 @@
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_SYS_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_SYS_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* The LPO trim value may be programmed into the TI OTP: */
 
@@ -45,7 +45,7 @@
 #  define TMS570_TITCM_LPOTRIM_SHIFT    (16)    /* Bits 16-31: LPO trim value */
 #  define TMS570_TITCM_LPOTRIM_MASK     (0xffff << TMS570_TITCM_LPOTRIM_SHIFT)
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TMS570_SYS_PC1_OFFSET           0x0000  /* SYS Pin Control Register 1 */
 #define TMS570_SYS_PC2_OFFSET           0x0004  /* SYS Pin Control Register 2 */
@@ -102,7 +102,7 @@
 #define TMS570_SYS_SSIVEC_OFFSET        0x00f4  /* Software Interrupt Vector Register */
 #define TMS570_SYS_SSIF_OFFSET          0x00f8  /* System Software Interrupt Flag Register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TMS570_SYS_PC1                  (TMS570_SYS_BASE+TMS570_SYS_PC1_OFFSET)
 #define TMS570_SYS_PC2                  (TMS570_SYS_BASE+TMS570_SYS_PC2_OFFSET)
@@ -159,7 +159,7 @@
 #define TMS570_SYS_SSIVEC               (TMS570_SYS_BASE+TMS570_SYS_SSIVEC_OFFSET)
 #define TMS570_SYS_SSIF                 (TMS570_SYS_BASE+TMS570_SYS_SSIF_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 #define SYS_GLBSTAT_OSC_ERR_MASK        (0x01)
 #define SYS_GLBSTAT_OSC_ERR_CLR         (0x0301)
@@ -200,8 +200,8 @@
 
 #define SYS_PC9_ECPCLKPS                (1 << 0)  /* Bit 0: ECLK pull up/pull down select */
 
-/* Clock Source Disable Register, Clock Source Disable Set Register, and Clock Source
- * Disable Clear Register
+/* Clock Source Disable Register, Clock Source Disable Set Register,
+ * and Clock Source Disable Clear Register
  */
 
 #define SYS_CSDIS_CLKSR0OFF             (1 << 0)  /* Bit 0: Clock source 0 */
@@ -221,8 +221,8 @@
 #define SYS_CSDIS_CLKSRC_PLL2           SYS_CSDIS_CLKSR6OFF /* PLL2 */
 #define SYS_CSDIS_CLKSRC_EXTCLKIN2      SYS_CSDIS_CLKSR7OFF /* EXTCLKIN2 */
 
-/* Clock Domain Disable Register, Clock Domain Disable Set Register, and Clock Domain
- * Disable Clear Register.
+/* Clock Domain Disable Register, Clock Domain Disable Set Register,
+ * and Clock Domain Disable Clear Register.
  */
 
 #define SYS_CDDIS_GCLKOFF               (1 << 0)  /* Bit 0:  GCLK domain off */
@@ -464,6 +464,7 @@
 #define SYS_PLLCTL1_MASKSLIP_MASK       (3 << SYS_PLLCTL1_MASKSLIP_SHIFT)
 #  define SYS_PLLCTL1_MASKSLIP_DISABLE  (0 << SYS_PLLCTL1_MASKSLIP_SHIFT) /* All values but 2 disable */
 #  define SYS_PLLCTL1_MASKSLIP_ENABLE   (1 << SYS_PLLCTL1_MASKSLIP_SHIFT)
+
 #define SYS_PLLCTL1_ROS                 (1 << 31)  /* Bit 31:  Reset on PLL Slip */
 
 /* PLL Control Register 2 */
@@ -488,22 +489,24 @@
 
 /* Die Identification Register, Lower Word */
 #define SYS_DIEIDL_
+
 /* Die Identification Register, Upper Word */
 #define SYS_DIEIDH_
+
 /* LPO/Clock Monitor Control Register */
 
 #define SYS_LPOMONCTL_LFTRIM_SHIFT      (0)       /* Bits 0-4: Low frequency oscillator trim value */
 #define SYS_LPOMONCTL_LFTRIM_MASK       (31 << SYS_LPOMONCTL_LFTRIM_SHIFT)
-#  define SYS_LPOMONCTL_20p67           (0 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 20.67% */
-#  define SYS_LPOMONCTL_25p76           (1 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 25.76% */
-#  define SYS_LPOMONCTL_30p84           (2 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 30.84% */
-#  define SYS_LPOMONCTL_35p90           (3 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 35.90% */
-#  define SYS_LPOMONCTL_40p93           (4 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 40.93% */
-#  define SYS_LPOMONCTL_45p95           (5 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 45.95% */
-#  define SYS_LPOMONCTL_50p97           (6 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 50.97% */
-#  define SYS_LPOMONCTL_55p91           (7 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 55.91% */
-#  define SYS_LPOMONCTL_60p86           (8 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 60.86% */
-#  define SYS_LPOMONCTL_65p78           (9 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 65.78% */
+#  define SYS_LPOMONCTL_20p67           (0 << SYS_LPOMONCTL_LFTRIM_SHIFT)  /* 20.67% */
+#  define SYS_LPOMONCTL_25p76           (1 << SYS_LPOMONCTL_LFTRIM_SHIFT)  /* 25.76% */
+#  define SYS_LPOMONCTL_30p84           (2 << SYS_LPOMONCTL_LFTRIM_SHIFT)  /* 30.84% */
+#  define SYS_LPOMONCTL_35p90           (3 << SYS_LPOMONCTL_LFTRIM_SHIFT)  /* 35.90% */
+#  define SYS_LPOMONCTL_40p93           (4 << SYS_LPOMONCTL_LFTRIM_SHIFT)  /* 40.93% */
+#  define SYS_LPOMONCTL_45p95           (5 << SYS_LPOMONCTL_LFTRIM_SHIFT)  /* 45.95% */
+#  define SYS_LPOMONCTL_50p97           (6 << SYS_LPOMONCTL_LFTRIM_SHIFT)  /* 50.97% */
+#  define SYS_LPOMONCTL_55p91           (7 << SYS_LPOMONCTL_LFTRIM_SHIFT)  /* 55.91% */
+#  define SYS_LPOMONCTL_60p86           (8 << SYS_LPOMONCTL_LFTRIM_SHIFT)  /* 60.86% */
+#  define SYS_LPOMONCTL_65p78           (9 << SYS_LPOMONCTL_LFTRIM_SHIFT)  /* 65.78% */
 #  define SYS_LPOMONCTL_70p75           (10 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 70.75% */
 #  define SYS_LPOMONCTL_75p63           (11 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 75.63% */
 #  define SYS_LPOMONCTL_80p61           (12 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 80.61% */
@@ -526,18 +529,19 @@
 #  define SYS_LPOMONCTL_161p38          (29 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 161.38% */
 #  define SYS_LPOMONCTL_165p90          (30 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 165.90% */
 #  define SYS_LPOMONCTL_170p42          (31 << SYS_LPOMONCTL_LFTRIM_SHIFT) /* 170.42% */
+
 #define SYS_LPOMONCTL_HFTRIM_SHIFT      (8)       /* Bits 8-12: High frequency oscillator trim value */
 #define SYS_LPOMONCTL_HFTRIM_MASK       (31 << SYS_LPOMONCTL_HFTRIM_SHIFT)
-#  define SYS_LPOMONCTL_HFTRIM_29p52    (0 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 29.52% */
-#  define SYS_LPOMONCTL_HFTRIM_34p24    (1 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 34.24% */
-#  define SYS_LPOMONCTL_HFTRIM_38p85    (2 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 38.85% */
-#  define SYS_LPOMONCTL_HFTRIM_43p45    (3 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 43.45% */
-#  define SYS_LPOMONCTL_HFTRIM_47p99    (4 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 47.99% */
-#  define SYS_LPOMONCTL_HFTRIM_52p55    (5 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 52.55% */
-#  define SYS_LPOMONCTL_HFTRIM_57p02    (6 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 57.02% */
-#  define SYS_LPOMONCTL_HFTRIM_61p46    (7 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 61.46% */
-#  define SYS_LPOMONCTL_HFTRIM_65p92    (8 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 65.92% */
-#  define SYS_LPOMONCTL_HFTRIM_70p17    (9 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 70.17% */
+#  define SYS_LPOMONCTL_HFTRIM_29p52    (0 << SYS_LPOMONCTL_HFTRIM_SHIFT)  /* 29.52% */
+#  define SYS_LPOMONCTL_HFTRIM_34p24    (1 << SYS_LPOMONCTL_HFTRIM_SHIFT)  /* 34.24% */
+#  define SYS_LPOMONCTL_HFTRIM_38p85    (2 << SYS_LPOMONCTL_HFTRIM_SHIFT)  /* 38.85% */
+#  define SYS_LPOMONCTL_HFTRIM_43p45    (3 << SYS_LPOMONCTL_HFTRIM_SHIFT)  /* 43.45% */
+#  define SYS_LPOMONCTL_HFTRIM_47p99    (4 << SYS_LPOMONCTL_HFTRIM_SHIFT)  /* 47.99% */
+#  define SYS_LPOMONCTL_HFTRIM_52p55    (5 << SYS_LPOMONCTL_HFTRIM_SHIFT)  /* 52.55% */
+#  define SYS_LPOMONCTL_HFTRIM_57p02    (6 << SYS_LPOMONCTL_HFTRIM_SHIFT)  /* 57.02% */
+#  define SYS_LPOMONCTL_HFTRIM_61p46    (7 << SYS_LPOMONCTL_HFTRIM_SHIFT)  /* 61.46% */
+#  define SYS_LPOMONCTL_HFTRIM_65p92    (8 << SYS_LPOMONCTL_HFTRIM_SHIFT)  /* 65.92% */
+#  define SYS_LPOMONCTL_HFTRIM_70p17    (9 << SYS_LPOMONCTL_HFTRIM_SHIFT)  /* 70.17% */
 #  define SYS_LPOMONCTL_HFTRIM_74p55    (10 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 74.55% */
 #  define SYS_LPOMONCTL_HFTRIM_78p92    (11 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 78.92% */
 #  define SYS_LPOMONCTL_HFTRIM_83p17    (12 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 83.17% */
@@ -560,33 +564,46 @@
 #  define SYS_LPOMONCTL_HFTRIM_151p80   (29 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 151.80% */
 #  define SYS_LPOMONCTL_HFTRIM_155p50   (30 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 155.50% */
 #  define SYS_LPOMONCTL_HFTRIM_159p35   (31 << SYS_LPOMONCTL_HFTRIM_SHIFT) /* 159.35% */
+
 #define SYS_LPOMONCTL_OSCFRQCONFIGCNT   (1 << 16) /* Bit 16:  Configures the counter based on OSC frequency. */
 #define SYS_LPOMONCTL_BIASENABLE        (1 << 24) /* Bit 24:  Bias enable. */
 
 /* Clock Test Register */
 #define SYS_CLKTEST_
+
 /* DFT Control Register */
 #define SYS_DFTCTRLREG_
+
 /* DFT Control Register 2 */
 #define SYS_DFTCTRLREG2_
+
 /* General Purpose Register */
 #define SYS_GPREG1_
+
 /* Imprecise Fault Status Register */
 #define SYS_IMPFASTS_
+
 /* Imprecise Fault Write Address Register */
 #define SYS_IMPFTADD_
+
 /* System Software Interrupt Request 1 Register */
 #define SYS_SSIR1_
+
 /* System Software Interrupt Request 2 Register */
 #define SYS_SSIR2_
+
 /* System Software Interrupt Request 3 Register */
 #define SYS_SSIR3_
+
 /* System Software Interrupt Request 4 Register */
 #define SYS_SSIR4_
+
 /* RAM Control Register */
 #define SYS_RAMGCR_
+
 /* Bus Matrix Module Control Register 1 */
 #define SYS_BMMCR1_
+
 /* CPU Reset Control Register */
 #define SYS_CPURSTCR_
 
@@ -612,13 +629,16 @@
 #  define SYS_ECPCNTL_ECPINSEL_LOW      (0 << SYS_ECPCNTL_ECPINSEL_SHIFT) /* Tied Low */
 #  define SYS_ECPCNTL_ECPINSEL_HCLK     (1 << SYS_ECPCNTL_ECPINSEL_SHIFT) /* HCLK */
 #  define SYS_ECPCNTL_ECPINSEL_EXTCLK   (2 << SYS_ECPCNTL_ECPINSEL_SHIFT) /* External clock */
+
 #define SYS_ECPCNTL_ECPCOS              (1 << 23) /* Bit 23: ECP continue on suspend */
 #define SYS_ECPCNTL_ECPSSEL             (1 << 24) /* Bit 24: Select VCLK os OSCIN as for ECLK */
 
 /* DEV Parity Control Register 1 */
 #define SYS_DEVCR1_
+
 /* System Exception Control Register */
 #define SYS_ECR_
+
 /* System Exception Status Register */
 
 #define SYS_ESR_MPMODE                  (1 << 0)  /* Bit 0:  Current memory protection unit (MPU) mode */
@@ -634,12 +654,16 @@
 
 /* System Test Abort Status Register */
 #define SYS_TASR_
+
 /* Global Status Register */
 #define SYS_GLBSTAT_
+
 /* Device Identification Register */
 #define SYS_DEVID_
+
 /* Software Interrupt Vector Register */
 #define SYS_SSIVEC_
+
 /* System Software Interrupt Flag Register */
 #define SYS_SSIF_
 

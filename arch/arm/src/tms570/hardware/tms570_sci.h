@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_sci.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
@@ -27,18 +27,18 @@
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_SCI_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_SCI_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TMS570_SCI_GCR0_OFFSET        0x0000 /* SCI Global Control Register 0 */
 #define TMS570_SCI_GCR1_OFFSET        0x0004 /* SCI Global Control Register 1 */
@@ -86,7 +86,7 @@
 #define TMS570_SCI_PD_OFFSET          TMS570_SCI_PIO7_OFFSET  /* Pin Pullup/Pulldown Disable Register */
 #define TMS570_SCI_PSL_OFFSET         TMS570_SCI_PIO8_OFFSET  /* Pin Pullup/Pulldown Selection Register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TMS570_SCI1_GCR0              (TMS570_SCI1_BASE+TMS570_SCI_GCR0_OFFSET)
 #define TMS570_SCI1_GCR1              (TMS570_SCI1_BASE+TMS570_SCI_GCR1_OFFSET)
@@ -178,7 +178,7 @@
 #  define TMS570_SCI1_PSL             TMS570_SCI_PIO8  /* Pin Pullup/Pulldown Selection Register */
 #endif
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* SCI Global Control Register 0 */
 
@@ -214,7 +214,7 @@
 
 /* SCI Set Interrupt Register,
  * SCI Clear Interrupt Register,
- ( SCI Set Interrupt Level Register, and
+ * SCI Set Interrupt Level Register, and
  * SCI Clear Interrupt Level Register
  */
 
@@ -309,8 +309,10 @@
 
 /* Receiver Emulation Data Buffer */
 #define SCI_ED_
+
 /* Receiver Data Buffer */
 #define SCI_RD_
+
 /* Transmit Data Buffer */
 #define SCI_TD_
 
@@ -330,20 +332,28 @@
 
 /* LIN Compare Register */
 #define LIN_COMPARE_
+
 /* LIN Receive Buffer 0 Register */
 #define LIN_RD0_
+
 /* LIN Receive Buffer 1 Register */
 #define LIN_RD1_
+
 /* LIN Mask Register */
 #define LIN_MASK_
+
 /* LIN Identification Register */
 #define LIN_ID_
+
 /* LIN Transmit Buffer 0 */
 #define LIN_TD0_
+
 /* LIN Transmit Buffer 1 */
 #define LIN_TD1_
+
 /* Maximum Baud Rate Selection Register */
 #define SCI_MBRS_
+
 /* Input/Output Error Enable Register */
 #define SCI_IODFTCTRL_
 

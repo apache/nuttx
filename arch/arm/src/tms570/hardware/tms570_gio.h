@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_gio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
@@ -27,16 +27,16 @@
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_GIO_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_GIO_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #define TMS570_GIOA                    0
 #define TMS570_GIOB                    1
@@ -50,7 +50,7 @@
 #define TMS570_NPORTS                  8
 #define TMS570_NIRQPORTS               4
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TMS570_GIO_GCR0_OFFSET         0x0000 /* GIO Global Control Register */
 #define TMS570_GIO_INTDET_OFFSET       0x0008 /* GIO Interrupt Detect Register */
@@ -147,7 +147,7 @@
 #define TMS570_GIOH_PULDIS_OFFSET      0x012c /* GIOH Pull Disable Register */
 #define TMS570_GIOH_PSL_OFFSET         0x0130 /* GIOH Pull Select Register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TMS570_GIO_GCR0                (TMS570_GIO_BASE+TMS570_GIO_GCR0_OFFSET)
 #define TMS570_GIO_INTDET              (TMS570_GIO_BASE+TMS570_GIO_INTDET_OFFSET)
@@ -244,7 +244,7 @@
 #define TMS570_GIOH_PULDIS             (TMS570_GIO_BASE+TMS570_GIOH_PULDIS_OFFSET)
 #define TMS570_GIOH_PSL                (TMS570_GIO_BASE+TMS570_GIOH_PSL_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* GIO Global Control Register */
 
@@ -420,9 +420,14 @@
 #  define GIO_OFF_GIOD6                (0x1f)    /*   GIOD6 interrupt pending */
 #  define GIO_OFF_GIOD7                (0x20)    /*   GIOD7 interrupt pending */
 
-/* GIO Data Direction Register, GIO Data Input Register, GIO Data Output Register,
- * GIO Data Set Register, GIO Data Clear Register, GIO Open Drain Register,
- * GIO Pull Disable Register, and GIO Pull Select Register
+/* GIO Data Direction Register,
+ * GIO Data Input Register,
+ * GIO Data Output Register,
+ * GIO Data Set Register,
+ * GIO Data Clear Register,
+ * GIO Open Drain Register,
+ * GIO Pull Disable Register,
+ * and GIO Pull Select Register
  */
 
 #define GIO_PIN(n)                     (1 << (n)) /* Bit n:  Corresponds to pin n */

@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_pbist.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
@@ -27,16 +27,17 @@
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_PBIST_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_PBIST_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
+
 /* PBIST RAM Groups */
 
 #define PBIST_PBIST_ROM_GROUP          1   /* ROM */
@@ -57,13 +58,13 @@
 #define PBIST_DCAN1_RAM_RGS            3   /* Dual-port */
 #define PBIST_DCAN2_RAM_RGS            4   /* Dual-port */
 #define PBIST_ESRAM1_RAM_RGS           6   /* Single-port */
-#define PBIST_MIBSPI1_RAM_RGS          7    /* Dual-port */
+#define PBIST_MIBSPI1_RAM_RGS          7   /* Dual-port */
 #define PBIST_VIM_RAM_RGS              8   /* Dual-port */
 #define PBIST_MIBADC_RAM_RGS           9   /* Dual-port */
 #define PBIST_N2HET_RAM_RGS            11  /* Dual-port */
 #define PBIST_HET_TU_RAM_RGS           12  /* Dual-port */
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TMS570_PBIST_RAMT_OFFSET       0x0160 /* RAM Configuration Register */
 #define TMS570_PBIST_DLR_OFFSET        0x0164 /* Datalogger Register */
@@ -84,7 +85,7 @@
 #define TMS570_PBIST_RINFOL_OFFSET     0x01c8 /* RAM Info Mask Lower Register */
 #define TMS570_PBIST_RINFOU_OFFSET     0x01cc /* RAM Info Mask Upper Register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TMS570_PBIST_RAMT              (TMS570_PBIST_BASE+TMS570_PBIST_RAMT_OFFSET)
 #define TMS570_PBIST_DLR               (TMS570_PBIST_BASE+TMS570_PBIST_DLR_OFFSET)
@@ -105,7 +106,7 @@
 #define TMS570_PBIST_RINFOL            (TMS570_PBIST_BASE+TMS570_PBIST_RINFOL_OFFSET)
 #define TMS570_PBIST_RINFOU            (TMS570_PBIST_BASE+TMS570_PBIST_RINFOU_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* RAM Configuration Register */
 
