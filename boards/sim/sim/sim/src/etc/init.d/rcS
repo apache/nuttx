@@ -86,11 +86,8 @@ uorb start &
 
 #ifdef CONFIG_LIB_FLUORIDE
 fluorided &
-bta bdname CONFIG_FLUORIDE_DEVICE_NAME
+bta bdname
 bta scan 2
-#ifdef CONFIG_BT
-usleep 100000
-#endif
 #endif /* CONFIG_LIB_FLUORIDE */
 
 #ifdef CONFIG_BT
