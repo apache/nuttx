@@ -71,15 +71,18 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
  * Name: rwb_semtake
  ****************************************************************************/
 
+#if defined(CONFIG_DRVR_WRITEBUFFER) && CONFIG_DRVR_WRDELAY != 0
 static int rwb_semtake(FAR sem_t *sem)
 {
   return nxsem_wait_uninterruptible(sem);
 }
+#endif
 
 /****************************************************************************
  * Name: rwb_forcetake
  ****************************************************************************/
 
+#if defined(CONFIG_DRVR_WRITEBUFFER) && CONFIG_DRVR_WRDELAY != 0
 static int rwb_forcetake(FAR sem_t *sem)
 {
   int result;
@@ -103,6 +106,7 @@ static int rwb_forcetake(FAR sem_t *sem)
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: rwb_semgive
