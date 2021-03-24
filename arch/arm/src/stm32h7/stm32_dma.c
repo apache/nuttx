@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <inttypes.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -927,7 +928,6 @@ static void stm32_gdma_limits_get(uint8_t controller, FAR uint8_t *first,
 
 static void stm32_mdma_disable(DMA_CHANNEL dmachan)
 {
-  DMA_CHANNEL dmachan    = (DMA_CHANNEL)handle;
   uint8_t     controller = dmachan->ctrl;
 
   DEBUGASSERT(controller == MDMA);
@@ -1017,8 +1017,8 @@ static bool stm32_mdma_capable(FAR stm32_dmacfg_t *cfg)
   uint32_t ccr  = cfg->cfg1;
   uint32_t ctcr = cfg->cfg2;
 
-  dmainfo("0x%08x/%u 0x%08x 0x%08x\n", cfg->maddr, cfg->ndata, ccr,
-          ctcr);
+  dmainfo("0x%08" PRIx32 "/%" PRIu32 " 0x%08" PRIx32 " 0x%08" PRIx32 "\n",
+          cfg->maddr, cfg->ndata, ccr, ctcr);
 
 #warning stm32_mdma_capable not implemented
 
@@ -1038,29 +1038,29 @@ static void stm32_mdma_dump(DMA_HANDLE handle, const char *msg)
 
   DEBUGASSERT(controller == MDMA);
 
-  dmainfo("   CISR:   %08x\n",
+  dmainfo("   CISR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CISR_OFFSET));
-  dmainfo("   CESR:   %08x\n",
+  dmainfo("   CESR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CESR_OFFSET));
-  dmainfo("   CCR:    %08x\n",
+  dmainfo("   CCR:    %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CCR_OFFSET));
-  dmainfo("   CTCR:   %08x\n",
+  dmainfo("   CTCR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CTCR_OFFSET));
-  dmainfo("   CBNDTR: %08x\n",
+  dmainfo("   CBNDTR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CBNDTR_OFFSET));
-  dmainfo("   CSAR:   %08x\n",
+  dmainfo("   CSAR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CSAR_OFFSET));
-  dmainfo("   CDAR:   %08x\n",
+  dmainfo("   CDAR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CDAR_OFFSET));
-  dmainfo("   CBRUR:  %08x\n",
+  dmainfo("   CBRUR:  %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CBRUR_OFFSET));
-  dmainfo("   CLAR:   %08x\n",
+  dmainfo("   CLAR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CLAR_OFFSET));
-  dmainfo("   CTBR:   %08x\n",
+  dmainfo("   CTBR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CTBR_OFFSET));
-  dmainfo("   CMAR:   %08x\n",
+  dmainfo("   CMAR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CMAR_OFFSET));
-  dmainfo("   CMDR:   %08x\n",
+  dmainfo("   CMDR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CMDR_OFFSET));
 }
 #endif
@@ -1234,7 +1234,8 @@ static void stm32_sdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
 
   DEBUGASSERT(dmachan->ctrl == DMA1 || dmachan->ctrl == DMA2);
 
-  dmainfo("paddr: %08x maddr: %08x ndata: %d scr: %08x\n",
+  dmainfo("paddr: %08" PRIx32 " maddr: %08" PRIx32 " ndata: %" PRIu32 " "
+          "scr: %08" PRIx32 "\n",
           cfg->paddr, cfg->maddr, cfg->ndata, cfg->cfg1);
 
 #ifdef CONFIG_STM32H7_DMACAPABLE
@@ -1472,7 +1473,8 @@ static bool stm32_sdma_capable(FAR stm32_dmacfg_t *cfg)
   uint32_t mend;
   uint32_t ccr = cfg->cfg1;
 
-  dmainfo("0x%08x/%u 0x%08x\n", cfg->maddr, cfg->ndata, cfg->cfg1);
+  dmainfo("0x%08" PRIx32 "/%" PRIu32 " 0x%08" PRIx32 "\n",
+          cfg->maddr, cfg->ndata, cfg->cfg1);
 
   /* Verify that the address conforms to the memory transfer size.
    * Transfers to/from memory performed by the DMA controller are
@@ -1535,7 +1537,8 @@ static bool stm32_sdma_capable(FAR stm32_dmacfg_t *cfg)
           ((mend + 1) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
         {
           dmainfo("stm32_dmacapable: dcache unaligned "
-                  "maddr:0x%08x mend:0x%08x\n", cfg->maddr, mend);
+                  "maddr:0x%08" PRIx32 " mend:0x%08" PRIx32 "\n",
+                  cfg->maddr, mend);
 #if !defined(CONFIG_STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
       return false;
 #endif
@@ -1676,21 +1679,21 @@ static void stm32_sdma_dump(DMA_HANDLE handle, const char *msg)
 
   DEBUGASSERT(dmachan->ctrl == DMA1 || dmachan->ctrl == DMA2);
 
-  dmainfo("   LISR: %08x\n",
+  dmainfo("   LISR: %08" PRIx32 "\n",
           dmabase_getreg(dmachan, STM32_DMA_LISR_OFFSET));
-  dmainfo("   HISR: %08x\n",
+  dmainfo("   HISR: %08" PRIx32 "\n",
           dmabase_getreg(dmachan, STM32_DMA_HISR_OFFSET));
-  dmainfo("   SCR:  %08x\n",
+  dmainfo("   SCR:  %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_DMA_SCR_OFFSET));
-  dmainfo("   SNDTR: %08x\n",
+  dmainfo("   SNDTR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_DMA_SNDTR_OFFSET));
-  dmainfo("   SPAR:  %08x\n",
+  dmainfo("   SPAR:  %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_DMA_SPAR_OFFSET));
-  dmainfo("   SM0AR: %08x\n",
+  dmainfo("   SM0AR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_DMA_SM0AR_OFFSET));
-  dmainfo("   SM1AR: %08x\n",
+  dmainfo("   SM1AR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_DMA_SM1AR_OFFSET));
-  dmainfo("   SFCR:  %08x\n",
+  dmainfo("   SFCR:  %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_DMA_SFCR_OFFSET));
 
   stm32_dmamux_dump(g_dma[dmachan->ctrl].dmamux,
@@ -1825,7 +1828,8 @@ static void stm32_bdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
   DEBUGASSERT(handle != NULL);
   DEBUGASSERT(dmachan->ctrl == BDMA);
 
-  dmainfo("paddr: %08x maddr: %08x ndata: %d scr: %08x\n",
+  dmainfo("paddr: %08" PRIx32 " maddr: %08" PRIx32 " ndata: %" PRIu32 " "
+          "scr: %08" PRIx32 "\n",
           cfg->paddr, cfg->maddr, cfg->ndata, cfg->cfg1);
 
 #ifdef CONFIG_STM32H7_DMACAPABLE
@@ -2005,7 +2009,8 @@ static bool stm32_bdma_capable(FAR stm32_dmacfg_t *cfg)
   uint32_t maddr = cfg->maddr;
   uint32_t ccr   = cfg->cfg1;
 
-  dmainfo("0x%08x/%u 0x%08x\n", cfg->maddr, cfg->ndata, cfg->cfg1);
+  dmainfo("0x%08" PRIx32 "/%" PRIu32 " 0x%08" PRIx32 "\n",
+          cfg->maddr, cfg->ndata, cfg->cfg1);
 
   /* Verify that the address conforms to the memory transfer size.
    * Transfers to/from memory performed by the BDMA controller are
@@ -2063,8 +2068,9 @@ static bool stm32_bdma_capable(FAR stm32_dmacfg_t *cfg)
   if ((cfg->maddr & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
       ((mend + 1) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
     {
-      dmainfo("stm32_dmacapable: dcache unaligned maddr:0x%08x "
-              "mend:0x%08x\n", cfg->maddr, mend);
+      dmainfo("stm32_dmacapable: dcache unaligned "
+              "maddr:0x%08" PRIx32 " mend:0x%08x\n",
+              cfg->maddr, mend);
 #if !defined(CONFIG_STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
       return false;
 #endif
@@ -2124,17 +2130,17 @@ static void stm32_bdma_dump(DMA_HANDLE handle, const char *msg)
 
   DEBUGASSERT(controller == BDMA);
 
-  dmainfo("   ISR:   %08x\n",
+  dmainfo("   ISR:   %08" PRIx32 "\n",
           dmabase_getreg(dmachan, STM32_BDMA_ISR_OFFSET));
-  dmainfo("   CCR:   %08x\n",
+  dmainfo("   CCR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET));
-  dmainfo("   CNDTR: %08x\n",
+  dmainfo("   CNDTR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_BDMACH_CNDTR_OFFSET));
-  dmainfo("   CPAR:  %08x\n",
+  dmainfo("   CPAR:  %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_BDMACH_CPAR_OFFSET));
-  dmainfo("   CM0AR: %08x\n",
+  dmainfo("   CM0AR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_BDMACH_CM0AR_OFFSET));
-  dmainfo("   CM1AR: %08x\n",
+  dmainfo("   CM1AR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_BDMACH_CM1AR_OFFSET));
 
   stm32_dmamux_dump(g_dma[dmachan->ctrl].dmamux, controller);
@@ -2150,22 +2156,22 @@ static void stm32_bdma_dump(DMA_HANDLE handle, const char *msg)
 #ifdef CONFIG_DEBUG_DMA_INFO
 static void stm32_dmamux_dump(DMA_MUX dmamux, uint8_t chan)
 {
-  dmainfo("DMAMUX%d CH=%d\n", dmamux->id, chan);
-  dmainfo("   CCR:   %08x\n",
+  dmainfo("DMAMUX%" PRIu8 " CH=%" PRIu8 "\n", dmamux->id, chan);
+  dmainfo("   CCR:   %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_CXCR_OFFSET(chan)));
-  dmainfo("   CSR:   %08x\n",
+  dmainfo("   CSR:   %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_CSR_OFFSET));
-  dmainfo("   RG0CR: %08x\n",
+  dmainfo("   RG0CR: %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_RG0CR_OFFSET));
-  dmainfo("   RG1CR: %08x\n",
+  dmainfo("   RG1CR: %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_RG1CR_OFFSET));
-  dmainfo("   RG2CR: %08x\n",
+  dmainfo("   RG2CR: %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_RG2CR_OFFSET));
-  dmainfo("   RG3CR: %08x\n",
+  dmainfo("   RG3CR: %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_RG3CR_OFFSET));
-  dmainfo("   RGSR:  %08x\n",
+  dmainfo("   RGSR:  %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_RGSR_OFFSET));
-  dmainfo("   RGCFR: %08x\n",
+  dmainfo("   RGCFR: %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_RGCFR_OFFSET));
 };
 #endif
@@ -2331,11 +2337,11 @@ DMA_HANDLE stm32_dmachannel(unsigned int dmamap)
 
   leave_critical_section(flags);
 
-  dmainfo("ctrl=%d item=%d\n", controller, item);
+  dmainfo("ctrl=%" PRIu8 " item=%d\n", controller, item);
 
   if (item == -1)
     {
-      dmainfo("No available DMA chan for CTRL=%d\n",
+      dmainfo("No available DMA chan for CTRL=%" PRIu8 "\n",
               controller);
 
       /* No available channel */
@@ -2347,7 +2353,8 @@ DMA_HANDLE stm32_dmachannel(unsigned int dmamap)
 
   dmachan = &g_dmach[item];
 
-  dmainfo("Get g_dmach[%d] CTRL=%d CH=%d\n", i, controller, dmachan->chan);
+  dmainfo("Get g_dmach[%d] CTRL=%" PRIu8 " CH=%" PRIu8 "\n",
+          i, controller, dmachan->chan);
 
   /* Be sure that we have proper DMA controller */
 
@@ -2363,7 +2370,8 @@ DMA_HANDLE stm32_dmachannel(unsigned int dmamap)
     {
       uint8_t dmamux_chan = dmachan->chan + g_dma[controller].dmamux_offset;
 
-      dmainfo("Get DMAMUX%d CH %d\n", dmamux->id, dmamux_chan);
+      dmainfo("Get DMAMUX%" PRIu8 " CH %" PRIu8 "\n",
+              dmamux->id, dmamux_chan);
 
       /* DMAMUX Set DMA channel source */
 
@@ -2423,7 +2431,8 @@ void stm32_dmafree(DMA_HANDLE handle)
     {
       uint8_t dmamux_chan = dmachan->chan + g_dma[controller].dmamux_offset;
 
-      dmainfo("Free DMAMUX%d CH %d\n", dmamux->id, dmamux_chan);
+      dmainfo("Free DMAMUX%" PRIu8 " CH %" PRIu8 "\n",
+              dmamux->id, dmamux_chan);
 
       /* Clear DMAMUX CCR register associated with channel */
 
@@ -2440,7 +2449,7 @@ void stm32_dmafree(DMA_HANDLE handle)
   dmachan->used = false;
   leave_critical_section(flags);
 
-  dmainfo("Unmapping DMAMUX(%d)\n", dmachan->chan);
+  dmainfo("Unmapping DMAMUX(%" PRIu8 ")\n", dmachan->chan);
 }
 
 /****************************************************************************
@@ -2578,7 +2587,8 @@ void stm32_dmadump(DMA_HANDLE handle, const char *msg)
 
   DEBUGASSERT(controller >= MDMA && controller <= BDMA);
 
-  dmainfo("DMA %d CH%d Registers: %s\n", dmachan->ctrl, dmachan->ctrl, msg);
+  dmainfo("DMA %" PRIu8 " CH%" PRIu8 " Registers: %s\n",
+          dmachan->ctrl, dmachan->ctrl, msg);
 
   g_dma_ops[controller].dma_dump(handle, msg);
 }
