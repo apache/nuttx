@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_gpio.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,22 +31,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_GPIO_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
 #include "hardware/nrf52_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_NRF52_HAVE_PORT1
 #  define NRF52_GPIO_NPORTS         2
@@ -59,7 +59,7 @@
 
 #define NRF52_GPIO_NPINS            32
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define NRF52_GPIO_OUT_OFFSET        0x0504 /* Write GPIO port */
 #define NRF52_GPIO_OUTSET_OFFSET     0x0508 /* Set individual bits in GPIO port */
@@ -73,7 +73,7 @@
 
 #define NRF52_GPIO_PIN_CNF_OFFSET(n) (0x0700 + (n << 2))
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define NRF52_GPIO0_OUT              (NRF52_GPIO_P0_BASE + NRF52_GPIO_OUT_OFFSET)
 #define NRF52_GPIO0_OUTSET           (NRF52_GPIO_P0_BASE + NRF52_GPIO_OUTSET_OFFSET)
@@ -95,7 +95,7 @@
 #  define NRF52_GPIO1_CNF(n)         (NRF52_GPIO_P1_BASE + NRF52_GPIO_PIN_CNF_OFFSET(n))
 #endif
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 #define GPIO_DETECTMODE_DEFAULT         (0)
 #define GPIO_DETECTMODE_LDETECT         (1)
