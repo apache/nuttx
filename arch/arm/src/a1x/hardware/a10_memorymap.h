@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/a1x/hardware/a10_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A10_MEMORYMAP_H
 #define __ARCH_ARM_SRC_A1X_HARDWARE_A10_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/a1x/chip.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Decimal configuration values may exceed 2Gb and, hence, overflow to negative
- * values unless we force them to unsigned long:
+ ****************************************************************************/
+
+/* Decimal configuration values may exceed 2Gb and, hence, overflow to
+ * negative values unless we force them to unsigned long:
  */
 
 #define __CONCAT(a,b) a ## b
@@ -281,8 +282,8 @@
 /* A1X Virtual (mapped) Memory Map
  *
  * board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location because it depends
- * on some the virtual address definitions provided above.
+ * memory map is used.  It is included in this odd location because it
+ * depends on some the virtual address definitions provided above.
  */
 
 #include <arch/board/board_memorymap.h>
@@ -429,9 +430,9 @@
 #    error "Only one of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is defined"
 #  endif
 
-  /* A sanity check, if the configuration says that the page table is read-only
-   * and pre-initialized (maybe ROM), then it should have also defined both of
-   * the page table base addresses.
+  /* A sanity check, if the configuration says that the page table is
+   * read-only and pre-initialized (maybe ROM), then it should have also
+   * defined both of the page table base addresses.
    */
 
 #  ifdef CONFIG_ARCH_ROMPGTABLE
@@ -442,10 +443,10 @@
 
   /* If CONFIG_PAGING is selected, then parts of the 1-to-1 virtual memory
    * map probably do not apply because paging logic will probably partition
-   * the SRAM section differently.  In particular, if the page table is located
-   * at the end of SRAM, then the virtual page table address defined below
-   * will probably be in error.  In that case PGTABLE_BASE_VADDR is defined
-   * in the file mmu.h
+   * the SRAM section differently.  In particular, if the page table is
+   * located at the end of SRAM, then the virtual page table address defined
+   * below will probably be in error.
+   * In that case PGTABLE_BASE_VADDR is defined in the file mmu.h
    *
    * We must declare the page table at the bottom or at the top of internal
    * SRAM.  We pick the bottom of internal SRAM *unless* there are vectors
@@ -469,9 +470,10 @@
 
 #  endif /* CONFIG_ARCH_LOWVECTORS */
 
-  /* Note that the page table does not lie in the same address space as does the
-   * mapped RAM in either case.  So we will need to create a special mapping for
-   * the page table at boot time.
+  /* Note that the page table does not lie in the same address space as does
+   * the mapped RAM in either case.
+   * So we will need to create a special mapping for the page table at boot
+   * time.
    */
 
 #  define ARMV7A_PGTABLE_MAPPING 1
@@ -480,10 +482,10 @@
 
 /* Level 2 Page table start addresses.
  *
- * 16Kb of memory is reserved hold the page table for the virtual mappings.  A
- * portion of this table is not accessible in the virtual address space (for
- * normal operation).   There are several large holes in the physical address
- * space for which there will never be level 1 mappings:
+ * 16Kb of memory is reserved hold the page table for the virtual mappings.
+ * A portion of this table is not accessible in the virtual address space
+ * (for normal operation).   There are several large holes in the physical
+ * address space for which there will never be level 1 mappings:
  *
  *                                    LI PAGE TABLE
  *   ADDRESS RANGE           SIZE     ENTRIES       SECTIONS
@@ -560,7 +562,8 @@
  *
  *   A1X_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
  *   A1X_VECTOR_VSRAM - Virtual address of vector table in SRAM
- *   A1X_VECTOR_VADDR - Virtual address of vector table (0x00000000 or 0xffff0000)
+ *   A1X_VECTOR_VADDR - Virtual address of vector table
+ *                     (0x00000000 or 0xffff0000)
  *
  * NOTE: When using LOWVECTORS, the actual base of the vectors appears to be
  * offset to address 0x0000:0040
@@ -588,16 +591,16 @@
 
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_A1X_HARDWARE_A10_MEMORYMAP_H */

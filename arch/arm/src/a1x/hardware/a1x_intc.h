@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/a1x/hardware/a1x_intc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A1X_INTC_H
 #define __ARCH_ARM_SRC_A1X_HARDWARE_A1X_INTC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/a1x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define A1X_INTC_VECTOR_OFFSET       0x0000 /* Interrupt Vector */
 #define A1X_INTC_BASEADDR_OFFSET     0x0004 /* Interrupt Base Address */
@@ -81,7 +81,7 @@
 #define A1X_INTC_PRIO3_OFFSET        0x008c /* Interrupt Source Priority 3 */
 #define A1X_INTC_PRIO4_OFFSET        0x0090 /* Interrupt Source Priority 4 */
 
-/* Register virtual addresses *******************************************************/
+/* Register virtual addresses ***********************************************/
 
 #define A1X_INTC_VECTOR              (A1X_INTC_VADDR+A1X_INTC_VECTOR_OFFSET)
 #define A1X_INTC_BASEADDR            (A1X_INTC_VADDR+A1X_INTC_BASEADDR_OFFSET)
@@ -130,7 +130,7 @@
 #define A1X_INTC_PRIO3               (A1X_INTC_VADDR+A1X_INTC_PRIO3_OFFSET)
 #define A1X_INTC_PRIO4               (A1X_INTC_VADDR+A1X_INTC_PRIO4_OFFSET)
 
-/* Register bit field definitions ***************************************************/
+/* Register bit field definitions *******************************************/
 
 /* Interrupt Vector */
 

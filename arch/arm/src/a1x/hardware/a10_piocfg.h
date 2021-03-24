@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/a1x/hardware/a10_piocfg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,31 +16,36 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A10_PIOCFG_H
 #define __ARCH_ARM_SRC_A1X_HARDWARE_A10_PIOCFG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/a1x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* PIO pin definitions *************************************************************/
+ ****************************************************************************/
+
+/* PIO pin definitions ******************************************************/
+
 /* Alternate Pin Functions.
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
- * Drivers, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.  */
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc. Drivers, however, will use the pin selection without the numeric
+ * suffix.
+ * Additional definitions are required in the board.h file.
+ */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific PIO options (such as pull-up or
- * -down).  Just the basics are defined for most pins in this file at the present
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific PIO options
+ * (such as pull-up or-down).
+ * Just the basics are defined for most pins in this file at the present
  * time.
  */
 
