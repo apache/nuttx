@@ -481,15 +481,21 @@ struct stm32_usbdev_s
    * ep0data
    *   For OUT SETUP requests, the SETUP data phase must also complete before
    *   the SETUP command can be processed.  The pack receipt logic will save
-   *   the accompanying EP0 IN data in ep0data[] before the SETUP command is
-   *   processed.
+   *   the accompanying EP0 OUT data in ep0data[] before the SETUP command is
+   *   processed. The data length is specified in the SETUP packet payload,
+   *   and can consist of multiple DATA packets.
    *
    *   For IN SETUP requests, the DATA phase will occur AFTER the SETUP
    *   control request is processed.  In that case, ep0data[] may be used as
    *   the response buffer.
    *
    * ep0datlen
-   *   Length of OUT DATA received in ep0data[] (Not used with OUT data)
+   *   Length of data received part of OUT SETUP request. During transfer
+   *   it is the total number of bytes received, which can be more than
+   *   CONFIG_USBDEV_SETUP_MAXDATASIZE. The value is clamped to valid length
+   *   of data in ep0data[] before SETUP OUT handler is called. Bytes that
+   *   exceed the maximum length are discarded, but must be read out of the
+   *   USB peripheral FIFO.
    */
 
   struct usb_ctrlreq_s    ctrlreq;
