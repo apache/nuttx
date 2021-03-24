@@ -131,7 +131,8 @@ void up_disable_irq(int irq)
        * Clear the associated bit to disable the interrupt
        */
 
-      putreg16((getreg16(DM320_INTC_EINT0) & ~(1 << irq)), DM320_INTC_EINT0);
+      putreg16((getreg16(DM320_INTC_EINT0) &
+                ~(1 << irq)), DM320_INTC_EINT0);
     }
   else if (irq < 32)
     {
@@ -139,7 +140,8 @@ void up_disable_irq(int irq)
        * Clear the associated bit to disable the interrupt
        */
 
-      putreg16((getreg16(DM320_INTC_EINT1) & ~(1 << (irq-16))), DM320_INTC_EINT1);
+      putreg16((getreg16(DM320_INTC_EINT1) &
+                ~(1 << (irq - 16))), DM320_INTC_EINT1);
     }
   else
     {
@@ -147,7 +149,8 @@ void up_disable_irq(int irq)
        * Clear the associated bit to disable the interrupt
        */
 
-      putreg16((getreg16(DM320_INTC_EINT2) & ~(1 << (irq-32))), DM320_INTC_EINT2);
+      putreg16((getreg16(DM320_INTC_EINT2) &
+                ~(1 << (irq - 32))), DM320_INTC_EINT2);
     }
 }
 
@@ -171,7 +174,8 @@ void up_enable_irq(int irq)
        * Set the associated bit to enable the interrupt
        */
 
-      putreg16((getreg16(DM320_INTC_EINT0) | (1 << irq)), DM320_INTC_EINT0);
+      putreg16((getreg16(DM320_INTC_EINT0) |
+               (1 << irq)), DM320_INTC_EINT0);
     }
   else if (irq < 32)
     {
@@ -179,7 +183,8 @@ void up_enable_irq(int irq)
        * Set the associated bit to enable the interrupt
        */
 
-      putreg16((getreg16(DM320_INTC_EINT1) | (1 << (irq-16))), DM320_INTC_EINT1);
+      putreg16((getreg16(DM320_INTC_EINT1) |
+               (1 << (irq - 16))), DM320_INTC_EINT1);
     }
   else
     {
@@ -187,7 +192,8 @@ void up_enable_irq(int irq)
        * Set the associated bit to enable the interrupt
        */
 
-      putreg16((getreg16(DM320_INTC_EINT2) | (1 << (irq-32))), DM320_INTC_EINT2);
+      putreg16((getreg16(DM320_INTC_EINT2) |
+               (1 << (irq - 32))), DM320_INTC_EINT2);
     }
 }
 
@@ -215,12 +221,12 @@ void arm_ack_irq(int irq)
     {
       /* Set the associated status bit to clear the interrupt  */
 
-      putreg16((1 << (irq-16)), DM320_INTC_IRQ1);
+      putreg16((1 << (irq - 16)), DM320_INTC_IRQ1);
     }
   else
     {
       /* Set the associated status bit to clear the interrupt */
 
-      putreg16((1 << (irq-32)), DM320_INTC_IRQ2);
+      putreg16((1 << (irq - 32)), DM320_INTC_IRQ2);
     }
 }

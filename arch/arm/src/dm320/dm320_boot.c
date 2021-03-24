@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/dm320/dm320_boot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
@@ -32,9 +32,9 @@
 
 #include <nuttx/board.h>
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 struct section_mapping_s
 {
@@ -44,16 +44,16 @@ struct section_mapping_s
   uint32_t nsections;  /* Number of mappings in the region */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 extern uint32_t _vector_start; /* Beginning of vector block */
 extern uint32_t _vector_end;   /* End+1 of vector block */
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static const struct section_mapping_s section_mapping[] =
 {
@@ -76,15 +76,16 @@ static const struct section_mapping_s section_mapping[] =
 };
 #define NMAPPINGS (sizeof(section_mapping) / sizeof(struct section_mapping_s))
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_setlevel1entry
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
+static inline void up_setlevel1entry(uint32_t paddr,
+                                     uint32_t vaddr, uint32_t mmuflags)
 {
   uint32_t *pgtable = (uint32_t *)PGTABLE_BASE_VADDR;
   uint32_t  index   = vaddr >> 20;
@@ -94,12 +95,13 @@ static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mm
   pgtable[index]  = (paddr | mmuflags);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_setlevel2coarseentry
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void up_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr,
-                                           uint32_t vaddr, uint32_t mmuflags)
+static inline void
+up_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr,
+                        uint32_t vaddr, uint32_t mmuflags)
 {
   uint32_t *ctable  = (uint32_t *)ctabvaddr;
   uint32_t  index;
@@ -116,13 +118,14 @@ static inline void up_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr,
   ctable[index] = (paddr | mmuflags);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_setupmappings
- ************************************************************************************/
+ ****************************************************************************/
 
 static void up_setupmappings(void)
 {
-  int i, j;
+  int i;
+  int j;
 
   for (i = 0; i < NMAPPINGS; i++)
     {
@@ -139,9 +142,9 @@ static void up_setupmappings(void)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_vectormapping
- ************************************************************************************/
+ ****************************************************************************/
 
 static void up_vectormapping(void)
 {
@@ -149,27 +152,34 @@ static void up_vectormapping(void)
   uint32_t vector_vaddr = DM320_VECTOR_VADDR;
   uint32_t end_paddr    = vector_paddr + DM320_IRAM_SIZE;
 
-  /* We want to keep our interrupt vectors and interrupt-related logic in zero-wait
-   * state internal RAM (IRAM).  The DM320 has 16Kb of IRAM positioned at physical
-   * address 0x0000:0000; we need to map this to 0xffff:0000.
+  /* We want to keep our interrupt vectors and interrupt-related logic in
+   * zero-wait state internal RAM (IRAM).  The DM320 has 16Kb of IRAM
+   * positioned at physical address 0x0000:0000;
+   * we need to map this to 0xffff:0000.
    */
 
   while (vector_paddr < end_paddr)
     {
-      up_setlevel2coarseentry(PGTABLE_L2_COARSE_VBASE, vector_paddr, vector_vaddr,
+      up_setlevel2coarseentry(PGTABLE_L2_COARSE_VBASE,
+                              vector_paddr,
+                              vector_vaddr,
                               MMU_L2_VECTORFLAGS);
       vector_paddr += 4096;
       vector_vaddr += 4096;
     }
 
-  /* Now set the level 1 descriptor to refer to the level 2 coarse page table. */
+  /* Now set the level 1 descriptor to refer to the level 2 coarse page
+   * table.
+   */
 
-  up_setlevel1entry(PGTABLE_L2_COARSE_PBASE, DM320_VECTOR_VCOARSE, MMU_L1_VECTORFLAGS);
+  up_setlevel1entry(PGTABLE_L2_COARSE_PBASE,
+                    DM320_VECTOR_VCOARSE,
+                    MMU_L1_VECTORFLAGS);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_copyvectorblock
- ************************************************************************************/
+ ****************************************************************************/
 
 static void up_copyvectorblock(void)
 {
@@ -183,20 +193,20 @@ static void up_copyvectorblock(void)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 void arm_boot(void)
 {
-  /* __start provided the basic MMU mappings for SDRAM.  Now provide mappings for all
-   * IO regions (Including the vector region).
+  /* __start provided the basic MMU mappings for SDRAM.
+   * Now provide mappings for all IO regions (Including the vector region).
    */
 
   up_setupmappings();
 
-  /* Provide a special mapping for the IRAM interrupt vector positioned in high
-   * memory.
+  /* Provide a special mapping for the IRAM interrupt vector positioned in
+   * high memory.
    */
 
   up_vectormapping();

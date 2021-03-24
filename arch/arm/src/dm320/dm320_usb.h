@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/dm320/dm320_usb.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,20 +16,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_DM320_DM320_USB_H
 #define __ARCH_ARM_SRC_DM320_DM320_USB_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* USB Controller Registers *********************************************************/
+/* USB Controller Registers *************************************************/
 
 #define DM320_USB_FADDR       (DM320_USBOTG_VADDR+0x0000) /* Peripheral Address */
 #define DM320_USB_POWER       (DM320_USBOTG_VADDR+0x0001) /* Power Control */
@@ -90,7 +90,7 @@
 #define DM320_USB_DMAADDR4    (DM320_USBOTG_VADDR+0x0238) /* DMA Channel4 Address */
 #define DM320_USB_DMACOUNT4   (DM320_USBOTG_VADDR+0x023c) /* DMA Channel4 Byte Count */
 
-/* POWER register bit settings ******************************************************/
+/* POWER register bit settings **********************************************/
 
 #define USB_POWER_ENSUS       (0x00000001)
 #define USB_POWER_SUSPEND     (0x00000002)
@@ -101,7 +101,7 @@
 #define USB_POWER_VBUSVAL     (0x00000040)
 #define USB_POWER_ISO         (0x00000080)
 
-/* USB interrupt bits **************************************************************/
+/* USB interrupt bits *******************************************************/
 
 #define USB_INT_NOINTERRUPT   (0x00000000)
 #define USB_INT_SUSPEND       (0x00000001)
@@ -135,11 +135,11 @@
 #define USB_EP2_RX            (0x04)
 #define USB_EP1_RX            (0x02)
 
-/* Endpoint control register index *************************************************/
+/* Endpoint control register index ******************************************/
 
 #define USB_EP0_SELECT        (0x00)
 
-/* DEVCTL register bit settings ****************************************************/
+/* DEVCTL register bit settings *********************************************/
 
 #define USB_DEVCTL_CID        (0x80)
 #define USB_DEVCTL_FSDEV      (0x40)
@@ -150,7 +150,7 @@
 #define USB_DEVCTL_HOSTREQ    (0x02)
 #define USB_DEVCTL_SESSREQ    (0x01)
 
-/* PERCSR0 register bit settings ***************************************************/
+/* PERCSR0 register bit settings ********************************************/
 
 #define USB_PERCSR0_CLRSETEND  (0x80)
 #define USB_PERCSR0_CLRRXRDY   (0x40)
@@ -161,7 +161,7 @@
 #define USB_PERCSR0_TXPKTRDY   (0x02)
 #define USB_PERCSR0_RXPKTRDY   (0x01)
 
-/* TXCSR1 register bit settings ****************************************************/
+/* TXCSR1 register bit settings *********************************************/
 
 #define USB_TXCSR1_CLRDATTOG   (0x40)
 #define USB_TXCSR1_SENTST      (0x20)
@@ -171,11 +171,11 @@
 #define USB_TXCSR1_FIFOEMP     (0x02)
 #define USB_TXCSR1_TXPKTRDY    (0x01)
 
-/* CSR2 register bit settings ******************************************************/
+/* CSR2 register bit settings ***********************************************/
 
 #define USB_CSR2_FLFIFO        (0x01)
 
-/* TXCSR2 register bit settings ****************************************************/
+/* TXCSR2 register bit settings *********************************************/
 
 #define USB_TXCSR2_AUTOSET     (0x80)
 #define USB_TXCSR2_ISO         (0x40)
@@ -184,7 +184,7 @@
 #define USB_TXCSR2_FRDATTOG    (0x08)
 #define USB_TXCSR2_DMAMODE1    (0x04)
 
-/* PERRXCSR1 register bit settings *************************************************/
+/* PERRXCSR1 register bit settings ******************************************/
 
 #define USB_PERRXCSR1_CLRDATTOG (0x80)
 #define USB_PERRXCSR1_SENTST   (0x40)
@@ -195,14 +195,14 @@
 #define USB_PERRXCSR1_FIFOFUL  (0x02)
 #define USB_PERRXCSR1_RXPKTRDY (0x01)
 
-/* PERRXCSR2 register bit settings *************************************************/
+/* PERRXCSR2 register bit settings ******************************************/
 
 #define USB_PERPXCSR2_AUTOCLR  (0x80)
 #define USB_PERPXCSR2_ISO      (0x40)
 #define USB_PERPXCSR2_DMAEN    (0x20)
 #define USB_PERPXCSR2_DMAMODE1 (0x10)
 
-/* TXFIFO2 register bit settings **************************************************/
+/* TXFIFO2 register bit settings ********************************************/
 
 #define USB_TXFIF02_SZMASK     (0xe0)
 #define USB_TXFIFO2_SZ_8       (0x00)
@@ -216,19 +216,19 @@
 #define USB_TXFIFO2_SINGLE_BUF (0x00)
 #define USB_TXFIFO2_DOUBLE_BUF (0x10)
 
-/* RXFIFO2 register bit settings **************************************************/
+/* RXFIFO2 register bit settings ********************************************/
 
 #define USB_RXFIF02_DPB        (0x10)
 
-/* USBDMA control register bit settings ********************************************/
+/* USBDMA control register bit settings *************************************/
 
 #define USBDMA_CNTL_DMAEN      (0x01)
 #define USBDMA_CNTL_DIR_IN     (0x02)
 #define USBDMA_CNTL_DMAMODE1   (0x04)
 #define USBDMA_CNTL_INTREN     (0x08)
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_DM320_DM320_USB_H */
