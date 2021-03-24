@@ -36,7 +36,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/pgalloc.h>
-#include <nuttx/irq.h>
 
 #include "tlsf/tlsf.h"
 
@@ -128,9 +127,6 @@ static void mm_seminitialize(FAR struct mm_heap_impl_s *impl)
 
 static int mm_trysemaphore(FAR struct mm_heap_impl_s *impl)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags = enter_critical_section();
-#endif
   pid_t my_pid = getpid();
   int ret;
 
@@ -201,9 +197,6 @@ static int mm_trysemaphore(FAR struct mm_heap_impl_s *impl)
     }
 
 errout:
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
   return ret;
 }
 
@@ -218,9 +211,6 @@ errout:
 
 static void mm_takesemaphore(FAR struct mm_heap_impl_s *impl)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags = enter_critical_section();
-#endif
   pid_t my_pid = getpid();
 
   /* Does the current task already hold the semaphore? */
@@ -262,10 +252,6 @@ static void mm_takesemaphore(FAR struct mm_heap_impl_s *impl)
       impl->mm_holder      = my_pid;
       impl->mm_counts_held = 1;
     }
-
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
 }
 
 /****************************************************************************
@@ -278,10 +264,6 @@ static void mm_takesemaphore(FAR struct mm_heap_impl_s *impl)
 
 static void mm_givesemaphore(FAR struct mm_heap_impl_s *impl)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags = enter_critical_section();
-#endif
-
   /* The current task should be holding at least one reference to the
    * semaphore.
    */
@@ -304,10 +286,6 @@ static void mm_givesemaphore(FAR struct mm_heap_impl_s *impl)
       impl->mm_counts_held = 0;
       DEBUGVERIFY(_SEM_POST(&impl->mm_semaphore));
     }
-
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
 }
 
 /****************************************************************************
