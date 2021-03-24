@@ -104,7 +104,8 @@
 #  define GPIO_INTERRUPT_HIGH_LEVEL   (4 << GPIO_INTERRUPT_SHIFT)
 #  define GPIO_INTERRUPT_LOW_LEVEL    (5 << GPIO_INTERRUPT_SHIFT)
 
-/* If the pin is a GPIO digital output, then this identifies the initial output value.
+/* If the pin is a GPIO digital output, then this identifies the initial
+ * output value.
  *
  * 1111 1100 0000 0000
  * 5432 1098 7654 3210

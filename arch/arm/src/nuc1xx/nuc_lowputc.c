@@ -43,6 +43,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Get the serial console UART configuration */
 
 #ifdef HAVE_SERIAL_CONSOLE
@@ -101,7 +102,8 @@ static inline void nuc_console_ready(void)
 #if 1
   /* Wait for the TX FIFO to be empty (excessive!) */
 
-  while ((getreg32(NUC_CONSOLE_BASE + NUC_UART_FSR_OFFSET) & UART_FSR_TX_EMPTY) == 0);
+  while ((getreg32(NUC_CONSOLE_BASE + NUC_UART_FSR_OFFSET) &
+          UART_FSR_TX_EMPTY) == 0);
 #else
   uint32_t depth;
 
@@ -109,10 +111,12 @@ static inline void nuc_console_ready(void)
 
   do
     {
-      register uint32_t regval = getreg32(NUC_CONSOLE_BASE + NUC_UART_FSR_OFFSET);
-      depth  = (regval & UART_FSR_TX_POINTER_MASK) >> UART_FSR_TX_POINTER_SHIFT;
+      register uint32_t regval = getreg32(NUC_CONSOLE_BASE +
+                                          NUC_UART_FSR_OFFSET);
+      depth  = (regval & UART_FSR_TX_POINTER_MASK) >>
+                UART_FSR_TX_POINTER_SHIFT;
     }
-  while (depth >= (NUC_CONSOLE_DEPTH-1));
+  while (depth >= (NUC_CONSOLE_DEPTH - 1));
 #endif
 }
 #endif /* HAVE_SERIAL_CONSOLE */
@@ -125,7 +129,8 @@ static inline void nuc_console_ready(void)
  * Name: nuc_lowsetup
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level initialization.
+ *   Called at the very beginning of _start.
+ *   Performs low level initialization.
  *
  ****************************************************************************/
 
@@ -228,7 +233,8 @@ void nuc_lowsetup(void)
   /* Enable UART clocking for the selected UARTs */
 
   regval = getreg32(NUC_CLK_APBCLK);
-  regval &= ~(CLK_APBCLK_UART0_EN | CLK_APBCLK_UART1_EN | CLK_APBCLK_UART2_EN);
+  regval &= ~(CLK_APBCLK_UART0_EN | CLK_APBCLK_UART1_EN |
+              CLK_APBCLK_UART2_EN);
 
 #ifdef CONFIG_NUC_UART0
   regval |= CLK_APBCLK_UART0_EN;
@@ -332,7 +338,8 @@ void nuc_lowputc(uint32_t ch)
  *   Mode DIV_X_EN DIV_X_ONE Divider X   BRD  (Baud rate equation)
  *   -------------------------------------------------------------
  *    0       0        0         B        A   UART_CLK / [16 * (A+2)]
- *    1       1        0         B        A   UART_CLK / [(B+1) * (A+2)] , B must >= 8
+ *    1       1        0         B        A   UART_CLK / [(B+1) * (A+2)],
+ *                                                        B must >= 8
  *    2       1        1     Don't care   A   UART_CLK / (A+2), A must >=3
  *
  * Here we assume that the default clock source for the UART modules is

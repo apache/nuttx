@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/nuc1xx/nuc_config.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NUC1XX_NUC_CONFIG_H
 #define __ARCH_ARM_SRC_NUC1XX_NUC_CONFIG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/nuc1xx/chip.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Limit the number of enabled UARTs to those supported by the chip architecture */
+ ****************************************************************************/
+
+/* Limit the number of enabled UARTs to those supported by the chip
+ * architecture
+ */
 
 #if NUC_NUARTS < 3
 #  undef CONFIG_NUC_UART2
@@ -52,8 +55,8 @@
 #  define HAVE_UART 1
 #endif
 
-/* Make sure all features are disabled for disabled U[S]ARTs.  This simplifies
- * checking later.
+/* Make sure all features are disabled for disabled U[S]ARTs.
+ *  This simplifies checking later.
  */
 
 #ifndef CONFIG_NUC_UART0
@@ -77,8 +80,9 @@
 #  undef CONFIG_UART2_RS485MODE
 #endif
 
-/* Is there a serial console? There should be at most one defined.  It could be on
- * any UARTn, n=0,1,2 - OR - there might not be any serial console at all.
+/* Is there a serial console? There should be at most one defined.
+ * It could be on any UARTn, n=0,1,2 - OR - there might not be any serial
+ * console at all.
  */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
@@ -100,16 +104,16 @@
 #  undef HAVE_SERIAL_CONSOLE
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_NUC1XX_NUC_CONFIG_H */

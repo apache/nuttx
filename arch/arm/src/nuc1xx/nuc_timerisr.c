@@ -42,6 +42,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Get the frequency of the selected clock source */
 
 #if defined(CONFIG_NUC_SYSTICK_CORECLK)
@@ -218,8 +219,9 @@ void up_timer_initialize(void)
    */
 
 #ifdef CONFIG_NUC_SYSTICK_CORECLK
-  putreg32((SYSTICK_CSR_CLKSOURCE | SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE),
-           ARMV6M_SYSTICK_CSR);
+  putreg32((SYSTICK_CSR_CLKSOURCE | SYSTICK_CSR_TICKINT |
+            SYSTICK_CSR_ENABLE),
+            ARMV6M_SYSTICK_CSR);
 #else
   putreg32((SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE), ARMV6M_SYSTICK_CSR);
 #endif
