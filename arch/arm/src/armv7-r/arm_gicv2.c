@@ -175,11 +175,11 @@ void arm_gic_initialize(void)
   /* Registers with 8-bits per interrupt */
 
   putreg32(0x80808080, GIC_ICDIPR(0));  /* SGI[3:0] priority */
-  putreg32(0x80808080, GIC_ICDIPR(4));	/* SGI[4:7] priority */
-  putreg32(0x80808080, GIC_ICDIPR(8));	/* SGI[8:11] priority */
-  putreg32(0x80808080, GIC_ICDIPR(12));	/* SGI[12:15] priority */
-  putreg32(0x80000000, GIC_ICDIPR(24));	/* PPI[0] priority */
-  putreg32(0x80808080, GIC_ICDIPR(28));	/* PPI[1:4] priority */
+  putreg32(0x80808080, GIC_ICDIPR(4));  /* SGI[4:7] priority */
+  putreg32(0x80808080, GIC_ICDIPR(8));  /* SGI[8:11] priority */
+  putreg32(0x80808080, GIC_ICDIPR(12)); /* SGI[12:15] priority */
+  putreg32(0x80000000, GIC_ICDIPR(24)); /* PPI[0] priority */
+  putreg32(0x80808080, GIC_ICDIPR(28)); /* PPI[1:4] priority */
 
   /* Set the binary point register.
    *
@@ -187,9 +187,10 @@ void arm_gic_initialize(void)
    * field; the value n (n=0-6) specifies that bits (n+1) through bit 7 are
    * used in the comparison for interrupt pre-emption.  A GIC supports a
    * minimum of 16 and a maximum of 256 priority levels so not all binary
-   * point settings may be meaningul. The special value n=7 (GIC_ICCBPR_NOPREMPT)
-   * disables pre-emption.  We disable all pre-emption here to prevent nesting
-   * of interrupt handling.
+   * point settings may be meaningul.
+   * The special value n=7 (GIC_ICCBPR_NOPREMPT) disables pre-emption.
+   * We disable all pre-emption here to prevent nesting of interrupt
+   * handling.
    */
 
   putreg32(GIC_ICCBPR_NOPREMPT, GIC_ICCBPR);
@@ -403,8 +404,8 @@ uint32_t *arm_decodeirq(uint32_t *regs)
  *
  *   This function implements enabling of the device specified by 'irq'
  *   at the interrupt controller level if supported by the architecture
- *   (up_irq_restore() supports the global level, the device level is hardware
- *   specific).
+ *   (up_irq_restore() supports the global level, the device level is
+ *   hardware specific).
  *
  *   Since this API is not supported on all architectures, it should be
  *   avoided in common implementations where possible.

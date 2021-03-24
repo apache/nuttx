@@ -89,6 +89,7 @@
 #  define MPU_RACR_AP_RWRW       (3 << MPU_RACR_AP_SHIFT) /* PL0:RW   PL1:RW   */
 #  define MPU_RACR_AP_RONO       (5 << MPU_RACR_AP_SHIFT) /* PL0:RO   PL1:None */
 #  define MPU_RACR_AP_RORO       (6 << MPU_RACR_AP_SHIFT) /* PL0:RO   PL1:RO   */
+
 #define MPU_RACR_XN              (1 << 12) /* Bit 12: Instruction access disable */
 
 /* MPU Region Number Register */
@@ -160,8 +161,8 @@ uint8_t mpu_log2regionfloor(size_t size);
  *
  * Description:
  *   Given (1) the offset to the beginning of valid data, (2) the size of the
- *   memory to be mapped and (2) the log2 size of the mapping to use, determine
- *   the minimal sub-region set to span that memory region.
+ *   memory to be mapped and (2) the log2 size of the mapping to use,
+ *   determine the minimal sub-region set to span that memory region.
  *
  * Assumption:
  *   l2size has the same properties as the return value from
@@ -509,8 +510,8 @@ static inline void mpu_priv_noncache(uintptr_t base, size_t size)
            MPU_RACR_XN;                            /* Instruction access disable */
   mpu_set_dracr(regval);
 
-  regval = MPU_RASR_ENABLE                        | /* Enable region */
-           MPU_RASR_RSIZE_LOG2((uint32_t)l2size)  | /* Region size   */
+  regval = MPU_RASR_ENABLE                       |     /* Enable region */
+           MPU_RASR_RSIZE_LOG2((uint32_t)l2size) |     /* Region size   */
          ((uint32_t)subregions << MPU_RASR_SRD_SHIFT); /* Sub-regions */
     mpu_set_drsr(regval);
 }

@@ -1,5 +1,5 @@
-/************************************************************************************
- * arch/arm/src/armv7-r/chip/arm-l2cc_pl310.c
+/****************************************************************************
+ * arch/arm/src/armv7-r/arm_l2cc_pl310.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,9 +16,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Reference: "CoreLink™ Level 2 Cache Controller L2C-310", Revision r3p2,
+/* Reference: "CoreLinkï¿½ Level 2 Cache Controller L2C-310", Revision r3p2,
  *   Technical Reference Manual, ARM DDI 0246F (ID011711), ARM
  *
  * NOTE: This logic is incompatible with older versions of the PL310!
@@ -45,7 +45,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***********************************************************/
+
+/* Configuration ************************************************************/
+
 /* Number of ways depends on ARM configuration */
 
 #if defined(CONFIG_ARMV7R_ASSOCIATIVITY_8WAY)
@@ -302,16 +304,17 @@ void arm_l2ccinitialize(void)
   /* Make sure that this is a PL310 cache, version r3p2.
    *
    * REVISIT: The SAMA5D4 is supposed to report its ID as 0x410000C8 which is
-   * r3p2, but the chip that I have actually* reports 0x410000C9 which is some
-   * later revision.
+   * r3p2, but the chip that I have actually* reports 0x410000C9 which is
+   * some later revision.
    */
 
-  //DEBUGASSERT((getreg32(L2CC_IDR) & L2CC_IDR_REV_MASK) == L2CC_IDR_REV_R3P2);
+  /* DEBUGASSERT((getreg32(L2CC_IDR) &
+   * L2CC_IDR_REV_MASK) == L2CC_IDR_REV_R3P2);
+   */
 
   /* Make sure that actual cache configuration agrees with the configured
    * cache configuration.
    */
-
 
 #if defined(CONFIG_ARMV7R_ASSOCIATIVITY_8WAY)
   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == 0);
@@ -322,17 +325,23 @@ void arm_l2ccinitialize(void)
 #endif
 
 #if defined(CONFIG_ARMV7R_WAYSIZE_16KB)
-  DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_16KB);
+  DEBUGASSERT((getreg32(L2CC_ACR) &
+              L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_16KB);
 #elif defined(CONFIG_ARMV7R_WAYSIZE_32KB)
-  DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_32KB);
+  DEBUGASSERT((getreg32(L2CC_ACR) &
+              L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_32KB);
 #elif defined(CONFIG_ARMV7R_WAYSIZE_64KB)
-  DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_64KB);
+  DEBUGASSERT((getreg32(L2CC_ACR) &
+              L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_64KB);
 #elif defined(CONFIG_ARMV7R_WAYSIZE_128KB)
-  DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_128KB);
+  DEBUGASSERT((getreg32(L2CC_ACR) &
+              L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_128KB);
 #elif defined(CONFIG_ARMV7R_WAYSIZE_256KB)
-  DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_256KB);
+  DEBUGASSERT((getreg32(L2CC_ACR) &
+              L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_256KB);
 #elif defined(CONFIG_ARMV7R_WAYSIZE_512KB)
-  DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_512KB);
+  DEBUGASSERT((getreg32(L2CC_ACR) &
+              L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_512KB);
 #else
 #  error No way size selected
 #endif

@@ -1,5 +1,5 @@
-/************************************************************************************
- * arch/arm/src/armv7-r/chip/l2cc_pl310.h
+/****************************************************************************
+ * arch/arm/src/armv7-r/l2cc_pl310.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,18 +16,18 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Reference: "CoreLink™ Level 2 Cache Controller L2C-310", Revision r3p2,
+/* Reference: "CoreLinkï¿½ Level 2 Cache Controller L2C-310", Revision r3p2,
  *   Technical Reference Manual, ARM DDI 0246F (ID011711), ARM
  */
 
 #ifndef __ARCH_ARM_SRC_ARMV7_R_L2CC_PL310_H
 #define __ARCH_ARM_SRC_ARMV7_R_L2CC_PL310_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -37,10 +37,11 @@
 
 #include "chip/chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* General Definitions **************************************************************/
+ ****************************************************************************/
+
+/* General Definitions ******************************************************/
 
 #define PL310_CACHE_LINE_SIZE      32
 
@@ -50,7 +51,7 @@
 #  define PL310_NLOCKREGS          1
 #endif
 
-/* L2CC Register Offsets ************************************************************/
+/* L2CC Register Offsets ****************************************************/
 
 #define L2CC_IDR_OFFSET            0x0000 /* Cache ID Register */
 #define L2CC_TYPR_OFFSET           0x0004 /* Cache Type Register */
@@ -86,13 +87,15 @@
 #define L2CC_CIWR_OFFSET           0x07fc /* Clean Invalidate Way Register */
                                           /* 0x0800-0x08fc Reserved */
 
-/* Data and Instruction Lockdown registers where n=0-7.  The registers for n > 0 are
- * implemented if the option pl310_LOCKDOWN_BY_MASTER is enabled. Otherwise, they are
- * unused
+/* Data and Instruction Lockdown registers where n=0-7.
+ * The registers for n > 0 are implemented if the option
+ * pl310_LOCKDOWN_BY_MASTER is enabled.
+ * Otherwise, they are unused
  */
 
 #define L2CC_DLKR_OFFSET(n)        (0x0900 + ((n) << 3)) /* Data Lockdown Register */
 #define L2CC_ILKR_OFFSET(n)        (0x0904 + ((n) << 3)) /* Instruction Lockdown Register */
+
                                           /* 0x0940-0x0f4c Reserved */
 #ifdef CONFIG_PL310_LOCKDOWN_BY_LINE
 #  define L2CC_LKLN_OFFSET         0x0950 /* Lock Line Enable Register */
@@ -108,7 +111,7 @@
                                           /* 0x0f64-0x0f7c Reserved */
 #define L2CC_POWCR_OFFSET          0x0f80 /* Power Control Register */
 
-/* L2CC Register Addresses **********************************************************/
+/* L2CC Register Addresses **************************************************/
 
 #define L2CC_IDR                   (L2CC_BASE+L2CC_IDR_OFFSET)
 #define L2CC_TYPR                  (L2CC_BASE+L2CC_TYPR_OFFSET)
@@ -148,7 +151,7 @@
 #define L2CC_PCR                   (L2CC_BASE+L2CC_PCR_OFFSET)
 #define L2CC_POWCR                 (L2CC_BASE+L2CC_POWCR_OFFSET)
 
-/* L2CC Register Bit Definitions ****************************************************/
+/* L2CC Register Bit Definitions ********************************************/
 
 /* Cache ID Register (32-bit ID) */
 
@@ -200,6 +203,7 @@
 #  define L2CC_ACR_FWA_NOALLOC     (1 << L2CC_ACR_FWA_SHIFT) /* No allocate */
 #  define L2CC_ACR_FWA_OVERRIDE    (2 << L2CC_ACR_FWA_SHIFT) /* Override AWCACHE attributes */
 #  define L2CC_ACR_FWA_MAPPED      (3 << L2CC_ACR_FWA_SHIFT) /* Internally mapped to 00 */
+
 #define L2CC_ACR_CRPOL             (1 << 25) /* Bit 25: Cache Replacement Policy */
 #define L2CC_ACR_NSLEN             (1 << 26) /* Bit 26: Non-Secure Lockdown Enable */
 #define L2CC_ACR_NSIAC             (1 << 27) /* Bit 27: Non-Secure Interrupt Access Control */
@@ -241,13 +245,13 @@
 
 /* Event Counter 1 Configuration Register */
 
-
 #define L2CC_ECFGR1_EIGEN_SHIFT    (0)       /* Bits 0-1: Event Counter Interrupt Generation */
 #define L2CC_ECFGR1_EIGEN_MASK     (3 << L2CC_ECFGR1_EIGEN_SHIFT)
 #  define L2CC_ECFGR1_EIGEN_INTDIS    (0 << L2CC_ECFGR1_EIGEN_SHIFT) /* Disables (default) */
 #  define L2CC_ECFGR1_EIGEN_INTENINCR (1 << L2CC_ECFGR1_EIGEN_SHIFT) /* Enables with Increment condition */
 #  define L2CC_ECFGR1_EIGEN_INTENOVER (2 << L2CC_ECFGR1_EIGEN_SHIFT) /* Enables with Overflow condition */
 #  define L2CC_ECFGR1_EIGEN_INTGENDIS (3 << L2CC_ECFGR1_EIGEN_SHIFT) /* Disables Interrupt generation */
+
 #define L2CC_ECFGR1_ESRC_SHIFT     (2)       /* Bits 2-5: Event Counter Source */
 #define L2CC_ECFGR1_ESRC_MASK      (15 << L2CC_ECFGR1_ESRC_SHIFT)
 #  define L2CC_ECFGR1_ESRC_CNTDIS     (0 << L2CC_ECFGR1_ESRC_SHIFT)  /* Counter Disabled */
@@ -275,6 +279,7 @@
 #  define L2CC_ECFGR0_EIGEN_INTENINCR (1 << L2CC_ECFGR0_EIGEN_SHIFT) /* Enables with Increment condition */
 #  define L2CC_ECFGR0_EIGEN_INTENOVER (2 << L2CC_ECFGR0_EIGEN_SHIFT) /* Enables with Overflow condition */
 #  define L2CC_ECFGR0_EIGEN_INTGENDIS (3 << L2CC_ECFGR0_EIGEN_SHIFT) /* Disables Interrupt generation */
+
 #define L2CC_ECFGR0_ESRC_SHIFT     (2)       /* Bits 2-5: Event Counter Source */
 #define L2CC_ECFGR0_ESRC_MASK      (15 << L2CC_ECFGR0_ESRC_SHIFT)
 #  define L2CC_ECFGR0_ESRC_CNTDIS     (0 << L2CC_ECFGR0_ESRC_SHIFT)  /* Counter Disabled */
@@ -295,10 +300,11 @@
 #  define L2CC_ECFGR0_ESRC_EPFRCVD    (15 << L2CC_ECFGR0_ESRC_SHIFT) /* Source is EPFRCVD */
 
 /* Event Counter 1 Value Register (32-bit value) */
+
 /* Event Counter 0 Value Register (32-bit value) */
 
-/* Interrupt Mask Register, Masked Interrupt Status Register, Raw Interrupt Status
- * Register, and Interrupt Clear Register.
+/* Interrupt Mask Register, Masked Interrupt Status Register,
+ * Raw Interrupt Status Register, and Interrupt Clear Register.
  */
 
 #define L2CC_INT_ECNTR             (1 << 0)  /* Bit 0:  Event Counter 1/0 Overflow Increment */
