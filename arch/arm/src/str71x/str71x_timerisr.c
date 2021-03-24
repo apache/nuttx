@@ -56,7 +56,8 @@
 
 /* In this case, the desired, maximum clocking would be MAX_TIM0CLK.  For
  * example if CLK_TCK is the default of 100Hz, then the ideal clocking for
- * timer0 would be 6,553,500 */
+ * timer0 would be 6,553,500
+ */
 
 #define MAX_TIM0CLK (MAX_OCAR * CLK_TCK)
 
@@ -150,13 +151,14 @@ void up_timer_initialize(void)
   putreg16(0x0000, STR71X_TIMER0_CR2);
   putreg16(0x0000, STR71X_TIMER0_SR);
 
-  /* Configure TIM0 so that it is clocked by the internal APB2 frequency (PCLK2)
-   * divided by the above prescaler value (1) -- versus an external Clock.
+  /* Configure TIM0 so that it is clocked by the internal APB2 frequency
+   * (PCLK2) divided by the above prescaler value (1) -- versus an external
+   * Clock.
    * -- Nothing to do because  STR71X_TIMERCR1_ECKEN is already cleared.
    *
-   * Select a divisor to reduce the frequency of clocking.  This must be
-   * done so that the entire timer interval can fit in the 16-bit OCAR register.
-   * (see the discussion above).
+   * Select a divisor to reduce the frequency of clocking.
+   * This must be done so that the entire timer interval can fit in the
+   * 16-bit OCAR register. (see the discussion above).
    */
 
   putreg16(STR71X_TIMERCR2_OCAIE | (PCLK2_DIVIDER - 1), STR71X_TIMER0_CR2);

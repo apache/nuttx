@@ -40,6 +40,7 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* g_current_regs[] holds a references to the current interrupt level
  * register storage structure.  If is non-NULL only during interrupt
  * processing.  Access to g_current_regs[] must be through the macro
@@ -188,8 +189,8 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t addr;
   uint32_t reg32;
 
-  /* The current interrupt priority (CIP) is always zero, so a minimum prioriy
-   * of one is enforced to prevent disabling the interrupt.
+  /* The current interrupt priority (CIP) is always zero, so a minimum
+   * prioriy of one is enforced to prevent disabling the interrupt.
    */
 
   if ((unsigned)irq < STR71X_NBASEIRQS && priority > 0 && priority < 16)
