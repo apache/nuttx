@@ -123,7 +123,7 @@ void up_timer_initialize(void)
   /* Set timer match registger to get a TICK_PER_SEC rate
    */
 
-  tmr_putreg32(LPC214X_PCLKFREQ/TICK_PER_SEC, LPC214X_TMR_MR0_OFFSET);
+  tmr_putreg32(LPC214X_PCLKFREQ / TICK_PER_SEC, LPC214X_TMR_MR0_OFFSET);
 
   /* Reset timer counter register and interrupt on match */
 

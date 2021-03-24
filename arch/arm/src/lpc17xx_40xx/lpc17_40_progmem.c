@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_progmem.c
  *
  *   Copyright (C) 2018 Michael Jung. All rights reserved.
@@ -31,16 +31,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * See NXP UM10360 LPC176x/5x User manual, Rev 4.1, Chapter 32: LPC176x/5x
  * Flash memory interface and programming.
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
-* Included Files
-******************************************************************************/
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -55,31 +55,33 @@
 
 #include "lpc17_40_progmem.h"
 
-/******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ******************************************************************************/
+ ****************************************************************************/
 
 static void lpc17_40_iap(void *in, void *out);
-static uint32_t lpc17_40_iap_prepare_sector_for_write_operation(uint32_t sector);
+static uint32_t
+lpc17_40_iap_prepare_sector_for_write_operation(uint32_t sector);
 static uint32_t lpc17_40_iap_erase_sector(uint32_t sector);
-static uint32_t lpc17_40_iap_copy_ram_to_flash(void *flash, const void *ram,
-                                            size_t count);
+static uint32_t lpc17_40_iap_copy_ram_to_flash(void *flash,
+                                               const void *ram,
+                                               size_t count);
 
-/******************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: lpc17_40_iap
  *
  * Description (from UM10360):
- *   For in-application programming the IAP routine should be called with a word
- *   pointer in register r0 pointing to memory (RAM) containing command code and
- *   parameters. The result from the IAP command is returned in the table
- *   pointed to by register r1. The user can reuse the command table for the
- *   result by passing the same pointer in registers r0 and r1.
+ *   For in-application programming the IAP routine should be called with a
+ *   word pointer in register r0 pointing to memory (RAM) containing command
+ *   code and parameters. The result from the IAP command is returned in the
+ *   table pointed to by register r1. The user can reuse the command table
+ *   for the result by passing the same pointer in registers r0 and r1.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void lpc17_40_iap(FAR void *in, FAR void *out)
 {
@@ -87,23 +89,26 @@ static void lpc17_40_iap(FAR void *in, FAR void *out)
 
   flags = enter_critical_section();
 
-  ((void (*)(FAR void *, FAR void *))LPC17_40_IAP_ENTRY_ADDR)(in, out);
+  ((void *(FAR void *, FAR void *))LPC17_40_IAP_ENTRY_ADDR)(in, out);
 
   leave_critical_section(flags);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: lpc17_40_iap_prepare_sector_for_write_operation
  *
  * Description (from UM10360):
  *   This command must be executed before executing "Copy RAM to Flash" or
- *   "Erase Sector(s)" command.  Successful execution of the "Copy RAM to Flash"
- *   or "Erase Sector(s)" command causes relevant sectors to be protected again.
- *   To prepare a single sector use the same "Start" and "End" sector numbers.
+ *   "Erase Sector(s)" command.  Successful execution of the "Copy RAM to
+ *   Flash" or "Erase Sector(s)" command causes relevant sectors to be
+ *   protected again.
+ *   To prepare a single sector use the same "Start" and "End" sector
+ *   numbers.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-static uint32_t lpc17_40_iap_prepare_sector_for_write_operation(uint32_t sector)
+static uint32_t
+lpc17_40_iap_prepare_sector_for_write_operation(uint32_t sector)
 {
   uint32_t inout[3];
 
@@ -116,15 +121,15 @@ static uint32_t lpc17_40_iap_prepare_sector_for_write_operation(uint32_t sector)
   return inout[0];
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: lpc17_40_iap_erase_sector
  *
  * Description (from UM10360):
- *   This command is used to erase a sector or multiple sectors of on-chip flash
- *   memory. To erase a single sector use the same "Start" and "End" sector
- *   numbers.
+ *   This command is used to erase a sector or multiple sectors of on-chip
+ *   flash memory. To erase a single sector use the same "Start" and "End"
+ *   sector numbers.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static uint32_t lpc17_40_iap_erase_sector(uint32_t sector)
 {
@@ -140,7 +145,7 @@ static uint32_t lpc17_40_iap_erase_sector(uint32_t sector)
   return inout[0];
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: lpc17_40_iap_copy_ram_to_flash
  *
  * Description (from UM10360):
@@ -149,7 +154,7 @@ static uint32_t lpc17_40_iap_erase_sector(uint32_t sector)
  *   command. The affected sectors are automatically protected again once the
  *   copy command is successfully executed.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static uint32_t lpc17_40_iap_copy_ram_to_flash(void *flash, const void *ram,
                                             size_t count)
@@ -167,70 +172,71 @@ static uint32_t lpc17_40_iap_copy_ram_to_flash(void *flash, const void *ram,
   return inout[0];
 }
 
-/******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_neraseblocks
  *
  * Description:
  *   Return number of erase blocks
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 size_t up_progmem_neraseblocks(void)
 {
   return CONFIG_LPC17_40_PROGMEM_NSECTORS;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_isuniform
  *
  * Description:
  *   Is program memory uniform or page size differs?
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 bool up_progmem_isuniform(void)
 {
   return true;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_pagesize
  *
  * Description:
  *   Return read/write page size
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 size_t up_progmem_pagesize(size_t page)
 {
   return (size_t)LPC17_40_PROGMEM_PAGE_SIZE;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_erasesize
  *
  * Description:
  *   Return erase block size
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 size_t up_progmem_erasesize(size_t block)
 {
   return (size_t)LPC17_40_PROGMEM_SECTOR_SIZE;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_getpage
  *
  * Description:
  *   Address to read/write page conversion
  *
  * Input Parameters:
- *   addr - Address with or without flash offset (absolute or aligned to page0)
+ *   addr - Address with or without flash offset
+ *          (absolute or aligned to page0)
  *
  * Returned Value:
  *   Page or negative value on error.  The following errors are reported
@@ -238,7 +244,7 @@ size_t up_progmem_erasesize(size_t block)
  *
  *     -EFAULT: On invalid address
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 ssize_t up_progmem_getpage(size_t addr)
 {
@@ -250,7 +256,7 @@ ssize_t up_progmem_getpage(size_t addr)
   return (size_t)(addr / LPC17_40_PROGMEM_PAGE_SIZE);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_getaddress
  *
  * Description:
@@ -262,14 +268,15 @@ ssize_t up_progmem_getpage(size_t addr)
  * Returned Value:
  *   Base address of given page, SIZE_MAX if page index is not valid.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 size_t up_progmem_getaddress(size_t page)
 {
-  return (size_t)(LPC17_40_PROGMEM_START_ADDR + page * LPC17_40_PROGMEM_PAGE_SIZE);
+  return (size_t)(LPC17_40_PROGMEM_START_ADDR +
+           page * LPC17_40_PROGMEM_PAGE_SIZE);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_eraseblock
  *
  * Description:
@@ -279,8 +286,8 @@ size_t up_progmem_getaddress(size_t page)
  *   block - The erase block index to be erased.
  *
  * Returned Value:
- *   block size or negative value on error.  The following errors are reported
- *   (errno is not set!):
+ *   block size or negative value on error.  The following errors are
+ *   reported (errno is not set!):
  *
  *     -EFAULT: On invalid page
  *     -EIO:    On unsuccessful erase
@@ -289,7 +296,7 @@ size_t up_progmem_getaddress(size_t page)
  *     -EPERM:  If operation is not permitted due to some other constraints
  *              (i.e. some internal block is not running etc.)
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 ssize_t up_progmem_eraseblock(size_t block)
 {
@@ -301,13 +308,14 @@ ssize_t up_progmem_eraseblock(size_t block)
     }
 
   rc = lpc17_40_iap_prepare_sector_for_write_operation((uint32_t)block +
-                                                    LPC17_40_PROGMEM_START_SECTOR);
+                                            LPC17_40_PROGMEM_START_SECTOR);
   if (rc != LPC17_40_IAP_RC_CMD_SUCCESS)
     {
       return -EIO;
     }
 
-  rc = lpc17_40_iap_erase_sector((uint32_t)block + LPC17_40_PROGMEM_START_SECTOR);
+  rc = lpc17_40_iap_erase_sector((uint32_t)block +
+                                            LPC17_40_PROGMEM_START_SECTOR);
 
   if (rc != LPC17_40_IAP_RC_CMD_SUCCESS)
     {
@@ -317,7 +325,7 @@ ssize_t up_progmem_eraseblock(size_t block)
   return (ssize_t)LPC17_40_PROGMEM_SECTOR_SIZE;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_ispageerased
  *
  * Description:
@@ -333,7 +341,7 @@ ssize_t up_progmem_eraseblock(size_t block)
  *   The following errors are reported:
  *     -EFAULT: On invalid page
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 ssize_t up_progmem_ispageerased(size_t page)
 {
@@ -358,7 +366,7 @@ ssize_t up_progmem_ispageerased(size_t page)
   return (ssize_t)(LPC17_40_PROGMEM_SECTOR_SIZE - i);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_write
  *
  * Description:
@@ -368,7 +376,8 @@ ssize_t up_progmem_ispageerased(size_t page)
  *   the address be aligned inside the page boundaries.
  *
  * Input Parameters:
- *   addr  - Address with or without flash offset (absolute or aligned to page0)
+ *   addr  - Address with or without flash offset
+ *           (absolute or aligned to page0)
  *   buf   - Pointer to buffer
  *   count - Number of bytes to write
  *
@@ -385,7 +394,7 @@ ssize_t up_progmem_ispageerased(size_t page)
  *     EPERM:  If operation is not permitted due to some other constraints
  *             (i.e. some internal block is not running etc.)
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 ssize_t up_progmem_write(size_t addr, FAR const void *buf, size_t count)
 {

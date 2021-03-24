@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_i2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_I2C_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_I2C_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/i2c/i2c_master.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* I2C register base address offset into the APB1 domain ****************************************/
+/* I2C register base address offset into the APB1 domain ********************/
 
 #define LPC31_I2C0_VBASE               (LPC31_APB1_VADDR+LPC31_APB1_I2C0_OFFSET)
 #define LPC31_I2C0_PBASE               (LPC31_APB1_PADDR+LPC31_APB1_I2C0_OFFSET)
@@ -41,7 +41,7 @@
 #define LPC31_I2C1_VBASE               (LPC31_APB1_VADDR+LPC31_APB1_I2C1_OFFSET)
 #define LPC31_I2C1_PBASE               (LPC31_APB1_PADDR+LPC31_APB1_I2C1_OFFSET)
 
-/* I2C register offsets (with respect to the I2C base) ******************************************/
+/* I2C register offsets (with respect to the I2C base) **********************/
 
 #define LPC31_I2C_RX_OFFSET            0x00 /* I2C RX Data FIFO */
 #define LPC31_I2C_TX_OFFSET            0x00 /* I2C TX Data FIFO */
@@ -57,7 +57,7 @@
 #define LPC31_I2C_STX_OFFSET           0x28 /* Slave Transmit FIFO */
 #define LPC31_I2C_STXFL_OFFSET         0x2c /* Slave Transmit FIFO level */
 
-/* I2C register (virtual) addresses *************************************************************/
+/* I2C register (virtual) addresses *****************************************/
 
 #define LPC31_I2C0_RX                  (LPC31_I2C0_VBASE+LPC31_I2C_RX_OFFSET)
 #define LPC31_I2C0_TX                  (LPC31_I2C0_VBASE+LPC31_I2C_TX_OFFSET)
@@ -87,9 +87,11 @@
 #define LPC31_I2C1_STX                 (LPC31_I2C1_VBASE+LPC31_I2C_STX_OFFSET)
 #define LPC31_I2C1_STXFL               (LPC31_I2C1_VBASE+LPC31_I2C_STXFL_OFFSET)
 
-/* I2C register bit definitions *****************************************************************/
+/* I2C register bit definitions *********************************************/
 
-/* I2Cn RX Data FIFO I2C0_RX, address 0x1300a000, I2C1_RX, address 0x1300a400 */
+/* I2Cn RX Data FIFO I2C0_RX, address 0x1300a000,
+ * I2C1_RX, address 0x1300a400
+ */
 
 #define I2C_RX_DATA_SHIFT                (0)       /* Bits 0-7: RxData Receive FIFO data bits */
 #define I2C_RX_DATA_MASK                 (0xff << I2C_RX_DATA_HIFT)
@@ -101,7 +103,9 @@
 #define I2C_TX_DATA_SHIFT                (0)       /* Bits 0-7: TxData Transmit FIFO data bits */
 #define I2C_TX_DATA_MASK                 (0xff << I2C_TX_DATA_SHIFT)
 
-/* I2Cn Status register I2C0_STAT, address 0x1300a004, I2C1_STAT, address 0x1300a404 */
+/* I2Cn Status register I2C0_STAT, address 0x1300a004,
+ * I2C1_STAT, address 0x1300a404
+ */
 
 #define I2C_STAT_TFES                    (1 << 13) /* Bit 13: Slave Transmit FIFO Empty */
 #define I2C_STAT_TFFS                    (1 << 12) /* Bit 12: Slave Transmit FIFO Full */
@@ -118,7 +122,9 @@
 #define I2C_STAT_AFI                     (1 << 1)  /* Bit 1:  Arbitration Failure Interrupt */
 #define I2C_STAT_TDI                     (1 << 0)  /* Bit 0:  Transaction Done Interrupt */
 
-/* I2Cn Control register I2C0_CTRL, address 0x1300a008, I2C1_CTRL, address 0x1300a408 */
+/* I2Cn Control register I2C0_CTRL, address 0x1300a008,
+ * I2C1_CTRL, address 0x1300a408
+ */
 
 #define I2C_CTRL_TFFSIE                  (1 << 10) /* Bit 10: Slave Transmit FIFO Not Full Interrupt Enable */
 #define I2C_CTRL_SEVEN                   (1 << 9)  /* Bit 9:  Seven-bit slave address */
@@ -132,57 +138,74 @@
 #define I2C_CTRL_AFIE                    (1 << 1)  /* Bit 1:  Transmitter Arbitration Failure Interrupt Enable */
 #define I2C_CTRL_TDIE                    (1 << 0)  /* Bit 0:  Transmit Done Interrupt Enable */
 
-/* I2Cn Clock Divider High I2C0_CLKHI, address 0x1300a00c, I2C1_CLKHI, address 0x1300a40c */
+/* I2Cn Clock Divider High I2C0_CLKHI, address 0x1300a00c,
+ * I2C1_CLKHI, address 0x1300a40c
+ */
 
 #define I2C_CLKHI_SHIFT                  (0)       /* Bits 0-9: Clock Divisor High */
 #define I2C_CLKHI_MASK                   (0x3ff << I2C_CLKHI_SHIFT)
 
-/* I2Cn Clock Divider Low I2C0_CLKLO, address 0x1300a010, I2C1_CLKLO, address 0x1300a410 */
+/* I2Cn Clock Divider Low I2C0_CLKLO, address 0x1300a010,
+ * I2C1_CLKLO, address 0x1300a410
+ */
 
 #define I2C_CLKLO_SHIFT                  (0)       /* Bits 0-9: Clock Divisor Low */
 #define I2C_CLKLO_MASK                   (0x3ff << I2C_CLKLO_SHIFT)
 
-
-/* I2Cn Slave Address I2C0_ADDR, address 0x1300a014, I2C1_ADDR, address 0x1300a414 */
+/* I2Cn Slave Address I2C0_ADDR, address 0x1300a014,
+ * I2C1_ADDR, address 0x1300a414
+ */
 
 #define I2C_ADR_SHIFT                    (0)       /* Bits 0-9: I2C bus slave address */
 #define I2C_ADR_MASK                     (0x3ff << I2C_ADR_SHIFT)
 
-/* I2Cn RX FIFO level I2C0_RXFL, address 0x1300a018, I2C1_RXFL, address 0x1300a018 */
+/* I2Cn RX FIFO level I2C0_RXFL, address 0x1300a018,
+ * I2C1_RXFL, address 0x1300a018
+ */
 
 #define I2C_RXFL_SHIFT                   (0)       /* Bits 0-1: Receive FIFO level */
 #define I2C_RXFL_MASK                    (3 << I2C_RXFL_SHIFT)
 
-/* I2Cn TX FIFO level I2C0_TXFL, address 0x1300a01c, I2C1_TXFL, address 0x1300a01c */
+/* I2Cn TX FIFO level I2C0_TXFL, address 0x1300a01c,
+ * I2C1_TXFL, address 0x1300a01c
+ */
 
 #define I2C_TXFL_SHIFT                   (0)       /* Bits 0-1: Receive FIFO level */
 #define I2C_TXFL_MASK                    (3 << I2C_TXFL_SHIFT)
 
-/* I2Cn RX byte count I2C0_RXB, address 0x1300a020, I2C1_RXB, address 0x1300a420 */
+/* I2Cn RX byte count I2C0_RXB, address 0x1300a020,
+ * I2C1_RXB, address 0x1300a420
+ */
 
 #define I2C_RXB_SHIFT                    (0)       /* Bits 0-15: Number of bytes received */
 #define I2C_RXB_MASK                     (0xffff << I2C_RXB_SHIFT)
 
-/* I2Cn TX byte count I2C0_TXB, address 0x1300a024, I2C1_TXB, address 0x1300a424 */
+/* I2Cn TX byte count I2C0_TXB, address 0x1300a024,
+ * I2C1_TXB, address 0x1300a424
+ */
 
 #define I2C_TXB_SHIFT                    (0)       /* Bits 0-15: Number of bytes sent */
 #define I2C_TXB_MASK                     (0xffff << I2C_TXB_SHIFT)
 
-/* I2Cn Slave TX Data FIFO I2C0_STX, address 0x1300a028, I2C1_STX, 0x1300a428 */
+/* I2Cn Slave TX Data FIFO I2C0_STX, address 0x1300a028,
+ * I2C1_STX, 0x1300a428
+ */
 
 #define I2C_STX_SHIFT                    (0)       /* Bits 0-7: Slave Transmit FIFO data */
 #define I2C_STX_MASK                     (0xff << I2C_STX_SHIFT)
 
-/* I2Cn Slave TX FIFO level I2C0_STXFL, address 0x1300a02c, I2C1_STXFL, address 0x1300a42c */
+/* I2Cn Slave TX FIFO level I2C0_STXFL, address 0x1300a02c,
+ * I2C1_STXFL, address 0x1300a42c
+ */
 
 #define I2C_STXFL_SHIFT                  (0)       /* Bits 0-1: Slave Transmit FIFO level */
 #define I2C_STXFL_MASK                   (3 << I2C_STXFL_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_i2cbus_initialize
  *
  * Description:
@@ -197,11 +220,11 @@
  * Returned Value:
  *   Valid I2C device structure reference on success; a NULL on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct i2c_master_s *lpc31_i2cbus_initialize(int port);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_i2cbus_uninitialize
  *
  * Description:
@@ -214,7 +237,7 @@ FAR struct i2c_master_s *lpc31_i2cbus_initialize(int port);
  *   OK on success, ERROR when internal reference count mismatch or dev
  *   points to invalid hardware device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lpc31_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 

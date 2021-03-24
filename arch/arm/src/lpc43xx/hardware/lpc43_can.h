@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_can.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_CAN_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_CAN_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Register Offsets *****************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define LPC43_CAN_CNTL_OFFSET        0x0000 /* CAN control register */
 #define LPC43_CAN_STAT_OFFSET        0x0004 /* Status register */
@@ -76,7 +77,7 @@
 #define LPC43_CAN_MSGV2_OFFSET       0x0164 /* Message valid 2 */
 #define LPC43_CAN_CLKDIV_OFFSET      0x0180 /* CAN clock divider register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define LPC43_CAN0_CNTL              (LPC43_CAN0_BASE+LPC43_CAN_CNTL_OFFSET)
 #define LPC43_CAN0_STAT              (LPC43_CAN0_BASE+LPC43_CAN_STAT_OFFSET)
@@ -166,7 +167,7 @@
 #define LPC43_CAN1_MSGV2             (LPC43_CAN1_BASE+LPC43_CAN_MSGV2_OFFSET)
 #define LPC43_CAN1_CLKDIV            (LPC43_CAN1_BASE+LPC43_CAN_CLKDIV_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* CAN control register */
 
@@ -179,6 +180,7 @@
 #define CAN_CNTL_CCE                 (1 << 6)  /* Bit 6:  Configuration change enable */
 #define CAN_CNTL_TEST                (1 << 7)  /* Bit 7:  Test mode enable */
                                                /* Bits 8-31: Reserved */
+
 /* Status register */
 
 #define CAN_STAT_LEC_SHIFT           (0)       /* Bits 0-2: Last error code */
@@ -190,12 +192,14 @@
 #define CAN_STAT_LEC_BI1E            (4 << CAN_STAT_LEC_SHIFT) /* Bit1Error */
 #define CAN_STAT_LEC_BIT0E           (5 << CAN_STAT_LEC_SHIFT) /* Bit0Error */
 #define CAN_STAT_LEC_CRCE            (6 << CAN_STAT_LEC_SHIFT) /* CRCError */
+
 #define CAN_STAT_TXOK                (1 << 3)  /* Bit 3:  Transmitted a message successfully */
 #define CAN_STAT_RXOK                (1 << 4)  /* Bit 4:  Received a message successfully */
 #define CAN_STAT_EPASS               (1 << 5)  /* Bit 5:  Error passive */
 #define CAN_STAT_EWARN               (1 << 6)  /* Bit 6:  Warning status */
 #define CAN_STAT_BOFF                (1 << 7)  /* Bit 7:  Busoff status */
                                                /* Bits 8-31: Reserved */
+
 /* Error counter register */
 
 #define CAN_EC_TEC_SHIFT             (0)       /* Bits 0-7: Transmit error counter */
@@ -204,6 +208,7 @@
 #define CAN_EC_REC_MASK              (0x7f << CAN_EC_REC_SHIFT)
 #define CAN_EC_RP                    (1 << 15)  /* Bit 15:  Receive error passive */
                                                 /* Bits 16-31: Reserved */
+
 /* Bit timing register */
 
 #define CAN_BT_BRP_SHIFT             (0)        /* Bits 0-5: Baud rate prescaler */
@@ -215,6 +220,7 @@
 #define CAN_BT_TSEG2_SHIFT           (12)       /* Bits 12-14: Time segment before the sample point */
 #define CAN_BT_TSEG2_MASK            (7 << CAN_BT_TSEG2_SHIFT)
                                                 /* Bits 15-31: Reserved */
+
 /* Interrupt register */
 
 #define CAN_INT_SHIFT                (0)       /* Bits 0-15: Interrupt ID */
@@ -252,9 +258,13 @@
 #  define CAN_INT_MSG30              (30 << CAN_INT_SHIFT) /* Message 30 */
 #  define CAN_INT_MSG31              (31 << CAN_INT_SHIFT) /* Message 31 */
 #  define CAN_INT_MSG32              (32 << CAN_INT_SHIFT) /* Message 32 */
-#  define CAN_INT_STAT	              (0x8000 << CAN_INT_SHIFT) /* Status interrupt */
+
+#  define CAN_INT_STAT              (0x8000 << CAN_INT_SHIFT) /* Status interrupt */
+
                                                /* Bits 16-31: Reserved */
+
 /* Test register */
+
                                                /* Bits 0-1: Reserved */
 #define CAN_TEST_BASIC               (1 << 2)  /* Bit 2:  Basic mode */
 #define CAN_TEST_SILENT              (1 << 3)  /* Bit 3:  Silent mode */
@@ -265,13 +275,16 @@
 #  define CAN_TEST_TX_MONITOR        (1 << CAN_TEST_TX_SHIFT) /* Sample point monitored TD pin */
 #  define CAN_TEST_TX_DOMINANT       (2 << CAN_TEST_TX_SHIFT) /* TD pin LOW/dominant */
 #  define CAN_TEST_TX_RECESSIVE      (3 << CAN_TEST_TX_SHIFT) /* TD pin HIGH/recessive */
+
 #define CAN_TEST_RX                  (1 << 7)  /* Bit 7:  Monitors actual value of RD Pin */
                                                /* Bits 8-31: Reserved */
+
 /* Baud rate prescaler extension register */
 
 #define CAN_BRPE_SHIFT               (0)       /* Bits 0-3: Baud rate prescaler extension */
 #define CAN_BRPE_MASK                (15 << CAN_BRPE_SHIFT)
                                                /* Bits 4-31: Reserved */
+
 /* Message interface 1/2 command request */
 
 #define CAN_CMDREQ_MSGNO_SHIFT       (0)       /* Bits 0-5: Message number */
@@ -279,6 +292,7 @@
                                                /* Bits 6-14: Reserved */
 #define CAN_CMDREQ_BUSY              (1 << 15) /* Bit 15: BUSY flag */
                                                /* Bits 16-31: Reserved */
+
 /* Message interface 1/2 command mask (write) */
 
 #define CAN_CMDMSKW_DATAB            (1 << 0)  /* Bit 0:  Access data bytes 4-7 */
@@ -290,6 +304,7 @@
 #define CAN_CMDMSKW_MASK             (1 << 6)  /* Bit 6:  Access mask bits */
 #define CAN_CMDMSKW_WRRD             (1 << 7)  /* Bit 7:  Write transfer (1) */
                                                /* Bits 8-31: Reserved */
+
 /* Message interface 1/2 command mask (read) */
 
 #define CAN_CMDMSKR_DATAB            (1 << 0)  /* Bit 0:  Access data bytes 4-7 */
@@ -301,10 +316,12 @@
 #define CAN_CMDMSKR_MASK             (1 << 6)  /* Bit 6:  Access mask bits */
 #define CAN_CMDMSKR_WRRD             (1 << 7)  /* Bit 7:  Read transfer (0) */
                                                /* Bits 8-31: Reserved */
+
 /* Message interface 1/2 mask 1 */
 
 #define CAN_MSK1                     0xffff    /* Bits 0-15: Identifier mask 0-15 */
                                                /* Bits 16-31: Reserved */
+
 /* Message interface 1/2 mask 2 */
 
 #define CAN_MSK2                     0x1fff    /* Bits 0-12: Identifier mask 16-28 */
@@ -312,10 +329,12 @@
 #define CAN_MSK2_MDIR                (1 << 14) /* Bit 14: Mask message direction */
 #define CAN_MSK2_MXTD                (1 << 15) /* Bit 15: Mask extend identifier */
                                                /* Bits 16-31: Reserved */
+
 /* Message interface 1/2 arbitration */
 
 #define CAN_ARB1                     0xffff    /* Bits 0-15: Identifier mask 0-15 */
                                                /* Bits 16-31: Reserved */
+
 /* Message interface 1/2 arbitration */
 
 #define CAN_MSK2                     0x1fff    /* Bits 0-12: Identifier mask 16-28 */
@@ -323,6 +342,7 @@
 #define CAN_MSK2_XTD                 (1 << 14) /* Bit 14: Extend identifier */
 #define CAN_MSK2_MSGVAL              (1 << 15) /* Bit 15: Message valid */
                                                /* Bits 16-31: Reserved */
+
 /* Message interface 1 message control */
 
 #define CAN_MCTRL_DLC_SHIFT          (0)       /* Bits 0-3: Data length code */
@@ -338,6 +358,7 @@
 #define CAN_MCTRL_MSGLST             (1 << 14) /* Bit 14: Message lost */
 #define CAN_MCTRL_NEWDAT             (1 << 15) /* Bit 15: New data */
                                                /* Bits 16-31: Reserved */
+
 /* Message interface 1/2 data A1 */
 
 #define CAN_DA1_DATA0_SHIFT          (0)       /* Bits 0-7: Data byte 0 */
@@ -345,6 +366,7 @@
 #define CAN_DA1_DATA1_SHIFT          (8)       /* Bits 8-15: Data byte 1 */
 #define CAN_DA1_DATA1_MASK           (0xff << CAN_DA1_DATA1_SHIFT)
                                                /* Bits 16-31: Reserved */
+
 /* Message interface 1/2 data A2 */
 
 #define CAN_DA2_DATA2_SHIFT          (0)       /* Bits 0-7: Data byte 2 */
@@ -352,6 +374,7 @@
 #define CAN_DA2_DATA3_SHIFT          (8)       /* Bits 8-15: Data byte 3 */
 #define CAN_DA2_DATA3_MASK           (0xff << CAN_DA2_DATA3_SHIFT)
                                                /* Bits 16-31: Reserved */
+
 /* Message interface 1/2 data B1 */
 
 #define CAN_DB1_DATA4_SHIFT          (0)       /* Bits 0-7: Data byte 4 */
@@ -359,6 +382,7 @@
 #define CAN_DB1_DATA5_SHIFT          (8)       /* Bits 8-15: Data byte 5 */
 #define CAN_DB1_DATA5_MASK           (0xff << CAN_DB1_DATA5_SHIFT)
                                                /* Bits 16-31: Reserved */
+
 /* Message interface 1/2 data B2 */
 
 #define CAN_DB2_DATA6_SHIFT          (0)       /* Bits 0-7: Data byte 6 */
@@ -366,78 +390,88 @@
 #define CAN_DB2_DATA7_SHIFT          (8)       /* Bits 8-15: Data byte 7 */
 #define CAN_DB2_DATA7_MASK           (0xff << CAN_DB2_DATA6_SHIFT)
                                                /* Bits 16-31: Reserved */
+
 /* Transmission request 1 */
 
 #define CAN_TXREQ1_MASK              0xffff    /* Bits 0-15: TX request bit msg 1-16 */
 #define CAN_TXREQ1(n)                (1 << ((n)-1)
                                                /* Bits 16-31: Reserved */
+
 /* Transmission request 2 */
 
 #define CAN_TXREQ2_MASK              0xffff    /* Bits 0-15: TX request bit msg 17-32 */
 #define CAN_TXREQ2(n)                (1 << ((n)-17)
                                                /* Bits 16-31: Reserved */
+
 /* New data 1 */
 
 #define CAN_ND1_MASK                 0xffff    /* Bits 0-15: New data bits msg 1-16 */
 #define CAN_ND1(n)                   (1 << ((n)-1)
                                                /* Bits 16-31: Reserved */
+
 /* New data 2 */
 
 #define CAN_ND2_MASK                 0xffff    /* Bits 0-15: New data bits msg 17-32 */
 #define CAN_ND2(n)                   (1 << ((n)-17)
                                                /* Bits 16-31: Reserved */
+
 /* Interrupt pending 1 */
 
 #define CAN_IR1_MASK                 0xffff    /* Bits 0-15: Interrupt pending msg 1-16 */
 #define CAN_IR1(n)                   (1 << ((n)-1)
                                                /* Bits 16-31: Reserved */
+
 /* Interrupt pending 2 */
 
 #define CAN_IR2_MASK                 0xffff    /* Bits 0-15: Interrupt pending msg 17-32 */
 #define CAN_IR2(n)                   (1 << ((n)-17)
                                                /* Bits 16-31: Reserved */
+
 /* Message valid 1 */
 
 #define CAN_MSGV1_MASK               0xffff    /* Bits 0-15: Interrupt pending msg 1-16 */
 #define CAN_MSGV1(n)                 (1 << ((n)-1)
                                                /* Bits 16-31: Reserved */
+
 /* Message valid 2 */
 
 #define CAN_MSGV2_MASK               0xffff    /* Bits 0-15: Interrupt pending msg 17-32 */
 #define CAN_MSGV2(n)                 (1 << ((n)-17)
                                                /* Bits 16-31: Reserved */
+
 /* CAN clock divider register */
 
 #define CAN_CLKDIV_SHIFT            (0)       /* Bits 0-3: Clock divider value */
 #define CAN_CLKDIV_MASK             (15 << CAN_CLKDIV_SHIFT)
-#  define CAN_CLKDIV_DIV1           (0 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 1 */
-#  define CAN_CLKDIV_DIV2           (1 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 2 */
-#  define CAN_CLKDIV_DIV3           (2 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 3 */
-#  define CAN_CLKDIV_DIV5           (3 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 5 */
-#  define CAN_CLKDIV_DIV9           (4 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 9 */
-#  define CAN_CLKDIV_DIV 17         (5 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 17 */
-#  define CAN_CLKDIV_DIV33          (6 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 33 */
-#  define CAN_CLKDIV_DIV65          (7 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 65 */
-#  define CAN_CLKDIV_DIV129         (8 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 129 */
-#  define CAN_CLKDIV_DIV257         (9 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 257 */
+#  define CAN_CLKDIV_DIV1           (0 << CAN_CLKDIV_SHIFT)  /* CAN_CLK = PCLK / 1 */
+#  define CAN_CLKDIV_DIV2           (1 << CAN_CLKDIV_SHIFT)  /* CAN_CLK = PCLK / 2 */
+#  define CAN_CLKDIV_DIV3           (2 << CAN_CLKDIV_SHIFT)  /* CAN_CLK = PCLK / 3 */
+#  define CAN_CLKDIV_DIV5           (3 << CAN_CLKDIV_SHIFT)  /* CAN_CLK = PCLK / 5 */
+#  define CAN_CLKDIV_DIV9           (4 << CAN_CLKDIV_SHIFT)  /* CAN_CLK = PCLK / 9 */
+#  define CAN_CLKDIV_DIV 17         (5 << CAN_CLKDIV_SHIFT)  /* CAN_CLK = PCLK / 17 */
+#  define CAN_CLKDIV_DIV33          (6 << CAN_CLKDIV_SHIFT)  /* CAN_CLK = PCLK / 33 */
+#  define CAN_CLKDIV_DIV65          (7 << CAN_CLKDIV_SHIFT)  /* CAN_CLK = PCLK / 65 */
+#  define CAN_CLKDIV_DIV129         (8 << CAN_CLKDIV_SHIFT)  /* CAN_CLK = PCLK / 129 */
+#  define CAN_CLKDIV_DIV257         (9 << CAN_CLKDIV_SHIFT)  /* CAN_CLK = PCLK / 257 */
 #  define CAN_CLKDIV_DIV513         (10 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 513 */
 #  define CAN_CLKDIV_DIV1025        (11 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 1025 */
 #  define CAN_CLKDIV_DIV2049        (12 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 2049 */
 #  define CAN_CLKDIV_DIV4097        (13 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 4097 */
 #  define CAN_CLKDIV_DIV8093        (14 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 8093 */
 #  define CAN_CLKDIV_DIV16385       (15 << CAN_CLKDIV_SHIFT) /* CAN_CLK = PCLK / 16385 */
+
                                                /* Bits 4-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_CAN_H */

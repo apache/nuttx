@@ -130,7 +130,7 @@ static inline uint64_t lpc54_get_compare(void)
   return g_cached_compare;
 }
 
- static void lpc54_set_mask(uint64_t value)
+static void lpc54_set_mask(uint64_t value)
 {
   irqstate_t flags;
 
@@ -143,7 +143,8 @@ static inline uint64_t lpc54_get_compare(void)
       putreg16((uint32_t)(value >> 32), LPC54_RIT_MASKH);
       putreg32((uint32_t)(value & 0xffffffffllu), LPC54_RIT_MASK);
       leave_critical_section();
-      putreg32(value, );
+      putreg32(value,
+              );
     }
 }
 
@@ -272,7 +273,7 @@ static void lpc54_ts_sub(FAR const struct timespec *ts1,
 
 static inline uint64_t lpc54_ts2tick(FAR const struct timespec *ts)
 {
-  return (uint64_t)ts->tv_sec * LPC54_CCLK +
+  return ((uint64_t)ts->tv_sec * LPC54_CCLK +
           ((uint64_t)ts->tv_nsec / g_min_nsec * g_min_ticks));
 }
 
@@ -284,8 +285,8 @@ static uint64_t lpc54_tick2ts(uint64_t ticks, FAR struct timespec *ts,
 
   if (with_rest)
     {
-      uint64_t ticks_mult = ticks/g_min_ticks;
-      ticks_whole = ticks_mult*g_min_ticks;
+      uint64_t ticks_mult = ticks / g_min_ticks;
+      ticks_whole = ticks_mult * g_min_ticks;
       ticks_rest = ticks - ticks_whole;
     }
   else
@@ -293,7 +294,7 @@ static uint64_t lpc54_tick2ts(uint64_t ticks, FAR struct timespec *ts,
       ticks_whole = ticks;
     }
 
-  ts->tv_sec = ticks_whole/LPC54_CCLK;
+  ts->tv_sec = ticks_whole / LPC54_CCLK;
   ts->tv_nsec = ((ticks_whole % LPC54_CCLK) / g_min_ticks) * g_min_nsec;
 
   return ticks_rest;
@@ -370,9 +371,9 @@ static void lpc54_save_timer(bool from_isr)
       lpc54_set_compare(COUNTER_MAX);
       lpc54_set_mask(0);
       lpc54_clear_interrupt();
-   }
+    }
   else
-   {
+    {
       /* Process reset if any */
 
       uint64_t match = lpc54_get_compare();
@@ -382,7 +383,7 @@ static void lpc54_save_timer(bool from_isr)
       lpc54_set_compare(COUNTER_MAX);
       lpc54_set_mask(0);
 
-     if (from_isr || lpc54_get_interrupt())
+      if (from_isr || lpc54_get_interrupt())
         {
           if (lpc54_get_reset_on_match()) /* Was reset? */
             {
@@ -676,7 +677,9 @@ int up_timer_gettime(FAR struct timespec *ts)
 
       if (reset_after)
         {
-          /* Count should be smaller then COUNTER_MAX-g_to_end -> no overflow */
+          /* Count should be smaller then
+           * COUNTER_MAX-g_to_end -> no overflow
+           */
 
           count += lpc54_get_compare();
         }

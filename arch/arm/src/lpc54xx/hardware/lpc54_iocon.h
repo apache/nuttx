@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_iocon.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC548X_IOCON_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC548X_IOCON_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC54_IOCON_PIO_n_OFFSET(p)    ((unsigned int)(p) << 2)
 #define LPC54_IOCON_PIO_0_OFFSET      (0x0000) /* IOCON Port(n) register 0  */
@@ -68,7 +68,7 @@
 #define LPC54_IOCON_PIO_30_OFFSET     (0x0078) /* IOCON Port(n) register 30  */
 #define LPC54_IOCON_PIO_31_OFFSET     (0x007c) /* IOCON Port(n) register 31  */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC54_IOCON_PIO_BASE(b)       (LPC54_IOCON_BASE + ((unsigned int)(b) << 7))
 #define LPC54_IOCON_PIO0_BASE         (LPC54_IOCON_BASE + 0x0000)
@@ -278,7 +278,8 @@
 #define LPC54_IOCON_PIO5_30           (LPC54_IOCON_PIO5_BASE + LPC54_IOCON_PIO_30_OFFSET)
 #define LPC54_IOCON_PIO5_31           (LPC54_IOCON_PIO5_BASE + LPC54_IOCON_PIO_31_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
+
 /* IOCON pin function select */
 
 #define IOCON_FUNC_GPIO             (0)

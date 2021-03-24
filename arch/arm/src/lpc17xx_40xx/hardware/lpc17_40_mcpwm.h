@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_mcpwm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_MCPWM_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_MCPWM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC17_40_MCPWM_CON_OFFSET       0x0000 /* PWM Control read address */
 #define LPC17_40_MCPWM_CONSET_OFFSET    0x0004 /* PWM Control set address */
@@ -67,7 +67,7 @@
 #define LPC17_40_MCPWM_INTFCLR_OFFSET   0x0070 /* Interrupt flags clear address */
 #define LPC17_40_MCPWM_CAPCLR_OFFSET    0x0074 /* Capture clear address */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC17_40_MCPWM_CON              (LPC17_40_MCPWM_BASE+LPC17_40_MCPWM_CON_OFFSET)
 #define LPC17_40_MCPWM_CONSET           (LPC17_40_MCPWM_BASE+LPC17_40_MCPWM_CONSET_OFFSET)
@@ -100,29 +100,31 @@
 #define LPC17_40_MCPWM_INTFCLR          (LPC17_40_MCPWM_BASE+LPC17_40_MCPWM_INTFCLR_OFFSET)
 #define LPC17_40_MCPWM_CAPCLR           (LPC17_40_MCPWM_BASE+LPC17_40_MCPWM_CAPCLR_OFFSET)
 
-/* Register bit definitions *********************************************************/
-/* There are no bit field definitions for the following registers because they support
- * 32-bit values:
+/* Register bit definitions *************************************************/
+
+/* There are no bit field definitions for the following registers because
+ * they support 32-bit values:
  *
- * - Timer Counter register, channel 0 (TC0), Timer Counter register, channel 1 (TC1),
- *   and Timer Counter register, channel 2 (TC2): 32-bit Timer/Counter values for
- *   channels 0, 1, 2 (no bit field definitions)
+ * - Timer Counter register, channel 0 (TC0), Timer Counter register,
+ *   channel 1 (TC1), and Timer Counter register, channel 2 (TC2):
+ *   32-bit Timer/Counter values for channels 0, 1, 2
+ *  (no bit field definitions)
  *
- * - Limit register, channel 0 (LIM0), Limit register, channel 1 (LIM1), and Limit
- *   register, channel 2 (LIM2): 32-bit Limit values for TC0, 1, 2 (no bit field
- *   definitions)
+ * - Limit register, channel 0 (LIM0), Limit register, channel 1 (LIM1),
+ *   and Limit register, channel 2 (LIM2): 32-bit Limit values for TC0, 1, 2
+ *   (no bit field definitions)
  *
- * - Match register, channel 0 MAT0), Match register, channel 1 (MAT1), and Match
- *   register, channel 2 (MAT2): 32-bit Match values for TC0, 1, 2 (no bit field
- *   definitions).
+ * - Match register, channel 0 MAT0), Match register, channel 1 (MAT1),
+ *   and Match register, channel 2 (MAT2): 32-bit Match values for TC0, 1, 2
+ *   (no bit field definitions).
  *
- * - Capture register, channel 0 (CAP0), Capture register, channel 1 (CAP1), and
- *   Capture register, channel 2 (CAP2): 32-bit TC value at a capture event for
- *  channels 0, 1, 2 (no bit field definitions)
+ * - Capture register, channel 0 (CAP0), Capture register, channel 1 (CAP1),
+ *   and Capture register, channel 2 (CAP2): 32-bit TC value at a capture
+ *  event for channels 0, 1, 2 (no bit field definitions)
  */
 
-/* PWM Control read address (CON), PWM Control set address (CONSET), and PWM Control
- * clear address (CONCLR) common register bit definitions.
+/* PWM Control read address (CON), PWM Control set address (CONSET),
+ * and PWM Control clear address (CONCLR) common register bit definitions.
  */
 
 #define MCPWM_CON_RUN0                  (1 << 0)  /* Bit 0:  Stops/starts timer channel 0 */
@@ -147,8 +149,10 @@
 #define MCPWM_CON_ACMODE                (1 << 30) /* Bit 30: 3-phase AC mode select */
 #define MCPWM_CON_DCMODE                (1 << 31) /* Bit 31: 3-phase DC mode select */
 
-/* Capture Control read address (CAPCON), Capture Control set address (CAPCONSET),
- * and Event Control clear address (CAPCONCLR) common register bit definitions
+/* Capture Control read address (CAPCON),
+ * Capture Control set address (CAPCONSET),
+ * and Event Control clear address (CAPCONCLR)
+ * common register bit definitions
  */
 
 #define MCPWM_CAPCON_CAP0MCI0RE         (1 << 0)  /* Bit 0:  Enable chan0 rising edge capture MCI0 */
@@ -176,6 +180,7 @@
 #define MCPWM_CAPCON_HNFCAP1            (1 << 22) /* Bit 22: Hardware noise filter */
 #define MCPWM_CAPCON_HNFCAP2            (1 << 23) /* Bit 23: Hardware noise filter */
                                                   /* Bits 24-31: Reserved */
+
 /* Dead time register */
 
 #define MCPWM_DT_DT0_SHIFT              (0)       /* Bits 0-9: Dead time for channel 0 */
@@ -185,6 +190,7 @@
 #define MCPWM_DT_DT2_SHIFT              (20)      /* Bits 20-29: Dead time for channel 2 */
 #define MCPWM_DT_DT2_MASK               (0x03ff << MCPWM_DT_DT2_SHIFT)
                                                   /* Bits 30-31: reserved */
+
 /* Commutation Pattern register */
 
 #define MCPWM_CP_CCPA0                  (1 << 0)  /* Bit 0:  Iinternal MCOA0 */
@@ -195,9 +201,12 @@
 #define MCPWM_CP_CCPB2                  (1 << 5)  /* Bit 5:  MCOB2 tracks internal MCOA0 */
                                                   /* Bits 6-31: reserved */
 
-/* Interrupt Enable read address (INTEN), Interrupt Enable set address (INTENSET),
- * Interrupt Enable clear address (INTENCLR), Interrupt flags read address (INTF),
- * Interrupt flags set address (INTFSET), and Interrupt flags clear address (INTFCLR)
+/* Interrupt Enable read address (INTEN),
+ * Interrupt Enable set address (INTENSET),
+ * Interrupt Enable clear address (INTENCLR),
+ * Interrupt flags read address (INTF),
+ * Interrupt flags set address (INTFSET),
+ * and Interrupt flags clear address (INTFCLR)
  * common bit field definitions
  */
 
@@ -216,7 +225,8 @@
 #define MCPWM_INT_ABORT                 (1 << 15) /* Bit 15:  Fast abort interrupt */
                                                   /* Bits 16-31: Reserved */
 
-/* Count Control read address (CNTCON), Count Control set address (CNTCONSET), and
+/* Count Control read address (CNTCON),
+ * Count Control set address (CNTCONSET), and
  * Count Control clear address (CNTCONCLR) common register bit definitions.
  */
 
@@ -250,16 +260,16 @@
 #define MCPWM_CAPCLR_MCCLR2             (1 << 2)  /* Bit 2:  Clear MCCAP2 register */
                                                   /* Bits 2-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_MCPWM_H */

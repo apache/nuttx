@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_ADC_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC17_40_ADC_CR_OFFSET      0x0000  /* A/D Control Register */
 #define LPC17_40_ADC_GDR_OFFSET     0x0004  /* A/D Global Data Register */
@@ -53,7 +53,7 @@
 #define LPC17_40_ADC_STAT_OFFSET    0x0030  /* A/D Status Register */
 #define LPC17_40_ADC_TRM_OFFSET     0x0034  /* ADC trim register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC17_40_ADC_CR             (LPC17_40_ADC_BASE+LPC17_40_ADC_CR_OFFSET)
 #define LPC17_40_ADC_GDR            (LPC17_40_ADC_BASE+LPC17_40_ADC_GDR_OFFSET)
@@ -72,7 +72,7 @@
 #define LPC17_40_ADC_STAT           (LPC17_40_ADC_BASE+LPC17_40_ADC_STAT_OFFSET)
 #define LPC17_40_ADC_TRM            (LPC17_40_ADC_BASE+LPC17_40_ADC_TRM_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* A/D Control Register */
 
@@ -94,9 +94,12 @@
 #  define ADC_CR_START_MAT0p3    (5 << ADC_CR_START_SHIFT) /* Start edge on MAT0.3 */
 #  define ADC_CR_START_MAT1p0    (6 << ADC_CR_START_SHIFT) /* Start edge on MAT1.0 */
 #  define ADC_CR_START_MAT1p1    (7 << ADC_CR_START_SHIFT) /* Start edge on MAT1.1 */
+
 #define ADC_CR_EDGE              (1 << 27) /* Bit 27: Start on falling edge  */
                                            /* Bits 28-31: Reserved */
+
 /* A/D Global Data Register AND Channel 0-7 Data Register */
+
                                            /* Bits 0-3: Reserved */
 #define ADC_DR_RESULT_SHIFT      (4)       /* Bits 4-15: Result of conversion (DONE==1) */
 #define ADC_DR_RESULT_MASK       (0x0fff << ADC_DR_RESULT_SHIFT)
@@ -120,6 +123,7 @@
 #define ADC_INTEN_CHAN7          (1 << 7)  /* Bit 7:  Enable ADC chan 7 complete interrupt */
 #define ADC_INTEN_GLOBAL         (1 << 8)  /* Bit 8:  Only the global DONE generates interrupt */
                                            /* Bits 9-31: Reserved */
+
 /* A/D Status Register */
 
 #define ADC_STAT_DONE(n)         (1 << (n))
@@ -142,7 +146,9 @@
 #define ADC_STAT_OVERRUN7        (1 << 15) /* Bit 15: A/D chan 7 OVERRUN */
 #define ADC_STAT_INT             (1 << 16) /* Bit 15: A/D interrupt */
                                            /* Bits 17-31: Reserved */
+
 /* ADC trim register */
+
                                            /* Bits 0-3: Reserved */
 #define ADC_TRM_ADCOFFS_SHIFT    (4)       /* Bits 4-7: A/D offset trim bits */
 #define ADC_TRM_ADCOFFS_MASK     (15 << ADC_TRM_ADCOFFS_SHIFT)
@@ -150,16 +156,16 @@
 #define ADC_TRM_TRIM_MASK        (15 << ADC_TRM_TRIM_SHIFT)
                                            /* Bits 12-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_ADC_H */

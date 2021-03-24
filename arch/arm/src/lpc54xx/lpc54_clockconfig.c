@@ -4,8 +4,8 @@
  *   Copyright (C) 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Parts of this file were adapted from sample code provided for the LPC54xx
- * family from NXP which has a compatible BSD license.
+ * Parts of this file were adapted from sample code provided for the
+ * LPC54xx family from NXP which has a compatible BSD license.
  *
  *   Copyright (c) 2016, Freescale Semiconductor, Inc.
  *   Copyright (c) 2016 - 2017 , NXP
@@ -172,7 +172,7 @@ static void lpc54_set_flash_waitstates(uint32_t freq)
  * Description:
  *   Configure the PLL.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void lpc54_configure_pll(FAR const struct pll_setup_s *pllsetup)
 {
@@ -216,7 +216,8 @@ static void lpc54_configure_pll(FAR const struct pll_setup_s *pllsetup)
 
   /* Flags for lock or power on */
 
-  if ((pllsetup->pllflags & (PLL_SETUPFLAG_POWERUP | PLL_SETUPFLAG_WAITLOCK)) != 0)
+  if ((pllsetup->pllflags &
+      (PLL_SETUPFLAG_POWERUP | PLL_SETUPFLAG_WAITLOCK)) != 0)
     {
       /* If turning the PLL back on, perform the following sequence to
        * accelerate PLL lock.
@@ -224,7 +225,8 @@ static void lpc54_configure_pll(FAR const struct pll_setup_s *pllsetup)
 
       volatile uint32_t delay;
       uint32_t maxcco = (1 << 18) | 0x5dd2; /* CCO = 1.6Ghz + MDEC enabled */
-      uint32_t ssctrl = getreg32(LPC54_SYSCON_SYSPLLMDEC) & ~SYSCON_SYSPLLMDEC_MREQ;
+      uint32_t ssctrl = getreg32(LPC54_SYSCON_SYSPLLMDEC) &
+                                 ~SYSCON_SYSPLLMDEC_MREQ;
 
       /* Initialize and power up PLL */
 
@@ -258,7 +260,8 @@ static void lpc54_configure_pll(FAR const struct pll_setup_s *pllsetup)
 
   if ((pllsetup->pllflags & PLL_SETUPFLAG_WAITLOCK) != 0)
     {
-      while ((getreg32(LPC54_SYSCON_SYSPLLSTAT) & SYSCON_SYSPLLSTAT_LOCK) == 0)
+      while ((getreg32(LPC54_SYSCON_SYSPLLSTAT) &
+                       SYSCON_SYSPLLSTAT_LOCK) == 0)
         {
         }
     }
@@ -277,7 +280,7 @@ static void lpc54_configure_pll(FAR const struct pll_setup_s *pllsetup)
  *   clocking using the settings in board.h.  This function also performs
  *   other low-level chip as necessary.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void lpc54_clockconfig(FAR const struct pll_setup_s *pllsetup)
 {

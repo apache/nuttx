@@ -28,16 +28,20 @@
  * the boot ROM is always executed first.
  *
  * The boot starts after reset is released.  The IRC is selected as CPU clock
- * and the Cortex-M4 starts the boot loader. By default the JTAG access to the
- * chip is disabled at reset.  The boot ROM determines the boot mode based on
- * the OTP BOOT_SRC value or reset state pins.  For flash-based parts, the part
- * boots from internal flash by default.  Otherwise, the boot ROM copies the
- * image to internal SRAM at location 0x1000:0000, sets the ARM's shadow
- * pointer to 0x1000:0000, and jumps to that location.
+ * and the Cortex-M4 starts the boot loader. By default the JTAG access to
+ * the chip is disabled at reset.  The boot ROM determines the boot mode
+ * based on the OTP BOOT_SRC value or reset state pins.  For flash-based
+ * parts, the part boots from internal flash by default.  Otherwise, the boot
+ * ROM copies the image to internal SRAM at location 0x1000:0000, sets the
+ * ARM's shadow pointer to 0x1000:0000, and jumps to that location.
  *
  * However, using JTAG the executable image can be also loaded directly into
  * and executed from SRAM.
  */
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -95,7 +99,9 @@
 
 static inline void lpc43_setbootrom(void)
 {
-  /* Set the shadow register to the beginning of the boot ROM (Only bits 12-31) */
+  /* Set the shadow register to the beginning of the boot ROM
+   * (Only bits 12-31)
+   */
 
   putreg32(LPC43_ROM_BASE, LPC43_CREG_M4MEMMAP);
 
@@ -164,7 +170,8 @@ static inline void lpc43_enabuffering(void)
  *       done, the processor reserves space on the stack for the FP state,
  *       but does not save that state information to the stack.
  *
- *  Software must not change the value of the ASPEN bit or LSPEN bit while either:
+ *  Software must not change the value of the ASPEN bit or LSPEN bit while
+ *  either:
  *   - the CPACR permits access to CP10 and CP11, that give access to the FP
  *     extension, or
  *   - the CONTROL.FPCA bit is set to 1
@@ -198,7 +205,7 @@ static inline void lpc43_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -228,7 +235,7 @@ static inline void lpc43_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -257,9 +264,9 @@ void __start(void)
 
   /* Reset as many of the LPC43 peripherals as possible. This is necessary
    * because the LPC43 does not provide any way of performing a full system
-   * reset under debugger control.  So, if CONFIG_DEBUG_FEATURES is set (indicating
-   * that a debugger is being used?), the boot logic will call this
-   * function on all restarts.
+   * reset under debugger control.  So, if CONFIG_DEBUG_FEATURES is set
+   * (indicating that a debugger is being used?), the boot logic will call
+   * this function on all restarts.
    */
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -292,6 +299,7 @@ void __start(void)
     {
       *dest++ = 0;
     }
+
   showprogress('B');
 
   /* Move the initialized data section from his temporary holding spot in
@@ -304,6 +312,7 @@ void __start(void)
     {
       *dest++ = *src++;
     }
+
   showprogress('C');
 
   /* Initialize the FPU (if configured) */

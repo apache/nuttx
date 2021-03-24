@@ -36,7 +36,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* SPIFI Configuration ******************************************************/
+
 /* This logic supports some special options that can be used to create an
  * MTD device on the SPIFI FLASH.
  *
@@ -47,18 +49,18 @@
  *   CONFIG_SPIFI_OFFSET - Offset the beginning of the block driver this many
  *     bytes into the device address space.  This offset must be an exact
  *     multiple of the erase block size (CONFIG_SPIFI_BLKSIZE). Default 0.
- *   CONFIG_SPIFI_BLKSIZE - The size of one device erase block.  If not defined
- *     then the driver will try to determine the correct erase block size by
- *     examining that data returned from spifi_initialize (which sometimes
- *     seems bad).
+ *   CONFIG_SPIFI_BLKSIZE - The size of one device erase block.  If not
+ *     defined then the driver will try to determine the correct erase block
+ *     size by examining that data returned from spifi_initialize (which
+ *     sometimes seems bad).
  *
  * Other SPIFI options
  *
  *   CONFIG_SPIFI_LIBRARY - Don't use the LPC43xx ROM routines but, instead,
  *     use an external library implementation of the SPIFI interface.
  *   CONFIG_SPIFI_SECTOR512 - If defined, then the driver will report a more
- *     FAT friendly 512 byte sector size and will manage the read-modify-write
- *     operations on the larger erase block.
+ *     FAT friendly 512 byte sector size and will manage the
+ *     read-modify-write operations on the larger erase block.
  *   CONFIG_SPIFI_READONLY - Define to support only read-only operations.
  */
 
@@ -67,15 +69,11 @@
 #endif
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

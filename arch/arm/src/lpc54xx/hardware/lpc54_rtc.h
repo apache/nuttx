@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_rtc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_RTC_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_RTC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 #define LPC54_RTC_NGPREGS          8       /* Number of general purpose registers */
 
-/* Register offsets *************************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC54_RTC_CTRL_OFFSET      0x0000  /* RTC control */
 #define LPC54_RTC_MATCH_OFFSET     0x0004  /* RTC match */
@@ -45,7 +45,7 @@
 
 #define LPC54_RTC_GPREG_OFFSET(n)  (0x0040 + ((n) << 2))
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC54_RTC_CTRL             (LPC54_RTC_BASE + LPC54_RTC_CTRL_OFFSET)
 #define LPC54_RTC_MATCH            (LPC54_RTC_BASE + LPC54_RTC_MATCH_OFFSET)
@@ -56,7 +56,7 @@
 
 #define LPC54_RTC_GPREG(n)         (LPC54_RTC_BASE + LPC54_RTC_GPREG_OFFSET(n))
 
-/* Register bit definitions *****************************************************************/
+/* Register bit definitions *************************************************/
 
 /* RTC control */
 
@@ -70,6 +70,7 @@
 #define RTC_CTRL_OSCPD             (1 << 8)  /* Bit 8:  RTC oscillator power-down control */
 
 /* RTC match (32-bit timer match value) */
+
 /* RTC counter (32-bit counter value) */
 
 /* High-resolution/wake-up timer control */

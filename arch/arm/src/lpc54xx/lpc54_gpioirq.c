@@ -65,8 +65,8 @@ static uint8_t g_pinints;
 
 static const uint8_t g_pinirq[MAX_PININT] =
 {
- LPC54_IRQ_PININT0, LPC54_IRQ_PININT1, LPC54_IRQ_PININT2, LPC54_IRQ_PININT3,
- LPC54_IRQ_PININT4, LPC54_IRQ_PININT5, LPC54_IRQ_PININT6, LPC54_IRQ_PININT7
+  LPC54_IRQ_PININT0, LPC54_IRQ_PININT1, LPC54_IRQ_PININT2, LPC54_IRQ_PININT3,
+  LPC54_IRQ_PININT4, LPC54_IRQ_PININT5, LPC54_IRQ_PININT6, LPC54_IRQ_PININT7
 };
 
 /****************************************************************************
@@ -145,15 +145,15 @@ void lpc54_gpio_irqinitialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_gpio_interrupt
  *
  * Description:
- *   Configure a GPIO interrupt pin based on bit-encoded description of the pin.
- *   This function is called by lpc54_gpio_config to setup interrupting pins.  It is
- *   not a user interface.
+ *   Configure a GPIO interrupt pin based on bit-encoded description of the
+ *   pin. This function is called by lpc54_gpio_config to setup interrupting
+ *   pins.  It is not a user interface.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lpc54_gpio_interrupt(lpc54_pinset_t pinset)
 {
@@ -265,14 +265,14 @@ int lpc54_gpio_interrupt(lpc54_pinset_t pinset)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_gpio_irqno
  *
  * Description:
- *   Returns the IRQ number that was associated with an interrupt pin after it was
- *   configured.
+ *   Returns the IRQ number that was associated with an interrupt pin after
+ *   it was configured.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lpc54_gpio_irqno(lpc54_pinset_t pinset)
 {
@@ -302,15 +302,15 @@ int lpc54_gpio_irqno(lpc54_pinset_t pinset)
   return -ENOENT;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_gpio_ackedge
  *
  * Description:
- *   Acknowledge edge interrupts by clearing the associated bits in the rising and
- *   falling registers.  This acknowledgemment is, of course, not needed for level
- *   interrupts.
+ *   Acknowledge edge interrupts by clearing the associated bits in the
+ *   rising and falling registers.  This acknowledgemment is, of course,
+ *   not needed for level interrupts.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lpc54_gpio_ackedge(int irq)
 {

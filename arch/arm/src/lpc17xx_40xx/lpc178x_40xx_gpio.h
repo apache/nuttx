@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc178x_40xx_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,19 +16,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_LPC178X_GPIO_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_LPC178X_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Bit-encoded input to lpc17_40_configgpio() ******************************************/
+ ****************************************************************************/
+
+/* Bit-encoded input to lpc17_40_configgpio() *******************************/
 
 /* Encoding: TTTT TTTT FFFF MMOV PPPN NNNN
  *
@@ -79,16 +80,16 @@
 
 #define GPIO_FUNC_SHIFT        (12)    /* Bits 12-15: GPIO mode */
 #define GPIO_FUNC_MASK         (15 << GPIO_FUNC_SHIFT)
-#  define GPIO_INPUT           (0 << GPIO_FUNC_SHIFT) /* 0000 GPIO input pin */
-#  define GPIO_INTFE           (1 << GPIO_FUNC_SHIFT) /* 0001 GPIO interrupt falling edge */
-#  define GPIO_INTRE           (2 << GPIO_FUNC_SHIFT) /* 0010 GPIO interrupt rising edge */
-#  define GPIO_INTBOTH         (3 << GPIO_FUNC_SHIFT) /* 0011 GPIO interrupt both edges */
-#  define GPIO_OUTPUT          (4 << GPIO_FUNC_SHIFT) /* 0100 GPIO outpout pin */
-#  define GPIO_ALT1            (5 << GPIO_FUNC_SHIFT) /* 0101 Alternate function 1 */
-#  define GPIO_ALT2            (6 << GPIO_FUNC_SHIFT) /* 0110 Alternate function 2 */
-#  define GPIO_ALT3            (7 << GPIO_FUNC_SHIFT) /* 0111 Alternate function 3 */
-#  define GPIO_ALT4            (8 << GPIO_FUNC_SHIFT) /* 1000 Alternate function 4 */
-#  define GPIO_ALT5            (9 << GPIO_FUNC_SHIFT) /* 1001 Alternate function 5 */
+#  define GPIO_INPUT           (0 << GPIO_FUNC_SHIFT)  /* 0000 GPIO input pin */
+#  define GPIO_INTFE           (1 << GPIO_FUNC_SHIFT)  /* 0001 GPIO interrupt falling edge */
+#  define GPIO_INTRE           (2 << GPIO_FUNC_SHIFT)  /* 0010 GPIO interrupt rising edge */
+#  define GPIO_INTBOTH         (3 << GPIO_FUNC_SHIFT)  /* 0011 GPIO interrupt both edges */
+#  define GPIO_OUTPUT          (4 << GPIO_FUNC_SHIFT)  /* 0100 GPIO outpout pin */
+#  define GPIO_ALT1            (5 << GPIO_FUNC_SHIFT)  /* 0101 Alternate function 1 */
+#  define GPIO_ALT2            (6 << GPIO_FUNC_SHIFT)  /* 0110 Alternate function 2 */
+#  define GPIO_ALT3            (7 << GPIO_FUNC_SHIFT)  /* 0111 Alternate function 3 */
+#  define GPIO_ALT4            (8 << GPIO_FUNC_SHIFT)  /* 1000 Alternate function 4 */
+#  define GPIO_ALT5            (9 << GPIO_FUNC_SHIFT)  /* 1001 Alternate function 5 */
 #  define GPIO_ALT6            (10 << GPIO_FUNC_SHIFT) /* 1010 Alternate function 6 */
 #  define GPIO_ALT7            (11 << GPIO_FUNC_SHIFT) /* 1011 Alternate function 7 */
 
@@ -178,15 +179,15 @@
 #  define GPIO_PIN30           (30 << GPIO_PIN_SHIFT)
 #  define GPIO_PIN31           (31 << GPIO_PIN_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 typedef uint32_t lpc17_40_pinset_t;
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #undef EXTERN
@@ -199,7 +200,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #ifdef __cplusplus

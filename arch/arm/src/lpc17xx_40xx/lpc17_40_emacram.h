@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_emacram.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,26 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_EMACRAM_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_EMACRAM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 #include "hardware/lpc17_40_ethernet.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Default, no-EMAC Case ************************************************************/
-/* Assume that all of AHB SRAM will be available for heap. If this is not true, then
- * LPC17_40_BANK0_HEAPSIZE will be undefined and redefined below.
+ ****************************************************************************/
+
+/* Default, no-EMAC Case ****************************************************/
+
+/* Assume that all of AHB SRAM will be available for heap. If this is not
+ * true, then LPC17_40_BANK0_HEAPSIZE will be undefined and redefined below.
  */
 
 #undef LPC17_40_BANK0_HEAPBASE
@@ -45,13 +47,17 @@
 #  define LPC17_40_BANK0_HEAPSIZE LPC17_40_BANK0_SIZE
 #endif
 
-/* Is networking enabled?  Is the LPC17xx/LPC40xx Ethernet device enabled? Does this chip have
- * and Ethernet controller?  Yes... then we will replace the above default definitions.
+/* Is networking enabled?
+ * Is the LPC17xx/LPC40xx Ethernet device enabled? Does this chip have
+ *  an Ethernet controller?
+ *
+ *  Yes... then we will replace the above default definitions.
  */
 
 #if defined(CONFIG_NET) && defined(CONFIG_LPC17_40_ETHERNET) && LPC17_40_NETHCONTROLLERS > 0
 
-/* EMAC RAM Configuration ***********************************************************/
+/* EMAC RAM Configuration ***************************************************/
+
 /* Is AHB SRAM available? */
 
 #ifndef LPC17_40_HAVE_BANK0
@@ -70,9 +76,9 @@
 #  define CONFIG_LPC17_40_ETH_NRXDESC 13
 #endif
 
-/* Size of the region at the beginning of AHB SRAM 0 set set aside for the EMAC.
- * This size must fit within AHB SRAM Bank 0 and also be a multiple of 32-bit
- * words.
+/* Size of the region at the beginning of AHB SRAM 0 set set aside for the
+ * EMAC. This size must fit within AHB SRAM Bank 0 and also be a multiple
+ * of 32-bit words.
  */
 
 #ifndef CONFIG_LPC17_40_EMACRAM_SIZE
@@ -87,8 +93,8 @@
 #  error "EMAC RAM size must be in multiples of 32-bit words"
 #endif
 
-/* Determine is there is any meaningful space left at the end of AHB Bank 0 that
- * could be added to the heap.
+/* Determine is there is any meaningful space left at the end of AHB Bank 0
+ * that could be added to the heap.
  */
 
 #undef LPC17_40_BANK0_HEAPBASE
@@ -98,29 +104,31 @@
 #  define LPC17_40_BANK0_HEAPSIZE (LPC17_40_BANK0_SIZE - CONFIG_LPC17_40_EMACRAM_SIZE)
 #endif
 
-/* Memory at the beginning of AHB SRAM, Bank 0 is set aside for EMAC Tx and Rx
- * descriptors.  The position is not controllable, only the size of the region
- * is controllable.
+/* Memory at the beginning of AHB SRAM, Bank 0 is set aside for EMAC Tx and
+ * Rx descriptors.  The position is not controllable, only the size of the
+ * region is controllable.
  */
 
 #define LPC17_40_EMACRAM_BASE   LPC17_40_SRAM_BANK0
 #define LPC17_40_EMACRAM_SIZE   CONFIG_LPC17_40_EMACRAM_SIZE
 
-/* Descriptor Memory Layout *********************************************************/
-/* EMAC DMA RAM and descriptor definitions.  The configured number of descriptors
- * will determine the organization and the size of the descriptor and status tables.
- * There is a complex interaction between the maximum packet size (CONFIG_NET_ETH_PKTSIZE)
- * and the number of Rx and Tx descriptors that can be supported (CONFIG_LPC17_40_ETH_NRXDESC
- * and CONFIG_LPC17_40_ETH_NTXDESC): Small buffers -> more packets.  This is something that
- * needs to be tuned for you system.
+/* Descriptor Memory Layout *************************************************/
+
+/* EMAC DMA RAM and descriptor definitions.  The configured number of
+ * descriptors will determine the organization and the size of the descriptor
+ * and status tables. There is a complex interaction between the maximum
+ * packet size (CONFIG_NET_ETH_PKTSIZE) and the number of Rx and Tx
+ * descriptors that can be supported (CONFIG_LPC17_40_ETH_NRXDESC and
+ * CONFIG_LPC17_40_ETH_NTXDESC): Small buffers -> more packets.  This is
+ * something that needs to be tuned for you system.
  *
  * For a 16Kb SRAM region, here is the relationship:
  *
  *  16384 <= ntx * (pktsize + 8 + 4) + nrx * (pktsize + 8 + 8)
  *
- * If ntx == nrx and pktsize == 590+2, then you could have ntx = nrx = 13.  In this
- * case, you would need only 15,756 bytes of EMAC RAM (but be careful with alignment!
- * 15,756 is not well aligned.).
+ * If ntx == nrx and pktsize == 590+2, then you could have ntx = nrx = 13.
+ * In this case, you would need only 15,756 bytes of EMAC RAM (but be careful
+ * with alignment! 15,756 is not well aligned.).
  */
 
 #define LPC17_40_TXDESCTAB_SIZE (CONFIG_LPC17_40_ETH_NTXDESC*LPC17_40_TXDESC_SIZE)
@@ -170,17 +178,17 @@
 #  error "Packet memory overlaps descriptor tables"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_NET && CONFIG_LPC17_40_ETHERNET && LPC17_40_NETHCONTROLLERS > 0*/
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_EMACRAM_H */

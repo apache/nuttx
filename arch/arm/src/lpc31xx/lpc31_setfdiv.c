@@ -94,7 +94,6 @@ void lpc31_setfdiv(enum lpc31_domainid_e dmnid,
       bcrndx = lpc31_bcrndx(dmnid);
       if (bcrndx != BCRNDX_INVALID)
         {
-
           /* Yes... Disable the BCR */
 
           regaddr = LPC31_CGU_BCR(bcrndx);

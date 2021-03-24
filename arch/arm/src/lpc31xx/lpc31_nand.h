@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_nand.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,30 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_NAND_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_NAND_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* NAND FLASH controller register base address offset into the APB4 domain **********************/
+/* NAND FLASH controller register base address offset into the APB4 domain **/
 
 #define LPC31_NAND_VBASE                (LPC31_APB4_VADDR+LPC31_APB4_NAND_OFFSET)
 #define LPC31_NAND_PBASE                (LPC31_APB4_PADDR+LPC31_APB4_NAND_OFFSET)
 
-/* NAND FLASH controller register offsets (with respect to the base of the APB4 domain) *********/
+/* NAND FLASH controller register offsets
+ * (with respect to the base of the APB4 domain)
+ */
 
 #define LPC31_NAND_IRQSTATUS1_OFFSET    0x00 /* Interrupt status register (first 32-bits) */
 #define LPC31_NAND_IRQMASK1_OFFSET      0x04 /* Interrupt mask register (first 32-bits) */
@@ -70,7 +72,7 @@
 #define LPC31_NAND_ECCERRSTATUS_OFFSET  0x78 /* ECC error status register */
 #define LPC31_NAND_AESFROMAHB_OFFSET    0x7c /* Enable AES engine from AHB */
 
-/* NAND FLASH controller register (virtual) addresses *******************************************/
+/* NAND FLASH controller register (virtual) addresses ***********************/
 
 #define LPC31_NAND_IRQSTATUS1           (LPC31_NAND_VBASE+LPC31_NAND_IRQSTATUS1_OFFSET)
 #define LPC31_NAND_IRQMASK1             (LPC31_NAND_VBASE+LPC31_NAND_IRQMASK1_OFFSET)
@@ -103,7 +105,8 @@
 #define LPC31_NAND_ECCERRSTATUS         (LPC31_NAND_VBASE+LPC31_NAND_ECCERRSTATUS_OFFSET)
 #define LPC31_NAND_AESFROMAHB           (LPC31_NAND_VBASE+LPC31_NAND_AESFROMAHB_OFFSET)
 
-/* NAND FLASH controller register bit definitions ***********************************************/
+/* NAND FLASH controller register bit definitions ***************************/
+
 /* NandIRQStatus1 register description (NandIRQStatus1, address 0x17000800) */
 
 #define NAND_IRQSTATUS1_MNANDRYBN3        (1 << 31) /* Bit 31: mNAND_RYBN3 positive edge */
@@ -172,7 +175,9 @@
 #define NAND_IRQIRQMASK1_RAM1AESDONE      (1 << 1)  /* Bit 1:  RAM 1 AES done (LPC3154 only) */
 #define NAND_IRQIRQMASK1_RAM0AESDONE      (1 << 0)  /* Bit 0:  RAM 0 AES done (LPC3154 only) */
 
-/* NandIRQStatusRaw1 register description (NandIRQStatusRaw1, address 0x17000808) */
+/* NandIRQStatusRaw1 register description (NandIRQStatusRaw1,
+ * address 0x17000808)
+ */
 
 #define NAND_IRQSTATUSRAW1_MNANDRYBN3     (1 << 31) /* Bit 31: mNAND_RYBN3 positive edge */
 #define NAND_IRQSTATUSRAW1_MNANDRYBN2     (1 << 30) /* Bit 30: mNAND_RYBN2 positive edge */
@@ -314,7 +319,9 @@
 #define NAND_CHECKSTS_R0                  (1 << 1)  /* Bit 1:  mNAND_RYBN0 value */
 #define NAND_CHECKSTS_VB                  (1 << 0)  /* Bit 0:  APB busy */
 
-/* NandControlFlow register description (NandControlFlow, address 0x17000838) */
+/* NandControlFlow register description
+ * (NandControlFlow, address 0x17000838)
+ */
 
 #define NAND_CONTROLFLOW_W1               (1 << 5)  /* Bit 5:  Starts write SRAM1 to NAND */
 #define NAND_CONTROLFLOW_W0               (1 << 4)  /* Bit 4:  Starts write SRAM0 to NAND */
@@ -346,7 +353,9 @@
 #define NAND_GPIO2_READDATA_SHIFT         (0)       /* Bit 0-15: Read data from NAND IO */
 #define NAND_GPIO2_READDATA_MASK          (0xffff << NAND_GPIO2_READDATA_SHIFT)
 
-/* NandIRQStatus2 register description (NandIRQStatus2, address 0x1700 0848) */
+/* NandIRQStatus2 register description
+ * (NandIRQStatus2, address 0x1700 0848)
+ */
 
 #define NAND_IRQSTATUS2_PGWHILEAPB        (1 << 4)  /* Bit 4:  Page access while APB access */
 #define NAND_IRQSTATUS2_APBWHILEPG        (1 << 3)  /* Bit 3:  APB access while page access */
@@ -362,7 +371,9 @@
 #define NAND_IRQMASK2_RAM1BUSY            (1 << 1)  /* Bit 1:  RAM1 access while busy */
 #define NAND_IRQMASK2_RAM0BUSY            (1 << 0)  /* Bit 0:  RAM0 access while busy */
 
-/* NandIRQStatusRaw2 register description (NandIRQStatusRaw2, address 0x1700 0850) */
+/* NandIRQStatusRaw2 register description
+ * (NandIRQStatusRaw2, address 0x1700 0850)
+ */
 
 #define NAND_IRQSTATUSRAW2_PGWHILEAPB     (1 << 4)  /* Bit 4:  Page access while APB access */
 #define NAND_IRQSTATUSRAW2_APBWHILEPG     (1 << 3)  /* Bit 3:  APB access while page access */
@@ -370,8 +381,13 @@
 #define NAND_IRQSTATUSRAW2_RAM1BUSY       (1 << 1)  /* Bit 1:  RAM1 access while busy */
 #define NAND_IRQSTATUSRAW2_RAM0BUSY       (1 << 0)  /* Bit 0:  RAM0 access while busy */
 
-/* First-fourth words of 128-bit AES key (32-bit values, no bit fields -- LPC3154 only) */
-/* First-fourth words of 128-bit initial AES value (32-bit values, no bit fields -- LPC3154 only) */
+/* First-fourth words of 128-bit AES key
+ * (32-bit values, no bit fields -- LPC3154 only)
+ */
+
+/* First-fourth words of 128-bit initial AES value
+ * (32-bit values, no bit fields -- LPC3154 only)
+ */
 
 /* Register to display AES state (LPC3154 only) */
 
@@ -381,7 +397,9 @@
 #  define NAND_AESSTATE_KEYSETUP          (1 << NAND_AESSTATE_SHIFT) /* AES key setup needed */
 #  define NAND_AESSTATE_IDLE              (3 << NAND_AESSTATE_SHIFT) /* AES module is IDLE */
 
-/* NandECCErrStatus register description (NandECCErrStatus, address 0x1700 0878) */
+/* NandECCErrStatus register description
+ * (NandECCErrStatus, address 0x1700 0878)
+ */
 
 #define NAND_ECCERRSTATUS_NERR1_SHIFT     (4)       /* Bits 4-7: Number of errors in RAM1 */
 #define NAND_ECCERRSTATUS_NERR1_MASK      (0x0f << NAND_ECCERRSTATUS_NERR1_SHIFT)

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_usb0_ohci.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_OHCI_H
 #define __ARCH_ARM_SRC_LPC54XX_LPC54_OHCI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -50,8 +50,8 @@ extern "C"
  *
  * Input Parameters:
  *   controller -- If the device supports more than USB host controller, then
- *     this identifies which controller is being initializeed.  Normally, this
- *     is just zero.
+ *     this identifies which controller is being initializeed.
+ *     Normally, this is just zero.
  *
  * Returned Value:
  *   And instance of the USB host interface.  The controlling task should

@@ -59,9 +59,9 @@
  * Description:
  *   Reset as many of the LPC43 peripherals as possible. This is necessary
  *   because the LPC43 does not provide any way of performing a full system
- *   reset under debugger control.  So, if CONFIG_DEBUG_FEATURES is set (indicating
- *   that a debugger is being used?), the boot logic will call this
- *   function on all restarts.
+ *   reset under debugger control.  So, if CONFIG_DEBUG_FEATURES is set
+ *   (indicating that a debugger is being used?), the boot logic will call
+ *   this function on all restarts.
  *
  * Assumptions:
  *   Since this function is called early in the boot sequence, it cannot

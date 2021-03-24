@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_emc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_EMC_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_EMC_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
+
 /* Register Offsets */
 
 #define LPC17_40_EMC_CONTROL_OFFSET             0x0000 /* EMC Control register */
@@ -262,6 +263,7 @@
 #define EMC_DYNAMICCONFIG_MD_MASK               (3 << EMC_DYNAMICCONFIG_MD_SHIFT)
 #  define EMC_DYNAMICCONFIG_MD_SDRAM            (0 << EMC_DYNAMICCONFIG_MD_SHIFT) /* SDRAM */
 #  define EMC_DYNAMICCONFIG_MD_LOWPOWER         (1 << EMC_DYNAMICCONFIG_MD_SHIFT) /* Low-power SDRAM */
+
 #define EMC_DYNAMICCONFIG_AM0_SHIFT             (7)       /* Bits 7-12: */
 #define EMC_DYNAMICCONFIG_AM0_MASK              (63 << EMC_DYNAMICCONFIG_AM0_SHIFT)
 #  define EMC_DYNAMICCONFIG_AM0(n)              ((n) << EMC_DYNAMICCONFIG_AM0_SHIFT)
@@ -276,6 +278,7 @@
 #  define EMC_DYNAMICRASCAS_RAS_1CCLK           (1 << EMC_DYNAMICRASCAS_RAS_SHIFT) /* One CCLK cycle */
 #  define EMC_DYNAMICRASCAS_RAS_2CCLK           (2 << EMC_DYNAMICRASCAS_RAS_SHIFT) /* Two CCLK cycles */
 #  define EMC_DYNAMICRASCAS_RAS_3CCLK           (3 << EMC_DYNAMICRASCAS_RAS_SHIFT) /* Three CCLK cycles */
+
 #define EMC_DYNAMICRASCAS_CAS_SHIFT             (8)       /* Bits 8-9: CAS latency */
 #define EMC_DYNAMICRASCAS_CAS_MASK              (3 << EMC_DYNAMICRASCAS_CAS_SHIFT)
 #  define EMC_DYNAMICRASCAS_CAS_1CCLK           (1 << EMC_DYNAMICRASCAS_CAS_SHIFT) /* One CCLK cycle */
@@ -320,16 +323,16 @@
 
 #define EMC_STATICWAITTURN_MASK                 (0x0000000f) /* Bits 0-3: Bus turn-around cycles */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_EMC_H */

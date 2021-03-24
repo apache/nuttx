@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_qei.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43QEI_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43QEI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
+
 /* Control registers */
 
 #define LPC43_QEI_CON_OFFSET     0x0000 /* Control register */
@@ -68,7 +69,8 @@
 #define LPC43_QEI_CLR_OFFSET     0x0fe8 /* Interrupt status clear register */
 #define LPC43_QEI_SET_OFFSET     0x0fec /* Interrupt status set register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
+
 /* Control registers */
 
 #define LPC43_QEI_CON            (LPC43_QEI_BASE+LPC43_QEI_CON_OFFSET)
@@ -105,9 +107,10 @@
 #define LPC43_QEI_CLR            (LPC43_QEI_BASE+LPC43_QEI_CLR_OFFSET)
 #define LPC43_QEI_SET            (LPC43_QEI_BASE+LPC43_QEI_SET_OFFSET)
 
-/* Register bit definitions *********************************************************/
-/* The following registers hold 32-bit integer values and have no bit fields defined
- * in this section:
+/* Register bit definitions *************************************************/
+
+/* The following registers hold 32-bit integer values and have no bit fields
+ * defined in this section:
  *
  *   Position register (POS)
  *   Maximum position register (MAXPOS)
@@ -129,6 +132,7 @@
  */
 
 /* Control registers */
+
 /* Control register */
 
 #define QEI_CON_RESP             (1 << 0)  /* Bit 0:  Reset position counter */
@@ -136,10 +140,12 @@
 #define QEI_CON_RESV             (1 << 2)  /* Bit 2:  Reset velocity */
 #define QEI_CON_RESI             (1 << 3)  /* Bit 3:  Reset index counter */
                                            /* Bits 4-31: reserved */
+
 /* Encoder status register */
 
 #define QEI_STAT_DIR             (1 << 0)  /* Bit 0:  Direction bit */
                                            /* Bits 1-31: reserved */
+
 /* Configuration register */
 
 #define QEI_CONF_DIRINV          (1 << 0)  /* Bit 0:  Direction invert */
@@ -154,12 +160,17 @@
 #  define QEI_CONF_INXGATE_A1B1  (2 << QEI_CONF_INXGATE_SHIFT) /* Pass index on Pha=1 Phb=1 */
 #  define QEI_CONF_INXGATE_A0B1  (4 << QEI_CONF_INXGATE_SHIFT) /* Pass index on Pha=0 Phb=1 */
 #  define QEI_CONF_INXGATE_A0B0  (8 << QEI_CONF_INXGATE_SHIFT) /* Pass index on Pha=0 Phb=0 */
+
                                            /* Bits 4-31: reserved */
 
 /* Interrupt registers */
-/* Interrupt enable clear register (IEC), Interrupt enable set register (IES),
- * Interrupt status register (INTSTAT), Interrupt enable register (IE), Interrupt
- * status clear register (CLR), and Interrupt status set register (SET) common
+
+/* Interrupt enable clear register (IEC),
+ * Interrupt enable set register (IES),
+ * Interrupt status register (INTSTAT),
+ * Interrupt enable register (IE), Interrupt
+ * status clear register (CLR),
+ * and Interrupt status set register (SET) common
  * bit definitions.
  */
 
@@ -181,16 +192,16 @@
 #define QEI_INT_MAXPOS           (1 << 15) /* Bit 15: Current position count goes through MAXPOS */
                                            /* Bits 16-31: reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43QEI_H */

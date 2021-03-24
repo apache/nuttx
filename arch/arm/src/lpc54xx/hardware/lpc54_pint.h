@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_pint.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_PINT_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_PINT_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *********************************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC54_PINT_ISEL_OFFSET    0x0000 /* Pin interrupt mode */
 #define LPC54_PINT_IENR_OFFSET    0x0004 /* Pin interrupt level or rising edge interrupt enable */
@@ -48,7 +48,7 @@
 #define LPC54_PINT_PMSRC_OFFSET   0x002c /* Pattern match interrupt bit-slice source */
 #define LPC54_PINT_PMCFG_OFFSET   0x0030 /* Pattern match interrupt bit slice configuration */
 
-/* Register addresses *******************************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC54_PINT_ISEL           (LPC54_PINT_BASE + LPC54_PINT_ISEL_OFFSET)
 #define LPC54_PINT_IENR           (LPC54_PINT_BASE + LPC54_PINT_IENR_OFFSET)
@@ -64,17 +64,21 @@
 #define LPC54_PINT_PMSRC          (LPC54_PINT_BASE + LPC54_PINT_PMSRC_OFFSET)
 #define LPC54_PINT_PMCFG          (LPC54_PINT_BASE + LPC54_PINT_PMCFG_OFFSET)
 
-/* Register bit definitions *************************************************************************/
+/* Register bit definitions *************************************************/
 
 /* Pin interrupt mode */
 
 #define PINT_PMODE(n)             (1 << (n)) /* Pin n level(1) or edge(0) sensitive.  n=0..7 */
 
-/* Pin interrupt level or rising edge interrupt enable, set, and clear registers */
+/* Pin interrupt level or rising edge interrupt enable,
+ * set, and clear registers
+ */
 
 #define PINT_ENRL(n)              (1 << (n)) /* Pin n enable(1) or disable(0) rising/level.  n=0..7 */
 
-/* Pin interrupt active level or falling edge interrupt enable, set, and clear registers */
+/* Pin interrupt active level or falling edge interrupt enable,
+ * set, and clear registers
+ */
 
 #define PINT_ENAF(n)              (1 << (n)) /* Pin n enable(1) or disable(0) falling/active.  n=0..7 */
 
@@ -136,8 +140,9 @@
 
 /* Pattern match interrupt bit slice configuration */
 
-/* PINT_PMCFG_ENDPTSn:  Determines whether slice n is an endpoint of a product term (minterm). Pin
- * interrupt n in the NVIC is raised if the minterm evaluates as true.
+/* PINT_PMCFG_ENDPTSn:
+ * Determines whether slice n is an endpoint of a product term (minterm).
+ * Pin interrupt n in the NVIC is raised if the minterm evaluates as true.
  */
 
 #define PINT_PMCFG_ENDPTS0        (1 << 0)   /* Bit 0: Slice n is an endpoint */

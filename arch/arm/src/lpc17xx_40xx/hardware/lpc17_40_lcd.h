@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_lcd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_LCD_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_LCD_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC17_40_LCD_TIMH_OFFSET            (0x0000) /* Horizontal Timing Control register */
 #define LPC17_40_LCD_TIMV_OFFSET            (0x0004) /* Vertical Timing Control register */
@@ -69,7 +69,7 @@
 #define LPC17_40_LCD_CRSR_INTRAW_OFFSET     (0x0c28) /* Cursor Raw Interrupt Status register */
 #define LPC17_40_LCD_CRSR_INTSTAT_OFFSET    (0x0c2c) /* Cursor Masked Interrupt Status register */
 
-/* Register Addresses ***************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define LPC17_40_LCD_TIMH                   (LPC17_40_LCD_BASE+LPC17_40_LCD_TIMH_OFFSET)
 #define LPC17_40_LCD_TIMV                   (LPC17_40_LCD_BASE+LPC17_40_LCD_TIMV_OFFSET)
@@ -99,9 +99,10 @@
 #define LPC17_40_LCD_CRSR_INTRAW            (LPC17_40_LCD_BASE+LPC17_40_LCD_CRSR_INTRAW_OFFSET)
 #define LPC17_40_LCD_CRSR_INTSTAT           (LPC17_40_LCD_BASE+LPC17_40_LCD_CRSR_INTSTAT_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* LCD_TIMH - Horizontal Timing Register */
+
                                                       /* Bits 0-1: Reserved */
 #define LCD_TIMH_PPL_SHIFT                  (2)       /* Bits 2-7: Pixels Per Line - 16-1024ppl */
 #define LCD_TIMH_PPL_MASK                   (0x3f << LCD_TIMH_PPL_SHIFT)
@@ -148,12 +149,15 @@
                                                       /* Bits 7-15: Reserved */
 #define LCD_LE_LEE                          (1 << 16) /* Bit 16: LCD line end enable */
                                                       /* Bit 17-31: Reserved */
+
 /* LCD_UPBASE - Upper Panel Frame Base Address Register */
+
                                                       /* Bits 0-2: Reserved */
 #define LCD_UPBASE_LCDUPBASE_SHIFT          (3)       /* Bits 3-31: LCD upper panel base address */
 #define LCD_UPBASE_LCDUPBASE_MASK           (0x1FFFFFFF << LCD_UPBASE_LCDUPBASE_SHIFT)
 
 /* LCD_UPBASE - Lower Panel Frame Base Address Register */
+
                                                       /* Bits 0-2: Reserved */
 #define LCD_UPBASE_LCDLPBASE_SHIFT          (3)       /* Bits 3-31: LCD lower panel base address */
 #define LCD_UPBASE_LCDLPBASE_MASK           (0x1FFFFFFF << LCD_UPBASE_LCDUPBASE_SHIFT)
@@ -171,6 +175,7 @@
 #  define LCD_CTRL_LCDBPP_24                (5 << LCD_CTRL_LCDBPP_SHIFT) /* 24 bpp (TFT panel only) */
 #  define LCD_CTRL_LCDBPP_565               (6 << LCD_CTRL_LCDBPP_SHIFT) /* 16 bpp, 5:6:5 mode */
 #  define LCD_CTRL_LCDBPP_444               (7 << LCD_CTRL_LCDBPP_SHIFT) /* 12 bpp, 4:4:4 mode */
+
 #define LCD_CTRL_LCDBW                      (1 << 4)  /* Bit 4: STN LCD monochrome/color selection */
 #define LCD_CTRL_LCDTFT                     (1 << 5)  /* Bit 5: LCD TFT type selection */
 #define LCD_CTRL_LCDMONO8                   (1 << 6)  /* Bit 6: Monochrome LCD interface bit */
@@ -184,7 +189,9 @@
                                                       /* Bits 14-15: Reserved */
 #define LCD_CTRL_WATERMARK                  (1 << 16) /* Bit 16: LCD DMA FIFO watermark level */
                                                       /* Bits 17-31: Reserved */
+
 /* LCD_INTMSK - Interrupt Mask Register */
+
                                                       /* Bits 0: Reserved */
 #define LCD_INTMSK_FUFIM                    (1 << 1)  /* Bit 1: FIFO underflow interrupt enable */
 #define LCD_INTMSK_LNBUIM                   (1 << 2)  /* Bit 2: LCD next base address interrupt enable */
@@ -194,6 +201,7 @@
 #define LCD_INTMSK_ALL                      (0x1e)
 
 /* LCD_INTRAW - Raw Interrupt Status Register */
+
                                                       /* Bits 0: Reserved */
 #define LCD_INTRAW_FUFRIS                   (1 << 1)  /* Bit 1: FIFO Underflow raw interrupt status */
 #define LCD_INTRAW_LNBURIS                  (1 << 2)  /* Bit 2: LCD Next address base update intterupt */
@@ -203,6 +211,7 @@
 #define LCD_INTRAW_ALL                      (0x1e)
 
 /* LCD_INTSTAT - Masked Interrupt Status Register */
+
                                                       /* Bits 0: Reserved */
 #define LCD_INTSTAT_FUFMIS                  (1 << 1)  /* Bit 1: FIFO Underflow raw interrupt status */
 #define LCD_INTSTAT_LNBUMIS                 (1 << 2)  /* Bit 2: LCD Next address base update intterupt */
@@ -212,6 +221,7 @@
 #define LCD_INTSTAT_ALL                     (0x1e)
 
 /* LCD_INTCLR - Interrupt Clear Register */
+
                                                       /* Bits 0: Reserved */
 #define LCD_INTCLR_FUFIC                    (1 << 1)  /* Bit 1: FIFO Underflow raw interrupt clear */
 #define LCD_INTCLR_LNBUIC                   (1 << 2)  /* Bit 2: LCD Next address base update intterupt */
@@ -221,8 +231,8 @@
 #define LCD_INTCLR_ALL                      (0x1e)
 
 /* Upper and Lower Panel Address register has no bitfields */
-/*
- *   Upper Panel Current Address register (LCDUPCURR)
+
+/*   Upper Panel Current Address register (LCDUPCURR)
  *   Lower Panel Current Address register (LCDLPCURR)
  */
 
@@ -244,6 +254,7 @@
 #define LCD_PAL_I1                          (1 << 31) /* Bit 31: Intensity/Unused bit */
 
 /* LCD_CRSR_IMG - Cursor Image Register - has no bitfields */
+
 /* The 256 words of the cursor image register defines the appearance
  * of either one 64x64 cursor, or 4 32x32 cursors.
  */
@@ -255,6 +266,7 @@
 #define LCD_CRSR_CTRL_CRSRNUM_SHIFT         (4)       /* Bits 4-5: Cursor image number */
 #define LCD_CRSR_CTRL_CRSRNUM_MASK          (3 << LCD_CRSR_CTRL_CRSRNUM1_0_SHIFT)
                                                       /* Bits 6-31: Reserved */
+
 /* If the selected cursor is 32x32 */
 
 #define LCD_CURSOR0                         (0)
@@ -282,6 +294,7 @@
 #define LCD_CRSR_PAL_BLUE_SHIFT             (16)      /* Bits 16-23: Blue color component */
 #define LCD_CRSR_PAL_BLUE_MASK              (0xff << LCD_CRSR_PAL0_BLUE_SHIFT)
                                                       /* Bits 24-31: Reserved */
+
 /* LCD CRSR_XY - Cursor XY Position Register */
 
 #define LCD_CRSR_CRSRX_SHIFT                (0)       /* Bits 0-9: X ordinate */
@@ -290,6 +303,7 @@
 #define LCD_CRSR_CRSRY_SHIFT                (16)      /* Bits 16-25: Y ordinate */
 #define LCD_CRSR_CRSRY_MASK                 (0x3ff << LCD_CRSR_CRSRY_SHIFT)
                                                       /* Bits 26-31: Reserved */
+
 /* LCD CRSR_CLIP - Cursor Clip Position Register */
 
 #define LCD_CRSR_CRSRCLIPX_SHIFT            (0)       /* Bits 0-5: X clip position */
@@ -298,10 +312,12 @@
 #define LCD_CRSR_CRSRCLIPY_SHIFT            (8)       /* Bits 8-13: Reserved */
 #define LCD_CRSR_CRSRCLIPY_MASK             (0x3f << LCD_CRSR_CRSRCLIPY_SHIFT)
                                                       /* Bits 14-31: Reserved */
+
 /* LCD CRSR_INTMSK - Cursor Interrupt Mask Register */
 
 #define LCD_CRSR_INTMSK_CRSRIM              (1 << 0)  /* Bit 0: Cursor interrupt mask */
                                                       /* Bits 1-31: Reserved */
+
 /* LCD CRSR_INTCLR - Cursor Interrupt Clear Register */
 
 #define LCD_CRSR_INTCLR_CRSRIC              (1 << 0)  /* Bit 0: Cursor interrupt clear */
@@ -311,6 +327,7 @@
 
 #define LCD_CRSR_INTRAW_CRSRRIS             (1 << 0)  /* Bit 0: Cursor raw interrupt status */
                                                       /* Bits 1-31: Reserved */
+
 /* LCD CRSR_INTSTAT - Mask Interrupt Status Register */
 
 #define LCD_CRSR_INTSTAT_CRSRMIS            (1 << 0)  /* Bit 0: Cursor mask interrupt status */

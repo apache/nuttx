@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,47 +16,48 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_H
 #define __ARCH_ARM_SRC_LPC54XX_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/* Include the memory map and the chip definitions file.  Other chip hardware files
- * should then include this file for the proper setup.
+/* Include the memory map and the chip definitions file.
+ * Other chip hardware files should then include this file for the proper
+ * setup.
  */
 
 #include <arch/irq.h>
 #include <arch/lpc54xx/chip.h>
 #include "hardware/lpc54_memorymap.h"
 
-/* The common ARMv7-M vector handling logic expects the following definition in this
- * file.  ARMV7M_PERIPHERAL_INTERRUPTS provides the number of supported external
- * interrupts which, for this architecture, is provided in the arch/lpc54xx/irq.h
- * header file.
+/* The common ARMv7-M vector handling logic expects the following definition
+ * in this file.  ARMV7M_PERIPHERAL_INTERRUPTS provides the number of
+ * supported external interrupts which, for this architecture, is provided in
+ * the arch/lpc54xx/irq.h header file.
  */
 
 #define ARMV7M_PERIPHERAL_INTERRUPTS LPC54_IRQ_NEXTINT
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_H */

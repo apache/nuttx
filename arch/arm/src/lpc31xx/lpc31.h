@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,27 +36,27 @@
 #include "chip.h"
 #include "lpc31_ioconfig.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
-/* NVIC priority levels *************************************************************/
+/* NVIC priority levels *****************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -67,9 +67,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Configure a pin as an input */
 
@@ -131,31 +131,32 @@ static inline void gpio_outputhigh(uint32_t ioconfig, uint32_t bit)
   putreg32(bit, regaddr);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_lowsetup
  *
  * Description:
- *   Called early in arm_boot.  Performs chip-common low level initialization.
+ *   Called early in arm_boot.
+ *   Performs chip-common low level initialization.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_lowsetup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_clockconfig
  *
  * Description:
  *   Called to change to new clock based on settings in board.h
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_clockconfig(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_spibus_initialize
  *
  * Description:
@@ -167,73 +168,76 @@ void lpc31_clockconfig(void);
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 struct spi_dev_s; /* Forward reference */
 FAR struct spi_dev_s *lpc31_spibus_initialize(int port);
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc31_spiselect and lpc31_spistatus
  *
  * Description:
  *   The external functions, lpc31_spiselect, lpc31_spistatus, and
  *   lpc31_spicmddata must be provided by board-specific logic.  These are
- *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   (including lpc31_spibus_initialize()) are provided by common LPC31XX logic.  To use
- *   this common SPI logic on your board:
+ *   implementations of the select, status, and cmddata methods of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All
+ *   other methods (including lpc31_spibus_initialize()) are provided by
+ *   common LPC31XX logic.  To use this common SPI logic on your board:
  *
- *   1. Provide logic in lpc31_boardinitialize() to configure SPI chip select
- *      pins.
+ *   1. Provide logic in lpc31_boardinitialize() to configure SPI chip
+ *      select pins.
  *   2. Provide lpc31_spiselect() and lpc31_spistatus() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. If CONFIG_SPI_CMDDATA is selected in your NuttX configuration, provide
- *      the lpc31_spicmddata() function in your board-specific logic.  This
- *      function will perform cmd/data selection operations using GPIOs in the
- *      way your board is configured.
- *   4. Add a calls to lpc31_spibus_initialize() in your low level application
- *      initialization logic
- *   5. The handle returned by lpc31_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
- *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
- *      the SPI MMC/SD driver).
+ *      board-specific logic.  These functions will perform chip selection
+ *      and status operations using GPIOs in the way your board
+ *      is configured.
+ *   3. If CONFIG_SPI_CMDDATA is selected in your NuttX configuration,
+ *      provide the lpc31_spicmddata() function in your board-specific logic.
+ *      This function will perform cmd/data selection operations using GPIOs
+ *      in the way your board is configured.
+ *   4. Add a calls to lpc31_spibus_initialize() in your low level
+ *      application initialization logic
+ *   5. The handle returned by lpc31_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
+ *      mmcsd_spislotinitialize(), for example, will bind the SPI driver
+ *      to the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-void  lpc31_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void  lpc31_spiselect(FAR struct spi_dev_s *dev,
+                      uint32_t devid, bool selected);
 uint8_t lpc31_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc31_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc31_spicmddata(FAR struct spi_dev_s *dev,
+                     uint32_t devid, bool cmd);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc31_usbpullup
  *
  * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide lpc31_pullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
- *   NULL.
+ *   If USB is supported and the board supports a pullup via GPIO (for USB
+ *   software connect and disconnect), then the board software must provide
+ *   lpc31_pullup. See include/nuttx/usb/usbdev.h for additional description
+ *   of this method. Alternatively, if no pull-up GPIO the following EXTERN
+ *   can be redefined to be NULL.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBDEV)
 struct usbdev_s;
 int lpc31_usbpullup(FAR struct usbdev_s *dev,  bool enable);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc31_usbsuspend
  *
  * Description:
- *   Board logic must provide the lpc31_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   Board logic must provide the lpc31_usbsuspend logic if the USBDEV driver
+ *   is used.  This function is called whenever the USB enters or leaves
+ *   suspend mode. This is an opportunity for the board logic to shutdown
+ *   clocks, power, etc. while the USB is suspended.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBDEV)
 struct usbdev_s;
@@ -248,8 +252,8 @@ void lpc31_usbsuspend(FAR struct usbdev_s *dev, bool resume);
  *
  * Input Parameters:
  *   controller -- If the device supports more than one EHCI interface, then
- *     this identifies which controller is being initializeed.  Normally, this
- *     is just zero.
+ *     this identifies which controller is being initializeed.  Normally,
+ *     this is just zero.
  *
  * Returned Value:
  *   And instance of the USB host interface.  The controlling task should
@@ -270,22 +274,23 @@ struct usbhost_connection_s;
 FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller);
 #endif
 
-/***********************************************************************************
+/****************************************************************************
  * Name: lpc31_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided by
- *   each platform that implements the EHCI host interface
+ *   Enable/disable driving of VBUS 5V output.  This function must be
+ *   provided by each platform that implements the EHCI host interface
  *
  * Input Parameters:
- *   rhport - Selects root hub port to be powered host interface.  This is not used
- *      with the LPC31 since it supports only a single root hub port.
+ *   rhport - Selects root hub port to be powered host interface.  This is
+ *            not used with the LPC31 since it supports only a single root
+ *            hub port.
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:
  *   None
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
 void lpc31_usbhost_vbusdrive(int rhport, bool enable);
@@ -301,7 +306,8 @@ void lpc31_usbhost_vbusdrive(int rhport, bool enable);
  *   slotno - Not used.
  *
  * Returned Value:
- *   A reference to an SDIO interface structure.  NULL is returned on failures.
+ *   A reference to an SDIO interface structure.
+ *   NULL is returned on failures.
  *
  ****************************************************************************/
 

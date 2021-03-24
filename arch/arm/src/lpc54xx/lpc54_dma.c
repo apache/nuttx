@@ -430,9 +430,10 @@ int lpc54_dma_setup(int ch, uint32_t cfg, uint32_t xfrcfg, uint8_t trigsrc,
    *   XFERCOUNT - Derived from with and nbytes
    */
 
-  xfrcfg &= ~(DMA_XFERCFG_RELOAD | DMA_XFERCFG_SWTRIG | DMA_XFERCFG_SETINTB |
-              DMA_XFERCFG_XFERCOUNT_MASK);
-  xfrcfg |= (DMA_XFERCFG_CFGVALID | DMA_XFERCFG_CLRTRIG | DMA_XFERCFG_SETINTA);
+  xfrcfg &= ~(DMA_XFERCFG_RELOAD | DMA_XFERCFG_SWTRIG |
+              DMA_XFERCFG_SETINTB | DMA_XFERCFG_XFERCOUNT_MASK);
+  xfrcfg |= (DMA_XFERCFG_CFGVALID | DMA_XFERCFG_CLRTRIG |
+              DMA_XFERCFG_SETINTA);
   xfrcfg |= DMA_XFERCFG_XFERCOUNT(nxfrs);
   putreg32(xfrcfg, base + LPC54_DMA_XFERCFG_OFFSET);
   ret = OK;
@@ -577,7 +578,8 @@ void lpc54_dmadump(int ch, const struct lpc54_dmaregs_s *regs,
 {
   uintptr_t base;
 
-  DEBUGASSERT((unsigned)ch <  LPC54_DMA_NCHANNELS && regs != NULL && msg != NULL);
+  DEBUGASSERT((unsigned)ch <  LPC54_DMA_NCHANNELS &&
+               regs != NULL && msg != NULL);
 
   /* Dump the sampled global DMA registers */
 

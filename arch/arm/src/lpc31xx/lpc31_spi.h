@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_SPI_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_SPI_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* SPI register base address offset into the APB2 domain ****************************************/
+/* SPI register base address offset into the APB2 domain ********************/
 
 #define LPC31_SPI_VBASE                (LPC31_APB2_VSECTION+LPC31_APB2_SPI_OFFSET)
 #define LPC31_SPI_PBASE                (LPC31_APB2_PSECTION+LPC31_APB2_SPI_OFFSET)
 
-/* SPI register offsets (with respect to the SPI base) ******************************************/
+/* SPI register offsets (with respect to the SPI base) **********************/
+
 /* SPI configuration registers */
 
 #define LPC31_SPI_CONFIG_OFFSET        0x000 /* Configuration register */
@@ -58,7 +59,8 @@
 #define LPC31_SPI_SLV1_2_OFFSET        0x030 /* Slave settings register 2 (for slave 1) */
 #define LPC31_SPI_SLV2_1_OFFSET        0x034 /* Slave settings register 1 (for slave 2) */
 #define LPC31_SPI_SLV2_2_OFFSET        0x038 /* Slave settings register 2 (for slave 2) */
-                                               /* 0x03c-0xfd0: Reserved */
+                                             /* 0x03c-0xfd0: Reserved */
+
 /* SPI interrupt registers */
 
 #define LPC31_SPI_INTTHR_OFFSET        0xfd4 /* Tx/Rx threshold interrupt levels */
@@ -68,9 +70,9 @@
 #define LPC31_SPI_INTENABLE_OFFSET     0xfe4 /* Interrupt enable register */
 #define LPC31_SPI_INTCLRSTATUS_OFFSET  0xfe8 /* INT_STATUS bits clear register */
 #define LPC31_SPI_INTSETSTATUS_OFFSET  0xfec /* INT_STATUS bits set register */
-                                               /* 0xff0-0xff8: Reserved */
+                                             /* 0xff0-0xff8: Reserved */
 
-/* SPI register (virtual) addresses *************************************************************/
+/* SPI register (virtual) addresses *****************************************/
 
 /* SPI configuration registers */
 
@@ -103,7 +105,8 @@
 #define LPC31_SPI_INTCLRSTATUS         (LPC31_SPI_VBASE+LPC31_SPI_INTCLRSTATUS_OFFSET)
 #define LPC31_SPI_INTSETSTATUS         (LPC31_SPI_VBASE+LPC31_SPI_INTSETSTATUS_OFFSET)
 
-/* SPI register bit definitions *****************************************************************/
+/* SPI register bit definitions *********************************************/
+
 /* SPI Configuration register CONFIG, address 0x15002000 */
 
 #define SPI_CONFIG_INTERSLVDELAY_SHIFT   (16)      /* Bits 16-31: Delay between xfrs to different slaves  */
@@ -123,11 +126,13 @@
 #  define SPI_SLVENABLE3_DISABLED        (0 << SPI_SLVENABLE3_SHIFT) /* Disabled */
 #  define SPI_SLVENABLE3_ENABLED         (1 << SPI_SLVENABLE3_SHIFT) /* Enabled */
 #  define SPI_SLVENABLE3_SUSPENDED       (3 << SPI_SLVENABLE3_SHIFT) /* Suspended */
+
 #define SPI_SLVENABLE2_SHIFT             (2)       /* Bits 2-3: Slave 2 enable bits */
 #define SPI_SLVENABLE2_MASK              (3 << SPI_SLVENABLE2_SHIFT)
 #  define SPI_SLVENABLE2_DISABLED        (0 << SPI_SLVENABLE2_SHIFT) /* Disabled */
 #  define SPI_SLVENABLE2_ENABLED         (1 << SPI_SLVENABLE2_SHIFT) /* Enabled */
 #  define SPI_SLVENABLE2_SUSPENDED       (3 << SPI_SLVENABLE2_SHIFT) /* Suspended */
+
 #define SPI_SLVENABLE1_SHIFT             (0)       /* Bits 0-1: Slave 1 enable bits */
 #define SPI_SLVENABLE1_MASK              (3 << SPI_SLVENABLE1_SHIFT)
 #  define SPI_SLVENABLE1_DISABLED        (0 << SPI_SLVENABLE1_SHIFT) /* Disabled */
@@ -179,7 +184,9 @@
 #define SPI_HWINFO_RXFIFODEPTH_SHIFT     (0)       /* Bits 0-7:   64 */
 #define SPI_HWINFO_RXFIFODEPTH_MASK      (0xff << SPI_HWINFO_RXFIFODEPTH_SHIFT)
 
-/* Slave settings 1 SLV0-2_1, addresses 0x15002024, 0x1500202c, and 0x15002034 */
+/* Slave settings 1 SLV0-2_1, addresses 0x15002024,
+ * 0x1500202c, and 0x15002034
+ */
 
 #define SPI_SLV_1_INTERXFRDLY_SHIFT      (24)      /* Bits 24-31: Delay between slave xfrs (master mode) */
 #define SPI_SLV_1_INTERXFRDLY_MASK       (0xff << SPI_SLV_1_INTERXFRDLY_SHIFT)
@@ -190,7 +197,9 @@
 #define SPI_SLV_1_CLKDIV1_SHIFT          (0)       /* Bits 0-7: Serial clock rate divisor 1 */
 #define SPI_SLV_1_CLKDIV1_MASK           (0xff << SPI_SLV_1_CLKDIV1_SHIFT)
 
-/* Slave settings 2 SLV0-2_2, addresses 0x15002028, 0x15002030, and0x15002038 */
+/* Slave settings 2 SLV0-2_2, addresses 0x15002028,
+ * 0x15002030, and0x15002038
+ */
 
 #define SPI_SLV_2_DELAY_SHIFT            (9)       /* Bits 9-16: Programmable delay */
 #define SPI_SLV_2_DELAY_MASK             (0xff << SPI_SLV_2_DELAY_SHIFT)
@@ -222,16 +231,16 @@
 #define SPI_INT_TO                       (1 << 1)  /* Bit 1:  Receive timeout interrupt bit */
 #define SPI_INT_OV                       (1 << 0)  /* Bit 0:  Receive overrtun interrupt bit */
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_SPI_H */

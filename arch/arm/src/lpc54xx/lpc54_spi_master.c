@@ -701,7 +701,9 @@ static void lpc54_spi_rxtransfer8(FAR struct lpc54_spidev_s *priv,
 
       if (xfr->expected == 0 || xfr->remaining == 0)
         {
-          /* No.. then just read and discard the data until the Rx FIFO is empty */
+          /* No..
+           * then just read and discard the data until the Rx FIFO is empty
+           */
 
           lpc54_spi_rxdiscard(priv);
           xfr->expected = 0;

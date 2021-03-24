@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_rom.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_ROM_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_ROM_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Table offsets ****************************************************************************/
+/* Table offsets ************************************************************/
 
 /* First level table offsets */
 
@@ -52,36 +52,40 @@
 #define LPC54_OTP_API_RNGREAD_OFFSET              0x002c
 #define LPC54_OTP_API_GETDRIVERVERSION_OFFSET     0x0030
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Dereference the LPC54_ROM_DRIVERTAB address to get the address of the ROM driver table.
- * Not often that I get to use a pointer-to-a-pointer-to-a-pointer.  The result of de-
- * referencing the LPC54_ROM_DRIVERTAB is a pointer to an array of type uinptr_t *.
+/* Dereference the LPC54_ROM_DRIVERTAB address to get the address of the ROM
+ * driver table. Not often that I get to use a
+ * pointer-to-a-pointer-to-a-pointer.  The result of de referencing the
+ * LPC54_ROM_DRIVERTAB is a pointer to an array of type uinptr_t *.
  */
 
 #define lpc54_driver_vtable (*(uintptr_t ***)LPC54_ROM_DRIVERTAB)
 
-/* Index the ROM driver table to get the specific driver table.  Perhaps in the future these
- * uintptr_t * arrays would be replaced with proper vtable structures.
+/* Index the ROM driver table to get the specific driver table.  Perhaps in
+ * the future these uintptr_t * arrays would be replaced with proper vtable
+ * structures.
  */
 
 #define lpc54_usb_vtable    lpc54_driver_vtable[LPC54_USB_API_OFFSET >> 2]
 #define lpc54_otg_vtable    lpc54_driver_vtable[LPC54_OTP_API_OFFSET >> 2]
 
-/* Then, finally, index the specific driver table to get the API entry point */
+/* Then, finally, index the specific driver table to get the API entry
+ * point
+ */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types/Functions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Name:  lpc54_rng_read
  *
  * Description:
- *   Returns a 32 bit random number from hardware.  The Random Number Generator is accessed
- *   through an API call located in the ROM.
+ *   Returns a 32 bit random number from hardware.  The Random Number
+ *   Generator is accessed through an API call located in the ROM.
  *
  * Input Parameters:
  *   None
@@ -89,7 +93,7 @@
  * Returned Value:
  *   Unsigned random number
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 typedef CODE unsigned int (*rng_read_t)(void);
 

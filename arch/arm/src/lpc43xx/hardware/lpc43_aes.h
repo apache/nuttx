@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_aes.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,30 +16,30 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_AES_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_AES_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* The AES is controlled through a set of simple API calls located in the LPC43xx
- * ROM.  This value holds the pointer to the AES driver table.
+/* The AES is controlled through a set of simple API calls located in the
+ * LPC43xx ROM.  This value holds the pointer to the AES driver table.
  */
 
 #define LPC43_ROM_AES_DRIVER_TABLE LPC43_ROM_DRIVER_TABLE2
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 enum lpc43_aescmd_e
 {
@@ -55,7 +55,9 @@ struct lpc43_aes_s
 
   void (*aes_Init)(void);
 
-  /* Offset 0x04 -- Defines AES engine operation mode.  See enum lpc43_aescmd_e */
+  /* Offset 0x04 -- Defines AES engine operation mode.
+   *  See enum lpc43_aescmd_e
+   */
 
   unsigned int (*aes_SetMode)(unsigned int cmd);
 
@@ -64,8 +66,8 @@ struct lpc43_aes_s
   void (*aes_LoadKey1)(void);
   void (*aes_LoadKey2)(void);
 
-  /* Loads randomly generated key in AES engine. To update the RNG and load a new
-   * random number, use the API call otp_GenRand before aes_LoadKeyRNG.
+  /* Loads randomly generated key in AES engine. To update the RNG and load
+   * a new random number, use the API call otp_GenRand before aes_LoadKeyRNG.
    */
 
   void (*aes_LoadKeyRNG)(void);
@@ -78,15 +80,16 @@ struct lpc43_aes_s
 
   void (*aes_LoadIV_SW)(const unsigned char *iv);
 
-  /* Loads 128-bit AES IC specific initialization vector, which is used to decrypt
-   * a boot image.
+  /* Loads 128-bit AES IC specific initialization vector, which is used to
+   * decrypt a boot image.
    */
 
   void (*aes_LoadIV_IC)(void);
 
   /* Process data */
 
-  unsigned int (*aes_Operate)(unsigned char* out, const unsigned char* in, unsigned blocks);
+  unsigned int (*aes_Operate)(unsigned char *out,
+                              const unsigned char *in, unsigned blocks);
 };
 
 enum lpc43_aes_errorcodes_e
@@ -100,12 +103,12 @@ enum lpc43_aes_errorcodes_e
   AES_API_ERR_DMA_BUSY
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_AES_H */

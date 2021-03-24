@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_cgu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   - UM10314 LPC3130/31 User manual Rev. 1.01 — 9 September 2009
@@ -25,25 +25,29 @@
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_CGU_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_CGU_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* CGU register base address offset into the APB0 domain ****************************************/
+/* CGU register base address offset into the APB0 domain ********************/
 
-/* APB0 offsets to Clock Switch Box (CSB) and CGU Configuration (CFG) register groups */
+/* APB0 offsets to Clock Switch Box (CSB) and CGU Configuration (CFG)
+ * register groups
+ */
 
 #define LPC31_APB0_GCU_CSB_OFFSET      (LPC31_APB0_GCU_OFFSET)
 #define LPC31_APB0_GCU_CFG_OFFSET      (LPC31_APB0_GCU_OFFSET+0x0c00)
 
-/* Virtual and physical base address of the CGU block and CSB and CFG register groups */
+/* Virtual and physical base address of the CGU block and CSB and CFG
+ * register groups
+ */
 
 #define LPC31_CGU_VBASE                (LPC31_APB0_VADDR+LPC31_APB0_CGU_OFFSET)
 #define LPC31_CGU_PBASE                (LPC31_APB0_PADDR+LPC31_APB0_CGU_OFFSET)
@@ -54,8 +58,12 @@
 #define LPC31_CGU_CFG_VBASE            (LPC31_APB0_VADDR+LPC31_APB0_GCU_CFG_OFFSET)
 #define LPC31_CGU_CFG_PBASE            (LPC31_APB0_PADDR+LPC31_APB0_GCU_CFG_OFFSET)
 
-/* CGU register offsets *************************************************************************/
-/* CGU clock switchbox register offsets (with respect to the CGU CSB register base) *************/
+/* CGU register offsets *****************************************************/
+
+/* CGU clock switchbox register offsets
+ * (with respect to the CGU CSB register base)
+ */
+
 /* Switch configuration registers (SCR) for base clocks */
 
 #define LPC31_CGU_SCR_OFFSET(n)        (0x000+((n)<<2))
@@ -442,7 +450,9 @@
 #define LPC31_CGU_FDC22_OFFSET         0x570 /* Fractional Divider 22 (CLK1024FS base) */
 #define LPC31_CGU_FDC23_OFFSET         0x574 /* Fractional Divider 23 (SPI_CLK base) */
 
-/* Dynamic fractional divider configuration (DYNFDC) registers (SYS base only) */
+/* Dynamic fractional divider configuration (DYNFDC) registers
+ * (SYS base only)
+ */
 
 #define LPC31_CGU_DYNFDC_OFFSET(n)     (0x578+((n)<<2))
 #define LPC31_CGU_DYNFDC0_OFFSET       0x578 /* Fractional Divider 0 (SYS base) */
@@ -464,7 +474,10 @@
 #define LPC31_CGU_DYNSEL5_OFFSET       0x5a8 /* Fractional Divider 5 (SYS base) */
 #define LPC31_CGU_DYNSEL6_OFFSET       0x5ac /* Fractional Divider 6 (SYS base) */
 
-/* CGU configuration register offsets (with respect to the CGU CFG register base) ***************/
+/* CGU configuration register offsets
+ * (with respect to the CGU CFG register base)
+ */
+
 /* Power and oscillator control */
 
 #define LPC31_CGU_POWERMODE_OFFSET     0x000 /* Power mode register */
@@ -511,13 +524,13 @@
 #define LPC31_CGU_I2SRXIF0RST_OFFSET   0x094 /* Reset I2SRX_IF_0 */
 #define LPC31_CGU_I2SRXFF1RST_OFFSET   0x098 /* Reset I2SRX_FIFO_1 */
 #define LPC31_CGU_I2SRXIF1RST_OFFSET   0x09c /* Reset I2SRX_IF_1 */
-                                               /* 0x0a0 to 0x0b0: Reserved */
+                                             /* 0x0a0 to 0x0b0: Reserved */
 #define LPC31_CGU_LCDRST_OFFSET        0x0b4 /* Reset LCD Interface */
 #define LPC31_CGU_SPIRSTAPB_OFFSET     0x0b8 /* Reset apb_clk domain of SPI */
 #define LPC31_CGU_SPIRSTIP_OFFSET      0x0bc /* Reset ip_clk domain of SPI */
 #define LPC31_CGU_DMARST_OFFSET        0x0c0 /* Reset DMA */
 #define LPC31_CGU_NANDECCRST_OFFSET    0x0c4 /* Reset Nandflash Controller ECC clock */
-                                               /* 0x0c8: Reserved */
+                                             /* 0x0c8: Reserved */
 #define LPC31_CGU_NANDCTRLRST_OFFSET   0x0cc /* Reset of Nandflash Controller */
 #define LPC31_CGU_RNGRST_OFFSET        0x0d0 /* Reset of RNG */
 #define LPC31_CGU_SDMMCRST_OFFSET      0x0d4 /* Reset MCI (on AHB clock) */
@@ -585,8 +598,10 @@
 #define LPC31_CGU_HP1SELI_OFFSET       0x158 /* Bandwidth selection register of HP1 PLL */
 #define LPC31_CGU_HP1SELP_OFFSET       0x15c /* Bandwidth selection register of HP1 PLL */
 
-/* CGU register (virtual) addresses *************************************************************/
-/* CGU clock switchbox (virtual) register addresses *********************************************/
+/* CGU register (virtual) addresses *****************************************/
+
+/* CGU clock switchbox (virtual) register addresses *************************/
+
 /* Switch configuration registers (SCR) for base clocks */
 
 #define LPC31_CGU_SCR(n)               (LPC31_CGU_CSB_VBASE+LPC31_CGU_SCR_OFFSET(n))
@@ -973,7 +988,9 @@
 #define LPC31_CGU_FDC22                (LPC31_CGU_CSB_VBASE+LPC31_CGU_FDC22_OFFSET)
 #define LPC31_CGU_FDC23                (LPC31_CGU_CSB_VBASE+LPC31_CGU_FDC23_OFFSET)
 
-/* Dynamic fractional divider configuration (DYNFDC) registers (SYS base only) */
+/* Dynamic fractional divider configuration (DYNFDC) registers
+ * (SYS base only)
+ */
 
 #define LPC31_CGU_DYNFDC(n)            (LPC31_CGU_CSB_VBASE+LPC31_CGU_DYNFDC_OFFSET(n))
 #define LPC31_CGU_DYNFDC0              (LPC31_CGU_CSB_VBASE+LPC31_CGU_DYNFDC0_OFFSET)
@@ -984,7 +1001,9 @@
 #define LPC31_CGU_DYNFDC5              (LPC31_CGU_CSB_VBASE+LPC31_CGU_DYNFDC5_OFFSET)
 #define LPC31_CGU_DYNFDC6              (LPC31_CGU_CSB_VBASE+LPC31_CGU_DYNFDC6_OFFSET)
 
-/* Dynamic fractional divider selection (DYNSEL) registers (SYS base only) */
+/* Dynamic fractional divider selection (DYNSEL) registers
+ * (SYS base only)
+ */
 
 #define LPC31_CGU_DYNSEL(n)            (LPC31_CGU_CSB_VBASE+LPC31_CGU_DYNSEL_OFFSET(n))
 #define LPC31_CGU_DYNSEL0              (LPC31_CGU_CSB_VBASE+LPC31_CGU_DYNSEL0_OFFSET)
@@ -995,7 +1014,8 @@
 #define LPC31_CGU_DYNSEL5              (LPC31_CGU_CSB_VBASE+LPC31_CGU_DYNSEL5_OFFSET)
 #define LPC31_CGU_DYNSEL6              (LPC31_CGU_CSB_VBASE+LPC31_CGU_DYNSEL6_OFFSET)
 
-/* CGU configuration (virtual) register address *************************************************/
+/* CGU configuration (virtual) register address *****************************/
+
 /* Power and oscillator control */
 
 #define LPC31_CGU_POWERMODE            (LPC31_CGU_CFG_VBASE+LPC31_CGU_POWERMODE_OFFSET)
@@ -1096,7 +1116,7 @@
 #define LPC31_CGU_HP1SELI              (LPC31_CGU_CFG_VBASE+LPC31_CGU_HP1SELI_OFFSET)
 #define LPC31_CGU_HP1SELP              (LPC31_CGU_CFG_VBASE+LPC31_CGU_HP1SELP_OFFSET)
 
-/* CGU register bit definitions *****************************************************************/
+/* CGU register bit definitions *********************************************/
 
 /* Frequency inputs */
 
@@ -1109,17 +1129,21 @@
 #define CGU_FREQIN_HPPLL1                6 /* HPPLL1 (System PLL) */
 #define CGU_NFREQIN                      7
 
-/* CGU clock switchbox register bit definitions *************************************************/
+/* CGU clock switchbox register bit definitions *****************************/
 
-/* Switch configuration register SCR0 to SCR11, addresses 0x13004000 to 0x1300402c */
+/* Switch configuration register SCR0 to SCR11,
+ * addresses 0x13004000 to 0x1300402c
+ */
 
 #define CGU_SCR_STOP                     (1 << 3)  /* Bit 3:  Forces switch in disable mode */
 #define CGU_SCR_RESET                    (1 << 2)  /* Bit 2:  Asynchronous reset of both switches */
 #define CGU_SCR_ENF2                     (1 << 1)  /* Bit 1:  Enable side #2 of switch */
 #define CGU_SCR_ENF1                     (1 << 0)  /* Bit 0:  Enable side #1 of switch */
 
-/* Frequency select register 1 FS1_0 to FS1_11, addresses 0x13004030 to 0x1300405c,
- * Frequency Select register 2 FS2_0 to FS2_11, addresses 0x13004060 to 0x1300408c
+/* Frequency select register 1 FS1_0 to FS1_11,
+ * addresses 0x13004030 to 0x1300405c,
+ * Frequency Select register 2 FS2_0 to FS2_11,
+ * addresses 0x13004060 to 0x1300408c
  */
 
 #define CGU_FS_SHIFT                     (0)      /* Bits 0-2: Selects input frequency for either side of frequency switch */
@@ -1132,7 +1156,9 @@
 #  define CGU_FS_HPPLL0                  (CGU_FREQIN_HPPLL0    << CGU_FS_SHIFT) /* HPPLL0 (Audio/I2S PLL) */
 #  define CGU_FS_HPPLL1                  (CGU_FREQIN_HPPLL1    << CGU_FS_SHIFT) /* HPPLL1 (System PLL) */
 
-/* Switch Status register SSR0 to SSR11, addresses 0x13004090 to 0x1300 40bc */
+/* Switch Status register SSR0 to SSR11,
+ * addresses 0x13004090 to 0x1300 40bc
+ */
 
 #define CGU_SSR_FS_SHIFT                 (2)       /* Bits 2-4: Feedback of current frequency selection */
 #define CGU_SSR_FS_MASK                  (7 << CGU_SSR_FS_SHIFT)
@@ -1143,6 +1169,7 @@
 #  define CGU_SSR_I2SRXWS1               (CGU_FREQIN_I2SRXWS1  << CGU_SSR_FS_SHIFT) /* I2SRX_WS1 */
 #  define CGU_SSR_HPPLL0                 (CGU_FREQIN_HPPLL0    << CGU_SSR_FS_SHIFT) /* HPPLL0 (Audio/I2S PLL) */
 #  define CGU_SSR_HPPLL1                 (CGU_FREQIN_HPPLL1    << CGU_SSR_FS_SHIFT) /* HPPLL1 (System PLL) */
+
 #define CGU_SSR_FS2STAT                  (1 << 1)  /* Bit 1:  Enable side #2 of the frequency switch */
 #define CGU_SSR_FS1STAT                  (1 << 0)  /* Bit 0:  Enable side #1 of the frequency switch */
 
@@ -1159,7 +1186,10 @@
 #define CGU_PSR_WAKEUP                   (1 << 1)  /* Bit 1:  Clock wakeup condition */
 #define CGU_PSR_ACTIVE                   (1 << 0)  /* Bit 0:  Indicates clock is active */
 
-/* Enable Select register ESR0 to ESR88, addresses 0x130043a0 to 0x13004500 */
+/* Enable Select register ESR0 to ESR88,
+ * addresses 0x130043a0 to 0x13004500
+ */
+
 /* The ESR_SEL varies according to the selected clock */
 
 #define CGU_ESR_ESRSEL_SHIFT             (1)       /* Bits 1-n: Common shift value */
@@ -1202,11 +1232,15 @@
 
 #define CGU_ESR_ESREN                    (1 << 0)  /* Bit 0:  Enable from FD selected by ESRSEL */
 
-/* Base control registers 0 BCR0 to BCR7, addresses 0x13004504 to 0x13004514 */
+/* Base control registers 0 BCR0 to BCR7,
+ * addresses 0x13004504 to 0x13004514
+ */
 
 #define CGU_BCR_FDRUN                    (1 << 0)  /* Bit 0: Enable fractional dividers */
 
-/* Fractional divider register 0 to 23 FDC0 to FDC23 (except FDC17) addresses 0x13004518 to 0x13004574 */
+/* Fractional divider register 0 to 23 FDC0 to FDC23
+ * (except FDC17) addresses 0x13004518 to 0x13004574
+ */
 
 #define CGU_FDC_MSUB_SHIFT               (11)      /* Bits 11-18: Modulo subtraction value */
 #define CGU_FDC_MSUB_MASK                (0x000000ff << CGU_FDC_MSUB_SHIFT)
@@ -1229,7 +1263,9 @@
 #define CGU_FDC_FIELDWIDTH               8         /* MSUB and MADD fields are 8-bits in width */
 #define CGU_FDC17_FIELDWIDTH             13        /* Except for FDC17 which is 13-bits in width */
 
-/* Dynamic Fractional Divider registers DYNFDC0 to DYNFDC6, addresses 0x13004578 to 0x13004590 */
+/* Dynamic Fractional Divider registers DYNFDC0 to DYNFDC6,
+ * addresses 0x13004578 to 0x13004590
+ */
 
 #define CGU_DYNFDC_STOPAUTORST           (1 << 19) /* Bit 19: Disable auto reset of fractional divider */
 #define CGU_DYNFDC_MSUB_SHIFT            (11)      /* Bits 11-18: Modulo subtraction value */
@@ -1240,7 +1276,9 @@
 #define CGU_DYNFDC_ALLOW                 (1 << 1)  /* Bit 1:  Enable dynamic fractional divider */
 #define CGU_DYNFDC_RUN                   (1 << 0)  /* Bit 0:  Enable the fractional divider during low speeds */
 
-/* Dynamic Fractional Divider Selection register DYNSEL0 to DYNSEL6, addresses 0x13004594 to 0x130045ac */
+/* Dynamic Fractional Divider Selection register DYNSEL0 to DYNSEL6,
+ * addresses 0x13004594 to 0x130045ac
+ */
 
 #define CGU_DYNSEL_MPMCREFRESHREQ        (1 << 8)  /* Bit 8:  Ext SDRAM refresh can enable high speed */
 #define CGU_DYNSEL_ECCRAMBUSY            (1 << 7)  /* Bit 7:  Hispeed mode during NAND ECC */
@@ -1253,8 +1291,10 @@
 #define CGU_DYNSEL_DMATRANS              (1 << 0)  /* Bit 0:  dma transfers can enable high-speed */
 #define CGU_DYNSEL_ALLBITS               (0x1ff)
 
-/* CGU configuration register bit definitions ***************************************************/
+/* CGU configuration register bit definitions *******************************/
+
 /* Power and oscillator control registers */
+
 /* Powermode register POWERMODE, address 0x13004c00 */
 
 #define CGU_POWERMODE_SHIFT              (0)      /* Bits 0-1: Powermode */
@@ -1442,10 +1482,12 @@
 
 #define CGU_NANDECCRST_RESET             (1 << 0)  /* Bit 0:  Reset for ECC clock domain of Nandflash Controller */
 
-/* NANDFLASH_CTRL_AES_RESET_N_SOFT register, address 0x13004cc8 (LPC3154 only) */
+/* NANDFLASH_CTRL_AES_RESET_N_SOFT register,
+ * address 0x13004cc8 (LPC3154 only)
+ */
 
 #define CGU_NANDAECRST_RESET             (1 << 0)  /* Bit 0:  Reset for AES clock domain of
-Nandflash Controller */
+                                                    * Nandflash Controller */
 
 /* NANDFLASH_CTRL_NAND_RESET_N_SOFT register, address 0x13004ccc */
 
@@ -1480,6 +1522,7 @@ Nandflash Controller */
 #define CGU_INTCRST_RESET                (1 << 0)  /* Bit 0:  Reset for Interrupt Controller */
 
 /* PLL control registers */
+
 /* HP0 Frequency Input Select register HP0_FIN_SELECT, address 0x13004cf0,
  * HP1 Frequency Input Select register HP1_FIN_SELECT, address 0x13004d28
  */
@@ -1566,7 +1609,6 @@ Nandflash Controller */
 #define CGU_HPINSELI_SHIFT               (0)      /* Bits 0-5: Bandwidth selection register of HP0/1 PLL */
 #define CGU_HPINSELI_MASK                (63 << CGU_HPINSELI_SHIFT)
 
-
 /* HP0 Bandwidth Selection register HP0_INSELP, address 0x13004d18,
  * HP1 bandwidth Selection register HP1_INSELP, address 0x13004d50
  */
@@ -1595,23 +1637,23 @@ Nandflash Controller */
 #define CGU_HPSELP_SHIFT                 (0)      /* Bits 0-4: Bandwidth selection register of HP0/1 PLL */
 #define CGU_HPIELP_MASK                  (31 << CGU_HPSELP_SHIFT)
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_CGU_H */

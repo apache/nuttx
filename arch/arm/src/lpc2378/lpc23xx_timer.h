@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc2378/lpc23xx_timer.h
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
@@ -36,18 +36,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC2378_LPC23XX_TIMER_H
 #define __ARCH_ARM_SRC_LPC2378_LPC23XX_TIMER_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define tmr_getreg8(o)    getreg8(LPC23XX_TMR0_BASE+(o))
 #define tmr_getreg16(o)   getreg16(LPC23XX_TMR0_BASE+(o))
@@ -106,12 +106,30 @@
 #define TMR_CCR_CAP1RE       (1 <<  3) /* Enable Rising edge on CAPn.1 will load TC to CR1 */
 #define TMR_CCR_CAP1FE       (1 <<  4) /* Enable Falling edge on CAPn.1 will load TC to CR1 */
 #define TMR_CCR_CAP1I        (1 <<  5) /* Enable Interrupt on load of CR1 */
-//~ #define TMR_CCR_CAP2RE       (1 <<  6) /* Enable Rising edge on CAPn.2 will load TC to CR2 */
-//~ #define TMR_CCR_CAP2FE       (1 <<  7) /* Enable Falling edge on CAPn.2 will load TC to CR2 */
-//~ #define TMR_CCR_CAP2I        (1 <<  8) /* Enable Interrupt on load of CR2 */
-//~ #define TMR_CCR_CAP3RE       (1 <<  9) /* Enable Rising edge on CAPn.3 will load TC to CR3 */
-//~ #define TMR_CCR_CAP3FE       (1 << 10) /* Enable Falling edge on CAPn.3 will load TC to CR3 */
-//~ #define TMR_CCR_CAP3I        (1 << 11) /* Enable Interrupt on load of CR3 */
+
+/* #define TMR_CCR_CAP2RE       (1 <<  6)
+ *  Enable Rising edge on CAPn.2 will load TC to CR2
+ */
+
+/* #define TMR_CCR_CAP2FE       (1 <<  7)
+ *  Enable Falling edge on CAPn.2 will load TC to CR2
+ */
+
+/* #define TMR_CCR_CAP2I        (1 <<  8)
+ * Enable Interrupt on load of CR2
+ */
+
+/* #define TMR_CCR_CAP3RE       (1 <<  9)
+ *  Enable Rising edge on CAPn.3 will load TC to CR3
+ */
+
+/* #define TMR_CCR_CAP3FE       (1 << 10)
+ *  Enable Falling edge on CAPn.3 will load TC to CR3
+ */
+
+/* #define TMR_CCR_CAP3I        (1 << 11)
+ *  Enable Interrupt on load of CR3
+ */
 
 /* Timer Capture Register 0/1/2/3 (32-bits, no bit fields) */
 
@@ -148,16 +166,16 @@
 #define   TMR_CTCR_CR2       (2 << 2) /*   CAPn.2 */
 #define   TMR_CTCR_CR3       (3 << 2) /*   CAPn.3 */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC2378_LPC23XX_TIMER_H */

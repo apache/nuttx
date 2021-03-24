@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_ethernet.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,26 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_ETHERNET_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_ETHERNET_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
+
 /* MAC registers */
 
 #define LPC17_40_ETH_MAC1_OFFSET        0x0000 /* MAC configuration register 1 */
@@ -91,7 +92,8 @@
 #define LPC17_40_ETH_INTSET_OFFSET      0x0fec /* Interrupt set register */
 #define LPC17_40_ETH_PWRDOWN_OFFSET     0x0ff4 /* Power-down register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
+
 /* MAC registers */
 
 #define LPC17_40_ETH_MAC1               (LPC17_40_ETH_BASE+LPC17_40_ETH_MAC1_OFFSET)
@@ -148,8 +150,10 @@
 #define LPC17_40_ETH_INTSET             (LPC17_40_ETH_BASE+LPC17_40_ETH_INTSET_OFFSET)
 #define LPC17_40_ETH_PWRDOWN            (LPC17_40_ETH_BASE+LPC17_40_ETH_PWRDOWN_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
+
 /* MAC registers */
+
 /* MAC configuration register 1 (MAC1) */
 
 #define ETH_MAC1_RE                     (1 << 0)  /* Bit 0:  Receive enable */
@@ -166,6 +170,7 @@
 #define ETH_MAC1_SIMRST                 (1 << 14) /* Bit 14: Simulation reset */
 #define ETH_MAC1_SOFTRST                (1 << 15) /* Bit 15: Soft reset */
                                                   /* Bits 16-31: Reserved */
+
 /* MAC configuration register 2 (MAC2) */
 
 #define ETH_MAC2_FD                     (1 << 0)  /* Bit 0:  Full duplex */
@@ -183,11 +188,13 @@
 #define ETH_MAC2_BPNBKOFF               (1 << 13) /* Bit 13: Back pressure/no backoff */
 #define ETH_MAC2_EXDEF                  (1 << 14) /* Bit 14: Excess defer */
                                                   /* Bits 15-31: Reserved */
+
 /* Back-to-Back Inter-Packet-Gap register (IPGT) */
 
 #define ETH_IPGT_SHIFT                  (0)       /* Bits 0-6 */
 #define ETH_IPGT_MASK                   (0x7f << ETH_IPGT_SHIFT)
                                                   /* Bits 7-31: Reserved */
+
 /* Non Back-to-Back Inter-Packet-Gap register (IPGR) */
 
 #define ETH_IPGR_GAP2_SHIFT             (0)       /* Bits 0-6: Gap part 2 */
@@ -196,6 +203,7 @@
 #define ETH_IPGR_GAP1_SHIFT             (8)       /* Bits 8-18: Gap part 1 */
 #define ETH_IPGR_GAP1_MASK              (0x7f << ETH_IPGR_GAP2_SHIFT)
                                                   /* Bits 15-31: Reserved */
+
 /* Collision window / Retry register (CLRT) */
 
 #define ETH_CLRT_RMAX_SHIFT             (0)       /* Bits 0-3: Retransmission maximum */
@@ -204,21 +212,26 @@
 #define ETH_CLRT_COLWIN_SHIFT           (8)       /* Bits 8-13: Collision window */
 #define ETH_CLRT_COLWIN_MASK            (0x3f << ETH_CLRT_COLWIN_SHIFT)
                                                   /* Bits 14-31: Reserved */
+
 /* Maximum Frame register (MAXF) */
 
 #define ETH_MAXF_SHIFT                  (0)       /* Bits 0-15 */
 #define ETH_MAXF_MASK                   (0xffff << ETH_MAXF_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* PHY Support register (SUPP) */
+
                                                   /* Bits 0-7: Reserved */
 #define ETH_SUPP_SPEED                  (1 << 8)  /* Bit 8:  0=10Bps 1=100Bps */
                                                   /* Bits 9-31: Reserved */
+
 /* Test register (TEST) */
 
 #define ETH_TEST_SPQ                    (1 << 0)  /* Bit 0:  Shortcut pause quanta */
 #define ETH_TEST_TP                     (1 << 1)  /* Bit 1:  Test pause */
 #define ETH_TEST_TBP                    (1 << 2)  /* Bit 2:  Test packpressure */
                                                   /* Bits 3-31: Reserved */
+
 /* MII Mgmt Configuration register (MCFG) */
 
 #define ETH_MCFG_SCANINC                (1 << 0)  /* Bit 0:  Scan increment */
@@ -243,6 +256,7 @@
                                                   /* Bits 6-14: Reserved */
 #define ETH_MCFG_MIIRST                 (1 << 15) /* Bit 15: Reset MII mgmt */
                                                   /* Bits 16-31: Reserved */
+
 /* MII Mgmt Command register (MCMD) */
 
 #define ETH_MCMD_READ                   (1 << 0)  /* Bit 0:  Single read cycle */
@@ -258,16 +272,19 @@
 #define ETH_MADR_PHYADDR_SHIFT          (8)       /* Bits 8-12: PHY address */
 #define ETH_MADR_PHYADDR_MASK           (31 << ETH_MADR_PHYADDR_SHIFT)
                                                   /* Bits 13-31: Reserved */
+
 /* MII Mgmt Write Data register (MWTD) */
 
 #define ETH_MWTD_SHIFT                  (0)       /* Bits 0-15 */
 #define ETH_MWTD_MASK                   (0xffff << ETH_MWTD_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* MII Mgmt Read Data register (MRDD) */
 
 #define ETH_MRDD_SHIFT                  (0)       /* Bits 0-15 */
 #define ETH_MRDD_MASK                   (0xffff << ETH_MRDD_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* MII Mgmt Indicators register (MIND) */
 
 #define ETH_MIND_BUSY                   (1 << 0)  /* Bit 0:  Busy */
@@ -275,6 +292,7 @@
 #define ETH_MIND_NVALID                 (1 << 2)  /* Bit 2:  Not valid */
 #define ETH_MIND_MIIFAIL                (1 << 3)  /* Bit 3:  MII link fail */
                                                   /* Bits 4-31: Reserved */
+
 /* Station Address 0 register (SA0) */
 
 #define ETH_SA0_OCTET2_SHIFT            (0)       /* Bits 0-7: Station address 2nd octet */
@@ -282,6 +300,7 @@
 #define ETH_SA0_OCTET1_SHIFT            (8)       /* Bits 8-15: Station address 1st octet */
 #define ETH_SA0_OCTET1_MASK             (0xff << ETH_SA0_OCTET1_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* Station Address 1 register (SA1) */
 
 #define ETH_SA1_OCTET4_SHIFT            (0)       /* Bits 0-7: Station address 4th octet */
@@ -289,6 +308,7 @@
 #define ETH_SA1_OCTET3_SHIFT            (8)       /* Bits 8-15: Station address 3rd octet */
 #define ETH_SA1_OCTET3_MASK             (0xff << ETH_SA0_OCTET3_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* Station Address 2 register (SA2) */
 
 #define ETH_SA2_OCTET6_SHIFT            (0)       /* Bits 0-7: Station address 5th octet */
@@ -296,7 +316,9 @@
 #define ETH_SA2_OCTET5_SHIFT            (8)       /* Bits 8-15: Station address 6th octet */
 #define ETH_SA2_OCTET5_MASK             (0xff << ETH_SA0_OCTET5_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* Control registers */
+
 /* Command register (CMD) */
 
 #define ETH_CMD_RXEN                    (1 << 0)  /* Bit 0:  Receive enable */
@@ -311,11 +333,13 @@
 #define ETH_CMD_RMII                    (1 << 9)  /* Bit 9:  RMII mode */
 #define ETH_CMD_FD                      (1 << 10) /* Bit 10: Full duplex */
                                                   /* Bits 11-31: Reserved */
+
 /* Status register */
 
 #define ETH_STAT_RX                     (1 << 0)  /* Bit 0:  RX status */
 #define ETH_STAT_TX                     (1 << 1)  /* Bit 1:  TX status */
                                                   /* Bits 2-31: Reserved */
+
 /* Receive descriptor base address register (RXDESC)
  *
  * The receive descriptor base address is a byte address aligned to a word
@@ -334,16 +358,19 @@
 #define ETH_RXDESCNO_SHIFT              (0)       /* Bits 0-15 */
 #define ETH_RXDESCNO_MASK               (0xffff << ETH_RXDESCNO_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* Receive produce index register (RXPRODIDX) */
 
 #define ETH_RXPRODIDX_SHIFT             (0)       /* Bits 0-15 */
 #define ETH_RXPRODIDX_MASK              (0xffff << ETH_RXPRODIDX_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* Receive consume index register (RXCONSIDX) */
 
 #define ETH_RXCONSIDX_SHIFT             (0)       /* Bits 0-15 */
 #define ETH_RXCONSIDX_MASK              (0xffff << ETH_RXPRODIDX_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* Transmit descriptor base address register (TXDESC)
  *
  *  The transmit descriptor base address is a byte address aligned to a word
@@ -363,16 +390,19 @@
 #define ETH_TXDESCRNO_SHIFT             (0)       /* Bits 0-15 */
 #define ETH_TXDESCRNO_MASK              (0xffff << ETH_TXDESCRNO_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* Transmit produce index register (TXPRODIDX) */
 
 #define ETH_TXPRODIDX_SHIFT             (0)       /* Bits 0-15 */
 #define ETH_TXPRODIDX_MASK              (0xffff << ETH_TXPRODIDX_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* Transmit consume index register (TXCONSIDX) */
 
 #define ETH_TXCONSIDX_SHIFT             (0)       /* Bits 0-15 */
 #define ETH_TXCONSIDX_MASK              (0xffff << ETH_TXPRODIDX_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* Transmit status vector 0 register (TSV0) */
 
 #define ETH_TSV0_CRCERR                 (1 << 0)  /* Bit 0:  CRC error */
@@ -401,6 +431,7 @@
 #define ETH_TSV1_COLCNT_SHIFT           (16)      /* Bits 16-19: Transmit collision count */
 #define ETH_TSV1_COLCNT_MASK            (15 << ETH_TSV1_COLCNT_SHIFT)
                                                   /* Bits 20-31: Reserved */
+
 /* Receive status vector register (RSV) */
 
 #define ETH_RSV_RXCNT_SHIFT             (0)       /* Bits 0-15: Received byte count */
@@ -421,6 +452,7 @@
 #define ETH_RSV_UNSUPOP                 (1 << 29) /* Bit 29: Unsupported Opcode */
 #define ETH_RSV_VLAN                    (1 << 30) /* Bit 30: VLAN */
                                                   /* Bit 31: Reserved */
+
 /* Flow control counter register (FCCNTR) */
 
 #define ETH_FCCNTR_MCOUNT_SHIFT         (0)       /* Bits 0-15: Mirror count */
@@ -433,7 +465,9 @@
 #define ETH_FCSTAT_MCOUNT_SHIFT         (0)       /* Bits 0-15: Current mirror count */
 #define ETH_FCSTAT_MCOUNT_MASK          (0xffff << ETH_FCSTAT_MCOUNT_SHIFT)
                                                   /* Bits 16-31: Reserved */
+
 /* Rx filter registers */
+
 /* Receive filter control register (RXFLCTRL) */
 
 #define ETH_RXFLCTRL_UCASTEN            (1 << 0)  /* Bit 0:  Accept all unicast frames */
@@ -446,6 +480,7 @@
 #define ETH_RXFLCTRL_MPKTEN             (1 << 12) /* Bit 12: Magic pkt filter WoL int */
 #define ETH_RXFLCTRL_RXFILEN            (1 << 13) /* Bit 13: Perfect match WoL interrupt */
                                                   /* Bits 14-31: Reserved */
+
 /* Receive filter WoL status register (RXFLWOLST) AND
  * Receive filter WoL clear register (RXFLWOLCLR)
  */
@@ -460,13 +495,18 @@
 #define ETH_RXFLWOL_RXFIL               (1 << 7)  /* Bit 7:  Receive filter WoL */
 #define ETH_RXFLWOL_MPKT                (1 << 8)  /* Bit 8:  Magic pkt filter WoL */
                                                   /* Bits 9-31: Reserved */
-/* Hash filter table LSBs register (HASHFLL) AND Hash filter table MSBs register
-* (HASHFLH) Are registers containing a 32-bit value with no bitfield.
+
+/* Hash filter table LSBs register (HASHFLL) AND Hash filter table MSBs
+ * register (HASHFLH) Are registers containing a 32-bit value with no
+ * bitfield.
  */
 
 /* Module control registers */
-/* Interrupt status register (INTST), Interrupt enable register (INTEN), Interrupt
- * clear register (INTCLR), and Interrupt set register (INTSET) common bit field
+
+/* Interrupt status register (INTST),
+ * Interrupt enable register (INTEN),
+ * Interrupt clear register (INTCLR),
+ * and Interrupt set register (INTSET) common bit field
  * definition:
  */
 
@@ -482,11 +522,13 @@
 #define ETH_INT_SOFT                    (1 << 12) /* Bit 12: Soft interrupt */
 #define ETH_INT_WKUP                    (1 << 13) /* Bit 13: Wakeup interrupt */
                                                   /* Bits 14-31: Reserved */
+
 /* Power-down register */
+
                                                   /* Bits 0-30: Reserved */
 #define ETH_PWRDOWN_MACAHB              (1 << 31) /* Power down MAC/AHB */
 
-/* Descriptors Offsets **************************************************************/
+/* Descriptors Offsets ******************************************************/
 
 /* Tx descriptor offsets */
 
@@ -511,7 +553,7 @@
 #define LPC17_40_RXSTAT_HASHCRC         0x04      /* Dest and source hash CRC */
 #define LPC17_40_RXSTAT_SIZE            0x08      /* Size in bytes of one Rx status */
 
-/* Descriptor Bit Definitions *******************************************************/
+/* Descriptor Bit Definitions ***********************************************/
 
 /* Tx descriptor bit definitions */
 
@@ -567,16 +609,16 @@
 #define RXSTAT_INFO_LASTFLAG            (1 << 30) /* Bit 30: Last fragment of a frame */
 #define RXSTAT_INFO_ERROR               (1 << 31) /* Bit 31: OR of other error conditions */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_ETHERNET_H */

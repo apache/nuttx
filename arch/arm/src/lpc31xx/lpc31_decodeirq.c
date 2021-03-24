@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_decodeirq.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -39,9 +39,9 @@
 
 #include "lpc31_intc.h"
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
@@ -62,8 +62,9 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   index = getreg32(LPC31_INTC_VECTOR0) & INTC_VECTOR_INDEX_MASK;
   if (index != 0)
     {
-      /* Shift the index so that the range of IRQ numbers are in bits 0-7 (values
-       * 1-127) and back off the IRQ number by 1 so that the numbering is zero-based
+      /* Shift the index so that the range of IRQ numbers are in bits 0-7
+       * (values 1-127) and back off the IRQ number by 1 so that the
+       * numbering is zero-based
        */
 
       irq = (index >> INTC_VECTOR_INDEX_SHIFT) -1;
@@ -76,8 +77,9 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
           arm_ack_irq(irq);
 
-          /* Current regs non-zero indicates that we are processing an interrupt;
-           * CURRENT_REGS is also used to manage interrupt level context switches.
+          /* Current regs non-zero indicates that we are processing an
+           * interrupt; CURRENT_REGS is also used to manage interrupt level
+           * context switches.
            *
            * Nested interrupts are not supported.
            */
@@ -116,6 +118,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 #endif
             }
 #endif
+
           /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
            * interrupt handler.
            */

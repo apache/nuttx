@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_GPIO_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_GPIO_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
- /* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 /* Pin interrupt registers (relative to LPC43_GPIOINT_BASE) */
 
@@ -48,7 +48,9 @@
 #define LPC43_GPIOINT_FALL_OFFSET   0x0020 /* Pin interrupt falling edge register */
 #define LPC43_GPIOINT_IST_OFFSET    0x0024 /* Pin interrupt status register */
 
-/* GPIO GROUP interrupt registers (relative to either LPC43_GRP0INT_BASE or LPC43_GRP1INT_BASE) */
+/* GPIO GROUP interrupt registers
+ * (relative to either LPC43_GRP0INT_BASE or LPC43_GRP1INT_BASE)
+ */
 
 #define LPC43_GRPINT_CTRL_OFFSET    0x0000 /* GPIO grouped interrupt control register */
 
@@ -164,7 +166,7 @@
 #define LPC43_GPIO_NOT6_OFFSET      0x2318 /* Toggle port 6 */
 #define LPC43_GPIO_NOT7_OFFSET      0x231c /* Toggle port 7 */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 /* Pin interrupt registers (relative to LPC43_GPIOINT_BASE) */
 
@@ -319,7 +321,7 @@
 #define LPC43_GPIO_NOT6             (LPC43_GPIO_BASE+LPC43_GPIO_NOT6_OFFSET)
 #define LPC43_GPIO_NOT7             (LPC43_GPIO_BASE+LPC43_GPIO_NOT7_OFFSET)
 
-/* Register Bit Definitions *************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Pin Interrupt Mode register */
 
@@ -367,6 +369,7 @@
 #define GRPINT_CTRL_COMB            (1 << 1)  /* Bit 1:  Combine enabled inputs for group interrupt */
 #define GRPINT_CTRL_TRIG            (1 << 2)  /* Bit 2:  Group interrupt trigger */
                                               /* Bits 3-31:  Reserved */
+
 /* GPIO grouped interrupt polarity registers */
 
 #define GRPINT_POL(p)               (1 << (p)) /* Bits 0-31: Configure polarity of port pins */
@@ -379,8 +382,10 @@
 
 #define GPIO_B                      (1 << 0)  /* Bit 0:  State of GPIO pin */
                                               /* Bits 1-7: Reserved */
-/* Byte word registers.  On Read:  0x00000000 or 0xffffffff.  On write 0x0000000 or any
- * non-zero value
+
+/* Byte word registers.
+ *  On Read:  0x00000000 or 0xffffffff.
+ *  On write  0x0000000 or any non-zero value
  */
 
 /* Direction registers */
@@ -411,16 +416,16 @@
 
 #define GPIO_NOT(p)                 (1 << (p)) /* Bits 0-31: Toggle output bits */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_GPIO_H */

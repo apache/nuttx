@@ -125,7 +125,8 @@ void up_timer_initialize(void)
 
   /* The request flag will be cleared when the divider change is complete */
 
-  while ((getreg32(LPC54_SYSCON_SYSTICKCLKDIV) & SYSCON_SYSTICKCLKDIV_REQFLAG) != 0)
+  while ((getreg32(LPC54_SYSCON_SYSTICKCLKDIV) &
+          SYSCON_SYSTICKCLKDIV_REQFLAG) != 0)
     {
     }
 

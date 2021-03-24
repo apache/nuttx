@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_inputmux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_INPUTMUX_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_INPUTMUX_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *********************************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC54_MUX_SCT0_INMUX_OFFSET(n)      (0x0000 + ((n) << 2))
 #define LPC54_MUX_SCT0_INMUX0_OFFSET        0x0000  /* Input mux register for SCT0 input 0 */
@@ -94,7 +94,7 @@
 #define LPC54_MUX_FREQMEAS_REF_OFFSET       0x0180  /* Selection for frequency measurement reference clock */
 #define LPC54_MUX_FREQMEAS_TARGET_OFFSET    0x0184  /* Selection for frequency measurement target clock */
 
-/* Register addresses *******************************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC54_MUX_SCT0_INMUX(n)             (LPC54_MUX_BASE + LPC54_MUX_SCT0_INMUX_OFFSET(n))
 #define LPC54_MUX_SCT0_INMUX0               (LPC54_MUX_BASE + LPC54_MUX_SCT0_INMUX0_OFFSET)
@@ -156,7 +156,7 @@
 #define LPC54_MUX_FREQMEAS_REF              (LPC54_MUX_BASE + LPC54_MUX_FREQMEAS_REF_OFFSET)
 #define LPC54_MUX_FREQMEAS_TARGET           (LPC54_MUX_BASE + LPC54_MUX_FREQMEAS_TARGET_OFFSET)
 
-/* Register bit definitions *************************************************************************/
+/* Register bit definitions *************************************************/
 
 /* Input mux register for SCT0 input 0-6 */
 
@@ -225,7 +225,7 @@
 #define MUX_DMA_ITRIG_INMUX_SHIFT           (0)      /* Bit 0-4: Trigger input number for DMA channel n (n = 0 to 29) */
 #define MUX_DMA_ITRIG_INMUX_MASK            (31 << MUX_DMA_ITRIG_INMUX_SHIFT)
 #  define MUX_DMA_ITRIG_INMUX(n)            ((uint32_t)(n) << MUX_DMA_ITRIG_INMUX_SHIFT)
-#  define MUX_DMA_ITRIG_INMUX_ADC0A         (0 << MUX_DMA_ITRIG_INMUX_SHIFT) /*  ADC0 Sequence A interrupt */
+#  define MUX_DMA_ITRIG_INMUX_ADC0A         (0 << MUX_DMA_ITRIG_INMUX_SHIFT)  /*  ADC0 Sequence A interrupt */
 #  define MUX_DMA_ITRIG_INMUX_ADC0B         (1  << MUX_DMA_ITRIG_INMUX_SHIFT) /* ADC0 Sequence B interrupt */
 #  define MUX_DMA_ITRIG_INMUX_SCT0DMA0      (2  << MUX_DMA_ITRIG_INMUX_SHIFT) /* SCT0 DMA request 0 */
 #  define MUX_DMA_ITRIG_INMUX_SCT0DMA1      (3  << MUX_DMA_ITRIG_INMUX_SHIFT) /* SCT0 DMA request 1 */

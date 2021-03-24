@@ -47,7 +47,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ********************************************************/
+/* Configuration ************************************************************/
+
 /* Terminology.  In the flat build (CONFIG_BUILD_FLAT=y), there is only a
  * single heap access with the standard allocations (malloc/free).  This
  * heap is referred to as the user heap.  In the protected build
@@ -196,15 +197,18 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 void arm_addregion(void)
 {
 #if defined(CONFIG_LPC31_EXTSRAM0) && defined(CONFIG_LPC31_EXTSRAM0HEAP)
-  MM_ADDREGION((FAR void *)LPC31_EXTSRAM0_VSECTION, CONFIG_LPC31_EXTSRAM0SIZE);
+  MM_ADDREGION((FAR void *)LPC31_EXTSRAM0_VSECTION,
+                CONFIG_LPC31_EXTSRAM0SIZE);
 #endif
 
 #if defined(CONFIG_LPC31_EXTSRAM1) && defined(CONFIG_LPC31_EXTSRAM1HEAP)
-  MM_ADDREGION((FAR void *)LPC31_EXTSRAM1_VSECTION, CONFIG_LPC31_EXTSRAM1SIZE);
+  MM_ADDREGION((FAR void *)LPC31_EXTSRAM1_VSECTION,
+                CONFIG_LPC31_EXTSRAM1SIZE);
 #endif
 
 #if defined(CONFIG_LPC31_EXTDRAM) && defined(CONFIG_LPC31_EXTDRAMHEAP)
-  MM_ADDREGION((FAR void *)LPC31_EXTSDRAM_VSECTION, CONFIG_LPC31_EXTDRAMSIZE);
+  MM_ADDREGION((FAR void *)LPC31_EXTSDRAM_VSECTION,
+                CONFIG_LPC31_EXTDRAMSIZE);
 #endif
 }
 #endif

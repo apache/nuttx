@@ -62,7 +62,6 @@
 
 bool lpc31_defclk(enum lpc31_clockid_e clkid)
 {
-
   uint32_t regaddr;
   uint32_t regval;
   bool     enable;
@@ -98,6 +97,7 @@ bool lpc31_defclk(enum lpc31_clockid_e clkid)
     {
       regval &= ~CGU_PCR_RUN;
     }
+
   putreg32(regval, regaddr);
   return enable;
 }

@@ -18,8 +18,7 @@
  *
  ****************************************************************************/
 
-/*
- * NOTE:  The SPIFI ROM interface is not defined in the LPC43xx user manual.
+/* NOTE:  The SPIFI ROM interface is not defined in the LPC43xx user manual.
  * Some information in this file drivers from the NXP header file
  * spifi_rom_api.h.  I do not believe that any copyright restrictions apply.
  * But just to be certain:
@@ -219,7 +218,8 @@ struct spifi_driver_s
   int32_t  (*checkAd)(struct spifi_dev_s *dev,
                struct spifi_operands_s *opers);
   int32_t  (*setProt)(struct spifi_dev_s *dev,
-               struct spifi_operands_s *opers, uint8_t *change, uint8_t *saveprot);
+               struct spifi_operands_s *opers,
+               uint8_t *change, uint8_t *saveprot);
   int32_t  (*check_block) (struct spifi_dev_s *dev, uint8_t *source,
                struct spifi_operands_s *opers, uint32_t check_program);
   int32_t  (*send_erase_cmd)(struct spifi_dev_s *dev, uint8_t op,
@@ -228,8 +228,9 @@ struct spifi_driver_s
                uint32_t length);
   int32_t  (*prog_block)(struct spifi_dev_s *dev, uint8_t *source,
                struct spifi_operands_s *opers, uint32_t *left_in_page);
-  uint32_t (*ck_prog)(struct spifi_dev_s *dev, uint8_t *source, uint8_t *dest,
-               uint32_t length);
+  uint32_t (*ck_prog)(struct spifi_dev_s *dev,
+                      uint8_t *source, uint8_t *dest,
+                      uint32_t length);
 
   /* Low level functions */
 
@@ -262,7 +263,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 int32_t spifi_init(struct spifi_dev_s *dev, uint32_t cshigh,

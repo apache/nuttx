@@ -1,4 +1,4 @@
-/********************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_evntrtr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_EVNTRTR_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_EVNTRTR_H
 
-/********************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/********************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************/
+ ****************************************************************************/
 
-/* EVNTRTR register base address offset into the APB0 domain ********************************************/
+/* EVNTRTR register base address offset into the APB0 domain ****************/
 
 #define LPC31_EVNTRTR_VBASE                      (LPC31_APB0_VADDR+LPC31_APB0_EVNTRTR_OFFSET)
 #define LPC31_EVNTRTR_PBASE                      (LPC31_APB0_PADDR+LPC31_APB0_EVNTRTR_OFFSET)
@@ -51,9 +51,9 @@
 #define EVNTRTR_BANK(e)                          ((e)>>5)          /* Maps a event to a bank */
 #define EVNTRTR_BIT(e)                           ((e)&0x1f)        /* Maps a event to a bit */
 
-/* EVNTRTR register offsets (with respect to the EVNTRTR base) ******************************************/
+/* EVNTRTR register offsets (with respect to the EVNTRTR base) **************/
 
-                                                                   /* 0x0000-0x0bff: Reserved */
+                                               /* 0x0000-0x0bff: Reserved */
 #define LPC31_EVNTRTR_PEND_OFFSET(b)             (0x0c00+_B(b))    /* Input event pending */
 #define LPC31_EVNTRTR_INTCLR_OFFSET(b)           (0x0c20+_B(b))    /* Input event clear */
 #define LPC31_EVNTRTR_INTSET_OFFSET(b)           (0x0c40+_B(b))    /* Input event set */
@@ -74,7 +74,7 @@
 #define LPC31_EVNTRTR_INTOUTMASKSET_OFFSET(o,b)  (0x1c00+_OB(o,b)) /* Interrupt output 'o' mask set */
 #define LPC31_EVNTRTR_CGUWKUPMASKSET_OFFSET(b)   (0x1c00+_OB(4,b)) /* cgu_wakeup mask set */
 
-/* EVNTRTR register (virtual) addresses *********************************************************************/
+/* EVNTRTR register (virtual) addresses *************************************/
 
 #define LPC31_EVNTRTR_PEND(b)                    (LPC31_EVNTRTR_VBASE+LPC31_EVNTRTR_PEND_OFFSET(b))
 #define LPC31_EVNTRTR_INTCLR(b)                  (LPC31_EVNTRTR_VBASE+LPC31_EVNTRTR_INTCLR_OFFSET(b))
@@ -95,7 +95,8 @@
 #define LPC31_EVNTRTR_INTOUTMASKSET(o,b)         (LPC31_EVNTRTR_VBASE+LPC31_EVNTRTR_INTOUTMASKSET_OFFSET(o,b))
 #define LPC31_EVNTRTR_CGUWKUPMASKSET(b)          (LPC31_EVNTRTR_VBASE+LPC31_EVNTRTR_CGUWKUPMASKSET_OFFSET(b)
 
-/* EVNTRTR event definitions ********************************************************************************/
+/* EVNTRTR event definitions ************************************************/
+
 /* Bank 0 */
 
 #define EVENTRTR_EBID6                             EVNTRTR_EVENT(0,31) /* Input event from GPIO pin */
@@ -202,7 +203,8 @@
 #define EVENTRTR_GPIO17                            EVNTRTR_EVENT(2,0)  /* Input event from GPIO pin */
 
 /* Bank 3 */
-                                                                       /* 30-31: Reserved */
+
+                                                       /* 30-31: Reserved */
 #define EVENTRTR_ISRAM1MRCFINISHED                 EVNTRTR_EVENT(3,29) /* ISRAM1 redundancy controller event */
 #define EVENTRTR_ISRAM0MRCFINISHED                 EVNTRTR_EVENT(3,28) /* ISRAM0 redundancy controller event */
 #define EVENTRTR_USBID                             EVNTRTR_EVENT(3,27) /* Input event from GPIO pin */
@@ -234,16 +236,16 @@
 #define EVENTRTR_GPIO20                            EVNTRTR_EVENT(3,1)  /* Input event from GPIO20 */
 #define EVENTRTR_GPIO19                            EVNTRTR_EVENT(3,0)  /* Input event from GPIO19 */
 
-/********************************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************************
- * Public Functions
- ********************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_EVNTRTR_H */

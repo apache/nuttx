@@ -55,6 +55,7 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* These tables have global scope because they are also used in
  * lpc17_40_gpiodbg.c
  */
@@ -171,7 +172,8 @@ const uint32_t g_odmode[GPIO_NPORTS] =
  *
  ****************************************************************************/
 
-static int lpc17_40_pinsel(unsigned int port, unsigned int pin, unsigned int value)
+static int lpc17_40_pinsel(unsigned int port,
+                           unsigned int pin, unsigned int value)
 {
   const uint32_t *table;
   uint32_t regaddr;
@@ -361,7 +363,8 @@ static void lpc17_40_clropendrain(unsigned int port, unsigned int pin)
  *
  ****************************************************************************/
 
-static inline int lpc17_40_configinput(lpc17_40_pinset_t cfgset, unsigned int port, unsigned int pin)
+static inline int lpc17_40_configinput(lpc17_40_pinset_t cfgset,
+                                       unsigned int port, unsigned int pin)
 {
   uint32_t regval;
   uint32_t fiobase;
@@ -403,6 +406,7 @@ static inline int lpc17_40_configinput(lpc17_40_pinset_t cfgset, unsigned int po
     }
 
   /* Set up PINSEL registers */
+
   /* Configure as GPIO */
 
   lpc17_40_pinsel(port, pin, PINCONN_PINSEL_GPIO);
@@ -422,12 +426,14 @@ static inline int lpc17_40_configinput(lpc17_40_pinset_t cfgset, unsigned int po
  * Name: lpc17_40_configinterrupt
  *
  * Description:
- *   Configure a GPIO interrupt pin based on bit-encoded description of the pin.
+ *   Configure a GPIO interrupt pin based on bit-encoded description of the
+ *   pin.
  *
  ****************************************************************************/
 
-static inline int lpc17_40_configinterrupt(lpc17_40_pinset_t cfgset, unsigned int port,
-                                        unsigned int pin)
+static inline int lpc17_40_configinterrupt(lpc17_40_pinset_t cfgset,
+                                           unsigned int port,
+                                           unsigned int pin)
 {
   /* First, configure the port as a generic input so that we have a known
    * starting point and consistent behavior during the re-configuration.
@@ -439,7 +445,8 @@ static inline int lpc17_40_configinterrupt(lpc17_40_pinset_t cfgset, unsigned in
 
   DEBUGASSERT(port == 0 || port == 2);
 #ifdef CONFIG_LPC17_40_GPIOIRQ
-  lpc17_40_setintedge(port, pin, (cfgset & GPIO_EDGE_MASK) >> GPIO_EDGE_SHIFT);
+  lpc17_40_setintedge(port, pin,
+                     (cfgset & GPIO_EDGE_MASK) >> GPIO_EDGE_SHIFT);
 #endif
   return OK;
 }
@@ -452,8 +459,9 @@ static inline int lpc17_40_configinterrupt(lpc17_40_pinset_t cfgset, unsigned in
  *
  ****************************************************************************/
 
-static inline int lpc17_40_configoutput(lpc17_40_pinset_t cfgset, unsigned int port,
-                                     unsigned int pin)
+static inline int lpc17_40_configoutput(lpc17_40_pinset_t cfgset,
+                                        unsigned int port,
+                                        unsigned int pin)
 {
   uint32_t fiobase;
   uint32_t regval;
@@ -468,7 +476,8 @@ static inline int lpc17_40_configoutput(lpc17_40_pinset_t cfgset, unsigned int p
 
   if ((cfgset & GPIO_OPEN_DRAIN) != 0)
     {
-      /* Set pull-up mode.  This normally only applies to input pins, but does have
+      /* Set pull-up mode.
+       * This normally only applies to input pins, but does have
        * meaning if the port is an open drain output.
        */
 
@@ -490,7 +499,6 @@ static inline int lpc17_40_configoutput(lpc17_40_pinset_t cfgset, unsigned int p
   regval |= (1 << pin);
   putreg32(regval, fiobase + LPC17_40_FIO_DIR_OFFSET);
 
-
   return OK;
 }
 
@@ -503,8 +511,9 @@ static inline int lpc17_40_configoutput(lpc17_40_pinset_t cfgset, unsigned int p
  *
  ****************************************************************************/
 
-static int lpc17_40_configalternate(lpc17_40_pinset_t cfgset, unsigned int port,
-                                 unsigned int pin, uint32_t alt)
+static int lpc17_40_configalternate(lpc17_40_pinset_t cfgset,
+                                    unsigned int port,
+                                    unsigned int pin, uint32_t alt)
 {
   /* First, configure the port as an input so that we have a known
    * starting point and consistent behavior during the re-configuration.
@@ -513,6 +522,7 @@ static int lpc17_40_configalternate(lpc17_40_pinset_t cfgset, unsigned int port,
   lpc17_40_configinput(DEFAULT_INPUT, port, pin);
 
   /* Set up PINSEL registers */
+
   /* Configure as GPIO */
 
   lpc17_40_pinsel(port, pin, alt);
@@ -556,7 +566,9 @@ int lpc17_40_configgpio(lpc17_40_pinset_t cfgset)
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   if (port < GPIO_NPORTS)
     {
-      /* Get the pin number and select the port configuration register for that pin */
+      /* Get the pin number and select the port configuration register for
+       * that pin
+       */
 
       pin = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
 
@@ -579,15 +591,18 @@ int lpc17_40_configgpio(lpc17_40_pinset_t cfgset)
           break;
 
         case GPIO_ALT1:    /* Alternate function 1 */
-          ret = lpc17_40_configalternate(cfgset, port, pin, PINCONN_PINSEL_ALT1);
+          ret = lpc17_40_configalternate(cfgset, port, pin,
+                                         PINCONN_PINSEL_ALT1);
           break;
 
         case GPIO_ALT2:    /* Alternate function 2 */
-          ret = lpc17_40_configalternate(cfgset, port, pin, PINCONN_PINSEL_ALT2);
+          ret = lpc17_40_configalternate(cfgset, port, pin,
+                                         PINCONN_PINSEL_ALT2);
           break;
 
         case GPIO_ALT3:    /* Alternate function 3 */
-          ret = lpc17_40_configalternate(cfgset, port, pin, PINCONN_PINSEL_ALT3);
+          ret = lpc17_40_configalternate(cfgset, port, pin,
+                                         PINCONN_PINSEL_ALT3);
           break;
 
         default:
@@ -663,7 +678,8 @@ bool lpc17_40_gpioread(lpc17_40_pinset_t pinset)
       /* Get the pin number and return the input state of that pin */
 
       pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-      return ((getreg32(fiobase + LPC17_40_FIO_PIN_OFFSET) & (1 << pin)) != 0);
+      return ((getreg32(fiobase + LPC17_40_FIO_PIN_OFFSET) &
+             (1 << pin)) != 0);
     }
 
   return false;

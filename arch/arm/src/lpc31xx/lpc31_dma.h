@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_dma.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,30 +16,30 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_DMA_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_DMA_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* DMA register base address offset into the APB4 domain ****************************************/
+/* DMA register base address offset into the APB4 domain ********************/
 
 #define LPC31_DMA_VBASE                (LPC31_APB4_VADDR+LPC31_APB4_DMA_OFFSET)
 #define LPC31_DMA_PBASE                (LPC31_APB4_PADDR+LPC31_APB4_DMA_OFFSET)
 
-/* DMA channel offsets (with respect to the DMA register base address) **************************/
+/* DMA channel offsets (with respect to the DMA register base address) ******/
 
 #define LPC31_DMACHAN_OFFSET(n)        ((n)*0x020)
 #define LPC31_DMACHAN0_OFFSET          0x000
@@ -69,7 +69,7 @@
 #define LPC31_DMACHAN10_ALT_OFFSET     0x2a0
 #define LPC31_DMACHAN11_ALT_OFFSET     0x2b0
 
-/* DMA channel virtual base addresses ***********************************************************/
+/* DMA channel virtual base addresses ***************************************/
 
 #define LPC31_DMACHAN_VBASE(n)         (LPC31_DMA_VBASE+LPC31_DMACHAN_OFFSET(n))
 #define LPC31_DMACHAN0_VBASE           (LPC31_DMA_VBASE+LPC31_DMACHAN0_OFFSET)
@@ -99,7 +99,9 @@
 #define LPC31_DMACHAN10_VBASE          (LPC31_DMA_VBASE+LPC31_DMACHAN10_ALT_OFFSET)
 #define LPC31_DMACHAN11_VBASE          (LPC31_DMA_VBASE+LPC31_DMACHAN11_ALT_OFFSET)
 
-/* DMA channel register offsets (with respect to the DMA channel register base) *****************/
+/* DMA channel register offsets
+ * (with respect to the DMA channel register base)
+ */
 
 #define LPC31_DMACHAN_SRCADDR_OFFSET   0x000 /* Source address register of DMA channel */
 #define LPC31_DMACHAN_DESTADDR_OFFSET  0X004 /* Destination address register of DMA channel */
@@ -108,7 +110,7 @@
 #define LPC31_DMACHAN_ENABLE_OFFSET    0x010 /* Enable register for DMA channel */
 #define LPC31_DMACHAN_XFERCOUNT_OFFSET 0x01c /* Transfer counter register for DMA channel */
 
-/* DMA global register offsets (with respect to the DMA register base) *************************/
+/* DMA global register offsets (with respect to the DMA register base) ******/
 
 #define LPC31_DMA_ALTENABLE_OFFSET     0x400 /* Alternative enable register */
 #define LPC31_DMA_IRQSTATUSCLR_OFFSET  0x404 /* IRQ status clear register */
@@ -116,7 +118,7 @@
 #define LPC31_DMA_TESTSTATUS_OFFSET    0x40c /* Test FIFO response status register */
 #define LPC31_DMA_SOFTINT_OFFSET       0x410 /* Software interrupt register */
 
-/* DMA channel register (virtual) addresses *****************************************************/
+/* DMA channel register (virtual) addresses *********************************/
 
 #define LPC31_DMACHAN_SRCADDR(n)       (LPC31_DMACHAN_VBASE(n)+LPC31_DMACHAN_SRCADDR_OFFSET)
 #define LPC31_DMACHAN_DESTADDR(n)      (LPC31_DMACHAN_VBASE(n)+LPC31_DMACHAN_DESTADDR_OFFSET)
@@ -274,7 +276,7 @@
 #define LPC31_DMACHAN11_ALT_XFERLEN    (LPC31_DMACHAN11_ALT_VBASE+LPC31_DMACHAN_XFERLEN_OFFSET)
 #define LPC31_DMACHAN11_ALT_CONFIG     (LPC31_DMACHAN11_ALT_VBASE+LPC31_DMACHAN_CONFIG_OFFSET)
 
-/* DMA global register (virtual) addresses ******************************************************/
+/* DMA global register (virtual) addresses **********************************/
 
 #define LPC31_DMA_ALTENABLE            (LPC31_DMA_VBASE+LPC31_DMA_ALTENABLE_OFFSET)
 #define LPC31_DMA_IRQSTATUSCLR         (LPC31_DMA_VBASE+LPC31_DMA_IRQSTATUSCLR_OFFSET)
@@ -282,14 +284,18 @@
 #define LPC31_DMA_TESTSTATUS           (LPC31_DMA_VBASE+LPC31_DMA_TESTSTATUS_OFFSET)
 #define LPC31_DMA_SOFTINT              (LPC31_DMA_VBASE+LPC31_DMA_SOFTINT_OFFSET)
 
-/* DMA channel register bit definitions *********************************************************/
+/* DMA channel register bit definitions *************************************/
 
-/* TRANSFER_LENGTH (addresses 0x17000008 (channel 0) to 0x17000168 (channel 11)) */
+/* TRANSFER_LENGTH (addresses 0x17000008
+ * (channel 0) to 0x17000168 (channel 11))
+ */
 
 #define DMACHAN_XFRLEN_SHIFT             (0)   /* Bits 0-20: Transfer length */
 #define DMACHAN_XFRLEN_MASK              (0x001fffff << DMACHAN_XFRLEN_SHIFT)
 
-/* CONFIGURATION (addresses 0x1700000c (channel 0) to 0x1700016c (channel 11)) */
+/* CONFIGURATION (addresses 0x1700000c
+ * (channel 0) to 0x1700016c (channel 11))
+ */
 
 #define DMACHAN_CONFIG_CIRC              (1 << 18) /* Bit 18: Enable circular buffer */
 #define DMACHAN_CONFIG_COMPCHENABLE      (1 << 17) /* Bit 17: Enable companion channel */
@@ -302,6 +308,7 @@
 #  define DMACHAN_CONFIG_XFERSIZE_HWORDS (1 << DMACHAN_CONFIG_XFERSIZE_SHIFT) /* Transfer half-words */
 #  define DMACHAN_CONFIG_XFERSIZE_BYTES  (2 << DMACHAN_CONFIG_XFERSIZE_SHIFT) /* Transfer bytes */
 #  define DMACHAN_CONFIG_XFERSIZE_BURSTS (3 << DMACHAN_CONFIG_XFERSIZE_SHIFT) /* Transfer bursts */
+
 #define DMACHAN_CONFIG_RDSLAVENR_SHIFT   (5)       /* Bits 5-9: Read slave enable */
 #define DMACHAN_CONFIG_RDSLAVENR_MASK    (31 << DMACHAN_CONFIG_RDSLAVENR_SHIFT)
 #define DMACHAN_CONFIG_WRSLAVENR_SHIFT   (0)       /* Bits 0-4: Write slave enable */
@@ -311,12 +318,14 @@
 
 #define DMACHAN_ENABLE_BIT               (1 << 0)  /* Bit 0: Enable */
 
-/* TRANSFER_COUNTER (addresses 0x1700001v (channel 0) to 0x1700017c (channel 11)) */
+/* TRANSFER_COUNTER (addresses 0x1700001v (channel 0)
+ * to 0x1700017c (channel 11))
+ */
 
 #define DMACHAN_XFRCOUNT_SHIFT           (0)       /* Bits 0-20: Transfer count */
 #define DMACHAN_XFRCOUNT_MASK            (0x001fffff << DMACHAN_XFRCOUNT_SHIFT)
 
-/* DMA global register bit definitions **********************************************************/
+/* DMA global register bit definitions **************************************/
 
 /* ALT_ENABLE (address 0x17000400) */
 
@@ -395,16 +404,16 @@
 
 #define DMA_SOFTINT_ENABLE               (1 << 0)  /* Bit 0:  Enable soft interrupt */
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_DMA_H */

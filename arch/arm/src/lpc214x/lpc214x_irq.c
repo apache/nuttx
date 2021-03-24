@@ -183,8 +183,9 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
 
       /* Enable the vectored interrupt */
 
-      vic_putreg(((irq << LPC214X_VECTCNTL_IRQSHIFT) | LPC214X_VECTCNTL_ENABLE),
-                 LPC214X_VIC_VECTCNTL0_OFFSET + offset);
+      vic_putreg(((irq << LPC214X_VECTCNTL_IRQSHIFT) |
+                  LPC214X_VECTCNTL_ENABLE),
+                  LPC214X_VIC_VECTCNTL0_OFFSET + offset);
       leave_critical_section(flags);
     }
 }

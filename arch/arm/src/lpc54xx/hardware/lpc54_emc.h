@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_emc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_EMC_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_EMC_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #define LPC54_EMC_CS0                     0
 #define LPC54_EMC_CS1                     1
@@ -38,7 +38,7 @@
 #define LPC54_EMC_CS3                     3
 #define LPC54_EMC_NCS                     4
 
-/* Register offsets *********************************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC54_EMC_CONTROL_OFFSET          0x0000  /* Controls operation of the memory controller */
 #define LPC54_EMC_STATUS_OFFSET           0x0004  /* Provides EMC status information */
@@ -87,7 +87,7 @@
 #define LPC54_EMC_STATWAITWRn_OFFSET(n)   (0x0214 + ((uintptr_t)(n) << 5))
 #define LPC54_EMC_STATWAITTURNn_OFFSET(n) (0x0218 + ((uintptr_t)(n) << 5))
 
-/* Register addresses *******************************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC54_EMC_CONTROL                 (LPC54_EMC_BASE + LPC54_EMC_CONTROL_OFFSET)
 #define LPC54_EMC_STATUS                  (LPC54_EMC_BASE + LPC54_EMC_STATUS_OFFSET)
@@ -125,7 +125,7 @@
 #define LPC54_EMC_STATWAITWR(n)           (LPC54_EMC_STATCS_BASE(n) + LPC54_EMC_STATWAITWR_OFFSET)
 #define LPC54_EMC_STATWAITTURN(n)         (LPC54_EMC_STATCS_BASE(n) + LPC54_EMC_STATWAITTURN_OFFSET)
 
-/* Register bit definitions *************************************************************************/
+/* Register bit definitions *************************************************/
 
 /* Controls operation of the memory controller */
 
@@ -246,6 +246,7 @@
 #  define EMC_STATEXTWAIT(n)              ((uint32_t)((n)-1) << EMC_STATEXTWAIT_SHIFT)
 
 /* Per-chip select dynamic memory registers */
+
 /* Dynamic Memory Configuration registers */
 #define EMC_DYNCONFIG_
 #define EMC_DYNCONFIG_MD_SHIFT            (3)       /* Bits 3-4: Memory device */
@@ -253,6 +254,7 @@
 #  define EMC_DYNCONFIG_MD(n)             ((uint32_t)(n) << EMC_DYNCONFIG_MD_SHIFT)
 #  define EMC_DYNCONFIG_MD_SDRAM          (0 << EMC_DYNCONFIG_MD_SHIFT) /* SDRAM */
 #  define EMC_DYNCONFIG_MD_LPDRAM         (1 << EMC_DYNCONFIG_MD_SHIFT) /* Low-power SDRAM */
+
 #define EMC_DYNCONFIG_AM0_SHIFT           (7)       /* Bits 7-12: See Table 656 in User Manual */
 #define EMC_DYNCONFIG_AM0_MASK            (0x3f << EMC_DYNCONFIG_AM0_SHIFT)
 #  define EMC_DYNCONFIG_AM0(n)            ((uint32_t)(n) << EMC_DYNCONFIG_AM0_SHIFT)
@@ -274,6 +276,7 @@
 #  define EMC_DYNRASCAS_CAS(n)            ((uint32_t)(n) << EMC_DYNRASCAS_CAS_SHIFT)
 
 /* Per-chip select static memory registers */
+
 /* Static Memory Configuration registers */
 
 #define EMC_STATCONFIG_MW_SHIFT           (0)       /* Bits 0-1: Memory width */
@@ -281,6 +284,7 @@
 #  define EMC_STATCONFIG_MW_8BIT          (0 << EMC_STATCONFIG_MW_SHIFT) /* 8 bit */
 #  define EMC_STATCONFIG_MW_16BIT         (1 << EMC_STATCONFIG_MW_SHIFT) /* 16 bit */
 #  define EMC_STATCONFIG_MW_32BIT         (2 << EMC_STATCONFIG_MW_SHIFT) /* 32 bit */
+
 #define EMC_STATCONFIG_PM                 (1 << 3)  /* Bit 3:  Page mode */
 #define EMC_STATCONFIG_PC                 (1 << 6)  /* Bit 6:  Chip select polarity */
 #define EMC_STATCONFIG_PB                 (1 << 7)  /* Bit 7:  Byte lane state */

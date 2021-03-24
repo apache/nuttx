@@ -90,7 +90,7 @@ lpc31_bitwidth(unsigned int value, unsigned int fdwid)
 
   /* Examine bits from the most significant down */
 
-  for (bit = fdwid-1; bit >= 0; bit--)
+  for (bit = fdwid - 1; bit >= 0; bit--)
     {
       /* Is this bit set?  If so, then the width of the value is 0 to bit,
        * or bit+1.
@@ -102,12 +102,14 @@ lpc31_bitwidth(unsigned int value, unsigned int fdwid)
           break;
         }
     }
+
   return width;
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: lpc31_fdivinit
  *
@@ -137,8 +139,9 @@ uint32_t lpc31_fdivinit(int fdcndx,
   madd = fdiv->m - fdiv->n;
   msub = -fdiv->n;
 
-  /* Determine the width of the madd and msub fields in the fractional divider
-   * register.  They are all 8-bits in width except for fractional divider 17.
+  /* Determine the width of the madd and msub fields in the fractional
+   * divider register.
+   * They are all 8-bits in width except for fractional divider 17.
    */
 
   fdwid     = CGU_FDC_FIELDWIDTH;
@@ -154,11 +157,13 @@ uint32_t lpc31_fdivinit(int fdcndx,
       msubshift = CGU_FDC17_MSUB_SHIFT;
     }
 
-  /* Find maximum bit width of madd & msub.  Here we calculate the width of the OR
-   * of the two values.  The width of the OR will be the width of the wider value
+  /* Find maximum bit width of madd & msub.  Here we calculate the width
+   * of the OR of the two values.  The width of the OR will be the width
+   * of the wider value
    */
 
-  fdshift = fdwid - lpc31_bitwidth((unsigned int)madd | (unsigned int)fdiv->n, fdwid);
+  fdshift = fdwid - lpc31_bitwidth((unsigned int)madd |
+                    (unsigned int)fdiv->n, fdwid);
 
   /* Calculate the fractional divider register values */
 

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_wdt.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_WDT_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_WDT_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC17_40_WDT_MOD_OFFSET       0x0000  /* Watchdog mode register */
 #define LPC17_40_WDT_TC_OFFSET        0x0004  /* Watchdog timer constant register */
@@ -50,7 +50,7 @@
 #  define LPC17_40_WDT_WINDOW_OFFSET  0x0018  /* Watchdog window compare value */
 #endif
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC17_40_WDT_MOD              (LPC17_40_WDT_BASE+LPC17_40_WDT_MOD_OFFSET)
 #define LPC17_40_WDT_TC               (LPC17_40_WDT_BASE+LPC17_40_WDT_TC_OFFSET)
@@ -63,7 +63,7 @@
 #  define LPC17_40_WDT_WINDOW         (LPC17_40_WDT_BASE+LPC17_40_WDT_WINDOW_OFFSET)
 #endif
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* Watchdog mode register */
 
@@ -75,6 +75,7 @@
 #  define WDT_MOD_WDPROTECT           (1 << 4)  /* Bit 4: Watchdog interrupt */
 #endif
                                                 /* Bits 5-31: Reserved */
+
 /* Watchdog timer constant register */
 
 #ifdef LPC176x
@@ -82,6 +83,7 @@
 #endif
 #ifdef LPC178x_40xx
 #  define WDT_TC                      (0x00ffffff) /* Bits 0-23: Watchdog time-out interval */
+
                                                 /* Bits 24-31: Reserved */
 #endif
 
@@ -90,6 +92,7 @@
 #define WDT_FEED_MASK                 (0xff)    /* Bits 0-7: Feed value should be 0xaa
                                                  *           followed by 0x55 */
                                                 /* Bits 14-31: Reserved */
+
 /* Watchdog timer value register */
 
 #ifdef LPC176x
@@ -108,6 +111,7 @@
 #    define WDT_CLKSEL_WDSEL_INTRC    (0 << WDT_CLKSEL_WDSEL_SHIFT) /* Internal RC osc */
 #    define WDT_CLKSEL_WDSEL_APB      (1 << WDT_CLKSEL_WDSEL_SHIFT) /* APB peripheral clock (watchdog pclk) */
 #    define WDT_CLKSEL_WDSEL_RTC      (2 << WDT_CLKSEL_WDSEL_SHIFT) /* RTC oscillator (rtc_clk) */
+
                                                 /* Bits 2-30: Reserved */
 #  define WDT_CLKSEL_WDLOCK           (1 << 31) /* Bit 31: Lock WDT register bits if set */
 #endif
@@ -126,16 +130,16 @@
                                                  /* Bits 24-31: Reserved */
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_WDT_H */

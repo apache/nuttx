@@ -114,6 +114,7 @@ static int lpc54_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* LPC54 RTC driver operations */
 
 static const struct rtc_ops_s g_rtc_ops =
@@ -490,8 +491,9 @@ static int lpc54_rdalarm(FAR struct rtc_lowerhalf_s *lower,
  * Name: lpc54_periodic_callback
  *
  * Description:
- *   This is the function that is called from the RTC driver when the periodic
- *   wakeup goes off.  It just invokes the upper half drivers callback.
+ *   This is the function that is called from the RTC driver when the
+ *   periodic wakeup goes off.  It just invokes the upper half drivers
+ *   callback.
  *
  * Input Parameters:
  *   None

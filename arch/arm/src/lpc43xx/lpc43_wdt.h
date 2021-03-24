@@ -48,15 +48,15 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
  * Name: lpc43_wwdtinitialize
  *
  * Description:
- *   Initialize the WWDT watchdog timer.  The watchdog timer is initializeed and
- *   registers as 'devpath.  The initial state of the watchdog time is
+ *   Initialize the WWDT watchdog timer.  The watchdog timer is initializeed
+ *   and registers as 'devpath.  The initial state of the watchdog time is
  *   disabled.
  *
  * Input Parameters:

@@ -195,7 +195,10 @@ static inline void up_configbaud(void)
 
               if (tmperr < errval)
                 {
-                  /* Yes, save these settings as the new, candidate optimal settings */
+                  /* Yes,
+                   * save these settings as the new,
+                   * candidate optimal settings
+                   */
 
                   mulval    = tmulval ;
                   divaddval = tdivaddval;
@@ -252,11 +255,13 @@ static inline void up_configbaud(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: lpc31_lowsetup
  *
  * Description:
- *   Called early in arm_boot.  Performs chip-common low level initialization.
+ *   Called early in arm_boot.
+ *   Performs chip-common low level initialization.
  *
  ****************************************************************************/
 

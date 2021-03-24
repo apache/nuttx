@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_CHIP_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "nvic.h"
@@ -36,19 +36,19 @@
 
 #include <arch/lpc17xx_40xx/irq.h>
 
-/* Include the memory map file.  Other chip hardware files should then include
- * this file for the proper setup.
+/* Include the memory map file.  Other chip hardware files should then
+ * include this file for the proper setup.
  */
 
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Provide the required number of peripheral interrupt vector definitions as well.
- * The definition LPC17_40_IRQ_NEXTINT simply comes from the chip-specific IRQ header
- * file included by arch/lpc17xx_40xx/irq.h.
+/* Provide the required number of peripheral interrupt vector definitions as
+ * well. The definition LPC17_40_IRQ_NEXTINT simply comes from the
+ * chip-specific IRQ header file included by arch/lpc17xx_40xx/irq.h.
  */
 
 #define ARMV7M_PERIPHERAL_INTERRUPTS  LPC17_40_IRQ_NEXTINT

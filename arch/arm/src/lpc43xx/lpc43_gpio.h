@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_GPIO_H
 #define __ARCH_ARM_SRC_LPC43XX_GPIO_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
@@ -33,9 +33,9 @@
 #include "chip.h"
 #include "hardware/lpc43_gpio.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* Max number of GPIO ports and the maximum number of pins per port */
 
@@ -43,8 +43,9 @@
 #define NUM_GPIO_PINS                 32
 #define NUM_GPIO_NGROUPS              2
 
-/* Each configurable pin can be individually configured by software in several modes. The
- * following definitions provide the bit encoding that is used to define a pin configuration.
+/* Each configurable pin can be individually configured by software in
+ * several modes. The following definitions provide the bit encoding that
+ * is used to define a pin configuration.
  * Note that these pins do not corresponding GPIO ports and pins.
  *
  * 16-bit Encoding:
@@ -226,13 +227,13 @@
 #  define GPIO_PIN30               (30 << GPIO_PIN_SHIFT)
 #  define GPIO_PIN31               (31 << GPIO_PIN_SHIFT)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -243,25 +244,26 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Name: lpc43_gpio_config
  *
  * Description:
- *   Configure a GPIO based on bit-encoded description of the pin.  NOTE: The pin *must*
- *   have first been configured for GPIO usage with a corresponding call to lpc43_pin_config.
+ *   Configure a GPIO based on bit-encoded description of the pin.
+ *    NOTE: The pin *must* have first been configured for GPIO usage with a
+ *    corresponding call to lpc43_pin_config.
  *
  * Returned Value:
  *   OK on success; A negated errno value on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int lpc43_gpio_config(uint16_t gpiocfg);
 
-/********************************************************************************************
+/****************************************************************************
  * Name: lpc43_gpio_write
  *
  * Description:
@@ -270,11 +272,11 @@ int lpc43_gpio_config(uint16_t gpiocfg);
  * Returned Value:
  *   None
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 void lpc43_gpio_write(uint16_t gpiocfg, bool value);
 
-/********************************************************************************************
+/****************************************************************************
  * Name: lpc43_gpio_read
  *
  * Description:
@@ -283,17 +285,18 @@ void lpc43_gpio_write(uint16_t gpiocfg, bool value);
  * Returned Value:
  *   The boolean state of the input pin
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 bool lpc43_gpio_read(uint16_t gpiocfg);
 
-/********************************************************************************************
+/****************************************************************************
  * Function:  lpc43_gpio_dump
  *
  * Description:
- *   Dump all pin configuration registers associated with the provided base address
+ *   Dump all pin configuration registers associated with the provided base
+ *   address
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
 int lpc43_gpio_dump(uint16_t gpiocfg, const char *msg);

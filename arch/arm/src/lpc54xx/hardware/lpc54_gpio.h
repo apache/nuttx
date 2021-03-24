@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_GPIO_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
 #include "hardware/lpc54_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define LPC54_GPIO_PORT0            0
 #define LPC54_GPIO_PORT1            1
@@ -41,7 +41,8 @@
 #define LPC54_GPIO_PORT5            5
 #define LPC54_GPIO_NPORTS           6
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
+
 /* Byte and word access to individual pins */
 
 #define LPC54_GPIO_B_OFFSET(p)      (0x0000 + (p))
@@ -61,7 +62,7 @@
 #define LPC54_GPIO_DIRCLR_OFFSET(n) (0x2400 + LPC54_GPIO_PORT_OFFSET(n))
 #define LPC54_GPIO_DIRNOT_OFFSET(n) (0x2480 + LPC54_GPIO_PORT_OFFSET(n))
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 /* Byte and word access to individual pins */
 
@@ -82,10 +83,10 @@
 #define LPC54_GPIO_DIRCLR(n)        (LPC54_GPIO_BASE + LPC54_GPIO_DIRCLR_OFFSET(n))
 #define LPC54_GPIO_DIRNOT(n)        (LPC54_GPIO_BASE + LPC54_GPIO_DIRNOT_OFFSET(n))
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
-/* Port registers are all bit arrays with one bit corresponding each of the 32 pins
- * of the port.
+/* Port registers are all bit arrays with one bit corresponding each of the
+ * 32 pins of the port.
  */
 
 #define GPIO_PORT_BIT(n)            (1 << ((n) & 31))

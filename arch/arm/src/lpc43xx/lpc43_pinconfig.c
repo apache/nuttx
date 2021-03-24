@@ -63,9 +63,12 @@
 
 int lpc43_pin_config(uint32_t pinconf)
 {
-  unsigned int pinset = ((pinconf & PINCONF_PINS_MASK) >> PINCONF_PINS_SHIFT);
-  unsigned int pin    = ((pinconf & PINCONF_PIN_MASK) >> PINCONF_PIN_SHIFT);
-  unsigned int func   = ((pinconf & PINCONF_FUNC_MASK) >> PINCONF_FUNC_SHIFT);
+  unsigned int pinset = ((pinconf & PINCONF_PINS_MASK) >>
+                                    PINCONF_PINS_SHIFT);
+  unsigned int pin    = ((pinconf & PINCONF_PIN_MASK) >>
+                                    PINCONF_PIN_SHIFT);
+  unsigned int func   = ((pinconf & PINCONF_FUNC_MASK) >>
+                                    PINCONF_FUNC_SHIFT);
   uintptr_t regaddr;
   uint32_t  regval;
 

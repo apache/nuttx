@@ -55,13 +55,13 @@
  * Name: lpc43_clrpend
  *
  * Description:
- *   Clear a pending interrupt at the NVIC.  This does not seem to be required
- *   for most interrupts.  Don't know why... but the LPC4366 Ethernet EMAC
- *   interrupt definitely needs it!
+ *   Clear a pending interrupt at the NVIC.  This does not seem to be
+ *   required for most interrupts.  Don't know why... but the LPC4366
+ *   Ethernet EMAC interrupt definitely needs it!
  *
- *   This function is logically a part of lpc43_irq.c, but I will keep it in
- *   a separate file so that it will not increase the footprint on LPC43xx
- *   platforms that do not need this function.
+ *   This function is logically a part of lpc43_irq.c, but I will keep it
+ *   in a separate file so that it will not increase the footprint on
+ *   LPC43xx platforms that do not need this function.
  *
  ****************************************************************************/
 
@@ -77,7 +77,8 @@ void lpc43_clrpend(int irq)
         }
       else if (irq < LPC43M4_IRQ_NIRQS)
         {
-          putreg32(1 << (irq - LPC43_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
+          putreg32(1 << (irq - LPC43_IRQ_EXTINT - 32),
+                   NVIC_IRQ32_63_CLRPEND);
         }
     }
 }

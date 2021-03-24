@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc546x_pinmux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,27 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC546X_PINMUX_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC546X_PINMUX_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Alternate Pin Functions.
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
- * Drivers, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.  For example, if
- * CAN0 RX connects vis P0.4 on some board, then the following definitions should
- * appear in the board.h header file for that board:
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc. Drivers, however, will use the pin selection without the numeric
+ * suffix. Additional definitions are required in the board.h file.
+ * For example, if CAN0 RX connects vis P0.4 on some board, then the
+ * following definitions should appear in the board.h header file for that
+ * board:
  *
  * #define GPIO_CAN0_RD GPIO_CAN0_RD_1
  *
@@ -45,13 +47,13 @@
  * All pins are Type D unless otherwise noted.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific GPIO options such as frequency,
- * open-drain/push-pull, and pull-up/down!  Just the basics are defined for most
- * pins in this file.
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific GPIO options such as
+ * frequency, open-drain/push-pull, and pull-up/down!  Just the basics are
+ * defined for most pins in this file.
  */
 
- /* Analog-to-Digital Conversion (ADC) */
+/* Analog-to-Digital Conversion (ADC) */
 
 #define GPIO_ADC0_0                  (GPIO_INPUT | GPIO_MODE_ANALOG | GPIO_PORT0 | GPIO_PIN10) /* Type A */
 #define GPIO_ADC0_1                  (GPIO_INPUT | GPIO_MODE_ANALOG | GPIO_PORT0 | GPIO_PIN11) /* Type A */

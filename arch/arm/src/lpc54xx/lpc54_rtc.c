@@ -99,7 +99,8 @@ static int lpc54_rtc_interrupt(int irq, void *context, FAR void *arg)
     {
       /* Clear pending status */
 
-      putreg32(status | RTC_CTRL_ALARM1HZ | RTC_CTRL_WAKE1KHZ, LPC54_RTC_CTRL);
+      putreg32(status | RTC_CTRL_ALARM1HZ | RTC_CTRL_WAKE1KHZ,
+               LPC54_RTC_CTRL);
 
       /* Perform the alarm callback */
 
@@ -119,8 +120,8 @@ static int lpc54_rtc_interrupt(int irq, void *context, FAR void *arg)
  * Name: up_rtc_initialize
  *
  * Description:
- *   Initialize the hardware RTC per the selected configuration.  This function is
- *   called once during the OS initialization sequence
+ *   Initialize the hardware RTC per the selected configuration.
+ *   This function is called once during the OS initialization sequence
  *
  * Input Parameters:
  *   None
@@ -136,15 +137,15 @@ int up_rtc_initialize(void)
 
   lpc54_rtc_enableclk();
 
-  /* If the 32 kHz output of the RTC is used by another part of the system, enable it
-   * via the EN bit in the RTCOSCCTRL register
+  /* If the 32 kHz output of the RTC is used by another part of the system,
+   * enable it via the EN bit in the RTCOSCCTRL register
    */
 
   putreg32(SYSCON_RTCOSCCTRL_EN, LPC54_SYSCON_RTCOSCCTRL);
 
-  /* The RTC is already running or, perhaps waiting to be enabled if it was never
-   * configured.  We will set enable the RTC only if the time if initialized by
-   * higher level logic.
+  /* The RTC is already running or, perhaps waiting to be enabled if it was
+   * never configured.  We will set enable the RTC only if the time if
+   * initialized by higher level logic.
    */
 
   g_rtc_enabled = true;
@@ -156,9 +157,10 @@ int up_rtc_initialize(void)
  *
  * Description:
  *   Get the current time in seconds.  This is similar to the standard time()
- *   function.  This interface is only required if the low-resolution RTC/counter
- *   hardware implementation selected.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC is set.
+ *   function.  This interface is only required if the low-resolution
+ *   RTC/counter hardware implementation selected.  It is only used by the
+ *   RTOS during initialization to set up the system time when CONFIG_RTC is
+ *   set.
  *
  * Input Parameters:
  *   None
@@ -262,7 +264,8 @@ int lpc54_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
       /* Make sure the the RTC is out of reset. */
 
       regval  = getreg32(LPC54_RTC_CTRL);
-      regval &= ~(RTC_CTRL_SWRESET | RTC_CTRL_ALARMDPDEN | RTC_CTRL_RTC1KHZEN |
+      regval &= ~(RTC_CTRL_SWRESET | RTC_CTRL_ALARMDPDEN |
+                  RTC_CTRL_RTC1KHZEN |
                   RTC_CTRL_WAKEDPDEN | RTC_CTRL_OSCPD);
       putreg32(regval, LPC54_RTC_CTRL);
 
@@ -347,7 +350,8 @@ int lpc54_rtc_cancelalarm(void)
       /* Unset the alarm */
 
       regval  = getreg32(LPC54_RTC_CTRL);
-      regval &= ~(RTC_CTRL_SWRESET | RTC_CTRL_ALARMDPDEN | RTC_CTRL_RTC1KHZEN |
+      regval &= ~(RTC_CTRL_SWRESET | RTC_CTRL_ALARMDPDEN |
+                  RTC_CTRL_RTC1KHZEN |
                   RTC_CTRL_WAKEDPDEN | RTC_CTRL_OSCPD);
       putreg32(regval, LPC54_RTC_CTRL);
 

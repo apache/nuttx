@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_syscon.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_SYSCON_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_SYSCON_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *************************************************************************/
+/* Register offsets *********************************************************/
 
 /* Main system configuration */
 
@@ -172,7 +172,7 @@
 
 #define LPC54_SYSCON_BODCTRL_OFFSET            0x0044  /* Brown-Out Detect control */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 /* Main system configuration */
 
@@ -312,28 +312,37 @@
 
 #define LPC54_SYSCON_BODCTRL                   (LPC54_OSYSCON_BASE + LPC54_SYSCON_BODCTRL_OFFSET)
 
-/* Register bit definitions *****************************************************************/
+/* Register bit definitions *************************************************/
 
 /* Main system configuration */
 
 /* AHB multilayer matrix priority control */
 #define SYSCON_AHBMATPRIO_
+
 /* System tick counter calibration */
 #define SYSCON_SYSTCKCAL_
+
 /* NMI source select */
 #define SYSCON_NMISRC_
+
 /* Asynchronous APB control */
 #define SYSCON_ASYNCAPBCTRL_
+
 /* POR captured value of port 0 */
 #define SYSCON_PIOPORCAP0_
+
 /* POR captured value of port 1 */
 #define SYSCON_PIOPORCAP1_
+
 /* Reset captured value of port 0 */
 #define SYSCON_PIORESCAP0_
+
 /* Reset captured value of port 1 */
 #define SYSCON_PIORESCAP1_
 
-/* Peripheral reset control 0: PRESETCTRL0, PRESETCTRLSET0, and PRESETCTRLCLR0 */
+/* Peripheral reset control 0:
+ * PRESETCTRL0, PRESETCTRLSET0, and PRESETCTRLCLR0
+ */
 
 #define SYSCON_PRESETCTRL0_FLASH               (1 << 7)  /* Bit 7:  Reset the flash controller */
 #define SYSCON_PRESETCTRL0_FMC                 (1 << 8)  /* Bit 8:  Reset the Flash accelerator */
@@ -353,7 +362,9 @@
 #define SYSCON_PRESETCTRL0_RTC                 (1 << 23) /* Bit 23: Enables the bus clock for the RTC */
 #define SYSCON_PRESETCTRL0_ADC0                (1 << 27) /* Bit 27: Reset the ADC0 register interface */
 
-/* Peripheral reset control 2: PRESETCTRL1, PRESETCTRLSET1, and PRESETCTRLCLR1 */
+/* Peripheral reset control 2:
+ * PRESETCTRL1, PRESETCTRLSET1, and PRESETCTRLCLR1
+ */
 
 #define SYSCON_PRESETCTRL1_MRT                 (1 << 0)  /* Bit 0:  Reset the Multi-Rate Timer */
 #define SYSCON_PRESETCTRL1_SCT0                (1 << 2)  /* Bit 2:  Reset SCT0 */
@@ -374,7 +385,9 @@
 #define SYSCON_PRESETCTRL1_CTIMER0             (1 << 26) /* Bit 26: Reset timer CTIMER0 */
 #define SYSCON_PRESETCTRL1_CTIMER1             (1 << 27) /* Bit 27: Reset timer CTIMER1 */
 
-/* Peripheral reset control 2: PRESETCTRL2, PRESETCTRL2, and PRESETCTRLCLR2 */
+/* Peripheral reset control 2:
+ * PRESETCTRL2, PRESETCTRL2, and PRESETCTRLCLR2
+ */
 
 #define SYSCON_PRESETCTRL2_LCD                 (1 << 2)  /* Bit 2:  Reset the LCD interface */
 #define SYSCON_PRESETCTRL2_SDIO                (1 << 3)  /* Bit 3:  Reset the SDIO interface */
@@ -398,7 +411,9 @@
 /* System reset status register */
 #define SYSCON_SYSRSTSTAT_
 
-/* AHB Clock control 0: AHBCLKCTRL0, AHBCLKCTRLCLR0, and AHBCLKCTRLSET0 */
+/* AHB Clock control 0:
+ * AHBCLKCTRL0, AHBCLKCTRLCLR0, and AHBCLKCTRLSET0
+ */
 
 #define SYSCON_AHBCLKCTRL0_ROM                 (1 << 1)  /* Bit 1:  Enables the clock for the Boot ROM */
 #define SYSCON_AHBCLKCTRL0_SRAM1               (1 << 3)  /* Bit 3:  Enables the clock for SRAM1 */
@@ -496,12 +511,16 @@
 
 /* Audio PLL clock source select */
 #define SYSCON_AUDPLLCLKSEL_
+
 /* SPIFI clock source select */
 #define SYSCON_SPIFICLKSEL_
+
 /* ADC clock source select */
 #define SYSCON_ADCCLKSEL_
+
 /* USB0 clock source select */
 #define SYSCON_USB0CLKSEL_
+
 /* USB1 clock source select */
 #define SYSCON_USB1CLKSEL_
 
@@ -569,14 +588,19 @@
 
 /* ARM Trace clock divider */
 #define SYSCON_ARMTRCLKDIV_
+
 /* MCAN0 clock divider */
 #define SYSCON_CAN0CLKDIV_
+
 /* MCAN1 clock divider */
 #define SYSCON_CAN1CLKDIV_
+
 /* Smartcard0 clock divider */
 #define SYSCON_SC0CLKDIV_
+
 /* Smartcard1 clock divider */
 #define SYSCON_SC1CLKDIV_
+
 /* System clock divider */
 
 #define SYSCON_AHBCLKDIV_DIV_SHIFT             (0)       /* Bits 0-7: Clock divider value */
@@ -586,14 +610,19 @@
 
 /* CLKOUT clock divider */
 #define SYSCON_CLKOUTDIV_
+
 /* FROHF clock divider */
 #define SYSCON_FROHFDIV_
+
 /* SPIFI clock divider */
 #define SYSCON_SPIFICLKDIV_
+
 /* ADC clock divider */
 #define SYSCON_ADCCLKDIV_
+
 /* USB0 clock divider */
 #define SYSCON_USB0CLKDIV_
+
 /* USB1 clock divider */
 #define SYSCON_USB1CLKDIV_
 
@@ -608,6 +637,7 @@
 
 /* DMIC clock divider */
 #define SYSCON_DMICCLKDIV_
+
 /* I2S MCLK clock divider */
 #define SYSCON_MCLKDIV_
 
@@ -648,11 +678,13 @@
 #  define SYSCON_FLASHCFG_FETCHCFG_NONE        (0 << SYSCON_FLASHCFG_FETCHCFG_SHIFT) /* Instruction fetches not buffered */
 #  define SYSCON_FLASHCFG_FETCHCFG_ONE         (1 << SYSCON_FLASHCFG_FETCHCFG_SHIFT) /* One buffer used for instruction fetches */
 #  define SYSCON_FLASHCFG_FETCHCFG_ALL         (2 << SYSCON_FLASHCFG_FETCHCFG_SHIFT) /*  All buffers used for instruction fetches */
+
 #define SYSCON_FLASHCFG_DATACFG_SHIFT          (2)       /* Bit 2-3: Data read configuration */
 #define SYSCON_FLASHCFG_DATACFG_MASK           (3 << SYSCON_FLASHCFG_DATACFG_SHIFT)
 #  define SYSCON_FLASHCFG_DATACFG_NONE         (0 << SYSCON_FLASHCFG_DATACFG_SHIFT) /* Data accesses from flash not buffered */
 #  define SYSCON_FLASHCFG_DATACFG_ONE          (1 << SYSCON_FLASHCFG_DATACFG_SHIFT) /* One buffer used for data accesses */
 #  define SYSCON_FLASHCFG_DATACFG_ALL          (2 << SYSCON_FLASHCFG_DATACFG_SHIFT) /*  All buffers used for data accesses */
+
 #define SYSCON_FLASHCFG_ACCEL                  (1 << 4)  /* Bit 4:  Acceleration enable */
 #define SYSCON_FLASHCFG_PREFEN                 (1 << 5)  /* Bit 5:  Prefetch enable */
 #define SYSCON_FLASHCFG_PREFOVR                (1 << 6)  /* Bit 6:  Prefetch override */
@@ -662,14 +694,19 @@
 
 /* USB0 clock control */
 #define SYSCON_USB0CLKCTRL_
+
 /* USB0 clock status */
 #define SYSCON_USB0CLKSTAT_
+
 /* Frequency measure register */
 #define SYSCON_FREQMECTRL_
+
 /* MCLK input/output control */
 #define SYSCON_MCLKIO_
+
 /* USB1 clock control */
 #define SYSCON_USB1CLKCTRL_
+
 /* USB1 clock status */
 #define SYSCON_USB1CLKSTAT_
 
@@ -682,8 +719,10 @@
 
 /* EMC clock delay control */
 #define SYSCON_EMCDLYCTRL_
+
 /* EMC delay chain calibration control */
 #define SYSCON_EMCDLYCAL_
+
 /* Ethernet PHY selection */
 
 #define SYSCON_ETHPHYSEL_MASK                  (1 << 2)  /* Bit 2:  PHY_SEL PHY interface */
@@ -705,12 +744,14 @@
 #  define SYSCON_SDIOCLKCTRL_DRVPHASE_90       (1 << SYSCON_SDIOCLKCTRL_DRVPHASE_SHIFT) /* 90 degree shift */
 #  define SYSCON_SDIOCLKCTRL_DRVPHASE_180      (2 << SYSCON_SDIOCLKCTRL_DRVPHASE_SHIFT) /* 180 degree shift */
 #  define SYSCON_SDIOCLKCTRL_DRVPHASE_270      (3 << SYSCON_SDIOCLKCTRL_DRVPHASE_SHIFT) /* 270 degree shift */
+
 #define SYSCON_SDIOCLKCTRL_SMPPHASE_SHIFT      (2)       /* Bits 2-3: cclk_in_sample delay */
 #define SYSCON_SDIOCLKCTRL_SMPPHASE_MASK       (3 << SYSCON_SDIOCLKCTRL_SMPPHASE_SHIFT)
 #  define SYSCON_SDIOCLKCTRL_SMPPHASE_0        (0 << SYSCON_SDIOCLKCTRL_SMPPHASE_SHIFT) /* 0 degree shift */
 #  define SYSCON_SDIOCLKCTRL_SMPPHASE_90       (1 << SYSCON_SDIOCLKCTRL_SMPPHASE_SHIFT) /* 90 degree shift */
 #  define SYSCON_SDIOCLKCTRL_SMPPHASE_180      (2 << SYSCON_SDIOCLKCTRL_SMPPHASE_SHIFT) /* 180 degree shift */
 #  define SYSCON_SDIOCLKCTRL_SMPPHASE_270      (3 << SYSCON_SDIOCLKCTRL_SMPPHASE_SHIFT) /* 270 degree shift */
+
 #define SYSCON_SDIOCLKCTRL_PHASEACTIVE         (1 << 7)  /* Bit 7:  Enables the delays */
 #define SYSCON_SDIOCLKCTRL_DRVDLY_SHIFT        (16)      /* Bits 16-20: cclk_in_drv delay */
 #define SYSCON_SDIOCLKCTRL_DRVDLY_MASK         (0x1f << SYSCON_SDIOCLKCTRL_DRVDLY_SHIFT)
@@ -787,6 +828,7 @@
 
 /* USB PLL control */
 #define SYSCON_USBPLLCTRL_
+
 /* USB PLL status */
 #define SYSCON_USBPLLSTAT_
 
@@ -833,18 +875,25 @@
 
 /* Audio PLL control */
 #define SYSCON_AUDPLLCTRL_
+
 /* Audio PLL status */
 #define SYSCON_AUDPLLSTAT_
+
 /* Audio PLL N divider */
 #define SYSCON_AUDPLLNDEC_
+
 /* Audio PLL P divider */
 #define SYSCON_AUDPLLPDEC_
+
 /* Audio PLL M divider */
 #define SYSCON_AUDPLLMDEC_
+
 /* Audio PLL fractional divider control */
 #define SYSCON_AUDPLLFRAC_
+
 /* Sleep configuration register 0 */
 #define SYSCON_PDSLEEPCFG0_
+
 /* Sleep configuration register 1 */
 #define SYSCON_PDSLEEPCFG1_
 
@@ -870,7 +919,7 @@
 #define SYSCON_PDRUNCFG0_VD5                   (1 << 28) /* Bit 28: Power control both USB0 PHY and USB1 PHY */
 #define SYSCON_PDRUNCFG0_VD6                   (1 << 29) /* Bit 29  Power control for EEPROM */
 
-/* Power configuration register 1  (also corresponding set/clear registers)*/
+/* Power configuration register 1  (also corresponding set/clear registers) */
 
 #define SYSCON_PDRUNCFG1_USB1PHY               (1 << 0)  /* Bit 0:  USB1 high speed PHY */
 #define SYSCON_PDRUNCFG1_USB1PLL               (1 << 1)  /* Bit 1:  USB PLL power */
@@ -881,24 +930,34 @@
 
 /* Start logic 0 wake-up enable register */
 #define SYSCON_STARTER0_
+
 /* Start logic 1 wake-up enable register */
 #define SYSCON_STARTER1_
+
 /* Set bits in STARTER0 */
 #define SYSCON_STARTERSET0_
+
 /* Set bits in STARTER1 */
 #define SYSCON_STARTERSET1_
+
 /* Clear bits in STARTER0 */
 #define SYSCON_STARTERCLR0_
+
 /* Clear bits in STARTER1 */
 #define SYSCON_STARTERCLR1_
+
 /* Configures special cases of hardware wake-up */
 #define SYSCON_HWWAKE_
+
 /* Auto clock-gate override */
 #define SYSCON_AUTOCGOR_
+
 /* JTAG ID code */
 #define SYSCON_JTAGIDCODE_
+
 /* Part ID */
 #define SYSCON_DEVICE_ID0_
+
 /* Boot ROM and die revision */
 #define SYSCON_DEVICE_ID1_
 

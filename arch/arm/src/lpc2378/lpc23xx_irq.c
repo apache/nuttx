@@ -93,8 +93,9 @@ void up_irqinitialize(void)
 {
   int reg;
 
-  /* Disable all interrupts.  We do this by writing ones to the IntClearEnable
-   * register.
+  /* Disable all interrupts.
+   * We do this by writing ones to the IntClearEnable register.
+   *
    */
 
   vic_putreg(0xffffffff, VIC_INTENCLEAR_OFFSET);
@@ -108,7 +109,7 @@ void up_irqinitialize(void)
   for (reg = 0; reg < NR_IRQS; reg++)
     {
       vic_putreg(0, VIC_VECTADDR0_OFFSET + (reg << 2));
-      vic_putreg(0x0F, VIC_VECTPRIORITY0_OFFSET + (reg << 2));
+      vic_putreg(0x0f, VIC_VECTPRIORITY0_OFFSET + (reg << 2));
     }
 
   /* currents_regs is non-NULL only while processing an interrupt */
@@ -160,8 +161,8 @@ void up_disable_irq(int irq)
 
   if (irq < NR_IRQS)
     {
-      /* Disable the irq by setting the corresponding bit in the VIC Interrupt
-       * Enable Clear register.
+      /* Disable the irq by setting the corresponding bit in the VIC
+       * Interrupt Enable Clear register.
        */
 
       vic_putreg((1 << irq), VIC_INTENCLEAR_OFFSET);
@@ -210,8 +211,8 @@ void arm_ack_irq(int irq)
 
   if ((unsigned)irq < NR_IRQS)
     {
-      /* Mask the IRQ by clearing the associated bit in Software Priority Mask
-       * register
+      /* Mask the IRQ by clearing the associated bit in Software Priority
+       * Mask register
        */
 
       reg32 = vic_getreg(VIC_PRIORITY_MASK_OFFSET);

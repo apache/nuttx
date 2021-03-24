@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_boot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
@@ -40,9 +40,9 @@
 #include "lpc31.h"
 #include "lpc31_boot.h"
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 struct section_mapping_s
 {
@@ -52,19 +52,19 @@ struct section_mapping_s
   uint32_t nsections;  /* Number of mappings in the region */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 extern uint32_t _vector_start; /* Beginning of vector block */
 extern uint32_t _vector_end;   /* End+1 of vector block */
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This table describes how to map a set of 1Mb pages to space the physical address
- * space of the LPCD313x.
+/* This table describes how to map a set of 1Mb pages to space the physical
+ * address space of the LPCD313x.
  */
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
@@ -110,13 +110,13 @@ static const struct section_mapping_s g_section_mapping[] =
 #define NMAPPINGS (sizeof(g_section_mapping) / sizeof(struct section_mapping_s))
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_setlevel1entry
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr,
@@ -131,12 +131,14 @@ static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr,
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_setlevel2coarseentry
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void up_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr,
-                                           uint32_t vaddr, uint32_t mmuflags)
+static inline void up_setlevel2coarseentry(uint32_t ctabvaddr,
+                                           uint32_t paddr,
+                                           uint32_t vaddr,
+                                           uint32_t mmuflags)
 {
   uint32_t *ctable  = (uint32_t *)ctabvaddr;
   uint32_t  index;
@@ -153,9 +155,9 @@ static inline void up_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr,
   ctable[index] = (paddr | mmuflags);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_setupmappings
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static void up_setupmappings(void)
@@ -179,13 +181,13 @@ static void up_setupmappings(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_vectorpermissions
  *
  * Description:
  *   Set permissions on the vector mapping.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
 static void  up_vectorpermissions(uint32_t mmuflags)
@@ -217,18 +219,18 @@ static void  up_vectorpermissions(uint32_t mmuflags)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_vectormapping
  *
  * Description:
  *   Setup a special mapping for the interrupt vectors when (1) the interrupt
- *   vectors are not positioned in ROM, and when (2) the interrupt vectors are
- *   located at the high address, 0xffff0000.  When the interrupt vectors are located
- *   in ROM, we just have to assume that they were set up correctly;  When vectors
- *   are located in low memory, 0x00000000, the shadow memory region will be mapped
- *   to support them.
+ *   vectors are not positioned in ROM, and when (2) the interrupt vectors
+ *   are located at the high address, 0xffff0000.  When the interrupt vectors
+ *   are located in ROM, we just have to assume that they were set up
+ *   correctly;  When vectors are located in low memory, 0x00000000, the
+ *   shadow memory region will be mapped to support them.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && !defined(CONFIG_ARCH_LOWVECTORS)
 static void up_vectormapping(void)
@@ -237,9 +239,10 @@ static void up_vectormapping(void)
   uint32_t vector_vaddr = LPC31_VECTOR_VADDR;
   uint32_t end_paddr    = vector_paddr + VECTOR_TABLE_SIZE;
 
-  /* We want to keep our interrupt vectors and interrupt-related logic in zero-wait
-   * state internal RAM (IRAM).  The DM320 has 16Kb of IRAM positioned at physical
-   * address 0x0000:0000; we need to map this to 0xffff:0000.
+  /* We want to keep our interrupt vectors and interrupt-related logic in
+   * zero-wait state internal RAM (IRAM).  The DM320 has 16Kb of IRAM
+   * positioned at physical address 0x0000:0000; we need to map this to
+   * 0xffff:0000.
    */
 
   while (vector_paddr < end_paddr)
@@ -250,20 +253,22 @@ static void up_vectormapping(void)
       vector_vaddr += 4096;
     }
 
-  /* Now set the level 1 descriptor to refer to the level 2 coarse page table. */
+  /* Now set the level 1 descriptor to refer to the level 2 coarse
+   * page table.
+   */
 
   up_setlevel1entry(PGTABLE_L2_COARSE_PBASE, LPC31_VECTOR_VCOARSE,
                     MMU_L1_VECTORFLAGS);
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_copyvectorblock
  *
  * Description:
  *   Copy the interrupt block to its final destination.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void up_copyvectorblock(void)
 {
@@ -271,8 +276,9 @@ static void up_copyvectorblock(void)
   uint32_t *end;
   uint32_t *dest;
 
-  /* If we are using vectors in low memory but RAM in that area has been marked
-   * read only, then temporarily mark the mapping write-able (non-buffered).
+  /* If we are using vectors in low memory but RAM in that area has been
+   * marked read only, then temporarily mark the mapping write-able
+   * (non-buffered).
    */
 
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && \
@@ -283,7 +289,8 @@ static void up_copyvectorblock(void)
   /* Copy the vectors into ISRAM at the address that will be mapped to the
    * vector address:
    *
-   *   LPC31_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
+   *   LPC31_VECTOR_PADDR - Unmapped, physical address of vector table in
+   *                        SRAM
    *   LPC31_VECTOR_VSRAM - Virtual address of vector table in SRAM
    *   LPC31_VECTOR_VADDR - Virtual address of vector table (0x00000000 or
    *                        0xffff0000)
@@ -304,37 +311,39 @@ static void up_copyvectorblock(void)
   up_vectorpermissions(MMU_L2_VECTROFLAGS);
 #endif
 
-  /* Then set the LPC313x shadow register, LPC31_SYSCREG_ARM926SHADOWPTR, so that
-   * the vector table is mapped to address 0x0000:0000 - NOTE: that there is not yet
-   * full support for the vector table at address 0xffff0000.
+  /* Then set the LPC313x shadow register, LPC31_SYSCREG_ARM926SHADOWPTR,
+   * so that the vector table is mapped to address 0x0000:0000
+   * NOTE: that there is not yet  full support for the vector table at
+   * address 0xffff0000.
    */
 
   putreg32(LPC31_VECTOR_PADDR, LPC31_SYSCREG_ARM926SHADOWPTR);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: arm_boot
  *
  * Description:
  *   Complete boot operations started in arm_head.S
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void arm_boot(void)
 {
-  /* __start provided the basic MMU mappings for SRAM.  Now provide mappings for all
-   * IO regions (Including the vector region).
+  /* __start provided the basic MMU mappings for SRAM.
+   * Now provide mappings for all IO regions
+   * (Including the vector region).
    */
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
   up_setupmappings();
 
-  /* Provide a special mapping for the IRAM interrupt vector positioned in high
-   * memory.
+  /* Provide a special mapping for the IRAM interrupt vector positioned in
+   * high memory.
    */
 
 #ifndef CONFIG_ARCH_LOWVECTORS
@@ -342,8 +351,8 @@ void arm_boot(void)
 #endif
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
-  /* Setup up vector block.  _vector_start and _vector_end are exported from
-   * up_vector.S
+  /* Setup up vector block.
+   * _vector_start and _vector_end are exported from up_vector.S
    */
 
   up_copyvectorblock();
@@ -369,7 +378,9 @@ void arm_boot(void)
 
   lpc31_lowsetup();
 
-  /* Perform early serial initialization if we are going to use the serial driver */
+  /* Perform early serial initialization if we are going to use the
+   * serial driver
+   */
 
 #ifdef USE_EARLYSERIALINIT
   arm_earlyserialinit();

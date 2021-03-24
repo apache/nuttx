@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_analogdie.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,30 +16,33 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_ANALOGDIE_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_ANALOGDIE_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
-/* I2C slave address ****************************************************************************/
-/* "The analog die has its own register set which is accessed through the I2C1 interface. The
- *  analog block has one device slave address 0001100. All blocks in the analog die behave
- *  like one I2C slave device to the I2C1 interface."
+ ****************************************************************************/
+
+/* I2C slave address ********************************************************/
+
+/* "The analog die has its own register set which is accessed through the
+ *  I2C1 interface. The analog block has one device slave address 0001100.
+ *  All blocks in the analog die behave like one I2C slave device to the
+ *  I2C1 interface."
  */
 
 #define LPC31_ANALOG_I2CADDR            0x0c
 
-/* I2C register base addresses ******************************************************************/
+/* I2C register base addresses **********************************************/
 
 #define LPC31_ANALOG_CHARGER_BASE       0x0000
 #define LPC31_ANALOG_CHARGER_SIZE       0x0010
@@ -50,13 +53,13 @@
 #define LPC31_ANALOG_RTC_BASE           0x0020
 #define LPC31_ANALOG_RTC_SIZE           0x0010
 
-/* Charger register addresses *******************************************************************/
+/* Charger register addresses ***********************************************/
 
 #define LPC31_CHARGER_OTGDCLIC          0x0000 /* PSU and Li-ion charger control register */
 #define LPC31_CHARGER_DCDCLIC           0x0001 /* PSU and Li-ion charger status register */
 #define LPC31_CHARGER_CGU_ANALOG        0x0002 /* Analog die CGU control register */
 
-/* Audio CODEC register addresses ***************************************************************/
+/* Audio CODEC register addresses *******************************************/
 
 #define LPC31_CODEC_AIN0                0x0010 /* Analog input PGA control */
 #define LPC31_CODEC_AIN1                0x0011 /* Analog input control */
@@ -67,7 +70,7 @@
 #define LPC31_CODEC_I2S1MUX             0x0016 /* I2S1 digital audio multiplexer control */
 #define LPC31_CODEC_AOUTDECINT          0x0017 /* Analog out status */
 
-/* RTC register addresses ***********************************************************************/
+/* RTC register addresses ***************************************************/
 
 #define LPC31_RTC_TIME                  0x0020 /* RTC time shadow register */
 #define LPC31_RTC_ALARMTIME             0x0021 /* RTC alarm time register */
@@ -75,7 +78,7 @@
 #define LPC31_RTC_SETENASTAT            0x0023 /* RTC set/enable register */
 #define LPC31_RTC_CLRENASTAT            0x0024 /* RTC clear register */
 
-/* Charger register bit definitions *************************************************************/
+/* Charger register bit definitions *****************************************/
 
 /* PSU and Li-ion charger control register */
 
@@ -99,6 +102,7 @@
 #  define CHARGER_DCDC2_ADJUST_1p04V    (5 << CHARGER_DCDC2_ADJUST_SHIFT) /* Output voltage 1.04 */
 #  define CHARGER_DCDC2_ADJUST_p97V     (6 << CHARGER_DCDC2_ADJUST_SHIFT) /* Output voltage 0.97 */
 #  define CHARGER_DCDC2_ADJUST_p9V      (7 << CHARGER_DCDC2_ADJUST_SHIFT) /* Output voltage 0.90 */
+
 #define CHARGER_DCDC1_ADJUST_SHIFT      (20)      /* Bits 20-22: DCDC1 voltage setting */
 #define CHARGER_DCDC1_ADJUST_MASK       (7 << CHARGER_DCDC1_ADJUST_SHIFT)
 #  define CHARGER_DCDC1_ADJUST_3p2V     (0 << CHARGER_DCDC1_ADJUST_SHIFT) /* Output voltage 3.2 */
@@ -109,6 +113,7 @@
 #  define CHARGER_DCDC1_ADJUST_2p63V    (5 << CHARGER_DCDC1_ADJUST_SHIFT) /* Output voltage 2.63 */
 #  define CHARGER_DCDC1_ADJUST_2p51V    (6 << CHARGER_DCDC1_ADJUST_SHIFT) /* Output voltage 2.51 */
 #  define CHARGER_DCDC1_ADJUST_2p4V     (7 << CHARGER_DCDC1_ADJUST_SHIFT) /* Output voltage 2.40 */
+
 #define CHARGER_DCDC_LDOON              (1 << 23) /* Bit 23: LDO on/off control */
 #define CHARGER_DCDC_CLKSTABLE          (1 << 24) /* Bit 24: DCDC clock control */
 #define CHARGER_USBOTG                  (1 << 28) /* Bit 28: USBOTG charge pump control */
@@ -156,7 +161,7 @@
 #define CHARGER_CGU_LSOFF               (1 << 22) /* Bit 22: Level shifter RTC off */
 #define CHARGER_CLKDAC_SAMEPHASE        (1 << 23) /* Bit 23: Clock phase DA not inverted */
 
-/* Audio CODEC register bit definitions *********************************************************/
+/* Audio CODEC register bit definitions *************************************/
 
 /* Analog input PGA control */
 
@@ -181,6 +186,7 @@
 #  define CODEC_AIN0_PGA3_18DB          (CODEC_AIN0_18DB << CODEC_AIN0_PGA3_SHIFT)
 #  define CODEC_AIN0_PGA3_21DB          (CODEC_AIN0_21DB << CODEC_AIN0_PGA3_SHIFT)
 #  define CODEC_AIN0_PGA3_24DB          (CODEC_AIN0_24DB << CODEC_AIN0_PGA3_SHIFT)
+
 #define CODEC_AIN0_PGA2_SHIFT           (4)      /* Bits 4-7: Gain of PGA2 (microphone input) */
 #define CODEC_AIN0_PGA2_MASK            (0xff << CODEC_AIN0_PGA2_SHIFT)
 #  define CODEC_AIN0_PGA2_0DB           (CODEC_AIN0_0DB  << CODEC_AIN0_PGA2_SHIFT)
@@ -192,6 +198,7 @@
 #  define CODEC_AIN0_PGA2_18DB          (CODEC_AIN0_18DB << CODEC_AIN0_PGA2_SHIFT)
 #  define CODEC_AIN0_PGA2_21DB          (CODEC_AIN0_21DB << CODEC_AIN0_PGA2_SHIFT)
 #  define CODEC_AIN0_PGA2_24DB          (CODEC_AIN0_24DB << CODEC_AIN0_PGA2_SHIFT)
+
 #define CODEC_AIN0_PGA1_SHIFT           (8)      /* Bits 8-11: Gain of PGA1 (left channel) */
 #define CODEC_AIN0_PGA1_MASK            (0xff << CODEC_AIN0_PGA1_SHIFT)
 #  define CODEC_AIN0_PGA1_0DB           (CODEC_AIN0_0DB  << CODEC_AIN0_PGA1_SHIFT)
@@ -224,6 +231,7 @@
 #  define CODEC_AIN1_MUXR_LINE          (1 << CODEC_AIN1_MUXR_SHIFT) /* Line input */
 #  define CODEC_AIN1_MUXR_MICTBYP       (2 << CODEC_AIN1_MUXR_SHIFT) /* Mic input tuner by-pass */
 #  define CODEC_AIN1_MUXR_MICLBYP       (3 << CODEC_AIN1_MUXR_SHIFT) /* Mic input Line-in by-pass */
+
 #define CODEC_AIN1_MUXL_SHIFT           (17)      /* Bits 17-18: MUX0 & MUX1 input selection for left channel */
 #define CODEC_AIN1_MUXL_MASK            (3 << CODEC_AIN1_MUXL_SHIFT)
 #  define CODEC_AIN1_MUXL_TUNER         (0 << CODEC_AIN1_MUXL_SHIFT) /* Tuner input */
@@ -245,18 +253,21 @@
 #  define CODEC_AOUT_LIMITERR_100MA     (1 << CODEC_AOUT_LIMITERR_SHIFT) /* Max current: 100 mA */
 #  define CODEC_AOUT_LIMITERR_120MA     (2 << CODEC_AOUT_LIMITERR_SHIFT) /* Max current: 120 mA */
 #  define CODEC_AOUT_LIMITERR_140MA     (3 << CODEC_AOUT_LIMITERR_SHIFT) /* Max current: 140 mA */
+
 #define CODEC_AOUT_LIMITERC_SHIFT       (8)      /* Bit 8-9: Current limiter setting (short-circuit protection) common ground channel */
 #define CODEC_AOUT_LIMITERC_MASK        (3 << CODEC_AOUT_LIMITERC_SHIFT)
 #  define CODEC_AOUT_LIMITERC_OFF       (0 << CODEC_AOUT_LIMITERC_SHIFT) /* Max current: off */
 #  define CODEC_AOUT_LIMITERC_200MA     (1 << CODEC_AOUT_LIMITERC_SHIFT) /* Max current: 200 mA */
 #  define CODEC_AOUT_LIMITERC_240MA     (2 << CODEC_AOUT_LIMITERC_SHIFT) /* Max current: 240 mA */
 #  define CODEC_AOUT_LIMITERC_280MA     (3 << CODEC_AOUT_LIMITERC_SHIFT) /* Max current: 280 mA */
+
 #define CODEC_AOUT_LIMITERL_SHIFT       (10)      /* Bit 10-11: Current limiter setting (short-circuit protection) left channel */
 #define CODEC_AOUT_LIMITERL_MASK        (3 << CODEC_AOUT_LIMITERL_SHIFT)
 #  define CODEC_AOUT_LIMITERL_OFF       (0 << CODEC_AOUT_LIMITERL_SHIFT) /* Max current: off */
 #  define CODEC_AOUT_LIMITERL_100MA     (1 << CODEC_AOUT_LIMITERL_SHIFT) /* Max current: 100 mA */
 #  define CODEC_AOUT_LIMITERL_120MA     (2 << CODEC_AOUT_LIMITERL_SHIFT) /* Max current: 120 mA */
 #  define CODEC_AOUT_LIMITERL_140MA     (3 << CODEC_AOUT_LIMITERL_SHIFT) /* Max current: 140 mA */
+
 #define CODEC_AOUT_PD_HP_R              (1 << 12) /* Bit 12: Power down the right headphone amplifier */
 #define CODEC_AOUT_PD_HP_C              (1 << 13) /* Bit 13: Power down the common ground headphone amplifier */
 #define CODEC_AOUT_PD_HP_L              (1 << 14) /* Bit 14: Power down the left headphone amplifier */
@@ -276,6 +287,7 @@
 #  define CODEC_DEC_AGCLVL_M8P0DBFS     (1 << CODEC_DEC_AGCLVL_SHIFT) /* AGC Target level -8.0 dBFS */
 #  define CODEC_DEC_AGCLVL_M11P5DBFS    (2 << CODEC_DEC_AGCLVL_SHIFT) /* AGC Target level -11.5 dBFS */
 #  define CODEC_DEC_AGCLVL_M14p0DBFS    (3 << CODEC_DEC_AGCLVL_SHIFT) /* AGC Target level -14.0 dBFS */
+
 #define CODEC_DEC_AGCEN                 (1 << 22) /* Bit 22: AGC Enable */
 #define CODEC_DEC_MUTE                  (1 << 21) /* Bit 21: Enable mute */
 #define CODEC_DEC_POLINV                (1 << 20) /* Bit 20: Enable polarity inversion */
@@ -297,6 +309,7 @@
 #  define CODEC_INT0_DEEM_CHAN1_44p1KHz (2 << CODEC_INT0_DEEM_CHAN1_SHIFT) /* De-emphasis for fs = 44.1 kHz */
 #  define CODEC_INT0_DEEM_CHAN1_48KHz   (3 << CODEC_INT0_DEEM_CHAN1_SHIFT) /* De-emphasis for fs = 48 kHz */
 #  define CODEC_INT0_DEEM_CHAN1_96KHz   (4 << CODEC_INT0_DEEM_CHAN1_SHIFT) /* De-emphasis for fs = 96 kHz */
+
 #define CODEC_INT0_SET_SILENCE          (1 << 3)  /* Bit 3:  overruling silence switch input */
 #define CODEC_INT0_SD_VALUE_SHIFT       (4)       /* Bits 4-5: Silence detection time window */
 #define CODEC_INT0_SD_VALUE_MASK        (3 << CODEC_INT0_SD_VALUE_SHIFT)
@@ -304,6 +317,7 @@
 #  define CODEC_INT0_SD_VALUE_4800      (1 << CODEC_INT0_SD_VALUE_SHIFT) /* 4800 fs samples */
 #  define CODEC_INT0_SD_VALUE_9600      (2 << CODEC_INT0_SD_VALUE_SHIFT) /* 9600 fs samples */
 #  define CODEC_INT0_SD_VALUE_19200     (3 << CODEC_INT0_SD_VALUE_SHIFT) /* 19200 fs samples */
+
 #define CODEC_INT0_SD                   (1 << 6)  /* Bit 6:  Silence detection enable */
 #define CODEC_INT0_PD_DAC               (1 << 7)  /* Bit 7:  Enable power down sequence interpolator */
 #define CODEC_INT0_PD_SLOPE             (1 << 8)  /* Bit 8:  DC ramp up/down slope setting */
@@ -313,17 +327,20 @@
 #  define CODEC_INT0_NS_4BIT            (1 << CODEC_INT0_NS_SHIFT) /* 4-bit noise shaped output */
 #  define CODEC_INT0_NS_5BIT            (2 << CODEC_INT0_NS_SHIFT) /* 5-bit noise shaped output */
 #  define CODEC_INT0_NS_6BIT            (3 << CODEC_INT0_NS_SHIFT) /* 6-bit noise shaped output */
+
 #define CODEC_INT0_SPEED_MODE_SHIFT     (11)      /* Bits 11-12: Input data rate settings (1fs or 8 fs) */
 #define CODEC_INT0_SPEED_MODE_MASK      (3 << CODEC_INT0_SPEED_MODE_SHIFT)
 #  define CODEC_INT0_SPEED_MODE_1FS     (0 << CODEC_INT0_SPEED_MODE_SHIFT) /* 1fs (normal) speed mode */
 #  define CODEC_INT0_SPEED_MODE_2FS     (1 << CODEC_INT0_SPEED_MODE_SHIFT) /* 2fs (double) speed mode */
 #  define CODEC_INT0_SPEED_MODE_8FS     (3 << CODEC_INT0_SPEED_MODE_SHIFT) /* 8fs speed mode */
+
 #define CODEC_INT0_FILTER_SHIFT         (13)      /* Bits 13-14: Filter coefficient settings for sharp/slow roll-off */
 #define CODEC_INT0_FILTER_MASK          (3 << CODEC_INT0_FILTER_SHIFT)
 #  define CODEC_INT0_FILTER_SLOWEST     (0 << CODEC_INT0_FILTER_SHIFT) /* Slow roll-off */
 #  define CODEC_INT0_FILTER_SLOWER      (1 << CODEC_INT0_FILTER_SHIFT) /* Slow roll-off */
 #  define CODEC_INT0_FILTER_SLOW        (2 << CODEC_INT0_FILTER_SHIFT) /* Slow roll-off */
 #  define CODEC_INT0_FILTER_SHARP       (3 << CODEC_INT0_FILTER_SHIFT) /* Sharp roll-off */
+
 #define CODEC_INT0_POLINV               (1 << 15) /* Bit 15:  Enable polarity inversion */
 
 /* Interpolator volume control */
@@ -343,6 +360,7 @@
 #  define CODEC_I2S1MUX_TXCTRL_LJ18     (5 << CODEC_I2S1MUX_TXCTRL_SHIFT) /* LSB justified 18 bits */
 #  define CODEC_I2S1MUX_TXCTRL_LJ20     (6 << CODEC_I2S1MUX_TXCTRL_SHIFT) /* LSB justified 20 bits */
 #  define CODEC_I2S1MUX_TXCTRL_LJ24     (7 << CODEC_I2S1MUX_TXCTRL_SHIFT) /* LSB justified 24 bits */
+
 #define CODEC_I2S1MUX_RXCTRL_SHIFT      (8)       /* Bit 8-10: Serial interface mode I2SRX interface */
 #define CODEC_I2S1MUX_RXCTRL_MASK       (7 << CODEC_I2S1MUX_RXCTRL_SHIFT)
 #  define CODEC_I2S1MUX_RXCTRL_DIL      (0 << CODEC_I2S1MUX_RXCTRL_SHIFT) /* DAD/ISN/LIRS */
@@ -352,6 +370,7 @@
 #  define CODEC_I2S1MUX_RXCTRL_LJ18     (5 << CODEC_I2S1MUX_RXCTRL_SHIFT) /* LSB justified 18 bits */
 #  define CODEC_I2S1MUX_RXCTRL_LJ20     (6 << CODEC_I2S1MUX_RXCTRL_SHIFT) /* LSB justified 20 bits */
 #  define CODEC_I2S1MUX_RXCTRL_LJ24     (7 << CODEC_I2S1MUX_RXCTRL_SHIFT) /* LSB justified 24 bits */
+
 #define CODEC_I2S1MUX_BYPASS            (1 << 16) /* Bit 16: Selection for Digital Mux */
 
 /* Analog out status */
@@ -373,9 +392,10 @@
 #define CODEC_AOUT_CLIPC                (1 << 25) /* Bit 25: Output of common ground headphone amplifier is clipped */
 #define CODEC_AOUT_CLIPL                (1 << 26) /* Bit 26: Output of left headphone amplifier is clipped */
 
-/* RTC register bit definitions *****************************************************************/
+/* RTC register bit definitions *********************************************/
 
 /* RTC time shadow register -- 32-bit time in seconds since epoch */
+
 /* RTC alarm time register -- 32-bit time in seconds since epoch */
 
 /* RTC status register (See also common interrupt bits below) */
@@ -384,23 +404,25 @@
 #define RTC_STATUS_PENDING              (1 << 16) /* Bit 16: Time in RTC_TIME has not yet been updated */
 #define RTC_STATUS_LSENA                (1 << 13) /* Bit 13: Software access (via level shifters) is enabled */
 
-/* RTC status register, RTC set/enable register, and RTC clear register common interrupt bits  */
+/* RTC status register, RTC set/enable register,
+ * and RTC clear register common interrupt bits
+ */
 
 #define RTC_INT_ALARM                   (1 << 0)  /* Bit 0:  RTC time counter matched alarm time */
 #define RTC_INT_UNSET                   (1 << 1)  /* Bit 1:  Time undefined */
 #define RTC_INT_ADENA                   (1 << 8)  /* Bit 8:  Alarm to the event router */
 #define RTC_INT_RTCENA                  (1 << 9)  /* Bit 9:  Alarm assertion to RTC_INT disabled */
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_ANALOGDIE_H */
