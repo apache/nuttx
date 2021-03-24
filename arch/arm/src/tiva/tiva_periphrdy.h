@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/tiva_periphrdy.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_TIVAPERIPHRDY_H
 #define __ARCH_ARM_SRC_TIVA_TIVAPERIPHRDY_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,12 +31,12 @@
 #include "chip.h"
 #include "hardware/tiva_sysctrl.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* We determine if a peripheral is ready by testing a bit (b) in system control
- * register (a).
+/* We determine if a peripheral is ready by testing a bit (b) in system
+ * control register (a).
  */
 
 #define tiva_periphrdy(a,b)        ((getreg32(a) & (b)) != 0)

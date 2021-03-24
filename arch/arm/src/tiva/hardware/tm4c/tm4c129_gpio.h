@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/tm4c/tm4c129_gpio.h
  *
  *   Copyright (C) 2009-2010, 2013, 2018 Gregory Nutt. All rights reserved.
@@ -32,20 +32,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C129_GPIO_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C129_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* REVISIT:  Why do we not use the AHB aperture for all GPIO accesses? */
 
 #define TIVA_GPIOK_BASE             TIVA_GPIOKAHB_BASE
@@ -58,7 +59,7 @@
 #define TIVA_GPIOS_BASE             TIVA_GPIOSAHB_BASE
 #define TIVA_GPIOT_BASE             TIVA_GPIOTAHB_BASE
 
-/* GPIO Register Offsets ************************************************************/
+/* GPIO Register Offsets ****************************************************/
 
 #define TIVA_GPIO_DATA_OFFSET       0x0000 /* GPIO Data */
 #define TIVA_GPIO_DIR_OFFSET        0x0400 /* GPIO Direction */
@@ -84,13 +85,13 @@
 #define TIVA_GPIO_PCTL_OFFSET       0x052c /* GPIO Port Control */
 #define TIVA_GPIO_ADCCTL_OFFSET     0x0530 /* GPIO ADC Control */
 #define TIVA_GPIO_DMACTL_OFFSET     0x0534 /* GPIO DMA Control */
-#define TIVA_GPIO_SI_OFFSET         0x0538  /* GPIO Select Interrupt */
-#define TIVA_GPIO_DR12R_OFFSET      0x053c  /* GPIO 12-mA Drive Select */
-#define TIVA_GPIO_WAKEPEN_OFFSET    0x0540  /* GPIO Wake Pin Enable */
-#define TIVA_GPIO_WAKELVL_OFFSET    0x0544  /* GPIO Wake Level */
-#define TIVA_GPIO_WAKESTAT_OFFSET   0x0548  /* GPIO Wake Status */
-#define TIVA_GPIO_PP_OFFSET         0x0fc0  /* GPIO Peripheral Property */
-#define TIVA_GPIO_PC_OFFSET         0x0fc4  /* GPIO Peripheral Configuration */
+#define TIVA_GPIO_SI_OFFSET         0x0538 /* GPIO Select Interrupt */
+#define TIVA_GPIO_DR12R_OFFSET      0x053c /* GPIO 12-mA Drive Select */
+#define TIVA_GPIO_WAKEPEN_OFFSET    0x0540 /* GPIO Wake Pin Enable */
+#define TIVA_GPIO_WAKELVL_OFFSET    0x0544 /* GPIO Wake Level */
+#define TIVA_GPIO_WAKESTAT_OFFSET   0x0548 /* GPIO Wake Status */
+#define TIVA_GPIO_PP_OFFSET         0x0fc0 /* GPIO Peripheral Property */
+#define TIVA_GPIO_PC_OFFSET         0x0fc4 /* GPIO Peripheral Configuration */
 
 #define TIVA_GPIO_PERIPHID4_OFFSET  0x0fd0 /* GPIO Peripheral Identification 4 */
 #define TIVA_GPIO_PERIPHID5_OFFSET  0x0fd4 /* GPIO Peripheral Identification 5 */
@@ -105,7 +106,7 @@
 #define TIVA_GPIO_PCELLID2_OFFSET   0x0ff8 /* GPIO PrimeCell Identification 2 */
 #define TIVA_GPIO_PCELLID3_OFFSET   0x0ffc /* GPIO PrimeCell Identification 3*/
 
-/* GPIO Register Addresses **********************************************************/
+/* GPIO Register Addresses **************************************************/
 
 #if TIVA_NPORTS > 0
 
@@ -539,7 +540,7 @@
 #  define TIVA_GPIOJ_PCELLID3       (TIVA_GPIOJ_BASE + TIVA_GPIO_PCELLID3_OFFSET)
 #endif
 
-/* GPIO Register Bitfield Definitions ***********************************************/
+/* GPIO Register Bitfield Definitions ***************************************/
 
 /* GPIO Interrupt Mask */
 
@@ -614,16 +615,16 @@
 #define GPIO_PC_EDM7_SHIFT          (14)    /* Bits 14-15: Extended Drive Mode Bit 7 */
 #define GPIO_PC_EDM7_MASK           (3 << GPIO_PC_EDM7_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C129_GPIO_H */

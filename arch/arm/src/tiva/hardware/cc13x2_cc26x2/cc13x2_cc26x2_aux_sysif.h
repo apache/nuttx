@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_aux_sysif.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a
+ * compatible BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,23 +37,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_AUX_SYSIF_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_AUX_SYSIF_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* AUX SYSIF Register Offsets ***************************************************************************************/
+/* AUX SYSIF Register Offsets ***********************************************/
 
 #define TIVA_AUX_SYSIF_OPMODEREQ_OFFSET                 0x0000  /* Operational Mode Request */
 #define TIVA_AUX_SYSIF_OPMODEACK_OFFSET                 0x0004  /* Operational Mode Acknowledgement */
@@ -96,7 +97,7 @@
 #define TIVA_AUX_SYSIF_TIMER2BRIDGE_OFFSET              0x00b0  /* AUX_TIMER2 Bridge */
 #define TIVA_AUX_SYSIF_SWPWRPROF_OFFSET                 0x00b4  /* Software Power Profiler */
 
-/* AUX SYSIF Register Addresses *************************************************************************************/
+/* AUX SYSIF Register Addresses *********************************************/
 
 #define TIVA_AUX_SYSIF_OPMODEREQ                        (TIVA_AUX_SYSIF_BASE + TIVA_AUX_SYSIF_OPMODEREQ_OFFSET)
 #define TIVA_AUX_SYSIF_OPMODEACK                        (TIVA_AUX_SYSIF_BASE + TIVA_AUX_SYSIF_OPMODEACK_OFFSET)
@@ -140,7 +141,7 @@
 #define TIVA_AUX_SYSIF_TIMER2BRIDGE                     (TIVA_AUX_SYSIF_BASE + TIVA_AUX_SYSIF_TIMER2BRIDGE_OFFSET)
 #define TIVA_AUX_SYSIF_SWPWRPROF                        (TIVA_AUX_SYSIF_BASE + TIVA_AUX_SYSIF_SWPWRPROF_OFFSET)
 
-/* AUX SYSIF Register Bifield Definitions ***************************************************************************/
+/* AUX SYSIF Register Bifield Definitions ***********************************/
 
 /* AUX_SYSIF_OPMODEREQ */
 

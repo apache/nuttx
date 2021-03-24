@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/tiva_wdt.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_WDT_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_SSI_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/tiva_memorymap.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* WDT register offsets *********************************************************************/
+/* WDT register offsets *****************************************************/
 
 #define TIVA_WDT_LOAD_OFFSET                    0x0000  /* Configuration */
 #define TIVA_WDT_VALUE_OFFSET                   0x0004  /* Current Count Value */
@@ -61,7 +61,7 @@
 #  define TIVA_WDT_CELLID3_OFFSET               0x0ffc  /* Watchdog PrimeCell Identification 3 */
 #endif
 
-/* WDT register addresses *******************************************************************/
+/* WDT register addresses ***************************************************/
 
 #define TIVA_WDT_LOAD                           (TIVA_WDT_BASE + TIVA_WDT_LOAD_OFFSET)
 #define TIVA_WDT_VALUE                          (TIVA_WDT_BASE + TIVA_WDT_VALUE_OFFSET)
@@ -89,7 +89,7 @@
 #  define TIVA_WDT_CELLID3                      (TIVA_WDT_BASE + TIVA_WDT_CELLID3_OFFSET)
 #endif
 
-/* WDT register bitfield definitions ********************************************************/
+/* WDT register bitfield definitions ****************************************/
 
 /* Configuration (32-bit interval value) */
 
@@ -113,8 +113,8 @@
 
 /* Interrupt Clear.
  *
- * A write of any value to this register clears the WDT interrupt and reloads the 32-bit
- * counter from the LOAD register.
+ * A write of any value to this register clears the WDT interrupt and reloads
+ * the 32-bit counter from the LOAD register.
  */
 
 /* Raw Interrupt Status */

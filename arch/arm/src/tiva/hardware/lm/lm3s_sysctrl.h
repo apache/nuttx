@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/lm/lm3s_sysctrl.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCONTROL_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCONTROL_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* System Control Register Offsets **************************************************/
+/* System Control Register Offsets ******************************************/
 
 #define TIVA_SYSCON_DID0_OFFSET       0x000 /* Device Identification 0 */
 #define TIVA_SYSCON_DID1_OFFSET       0x004 /* Device Identification 1 */
@@ -63,7 +63,7 @@
 #define TIVA_SYSCON_DCGC2_OFFSET      0x128 /* Deep Sleep Mode Clock Gating Control Register 2 */
 #define TIVA_SYSCON_DSLPCLKCFG_OFFSET 0x144 /* Deep Sleep Clock Configuration*/
 
-/* System Control Register Addresses ************************************************/
+/* System Control Register Addresses ****************************************/
 
 #define TIVA_SYSCON_DID0              (TIVA_SYSCON_BASE + TIVA_SYSCON_DID0_OFFSET)
 #define TIVA_SYSCON_DID1              (TIVA_SYSCON_BASE + TIVA_SYSCON_DID1_OFFSET)
@@ -95,7 +95,7 @@
 #define TIVA_SYSCON_DCGC2             (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGC2_OFFSET)
 #define TIVA_SYSCON_DSLPCLKCFG        (TIVA_SYSCON_BASE + TIVA_SYSCON_DSLPCLKCFG_OFFSET)
 
-/* System Control Register Bit Definitions ******************************************/
+/* System Control Register Bit Definitions **********************************/
 
 /* Device Identification 0 (DID0), offset 0x000 */
 
@@ -113,7 +113,7 @@
 #define SYSCON_DID1_QUAL_SHIFT        0         /* Bits 1-0: Qualification Status */
 #define SYSCON_DID1_QUAL_MASK         (0x03 << SYSCON_DID1_QUAL_SHIFT)
 #define SYSCON_DID1_ROHS              (1 << 2)  /* Bit 2: RoHS-Compliance */
-#define SYSCON_DID1_PKG_SHIFT         3 /* Bits 4-3: Package Type */
+#define SYSCON_DID1_PKG_SHIFT         3         /* Bits 4-3: Package Type */
 #define SYSCON_DID1_PKG_MASK          (0x03 << SYSCON_DID1_PKG_SHIFT)
 #define SYSCON_DID1_TEMP_SHIFT        5         /* Bits 7-5: Temperature Range */
 #define SYSCON_DID1_TEMP_MASK         (0x07 << SYSCON_DID1_TEMP_SHIFT)
@@ -289,6 +289,7 @@
 #  define SYSCON_RCC_OSCSRC_PIOSC     (1 << SYSCON_RCC_OSCSRC_SHIFT) /* Internal oscillator (reset) */
 #  define SYSCON_RCC_OSCSRC_PIOSC4    (2 << SYSCON_RCC_OSCSRC_SHIFT) /* Internal oscillator / 4 */
 #  define SYSCON_RCC_OSCSRC_LFIOSC    (3 << SYSCON_RCC_OSCSRC_SHIFT) /* 30KHz internal oscillator */
+
 #define SYSCON_RCC_XTAL_SHIFT         6         /* Bits 10-6: Crystal Value */
 #define SYSCON_RCC_XTAL_MASK          (0x1f << SYSCON_RCC_XTAL_SHIFT)
 #  define SYSCON_RCC_XTAL1000KHZ      ( 0 << SYSCON_RCC_XTAL_SHIFT)  /* 1.0000MHz (NO PLL) */
@@ -349,6 +350,7 @@
 #  define SYSCON_RCC2_OSCSRC2_PIOSC4   (2 << SYSCON_RCC2_OSCSRC2_SHIFT) /* Internal oscillator / 4 */
 #  define SYSCON_RCC2_OSCSRC2_LFIOSC   (3 << SYSCON_RCC2_OSCSRC2_SHIFT) /* 30KHz internal oscillator */
 #  define SYSCON_RCC2_OSCSRC2_32768HZ  (7 << SYSCON_RCC2_OSCSRC2_SHIFT) /* 32.768KHz external oscillator */
+
 #define SYSCON_RCC2_BYPASS2           (1 << 11) /* Bit 11: Bypass PLL */
 #define SYSCON_RCC2_PWRDN2            (1 << 13) /* Bit 13: Power-Down PLL */
 #define SYSCON_RCC2_SYSDIV2_SHIFT     23        /* Bits 28-23: System Clock Divisor */
@@ -474,22 +476,22 @@
 #define SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT   4 /* Bits 6-4: Clock Source */
 #define SYSCON_DSLPCLKCFG_DSOSCSRC_MASK    (0x07 << SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT)
 
-/* UART Run Mode Clock Gating Control*/
+/* UART Run Mode Clock Gating Control */
 
 #ifdef CONFIG_ARCH_CHIP_LM3S9B92
 #  define SYSCON_RCGCUART(n)          (1 << (n)) /* Bit n:  UART Module n Run Mode Clock Gating Control */
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCONTROL_H */

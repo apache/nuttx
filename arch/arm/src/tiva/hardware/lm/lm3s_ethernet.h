@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/lm/lm3s_ethernet.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_ETHERNET_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_ETHERNET_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/net/mii.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Ethernet Controller Register Offsets *********************************************/
+/* Ethernet Controller Register Offsets *************************************/
 
 /* Ethernet MAC Register Offsets */
 
@@ -59,7 +59,7 @@
 
 /* MII Management Register Offsets (see include/nuttx/net/mii.h) */
 
-/* Ethernet Controller Register Addresses *******************************************/
+/* Ethernet Controller Register Addresses ***********************************/
 
 #define TIVA_MAC_RIS          (TIVA_ETHCON_BASE + TIVA_MAC_RIS_OFFSET)
 #define TIVA_MAC_IACK         (TIVA_ETHCON_BASE + TIVA_MAC_IACK_OFFSET)
@@ -96,9 +96,11 @@
 #define MAC_MII_LEDCONFIG     (TIVA_ETHCON_BASE + MII_TIVA_LEDCONFIG)
 #define MAC_MII_MDICONTROL    (TIVA_ETHCON_BASE + MII_TIVA_MDICONTROL)
 
-/* Ethernet Controller Register Bit Definitions *************************************/
+/* Ethernet Controller Register Bit Definitions *****************************/
 
-/* Ethernet MAC Raw Interrupt Status/Acknowledge (MACRIS/MACIACK), offset 0x000 */
+/* Ethernet MAC Raw Interrupt Status/Acknowledge
+ * (MACRIS/MACIACK), offset 0x000
+ */
 
 #define MAC_RIS_RXINT         (1 << 0)  /* Bit 0:  Packet Received */
 #define MAC_RIS_TXER          (1 << 1)  /* Bit 1:  Transmit Error */
@@ -173,16 +175,16 @@
 
 #define MAC_TR_NEWTX          (1 << 0)  /* Bit 0:  New Transmission */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_ETHERNET_H */

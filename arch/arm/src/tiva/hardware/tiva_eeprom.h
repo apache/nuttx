@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/tiva_eeprom.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -32,16 +32,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_EEPROM_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_EEPROM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TIVA_EEPROM_EESIZE_OFFSET     0x0000  /* EEPROM Size Information */
 #define TIVA_EEPROM_EEBLOCK_OFFSET    0x0004  /* EEPROM Current Block */
@@ -63,7 +63,7 @@
 #define TIVA_EEPROM_EEDBGME_OFFSET    0x0080  /* EEPROM Debug Mass Erase */
 #define TIVA_EEPROM_PP_OFFSET         0x0fc0  /* EEPROM Peripheral Properties */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TIVA_EEPROM_EESIZE            (TIVA_EEPROM_BASE + TIVA_EEPROM_EESIZE_OFFSET)
 #define TIVA_EEPROM_EEBLOCK           (TIVA_EEPROM_BASE + TIVA_EEPROM_EEBLOCK_OFFSET)
@@ -85,36 +85,48 @@
 #define TIVA_EEPROM_EEDBGME           (TIVA_EEPROM_BASE + TIVA_EEPROM_EEDBGME_OFFSET)
 #define TIVA_EEPROM_PP                (TIVA_EEPROM_BASE + TIVA_EEPROM_PP_OFFSET)
 
-/* Register Bit-Field Definitions ***************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
-/* The following are defines for the bit fields in the EEPROM_EESIZE register. */
+/* The following are defines for the bit fields in the EEPROM_EESIZE
+ * register.
+ */
 
 #define EEPROM_EESIZE_WORDCNT_M       0x0000ffff  /* Number of 32-Bit Words */
 #define EEPROM_EESIZE_BLKCNT_M        0x07ff0000  /* Number of 16-Word Blocks */
 #define EEPROM_EESIZE_WORDCNT_S       0
 #define EEPROM_EESIZE_BLKCNT_S        16
 
-/* The following are defines for the bit fields in the EEPROM_EEBLOCK register. */
+/* The following are defines for the bit fields in the EEPROM_EEBLOCK
+ * register.
+ */
 
 #define EEPROM_EEBLOCK_BLOCK_M        0x0000ffff  /* Current Block */
 #define EEPROM_EEBLOCK_BLOCK_S        0
 
-/* The following are defines for the bit fields in the EEPROM_EEOFFSET register. */
+/* The following are defines for the bit fields in the EEPROM_EEOFFSET
+ * register.
+ */
 
 #define EEPROM_EEOFFSET_OFFSET_M      0x0000000f  /* Current Address Offset */
 #define EEPROM_EEOFFSET_OFFSET_S      0
 
-/* The following are defines for the bit fields in the EEPROM_EERDWR register. */
+/* The following are defines for the bit fields in the EEPROM_EERDWR
+ * register.
+ */
 
 #define EEPROM_EERDWR_VALUE_M         0xffffffff  /* EEPROM Read or Write Data */
 #define EEPROM_EERDWR_VALUE_S         0
 
-/* The following are defines for the bit fields in the EEPROM_EERDWRINC register. */
+/* The following are defines for the bit fields in the EEPROM_EERDWRINC
+ * register.
+ */
 
 #define EEPROM_EERDWRINC_VALUE_M      0xffffffff  /* EEPROM Read or Write Data with Increment */
 #define EEPROM_EERDWRINC_VALUE_S      0
 
-/* The following are defines for the bit fields in the EEPROM_EEDONE register. */
+/* The following are defines for the bit fields in the EEPROM_EEDONE
+ * register.
+ */
 
 #define EEPROM_EEDONE_WORKING         0x00000001  /* EEPROM Working */
 #define EEPROM_EEDONE_WKERASE         0x00000004  /* Working on an Erase */
@@ -122,16 +134,22 @@
 #define EEPROM_EEDONE_NOPERM          0x00000010  /* Write Without Permission */
 #define EEPROM_EEDONE_WRBUSY          0x00000020  /* Write Busy */
 
-/* The following are defines for the bit fields in the EEPROM_EESUPP register. */
+/* The following are defines for the bit fields in the EEPROM_EESUPP
+ * register.
+ */
 
 #define EEPROM_EESUPP_ERETRY          0x00000004  /* Erase Must Be Retried */
 #define EEPROM_EESUPP_PRETRY          0x00000008  /* Programming Must Be Retried */
 
-/* The following are defines for the bit fields in the EEPROM_EEUNLOCK register. */
+/* The following are defines for the bit fields in the EEPROM_EEUNLOCK
+ * register.
+ */
 
 #define EEPROM_EEUNLOCK_UNLOCK_M      0xffffffff  /* EEPROM Unlock */
 
-/* The following are defines for the bit fields in the EEPROM_EEPROT register. */
+/* The following are defines for the bit fields in the EEPROM_EEPROT
+ * register.
+ */
 
 #define EEPROM_EEPROT_PROT_M          0x00000007  /* Protection Control */
 #define EEPROM_EEPROT_PROT_RWNPW      0x00000000  /* This setting is the default. If
@@ -145,48 +163,68 @@
                                                    * block is readable, not writable */
 #define EEPROM_EEPROT_ACC             0x00000008  /* Access Control */
 
-/* The following are defines for the bit fields in the EEPROM_EEPASS0 register. */
+/* The following are defines for the bit fields in the
+ * EEPROM_EEPASS0 register.
+ */
 
 #define EEPROM_EEPASS0_PASS_M         0xffffffff  /* Password */
 #define EEPROM_EEPASS0_PASS_S         0
 
-/* The following are defines for the bit fields in the EEPROM_EEPASS1 register. */
+/* The following are defines for the bit fields in the
+ * EEPROM_EEPASS1 register.
+ */
 
 #define EEPROM_EEPASS1_PASS_M         0xffffffff  /* Password */
 #define EEPROM_EEPASS1_PASS_S         0
 
-/* The following are defines for the bit fields in the EEPROM_EEPASS2 register. */
+/* The following are defines for the bit fields in the
+ * EEPROM_EEPASS2 register.
+ */
 
 #define EEPROM_EEPASS2_PASS_M         0xffffffff  /* Password */
 #define EEPROM_EEPASS2_PASS_S         0
 
-/* The following are defines for the bit fields in the EEPROM_EEINT register. */
+/* The following are defines for the bit fields in the
+ * EEPROM_EEINT register.
+ */
 
 #define EEPROM_EEINT_INT              0x00000001  /* Interrupt Enable */
 
-/* The following are defines for the bit fields in the EEPROM_EEHIDE0 register. */
+/* The following are defines for the bit fields in the
+ * EEPROM_EEHIDE0 register.
+ */
 
 #define EEPROM_EEHIDE0_HN_M           0xfffffffe  /* Hide Block */
 
-/* The following are defines for the bit fields in the EEPROM_EEHIDE register. */
+/* The following are defines for the bit fields in the
+ * EEPROM_EEHIDE register.
+ */
 
 #define EEPROM_EEHIDE_HN_M            0xfffffffe  /* Hide Block */
 
-/* The following are defines for the bit fields in the EEPROM_EEHIDE1 register. */
+/* The following are defines for the bit fields in the
+ * EEPROM_EEHIDE1 register.
+ */
 
 #define EEPROM_EEHIDE1_HN_M           0xffffffff  /* Hide Block */
 
-/* The following are defines for the bit fields in the EEPROM_EEHIDE2 register. */
+/* The following are defines for the bit fields in the
+ * EEPROM_EEHIDE2 register.
+ */
 
 #define EEPROM_EEHIDE2_HN_M           0xffffffff  /* Hide Block */
 
-/* The following are defines for the bit fields in the EEPROM_EEDBGME register. */
+/* The following are defines for the bit fields in the
+ * EEPROM_EEDBGME register.
+ */
 
 #define EEPROM_EEDBGME_ME             0x00000001  /* Mass Erase */
 #define EEPROM_EEDBGME_KEY_M          0xffff0000  /* Erase Key */
 #define EEPROM_EEDBGME_KEY_S          16
 
-/* The following are defines for the bit fields in the EEPROM_PP register. */
+/* The following are defines for the bit fields in the
+ * EEPROM_PP register.
+ */
 
 #define EEPROM_PP_SIZE_M              0x0000ffff  /* EEPROM Size */
 #define EEPROM_PP_SIZE_64             0x00000000  /* 64 bytes of EEPROM */

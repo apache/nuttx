@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/common/lmxx_tm4c_enablepwr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_COMMON_LMXX_TM4C_ENABLEPWR_H
 #define __ARCH_ARM_SRC_TIVA_COMMON_LMXX_TM4C_ENABLEPWR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,12 +31,12 @@
 #include "chip.h"
 #include "hardware/tiva_sysctrl.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Power control is enabled or disabled by setting or clearing a bit (b) in a system
- * control register (a))
+/* Power control is enabled or disabled by setting or clearing a bit (b) in
+ * a system control register (a))
  */
 
 #define tiva_enablepwr(a, b)       modifyreg32((a), 0, (b))
