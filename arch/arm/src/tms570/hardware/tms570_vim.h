@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_vim.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
@@ -27,21 +27,21 @@
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_VIM_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_VIM_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #define VIM_REGNDX(ch)                  ((ch) >> 5)
 #define VIM_REGBIT(ch)                  ((ch) & 31)
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 /* Register Offsets relative to the VIM Parity Frame */
 
@@ -87,7 +87,7 @@
 #define TMS570_VIM_CHANCTRL_INDEX(n)    ((n) >> 2)
 #define TMS570_VIM_CHANCTRL_OFFSET(n)   (0x0080 << (TMS570_VIM_CHANCTRL_INDEX(n) << 2))
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 /* VIM Parity Frame Registers */
 
@@ -132,14 +132,17 @@
 
 #define TMS570_VIM_CHANCTRL(n)          (TMS570_VIM_BASE+TMS570_VIM_CHANCTRL_OFFSET(n))
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Interrupt Vector Table Parity Flag Register */
 #define VIM_PARFLG_
+
 /* Interrupt Vector Table Parity Control Register */
 #define VIM_PARCTL_
+
 /* Address Parity Error Register */
 #define VIM_ADDERR_
+
 /* Fall-Back Address Parity Error Register */
 #define VIM_FBPARERR_
 
@@ -153,44 +156,64 @@
 
 /* FIQ/IRQ Program Control Register 0 */
 #define VIM_FIRQPR0_
+
 /* FIQ/IRQ Program Control Register 1 */
 #define VIM_FIRQPR1_
+
 /* FIQ/IRQ Program Control Register 2 */
 #define VIM_FIRQPR2_
+
 /* Pending Interrupt Read Location Register 0 */
 #define VIM_INTREQ0_
+
 /* Pending Interrupt Read Location Register 1 */
 #define VIM_INTREQ1_
+
 /* Pending Interrupt Read Location Register 2 */
 #define VIM_INTREQ2_
+
 /* Interrupt Enable Set Register 0 */
 #define VIM_REQENASET0_
+
 /* Interrupt Enable Set Register 1 */
 #define VIM_REQENASET1_
+
 /* Interrupt Enable Set Register 2 */
 #define VIM_REQENASET2_
+
 /* Interrupt Enable Clear Register 0 */
 #define VIM_REQENACLR0_
+
 /* Interrupt Enable Clear Register 1 */
 #define VIM_REQENACLR1_
+
 /* Interrupt Enable Clear Register 2 */
 #define VIM_REQENACLR2_
+
 /* Wake-up Enable Set Register 0 */
 #define VIM_WAKEENASET0_
+
 /* Wake-up Enable Set Register 1 */
 #define VIM_WAKEENASET1_
+
 /* Wake-up Enable Set Register 2 */
 #define VIM_WAKEENASET2_
+
 /* Wake-up Enable Clear Register 0 */
 #define VIM_WAKEENACLR0_
+
 /* Wake-up Enable Clear Register 1 */
 #define VIM_WAKEENACLR1_
+
 /* Wake-up Enable Clear Register 2 */
 #define VIM_WAKEENACLR2_
+
 /* IRQ Interrupt Vector Register */
 #define VIM_IRQVECREG_
+
 /* FIQ Interrupt Vector Register */
 #define VIM_FIQVECREG_
+
 /* Capture Event Register */
 #define VIM_CAPEVT_
 

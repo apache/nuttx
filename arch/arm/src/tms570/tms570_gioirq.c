@@ -91,7 +91,9 @@ static int tms3570_gio_interrupt(int irq, void *context, FAR void *arg)
 
 void tms570_gioirq_initialize(void)
 {
-  /* Disable all pin interrupts on the pin.  Make sure they are all level 0. */
+  /* Disable all pin interrupts on the pin.
+   * Make sure they are all level 0.
+   */
 
   putreg32(0xffffffff, TMS570_GIO_ENACLR);
   putreg32(0xffffffff, TMS570_GIO_LVLCLR);
@@ -102,13 +104,13 @@ void tms570_gioirq_initialize(void)
   up_enable_irq(TMS570_REQ_GIO_0);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: tms570_gioirq
  *
  * Description:
  *   Configure an interrupt for the specified GIO pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void tms570_gioirq(gio_pinset_t pinset)
 {
@@ -117,13 +119,15 @@ void tms570_gioirq(gio_pinset_t pinset)
   irqstate_t flags;
   uint32_t regval;
 
-  /* Start with the pin interrupts disabled.  Make sure that level 0 is selected. */
+  /* Start with the pin interrupts disabled.
+   *  Make sure that level 0 is selected.
+   */
 
   putreg32(GIO_ENACLR_PORT_PIN(port, pin), TMS570_GIO_ENACLR);
   putreg32(GIO_LVLCLR_PORT_PIN(port, pin), TMS570_GIO_LVLCLR);
 
-  /* Make sure that the pin is configured as an input and that interrupts can e
-   * supported on this port.
+  /* Make sure that the pin is configured as an input and that interrupts can
+   * e supported on this port.
    */
 
   if ((pinset & GIO_MODE_MASK) == GIO_INPUT && port < TMS570_NIRQPORTS)
@@ -182,13 +186,13 @@ void tms570_gioirq(gio_pinset_t pinset)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: tms570_gioirqenable
  *
  * Description:
  *   Enable the interrupt for specified GIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void tms570_gioirqenable(int irq)
 {
@@ -210,13 +214,13 @@ void tms570_gioirqenable(int irq)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: tms570_gioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified GIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void tms570_gioirqdisable(int irq)
 {

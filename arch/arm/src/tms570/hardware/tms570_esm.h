@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_esm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
@@ -27,22 +27,22 @@
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_ESM_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_ESM_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #define ESM_GROUP1                0
 #define ESM_GROUP2                1
 #define ESM_GROUP3                2
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TMS570_ESM_EEPAPR1_OFFSET 0x0000 /* ESM Enable ERROR Pin Action/Response Register 1 */
 #define TMS570_ESM_DEPAPR1_OFFSET 0x0004 /* ESM Disable ERROR Pin Action/Response Register 1 */
@@ -50,7 +50,9 @@
 #define TMS570_ESM_IECR1_OFFSET   0x000c /* ESM Interrupt Enable Clear/Status Register 1 */
 #define TMS570_ESM_ILSR1_OFFSET   0x0010 /* Interrupt Level Set/Status Register 1 */
 #define TMS570_ESM_ILCR1_OFFSET   0x0014 /* Interrupt Level Clear/Status Register 1 */
+
 #define TMS570_ESM_SRA_OFFSET(n)  (0x0018 + ((n) << 2)) /* n=0, 1, 2 */
+
 #  define TMS570_ESM_SR1_OFFSET   0x0018 /* ESM Status Register for group 1 */
 #  define TMS570_ESM_SR2_OFFSET   0x001c /* ESM Status Register for group 2 */
 #  define TMS570_ESM_SR3_OFFSET   0x0020 /* ESM Status Register for group 3 */
@@ -68,13 +70,15 @@
 #define TMS570_ESM_ILSR4_OFFSET   0x0050 /* Interrupt Level Set/Status Register 4 */
 #define TMS570_ESM_ILCR4_OFFSET   0x0054 /* Interrupt Level Clear/Status Register 4 */
 #define TMS570_ESM_SR4_OFFSET     0x0058 /* ESM Status Register 4 */
+
 #define TMS570_ESM_SRB_OFFSET(n)  (0x0058 + (((n)-4) << 2)) /* n=4, 5, 6 */
+
 #  define TMS570_ESM_SR4_OFFSET   0x0058 /* ESM Status Register for group 4 */
 #  define TMS570_ESM_SR5_OFFSET   0x005c /* ESM Status Register for group 5 */
 #  define TMS570_ESM_SR6_OFFSET   0x0060 /* ESM Status Register for group 6 */
 #define TMS570_ESM_SSR5_OFFSET    0x0064 /* ESM Status Shadow Register 5 */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TMS570_ESM_EEPAPR1        (TMS570_ESM_BASE+TMS570_ESM_EEPAPR1_OFFSET)
 #define TMS570_ESM_DEPAPR1        (TMS570_ESM_BASE+TMS570_ESM_DEPAPR1_OFFSET)
@@ -106,7 +110,7 @@
 #  define TMS570_ESM_SR6          (TMS570_ESM_BASE+TMS570_ESM_SR6_OFFSET)
 #define TMS570_ESM_SSR5           (TMS570_ESM_BASE+TMS570_ESM_SSR5_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* ESM Enable ERROR Pin Action/Response Register 1 */
 

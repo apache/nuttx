@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_iomm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
@@ -27,18 +27,18 @@
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_IOMM_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_IOMM_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TMS570_IOMM_REVISION_OFFSET     0x0000 /* Revision Register */
 #define TMS570_IOMM_BOOT_OFFSET         0x0020 /* Boot Mode Register */
@@ -85,7 +85,7 @@
 #  define TMS570_IOMM_PINMMR29_OFFSET   0x0184 /* Pin Multiplexing Control Register 29 */
 #  define TMS570_IOMM_PINMMR30_OFFSET   0x0188 /* Pin Multiplexing Control Register 30 */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TMS570_IOMM_REVISION            (TMS570_IOMM_BASE+TMS570_IOMM_REVISION_OFFSET)
 #define TMS570_IOMM_BOOT                (TMS570_IOMM_BASE+TMS570_IOMM_BOOT_OFFSET)
@@ -132,10 +132,11 @@
 #  define TMS570_IOMM_PINMMR29          (TMS570_IOMM_BASE+TMS570_IOMM_PINMMR29_OFFSET)
 #  define TMS570_IOMM_PINMMR30          (TMS570_IOMM_BASE+TMS570_IOMM_PINMMR30_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Revision Register */
 #define IOMM_REVISION_
+
 /* Boot Mode Register */
 #define IOMM_BOOT_
 
@@ -151,21 +152,28 @@
 
 /* Error Raw Status / Set Register */
 #define IOMM_ERRRAWSTATUS_
+
 /* Error Enabled Status / Clear Register */
 #define IOMM_ERRSTATUS_
+
 /* Error Signaling Enable Register */
 #define IOMM_ERRENABLE_
+
 /* Error Signaling Enable Clear Register */
 #define IOMM_ERRENABLECLR_
+
 /* Fault Address Register */
 #define IOMM_FAULTADDRESS_
+
 /* Fault Status Register */
 #define IOMM_FAULTSTATUS_
+
 /* Fault Clear Register */
 #define IOMM_FAULTCLR_
 
-/* Pin Multiplexing Control Register n, n=0..30.  Each 8-bit field controls the functionality of
- * one pin/ball.  There are then a maximum of 31*4 = 124 pin/ball configurations supported.
+/* Pin Multiplexing Control Register n, n=0..30.
+ * Each 8-bit field controls the functionality of one pin/ball.
+ * There are then a maximum of 31*4 = 124 pin/ball configurations supported.
  */
 
 #define IOMM_PINMMR_REGNDX(n)           ((n) >> 2)

@@ -38,6 +38,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The input clock to the RTI is the RTICLK.  The RTI source is always VCLK
  * which may be divided down by 2.  The correct RTICLK frequency must be
  * provided by board.h file as BOARD_RTICLK_FREQUENCY.

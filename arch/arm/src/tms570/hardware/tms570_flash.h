@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_flash.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
@@ -27,18 +27,18 @@
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_FLASH_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_FLASH_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TMS570_FLASH_FRDCNTL_OFFSET       0x000 /* Flash Option Control Register */
 #define TMS570_FLASH_FEDACTRL1_OFFSET     0x008 /* Flash Error Detection and Correction Control Register 1 */
@@ -83,7 +83,7 @@
 #define TMS570_FLASH_EEUNCERRADD_OFFSET   0x320 /* EEPROM Emulation Un-Correctable Error Address Register */
 #define TMS570_FLASH_FCFGBANK_OFFSET      0x400 /* Flash Bank Configuration Register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TMS570_FLASH_FRDCNTL              (TMS570_FWRAP_BASE+TMS570_FLASH_FRDCNTL_OFFSET)
 #define TMS570_FLASH_FEDACTRL1            (TMS570_FWRAP_BASE+TMS570_FLASH_FEDACTRL1_OFFSET)
@@ -128,7 +128,7 @@
 #define TMS570_FLASH_EEUNCERRADD          (TMS570_FWRAP_BASE+TMS570_FLASH_EEUNCERRADD_OFFSET)
 #define TMS570_FLASH_FCFGBANK             (TMS570_FWRAP_BASE+TMS570_FLASH_FCFGBANK_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Flash Option Control Register */
 
@@ -140,30 +140,43 @@
 
 /* Flash Error Detection and Correction Control Register 1 */
 #define FLASH_FEDACTRL1_
+
 /* Flash Error Detection and Correction Control Register 2 */
 #define FLASH_FEDACTRL2_
+
 /* Flash Correctable Error Count Register */
 #define FLASH_FCORERRCNT_
+
 /* Flash Correctable Error Address Register */
 #define FLASH_FCORERRADD_
+
 /* Flash Correctable Error Position Register */
 #define FLASH_FCORERRPOS_
+
 /* Flash Error Detection and Correction Status Register */
 #define FLASH_FEDACSTATUS_
+
 /* Flash Un-Correctable Error Address Register */
 #define FLASH_FUNCERRADD_
+
 /* Flash Error Detection and Correction Sector Disable Register */
 #define FLASH_FEDACSDIS_
+
 /* Flash Primary Address Tag Register */
 #define FLASH_FPRIMADDTAG_
+
 /* Flash Duplicate Address Tag Register */
 #define FLASH_FDUPDDTAG_
+
 /* Flash Bank Protection Register */
 #define FLASH_FBPROT_
+
 /* Flash Bank Sector Enable Register */
 #define FLASH_FBSE_
+
 /* Flash Bank Busy Register */
 #define FLASH_FBBUSY_
+
 /* Flash Bank Access Control Register */
 #define FLASH_FBAC_
 
@@ -187,32 +200,46 @@
 
 /* Flash Bank/Pump Ready Register */
 #define FLASH_FBPRDY_
+
 /* Flash Pump Access Control Register 1 */
 #define FLASH_FPAC1_
+
 /* Flash Pump Access Control Register 2 */
 #define FLASH_FPAC2_
+
 /* Flash Module Access Control Register */
 #define FLASH_FMAC_
+
 /* Flash Module Status Register */
 #define FLASH_FMSTAT_
+
 /* EEPROM Emulation Data MSW Register */
 #define FLASH_FEMUDMSW_
+
 /* EEPROM Emulation Data LSW Register */
 #define FLASH_FEMUDLSW_
+
 /* EEPROM Emulation ECC Register */
 #define FLASH_FEMUECC_
+
 /* EEPROM Emulation Address Register */
 #define FLASH_FEMUADDR_
+
 /* Diagnostic Control Register */
 #define FLASH_FDIAGCTRL_
+
 /* Uncorrected Raw Data High Register */
 #define FLASH_FRAWDATAH_
+
 /* Uncorrected Raw Data Low Register */
 #define FLASH_FRAWDATAL_
+
 /* Uncorrected Raw ECC Register */
 #define FLASH_FRAWECC_
+
 /* Parity Override Register */
 #define FLASH_FPAROVR_
+
 /* Flash Error Detection and Correction Sector Disable Register 2 */
 #define FLASH_FEDACSDIS2_
 
@@ -238,18 +265,25 @@
 
 /* EEPROM Emulation Error Detection and Correction Control Register 1 */
 #define FLASH_EECTRL1_
+
 /* EEPROM Emulation Error Detection and Correction Control Register 2 */
 #define FLASH_EECTRL2_
+
 /* EEPROM Emulation Correctable Error Count Register */
 #define FLASH_EECORERRCNT_
+
 /* EEPROM Emulation Correctable Error Address Register */
 #define FLASH_EECORERRADD_
+
 /* EEPROM Emulation Correctable Error Bit Position Register */
 #define FLASH_EECORERRPOS_
+
 /* EEPROM Emulation Error Status Register */
 #define FLASH_EESTATUS_
+
 /* EEPROM Emulation Un-Correctable Error Address Register */
 #define FLASH_EEUNCERRADD_
+
 /* Flash Bank Configuration Register */
 #define FLASH_FCFGBANK_
 
