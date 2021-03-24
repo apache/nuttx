@@ -884,15 +884,15 @@ tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    */
 
   regval  = tiva_getreg(priv, TIVA_TIMER_TAMR_OFFSET);
-  regval &= ~TIMER_TnMR_TnMR_MASK;
+  regval &= ~TIMER_TNMR_TNMR_MASK;
 
   if (priv->config->mode == TIMER32_MODE_ONESHOT)
     {
-      regval |= TIMER_TnMR_TnMR_ONESHOT;
+      regval |= TIMER_TNMR_TNMR_ONESHOT;
     }
   else /* if (priv->config->mode == TIMER32_MODE_PERIODIC) */
     {
-      regval |= TIMER_TnMR_TnMR_PERIODIC;
+      regval |= TIMER_TNMR_TNMR_PERIODIC;
     }
 
   tiva_putreg(priv, TIVA_TIMER_TAMR_OFFSET, regval);
@@ -930,9 +930,9 @@ tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
 
   /* Setup defaults */
 
-  regval &= (TIMER_TnMR_TnCDIR | TIMER_TnMR_TnWOT | TIMER_TnMR_TnCDIR);
+  regval &= (TIMER_TNMR_TNCDIR | TIMER_TNMR_TNWOT | TIMER_TNMR_TNCDIR);
 #ifdef CONFIG_ARCH_CHIP_TM4C129
-  regval |= TIMER_TnMR_TnCINTD;
+  regval |= TIMER_TNMR_TNCINTD;
 #endif
 
   /* Enable snapshot mode?
@@ -961,7 +961,7 @@ tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
 
   if (TIMER_ISCOUNTUP(timer))
     {
-      regval |= TIMER_TnMR_TnCDIR_UP;
+      regval |= TIMER_TNMR_TNCDIR_UP;
     }
 
   tiva_putreg(priv, TIVA_TIMER_TAMR_OFFSET, regval);
@@ -1093,15 +1093,15 @@ tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
 
   regoffset = tmndx ? TIVA_TIMER_TBMR_OFFSET : TIVA_TIMER_TAMR_OFFSET;
   regval    = tiva_getreg(priv, regoffset);
-  regval   &= ~TIMER_TnMR_TnMR_MASK;
+  regval   &= ~TIMER_TNMR_TNMR_MASK;
 
   if (timer->mode == TIMER16_MODE_ONESHOT)
     {
-      regval |= TIMER_TnMR_TnMR_ONESHOT;
+      regval |= TIMER_TNMR_TNMR_ONESHOT;
     }
   else /* if (timer->mode == TIMER16_MODE_PERIODIC) */
     {
-      regval |= TIMER_TnMR_TnMR_PERIODIC;
+      regval |= TIMER_TNMR_TNMR_PERIODIC;
     }
 
   tiva_putreg(priv, regoffset, regval);
@@ -1141,9 +1141,9 @@ tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
 
   /* Setup defaults */
 
-  regval &= (TIMER_TnMR_TnCDIR | TIMER_TnMR_TnWOT | TIMER_TnMR_TnCDIR);
+  regval &= (TIMER_TNMR_TNCDIR | TIMER_TNMR_TNWOT | TIMER_TNMR_TNCDIR);
 #ifdef CONFIG_ARCH_CHIP_TM4C129
-  regval |= TIMER_TnMR_TnCINTD;
+  regval |= TIMER_TNMR_TNCINTD;
 #endif
 
   /* Enable snapshot mode?
@@ -1172,7 +1172,7 @@ tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
 
   if (TIMER_ISCOUNTUP(timer))
     {
-      regval |= TIMER_TnMR_TnCDIR_UP;
+      regval |= TIMER_TNMR_TNCDIR_UP;
     }
 
   tiva_putreg(priv, regoffset, regval);
@@ -1636,9 +1636,9 @@ static int tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
    */
 
   regoffset = tmndx ? TIVA_TIMER_TBMR_OFFSET : TIVA_TIMER_TAMR_OFFSET;
-  clrbits = TIMER_TnMR_TnMR_MASK | TIMER_TnMR_TnCMR | TIMER_TnMR_TnAMS;
-  setbits = TIMER_TnMR_TnMR_PERIODIC | TIMER_TnMR_TnCMR_EDGECOUNT |
-            TIMER_TnMR_TnAMS_PWM;
+  clrbits = TIMER_TNMR_TNMR_MASK | TIMER_TNMR_TNCMR | TIMER_TNMR_TNAMS;
+  setbits = TIMER_TNMR_TNMR_PERIODIC | TIMER_TNMR_TNCMR_EDGECOUNT |
+            TIMER_TNMR_TNAMS_PWM;
   tiva_modifyreg(priv, regoffset, clrbits, setbits);
 
   /* 4. Configure the output state of the PWM signal (whether or not it is
@@ -1674,7 +1674,7 @@ static int tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
   tiva_modifyreg(priv, TIVA_TIMER_CTL_OFFSET, clrbits, setbits);
 
   regoffset = tmndx ? TIVA_TIMER_TBMR_OFFSET : TIVA_TIMER_TAMR_OFFSET;
-  tiva_modifyreg(priv, regoffset, 0, TIMER_TnMR_TnPWMIE);
+  tiva_modifyreg(priv, regoffset, 0, TIMER_TNMR_TNPWMIE);
 
   /* 6. Set PWM period: This is a 24-bit value. Put the high byte (bits 16
    *    through 23) in the prescaler register (TIVA_TIMER_TnPR_OFFSET).
@@ -2579,7 +2579,7 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
 
       moder = base + TIVA_TIMER_TAMR_OFFSET;
       modev1 = getreg32(moder);
-      modev2 = modev1 & ~TIMER_TnMR_TnCINTD;
+      modev2 = modev1 & ~TIMER_TNMR_TNCINTD;
       putreg32(modev2, moder);
 #endif /* CONFIG_ARCH_CHIP_TM4C129 */
 
@@ -2728,7 +2728,7 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle,
        */
 
       modev1 = getreg32(moder);
-      modev2 = modev1 & ~TIMER_TnMR_TnCINTD;
+      modev2 = modev1 & ~TIMER_TNMR_TNCINTD;
       putreg32(modev2, moder);
 #endif /* CONFIG_ARCH_CHIP_TM4C129 */
 

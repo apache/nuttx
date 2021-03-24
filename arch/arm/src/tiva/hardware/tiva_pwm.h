@@ -56,45 +56,45 @@
 #define TIVA_PWM_FAULTVAL_OFFSET        (0x24)  /* PWM Fault Condition Value */
 #define TIVA_PWM_ENUPD_OFFSET           (0x28)  /* PWM Enable Update */
 
-#define TIVA_PWMn_BASE                  (0x40)  /* PWMn Base */
-#define TIVA_PWMn_INTERVAL              (0x40)  /* PWMn Interval */
+#define TIVA_PWMN_BASE                  (0x40)  /* PWMn Base */
+#define TIVA_PWMN_INTERVAL              (0x40)  /* PWMn Interval */
 
-#define TIVA_PWMn_CTL_OFFSET            (0x0)   /* PWMn Control */
-#define TIVA_PWMn_INTEN_OFFSET          (0x4)   /* PWMn Interrupt and Trigger Enable */
-#define TIVA_PWMn_RIS_OFFSET            (0x8)   /* PWMn Raw Interrupt Status */
-#define TIVA_PWMn_ISC_OFFSET            (0xc)   /* PWMn Interrupt Status and Clear */
-#define TIVA_PWMn_LOAD_OFFSET           (0x10)  /* PWMn Load */
-#define TIVA_PWMn_COUNT_OFFSET          (0x14)  /* PWMn Counter */
-#define TIVA_PWMn_CMPA_OFFSET           (0x18)  /* PWMn Compare A */
-#define TIVA_PWMn_CMPB_OFFSET           (0x1c)  /* PWMn Compare B */
-#define TIVA_PWMn_GENA_OFFSET           (0x20)  /* PWMn Generator A Control */
-#define TIVA_PWMn_GENB_OFFSET           (0x24)  /* PWMn Generator B Control */
-#define TIVA_PWMn_DBCTL_OFFSET          (0x28)  /* PWMn Dead-Band Control */
-#define TIVA_PWMn_DBRISE_OFFSET         (0x2c)  /* PWMn Dead-Band Rising-Edge-Delay */
-#define TIVA_PWMn_DBFALL_OFFSET         (0x30)  /* PWMn Dead-Band Falling-Edge-Delay */
-#define TIVA_PWMn_FLTSRC0_OFFSET        (0x34)  /* PWMn Fault Source 0 */
-#define TIVA_PWMn_FLTSRC1_OFFSET        (0x38)  /* PWMn Fault Source 1 */
-#define TIVA_PWMn_MINFLTPER_OFFSET      (0x3c)  /* PWMn Minimum Fault Period */
+#define TIVA_PWMN_CTL_OFFSET            (0x0)   /* PWMn Control */
+#define TIVA_PWMN_INTEN_OFFSET          (0x4)   /* PWMn Interrupt and Trigger Enable */
+#define TIVA_PWMN_RIS_OFFSET            (0x8)   /* PWMn Raw Interrupt Status */
+#define TIVA_PWMN_ISC_OFFSET            (0xc)   /* PWMn Interrupt Status and Clear */
+#define TIVA_PWMN_LOAD_OFFSET           (0x10)  /* PWMn Load */
+#define TIVA_PWMN_COUNT_OFFSET          (0x14)  /* PWMn Counter */
+#define TIVA_PWMN_CMPA_OFFSET           (0x18)  /* PWMn Compare A */
+#define TIVA_PWMN_CMPB_OFFSET           (0x1c)  /* PWMn Compare B */
+#define TIVA_PWMN_GENA_OFFSET           (0x20)  /* PWMn Generator A Control */
+#define TIVA_PWMN_GENB_OFFSET           (0x24)  /* PWMn Generator B Control */
+#define TIVA_PWMN_DBCTL_OFFSET          (0x28)  /* PWMn Dead-Band Control */
+#define TIVA_PWMN_DBRISE_OFFSET         (0x2c)  /* PWMn Dead-Band Rising-Edge-Delay */
+#define TIVA_PWMN_DBFALL_OFFSET         (0x30)  /* PWMn Dead-Band Falling-Edge-Delay */
+#define TIVA_PWMN_FLTSRC0_OFFSET        (0x34)  /* PWMn Fault Source 0 */
+#define TIVA_PWMN_FLTSRC1_OFFSET        (0x38)  /* PWMn Fault Source 1 */
+#define TIVA_PWMN_MINFLTPER_OFFSET      (0x3c)  /* PWMn Minimum Fault Period */
 
-#define TIVA_PWMn_FAULT_BASE            (0x800) /* PWMn Fault Base */
-#define TIVA_PWMn_FAULT_INTERVAL        (0x80)  /* PWMn Fault Interval */
+#define TIVA_PWMN_FAULT_BASE            (0x800) /* PWMn Fault Base */
+#define TIVA_PWMN_FAULT_INTERVAL        (0x80)  /* PWMn Fault Interval */
 
-#define TIVA_PWMn_FAULT_SEN_OFFSET      (0x0)   /* PWMn Fault Pin Logic Sense */
-#define TIVA_PWMn_FAULT_STAT0_OFFSET    (0x4)   /* PWMn Fault Status 0 */
-#define TIVA_PWMn_FAULT_STAT1_OFFSET    (0x8)   /* PWMn Fault Status 1 */
+#define TIVA_PWMN_FAULT_SEN_OFFSET      (0x0)   /* PWMn Fault Pin Logic Sense */
+#define TIVA_PWMN_FAULT_STAT0_OFFSET    (0x4)   /* PWMn Fault Status 0 */
+#define TIVA_PWMN_FAULT_STAT1_OFFSET    (0x8)   /* PWMn Fault Status 1 */
 
 #define TIVA_PWM_PP                     (0xfc0) /* PWM Peripheral Properties */
 #define TIVA_PWM_CC                     (0xfc8) /* PWM Clock Configuration */
 
-#define TIVA_PWMn_GENx_ACTCMPBD         (10)    /* (Bit) Action for Comparator B Down */
-#define TIVA_PWMn_GENx_ACTCMPBU         (8)     /* (Bit) Action for Comparator B Up */
-#define TIVA_PWMn_GENx_ACTCMPAD         (6)     /* (Bit) Action for Comparator A Down */
-#define TIVA_PWMn_GENx_ACTCMPAU         (4)     /* (Bit) Action for Comparator A Up */
-#define TIVA_PWMn_GENx_ACTLOAD          (2)     /* (Bit) Action for Counter equals LOAD */
-#define TIVA_PWMn_GENx_ACTZERO          (0)     /* (Bit) Action for Counter equals ZERO */
-#define GENx_INVERT                     (0x1)   /* (Value) Invert */
-#define GENx_LOW                        (0x2)   /* (Value) Drive Low */
-#define GENx_HIGH                       (0x3)   /* (Value) Drive High */
+#define TIVA_PWMN_GENX_ACTCMPBD         (10)    /* (Bit) Action for Comparator B Down */
+#define TIVA_PWMN_GENX_ACTCMPBU         (8)     /* (Bit) Action for Comparator B Up */
+#define TIVA_PWMN_GENX_ACTCMPAD         (6)     /* (Bit) Action for Comparator A Down */
+#define TIVA_PWMN_GENX_ACTCMPAU         (4)     /* (Bit) Action for Comparator A Up */
+#define TIVA_PWMN_GENX_ACTLOAD          (2)     /* (Bit) Action for Counter equals LOAD */
+#define TIVA_PWMN_GENX_ACTZERO          (0)     /* (Bit) Action for Counter equals ZERO */
+#define GENX_INVERT                     (0x1)   /* (Value) Invert */
+#define GENX_LOW                        (0x2)   /* (Value) Drive Low */
+#define GENX_HIGH                       (0x3)   /* (Value) Drive High */
 
 #define TIVA_PWM_CC_USEPWM              (8)     /* (Bit) Use PWM Clock Divisor */
 #define TIVA_PWM_CC_PWMDIV              (0)     /* (Bit) PWM Clock Divider */
@@ -106,7 +106,7 @@
 #define CC_PWMDIV_32                    (0x4)   /* (Value) Divided by 32 */
 #define CC_PWMDIV_64                    (0x5)   /* (Value) Divided by 64 */
 
-#define TIVA_PWMn_CTL_ENABLE            (0)     /* (Bit) PWM Block Enable */
+#define TIVA_PWMN_CTL_ENABLE            (0)     /* (Bit) PWM Block Enable */
 #define CTL_DISABLE                     (0)     /* (Value) Disable */
 #define CTL_ENABLE                      (1)     /* (Value) Enable */
 

@@ -183,19 +183,19 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   if (mp1rev < 542)
     {
-      uint32_t ldoTrimReg = getreg32(TIVA_FCFG1_BAT_RC_LDO_TRIM);
+      uint32_t ldo_trim_reg = getreg32(TIVA_FCFG1_BAT_RC_LDO_TRIM);
       uint32_t vtrim_bod;
       uint32_t vtrim_udig;
       uint8_t regval8;
 
       /* bit[27:24] unsigned */
 
-      vtrim_bod = ((ldoTrimReg & FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD_MASK) >>
+      vtrim_bod = ((ldo_trim_reg & FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD_MASK) >>
                   FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD_SHIFT);
 
       /* bit[19:16] signed but treated as unsigned */
 
-      vtrim_udig = ((ldoTrimReg & FCFG1_BAT_RC_LDO_TRIM_VTRIM_UDIG_MASK) >>
+      vtrim_udig = ((ldo_trim_reg & FCFG1_BAT_RC_LDO_TRIM_VTRIM_UDIG_MASK) >>
                    FCFG1_BAT_RC_LDO_TRIM_VTRIM_UDIG_SHIFT);
 
       if (vtrim_bod > 0)

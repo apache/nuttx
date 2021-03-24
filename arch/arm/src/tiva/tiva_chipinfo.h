@@ -71,22 +71,22 @@ enum cc13xx_protocol_e
 enum cc13xx_package_e
 {
   PACKAGE_UNKNOWN        = -1,   /* -1 means that current package type is unknown */
-  PACKAGE_4x4            =  0,   /*  0 This is a 4x4 mm QFN (RHB) package */
-  PACKAGE_5x5            =  1,   /*  1 This is a 5x5 mm QFN (RSM) package */
-  PACKAGE_7x7            =  2,   /*  2 This is a 7x7 mm QFN (RGZ) package */
+  PACKAGE_4X4            =  0,   /*  0 This is a 4x4 mm QFN (RHB) package */
+  PACKAGE_5X5            =  1,   /*  1 This is a 5x5 mm QFN (RSM) package */
+  PACKAGE_7X7            =  2,   /*  2 This is a 7x7 mm QFN (RGZ) package */
   PACKAGE_WAFER          =  3,   /*  3 This is a wafer sale package (naked die) */
   PACKAGE_WCSP           =  4,   /*  4 This is a 2.7x2.7 mm WCSP (YFV) */
-  PACKAGE_7x7_Q1         =  5    /*  5 This is a 7x7 mm QFN package with Wettable Flanks */
+  PACKAGE_7X7_Q1         =  5    /*  5 This is a 7x7 mm QFN package with Wettable Flanks */
 };
 
 enum cc13xx_chipfamily_e
 {
   FAMILY_UNKNOWN         = -1,   /* -1 The chip's family member is unknown */
-  FAMILY_CC26x0          =  0,   /*  0 The chip is a CC26x0 family member */
-  FAMILY_CC13x0          =  1,   /*  1 The chip is a CC13x0 family member */
-  FAMILY_CC26x1          =  2,   /*  2 The chip is a CC26x1 family member */
-  FAMILY_CC26x0R2        =  3,   /*  3 The chip is a CC26x0R2 family (new ROM contents) */
-  FAMILY_CC13x2_CC26x2   =  4    /*  4 The chip is a CC13x2, CC26x2 family member */
+  FAMILY_CC26X0          =  0,   /*  0 The chip is a CC26x0 family member */
+  FAMILY_CC13X0          =  1,   /*  1 The chip is a CC13x0 family member */
+  FAMILY_CC26X1          =  2,   /*  2 The chip is a CC26x1 family member */
+  FAMILY_CC26X0R2        =  3,   /*  3 The chip is a CC26x0R2 family (new ROM contents) */
+  FAMILY_CC13X2_CC26X2   =  4    /*  4 The chip is a CC13x2, CC26x2 family member */
 };
 
 enum cc13xx_chiptype_e

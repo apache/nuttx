@@ -83,7 +83,7 @@ static void trim_wakeup_frompowerdown(void)
 }
 
 /****************************************************************************
- * Name: Step_RCOSCHF_CTRIM
+ * Name: step_rcoschf_ctrim
  *
  * Description:
  *   Special shadow register trim propagation on first batch of devices.
@@ -93,7 +93,7 @@ static void trim_wakeup_frompowerdown(void)
  *
  ****************************************************************************/
 
-static void Step_RCOSCHF_CTRIM(uint32_t tocode)
+static void step_rcoschf_ctrim(uint32_t tocode)
 {
   uint32_t current_rcoschfctrl;
   uint32_t current_trim;
@@ -278,7 +278,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   fusedata = getreg32(TIVA_FCFG1_SHDW_OSC_BIAS_LDO_TRIM);
 
-  Step_RCOSCHF_CTRIM((fusedata &
+  step_rcoschf_ctrim((fusedata &
                       FCFG1_SHDW_OSC_BIAS_LDO_TRIM_RCOSCHF_CTRIM_MASK) >>
                      FCFG1_SHDW_OSC_BIAS_LDO_TRIM_RCOSCHF_CTRIM_SHIFT);
 
