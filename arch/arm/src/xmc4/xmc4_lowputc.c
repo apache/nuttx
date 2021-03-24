@@ -141,7 +141,9 @@ void arm_lowputc(char ch)
   uintptr_t base;
   uint32_t regval;
 
-  /* Get the base address of the USIC registers associated with this channel */
+  /* Get the base address of the USIC registers associated with this
+   * channel
+   */
 
   base = xmc4_channel_baseaddress(CONSOLE_CHAN);
   DEBUGASSERT(base != 0);
@@ -241,7 +243,9 @@ int xmc4_uart_configure(enum usic_channel_e channel,
   uint32_t regval;
   int ret;
 
-  /* Get the base address of the USIC registers associated with this channel */
+  /* Get the base address of the USIC registers associated with this
+   * channel
+   */
 
   base = xmc4_channel_baseaddress(channel);
   if (base == 0)

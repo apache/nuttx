@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/xmc4/hardware/xmc4_pinmux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,40 +16,43 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Reference: XMC4500 Reference Manual V1.5 2014-07 Microcontrollers. */
 
 #ifndef __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_PINMUX_H
 #define __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_PINMUX_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Alternate Pin Functions.  All members of the XMC4xxx family share the same
- * pin multiplexing (although they may differ in the pins physically available).
+ * pin multiplexing (although they may differ in the pins physically
+ * available).
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
- * Drivers, however, will use the pin selection without the numeric suffix.
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc. Drivers, however, will use the pin selection without the numeric
+ * suffix.
  * Additional definitions are required in the board.h file.  For example, if
- * CAN_N2TXD connects vis P1.9 on some board, then the following definition should
- * appear in the board.h header file for that board:
+ * CAN_N2TXD connects vis P1.9 on some board, then the following definition
+ * should appear in the board.h header file for that board:
  *
  * #define GPIO_CAN_N2TXD GPIO_CAN_N2TXD_1
  *
  * The driver will then automatically configure PA11 as the CAN1 RX pin.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific GPIO options such as frequency,
- * open-drain/push-pull, and pull-up/down!  Just the basics are defined for most
- * pins in this file.
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific GPIO options such as
+ * frequency, open-drain/push-pull, and pull-up/down!  Just the basics are
+ * defined for most pins in this file.
  */
 
 #define GPIO_CAN_N0RXDA          (GPIO_INPUT | GPIO_PORT1 | GPIO_PIN5)
