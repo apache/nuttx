@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/armv7-m/svcall.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_ARMV7_M_SVCALL_H
 #define __ARCH_ARM_SRC_ARMV7_M_SVCALL_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,15 +31,17 @@
 #  include <syscall.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
-/* This logic uses three system calls {0,1,2} for context switching and one for the
- * syscall return.  So a minimum of four syscall values must be reserved.  If
- * CONFIG_BUILD_PROTECTED is defined, then four more syscall values must be reserved.
+/* This logic uses three system calls {0,1,2} for context switching and one
+ * for the syscall return.
+ * So a minimum of four syscall values must be reserved.
+ * If CONFIG_BUILD_PROTECTED is defined, then four more syscall values must
+ * be reserved.
  */
 
 #ifdef CONFIG_LIB_SYSCALL
@@ -58,7 +60,7 @@
 #  endif
 #endif
 
-/* Cortex-M system calls ************************************************************/
+/* Cortex-M system calls ****************************************************/
 
 /* SYS call 0:
  *
@@ -108,7 +110,8 @@
 
 /* SYS call 6:
  *
- * void signal_handler(_sa_sigaction_t sighand, int signo, FAR siginfo_t *info,
+ * void signal_handler(_sa_sigaction_t sighand,
+ *                     int signo, FAR siginfo_t *info,
  *                     FAR void *ucontext);
  */
 
@@ -124,8 +127,8 @@
 #endif /* CONFIG_BUILD_PROTECTED */
 #endif /* CONFIG_LIB_SYSCALL */
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_ARMV7_M_SVCALL_H */

@@ -1,11 +1,12 @@
-/***********************************************************************************************
+/****************************************************************************
  * arch/arm/src/armv7-m/itm.h
  *
  *   Copyright (c) 2009 - 2013 ARM LIMITED
  *
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+ *  modification, are permitted provided that the following conditions
+ *  are met:
  *
  *  - Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
@@ -16,17 +17,17 @@
  *    to endorse or promote products derived from this software without
  *    specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- *  ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
- *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ *  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ *  PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS
+ *  AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *   Copyright (C) 2014 Pierre-noel Bouteville . All rights reserved.
  *   Author: Pierre-noel Bouteville <pnb990@gmail.com>
@@ -58,27 +59,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ***********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_ARMV7_M_ITM_H
 #define __ARCH_ARM_SRC_ARMV7_M_ITM_H
 
-/***********************************************************************************************
+/****************************************************************************
  * Included Files
- ***********************************************************************************************/
+ ****************************************************************************/
 
 #include <stdint.h>
 
-/***********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ***********************************************************************************************/
+ ****************************************************************************/
 
-/* Instrumentation Trace Macrocell Register (ITM) Definitions **********************************/
-/* ITM Register Base Address *******************************************************************/
+/* Instrumentation Trace Macrocell Register (ITM) Definitions ***************/
+
+/* ITM Register Base Address ************************************************/
 
 #define ITM_BASE                 (0xe0000000ul)
 
-/* ITM Register Addresses **********************************************************************/
+/* ITM Register Addresses ***************************************************/
 
 #define ITM_PORT(i)              (ITM_BASE + (i * 4)) /* Stimulus Port 32-bit */
 #define ITM_TER                  (ITM_BASE + 0x0e00)  /* Trace Enable Register */
@@ -102,7 +104,7 @@
 #define ITM_CID2                 (ITM_BASE + 0x0ff8)  /* Component  Identification Register #2 */
 #define ITM_CID3                 (ITM_BASE + 0x0ffc)  /* Component  Identification Register #3 */
 
-/* ITM Register Bit Field Definitions **********************************************************/
+/* ITM Register Bit Field Definitions ***************************************/
 
 /* ITM TPR */
 
@@ -158,9 +160,9 @@
 
 #define ITM_RXBUFFER_EMPTY       0x5aa55aa5
 
-/***********************************************************************************************
+/****************************************************************************
  * Public Data
- ***********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 extern "C"
@@ -169,9 +171,9 @@ extern "C"
 
 extern volatile int32_t g_itm_rxbuffer; /* External variable to receive characters. */
 
-/***********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ***********************************************************************************************/
+ ****************************************************************************/
 
 uint32_t itm_sendchar(uint32_t ch);
 int32_t itm_receivechar(void);
