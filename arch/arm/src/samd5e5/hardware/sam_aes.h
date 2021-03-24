@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_aes.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_AES_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_AES_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* AES register offsets ********************************************************************/
+/* AES register offsets *****************************************************/
 
 #define SAM_AES_CTRLA_OFFSET       0x0000 /* Control A Register */
 #define SAM_AES_CTRLB_OFFSET       0x0004 /* Control B Register */
@@ -70,7 +70,7 @@
 #define SAM_AES_CIPLEN_OFFSET      0x0080 /* Cipher Length Register */
 #define SAM_AES_RANDSEED_OFFSET    0x0084 /* Random Seed Register */
 
-/* AES register addresses ******************************************************************/
+/* AES register addresses ***************************************************/
 
 #define SAM_AES_CTRLA              (SAM_AES_BASE+SAM_AES_CTRLA_OFFSET)
 #define SAM_AES_CTRLB              (SAM_AES_BASE+SAM_AES_CTRLB_OFFSET)
@@ -107,7 +107,7 @@
 #define SAM_AES_CIPLEN             (SAM_AES_BASE+SAM_AES_CIPLEN_OFFSET)
 #define SAM_AES_RANDSEED           (SAM_AES_BASE+SAM_AES_RANDSEED_OFFSET)
 
-/* AES register bit definitions ************************************************************/
+/* AES register bit definitions *********************************************/
 
 /* Control A Register */
 
@@ -122,6 +122,7 @@
 #  define AES_CTRLA_AESMODE_CNTR   (4 << AES_CTRLA_AESMODE_SHIFT) /* Counter mode */
 #  define AES_CTRLA_AESMODE_CCM    (5 << AES_CTRLA_AESMODE_SHIFT) /* CCM mode */
 #  define AES_CTRLA_AESMODE_GCM    (6 << AES_CTRLA_AESMODE_SHIFT) /* Galois counter mode */
+
 #define AES_CTRLA_CFBS_SHIFT       (5)       /* Bits 5-7: Cipher feedback block size */
 #define AES_CTRLA_CFBS_MASK        (7 << AES_CTRLA_CFBS_SHIFT)
 #  define AES_CTRLA_CFBS_128       (0 << AES_CTRLA_CFBS_SHIFT) /* 128-bit data block */
@@ -129,11 +130,13 @@
 #  define AES_CTRLA_CFBS_32        (2 << AES_CTRLA_CFBS_SHIFT) /* 32-bit data block */
 #  define AES_CTRLA_CFBS_16        (3 << AES_CTRLA_CFBS_SHIFT) /* 16-bit data block */
 #  define AES_CTRLA_CFBS_8         (4 << AES_CTRLA_CFBS_SHIFT) /* 8-bit data block */
+
 #define AES_CTRLA_KEYSIZE_SHIFT    (8)       /* Bits 8-9: Encryption key size */
 #define AES_CTRLA_KEYSIZE_MASK     (3 << AES_CTRLA_KEYSIZE_SHIFT)
 #  define AES_CTRLA_KEYSIZE_128    (0 << AES_CTRLA_KEYSIZE_SHIFT) /* 128-bit key */
 #  define AES_CTRLA_KEYSIZE_192    (1 << AES_CTRLA_KEYSIZE_SHIFT) /* 192-bit key */
 #  define AES_CTRLA_KEYSIZE_256    (2 << AES_CTRLA_KEYSIZE_SHIFT) /* 256-bit key */
+
 #define AES_CTRLA_CIPHER           (1 << 10) /* Bit 10:  Cipher */
 #define AES_CTRLA_STARTMODE        (1 << 11) /* Bit 11:  Start mode select */
 #define AES_CTRLA_LOD              (1 << 12) /* Bit 12:  Last output data mode */
@@ -157,8 +160,8 @@
 #define AES_CTRLB_EOM              (1 << 2)  /* Bit 2:  End of message */
 #define AES_CTRLB_GFMUL            (1 << 3)  /* Bit 3:  GF multiplication */
 
-/* Common Bit Definitions for the Interrupt Enable Clear Register, Interrupt Enable Set
- * Register, and Interrupt Flag Status and Clear Register
+/* Common Bit Definitions for the Interrupt Enable Clear Register, Interrupt
+ * Enable Set Register, and Interrupt Flag Status and Clear Register
  */
 
 #define AES_INT_ENCCMP             (1 << 0)  /* Bit 0:  Encryption complete interrupt */
@@ -174,23 +177,29 @@
 #define AES_DBGCTRL_DBGRUN         (1 << 0)  /* Bit 0:  Debug run */
 
 /* Keyword n Register, n = 0-7 (32-value) */
+
 /* Data Register (32-bit value) */
+
 /* Initialization Vector n Register, n=0-3 (32-bit value) */
+
 /* Hash Key n Register, n=0-3 (32-bit value) */
+
 /* Galois Hash n Register, n=0-3 (32-bit value) */
+
 /* Cipher Length Register (32-bit value) */
+
 /* Random Seed Register (32-bit value) */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_AES_H */

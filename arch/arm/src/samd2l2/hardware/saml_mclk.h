@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_mclk.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_MCLK_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_MCLK_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,10 +36,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* MCLK register offsets ************************************************************/
+ ****************************************************************************/
+
+/* MCLK register offsets ****************************************************/
 
 #define SAM_MCLK_CTRLA_OFFSET      0x0000  /* CTRLA register */
 #define SAM_MCLK_INTENCLR_OFFSET   0x0001  /* Interrupt enable clear */
@@ -56,7 +57,7 @@
 #define SAM_MCLK_APBDMASK_OFFSET   0x0020  /* APBD mask */
 #define SAM_MCLK_APBEMASK_OFFSET   0x0024  /* APBE mask */
 
-/* MCLK register addresses **********************************************************/
+/* MCLK register addresses **************************************************/
 
 #define SAM_MCLK_CTRLA             (SAM_MCLK_BASE+SAM_MCLK_CTRLA_OFFSET)
 #define SAM_MCLK_INTENCLR          (SAM_MCLK_BASE+SAM_MCLK_INTENCLR_OFFSET)
@@ -73,15 +74,15 @@
 #define SAM_MCLK_APBDMASK          (SAM_MCLK_BASE+SAM_MCLK_APBDMASK_OFFSET)
 #define SAM_MCLK_APBEMASK          (SAM_MCLK_BASE+SAM_MCLK_APBEMASK_OFFSET)
 
-/* MCLK register bit definitions ****************************************************/
+/* MCLK register bit definitions ********************************************/
 
 /* CTRLA register */
 
 #define MCLK_CTRLA_CFDEN           (1 << 2)  /* Bit 2: Clock Failure Detector Enable */
 #define MCLK_CTRLA_EMCLK           (1 << 4)  /* Bit 4: Emergency Clock Select */
 
-/* Interrupt enable clear, Interrupt enable set, and  Interrupt flag status and
- * clear.
+/* Interrupt enable clear, Interrupt enable set,
+ * and  Interrupt flag status and clear.
  */
 
 #define MCLK_INT_CKRDY             (1 << 0)  /* Bit 0:  Clock ready */
@@ -155,6 +156,7 @@
 /* APBC mask */
 
 #define MCLK_APBCMASK_SERCOM(n)    (1 << (n))  /* Bit n:  SERCOMn APBC clock enable, n=0-4 */
+
 #  define MCLK_APBCMASK_SERCOM0    (1 << 0)  /* Bit 0:  SERCOM0 APBC clock enable */
 #  define MCLK_APBCMASK_SERCOM1    (1 << 1)  /* Bit 1:  SERCOM1 APBC clock enable */
 #  define MCLK_APBCMASK_SERCOM2    (1 << 2)  /* Bit 2:  SERCOM2 APBC clock enable */
@@ -186,17 +188,17 @@
 
 #define MCLK_APBEMASK_PAC          (1 << 0)  /* Bit 0:  PAC APBE clock enable */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_MCLK_H */

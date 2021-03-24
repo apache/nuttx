@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_tc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,27 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_TC_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_TC_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* TC register offsets **************************************************************************/
+/* TC register offsets ******************************************************/
 
-/* Timer channel offsets (with respect to timer base offset at 0x00, 0x40, and 0x80 */
+/* Timer channel offsets
+ *(with respect to timer base offset at 0x00, 0x40, and 0x80
+ */
 
 #define SAM_TC_CCR_OFFSET            0x0000 /* Channel Control Register */
 #define SAM_TC_CMR_OFFSET            0x0004 /* Channel Mode Register */
@@ -76,7 +78,7 @@
 #  define SAM_TC_WPMR_OFFSET         0xe4 /* Write Protect Mode Register */
 #endif
 
-/* TC register addresses ************************************************************************/
+/* TC register addresses ****************************************************/
 
 #define SAM_TC0_CCR                  (SAM_TC0_BASE+SAM_TC_CCR_OFFSET)
 #define SAM_TC0_CMR                  (SAM_TC0_BASE+SAM_TC_CMR_OFFSET)
@@ -296,8 +298,9 @@
 #  define SAM_TC_QISR                (SAM_TC_BASE+SAM_TC_QISR_OFFSET)
 #endif
 
-/* TC register bit definitions ******************************************************************/
-/* Timer channel registers **********************************************************************/
+/* TC register bit definitions **********************************************/
+
+/* Timer channel registers **************************************************/
 
 /* TC Channel Control Register */
 
@@ -325,6 +328,7 @@
 #  define TC_CMR_BURST_XC0           (1 << TC_CMR_BURST_SHIFT) /* XC0 ANDed with selected clock */
 #  define TC_CMR_BURST_XC1           (2 << TC_CMR_BURST_SHIFT) /* XC1 ANDed with selected clock */
 #  define TC_CMR_BURST_XC2           (3 << TC_CMR_BURST_SHIFT) /* XC2 ANDed with selected clock */
+
 #define TC_CMR_WAVE                  (1 << 15) /* Bit 15: Waveform Mode */
 
 /* TC Channel Mode Register -- Capture mode only */
@@ -337,6 +341,7 @@
 #  define TC_CMR_ETRGEDG_REDGE       (1 << TC_CMR_ETRGEDG_SHIFT) /* Rising edge */
 #  define TC_CMR_ETRGEDG_FEDGE       (2 << TC_CMR_ETRGEDG_SHIFT) /* Falling edge */
 #  define TC_CMR_ETRGEDG_EACH        (3 << TC_CMR_ETRGEDG_SHIFT) /* Each */
+
 #define TC_CMR_ABETRG                (1 << 10) /* Bit 10: TIOA or TIOB External Trigger Selection */
 #define TC_CMR_CPCTRG                (1 << 14) /* Bit 14: RC Compare Trigger Enable */
 #define TC_CMR_LDRA_SHIFT            (16)      /* Bits 16-17: RA Loading Selection */
@@ -345,6 +350,7 @@
 #  define TC_CMR_LDRA_REDGE          (1 << TC_CMR_LDRA_SHIFT) /* Rising edge of TIOA */
 #  define TC_CMR_LDRA_FEDGE          (2 << TC_CMR_LDRA_SHIFT) /* Falling edge of TIOA */
 #  define TC_CMR_LDRA_EACH           (3 << TC_CMR_LDRA_SHIFT) /* Each  edge of TIOA */
+
 #define TC_CMR_LDRB_SHIFT            (18)      /* Bits 18-19: RB Loading Selection */
 #define TC_CMR_LDRB_MASK             (3 << TC_CMR_LDRB_SHIFT)
 #  define TC_CMR_LDRB_NONE           (0 << TC_CMR_LDRB_SHIFT) /* None */
@@ -372,12 +378,14 @@
 #  define TC_CMR_EEVTEDG_REDGE       (1 << TC_CMR_EEVTEDG_SHIFT) /* Rising edge */
 #  define TC_CMR_EEVTEDG_FEDGE       (2 << TC_CMR_EEVTEDG_SHIFT) /* Falling edge */
 #  define TC_CMR_EEVTEDG_EACH        (3 << TC_CMR_EEVTEDG_SHIFT) /* Each edge */
+
 #define TC_CMR_EEVT_SHIFT            (10)      /* Bits 10-11: External Event Selection (Waveform mode) */
 #define TC_CMR_EEVT_MASK             (3 << TC_CMR_EEVT_SHIFT)
 #  define TC_CMR_EEVT_TIOB           (0 << TC_CMR_EEVT_SHIFT) /* TIOB input */
 #  define TC_CMR_EEVT_XC0            (1 << TC_CMR_EEVT_SHIFT) /* XC0 output */
 #  define TC_CMR_EEVT_XC1            (2 << TC_CMR_EEVT_SHIFT) /* XC1 output */
 #  define TC_CMR_EEVT_XC2            (3 << TC_CMR_EEVT_SHIFT) /* XC2 output */
+
 #define TC_CMR_ENETRG                (1 << 12) /* Bit 12: External Event Trigger Enable (Waveform mode) */
 #define TC_CMR_WAVSEL_SHIFT          (13)      /* Bits 13-14: Waveform Selection (Waveform mode) */
 #define TC_CMR_WAVSEL_MASK           (3 << TC_CMR_WAVSEL_SHIFT)
@@ -385,6 +393,7 @@
 #  define TC_CMR_WAVSEL_UPDWN        (1 << TC_CMR_WAVSEL_SHIFT) /* UPDOWN mode w/o  auto trigger (Waveform mode) */
 #  define TC_CMR_WAVSEL_UPAUTO       (2 << TC_CMR_WAVSEL_SHIFT) /* UP mode with auto trigger (Waveform mode) */
 #  define TC_CMR_WAVSEL_UPDWNAUTO    (3 << TC_CMR_WAVSEL_SHIFT) /* UPDOWN mode with auto trigger (Waveform mode) */
+
 #define TC_CMR_ACPA_SHIFT            (16)      /* Bits 16-17: RA Compare Effect on TIOA (Waveform mode) */
 #define TC_CMR_ACPA_MASK             (3 << TC_CMR_ACPA_SHIFT)
 #  define TC_CMR_ACPA_NONE           (0 << TC_CMR_ACPA_SHIFT)
@@ -463,7 +472,10 @@
 #  define TC_RVALUE_MASK             (0x0000ffff)
 #endif
 
-/* TC Status Register, TC Interrupt Enable Register, TC Interrupt Disable Register, and  TC Interrupt Mask Register common bit-field definitions */
+/* TC Status Register, TC Interrupt Enable Register,
+ * TC Interrupt Disable Register, and
+ * TC Interrupt Mask Register common bit-field definitions
+ */
 
 #define TC_INT_COVFS                 (1 << 0)  /* Bit 0:  Counter Overflow */
 #define TC_INT_LOVRS                 (1 << 1)  /* Bit 1:  Load Overrun */
@@ -493,14 +505,17 @@
 #  define TC_EMR_TRIGSRCA_MASK       (3 << TC_EMR_TRIGSRCA_SHIFT)
 #    define TC_EMR_TRIGSRCA_TIOA     (0 << TC_EMR_TRIGSRCA_SHIFT) /* Input A driven by pin TIOAx */
 #    define TC_EMR_TRIGSRCA_PWM      (1 << TC_EMR_TRIGSRCA_SHIFT) /* Input A driven by PWMx */
+
 #  define TC_EMR_TRIGSRCB_SHIFT      (5)       /* Bits 4-5: Trigger source for input B */
 #  define TC_EMR_TRIGSRCB_MASK       (3 << TC_EMR_TRIGSRCB_SHIFT)
 #    define TC_EMR_TRIGSRCB_TIOA     (0 << TC_EMR_TRIGSRCB_SHIFT) /* Input B driven by pin TIOBx */
 #    define TC_EMR_TRIGSRCB_PWM      (1 << TC_EMR_TRIGSRCB_SHIFT) /* Input B driven by PWMx */
+
 #  define TC_EMR_NODIVCLK            (1 << 8)  /* Bit 8:  NO DIVided CLocK */
 #endif
 
-/* Timer common registers ***********************************************************************/
+/* Timer common registers ***************************************************/
+
 /* TC Block Control Register */
 
 #define TC_BCR_SYNC                  (1 << 0)  /* Bit 0: Synchro Command */
@@ -566,16 +581,16 @@
 #    define TC_WPMR_WPKEY            (0x0054494d << TC_WPMR_WPKEY_SHIFT)
 #endif
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_TC_H */

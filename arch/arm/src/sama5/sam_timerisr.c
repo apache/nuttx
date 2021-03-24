@@ -39,6 +39,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The PIT counter runs at a rate of the main clock (MCK) divided by 16.
  *
  * On the SAMA5D4, the clocking to the PIC may be divided down from MCK.

@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_gclk.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_GCLK_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_GCLK_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,10 +36,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* GCLK register offsets ********************************************************************/
+ ****************************************************************************/
+
+/* GCLK register offsets ****************************************************/
 
 #define SAM_GCLK_CTRLA_OFFSET        0x0000 /* Control register */
 #define SAM_GCLK_SYNCHBUSY_OFFSET    0x0004 /* Status register */
@@ -47,7 +48,7 @@
 #define SAM_GCLK_GENCTRL_OFFSET(n)   (0x0020 + ((n) << 2)) /* General clock generator n */
 #define SAM_GCLK_PCHCTRL_OFFSET(m)   (0x0080 + ((m) << 2)) /* Peripheral channel control m */
 
-/* GCLK register addresses ******************************************************************/
+/* GCLK register addresses **************************************************/
 
 #define SAM_GCLK_CTRLA               (SAM_GCLK_BASE+SAM_GCLK_CTRLA_OFFSET)
 #define SAM_GCLK_SYNCHBUSY           (SAM_GCLK_BASE+SAM_GCLK_SYNCHBUSY_OFFSET)
@@ -55,7 +56,7 @@
 #define SAM_GCLK_GENCTRL(n)          (SAM_GCLK_BASE+SAM_GCLK_GENCTRL_OFFSET(n))
 #define SAM_GCLK_PCHCTRL(m)          (SAM_GCLK_BASE+SAM_GCLK_PCHCTRL_OFFSET(m))
 
-/* GCLK register bit definitions ************************************************************/
+/* GCLK register bit definitions ********************************************/
 
 /* Control register */
 
@@ -64,7 +65,9 @@
 /* Status register */
 
 #define GCLK_SYNCHBUSY_SWRST         (1 << 0)  /* Bit 0:  SWRST synchronization busy */
+
 #define GCLK_SYNCHBUSY_GENCTRL(n)    (1 << ((n) + 2))  /* Bit n+2: Generator control n busy */
+
 #  define GCLK_SYNCHBUSY_GENCTRL0    (1 << 2)  /* Bit 2:  Generator control 0 busy */
 #  define GCLK_SYNCHBUSY_GENCTRL1    (1 << 3)  /* Bit 3:  Generator control 1 busy */
 #  define GCLK_SYNCHBUSY_GENCTRL2    (1 << 4)  /* Bit 4:  Generator control 2 busy */
@@ -88,6 +91,7 @@
 #  define GCLK_GENCTRL_SRC_OSC16M    (6 << GCLK_GENCTRL_SRC_SHIFT) /* OSC16M oscillator output */
 #  define GCLK_GENCTRL_SRC_DFLL48M   (7 << GCLK_GENCTRL_SRC_SHIFT) /* DFLL48M output */
 #  define GCLK_GENCTRL_SRC_DPLL96M   (8 << GCLK_GENCTRL_SRC_SHIFT) /* DPLL96M output */
+
 #define GCLK_GENCTRL_GENEN           (1 << 8)  /* Bit 8:  Generator enable */
 #define GCLK_GENCTRL_IDC             (1 << 9)  /* Bit 9:  Improve duty cycle */
 #define GCLK_GENCTRL_OOV             (1 << 10) /* Bit 10: Clock output selection */
@@ -118,7 +122,7 @@
 #define GCLK_PCHCTRL_CHEN            (1 << 6)  /* Bit 6:  Channel enable */
 #define GCLK_PCHCTRL_WRTLOCK         (1 << 7)  /* Bit 7:  Write lock */
 
-/* PCHCTRL channel mapping ******************************************************************/
+/* PCHCTRL channel mapping **************************************************/
 
 #define GCLK_CHAN_DFLL48M_REF        0         /* DFLL48M Reference */
 #define GCLK_CHAN_DPLL               1         /* FDPLL96M input clock source for reference */
@@ -164,17 +168,17 @@
 #define GCLK_CHAN_PTC                33        /* PTC */
 #define GCLK_CHAN_CCL                34        /* CCL */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_GCLK_H */

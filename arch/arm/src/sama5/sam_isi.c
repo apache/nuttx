@@ -58,6 +58,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure defines the overall state of the ISI interface */
 
 struct sam_isi_s
@@ -107,6 +108,7 @@ int sam_isi_initialize(void)
   int ret;
 
   /* Configure PIO pins for the ISI (outputs) */
+
   /* Data pins */
 
   sam_configpio(PIO_ISI_D0);
@@ -144,7 +146,8 @@ int sam_isi_initialize(void)
    * initialized?
    */
 
-  g_isi.actual = sam_pck_configure(ISI_PCKID, PCKSRC_MCK, CONFIG_ISI_MCKFREQ);
+  g_isi.actual = sam_pck_configure(ISI_PCKID, PCKSRC_MCK,
+                                   CONFIG_ISI_MCKFREQ);
   ginfo("PCK%d frequency=%d actual=%d\n",
         ISI_PCKID, CONFIG_ISI_MCKFREQ, g_isi.actual);
 

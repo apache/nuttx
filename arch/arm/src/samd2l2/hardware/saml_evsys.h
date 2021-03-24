@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_evsys.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_EVSYS_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_EVSYS_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,10 +36,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* EVSYS register offsets *******************************************************************/
+ ****************************************************************************/
+
+/* EVSYS register offsets ***************************************************/
 
 #define SAM_EVSYS_CTRLA_OFFSET             0x0000  /* Control register */
 #define SAM_EVSYS_CHSTATUS_OFFSET          0x000c  /* Channel status register */
@@ -47,10 +48,11 @@
 #define SAM_EVSYS_INTENSET_OFFSET          0x0014  /* Interrupt enable set register */
 #define SAM_EVSYS_INTFLAG_OFFSET           0x0018  /* Interrupt flag status and clear register */
 #define SAM_EVSYS_SWEVT_OFFSET             0x001c  /* Event user */
+
 #define SAM_EVSYS_CHANNEL_OFFSET(n)  (0x0020 + ((n) << 2)) /* Channel registers */
 #define SAM_EVSYS_USER_OFFSET(n)     (0x0080 + ((m) << 2)) /* User registers */
 
-/* EVSYS register addresses *****************************************************************/
+/* EVSYS register addresses *************************************************/
 
 #define SAM_EVSYS_CTRLA                    (SAM_EVSYS_BASE+SAM_EVSYS_CTRLA_OFFSET)
 #define SAM_EVSYS_CHSTATUS                 (SAM_EVSYS_BASE+SAM_EVSYS_CHSTATUS_OFFSET
@@ -61,7 +63,7 @@
 #define SAM_EVSYS_CHANNEL_BASE(n)          (SAM_EVSYS_BASE+SAM_EVSYS_CHANNEL_OFFSET(n))
 #define SAM_EVSYS_USER_BASE(n)             (SAM_EVSYS_BASE+SAM_EVSYS_USER_OFFSET(n))
 
-/* EVSYS register bit definitions ***********************************************************/
+/* EVSYS register bit definitions *******************************************/
 
 /* Control register */
 
@@ -76,7 +78,9 @@
 #define EVSYS_CHSTATUS_CHBUSY_MASK         (0xfff << EVSYS_CHSTATUS_CHBUSY_SHIFT)
 #  define EVSYS_CHSTATUS_CHBUSY(n)         ((uint32_t)(n) << EVSYS_CHSTATUS_CHBUSY_SHIFT)
 
-/* Interrupt enable clear, interrupt enable set, and interrupt flag status and clear registers */
+/* Interrupt enable clear, interrupt enable set,
+ * and interrupt flag status and clear registers
+ */
 
 #define EVSYS_INT_OVR_SHIFT                (0)       /* Bits 0-7: Overrun channel n interrupt, n= 0-11 */
 #define EVSYS_INT_OVR_MASK                 (0xfff << EVSYS_INT_OVR_SHIFT)
@@ -178,17 +182,20 @@
 #  define EVSYS_CHANNEL_EVGEN_CCL_LUTOUT2  (0x50 << EVSYS_CHANNEL_EVGEN_SHIFT) /* CCL output 2 */
 #  define EVSYS_CHANNEL_EVGEN_CCL_LUTOUT3  (0x51 << EVSYS_CHANNEL_EVGEN_SHIFT) /* CCL output 3 */
 #  define EVSYS_CHANNEL_EVGEN_PAC_ACCERR   (0x52 << EVSYS_CHANNEL_EVGEN_SHIFT) /* PAC access error */
+
 #define EVSYS_CHANNEL_PATH_SHIFT           (8)       /* Bits 8-9: Path selection */
 #define EVSYS_CHANNEL_PATH_MASK            (3 << EVSYS_CHANNEL_PATH_SHIFT)
 #  define EVSYS_CHANNEL_PATH_SYNCH         (0 << EVSYS_CHANNEL_PATH_SHIFT) /* Synchronized path */
 #  define EVSYS_CHANNEL_PATH_RESYNCH       (1 << EVSYS_CHANNEL_PATH_SHIFT) /* Resynchronized path */
 #  define EVSYS_CHANNEL_PATH_ASYNCH        (2 << EVSYS_CHANNEL_PATH_SHIFT) /* Asynchronous path */
+
 #define EVSYS_CHANNEL_EDGESEL_SHIFT        (10)      /* Bits 10-11: Edge dection selection */
 #define EVSYS_CHANNEL_EDGESEL_MASK         (3 << EVSYS_CHANNEL_EDGESEL_SHIFT)
 #  define EVSYS_CHANNEL_EDGESEL_NONE       (0 << EVSYS_CHANNEL_EDGESEL_SHIFT) /* No event output */
 #  define EVSYS_CHANNEL_EDGESEL_RISING     (1 << EVSYS_CHANNEL_EDGESEL_SHIFT) /* Detect on rising edge */
 #  define EVSYS_CHANNEL_EDGESEL_FALLING    (2 << EVSYS_CHANNEL_EDGESEL_SHIFT) /* Detect on falling edge */
 #  define EVSYS_CHANNEL_EDGESEL_BOTH       (3 << EVSYS_CHANNEL_EDGESEL_SHIFT) /* Detect on both edges */
+
 #define EVSYS_CHANNEL_RUNSTDBY             (1 << 14) /* Bit 14: Run in standby */
 #define EVSYS_CHANNEL_ONDEMAND             (1 << 15) /* Bit 15: Generic clock on-demand */
 
@@ -197,9 +204,10 @@
 #define EVSYS_USER_CHANNEL_SHIFT           (0)       /* Bits 0-5: Channel number */
 #define EVSYS_USER_CHANNEL_MASK            (63 << EVSYS_USER_CHANNEL_SHIFT)
 #  define EVSYS_USER_CHANNEL_NONE          (0 << EVSYS_USER_CHANNEL_SHIFT) /* No channel output selected */
+
 #  define EVSYS_USER_CHANNEL(n)            ((uint32_t)((n)+1) << EVSYS_USER_CHANNEL_SHIFT) /* Channel n */
 
-/* User multiplexer numbers  ****************************************************************/
+/* User multiplexer numbers  ************************************************/
 
 #define EVSYS_USER_PORT_EV0                0         /* Event 0 */
 #define EVSYS_USER_PORT_EV1                1         /* Event 1 */
@@ -230,17 +238,17 @@
 #define EVSYS_USER_TC0                     26        /* TC0 */
 #define EVSYS_USER_TC1                     27        /* TC1 */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_EVSYS_H */

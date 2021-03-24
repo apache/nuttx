@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/sam_dmac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_SAM_DMAC_H
 #define __ARCH_ARM_SRC_SAMD2L2_SAM_DMAC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -43,22 +43,26 @@
 #  error Unrecognized SAMD/L architecture
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* DMA ******************************************************************************/
+/* DMA **********************************************************************/
 
-/* Flags used to characterize the desired DMA channel.  The naming convention is that
- * one side is the peripheral and the other is memory (however, the interface could still
- * be used if, for example, both sides were memory although the naming would be awkward)
+/* Flags used to characterize the desired DMA channel.  The naming convention
+ * is that one side is the peripheral and the other is memory (however, the
+ * interface could still be used if, for example, both sides were memory
+ * although the naming would be awkward)
  */
 
 /* Common characteristics
  *
- *   BEATSIZE - The size of one bus transfer or "beat".  8-, 16-, or 32-bits
- *   STEPSIZE - When the address is incremented, it is increments by how many "beats"?
- *   STEPSEL  - The STEPSIZE may be applied only to the memory to the peripheral.
+ *   BEATSIZE - The size of one bus transfer or "beat".  8-, 16-,
+ *               or 32-bits
+ *   STEPSIZE - When the address is incremented, it is increments
+ *               by how many "beats"?
+ *   STEPSEL  - The STEPSIZE may be applied only to the memory to
+ *               the peripheral.
  */
 
 #define DMACH_FLAG_BEATSIZE_SHIFT        (0)       /* Bits 0-1: Beat size */
@@ -66,6 +70,7 @@
 #  define DMACH_FLAG_BEATSIZE_BYTE       (0 << DMACH_FLAG_BEATSIZE_SHIFT) /* 8-bit bus transfer */
 #  define DMACH_FLAG_BEATSIZE_HWORD      (1 << DMACH_FLAG_BEATSIZE_SHIFT) /* 16-bit bus transfer */
 #  define DMACH_FLAG_BEATSIZE_WORD       (2 << DMACH_FLAG_BEATSIZE_SHIFT) /* 32-bit bus transfer */
+
 #define DMACH_FLAG_STEPSEL               (1 << 2) /* Bit 2: Step selection */
 #  define DMACH_FLAG_STEPSEL_MEM         (0)      /*        0=Step size applies to memory */
 #  define DMACH_FLAG_STEPSEL_PERIPH      (1 << 2) /*        1=Step size applies to peripheral */
@@ -79,6 +84,7 @@
 #  define DMACH_FLAG_STEPSIZE_X32        (5 << DMACH_FLAG_STEPSIZE_SHIFT) /* Next ADDR = ADDR + (BEATSIZE+1) * 32 */
 #  define DMACH_FLAG_STEPSIZE_X64        (6 << DMACH_FLAG_STEPSIZE_SHIFT) /* Next ADDR = ADDR + (BEATSIZE+1) * 64 */
 #  define DMACH_FLAG_STEPSIZE_X128       (7 << DMACH_FLAG_STEPSIZE_SHIFT) /* Next ADDR = ADDR + (BEATSIZE+1) * 128 */
+
 #define DMACH_FLAG_PRIORITY_SHIFT        (6)       /* Bit 6-7: Arbitration priority */
 #define DMACH_FLAG_PRIORITY_MASK         (3 << DMACH_FLAG_PRIORITY_SHIFT)
 #  define DMACH_FLAG_PRIORITY(n)         ((uint32_t)(n) << DMACH_FLAG_PRIORITY_SHIFT)
@@ -86,14 +92,18 @@
 
 /* Peripheral endpoint characteristics.
  *
- * PERIPH_TXTRIG    - The TX ID of the peripheral that provides the DMA trigger.  This
- *                    is one of the DMA_TRIGSRC_*[_TX] definitions.  This trigger source
- *                    is selected when sam_dmatxsetup() is called.
- * PERIPH_RXTRIG    - The RX ID of the peripheral that provides the DMA trigger.  This
- *                    is one of the DMA_TRIGSRC_*[_RX] definitions.  This trigger source
- *                    is selected when sam_dmarxsetup() is called.
- * PERIPH_INCREMENT - Indicates that the peripheral address should be incremented on
- *                    each "beat"
+ * PERIPH_TXTRIG    - The TX ID of the peripheral that provides the DMA
+ *                     trigger.
+ *                    This is one of the DMA_TRIGSRC_*[_TX] definitions.
+ *                    This trigger source is selected when sam_dmatxsetup()
+ *                    is called.
+ * PERIPH_RXTRIG    - The RX ID of the peripheral that provides the DMA
+ *                    trigger.
+ *                    This is one of the DMA_TRIGSRC_*[_RX] definitions.
+ *                    This trigger source is selected when sam_dmarxsetup()
+ *                    is called.
+ * PERIPH_INCREMENT - Indicates that the peripheral address should be
+ *                    incremented on each "beat"
  * PERIPH_QOS       - Quality of service for peripheral accesses
  */
 
@@ -113,8 +123,8 @@
 
 /* Memory endpoint characteristics
  *
- * MEM_INCREMENT - Indicates that the memory address should be incremented on each
- *                 "beat"
+ * MEM_INCREMENT - Indicates that the memory address should be incremented on
+ *                 each "beat"
  * MEM_QOS       - Quality of service for memory accesses
  */
 
@@ -125,16 +135,19 @@
 #  define DMACH_FLAG_MEM_QOS_LOW         (1 << DMACH_FLAG_MEM_QOS_SHIFT) /* Sensitive bandwidth */
 #  define DMACH_FLAG_MEM_QOS_MEDIUM      (2 << DMACH_FLAG_MEM_QOS_SHIFT) /* Sensitive latency */
 #  define DMACH_FLAG_MEM_QOS_HIGH        (3 << DMACH_FLAG_MEM_QOS_SHIFT) /* Critical latency */
+
                                                    /* Bits 27-31: Not used */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 typedef FAR void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 
-/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
+/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA
+ * is selected
+ */
 
 #ifdef CONFIG_DEBUG_DMA_INFO
 struct sam_dmaregs_s
@@ -167,15 +180,15 @@ struct sam_dmaregs_s
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -186,119 +199,124 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_dmachannel
  *
  * Description:
- *   Allocate a DMA channel.  This function sets aside a DMA channel and gives the
- *   caller exclusive access to the DMA channel.
+ *   Allocate a DMA channel.
+ *   This function sets aside a DMA channel and gives the caller exclusive
+ *   access to the DMA channel.
  *
- *   The naming convention in all of the DMA interfaces is that one side is the
- *   'peripheral' and the other is 'memory'.  However, the interface could still be
- *   used if, for example, both sides were memory although the naming would be
- *   awkward.
+ *   The naming convention in all of the DMA interfaces is that one side is
+ *   the 'peripheral' and the other is 'memory'.  However, the interface
+ *   could still be used if, for example, both sides were memory although
+ *   the naming would be awkward.
  *
  * Returned Value:
- *   If a DMA channel if the required FIFO size is available, this function returns
- *   a non-NULL, void* DMA channel handle.  NULL is returned on any failure.
+ *   If a DMA channel if the required FIFO size is available, this function
+ *   returns a non-NULL, void* DMA channel handle.
+ *   NULL is returned on any failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 DMA_HANDLE sam_dmachannel(uint32_t chflags);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_dmaconfig
  *
  * Description:
  *   There are two channel usage models:  (1) The channel is allocated and
- *   configured in one step.  This is the typical case where a DMA channel performs
- *   a constant role.  The alternative is (2) where the DMA channel is reconfigured
- *   on the fly. In this case, the chflags provided to sam_dmachannel are not used
- *   and sam_dmaconfig() is called before each DMA to configure the DMA channel
- *   appropriately.
+ *   configured in one step.  This is the typical case where a DMA channel
+ *   performs a constant role.  The alternative is (2) where the DMA channel
+ *   is reconfigured on the fly. In this case, the chflags provided to
+ *   sam_dmachannel are not used and sam_dmaconfig() is called before each
+ *   DMA to configure the DMA channel appropriately.
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_dmaconfig(DMA_HANDLE handle, uint32_t chflags);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_dmafree
  *
  * Description:
- *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must NEVER be
- *   used again until sam_dmachannel() is called again to re-gain a valid handle.
+ *   Release a DMA channel.
+ *   NOTE:  The 'handle' used in this argument must NEVER be used again until
+ *   sam_dmachannel() is called again to re-gain a valid handle.
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_dmafree(DMA_HANDLE handle);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_dmatxsetup
  *
  * Description:
- *   Configure DMA for transmit of one buffer (memory to peripheral).  This function
- *   may be called multiple times to handle large and/or non-contiguous transfers.
- *   Calls to sam_dmatxsetup() and sam_dmarxsetup() must not be intermixed on the
- *   same transfer, however.
+ *   Configure DMA for transmit of one buffer (memory to peripheral).
+ *   This function may be called multiple times to handle large and/or
+ *   non-contiguous transfers.
+ *   Calls to sam_dmatxsetup() and sam_dmarxsetup() must not be intermixed
+ *   on the same transfer, however.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
                    size_t nbytes);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_dmarxsetup
  *
  * Description:
- *   Configure DMA for receipt of one buffer (peripheral to memory).  This function
- *   may be called multiple times to handle large and/or non-contiguous transfers.
- *   Calls to sam_dmatxsetup() and sam_dmarxsetup() must not be intermixed on the
- *   same transfer, however.
+ *   Configure DMA for receipt of one buffer (peripheral to memory).
+ *   This function may be called multiple times to handle large and/or
+ *   non-contiguous transfers.
+ *   Calls to sam_dmatxsetup() and sam_dmarxsetup() must not be intermixed
+ *   on the same transfer, however.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
                    size_t nbytes);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_dmastart
  *
  * Description:
  *   Start the DMA transfer
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_dmastop
  *
  * Description:
  *   Cancel the DMA.  After sam_dmastop() is called, the DMA channel is
- *   reset and sam_dmarx/txsetup() must be called before sam_dmastart() can be
- *   called again
+ *   reset and sam_dmarx/txsetup() must be called before sam_dmastart()
+ *   can be called again
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_dmastop(DMA_HANDLE handle);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_dmasample
  *
  * Description:
  *   Sample DMA register contents
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs);
@@ -306,13 +324,13 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs);
 #  define sam_dmasample(handle,regs)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_dmadump
  *
  * Description:
  *   Dump previously sampled DMA register contents
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,

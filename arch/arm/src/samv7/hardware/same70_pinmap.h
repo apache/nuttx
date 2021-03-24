@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/same70_pinmap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,26 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAME70_PINMAP_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAME70_PINMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "sam_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* GPIO pin definitions *************************************************************/
+/* GPIO pin definitions *****************************************************/
+
 /* Alternate Pin Functions
  *
  * These are mostly for reference and are not in pin configuration.
@@ -115,21 +116,21 @@
 
 /* Peripheral Pin Functions.
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
- * Drivers, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.  For example, if we
- * wanted the UART1 TX output PCK0 on PA4, then the following definition
- * should appear in the board.h header file for that board:
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc. Drivers, however, will use the pin selection without the numeric
+ * suffix. Additional definitions are required in the board.h file.  For
+ * example, if we wanted the UART1 TX output PCK0 on PA4, then the following
+ * definition should appear in the board.h header file for that board:
  *
  * #define GPIO_UART1_TXD GPIO_UART1_TXD_1
  *
  * The driver will then automatically configure PA6 as the PCK0 pin.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific GPIO options such as frequency,
- * open-drain/push-pull, and pull-up/down!  Just the basics are defined for most
- * pins in this file.
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific GPIO options such as
+ * frequency, open-drain/push-pull, and pull-up/down!  Just the basics are
+ * defined for most pins in this file.
  */
 
 /* Analog Front End (AFE) */
@@ -519,19 +520,19 @@
 #define GPIO_USART2_SCK      (GPIO_PERIPHB | GPIO_CFG_DEFAULT | GPIO_PORT_PIOD | GPIO_PIN17)
 #define GPIO_USART2_TXD      (GPIO_PERIPHB | GPIO_CFG_DEFAULT | GPIO_PORT_PIOD | GPIO_PIN16)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -542,9 +543,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

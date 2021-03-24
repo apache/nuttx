@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd21_pinmap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
@@ -26,35 +26,37 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD21_PINMAP_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD21_PINMAP_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* GPIO pin definitions *********************************************************************/
+ ****************************************************************************/
+
+/* GPIO pin definitions *****************************************************/
+
 /* Alternate Pin Functions.
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
- * Drivers, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.  For example, if we
- * wanted the SERCOM0 PAD0 on PA8, then the following definition should appear in
- * the board.h header file for that board:
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc. Drivers, however, will use the pin selection without the numeric
+ * suffix. Additional definitions are required in the board.h file.
+ * For example, if we wanted the SERCOM0 PAD0 on PA8, then the following
+ * definition should appear in the board.h header file for that board:
  *
  * #define PORT_SERCOM0_PAD0 PORT_SERCOM0_PAD0_1
  *
  * The driver will then automatically configure PA8 as the SERCOM0 PAD0 pin.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific GPIO options such as frequency,
- * open-drain/push-pull, and pull-up/down!  Just the basics are defined for most
- * pins in this file.
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific GPIO options such as
+ * frequency, open-drain/push-pull, and pull-up/down!  Just the basics are
+ * defined for most pins in this file.
  */
 
 /* Analog comparator */
@@ -387,16 +389,16 @@
 #define PORT_PTC_Y14          (PORT_PTC_FUNCB | PORTB | PORT_PTC_PIN8)
 #define PORT_PTC_Y15          (PORT_PTC_FUNCB | PORTB | PORT_PTC_PIN9)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD21_PINMAP_H */

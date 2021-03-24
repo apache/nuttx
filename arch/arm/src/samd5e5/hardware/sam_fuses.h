@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_fuses.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,27 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_FUSES_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_FUSES_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* NVM Fuse addresses **********************************************************************/
+ ****************************************************************************/
 
-/* NVM user row bits.  The first eight 32-bit words contains calibration information that
- * are automatically read at device power-on.  The remaining 480 bytes can be used for
- * storing custom parameters.
+/* NVM Fuse addresses *******************************************************/
+
+/* NVM user row bits.  The first eight 32-bit words contains calibration
+ * information that are automatically read at device power-on.
+ *  The remaining 480 bytes can be used for storing custom parameters.
  */
 
 #define SAM_NVMUSER_ROW0                 (SAM_NVM_USERPAGE + 0x0000)   /* Bits 0-31 */
@@ -60,7 +61,8 @@
 #define SAM_NVM_CALIBTEMP2               (SAM_NVM_CALIBAREA + 0x0080) /* Bits 64-95 */
 #define SAM_NVM_CALIBTEMP3               (SAM_NVM_CALIBAREA + 0x0080) /* Bits 96-127 */
 
-/* Fuse bit-field definitions **************************************************************/
+/* Fuse bit-field definitions ***********************************************/
+
 /* NVM user pages */
 
 #define SAM_FUSES_BOD33_DIS_ADDR         SAM_NVMUSER_ROW0
@@ -89,7 +91,7 @@
 #define SAM_FUSES_NVM_BOOT_MASK          (15 << SAM_FUSES_NVM_BOOT_SHIFT)
 #  define SAM_FUSES_NVM_BOOT(n)          (((uint32_t)n) << SAM_FUSES_NVM_BOOT_SHIFT)
 
-                                                  /* Bits 30-31: Factor settings */
+                                          /* Bits 30-31: Factor settings */
 
 #define SAM_FUSES_SEESBLK_ADDR           SAM_NVMUSER_ROW1
 #define SAM_FUSES_SEESBLK_SHIFT          (0)      /* Bits 32-35: NVM Bootloader Size */
@@ -105,7 +107,7 @@
 #define SAM_FUSES_RAM_ECCDIS_SHIFT       (7)      /* Bit 39: SmartEEPROM Page Size */
 #define SAM_FUSES_RAM_ECCDIS_MASK        (1 << SAM_FUSES_RAM_ECCDIS_SHIFT)
 
-                                                  /* Bits 40-47: Factor settings */
+                                          /* Bits 40-47: Factor settings */
 
 #define SAM_FUSES_WDT_ENA_ADDR           SAM_NVMUSER_ROW1
 #define SAM_FUSES_WDT_ENA_SHIFT          (16)      /* Bit 48: WDT Enable */
@@ -133,16 +135,18 @@
 #define SAM_FUSES_WDT_WEN_SHIFT          (30)      /* Bit 62: WDT Window Mode Enable*/
 #define SAM_FUSES_WDT_WEN_MASK           (1 << SAM_FUSES_WDT_WEN_SHIFT)
 
-                                                   /* Bit 63: Reserved */
+                                           /* Bit 63: Reserved */
 
 #define SAM_FUSES_LOCK_ADDR              SAM_NVMUSER_ROW2
 #define SAM_FUSES_LOCK_SHIFT             (0)       /* Bits 64-95: NVM Region Lock bits */
 #define SAM_FUSES_LOCK_MASK              (0xffffffff << SAM_FUSES_LOCK_SHIFT)
 #  define SAM_FUSES_LOCK(n)              ((uint32_t)(n) << SAM_FUSES_LOCK_SHIFT)
 
-                                                   /* Bits 96-127: Usage page */
-                                                   /* Bits 128-159: Reserved */
-                                                   /* Bits 160-255: User pages */
+                                           /* Bits 96-127: Usage page */
+
+                                           /* Bits 128-159: Reserved */
+
+                                           /* Bits 160-255: User pages */
 
 /* NVM Calibration Area */
 
@@ -166,7 +170,7 @@
 #define SAM_FUSES_ADC0_BIASR2R_MASK         (7 << SAM_FUSES_ADC0_BIASR2R_SHIFT)
 #  define SAM_FUSES_ADC0_BIASR2R(n)         ((uint32_t)(n) << SAM_FUSES_ADC0_BIASR2R_SHIFT)
 
-                                                      /* Bits 11-15: Reserved */
+                                              /* Bits 11-15: Reserved */
 
 #define SAM_FUSES_ADC1_BIASCOMP_ADDR        SAM_NVM_CALIBAREA0
 #define SAM_FUSES_ADC1_BIASCOMP_SHIFT       (16)      /* Bits 16-18: ADC1 Bias comparator scaling */
@@ -183,7 +187,7 @@
 #define SAM_FUSES_ADC1_BIASR2R_MASK         (7 << SAM_FUSES_ADC1_BIASR2R_SHIFT)
 #  define SAM_FUSES_ADC1_BIASR2R(n)         ((uint32_t)(n) << SAM_FUSES_ADC1_BIASR2R_SHIFT)
 
-                                                      /* Bits 25-35: Reserved */
+                                              /* Bits 25-35: Reserved */
 
 #define SAM_FUSES_USBTRANSN_ADDR            SAM_NVM_CALIBAREA1
 #define SAM_FUSES_USBTRANSN_SHIFT           (0)     /* Bits 32-36: USB TRNSN Calibration */
@@ -246,16 +250,16 @@
 
                                                      /* 88-127: Reserved */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_FUSES_H */

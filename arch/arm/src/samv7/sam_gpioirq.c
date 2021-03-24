@@ -108,6 +108,7 @@ static int sam_irqbase(int irq, uint32_t *base, int *pin)
           return OK;
         }
 #endif
+
 #ifdef CONFIG_SAMV7_GPIOB_IRQ
       if (irq <= SAM_IRQ_PB31)
         {
@@ -116,6 +117,7 @@ static int sam_irqbase(int irq, uint32_t *base, int *pin)
           return OK;
         }
 #endif
+
 #ifdef CONFIG_SAMV7_GPIOC_IRQ
       if (irq <= SAM_IRQ_PC31)
         {
@@ -124,6 +126,7 @@ static int sam_irqbase(int irq, uint32_t *base, int *pin)
           return OK;
         }
 #endif
+
 #ifdef CONFIG_SAMV7_GPIOD_IRQ
       if (irq <= SAM_IRQ_PD31)
         {
@@ -132,6 +135,7 @@ static int sam_irqbase(int irq, uint32_t *base, int *pin)
           return OK;
         }
 #endif
+
 #ifdef CONFIG_SAMV7_GPIOE_IRQ
       if (irq <= SAM_IRQ_PE31)
         {
@@ -159,7 +163,8 @@ static int sam_gpiointerrupt(uint32_t base, int irq0, void *context)
   uint32_t bit;
   int      irq;
 
-  pending = getreg32(base + SAM_PIO_ISR_OFFSET) & getreg32(base + SAM_PIO_IMR_OFFSET);
+  pending = getreg32(base + SAM_PIO_ISR_OFFSET) &
+            getreg32(base + SAM_PIO_IMR_OFFSET);
   for (bit = 1, irq = irq0; pending != 0; bit <<= 1, irq++)
     {
       if ((pending & bit) != 0)
@@ -173,6 +178,7 @@ static int sam_gpiointerrupt(uint32_t base, int irq0, void *context)
           pending &= ~bit;
         }
     }
+
   return OK;
 }
 
@@ -317,13 +323,13 @@ void sam_gpioirqinitialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_gpioirq
  *
  * Description:
  *   Configure an interrupt for the specified GPIO pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_gpioirq(gpio_pinset_t pinset)
 {
@@ -360,7 +366,7 @@ void sam_gpioirq(gpio_pinset_t pinset)
           putreg32(pin, base + SAM_PIO_FELLSR_OFFSET); /* Low level/Falling edge */
         }
     }
-   else
+  else
     {
       /* No.. Disable additional interrupt mode */
 
@@ -368,13 +374,13 @@ void sam_gpioirq(gpio_pinset_t pinset)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_gpioirqenable(int irq)
 {
@@ -385,18 +391,19 @@ void sam_gpioirqenable(int irq)
     {
       /* Clear (all) pending interrupts and enable this pin interrupt */
 
-      //(void)getreg32(base + SAM_PIO_ISR_OFFSET);
+      /* (void)getreg32(base + SAM_PIO_ISR_OFFSET); */
+
       putreg32((1 << pin), base + SAM_PIO_IER_OFFSET);
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_gpioirqdisable(int irq)
 {

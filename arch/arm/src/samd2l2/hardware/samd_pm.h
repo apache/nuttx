@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_pm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
@@ -28,9 +28,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_PM_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_PM_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -38,10 +38,11 @@
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* PM register offsets ********************************************************************/
+ ****************************************************************************/
+
+/* PM register offsets ******************************************************/
 
 #define SAM_PM_CTRL_OFFSET        0x0000  /* Control register */
 #define SAM_PM_SLEEP_OFFSET       0x0001  /* Sleep mode register */
@@ -58,7 +59,7 @@
 #define SAM_PM_INTFLAG_OFFSET     0x0036  /* Interrupt flag status and clear register */
 #define SAM_PM_RCAUSE_OFFSET      0x0038  /* Reset cause register */
 
-/* PM register addresses ******************************************************************/
+/* PM register addresses ****************************************************/
 
 #define SAM_PM_CTRL               (SAM_PM_BASE+SAM_PM_CTRL_OFFSET)
 #define SAM_PM_SLEEP              (SAM_PM_BASE+SAM_PM_SLEEP_OFFSET)
@@ -75,7 +76,7 @@
 #define SAM_PM_INTFLAG            (SAM_PM_BASE+SAM_PM_INTFLAG_OFFSET)
 #define SAM_PM_RCAUSE             (SAM_PM_BASE+SAM_PM_RCAUSE_OFFSET)
 
-/* PM register bit definitions ************************************************************/
+/* PM register bit definitions **********************************************/
 
 /* Control register */
 
@@ -217,7 +218,9 @@
 #  define PM_APBCMASK_I2S         (1 << 20) /* Bit 20: Inter IC Sound */
 #endif
 
-/* Interrupt enable clear, Interrupt enable set, and Interrupt flag status and clear registers */
+/* Interrupt enable clear, Interrupt enable set,
+ * and Interrupt flag status and clear registers
+ */
 
 #define PM_INT_CKRDY              (1 << 0)  /* Bit 0: Clock Ready Interrupt */
 
@@ -234,17 +237,17 @@
 #define PM_RCAUSE_WDT             (1 << 5)  /* Bit 5: Watchdog Reset */
 #define PM_RCAUSE_SYST            (1 << 6)  /* Bit 6: System Reset Request */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_PM_H */

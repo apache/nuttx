@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_can.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_CAN_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_CAN_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
 #define SAM_CAN_NMBOXES              8      /* 8 Mailboxes */
 #define SAM_CAN_MBOX(n)              (n)
@@ -45,7 +45,7 @@
 #define SAM_CAN_MBOX6                6
 #define SAM_CAN_MBOX7                7
 
-/* CAN register offsets *****************************************************************/
+/* CAN register offsets *****************************************************/
 
 #define SAM_CAN_MR_OFFSET            0x0000 /* Mode Register */
 #define SAM_CAN_IER_OFFSET           0x0004 /* Interrupt Enable Register */
@@ -58,10 +58,13 @@
 #define SAM_CAN_ECR_OFFSET           0x0020 /* Error Counter Register */
 #define SAM_CAN_TCR_OFFSET           0x0024 /* Transfer Command Register */
 #define SAM_CAN_ACR_OFFSET           0x0028 /* Abort Command Register */
+
                                      /* 0x002c-0x00e0: Reserved */
 #define SAM_CAN_WPMR_OFFSET          0x00e4 /* Write Protect Mode Register */
 #define SAM_CAN_WPSR_OFFSET          0x00e8 /* Write Protect Status Register */
+
                                      /* 0x00eC-0x01fc: Reserved */
+
 /* Mailbox Registers */
 
 #define SAM_CAN_MBOX_OFFSET(n)       (0x0200+((n) << 5))
@@ -74,7 +77,7 @@
 #define SAM_CAN_MDH_OFFSET           0x0018 /* Mailbox Data High Register */
 #define SAM_CAN_MCR_OFFSET           0x001c /* Mailbox Control Register */
 
-/* CAN register addresses ***************************************************************/
+/* CAN register addresses ***************************************************/
 
 #define SAM_CAN0_MR                  (SAM_CAN0_BASE+SAM_CAN_MR_OFFSET)
 #define SAM_CAN0_IER                 (SAM_CAN0_BASE+SAM_CAN_IER_OFFSET)
@@ -128,7 +131,7 @@
 #define SAM_CAN1_MDH(n)              (SAM_CAN1_MBOX_BASE(n)+SAM_CAN_MDH_OFFSET)
 #define SAM_CAN1_MCR(n)              (SAM_CAN1_MBOX_BASE(n)+SAM_CAN_MCR_OFFSET)
 
-/* CAN register bit definitions *********************************************************/
+/* CAN register bit definitions *********************************************/
 
 /* Mode Register */
 
@@ -144,6 +147,7 @@
 /* Interrupt Enable, Interrupt Disable, Interrupt Mask and Status Register */
 
 #define CAN_INT_MB(n)                (1 << (n)) /* Bit n: Mailbox n Interrupt */
+
 #define CAN_INT_ERRA                 (1 << 16) /* Bit 16: Error Active Mode Interrupt */
 #define CAN_INT_WARN                 (1 << 17) /* Bit 17: Warning Limit Interrupt */
 #define CAN_INT_ERRP                 (1 << 18) /* Bit 18: Error Passive Mode Interrupt */
@@ -179,7 +183,7 @@
 #define CAN_BR_BRP_SHIFT             (16)      /* Bits 16-22: Baudrate Prescaler */
 #define CAN_BR_BRP_MASK              (127 << CAN_BR_BRP_SHIFT)
 #  define CAN_BR_BRP(n)              ((uint32_t)(n) << CAN_BR_BRP_SHIFT)
-#define CAN_BR_SMP                   (1 << 24) /* Bit 24: Sampling Mode
+#define CAN_BR_SMP                   (1 << 24) /* Bit 24: Sampling Mode */
 
 /* Timer Register */
 
@@ -277,6 +281,7 @@
 #define CAN_MSR_MMI                  (1 << 24) /* Bit 24: Mailbox Message Ignored */
 
 /* Mailbox Data Low Register (32-bit value) */
+
 /* Mailbox Data High Register (32-bit value) */
 
 /* Mailbox Control Register */
@@ -288,16 +293,16 @@
 #define CAN_MCR_MACR                 (1 << 22) /* Bit 22: Abort Request for Mailbox n */
 #define CAN_MCR_MTCR                 (1 << 23) /* Bit 23: Mailbox Transfer Command */
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_CAN_H */

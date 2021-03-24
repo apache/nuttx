@@ -44,12 +44,16 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
-static const char g_portchar[SAM_NPORTS]   = { 'A', 'B', 'C', 'D' };
+static const char g_portchar[SAM_NPORTS]   =
+{
+  'A', 'B', 'C', 'D'
+};
 #endif
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_portbase
  *
@@ -103,6 +107,7 @@ static inline void sam_configinput(uintptr_t base, port_pinset_t pinset)
   bit = (1 << pin);
 
   /* Direction bit is already zero (input) */
+
   /* Enable the I/O synchronizer? */
 
   if ((pinset & PORT_SYNCHRONIZER_MASK) == PORT_SYNCHRONIZER_ON)
@@ -114,7 +119,8 @@ static inline void sam_configinput(uintptr_t base, port_pinset_t pinset)
 
   /* Set the pin configuration */
 
-  regval = (PORT_WRCONFIG_WRPINCFG | PORT_WRCONFIG_WRPMUX | PORT_WRCONFIG_INEN);
+  regval = (PORT_WRCONFIG_WRPINCFG | PORT_WRCONFIG_WRPMUX |
+            PORT_WRCONFIG_INEN);
   if (pin >= 16)
     {
        /* Select the upper half word and adjust the bit setting */
@@ -137,6 +143,7 @@ static inline void sam_configinput(uintptr_t base, port_pinset_t pinset)
 
           putreg32(bit, base + SAM_PORT_OUTSET_OFFSET);
         }
+
         /* Fall through */
 
       case PORT_PULL_DOWN:
@@ -186,7 +193,9 @@ static inline void sam_configinterrupt(uintptr_t base, port_pinset_t pinset)
 
   putreg32(regval, base + SAM_PORT_WRCONFIG_OFFSET);
 
-  /* Configure the interrupt edge sensitivity in CONFIGn register of the EIC */
+  /* Configure the interrupt edge sensitivity in CONFIGn register of
+   * the EIC
+   */
 
   sam_eic_configure(pin, pinset);
 
@@ -234,7 +243,8 @@ static inline void sam_configoutput(uintptr_t base, port_pinset_t pinset)
    * buffer enabled.
    */
 
-  regval = (PORT_WRCONFIG_WRPINCFG | PORT_WRCONFIG_WRPMUX | PORT_WRCONFIG_INEN);
+  regval = (PORT_WRCONFIG_WRPINCFG | PORT_WRCONFIG_WRPMUX |
+            PORT_WRCONFIG_INEN);
   if (pin > 16)
     {
        /* Select the upper half word and adjust the bit setting */
@@ -257,6 +267,7 @@ static inline void sam_configoutput(uintptr_t base, port_pinset_t pinset)
 
           putreg32(bit, base + SAM_PORT_OUTSET_OFFSET);
         }
+
         /* Fall through */
 
       case PORT_PULL_DOWN:
@@ -318,7 +329,8 @@ static inline void sam_configperiph(uintptr_t base, port_pinset_t pinset)
    * selected function.
    */
 
-  regval = (PORT_WRCONFIG_WRPINCFG | PORT_WRCONFIG_WRPMUX | PORT_WRCONFIG_PMUXEN);
+  regval = (PORT_WRCONFIG_WRPINCFG | PORT_WRCONFIG_WRPMUX |
+            PORT_WRCONFIG_PMUXEN);
 
   /* If pin is output with readback then enable the input buffer */
 
@@ -354,6 +366,7 @@ static inline void sam_configperiph(uintptr_t base, port_pinset_t pinset)
 
           putreg32(bit, base + SAM_PORT_OUTSET_OFFSET);
         }
+
         /* Fall through */
 
       case PORT_PULL_DOWN:
@@ -517,13 +530,14 @@ bool sam_portread(port_pinset_t pinset)
   return (getreg32(base + SAM_PORT_IN_OFFSET) & pin) != 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Function:  sam_dumpport
  *
  * Description:
- *   Dump all PORT registers associated with the base address of the provided pinset.
+ *   Dump all PORT registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int sam_dumpport(uint32_t pinset, const char *msg)

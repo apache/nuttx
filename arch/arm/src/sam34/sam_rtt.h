@@ -64,7 +64,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #if defined(CONFIG_SAM34_RTT)
@@ -88,7 +88,6 @@ extern "C"
 void sam_rttinitialize(FAR const char *devpath);
 
 #endif // CONFIG_SAM34_RTT
-
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4cm_slcdc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4CM_SLCDC_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4CM_SLCDC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* SLCDC register offsets ************************************************************/
+/* SLCDC register offsets ***************************************************/
 
 #define SAM_SLCDC_CR_OFFSET        0x0000 /* Control Register */
 #define SAM_SLCDC_MR_OFFSET        0x0004 /* Mode Register */
@@ -54,7 +54,7 @@
 #define SAM_SLCDC_LMEMR_OFFSET(com) (0x200 + (com)*8 + 0x0)
 #define SAM_SLCDC_MMEMR_OFFSET(com) (0x200 + (com)*8 + 0x4)
 
-/* SLCDC register addresses **********************************************************/
+/* SLCDC register addresses *************************************************/
 
 #define SAM_SLCDC_CR               (SAM_SLCDC_BASE + SAM_SLCDC_CR_OFFSET)
 #define SAM_SLCDC_MR               (SAM_SLCDC_BASE + SAM_SLCDC_MR_OFFSET)
@@ -74,7 +74,7 @@
 #define SAM_SLCDC_LMEMR(com)       (SAM_SLCDC_BASE + SAM_SLCDC_LMEMR_OFFSET(com))
 #define SAM_SLCDC_MMEMR(com)       (SAM_SLCDC_BASE + SAM_SLCDC_MMEMR_OFFSET(com))
 
-/* SLCDC register bit definitions ****************************************************/
+/* SLCDC register bit definitions *******************************************/
 
 /* Control Register */
 

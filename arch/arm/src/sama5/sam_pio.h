@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/sam_pio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_SAM_PIO_H
 #define __ARCH_ARM_SRC_SAMA5_SAM_PIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -33,10 +33,6 @@
 #include <arch/sama5/chip.h>
 
 #include "hardware/sam_memorymap.h"
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
 
 /* Definitions and types customized for each SAMA5Dx family */
 
@@ -48,9 +44,13 @@
 #  error Unrecognized SAMA5 architecture
 #endif
 
-/************************************************************************************
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Lookup for non-secure PIOs */
 
@@ -64,15 +64,15 @@ extern const uintptr_t g_spiobase[SAM_NPIO];
 #  define sam_spion_vbase(n) (g_spiobase[(n)])
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -83,17 +83,18 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pioirqinitialize
  *
  * Description:
- *   Initialize logic to support a second level of interrupt decoding for PIO pins.
+ *   Initialize logic to support a second level of interrupt decoding for PIO
+ *   pins.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIO_IRQ
 void sam_pioirqinitialize(void);
@@ -101,43 +102,43 @@ void sam_pioirqinitialize(void);
 #  define sam_pioirqinitialize()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_configpio
  *
  * Description:
  *   Configure a PIO pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int sam_configpio(pio_pinset_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_piowrite
  *
  * Description:
  *   Write one or zero to the selected PIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_piowrite(pio_pinset_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pioread
  *
  * Description:
  *   Read one or zero from the selected PIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool sam_pioread(pio_pinset_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pioirq
  *
  * Description:
  *   Configure an interrupt for the specified PIO pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIO_IRQ
 void sam_pioirq(pio_pinset_t pinset);
@@ -145,13 +146,13 @@ void sam_pioirq(pio_pinset_t pinset);
 #  define sam_pioirq(pinset)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pioirqenable
  *
  * Description:
  *   Enable the interrupt for specified PIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIO_IRQ
 void sam_pioirqenable(int irq);
@@ -159,13 +160,13 @@ void sam_pioirqenable(int irq);
 #  define sam_pioirqenable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified PIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIO_IRQ
 void sam_pioirqdisable(int irq);
@@ -173,30 +174,33 @@ void sam_pioirqdisable(int irq);
 #  define sam_pioirqdisable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pio_forceclk
  *
  * Description:
- *   Enable PIO clocking.  This logic is overly conservative and does not enable PIO
- *   clocking unless necessary (PIO input selected, glitch/filtering enable, or PIO
- *   interrupts enabled).  There are, however, certain conditions were we may want
- *   for force the PIO clock to be enabled.  An example is reading the input value
- *   from an open drain output.
+ *  Enable PIO clocking.
+ *  This logic is overly conservative and does not enable PIO clocking unless
+ *  necessary (PIO input selected, glitch/filtering enable, or PIO interrupts
+ *  enabled).  There are, however, certain conditions were we may want for
+ *  force the PIO clock to be enabled.  An example is reading the input value
+ *  from an open drain output.
  *
- *   The PIO automatic enable/disable logic is not smart enough enough to know about
- *   these cases.  For those cases, sam_pio_forceclk() is provided.
+ *  The PIO automatic enable/disable logic is not smart enough enough to know
+ *  about these cases.
+ *  For those cases, sam_pio_forceclk() is provided.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_pio_forceclk(pio_pinset_t pinset, bool enable);
 
-/************************************************************************************
+/****************************************************************************
  * Function:  sam_dumppio
  *
  * Description:
- *   Dump all PIO registers associated with the base address of the provided pinset.
+ *   Dump all PIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int sam_dumppio(uint32_t pinset, const char *msg);

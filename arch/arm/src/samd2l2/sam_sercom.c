@@ -275,8 +275,8 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
        * generic clock generator pointed by CLKCTRL.GEN and the GENDIV.DIV
        * will also be locked.
        *
-       * We lock the SERCOM slow clock because it is common to all SERCOM modules
-       * and, once set, should not be changed again.
+       * We lock the SERCOM slow clock because it is common to all SERCOM
+       * modules and, once set, should not be changed again.
        */
 
       regval |= (/* GCLK_CLKCTRL_WRTLOCK | */ GCLK_CLKCTRL_CLKEN);

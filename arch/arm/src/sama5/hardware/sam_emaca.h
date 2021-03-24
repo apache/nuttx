@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_emaca.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_EMACA_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_EMACA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* EMAC Register Offsets ************************************************************/
+ ****************************************************************************/
+
+/* EMAC Register Offsets ****************************************************/
 
 #define SAM_EMAC_NCR_OFFSET       0x0000 /* Network Control Register */
 #define SAM_EMAC_NCFGR_OFFSET     0x0004 /* Network Configuration Register */
@@ -82,7 +83,7 @@
 #define SAM_EMAC_WOL_OFFSET       0x00c4 /* Wake on LAN Register */
                                          /* 0x00c8-0x00fc Reserved */
 
-/* EMAC Register Addresses **********************************************************/
+/* EMAC Register Addresses **************************************************/
 
 #define SAM_EMAC_NCR              (SAM_EMAC_VBASE+SAM_EMAC_NCR_OFFSET)
 #define SAM_EMAC_NCFGR            (SAM_EMAC_VBASE+SAM_EMAC_NCFGR_OFFSET)
@@ -131,7 +132,7 @@
 #define SAM_EMAC_USRIO            (SAM_EMAC_VBASE+SAM_EMAC_USRIO_OFFSET)
 #define SAM_EMAC_WOL              (SAM_EMAC_VBASE+SAM_EMAC_WOL_OFFSET)
 
-/* EMAC Register Bit Definitions ****************************************************/
+/* EMAC Register Bit Definitions ********************************************/
 
 /* Network Control Register */
 
@@ -163,6 +164,7 @@
 #  define EMAC_NCFGR_CLK_DIV16    (1 << EMAC_NCFGR_CLK_SHIFT) /* MCK divided by 16 (MCK up to 40 MHz) */
 #  define EMAC_NCFGR_CLK_DIV32    (2 << EMAC_NCFGR_CLK_SHIFT) /* MCK divided by 32 (MCK up to 80 MHz) */
 #  define EMAC_NCFGR_CLK_DIV64    (3 << EMAC_NCFGR_CLK_SHIFT) /* MCK divided by 64 (MCK up to 160 MHz) */
+
 #define EMAC_NCFGR_RTY            (1 << 12) /* Bit 12: Retry test */
 #define EMAC_NCFGR_PAE            (1 << 13) /* Bit 13: Pause Enable */
 #define EMAC_NCFGR_RBOF_SHIFT     (14)      /* Bits 14-15: Receive Buffer Offset */
@@ -171,6 +173,7 @@
 #  define EMAC_NCFGR_RBOF_1       (1 << EMAC_NCFGR_RBOF_SHIFT) /* One-byte offset from RX buffer start */
 #  define EMAC_NCFGR_RBOF_2       (2 << EMAC_NCFGR_RBOF_SHIFT) /* Two-byte offset from RX buffer start */
 #  define EMAC_NCFGR_RBOF_3       (3 << EMAC_NCFGR_RBOF_SHIFT) /* Three-byte offset fromRX buffer start */
+
 #define EMAC_NCFGR_RLCE           (1 << 16) /* Bit 16: Receive Length field Checking Enable */
 #define EMAC_NCFGR_DRFCS          (1 << 17) /* Bit 17: Discard Receive FCS */
 #define EMAC_NCFGR_EFRHD          (1 << 18) /* Bit 18: Enable RX frames in HD mode while transmitting */
@@ -205,7 +208,11 @@
 #define EMAC_RSR_REC              (1 << 1)  /* Bit 1:  Frame Received */
 #define EMAC_RSR_OVR              (1 << 2)  /* Bit 2:  Receive Overrun */
 
-/* Interrupt Status Register (ISR), Interrupt Enable Register (IER), Interrupt Disable Register (IDR) and Interrupt Mask Register (IMR) */
+/* Interrupt Status Register (ISR),
+ * Interrupt Enable Register (IER),
+ * Interrupt Disable Register (IDR)
+ * and Interrupt Mask Register (IMR)
+ */
 
 #define EMAC_INT_MFD              (1 << 0)  /* Bit 0:  Management Frame Done */
 #define EMAC_INT_RCOMP            (1 << 1)  /* Bit 1:  Receive Complete */
@@ -331,24 +338,29 @@
 #define EMAC_RLE_MASK             (0x000000ff) /* Bits 0-7: Receive Length Field Mismatch */
 
 /* Hash Register Bottom [31:0] Register (LS 32-bit hash address) */
+
 /* Hash Register Top [63:32] Register (MS 32-bit hash address) */
 
 /* Specific Address 1 Bottom [31:0] Register (LS 32-bit address) */
+
 /* Specific Address 1 Top [47:32] Register */
 
 #define EMAC_SA1T_MASK            (0x0000ffff) /* Bits 0-15: Bits 32-47 of the destination address */
 
 /* Specific Address 2 Bottom [31:0] Register (LS 32-bit address) */
+
 /* Specific Address 2 Top [47:32] Register */
 
 #define EMAC_SA2T_MASK            (0x0000ffff) /* Bits 0-15: Bits 32-47 of the destination address */
 
 /* Specific Address 3 Bottom [31:0] Register (LS 32-bit address) */
+
 /* Specific Address 3 Top [47:32] Register */
 
 #define EMAC_SA3T_MASK            (0x0000ffff) /* Bits 0-15: Bits 32-47 of the destination address */
 
 /* Specific Address 4 Bottom [31:0] Register (LS 32-bit address) */
+
 /* Specific Address 4 Top [47:32] Register */
 
 #define EMAC_SA4T_MASK            (0x0000ffff) /* Bits 0-15: Bits 32-47 of the destination address */
@@ -371,12 +383,12 @@
 #define EMAC_WOL_SA1              (1 << 18) /* Bit 18: Specific address register 1 event enable */
 #define EMAC_WOL_MTI              (1 << 19) /* Bit 19: Multicast hash event enable */
 
-/* Descriptors **********************************************************************/
+/* Descriptors **************************************************************/
 
 /* Receive buffer descriptor:  Address word */
 
-#define EMACRXD_ADDR_OWNER        (1 << 0)  /* Bit 0:  1=Software owns; 0=EMAC owns */
-#define EMACRXD_ADDR_WRAP         (1 << 1)  /* Bit 1:  Last descriptor in list */
+#define EMACRXD_ADDR_OWNER        (1 << 0)     /* Bit 0:  1=Software owns; 0=EMAC owns */
+#define EMACRXD_ADDR_WRAP         (1 << 1)     /* Bit 1:  Last descriptor in list */
 #define EMACRXD_ADDR_MASK         (0xfffffffc) /* Bits 2-31: Aligned buffer address */
 
 /* Receive buffer descriptor:  Control word */
@@ -419,9 +431,10 @@
 #define EMACTXD_STA_WRAP          (1 << 30) /* Bit 30: Last descriptor in descriptor list */
 #define EMACTXD_STA_USED          (1 << 31) /* Bit 31: Zero for the EMAC to read from buffer */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Receive buffer descriptor */
 
 struct emac_rxdesc_s

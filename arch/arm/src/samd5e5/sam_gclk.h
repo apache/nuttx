@@ -102,7 +102,8 @@ extern "C"
  *
  ****************************************************************************/
 
-void sam_gclk_configure(int gclk, FAR const struct sam_gclk_config_s *config);
+void sam_gclk_configure(int gclk,
+                        FAR const struct sam_gclk_config_s *config);
 
 /****************************************************************************
  * Name: sam_gclk_chan_enable

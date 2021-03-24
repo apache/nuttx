@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_acc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_ACC_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_ACC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* ACC register offsets *****************************************************************/
+/* ACC register offsets *****************************************************/
 
 #define SAM_ACC_CR_OFFSET          0x0000 /* Control Register */
 #define SAM_ACC_MR_OFFSET          0x0004 /* Mode Register */
@@ -46,7 +46,7 @@
 #define SAM_ACC_WPMR_OFFSET        0x00e4 /* Write Protect Mode Register */
 #define SAM_ACC_WPSR_OFFSET        0x00e8 /* Write Protect Status Register */
 
-/* ACC register addresses **************************************************************/
+/* ACC register addresses ***************************************************/
 
 #define SAM_ACC_CR                 (SAM_ACC_BASE+SAM_ACC_CR_OFFSET)
 #define SAM_ACC_MR                 (SAM_ACC_BASE+SAM_ACC_MR_OFFSET)
@@ -58,7 +58,7 @@
 #define SAM_ACC_WPMR               (SAM_ACC_BASE+SAM_ACC_WPMR_OFFSET)
 #define SAM_ACC_WPSR               (SAM_ACC_BASE+SAM_ACC_WPSR_OFFSET
 
-/* ACC register bit definitions ********************************************************/
+/* ACC register bit definitions *********************************************/
 
 /* Control Register */
 
@@ -76,9 +76,11 @@
 #  define ACC_MR_SELMINUS_AD1      (5 << ACC_MR_SELMINUS_SHIFT) /* Select AD1 */
 #  define ACC_MR_SELMINUS_AD2      (6 << ACC_MR_SELMINUS_SHIFT) /* Select AD2 */
 #  define ACC_MR_SELMINUS_AD3      (7 << ACC_MR_SELMINUS_SHIFT) /* Select AD3 */
+
 #define ACC_MR_SELPLUS_SHIFT       (4)       /* Bits 4-6: Selection for plus comparator input */
 #define ACC_MR_SELPLUS_MASK        (7 << ACC_MR_SELPLUS_SHIFT)
 #  define ACC_MR_SELPLUS_AD(n)     ((uint32_t)(n) << ACC_MR_SELPLUS_SHIFT) /* Select and, n=0-7 */
+
 #  define ACC_MR_SELPLUS_AD0       (0 << ACC_MR_SELPLUS_SHIFT) /* Select AD0 */
 #  define ACC_MR_SELPLUS_AD1       (1 << ACC_MR_SELPLUS_SHIFT) /* Select AD1 */
 #  define ACC_MR_SELPLUS_AD2       (2 << ACC_MR_SELPLUS_SHIFT) /* Select AD2 */
@@ -87,17 +89,21 @@
 #  define ACC_MR_SELPLUS_AD5       (5 << ACC_MR_SELPLUS_SHIFT) /* Select AD5 */
 #  define ACC_MR_SELPLUS_AD6       (6 << ACC_MR_SELPLUS_SHIFT) /* Select AD6 */
 #  define ACC_MR_SELPLUS_AD7       (7 << ACC_MR_SELPLUS_SHIFT) /* Select AD7 */
+
 #define ACC_MR_ACEN                (1 << 8)  /* Bit 8:  Analog comparator enable */
 #define ACC_MR_EDGETYP_SHIFT       (9)       /* Bits 9-10: Edge type */
 #define ACC_MR_EDGETYP_MASK        (3 << ACC_MR_EDGETYP_SHIFT)
 #  define ACC_MR_EDGETYP_RISING    (0 << ACC_MR_EDGETYP_SHIFT) /* Only rising edge of comparator output */
 #  define ACC_MR_EDGETYP_FALLING   (1 << ACC_MR_EDGETYP_SHIFT) /* Falling edge of comparator output */
 #  define ACC_MR_EDGETYP_ANY       (2 << ACC_MR_EDGETYP_SHIFT) /* Any edge of comparator output */
+
 #define ACC_MR_INV                 (1 << 12) /* Bit 12: Invert comparator output */
 #define ACC_MR_SELFS               (1 << 13) /* Bit 13: Selection of fault source */
 #define ACC_MR_FE                  (1 << 14) /* Bit 14: Fault enable */
 
-/* Interrupt Enable, Interrupt Disable, Interrupt Mask, and  Interrupt Status */
+/* Interrupt Enable, Interrupt Disable, Interrupt Mask,
+ * and  Interrupt Status
+ */
 
 #define ACC_INT_CE                 (1 << 0)  /* Bit 0:  Comparison edge interrupt */
 
@@ -123,16 +129,16 @@
 
 #define ACC_WPSR_WPROTERR          (1 << 0)  /* Bit 0:  Write protection error */
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_ACC_H */

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_flexcom.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_FLEXCOM_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_FLEXCOM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Common Flexcom Register Offsets **************************************************/
+/* Common Flexcom Register Offsets ******************************************/
 
 #define SAM_FLEX_MR_OFFSET     0x000 /* FLEXCOM Mode Register */
                                      /* 0x0004–0x000c Reserved */
@@ -46,7 +46,7 @@
                                      /* 0x0400-0x05ff: Flexcom USART register */
                                      /* 0x0600-0x07ff: Flexcom USART register */
 
-/* Common Flexcom Register Addresses ************************************************/
+/* Common Flexcom Register Addresses ****************************************/
 
 #ifdef CONFIG_SAMA5_HAVE_FLEXCOM0
 #  define SAM_FLEX0_MR         (SAM_FLEXCOM0_VBASE+SAM_FLEX_MR_OFFSET)
@@ -78,7 +78,7 @@
 #  define SAM_FLEX4_THR        (SAM_FLEXCOM4_VBASE+SAM_FLEX_THR_OFFSET)
 #endif
 
-/* Common Flexcom Register Bit Field Definitions ************************************/
+/* Common Flexcom Register Bit Field Definitions ****************************/
 
 /* FLEXCOM Mode Register */
 
@@ -97,15 +97,15 @@
 
 #define FLEX_THR_MASK          (0xffff)
 
-/* Flexcom USART Register Definitions ***********************************************/
+/* Flexcom USART Register Definitions ***************************************/
 
 #include "hardware/sam_flexcom_usart.h"
 
-/* Flexcom SPI Register Definitions *************************************************/
+/* Flexcom SPI Register Definitions *****************************************/
 
 #include "hardware/sam_flexcom_spi.h"
 
-/* Flexcom TWI Register Definitions *************************************************/
+/* Flexcom TWI Register Definitions *****************************************/
 
 #include "hardware/sam_flexcom_twi.h"
 

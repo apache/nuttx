@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_pio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM4E_PIO_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM4E_PIO_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/samv7/chip.h>
@@ -32,10 +32,11 @@
 
 #if SAMV7_NPIO > 0
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
-/* Configuration ************************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 #define GPIO_HAVE_PULLDOWN         1
 #define GPIO_HAVE_PERIPHCD         1
@@ -44,7 +45,7 @@
 #define GPIO_HAVE_DRIVER           1
 #define GPIO_HAVE_KEYPAD           1
 
-/* Misc Helper Definitions **************************************************************/
+/* Misc Helper Definitions **************************************************/
 
 #define PIOA                       (0)
 #define PIOB                       (1)
@@ -52,7 +53,7 @@
 #define PIOD                       (3)
 #define PIOE                       (4)
 
-/* PIO register offsets *****************************************************************/
+/* PIO register offsets *****************************************************/
 
 #define SAM_PIO_PER_OFFSET         0x0000 /* PIO Enable Register */
 #define SAM_PIO_PDR_OFFSET         0x0004 /* PIO Disable Register */
@@ -135,8 +136,7 @@
 #define SAM_PIO_PCRHR_OFFSET       0x0164 /* Parallel Capture Reception Holding Register */
                                           /* 0x0168-0x018c: Reserved for PDC registers */
 
-/* PIO register addresses ***************************************************************/
-
+/* PIO register addresses ***************************************************/
 
 #define SAM_PIOA_PER               (SAM_PIOA_BASE+SAM_PIO_PER_OFFSET)
 #define SAM_PIOA_PDR               (SAM_PIOA_BASE+SAM_PIO_PDR_OFFSET)
@@ -471,7 +471,7 @@
 #  define SAM_PIOE_PCRHR           (SAM_PIOE_BASE+SAM_PIO_PCRHR_OFFSET
 #endif
 
-/* PIO register bit definitions *********************************************************/
+/* PIO register bit definitions *********************************************/
 
 /* Common bit definitions for ALMOST all IO registers (exceptions follow) */
 
@@ -551,28 +551,31 @@
 #  define PIO_PCMR_DSIZE_BYTE      (0 << PIO_PCMR_DSIZE_SHIFT) /* 8-bit data in PIO_PCRHR */
 #  define PIO_PCMR_DSIZE_HWORD     (1 << PIO_PCMR_DSIZE_SHIFT) /* 16-bit data in PIO_PCRHR */
 #  define PIO_PCMR_DSIZE_WORD      (2 << PIO_PCMR_DSIZE_SHIFT) /* 32-bit data in PIO_PCRHR */
+
 #define PIO_PCMR_ALWYS             (1 << 9)  /* Bit 9:  Parallel Capture Mode Always Sampling */
 #define PIO_PCMR_HALFS             (1 << 10) /* Bit 10: Parallel Capture Mode Half Sampling */
 #define PIO_PCMR_FRSTS             (1 << 11) /* Bit 11: Parallel Capture Mode First Sample */
 
-/* PIO Parallel Capture Interrupt Enable, Disable, Mask, and Status Registers */
+/* PIO Parallel Capture Interrupt Enable, Disable, Mask,
+ * and Status Registers
+ */
 
 #define PIOC_PCINT_DRDY            (1 << 0)  /* Bit 0:  Parallel Capture Mode Data Ready Interrupt */
 #define PIOC_PCINT_OVRE            (1 << 1)  /* Bit 1:  Parallel Capture Mode Overrun Error Interrupt */
 #define PIOC_PCINT_ENDRX           (1 << 2)  /* Bit 2:  End of Reception Transfer Interrupt */
 #define PIOC_PCINT_RXBUFF          (1 << 3)  /* Bit 3:  Reception Buffer Full Interrupt */
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* SAMV7_NPIO > 0 */
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM4E_PIO_H */

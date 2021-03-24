@@ -77,6 +77,7 @@ const uintptr_t g_piobase[SAM_NPIO] =
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Maps a port number to the standard port character */
 
 #if defined(CONFIG_DEBUG_GPIO_INFO) && SAM_NPIO > 0
@@ -171,6 +172,7 @@ static uint32_t g_forced[SAM_NPIO];
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_piobase
  *
@@ -818,20 +820,22 @@ bool sam_pioread(pio_pinset_t pinset)
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pio_forceclk
  *
  * Description:
- *   Enable PIO clocking.  This logic is overly conservative and does not enable PIO
- *   clocking unless necessary (PIO input selected, glitch/filtering enable, or PIO
- *   interrupts enabled).  There are, however, certain conditions were we may want
- *   for force the PIO clock to be enabled.  An example is reading the input value
- *   from an open drain output.
+ *   Enable PIO clocking.
+ *   This logic is overly conservative and does not enable PIO clocking
+ *   unless necessary (PIO input selected, glitch/filtering enable, or PIO
+ *   interrupts enabled).  There are, however, certain conditions were we may
+ *   want to force the PIO clock to be enabled.
+ *   An example is reading the input value from an open drain output.
  *
- *   The PIO automatic enable/disable logic is not smart enough enough to know about
- *   these cases.  For those cases, sam_pio_forceclk() is provided.
+ *   The PIO automatic enable/disable logic is not smart enough enough to
+ *   know about these cases.
+ *   For those cases, sam_pio_forceclk() is provided.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_pio_forceclk(pio_pinset_t pinset, bool enable)
 {
@@ -868,13 +872,14 @@ void sam_pio_forceclk(pio_pinset_t pinset, bool enable)
   leave_critical_section(flags);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Function:  sam_dumppio
  *
  * Description:
- *   Dump all PIO registers associated with the base address of the provided pinset.
+ *   Dump all PIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int sam_dumppio(uint32_t pinset, const char *msg)
@@ -897,36 +902,50 @@ int sam_dumppio(uint32_t pinset, const char *msg)
 
 #ifdef SAM_PIO_ISLR_OFFSET
   gpioinfo("    PSR: %08x   ISLR: %08x    OSR: %08x   IFSR: %08x\n",
-           getreg32(base + SAM_PIO_PSR_OFFSET), getreg32(base + SAM_PIO_ISLR_OFFSET),
-           getreg32(base + SAM_PIO_OSR_OFFSET), getreg32(base + SAM_PIO_IFSR_OFFSET));
+           getreg32(base + SAM_PIO_PSR_OFFSET),
+           getreg32(base + SAM_PIO_ISLR_OFFSET),
+           getreg32(base + SAM_PIO_OSR_OFFSET),
+           getreg32(base + SAM_PIO_IFSR_OFFSET));
 #else
   gpioinfo("    PSR: %08x    OSR: %08x   IFSR: %08x\n",
-           getreg32(base + SAM_PIO_PSR_OFFSET), getreg32(base + SAM_PIO_OSR_OFFSET),
+           getreg32(base + SAM_PIO_PSR_OFFSET),
+           getreg32(base + SAM_PIO_OSR_OFFSET),
            getreg32(base + SAM_PIO_IFSR_OFFSET));
 #endif
   gpioinfo("   ODSR: %08x   PDSR: %08x    IMR: %08x    ISR: %08x\n",
-           getreg32(base + SAM_PIO_ODSR_OFFSET), getreg32(base + SAM_PIO_PDSR_OFFSET),
-           getreg32(base + SAM_PIO_IMR_OFFSET), getreg32(base + SAM_PIO_ISR_OFFSET));
+           getreg32(base + SAM_PIO_ODSR_OFFSET),
+           getreg32(base + SAM_PIO_PDSR_OFFSET),
+           getreg32(base + SAM_PIO_IMR_OFFSET),
+           getreg32(base + SAM_PIO_ISR_OFFSET));
   gpioinfo("   MDSR: %08x   PUSR: %08x ABDCSR: %08x %08x\n",
-           getreg32(base + SAM_PIO_MDSR_OFFSET), getreg32(base + SAM_PIO_PUSR_OFFSET),
-           getreg32(base + SAM_PIO_ABCDSR1_OFFSET), getreg32(base + SAM_PIO_ABCDSR2_OFFSET));
+           getreg32(base + SAM_PIO_MDSR_OFFSET),
+           getreg32(base + SAM_PIO_PUSR_OFFSET),
+           getreg32(base + SAM_PIO_ABCDSR1_OFFSET),
+           getreg32(base + SAM_PIO_ABCDSR2_OFFSET));
   gpioinfo(" IFSCSR: %08x   SCDR: %08x  PPDSR: %08x   OWSR: %08x\n",
-           getreg32(base + SAM_PIO_IFSCSR_OFFSET), getreg32(base + SAM_PIO_SCDR_OFFSET),
-           getreg32(base + SAM_PIO_PPDSR_OFFSET), getreg32(base + SAM_PIO_OWSR_OFFSET));
+           getreg32(base + SAM_PIO_IFSCSR_OFFSET),
+           getreg32(base + SAM_PIO_SCDR_OFFSET),
+           getreg32(base + SAM_PIO_PPDSR_OFFSET),
+           getreg32(base + SAM_PIO_OWSR_OFFSET));
 #ifdef SAM_PIO_LOCKSR_OFFSET
   gpioinfo("  AIMMR: %08x   ELSR: %08x FRLHSR: %08x LOCKSR: %08x\n",
-           getreg32(base + SAM_PIO_AIMMR_OFFSET), getreg32(base + SAM_PIO_ELSR_OFFSET),
-           getreg32(base + SAM_PIO_FRLHSR_OFFSET), getreg32(base + SAM_PIO_LOCKSR_OFFSET));
+           getreg32(base + SAM_PIO_AIMMR_OFFSET),
+           getreg32(base + SAM_PIO_ELSR_OFFSET),
+           getreg32(base + SAM_PIO_FRLHSR_OFFSET),
+           getreg32(base + SAM_PIO_LOCKSR_OFFSET));
 #else
   gpioinfo("  AIMMR: %08x   ELSR: %08x FRLHSR: %08x\n",
-           getreg32(base + SAM_PIO_AIMMR_OFFSET), getreg32(base + SAM_PIO_ELSR_OFFSET),
+           getreg32(base + SAM_PIO_AIMMR_OFFSET),
+           getreg32(base + SAM_PIO_ELSR_OFFSET),
            getreg32(base + SAM_PIO_FRLHSR_OFFSET));
 #endif
   gpioinfo("SCHMITT: %08x DRIVER: %08x %08x\n",
-           getreg32(base + SAM_PIO_SCHMITT_OFFSET), getreg32(base + SAM_PIO_DRIVER1_OFFSET),
+           getreg32(base + SAM_PIO_SCHMITT_OFFSET),
+           getreg32(base + SAM_PIO_DRIVER1_OFFSET),
            getreg32(base + SAM_PIO_DRIVER2_OFFSET));
   gpioinfo("   WPMR: %08x   WPSR: %08x\n",
-           getreg32(base + SAM_PIO_WPMR_OFFSET), getreg32(base + SAM_PIO_WPSR_OFFSET));
+           getreg32(base + SAM_PIO_WPMR_OFFSET),
+           getreg32(base + SAM_PIO_WPSR_OFFSET));
 
   leave_critical_section(flags);
   return OK;

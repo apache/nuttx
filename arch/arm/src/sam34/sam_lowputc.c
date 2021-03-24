@@ -54,7 +54,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration **********************************************************/
+/* Configuration ************************************************************/
 
 /* If the USART is not being used as a UART, then it really isn't enabled
  * for our purposes.
@@ -134,9 +134,9 @@
 
   /* Select MCU-specific settings
    *
-   * For the SAM3U, SAM3A, SAM3X, SAM4E and SAM4S the USARTs are driven by the
-   *   main clock.  (This could also be the MCK/8 or an external clock but
-   *   those options have not yet been necessary).
+   * For the SAM3U, SAM3A, SAM3X, SAM4E and SAM4S the USARTs are driven by
+   * the main clock. (This could also be the MCK/8 or an external clock
+   * but those options have not yet been necessary).
    * For the SAM4L, the USARTs are driven by CLK_USART (undivided) which is
    *   selected by the PBADIVMASK register.
    */
@@ -295,7 +295,6 @@ void arm_lowputc(char ch)
 #endif
 }
 
-
 /****************************************************************************
  * Name: up_putc
  *
@@ -429,8 +428,9 @@ void sam_lowsetup(void)
    * This may limit BAUD rates for lower USART clocks.
    */
 
-  putreg32(((SAM_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) / (SAM_CONSOLE_BAUD << 4)),
-           SAM_CONSOLE_BASE + SAM_UART_BRGR_OFFSET);
+  putreg32(((SAM_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) /
+            (SAM_CONSOLE_BAUD << 4)),
+             SAM_CONSOLE_BASE + SAM_UART_BRGR_OFFSET);
 
   /* Enable receiver & transmitter */
 

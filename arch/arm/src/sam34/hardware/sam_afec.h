@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_afec.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_AFEC_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_AFEC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
-/* General definitions ******************************************************************/
+ ****************************************************************************/
+
+/* General definitions ******************************************************/
 
 #define SAM_ADC_NCHANNELS            16     /* 16 ADC Channels */
 
-/* AFEC register offsets ****************************************************************/
+/* AFEC register offsets ****************************************************/
 
 #define SAM_AFEC_CR_OFFSET           0x0000 /* Control Register */
 #define SAM_AFEC_MR_OFFSET           0x0004 /* Mode Register */
@@ -73,7 +74,7 @@
                                             /* 0x0fc Reserved */
                                             /* 0x0100-0x0124 Reserved for PDC */
 
-/* AFEC register addresses **************************************************************/
+/* AFEC register addresses **************************************************/
 
 #define SAM_AFEC0_CR                 (SAM_AFEC0_BASE+SAM_AFEC_CR_OFFSET)
 #define SAM_AFEC0_MR                 (SAM_AFEC0_BASE+SAM_AFEC_MR_OFFSET)
@@ -129,7 +130,7 @@
 #define SAM_AFEC1_WPMR               (SAM_AFEC1_BASE+SAM_AFEC_WPMR_OFFSET)
 #define SAM_AFEC1_WPSR               (SAM_AFEC1_BASE+SAM_AFEC_WPSR_OFFSET)
 
-/* AFEC register bit definitions *******************************************************/
+/* AFEC register bit definitions ********************************************/
 
 /* Control Register */
 
@@ -148,6 +149,7 @@
 #  define AFEC_MR_TRGSEL_TIOA2       (3 << AFEC_MR_TRGSEL_SHIFT) /* TIOA2 */
 #  define AFEC_MR_TRGSEL_PWM0        (4 << AFEC_MR_TRGSEL_SHIFT) /* PWM Event Line 0 */
 #  define AFEC_MR_TRGSEL_PWM1        (5 << AFEC_MR_TRGSEL_SHIFT) /* PWM Event Line 1 */
+
 #define AFEC_MR_SLEEP                (1 << 5)  /* Bit 5:  Sleep Mode */
 #define AFEC_MR_FWUP                 (1 << 6)  /* Bit 6:  Fast Wake Up */
 #define AFEC_MR_FREERUN              (1 << 7)  /* Bit 7:  Free Run Mode */
@@ -172,12 +174,14 @@
 #  define AFEC_MR_STARTUP_832        (13 << AFEC_MR_STARTUP_SHIFT) /* 832 periods of ADCClock */
 #  define AFEC_MR_STARTUP_896        (14 << AFEC_MR_STARTUP_SHIFT) /* 896 periods of ADCClock */
 #  define AFEC_MR_STARTUP_960        (15 << AFEC_MR_STARTUP_SHIFT) /* 960 periods of ADCClock */
+
 #define AFEC_MR_SETTLING_SHIFT       (20)      /* Bits 20-21: Analog Settling Time */
 #define AFEC_MR_SETTLING_MASK        (15 << AFEC_MR_SETTLING_SHIFT)
 #  define AFEC_MR_SETTLING_3         (0 << AFEC_MR_SETTLING_SHIFT) /* 3 periods of ADCClock */
 #  define AFEC_MR_SETTLING_5         (1 << AFEC_MR_SETTLING_SHIFT) /* 5 periods of ADCClock */
 #  define AFEC_MR_SETTLING_9         (2 << AFEC_MR_SETTLING_SHIFT) /* 9 periods of ADCClock */
 #  define AFEC_MR_SETTLING_17        (3 << AFEC_MR_SETTLING_SHIFT) /* 17 periods of ADCClock */
+
 #define AFEC_MR_ANACH                (1 << 23) /* Bit 23: Analog Change */
 #define AFEC_MR_TRACKTIM_SHIFT       (24)      /* Bits 24-27: Tracking Time */
 #define AFEC_MR_TRACKTIM_MASK        (15 << AFEC_MR_TRACKTIM_SHIFT)
@@ -195,6 +199,7 @@
 #  define AFEC_EMR_CMPMODE_HIGH      (1 << AFEC_EMR_CMPMODE_SHIFT) /* Event when higher than high window threshold */
 #  define AFEC_EMR_CMPMODE_IN        (2 << AFEC_EMR_CMPMODE_SHIFT) /* Event when in comparison window */
 #  define AFEC_EMR_CMPMODE_OUT       (3 << AFEC_EMR_CMPMODE_SHIFT) /* Event when out of comparison window */
+
 #define AFEC_EMR_CMPSEL_SHIFT        (3)       /* Bit 3-7: Comparison Selected Channel */
 #define AFEC_EMR_CMPSEL_MASK         (31 << AFEC_EMR_CMPSEL_SHIFT)
 #  define AFEC_EMR_CMPSEL(n)         ((uint32_t)(n) << AFEC_EMR_CMPSEL_SHIFT)
@@ -210,6 +215,7 @@
 # define AFEC_EMR_RES_OSR16          (3 << AFEC_EMR_RES_SHIFT) /* 14-bit resolution, AFEC sample rate divided by 16 (averaging) */
 # define AFEC_EMR_RES_OSR64          (4 << AFEC_EMR_RES_SHIFT) /* 15-bit resolution, AFEC sample rate divided by 64 (averaging) */
 # define AFEC_EMR_RES_OSR256         (5 << AFEC_EMR_RES_SHIFT) /* 16-bit resolution, AFEC sample rate divided by 256 (averaging) */
+
 #define AFEC_EMR_TAG                 (1 << 24) /* Bit 24: TAG of the AFEC_LDCR register */
 #define AFEC_EMR_STM                 (1 << 25) /* Bit 25: Single Trigger Mode */
 
@@ -301,7 +307,9 @@
 #define AFEC_LCDR_CHANB_SHIFT        (24)      /* Bits 24-27: Channel number */
 #define AFEC_LCDR_CHANB_MASK         (15 << AFEC_LCDR_CHANB_SHIFT)
 
-/* Interrupt Enable, Interrupt Disable, Interrupt Mask, and Interrupt Status Registers */
+/* Interrupt Enable, Interrupt Disable, Interrupt Mask,
+ * and Interrupt Status Registers
+ */
 
 #define AFEC_INT_EOC(n)              (1 << (n))
 #  define AFEC_INT_EOC0              (1 << 0)  /* Bit 0:  End of Conversion 0 */
@@ -415,7 +423,9 @@
 #define AFEC_CGR_GAIN15_MASK         (3 << AFEC_CGR_GAIN15_SHIFT)
 #  define AFEC_CGR_GAIN15(v)         ((uint32_t)(v) << AFEC_CGR_GAIN15_SHIFT)
 
-/* Channel Calibration DC Offset Register (Used in Automatic Calibration Procedure) */
+/* Channel Calibration DC Offset Register
+ * (Used in Automatic Calibration Procedure)
+ */
 
 #define AFEC_CDOR_OFF(n)             (1 << (n))
 #  define AFEC_CDOR_OFF0             (1 << 0)  /* Bit 0:  Offset for channel 0 */
@@ -507,16 +517,16 @@
 #define AFEC_WPSR_WPVSRC_SHIFT       (8)       /* Bits 8-23: Write Protect Violation Source */
 #define AFEC_WPSR_WPVSRC_MASK        (0x0000ffff << AFEC_WPSR_WPVSRC_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_AFEC_H */

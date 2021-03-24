@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/_sama5d2x_pio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D2X_PIO_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D2X_PIO_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
-/* Misc Helper Definitions **************************************************************/
+ ****************************************************************************/
+
+/* Misc Helper Definitions **************************************************/
 
 #define PIOA                       (0)
 #define PIOB                       (1)
@@ -41,7 +42,7 @@
 #define PIOD                       (3)
 #define PIOE                       (4)
 
-/* PIO register offsets *****************************************************************/
+/* PIO register offsets *****************************************************/
 
 #define SAM_PIO_IOGROUP_OFFSET(n)  (0x0000 + ((n) << 6))
 #  define SAM_PIO_IOGROUPA_OFFSET  0x0000
@@ -98,7 +99,7 @@
 #define SAM_SPIO_WPMR_OFFSET       0x15e0 /* Secure PIO Write Protection Mode Register */
 #define SAM_SPIO_WPSR_OFFSET       0x15e4 /* Secure PIO Write Protection Status Register */
 
-/* PIO register addresses ***************************************************************/
+/* PIO register addresses ***************************************************/
 
 #define SAM_PIO_IOGROUP_VBASE(n)   (SAM_PIO_VBASE+SAM_PIO_IOGROUP_OFFSET(n))
 #  define SAM_PIO_IOGROUPA_VBASE   (SAM_PIO_VBASE+SAM_PIO_IOGROUPA_OFFSET)
@@ -235,7 +236,7 @@
 #define SAM_SPIO_WPMR              (SAM_PIO_VBASE+SAM_SPIO_WPMR_OFFSET)
 #define SAM_SPIO_WPSR              (SAM_PIO_VBASE+SAM_SPIO_WPSR_OFFSET)
 
-/* PIO register bit definitions *********************************************************/
+/* PIO register bit definitions *********************************************/
 
 /* Common bit definitions for many IO registers (exceptions follow) */
 
@@ -254,6 +255,7 @@
 #  define PIO_CFGR_FUNC_PERIPHE    (5 << PIO_CFGR_FUNC_SHIFT) /* Select peripheral E */
 #  define PIO_CFGR_FUNC_PERIPHF    (6 << PIO_CFGR_FUNC_SHIFT) /* Select peripheral F */
 #  define PIO_CFGR_FUNC_PERIPHG    (7 << PIO_CFGR_FUNC_SHIFT) /* Select peripheral G */
+
 #define PIO_CFGR_DIR               (1 << 8)  /* Bit 8:  Direction */
 #  define PIO_CFGR_DIR_INPUT       (0)       /*         0=Input */
 #  define PIO_CFGR_DIR_OUTPUT      (1 << 8)  /*         1=Output */
@@ -268,6 +270,7 @@
 #  define PIO_CFGR_DRVSTR_LOW      (0 << PIO_CFGR_DRVSTR_SHIFT) /* Low drive */
 #  define PIO_CFGR_DRVSTR_MED      (2 << PIO_CFGR_DRVSTR_SHIFT) /* Medium drive */
 #  define PIO_CFGR_DRVSTR_HIGH     (3 << PIO_CFGR_DRVSTR_SHIFT) /* High drive */
+
 #define PIO_CFGR_EVTSEL_SHIFT      (24)       /* Bits 24-26: Event Selection */
 #define PIO_CFGR_EVTSEL_MASK       (7 << PIO_CFGR_EVTSEL_SHIFT)
 #  define PIO_CFGR_EVTSEL_FALLING  (0 << PIO_CFGR_EVTSEL_SHIFT) /* Event detection on input falling edge */
@@ -275,6 +278,7 @@
 #  define PIO_CFGR_EVTSEL_BOTH     (2 << PIO_CFGR_EVTSEL_SHIFT) /* Event detection on input both edge */
 #  define PIO_CFGR_EVTSEL_LOW      (3 << PIO_CFGR_EVTSEL_SHIFT) /* Event detection on low level input */
 #  define PIO_CFGR_EVTSEL_HIGH     (4 << PIO_CFGR_EVTSEL_SHIFT) /* Event detection on high level input */
+
 #define PIO_CFGR_PCFS              (1 << 29) /* Bit 29: Physical Configuration Freeze Status */
 #define PIO_CFGR_ICFS              (1 << 30) /* Bit 30: Interrupt Configuration Freeze Status */
 
@@ -286,7 +290,9 @@
 #define PIO_IOFR_FRZKEY_MASK       (0x00ffffff << PIO_IOFR_FRZKEY_SHIFT)
 #  define PIO_IOFR_FRZKEY          (0x00494F46 << PIO_IOFR_FRZKEY_SHIFT) /* ""IOF" */
 
-/* PIO Write Protection Mode Register and Secure PIO Write Protection Mode Register */
+/* PIO Write Protection Mode Register and Secure PIO Write Protection Mode
+ * Register
+ */
 
 #define PIO_WPMR_WPEN              (1 << 0)  /* Bit 0:  Write Protection Enable */
 #define PIO_WPMR_WPITEN            (1 << 1)  /* Bit 1:  Write Protection Interrupt Enable */
@@ -294,7 +300,9 @@
 #define PIO_WPMR_WPKEY_MASK        (0x00ffffff << PIO_WPMR_WPKEY_SHIFT)
 #  define PIO_WPMR_WPKEY           (0x0050494f << PIO_WPMR_WPKEY_SHIFT) /* "PIO" */
 
-/* PIO Write Protection Status Register and Secure PIO Write Protection Status Register*/
+/* PIO Write Protection Status Register and Secure PIO Write Protection
+ * Status Register
+ */
 
 #define PIO_WPSR_WPVS              (1 << 0)  /* Bit 0:  Write Protection Violation Status */
 #define PIO_WPSR_WPVSRC_SHIFT      (8)       /* Bits 8-23: Write Protection Violation Source */
@@ -306,16 +314,16 @@
 #define SPIO_SCDR_DIV_MASK         (0x3fff << SPIO_SCDR_DIV_SHIFT)
 #  define SPIO_SCDR_DIV(n)         ((uint32_t)(n) << SPIO_SCDR_DIV_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D2X_PIO_H */

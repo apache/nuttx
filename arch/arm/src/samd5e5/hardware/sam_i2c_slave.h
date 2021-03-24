@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_i2c_slave.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_I2C_SLAVE_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_I2C_SLAVE_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* I2C register offsets *********************************************************************/
+/* I2C register offsets *****************************************************/
 
 #define SAM_I2C_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_I2C_CTRLB_OFFSET       0x0004  /* Control B register */
@@ -47,7 +47,7 @@
 #define SAM_I2C_ADDR_OFFSET        0x0024  /* Address register */
 #define SAM_I2C_DATA_OFFSET        0x0028  /* Data register */
 
-/* I2C register addresses *******************************************************************/
+/* I2C register addresses ***************************************************/
 
 #define SAM_I2C0_CTRLA             (SAM_SERCOM0_BASE + SAM_I2C_CTRLA_OFFSET)
 #define SAM_I2C0_CTRLB             (SAM_SERCOM0_BASE + SAM_I2C_CTRLB_OFFSET)
@@ -145,7 +145,7 @@
 #define SAM_I2C7_ADDR              (SAM_SERCOM7_BASE + SAM_I2C_ADDR_OFFSET)
 #define SAM_I2C7_DATA              (SAM_SERCOM7_BASE + SAM_I2C_DATA_OFFSET)
 
-/* I2C register bit definitions *************************************************************/
+/* I2C register bit definitions *********************************************/
 
 /* Control A register */
 
@@ -154,22 +154,27 @@
 #define I2C_CTRLA_MODE_SHIFT       (2)       /* Bits 2-4: Operating Mode */
 #define I2C_CTRLA_MODE_MASK        (7 << I2C_CTRLA_MODE_SHIFT)
 #  define I2C_CTRLA_MODE_SLAVE     (4 << I2C_CTRLA_MODE_SHIFT) /* I2C slave mode */
+
 #define I2C_CTRLA_RUNSTDBY         (1 << 7)  /* Bit 7:  Run in standby */
 #define I2C_CTRLA_PINOUT           (1 << 16) /* Bit 16: Pin usage */
+
 #  define I2C_CTRLA_1WIRE          (0)              /* 4-wire operation disabled */
 #  define I2C_CTRLA_4WIRE          I2C_CTRLA_PINOUT /* 4-wire operation enabled */
+
 #define I2C_CTRLA_SDAHOLD_SHIFT    (20)      /* Bits 20-21: SDA Hold Time */
 #define I2C_CTRLA_SDAHOLD_MASK     (3 << I2C_CTRLA_SDAHOLD_SHIFT)
 #  define I2C_CTRLA_SDAHOLD_DIS    (0 << I2C_CTRLA_SDAHOLD_SHIFT) /* Disabled */
 #  define I2C_CTRLA_SDAHOLD_75NS   (1 << I2C_CTRLA_SDAHOLD_SHIFT) /* 50-100ns hold time */
 #  define I2C_CTRLA_SDAHOLD_450NS  (2 << I2C_CTRLA_SDAHOLD_SHIFT) /* 300-600ns hold time */
 #  define I2C_CTRLA_SDAHOLD_600NS  (3 << I2C_CTRLA_SDAHOLD_SHIFT) /* 400-800ns hold time */
+
 #define I2C_CTRLA_SEXTTOEN         (1 << 23) /* Bit 23: Slave SCL low extend time-out */
 #define I2C_CTRLA_SPEED_SHIFT      (24)      /* Bits 24-25: Trnasfer speed */
 #define I2C_CTRLA_SPEED_MASK       (3 << I2C_CTRLA_SPEED_SHIFT)
 #  define I2C_CTRLA_SPEED_STD      (0 << I2C_CTRLA_SPEED_SHIFT) /* Standard (<=100KHz) fast <=400KHz */
 #  define I2C_CTRLA_SPEED_FAST     (1 << I2C_CTRLA_SPEED_SHIFT) /* Fast-mode please (<=1MHz) */
 #  define I2C_CTRLA_SPEED_HIGH     (2 << I2C_CTRLA_SPEED_SHIFT) /* High-speed mode (<=3.4Mhz */
+
 #define I2C_CTRLA_SCLSM            (1 << 27) /* Bit 27: SCL clock stretch mode */
 #define I2C_CTRLA_LOWTOUT          (1 << 30) /* Bit 30: SCL Low Time-Out */
 
@@ -183,12 +188,15 @@
 #  define I2C_CRLB_AMODE_MASK      (0 << I2C_CRLB_AMODE_SHIFT) /* ADDRMASK used to mask ADDR */
 #  define I2C_CRLB_AMODE_2ADDRS    (1 << I2C_CRLB_AMODE_SHIFT) /* Slave 2 addresses: ADDR & ADDRMASK */
 #  define I2C_CRLB_AMODE_RANGE     (2 << I2C_CRLB_AMODE_SHIFT) /* Slave range of addresses: ADDRMASK-ADDR */
+
 #define I2C_CTRLB_CMD_SHIFT        (16)      /* Bits 16-17: Command */
 #define I2C_CTRLB_CMD_MASK         (3 << I2C_CTRLB_CMD_SHIFT)
 #  define I2C_CTRLB_CMD_NOACTION   (0 << I2C_CTRLB_CMD_SHIFT) /* No action */
 #  define I2C_CTRLB_CMD_WAITSTART  (2 << I2C_CTRLB_CMD_SHIFT) /* ACK (write) wait for START */
 #  define I2C_CTRLB_CMD_ACKREAD    (3 << I2C_CTRLB_CMD_SHIFT) /* ACK with read (context dependent) */
+
 #define I2C_CTRLB_ACKACT           (1 << 18) /* Bit 18: Acknowledge Action */
+
 #  define I2C_CTRLB_ACK            (0)              /* Send ACK */
 #  define I2C_CTRLB_NCK            I2C_CTRLB_ACKACT /* Send NACK */
 
@@ -198,11 +206,12 @@
 #define I2C_CTRLC_SDASETUP_MASK    (15 << I2C_CTRLC_SDASETUP_SHIFT)
 #  define I2C_CTRLC_SDASETUP(n)    ((uint32_t)(n) << I2C_CTRLC_SDASETUP_SHIFT)
 #define I2C_CTRLC_DATA32B          (1 << 24) /* Bit 24: Data 32 Bit */
+
 #  define I2C_CTRLC_DATA32B_8BIT   (0)               /* DATA register is 8-bit */
 #  define I2C_CTRLC_DATA32B_32BIT  I2C_CTRLC_DATA32B /* DATA register is 32-bit */
 
-/* Interrupt enable clear, interrupt enable set, interrupt enable set, interrupt flag and
- * status clear registers.
+/* Interrupt enable clear, interrupt enable set, interrupt enable set,
+ * interrupt flag and status clear registers.
  */
 
 #define I2C_INT_PREC               (1 << 0)  /* Bit 0:  Stop received interrupt */
@@ -253,16 +262,16 @@
 
 #define I2C_DATA_MASK              (0xff)    /* Bits 0-7: Data */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_I2C_SLAVE_H */

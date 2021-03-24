@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_pmc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_PMC_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_PMC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* PMC register offsets *********************************************************************/
+/* PMC register offsets *****************************************************/
 
 #define SAM_PMC_SCER_OFFSET              0x0000 /* System Clock Enable Register */
 #define SAM_PMC_SCDR_OFFSET              0x0004 /* System Clock Disable Register */
@@ -56,7 +56,7 @@
     defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SAM_PMC_CKGR_UCKR_OFFSET       0x001c /* UTMI Clock Register */
 #endif
-                                                /* 0x001c: Reserved (SAM4S)*/
+                                                /* 0x001c: Reserved (SAM4S) */
 #define SAM_PMC_CKGR_MOR_OFFSET          0x0020 /* Main Oscillator Register */
 #define SAM_PMC_CKGR_MCFR_OFFSET         0x0024 /* Main Clock Frequency Register */
 #define SAM_PMC_CKGR_PLLAR_OFFSET        0x0028 /* PLLA Register */
@@ -64,7 +64,7 @@
 #if defined(CONFIG_ARCH_CHIP_SAM4CM) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_PMC_CKGR_PLLBR_OFFSET      0x002c /* PLLB Register */
 #endif
-                                                /* 0x002c: Reserved (SAM3U)*/
+                                                /* 0x002c: Reserved (SAM3U) */
 #define SAM_PMC_MCKR_OFFSET              0x0030 /* Master Clock Register */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || \
@@ -111,7 +111,7 @@
 #  define SAM_PMC_PMMR_OFFSET            0x0130 /* PLL Maximum Multiplier Value Register */
 #endif
 
-/* PMC register addresses *******************************************************************/
+/* PMC register addresses ***************************************************/
 
 #define SAM_PMC_SCER                     (SAM_PMC_BASE+SAM_PMC_SCER_OFFSET)
 #define SAM_PMC_SCDR                     (SAM_PMC_BASE+SAM_PMC_SCDR_OFFSET)
@@ -182,10 +182,10 @@
 #  define SAM_PMC_PMMR                   (SAM_PMC_BASE+SAM_PMC_PMMR_OFFSET)
 #endif
 
-/* PMC register bit definitions *************************************************************/
+/* PMC register bit definitions *********************************************/
 
-/* PMC System Clock Enable Register, PMC System Clock Disable Register, and PMC System
- * Clock Status Register common bit-field definitions
+/* PMC System Clock Enable Register, PMC System Clock Disable Register,
+ * and PMC System Clock Status Register common bit-field definitions
  */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM4S)
@@ -207,8 +207,9 @@
 #  define PMC_CPKEY                      (0xa << 20)
 #endif
 
-/* PMC Peripheral Clock Enable Register, PMC Peripheral Clock Disable Register, and PMC
- * Peripheral Clock Status Register common bit-field definitions.
+/* PMC Peripheral Clock Enable Register, PMC Peripheral Clock Disable
+ * Register, and PMC Peripheral Clock Status Register common bit-field
+ * definitions.
  */
 
 #define PMC_PIDL(n)                      (1 << (n))
@@ -267,6 +268,7 @@
 #  define PMC_CKGR_MOR_MOSCRCF_4MHz      (0 << PMC_CKGR_MOR_MOSCRCF_SHIFT) /* Fast RC Osc is 4MHz (default) */
 #  define PMC_CKGR_MOR_MOSCRCF_8MHz      (1 << PMC_CKGR_MOR_MOSCRCF_SHIFT) /* Fast RC Osc is 8MHz */
 #  define PMC_CKGR_MOR_MOSCRCF_12MHz     (2 << PMC_CKGR_MOR_MOSCRCF_SHIFT) /* Fast RC Osc is 12MHz */
+
 #define PMC_CKGR_MOR_MOSCXTST_SHIFT      (8)       /* Bits 8-15: Main Crystal Oscillator Start-up Time */
 #define PMC_CKGR_MOR_MOSCXTST_MASK       (0xff << PMC_CKGR_MOR_MOSCXTST_SHIFT)
 #  define PMC_CKGR_MOR_MOSCXTST(n)       ((uint32_t)(n) << PMC_CKGR_MOR_MOSCXTST_SHIFT)
@@ -317,6 +319,7 @@
 #    define PMC_CKGR_PLLBR_DIV_ZERO      (0 << PMC_CKGR_PLLBR_DIV_SHIFT)   /* Divider output is 0 */
 #    define PMC_CKGR_PLLBR_DIV_BYPASS    (1 << PMC_CKGR_PLLBR_DIV_SHIFT)   /* Divider is bypassed (DIV=1) */
 #    define PMC_CKGR_PLLBR_DIV(n)        ((n) << PMC_CKGR_PLLBR_DIV_SHIFT) /* Divider output is DIV=n, n=2..255 */
+
 #  define PMC_CKGR_PLLBR_COUNT_SHIFT     (8)       /* Bits 8-13: PLLA Counter */
 #  define PMC_CKGR_PLLBR_COUNT_MASK      (63 << PMC_CKGR_PLLBR_COUNT_SHIFT)
 #  define PMC_CKGR_PLLBR_MUL_SHIFT       (16)      /* Bits 16-26: PLLA Multiplier */
@@ -421,8 +424,8 @@
 #  define PMC_PCK_PRES_DIV32             (5 << PMC_PCK_PRES_SHIFT) /* Selected clock divided by 32 */
 #  define PMC_PCK_PRES_DIV64             (6 << PMC_PCK_PRES_SHIFT) /* Selected clock divided by 64 */
 
-/* PMC Interrupt Enable Register, PMC Interrupt Disable Register, PMC Status Register,
- * and PMC Interrupt Mask Register common bit-field definitions
+/* PMC Interrupt Enable Register, PMC Interrupt Disable Register, PMC Status
+ * Register, and PMC Interrupt Mask Register common bit-field definitions
  */
 
 #define PMC_INT_MOSCXTS                  (1 << 0)  /* Bit 0:  Main Crystal Oscillator Status Interrupt */
@@ -450,8 +453,8 @@
 #define PMC_SR_CFDS                      (1 << 19) /* Bit 19: Clock Failure Detector Status (SR only) */
 #define PMC_SR_FOS                       (1 << 20) /* Bit 20: Clock Failure Detector Fault Output Status (SR only) */
 
-/* PMC Fast Startup Mode Register and PMC Fast Startup Polarity Register common bit-field
- * definitions
+/* PMC Fast Startup Mode Register and PMC Fast Startup Polarity Register
+ * common bit-field definitions
  */
 
 #define PMC_FSTI(n)                      (1 << (n))
@@ -491,6 +494,7 @@
 /* Fast Startup Polarity Register */
 
 #define PMC_FSTP(n)                      (1 << (n)) /* Fast Startup Input Polarity n, n=0..15 */
+
 #  define PMC_FSTP0                      (1 << 0)  /* Bit 0:  Fast Startup Input Polarity 0 */
 #  define PMC_FSTP1                      (1 << 1)  /* Bit 1:  Fast Startup Input Polarity 1 */
 #  define PMC_FSTP2                      (1 << 2)  /* Bit 2:  Fast Startup Input Polarity 2 */
@@ -526,7 +530,9 @@
 #define PMC_WPSR_WPVSRC_MASK             (0xffff << PMC_WPSR_WPVSRC_SHIFT)
 
 /* Peripheral Clock Enable Register 1 */
+
 /* Peripheral Clock Disable Register 1 */
+
 /* Peripheral Clock Status Register 1 */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
@@ -567,6 +573,7 @@
 #    define PMC_PCR_DIV1                 (0 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK */
 #    define PMC_PCR_DIV2                 (1 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/2 */
 #    define PMC_PCR_DIV4                 (2 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/4 */
+
 #  define PMC_PCR_EN                     (1 << 28) /* Bit 28: Enable */
 #endif
 
@@ -593,16 +600,16 @@
 #  define PMC_PMMR_MASK                 (0x7ff) /* Bits 0-10: PLLA Maximum Allowed Multiplier */
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_PMC_H */

@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_trng.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_TRNG_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_TRNG_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,10 +36,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* TRNG register offsets ********************************************************************/
+ ****************************************************************************/
+
+/* TRNG register offsets ****************************************************/
 
 #define SAM_TRNG_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_TRNG_EVCTRL_OFFSET      0x0004  /* Event control register */
@@ -48,7 +49,7 @@
 #define SAM_TRNG_INTFLAG_OFFSET     0x000a  /* Interrupt flag and status clear register */
 #define SAM_TRNG_DATA_OFFSET        0x0020  /* Output data register */
 
-/* TRNG register addresses ******************************************************************/
+/* TRNG register addresses **************************************************/
 
 #define SAM_TRNG_CTRLA              (SAM_TRNG_BASE+SAM_TRNG_CTRLA_OFFSET)
 #define SAM_TRNG_EVCTRL             (SAM_TRNG_BASE+SAM_TRNG_EVCTRL_OFFSET)
@@ -57,32 +58,32 @@
 #define SAM_TRNG_INTFLAG            (SAM_TRNG_BASE+SAM_TRNG_INTFLAG_OFFSET)
 #define SAM_TRNG_DATA               (SAM_TRNG_BASE+SAM_TRNG_DATA_OFFSET)
 
-/* TRNG register bit definitions ************************************************************/
+/* TRNG register bit definitions ********************************************/
 
 /* Control register */
 
 #define TRNG_CTRLA_ENABLE            (1 << 1)  /* Bit 1:  Enable */
 #define TRNG_CTRLA_WEN               (1 << 6)  /* Bit 6:  Run in standby */
 
-/* Event control register, Interrupt enable clear, interrupt enable set register, interrupt
- * flag status registers.
+/* Event control register, Interrupt enable clear, interrupt enable set
+ * register, interrupt flag status registers.
  */
 
 #define TRNG_EVCTRL_DATARDY          (1 << 0)  /* Bit 0:  Data ready */
 
 /* Data register (32-bit data) */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_TRNG_H */

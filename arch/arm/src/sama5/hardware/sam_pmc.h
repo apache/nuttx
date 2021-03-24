@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_pmc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_PMC_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_PMC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* PMC register offsets *********************************************************************/
+/* PMC register offsets *****************************************************/
 
 #define SAM_PMC_SCER_OFFSET            0x0000 /* System Clock Enable Register */
 #define SAM_PMC_SCDR_OFFSET            0x0004 /* System Clock Disable Register */
@@ -102,7 +102,7 @@
 #  define SAM_PMC_AUDIO_PLL1_OFFSET    0x0150 /* Audio PLL Register 1 */
 #endif
 
-/* PMC register addresses *******************************************************************/
+/* PMC register addresses ***************************************************/
 
 #define SAM_PMC_SCER                   (SAM_PMC_VBASE+SAM_PMC_SCER_OFFSET)
 #define SAM_PMC_SCDR                   (SAM_PMC_VBASE+SAM_PMC_SCDR_OFFSET)
@@ -162,10 +162,10 @@
 #  define SAM_PMC_AUDIO_PLL1           (SAM_PMC_VBASE+SAM_PMC_AUDIO_PLL1_OFFSET)
 #endif
 
-/* PMC register bit definitions *************************************************************/
+/* PMC register bit definitions *********************************************/
 
-/* PMC System Clock Enable Register, PMC System Clock Disable Register, and PMC System
- * Clock Status Register common bit-field definitions
+/* PMC System Clock Enable Register, PMC System Clock Disable Register,
+ * and PMC System Clock Status Register common bit-field definitions
  */
 
 #if defined(ATSAMA5D2) || defined(ATSAMA5D3)
@@ -191,8 +191,9 @@
 #  define PMC_ISCCK                    (1 << 18) /* Bit 18: ISC Clock Enable */
 #endif
 
-/* PMC Peripheral Clock Enable Register, PMC Peripheral Clock Disable Register, and PMC
- * Peripheral Clock Status Register common bit-field definitions.
+/* PMC Peripheral Clock Enable Register, PMC Peripheral Clock Disable
+ * Register, and PMC Peripheral Clock Status Register common bit-field
+ * definitions.
  */
 
 #define PMC_PIDL(n)                    (1 << (n))
@@ -285,9 +286,9 @@
 #    define PMC_CKGR_PLLAR_DIV(n)      ((n) << PMC_CKGR_PLLAR_DIV_SHIFT) /* Divider output is DIV=n, n=2..255 */
 #  define SAMA5_HAVE_PLLAR_DIV         1
 
-/* According the preliminary documentation, there is no DIV field in the SAMA5D4
- * PLLAR register.  However, through trial and error, I find that the PLL output
- * is still disabled if the DIV field is set to zero.
+/* According the preliminary documentation, there is no DIV field in the
+ * SAMA5D4 PLLAR register.  However, through trial and error, I find that
+ * the PLL output is still disabled if the DIV field is set to zero.
  */
 
 #elif defined(ATSAMA5D4)
@@ -300,6 +301,7 @@
 #define PMC_CKGR_PLLAR_OUT_SHIFT       (14)      /* Bits 14-17: PLLA Clock Frequency Range */
 #define PMC_CKGR_PLLAR_OUT_MASK        (15 << PMC_CKGR_PLLAR_OUT_SHIFT)
 #  define PMC_CKGR_PLLAR_OUT           (0 << PMC_CKGR_PLLAR_OUT_SHIFT) /* To be programmed to 0 */
+
 #define PMC_CKGR_PLLAR_MUL_SHIFT       (18)      /* Bits 18-24: PLLA Multiplier */
 #define PMC_CKGR_PLLAR_MUL_MASK        (0x7f << PMC_CKGR_PLLAR_MUL_SHIFT)
 #  define PMC_CKGR_PLLAR_MUL(n)        ((uint32_t)(n) << PMC_CKGR_PLLAR_MUL_SHIFT)
@@ -313,6 +315,7 @@
 #  define PMC_MCKR_CSS_MAIN            (1 << PMC_MCKR_CSS_SHIFT) /* Main Clock */
 #  define PMC_MCKR_CSS_PLLA            (2 << PMC_MCKR_CSS_SHIFT) /* PLLA Clock */
 #  define PMC_MCKR_CSS_UPLL            (3 << PMC_MCKR_CSS_SHIFT) /* UPLL Clock */
+
 #define PMC_MCKR_PRES_SHIFT            (4)       /* Bits 4-6: Processor Clock Prescaler */
 #define PMC_MCKR_PRES_MASK             (7 << PMC_MCKR_PRES_SHIFT)
 #  define PMC_MCKR_PRES_DIV1           (0 << PMC_MCKR_PRES_SHIFT) /* Selected clock */
@@ -322,12 +325,14 @@
 #  define PMC_MCKR_PRES_DIV16          (4 << PMC_MCKR_PRES_SHIFT) /* Selected clock divided by 16 */
 #  define PMC_MCKR_PRES_DIV32          (5 << PMC_MCKR_PRES_SHIFT) /* Selected clock divided by 32 */
 #  define PMC_MCKR_PRES_DIV64          (6 << PMC_MCKR_PRES_SHIFT) /* Selected clock divided by 64 */
+
 #define PMC_MCKR_MDIV_SHIFT            (8)        /* Bits 8-9: Master Clock Division */
 #define PMC_MCKR_MDIV_MASK             (3 << PMC_MCKR_MDIV_SHIFT)
 #  define PMC_MCKR_MDIV_PCKDIV1        (0 << PMC_MCKR_MDIV_SHIFT) /* Prescaler Output Clock divided by 1 */
 #  define PMC_MCKR_MDIV_PCKDIV2        (1 << PMC_MCKR_MDIV_SHIFT) /* Prescaler Output Clock divided by 2 */
 #  define PMC_MCKR_MDIV_PCKDIV4        (2 << PMC_MCKR_MDIV_SHIFT) /* Prescaler Output Clock divided by 4 */
 #  define PMC_MCKR_MDIV_PCKDIV3        (3 << PMC_MCKR_MDIV_SHIFT) /* Prescaler Output Clock divided by 3 */
+
 #define PMC_MCKR_PLLADIV2              (1 << 12) /* Bit 12: PLLA Divider */
 
 #if defined(ATSAMA5D2) || defined(ATSAMA5D4)
@@ -385,8 +390,8 @@
 #    define PMC_PCK_PRES(n)            ((uint32_t)(n) << PMC_PCK_PRES_SHIFT)
 #endif
 
-/* PMC Interrupt Enable Register, PMC Interrupt Disable Register, PMC Status Register,
- * and PMC Interrupt Mask Register common bit-field definitions
+/* PMC Interrupt Enable Register, PMC Interrupt Disable Register, PMC Status
+ * Register, and PMC Interrupt Mask Register common bit-field definitions
  */
 
 #define PMC_INT_MOSCXTS                (1 << 0)  /* Bit 0:  Main Crystal Oscillator Status Interrupt */
@@ -420,6 +425,7 @@
 /* Fast Startup Mode Register */
 
 #  define PMC_FSMR_FSTT(n)            (1 << (n)) /* Bits 0-8: Fast Startup Input Enable 0 to 8 */
+
 #    define PMC_FSMR_FSTT0            (1 << 0)  /* Bit 0:  Fast Startup Input Enable 0 */
 #    define PMC_FSMR_FSTT1            (1 << 1)  /* Bit 1:  Fast Startup Input Enable 1 */
 #    define PMC_FSMR_FSTT2            (1 << 2)  /* Bit 2:  Fast Startup Input Enable 2 */
@@ -440,6 +446,7 @@
 /* Fast Startup Polarity Register */
 
 #  define PMC_FSPR_FSTP(n)            (1 << (n)) /* Bits 0-8: Fast Startup Input Polarity 0 to 8 */
+
 #    define PMC_FSPR_FSTP0            (1 << 0)  /* Bit 0:  Fast Startup Input Polarity 0 */
 #    define PMC_FSPR_FSTP1            (1 << 1)  /* Bit 1:  Fast Startup Input Polarity 1 */
 #    define PMC_FSPR_FSTP2            (1 << 2)  /* Bit 2:  Fast Startup Input Polarity 2 */
@@ -484,7 +491,9 @@
 #define PMC_WPSR_WPVSRC_MASK           (0xffff << PMC_WPSR_WPVSRC_SHIFT)
 
 /* Peripheral Clock Enable Register 1 */
+
 /* Peripheral Clock Disable Register 1 */
+
 /* Peripheral Clock Status Register 1 */
 
 #define PMC_PIDH(n)                    (1 << ((n) - 32))
@@ -576,11 +585,12 @@
 #endif
 
 #ifdef ATSAMA5D2
-/* SleepWalking Enable Register 0, SleepWalking Disable Register 0, and SleepWalking
- * Activity Status Register 0.
+/* SleepWalking Enable Register 0, SleepWalking Disable Register 0, and
+ * SleepWalking Activity Status Register 0.
  */
 
 #  define PMC_SLPWK_ER0(n)             (1 << (n)) /* Peripheral n SleepWalking Enable */
+
 #    define PMC_SLPWK_ER0_PID19        (1 << 19) /* Peripheral 19 SleepWalking Enable */
 #    define PMC_SLPWK_ER0_PID20        (1 << 19) /* Peripheral 20 SleepWalking Enable */
 #    define PMC_SLPWK_ER0_PID21        (1 << 19) /* Peripheral 21 SleepWalking Enable */
@@ -596,16 +606,17 @@
 #endif
 
 #ifdef ATSAMA5D2
-/* SleepWalking Enable Register 1, SleepWalking Disable Register 1, and SleepWalking Status
- * Register 1, and SleepWalking Activity Status Register 1.
+/* SleepWalking Enable Register 1, SleepWalking Disable Register 1, and
+ * SleepWalking Status Register 1, and SleepWalking Activity Status
+ * Register 1.
  */
 
 #  define PMC_SLPWK_ER1(n)             (1 << ((n)-1)) /* Peripheral n SleepWalking Enable */
+
 #    define PMC_SLPWK_ER1_PID33        (1 << 1)  /* Peripheral 33 SleepWalking Enable */
 #    define PMC_SLPWK_ER1_PID34        (1 << 2)  /* Peripheral 34 SleepWalking Enable */
 #    define PMC_SLPWK_ER1_PID40        (1 << 8)  /* Peripheral 40 SleepWalking Enable */
 #endif
-
 
 #ifdef ATSAMA5D2
 /* SleepWalking Activity In Progress Register */
@@ -652,16 +663,16 @@
 #    define PMC_AUDIO_PLL1_QDAUDIO(n)  ((uint32_t)(n) << PMC_AUDIO_PLL1_QDAUDIO_SHIFT)
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_PMC_H */

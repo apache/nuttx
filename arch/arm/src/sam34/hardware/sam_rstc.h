@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_rstc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_RSTC_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_RSTC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* RSTC register offsets ****************************************************************/
+/* RSTC register offsets ****************************************************/
 
 #define SAM_RSTC_CR_OFFSET      0x00 /* Control Register */
 #define SAM_RSTC_SR_OFFSET      0x04 /* Status Register */
@@ -44,7 +44,7 @@
 #  define SAM_RSTC_CPMR_OFFSET  0x0c /* Coprocessor Mode Register */
 #endif
 
-/* RSTC register addresses **************************************************************/
+/* RSTC register addresses **************************************************/
 
 #define SAM_RSTC_CR             (SAM_RSTC_BASE+SAM_RSTC_CR_OFFSET)
 #define SAM_RSTC_SR             (SAM_RSTC_BASE+SAM_RSTC_SR_OFFSET)
@@ -54,7 +54,7 @@
 #  define SAM_RSTC_CPMR         (SAM_RSTC_BASE+SAM_RSTC_CPMR_OFFSET)
 #endif
 
-/* RSTC register bit definitions ********************************************************/
+/* RSTC register bit definitions ********************************************/
 
 /* Reset Controller Control Register */
 
@@ -75,6 +75,7 @@
 #  define RSTC_SR_RSTTYP_WDOG   (2 << RSTC_SR_RSTTYP_SHIFT) /* Watchdog Reset */
 #  define RSTC_SR_RSTTYP_SWRST  (3 << RSTC_SR_RSTTYP_SHIFT) /* Software Reset */
 #  define RSTC_SR_RSTTYP_NRST   (4 << RSTC_SR_RSTTYP_SHIFT) /* User Reset NRST pin */
+
 #define RSTC_SR_NRSTL           (1 << 16) /* Bit 16:  NRST Pin Level */
 #define RSTC_SR_SRCMP           (1 << 17) /* Bit 17:  Software Reset Command in Progress */
 
@@ -92,21 +93,21 @@
 #if defined(CONFIG_ARCH_CHIP_SAM4CM)
 /* Coprocessor Mode Register */
 
-#  define RSTC_CPMR_CPROCEN     (1 << 0)  /* Coprocessor (second processor) Enable */
-#  define RSTC_CPMR_CPEREN      (1 << 4)  /* Coprocessor Peripheral Enable */
+#  define RSTC_CPMR_CPROCEN     (1 << 0)     /* Coprocessor (second processor) Enable */
+#  define RSTC_CPMR_CPEREN      (1 << 4)     /* Coprocessor Peripheral Enable */
 #  define RSTC_CPMR_CPKEY       (0x5a << 24) /* Key */
 #endif
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_RSTC_H */

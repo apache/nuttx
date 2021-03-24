@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_xdmac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_XDMAC_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_XDMAC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/sama5/chip.h>
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
-/* XDMAC Register Offsets ***********************************************************/
+ ****************************************************************************/
+
+/* XDMAC Register Offsets ***************************************************/
 
 #define SAM_XDMAC_GTYPE_OFFSET      0x0000 /* Global Type Register */
 #define SAM_XDMAC_GCFG_OFFSET       0x0004 /* Global Configuration Register */
@@ -72,7 +73,9 @@
 #  define SAM_XDMAC_CH14_OFFSET    0x03d0
 #  define SAM_XDMAC_CH15_OFFSET    0x0410
 
-/* Offsets to channel registers relative to the base of the DMA channel registers */
+/* Offsets to channel registers relative to the base of the DMA channel
+ * registers
+ */
 
 #define SAM_XDMACH_CIE_OFFSET       0x0000 /* Channel Interrupt Enable Register */
 #define SAM_XDMACH_CID_OFFSET       0x0004 /* Channel Interrupt Disable Register */
@@ -91,7 +94,7 @@
                                            /* 0x0038-0x003c Reserved */
                                            /* 0x0fec–0x0ffc Reserved */
 
-/* XDMAC Register Addresses *********************************************************/
+/* XDMAC Register Addresses *************************************************/
 
 #define SAM_XDMAC0_GTYPE            (SAM_XDMAC0_VBASE+SAM_XDMAC_GTYPE_OFFSET)
 #define SAM_XDMAC0_GCFG             (SAM_XDMAC0_VBASE+SAM_XDMAC_GCFG_OFFSET)
@@ -203,13 +206,13 @@
 #define SAM_XDMACH1_CSUS(n)         (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CSUS_OFFSET)
 #define SAM_XDMACH1_CDUS(n)         (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CDUS_OFFSET)
 
-/* XDMAC Register Bit Definitions ***************************************************/
+/* XDMAC Register Bit Definitions *******************************************/
 
 /* Global Type Register */
 
 #define XDMAC_GTYPE_NB_CH_SHIFT     (0)       /* Bits 0-4: Number of Channels Minus One */
 #define XDMAC_GTYPE_NB_CH_MASK      (31 << XDMAC_GTYPE_NB_CH_SHIFT)
-  #define XDMAC_GTYPE_NB_CH(n)      ((uint32_t)(n) << XDMAC_GTYPE_NB_CH_SHIFT)
+#  define XDMAC_GTYPE_NB_CH(n)      ((uint32_t)(n) << XDMAC_GTYPE_NB_CH_SHIFT)
 #define XDMAC_GTYPE_FIFO_SZ_SHIFT   (5)       /* Bits 5-15: Number of Bytes */
 #define XDMAC_GTYPE_FIFO_SZ_MASK    (0x7ff << XDMAC_GTYPE_FIFO_SZ_SHIFT)
 #  define XDMAC_GTYPE_FIFO_SZ(n)    ((uint32_t)(n) << XDMAC_GTYPE_FIFO_SZ_SHIFT)
@@ -242,25 +245,26 @@
 
 /* All of these registers have the same layout:
  *
- * - Global Interrupt Enable Register, Global Interrupt Disable Register, Interrupt
- *   Mask Register, and Global Interrupt Status Register.
+ * - Global Interrupt Enable Register, Global Interrupt Disable Register,
+ *   Interrupt Mask Register, and Global Interrupt Status Register.
  *
- * - Global Channel Enable Register, Global Channel Disable Register, and Global
- *   Channel Status Register
+ * - Global Channel Enable Register, Global Channel Disable Register, and
+ *   Global Channel Status Register
  *
- * - Global Channel Read Suspend Register, Global Channel Write Suspend Register,
- *   Channel Read Write Suspend Register, and Global Channel Read Write Resume
+ * - Global Channel Read Suspend Register, Global Channel Write Suspend
+ *   Register, Channel Read Write Suspend Register, and Global Channel Read
+ *   Write Resume Register
+ *
+ * - Global Channel Software Request Register, Global Channel Software
+ *   Request Status Register, and Global Channel Software Flush Request
  *   Register
- *
- * - Global Channel Software Request Register, Global Channel Software Request
- *   Status Register, and Global Channel Software Flush Request Register
  */
 
 #define XDMAC_CHAN(n)               (1 << (n))
 #define XDMAC_CHAN_ALL              (0x0000ffff)
 
-/* Channel Interrupt Enable Register, Channel Interrupt Disable Register, Channel
- * Interrupt Mask Register, and Channel Interrupt Status Register.
+/* Channel Interrupt Enable Register, Channel Interrupt Disable Register,
+ * Channel Interrupt Mask Register, and Channel Interrupt Status Register.
  */
 
 #define XDMAC_CHINT_BI              (1 << 0)  /* Bit 0:  End of Block Interrupt  */
@@ -275,9 +279,12 @@
 #define XDMAC_CHINT_ALL             (0x0000007f)
 
 /* Channel Source Address (SA) Register (aligned 32-bit address) */
+
 /* Channel Destination Address (DA) Register (aligned 32-bit address) */
 
-/* Channel Next Descriptor Address (CNDA) Register (aligned 32-bit address) */
+/* Channel Next Descriptor Address (CNDA) Register
+ * (aligned 32-bit address)
+ */
 
 #define XDMACH_CNDA_NDAIF           (1 << 0)  /* Bit 0:  Channel Next Descriptor Interface */
 
@@ -309,10 +316,12 @@
 #define XDMACH_CC_MBSIZE_SHIFT      (1)       /* Bits 1-2: Channel Memory Burst Size */
 #define XDMACH_CC_MBSIZE_MASK       (3 << XDMACH_CC_MBSIZE_SHIFT)
 #  define XDMACH_CC_MBSIZE(n)       ((uint32_t)(n) << XDMACH_CC_MBSIZE_SHIFT) /* n=0-3 */
+
 #  define XDMACH_CC_MBSIZE_1        (0 << XDMACH_CC_MBSIZE_SHIFT) /* The memory burst size is set to one */
 #  define XDMACH_CC_MBSIZE_4        (1 << XDMACH_CC_MBSIZE_SHIFT) /* The memory burst size is set to four */
 #  define XDMACH_CC_MBSIZE_8        (2 << XDMACH_CC_MBSIZE_SHIFT) /* The memory burst size is set to eight */
 #  define XDMACH_CC_MBSIZE_16       (3 << XDMACH_CC_MBSIZE_SHIFT) /* The memory burst size is set to sixteen */
+
 #define XDMACH_CC_DSYNC             (1 << 4)  /* Bit 4:  Channel Synchronization */
 #define XDMACH_CC_PROT              (1 << 5)  /* Bit 5:  Channel Protection */
 #define XDMACH_CC_SWREQ             (1 << 6)  /* Bit 6:  Channel Software Request Trigger */
@@ -324,12 +333,14 @@
 #  define XDMACH_CC_CSIZE_4         (2 << XDMACH_CC_CSIZE_SHIFT) /* 4 data transferred */
 #  define XDMACH_CC_CSIZE_8         (3 << XDMACH_CC_CSIZE_SHIFT) /* 8 data transferred */
 #  define XDMACH_CC_CSIZE_16        (4 << XDMACH_CC_CSIZE_SHIFT) /* 16 data transferred */
+
 #define XDMACH_CC_DWIDTH_SHIFT      (11)      /* Bits 11-12: Channel Data Width */
 #define XDMACH_CC_DWIDTH_MASK       (3 << XDMACH_CC_DWIDTH_SHIFT)
 #  define XDMACH_CC_DWIDTH_BYTE     (0 << XDMACH_CC_DWIDTH_SHIFT) /* The data size is set to 8 bits */
 #  define XDMACH_CC_DWIDTH_HWORD    (1 << XDMACH_CC_DWIDTH_SHIFT) /* The data size is set to 16 bits */
 #  define XDMACH_CC_DWIDTH_WORD     (2 << XDMACH_CC_DWIDTH_SHIFT) /* The data size is set to 32 bits */
 #  define XDMACH_CC_DWIDTH_DWORD    (3 << XDMACH_CC_DWIDTH_SHIFT) /* The data size is set to 64 bits */
+
 #define XDMACH_CC_SIF               (1 << 13) /* Bit 13: Channel Source Interface Identifier */
 #define XDMACH_CC_DIF               (1 << 14) /* Bit 14: Channel Destination Interface Identifier */
 #define XDMACH_CC_SAM_SHIFT         (16)      /* Bits 16-17: Channel Source Addressing Mode */
@@ -338,12 +349,14 @@
 #  define XDMACH_CC_SAM_INCR        (1 << XDMACH_CC_SAM_SHIFT) /* Address is incremented */
 #  define XDMACH_CC_SAM_UBS         (2 << XDMACH_CC_SAM_SHIFT) /* Microblock stride is added */
 #  define XDMACH_CC_SAM_UBSDS       (3 << XDMACH_CC_SAM_SHIFT) /* Microblock stride and data stride is added */
+
 #define XDMACH_CC_DAM_SHIFT         (18)      /* Bits 18-19: Channel Destination Addressing Mode */
 #define XDMACH_CC_DAM_MASK          (3 << XDMACH_CC_DAM_SHIFT)
 #  define XDMACH_CC_DAM_FIXED       (0 << XDMACH_CC_DAM_SHIFT) /* The address remains unchanged */
 #  define XDMACH_CC_DAM_INCR        (1 << XDMACH_CC_DAM_SHIFT) /* Address is incremented */
 #  define XDMACH_CC_DAM_UBS         (2 << XDMACH_CC_DAM_SHIFT) /* Microblock stride is added */
 #  define XDMACH_CC_DAM_UBSDS       (3 << XDMACH_CC_DAM_SHIFT) /* Microblock stride and data stride is added */
+
 #define XDMACH_CC_INITD             (1 << 21) /* Bit 21: Channel Initialization Terminated */
 #define XDMACH_CC_RDIP              (1 << 22) /* Bit 22: Read in Progress */
 #define XDMACH_CC_WRIP              (1 << 23) /* Bit 23: Write in Progress */
@@ -368,7 +381,8 @@
 
 #define XDMACH_CDUS_DUBS_MASK       (0x00ffffff)       /* Bits 0-23: Channel Destination Microblock Stride */
 
-/* XDMA Channel Definitions *************************************************************/
+/* XDMA Channel Definitions *************************************************/
+
 /* XDMA Controller 0 Channel Definitions (always secure) */
 
 #define XDMAC0_CH_HSMCI0            0  /* HSMCI0 Receive/Transmit */
@@ -456,7 +470,7 @@
 #define XDMAC1_CH_SMD_TX            33 /* SMD Transmit */
 #define XDMAC1_CH_SMD_RX            34 /* SMD Receive */
 
-/* Descriptor structure member definitions **********************************************/
+/* Descriptor structure member definitions **********************************/
 
 /* Next Descriptor Address (32-bit address) */
 
@@ -476,18 +490,22 @@
 #  define CHNEXT_UBC_NVIEW_3        (3 << CHNEXT_UBC_NVIEW_SHIFT) /* Next Descriptor View 3 */
 
 /* Source Address (32-bit address) */
+
 /* Destination Address (32-bit address) */
 
 /* Configuration Register */
+
 /* Block Control */
 
 /* Data Stride (32-bit value) */
+
 /* Source Microblock Stride (32-bit value) */
+
 /* Destination Microblock Stride (32-bit value) */
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
 struct chnext_view0_s
 {

@@ -1,4 +1,4 @@
-/************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/_sama5d4x_pinmap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,40 +16,43 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D4X_PINMAP_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D4X_PINMAP_H
 
-/************************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "sam_pio.h"
 
-/************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************************/
+ ****************************************************************************/
 
-/* PIO pin definitions **************************************************************************************/
+/* PIO pin definitions ******************************************************/
+
 /* Alternate Pin Functions.
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.  Drivers, however, will
- * use the pin selection without the numeric suffix.  Additional definitions are required in the board.h
- * file.  For example, if we wanted the PCK0 on PB26, then the following definition should appear in the
- * board.h header file for that board:
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc.  Drivers, however, will use the pin selection without the numeric
+ * suffix.  Additional definitions are required in the board.h file.
+ * For example, if we wanted the PCK0 on PB26, then the following definition
+ * should appear in the board.h header file for that board:
  *
  *   #define PIO_PMC_PCK0 PIO_PMC_PCK0_1
  *
  * The PCK logic will then automatically configure PB26 as the PCK0 pin.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific PIO options such as frequency, open-drain/push-pull,
- * and pull-up/down!  Just the basics are defined for most pins in this file at the present time.
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific PIO options such as
+ * frequency, open-drain/push-pull, and pull-up/down!  Just the basics are
+ * defined for most pins in this file at the present time.
  */
 
 /* Analog-to-Digital Converter - ADC */

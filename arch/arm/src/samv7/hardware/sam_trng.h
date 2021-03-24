@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_trng.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_TRNG_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_TRNG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* TRNG Register Offsets ************************************************************/
+ ****************************************************************************/
+
+/* TRNG Register Offsets ****************************************************/
 
 #define SAM_TRNG_CR_OFFSET        0x0000 /* Control Register */
 #define SAM_TRNG_IER_OFFSET       0x0010 /* Interrupt Enable Register */
@@ -40,7 +41,7 @@
 #define SAM_TRNG_ISR_OFFSET       0x001c /* Interrupt Status Register */
 #define SAM_TRNG_ODATA_OFFSET     0x0050 /* Output Data Register */
 
-/* TRNG Register Addresses **********************************************************/
+/* TRNG Register Addresses **************************************************/
 
 #define SAM_TRNG_CR               (SAM_TRNG_BASE+SAM_TRNG_CR_OFFSET)
 #define SAM_TRNG_IER              (SAM_TRNG_BASE+SAM_TRNG_IER_OFFSET)
@@ -49,7 +50,7 @@
 #define SAM_TRNG_ISR              (SAM_TRNG_BASE+SAM_TRNG_ISR_OFFSET)
 #define SAM_TRNG_ODATA            (SAM_TRNG_BASE+SAM_TRNG_ODATA_OFFSET)
 
-/* TRNG Register Bit Definitions ****************************************************/
+/* TRNG Register Bit Definitions ********************************************/
 
 /* Control Register */
 
@@ -59,8 +60,8 @@
 #define TRNG_CR_KEY_MASK          (0xffffff << TRNG_CR_KEY_SHIFT)
 # define TRNG_CR_KEY              (0x524e47 << TRNG_CR_KEY_SHIFT) /* RNG in ASCII */
 
-/* Interrupt Enable Register, Interrupt Disable Register, Interrupt Mask Register,
- * and Interrupt Status Register
+/* Interrupt Enable Register, Interrupt Disable Register,
+ * Interrupt Mask Register, and Interrupt Status Register
  */
 
 #define TRNG_INT_DATRDY           (1 << 0)  /* Bit 0:  Data ready */

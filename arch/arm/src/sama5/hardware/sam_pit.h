@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_pit.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,36 +16,37 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_PIT_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_PIT_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* PIT Register Offsets *************************************************************/
+ ****************************************************************************/
+
+/* PIT Register Offsets *****************************************************/
 
 #define SAM_PIT_MR_OFFSET    0x0000 /* Mode Register */
 #define SAM_PIT_SR_OFFSET    0x0004 /* Status Register */
 #define SAM_PIT_PIVR_OFFSET  0x0008 /* Periodic Interval Value Register */
 #define SAM_PIT_PIIR_OFFSET  0x000c /* Periodic Interval Image Register */
 
-/* PIT Register Addresses ***********************************************************/
+/* PIT Register Addresses ***************************************************/
 
 #define SAM_PIT_MR          (SAM_PITC_VBASE+SAM_PIT_MR_OFFSET)
 #define SAM_PIT_SR          (SAM_PITC_VBASE+SAM_PIT_SR_OFFSET)
 #define SAM_PIT_PIVR        (SAM_PITC_VBASE+SAM_PIT_PIVR_OFFSET)
 #define SAM_PIT_PIIR        (SAM_PITC_VBASE+SAM_PIT_PIIR_OFFSET)
 
-/* PIT Register Bit Definitions *****************************************************/
+/* PIT Register Bit Definitions *********************************************/
 
 /* Mode Register */
 
@@ -60,6 +61,7 @@
 #define PIT_SR_S            (1 << 0)  /* Bit 0: Periodic Interval Timer Status */
 
 /* Periodic Interval Value Register */
+
 /* Periodic Interval Image Register */
 
 #define PIT_CPIV_SHIFT      (0) /* Bits 0-19: Current Periodic Interval Value */

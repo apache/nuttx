@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/sam_ethernet.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_SAM_ETHERNET_H
 #define __ARCH_ARM_SRC_SAMV7_SAM_ETHERNET_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/samv7/chip.h>
 
 #include "hardware/sam_emac.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Understood PHY types */
 
 #define SAMV7_PHY_DM9161  0
@@ -150,9 +151,9 @@
 #  endif
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -220,15 +221,16 @@ int sam_emac_initialize(int intf);
 int sam_emac_setmacaddr(int intf, uint8_t mac[6]);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function: sam_phy_boardinitialize
  *
  * Description:
- *   Some boards require specialized initialization of the PHY before it can be used.
- *   This may include such things as configuring GPIOs, resetting the PHY, etc.  If
- *   CONFIG_SAMV7_PHYINIT is defined in the configuration then the board specific
- *   logic must provide sam_phyinitialize();  The SAMV7 Ethernet driver will call
- *   this function one time before it first uses the PHY.
+ *   Some boards require specialized initialization of the PHY before it can
+ *   be used. This may include such things as configuring GPIOs, resetting
+ *   the PHY, etc.  If CONFIG_SAMV7_PHYINIT is defined in the configuration
+ *   then the board specific logic must provide sam_phyinitialize();
+ *   The SAMV7 Ethernet driver will call this function one time before it
+ *   first uses the PHY.
  *
  * Input Parameters:
  *   intf - Always zero for now.
@@ -238,7 +240,7 @@ int sam_emac_setmacaddr(int intf, uint8_t mac[6]);
  *
  * Assumptions:
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_PHYINIT
 int sam_phy_boardinitialize(int intf);

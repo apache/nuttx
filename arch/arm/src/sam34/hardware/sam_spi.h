@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_SPI_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_SPI_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
-/* General definitions ******************************************************************/
+ ****************************************************************************/
+
+/* General definitions ******************************************************/
 
 #define SAM_SPI_NCS               4    /* Four chip selects */
 
-/* SPI register offsets *****************************************************************/
+/* SPI register offsets *****************************************************/
 
 #define SAM_SPI_CR_OFFSET         0x0000 /* Control Register */
 #define SAM_SPI_MR_OFFSET         0x0004 /* Mode Register */
@@ -62,7 +63,7 @@
 #endif
                                          /* 0x100-0x124 Reserved for PDC Registers */
 
-/* SPI register addresses ***************************************************************/
+/* SPI register addresses ***************************************************/
 
 #define SAM_SPI0_CR               (SAM_SPI0_BASE+SAM_SPI_CR_OFFSET)   /* Control Register */
 #define SAM_SPI0_MR               (SAM_SPI0_BASE+SAM_SPI_MR_OFFSET)   /* Mode Register */
@@ -104,7 +105,7 @@
 #  define SAM_SPI1_VERSION        (SAM_SPI1_BASE+SAM_SPI_VERSION_OFFSET)
 #endif
 
-/* SPI register bit definitions *********************************************************/
+/* SPI register bit definitions *********************************************/
 
 /* SPI Control Register */
 
@@ -137,6 +138,7 @@
 #  define SPI_MR_PCS1             (1 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 1101 (w/PCSDEC=0) */
 #  define SPI_MR_PCS2             (3 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 1011 (w/PCSDEC=0) */
 #  define SPI_MR_PCS3             (7 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 0111 (w/PCSDEC=0) */
+
 #define SPI_MR_DLYBCS_SHIFT       (24)      /* Bits 24-31: Delay Between Chip Selects */
 #define SPI_MR_DLYBCS_MASK        (0xff << SPI_MR_DLYBCS_SHIFT)
 
@@ -161,9 +163,11 @@
 #  define SPI_TDR_PCS1            (1 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 1101 (w/PCSDEC=0) */
 #  define SPI_TDR_PCS2            (3 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 1011 (w/PCSDEC=0) */
 #  define SPI_TDR_PCS3            (7 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 0111 (w/PCSDEC=0) */
+
 #define SPI_TDR_LASTXFER          (1 << 24) /* Bit 24: Last Transfer */
 
-/* SPI Status Register, SPI Interrupt Enable Register, SPI Interrupt Disable Register,
+/* SPI Status Register, SPI Interrupt Enable Register,
+ * SPI Interrupt Disable Register,
  * and SPI Interrupt Mask Register (common bit fields)
  */
 
@@ -193,6 +197,7 @@
 #define SPI_CSR_BITS_SHIFT        (4)       /* Bits 4-7: Bits Per Transfer */
 #define SPI_CSR_BITS_MASK         (15 << SPI_CSR_BITS_SHIFT)
 #  define SPI_CSR_BITS(n)         (((n)-8) << SPI_CSR_BITS_SHIFT) /* n, n=8-16 */
+
 #  define SPI_CSR_BITS8           (0 << SPI_CSR_BITS_SHIFT) /* 8 */
 #  define SPI_CSR_BITS9           (1 << SPI_CSR_BITS_SHIFT) /* 9 */
 #  define SPI_CSR_BITS10          (2 << SPI_CSR_BITS_SHIFT) /* 10 */
@@ -202,6 +207,7 @@
 #  define SPI_CSR_BITS14          (6 << SPI_CSR_BITS_SHIFT) /* 14 */
 #  define SPI_CSR_BITS15          (7 << SPI_CSR_BITS_SHIFT) /* 15 */
 #  define SPI_CSR_BITS16          (8 << SPI_CSR_BITS_SHIFT) /* 16 */
+
 #define SPI_CSR_SCBR_SHIFT        (8)       /* Bits 8-15: Serial Clock Baud Rate */
 #define SPI_CSR_SCBR_MASK         (0xff << SPI_CSR_SCBR_SHIFT)
 #  define SPI_CSR_SCBR(n)         ((uint32_t)(n) << SPI_CSR_SCBR_SHIFT)
@@ -259,16 +265,16 @@
 #  define SPI_VERSION_MFN_MASK        (7 << SPI_VERSION_MFN_SHIFT)
 #endif
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_SPI_H */

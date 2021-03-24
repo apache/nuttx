@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_dac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_DAC_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_DAC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,10 +36,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* DAC register offsets ********************************************************************/
+ ****************************************************************************/
+
+/* DAC register offsets *****************************************************/
 
 #define SAM_DAC_CTRLA_OFFSET       0x0000 /* Control A Register */
 #define SAM_DAC_CTRLB_OFFSET       0x0001 /* Control B Register */
@@ -57,7 +58,7 @@
 #define SAM_DAC_DATABUF1_OFFSET    0x0016 /* Data Buffer DAC1 Register */
 #define SAM_DAC_DBCTRL_OFFSET      0x0017 /* Debug Control Register */
 
-/* DAC register addresses ******************************************************************/
+/* DAC register addresses ***************************************************/
 
 #define SAM_DAC_CTRLA              (SAM_DAC_BASE+SAM_DAC_CTRLA_OFFSET)
 #define SAM_DAC_CTRLB              (SAM_DAC_BASE+SAM_DAC_CTRLB_OFFSET)
@@ -75,7 +76,7 @@
 #define SAM_DAC_DATABUF1           (SAM_DAC_BASE+SAM_DAC_DATABUF1_OFFSET)
 #define SAM_DAC_DBCTRL              (SAM_DAC_BASE+SAM_DAC_DBCTRL_OFFSET)
 
-/* DAC register bit definitions ************************************************************/
+/* DAC register bit definitions *********************************************/
 
 /* Control A Register */
 
@@ -101,8 +102,9 @@
 #define DAC_EVCTRL_INVEI0          (1 << 4)  /* Bit 4:  Enable inversion of DAC0 input event */
 #define DAC_EVCTRL_INVEI1          (1 << 5)  /* Bit 5:  Enable inversion of DAC1 input event */
 
-/* Common bit definitions for Interrupt Enable Clear Register, Interrupt Enable Set
- * Register, and Interrupt Flag Status and Clear Register
+/* Common bit definitions for Interrupt Enable Clear Register,
+ * Interrupt Enable Set Register,
+ * and Interrupt Flag Status and Clear Register
  */
 
 #define DAC_INT_UNDERRUN0          (1 << 0)  /* Bit 0:  Underrun interrupt for DAC2 */
@@ -136,6 +138,7 @@
 #  define DAC_DACCTRL_CCTRL_CC100K (0 << DAC_DACCTRL_CCTRL_SHIFT) /* GCLK_DAC <= 1.2MHz */
 #  define DAC_DACCTRL_CCTRL_CC1M   (1 << DAC_DACCTRL_CCTRL_SHIFT) /* 1.2MHz < GCLK_DAC <= 6MHz */
 #  define DAC_DACCTRL_CCTRL_CC2M   (2 << DAC_DACCTRL_CCTRL_SHIFT) /* 6MHz < GCLK_DAC <= 12MHz */
+
 #define DAC_DACCTRL_RUNSTDBY       (1 << 6)  /* Bit 6:  Run in standby */
 #define DAC_DACCTRL_DITHER         (1 << 7)  /* Bit 7:  Dithering mode */
 #define DAC_DACCTRL_REFRESH_SHIFT  (8)       /* Bit 8-11: Refresh period */
@@ -143,23 +146,24 @@
 #  define DAC_DACCTRL_REFRESH(n)   ((uin16_t)(n) << DAC_DACCTRL_REFRESH_SHIFT)
 
 /* Data DAC0/1 Register (16-bit data) */
+
 /* Data Buffer DAC0/1 Register (16-bit data) */
 
 /* Debug Control Register */
 
 #define DAC_DBCTRL_DBGRUN          (1 << 0)  /* Bit 0:  Debug run */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_DAC_H */

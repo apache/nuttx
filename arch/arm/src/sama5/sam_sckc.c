@@ -79,6 +79,7 @@ void sam_sckc_enable(bool enable)
 
 #ifdef ATSAMA5D3
   /* REVISIT: Missing the logic that disables the external OSC32 */
+
   /* Enable external OSC 32 kHz */
 
   regval  = getreg32(SAM_SCKC_CR);

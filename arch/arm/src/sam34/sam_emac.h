@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/sam_emac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_SAM_ETHERNET_H
 #define __ARCH_ARM_SRC_SAM34_SAM_ETHERNET_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -32,17 +32,17 @@
 
 #ifdef CONFIG_SAM34_EMAC
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Definitions for use with sam_phy_boardinitialize */
 
 #define EMAC_INTF 0
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -74,15 +74,16 @@ extern "C"
 
 void arm_netinitialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Function: sam_phy_boardinitialize
  *
  * Description:
- *   Some boards require specialized initialization of the PHY before it can be used.
- *   This may include such things as configuring GPIOs, resetting the PHY, etc.  If
- *   CONFIG_SAM34_PHYINIT is defined in the configuration then the board specific
- *   logic must provide sam_phyinitialize();  The SAM34 Ethernet driver will call
- *   this function one time before it first uses the PHY.
+ *   Some boards require specialized initialization of the PHY before it can
+ *   be used. This may include such things as configuring GPIOs, resetting
+ *   the PHY, etc.  If CONFIG_SAM34_PHYINIT is defined in the configuration
+ *   then the board specific logic must provide sam_phyinitialize();  The
+ *   SAM34 Ethernet driver will call this function one time before it first
+ *   uses the PHY.
  *
  * Input Parameters:
  *   intf - Always zero for now.
@@ -92,7 +93,7 @@ void arm_netinitialize(void);
  *
  * Assumptions:
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAM34_PHYINIT
 int sam_phy_boardinitialize(int intf);

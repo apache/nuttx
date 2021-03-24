@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/sam_udp.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_SAM_UDP_H
 #define __ARCH_ARM_SRC_SAM34_SAM_UDP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/usb/usbdev.h>
@@ -32,9 +32,9 @@
 #include "chip.h"
 #include "hardware/sam_udp.h"
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -47,24 +47,27 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_udp_suspend
  *
  * Description:
  *   Board logic must provide the sam_udp_suspend logic if the UDP driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
+ *   used.  This function is called whenever the USB enters or leaves suspend
+ *   mode.
  *
- *   When 'resume' is false, this function call provides an opportunity to perform
- *   board-specific power-saving actions so that less power is consumed while the
- *   USB is suspended.
+ *   When 'resume' is false, this function call provides an opportunity to
+ *   perform board-specific power-saving actions so that less power is
+ *   consumed while the USB is suspended.
  *
- *   Certain power-saving operations are performed by the UDP driver when it enters
- *   suspend mode:  The USB device peripheral clocks are be switched off.  MCK and
- *   UDPCK are switched off and the USB transceiver is disabled.
+ *   Certain power-saving operations are performed by the UDP driver when it
+ *   enters suspend mode:  The USB device peripheral clocks are be switched
+ *   off.
+ *   MCK and UDPCK are switched off and the USB transceiver is disabled.
  *
- *   When 'resume' is true, normal clocking and operations must all be restored.
+ *   When 'resume' is true, normal clocking and operations must all be
+ *   restored.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_udp_suspend(FAR struct usbdev_s *dev, bool resume);
 

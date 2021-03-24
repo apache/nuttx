@@ -73,7 +73,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-
 #undef EXTERN
 #if defined(__cplusplus)
 }

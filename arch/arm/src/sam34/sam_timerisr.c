@@ -40,6 +40,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Select MCU-specific settings
  *
  * For the SAM3U, SAM3A, and SAM3X, Systick is driven by the main clock

@@ -78,16 +78,16 @@
 void sam_cmcc_enable(void)
 {
   /* "On reset, the cache controller data entries are all invalidated and the
-   *  cache is disabled. The cache is transparent to processor operations. The
-   *  cache controller is activated with its configuration registers. The
+   *  cache is disabled. The cache is transparent to processor operations.
+   *  The cache controller is activated with its configuration registers. The
    *  configuration interface is memory mapped in the private peripheral bus.
    *
    * "Use the following sequence to enable the cache controller.
    *
-   * "1. Verify that the cache controller is disabled, reading the value of the
-   *     CSTS (cache status) field of the CMCC_SR register.
-   * "2. Enable the cache controller, writing 1 to the CEN (cache enable) field
-   *    of the CMCC_CTRL register."
+   * "1. Verify that the cache controller is disabled, reading the value of
+   *     the CSTS (cache status) field of the CMCC_SR register.
+   * "2. Enable the cache controller, writing 1 to the CEN (cache enable)
+   *    field of the CMCC_CTRL register."
    */
 
   if ((getreg32(SAM_CMCC_SR) & CMCC_SR_CSTS) == 0)
@@ -160,9 +160,9 @@ void sam_cmcc_invalidate(uintptr_t start, uintptr_t end)
       return;
     }
 
-  /* "When an invalidate by line command is issued the cache controller resets
-   *  the valid bit information of the decoded cache line. As the line is no
-   *  longer valid the replacement counter points to that line.
+  /* "When an invalidate by line command is issued the cache controller
+   *  resets the valid bit information of the decoded cache line. As the
+   *  line is no longer valid the replacement counter points to that line.
    *
    * "Use the following sequence to invalidate one line of cache.
    *

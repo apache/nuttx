@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_twihs.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_TWIHS_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_TWIHS_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/samv7/chip.h>
@@ -32,11 +32,11 @@
 
 #if SAMV7_NTWIHS > 0
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* TWIHS register offsets *****************************************************************/
+/* TWIHS register offsets ***************************************************/
 
 #define SAM_TWIHS_CR_OFFSET        0x0000 /* Control Register */
 #define SAM_TWIHS_MMR_OFFSET       0x0004 /* Master Mode Register */
@@ -57,7 +57,7 @@
 #define SAM_TWIHS_WPMR_OFFSET      0x00e4 /* Protection Mode Register */
 #define SAM_TWIHS_WPSR_OFFSET      0x00e8 /* Protection Status Register */
 
-/* TWIHS register addresses ***************************************************************/
+/* TWIHS register addresses *************************************************/
 
 #define SAM_TWIHS0_CR              (SAM_TWIHS0_BASE+SAM_TWIHS_CR_OFFSET)
 #define SAM_TWIHS0_MMR             (SAM_TWIHS0_BASE+SAM_TWIHS_MMR_OFFSET)
@@ -114,7 +114,8 @@
 #  define SAM_TWIHS2_WPSR          (SAM_TWIHS2_BASE)+SAM_TWIHS_WPSR_OFFSET)
 #endif
 
-/* TWIHS register bit definitions *********************************************************/
+/* TWIHS register bit definitions *******************************************/
+
 /* TWIHS Control Register */
 
 #define TWIHS_CR_START             (1 << 0)  /* Bit 0:  Send SAMV7_NTWIHS START Condition */
@@ -142,6 +143,7 @@
 #  define TWIHS_MMR_IADRSZ_1BYTE   (1 << TWIHS_MMR_IADRSZ_SHIFT) /* One-byte internal device address */
 #  define TWIHS_MMR_IADRSZ_2BYTE   (2 << TWIHS_MMR_IADRSZ_SHIFT) /* Two-byte internal device address */
 #  define TWIHS_MMR_IADRSZ_3BYTE   (3 << TWIHS_MMR_IADRSZ_SHIFT) /* Three-byte internal device address */
+
 #define TWIHS_MMR_MREAD            (1 << 12) /* Bit 12: Master Read Direction */
 #define TWIHS_MMR_DADR_SHIFT       (16)      /* Bits 16-22:  Device Address */
 #define TWIHS_MMR_DADR_MASK        (0x7f << TWIHS_MMR_DADR_SHIFT)
@@ -184,8 +186,8 @@
 #define TWIHS_CWGR_HOLD_MASK       (31 << TWIHS_CWGR_HOLD_SHIFT)
 #  define TWIHS_CWGR_HOLD(n)       ((uint32_t)(n) << TWIHS_CWGR_HOLD_SHIFT)
 
-/* TWIHS Status Register, TWIHS Interrupt Enable Register, TWIHS Interrupt Disable
- * Register, and TWIHS Interrupt Mask Register common bit fields.
+/* TWIHS Status Register, TWIHS Interrupt Enable Register, TWIHS Interrupt
+ * Disable Register, and TWIHS Interrupt Mask Register common bit fields.
  */
 
 #define TWIHS_INT_TXCOMP           (1 << 0)  /* Bit 0:  Transmission Completed */
@@ -220,7 +222,6 @@
 
 #define TWIHS_THR_TXDATA_SHIFT     (0)       /* Bits 0-7: Master or Slave Transmit Holding Data */
 #define TWIHS_THR_TXDATA_MASK      (0xff << TWIHS_THR_TXDATA_SHIFT)
-
 
 /* SMBus Timing Register */
 
@@ -274,17 +275,17 @@
 #define TWIHS_WPSR_WPVSRC_SHIFT    (8)       /* Bits 8-23: Write Protect Violation Source */
 #define TWIHS_WPSR_WPVSRC_MASK     (0xffff << TWIHS_WPSR_WPVSRC_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* SAMV7_NTWIHS > 0 */
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_TWIHS_H */

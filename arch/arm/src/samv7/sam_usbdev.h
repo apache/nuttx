@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/sam_usbdev.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_SAM_USBDEV_H
 #define __ARCH_ARM_SRC_SAMV7_SAM_USBDEV_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -34,9 +34,9 @@
 
 #include "hardware/sam_usbhs.h"
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -49,16 +49,17 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_usbsuspend
  *
  * Description:
- *   Board logic must provide the sam_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   Board logic must provide the sam_usbsuspend logic if the USBDEV driver
+ *   is used.
+ *   This function is called whenever the USB enters or leaves suspend  mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power,
+ *   etc. while the USB is suspended.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 

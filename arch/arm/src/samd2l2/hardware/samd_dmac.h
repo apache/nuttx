@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_dmac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
@@ -26,18 +26,19 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_DMAC_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_DMAC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* DMAC register offsets ********************************************************************/
+ ****************************************************************************/
+
+/* DMAC register offsets ****************************************************/
 
 #define SAM_DMAC_CTRL_OFFSET             0x0000  /* Control Register */
 #define SAM_DMAC_CRCCTRL_OFFSET          0x0002  /* CRC Control Register */
@@ -71,7 +72,7 @@
 #define SAM_LPSRAM_DSTADDR_OFFSET        0x0008  /* Block Transfer Destination Address Register */
 #define SAM_LPSRAM_DESCADDR_OFFSET       0x000c  /* Next Address Descriptor Register */
 
-/* DMAC register addresses ******************************************************************/
+/* DMAC register addresses **************************************************/
 
 #define SAM_DMAC_CTRL                  (SAM_DMAC_BASE+SAM_DMAC_CTRL_OFFSET)
 #define SAM_DMAC_CRCCTRL               (SAM_DMAC_BASE+SAM_DMAC_CRCCTRL_OFFSET)
@@ -97,7 +98,7 @@
 #define SAM_DMAC_CHINTFLAG             (SAM_DMAC_BASE+SAM_DMAC_CHINTFLAG_OFFSET)
 #define SAM_DMAC_CHSTATUS              (SAM_DMAC_BASE+SAM_DMAC_CHSTATUS_OFFSET)
 
-/* DMAC register bit definitions ************************************************************/
+/* DMAC register bit definitions ********************************************/
 
 /* Control Register */
 
@@ -116,10 +117,12 @@
 #  define DMAC_CRCCTRL_CRCBEATSIZE_BYTE  (0 < DMAC_CRCCTRL_CRCBEATSIZE_SHIFT) /* 8-bit bus transfer */
 #  define DMAC_CRCCTRL_CRCBEATSIZE_HWORD (1 < DMAC_CRCCTRL_CRCBEATSIZE_SHIFT) /* 16-bit bus transfer */
 #  define DMAC_CRCCTRL_CRCBEATSIZE_WORD  (2 < DMAC_CRCCTRL_CRCBEATSIZE_SHIFT) /* 32-bit bus transfer */
+
 #define DMAC_CRCCTRL_CRCPOLY_SHIFT       (2)       /* Bits 2-3: CRC polynomial type */
 #define DMAC_CRCCTRL_CRCPOLY_MASK        (3 < DMAC_CRCCTRL_CRCPOLY_SHIFT)
 #  define DMAC_CRCCTRL_CRCPOLY_CRC16     (0 < DMAC_CRCCTRL_CRCPOLY_SHIFT) /* CRC-16 (CRC-CCITT) */
 #  define DMAC_CRCCTRL_CRCPOLY_CRC32     (1 < DMAC_CRCCTRL_CRCPOLY_SHIFT) /* CRC32 (IEEE 802.3) */
+
 #define DMAC_CRCCTRL_CRCSRC_SHIFT        (8)       /* Bits 8-13: CRC Input Source */
 #define DMAC_CRCCTRL_CRCSRC_MASK         (0x3f < DMAC_CRCCTRL_CRCSRC_SHIFT)
 #  define DMAC_CRCCTRL_CRCSRC_NOACTION   (0 < DMAC_CRCCTRL_CRCSRC_SHIFT) /* No action */
@@ -127,6 +130,7 @@
 #  define DMAC_CRCCTRL_CRCSRC_CHAN(n)    (((uint32_t)(n) + 0x20) < DMAC_CRCCTRL_CRCSRC_SHIFT)
 
 /* CRC Data Input Register (32-bit value) */
+
 /* CRC Checksum Register (32-bit value) */
 
 /* CRC Status Register */
@@ -146,12 +150,14 @@
 #  define DMAC_QOSCTRL_WRBQOS_LOW        (1 << DMAC_QOSCTRL_WRBQOS_SHIFT) /* Sensitive bandwidth */
 #  define DMAC_QOSCTRL_WRBQOS_MEDIUM     (2 << DMAC_QOSCTRL_WRBQOS_SHIFT) /* Sensitive latency */
 #  define DMAC_QOSCTRL_WRBQOS_HIGH       (3 << DMAC_QOSCTRL_WRBQOS_SHIFT) /* Critical latency */
+
 #define DMAC_QOSCTRL_FQOS_SHIFT          (2)       /* Bits 2-3: Fetch quality of service */
 #define DMAC_QOSCTRL_FQOS_MASK           (3 << DMAC_QOSCTRL_FQOS_SHIFT)
 #  define DMAC_QOSCTRL_FQOS_DISABLE      (0 << DMAC_QOSCTRL_FQOS_SHIFT) /* Background */
 #  define DMAC_QOSCTRL_FQOS_LOW          (1 << DMAC_QOSCTRL_FQOS_SHIFT) /* Sensitive bandwidth */
 #  define DMAC_QOSCTRL_FQOS_MEDIUM       (2 << DMAC_QOSCTRL_FQOS_SHIFT) /* Sensitive latency */
 #  define DMAC_QOSCTRL_FQOS_HIGH         (3 << DMAC_QOSCTRL_FQOS_SHIFT) /* Critical latency */
+
 #define DMAC_QOSCTRL_DQOS_SHIFT          (4)       /* Bits 4-5: Data transfer quality of service */
 #define DMAC_QOSCTRL_DQOS_MASK           (3 << DMAC_QOSCTRL_DQOS_SHIFT)
 #  define DMAC_QOSCTRL_DQOS_DISABLE      (0 << DMAC_QOSCTRL_DQOS_SHIFT) /* Background */
@@ -159,8 +165,9 @@
 #  define DMAC_QOSCTRL_DQOS_MEDIUM       (2 << DMAC_QOSCTRL_DQOS_SHIFT) /* Sensitive latency */
 #  define DMAC_QOSCTRL_DQOS_HIGH         (3 << DMAC_QOSCTRL_DQOS_SHIFT) /* Critical latency */
 
-/* Common bit definitions for: Software Trigger Control Register, Interrupt Status Register,
- * Busy Channels Register, and Pending Channels Register
+/* Common bit definitions for: Software Trigger Control Register,
+ * Interrupt Status Register, Busy Channels Register, and Pending Channels
+ * Register
  */
 
 #define DMAC_CHAN(n)                     (1 << (n)) /* DMAC Channel n, n=0-11 */
@@ -196,7 +203,9 @@
 #define DMAC_INTPEND_PEND                (1 << 15) /* Bit 15: Pending */
 
 /* Interrupt Status Register */
+
 /* Busy Channels Register */
+
 /* Pending Channels Register */
 
 /* Active Channels and Levels Register */
@@ -212,6 +221,7 @@
 #define DMAC_ACTIVE_BTCNT_MASK           (0xffff << DMAC_ACTIVE_BTCNT_SHIFT)
 
 /* Descriptor Memory Section Base Address Register (32-bit address) */
+
 /* Write-Back Memory Section Base Address Register (31-bit address) */
 
 /* Channel ID Register */
@@ -229,12 +239,13 @@
 #define DMAC_CHCTRLB_EVACT_MASK          (7 << DMAC_CHCTRLB_EVACT_SHIFT)
 #  define DMAC_CHCTRLB_EVACT_NOACT       (0 << DMAC_CHCTRLB_EVACT_SHIFT) /* No action */
 #  define DMAC_CHCTRLB_EVACT_TRIG        (1 << DMAC_CHCTRLB_EVACT_SHIFT) /* Normal Transfer and Conditional Transfer on Strobe
-trigger */
+                                                                          * trigger */
 #  define DMAC_CHCTRLB_EVACT_CTRIG       (2 << DMAC_CHCTRLB_EVACT_SHIFT) /* Conditional transfer trigger */
 #  define DMAC_CHCTRLB_EVACT_CBLOCK      (3 << DMAC_CHCTRLB_EVACT_SHIFT) /* Conditional block transfer */
 #  define DMAC_CHCTRLB_EVACT_SUSPEND     (4 << DMAC_CHCTRLB_EVACT_SHIFT) /* Channel suspend operation */
 #  define DMAC_CHCTRLB_EVACT_RESUME      (5 << DMAC_CHCTRLB_EVACT_SHIFT) /* Channel resume operation */
 #  define DMAC_CHCTRLB_EVACT_SSKIP       (6 << DMAC_CHCTRLB_EVACT_SHIFT) /* Skip next block suspend action */
+
 #define DMAC_CHCTRLB_EVIE                (1 << 3)  /* Bit 3:  Channel event input enable */
 #define DMAC_CHCTRLB_EVOE                (1 << 4)  /* Bit 4:  Channel event output enable */
 #define DMAC_CHCTRLB_LVL_SHIFT           (5)       /* Bits 5-6: Channel arbitration level */
@@ -244,14 +255,16 @@ trigger */
 #  define DMAC_CHCTRLB_LVL_LVL1          (1 << DMAC_CHCTRLB_LVL_SHIFT) /* Channel priority level 1 */
 #  define DMAC_CHCTRLB_LVL_LVL2          (2 << DMAC_CHCTRLB_LVL_SHIFT) /* Channel priority level 2 */
 #  define DMAC_CHCTRLB_LVL_LVL3          (3 << DMAC_CHCTRLB_LVL_SHIFT) /* Channel priority level 3 */
+
 #define DMAC_CHCTRLB_TRIGSRC_SHIFT       (8)       /* Bits 8-13: Trigger source */
 #define DMAC_CHCTRLB_TRIGSRC_MASK        (0x3f << DMAC_CHCTRLB_TRIGSRC_SHIFT)
-  #define DMAC_CHCTRLB_TRIGSRC(n)        ((uint32_t)(n) << DMAC_CHCTRLB_TRIGSRC_SHIFT)
+#  define DMAC_CHCTRLB_TRIGSRC(n)        ((uint32_t)(n) << DMAC_CHCTRLB_TRIGSRC_SHIFT)
 #define DMAC_CHCTRLB_TRIGACT_SHIFT       (22)      /* Bits 22-23: Trigger action */
 #define DMAC_CHCTRLB_TRIGACT_MASK        (3 << DMAC_CHCTRLB_TRIGACT_SHIFT)
 #  define DMAC_CHCTRLB_TRIGACT_BLOCK     (0 << DMAC_CHCTRLB_TRIGACT_SHIFT) /* One trigger required for each action */
 #  define DMAC_CHCTRLB_TRIGACT_BEAT      (2 << DMAC_CHCTRLB_TRIGACT_SHIFT) /* One trigger required for beat transfer */
 #  define DMAC_CHCTRLB_TRIGACT_TRANSACT  (3 << DMAC_CHCTRLB_TRIGACT_SHIFT) /* One trigger required for each transaction */
+
 #define DMAC_CHCTRLB_CMD_SHIFT           (24)      /* Bits 24-25: Software command */
 #define DMAC_CHCTRLB_CMD_MASK            (3 << DMAC_CHCTRLB_CMD_SHIFT)
 #  define DMAC_CHCTRLB_CMD_NOACTION      (0 << DMAC_CHCTRLB_CMD_SHIFT) /* No action */
@@ -271,7 +284,7 @@ trigger */
 #define DMAC_TRIGSRC_SERCOM3_TX          (8)  /* SERCOM3 TX Trigger */
 #define DMAC_TRIGSRC_SERCOM4_RX          (9)  /* SERCOM4 RX Trigger */
 #define DMAC_TRIGSRC_SERCOM4_TX          (10) /* SERCOM4 TX Trigger */
-#define DMAC_TRIGSRC_SERCOM5_RX          (11)  /* SERCOM4 RX Trigger */
+#define DMAC_TRIGSRC_SERCOM5_RX          (11) /* SERCOM4 RX Trigger */
 #define DMAC_TRIGSRC_SERCOM5_TX          (12) /* SERCOM4 TX Trigger */
 #define DMAC_TRIGSRC_TCC0_OVF            (13) /* TCC0 Overflow Trigger */
 #define DMAC_TRIGSRC_TCC0_MC0            (14) /* TCC0 Match/Compare 0 Trigger */
@@ -306,8 +319,9 @@ trigger */
 #define DMAC_TRIGSRC_I2S0_TX             (43) /* I2S0 TX Trigger */
 #define DMAC_TRIGSRC_I2S1_TX             (44) /* I2S1 TX Trigger */
 
-/* Common register bit definitions: Channel Interrupt Enable Clear Register, Channel Interrupt
- * Enable Set Register, and  Channel Interrupt Flag Status and Clear Register
+/* Common register bit definitions: Channel Interrupt Enable Clear Register,
+ * Channel Interrupt Enable Set Register, and  Channel Interrupt Flag Status
+ * and Clear Register
  */
 
 #define DMAC_INT_TERR                    (1 << 0)  /* Bit 0:  Transfer error interrupt */
@@ -324,26 +338,29 @@ trigger */
 /* Block Transfer Control Register */
 
 #define LPSRAM_BTCTRL_VALID              (1 << 0)  /* Bit 0: Descriptor valid */
-#define LPSRAM_BTCTRL_EVOSEL_SHIFT       (1)      /* Bits 1-2: Event output selection */
+#define LPSRAM_BTCTRL_EVOSEL_SHIFT       (1)       /* Bits 1-2: Event output selection */
 #define LPSRAM_BTCTRL_EVOSEL_MASK        (3 << LPSRAM_BTCTRL_EVOSEL_SHIFT)
 #  define LPSRAM_BTCTRL_EVOSEL_DISABLE   (0 << LPSRAM_BTCTRL_EVOSEL_SHIFT) /* Event generation disabled */
 #  define LPSRAM_BTCTRL_EVOSEL_BLOCK     (1 << LPSRAM_BTCTRL_EVOSEL_SHIFT) /* Event strobe when block transfer complete */
 #  define LPSRAM_BTCTRL_EVOSEL_BEAT      (3 << LPSRAM_BTCTRL_EVOSEL_SHIFT) /* Event strobe when beat transfer complete */
+
 #define LPSRAM_BTCTRL_BLOCKACT_SHIFT     (3)      /* Bits 3-4: Block action */
 #define LPSRAM_BTCTRL_BLOCKACT_MASK      (3 << LPSRAM_BTCTRL_BLOCKACT_SHIFT)
 #  define LPSRAM_BTCTRL_BLOCKACT_NOACT   (0 << LPSRAM_BTCTRL_BLOCKACT_SHIFT) /* Channel disabled if last block transfer */
 #  define LPSRAM_BTCTRL_BLOCKACT_INT     (1 << LPSRAM_BTCTRL_BLOCKACT_SHIFT) /* Channel disabled if last block transfer + block int */
 #  define LPSRAM_BTCTRL_BLOCKACT_SUSPEND (2 << LPSRAM_BTCTRL_BLOCKACT_SHIFT) /* Channel suspend operation is completed */
 #  define LPSRAM_BTCTRL_BLOCKACT_BOTH    (3 << LPSRAM_BTCTRL_BLOCKACT_SHIFT) /* Both channel suspend operation + block int */
+
 #define LPSRAM_BTCTRL_BEATSIZE_SHIFT     (8)      /* Bits 8-9: Beat size */
 #define LPSRAM_BTCTRL_BEATSIZE_MASK      (3 << LPSRAM_BTCTRL_BEATSIZE_SHIFT)
 #  define LPSRAM_BTCTRL_BEATSIZE_BYTE    (0 << LPSRAM_BTCTRL_BEATSIZE_SHIFT) /* 8-bit bus transfer */
 #  define LPSRAM_BTCTRL_BEATSIZE_HWORD   (1 << LPSRAM_BTCTRL_BEATSIZE_SHIFT) /* 16-bit bus transfer */
 #  define LPSRAM_BTCTRL_BEATSIZE_WORD    (2 << LPSRAM_BTCTRL_BEATSIZE_SHIFT) /* 32-bit bus transfer */
+
 #define LPSRAM_BTCTRL_SRCINC             (1 << 10)  /* Bit 10: Source address increment enable */
 #define LPSRAM_BTCTRL_DSTINC             (1 << 11)  /* Bit 11: Destination address increment enable */
 #define LPSRAM_BTCTRL_STEPSEL            (1 << 12)  /* Bit 12: Step selection */
-#define LPSRAM_BTCTRL_STEPSIZE_SHIFT     (13)      /* Bits 13-15: Address increment step */
+#define LPSRAM_BTCTRL_STEPSIZE_SHIFT     (13)       /* Bits 13-15: Address increment step */
 #define LPSRAM_BTCTRL_STEPSIZE_MASK      (7 << LPSRAM_BTCTRL_STEPSIZE_SHIFT)
 #  define LPSRAM_BTCTRL_STEPSIZE_X1      (0 << LPSRAM_BTCTRL_STEPSIZE_SHIFT) /* Next ADDR = ADDR + (BEATSIZE+1) * 1 */
 #  define LPSRAM_BTCTRL_STEPSIZE_X2      (1 << LPSRAM_BTCTRL_STEPSIZE_SHIFT) /* Next ADDR = ADDR + (BEATSIZE+1) * 2 */
@@ -355,13 +372,17 @@ trigger */
 #  define LPSRAM_BTCTRL_STEPSIZE_X128    (7 << LPSRAM_BTCTRL_STEPSIZE_SHIFT) /* Next ADDR = ADDR + (BEATSIZE+1) * 128 */
 
 /* Block Transfer Count Register (16-bit count) */
+
 /* Block Transfer Source Address Register (32-bit address) */
+
 /* Block Transfer Destination Address Register (32-bit address) */
+
 /* Next Address Descriptor Register (32-bit address) */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
+
 /* DMA descriptor */
 
 struct dma_desc_s
@@ -373,12 +394,12 @@ struct dma_desc_s
   uint32_t descaddr; /* Next Address Descriptor Register */
 };
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_DMAC_H */

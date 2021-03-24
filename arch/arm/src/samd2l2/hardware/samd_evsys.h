@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_evsys.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_EVSYS_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_EVSYS_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,10 +36,11 @@
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* EVSYS register offsets *******************************************************************/
+ ****************************************************************************/
+
+/* EVSYS register offsets ***************************************************/
 
 #define SAM_EVSYS_CTRL_OFFSET        0x0000  /* Control register */
 #define SAM_EVSYS_CHANNEL_OFFSET     0x0004  /* Channel register */
@@ -49,7 +50,7 @@
 #define SAM_EVSYS_INTENSET_OFFSET    0x0014  /* Interrupt enable set register */
 #define SAM_EVSYS_INTFLAG_OFFSET     0x0018  /* Interrupt flag status and clear register */
 
-/* EVSYS register addresses *****************************************************************/
+/* EVSYS register addresses *************************************************/
 
 #define SAM_EVSYS_CTRL               (SAM_EVSYS_BASE+SAM_EVSYS_CTRL_OFFSET)
 #define SAM_EVSYS_CHANNEL            (SAM_EVSYS_BASE+SAM_EVSYS_CHANNEL_OFFSET)
@@ -59,7 +60,7 @@
 #define SAM_EVSYS_INTENSET           (SAM_EVSYS_BASE+SAM_EVSYS_INTENSET_OFFSET)
 #define SAM_EVSYS_INTFLAG            (SAM_EVSYS_BASE+SAM_EVSYS_INTFLAG_OFFSET)
 
-/* EVSYS register bit definitions ***********************************************************/
+/* EVSYS register bit definitions *******************************************/
 
 /* Control register */
 
@@ -220,6 +221,7 @@
 #  define EVSYS_CHANNEL_PATH_SYNCH      (0 << EVSYS_CHANNEL_PATH_SHIFT) /* Synchronous path */
 #  define EVSYS_CHANNEL_PATH_RESYNCH    (1 << EVSYS_CHANNEL_PATH_SHIFT) /* Resynchronized path */
 #  define EVSYS_CHANNEL_PATH_ASYNCH     (2 << EVSYS_CHANNEL_PATH_SHIFT) /* Asynchronous path */
+
 #define EVSYS_CHANNEL_EDGSEL_SHIFT   (26)       /* Bits 26-27: Edge Detection Selection */
 #define EVSYS_CHANNEL_EDGSEL_MASK    (3 << EVSYS_CHANNEL_EDGSEL_SHIFT)
 #  define EVSYS_CHANNEL_EDGSEL_NOEVT    (0 << EVSYS_CHANNEL_EDGSEL_SHIFT) /* No event output */
@@ -306,7 +308,9 @@
 #    define EVSYS_CHSTATUS_CHBUSYH(n)   (1 << ((n) + 16))
 #endif
 
-/* Interrupt enable clear, interrupt enable set, and interrupt flag status and clear registers */
+/* Interrupt enable clear, interrupt enable set,
+ * and interrupt flag status and clear registers
+ */
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD20
 #  define EVSYS_INT_OVR_SHIFT          (0)       /* Bits 0-7: Overrun channel n interrupt, n=0-7 */
@@ -326,17 +330,17 @@
 #    define EVSYS_INT_EVD(n)         (1 << ((n) + 16))
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_EVSYS_H */

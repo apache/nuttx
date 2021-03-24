@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/sam_ethernet.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_SAM_ETHERNET_H
 #define __ARCH_ARM_SRC_SAMA5_SAM_ETHERNET_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,9 +31,10 @@
 #include "hardware/sam_emac.h"
 #include "hardware/sam_gmac.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Understood PHY types */
 
 #define SAMA5_PHY_DM9161  0
@@ -235,9 +236,9 @@
 #  endif
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -294,15 +295,16 @@ int sam_emac_initialize(void);
 int sam_emac_initialize(int intf);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function: sam_phy_boardinitialize
  *
  * Description:
- *   Some boards require specialized initialization of the PHY before it can be used.
- *   This may include such things as configuring GPIOs, resetting the PHY, etc.  If
- *   CONFIG_SAMA5_PHYINIT is defined in the configuration then the board specific
- *   logic must provide sam_phyinitialize();  The SAMA5 Ethernet driver will call
- *   this function one time before it first uses the PHY.
+ *   Some boards require specialized initialization of the PHY before it can
+ *   be used. This may include such things as configuring GPIOs, resetting
+ *   the PHY, etc.  If CONFIG_SAMA5_PHYINIT is defined in the configuration
+ *   then the board specific logic must provide sam_phyinitialize();
+ *   The SAMA5 Ethernet driver will call this function one time before it
+ *   first uses the PHY.
  *
  * Input Parameters:
  *   intf - Always zero for now.
@@ -312,7 +314,7 @@ int sam_emac_initialize(int intf);
  *
  * Assumptions:
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PHYINIT
 int sam_phy_boardinitialize(int intf);

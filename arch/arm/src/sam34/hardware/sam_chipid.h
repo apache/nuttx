@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_chipid.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,35 +16,35 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_CHIPID_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_CHIPID_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* CHIPID register offsets **************************************************************/
+/* CHIPID register offsets **************************************************/
 
 #define SAM_CHIPID_CIDR                 0x00 /* Chip ID Register */
 #define SAM_CHIPID_EXID                 0x04 /* Chip ID Extension Register */
 
-/* CHIPID register addresses ************************************************************/
+/* CHIPID register addresses ************************************************/
 
 #define SAM_CHIPID_CIDR                 (SAM_CHIPID_BASE+SAM_CHIPID_CIDR)
 #define SAM_CHIPID_EXID                 (SAM_CHIPID_BASE+SAM_CHIPID_EXID)
 
-/* CHIPID register bit definitions ******************************************************/
+/* CHIPID register bit definitions ******************************************/
 
 #define CHIPID_CIDR_VERSION_SHIFT       (0)      /* Bits 0-4:  Version of the Device */
 #define CHIPID_CIDR_VERSION_MASK        (0x1f << CHIPID_CIDR_VERSION_SHIFT)
@@ -57,6 +57,7 @@
 #  define CHIPID_CIDR_EPROC_ARM926EJS   (5 << CHIPID_CIDR_EPROC_SHIFT) /* ARM926EJ-S */
 #  define CHIPID_CIDR_EPROC_CORTEXA5    (6 << CHIPID_CIDR_EPROC_SHIFT) /* Cortex-A5 */
 #  define CHIPID_CIDR_EPROC_CORTEXM4    (7 << CHIPID_CIDR_EPROC_SHIFT) /* Cortex-M4 */
+
 #define CHIPID_CIDR_NVPSIZ_SHIFT        (8)      /* Bits 8-11:  Nonvolatile Program Memory Size */
 #define CHIPID_CIDR_NVPSIZ_MASK         (15 << CHIPID_CIDR_NVPSIZ_SHIFT)
 #  define CHIPID_CIDR_NVPSIZ_NONE       (0  << CHIPID_CIDR_NVPSIZ_SHIFT) /* None */
@@ -69,6 +70,7 @@
 #  define CHIPID_CIDR_NVPSIZ_512KB      (10 << CHIPID_CIDR_NVPSIZ_SHIFT) /* 512K bytes */
 #  define CHIPID_CIDR_NVPSIZ_1MB        (12 << CHIPID_CIDR_NVPSIZ_SHIFT) /* 1024K bytes */
 #  define CHIPID_CIDR_NVPSIZ_2MB        (14 << CHIPID_CIDR_NVPSIZ_SHIFT) /* 2048K bytes */
+
 #define CHIPID_CIDR_NVPSIZ2_SHIFT       (12)      /* Bits 12-15:  Nonvolatile Program Memory Size */
 #define CHIPID_CIDR_NVPSIZ2_MASK        (15 << CHIPID_CIDR_NVPSIZ_SHIFT)
 #  define CHIPID_CIDR_NVPSIZ2_NONE      (0  << CHIPID_CIDR_NVPSIZ_SHIFT) /* None */
@@ -81,6 +83,7 @@
 #  define CHIPID_CIDR_NVPSIZ2_512KB     (10 << CHIPID_CIDR_NVPSIZ_SHIFT) /* 512K bytes */
 #  define CHIPID_CIDR_NVPSIZ2_1MB       (12 << CHIPID_CIDR_NVPSIZ_SHIFT) /* 1024K bytes */
 #  define CHIPID_CIDR_NVPSIZ2_2MB       (14 << CHIPID_CIDR_NVPSIZ_SHIFT) /* 2048K bytes */
+
 #define CHIPID_CIDR_SRAMSIZ_SHIFT       (16)      /* Bits 16-19:  Internal SRAM Size */
 #define CHIPID_CIDR_SRAMSIZ_MASK        (15 << CHIPID_CIDR_SRAMSIZ_SHIFT)
 #  define CHIPID_CIDR_SRAMSIZ_48KB      (0  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 48K bytes */
@@ -101,6 +104,7 @@
 #  define CHIPID_CIDR_SRAMSIZ_256KB     (13 << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 256K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_96KB      (14 << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 96K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_512KB     (15 << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 512K bytes */
+
 #define CHIPID_CIDR_ARCH_SHIFT          (20)      /* Bits 20-27:  Architecture Identifier */
 #define CHIPID_CIDR_ARCH_MASK           (0xff << CHIPID_CIDR_ARCH_SHIFT)
 #  define CHIPID_CIDR_ARCH_AT91SAM9XX   (0x19 << CHIPID_CIDR_ARCH_SHIFT) /* AT91SAM9xx Series */
@@ -144,6 +148,7 @@
 #  define CHIPID_CIDR_ARCH_SAM4LB       (0xb1 << CHIPID_CIDR_ARCH_SHIFT) /* SAM4LxB Series */
 #  define CHIPID_CIDR_ARCH_SAM4LC       (0xb2 << CHIPID_CIDR_ARCH_SHIFT) /* SAM4LxC Series */
 #  define CHIPID_CIDR_ARCH_AT75CXX      (0xf0 << CHIPID_CIDR_ARCH_SHIFT) /* AT75Cxx Series */
+
 #define CHIPID_CIDR_NVPTYP_SHIFT        (28)      /* Bits 28-30:  Nonvolatile Program Memory Type */
 #define CHIPID_CIDR_NVPTYP_MASK         (7 << CHIPID_CIDR_NVPTYP_SHIFT)
 #  define CHIPID_CIDR_NVPTYP_ROM        (0 << CHIPID_CIDR_NVPTYP_SHIFT) /* ROM */
@@ -151,6 +156,7 @@
 #  define CHIPID_CIDR_NVPTYP_SRAM       (4 << CHIPID_CIDR_NVPTYP_SHIFT) /* SRAM emulating ROM */
 #  define CHIPID_CIDR_NVPTYP_EFLASH     (2 << CHIPID_CIDR_NVPTYP_SHIFT) /* Embedded Flash Memory */
 #  define CHIPID_CIDR_NVPTYP_REFLASH    (3 << CHIPID_CIDR_NVPTYP_SHIFT) /* ROM and Embedded Flash Memory */
+
 #define CHIPID_CIDR_EXT                 (1 << 31) /* Bit 31: Extension Flag */
 
 /* Chip ID Extension Register (32-bit value for SAM3U and SAM4S) */
@@ -170,16 +176,16 @@
 #    define CHIPID_EXID_PACKAGE_144PIN  (5 << CHIPID_EXID_PACKAGE_SHIFT) /* 144-pin package */
 #endif
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_CHIPID_H */

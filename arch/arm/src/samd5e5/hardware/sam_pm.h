@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_pm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PM_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PM_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* PM register offsets ******************************************************************************/
+/* PM register offsets ******************************************************/
 
 #define SAM_PM_CTRLA_OFFSET              0x0000  /* Control A */
 #define SAM_PM_SLEEPCFG_OFFSET           0x0001  /* Sleep configuration */
@@ -44,7 +44,7 @@
 #define SAM_PM_HIBCFG_OFFSET             0x0009  /* Hibernate configuration */
 #define SAM_PM_BKUPCFG_OFFSET            0x000a  /* Backup configuration */
 
-/* PM register addresses ****************************************************************************/
+/* PM register addresses ****************************************************/
 
 #define SAM_PM_CTRLA                     (SAM_PM_BASE + SAM_PM_CTRLA_OFFSET)
 #define SAM_PM_SLEEPCFG                  (SAM_PM_BASE + SAM_PM_SLEEPCFG_OFFSET)
@@ -55,7 +55,7 @@
 #define SAM_PM_HIBCFG                    (SAM_PM_BASE + SAM_PM_HIBCFG_OFFSET)
 #define SAM_PM_BKUPCFG                   (SAM_PM_BASE + SAM_PM_BKUPCFG_OFFSET)
 
-/* PM register bit definitions **********************************************************************/
+/* PM register bit definitions **********************************************/
 
 /* Control A register */
 
@@ -74,7 +74,9 @@
 #  define PM_SLEEPCFG_MODE_OFF           (7 << PM_SLEEPCFG_MODE_SHIFT) /* All power domains are
                                                                         * powered OFF */
 
-/* Interrupt enable clear, Interrupt enable set, and Interrupt flag status and clear registers */
+/* Interrupt enable clear, Interrupt enable set,
+ * and Interrupt flag status and clear registers
+ */
 
 #define PM_INT_SLEEPRDY                  (1 << 0)  /* Bit 0: Sleep mode entry ready interrupt */
 
@@ -86,6 +88,7 @@
 #  define PM_STDBYCFG_RAMCFG_PARTIAL     (1 << PM_STDBYCFG_RAMCFG_SHIFT) /* PD0 ACTIVE; PD1/2 handled by HW */
 #  define PM_STDBYCFG_RAMCFG_OFF         (2 << PM_STDBYCFG_RAMCFG_SHIFT) /* Only the first 32Kb of system
                                                                           * RAM is retained */
+
 #define PM_STDBYCFG_FASTWKUP_SHIFT       (4)       /* Bits 4-5: Fast Wakeup */
 #define PM_STDBYCFG_FASTWKUP_MASK        (3 << PM_STDBYCFG_FASTWKUP_SHIFT)
 #  define PM_STDBYCFG_FASTWKUP_NO        (0 << PM_STDBYCFG_FASTWKUP_SHIFT) /* Disabled */
@@ -101,6 +104,7 @@
 #  define PM_HIBCFG_RAMCFG_PARTIAL       (1 << PM_HIBCFG_RAMCFG_SHIFT) /* PD0 ACTIVE; PD1/2 handled by HW */
 #  define PM_HIBCFG_RAMCFG_OFF           (2 << PM_HIBCFG_RAMCFG_SHIFT) /* Only the first 32Kb of system
                                                                         * RAM is retained */
+
 #define PM_HIBCFG_BRAMCFG_SHIFT          (0)       /* Bits 0-1: Backup RAM Configuration */
 #define PM_HIBCFG_BRAMCFG_MASK           (3 << PM_HIBCFG_BRAMCFG_SHIFT)
 #  define PM_HIBCFG_BRAMCFG_RET          (0 << PM_HIBCFG_BRAMCFG_SHIFT) /* System RAM is retained */
@@ -117,16 +121,16 @@
 #  define PM_BKUPCFG_BRAMCFG_OFF         (2 << PM_BKUPCFG_BRAMCFG_SHIFT) /* Only the first 32Kb of system
                                                                           * RAM is retained */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PM_H */

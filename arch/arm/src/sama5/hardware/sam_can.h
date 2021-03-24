@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_can.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,26 +16,26 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_CAN_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_CAN_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define SAM_CAN_NMAILBOXES       8
 #define SAM_CAN_MAXPERCLK        66000000
 
-/* CAN Register Offsets *************************************************************/
+/* CAN Register Offsets *****************************************************/
 
 #define SAM_CAN_MR_OFFSET        0x0000 /* Mode Register */
 #define SAM_CAN_IER_OFFSET       0x0004 /* Interrupt Enable Register */
@@ -71,7 +71,7 @@
 #define SAM_CAN_MnDH_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MDH_OFFSET)
 #define SAM_CAN_MnCR_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MCR_OFFSET)
 
-/* CAN Register Addresses ***********************************************************/
+/* CAN Register Addresses ***************************************************/
 
 #define SAM_CAN0_MR              (SAM_CAN0_VBASE+SAM_CAN_MR_OFFSET)
 #define SAM_CAN0_IER             (SAM_CAN0_VBASE+SAM_CAN_IER_OFFSET)
@@ -123,7 +123,7 @@
 #define SAM_CAN1_MDH(n)          (SAM_CAN1_VBASE+SAM_CAN_MnDH_OFFSET(n))
 #define SAM_CAN1_MCR(n)          (SAM_CAN1_VBASE+SAM_CAN_MnCR_OFFSET(n))
 
-/* CAN Register Bit Definitions *****************************************************/
+/* CAN Register Bit Definitions *********************************************/
 
 /* Mode Register */
 
@@ -136,19 +136,19 @@
 #define CAN_MR_TIMFRZ            (1 << 6)  /* Bit 6:  Enable Timer Freeze */
 #define CAN_MR_DRPT              (1 << 7)  /* Bit 7:  Disable Repeat */
 
-/* Interrupt Enable Register, Interrupt Disable Register, Interrupt Mask Register,
- * and Status Register
+/* Interrupt Enable Register, Interrupt Disable Register,
+ * Interrupt Mask Register, and Status Register
  */
 
 #define CAN_INT_MB(n)            (1 << (n)) /* Bit n:  Mailbox n Event */
-#define CAN_INT_MB0              (1 << 0)  /* Bit 0:  Mailbox 0 Event */
-#define CAN_INT_MB1              (1 << 1)  /* Bit 1:  Mailbox 1 Event */
-#define CAN_INT_MB2              (1 << 2)  /* Bit 2:  Mailbox 2 Event */
-#define CAN_INT_MB3              (1 << 3)  /* Bit 3:  Mailbox 3 Event */
-#define CAN_INT_MB4              (1 << 4)  /* Bit 4:  Mailbox 4 Event */
-#define CAN_INT_MB5              (1 << 5)  /* Bit 5:  Mailbox 5 Event */
-#define CAN_INT_MB6              (1 << 6)  /* Bit 6:  Mailbox 6 Event */
-#define CAN_INT_MB7              (1 << 7)  /* Bit 7:  Mailbox 7 Event */
+#define CAN_INT_MB0              (1 << 0)   /* Bit 0:  Mailbox 0 Event */
+#define CAN_INT_MB1              (1 << 1)   /* Bit 1:  Mailbox 1 Event */
+#define CAN_INT_MB2              (1 << 2)   /* Bit 2:  Mailbox 2 Event */
+#define CAN_INT_MB3              (1 << 3)   /* Bit 3:  Mailbox 3 Event */
+#define CAN_INT_MB4              (1 << 4)   /* Bit 4:  Mailbox 4 Event */
+#define CAN_INT_MB5              (1 << 5)   /* Bit 5:  Mailbox 5 Event */
+#define CAN_INT_MB6              (1 << 6)   /* Bit 6:  Mailbox 6 Event */
+#define CAN_INT_MB7              (1 << 7)   /* Bit 7:  Mailbox 7 Event */
 #define CAN_INT_MBALL            (0x000000ff)
 
 #define CAN_INT_ERRA             (1 << 16) /* Bit 16: Error Active Mode */
@@ -188,7 +188,7 @@
 #define CAN_BR_BRP_SHIFT         (16)     /* Bits 16-22: Baudrate Prescaler */
 #define CAN_BR_BRP_MASK          (0x7f << CAN_BR_BRP_SHIFT)
 #  define CAN_BR_BRP(n)          ((uint32_t)(n) << CAN_BR_BRP_SHIFT)
-#define CAN_BR_SMP               (1 << 24) /* Bit 24: Sampling Mode */
+#define CAN_BR_SMP               (1 << 24)  /* Bit 24: Sampling Mode */
 #  define CAN_BR_ONCE            (0)        /* Bit 24: 0:Bit stream sampled once at sample point */
 #  define CAN_BR_THREE           CAN_BR_SMP /* Bit 24: 1:Sampling three times */
 
@@ -210,6 +210,7 @@
 /* Transfer Command Register */
 
 #define CAN_TCR_MB(n)            (1 << (n)) /* Bit n: Transfer Request for Mailbox n */
+
 #define CAN_TCR_MB0              (1 << 0)  /* Bit 0:  Transfer Request for Mailbox 0 */
 #define CAN_TCR_MB1              (1 << 1)  /* Bit 1:  Transfer Request for Mailbox 1 */
 #define CAN_TCR_MB2              (1 << 2)  /* Bit 2:  Transfer Request for Mailbox 2 */
@@ -223,6 +224,7 @@
 /* Abort Command Register */
 
 #define CAN_ACR_MB(n)            (1 << (n)) /* Bit n: Abort Request for Mailbox n */
+
 #define CAN_ACR_MB0              (1 << 0)  /* Bit 0:  Abort Request for Mailbox 0 */
 #define CAN_ACR_MB1              (1 << 1)  /* Bit 1:  Abort Request for Mailbox 1 */
 #define CAN_ACR_MB2              (1 << 2)  /* Bit 2:  Abort Request for Mailbox 2 */

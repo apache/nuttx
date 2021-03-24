@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_nvmctrl.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
@@ -28,9 +28,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_NVMCTRL_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_NVMCTRL_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -38,10 +38,11 @@
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* NVMCTRL register offsets *****************************************************************/
+ ****************************************************************************/
+
+/* NVMCTRL register offsets *************************************************/
 
 #define SAM_NVMCTRL_CTRLA_OFFSET     0x0000 /* Control A register */
 #define SAM_NVMCTRL_CTRLB_OFFSET     0x0004 /* Control B register */
@@ -53,7 +54,7 @@
 #define SAM_NVMCTRL_ADDR_OFFSET      0x001c /* Address register */
 #define SAM_NVMCTRL_LOCK_OFFSET      0x0020 /* Lock section register */
 
-/* NVMCTRL register addresses ***************************************************************/
+/* NVMCTRL register addresses ***********************************************/
 
 #define SAM_NVMCTRL_CTRLA            (SAM_NVMCTRL_BASE+SAM_NVMCTRL_CTRLA_OFFSET)
 #define SAM_NVMCTRL_CTRLB            (SAM_NVMCTRL_BASE+SAM_NVMCTRL_CTRLB_OFFSET)
@@ -65,7 +66,7 @@
 #define SAM_NVMCTRL_ADDR             (SAM_NVMCTRL_BASE+SAM_NVMCTRL_ADDR_OFFSET)
 #define SAM_NVMCTRL_LOCK             (SAM_NVMCTRL_BASE+SAM_NVMCTRL_LOCK_OFFSET)
 
-/* NVMCTRL register bit definitions *********************************************************/
+/* NVMCTRL register bit definitions *****************************************/
 
 /* Control A register */
 
@@ -90,6 +91,7 @@
 #  define NVMCTRL_CTRLA_CMD_PBC      (0x44 << NVMCTRL_CTRLA_CMD_SHIFT) /* Page Buffer Clear */
 #  define NVMCTRL_CTRLA_CMD_SSB      (0x45 << NVMCTRL_CTRLA_CMD_SHIFT) /* Set Security Bit */
 #  define NVMCTRL_CTRLA_CMD_INVALL   (0x46 << NVMCTRL_CTRLA_CMD_SHIFT) /* Invalidate all cache lines */
+
 #define NVMCTRL_CTRLA_CMDEX_SHIFT    (8)       /* Bits 8-15: Command Execution */
 #define NVMCTRL_CTRLA_CMDEX_MASK     (0xff << NVMCTRL_CTRLA_CMDEX_SHIFT)
 #  define NVMCTRL_CTRLA_CMDEX        (0xa5 << NVMCTRL_CTRLA_CMDEX_SHIFT)
@@ -105,11 +107,13 @@
 #  define NVMCTRL_CTRLB_SLEEPPRM_WAKEONACCESS    (0 << NVMCTRL_CTRLB_SLEEPPRM_SHIFT) /* Exit low power on first access */
 #  define NVMCTRL_CTRLB_SLEEPPRM_WAKEUPINSTANT   (1 << NVMCTRL_CTRLB_SLEEPPRM_SHIFT) /* Exit low power when exit sleep */
 #  define NVMCTRL_CTRLB_SLEEPPRM_DISABLED        (3 << NVMCTRL_CTRLB_SLEEPPRM_SHIFT) /* Auto power reduction disabled */
+
 #define NVMCTRL_CTRLB_READMODE_SHIFT (16)      /* Bits 16-17: NVMCTRL Read Mode */
 #define NVMCTRL_CTRLB_READMODE_MASK  (3 << NVMCTRL_CTRLB_READMODE_SHIFT)
 #  define NVMCTRL_CTRLB_READMODE_NO_MISS_PENALTY (0 << NVMCTRL_CTRLB_READMODE_SHIFT) /* No extra wait states on miss */
 #  define NVMCTRL_CTRLB_READMODE_LOW_POWER       (1 << NVMCTRL_CTRLB_READMODE_SHIFT) /* Insert wait/reduce power */
 #  define NVMCTRL_CTRLB_READMODE_DETERMINISTIC   (2 << NVMCTRL_CTRLB_READMODE_SHIFT) /* Same wait on all access */
+
 #define NVMCTRL_CTRLB_CACHEDIS       (1 << 18)  /* Bit 18: Cache Disable */
 
 /* NVM parameter register */
@@ -134,7 +138,9 @@
 #endif
 
 /* Interrupt clear register */
+
 /* Interrupt set register */
+
 /* Interface flags status and clear register */
 
 #define NVMCTRL_INT_READY            (1 << 0)  /* Bit 0: NVM Ready Interrupt */
@@ -157,17 +163,17 @@
 
 #define NVMCTRL_LOCK_REGION(n)       (1 << (n)) /* Region n is locked */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_NVMCTRL_H */

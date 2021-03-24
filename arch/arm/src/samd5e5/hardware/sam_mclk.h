@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_mclk.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_MCLK_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_MCLK_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* MCLK register offsets ************************************************************/
+ ****************************************************************************/
+
+/* MCLK register offsets ****************************************************/
 
 #define SAM_MCLK_CTRLA_OFFSET      0x0000  /* CTRLA register */
 #define SAM_MCLK_INTENCLR_OFFSET   0x0001  /* Interrupt enable clear */
@@ -47,7 +48,7 @@
 #define SAM_MCLK_APBCMASK_OFFSET   0x001c  /* APBC mask */
 #define SAM_MCLK_APBDMASK_OFFSET   0x0020  /* APBD mask */
 
-/* MCLK register addresses **********************************************************/
+/* MCLK register addresses **************************************************/
 
 #define SAM_MCLK_CTRLA             (SAM_MCLK_BASE + SAM_MCLK_CTRLA_OFFSET)
 #define SAM_MCLK_INTENCLR          (SAM_MCLK_BASE + SAM_MCLK_INTENCLR_OFFSET)
@@ -61,12 +62,12 @@
 #define SAM_MCLK_APBCMASK          (SAM_MCLK_BASE + SAM_MCLK_APBCMASK_OFFSET)
 #define SAM_MCLK_APBDMASK          (SAM_MCLK_BASE + SAM_MCLK_APBDMASK_OFFSET)
 
-/* MCLK register bit definitions ****************************************************/
+/* MCLK register bit definitions ********************************************/
 
 /* CTRLA register -- All bits are reserved (?) */
 
-/* Interrupt enable clear, Interrupt enable set, and  Interrupt flag status and
- * clear.
+/* Interrupt enable clear, Interrupt enable set,
+ * and  Interrupt flag status and clear.
  */
 
 #define MCLK_INT_CKRDY             (1 << 0)  /* Bit 0:  Clock ready */
@@ -86,30 +87,30 @@
 
 /* AHB mask */
 
-#define MCLK_AHBMASK_HPB0          (1 << 0)  /* Bit 0:  AHB HPB0 clock for enable */
-#define MCLK_AHBMASK_HPB1          (1 << 1)  /* Bit 1:  AHB HPB1 clock enable */
-#define MCLK_AHBMASK_HPB2          (1 << 2)  /* Bit 2:  AHB HPB2 clock enable */
-#define MCLK_AHBMASK_HPB3          (1 << 3)  /* Bit 3:  AHB HPB3 clock enable */
-#define MCLK_AHBMASK_DSU           (1 << 4)  /* Bit 4:  DSU AHB clock enable */
-                                             /* Bit 5:  Reserved */
-#define MCLK_AHBMASK_NVMCTRL       (1 << 6)  /* Bit 6:  NVMCTRL AHB clock enable */
-                                             /* Bit 7:  Reserved */
-#define MCLK_AHBMASK_CMCC          (1 << 8)  /* Bit 8:  CMCC AHB Clock Enable */
-#define MCLK_AHBMASK_DMAC          (1 << 9)  /* Bit 9:  DMAC AHB clock enable */
-#define MCLK_AHBMASK_USB           (1 << 10) /* Bit 10: USB AHB clock enable */
-                                             /* Bit 11: Reserved */
-#define MCLK_AHBMASK_PAC           (1 << 12) /* Bit 12: PAC AHB clock enable */
-#define MCLK_AHBMASK_QSPI          (1 << 13) /* Bit 13: QSPI AHB Clock Enable */
-#define MCLK_AHBMASK_GMAC          (1 << 14) /* Bit 14: GMAC AHB Clock Enable */
-#define MCLK_AHBMASK_SDHC0         (1 << 15) /* Bit 15: SDHC0 HB Clock Enable */
-#define MCLK_AHBMASK_SDHC1         (1 << 16) /* Bit 16: SDHC1 HB Clock Enable */
-#define MCLK_AHBMASK_CAN0          (1 << 17) /* Bit 17: CAN0 AHB Clock Enable */
-#define MCLK_AHBMASK_CAN1          (1 << 18) /* Bit 18: CAN1 AHB Clock Enable */
-#define MCLK_AHBMASK_ICM           (1 << 19) /* Bit 19: ICM AHB Clock Enable */
-#define MCLK_AHBMASK_PUKCC         (1 << 20) /* Bit 20: PUKCC AHB Clock Enable */
-#define MCLK_AHBMASK_QSPI2X        (1 << 21) /* Bit 21: QSPI_2X AHB Clock Enable */
+#define MCLK_AHBMASK_HPB0          (1 << 0)     /* Bit 0:  AHB HPB0 clock for enable */
+#define MCLK_AHBMASK_HPB1          (1 << 1)     /* Bit 1:  AHB HPB1 clock enable */
+#define MCLK_AHBMASK_HPB2          (1 << 2)     /* Bit 2:  AHB HPB2 clock enable */
+#define MCLK_AHBMASK_HPB3          (1 << 3)     /* Bit 3:  AHB HPB3 clock enable */
+#define MCLK_AHBMASK_DSU           (1 << 4)     /* Bit 4:  DSU AHB clock enable */
+                                                /* Bit 5:  Reserved */
+#define MCLK_AHBMASK_NVMCTRL       (1 << 6)     /* Bit 6:  NVMCTRL AHB clock enable */
+                                                /* Bit 7:  Reserved */
+#define MCLK_AHBMASK_CMCC          (1 << 8)     /* Bit 8:  CMCC AHB Clock Enable */
+#define MCLK_AHBMASK_DMAC          (1 << 9)     /* Bit 9:  DMAC AHB clock enable */
+#define MCLK_AHBMASK_USB           (1 << 10)    /* Bit 10: USB AHB clock enable */
+                                                /* Bit 11: Reserved */
+#define MCLK_AHBMASK_PAC           (1 << 12)    /* Bit 12: PAC AHB clock enable */
+#define MCLK_AHBMASK_QSPI          (1 << 13)    /* Bit 13: QSPI AHB Clock Enable */
+#define MCLK_AHBMASK_GMAC          (1 << 14)    /* Bit 14: GMAC AHB Clock Enable */
+#define MCLK_AHBMASK_SDHC0         (1 << 15)    /* Bit 15: SDHC0 HB Clock Enable */
+#define MCLK_AHBMASK_SDHC1         (1 << 16)    /* Bit 16: SDHC1 HB Clock Enable */
+#define MCLK_AHBMASK_CAN0          (1 << 17)    /* Bit 17: CAN0 AHB Clock Enable */
+#define MCLK_AHBMASK_CAN1          (1 << 18)    /* Bit 18: CAN1 AHB Clock Enable */
+#define MCLK_AHBMASK_ICM           (1 << 19)    /* Bit 19: ICM AHB Clock Enable */
+#define MCLK_AHBMASK_PUKCC         (1 << 20)    /* Bit 20: PUKCC AHB Clock Enable */
+#define MCLK_AHBMASK_QSPI2X        (1 << 21)    /* Bit 21: QSPI_2X AHB Clock Enable */
 #define MCLK_AHBMASK_NVMCTRL_SMEEPROM (1 << 22) /* Bit 22: NVMCTRL_SMEEPROM AHB Clock Enable */
-#define MCLK_AHBMASK_NVMCTRL_CACHE (1 << 23) /* Bit 23: NVMCTRL_CACHE AHB Clock Enable */
+#define MCLK_AHBMASK_NVMCTRL_CACHE (1 << 23)    /* Bit 23: NVMCTRL_CACHE AHB Clock Enable */
 
 /* APBA mask */
 
@@ -175,16 +176,16 @@
 #define MCLK_APBDMASK_I2C          (1 << 10) /* Bit 10: I2S APBD clock enable */
 #define MCLK_APBDMASK_PCC          (1 << 11) /* Bit 11: PCC APBD clock enable */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_MCLK_H */

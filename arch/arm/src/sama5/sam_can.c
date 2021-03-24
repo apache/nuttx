@@ -1198,7 +1198,9 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 #  warning REVISIT
 #endif
 
-  /* The message buffer is probably not properaly aligned for 32-bit accesses */
+  /* The message buffer is probably not properaly aligned for 32-bit
+   * accesses
+   */
 
   ptr    = msg->cm_data;
   regval = CAN_MDL0(ptr[0]) | CAN_MDL1(ptr[1]) | CAN_MDL2(ptr[2]) |

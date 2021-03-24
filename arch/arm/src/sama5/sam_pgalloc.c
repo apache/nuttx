@@ -42,6 +42,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Currently, page cache memory must be allocated in DRAM.  There are other
  * possibilities, but the logic in this file will have to extended in order
  * handle any other possibility.
@@ -121,7 +122,8 @@ uintptr_t sam_virtpgaddr(uintptr_t paddr)
    * The correct solutions is complex and, perhaps, will never be needed.
    */
 
-  poolstart = ((uintptr_t)SAM_DDRCS_PSECTION + CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET);
+  poolstart = ((uintptr_t)SAM_DDRCS_PSECTION +
+                CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET);
   poolend   = poolstart + CONFIG_SAMA5_DDRCS_PGHEAP_SIZE;
 
   if (paddr >= poolstart && paddr < poolend)

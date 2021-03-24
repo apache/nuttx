@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_i2c_master.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_I2C_MASTER_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_I2C_MASTER_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -37,10 +37,11 @@
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* I2C register offsets *********************************************************************/
+ ****************************************************************************/
+
+/* I2C register offsets *****************************************************/
 
 #define SAM_I2C_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_I2C_CTRLB_OFFSET       0x0004  /* Control B register */
@@ -66,7 +67,7 @@
 #  define SAM_I2C_DBGCTRL_OFFSET   0x0030  /* Debug control register */
 #endif
 
-/* I2C register addresses *******************************************************************/
+/* I2C register addresses ***************************************************/
 
 #define SAM_I2C0_CTRLA             (SAM_SERCOM0_BASE+SAM_I2C_CTRLA_OFFSET)
 #define SAM_I2C0_CTRLB             (SAM_SERCOM0_BASE+SAM_I2C_CTRLB_OFFSET)
@@ -164,7 +165,7 @@
 #define SAM_I2C5_DATA              (SAM_SERCOM5_BASE+SAM_I2C_DATA_OFFSET)
 #define SAM_I2C5_DBGCTRL           (SAM_SERCOM5_BASE+SAM_I2C_DBGCTRL_OFFSET)
 
-/* I2C register bit definitions *************************************************************/
+/* I2C register bit definitions *********************************************/
 
 /* Control A register */
 
@@ -173,10 +174,13 @@
 #define I2C_CTRLA_MODE_SHIFT       (2)       /* Bits 2-4: Operating Mode */
 #define I2C_CTRLA_MODE_MASK        (7 << I2C_CTRLA_MODE_SHIFT)
 #  define I2C_CTRLA_MODE_MASTER    (5 << I2C_CTRLA_MODE_SHIFT) /* I2C master mode */
+
 #define I2C_CTRLA_RUNSTDBY         (1 << 7)  /* Bit 7:  Run in standby */
 #define I2C_CTRLA_PINOUT           (1 << 16) /* Bit 16: Transmit data pinout */
+
 #  define I2C_CTRLA_1WIRE          (0)              /* 4-wire operation disable */
 #  define I2C_CTRLA_4WIRE          I2C_CTRLA_PINOUT /* 4-wire operation enable */
+
 #define I2C_CTRLA_SDAHOLD_SHIFT    (20)      /* Bits 20-21: SDA Hold Time */
 #define I2C_CTRLA_SDAHOLD_MASK     (3 << I2C_CTRLA_SDAHOLD_SHIFT)
 #  define I2C_CTRLA_SDAHOLD_DIS    (0 << I2C_CTRLA_SDAHOLD_SHIFT) /* Disabled */
@@ -192,6 +196,7 @@
 #    define I2C_CTRLA_SPEED_STANDARD  (0 << I2C_CTRLA_SPEED_SHIFT) /* Standard-mode (<=100 kHz) and Fast-mode (<=400 kHz) */
 #    define I2C_CTRLA_SPEED_FAST      (1 << I2C_CTRLA_SPEED_SHIFT) /* Fast-mode Plus (<=1 MHz) */
 #    define I2C_CTRLA_SPEED_HIGHSPEED (2 << I2C_CTRLA_SPEED_SHIFT) /* High-speed mode (<=3.4 MHz) */
+
 #  define I2C_CTRLA_SCLSM          (1 << 27) /* Bit 27: SCL clock stretch mode */
 #endif
 
@@ -201,6 +206,7 @@
 #  define I2C_CTRLA_INACTOUT_55US  (1 << I2C_CTRLA_INACTOUT_SHIFT) /* 5-6 SCL cycle time-out (50-60µs) */
 #  define I2C_CTRLA_INACTOUT_105US (2 << I2C_CTRLA_INACTOUT_SHIFT) /* 10-11 SCL cycle time-out (100-110µs) */
 #  define I2C_CTRLA_INACTOUT_205US (3 << I2C_CTRLA_INACTOUT_SHIFT) /* 20-21 SCL cycle time-out (200-210µs) */
+
 #define I2C_CTRLA_LOWTOUT          (1 << 30)  /* Bit 30: SCL Low Time-Out */
 
 /* Control B register */
@@ -213,7 +219,9 @@
 #  define I2C_CTRLB_CMD_ACKREP     (1 << I2C_CTRLB_CMD_SHIFT) /* ACK followed by repeated START */
 #  define I2C_CTRLB_CMD_ACKREAD    (2 << I2C_CTRLB_CMD_SHIFT) /* ACK followed by read operation */
 #  define I2C_CTRLB_CMD_ACKSTOP    (3 << I2C_CTRLB_CMD_SHIFT) /* ACK followed by STOP */
+
 #define I2C_CTRLB_ACKACT           (1 << 18) /* Bit 18: Acknowledge Action */
+
 #  define I2C_CTRLB_ACK            (0)              /* Send ACK */
 #  define I2C_CTRLB_NACK           I2C_CTRLB_ACKACT /* Send NACK */
 
@@ -235,8 +243,8 @@
 #    define I2C_HSBAUDLOW(n)       (uint16)(n) << I2C_HSBAUDLOW_SHIFT
 #endif
 
-/* Interrupt enable clear, interrupt enable set, interrupt enable set, interrupt flag and
- * status clear registers.
+/* Interrupt enable clear, interrupt enable set, interrupt enable set,
+ * interrupt flag and status clear registers.
  */
 
 #define I2C_INT_MB                 (1 << 0)  /* Bit 0:  Master on bus interrupt */
@@ -260,6 +268,7 @@
 #  define I2C_STATUS_BUSSTATE_IDLE    (1 << I2C_STATUS_BUSSTATE_SHIFT) /* Waiting for transaction */
 #  define I2C_STATUS_BUSSTATE_OWNER   (2 << I2C_STATUS_BUSSTATE_SHIFT) /* Master of bus owner */
 #  define I2C_STATUS_BUSSTATE_BUSY    (3 << I2C_STATUS_BUSSTATE_SHIFT) /* Other master owns */
+
 #define I2C_STATUS_LOWTOUT         (1 << 6)  /* Bit 6:  SCL Low Time-Out */
 #define I2C_STATUS_CLKHOLD         (1 << 7)  /* Bit 7:  Clock Hold */
 
@@ -311,17 +320,17 @@
 
 #define I2C_DBGCTRL_DBGSTOP        (1 << 0)  /* Bit 0: Debug stop mode */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_I2C_MASTER_H */

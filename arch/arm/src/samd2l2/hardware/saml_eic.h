@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_eic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_EIC_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_EIC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,10 +36,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* EIC register offsets *********************************************************************/
+ ****************************************************************************/
+
+/* EIC register offsets *****************************************************/
 
 #define SAM_EIC_CTRLA_OFFSET         0x0000  /* Control A register */
 #define SAM_EIC_NVMICTRL_OFFSET      0x0001  /* Non-maskable interrupt control register */
@@ -55,7 +56,7 @@
 #define SAM_EIC_CONFIG2_OFFSET       0x0024  /* Configuration 2 register */
 #define SAM_EIC_CONFIG3_OFFSET       0x0028  /* Configuration 3 register */
 
-/* EIC register addresses *******************************************************************/
+/* EIC register addresses ***************************************************/
 
 #define SAM_EIC_CTRLA                (SAM_EIC_BASE+SAM_EIC_CTRLA_OFFSET)
 #define SAM_EIC_NVMICTRL             (SAM_EIC_BASE+SAM_EIC_NVMICTRL_OFFSET)
@@ -71,13 +72,14 @@
 #define SAM_EIC_CONFIG2              (SAM_EIC_BASE+SAM_EIC_CONFIG2_OFFSET)
 #define SAM_EIC_CONFIG3              (SAM_EIC_BASE+SAM_EIC_CONFIG3_OFFSET)
 
-/* EIC register bit definitions *************************************************************/
+/* EIC register bit definitions *********************************************/
 
 /* Control A register */
 
 #define EIC_CTRLA_SWRST              (1 << 0)  /* Bit 0:  Software reset */
 #define EIC_CTRLA_ENABLE             (1 << 1)  /* Bit 1:  Enable */
 #define EIC_CTRLA_CKSEL              (1 << 2)  /* Bit 2:  Clock selection */
+
 #  define EIC_CTRLA_CKSEL_GCLK_EIC   (0)             /*   0=EIC clocked by GCLK_EIC */
 #  define EIC_CTRLA_CKSEL_CLK_ULP32K EIC_CTRLA_CKSEL /*   1=EIC clocked by CLK_ULP32K */
 
@@ -91,6 +93,7 @@
 #  define EIC_NVMICTRL_NMISENSE_BOTH (3 << EIC_NVMICTRL_NMISENSE_SHIFT) /* Both edge detection */
 #  define EIC_NVMICTRL_NMISENSE_HIGH (4 << EIC_NVMICTRL_NMISENSE_SHIFT) /* High level detection */
 #  define EIC_NVMICTRL_NMISENSE_LOW  (5 << EIC_NVMICTRL_NMISENSE_SHIFT) /* Low level detection */
+
 #define EIC_NVMICTRL_NMIFLTEN        (1 << 3)  /* Bit 3: Non-maskable interrupt filter enable */
 #define EIC_NVMICTRL_ASYNC           (1 << 4)  /* Bit 4: Asynchronous edge detection mode */
 
@@ -103,8 +106,9 @@
 #define EIC_SYNCBUSY_SWRST           (1 << 0)  /* Bit 0:  Software reset syncrhonization busy */
 #define EIC_SYNCBUSY_ENABLE          (1 << 1)  /* Bit 1:  Enable syncrhonization busy */
 
-/* Event control, Interrupt enable clear, interrupt enable set register, interrupt flag
- * status and clear, and External interrupt asynchronous mode registers.
+/* Event control, Interrupt enable clear, interrupt enable set register,
+ * interrupt flag status and clear, and External interrupt asynchronous
+ * mode registers.
  */
 
 #define EIC_EXTINT_SHIFT             (0)       /* Bits 0-15: External interrupt n */
@@ -177,17 +181,17 @@
 #  define EIC_CONFIG3_SENSE_HIGH     (4 << EIC_CONFIG3_SENSE_SHIFT(n)) /* High level detection */
 #  define EIC_CONFIG3_SENSE_LOW      (5 << EIC_CONFIG3_SENSE_SHIFT(n)) /* Low level detection */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_EIC_H */

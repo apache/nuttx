@@ -25,8 +25,8 @@
  * is suppressed and the platform specific code is expected to provide the
  * following custom functions.
  *
- *   void up_timer_initialize(void): Initializes the timer facilities.  Called
- *     early in the initialization sequence (by up_initialize()).
+ *   void up_timer_initialize(void): Initializes the timer facilities.
+ *      Called early in the initialization sequence (by up_initialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *   int up_timer_cancel(void):  Cancels the interval timer.
@@ -40,6 +40,7 @@
  *     logic when the interval timer expires.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * SAMV7 Timer Usage
  *
@@ -349,9 +350,10 @@ int up_timer_gettime(FAR struct timespec *ts)
 
 int up_timer_cancel(FAR struct timespec *ts)
 {
-  return ONESHOT_INITIALIZED(&g_tickless.oneshot) && FREERUN_INITIALIZED(&g_tickless.freerun) ?
-         sam_oneshot_cancel(&g_tickless.oneshot, &g_tickless.freerun, ts) :
-         -EAGAIN;
+  return ONESHOT_INITIALIZED(&g_tickless.oneshot) &&
+         FREERUN_INITIALIZED(&g_tickless.freerun) ?
+         sam_oneshot_cancel(&g_tickless.oneshot,
+         &g_tickless.freerun, ts) : -EAGAIN;
 }
 
 /****************************************************************************
@@ -382,7 +384,7 @@ int up_timer_cancel(FAR struct timespec *ts)
 int up_timer_start(FAR const struct timespec *ts)
 {
   return ONESHOT_INITIALIZED(&g_tickless.oneshot) ?
-         sam_oneshot_start(&g_tickless.oneshot, &g_tickless.freerun, sam_oneshot_handler, NULL, ts) :
-         -EAGAIN;
+         sam_oneshot_start(&g_tickless.oneshot,
+         &g_tickless.freerun, sam_oneshot_handler, NULL, ts) : -EAGAIN;
 }
 #endif /* CONFIG_SCHED_TICKLESS */

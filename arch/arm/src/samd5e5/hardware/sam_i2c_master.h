@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_i2c_master.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_I2C_MASTER_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_I2C_MASTER_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* I2C register offsets *********************************************************************/
+/* I2C register offsets *****************************************************/
 
 #define SAM_I2C_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_I2C_CTRLB_OFFSET       0x0004  /* Control B register */
@@ -48,7 +48,7 @@
 #define SAM_I2C_DATA_OFFSET        0x0028  /* Data register */
 #define SAM_I2C_DBGCTRL_OFFSET     0x0030  /* Debug control register */
 
-/* I2C register addresses *******************************************************************/
+/* I2C register addresses ***************************************************/
 
 #define SAM_I2C0_CTRLA             (SAM_SERCOM0_BASE + SAM_I2C_CTRLA_OFFSET)
 #define SAM_I2C0_CTRLB             (SAM_SERCOM0_BASE + SAM_I2C_CTRLB_OFFSET)
@@ -154,7 +154,7 @@
 #define SAM_I2C7_DATA              (SAM_SERCOM7_BASE + SAM_I2C_DATA_OFFSET)
 #define SAM_I2C7_DBGCTRL           (SAM_SERCOM7_BASE + SAM_I2C_DBGCTRL_OFFSET)
 
-/* I2C register bit definitions *************************************************************/
+/* I2C register bit definitions *********************************************/
 
 /* Control A register */
 
@@ -224,8 +224,8 @@
 #define I2C_HSBAUDLOW_MASK         (0xff << I2C_HSBAUDLOW_SHIFT)
 #  define I2C_HSBAUDLOW(n)         ((uint16)(n) << I2C_HSBAUDLOW_SHIFT)
 
-/* Interrupt enable clear, interrupt enable set, interrupt enable set, interrupt flag and
- * status clear registers.
+/* Interrupt enable clear, interrupt enable set, interrupt enable set,
+ * interrupt flag and status clear registers.
  */
 
 #define I2C_INT_MB                 (1 << 0)  /* Bit 0:  Master on bus interrupt */
@@ -277,16 +277,16 @@
 
 #define I2C_DBGCTRL_DBGSTOP        (1 << 0)  /* Bit 0: Debug stop mode */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Functions Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_I2C_MASTER_H */

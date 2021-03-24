@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_qspi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_QSPI_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_QSPI_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/samv7/chip.h>
@@ -32,15 +32,16 @@
 
 #if SAMV7_NQSPI > 0
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
-/* General Characteristics **************************************************************/
+ ****************************************************************************/
+
+/* General Characteristics **************************************************/
 
 #define SAM_QSPI_MINBITS           8      /* Minimum word width */
 #define SAM_QSPI_MAXBITS           16     /* Maximum word width */
 
-/* QSPI register offsets ****************************************************************/
+/* QSPI register offsets ****************************************************/
 
 #define SAM_QSPI_CR_OFFSET         0x0000 /* Control Register */
 #define SAM_QSPI_MR_OFFSET         0x0004 /* Mode Register */
@@ -60,9 +61,9 @@
                                           /* 0x0048–0x00e0 Reserved */
 #define SAM_QSPI_WPCR_OFFSET       0x00e4 /* Write Protection Control Register */
 #define SAM_QSPI_WPSR_OFFSET       0x00e8 /* Write Protection Status Register */
-                                         /* 0xec-0xfc: Reserved */
+                                          /* 0xec-0xfc: Reserved */
 
-/* QSPI register addresses **************************************************************/
+/* QSPI register addresses **************************************************/
 
 #define SAM_QSPI0_CR               (SAM_QSPI0_BASE+SAM_QSPI_CR_OFFSET)   /* Control Register */
 #define SAM_QSPI0_MR               (SAM_QSPI0_BASE+SAM_QSPI_MR_OFFSET)   /* Mode Register */
@@ -100,7 +101,7 @@
 #  define SAM_QSPI1_WPSR           (SAM_QSPI1_BASE+SAM_QSPI_WPSR_OFFSET) /* Write Protection Status Register */
 #endif
 
-/* QSPI register bit definitions ********************************************************/
+/* QSPI register bit definitions ********************************************/
 
 /* QSPI Control Register */
 
@@ -119,6 +120,7 @@
 #  define QSPI_MR_CSMODE_NRELOAD   (0 << QSPI_MR_CSMODE_SHIFT) /* CS deasserted if TD not reloaded */
 #  define QSPI_MR_CSMODE_LASTXFER  (1 << QSPI_MR_CSMODE_SHIFT) /* CS deasserted when LASTXFER transferred */
 #  define QSPI_MR_CSMODE_SYSTEM    (2 << QSPI_MR_CSMODE_SHIFT) /* CS deasserted after each transfer */
+
 #define QSPI_MR_NBBITS_SHIFT       (8)       /* Bits 8-11: Number Of Bits Per Transfer */
 #define QSPI_MR_NBBITS_MASK        (15 << QSPI_MR_NBBITS_SHIFT)
 #  define QSPI_MR_NBBITS(n)        ((uint32_t)((n)-SAM_QSPI_MINBITS) << QSPI_MR_NBBITS_SHIFT)
@@ -131,6 +133,7 @@
 #  define QSPI_MR_NBBITS_14BIT     (6 << QSPI_MR_NBBITS_SHIFT) /* 14 bits for transfer */
 #  define QSPI_MR_NBBITS_15BIT     (7 << QSPI_MR_NBBITS_SHIFT) /* 15 bits for transfer */
 #  define QSPI_MR_NBBITS_16BIT     (8 << QSPI_MR_NBBITS_SHIFT) /* 16 bits for transfer */
+
 #define QSPI_MR_DLYBCT_SHIFT       (16)      /* Bits 16-23: Delay Between Consecutive Transfers */
 #define QSPI_MR_DLYBCT_MASK        (0xff << QSPI_MR_DLYBCT_SHIFT)
 #  define QSPI_MR_DLYBCT(n)        ((uint32_t)(n) << QSPI_MR_DLYBCT_SHIFT)
@@ -148,7 +151,8 @@
 #define QSPI_TDR_TD_SHIFT          (0)       /* Bits 0-15:  Transmit Data */
 #define QSPI_TDR_TD_MASK           (0xffff << QSPI_TDR_TD_SHIFT)
 
-/* QSPI Status Register, QSPI Interrupt Enable Register, QSPI Interrupt Disable Register,
+/* QSPI Status Register, QSPI Interrupt Enable Register,
+ * QSPI Interrupt Disable Register,
  * and QSPI Interrupt Mask Register (common bit fields)
  */
 
@@ -198,6 +202,7 @@
 #  define QSPI_IFR_WIDTH_QUADIO    (4 << QSPI_IFR_WIDTH_SHIFT) /* Single-bit  Quad           Quad */
 #  define QSPI_IFR_WIDTH_DUALCMD   (5 << QSPI_IFR_WIDTH_SHIFT) /* Dual        Dual           Dual */
 #  define QSPI_IFR_WIDTH_QUADCMD   (6 << QSPI_IFR_WIDTH_SHIFT) /* Quad        Quad           Quad */
+
 #define QSPI_IFR_INSTEN            (1 << 4)  /* Bit 4:  Instruction Enable */
 #define QSPI_IFR_ADDREN            (1 << 5)  /* Bit 5:  Address Enable */
 #define QSPI_IFR_OPTEN             (1 << 6)  /* Bit 6:  Option Enable */
@@ -208,6 +213,7 @@
 #  define QSPI_IFR_OPTL_2BIT       (1 << QSPI_IFR_OPTL_SHIFT) /* Option is 2 bits */
 #  define QSPI_IFR_OPTL_4BIT       (2 << QSPI_IFR_OPTL_SHIFT) /* Option is 4 bits */
 #  define QSPI_IFR_OPTL_8BIT       (3 << QSPI_IFR_OPTL_SHIFT) /* Option is 8 bits */
+
 #define QSPI_IFR_ADDRL             (1 << 10) /* Bit 10: Address Length */
 #  define QSPI_IFR_ADDRL_24BIT     (0 << 10) /*   0=24-bit */
 #  define QSPI_IFR_ADDRL_32BIT     (1 << 10) /*   1=32-bit */
@@ -217,6 +223,7 @@
 #  define QSPI_IFR_TFRTYP_RDMEM    (1 << QSPI_IFR_TFRTYP_SHIFT) /* Read data transfer from serial memory */
 #  define QSPI_IFR_TFRTYP_WRITE    (2 << QSPI_IFR_TFRTYP_SHIFT) /* Write transfer into serial memory */
 #  define QSPI_IFR_TFRTYP_WRMEM    (3 << QSPI_IFR_TFRTYP_SHIFT) /* Write data transfer the serial memory */
+
 #define QSPI_IFR_CRM               (1 << 14) /* Bit 14: Continuous Read Mode */
 #define QSPI_IFR_NBDUM_SHIFT       (16)      /* Bits 16-20: Number Of Dummy Cycles */
 #define QSPI_IFR_NBDUM_MASK        (31 << QSPI_IFR_NBDUM_SHIFT)
@@ -242,17 +249,17 @@
 #define QSPI_WPSR_WPVSRC_SHIFT     (8)      /* Bits 8-15: QSPI Write Protection Violation Source */
 #define QSPI_WPSR_WPVSRC_MASK      (0xff << QSPI_WPSR_WPVSRC_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* SAMV7_NQSPI > 0 */
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_QSPI_H */

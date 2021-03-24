@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4cm_aes.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4CM_AES_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4CM_AES_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* AES register offsets *********************************************************************/
+/* AES register offsets *****************************************************/
 
 #define SAM_AES_CR_OFFSET                0x0000 /* Control Register */
 #define SAM_AES_MR_OFFSET                0x0004 /* Control Register */
@@ -53,7 +53,7 @@
 #define SAM_AES_CTRR_OFFSET              0x0098 /* GCM Encryption Counter Value Register */
 #define SAM_AES_GCMHR_OFFSET             0x009C /* GCM H World Register */
 
-/* AES register addresses *******************************************************************/
+/* AES register addresses ***************************************************/
 
 #define SAM_AES_CR                       (SAM_AES_BASE + SAM_AES_CR_OFFSET)
 #define SAM_AES_MR                       (SAM_AES_BASE + SAM_AES_MR_OFFSET)
@@ -72,7 +72,7 @@
 #define SAM_AES_CTRR                     (SAM_AES_BASE + SAM_AES_CTRR_OFFSET)
 #define SAM_AES_GCMHR                    (SAM_AES_BASE + SAM_AES_GCMHR_OFFSET)
 
-/* AES register bit definitions *************************************************************/
+/* AES register bit definitions *********************************************/
 
 /* AES Control Register */
 

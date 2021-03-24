@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_dac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
@@ -26,9 +26,9 @@
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_DAC_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_DAC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,10 +36,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* DAC register offsets ********************************************************************/
+ ****************************************************************************/
+
+/* DAC register offsets *****************************************************/
 
 #define SAM_DAC_CTRLA_OFFSET       0x0000 /* Control A Register */
 #define SAM_DAC_CTRLB_OFFSET       0x0001 /* Control B Register */
@@ -53,7 +54,7 @@
 #define SAM_DAC_DATABUF0_OFFSET    0x000C /* Data Buffer DAC0 Register */
 #define SAM_DAC_DATABUF1_OFFSET    0x000D /* Data Buffer DAC1 Register */
 
-/* DAC register addresses ******************************************************************/
+/* DAC register addresses ***************************************************/
 
 #define SAM_DAC_CTRLA              (SAM_DAC_BASE+SAM_DAC_CTRLA_OFFSET)
 #define SAM_DAC_CTRLB              (SAM_DAC_BASE+SAM_DAC_CTRLB_OFFSET)
@@ -67,7 +68,7 @@
 #define SAM_DAC_DATABUF0           (SAM_DAC_BASE+SAM_DAC_DATABUF0_OFFSET)
 #define SAM_DAC_DATABUF1           (SAM_DAC_BASE+SAM_DAC_DATABUF1_OFFSET)
 
-/* DAC register bit definitions ************************************************************/
+/* DAC register bit definitions *********************************************/
 
 /* Control A Register */
 
@@ -93,8 +94,9 @@
 #define DAC_EVCTRL_STARTEI         (1 << 0)  /* Bit 0:  Start conversion event input */
 #define DAC_EVCTRL_EMPTYEO         (1 << 1)  /* Bit 1:  Data buffer empty event output */
 
-/* Common bit definitions for Interrupt Enable Clear Register, Interrupt Enable Set
- * Register, and Interrupt Flag Status and Clear Register
+/* Common bit definitions for Interrupt Enable Clear Register,
+ * Interrupt Enable Set Register,
+ * and Interrupt Flag Status and Clear Register
  */
 
 #define DAC_INT_UNDERRUN           (1 << 0)  /* Bit 0:  Underrun interrupt */
@@ -106,17 +108,17 @@
 
 #define DAC_STATUS_SYNCBUSY        (1 << 7)  /* Bit 0:  Sync busy */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_DAC_H */

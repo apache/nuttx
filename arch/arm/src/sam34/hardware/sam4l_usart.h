@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4l_usart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_UART_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_UART_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* USART register offsets ***********************************************************************/
+/* USART register offsets ***************************************************/
 
 #define SAM_UART_CR_OFFSET           0x0000 /* Control Register */
 #define SAM_UART_MR_OFFSET           0x0004 /* Mode Register */
@@ -63,7 +63,7 @@
 #define SAM_UART_VERSION_OFFSET      0x00fc /* Version Register */
                                             /* 0x0100-0x0124: PDC Area */
 
-/* USART register addresses *********************************************************************/
+/* USART register addresses *************************************************/
 
 #define SAM_USART_CR(n)              (SAM_USARTN_BASE(n)+SAM_UART_CR_OFFSET)
 #define SAM_USART_MR(n)              (SAM_USARTN_BASE(n)+SAM_UART_MR_OFFSET)
@@ -175,7 +175,7 @@
 #define SAM_USART3_WPSR              (SAM_USART3_BASE+SAM_UART_WPSR_OFFSET)
 #define SAM_USART3_VERSION           (SAM_USART3_BASE+SAM_UART_VERSION_OFFSET)
 
-/* USART register bit definitions ***************************************************************/
+/* USART register bit definitions *******************************************/
 
 /* USART Control Register */
 
@@ -214,17 +214,20 @@
 #  define UART_MR_MODE_IRDA          (8  << UART_MR_MODE_SHIFT) /* IrDA */
 #  define UART_MR_MODE_SPIMSTR       (14 << UART_MR_MODE_SHIFT) /* SPI Master */
 #  define UART_MR_MODE_SPISLV        (15 << UART_MR_MODE_SHIFT) /* SPI Slave */
+
 #define UART_MR_USCLKS_SHIFT         (4)       /* Bits 4-5: Clock Selection */
 #define UART_MR_USCLKS_MASK          (3 << UART_MR_USCLKS_SHIFT)
 #  define UART_MR_USCLKS_USART       (0 << UART_MR_USCLKS_SHIFT) /* CLK_USART */
 #  define UART_MR_USCLKS_USARTDIV    (0 << UART_MR_USCLKS_SHIFT) /* CLK_USART/DIV(1) */
 #  define UART_MR_USCLKS_CLK         (0 << UART_MR_USCLKS_SHIFT) /* CLK */
+
 #define UART_MR_CHRL_SHIFT           (6)       /* Bits 6-7: Character Length */
 #define UART_MR_CHRL_MASK            (3 << UART_MR_CHRL_SHIFT)
 #  define UART_MR_CHRL_5BITS         (0 << UART_MR_CHRL_SHIFT) /* 5 bits */
 #  define UART_MR_CHRL_6BITS         (1 << UART_MR_CHRL_SHIFT) /* 6 bits */
 #  define UART_MR_CHRL_7BITS         (2 << UART_MR_CHRL_SHIFT) /* 7 bits */
 #  define UART_MR_CHRL_8BITS         (3 << UART_MR_CHRL_SHIFT) /* 8 bits */
+
 #define UART_MR_SYNC                 (1 << 8)  /* Bit 8: Synchronous Mode Select */
 #define UART_MR_CPHA                 (1 << 8)  /* Bit 8: SPI Clock Phase */
 #define UART_MR_PAR_SHIFT            (9)       /* Bits 9-11: Parity Type */
@@ -235,17 +238,20 @@
 #  define UART_MR_PAR_MARK           (3 << UART_MR_PAR_SHIFT) /* Mark: parity forced to 1 */
 #  define UART_MR_PAR_NONE           (4 << UART_MR_PAR_SHIFT) /* No parity */
 #  define UART_MR_PAR_MULTIDROP      (6 << UART_MR_PAR_SHIFT) /* Multidrop mode */
+
 #define UART_MR_NBSTOP_SHIFT         (12)      /* Bits 12-13: Number of Stop Bits */
 #define UART_MR_NBSTOP_MASK          (3 << UART_MR_NBSTOP_SHIFT)
 #  define UART_MR_NBSTOP_1           (0 << UART_MR_NBSTOP_SHIFT) /* 1 stop bit 1 stop bit */
 #  define UART_MR_NBSTOP_1p5         (1 << UART_MR_NBSTOP_SHIFT) /* 1.5 stop bits */
 #  define UART_MR_NBSTOP_2           (2 << UART_MR_NBSTOP_SHIFT) /* 2 stop bits 2 stop bits */
+
 #define UART_MR_CHMODE_SHIFT         (14)      /* Bits 14-15: Channel Mode */
 #define UART_MR_CHMODE_MASK          (3 << UART_MR_CHMODE_SHIFT)
 #  define UART_MR_CHMODE_NORMAL      (0 << UART_MR_CHMODE_SHIFT) /* Normal Mode */
 #  define UART_MR_CHMODE_ECHO        (1 << UART_MR_CHMODE_SHIFT) /* Automatic Echo */
 #  define UART_MR_CHMODE_LLPBK       (2 << UART_MR_CHMODE_SHIFT) /* Local Loopback */
 #  define UART_MR_CHMODE_RLPBK       (3 << UART_MR_CHMODE_SHIFT) /* Remote Loopback */
+
 #define UART_MR_MSBF                 (1 << 16) /* Bit 16: Most Significant Bit first */
 #define UART_MR_CPOL                 (1 << 16) /* Bit 16: SPI Clock Polarity */
 #define UART_MR_MODE9                (1 << 17) /* Bit 17: 9-bit Character Length */
@@ -262,7 +268,8 @@
 #define UART_MR_MODSYNC              (1 << 30) /* Bit 30: Manchester Synchronization Mode */
 #define UART_MR_ONEBIT               (1 << 31) /* Bit 31: Start Frame Delimiter Selector */
 
-/* USART Interrupt Enable Register, USART Interrupt Disable Register, USART Interrupt Mask
+/* USART Interrupt Enable Register
+ * USART Interrupt Disable Register, USART Interrupt Mask
  * Register, and USART Status Register common bit field definitions.
  *
  * - Bits that provide interrupts with UART_INT_
@@ -357,6 +364,7 @@
 #  define UART_MAN_TXPP_ALLZERO      (1 << UART_MAN_TXPP_SHIFT) /* ALL_ZERO */
 #  define UART_MAN_TXPP_ZEROONE      (2 << UART_MAN_TXPP_SHIFT) /* ZERO_ONE */
 #  define UART_MAN_TXPP_ONEZERO      (3 << UART_MAN_TXPP_SHIFT) /* ONE_ZERO */
+
 #define UART_MAN_TXMPOL              (1 << 12) /* Bit 12: Transmitter Manchester Polarity */
 #define UART_MAN_RXPL_SHIFT          (16)      /* Bits 16-19: Receiver Preamble Length */
 #define UART_MAN_RXPL_MASK           (15 << UART_MAN_RXPL_SHIFT)
@@ -366,6 +374,7 @@
 #  define UART_MAN_RXPP_ALLZERO      (1 << UART_MAN_RXPP_SHIFT) /* ALL_ZERO */
 #  define UART_MAN_RXPP_ZEROONE      (2 << UART_MAN_RXPP_SHIFT) /* ZERO_ONE */
 #  define UART_MAN_RXPP_ONEZERO      (3 << UART_MAN_RXPP_SHIFT) /* ONE_ZERO */
+
 #define UART_MAN_RXMPOL              (1 << 28) /* Bit 28: Receiver Manchester Polarity */
 #define UART_MAN_DRIFT               (1 << 30) /* Bit 30: Drift compensation */
 
@@ -376,6 +385,7 @@
 #  define UART_LINMR_NACT_PUBLISH    (0 << UART_LINMR_NACT_SHIFT) /* USART transmits response */
 #  define UART_LINMR_NACT_SUBSCRIBE  (1 << UART_LINMR_NACT_SHIFT) /* USART receives response */
 #  define UART_LINMR_NACT_IGNORE     (2 << UART_LINMR_NACT_SHIFT) /* USART does neither */
+
 #define UART_LINMR_PARDIS            (1 << 2)  /* Bit 0:  Parity Disable */
 #define UART_LINMR_CHKDIS            (1 << 3)  /* Bit 0:  Checksum Disable */
 #define UART_LINMR_CHKTYP            (1 << 4)  /* Bit 0:  Checksum Type */
@@ -417,16 +427,16 @@
 #define UART_VERSION_MFN_SHIFT       (16)      /* Bits 16-18: Reserved */
 #define UART_VERSION_MFN_MASK        (7 << UART_VERSION_MFN_SHIFT)
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_UART_H */

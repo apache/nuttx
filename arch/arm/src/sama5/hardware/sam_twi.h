@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_twi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_TWI_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_TWI_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* TWI register offsets *****************************************************************/
+/* TWI register offsets *****************************************************/
 
 #define SAM_TWI_CR_OFFSET           0x0000 /* Control Register */
 #define SAM_TWI_MMR_OFFSET          0x0004 /* Master Mode Register */
@@ -53,7 +53,7 @@
 #define SAM_TWI_WPSR_OFFSET         0x00e8 /* Protection Status Register */
                                            /* 0x00ec-0x00fc: Reserved */
 
-/* TWI register addresses ***************************************************************/
+/* TWI register addresses ***************************************************/
 
 #define SAM_TWI0_CR                 (SAM_TWI0_VBASE+SAM_TWI_CR_OFFSET)
 #define SAM_TWI0_MMR                (SAM_TWI0_VBASE+SAM_TWI_MMR_OFFSET)
@@ -113,7 +113,7 @@
 #  define SAM_TWI3_WPSR             (SAM_TWI3_VBASE+SAM_TWI_WPSR_OFFSET)
 #endif
 
-/* TWI register bit definitions *********************************************************/
+/* TWI register bit definitions *********************************************/
 
 /* TWI Control Register */
 
@@ -134,6 +134,7 @@
 #  define TWI_MMR_IADRSZ_1BYTE      (1 << TWI_MMR_IADRSZ_SHIFT) /* One-byte internal device address */
 #  define TWI_MMR_IADRSZ_2BYTE      (2 << TWI_MMR_IADRSZ_SHIFT) /* Two-byte internal device address */
 #  define TWI_MMR_IADRSZ_3BYTE      (3 << TWI_MMR_IADRSZ_SHIFT) /* Three-byte internal device address */
+
 #define TWI_MMR_MREAD               (1 << 12) /* Bit 12: Master Read Direction */
 #define TWI_MMR_DADR_SHIFT          (16)      /* Bits 16-22:  Device Address */
 #define TWI_MMR_DADR_MASK           (0x7f << TWI_MMR_DADR_SHIFT)
@@ -211,16 +212,16 @@
 #define TWI_WPSR_WPVSRC_SHIFT      (8)       /* Bits 8-31: Write Protection Violation Source */
 #define TWI_WPSR_WPVSRC_MASK       (0x00ffffff << TWI_WPSR_WPVSRC_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_TWI_H */

@@ -151,7 +151,9 @@ void sam_gclk_configure(int gclk, FAR const struct sam_gclk_config_s *config)
 
               regval |= GCLK_GENCTRL1_DIV((uint32_t)config->div);
 
-              /* Enable non-binary division with increased duty cycle accuracy */
+              /* Enable non-binary division with increased duty cycle
+               * accuracy
+               */
 
               regval |= GCLK_GENCTRL_IDC;
             }

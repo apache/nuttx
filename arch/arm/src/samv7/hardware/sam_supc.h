@@ -1,4 +1,4 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_supc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_SUPC_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_SUPC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* SUPC register offsets ****************************************************************/
+/* SUPC register offsets ****************************************************/
 
 #define SAM_SUPC_CR_OFFSET              0x0000 /* Supply Controller Control Register */
 #define SAM_SUPC_SMMR_OFFSET            0x0004 /* Supply Controller Supply Monitor Mode Register */
@@ -43,7 +43,7 @@
 #define SAM_SUPC_WUIR_OFFSET            0x0010 /* Supply Controller Wake Up Inputs Register */
 #define SAM_SUPC_SR_OFFSET              0x0014 /* Supply Controller Status Register */
 
-/* SUPC register addresses **************************************************************/
+/* SUPC register addresses **************************************************/
 
 #define SAM_SUPC_CR                     (SAM_SUPC_BASE+SAM_SUPC_CR_OFFSET)
 #define SAM_SUPC_SMMR                   (SAM_SUPC_BASE+SAM_SUPC_SMMR_OFFSET)
@@ -52,7 +52,8 @@
 #define SAM_SUPC_WUIR                   (SAM_SUPC_BASE+SAM_SUPC_WUIR_OFFSET)
 #define SAM_SUPC_SR                     (SAM_SUPC_BASE+SAM_SUPC_SR_OFFSET)
 
-/* SUPC register bit definitions ********************************************************/
+/* SUPC register bit definitions ********************************************/
+
 /* Supply Controller Control Register */
 
 #define SUPC_CR_VROFF                   (1 << 2)  /* Bit 2:  Voltage Regulator Off */
@@ -82,6 +83,7 @@
 #  define SUPC_SMMR_SMTH_3p2V           (13  << SUPC_SMMR_SMTH_SHIFT) /* 3.12 < 3.16 < 3.20 */
 #  define SUPC_SMMR_SMTH_3p3V           (14  << SUPC_SMMR_SMTH_SHIFT) /* 3.24 < 3.28 < 3.32 */
 #  define SUPC_SMMR_SMTH_3p4V           (15  << SUPC_SMMR_SMTH_SHIFT) /* 3.36 < 3.40 < 3.44 */
+
 #define SUPC_SMMR_SMSMPL_SHIFT          (8)       /* Bits 8-10:  Supply Monitor Sampling Period */
 #define SUPC_SMMR_SMSMPL_MASK           (7 << SUPC_SMMR_SMSMPL_SHIFT)
 #  define SUPC_SMMR_SMSMPL_SMD          (0 << SUPC_SMMR_SMSMPL_SHIFT) /* Supply Monitor disabled */
@@ -89,6 +91,7 @@
 #  define SUPC_SMMR_SMSMPL_32SLCK       (2 << SUPC_SMMR_SMSMPL_SHIFT) /* Eevery 32 SLCK periods */
 #  define SUPC_SMMR_SMSMPL_256SLCK      (3 << SUPC_SMMR_SMSMPL_SHIFT) /* Every 256 SLCK periods */
 #  define SUPC_SMMR_SMSMPL_2048SLCK     (4 << SUPC_SMMR_SMSMPL_SHIFT) /* Every 2,048 SLCK periods */
+
 #define SUPC_SMMR_SMRSTEN               (1 << 12) /* Bit 12: Supply Monitor Reset Enable */
 #define SUPC_SMMR_SMIEN                 (1 << 13) /* Bit 13: Supply Monitor Interrupt Enable */
 
@@ -119,6 +122,7 @@
 #  define SUPC_WUMR_WKUPDBC_512SCLK     (3 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 512 SLCK periods */
 #  define SUPC_WUMR_WKUPDBC_4096SCLK    (4 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 4096 SLCK periods */
 #  define SUPC_WUMR_WKUPDBC_32768SCLK   (5 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 32768 SLCK periods */
+
 #define SUPC_WUMR_LPDBC_SHIFT           (16)      /* Bits 16-18: Low Power Debouncer Period */
 #define SUPC_WUMR_LPDBC_MASK            (7 << SUPC_WUMR_LPDBC_SHIFT)
 #  define SUPC_WUMR_LPDBC_DISABLE       (0 << SUPC_WUMR_LPDBC_SHIFT) /* Disable low power debouncer */
@@ -154,16 +158,16 @@
 #define SUPC_SR_WKUPIS_MASK            (0x3fff << SUPC_SR_WKUPIS_SHIFT)
 #  define SUPC_SR_WKUPIS(n)            (1 << (SUPC_SR_WKUPIS_SHIFT+(n)))
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_SUPC_H */

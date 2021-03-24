@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/_sama5d3x_mpddrc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D3X_MPDDRC_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D3X_MPDDRC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* MPDDRC Register Offsets **********************************************************/
+ ****************************************************************************/
+
+/* MPDDRC Register Offsets **************************************************/
 
 #define SAM_MPDDRC_MR_OFFSET            0x0000 /* MPDDRC Mode Register */
 #define SAM_MPDDRC_RTR_OFFSET           0x0004 /* MPDDRC Refresh Timer Register */
@@ -64,7 +65,7 @@
                                                /* 0x158-0x1cc Reserved */
                                                /* 0x1dc-0x1f8 Reserved */
 
-/* MPDDRC Register Addresses ********************************************************/
+/* MPDDRC Register Addresses ************************************************/
 
 #define SAM_MPDDRC_MR                   (SAM_MPDDRC_VBASE+SAM_MPDDRC_MR_OFFSET)
 #define SAM_MPDDRC_RTR                  (SAM_MPDDRC_VBASE+SAM_MPDDRC_RTR_OFFSET)
@@ -92,7 +93,7 @@
 #define SAM_MPDDRC_WPCR                 (SAM_MPDDRC_VBASE+SAM_MPDDRC_WPCR_OFFSET)
 #define SAM_MPDDRC_WPSR                 (SAM_MPDDRC_VBASE+SAM_MPDDRC_WPSR_OFFSET)
 
-/* MPDDRC Register Bit Definitions **************************************************/
+/* MPDDRC Register Bit Definitions ******************************************/
 
 /* MPDDRC Mode Register */
 
@@ -106,6 +107,7 @@
 #  define MPDDRC_MR_MODE_EXTLMR         (5 << MPDDRC_MR_MODE_SHIFT) /* 'Extended Load Mode Register' when device accessed */
 #  define MPDDRC_MR_MODE_DEEP           (6 << MPDDRC_MR_MODE_SHIFT) /* Deep power mode */
 #  define MPDDRC_MR_MODE_LPDDR2         (7 << MPDDRC_MR_MODE_SHIFT) /* LPDDR2 Mode Register' when device accessed */
+
 #define MPDDRC_MR_MRS_SHIFT             (8)       /* Bits 8-15: Mode Register Select LPDDR2 */
 #define MPDDRC_MR_MRS_MASK              (0xff << MPDDRC_MR_MRS_SHIFT)
 #  define MPDDRC_MR_MRS(n)              ((n) << MPDDRC_MR_MRS_SHIFT)
@@ -129,12 +131,14 @@
 #  define MPDDRC_CR_NC_10               (1 << MPDDRC_CR_NC_SHIFT) /* 10 DDR column bits */
 #  define MPDDRC_CR_NC_11               (2 << MPDDRC_CR_NC_SHIFT) /* 11 DDR column bits */
 #  define MPDDRC_CR_NC_12               (3 << MPDDRC_CR_NC_SHIFT) /* 12 DDR column bits */
+
 #define MPDDRC_CR_NR_SHIFT              (2)       /* Bits 2-3: Number of Row Bits */
 #define MPDDRC_CR_NR_MASK               (3 << MPDDRC_CR_NR_SHIFT)
 #  define MPDDRC_CR_NR_11               (0 << MPDDRC_CR_NR_SHIFT) /* 00 ROW_11 11 row bits */
 #  define MPDDRC_CR_NR_12               (1 << MPDDRC_CR_NR_SHIFT) /* 01 ROW_12 12 row bits */
 #  define MPDDRC_CR_NR_13               (2 << MPDDRC_CR_NR_SHIFT) /* 10 ROW_13 13 row bits */
 #  define MPDDRC_CR_NR_14               (3 << MPDDRC_CR_NR_SHIFT) /* 11 ROW_14 14 row bits */
+
 #define MPDDRC_CR_CAS_SHIFT             (4)       /* Bits 4-6: CAS Latency */
 #define MPDDRC_CR_CAS_MASK              (7 << MPDDRC_CR_CAS_SHIFT)
 #  define MPDDRC_CR_CAS_2               (2 << MPDDRC_CR_CAS_SHIFT) /* 010 DDR_CAS2 LPDDR1 CAS Latency 2 */
@@ -142,6 +146,7 @@
 #  define MPDDRC_CR_CAS_4               (4 << MPDDRC_CR_CAS_SHIFT) /* 100 DDR_CAS4 DDR2/LPDDR2 CAS Latency 4 */
 #  define MPDDRC_CR_CAS_5               (5 << MPDDRC_CR_CAS_SHIFT) /* 101 DDR_CAS5 DDR2/LPDDR2 CAS Latency 5 */
 #  define MPDDRC_CR_CAS_6               (6 << MPDDRC_CR_CAS_SHIFT) /* 110 DDR_CAS6 DDR2 CAS Latency 6 */
+
 #define MPDDRC_CR_DLL                   (1 << 7)  /* Bit 7:  Reset DLL */
 #define MPDDRC_CR_DIC_DS                (1 << 8)  /* Bit 8:  Output Driver Impedance Control (Drive Strength) */
 #define MPDDRC_CR_DIS_DLL               (1 << 9)  /* Bit 9:  Disable DLL */
@@ -151,15 +156,19 @@
 #  define MPDDRC_CR_ZQ_LONG             (1 << MPDDRC_CR_ZQ_SHIFT) /* Long calibration */
 #  define MPDDRC_CR_ZQ_SHORT            (2 << MPDDRC_CR_ZQ_SHIFT) /* Short calibration */
 #  define MPDDRC_CR_ZQ_RESET            (3 << MPDDRC_CR_ZQ_SHIFT) /* ZQ Reset */
+
 #define MPDDRC_CR_OCD_SHIFT             (12)      /* Bits 12-14: Off-chip Driver */
 #define MPDDRC_CR_OCD_MASK              (7 << MPDDRC_CR_OCD_SHIFT)
 #  define MPDDRC_CR_OCD_EXIT            (0 << MPDDRC_CR_OCD_SHIFT) /* OCD calibration mode exit, maintain setting */
 #  define MPDDRC_CR_OCD_DEFAULT         (7 << MPDDRC_CR_OCD_SHIFT) /* OCD calibration default */
+
 #define MPDDRC_CR_DQMS                  (1 << 16) /* Bit 16: Mask Data is Shared */
 #define MPDDRC_CR_ENRDM                 (1 << 17) /* Bit 17: Enable Read Measure */
 #define MPDDRC_CR_NB                    (1 << 20) /* Bit 20: Number of Banks */
-#  define MPDDRC_CR_4BANKS              (0)       /* 4 banks */
+
+#  define MPDDRC_CR_4BANKS              (0)          /* 4 banks */
 #  define MPDDRC_CR_8BANKS              MPDDRC_CR_NB /* 8 banks */
+
 #define MPDDRC_CR_NDQS                  (1 << 21) /* Bit 21: Not DQS */
 #define MPDDRC_CR_DECOD                 (1 << 22) /* Bit 22: Type of Decoding */
 #define MPDDRC_CR_UNAL                  (1 << 23) /* Bit 23: Support Unaligned Access */
@@ -233,6 +242,7 @@
 #  define MPDDRC_LPR_LPCB_SELFREFRESH   (1 << MPDDRC_LPR_LPCB_SHIFT) /* Issues a 'Self Refresh' to device, clocks deactivated */
 #  define MPDDRC_LPR_LPCB_POWERDOWN     (2 << MPDDRC_LPR_LPCB_SHIFT) /* Issues a 'Power-down' to device after each access */
 #  define MPDDRC_LPR_LPCB_DEEPPWD       (3 << MPDDRC_LPR_LPCB_SHIFT) /* TIssues a 'Deep Power-down' to Low-power device */
+
 #define MPDDRC_LPR_CLK_FR               (1 << 2)  /* Bit 2:  Clock Frozen Command */
 #define MPDDRC_LPR_LPDDR2_PWOFF         (1 << 3)  /* Bit 3:  LPDDR2 Power Off */
 #define MPDDRC_LPR_PASR_SHIFT           (4)       /* Bits 4-6: Partial Array Self Refresh */
@@ -246,6 +256,7 @@
 #  define MPDDRC_LPR_TIMEOUT_0CLKS      (0 << MPDDRC_LPR_TIMEOUT_SHIFT) /* Activates low-power mode after the end of transfer */
 #  define MPDDRC_LPR_TIMEOUT_64CLKS     (1 << MPDDRC_LPR_TIMEOUT_SHIFT) /* Activates low-power mode 64 clocks after the end of transfer */
 #  define MPDDRC_LPR_TIMEOUT_128CLKS    (2 << MPDDRC_LPR_TIMEOUT_SHIFT) /* 28 Activates low-power mode 128 clocks after the end of transfer */
+
 #define MPDDRC_LPR_APDE                 (1 << 16) /* Bit 16:  ctive Power Down Exit Time */
 #  define MPDDRC_LPR_APDE_FAST          (0)
 #  define MPDDRC_LPR_APDE_SLOW          MPDDRC_LPR_APDE
@@ -262,8 +273,10 @@
 #  define MPDDRC_MD_LPDDR_SDRAM         (2 << MPDDRC_MD_SHIFT) /* Low-power DDR1-SDRAM */
 #  define MPDDRC_MD_DDR2_SDRAM          (6 << MPDDRC_MD_SHIFT) /* DDR2-SDRAM */
 #  define MPDDRC_MD_LPDDR2_SDRAM        (7 << MPDDRC_MD_SHIFT) /* Low-Power DDR2-SDRAM */
+
 #define MPDDRC_MD_DBW                   (1 << 4)  /* Bit 4:  Data Bus Width */
 #  define MPDDRC_MD_DBW32               (0)       /* Data bus width is 32 bits */
+
 #  define MPDDRC_MD_DBW16               MPDDRC_MD_DBW /* Data bus width is 16 bits */
 
 /* MPDDRC High Speed Register */
@@ -311,6 +324,7 @@
 #  define MPDDRC_IO_CALIBR_RZQ60_50     (4 << MPDDRC_IO_CALIBR_RDIV_SHIFT) /* LPDDR2:RZQ = 60 Ohm   DDR2/LPDDR1: RZQ = 50 Ohm */
 #  define MPDDRC_IO_CALIBR_RZQ80_67     (6 << MPDDRC_IO_CALIBR_RDIV_SHIFT) /* LPDDR2 RZQ = 80 Ohm   DDR2/LPDDR1: RZQ = 66.7 Ohm */
 #  define MPDDRC_IO_CALIBR_RZQ120_100   (7 << MPDDRC_IO_CALIBR_RDIV_SHIFT) /* LPDDR2:RZQ = 120 Oh m DDR2/LPDDR1: RZQ = 100 Ohm */
+
 #define MPDDRC_IO_CALIBR_TZQIO_SHIFT    (8)       /* Bits 8-10: IO Calibration */
 #define MPDDRC_IO_CALIBR_TZQIO_MASK     (7 << MPDDRC_IO_CALIBR_TZQIO_SHIFT)
 #  define MPDDRC_IO_CALIBR_TZQIO(n)     ((n) << MPDDRC_IO_CALIBR_TZQIO_SHIFT)
@@ -326,6 +340,7 @@
 #define MPDDRC_OCMS_SCR_EN              (1 << 0)  /* Bit 0:  Scrambling enable */
 
 /* MPDDRC OCMS KEY1 Register (32-bit key value) */
+
 /* MPDDRC OCMS KEY2 Register (32-bit key value) */
 
 /* MPDDRC DLL Master Offset Register */
@@ -379,7 +394,7 @@
 #define MPDDRC_WPCR_WPEN                (1 << 0)  /* Bit 0:  Write Protection Enable */
 #define MPDDRC_WPCR_WPKEY_SHIFT         (8)       /* Bits 8-31: Write Protection KEY */
 #define MPDDRC_WPCR_WPKEY_MASK          (0x00ffffff << MPDDRC_WPCR_WPKEY_SHIFT)
-  #define MPDDRC_WPCR_WPKEY             (0x00444452 << MPDDRC_WPCR_WPKEY_SHIFT)
+#  define MPDDRC_WPCR_WPKEY             (0x00444452 << MPDDRC_WPCR_WPKEY_SHIFT)
 
 /* MPDDRC Write Protect Status Register */
 
