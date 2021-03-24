@@ -1587,22 +1587,42 @@ static inline void stm32_ep0out_receive(FAR struct stm32_ep_s *privep,
 
   if (priv->ep0state == EP0STATE_SETUP_OUT)
     {
-      /* Read the data into our special buffer for SETUP data */
-
-      int readlen = MIN(CONFIG_USBDEV_SETUP_MAXDATASIZE, bcnt);
-      stm32_rxfifo_read(privep, priv->ep0data, readlen);
+      if (priv->ep0datlen < CONFIG_USBDEV_SETUP_MAXDATASIZE)
+        {
+          /* Read the data into our special buffer for SETUP data */
+          int readlen = MIN(CONFIG_USBDEV_SETUP_MAXDATASIZE - priv->ep0datlen, bcnt);
+          stm32_rxfifo_read(privep, priv->ep0data, readlen);
+          priv->ep0datlen += readlen;
+          bcnt -= readlen;
+        }
 
       /* Do we have to discard any excess bytes? */
 
-      stm32_rxfifo_discard(privep,  bcnt - readlen);
+      if (bcnt > 0)
+        {
+          stm32_rxfifo_discard(privep,  bcnt);
+          priv->ep0datlen += bcnt;
+        }
 
-      /* Now we can process the setup command */
+      /* Is the transfer complete? */
 
-      privep->active  = false;
-      priv->ep0state  = EP0STATE_SETUP_READY;
-      priv->ep0datlen = readlen;
+      if (priv->ep0datlen >= GETUINT16(priv->ctrlreq.len))
+        {
+          /* Now we can process the setup command */
 
-      stm32_ep0out_setup(priv);
+          privep->active  = false;
+          priv->ep0state  = EP0STATE_SETUP_READY;
+          priv->ep0datlen = MIN(CONFIG_USBDEV_SETUP_MAXDATASIZE, priv->ep0datlen);
+
+          stm32_ep0out_setup(priv);
+        }
+      else
+        {
+          /* More data to come, clear NAKSTS */
+          uint32_t regval  = stm32_getreg(STM32_OTGFS_DOEPCTL0);
+          regval |= OTGFS_DOEPCTL0_CNAK;
+          stm32_putreg(regval, STM32_OTGFS_DOEPCTL0);
+        }
     }
   else
     {
@@ -3360,6 +3380,7 @@ static inline void stm32_rxinterrupt(FAR struct stm32_usbdev_s *priv)
                     /* Wait for the data phase. */
 
                     priv->ep0state = EP0STATE_SETUP_OUT;
+                    priv->ep0datlen = 0;
                   }
                 else
                   {
