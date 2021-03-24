@@ -48,8 +48,8 @@
 
 uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 {
-  /* Save the saved processor context in CURRENT_REGS where it can be accessed
-   * for register dumps and possibly context switching.
+  /* Save the saved processor context in CURRENT_REGS where it can be
+   * accessed for register dumps and possibly context switching.
    */
 
   CURRENT_REGS = regs;

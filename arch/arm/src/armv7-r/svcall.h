@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/armv7-r/svcall.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_ARMV7_R_SVCALL_H
 #define __ARCH_ARM_SRC_ARMV7_R_SVCALL_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -33,14 +33,15 @@
 
 #ifdef CONFIG_LIB_SYSCALL
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
-/* This logic uses one system call for the syscall return.  So a minimum of one
- * syscall values must be reserved.  If CONFIG_BUILD_PROTECTED is defined, then four
+/* This logic uses one system call for the syscall return.
+ *  So a minimum of one syscall values must be reserved.
+ * If CONFIG_BUILD_PROTECTED is defined, then four
  * more syscall values must be reserved.
  */
 
@@ -58,7 +59,7 @@
 #  endif
 #endif
 
-/* Cortex-R system calls ************************************************************/
+/* Cortex-R system calls ****************************************************/
 
 /* SYS call 0:
  *
@@ -93,7 +94,8 @@
 
 /* SYS call 4:
  *
- * void signal_handler(_sa_sigaction_t sighand, int signo, FAR siginfo_t *info,
+ * void signal_handler(_sa_sigaction_t sighand, int signo,
+ *                     FAR siginfo_t *info,
  *                     FAR void *ucontext);
  */
 
@@ -108,9 +110,9 @@
 
 #endif /* CONFIG_BUILD_PROTECTED */
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* CONFIG_LIB_SYSCALL */
 #endif /* __ARCH_ARM_SRC_ARMV7_R_SVCALL_H */
