@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_getoptargp.c
+ * include/nuttx/lib/getopt.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,31 +18,72 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_LIB_GETOPT_H
+#define __INCLUDE_NUTTX_LIB_GETOPT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
-
-#include "unistd.h"
+#include <stdbool.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#define GETOPT_INIITIALIZER() = \
+  { \
+    NULL, \
+    0, \
+    1, \
+    '?' \
+    NULL, \
+    false \
+  }
 
 /****************************************************************************
- * Name: getoptargp
- *
- * Description:
- *   Returns a pointer to optarg.  This function is only used for external
- *   modules that need to access the base, global variable, optarg.
- *
+ * Public Types
  ****************************************************************************/
 
-FAR char **getoptargp(void)
+/* This structure encapsulates all variables associated with getopt(). */
+
+struct getopt_s
 {
-  FAR struct getopt_s *go = getoptvars();
-  return &go->go_optarg;
+  /* Part of the implementation of the public getopt() interface */
+
+  FAR char *go_optarg;       /* Optional argument following option */
+  int       go_opterr;       /* Print error message */
+  int       go_optind;       /* Index into argv */
+  int       go_optopt;       /* unrecognized option character */
+
+  /* Internal getopt() state */
+
+  FAR char *go_optptr;       /* Current parsing location */
+  bool      go_binitialized; /* true:  getopt() has been initialized */
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __INCLUDE_NUTTX_LIB_GETOPT_H */

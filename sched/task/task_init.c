@@ -32,6 +32,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/lib/libvars.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -84,11 +85,14 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
                 main_t entry, FAR char * const argv[])
 {
   uint8_t ttype = tcb->cmn.flags & TCB_FLAG_TTYPE_MASK;
+#ifndef CONFIG_BUILD_KERNEL
+  FAR struct task_group_s *group;
+#endif
   int ret;
 
+#ifndef CONFIG_DISABLE_PTHREAD
   /* Only tasks and kernel threads can be initialized in this way */
 
-#ifndef CONFIG_DISABLE_PTHREAD
   DEBUGASSERT(tcb && ttype != TCB_FLAG_TTYPE_PTHREAD);
 #endif
 
@@ -125,6 +129,18 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
     {
       goto errout_with_group;
     }
+
+#ifndef CONFIG_BUILD_KERNEL
+  /* Allocate a stack frame to hold task-specific data */
+
+  group = tcb->cmn.group;
+  group->tg_libvars = up_stack_frame(&tcb->cmn, sizeof(struct libvars_s));
+  DEBUGASSERT(group->tg_libvars != NULL);
+
+  /* Save the allocated task data in TLS */
+
+  tls_set_taskdata(&tcb->cmn);
+#endif
 
   /* Initialize the task control block */
 

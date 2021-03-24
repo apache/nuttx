@@ -78,6 +78,7 @@ struct tls_info_s
 #if CONFIG_TLS_NELEM > 0
   uintptr_t tl_elem[CONFIG_TLS_NELEM]; /* TLS elements */
 #endif
+  FAR struct libvars_s *tl_libvars;    /* Task-specific C library data */
   int tl_errno;                        /* Per-thread error number */
 };
 

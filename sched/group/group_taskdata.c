@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_getoptargp.c
+ * sched/group/group_taskdata.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,25 +24,52 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
+#include <sched.h>
+#include <assert.h>
 
-#include "unistd.h"
+#include <nuttx/tls.h>
+
+#include "group/group.h"
+
+#ifndef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getoptargp
+ * Name: tls_set_taskdata
  *
  * Description:
- *   Returns a pointer to optarg.  This function is only used for external
- *   modules that need to access the base, global variable, optarg.
+ *   Set task-specific data pointer in TLS.
+ *
+ * Input Parameters:
+ *   tcb - Identifies task to set TLS data
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-FAR char **getoptargp(void)
+void tls_set_taskdata(FAR struct tcb_s *tcb)
 {
-  FAR struct getopt_s *go = getoptvars();
-  return &go->go_optarg;
+  FAR struct tls_info_s *info;
+  FAR struct task_group_s *group;
+
+  DEBUGASSERT(tcb != NULL && tcb->group != NULL);
+  group = tcb->group;
+
+  /* This currently assumes a push-down stack.  The TLS data lies at the
+   * lowest address of the stack allocation.
+   */
+
+  info = (FAR struct tls_info_s *)tcb->stack_alloc_ptr;
+
+  /* Copy the task data point buffer in the group structure into the
+   * thread's TLS data.
+   */
+
+  info->tl_libvars = group->tg_libvars;
 }
+
+#endif /* !CONFIG_BUILD_KERNEL */
