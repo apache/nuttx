@@ -38,7 +38,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* The Peripheral Clock (ipg_clk) is selected as the GPT clock source.  NOTE
+
+/* The Peripheral Clock (ipg_clk) is selected as the GPT clock source.
+ * NOTE
  * that the ipg_clk may be turned off in low power modes, stopping the timer
  * which is probably what you want.
  *

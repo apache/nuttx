@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx6/hardware/imx_enet.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,26 +16,26 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_ENET_H
 #define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_ENET_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define IMX_ENET_HAS_DBSWAP 1
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define IMX_ENET_EIR_OFFSET      0x0004 /* Interrupt Event Register */
 #define IMX_ENET_EIMR_OFFSET     0x0008 /* Interrupt Mask Register */
@@ -96,7 +96,7 @@
 #define IMX_ENET_TCSR3_OFFSET    0x0620 /* Timer Control Status Register */
 #define IMX_ENET_TCCR3_OFFSET    0x0624 /* Timer Compare Capture Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define IMX_ENET_EIR             (IMX_ENET_VBASE+IMX_ENET_EIR_OFFSET)
 #define IMX_ENET_EIMR            (IMX_ENET_VBASE+IMX_ENET_EIMR_OFFSET)
@@ -149,7 +149,7 @@
 #define IMX_ENET_TCSR3           (IMX_ENET_VBASE+IMX_ENET_TCSR3_OFFSET)
 #define IMX_ENET_TCCR3           (IMX_ENET_VBASE+IMX_ENET_TCCR3_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Interrupt Event Register, Interrupt Mask Register */
 
@@ -490,7 +490,7 @@
 
 /* Timer Compare Capture Register (32-bit compare value) */
 
-/* Buffer Descriptors ***************************************************************/
+/* Buffer Descriptors *******************************************************/
 
 /* Endian-independent descriptor offsets */
 
@@ -637,11 +637,11 @@
 #  define RXDESC_BDU                 (1 << 7)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Buffer Descriptors ***************************************************************/
+/* Buffer Descriptors *******************************************************/
 
 /* Legacy Buffer Descriptor */
 

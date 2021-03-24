@@ -212,8 +212,8 @@ static void imx_vectormapping(void)
  * Description:
  *   Copy the interrupt block to its final destination.  Vectors are already
  *   positioned at the beginning of the text region and only need to be
- *   copied in the case where we are using high vectors or where the beginning
- *   of the text region cannot be remapped to address zero.
+ *   copied in the case where we are using high vectors or where the
+ *   beginning of the text region cannot be remapped to address zero.
  *
  ****************************************************************************/
 
@@ -232,8 +232,8 @@ static void imx_copyvectorblock(void)
   imx_vectorpermissions(MMU_L2_VECTRWFLAGS);
 #endif
 
-  /* Copy the vectors into OCRAM at the address that will be mapped to the vector
-   * address:
+  /* Copy the vectors into OCRAM at the address that will be mapped to the
+   * vector address:
    *
    *   IMX_VECTOR_PADDR - Unmapped, physical address of vector table in OCRAM
    *   IMX_VECTOR_VSRAM - Virtual address of vector table in OCRAM
@@ -505,7 +505,8 @@ void arm_boot(void)
 
   /* Now we can enable all other CPUs.  The enabled CPUs will start execution
    * at __cpuN_start and, after very low-level CPU initialization has been
-   * performed, will branch to arm_cpu_boot() (see arch/arm/src/armv7-a/smp.h)
+   * performed, will branch to arm_cpu_boot()
+   * (see arch/arm/src/armv7-a/smp.h)
    */
 
   imx_cpu_enable();

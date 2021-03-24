@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx6/hardware/imx_iomuxc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,34 +16,35 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Reference:
- *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual," Document Number
- *   IMX6DQRM, Rev. 3, 07/2015, FreeScale.
+ *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual",
+ *   Document Number IMX6DQRM, Rev. 3, 07/2015, FreeScale.
  */
 
 #ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_IOMUXC_H
 #define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_IOMUXC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imx_memorymap.h"
 
-/* These definitions derive from specifications for the i.MX 6Quad/6Dual and require
- * review and modification in order to support other family members.
+/* These definitions derive from specifications for the i.MX 6Quad/6Dual and
+ * require review and modification in order to support other family members.
  */
 
 #if defined(CONFIG_ARCH_CHIP_IMX6_6QUAD) || defined(CONFIG_ARCH_CHIP_IMX6_6DUAL)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* IOMUXC Register Offsets **********************************************************/
+/* IOMUXC Register Offsets **************************************************/
+
 /* General Purpose Registers */
 
 #define IMX_IOMUXC_GPR0_OFFSET                0x0000
@@ -62,6 +63,7 @@
 #define IMX_IOMUXC_GPR13_OFFSET               0x0034
 
 /* Pad Mux Registers */
+
 /* Pad Mux Register Indices (used by software for table lookups) */
 
 #define IMX_PADMUX_SD2_DATA1_INDEX              0
@@ -467,6 +469,7 @@
 #define IMX_PADMUX_SD2_DATA3_OFFSET           0x035c
 
 /* Pad Control Registers */
+
 /* Pad Mux Register Indices (used by software for table lookups) */
 
 #define IMX_PADCTL_SD2_DATA1_INDEX              0
@@ -1112,7 +1115,8 @@
 #define IMX_INPUT_USB_H1_OC_OFFSET            0x0948
 #define IMX_INPUT_USDHC1_WP_ON_OFFSET         0x094c
 
-/* IOMUXC Register Addresses ********************************************************/
+/* IOMUXC Register Addresses ************************************************/
+
 /* General Purpose Registers */
 
 #define IMX_IOMUXC_GPR0                       (IMX_IOMUXC_VBASE+IMX_IOMUXC_GPR0_OFFSET)
@@ -1722,7 +1726,7 @@
 #define IMX_INPUT_USB_H1_OC                   (IMX_IOMUXC_VBASE+IMX_INPUT_USB_H1_OC_OFFSET)
 #define IMX_INPUT_USDHC1_WP_ON                (IMX_IOMUXC_VBASE+IMX_INPUT_USDHC1_WP_ON_OFFSET)
 
-/* IOMUXC Register Bit Definitions **************************************************/
+/* IOMUXC Register Bit Definitions ******************************************/
 
 /* General Purpose Register 0 (GPR0) */
 
@@ -2063,6 +2067,7 @@
 #define GPR10_LOCK_DBG_EN                     (1 << 29)
 
 /* General Purpose Register 11 (GPR11) -- Contains no fields of interest. */
+
 /* General Purpose Register 12 (GPR12) */
 
 #define GPR12_USDHC_DBG_MUX_SHIFT             (2)
@@ -2087,7 +2092,7 @@
 #  define GPR12_DIA_STATUS_BUS_SELECT(n)      ((uint32_t)(n) << GPR12_DIA_STATUS_BUS_SELECT_SHIFT)
 #define GPR12_PCIE_CTL_7_SHIFT                (21)
 #define GPR12_PCIE_CTL_7_MASK                 (7 << GPR12_PCIE_CTL_7_SHIFT)
-  #define GPR12_PCIE_CTL_7(n)                 ((uint32_t)(n) << GPR12_PCIE_CTL_7_SHIFT)
+#  define GPR12_PCIE_CTL_7(n)                 ((uint32_t)(n) << GPR12_PCIE_CTL_7_SHIFT)
 #define GPR12_ARMP_APB_CLK_EN                 (1 << 24)
 #define GPR12_ARMP_ATB_CLK_EN                 (1 << 25)
 #define GPR12_ARMP_AHB_CLK_EN                 (1 << 26)
@@ -2227,6 +2232,7 @@
 #define PADCTL_DSE_SHIFT                      (3)       /* Bits 3-5: Drive Strength Field */
 #define PADCTL_DSE_MASK                       (7 << PADCTL_DSE_SHIFT)
 #  define PADCTL_DSE(n)                       ((uint32_t)(n) << PADCTL_DSE_SHIFT) /* n=DRIVE_* */
+
 #  define PADCTL_DSE_HIZ                      (0 << PADCTL_DSE_SHIFT) /* HI-Z */
 #  define PADCTL_DSE_260OHM                   (1 << PADCTL_DSE_SHIFT) /* 150 Ohm @3.3V, 260 Ohm @1.8V */
 #  define PADCTL_DSE_130OHM                   (2 << PADCTL_DSE_SHIFT) /* 75 Ohm @3.3V, 130 Ohm @1.8V */
@@ -2235,25 +2241,31 @@
 #  define PADCTL_DSE_50OHM                    (5 << PADCTL_DSE_SHIFT) /* 30 Ohm @3.3V, 50 Ohm @1.8V */
 #  define PADCTL_DSE_40OHM                    (6 << PADCTL_DSE_SHIFT) /* 25 Ohm @3.3V, 40 Ohm @1.8V */
 #  define PADCTL_DSE_33OHM                    (7 << PADCTL_DSE_SHIFT) /* 20 Ohm @3.3V, 33 Ohm @1.8V */
+
 #define PADCTL_SPEED_SHIFT                    (6)       /* Bits 6-7: Speed Field */
 #define PADCTL_SPEED_MASK                     (3 << PADCTL_SPEED_SHIFT)
 #  define PADCTL_SPEED(n)                     ((uint32_t)(n) << PADCTL_SPEED_SHIFT) /* n=SPEED_* */
+
 #  define PADCTL_SPEED_LOW                    (0 << PADCTL_SPEED_SHIFT) /* Low frequency (50 MHz) */
 #  define PADCTL_SPEED_MEDIUM                 (1 << PADCTL_SPEED_SHIFT) /* Medium frequency (100, 150 MHz) */
 #  define PADCTL_SPEED_MAX                    (3 << PADCTL_SPEED_SHIFT) /* Maximum frequency (100, 150, 200 MHz) */
+
 #define PADCTL_ODE                            (1 << 11) /* Bit 11: Open Drain Enable Field */
 #define PADCTL_PKE                            (1 << 12) /* Bit 12: Pull / Keep Enable Field */
 #define PADCTL_PUE                            (1 << 13) /* Bit 13: Pull / Keep Select Field */
 #define PADCTL_PUS_SHIFT                      (14)      /* Bits 14-15: Pull Up / Down Config. Field */
 #define PADCTL_PUS_MASK                       (3 << PADCTL_PUS_SHIFT)
 #  define PADCTL_PUS(n)                       ((uint32_t)(n) << PADCTL_PUS_SHIFT) /* n=PULL_* */
+
 #  define PADCTL_PUS_DOWN_100K                (0 << PADCTL_PUS_SHIFT) /* 100K Ohm Pull Down */
 #  define PADCTL_PUS_UP_47K                   (1 << PADCTL_PUS_SHIFT) /* 47K Ohm Pull Up */
 #  define PADCTL_PUS_UP_100K                  (2 << PADCTL_PUS_SHIFT) /* 100K Ohm Pull Up */
 #  define PADCTL_PUS_UP_22K                   (3 << PADCTL_PUS_SHIFT) /*  22K Ohm Pull Up */
+
 #define PADCTL_HYS                            (1 << 16) /* Bit 16: Hysteresis Enable Field */
 
 /* Pad Group Control Registers */
+
 /* Select Input Registers */
 
 #endif /* CONFIG_ARCH_CHIP_IMX6_6QUAD || CONFIG_ARCH_CHIP_IMX6_6DUAL */

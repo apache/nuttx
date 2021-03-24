@@ -32,23 +32,23 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_IOMUXC_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_IOMUXC_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets **********************************************************/
+/* Register offsets *********************************************************/
 
 #define IMXRT_IOMUXC_GPR_GPR0_OFFSET                    0x0000 /* GPR0 General Purpose Register*/
 #define IMXRT_IOMUXC_GPR_GPR1_OFFSET                    0x0004 /* GPR1 General Purpose Register*/
@@ -615,7 +615,7 @@
 #define IMXRT_INPUT_XBAR1_IN18_OFFSET               0x04bc
 #define IMXRT_INPUT_XBAR1_IN19_OFFSET               0x04c0
 
-/* Register addresses ********************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_IOMUXC_GPR_GPR0            (IMXRT_IOMUXCGPR_BASE + IMXRT_IOMUXC_GPR_GPR0_OFFSET)
 #define IMXRT_IOMUXC_GPR_GPR1            (IMXRT_IOMUXCGPR_BASE + IMXRT_IOMUXC_GPR_GPR1_OFFSET)
@@ -966,7 +966,7 @@
 #define IMXRT_INPUT_XBAR1_IN18           (IMXRT_IOMUXC_BASE + IMXRT_INPUT_XBAR1_IN18_OFFSET)
 #define IMXRT_INPUT_XBAR1_IN19           (IMXRT_IOMUXC_BASE + IMXRT_INPUT_XBAR1_IN19_OFFSET)
 
-/* Register bit definitions **************************************************/
+/* Register bit definitions *************************************************/
 
 /* General Purpose Register 0 (GPR0) - Reserved */
 

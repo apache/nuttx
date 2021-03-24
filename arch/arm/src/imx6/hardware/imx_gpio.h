@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx6/hardware/imx_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,26 +16,26 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Reference:
- *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual," Document Number
- *   IMX6DQRM, Rev. 3, 07/2015, FreeScale.
+ *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual",
+ *   Document Number IMX6DQRM, Rev. 3, 07/2015, FreeScale.
  */
 
 #ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_GPIO_H
 #define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imx_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define GPIO1                     0      /* Port 1 index */
 #define GPIO2                     1      /* Port 2 index */
@@ -48,7 +48,7 @@
 #define IMX_GPIO_NPORTS           7      /* Seven total ports */
 #define IMX_GPIO_NPINS           32      /* Up to 32 pins per port */
 
-/* GPIO Register Offsets ************************************************************/
+/* GPIO Register Offsets ****************************************************/
 
 #define IMX_GPIO_DR_OFFSET       0x0000  /* Data Register */
 #define IMX_GPIO_GDIR_OFFSET     0x0004  /* Data Direction Register */
@@ -59,7 +59,7 @@
 #define IMX_GPIO_ISR_OFFSET      0x0018  /* Interrupt Status Register */
 #define IMX_GPIO_EDGE_OFFSET     0x001c  /* Interrupt Status Register */
 
-/* GPIO Register Addresses **********************************************************/
+/* GPIO Register Addresses **************************************************/
 
 #define IMX_GPIO_DR(n)           (IMX_GPIO_VBASE(n)+IMX_GPIO_DR_OFFSET)
 #define IMX_GPIO_GDIR(n)         (IMX_GPIO_VBASE(n)+IMX_GPIO_GDIR_OFFSET)
@@ -133,7 +133,7 @@
 #define IMX_GPIO7_ISR            (IMX_GPIO7_VBASE+IMX_GPIO_ISR_OFFSET)
 #define IMX_GPIO7_EDGE           (IMX_GPIO7_VBASE+IMX_GPIO_EDGE_OFFSET)
 
-/* GPIO Register Bit Definitions ****************************************************/
+/* GPIO Register Bit Definitions ********************************************/
 
 /* Most registers are laid out simply with one bit per pin */
 

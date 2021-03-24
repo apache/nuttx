@@ -87,4 +87,4 @@ void imxrt_usdhc_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
 
 FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno);
 
-#endif /*__ARCH_ARM_SRC_IMXRT_IMX_USDHC_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_IMX_USDHC_H */

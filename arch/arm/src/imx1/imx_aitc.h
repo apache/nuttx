@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx1/imx_aitc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,20 +16,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_IMX_AITC_H
 #define __ARCH_ARM_IMX_AITC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* AITC Register Offsets ************************************************************/
+/* AITC Register Offsets ****************************************************/
 
 #define AITC_INTCNTL_OFFSET          0x0000 /* Interrupt Control Register */
 #define AITC_NIMASK_OFFSET           0x0004 /* Normal Interrupt Mask Register */
@@ -59,7 +59,7 @@
 #define AITC_FIPNDH_OFFSET           0x0060
 #define AITC_FIPNDL_OFFSET           0x0064
 
-/* AITC Register Addresses **********************************************************/
+/* AITC Register Addresses **************************************************/
 
 #define IMX_AITC_INTCNTL             (IMX_AITC_VBASE + AITC_INTCNTL_OFFSET)
 #define IMX_AITC_NIMASK              (IMX_AITC_VBASE + AITC_NIMASK_OFFSET)
@@ -89,16 +89,15 @@
 #define IMX_AITC_FIPNDH              (IMX_AITC_VBASE + AITC_FIPNDH_OFFSET)
 #define IMX_AITC_FIPNDL              (IMX_AITC_VBASE + AITC_FIPNDL_OFFSET)
 
-/* AITC Register Bit Definitions ****************************************************/
-
+/* AITC Register Bit Definitions ********************************************/
 
 #define AITC_NIVECSR_NIPRILVL_SHIFT  0  /* Bits 15–0: Priority of highest priority interrupt */
 #define AITC_NIVECSR_NIPRILVL_MASK   (0x0000ffff << AITC_NIVECSR_NIPRILVL_SHIFT);
 #define AITC_NIVECSR_NIVECTOR_SHIFT  16 /* Bits 31–16: Vector index of highest priority interrupt */
 #define AITC_NIVECSR_NIVECTOR_MASK   (0x0000ffff << AITC_NIVECSR_NIVECTOR_SHIFT);
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_IMX_AITC_H */

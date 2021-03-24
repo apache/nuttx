@@ -393,7 +393,9 @@ static int spi_performtx(struct imx_spidev_s *priv)
         }
       else
         {
-          /* Yes.. The transfer is complete, disable Tx FIFO empty interrupt */
+          /* Yes..
+           * The transfer is complete, disable Tx FIFO empty interrupt
+           */
 
           regval = spi_getreg(priv, CSPI_INTCS_OFFSET);
           regval &= ~CSPI_INTCS_TEEN;
@@ -1118,7 +1120,9 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port)
 #endif
   nxsem_init(&priv->exclsem, 0, 1);
 
-  /* Initialize control register: min frequency, ignore ready, master mode, mode=0, 8-bit */
+  /* Initialize control register:
+   * min frequency, ignore ready, master mode, mode=0, 8-bit
+   */
 
   spi_putreg(priv, CSPI_CTRL_OFFSET,
              CSPI_CTRL_DIV512 |                /* Lowest frequency */

@@ -34,6 +34,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* 16-bit Encoding:
  *
  *   .... RRRR ODDD LSST
@@ -121,7 +122,7 @@
  * Public Types
  ****************************************************************************/
 
- /* The smallest integer type that can hold the IOMUX encoding */
+/* The smallest integer type that can hold the IOMUX encoding */
 
 typedef uint16_t iomux_pinset_t;
 

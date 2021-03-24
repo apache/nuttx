@@ -39,7 +39,7 @@
  * Name: imxrt_clrpend
  *
  * Description:
- *   Clear a pending interrupt at the NVIC.  This does not seem to be required
+ *   Clear a pending interrupt at the NVIC. This does not seem to be required
  *   for most interrupts.  Don't know why... but the LPC54xx Ethernet EMAC
  *   interrupt definitely needs it!
  *
@@ -57,30 +57,35 @@ void imxrt_clrpend(int irq)
     {
       if (irq < (IMXRT_IRQ_EXTINT + 32))
         {
-          putreg32(1 << (irq - IMXRT_IRQ_EXTINT), NVIC_IRQ0_31_CLRPEND);
+          putreg32(1 << (irq - IMXRT_IRQ_EXTINT),
+                  NVIC_IRQ0_31_CLRPEND);
         }
 #if IMXRT_IRQ_NEXTINT >= 64
       else if (irq < (IMXRT_IRQ_EXTINT + 64))
         {
-          putreg32(1 << (irq - IMXRT_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
+          putreg32(1 << (irq - IMXRT_IRQ_EXTINT - 32),
+                   NVIC_IRQ32_63_CLRPEND);
         }
 #endif
 #if IMXRT_IRQ_NEXTINT >= 96
       else if (irq < (IMXRT_IRQ_EXTINT + 96))
         {
-          putreg32(1 << (irq - IMXRT_IRQ_EXTINT - 64), NVIC_IRQ64_95_CLRPEND);
+          putreg32(1 << (irq - IMXRT_IRQ_EXTINT - 64),
+                   NVIC_IRQ64_95_CLRPEND);
         }
 #endif
 #if IMXRT_IRQ_NEXTINT >= 128
       else if (irq < (IMXRT_IRQ_EXTINT + 128))
         {
-          putreg32(1 << (irq - IMXRT_IRQ_EXTINT - 96), NVIC_IRQ96_127_CLRPEND);
+          putreg32(1 << (irq - IMXRT_IRQ_EXTINT - 96),
+                   NVIC_IRQ96_127_CLRPEND);
         }
 #endif
 #if IMXRT_IRQ_NEXTINT >= 160
       else if (irq < (IMXRT_IRQ_EXTINT + 160))
         {
-          putreg32(1 << (irq - IMXRT_IRQ_EXTINT - 128), NVIC_IRQ128_159_CLRPEND);
+          putreg32(1 << (irq - IMXRT_IRQ_EXTINT - 128),
+                   NVIC_IRQ128_159_CLRPEND);
         }
 #endif
       else

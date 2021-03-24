@@ -49,7 +49,8 @@
 
 /* Select MCU-specific settings
  *
- * The SysTick timer is driven by the output of the Main Clock (main_clk). */
+ * The SysTick timer is driven by the output of the Main Clock (main_clk).
+ */
 
 #define IMXRT_SYSTICK_CLOCK  BOARD_CPU_FREQUENCY
 
@@ -146,33 +147,31 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
       case(PM_NORMAL):
         {
           /* Logic for PM_NORMAL goes here */
-
         }
         break;
 
       case(PM_IDLE):
         {
           /* Logic for PM_IDLE goes here */
-
         }
         break;
 
       case(PM_STANDBY):
         {
           /* Logic for PM_STANDBY goes here */
-
         }
         break;
 
       case(PM_SLEEP):
         {
           /* Logic for PM_SLEEP goes here */
-
         }
         break;
 
       default:
+
         /* Should not get here */
+
         break;
     }
 }

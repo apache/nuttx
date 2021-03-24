@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_ADC_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define IMXRT_ADC_HC0_OFFSET                0x0000  /* Control register for hardware triggers */
 #define IMXRT_ADC_HC1_OFFSET                0x0004  /* Control register for hardware triggers */
@@ -58,7 +58,7 @@
 #define IMXRT_ADC_OFS_OFFSET                0x0054  /* Offset correction value register */
 #define IMXRT_ADC_CAL_OFFSET                0x0058  /* Calibration value register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 /* ADC1 Register Addresses */
 
@@ -112,7 +112,7 @@
 #define IMXRT_ADC2_OFS                      (IMXRT_ADC2_BASE + IMXRT_ADC_OFS_OFFSET)  /* ADC2 Offset correction value register */
 #define IMXRT_ADC2_CAL                      (IMXRT_ADC2_BASE + IMXRT_ADC_CAL_OFFSET)  /* ADC2 Calibration value register */
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Control register for hardware  & SW triggers for n=0,1..7 */
 
@@ -139,7 +139,10 @@
 #  define ADC_HC_ADCH_VREFSH                 (25 << ADC_HC_ADCH_SHIFT)  /* internal channel, for ADC self-test, hard connected to VRH internally */
 #  define ADC_HC_ADCH_DIS                    (31 << ADC_HC_ADCH_SHIFT)  /* */
 
-                                                        /* Bits: 5-6 Reserved */
+/*                                                         Bits: 5-6
+ *                                                         Reserved
+ */
+
 #define ADC_HC_AIEN                          (1 << 7)   /* Bit: 7  Conversion Complete Interrupt Enable/Disable Control */
                                                         /* Bits: 8-31 Reserved */
 

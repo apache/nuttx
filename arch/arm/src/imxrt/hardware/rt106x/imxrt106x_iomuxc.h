@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/rt106x/imxrt106x_iomuxc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT106X_IOMUXC_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT106X_IOMUXC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define IMXRT_IOMUXC_GPR_GPR0_OFFSET                    0x0000 /* GPR0 General Purpose Register*/
 #define IMXRT_IOMUXC_GPR_GPR1_OFFSET                    0x0004 /* GPR1 General Purpose Register*/
@@ -911,7 +911,7 @@
 #define IMXRT_INPUT_SEMC_I_IPP_IND_DQS4_OFFSET          0x0788
 #define IMXRT_INPUT_CANFD_IPP_IND_CANRX_OFFSET          0x078C
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_IOMUXC_GPR_GPR0            (IMXRT_IOMUXCGPR_BASE + IMXRT_IOMUXC_GPR_GPR0_OFFSET)
 #define IMXRT_IOMUXC_GPR_GPR1            (IMXRT_IOMUXCGPR_BASE + IMXRT_IOMUXC_GPR_GPR1_OFFSET)
@@ -1471,7 +1471,7 @@
 #define IMXRT_INPUT_SEMC_I_IPP_IND_DQS4          (IMXRT_IOMUXC_BASE + IMXRT_INPUT_SEMC_I_IPP_IND_DQS4_OFFSET)
 #define IMXRT_INPUT_CANFD_IPP_IND_CANRX          (IMXRT_IOMUXC_BASE + IMXRT_INPUT_CANFD_IPP_IND_CANRX_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* General Purpose Register 0 (GPR0) - Reserved */
 

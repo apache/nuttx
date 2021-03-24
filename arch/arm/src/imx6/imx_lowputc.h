@@ -68,27 +68,28 @@ struct uart_config_s
 
 void imx_lowsetup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: imx_uart_configure
  *
  * Description:
  *   Configure a UART for non-interrupt driven operation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef IMX_HAVE_UART
-int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config);
+int imx_uart_configure(uint32_t base,
+                       FAR const struct uart_config_s *config);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: imx_lowputc
  *
  * Description:
- *   Output a byte with as few system dependencies as possible.  This will even work
- *   BEFORE the console is initialized if we are booting from U-Boot (and the same
- *   UART is used for the console, of course.)
+ *   Output a byte with as few system dependencies as possible.
+ *   This will even work BEFORE the console is initialized if we are booting
+ *   from U-Boot (and the same UART is used for the console, of course.)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(IMX_HAVE_UART) && defined(CONFIG_DEBUG_FEATURES)
 void imx_lowputc(int ch);

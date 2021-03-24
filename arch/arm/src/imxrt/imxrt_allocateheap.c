@@ -250,7 +250,8 @@
  * aligned).
  */
 
-const uintptr_t g_idle_topstack = (uintptr_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE;
+const uintptr_t g_idle_topstack = (uintptr_t)&_ebss +
+                                  CONFIG_IDLETHREAD_STACKSIZE;
 
 /****************************************************************************
  * Public Functions
@@ -285,7 +286,8 @@ const uintptr_t g_idle_topstack = (uintptr_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZ
  *
  *     Kernel .data region.  Size determined at link time.
  *     Kernel .bss  region  Size determined at link time.
- *     Kernel IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
+ *     Kernel IDLE thread stack. (size determined by
+ *     CONFIG_IDLETHREAD_STACKSIZE).
  *     Padding for alignment
  *     User .data region.  Size determined at link time.
  *     User .bss region  Size determined at link time.
@@ -306,7 +308,8 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+                     CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = PRIMARY_RAM_END - ubase;
 
   DEBUGASSERT(ubase < (uintptr_t)PRIMARY_RAM_END);
@@ -345,7 +348,8 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+                    CONFIG_MM_KERNEL_HEAPSIZE;
   DEBUGASSERT(ubase < (uintptr_t)PRIMARY_RAM_END);
 
   /* Return the kernel heap settings (i.e., the part of the heap region

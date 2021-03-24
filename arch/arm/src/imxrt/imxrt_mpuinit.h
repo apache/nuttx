@@ -57,8 +57,8 @@ extern "C"
  * Name: imxrt_mpu_initialize
  *
  * Description:
- *   Configure the MPU to permit user-space access to only unrestricted i.MXRT
- *   resources.
+ *   Configure the MPU to permit user-space access to only unrestricted
+ *   i.MXRT resources.
  *
  ****************************************************************************/
 

@@ -318,7 +318,7 @@ static const uint8_t g_gpio7_padmux[IMX_GPIO_NPINS] =
   IMX_PADMUX_INVALID,                /* GPIO6 Pin 31 */
 };
 
-static FAR const uint8_t *g_gpio_padmux[IMX_GPIO_NPORTS+1] =
+static FAR const uint8_t *g_gpio_padmux[IMX_GPIO_NPORTS + 1] =
 {
   g_gpio1_padmux,                    /* GPIO1 */
   g_gpio2_padmux,                    /* GPIO2 */
@@ -559,13 +559,13 @@ int imx_config_gpio(gpio_pinset_t pinset)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: imx_gpio_write
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void imx_gpio_write(gpio_pinset_t pinset, bool value)
 {
@@ -578,13 +578,13 @@ void imx_gpio_write(gpio_pinset_t pinset, bool value)
   leave_critical_section(flags);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: imx_gpio_read
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool imx_gpio_read(gpio_pinset_t pinset)
 {

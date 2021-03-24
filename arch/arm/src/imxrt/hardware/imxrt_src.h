@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_src.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_SRC_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_SRC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *************************************************************************/
+/* Register offsets *********************************************************/
 
 #define IMXRT_SRC_SCR_OFFSET              0x0000  /* SRC Control Register */
 #define IMXRT_SRC_SBMR1_OFFSET            0x0004  /* SRC Boot Mode Register 1 */
@@ -49,7 +49,7 @@
 #define IMXRT_SRC_GPR9_OFFSET             0x0040  /* SRC General Purpose Register 9 */
 #define IMXRT_SRC_GPR10_OFFSET            0x0044  /* SRC General Purpose Register 10 */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_SRC_SCR                     (IMXRT_SRC_BASE + IMXRT_SRC_SCR_OFFSET)
 #define IMXRT_SRC_SBMR1                   (IMXRT_SRC_BASE + IMXRT_SRC_SBMR1_OFFSET)
@@ -66,7 +66,7 @@
 #define IMXRT_SRC_GPR9                    (IMXRT_SRC_BASE + IMXRT_SRC_GPR9_OFFSET)
 #define IMXRT_SRC_GPR10                   (IMXRT_SRC_BASE + IMXRT_SRC_GPR10_OFFSET)
 
-/* Register bit definitions *****************************************************************/
+/* Register bit definitions *************************************************/
 
 /* SRC Control Register */
 
@@ -131,11 +131,12 @@
                                                     /* Bits 5-23: Reserved */
 #define SRC_SBMR2_BMOD_SHIFT              (24)      /* Bits 24-25: Latched state of the BOOT_MODE
                                                      *  and BOOT_MODE0 signals on POR.
-                                                    /* Bits 26-31: Reserved */
+                                                     * Bits 26-31: Reserved */
 
 /* SRC General Purpose Register 1 (32-bit values, some have reserved bits)
- * NOTE:  Ald GPR registers are used by the ROM code and should not be used by application
- * software.
+
+ * NOTE:  Ald GPR registers are used by the ROM code and should not be used
+ * by application software.
  */
 
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_SRC_H */
