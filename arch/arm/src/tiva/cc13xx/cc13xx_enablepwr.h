@@ -1,58 +1,44 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/cc13xx/cc13xx_enablepwr.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_CC13XX_CC13XX_ENABLEPWR_H
 #define __ARCH_ARM_SRC_TIVA_CC13XX_CC13XX_ENABLEPWR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "cc13xx/cc13xx_prcm.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* CC13xx Power Domains:
  *
  * 1) PRCM_DOMAIN_RFCORE : RF Core
  * 2) PRCM_DOMAIN_SERIAL : SSI0, UART0, I2C0
- * 3) PRCM_DOMAIN_PERIPH : GPT0, GPT1, GPT2, GPT3, GPIO, SSI1, I2S, DMA, UART1
+ * 3) PRCM_DOMAIN_PERIPH : GPT0, GPT1, GPT2, GPT3, GPIO, SSI1,
+ *                         I2S, DMA, UART1
  * 4) PRCM_DOMAIN_VIMS   : SRAM, FLASH, ROM
  * 5) PRCM_DOMAIN_SYSBUS
  * 6) PRCM_DOMAIN_CPU
@@ -136,28 +122,28 @@
 #define tiva_trng_enablepwr()      cc13xx_periph_enablepwr(PRCM_PERIPH_TRNG)
 #define tiva_trng_disablepwr()     cc13xx_periph_disablepwr(PRCM_PERIPH_TRNG)
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  cc13xx_periph_enablepwr
  *
  * Description:
  *   Enable the power domain associated with the peripheral.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void cc13xx_periph_enablepwr(uint32_t peripheral);
 
-/************************************************************************************
+/****************************************************************************
  * Name:  cc13xx_periph_disablepwr
  *
  * Description:
- *   Disable the power domain associated with the peripheral if and only if all
- *   peripherals using that power domain no longer need power.
+ *   Disable the power domain associated with the peripheral if and only if
+ *   all peripherals using that power domain no longer need power.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void cc13xx_periph_disablepwr(uint32_t peripheral);
 

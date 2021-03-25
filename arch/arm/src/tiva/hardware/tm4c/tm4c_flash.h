@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/tm4c/tm4c_flash.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -36,30 +36,31 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_FLASH_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_FLASH_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* FLASH dimensions ****************************************************************/
+ ****************************************************************************/
+
+/* FLASH dimensions *********************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129XNCZAD) || defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT) || \
     defined(CONFIG_ARCH_CHIP_TM4C129ENCPDT)
 
-/* For the TM4C129X family, the Flash memory is configured in groups of four banks
- * four banks of 16K x 128 bits (4 * 256 KB total) which are two-way interleaved.
- * Because the memory is two-way interleaved and each bank individually is an 8-KB
- * sector, when the user erases a sector, using the ERASE bits in the Flash Memory
- * Control (FMC) register, it is a 16 KB erase.
+/* For the TM4C129X family, the Flash memory is configured in groups of four
+ * banks of 16K x 128 bits (4 * 256 KB total) which are two-way interleaved.
+ * Because the memory is two-way interleaved and each bank individually is an
+ * 8-KB sector, when the user erases a sector, using the ERASE bits in the
+ * Flash Memory Control (FMC) register, it is a 16 KB erase.
  */
 
 #  define TIVA_FLASH_NPAGES        64
@@ -69,7 +70,7 @@
 
 #define TIVA_FLASH_SIZE            (TIVA_FLASH_NPAGES * TIVA_FLASH_PAGESIZE)
 
-/* Flash register offsets ************************************************************/
+/* Flash register offsets ***************************************************/
 
 /* Internal Memory Registers (Relative to Internal Memory Control Offset) */
 
@@ -133,7 +134,8 @@
 #define TIVA_FLASH_FMPPE14_OFFSET    0x0438 /* Flash Memory Protection Program Enable 14 */
 #define TIVA_FLASH_FMPPE15_OFFSET    0x043c /* Flash Memory Protection Program Enable 15 */
 
-/* Flash register addresses **********************************************************/
+/* Flash register addresses *************************************************/
+
 /* Internal Memory Registers (Internal Memory Control Offset) */
 
 #define TIVA_FLASH_FMA               (TIVA_FLASHCON_BASE + TIVA_FLASH_FMA_OFFSET)
@@ -196,7 +198,7 @@
 #define TIVA_FLASH_FMPPE14           (TIVA_SYSCON_BASE + TIVA_FLASH_FMPPE14_OFFSET)
 #define TIVA_FLASH_FMPPE15           (TIVA_SYSCON_BASE + TIVA_FLASH_FMPPE15_OFFSET)
 
-/* Flash register bit definitions ****************************************************/
+/* Flash register bit definitions *******************************************/
 
 /* Internal Memory Registers (Relative to Internal Memory Control Offset) */
 
@@ -269,6 +271,7 @@
 #define FLASH_PP_SIZE_MASK           (0xffff << FLASH_PP_SIZE_SHIFT)
 #  define FLASH_PP_SIZE_512KB        (255 << FLASH_PP_SIZE_SHIFT)/* 512 KB of Flash */
 #  define FLASH_PP_SIZE_1MB          (511 << FLASH_PP_SIZE_SHIFT)/* 1024 KB of Flash */
+
 #define FLASH_PP_MAINSS_SHIFT        (16)      /* Bit1 16-18: Flash Sector Size of the physical bank */
 #define FLASH_PP_MAINSS_MASK         (7 << FLASH_PP_MAINSS_SHIFT)
 #  define FLASH_PP_MAINSS_1KB        (0 << FLASH_PP_MAINSS_SHIFT) /* 1 KB */
@@ -276,12 +279,14 @@
 #  define FLASH_PP_MAINSS_4KB        (2 << FLASH_PP_MAINSS_SHIFT) /* 4 KB */
 #  define FLASH_PP_MAINSS_8KB        (3 << FLASH_PP_MAINSS_SHIFT) /* 8 KB */
 #  define FLASH_PP_MAINSS_16KB       (4 << FLASH_PP_MAINSS_SHIFT) /* 16 KB */
+
 #define FLASH_PP_EESS_SHIFT          (19)      /* Bits 19-22: EEPROM Sector Size of the physical bank */
 #define FLASH_PP_EESS_MASK           (15 << FLASH_PP_EESS_SHIFT)
 #  define FLASH_PP_EESS_1KB          (0 << FLASH_PP_EESS_SHIFT) /* 1 KB */
 #  define FLASH_PP_EESS_2KB          (1 << FLASH_PP_EESS_SHIFT) /* 2 KB */
 #  define FLASH_PP_EESS_4KB          (2 << FLASH_PP_EESS_SHIFT) /* 4 KB */
 #  define FLASH_PP_EESS_8KB          (3 << FLASH_PP_EESS_SHIFT) /* 8 KB */
+
 #define FLASH_PP_DFA                 (1 << 28) /* Bit 28: DMA Flash Access */
 #define FLASH_PP_FMM                 (1 << 29) /* Bit 29: Flash Mirror Mode */
 #define FLASH_PP_PFC                 (1 << 30) /* Bit 30: Prefetch Buffer Mode */
@@ -319,30 +324,37 @@
 #  define FLASH_ROMSWMAP_SW0EN_NOTVIS  (0 << FLASH_ROMSWMAP_SW0EN_SHIFT)  /* Software region not available to the core */
 #  define FLASH_ROMSWMAP_SAFERTOS      (1 << FLASH_ROMSWMAP_SW0EN_SHIFT)  /* SafeRTOS Present */
 #  define FLASH_ROMSWMAP_SW0EN_CORE    (1 << FLASH_ROMSWMAP_SW0EN_SHIFT)  /* Region available to core */
+
 #define FLASH_ROMSWMAP_SW1EN_SHIFT     (2)     /* Bits 2-3: ROM SW Region 1 Availability */
 #define FLASH_ROMSWMAP_SW1EN_MASK      (3 << FLASH_ROMSWMAP_SW1EN_SHIFT)
 #  define FLASH_ROMSWMAP_SW1EN_NOTVIS  (0 << FLASH_ROMSWMAP_SW1EN_SHIFT)  /* Software region not available to the core */
 #  define FLASH_ROMSWMAP_SW1EN_CORE    (1 << FLASH_ROMSWMAP_SW1EN_SHIFT)  /* Region available to core */
+
 #define FLASH_ROMSWMAP_SW2EN_SHIFT     (4)     /* Bits 4-5: ROM SW Region 2 Availability */
 #define FLASH_ROMSWMAP_SW2EN_MASK      (3 << FLASH_ROMSWMAP_SW2EN_SHIFT)
 #  define FLASH_ROMSWMAP_SW2EN_NOTVIS  (0 << FLASH_ROMSWMAP_SW2EN_SHIFT)  /* Software region not available to the core */
 #  define FLASH_ROMSWMAP_SW2EN_CORE    (1 << FLASH_ROMSWMAP_SW2EN_SHIFT)  /* Region available to core */
+
 #define FLASH_ROMSWMAP_SW3EN_SHIFT     (6)     /* Bits 6-7: ROM SW Region 3 Availability */
 #define FLASH_ROMSWMAP_SW3EN_MASK      (3 << FLASH_ROMSWMAP_SW3EN_SHIFT)
 #  define FLASH_ROMSWMAP_SW3EN_NOTVIS  (0 << FLASH_ROMSWMAP_SW3EN_SHIFT)  /* Software region not available to the core */
 #  define FLASH_ROMSWMAP_SW3EN_CORE    (1 << FLASH_ROMSWMAP_SW3EN_SHIFT)  /* Region available to core */
+
 #define FLASH_ROMSWMAP_SW4EN_SHIFT     (8)     /* Bits 8-9: ROM SW Region 4 Availability */
 #define FLASH_ROMSWMAP_SW4EN_MASK      (3 << FLASH_ROMSWMAP_SW4EN_SHIFT)
 #  define FLASH_ROMSWMAP_SW4EN_NOTVIS  (0 << FLASH_ROMSWMAP_SW4EN_SHIFT)  /* Software region not available to the core */
 #  define FLASH_ROMSWMAP_SW4EN_CORE    (1 << FLASH_ROMSWMAP_SW4EN_SHIFT)  /* Region available to core */
+
 #define FLASH_ROMSWMAP_SW5EN_SHIFT     (10)    /* Bits 10-11: ROM SW Region 5 Availability */
 #define FLASH_ROMSWMAP_SW5EN_MASK      (3 << FLASH_ROMSWMAP_SW5EN_SHIFT)
 #  define FLASH_ROMSWMAP_SW5EN_NOTVIS  (0 << FLASH_ROMSWMAP_SW5EN_SHIFT)  /* Software region not available to the core */
-#  define FLASH_ROMSWMAP_SW5EN_CORE    (1 << FLASH_ROMSWMAP_SW5EN_SHIFT) /* Region available to core */
+#  define FLASH_ROMSWMAP_SW5EN_CORE    (1 << FLASH_ROMSWMAP_SW5EN_SHIFT)  /* Region available to core */
+
 #define FLASH_ROMSWMAP_SW6EN_SHIFT     (12)    /* Bits 12-13: ROM SW Region 6 Availability */
 #define FLASH_ROMSWMAP_SW6EN_MASK      (3 << FLASH_ROMSWMAP_SW6EN_SHIFT)
 #  define FLASH_ROMSWMAP_SW6EN_NOTVIS  (0 << FLASH_ROMSWMAP_SW6EN_SHIFT) /* Software region not available to the core */
 #  define FLASH_ROMSWMAP_SW6EN_CORE    (1 << FLASH_ROMSWMAP_SW6EN_SHIFT) /* Region available to core */
+
 #define FLASH_ROMSWMAP_SW7EN_SHIFT     (14)    /* Bits 14-15: ROM SW Region 7 Availability */
 #define FLASH_ROMSWMAP_SW7EN_MASK      (3 << FLASH_ROMSWMAP_SW7EN_SHIFT)
 #  define FLASH_ROMSWMAP_SW7EN_NOTVIS  (0 << FLASH_ROMSWMAP_SW7EN_SHIFT) /* Software region not available to the core */
@@ -383,6 +395,7 @@
 #  define FLASH_BOOTCFG_PIN_5        (5 << FLASH_BOOTCFG_PIN_SHIFT) /* Pin 5 */
 #  define FLASH_BOOTCFG_PIN_6        (6 << FLASH_BOOTCFG_PIN_SHIFT) /* Pin 6 */
 #  define FLASH_BOOTCFG_PIN_7        (7 << FLASH_BOOTCFG_PIN_SHIFT) /* Pin 7 */
+
 #define FLASH_BOOTCFG_PORT_SHIFT     (13)      /* Bits 13-15:  Boot GPIO Port */
 #define FLASH_BOOTCFG_PORT_MASK      (7 << FLASH_BOOTCFG_PORT_SHIFT)
 #  define FLASH_BOOTCFG_PORT_A       (0 << FLASH_BOOTCFG_PORT_SHIFT) /* Port A */
@@ -393,10 +406,13 @@
 #  define FLASH_BOOTCFG_PORT_F       (5 << FLASH_BOOTCFG_PORT_SHIFT) /* Port F */
 #  define FLASH_BOOTCFG_PORT_G       (6 << FLASH_BOOTCFG_PORT_SHIFT) /* Port G */
 #  define FLASH_BOOTCFG_PORT_H       (7 << FLASH_BOOTCFG_PORT_SHIFT) /* Port H */
+
 #define FLASH_BOOTCFG_NW             (1 << 31) /* Bit 31:  Not Written */
 
 /* User Register 0-3 (32-bit value) */
+
 /* Flash Memory Protection Read Enable 0-15 (32-bit, bit-encoded) */
+
 /* Flash Memory Protection Program Enable 0-15 (32-bit, bit-encoded) */
 
 #endif // __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_FLASH_H

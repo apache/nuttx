@@ -909,6 +909,12 @@ config ESP32_WIFI_CONNECT_TIMEOUT
 	help
 		Max waiting time of connecting to AP.
 
+config ESP32_WIFI_SCAN_RESULT_SIZE
+	int "Scan result buffer"
+	default 4096
+	help
+		Maximum scan result buffer size.
+
 config ESP32_WIFI_SAVE_PARAM
 	bool "Save WiFi Parameters"
 	default n
@@ -950,6 +956,19 @@ config ESP32_RT_TIMER_TASK_STACK_SIZE
 	default 2048
 
 endmenu # Real-Time Timer
+
+if ESP32_TIMER
+menu "Timer/counter Configuration"
+
+config ESP32_ONESHOT
+	bool "One-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+endmenu # Timer/counter Configuration
+endif # ESP32_TIMER
 
 menu "Partition Configuration"
 	depends on ESP32_PARTITION

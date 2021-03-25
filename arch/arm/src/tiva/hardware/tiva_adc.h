@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/tiva_adc.h
  *
  *   Copyright (C) 2015 Calvin Maguranis. All rights reserved.
@@ -31,22 +31,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADC_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* ADC register offsets *************************************************************/
+/* ADC register offsets *****************************************************/
 
 #define TIVA_ADC_ACTSS_OFFSET    0x000   /* ADC Active Sample Sequencer */
 #define TIVA_ADC_RIS_OFFSET      0x004   /* ADC Raw Interrupt Status */
@@ -96,7 +96,7 @@
 #define TIVA_ADC_PC_OFFSET       0xfc4   /* ADC Peripheral Configuration */
 #define TIVA_ADC_CC_OFFSET       0xfc8   /* ADC Clock Configuration */
 
-/* ADC register addresses ***********************************************************/
+/* ADC register addresses ***************************************************/
 
 #define TIVA_ADC_BASE(n)         (TIVA_ADC0_BASE + (n)*0x01000)
 #define TIVA_ADC_SS(n)           (TIVA_ADC_SS_BASE + ((n)*TIVA_ADC_SSMUX_OFFSET))
@@ -144,7 +144,7 @@
 #define TIVA_ADC_DCCMP6(n)       (TIVA_ADC_BASE(n)+TIVA_ADC_DCCMP6_OFFSET) /* ADC Digital Comparator Range 6 */
 #define TIVA_ADC_DCCMP7(n)       (TIVA_ADC_BASE(n)+TIVA_ADC_DCCMP7_OFFSET) /* ADC Digital Comparator Range 7 */
 
-/* ADC register address expansion ***************************************************/
+/* ADC register address expansion *******************************************/
 
 #define TIVA_ADC0_ACTSS          (TIVA_ADC_BASE(0) + TIVA_ADC_ACTSS_OFFSET) /* ADC Active Sample Sequencer */
 #define TIVA_ADC0_RIS            (TIVA_ADC_BASE(0) + TIVA_ADC_RIS_OFFSET)   /* ADC Raw Interrupt Status */
@@ -286,7 +286,7 @@
 #define TIVA_ADC1_DCCMP6         (TIVA_ADC_BASE(1) + TIVA_ADC_DCCMP6_OFFSET) /* ADC Digital Comparator Range 6 */
 #define TIVA_ADC1_DCCMP7         (TIVA_ADC_BASE(1) + TIVA_ADC_DCCMP7_OFFSET) /* ADC Digital Comparator Range 7 */
 
-/* ADC register bit settings ********************************************************/
+/* ADC register bit settings ************************************************/
 
 /* Bit fields in the TIVA_ADC_ACTSS register. */
 

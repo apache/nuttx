@@ -268,6 +268,12 @@
 
 #define IW_MAX_FREQUENCIES  32   /* Max. frequencies in struct iw_range */
 
+/* ESSID flags */
+
+#define IW_ESSID_OFF        0    /* Disconnect with access point */
+#define IW_ESSID_ON         1    /* Connect  with access point */
+#define IW_ESSID_DELAY_ON   2    /* Delay the connection behavior of essid */
+
 /* Transmit Power flags available */
 
 #define IW_TXPOW_TYPE       0x00ff  /* Type of value */

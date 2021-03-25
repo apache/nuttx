@@ -33,7 +33,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* GPIO Pin Definitions *****************************************************/
+/* ESP32-DevKitC GPIOs ******************************************************/
+
+/* BOOT Button */
+
+#define BUTTON_BOOT  0
 
 /* LED
  *
@@ -45,6 +49,18 @@
 /* MCP2515 Interrupt pin */
 
 #define GPIO_MCP2515_IRQ      22
+
+/* TIMERS */
+
+#define TIMER0 0
+#define TIMER1 1
+#define TIMER2 2
+#define TIMER3 3
+
+/* ONESHOT */
+
+#define ONESHOT_TIMER         1
+#define ONESHOT_RESOLUTION_US 1
 
 /****************************************************************************
  * Public Types

@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x0/cc13x0_aux_wuc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a
+ * compatible BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,23 +37,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_AUX_WUC_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_AUX_WUC_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* AUX WUC Register Offsets *****************************************************************************************/
+/* AUX WUC Register Offsets *************************************************/
 
 #define TIVA_AUX_WUC_MODCLKEN0_OFFSET             0x0000  /* Module Clock Enable */
 #define TIVA_AUX_WUC_PWROFFREQ_OFFSET             0x0004  /* Power Off Request */
@@ -74,7 +75,7 @@
 #define TIVA_AUX_WUC_AUXIOLATCH_OFFSET            0x0054  /* AUX Input Output Latch */
 #define TIVA_AUX_WUC_MODCLKEN1_OFFSET             0x005c  /* Module Clock Enable 1 */
 
-/* AUX WUC Register Addresses ***************************************************************************************/
+/* AUX WUC Register Addresses ***********************************************/
 
 #define TIVA_AUX_WUC_MODCLKEN0                    (TIVA_AUX_WUC_BASE + TIVA_AUX_WUC_MODCLKEN0_OFFSET)
 #define TIVA_AUX_WUC_PWROFFREQ                    (TIVA_AUX_WUC_BASE + TIVA_AUX_WUC_PWROFFREQ_OFFSET)
@@ -96,7 +97,7 @@
 #define TIVA_AUX_WUC_AUXIOLATCH                   (TIVA_AUX_WUC_BASE + TIVA_AUX_WUC_AUXIOLATCH_OFFSET)
 #define TIVA_AUX_WUC_MODCLKEN1                    (TIVA_AUX_WUC_BASE + TIVA_AUX_WUC_MODCLKEN1_OFFSET)
 
-/* AUX WUC Register Bitfield Definitions ****************************************************************************/
+/* AUX WUC Register Bitfield Definitions ************************************/
 
 /* AUX_WUC_MODCLKEN0 */
 

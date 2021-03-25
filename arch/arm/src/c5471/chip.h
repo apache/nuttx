@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/c5471/chip.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -163,6 +148,7 @@
 #define UART_IRDA_XMIT_FIFO_SIZE 64
 
 /* UART_LCR Register */
+
                                         /* Bits 31-7: Reserved */
 #define UART_LCR_BOC         0x00000040 /* Bit 6: Break Control */
                                         /* Bit 5: Parity Type 2 */
@@ -218,39 +204,39 @@
 #define GIO_REGISTER_BASE    0xffff2800
 
 #define GPIO_IO              0xffff2800 /* Writeable when I/O is configured
-					 * as an output; reads value on I/O
-					 * pin when I/O is configured as an
-					 * input */
+                                         * as an output; reads value on I/O
+                                         * pin when I/O is configured as an
+                                         * input */
 #define GPIO_CIO             0xffff2804 /* GPIO configuration register */
 #define GPIO_IRQA            0xffff2808 /* In conjunction with GPIO_IRQB
-					 * determines the behavior when GPIO
-					 * pins configured as input IRQ */
+                                         * determines the behavior when GPIO
+                                         * pins configured as input IRQ */
 #define GPIO_IRQB            0xffff280c /* Determines the behavior when GPIO
-					 * pins configured as input IRQ */
+                                         * pins configured as input IRQ */
 #define GPIO_DDIO            0xffff2810 /* Delta Detect Register
-					 * (detects changes in the I/O pins) */
+                                         * (detects changes in the I/O pins) */
 #define GPIO_EN              0xffff2814 /* Selects register for muxed GPIOs */
 
 #define KGIO_REGISTER_BASE   0xffff2900
 
 #define KBGPIO_IO            0xffff2900 /* Keyboard I/O bits: Writeable
-					 * when KBGPIO is configured as an
-					 * output; reads value on I/O pin
-					 * when KBGPIO is configured as an
-					 * input */
+                                         * when KBGPIO is configured as an
+                                         * output; reads value on I/O pin
+                                         * when KBGPIO is configured as an
+                                         * input */
 #define KBGPIO_CIO           0xffff2904 /* KBGPIO configuration register */
 #define KBGPIO_IRQA          0xffff2908 /* In conjunction with KBGPIO_IRQB
-					 * determines the behavior when
-					 * KBGPIO pins configured as input
-					 * IRQ */
+                                         * determines the behavior when
+                                         * KBGPIO pins configured as input
+                                         * IRQ */
 #define KBGPIO_IRQB          0xffff290c /* In conjunction with KBGPIO_IRQA
-					 * determines the behavior when
-					 * KBGPIO pins configured as input
-					 * IRQ */
+                                         * determines the behavior when
+                                         * KBGPIO pins configured as input
+                                         * IRQ */
 #define KBGPIO_DDIO          0xffff2910 /* Delta Detect Register (detects
-					 * changes in the KBGPIO pins) */
+                                         * changes in the KBGPIO pins) */
 #define KBGPIO_EN            0xffff2914 /* Selects register for muxed
-					 * KBGPIOs */
+                                         * KBGPIOs */
 
 /* Timers *******************************************************************/
 

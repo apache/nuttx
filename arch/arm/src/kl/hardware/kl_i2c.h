@@ -1,54 +1,39 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kl/hardware/kl_i2c.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_I2C_H
 #define __ARCH_ARM_SRC_KL_HARDWARE_KL_I2C_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KL_I2C_A1_OFFSET       0x0000 /* I2C Address Register 1 */
 #define KL_I2C_F_OFFSET        0x0001 /* I2C Frequency Divider register */
@@ -63,7 +48,7 @@
 #define KL_I2C_SLTH_OFFSET     0x000a /* I2C SCL Low Timeout Register High */
 #define KL_I2C_SLTL_OFFSET     0x000b /* I2C SCL Low Timeout Register Low */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KL_I2C0_A1             (KL_I2C0_BASE+KL_I2C_A1_OFFSET)
 #define KL_I2C0_F              (KL_I2C0_BASE+KL_I2C_F_OFFSET)
@@ -91,9 +76,10 @@
 #define KL_I2C1_SLTH           (KL_I2C1_BASE+KL_I2C_SLTH_OFFSET)
 #define KL_I2C1_SLTL           (KL_I2C1_BASE+KL_I2C_SLTL_OFFSET)
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* I2C Address Register 1 (8-bit) */
+
                                          /* Bit 0: Reserved */
 #define I2C_A1_SHIFT           (1)       /* Bits 1-7: Address */
 #define I2C_A1_MASK            (0x7f << I2C_A1_SHIFT)
@@ -143,6 +129,7 @@
 #define I2C_C2_GCAEN           (1 << 7)  /* Bit 7:  General call address enable */
 
 /* I2C Programmable Input Glitch Filter register (8-bit) */
+
                                          /* Bits 5-7: Reserved */
 #define I2C_FLT_SHIFT          (0)       /* Bits 0-4: I2C programmable filter factor */
 #define I2C_FLT_MASK           (0x1f << I2C_FLT_SHIFT)
@@ -151,6 +138,7 @@
 #define I2C_FLT_SHEN           (1 << 7)  /* Bit 7:  Stop hold enable */
 
 /* I2C Range Address register (8-bit) */
+
                                          /* Bit 0: Reserved */
 #define I2C_RA_SHIFT           (1)       /* Bits 1-7: Range slave address */
 #define I2C_RA_MASK            (0x7f << I2C_RA_SHIFT)
@@ -167,22 +155,25 @@
 #define I2C_SMB_FACK           (1 << 7)  /* Bit 7:  Fast NACK/ACK enable */
 
 /* I2C Address Register 2 (8-bit) */
+
                                          /* Bit 0: Reserved */
 #define I2C_A2_SAD_SHIFT       (1)       /* Bits 1-7: SMBus address */
 #define I2C_A2_SAD_MASK        (0x7f << I2C_A2_SHIFT)
 
-/* I2C SCL Low Timeout Register High/Low (16-bit data in two 8-bit registers) */
+/* I2C SCL Low Timeout Register High/Low
+ *(16-bit data in two 8-bit registers)
+ */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_I2C_H */

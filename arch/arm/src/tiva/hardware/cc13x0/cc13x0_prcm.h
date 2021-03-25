@@ -1,10 +1,11 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x0/cc13x0_prcm.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a
+ * compatible BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,23 +37,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_PRCM_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_PRCM_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* PRCM Register Offsets ****************************************************************************/
+/* PRCM Register Offsets ****************************************************/
 
 #define TIVA_PRCM_INFRCLKDIVR_OFFSET     0x0000  /* Infrastructure Clock Division Factor For Run Mode */
 #define TIVA_PRCM_INFRCLKDIVS_OFFSET     0x0004  /* Infrastructure Clock Division Factor For Sleep Mode */
@@ -114,7 +115,7 @@
 #define TIVA_PRCM_PWRPROFSTAT_OFFSET     0x01e0  /* Power Profiler Register */
 #define TIVA_PRCM_RAMRETEN_OFFSET        0x0224  /* Memory Retention Control */
 
-/* PRCM Register Addresses *************************************************************************/
+/* PRCM Register Addresses **************************************************/
 
 #define TIVA_PRCM_INFRCLKDIVR            (TIVA_PRCM_BASE + TIVA_PRCM_INFRCLKDIVR_OFFSET)
 #define TIVA_PRCM_INFRCLKDIVS            (TIVA_PRCM_BASE + TIVA_PRCM_INFRCLKDIVS_OFFSET)
@@ -176,7 +177,7 @@
 #define TIVA_PRCM_PWRPROFSTAT            (TIVA_PRCM_BASE + TIVA_PRCM_PWRPROFSTAT_OFFSET)
 #define TIVA_PRCM_RAMRETEN               (TIVA_PRCM_BASE + TIVA_PRCM_RAMRETEN_OFFSET)
 
-/* PRCM Register Bitfield Definitions **************************************************************/
+/* PRCM Register Bitfield Definitions ***************************************/
 
 /* Infrastructure Clock Division Factor For Run Mode */
 
@@ -322,6 +323,7 @@
 #  define PRCM_I2SCLKCTL_WCLKPHASE_SINGLE (0 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT) /* Single phase */
 #  define PRCM_I2SCLKCTL_WCLKPHASE_DUAL   (1 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT) /* Dual phase */
 #  define PRCM_I2SCLKCTL_WCLKPHASE_USER   (2 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT) /* User Defined */
+
 #define PRCM_I2SCLKCTL_POSEDGE            (1 << 3)  /* Bit 3: Sample/clock on positive edge */
 #  define PRCM_I2SCLKCTL_NEGEDGE          (0)       /*        Sample/clock on negative edge */
 
@@ -475,16 +477,16 @@
 #  define PRCM_RAMRETEN_VIMS_CRAM        (2 << PRCM_RAMRETEN_VIMS_SHIFT)
 #define PRCM_RAMRETEN_RFC                (1 << 2)  /* Bit 2:  RFC SRAM retention enabled */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_PRCM_H */

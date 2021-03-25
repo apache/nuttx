@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am335x_timer.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_TIMER_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_TIMER_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/am335x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AM335X_TMR_TIDR_OFFSET          0x0000 /* Identification Register */
 #define AM335X_TMR_TIOCP_CFG_OFFSET     0x0010 /* Timer OCP Configuration Register */
@@ -88,7 +88,7 @@
 #define AM335X_TMR1MS_TOCR_OFFSET       0x0054 /* 1ms Timer Overflow Counter Register */
 #define AM335X_TMR1MS_TOWR_OFFSET       0x0058 /* 1ms Timer Overflow Interrupts Register */
 
-/* Register virtual addresses *******************************************************/
+/* Register virtual addresses ***********************************************/
 
 #define AM335X_TMR1MS_TIOCP_CFG         (AM335X_DMTIMER1_1MS_VADDR + AM335X_TMR1MS_TIOCP_CFG_OFFSET)
 #define AM335X_TMR1MS_TISTAT            (AM335X_DMTIMER1_1MS_VADDR + AM335X_TMR1MS_TISTAT_OFFSET)
@@ -108,7 +108,7 @@
 #define AM335X_TMR2_TCRR                (AM335X_DMTIMER2_VADDR + AM335X_TMR_TCRR_OFFSET)
 #define AM335X_TMR2_TLDR                (AM335X_DMTIMER2_VADDR + AM335X_TMR_TLDR_OFFSET)
 
-/* Register bit field definitions ***************************************************/
+/* Register bit field definitions *******************************************/
 
 #define TMR_TIOCP_SOFT_RESET            (1 << 0) /* Bit 0: Software reset */
 #define TMR_TIOCP_EMU_FREE              (1 << 1) /* Bit 1: Sensitivity to emulation (debug) suspend event from Debug Subsystem. */
@@ -138,11 +138,13 @@
 #  define TMR_TCLR_TCM_RISING           (1 << TMR_TCLR_TCM_SHIFT) /* Capture on rising edges */
 #  define TMR_TCLR_TCM_FALLING          (2 << TMR_TCLR_TCM_SHIFT) /* Capture on falling edges */
 #  define TMR_TCLR_TCM_BOTH             (3 << TMR_TCLR_TCM_SHIFT) /* Capture on both edges */
+
 #define TMR_TCLR_TRG_SHIFT              (10)      /* Bits 10-11: Trigger Output Mode */
 #define TMR_TCLR_TRG_MASK               (3 << TMR_TCLR_TRG_SHIFT)
 #  define TMR_TCLR_TRG_NONE             (0 << TMR_TCLR_TRG_SHIFT) /* No trigger */
 #  define TMR_TCLR_TRG_OFLOW            (1 << TMR_TCLR_TRG_SHIFT) /* Trigger on overflow */
 #  define TMR_TCLR_TRG_OFLOWMATCH       (2 << TMR_TCLR_TRG_SHIFT) /* Trigger on overflow and match */
+
 #define TMR_TCLR_PT                     (1 << 12) /* Bit 12: Pulse or toggle mode */
 #define TMR_TCLR_CAPT                   (1 << 13) /* Bit 13: Capture mode. */
 #define TMR_TCLR_GPO_CFG                (1 << 14) /* Bit 14: General purpose output configuration */
@@ -165,6 +167,7 @@
 #  define TMR1MS_TIOCP_IDLE_MODE_NOIDLE (1 << TMR1MS_TIOCP_IDLE_MODE_SHIFT) /* No-idle mode */
 #  define TMR1MS_TIOCP_IDLE_MODE_SMART  (2 << TMR1MS_TIOCP_IDLE_MODE_SHIFT) /* Smart-idle mode */
 #  define TMR1MS_TIOCP_IDLE_MODE_WAKEUP (3 << TMR1MS_TIOCP_IDLE_MODE_SHIFT) /* Smart-idle wakeup-capable mode */
+
 #define TMR1MS_TIOCP_EMU_FREE           (1 << 5) /* Bit 5: Sensitivity to emulation (debug) suspend event from Debug Subsystem. */
 
 #define TMR1MS_TISTAT                   (1 << 0) /* Bit 0: Internal reset monitoring */
@@ -186,11 +189,13 @@
 #  define TMR1MS_TCLR_TCM_RISING        (1 << TMR1MS_TCLR_TCM_SHIFT) /* Capture on rising edges */
 #  define TMR1MS_TCLR_TCM_FALLING       (2 << TMR1MS_TCLR_TCM_SHIFT) /* Capture on falling edges */
 #  define TMR1MS_TCLR_TCM_BOTH          (3 << TMR1MS_TCLR_TCM_SHIFT) /* Capture on both edges */
+
 #define TMR1MS_TCLR_TRG_SHIFT           (10)      /* Bits 10-11: Trigger Output Mode */
 #define TMR1MS_TCLR_TRG_MASK            (3 << TMR1MS_TCLR_TRG_SHIFT)
 #  define TMR1MS_TCLR_TRG_NONE          (0 << TMR1MS_TCLR_TRG_SHIFT) /* No trigger */
 #  define TMR1MS_TCLR_TRG_OFLOW         (1 << TMR1MS_TCLR_TRG_SHIFT) /* Trigger on overflow */
 #  define TMR1MS_TCLR_TRG_OFLOWMATCH    (2 << TMR1MS_TCLR_TRG_SHIFT) /* Trigger on overflow and match */
+
 #define TMR1MS_TCLR_PT                  (1 << 12) /* Bit 12: Pulse or toggle mode */
 #define TMR1MS_TCLR_CAPT                (1 << 13) /* Bit 13: Capture mode. */
 #define TMR1MS_TCLR_GPO_CFG             (1 << 14) /* Bit 14: General purpose output configuration */

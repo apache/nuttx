@@ -1,52 +1,37 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/lm/lm3s_sysctrl.h
  *
- *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCONTROL_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCONTROL_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* System Control Register Offsets **************************************************/
+/* System Control Register Offsets ******************************************/
 
 #define TIVA_SYSCON_DID0_OFFSET       0x000 /* Device Identification 0 */
 #define TIVA_SYSCON_DID1_OFFSET       0x004 /* Device Identification 1 */
@@ -78,7 +63,7 @@
 #define TIVA_SYSCON_DCGC2_OFFSET      0x128 /* Deep Sleep Mode Clock Gating Control Register 2 */
 #define TIVA_SYSCON_DSLPCLKCFG_OFFSET 0x144 /* Deep Sleep Clock Configuration*/
 
-/* System Control Register Addresses ************************************************/
+/* System Control Register Addresses ****************************************/
 
 #define TIVA_SYSCON_DID0              (TIVA_SYSCON_BASE + TIVA_SYSCON_DID0_OFFSET)
 #define TIVA_SYSCON_DID1              (TIVA_SYSCON_BASE + TIVA_SYSCON_DID1_OFFSET)
@@ -110,7 +95,7 @@
 #define TIVA_SYSCON_DCGC2             (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGC2_OFFSET)
 #define TIVA_SYSCON_DSLPCLKCFG        (TIVA_SYSCON_BASE + TIVA_SYSCON_DSLPCLKCFG_OFFSET)
 
-/* System Control Register Bit Definitions ******************************************/
+/* System Control Register Bit Definitions **********************************/
 
 /* Device Identification 0 (DID0), offset 0x000 */
 
@@ -128,7 +113,7 @@
 #define SYSCON_DID1_QUAL_SHIFT        0         /* Bits 1-0: Qualification Status */
 #define SYSCON_DID1_QUAL_MASK         (0x03 << SYSCON_DID1_QUAL_SHIFT)
 #define SYSCON_DID1_ROHS              (1 << 2)  /* Bit 2: RoHS-Compliance */
-#define SYSCON_DID1_PKG_SHIFT         3 /* Bits 4-3: Package Type */
+#define SYSCON_DID1_PKG_SHIFT         3         /* Bits 4-3: Package Type */
 #define SYSCON_DID1_PKG_MASK          (0x03 << SYSCON_DID1_PKG_SHIFT)
 #define SYSCON_DID1_TEMP_SHIFT        5         /* Bits 7-5: Temperature Range */
 #define SYSCON_DID1_TEMP_MASK         (0x07 << SYSCON_DID1_TEMP_SHIFT)
@@ -304,6 +289,7 @@
 #  define SYSCON_RCC_OSCSRC_PIOSC     (1 << SYSCON_RCC_OSCSRC_SHIFT) /* Internal oscillator (reset) */
 #  define SYSCON_RCC_OSCSRC_PIOSC4    (2 << SYSCON_RCC_OSCSRC_SHIFT) /* Internal oscillator / 4 */
 #  define SYSCON_RCC_OSCSRC_LFIOSC    (3 << SYSCON_RCC_OSCSRC_SHIFT) /* 30KHz internal oscillator */
+
 #define SYSCON_RCC_XTAL_SHIFT         6         /* Bits 10-6: Crystal Value */
 #define SYSCON_RCC_XTAL_MASK          (0x1f << SYSCON_RCC_XTAL_SHIFT)
 #  define SYSCON_RCC_XTAL1000KHZ      ( 0 << SYSCON_RCC_XTAL_SHIFT)  /* 1.0000MHz (NO PLL) */
@@ -364,6 +350,7 @@
 #  define SYSCON_RCC2_OSCSRC2_PIOSC4   (2 << SYSCON_RCC2_OSCSRC2_SHIFT) /* Internal oscillator / 4 */
 #  define SYSCON_RCC2_OSCSRC2_LFIOSC   (3 << SYSCON_RCC2_OSCSRC2_SHIFT) /* 30KHz internal oscillator */
 #  define SYSCON_RCC2_OSCSRC2_32768HZ  (7 << SYSCON_RCC2_OSCSRC2_SHIFT) /* 32.768KHz external oscillator */
+
 #define SYSCON_RCC2_BYPASS2           (1 << 11) /* Bit 11: Bypass PLL */
 #define SYSCON_RCC2_PWRDN2            (1 << 13) /* Bit 13: Power-Down PLL */
 #define SYSCON_RCC2_SYSDIV2_SHIFT     23        /* Bits 28-23: System Clock Divisor */
@@ -489,22 +476,22 @@
 #define SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT   4 /* Bits 6-4: Clock Source */
 #define SYSCON_DSLPCLKCFG_DSOSCSRC_MASK    (0x07 << SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT)
 
-/* UART Run Mode Clock Gating Control*/
+/* UART Run Mode Clock Gating Control */
 
 #ifdef CONFIG_ARCH_CHIP_LM3S9B92
 #  define SYSCON_RCGCUART(n)          (1 << (n)) /* Bit n:  UART Module n Run Mode Clock Gating Control */
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCONTROL_H */

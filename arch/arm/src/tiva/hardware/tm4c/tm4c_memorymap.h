@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/tm4c/tm4c_memorymap.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
@@ -31,22 +31,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_MEMORYMAP_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Memory map ***********************************************************************/
+/* Memory map ***************************************************************/
 
 #if defined (CONFIG_ARCH_CHIP_TM4C123AH6PM) || defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB) || \
     defined(CONFIG_ARCH_CHIP_TM4C123GH6PM) ||  defined(CONFIG_ARCH_CHIP_TM4C123GH6PZ)  || \
@@ -101,7 +101,7 @@
 #  error "Memory map not specified for this TM4C chip"
 #endif
 
-/* Peripheral base addresses ********************************************************/
+/* Peripheral base addresses ************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB)
 
@@ -615,7 +615,10 @@
 
 /* Peripheral region 2 */
 
-                                                            /* -0x2ffff: Reserved */
+/*                                                            -0x2ffff:
+ *                                                             Reserved
+ */
+
 #  define TIVA_CCM_BASE       (TIVA_PERIPH2_BASE + 0x30000) /* -0x30fff: CRC/Cryptographic Control */
                                                             /* -0x33fff: Reserved */
 #  define TIVA_SHAMD5_BASE    (TIVA_PERIPH2_BASE + 0x34000) /* -0x35fff: SHA/MD5 */
@@ -722,7 +725,9 @@
 
 /* Peripheral region 2 */
 
-                                                            /* -0x2ffff: Reserved */
+/*                                                             -0x2ffff:
+ *                                                              Reserved
+ */
 #  define TIVA_CCM_BASE       (TIVA_PERIPH2_BASE + 0x30000) /* -0x30fff: CRC/Cryptographic Control */
                                                             /* -0x53fff: Reserved */
 #  define TIVA_EPHY_BASE      (TIVA_PERIPH2_BASE + 0x54000) /* -0x54fff: EPHY 0 */
@@ -823,7 +828,10 @@
 
 /* Peripheral region 2 */
 
-                                                            /* -0x2ffff: Reserved */
+/*                                                             -0x2ffff:
+ *                                                              Reserved
+ */
+
 #  define TIVA_CCM_BASE       (TIVA_PERIPH2_BASE + 0x30000) /* -0x30fff: CRC/Cryptographic Control */
                                                             /* -0x53fff: Reserved */
 #  define TIVA_EPHY_BASE      (TIVA_PERIPH2_BASE + 0x54000) /* -0x54fff: EPHY 0 */
@@ -929,7 +937,9 @@
 
 /* Peripheral region 2 */
 
-                                                            /* -0x2ffff: Reserved */
+/*                                                             -0x2ffff:
+ *                                                             Reserved
+ */
 #  define TIVA_CCM_BASE       (TIVA_PERIPH2_BASE + 0x30000) /* -0x30fff: CRC/Cryptographic Control */
                                                             /* -0x33fff: Reserved */
 #  define TIVA_SHAMD5_BASE    (TIVA_PERIPH2_BASE + 0x34000) /* -0x35fff: SHA/MD5 */
@@ -944,16 +954,16 @@
 #  error "Peripheral base addresses not specified for this Tiva chip"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_MEMORYMAP_H */

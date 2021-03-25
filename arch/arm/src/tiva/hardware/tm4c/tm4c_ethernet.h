@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/tm4c/tm4c_ethernet.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
@@ -36,24 +36,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_ETHERNET_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_ETHERNET_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Ethernet Controller Register Offsets *********************************************/
+/* Ethernet Controller Register Offsets *************************************/
 
 /* Ethernet MAC Register Offsets */
 
@@ -134,7 +134,7 @@
 #define TIVA_EPHY_IM_OFFSET            0x0fd4  /* Ethernet PHY Interrupt Mask */
 #define TIVA_EPHY_MISC_OFFSET          0x0fd8  /* RW1C Ethernet PHY Masked Interrupt Status and Clear */
 
-/* Ethernet Controller Register Addresses *******************************************/
+/* Ethernet Controller Register Addresses ***********************************/
 
 #define TIVA_EMAC_CFG                  (TIVA_ETHCON_BASE + TIVA_EMAC_CFG_OFFSET)
 #define TIVA_EMAC_FRAMEFLTR            (TIVA_ETHCON_BASE + TIVA_EMAC_FRAMEFLTR_OFFSET)
@@ -240,7 +240,7 @@
 #define TIVA_EPHY_RCR                  0x1f /* Ethernet PHY Reset Control */
 #define TIVA_EPHY_LEDCFG               0x25 /* Ethernet PHY LED Configuration */
 
-/* Ethernet Controller Register Bit Definitions *************************************/
+/* Ethernet Controller Register Bit Definitions *****************************/
 
 /* Ethernet MAC Configuration */
 
@@ -249,6 +249,7 @@
 #  define EMAC_CFG_PRELEN_7            (0 << EMAC_CFG_PRELEN_SHIFT) /* 7 bytes of preamble */
 #  define EMAC_CFG_PRELEN_5            (1 << EMAC_CFG_PRELEN_SHIFT) /* 5 bytes of preamble */
 #  define EMAC_CFG_PRELEN_3            (2 << EMAC_CFG_PRELEN_SHIFT) /* 3 bytes of preamble */
+
 #define EMAC_CFG_RE                    (1 << 2)  /* Bit 2:  Receiver Enable */
 #define EMAC_CFG_TE                    (1 << 3)  /* Bit 3:  Transmitter Enable */
 #define EMAC_CFG_DC                    (1 << 4)  /* Bit 4:  Deferral Check */
@@ -258,6 +259,7 @@
 #  define EMAC_CFG_BL_8                (1 << EMAC_CFG_BL_SHIFT) /* k = min (n,8) */
 #  define EMAC_CFG_BL_4                (2 << EMAC_CFG_BL_SHIFT) /* k = min (n,4) */
 #  define EMAC_CFG_BL_1                (3 << EMAC_CFG_BL_SHIFT) /* k = min (n,1) */
+
 #define EMAC_CFG_ACS                   (1 << 7)  /* Bit 7:  Automatic Pad or CRC Stripping */
 #define EMAC_CFG_DR                    (1 << 9)  /* Bit 8:  Disable Retry */
 #define EMAC_CFG_IPC                   (1 << 10) /* Bit 10: Checksum Offload */
@@ -267,9 +269,10 @@
 #define EMAC_CFG_FES                   (1 << 14) /* Bit 14: Speed */
 #define EMAC_CFG_PS                    (1 << 15) /* Bit 15: Port Select */
 #define EMAC_CFG_DISCRS                (1 << 16) /* Bit 16: Disable Carrier Sense During Transmission */
-#define EMAC_CFG_IFG_SHIFT             (17)     /* Bits 17-19: Inter-Frame Gap (IFG) */
+#define EMAC_CFG_IFG_SHIFT             (17)      /* Bits 17-19: Inter-Frame Gap (IFG) */
 #define EMAC_CFG_IFG_MASK              (7 << EMAC_CFG_IFG_SHIFT)
 #  define EMAC_CFG_IFG(n)              ((12-((n) >> 3)) << EMAC_CFG_IFG_SHIFT) /* n bit times, n=40,48,..96 */
+
 #  define EMAC_CFG_IFG_96              (0 << EMAC_CFG_IFG_SHIFT) /* 96 bit times */
 #  define EMAC_CFG_IFG_88              (1 << EMAC_CFG_IFG_SHIFT) /* 88 bit times */
 #  define EMAC_CFG_IFG_80              (2 << EMAC_CFG_IFG_SHIFT) /* 80 bit times */
@@ -278,6 +281,7 @@
 #  define EMAC_CFG_IFG_56              (5 << EMAC_CFG_IFG_SHIFT) /* 56 bit times */
 #  define EMAC_CFG_IFG_48              (6 << EMAC_CFG_IFG_SHIFT) /* 48 bit times */
 #  define EMAC_CFG_IFG_40              (7 << EMAC_CFG_IFG_SHIFT) /* 40 bit times */
+
 #define EMAC_CFG_JFEN                  (1 << 20) /* Bit 20: Jumbo Frame Enable */
 #define EMAC_CFG_JD                    (1 << 22) /* Bit 21: Jabber Disable */
 #define EMAC_CFG_WDDIS                 (1 << 23) /* Bit 23: Watchdog Disable */
@@ -304,6 +308,7 @@
 #  define EMAC_FRAMEFLTR_PCF_PAUSE     (1 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Prevents all except PAUSE */
 #  define EMAC_FRAMEFLTR_PCF_ALL       (2 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Forward all control frames */
 #  define EMAC_FRAMEFLTR_PCF_FILTER    (3 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Forwards all that pass address filter */
+
 #define EMAC_FRAMEFLTR_SAIF            (1 << 8)  /* Bit 8:  Source Address (SA) Inverse Filtering */
 #define EMAC_FRAMEFLTR_SAF             (1 << 9)  /* Bit 9:  Source Address Filter Enable */
 #define EMAC_FRAMEFLTR_HPF             (1 << 10) /* Bit 10: Hash or Perfect Filter */
@@ -311,6 +316,7 @@
 #define EMAC_FRAMEFLTR_RA              (1 << 31) /* Bit 31: Receive All */
 
 /* Ethernet MAC Hash Table High (32-bit data) */
+
 /* Ethernet MAC Hash Table Low (32-bit data) */
 
 /* Ethernet MAC MII Address */
@@ -324,6 +330,7 @@
 #  define EMAC_MIIADDR_CR_20_35        (2 << EMAC_MIIADDR_CR_SHIFT) /* System Clock=20-35 MHz; MDIO clock=SYSCLK/16 */
 #  define EMAC_MIIADDR_CR_35_60        (3 << EMAC_MIIADDR_CR_SHIFT) /* System Clock=35-60 MHz; MDIO clock=SYSCLK/26 */
 #  define EMAC_MIIADDR_CR_150_168      (4 << EMAC_MIIADDR_CR_SHIFT) /* System Clock=150-168 MHz; MDIO clock=SYSCLK/102 */
+
 #define EMAC_MIIADDR_MII_SHIFT         (6)       /* Bits 6-10: MII Register */
 #define EMAC_MIIADDR_MII_MASK          (31 << EMAC_MIIADDR_MII_SHIFT)
 #  define EMAC_MIIADDR_MII(n)          ((uint32_t)(n) << EMAC_MIIADDR_MII_SHIFT)
@@ -348,6 +355,7 @@
 #  define EMAC_FLOWCTL_PLT_M28         (1 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 28 slot times */
 #  define EMAC_FLOWCTL_PLT_M144        (2 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 144 slot times */
 #  define EMAC_FLOWCTL_PLT_M256        (3 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 256 slot times */
+
 #define EMAC_FLOWCTL_DZQP              (1 << 7)  /* Bit 7:  Disable Zero-Quanta Pause */
 #define EMAC_FLOWCTL_PT_SHIFT          (16)      /* Bits 16-31: Pause Time */
 #define EMAC_FLOWCTL_PT_MASK           (0xffff << EMAC_FLOWCTL_PT_SHIFT)
@@ -374,12 +382,14 @@
 #  define EMAC_STATUS_RRC_STATUS       (1 << EMAC_STATUS_RRC_SHIFT) /* Reading frame data */
 #  define EMAC_STATUS_RRC_DATA         (2 << EMAC_STATUS_RRC_SHIFT) /* Reading frame status (or timestamp) */
 #  define EMAC_STATUS_RRC_FLUSH        (3 << EMAC_STATUS_RRC_SHIFT) /* Flushing the frame data and status */
+
 #define EMAC_STATUS_RXF_SHIFT          (8)       /* Bits 8-9: TX/RX Controller RX FIFO Fill-level Status */
 #define EMAC_STATUS_RXF_MASK           (3 << EMAC_STATUS_RXF_SHIFT)
 #  define EMAC_STATUS_RXF_EMPTY        (0 << EMAC_STATUS_RXF_SHIFT) /* RX FIFO Empty */
 #  define EMAC_STATUS_RXF_BELOW        (1 << EMAC_STATUS_RXF_SHIFT) /* Below the flow-control deactivate threshold */
 #  define EMAC_STATUS_RXF_ABOVE        (2 << EMAC_STATUS_RXF_SHIFT) /* Above the flow-control activate threshold */
 #  define EMAC_STATUS_RXF_FULL         (3 << EMAC_STATUS_RXF_SHIFT) /* RX FIFO Full */
+
 #define EMAC_STATUS_TPE                (1 << 16) /* Bit 16: MAC MII Transmit Protocol Engine Status */
 #define EMAC_STATUS_TFC_SHIFT          (17)      /* Bits 17-18: MAC Transmit Frame Controller Status */
 #define EMAC_STATUS_TFC_MASK           (3 << EMAC_STATUS_TFC_SHIFT)
@@ -387,6 +397,7 @@
 #  define EMAC_STATUS_TFC_STATUS       (1 << EMAC_STATUS_TFC_SHIFT) /* Waiting for status */
 #  define EMAC_STATUS_TFC_PAUSE        (2 << EMAC_STATUS_TFC_SHIFT) /* Generating and transmitting a PAUSE control frame */
 #  define EMAC_STATUS_TFC_INPUT        (3 << EMAC_STATUS_TFC_SHIFT) /* Transferring input frame for transmission */
+
 #define EMAC_STATUS_TXPAUSED           (1 << 19) /* Bit 19: MAC Transmitter PAUSE */
 #define EMAC_STATUS_TRC_SHIFT          (20)      /* Bits 20-21: TX/RX Controller's TX FIFO Read Controller Status */
 #define EMAC_STATUS_TRC_MASK           (3 << EMAC_STATUS_TRC_SHIFT)
@@ -394,6 +405,7 @@
 #  define EMAC_STATUS_TRC_READ         (1 << EMAC_STATUS_TRC_SHIFT) /* READ state */
 #  define EMAC_STATUS_TRC_WAIT         (2 << EMAC_STATUS_TRC_SHIFT) /* Waiting for TX Status from MAC transmitter */
 #  define EMAC_STATUS_TRC_WRFLUSH      (3 << EMAC_STATUS_TRC_SHIFT) /* Writing received TX Status or flushing TX FIFO */
+
 #define EMAC_STATUS_TWC                (1 << 22) /* Bit 22: TX/RX Controller TX FIFO Write Controller Active Status */
 #define EMAC_STATUS_TXFE               (1 << 24) /* Bit 24: TX/RX Controller TX FIFO Not Empty Status */
 #define EMAC_STATUS_TXFF               (1 << 25) /* Bit 25: TX/RX Controller TX FIFO Full Status */
@@ -428,6 +440,7 @@
 #define EMAC_IM_ALLINTS                (EMAC_IM_PMT|EMAC_IM_TSI)
 
 /* Ethernet MAC Address 0 High */
+
 /* Ethernet MAC Address 0 Low Register (32-bit MAC Address0 [31:0]) */
 
 #define EMAC_ADDR0H_ADDRHI_SHIFT       (0)       /* Bits 0-15: MAC Address0 [47:32] */
@@ -436,6 +449,7 @@
 #define EMAC_ADDR0H_AE                 (1 << 31) /* Bit 31: Address Enable */
 
 /* Ethernet MAC Address 1 High */
+
 /* Ethernet MAC Address 1 Low  (32-bit MAC Address0 [31:0]) */
 
 #define EMAC_ADDR1H_ADDRHI_SHIFT       (0)       /* Bits 0-15: MAC Address0 [47:32] */
@@ -454,6 +468,7 @@
 #define EMAC_ADDR1H_AE                 (1 << 31) /* Bit 31: Address Enable */
 
 /* Ethernet MAC Address 2 High */
+
 /* Ethernet MAC Address 2 Low  (32-bit MAC Address0 [31:0]) */
 
 #define EMAC_ADDR2H_ADDRHI_SHIFT       (0)       /* Bits 0-15: MAC Address0 [47:32] */
@@ -472,6 +487,7 @@
 #define EMAC_ADDR2H_AE                 (1 << 31) /* Bit 31: Address Enable */
 
 /* Ethernet MAC Address 3 High */
+
 /* Ethernet MAC Address 3 Low  (32-bit MAC Address0 [31:0]) */
 
 #define EMAC_ADDR3H_ADDRHI_SHIFT       (0)       /* Bits 0-15: MAC Address0 [47:32] */
@@ -488,7 +504,6 @@
 #  define EMAC_ADDR3H_EMACADDR3H_8     (1 << 29) /* ADDRHI [15:8] of EMACADDR3H Register */
 #define EMAC_ADDR3H_SA                 (1 << 30) /* Bit 30: Source Address */
 #define EMAC_ADDR3H_AE                 (1 << 31) /* Bit 31: Address Enable */
-
 
 /* Ethernet MAC Watchdog Timeout */
 
@@ -536,12 +551,25 @@
 #define EMAC_MMCTXIM_OCTCNT            (1 << 20) /* Bit 20: MMC Transmit Good Octet Counter Interrupt Mask */
 
 /* Ethernet MAC Transmit Frame Count for Good and Bad Frames (32-bit data) */
-/* Ethernet MAC Transmit Frame Count for Frames Transmitted after Single Collision (32-bit data) */
-/* Ethernet MAC Transmit Frame Count for Frames Transmitted after Multiple Collisions (32-bit data) */
+
+/* Ethernet MAC Transmit Frame Count for Frames Transmitted after
+ * Single Collision (32-bit data)
+ */
+
+/* Ethernet MAC Transmit Frame Count for Frames Transmitted after
+ * Multiple Collisions (32-bit data)
+ */
+
 /* Ethernet MAC Transmit Octet Count Good (32-bit data) */
+
 /* Ethernet MAC Receive Frame Count for Good and Bad Frames (32-bit data) */
+
 /* Ethernet MAC Receive Frame Count for CRC Error Frames (32-bit data) */
-/* Ethernet MAC Receive Frame Count for Alignment Error Frames (32-bit data) */
+
+/* Ethernet MAC Receive Frame Count for Alignment Error Frames
+ * (32-bit data)
+ */
+
 /* Ethernet MAC Receive Frame Count for Good Unicast Frames (32-bit data) */
 
 /* Ethernet MAC VLAN Tag Inclusion or Replacement */
@@ -555,6 +583,7 @@
 #  define EMAC_VLNINCREP_VLC_TAGDEL    (1 << EMAC_VLNINCREP_VLC_SHIFT) /* VLAN tag deletion */
 #  define EMAC_VLNINCREP_VLC_TAGINS    (2 << EMAC_VLNINCREP_VLC_SHIFT) /* VLAN tag insertion */
 #  define EMAC_VLNINCREP_VLC_TAGREP    (3 << EMAC_VLNINCREP_VLC_SHIFT) /* VLAN tag replacement */
+
 #define EMAC_VLNINCREP_VLP             (1 << 18) /* Bit 18: VLAN Priority Control */
 #define EMAC_VLNINCREP_CSVL            (1 << 19) /* Bit 19: C-VLAN or S-VLAN */
 
@@ -590,12 +619,14 @@
 #define EMAC_SUBSECINC_SSINC_MASK      (0xff << EMAC_SUBSECINC_SSINC_SHIFT)
 
 /* Ethernet MAC System Time - Seconds (32-bit value) */
+
 /* Ethernet MAC System Time - Nanoseconds */
 
 #define EMAC_TIMNANO_TSSS_SHIFT        (0)       /* Bits 0-30: Timestamp Sub-Seconds */
 #define EMAC_TIMNANO_TSSS_MASK         (0x7fffffff << EMAC_TIMNANO_TSSS_SHIFT)
 
 /* Ethernet MAC System Time - Seconds Update (32-bit value) */
+
 /* Ethernet MAC System Time - Nanoseconds Update */
 
 #define EMAC_TIMNANOU_TSSS_SHIFT       (0)       /* Bits 0-30: Timestamp Sub-Second */
@@ -603,7 +634,9 @@
 #define EMAC_TIMNANOU_ADDSUB           (1 << 31) /* Bit 31: Add or subtract time */
 
 /* Ethernet MAC Timestamp Addend (32-bit value) */
+
 /* Ethernet MAC Target Time Seconds (32-bit value) */
+
 /* Ethernet MAC Target Time Nanoseconds */
 
 #define EMAC_TARGNANO_TTSLO_SHIFT      (0)       /* Bits 0-30: Target Timestamp Low Register */
@@ -640,6 +673,7 @@
 #  define EMAC_PPSCTRL_PPSCTRL_8192HZ  (13 << EMAC_PPSCTRL_PPSCTRL_SHIFT) /* Binary rollover=8.192 kHz; digital rollover=4.096 kHz */
 #  define EMAC_PPSCTRL_PPSCTRL_16384HZ (14 << EMAC_PPSCTRL_PPSCTRL_SHIFT) /* Binary rollover=16.384 kHz; digital rollover=8.092 kHz */
 #  define EMAC_PPSCTRL_PPSCTRL_32768HZ (15 << EMAC_PPSCTRL_PPSCTRL_SHIFT) /* Binary rollover=32.768 KHz; digital rollover=16.384 KHz */
+
 #define EMAC_PPSCTRL_PPSEN0            (1 << 4)  /* Bit 4:  Flexible PPS Output Mode Enable */
 #define EMAC_PPSCTRL_TRGMODS0_SHIFT    (5)       /* Bits 5-6: Target Time Register Mode for PPS0 Output */
 #define EMAC_PPSCTRL_TRGMODS0_MASK     (3 << EMAC_PPSCTRL_TRGMODS0_SHIFT)
@@ -648,6 +682,7 @@
 #  define EMAC_PPSCTRL_TRGMODS0_PPS0ONLY (3 << EMAC_PPSCTRL_TRGMODS0_SHIFT) /* Control ENOPPS output */
 
 /* Ethernet MAC PPS0 Interval (32-bit value) */
+
 /* Ethernet MAC PPS0 Width (32-bit value) */
 
 /* Ethernet MAC DMA Bus Mode */
@@ -667,6 +702,7 @@
 #  define EMAC_DMABUSMOD_PR_2TO1       (1 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 2:1 */
 #  define EMAC_DMABUSMOD_PR_3TO1       (2 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 3:1 */
 #  define EMAC_DMABUSMOD_PR_4TO1       (3 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 4:1 */
+
 #define EMAC_DMABUSMOD_FB              (1 << 16) /* Bit 16: Fixed Burst */
 #define EMAC_DMABUSMOD_RPBL_SHIFT      (17)      /* Bits 17:22: RX DMA Programmable Burst Length (PBL) */
 #define EMAC_DMABUSMOD_RPBL_MASK       (0x3f << EMAC_DMABUSMOD_RPBL_SHIFT)
@@ -679,6 +715,7 @@
 #define EMAC_DMABUSMOD_RIB             (1 << 31) /* Bit 31: Rebuild Burst */
 
 /* Ethernet MAC Transmit Poll Demand (32-bit value) */
+
 /* Ethernet MAC Receive Poll Demand (32-bit value) */
 
 /* Ethernet MAC Receive Descriptor List Address */
@@ -689,7 +726,10 @@
 
 #define EMAC_TXDLADDR_MASK             (0xfffffffc)
 
-/* Ethernet MAC DMA Interrupt Status and Ethernet MAC DMA Interrupt Mask Register (common bit definitions) */
+/* Ethernet MAC DMA Interrupt Status and
+ * Ethernet MAC DMA Interrupt Mask Register
+ * (common bit definitions)
+ */
 
 #define EMAC_DMAINT_TI                 (1 << 0)  /* Bit 0:  Transmit interrupt */
 #define EMAC_DMAINT_TPSI               (1 << 1)  /* Bit 1:  Transmit process stopped interrupt */
@@ -718,6 +758,7 @@
 #  define EMAC_DMARIS_RS_RUNCRD        (5 << EMAC_DMARIS_RS_SHIFT) /* Running: Closing receive descriptor */
 #  define EMAC_DMARIS_RS_TSWS          (6 << EMAC_DMARIS_RS_SHIFT) /* Writing Timestamp */
 #  define EMAC_DMARIS_RS_RUNTXD        (7 << EMAC_DMARIS_RS_SHIFT) /* Running: Transferring receive packet data from buffer */
+
 #define EMAC_DMARIS_TS_SHIFT           (20)      /* Bits 20-22: Transmit Process State */
 #define EMAC_DMARIS_TS_MASK            (7 << EMAC_DMARIS_TS_SHIFT)
 #  define EMAC_DMARIS_TS_STOP          (0 << EMAC_DMARIS_TS_SHIFT) /* Stopped; Reset or Stop transmit command processed */
@@ -726,7 +767,8 @@
 #  define EMAC_DMARIS_TS_RUNTX         (3 << EMAC_DMARIS_TS_SHIFT) /* Running; Reading data from host buffer and queuing to TX FIFO */
 #  define EMAC_DMARIS_TS_TSTAMP        (4 << EMAC_DMARIS_TS_SHIFT) /* Writing Timestamp */
 #  define EMAC_DMARIS_TS_SUSPEND       (6 << EMAC_DMARIS_TS_SHIFT) /* Suspended; Transmit descriptor unavailable or transmit underflow */
-#  define EMAC_DMARIS_TS_RUNCTD        (7 << EMAC_DMARIS_TS_SHIFT)  /* Running; Closing transmit descriptor */
+#  define EMAC_DMARIS_TS_RUNCTD        (7 << EMAC_DMARIS_TS_SHIFT) /* Running; Closing transmit descriptor */
+
 #define EMAC_DMARIS_AE_SHIFT           (23)      /* Bits 23-25: Access Error */
 #define EMAC_DMARIS_AE_MASK            (7 << EMAC_DMARIS_AE_SHIFT)
 #  define EMAC_DMARIS_AE_RXDMAWD       (0 << EMAC_DMARIS_AE_SHIFT) /* Error during RX DMA Write Data Transfer */
@@ -735,6 +777,7 @@
 #  define EMAC_DMARIS_AE_TXDMADW       (5 << EMAC_DMARIS_AE_SHIFT) /* Error during TX DMA Descriptor Write Access */
 #  define EMAC_DMARIS_AE_RXDMADR       (6 << EMAC_DMARIS_AE_SHIFT) /* Error during RX DMA Descriptor Read Access */
 #  define EMAC_DMARIS_AE_TXDMADR       (7 << EMAC_DMARIS_AE_SHIFT) /* Error during TX DMA Descriptor Read Access */
+
 #define EMAC_DMARIS_MMC                (1 << 27) /* Bit 27: MAC MMC Interrupt */
 #define EMAC_DMARIS_PMT                (1 << 28) /* Bit 28: MAC PMT Interrupt Status */
 #define EMAC_DMARIS_TT                 (1 << 29) /* Bit 29: Timestamp Trigger Interrupt Status */
@@ -749,6 +792,7 @@
 #  define EMAC_DMAOPMODE_RTC_32        (1 << EMAC_DMAOPMODE_RTC_SHIFT) /* 32 bytes */
 #  define EMAC_DMAOPMODE_RTC_96        (2 << EMAC_DMAOPMODE_RTC_SHIFT) /* 96 bytes */
 #  define EMAC_DMAOPMODE_RTC_128       (3 << EMAC_DMAOPMODE_RTC_SHIFT) /* 128 bytes */
+
 #define EMAC_DMAOPMODE_DGF             (1 << 5)  /* Bit 5:  Drop Giant Frame Enable */
 #define EMAC_DMAOPMODE_FUF             (1 << 6)  /* Bit 6:  Forward Undersized Good Frames */
 #define EMAC_DMAOPMODE_FEF             (1 << 7)  /* Bit 7:  Forward Error Frames */
@@ -763,6 +807,7 @@
 #  define EMAC_DMAOPMODE_TTC_32        (5 << EMAC_DMAOPMODE_TTC_SHIFT) /* 32 bytes */
 #  define EMAC_DMAOPMODE_TTC_24        (6 << EMAC_DMAOPMODE_TTC_SHIFT) /* 24 bytes */
 #  define EMAC_DMAOPMODE_TTC_16        (7 << EMAC_DMAOPMODE_TTC_SHIFT) /* 16 bytes */
+
 #define EMAC_DMAOPMODE_FTF             (1 << 20) /* Bit 20: Flush Transmit FIFO */
 #define EMAC_DMAOPMODE_TSF             (1 << 21) /* Bit 21: Transmit Store and Forward */
 #define EMAC_DMAOPMODE_DFF             (1 << 24) /* Bit 24: Disable Flushing of Received Frames */
@@ -784,8 +829,11 @@
 #define EMAC_RXINTWDT_RIWT_MASK        (0xff << EMAC_RXINTWDT_RIWT_SHIFT)
 
 /* Ethernet MAC Current Host Transmit Descriptor (32-bit value) */
+
 /* Ethernet MAC Current Host Receive Descriptor (32-bit value) */
+
 /* Ethernet MAC Current Host Transmit Buffer Address (32-bit value) */
+
 /* Ethernet MAC Current Host Receive Buffer Address (32-bit value) */
 
 /* Ethernet MAC Peripheral Property Register */
@@ -796,6 +844,7 @@
 #  define EMAC_PP_PHYTYPE_FURY         (1 << EMAC_PP_PHYTYPE_SHIFT) /* Fury class PHY */
 #  define EMAC_PP_PHYTYPE_TPFS         (2 << EMAC_PP_PHYTYPE_SHIFT) /* Tempest/Firestorm class PHY */
 #  define EMAC_PP_PHYTYPE_SNOWFLAKE    (3 << EMAC_PP_PHYTYPE_SHIFT) /* Snowflake class PHY */
+
 #define EMAC_PP_MACTYPE_SHIFT          (8)       /* Bits 8-11: Ethernet MAC Type */
 #define EMAC_PP_MACTYPE_MASK           (7 << EMAC_PP_MACTYPE_SHIFT)
 #  define EMAC_PP_MACTYPE_LM3S         (0 << EMAC_PP_MACTYPE_SHIFT) /* Stellaris® LM3S-class MAC */
@@ -810,6 +859,7 @@
 #  define EMAC_PC_ANMODE_10FD          (1 << EMAC_PC_ANMODE_SHIFT)  /* When ANEN = 0x0, mode is 10Base-T, Full-Duplex */
 #  define EMAC_PC_ANMODE_100HD         (2 << EMAC_PC_ANMODE_SHIFT)  /* When ANEN = 0x0, mode is 100Base-TX, Half-Duplex */
 #  define EMAC_PC_ANMODE_100FD         (3 << EMAC_PC_ANMODE_SHIFT)  /* When ANEN = 0x0, mode is 100Base-TX, Full-Duplex */
+
 #define EMAC_PC_ANEN                   (1 << 3)  /* Bit 3:  Auto Negotiation Enable */
 #define EMAC_PC_FASTANSEL_SHIFT        (4)       /* Bits 4-5: Fast Auto Negotiation Select */
 #define EMAC_PC_FASTANSEL_MASK         (3 << EMAC_PC_FASTANSEL_SHIFT)
@@ -836,6 +886,7 @@
 #define EMAC_PC_PINTFS_MASK            (7 << EMAC_PC_PINTFS_SHIFT)
 #  define EMAC_PC_PINTFS_MII           (0 << EMAC_PC_PINTFS_SHIFT) /* MII: Internal PHY or external PHY connected via MII */
 #  define EMAC_PC_PINTFS_RMII          (4 << EMAC_PC_PINTFS_SHIFT) /* RMII: External PHY connected via RMII */
+
 #define EMAC_PC_PHYEXT                 (1 << 31) /* Bit 31: PHY Select */
 
 /* Ethernet MAC Clock Configuration Register */
@@ -884,7 +935,10 @@
 #define EPHY_BMSR_100BTXHD             (1 << 13) /* Bit 13: 100Base-TX Half Duplex Capable */
 #define EPHY_BMSR_100BTXFD             (1 << 14) /* Bit 14: 100Base-TX Full Duplex Capable */
 
-/* Ethernet PHY Identifier Register 1 (Most significant 16 bits of the OUI) */
+/* Ethernet PHY Identifier Register 1
+ * (Most significant 16 bits of the OUI)
+ */
+
 /* Ethernet PHY Identifier Register 2 */
 
 #define EPHY_ID2_MDLREV_SHIFT          (0)       /* Bits 0-3:  Model Revision Number */
@@ -963,6 +1017,7 @@
 #  define EPHY_CFG1_FANSEL_BLT80       (0 << EPHY_CFG1_FANSEL_SHIFT) /* Break Link Timer: 80 ms */
 #  define EPHY_CFG1_FANSEL_BLT120      (1 << EPHY_CFG1_FANSEL_SHIFT) /* Break Link Timer: 120 ms */
 #  define EPHY_CFG1_FANSEL_BLT240      (2 << EPHY_CFG1_FANSEL_SHIFT) /*  Break Link Timer: 240 ms */
+
 #define EPHY_CFG1_FASTANEN             (1 << 4)  /* Bit 4:  Fast Auto Negotiation Enable */
 #define EPHY_CFG1_RAMDIX               (1 << 5)  /* Bit 5:  Robust Auto MDI/MDIX */
 #define EPHY_CFG1_FAMDIX               (1 << 6)  /* Bit 6:  Fast Auto MDI/MDIX */
@@ -1030,6 +1085,7 @@
 #  define EPHY_SCR_LBFIFO_5            (1 << EPHY_SCR_LBFIFO_SHIFT) /* Five nibble FIFO */
 #  define EPHY_SCR_LBFIFO_6            (2 << EPHY_SCR_LBFIFO_SHIFT) /* Six nibble FIFO */
 #  define EPHY_SCR_LBFIFO_8            (3 << EPHY_SCR_LBFIFO_SHIFT) /* Eight nibble FIFO */
+
 #define EPHY_SCR_SBPYASS               (1 << 11) /* Bit 11: Scrambler Bypass */
 #define EPHY_SCR_PSMODE_SHIFT          (12)      /* Bits 12-13:  Power Saving Modes */
 #define EPHY_SCR_PSMODE_MASK           (3 << EPHY_SCR_PSMODE_SHIFT)
@@ -1037,6 +1093,7 @@
 #  define EPHY_SCR_PSMODE_LOWPWR       (1 << EPHY_SCR_PSMODE_SHIFT) /* IEEE Power Down */
 #  define EPHY_SCR_PSMODE_ACTWOL       (2 << EPHY_SCR_PSMODE_SHIFT) /* Active Sleep */
 #  define EPHY_SCR_PSMODE_PASWOL       (3 << EPHY_SCR_PSMODE_SHIFT) /* Passive Sleep */
+
 #define EPHY_SCR_PSEN                  (1 << 14) /* Bit 14: Power Saving Modes Enable */
 #define EPHY_SCR_DISCLK                (1 << 15) /* Bit 15: Disable CLK */
 
@@ -1148,6 +1205,7 @@
 #  define EPHY_CDCR_LINKQUAL_GOOD      (1 << EPHY_CDCR_LINKQUAL_SHIFT) /* Good Quality Link Indication */
 #  define EPHY_CDCR_LINKQUAL_MILD      (2 << EPHY_CDCR_LINKQUAL_SHIFT) /* Mid- Quality Link Indication */
 #  define EPHY_CDCR_LINKQUAL_POOR      (3 << EPHY_CDCR_LINKQUAL_SHIFT) /* Poor Quality Link Indication */
+
 #define EPHY_CDCR_START                (1 << 15) /* Bit 15: Cable Diagnostic Process Start */
 
 /* Ethernet PHY Reset Control */
@@ -1168,6 +1226,7 @@
 #  define EPHY_LEDCFG_LED0_10BT        (6 << EPHY_LEDCFG_LED0_SHIFT) /* 10-Base TX */
 #  define EPHY_LEDCFG_LED0_FD          (7 << EPHY_LEDCFG_LED0_SHIFT) /* Full Duplex */
 #  define EPHY_LEDCFG_LED0_LINKTXRX    (8 << EPHY_LEDCFG_LED0_SHIFT) /* Link OK/Blink on TX/RX Activity */
+
 #define EPHY_LEDCFG_LED1_SHIFT         (4)       /* Bits 4-7:  LED1 Configuration */
 #define EPHY_LEDCFG_LED1_MASK          (15 << EPHY_LEDCFG_LED1_SHIFT)
 #  define EPHY_LEDCFG_LED1_LINK        (0 << EPHY_LEDCFG_LED1_SHIFT) /* Link OK */
@@ -1179,6 +1238,7 @@
 #  define EPHY_LEDCFG_LED1_10BT        (6 << EPHY_LEDCFG_LED1_SHIFT) /* 10-Base TX */
 #  define EPHY_LEDCFG_LED1_FD          (7 << EPHY_LEDCFG_LED1_SHIFT) /* Full Duplex */
 #  define EPHY_LEDCFG_LED1_LINKTXRX    (8 << EPHY_LEDCFG_LED1_SHIFT) /* Link OK/Blink on TX/RX Activity */
+
 #define EPHY_LEDCFG_LED2_SHIFT         (8)       /* Bits 8-11:  LED2 Configuration */
 #define EPHY_LEDCFG_LED2_MASK          (15 << EPHY_LEDCFG_LED2_SHIFT)
 #  define EPHY_LEDCFG_LED2_LINK        (0 << EPHY_LEDCFG_LED2_SHIFT) /* Link OK */
@@ -1191,7 +1251,8 @@
 #  define EPHY_LEDCFG_LED2_FD          (7 << EPHY_LEDCFG_LED2_SHIFT) /* Full Duplex */
 #  define EPHY_LEDCFG_LED2_LINKTXRX    (8 << EPHY_LEDCFG_LED2_SHIFT) /* Link OK/Blink on TX/RX Activity */
 
-/* DMA Descriptors **********************************************************************************/
+/* DMA Descriptors **********************************************************/
+
 /* TDES0: Transmit descriptor Word0 */
 
 #define EMAC_TDES0_DB                 (1 << 0)  /* Bit 0:  Deferred bit */
@@ -1216,6 +1277,7 @@
 #  define EMAC_TDES0_VLIC_REMOVE      (1 << EMAC_TDES0_VLIC_SHIFT) /* Remove the VLAN tag before sending */
 #  define EMAC_TDES0_VLIC_INSERT      (2 << EMAC_TDES0_VLIC_SHIFT) /* Insert a VLAN tag (EMACVLNINCREP) */
 #  define EMAC_TDES0_VLIC_REPLACE     (3 << EMAC_TDES0_VLIC_SHIFT) /* Replace the VLAN tag i(EMACVLNINCREP) */
+
 #define EMAC_TDES0_TCH                (1 << 20) /* Bit 20: Second address chained */
 #define EMAC_TDES0_TER                (1 << 21) /* Bit 21: Transmit end of ring */
 #define EMAC_TDES0_CIC_SHIFT          (22)      /* Bits 22-23: Checksum insertion control */
@@ -1224,6 +1286,7 @@
 #  define EMAC_TDES0_CIC_IH           (1 << EMAC_TDES0_CIC_SHIFT) /* Insert IPv4 header checksum */
 #  define EMAC_TDES0_CIC_IHPL         (2 << EMAC_TDES0_CIC_SHIFT) /* Insert TCP/UDP/ICMP checksum */
 #  define EMAC_TDES0_CIC_ALL          (3 << EMAC_TDES0_CIC_SHIFT) /* TCP/UDP/ICMP checksum fully calculated */
+
 #define EMAC_TDES0_CRCR               (1 << 24) /* Bit 24: CRC Replacement Control */
 #define EMAC_TDES0_TTSE               (1 << 25) /* Bit 25: Transmit time stamp enable */
 #define EMAC_TDES0_DP                 (1 << 26) /* Bit 26: Disable pad */
@@ -1248,8 +1311,11 @@
 #  define EMAC_TDES1_CTRL_REPLACE     (2 << EMAC_TDES1_CTRL_SHIFT) /* Replace the source address */
 
 /* TDES2: Transmit descriptor Word2 (32-bit address) */
+
 /* TDES3: Transmit descriptor Word3 (32-bit address) */
+
 /* TDES6: Transmit descriptor Word6 (32-bit time stamp) */
+
 /* TDES7: Transmit descriptor Word7 (32-bit time stamp) */
 
 /* RDES0: Receive descriptor Word0 */
@@ -1288,6 +1354,7 @@
 #define EMAC_RDES1_DIC                (1 << 31) /* Bit 31: Disable interrupt on completion */
 
 /* RDES2: Receive descriptor Word2 (32-bit address) */
+
 /* RDES3: Receive descriptor Word3 (32-bit address) */
 
 /* RDES4: Receive descriptor Word4 */
@@ -1298,6 +1365,7 @@
 #  define EMAC_RDES4_IPPT_UDP         (1 << EMAC_RDES4_IPPT_SHIFT) /* UDP payload in IP datagram */
 #  define EMAC_RDES4_IPPT_TCP         (2 << EMAC_RDES4_IPPT_SHIFT) /* TCP payload in IP datagram */
 #  define EMAC_RDES4_IPPT_ICMP        (3 << EMAC_RDES4_IPPT_SHIFT) /* ICMP payload in IP datagram */
+
 #define EMAC_RDES4_IPHE               (1 << 3)  /* Bit 3:  IP header error */
 #define EMAC_RDES4_IPPE               (1 << 4)  /* Bit 4:  IP payload error */
 #define EMAC_RDES4_IPCB               (1 << 5)  /* Bit 5:  IP checksum bypassed */
@@ -1324,17 +1392,20 @@
 #  define EMAC_RDES4_PMT_MANAGEMENT   (9 << EMAC_RDES4_PMT_SHIFT)  /* Management */
 #  define EMAC_RDES4_PMT_SIGNALING    (10 << EMAC_RDES4_PMT_SHIFT) /* Signaling */
 #  define EMAC_RDES4_PMT_PTP          (15 << EMAC_RDES4_PMT_SHIFT) /* PTP packet w/ Reserved message type */
+
 #define EMAC_RDES4_PFT                (1 << 12) /* Bit 12: PTP frame type */
 #define EMAC_RDES4_PV                 (1 << 13) /* Bit 13: PTP version */
 #define EMAC_RDES4_TSD                (1 << 14) /* Bit 14: Time stampe dropped */
 
 /* RDES5: Receive descriptor Word5 - Reserved */
+
 /* RDES6: Receive descriptor Word6 (32-bit time stamp) */
+
 /* RDES7: Receive descriptor Word7 (32-bit time stamp) */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -1378,13 +1449,13 @@ struct emac_rxdesc_s
 #endif
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_ETHERNET_H */

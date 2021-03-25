@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/include/esp32_board_tim.h
+ * boards/xtensa/esp32/common/src/esp32_oneshot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,35 +18,26 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_TIM_H
-#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_TIM_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#ifndef __ASSEMBLY__
+#include <debug.h>
+#include <sys/types.h>
+#include <nuttx/timers/timer.h>
+#include <nuttx/clock.h>
+#include <nuttx/timers/oneshot.h>
+#include "esp32_board_oneshot.h"
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
-
-#ifdef CONFIG_TIMER
 
 /****************************************************************************
  * Name: board_timer_init
@@ -60,14 +51,33 @@ extern "C"
  *
  ****************************************************************************/
 
-int board_timer_init(void);
+int esp32_oneshot_init(int timer, uint16_t resolution)
+{
+  int ret = OK;
+  FAR struct oneshot_lowerhalf_s *os_lower = NULL;
 
-#endif /* CONFIG_TIMER */
+  os_lower = oneshot_initialize(timer, resolution);
+  if (os_lower != NULL)
+    {
+#if defined(CONFIG_CPULOAD_ONESHOT)
+      /* Configure the oneshot timer to support CPU load measurement */
 
-#undef EXTERN
-#if defined(__cplusplus)
+      nxsched_oneshot_extclk(os_lower);
+
+#else
+      ret = oneshot_register("/dev/oneshot", os_lower);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+            "ERROR: Failed to register oneshot at /dev/oneshot: %d\n", ret);
+        }
+#endif /* CONFIG_CPULOAD_ONESHOT */
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: oneshot_initialize failed\n");
+      ret = -EBUSY;
+    }
+
+  return ret;
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_TIM_H */

@@ -1,11 +1,11 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/common/tiva_pwm.c
  *
  *   Copyright (C) 2016 Young Mu. All rights reserved.
  *   Author: Young Mu <young.mu@aliyun.com>
  *
- * The basic structure of this driver derives in spirit (if nothing more) from the
- * NuttX SAM PWM driver which has:
+ * The basic structure of this driver derives in spirit (if nothing more)
+ * from the NuttX SAM PWM driver which has:
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,11 +37,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -61,9 +61,9 @@
 #include "hardware/tiva_pinmap.h"
 #include "hardware/tiva_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 uint32_t g_pwm_pinset[] =
 {
@@ -94,24 +94,28 @@ struct tiva_pwm_chan_s
 #endif
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN0)
-static int tiva_pwm_gen0_interrupt(int irq, FAR void *context, FAR void *arg);
+static int tiva_pwm_gen0_interrupt(int irq,
+                                   FAR void *context, FAR void *arg);
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN2)
-static int tiva_pwm_gen1_interrupt(int irq, FAR void *context, FAR void *arg);
+static int tiva_pwm_gen1_interrupt(int irq,
+                                   FAR void *context, FAR void *arg);
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN4)
-static int tiva_pwm_gen2_interrupt(int irq, FAR void *context, FAR void *arg);
+static int tiva_pwm_gen2_interrupt(int irq,
+                                   FAR void *context, FAR void *arg);
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN6)
-static int tiva_pwm_gen3_interrupt(int irq, FAR void *context, FAR void *arg);
+static int tiva_pwm_gen3_interrupt(int irq,
+                                   FAR void *context, FAR void *arg);
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && \
@@ -131,7 +135,8 @@ static int tiva_pwm_setup(FAR struct pwm_lowerhalf_s *dev);
 static int tiva_pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
 #ifdef CONFIG_PWM_PULSECOUNT
 static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                          FAR const struct pwm_info_s *info, FAR void *handle);
+                          FAR const struct pwm_info_s *info,
+                          FAR void *handle);
 #else
 static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
                           FAR const struct pwm_info_s *info);
@@ -140,9 +145,9 @@ static int tiva_pwm_stop(FAR struct pwm_lowerhalf_s *dev);
 static int tiva_pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
                           int cmd, unsigned long arg);
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint32_t g_pwm_freq = 1875000;
 static uint32_t g_pwm_counter = (1 << 16);
@@ -163,7 +168,8 @@ static struct tiva_pwm_chan_s g_pwm_chan0 =
   .controller_id   = 0,
   .controller_base = TIVA_PWM0_BASE,
   .generator_id    = 0,
-  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMn_BASE + TIVA_PWMn_INTERVAL * 0,
+  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
+                     TIVA_PWMN_INTERVAL * 0,
   .channel_id      = 0,
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
@@ -182,7 +188,8 @@ static struct tiva_pwm_chan_s g_pwm_chan1 =
   .controller_id   = 0,
   .controller_base = TIVA_PWM0_BASE,
   .generator_id    = 0,
-  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMn_BASE + TIVA_PWMn_INTERVAL * 0,
+  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
+                     TIVA_PWMN_INTERVAL * 0,
   .channel_id      = 1,
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
@@ -201,7 +208,8 @@ static struct tiva_pwm_chan_s g_pwm_chan2 =
   .controller_id   = 0,
   .controller_base = TIVA_PWM0_BASE,
   .generator_id    = 1,
-  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMn_BASE + TIVA_PWMn_INTERVAL * 1,
+  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
+                     TIVA_PWMN_INTERVAL * 1,
   .channel_id      = 2,
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
@@ -220,7 +228,8 @@ static struct tiva_pwm_chan_s g_pwm_chan3 =
   .controller_id   = 0,
   .controller_base = TIVA_PWM0_BASE,
   .generator_id    = 1,
-  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMn_BASE + TIVA_PWMn_INTERVAL * 1,
+  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
+                     TIVA_PWMN_INTERVAL * 1,
   .channel_id      = 3,
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
@@ -239,7 +248,8 @@ static struct tiva_pwm_chan_s g_pwm_chan4 =
   .controller_id   = 0,
   .controller_base = TIVA_PWM0_BASE,
   .generator_id    = 2,
-  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMn_BASE + TIVA_PWMn_INTERVAL * 2,
+  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
+                     TIVA_PWMN_INTERVAL * 2,
   .channel_id      = 4,
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
@@ -258,7 +268,8 @@ static struct tiva_pwm_chan_s g_pwm_chan5 =
   .controller_id   = 0,
   .controller_base = TIVA_PWM0_BASE,
   .generator_id    = 2,
-  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMn_BASE + TIVA_PWMn_INTERVAL * 2,
+  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
+                     TIVA_PWMN_INTERVAL * 2,
   .channel_id      = 5,
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
@@ -277,7 +288,8 @@ static struct tiva_pwm_chan_s g_pwm_chan6 =
   .controller_id   = 0,
   .controller_base = TIVA_PWM0_BASE,
   .generator_id    = 3,
-  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMn_BASE + TIVA_PWMn_INTERVAL * 3,
+  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
+                     TIVA_PWMN_INTERVAL * 3,
   .channel_id      = 6,
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
@@ -296,7 +308,8 @@ static struct tiva_pwm_chan_s g_pwm_chan7 =
   .controller_id   = 0,
   .controller_base = TIVA_PWM0_BASE,
   .generator_id    = 3,
-  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMn_BASE + TIVA_PWMn_INTERVAL * 3,
+  .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
+                     TIVA_PWMN_INTERVAL * 3,
   .channel_id      = 7,
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
@@ -308,17 +321,17 @@ static struct tiva_pwm_chan_s g_pwm_chan7 =
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: tiva_pwm_gen[n]_interrupt
  *
  * Description:
  *   Pulse count interrupt handlers for PWM[n]
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN0)
 static int tiva_pwm_gen0_interrupt(int irq, FAR void *context, FAR void *arg)
@@ -348,13 +361,13 @@ static int tiva_pwm_gen3_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: tiva_pwm_interrupt
  *
  * Description:
  *   Common pulse count interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_PWM_PULSECOUNT) && \
     (defined(CONFIG_TIVA_PWM0_CHAN0) || defined(CONFIG_TIVA_PWM0_CHAN2) || \
@@ -363,7 +376,7 @@ static int tiva_pwm_interrupt(struct tiva_pwm_chan_s *chan)
 {
   /* Clear interrupt */
 
-  tiva_pwm_putreg(chan, TIVA_PWMn_ISC_OFFSET, INT_SET << INTCMPAD);
+  tiva_pwm_putreg(chan, TIVA_PWMN_ISC_OFFSET, INT_SET << INTCMPAD);
 
   /* Count down current pulse count */
 
@@ -373,7 +386,8 @@ static int tiva_pwm_interrupt(struct tiva_pwm_chan_s *chan)
 
   if (chan->cur_count == 0)
     {
-      tiva_pwm_putreg(chan, TIVA_PWMn_CTL_OFFSET, CTL_DISABLE << TIVA_PWMn_CTL_ENABLE);
+      tiva_pwm_putreg(chan, TIVA_PWMN_CTL_OFFSET,
+                      CTL_DISABLE << TIVA_PWMN_CTL_ENABLE);
       chan->cur_count = chan->count;
       pwm_expired(chan->handle);
     }
@@ -382,28 +396,28 @@ static int tiva_pwm_interrupt(struct tiva_pwm_chan_s *chan)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: tiva_pwm_getreg
  *
  * Description:
  *   Get a 32-bit register value by offset
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t tiva_pwm_getreg(struct tiva_pwm_chan_s *chan,
                                        unsigned int offset)
 {
-    uintptr_t regaddr = chan->generator_base + offset;
-    return getreg32(regaddr);
+  uintptr_t regaddr = chan->generator_base + offset;
+  return getreg32(regaddr);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: tiva_pwm_putreg
  *
  * Description:
  *  Put a 32-bit register value by offset
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void tiva_pwm_putreg(struct tiva_pwm_chan_s *chan,
                                    unsigned int offset, uint32_t regval)
@@ -500,7 +514,8 @@ static int tiva_pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 
 #ifdef CONFIG_PWM_PULSECOUNT
 static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                          FAR const struct pwm_info_s *info, FAR void *handle)
+                          FAR const struct pwm_info_s *info,
+                          FAR void *handle)
 {
   FAR struct tiva_pwm_chan_s *chan = (FAR struct tiva_pwm_chan_s *)dev;
   pwminfo("start PWM for channel %d\n", chan->channel_id);
@@ -533,7 +548,8 @@ static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
       /* Disable interrupt */
 
-      uint32_t enable = getreg32(chan->controller_base + TIVA_PWM_INTEN_OFFSET);
+      uint32_t enable = getreg32(chan->controller_base +
+                                 TIVA_PWM_INTEN_OFFSET);
       enable &= ~(INT_ENABLE << chan->generator_id);
       putreg32(enable, chan->controller_base + TIVA_PWM_INTEN_OFFSET);
     }
@@ -541,7 +557,8 @@ static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
     {
       /* Enable interrupt */
 
-      uint32_t enable = getreg32(chan->controller_base + TIVA_PWM_INTEN_OFFSET);
+      uint32_t enable = getreg32(chan->controller_base +
+                                 TIVA_PWM_INTEN_OFFSET);
       enable |= (INT_ENABLE << chan->generator_id);
       putreg32(enable, chan->controller_base + TIVA_PWM_INTEN_OFFSET);
     }
@@ -589,18 +606,18 @@ static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
 
   /* Configure PWM countdown mode (refer to TM4C1294NCPDT 23.4.6) */
 
-  tiva_pwm_putreg(chan, TIVA_PWMn_CTL_OFFSET, 0);
+  tiva_pwm_putreg(chan, TIVA_PWMN_CTL_OFFSET, 0);
   if (chan->channel_id % 2 == 0)
     {
-      tiva_pwm_putreg(chan, TIVA_PWMn_GENA_OFFSET,
-                      GENx_LOW << TIVA_PWMn_GENx_ACTCMPAD |
-                      GENx_HIGH << TIVA_PWMn_GENx_ACTLOAD);
+      tiva_pwm_putreg(chan, TIVA_PWMN_GENA_OFFSET,
+                      GENX_LOW << TIVA_PWMN_GENX_ACTCMPAD |
+                      GENX_HIGH << TIVA_PWMN_GENX_ACTLOAD);
     }
   else
     {
-      tiva_pwm_putreg(chan, TIVA_PWMn_GENB_OFFSET,
-                      GENx_LOW << TIVA_PWMn_GENx_ACTCMPBD |
-                      GENx_HIGH << TIVA_PWMn_GENx_ACTLOAD);
+      tiva_pwm_putreg(chan, TIVA_PWMN_GENB_OFFSET,
+                      GENX_LOW << TIVA_PWMN_GENX_ACTCMPBD |
+                      GENX_HIGH << TIVA_PWMN_GENX_ACTLOAD);
     }
 
   /* Set the PWM period (refer to TM4C1294NCPDT 23.4.7) */
@@ -618,7 +635,7 @@ static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
       return -ERANGE;
     }
 
-  tiva_pwm_putreg(chan, TIVA_PWMn_LOAD_OFFSET, load - 1);
+  tiva_pwm_putreg(chan, TIVA_PWMN_LOAD_OFFSET, load - 1);
 
   /* Configure PWM duty (refer to TM4C1294NCPDT 23.4.8-9)
    *
@@ -633,16 +650,18 @@ static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
 
   if (chan->channel_id % 2 == 0)
     {
-      tiva_pwm_putreg(chan, TIVA_PWMn_CMPA_OFFSET, comp - 1);
+      tiva_pwm_putreg(chan, TIVA_PWMN_CMPA_OFFSET, comp - 1);
     }
   else
     {
-      tiva_pwm_putreg(chan, TIVA_PWMn_CMPB_OFFSET, comp - 1);
+      tiva_pwm_putreg(chan, TIVA_PWMN_CMPB_OFFSET, comp - 1);
     }
 
   /* Enable the PWM generator (refer to TM4C1294NCPDT 23.4.10) */
 
-  tiva_pwm_putreg(chan, TIVA_PWMn_CTL_OFFSET, CTL_ENABLE << TIVA_PWMn_CTL_ENABLE);
+  tiva_pwm_putreg(chan,
+                  TIVA_PWMN_CTL_OFFSET,
+                  CTL_ENABLE << TIVA_PWMN_CTL_ENABLE);
 
   /* Enable PWM channel (refer to TM4C1294NCPDT 23.4.11) */
 
@@ -817,16 +836,17 @@ FAR struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel)
    * TODO: need an algorithm to choose the best divider and load value combo.
    */
 
-  putreg32(CC_USEPWM << TIVA_PWM_CC_USEPWM | CC_PWMDIV_64 << TIVA_PWM_CC_PWMDIV,
+  putreg32(CC_USEPWM << TIVA_PWM_CC_USEPWM |
+           CC_PWMDIV_64 << TIVA_PWM_CC_PWMDIV,
            chan->controller_base + TIVA_PWM_CC);
 
 #ifdef CONFIG_PWM_PULSECOUNT
 
   /* Enable interrupt INTCMPAD mode */
 
-  tiva_pwm_putreg(chan, TIVA_PWMn_INTEN_OFFSET, INT_SET << INTCMPAD);
+  tiva_pwm_putreg(chan, TIVA_PWMN_INTEN_OFFSET, INT_SET << INTCMPAD);
 
-  /* Attach IRQ handler and enable interrupt*/
+  /* Attach IRQ handler and enable interrupt */
 
   switch (chan->channel_id)
     {

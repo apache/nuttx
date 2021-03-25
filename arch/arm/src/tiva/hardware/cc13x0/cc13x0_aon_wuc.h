@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x0/cc13x0_aon_wuc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a
+ * compatible BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,23 +37,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_AON_WUC_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_AON_WUC_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* AON SYSCTL Register Offsets **************************************************************************************/
+/* AON SYSCTL Register Offsets **********************************************/
 
 #define TIVA_AON_WUC_MCUCLK_OFFSET                  0x0000  /* MCU Clock Management */
 #define TIVA_AON_WUC_AUXCLK_OFFSET                  0x0004  /* AUX Clock Management */
@@ -69,7 +70,7 @@
 #define TIVA_AON_WUC_JTAGCFG_OFFSET                 0x0040  /* JTAG Configuration */
 #define TIVA_AON_WUC_JTAGUSERCODE_OFFSET            0x0044  /* JTAG USERCODE */
 
-/* AON SYSCTL Register Addresses ************************************************************************************/
+/* AON SYSCTL Register Addresses ********************************************/
 
 #define TIVA_AON_WUC_MCUCLK                         (TIVA_AON_WUC_BASE + TIVA_AON_WUC_MCUCLK_OFFSET)
 #define TIVA_AON_WUC_AUXCLK                         (TIVA_AON_WUC_BASE + TIVA_AON_WUC_AUXCLK_OFFSET)
@@ -86,7 +87,7 @@
 #define TIVA_AON_WUC_JTAGCFG                        (TIVA_AON_WUC_BASE + TIVA_AON_WUC_JTAGCFG_OFFSET)
 #define TIVA_AON_WUC_JTAGUSERCODE                   (TIVA_AON_WUC_BASE + TIVA_AON_WUC_JTAGUSERCODE_OFFSET)
 
-/* AON SYSCTL Register Bitfield Definitions *************************************************************************/
+/* AON SYSCTL Register Bitfield Definitions *********************************/
 
 /* AON_WUC_MCUCLK */
 

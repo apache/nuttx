@@ -30,68 +30,21 @@
 #include "hardware/bl602_glb.h"
 #include "hardware/bl602_hbn.h"
 
+/* We choose to use ROM driver here.
+ *
+ * Because BL602 will reset the XIP Flash controller when performing
+ * reset, this part of the code cannot be placed on the XIP Flash.
+ */
+
+typedef void (*bl602_romdrv_reset_system) (void);
+typedef void (*bl602_romdrv_reset_sw_cpu) (void);
+typedef void (*bl602_romdrv_reset_por) (void);
+
+#define ROM_APITABLE  ((uint32_t *)0x21010800)
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: bl602_chip_reset
- *
- * Description:
- *   Control the different reset modes
- *
- * Input Parameters:
- *   mask - Reset bitmask use these defines
- *          SWRST_CFG2_CTRL_SYS_RESET, SWRST_CFG2_CTRL_CPU_RESET,
- *          SWRST_CFG2_CTRL_PWRON_RST
- *
- ****************************************************************************/
-
-static void bl602_chip_reset(uint32_t mask)
-{
-  /* Reset the root clock */
-
-  modifyreg32(BL602_HBN_GLB, HBN_GLB_HBN_ROOT_CLK_SEL_MASK, 0);
-
-  /* Clear root clock dividers */
-
-  modifyreg32(
-      BL602_CLK_CFG0,
-      CLK_CFG0_REG_BCLK_DIV_MASK | CLK_CFG0_REG_HCLK_DIV_MASK,
-      0
-  );
-
-  /* This register should toggled on-off on changes to root clock.
-   * details of this register are not documented, but is clear from ROM
-   */
-
-  putreg32(1, 0x40000ffc);
-  putreg32(0, 0x40000ffc);
-
-  /* Trigger reset
-   * NOTE: The reset seems to be rising _edge_ triggered so the reset
-   *       bit should be cleared first otherwise the reset will not
-   *       trigger if it has previously fired.
-   */
-
-  modifyreg32(
-      BL602_SWRST_CFG2,
-      (SWRST_CFG2_CTRL_SYS_RESET | SWRST_CFG2_CTRL_CPU_RESET | \
-       SWRST_CFG2_CTRL_PWRON_RST),
-      0
-  );
-
-  modifyreg32(
-      BL602_SWRST_CFG2,
-      (SWRST_CFG2_CTRL_SYS_RESET | SWRST_CFG2_CTRL_CPU_RESET | \
-       SWRST_CFG2_CTRL_PWRON_RST),
-      mask
-  );
-
-  /* Wait for the reset */
-
-  for (; ; );
-}
 
 /****************************************************************************
  * Public Functions
@@ -107,7 +60,11 @@ static void bl602_chip_reset(uint32_t mask)
 
 void up_systemreset(void)
 {
-  bl602_chip_reset(SWRST_CFG2_CTRL_SYS_RESET | SWRST_CFG2_CTRL_CPU_RESET);
+  /* When perform reset before, MUST disable interrupt */
+
+  asm volatile("csrci mstatus, 8");
+
+  ((bl602_romdrv_reset_system)(*(ROM_APITABLE + 47)))();
 }
 
 /****************************************************************************
@@ -120,7 +77,11 @@ void up_systemreset(void)
 
 void bl602_cpu_reset(void)
 {
-  bl602_chip_reset(SWRST_CFG2_CTRL_CPU_RESET);
+  /* When perform reset before, MUST disable interrupt */
+
+  asm volatile("csrci mstatus, 8");
+
+  ((bl602_romdrv_reset_sw_cpu)(*(ROM_APITABLE + 48)))();
 }
 
 /****************************************************************************
@@ -133,8 +94,9 @@ void bl602_cpu_reset(void)
 
 void bl602_por_reset(void)
 {
-  bl602_chip_reset(
-    SWRST_CFG2_CTRL_SYS_RESET | \
-    SWRST_CFG2_CTRL_CPU_RESET | \
-    SWRST_CFG2_CTRL_PWRON_RST);
+  /* When perform reset before, MUST disable interrupt */
+
+  asm volatile("csrci mstatus, 8");
+
+  ((bl602_romdrv_reset_por)(*(ROM_APITABLE + 49)))();
 }

@@ -41,6 +41,22 @@
 #define GPIO_LED2  2
 #define GPIO_LED3  4
 
+/* BOOT Button */
+
+#define BUTTON_BOOT  0
+
+/* TIMERS */
+
+#define TIMER0 0
+#define TIMER1 1
+#define TIMER2 2
+#define TIMER3 3
+
+/* ONESHOT */
+
+#define ONESHOT_TIMER         1
+#define ONESHOT_RESOLUTION_US 1
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

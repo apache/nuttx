@@ -29,6 +29,10 @@
 
 #include <stdint.h>
 
+#define BL602_GLB_EM_0KB  0x0 /* 0KB */
+#define BL602_GLB_EM_8KB  0x3 /* 8KB */
+#define BL602_GLB_EM_16KB 0xF /* 16KB */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -79,6 +83,22 @@ void bl602_swrst_ahb_slave1(uint32_t slave1);
  ****************************************************************************/
 
 uint8_t bl602_glb_get_bclk_div(void);
+
+/****************************************************************************
+ * Name: bl602_set_em_sel
+ *
+ * Description:
+ *   Set how much wifi ram is allocated to ble.
+ *
+ * Input Parameters:
+ *   em_type: memory size type
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void bl602_set_em_sel(int em_type);
 
 #undef EXTERN
 #if defined(__cplusplus)

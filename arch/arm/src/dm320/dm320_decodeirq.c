@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * arch/arm/src/dm320/dm320_decodeirq.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,9 +36,9 @@
 
 #include "group/group.h"
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
@@ -52,7 +52,9 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
   uint16_t irqentry = getreg16(DM320_INTC_IRQENTRY0);
 
-  /* The irqentry value is an offset into a table.  Zero means no interrupt. */
+  /* The irqentry value is an offset into a table.
+   * Zero means no interrupt.
+   */
 
   if (irqentry != 0)
     {
@@ -68,8 +70,10 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
           arm_ack_irq(irq);
 
-          /* Current regs non-zero indicates that we are processing an interrupt;
-           * CURRENT_REGS is also used to manage interrupt level context switches.
+          /* Current regs non-zero indicates that we are processing an
+           * interrupt;
+           * CURRENT_REGS is also used to manage interrupt level context
+           * switches.
            *
            * Nested interrupts are not supported.
            */

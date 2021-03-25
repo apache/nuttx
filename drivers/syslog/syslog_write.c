@@ -56,7 +56,8 @@
 
 static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
 {
-  size_t nwritten;
+  int i;
+  size_t nwritten = 0;
 
   if (up_interrupt_context() || sched_idletask())
     {
@@ -70,23 +71,43 @@ static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
           else
 #endif
             {
-              DEBUGASSERT(g_syslog_channel->sc_force != NULL);
-              g_syslog_channel->sc_force(*buffer++);
+              for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
+                {
+                  if (g_syslog_channel[i] == NULL)
+                    {
+                      break;
+                    }
+
+                  DEBUGASSERT(g_syslog_channel[i]->sc_force != NULL);
+                  g_syslog_channel[i]->sc_force(*buffer++);
+                }
             }
         }
     }
-#ifdef CONFIG_SYSLOG_WRITE
-  else if (g_syslog_channel->sc_write)
-    {
-      nwritten = g_syslog_channel->sc_write(buffer, buflen);
-    }
-#endif
   else
     {
-      for (nwritten = 0; nwritten < buflen; nwritten++)
+      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
         {
-          DEBUGASSERT(g_syslog_channel->sc_putc != NULL);
-          g_syslog_channel->sc_putc(*buffer++);
+          if (g_syslog_channel[i] == NULL)
+            {
+              break;
+            }
+
+#ifdef CONFIG_SYSLOG_WRITE
+          if (g_syslog_channel[i]->sc_write)
+            {
+              nwritten = g_syslog_channel[i]->sc_write(buffer, buflen);
+            }
+          else
+#endif
+            {
+              DEBUGASSERT(g_syslog_channel[i]->sc_putc != NULL);
+
+              for (nwritten = 0; nwritten < buflen; nwritten++)
+                {
+                  g_syslog_channel[i]->sc_putc(*buffer++);
+                }
+            }
         }
     }
 
@@ -122,7 +143,7 @@ ssize_t syslog_write(FAR const char *buffer, size_t buflen)
        * buffer.
        */
 
-      syslog_flush_intbuffer(g_syslog_channel, false);
+      syslog_flush_intbuffer(false);
     }
 #endif
 

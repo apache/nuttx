@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/arm/arm.h
  *
  *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
@@ -31,20 +31,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_COMMON_ARM_H
 #define __ARCH_ARM_SRC_COMMON_ARM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* ARM9EJS **************************************************************************/
+/* ARM9EJS ******************************************************************/
 
 /* PSR bits */
 
@@ -146,6 +146,7 @@
 /* Level 1 Section Descriptor.  Section descriptors allow fast, single
  * level mapping between 1Mb address regions.
  */
+
                                         /* Bits 1:0:   Type of mapping */
 #define PMD_SECT_BUFFERABLE 0x00000004  /* Bit  2:     1=bufferable */
 #define PMD_SECT_CACHEABLE  0x00000008  /* Bit  3:     1=cacheable */
@@ -171,32 +172,44 @@
 /* Level 1 Coarse Table Descriptor.  Coarse Table Descriptors support
  * two level mapping between 16Kb memory regions.
  */
-                                        /* Bits 1:0:   Type of mapping */
-                                        /* Bits 3:2:   Should be zero */
-                                        /* Bit  4:     Common, must be one */
-                                        /* Bits 8:5:   Common domain control */
-                                        /* Bits 9:     Should be zero */
+
+                                        /* Bits 1:0: Type of mapping */
+
+                                        /* Bits 3:2: Should be zero */
+
+                                        /* Bit  4:   Common, must be one */
+
+                                        /* Bits 8:5: Common domain control */
+
+                                        /* Bits 9:   Should be zero */
+
 #define PMD_COARSE_TEX_MASK 0xfffffc00  /* Bits 31:10: v5, Physical page */
 
 /* Level 1 Fine Table Descriptor.  Coarse Table Descriptors support
  * two level mapping between 4Kb memory regions.
  */
 
-                                        /* Bits 1:0:   Type of mapping */
-                                        /* Bits 3:2:   Should be zero */
-                                        /* Bit  4:     Common, must be one */
-                                        /* Bits 8:5:   Common domain control */
-                                        /* Bits 11:9:  Should be zero */
+                                        /* Bits 1:0: Type of mapping */
+
+                                        /* Bits 3:2: Should be zero */
+
+                                        /* Bit  4:   Common, must be one */
+
+                                        /* Bits 8:5: Common domain control */
+
+                                        /* Bits 11:9: Should be zero */
+
 #define PMD_FINE_TEX_MASK   0xfffff000  /* Bits 31:12: v5, Physical page */
 
-/* Level 2 Table Descriptor (PTE).  A section descriptor provides the base address
- * of a 1MB block of memory. The page table descriptors provide the base address of
- * a page table that contains second-level descriptors. There are two sizes of page
- * table:
+/* Level 2 Table Descriptor (PTE).
+ * A section descriptor provides the base address of a 1MB block of memory.
+ * The page table descriptors provide the base address of a page table that
+ * contains second-level descriptors.
+ * There are two sizes of page table:
  *   - Coarse page tables have 256 entries, splitting the 1MB that the table
  *     describes into 4KB blocks
- *   - Fine/tiny page tables have 1024 entries, splitting the 1MB that the table
- *     describes into 1KB blocks.
+ *   - Fine/tiny page tables have 1024 entries, splitting the 1MB that the
+ *     table describes into 1KB blocks.
  *
  * The following definitions apply to all L2 tables:
  */
@@ -211,8 +224,11 @@
                                         /* Bits 31:4:  Depend on type */
 
 /* Large page -- 64Kb */
-                                         /* Bits: 1:0:  Type of mapping */
-                                         /* Bits: 3:2:  Bufferable/cacheable */
+
+                                        /* Bits: 1:0: Type of mapping */
+
+                                        /* Bits: 3:2: Bufferable/cacheable */
+
 #define PTE_LARGE_AP_MASK    (0xff << 4) /* Bits 11:4   Access permissions */
 #define PTE_LARGE_AP_UNO_SRO (0x00 << 4)
 #define PTE_LARGE_AP_UNO_SRW (0x55 << 4)
@@ -223,8 +239,10 @@
 
 /* Small page -- 4Kb */
 
-                                         /* Bits: 1:0:  Type of mapping */
-                                         /* Bits: 3:2:  Bufferable/cacheable */
+                                        /* Bits: 1:0: Type of mapping */
+
+                                        /* Bits: 3:2: Bufferable/cacheable */
+
 #define PTE_SMALL_AP_MASK    (0xff << 4) /* Bits: 11:4: Access permissions */
 #define PTE_SMALL_AP_UNO_SRO (0x00 << 4)
 #define PTE_SMALL_AP_UNO_SRW (0x55 << 4)
@@ -236,8 +254,10 @@
 
 /* Fine/Tiny page -- 1Kb */
 
-                                        /* Bits: 1:0:  Type of mapping */
-                                        /* Bits: 3:2:  Bufferable/cacheable */
+                                       /* Bits: 1:0: Type of mapping */
+
+                                       /* Bits: 3:2: Bufferable/cacheable */
+
 #define PTE_EXT_AP_MASK      (3 << 4)   /* Bits: 5:4:  Access persions */
 #define PTE_EXT_AP_UNO_SRO   (0 << 4)
 #define PTE_EXT_AP_UNO_SRW   (1 << 4)
@@ -266,18 +286,19 @@
 
 #define SECTION_SIZE          (1 << 20)   /* 1Mb */
 
-/* CP15 register c2 contains a pointer to the base address of a paged table in
- * physical memory.  Only bits 14-31 of the page table address is retained there;
- * The full 30-bit address is formed by ORing in bits 2-13 or the virtual address
- * (MVA).  As a consequence, the page table must be aligned to a 16Kb address in
- * physical memory and could require up to 16Kb of memory.
+/* CP15 register c2 contains a pointer to the base address of a paged table
+ * in physical memory.
+ * Only bits 14-31 of the page table address is retained there;
+ * The full 30-bit address is formed by ORing in bits 2-13 or the virtual
+ * address (MVA).  As a consequence, the page table must be aligned to a 16Kb
+ * address in physical memory and could require up to 16Kb of memory.
  */
 
 #define PGTABLE_SIZE          0x00004000
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -288,7 +309,7 @@ static inline unsigned int get_cp15c1(void)
   unsigned int retval;
   __asm__ __volatile__
     (
-	 "\tmrc	p15, 0, %0, c1, c0"
+     "\tmrc    p15, 0, %0, c1, c0"
      : "=r" (retval)
      :
      : "memory");
@@ -302,12 +323,13 @@ static inline unsigned int get_cp15c2(void)
   unsigned int retval;
   __asm__ __volatile__
     (
-	 "\tmrc	p15, 0, %0, c2, c0"
+     "\tmrc    p15, 0, %0, c2, c0"
      : "=r" (retval)
      :
      : "memory");
   return retval;
 }
+
 /* Get the current value of the CP15 C3 domain access register */
 
 static inline unsigned int get_cp15c3(void)
@@ -315,7 +337,7 @@ static inline unsigned int get_cp15c3(void)
   unsigned int retval;
   __asm__ __volatile__
     (
-	 "\tmrc	p15, 0, %0, c3, c0"
+     "\tmrc    p15, 0, %0, c3, c0"
      : "=r" (retval)
      :
      : "memory");

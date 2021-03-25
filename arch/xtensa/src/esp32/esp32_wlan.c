@@ -44,6 +44,8 @@
 #endif
 
 #include "esp32_wlan.h"
+#include "esp32_wifi_utils.h"
+#include "esp32_wifi_adapter.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -111,19 +113,21 @@ struct wlan_pktbuf
 struct wlan_ops
 {
   int (*start)(void);
-
   int (*send)(void *pdata, size_t n);
-
-  int (*ssid)(const uint8_t *pdata, uint8_t n);
-
-  int (*passwd)(const uint8_t *pdata, uint8_t n);
-
+  int (*essid)(struct iwreq *iwr, bool set);
+  int (*bssid)(struct iwreq *iwr, bool set);
+  int (*passwd)(struct iwreq *iwr, bool set);
+  int (*mode)(struct iwreq *iwr, bool set);
+  int (*auth)(struct iwreq *iwr, bool set);
+  int (*freq)(struct iwreq *iwr, bool set);
+  int (*bitrate)(struct iwreq *iwr, bool set);
+  int (*txpower)(struct iwreq *iwr, bool set);
+  int (*channel)(struct iwreq *iwr, bool set);
+  int (*country)(struct iwreq *iwr, bool set);
+  int (*rssi)(struct iwreq *iwr, bool set);
   int (*connect)(void);
-
   int (*disconnect)(void);
-
   int (*event)(pid_t pid, FAR struct sigevent *event);
-
   int (*stop)(void);
 };
 
@@ -179,8 +183,17 @@ static const struct wlan_ops g_sta_ops =
 {
   .start      = esp_wifi_sta_start,
   .send       = esp_wifi_sta_send_data,
-  .ssid       = esp_wifi_sta_set_ssid,
-  .passwd     = esp_wifi_sta_set_password,
+  .essid      = esp_wifi_sta_essid,
+  .bssid      = esp_wifi_sta_bssid,
+  .passwd     = esp_wifi_sta_password,
+  .mode       = esp_wifi_sta_mode,
+  .auth       = esp_wifi_sta_auth,
+  .freq       = esp_wifi_sta_freq,
+  .bitrate    = esp_wifi_sta_bitrate,
+  .txpower    = esp_wifi_sta_txpower,
+  .channel    = esp_wifi_sta_channel,
+  .country    = esp_wifi_sta_country,
+  .rssi       = esp_wifi_sta_rssi,
   .connect    = esp_wifi_sta_connect,
   .disconnect = esp_wifi_sta_disconnect,
   .event      = esp_wifi_notify_subscribe,
@@ -193,8 +206,17 @@ static const struct wlan_ops g_softap_ops =
 {
   .start      = esp_wifi_softap_start,
   .send       = esp_wifi_softap_send_data,
-  .ssid       = esp_wifi_softap_set_ssid,
-  .passwd     = esp_wifi_softap_set_password,
+  .essid      = esp_wifi_softap_essid,
+  .bssid      = esp_wifi_softap_bssid,
+  .passwd     = esp_wifi_softap_password,
+  .mode       = esp_wifi_softap_mode,
+  .auth       = esp_wifi_softap_auth,
+  .freq       = esp_wifi_softap_freq,
+  .bitrate    = esp_wifi_softap_bitrate,
+  .txpower    = esp_wifi_softap_txpower,
+  .channel    = esp_wifi_softap_channel,
+  .country    = esp_wifi_softap_country,
+  .rssi       = esp_wifi_softap_rssi,
   .connect    = esp_wifi_softap_connect,
   .disconnect = esp_wifi_softap_disconnect,
   .event      = esp_wifi_notify_subscribe,
@@ -1477,54 +1499,136 @@ static int wlan_ioctl(FAR struct net_driver_s *dev,
 #endif
 
       case SIOCSIWENCODEEXT:
-        {
-          struct iw_encode_ext *ext = iwr->u.encoding.pointer;
-          ret = ops->passwd(ext->key, ext->key_len);
-          if (ret < 0)
-            {
-              nerr("ERROR: Failed to set password\n");
-            }
-        }
-        break;
-      case SIOCSIWESSID:
-        {
-          struct iw_point *essid = &iwr->u.essid;
-          if (essid->length)
-            {
-              ret = ops->ssid(essid->pointer, essid->length);
-              if (ret < 0)
-                {
-                  nerr("ERROR: Failed to set SSID\n");
-                  break;
-                }
+        ret = ops->passwd(iwr, true);
 
-              ret = ops->connect();
-              if (ret < 0)
-                {
-                  nerr("ERROR: Failed to connect\n");
-                  break;
-                }
-            }
-          else
-            {
-              ret = ops->disconnect();
-              if (ret < 0)
-                {
-                  nerr("ERROR: Failed to connect\n");
-                  break;
-                }
-            }
-        }
         break;
-      case SIOCSIWMODE:
-        ret = OK;
+
+      case SIOCGIWENCODEEXT:
+        ret = ops->passwd(iwr, false);
         break;
-      case SIOCSIWAUTH:
-        ret = OK;
+
+      case SIOCSIWESSID:
+        if ((iwr->u.essid.flags == IW_ESSID_ON) ||
+            (iwr->u.essid.flags == IW_ESSID_DELAY_ON))
+          {
+            ret = ops->essid(iwr, true);
+            if (ret < 0)
+              {
+                break;
+              }
+
+            if (iwr->u.essid.flags == IW_ESSID_ON)
+              {
+                ret = ops->connect();
+              }
+          }
+        else
+          {
+            ret = ops->disconnect();
+          }
+
         break;
-      case SIOCSIWFREQ:
-        ret = OK;
+
+      case SIOCGIWESSID:    /* Get ESSID */
+        ret = ops->essid(iwr, false);
         break;
+
+      case SIOCSIWAP:       /* Set access point MAC addresses */
+        if (iwr->u.ap_addr.sa_data[0] != 0 &&
+            iwr->u.ap_addr.sa_data[1] != 0 &&
+            iwr->u.ap_addr.sa_data[2] != 0)
+          {
+            ret = ops->bssid(iwr, true);
+            if (ret < 0)
+              {
+                nerr("ERROR: Failed to set BSSID\n");
+                break;
+              }
+
+            ret = ops->connect();
+            if (ret < 0)
+              {
+                nerr("ERROR: Failed to connect\n");
+                break;
+              }
+          }
+        else
+          {
+            ret = ops->disconnect();
+            if (ret < 0)
+              {
+                nerr("ERROR: Failed to connect\n");
+                break;
+              }
+          }
+
+        break;
+
+      case SIOCGIWAP:       /* Get access point MAC addresses */
+        ret = ops->bssid(iwr, false);
+        break;
+
+      case SIOCSIWSCAN:
+        ret = esp_wifi_start_scan(iwr);
+        break;
+
+      case SIOCGIWSCAN:
+        ret = esp_wifi_get_scan_results(iwr);
+        break;
+
+      case SIOCSIWCOUNTRY:  /* Set country code */
+        ret = ops->country(iwr, true);
+        break;
+
+      case SIOCGIWSENS:    /* Get sensitivity (dBm) */
+        ret = ops->rssi(iwr, false);
+        break;
+
+      case SIOCSIWMODE:     /* Set operation mode */
+        ret = ops->mode(iwr, true);
+        break;
+
+      case SIOCGIWMODE:     /* Get operation mode */
+        ret = ops->mode(iwr, false);
+        break;
+
+      case SIOCSIWAUTH:    /* Set authentication mode params */
+        ret = ops->auth(iwr, true);
+        break;
+
+      case SIOCGIWAUTH:    /* Get authentication mode params */
+        ret = ops->auth(iwr, false);
+        break;
+
+      case SIOCSIWFREQ:     /* Set channel/frequency (MHz) */
+        ret = ops->freq(iwr, true);
+        break;
+
+      case SIOCGIWFREQ:     /* Get channel/frequency (MHz) */
+        ret = ops->freq(iwr, false);
+        break;
+
+      case SIOCSIWRATE:     /* Set default bit rate (Mbps) */
+        wlwarn("WARNING: SIOCSIWRATE not implemented\n");
+        ret = -ENOSYS;
+        break;
+
+      case SIOCGIWRATE:     /* Get default bit rate (Mbps) */
+        ret = ops->bitrate(iwr, false);
+        break;
+
+      case SIOCSIWTXPOW:    /* Set transmit power (dBm) */
+        ret = ops->txpower(iwr, true);
+        break;
+
+      case SIOCGIWTXPOW:    /* Get transmit power (dBm) */
+        ret = ops->txpower(iwr, false);
+        break;
+
+      case SIOCGIWRANGE:    /* Get range of parameters */
+        ret = ops->channel(iwr, false);
+        break;
+
       default:
         nerr("ERROR: Unrecognized IOCTL command: %d\n", cmd);
         ret = -ENOTTY;  /* Special return value for this case */
@@ -1747,6 +1851,13 @@ int esp32_wlan_sta_initialize(void)
         eth_mac[0], eth_mac[1], eth_mac[2],
         eth_mac[3], eth_mac[4], eth_mac[5]);
 
+  ret = esp_wifi_scan_init();
+  if (ret < 0)
+    {
+      nerr("ERROR: Initialize WiFi scan parameter error: %d\n", ret);
+      return ret;
+    }
+
   ret = esp32_net_initialize(ESP32_WLAN_STA_DEVNO, eth_mac, &g_sta_ops);
   if (ret < 0)
     {
@@ -1806,6 +1917,13 @@ int esp32_wlan_softap_initialize(void)
   ninfo("WiFi softAP MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
         eth_mac[0], eth_mac[1], eth_mac[2],
         eth_mac[3], eth_mac[4], eth_mac[5]);
+
+  ret = esp_wifi_scan_init();
+  if (ret < 0)
+    {
+      nerr("ERROR: Initialize WiFi scan parameter error: %d\n", ret);
+      return ret;
+    }
 
   ret = esp32_net_initialize(ESP32_WLAN_SOFTAP_DEVNO, eth_mac,
                              &g_softap_ops);

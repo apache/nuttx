@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/kl/kl_gpio.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -53,7 +38,9 @@
 /****************************************************************************
  * Pre-processor Declarations
  ****************************************************************************/
-/* Bit-encoded input to kl_pinconfig() *****************************************/
+
+/* Bit-encoded input to kl_pinconfig() **************************************/
+
 /* General form (32-bits, only 22 bits are unused in the encoding):
  *
  * oooo mmmv iiii ifd- ---- -ppp ---b bbbb
@@ -112,9 +99,11 @@
 #define _PIN_OUTPUT_LOWDRIVE   (1 << _PIN_OPTIONS_SHIFT) /* 0xx1 Output with low drive strength */
 #define _PIN_OUTPUT_HIGHDRIVE  (9 << _PIN_OPTIONS_SHIFT) /* 1xx1 Output with high drive strength */
 
-/* End-user pin modes and configurations.  Notes:  (1) None of the digital options
- * are available for the analog mode, (2) digital settings may be combined (OR'ed)
- * provided that input-only and output-only options are not intermixed.
+/* End-user pin modes and configurations.
+ * Notes:
+ *  (1) None of the digital options are available for the analog mode,
+ *  (2) digital settings may be combined (OR'ed) provided that input-only and
+ *      output-only options are not intermixed.
  */
 
 #define PIN_ANALOG             _PIN_MODE_ANALOG
@@ -354,15 +343,16 @@ void kl_gpiowrite(uint32_t pinset, bool value);
 
 bool kl_gpioread(uint32_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_gpioirqattach
  *
  * Description:
  *   Attach a pin interrupt handler.  The normal initialization sequence is:
  *
- *   1. Call kl_configgpio() to configure the interrupting pin (pin interrupts
- *      will be disabled.
- *   2. Call kl_gpioirqattach() to attach the pin interrupt handling function.
+ *   1. Call kl_configgpio() to configure the interrupting pin (pin
+ *     interrupts will be disabled.
+ *   2. Call kl_gpioirqattach() to attach the pin interrupt handling
+ *      function.
  *   3. Call kl_gpioirqenable() to enable interrupts on the pin.
  *
  * Input Parameters:
@@ -371,20 +361,21 @@ bool kl_gpioread(uint32_t pinset);
  *  - pinarg:  The argument that will accompany the pin interrupt
  *
  * Returned Value:
- *   Zero (OK) is returned on success; On any failure, a negated errno value is
- *   returned to indicate the nature of the failure.
+ *   Zero (OK) is returned on success;
+ *   On any failure, a negated errno value is returned to indicate the nature
+ *   of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr, void *pinarg);
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified pin IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_KL_GPIOIRQ
 void kl_gpioirqenable(uint32_t pinset);
@@ -392,13 +383,13 @@ void kl_gpioirqenable(uint32_t pinset);
 #  define kl_gpioirqenable(pinset)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_KL_GPIOIRQ
 void kl_gpioirqdisable(uint32_t pinset);

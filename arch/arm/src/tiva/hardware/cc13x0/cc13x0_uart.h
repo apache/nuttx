@@ -1,10 +1,11 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x0/cc13x0_uart.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a compatible
+ * BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,23 +37,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_UART_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/chip/chip.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* UART register offsets ************************************************************/
+/* UART register offsets ****************************************************/
 
 #define TIVA_UART_DR_OFFSET        0x0000 /* UART Data */
 #define TIVA_UART_RSR_OFFSET       0x0004 /* UART Receive Status */
@@ -82,7 +83,7 @@
 #define TIVA_UART_PCELLID2_OFFSET  0x0ff8 /* UART PrimeCell Identification 2 */
 #define TIVA_UART_PCELLID3_OFFSET  0x0ffc /* UART PrimeCell Identification 3 */
 
-/* UART register addresses **********************************************************/
+/* UART register addresses **************************************************/
 
 #define TIVA_UART_BASE(n)          (TIVA_UART0_BASE + (n)*0x01000)
 
@@ -118,7 +119,7 @@
 #  define TIVA_UART0_DMACTL        (TIVA_UART0_BASE + TIVA_UART_DMACTL_OFFSET)
 #endif
 
-/* UART register bit settings *******************************************************/
+/* UART register bit settings ***********************************************/
 
 /* UART Data (DR) */
 
@@ -255,12 +256,12 @@
 #define UART_DMACTL_TXDMAE         (1 << 1)  /* Bit 1:  Transmit DMA Enable */
 #define UART_DMACTL_DMAERR         (1 << 2)  /* Bit 2:  DMA on Error */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_UART_H */

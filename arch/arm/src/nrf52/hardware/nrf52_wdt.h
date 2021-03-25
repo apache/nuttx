@@ -1,4 +1,4 @@
-/***************************************************************************************************
+/****************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_wdt.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ***************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_WDT_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_WDT_H
 
-/***************************************************************************************************
+/****************************************************************************
  * Included Files
- ***************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
-/***************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ***************************************************************************************************/
+ ****************************************************************************/
 
-/* WDT Register Offsets ****************************************************************************/
+/* WDT Register Offsets *****************************************************/
 
 /* Registers for the WDT function: */
 
@@ -54,7 +54,7 @@
 #define NRF52_WDT_RR6_OFFSET              0x0618  /* Reload request 6 */
 #define NRF52_WDT_RR7_OFFSET              0x061c  /* Reload request 7 */
 
-/* WDT Register Addresses **************************************************************************/
+/* WDT Register Addresses ***************************************************/
 
 #define NRF52_WDT_TASKS_START             (NRF52_WDT_BASE + NRF52_WDT_TASKS_START_OFFSET)
 #define NRF52_WDT_EVENTS_TIMEOUT          (NRF52_WDT_BASE + NRF52_WDT_EVENTS_TIMEOUT_OFFSET)
@@ -74,7 +74,7 @@
 #define NRF52_WDT_RR6                     (NRF52_WDT_BASE + NRF52_WDT_RR6_OFFSET)
 #define NRF52_WDT_RR7                     (NRF52_WDT_BASE + NRF52_WDT_RR7_OFFSET)
 
-/* WDT Register Bitfield Definitions ***************************************************************/
+/* WDT Register Bitfield Definitions ****************************************/
 
 /* INTENSET/INTENCLR Register */
 

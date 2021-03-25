@@ -1,54 +1,39 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kl/hardware/kl_spi.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_SPI_H
 #define __ARCH_ARM_SRC_KL_HARDWARE_KL_SPI_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KL_SPI_C1_OFFSET    0x0000 /* SPI control register 1 */
 #define KL_SPI_C2_OFFSET    0x0001 /* SPI control register 2 */
@@ -57,7 +42,7 @@
 #define KL_SPI_D_OFFSET     0x0005 /* SPI data register */
 #define KL_SPI_M_OFFSET     0x0007 /* SPI match register */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KL_SPI0_C1          (KL_SPI0_BASE+KL_SPI_C1_OFFSET)
 #define KL_SPI0_C2          (KL_SPI0_BASE+KL_SPI_C2_OFFSET)
@@ -73,7 +58,7 @@
 #define KL_SPI1_D           (KL_SPI1_BASE+KL_SPI_D_OFFSET)
 #define KL_SPI1_M           (KL_SPI1_BASE+KL_SPI_M_OFFSET)
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* SPI control register 1 */
 
@@ -101,6 +86,7 @@
 #define SPI_BR_SPR_SHIFT    (0)       /* Bits 0-3: SPI baud rate divisor */
 #define SPI_BR_SPR_MASK     (15 << SPI_BR_SPR_SHIFT)
 #  define SPI_BR_SPR_DIV(n) (((n)-1) << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 2^(n-1) */
+
 #  define SPI_BR_SPR_DIV2   (0 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 2 */
 #  define SPI_BR_SPR_DIV4   (1 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 4 */
 #  define SPI_BR_SPR_DIV8   (2 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 8 */
@@ -110,11 +96,15 @@
 #  define SPI_BR_SPR_DIV128 (6 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 128 */
 #  define SPI_BR_SPR_DIV256 (7 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 256 */
 #  define SPI_BR_SPR_DIV512 (8 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 512 */
+
 #define SPI_BR_SPPR_SHIFT   (4)       /* Bits 4-6: SPI baud rate prescale divisor */
 #define SPI_BR_SPPR_MASK    (7 << SPI_BR_SPPR_SHIFT)
 #  define SPI_BR_SPPR(n)    (((n)-1) << SPI_BR_SPPR_SHIFT) /* Prescaler=n, n=1-8 */
+
                                       /* Bit 7:  Reserved */
+
 /* SPI status register */
+
                                       /* Bits 0-3: Reserved */
 #define SPI_S_MODF          (1 << 4)  /* Bit 4:  Master mode fault flag */
 #define SPI_S_SPTEF         (1 << 5)  /* Bit 5:  SPI transmit buffer empty flag */
@@ -122,18 +112,19 @@
 #define SPI_S_SPRF          (1 << 7)  /* Bit 7:  SPI read buffer full flag */
 
 /* SPI data register (8-bit data, low byte) */
+
 /* SPI match register (8-bit match value) */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_SPI_H */

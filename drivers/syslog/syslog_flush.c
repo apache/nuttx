@@ -64,21 +64,29 @@
 
 int syslog_flush(void)
 {
-  DEBUGASSERT(g_syslog_channel != NULL);
+  int i;
 
 #ifdef CONFIG_SYSLOG_INTBUFFER
   /* Flush any characters that may have been added to the interrupt
    * buffer.
    */
 
-  syslog_flush_intbuffer(g_syslog_channel, true);
+  syslog_flush_intbuffer(true);
 #endif
 
-  /* Then flush all of the buffered output to the SYSLOG device */
-
-  if (g_syslog_channel->sc_flush != NULL)
+  for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
     {
-      return g_syslog_channel->sc_flush();
+      if (g_syslog_channel[i] == NULL)
+        {
+          break;
+        }
+
+      /* Then flush all of the buffered output to the SYSLOG device */
+
+      if (g_syslog_channel[i]->sc_flush != NULL)
+        {
+          g_syslog_channel[i]->sc_flush();
+        }
     }
 
   return OK;

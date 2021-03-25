@@ -1,59 +1,44 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_rti.h
- * Real Time Interrupt (RTI) Module Register Definitions
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *   TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller, Technical Reference Manual, Texas
- *   Instruments, Literature Number: SPNU517A, September 2013
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
+
+/* References:
+ * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
+ * Technical Reference Manual, Texas Instruments,
+ * Literature Number: SPNU517A, September 2013
+ */
 
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_RTI_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_RTI_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TMS570_RTI_GCTRL_OFFSET         0x0000 /* RTI Global Control Register */
                                                /* 0x0004 RTITBCTRL Reserved. Do NOT use. */
@@ -95,7 +80,7 @@
 #define TMS570_RTI_COMP2CLR_OFFSET      0x00b8 /* RTI Compare 2 Clear Register */
 #define TMS570_RTI_COMP3CLR_OFFSET      0x00bc /* RTI Compare 3 Clear Register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TMS570_RTI_GCTRL                (TMS570_RTIDWWD_BASE+TMS570_RTI_GCTRL_OFFSET)
 #define TMS570_RTI_CAPCTRL              (TMS570_RTIDWWD_BASE+TMS570_RTI_CAPCTRL_OFFSET)
@@ -134,7 +119,7 @@
 #define TMS570_RTI_COMP2CLR             (TMS570_RTIDWWD_BASE+TMS570_RTI_COMP2CLR_OFFSET)
 #define TMS570_RTI_COMP3CLR             (TMS570_RTIDWWD_BASE+TMS570_RTI_COMP3CLR_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* RTI Global Control Register */
 
@@ -155,15 +140,21 @@
 #define RTI_COMPCTRL_COMPSEL3           (1 << 12) /* Bit 12: Compare select 3 */
 
 /* RTI Free Running Counter 0/1 Register (32-bit counter value) */
+
 /* RTI Up Counter 0/1 Register (32-bit counter value) */
+
 /* RTI Compare Up Counter 0/1 Register (32-bit counter value) */
+
 /* RTI Capture Free Running Counter 0/1 Register (32-bit counter value) */
+
 /* RTI Capture Up Counter 0/1 Register (32-bit counter value) */
+
 /* RTI Compare 0/1/2/3 Register Section (32-bit counter value) */
+
 /* RTI Update Compare 0/1/2/3 Register (32-bit counter value) */
 
-/* RTI Set Interrupt Enable Register, RTI Clear Interrupt Enable Register, and
- * RTI Interrupt Flag Register
+/* RTI Set Interrupt Enable Register, RTI Clear Interrupt Enable Register,
+ * and RTI Interrupt Flag Register
  */
 
 #define RTI_INT0                        (1 << 0)  /* Bit 0:  Compare interrupt 0 */
@@ -177,26 +168,37 @@
 
 /* Digital Watchdog Control Register */
 #define RTI_DWDCTRL_
+
 /* Digital Watchdog Preload Register */
 #define RTI_DWDPRLD_
+
 /* Watchdog Status Register */
 #define RTI_WDSTATUS_
+
 /* RTI Watchdog Key Register */
 #define RTI_WDKEY_
+
 /* RTI Digital Watchdog Down Counter Register */
 #define RTI_DWDCNTR_
+
 /* Digital Windowed Watchdog Reaction Control Register Section */
 #define RTI_WWDRXNCTRL_
+
 /* Digital Windowed Watchdog Window Size Control Register */
 #define RTI_WWDSIZECTRL_
+
 /* RTI Compare Interrupt Clear Enable Register */
 #define RTI_INTCLRENABLE_
+
 /* RTI Compare 0 Clear Register */
 #define RTI_COMP0CLR_
+
 /* RTI Compare 1 Clear Register */
 #define RTI_COMP1CLR_
+
 /* RTI Compare 2 Clear Register */
 #define RTI_COMP2CLR_
+
 /* RTI Compare 3 Clear Register */
 #define RTI_COMP3CLR_
 

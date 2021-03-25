@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am335x_dcan.h
  *
  *   Copyright (C) 2019 Petro Karashchenko. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_DCAN_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_DCAN_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/am335x_memorymap.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *************************************************************************/
+/* Register offsets *********************************************************/
 
 #define AM335X_DCAN_CTL_OFFSET          0x0000 /* CAN Control Register */
 #define AM335X_DCAN_ES_OFFSET           0x0004 /* Error and Status Register */
@@ -119,7 +119,7 @@
 #define AM335X_DCAN_IFDATB_OFFSET(n)    (0x0114 + ((unsigned int)(n) - 1) * 0x20)
 #define AM335X_DCAN_IF3UPD_OFFSET(n)    (0x0160 + ((((unsigned int)(n) - 1) >> 5) << 2))
 
-/* Register virtual addresses ***************************************************************/
+/* Register virtual addresses ***********************************************/
 
 #define AM335X_DCAN0_CTL                (AM335X_DCAN0_VADDR + AM335X_DCAN_CTL_OFFSET)
 #define AM335X_DCAN0_ES                 (AM335X_DCAN0_VADDR + AM335X_DCAN_ES_OFFSET)
@@ -261,7 +261,7 @@
 #define AM335X_DCAN1_IFDATB(n)          (AM335X_DCAN1_VADDR + AM335X_DCAN_IFDATB_OFFSET(n))
 #define AM335X_DCAN1_IF3UPD(n)          (AM335X_DCAN1_VADDR + AM335X_DCAN_IF3UPD_OFFSET(n))
 
-/* Register bit field definitions ***********************************************************/
+/* Register bit field definitions *******************************************/
 
 #define DCAN_CTL_INIT                   (1 << 0)  /* Bit 0:  Initialization mode */
 #define DCAN_CTL_IE0                    (1 << 1)  /* Bit 1:  Interrupt line 0 enable */
@@ -272,10 +272,12 @@
 #define DCAN_CTL_TEST                   (1 << 7)  /* Bit 7:  Test mode enable */
 #define DCAN_CTL_IDS                    (1 << 8)  /* Bit 8:  Interruption debug support enable */
 #define DCAN_CTL_ABO                    (1 << 9)  /* Bit 9:  Auto-Bus-On enable */
+
 #define DCAN_CTL_PMD_SHIFT              (10)  /* Bits 10-13:  Parity on/off. */
 #define DCAN_CTL_PMD_MASK               (15 << DCAN_CTL_PMD_SHIFT)
 #  define DCAN_CTL_PMD_OFF              (5 << DCAN_CTL_PMD_SHIFT)  /* Parity function disabled */
-#  define DCAN_CTL_PMD_ON               (10 << DCAN_CTL_PMD_SHIFT)  /* Parity function enabled */
+#  define DCAN_CTL_PMD_ON               (10 << DCAN_CTL_PMD_SHIFT) /* Parity function enabled */
+
 #define DCAN_CTL_SWR                    (1 << 15)  /* Bit 15:  Software reset enable */
 #define DCAN_CTL_INITDBG                (1 << 16)  /* Bit 16:  Internal init state while debug access */
 #define DCAN_CTL_IE1                    (1 << 17)  /* Bit 17:  Interrupt line 1 enable */
@@ -295,6 +297,7 @@
 #  define DCAN_ES_LEC_BIT0_ERROR        (5 << DCAN_ES_LEC_SHIFT)  /* Bit0 error */
 #  define DCAN_ES_LEC_CRC_ERROR         (6 << DCAN_ES_LEC_SHIFT)  /* CRC error */
 #  define DCAN_ES_LEC_NO_EVENT          (7 << DCAN_ES_LEC_SHIFT)  /* No CAN bus event since last read */
+
 #define DCAN_ES_TX_OK                   (1 << 3)  /* Bit 3: Transmitted a message successfully */
 #define DCAN_ES_RX_OK                   (1 << 4)  /* Bit 4: Received a message successfully */
 #define DCAN_ES_EPASSIVE                (1 << 5)  /* Bit 5: Error passive state */
@@ -302,7 +305,7 @@
 #define DCAN_ES_BUSOFF                  (1 << 7)  /* Bit 7: Bus-Off state */
 #define DCAN_ES_PER                     (1 << 8)  /* Bit 8: Parity error detected */
 #define DCAN_ES_WKUP_PND                (1 << 9)  /* Bit 9: Wake up pending */
-#define DCAN_ES_PDA                     (1 << 10)  /* Bit 10: Local power-down mode acknowledge */
+#define DCAN_ES_PDA                     (1 << 10) /* Bit 10: Local power-down mode acknowledge */
 
 #define DCAN_ERRC_TEC_SHIFT             (0)  /* Bits 10-13:  Parity on/off. */
 #define DCAN_ERRC_TEC_MASK              (255 << DCAN_ERRC_TEC_SHIFT)
@@ -329,12 +332,13 @@
 
 #define DCAN_TEST_SILENT                (1 << 3)  /* Bit 3:  Silent mode */
 #define DCAN_TEST_LBACK                 (1 << 4)  /* Bit 4:  Loopback mode */
-#define DCAN_TEST_TX_SHIFT              (5)  /* Bits 5-6:  Control of CAN_TX pin */
+#define DCAN_TEST_TX_SHIFT              (5)       /* Bits 5-6:  Control of CAN_TX pin */
 #define DCAN_TEST_TX_MASK               (3 << DCAN_TEST_TX_SHIFT)
 #  define DCAN_TEST_TX_NORMAL           (0 << DCAN_TEST_TX_SHIFT)  /* Normal operation */
 #  define DCAN_TEST_TX_SAMLE            (1 << DCAN_TEST_TX_SHIFT)  /* Sample point can be monitored at CAN_TX pin */
 #  define DCAN_TEST_TX_DOMINANT         (2 << DCAN_TEST_TX_SHIFT)  /* CAN_TX pin drives a dominant value */
 #  define DCAN_TEST_TX_RECESSIVE        (3 << DCAN_TEST_TX_SHIFT)  /* CAN_TX pin drives a recessive value */
+
 #define DCAN_TEST_RX                    (1 << 7)  /* Bit 7:  Receive pin monitoring */
 #define DCAN_TEST_EXL                   (1 << 8)  /* Bit 8:  External loopback mode */
 #define DCAN_TEST_RDA                   (1 << 9)  /* Bit 9:  RAM direct access enable */
@@ -353,6 +357,7 @@
 #define DCAN_MSGVAL(n)                  (1 << (((unsigned int)(n) - 1) & 0x1f))  /* Bit 0-31:  Message valid bits (for all message objects) */
 
 #define DCAN_INTMUX_LAST                (1 << 0)  /* Bit 0:  Last implemented message object */
+
 #define DCAN_INTMUX(n)                  (1 << ((unsigned int)(n) & 0x1f))  /* Bit n:  Message object number n */
 
 #define DCAN_IFCMD_MSG_NUM_SHIFT        (0)  /* Bits 0-7:  Number of message object in message RAM which is used for data transfer */
@@ -382,9 +387,9 @@
 
 #define DCAN_IFMCTL_DLC_SHIFT           (0)  /* Bits 0-3:  Data length code */
 #define DCAN_IFMCTL_DLC_MASK            (15 << DCAN_IFMCTL_DLC_SHIFT)
-#define DCAN_IFMCTL_EOB                 (1 << 7)  /* Bit 7:  Data frame has 0 to 8 data bits. */
-#define DCAN_IFMCTL_TX_RQST             (1 << 8)  /* Bit 8:  Transmit request */
-#define DCAN_IFMCTL_RMT_EN              (1 << 9)  /* Bit 9:  Remote enable */
+#define DCAN_IFMCTL_EOB                 (1 << 7)   /* Bit 7:  Data frame has 0 to 8 data bits. */
+#define DCAN_IFMCTL_TX_RQST             (1 << 8)   /* Bit 8:  Transmit request */
+#define DCAN_IFMCTL_RMT_EN              (1 << 9)   /* Bit 9:  Remote enable */
 #define DCAN_IFMCTL_RX_IE               (1 << 10)  /* Bit 10:  Receive interrupt enable */
 #define DCAN_IFMCTL_TX_IE               (1 << 11)  /* Bit 11:  Transmit interrupt enable */
 #define DCAN_IFMCTL_UMASK               (1 << 12)  /* Bit 12:  Use acceptance mask */
@@ -392,13 +397,13 @@
 #define DCAN_IFMCTL_MSGLST              (1 << 14)  /* Bit 14:  Message lost (only valid for message objects with direction Receive) */
 #define DCAN_IFMCTL_NEWDAT              (1 << 15)  /* Bit 15:  New data */
 
-#define DCAN_IF3OBS_MASK                (1 << 0)  /* Bit 0:  Mask data read observation */
-#define DCAN_IF3OBS_ARB                 (1 << 1)  /* Bit 1:  Arbitration data read observation */
-#define DCAN_IF3OBS_CTRL                (1 << 2)  /* Bit 2:  Control read observation */
-#define DCAN_IF3OBS_DATAA               (1 << 3)  /* Bit 3:  Data A read observation */
-#define DCAN_IF3OBS_DATAB               (1 << 4)  /* Bit 4:  Data B read observation */
-#define DCAN_IF3OBS_SM                  (1 << 8)  /* Bit 8:  Status of Mask data read access */
-#define DCAN_IF3OBS_SA                  (1 << 9)  /* Bit 9:  Status of Arbitration data read access */
+#define DCAN_IF3OBS_MASK                (1 << 0)   /* Bit 0:  Mask data read observation */
+#define DCAN_IF3OBS_ARB                 (1 << 1)   /* Bit 1:  Arbitration data read observation */
+#define DCAN_IF3OBS_CTRL                (1 << 2)   /* Bit 2:  Control read observation */
+#define DCAN_IF3OBS_DATAA               (1 << 3)   /* Bit 3:  Data A read observation */
+#define DCAN_IF3OBS_DATAB               (1 << 4)   /* Bit 4:  Data B read observation */
+#define DCAN_IF3OBS_SM                  (1 << 8)   /* Bit 8:  Status of Mask data read access */
+#define DCAN_IF3OBS_SA                  (1 << 9)   /* Bit 9:  Status of Arbitration data read access */
 #define DCAN_IF3OBS_SC                  (1 << 10)  /* Bit 10:  Status of control bits read access */
 #define DCAN_IF3OBS_SDA                 (1 << 11)  /* Bit 11:  Status of Data A read access */
 #define DCAN_IF3OBS_SDB                 (1 << 12)  /* Bit 12:  Status of Data B read access */
@@ -406,18 +411,18 @@
 
 #define DCAN_IF3UPD(n)                  (1 << (((unsigned int)(n) - 1) & 0x1f))  /* Bit 0-31: IF3 Update Enabled (for all message objects) */
 
-#define DCAN_TIOC_IN                    (1 << 0)  /* Bit 0:  CAN_TX data in */
-#define DCAN_TIOC_OUT                   (1 << 1)  /* Bit 1:  CAN_TX data out write */
-#define DCAN_TIOC_DIR                   (1 << 2)  /* Bit 2:  CAN_TX data direction */
-#define DCAN_TIOC_FUNC                  (1 << 3)  /* Bit 3:  CAN_TX function */
+#define DCAN_TIOC_IN                    (1 << 0)   /* Bit 0:  CAN_TX data in */
+#define DCAN_TIOC_OUT                   (1 << 1)   /* Bit 1:  CAN_TX data out write */
+#define DCAN_TIOC_DIR                   (1 << 2)   /* Bit 2:  CAN_TX data direction */
+#define DCAN_TIOC_FUNC                  (1 << 3)   /* Bit 3:  CAN_TX function */
 #define DCAN_TIOC_OD                    (1 << 16)  /* Bit 16:  CAN_TX open drain enable */
 #define DCAN_TIOC_PD                    (1 << 17)  /* Bit 17:  CAN_TX pull disable */
 #define DCAN_TIOC_PU                    (1 << 18)  /* Bit 18:  CAN_TX pull up/pull down select */
 
-#define DCAN_RIOC_IN                    (1 << 0)  /* Bit 0:  CAN_RX data in */
-#define DCAN_RIOC_OUT                   (1 << 1)  /* Bit 1:  CAN_RX data out write */
-#define DCAN_RIOC_DIR                   (1 << 2)  /* Bit 2:  CAN_RX data direction */
-#define DCAN_RIOC_FUNC                  (1 << 3)  /* Bit 3:  CAN_RX function */
+#define DCAN_RIOC_IN                    (1 << 0)   /* Bit 0:  CAN_RX data in */
+#define DCAN_RIOC_OUT                   (1 << 1)   /* Bit 1:  CAN_RX data out write */
+#define DCAN_RIOC_DIR                   (1 << 2)   /* Bit 2:  CAN_RX data direction */
+#define DCAN_RIOC_FUNC                  (1 << 3)   /* Bit 3:  CAN_RX function */
 #define DCAN_RIOC_OD                    (1 << 16)  /* Bit 16:  CAN_RX open drain enable */
 #define DCAN_RIOC_PD                    (1 << 17)  /* Bit 17:  CAN_RX pull disable */
 #define DCAN_RIOC_PU                    (1 << 18)  /* Bit 18:  CAN_RX pull up/pull down select */

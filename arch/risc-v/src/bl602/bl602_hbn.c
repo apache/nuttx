@@ -58,3 +58,9 @@ void bl602_set_uart_clk_sel(int clk_sel)
       modifyreg32(BL602_HBN_GLB, HBN_GLB_HBN_UART_CLK_SEL, 0);
     }
 }
+
+void bl602_aon_pad_iesmt_cfg(uint8_t pad_cfg)
+{
+  modifyreg32(BL602_HBN_IRQ_MODE, HBN_IRQ_MODE_REG_AON_PAD_IE_SMT,
+      pad_cfg << 8);
+}

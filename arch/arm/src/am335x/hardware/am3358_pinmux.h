@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am3358_pinmux.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
@@ -36,33 +36,36 @@
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM3358_PINMUX_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM3358_PINMUX_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/am335x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Alternate Pin Functions.
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
- * Drivers, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.  For example, if
- * UART2 RXD connects via the MMC0_CLK pin, then the following definition should
- * appear in the board.h header file for that board:
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc. Drivers, however, will use the pin selection without the numeric
+ * suffix. Additional definitions are required in the board.h file.
+ * For example, if UART2 RXD connects via the MMC0_CLK pin, then the
+ * following definition should appear in the board.h header file for that
+ * board:
  *
  *   #define GPIO_UART2_RXD GPIO_UART2_RXD_1
  *
- * The driver will then automatically configure to use the MMC0_CLK pin for UART2 RXD.
+ * The driver will then automatically configure to use the MMC0_CLK pin for
+ * UART2 RXD.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific GPIO options (such as pull-up or
- * -down).  Just the basics are defined for most pins in this file at the present
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific GPIO options
+ * (such as pull-up or -down).
+ *  Just the basics are defined for most pins in this file at the present
  * time.
  */
 

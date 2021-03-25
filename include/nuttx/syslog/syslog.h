@@ -131,12 +131,30 @@ extern "C"
  *   channel - Provides the interface to the channel to be used.
  *
  * Returned Value:
- *   Zero (OK)is returned on  success.  A negated errno value is returned
+ *   Zero (OK) is returned on success.  A negated errno value is returned
  *   on any failure.
  *
  ****************************************************************************/
 
 int syslog_channel(FAR const struct syslog_channel_s *channel);
+
+/****************************************************************************
+ * Name: syslog_channel_remove
+ *
+ * Description:
+ *   Removes an already configured SYSLOG channel from the list of used
+ *   channels.
+ *
+ * Input Parameters:
+ *   channel - Provides the interface to the channel to be removed.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_channel_remove(FAR const struct syslog_channel_s *channel);
 
 /****************************************************************************
  * Name: syslog_initialize

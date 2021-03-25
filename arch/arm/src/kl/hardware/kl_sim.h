@@ -1,54 +1,39 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kl/hardware/kl_sim.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_SIM_H
 #define __ARCH_ARM_SRC_KL_HARDWARE_KL_SIM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 /* Relative to KL_SIMLP_BASE */
 
@@ -75,8 +60,10 @@
 #define KL_SIM_COPC_OFFSET           0x0100 /* COP Control Register */
 #define KL_SIM_SRVCOP_OFFSET         0x0104 /* Service COP Register */
 
-/* Register Addresses ***************************************************************/
-/* NOTE: The SIM_SOPT1 register is located at a different base address than the
+/* Register Addresses *******************************************************/
+
+/* NOTE:
+ * The SIM_SOPT1 register is located at a different base address than the
  * other SIM registers.
  */
 
@@ -101,15 +88,17 @@
 #define KL_SIM_COPC                  (KL_SIM_BASE+KL_SIM_COPC_OFFSET)
 #define KL_SIM_SRVCOP                (KL_SIM_BASE+KL_SIM_SRVCOP_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* System Options Register 1 */
+
                                                /* Bits 0-17: Reserved */
 #define SIM_SOPT1_OSC32KSEL_SHIFT    (18)      /* Bit 18-19: 32K oscillator clock select */
 #define SIM_SOPT1_OSC32KSEL_MASK     (3 << SIM_SOPT1_OSC32KSEL_SHIFT)
 #  define SIM_SOPT1_OSC32KSEL_SYS    (1 << SIM_SOPT1_OSC32KSEL_SHIFT) /* System oscillator (OSC32KCLK) */
 #  define SIM_SOPT1_OSC32KSEL_RTC    (2 << SIM_SOPT1_OSC32KSEL_SHIFT) /* RTC_CLKIN */
 #  define SIM_SOPT1_OSC32KSEL_LPO    (3 << SIM_SOPT1_OSC32KSEL_SHIFT) /* LPO 1kHz */
+
                                                /* Bits 20-28: Reserved */
 #define SIM_SOPT1_USBSTBY            (1 << 29) /* Bit 29: USB voltage regulator in
                                                 *         standby mode (VLPR and VLPW modes) */
@@ -135,6 +124,7 @@
 #  define SIM_SOPT2_CLKOUTSEL_LPO      (3 << SIM_SOPT2_CLKOUTSEL_SHIFT) /* LPO clock (1 kHz) */
 #  define SIM_SOPT2_CLKOUTSEL_MCGIRCLK (4 << SIM_SOPT2_CLKOUTSEL_SHIFT) /* MCGIRCLK */
 #  define SIM_SOPT2_CLKOUTSEL_OSCERCLK (6 << SIM_SOPT2_CLKOUTSEL_SHIFT) /* OSCERCLK */
+
 #define SIM_SOPT2_CMTUARTPAD         (1 << 11) /* Bit 11: CMT/UART pad drive strength */
 #define SIM_SOPT2_TRACECLKSEL        (1 << 12) /* Bit 12: Debug trace clock select */
                                                /* Bits 13-15: Reserved */
@@ -148,12 +138,14 @@
 #  define SIM_SOPT2_TPMSRC_MCGCLK    (1 << SIM_SOPT2_TPMSRC_SHIFT) /* MCGFLLCLK clock or MCGPLLCLK/2 */
 #  define SIM_SOPT2_TPMSRC_OCSERCLK  (2 << SIM_SOPT2_TPMSRC_SHIFT) /* OSCERCLK clock */
 #  define SIM_SOPT2_TPMSRC_MCGIRCLK  (3 << SIM_SOPT2_TPMSRC_SHIFT) /* MCGIRCLK clock */
+
 #define SIM_SOPT2_UART0SRC_SHIFT     (26)      /* Bits 26-27: UART0 clock source select */
 #define SIM_SOPT2_UART0SRC_MASK      (3 << SIM_SOPT2_UART0SRC_SHIFT)
 #  define SIM_SOPT2_UART0SRC_DIS      (0 << SIM_SOPT2_UART0SRC_SHIFT) /* Clock disabled */
 #  define SIM_SOPT2_UART0SRC_MCGCLK   (1 << SIM_SOPT2_UART0SRC_SHIFT) /* MCGFLLCLK clock or MCGPLLCLK/2 clock */
 #  define SIM_SOPT2_UART0SRC_OSCERCLK (2 << SIM_SOPT2_UART0SRC_SHIFT) /* OSCERCLK clock */
 #  define SIM_SOPT2_UART0SRC_MCGIRCLK (3 << SIM_SOPT2_UART0SRC_SHIFT) /* MCGIRCLK clock */
+
                                                /* Bits 28-31: Reserved */
 
 /* System Options Register 4 */
@@ -175,6 +167,7 @@
 #  define SIM_SOPT5_UART0TXSRC_TX    (0 << SIM_SOPT5_UART0TXSRC_SHIFT) /* UART0_TX pin */
 #  define SIM_SOPT5_UART0TXSRC_TPM1  (1 << SIM_SOPT5_UART0TXSRC_SHIFT) /* UART0_TX modulated with TPM1 ch0 output */
 #  define SIM_SOPT5_UART0TXSRC_TPM2  (2 << SIM_SOPT5_UART0TXSRC_SHIFT) /* UART0_TX modulated with TPM2 ch0 output */
+
 #define SIM_SOPT5_UART0RXSRC         (1 << 2)  /* Bit 2: UART 0 receive data source select */
                                                /* Bit 3: Reserved */
 #define SIM_SOPT5_UART1TXSRC_SHIFT   (4)       /* Bits 4-5: UART 1 transmit data source select */
@@ -182,11 +175,13 @@
 #  define SIM_SOPT5_UART1TXSRC_TX    (0 << SIM_SOPT5_UART1TXSRC_SHIFT) /* UART1_TX pin */
 #  define SIM_SOPT5_UART1TXSRC_TPM1  (1 << SIM_SOPT5_UART1TXSRC_SHIFT) /* UART1_TX modulated with TPM1 ch0 output */
 #  define SIM_SOPT5_UART1TXSRC_TPM2  (2 << SIM_SOPT5_UART1TXSRC_SHIFT) /* UART1_TX modulated with TPM2 ch0 output */
+
 #define SIM_SOPT5_UART1RXSRC         (1 << 6)  /* Bit 6: UART 1 receive data source select */
 #define SIM_SOPT5_UART0ODE           (1 << 16) /* Bit 16: UART0 Open Drain Enable */
 #define SIM_SOPT5_UART1ODE           (1 << 17) /* Bit 17: UART1 Open Drain Enable */
 #define SIM_SOPT5_UART2ODE           (1 << 18) /* Bit 18: UART2 Open Drain Enable */
                                                /* Bits 20-31: Reserved */
+
 /* System Options Register 7 */
 
 #define SIM_SOPT7_ADC0TRGSEL_SHIFT   (0)       /* Bits 0-3: ADC0 trigger select */
@@ -201,10 +196,12 @@
 #  define SIM_SOPT7_ADC0TRGSEL_ALARM (12 << SIM_SOPT7_ADC0TRGSEL_SHIFT) /* RTC alarm */
 #  define SIM_SOPT7_ADC0TRGSEL_SECS  (13 << SIM_SOPT7_ADC0TRGSEL_SHIFT) /* RTC seconds */
 #  define SIM_SOPT7_ADC0TRGSEL_LPTMR (14 << SIM_SOPT7_ADC0TRGSEL_SHIFT) /* LPTMR0 trigger */
+
 #define SIM_SOPT7_ADC0PRETRGSEL      (1 << 4)  /* Bit 4:  ADC0 pretrigger select */
                                                /* Bits 5-6: Reserved */
 #define SIM_SOPT7_ADC0ALTTRGEN       (1 << 7)  /* Bit 7:  ADC0 alternate trigger enable */
                                                /* Bits 8-31: Reserved */
+
 /* System Device Identification Register */
 
 #define SIM_SDID_PINID_SHIFT         (0)       /* Bits 0-3: Pincount identification */
@@ -216,6 +213,7 @@
 #  define SIM_SDID_PINID_64PIN       (5 << SIM_SDID_PINID_SHIFT)  /* 64-pin */
 #  define SIM_SDID_PINID_80PIN       (6 << SIM_SDID_PINID_SHIFT)  /* 80-pin */
 #  define SIM_SDID_PINID_100PIN      (8 << SIM_SDID_PINID_SHIFT)  /* 100-pin */
+
                                                /* Bits 406: Reserved */
 #define SIM_SDID_DIEID_SHIFT         (7)       /* Bits 7-1: Device die number */
 #define SIM_SDID_DIEID_MASK          (15 << SIM_SDID_DIEID_SHIFT)
@@ -231,15 +229,18 @@
 #  define SIM_SDID_SRAMSIZE_16KB     (5 << SIM_SDID_SRAMSIZE_SHIFT) /* 16 KB */
 #  define SIM_SDID_SRAMSIZE_32KB     (6 << SIM_SDID_SRAMSIZE_SHIFT) /* 32 KB */
 #  define SIM_SDID_SRAMSIZE_64KB     (7 << SIM_SDID_SRAMSIZE_SHIFT) /* 64 KB */
+
 #define SIM_SDID_SERIESID_SHIFT      (10)      /* Bits 20-23: Kinetis Series ID */
 #define SIM_SDID_SERIESID_MASK       (15 << SIM_SDID_SERIESID_SHIFT)
 #  define SIM_SDID_SERIESID_KL       (1 << SIM_SDID_SERIESID_SHIFT) /* KL family */
+
 #define SIM_SDID_SUBFAMID_SHIFT      (24)      /* Bits 24-27: Kinetis Sub-Family ID */
 #define SIM_SDID_SUBFAMID_MASK       (15 << SIM_SDID_SUBFAMID_SHIFT)
 #  define SIM_SDID_SUBFAMID_KLX2     (2 << SIM_SDID_SUBFAMID_SHIFT) /* KLx2 Subfamily (low end) */
 #  define SIM_SDID_SUBFAMID_KLX4     (4 << SIM_SDID_SUBFAMID_SHIFT) /* KLx4 Subfamily (basic analog) */
 #  define SIM_SDID_SUBFAMID_KLX5     (5 << SIM_SDID_SUBFAMID_SHIFT) /* KLx5 Subfamily (advanced analog) */
 #  define SIM_SDID_SUBFAMID_KLX6     (6 << SIM_SDID_SUBFAMID_SHIFT) /* KL3x KLx6 Subfamily (advanced analog with I2S) */
+
 #define SIM_SDID_FAMID_SHIFT         (28)     /* Bits 28-31: Kinetis family ID */
 #define SIM_SDID_FAMID_MASK          (15 << SIM_SDID_FAMID_SHIFT)
 #  define SIM_SDID_FAMID_KL0         (0 << SIM_SDID_FAMID_SHIFT) /* KL0x Family (low end) */
@@ -249,6 +250,7 @@
 #  define SIM_SDID_FAMID_KL4         (4 << SIM_SDID_FAMID_SHIFT) /* KL4x Family (USB and Segment LCD) */
 
 /* System Clock Gating Control Register 4 */
+
                                                /* Bits 0-5: Reserved */
 #define SIM_SCGC4_I2C0               (1 << 6)  /* Bit 6:  I2C0 Clock Gate Control */
 #define SIM_SCGC4_I2C1               (1 << 7)  /* Bit 7:  I2C1 Clock Gate Control */
@@ -263,6 +265,7 @@
 #define SIM_SCGC4_SPI0               (1 << 22) /* Bit 22: SPI0 Clock Gate Control */
 #define SIM_SCGC4_SPI1               (1 << 23) /* Bit 23: SPI1 Clock Gate Control */
                                                /* Bits 24-31: Reserved */
+
 /* System Clock Gating Control Register 5 */
 
 #define SIM_SCGC5_LPTIMER            (1 << 0)  /* Bit 0:  Low Power Timer Clock Gate Control */
@@ -275,6 +278,7 @@
 #define SIM_SCGC5_PORTD              (1 << 12) /* Bit 12: Port D Clock Gate Control */
 #define SIM_SCGC5_PORTE              (1 << 13) /* Bit 13: Port E Clock Gate Control */
                                                /* Bits 14-31: Reserved */
+
 /* System Clock Gating Control Register 6 */
 
 #define SIM_SCGC6_FTFL               (1 << 0)  /* Bit 0:  Flash Memory Clock Gate Control */
@@ -295,11 +299,14 @@
                                                /* Bits 0-7: Reserved */
 #define SIM_SCGC7_DMA                (1 << 8)  /* Bit 8:  DMA Clock Gate Control */
                                                /* Bits 9-31: Reserved */
+
 /* System Clock Divider Register 1 */
+
                                                /* Bits 0-15: Reserved */
 #define SIM_CLKDIV1_OUTDIV4_SHIFT    (16)      /* Bits 16-18: Clock 4 output divider value */
 #define SIM_CLKDIV1_OUTDIV4_MASK     (7 << SIM_CLKDIV1_OUTDIV4_SHIFT)
 #  define SIM_CLKDIV1_OUTDIV4(n)     (((n)-1) << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by n, n=1..16 */
+
 #  define SIM_CLKDIV1_OUTDIV4_1      (0 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 1 */
 #  define SIM_CLKDIV1_OUTDIV4_2      (1 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 2 */
 #  define SIM_CLKDIV1_OUTDIV4_3      (2 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 3 */
@@ -308,10 +315,12 @@
 #  define SIM_CLKDIV1_OUTDIV4_6      (5 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 6 */
 #  define SIM_CLKDIV1_OUTDIV4_7      (6 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 7 */
 #  define SIM_CLKDIV1_OUTDIV4_8      (7 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 8 */
+
                                                /* Bits 19-27: Reserved */
 #define SIM_CLKDIV1_OUTDIV1_SHIFT    (28)      /* Bits 28-31: Clock 1 output divider value */
 #define SIM_CLKDIV1_OUTDIV1_MASK     (15 << SIM_CLKDIV1_OUTDIV1_SHIFT)
 #  define SIM_CLKDIV1_OUTDIV1(n)     (((n)-1) << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by n, n=1..16 */
+
 #  define SIM_CLKDIV1_OUTDIV1_1      (0 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 1 */
 #  define SIM_CLKDIV1_OUTDIV1_2      (1 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 2 */
 #  define SIM_CLKDIV1_OUTDIV1_3      (2 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 3 */
@@ -348,16 +357,22 @@
                                                                      * 4 KB protection region */
 #  define SIM_FCFG1_PFSIZE_256KB     (9 << SIM_FCFG1_PFSIZE_SHIFT)  /* 256 KB of program flash memory,
                                                                      * 8 KB protection region */
+
                                                /* Bits 28-31: Reserved */
+
 /* Flash Configuration Register 2 */
+
                                                /* Bits 0-15: Reserved */
 #define SIM_FCFG2_MAXADDR0_SHIFT     (24)      /* Bits 24-30: Max address block */
 #define SIM_FCFG2_MAXADDR0_MASK      (0x7f << SIM_FCFG2_MAXADDR0_SHIFT)
                                                /* Bit 31: Reserved */
 
 /* Unique Identification Register High. 16-bit Unique Identification. */
+
 /* Unique Identification Register Mid-High. 32-bit Unique Identification. */
+
 /* Unique Identification Register Mid Low. 32-bit Unique Identification. */
+
 /* Unique Identification Register Low. 32-bit Unique Identification. */
 
 /* COP Control Register */
@@ -376,15 +391,15 @@
 
 /* Service COP Register. 8-bit value. */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 #endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_SIM_H */

@@ -10,37 +10,38 @@
  *    Copyright (c) 2015-2017, Texas Instruments Incorporated
  *    All rights reserved.
  *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- *  1) Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
+ * 1) Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- *  2) Redistributions in binary form must reproduce the above copyright notice,
- *     this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
+ * 2) Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- *  3) Neither the name NuttX nor the names of its contributors may be used to
- *     endorse or promote products derived from this software without specific
- *     prior written permission.
+ * 3) Neither the name NuttX nor the names of its contributors may be used to
+ *    endorse or promote products derived from this software without specific
+ *    prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -59,11 +60,11 @@
 
 #include "cc13xx/cc13x0_rom.h"
 
-/******************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: trim_wakeup_frompowerdown
  *
  * Description:
@@ -73,14 +74,14 @@
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void trim_wakeup_frompowerdown(void)
 {
   /* Currently no specific trim for Powerdown */
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: trim_wakeup_fromshutdown
  *
  * Description:
@@ -93,7 +94,7 @@ static void trim_wakeup_frompowerdown(void)
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 {
@@ -126,14 +127,16 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
     {
       /* ADI3_REFSYS:DCDCCTL5[3] (=DITHER_EN) = CCFG_MODE_CONF_1[19]
        * (=ALT_DCDC_DITHER_EN) ADI3_REFSYS:DCDCCTL5[2:0](=IPEAK ) =
-       * CCFG_MODE_CONF_1[18:16](=ALT_DCDC_IPEAK ) Using a single 4-bit masked
-       * write since layout is equal for both source and destination
+       * CCFG_MODE_CONF_1[18:16](=ALT_DCDC_IPEAK )
+       * Using a single 4-bit masked write since layout is equal for
+       * both source and destination
        */
 
       regval = getreg32(TIVA_CCFG_MODE_CONF_1);
       regval = (0xf0 | (regval >> CCFG_MODE_CONF_1_ALT_DCDC_IPEAK_SHIFT));
       putreg8((uint8_t)regval,
-              TIVA_ADI3_REFSYS_MASK4B + (TIVA_ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
+              TIVA_ADI3_REFSYS_MASK4B +
+             (TIVA_ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
     }
 
   /* Enable for JTAG to be powered down. The JTAG domain is automatically
@@ -167,7 +170,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
   rom_setup_coldreset_from_shutdown_cfg2(fcfg1_revision, ccfg_modeconf);
 
   /* Increased margin between digital supply voltage and VDD BOD during
-   * standby. VTRIM_UDIG: signed 4 bits value to be incremented by 2 (max = 7)
+   * standby.
+   * VTRIM_UDIG: signed 4 bits value to be incremented by 2 (max = 7)
    * VTRIM_BOD: unsigned 4 bits value to be decremented by 1 (min = 0) This
    * applies to chips with mp1rev < 542 for cc13x0 and for mp1rev < 527 for
    * cc26x0
@@ -179,19 +183,19 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   if (mp1rev < 542)
     {
-      uint32_t ldoTrimReg = getreg32(TIVA_FCFG1_BAT_RC_LDO_TRIM);
+      uint32_t ldo_trim_reg = getreg32(TIVA_FCFG1_BAT_RC_LDO_TRIM);
       uint32_t vtrim_bod;
       uint32_t vtrim_udig;
       uint8_t regval8;
 
       /* bit[27:24] unsigned */
 
-      vtrim_bod = ((ldoTrimReg & FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD_MASK) >>
+      vtrim_bod = ((ldo_trim_reg & FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD_MASK) >>
                   FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD_SHIFT);
 
       /* bit[19:16] signed but treated as unsigned */
 
-      vtrim_udig = ((ldoTrimReg & FCFG1_BAT_RC_LDO_TRIM_VTRIM_UDIG_MASK) >>
+      vtrim_udig = ((ldo_trim_reg & FCFG1_BAT_RC_LDO_TRIM_VTRIM_UDIG_MASK) >>
                    FCFG1_BAT_RC_LDO_TRIM_VTRIM_UDIG_SHIFT);
 
       if (vtrim_bod > 0)
@@ -239,7 +243,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
   putreg32(regval, TIVA_FLASH_CFG);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: trim_coldreset
  *
  * Description:
@@ -248,28 +252,28 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void trim_coldreset(void)
 {
   /* Currently no specific trim for Cold Reset */
 }
 
-/******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: cc13xx_trim_device
  *
  * Description:
  *   Perform the necessary trim of the device which is not done in boot code
  *
  *   This function should only execute coming from ROM boot. The current
- *   implementation does not take soft reset into account. However, it does no
- *   damage to execute it again. It only consumes time.
+ *   implementation does not take soft reset into account. However, it does
+ *   no damage to execute it again. It only consumes time.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void cc13xx_trim_device(void)
 {
@@ -303,11 +307,11 @@ void cc13xx_trim_device(void)
 
   putreg32(AUX_WUC_MODCLKEN1_SMPH, TIVA_AUX_WUC_MODCLKEN1);
 
-  /* Warm resets on CC13x0 and CC26x0 complicates software design because much
-   * of our software expect that initialization is done from a full system
-   * reset. This includes RTC setup, oscillator configuration and AUX setup. To
-   * ensure a full reset of the device is done when customers get e.g. a
-   * Watchdog reset, the following is set here:
+  /* Warm resets on CC13x0 and CC26x0 complicates software design because
+   * much of our software expect that initialization is done from a full
+   * system reset. This includes RTC setup, oscillator configuration and
+   * AUX setup. To ensure a full reset of the device is done when customers
+   * get e.g. a Watchdog reset, the following is set here:
    */
 
   regval  = getreg32(TIVA_PRCM_WARMRESET);
@@ -338,11 +342,11 @@ void cc13xx_trim_device(void)
       trim_wakeup_frompowerdown();
     }
 
-  /* Check for shutdown.  When device is going to shutdown the hardware will
-   * automatically clear the SLEEPDIS bit in the SLEEP register in the
-   * AON_SYSCTL module. It is left for the application to assert this bit when
-   * waking back up, but not before the desired IO configuration has been
-   * re-established.
+  /* Check for shutdown.
+   * When device is going to shutdown the hardware will automatically clear
+   * the SLEEPDIS bit in the SLEEP register in the AON_SYSCTL module.
+   * It is left for the application to assert this bit when waking back
+   * up, but not before the desired IO configuration has been re-established.
    */
 
   else if ((getreg32(TIVA_AON_SYSCTL_SLEEPCTL) &
@@ -358,8 +362,8 @@ void cc13xx_trim_device(void)
     }
   else
     {
-      /* Consider adding a check for soft reset to allow debugging to skip this
-       * section!!! NB. This should be calling a ROM implementation of
+      /* Consider adding a check for soft reset to allow debugging to skip
+       * this section!!! NB. This should be calling a ROM implementation of
        * required trim and compensation e.g. trim_coldreset() -->
        * trim_wakeup_fromshutdown() -->  trim_wakeup_frompowerdown()
        */
@@ -375,8 +379,8 @@ void cc13xx_trim_device(void)
 
   putreg32(0, TIVA_PRCM_PDCTL1VIMS);
 
-  /* Configure optimal wait time for flash FSM in cases where flash pump wakes
-   * up from sleep
+  /* Configure optimal wait time for flash FSM in cases where flash pump
+   * wakes up from sleep
    */
 
   regval  = getreg32(TIVA_FLASH_FPAC1);
@@ -385,8 +389,8 @@ void cc13xx_trim_device(void)
   putreg32(regval, TIVA_FLASH_FPAC1);
 
   /* And finally at the end of the flash boot process: SET BOOT_DET bits in
-   * AON_SYSCTL to 3 if already found to be 1 Note: The BOOT_DET_x_CLR/SET bits
-   * must be manually cleared
+   * AON_SYSCTL to 3 if already found to be 1 Note: The BOOT_DET_x_CLR/SET
+   * bits must be manually cleared
    */
 
   if ((getreg32(TIVA_AON_SYSCTL_RESETCTL) &

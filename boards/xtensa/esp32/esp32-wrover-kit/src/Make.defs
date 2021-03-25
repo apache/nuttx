@@ -55,6 +55,10 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += esp32_gpio.c
 endif
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += esp32_buttons.c
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld
 

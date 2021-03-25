@@ -1,51 +1,36 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/a1x/hardware/a1x_pio.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A1X_PIO_H
 #define __ARCH_ARM_SRC_A1X_HARDWARE_A1X_PIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/a1x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define PIO_REG_PORTA         0
 #define PIO_REG_PORTB         1
@@ -76,7 +61,7 @@
 #define PIO_REG_INT_LOWLEVEL  3
 #define PIO_REG_INT_BOTHEDGES 4
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define A1X_PIO_CFG0_OFFSET(n)    (0x0000 + (n)*0x24) /* Port Configure Register 0, n=0-9 */
 #define A1X_PIO_CFG1_OFFSET(n)    (0x0004 + (n)*0x24) /* Port Configure Register 1, n=0-9 */
@@ -97,7 +82,7 @@
 #define A1X_SDR_PAD_DRV_OFFSET    0x0220              /* SDRAM Pad Multi-Driving Register */
 #define A1X_SDR_PAD_PUL_OFFSET    0x0224              /* SDRAM Pad Pull Register */
 
-/* Register virtual addresses *******************************************************/
+/* Register virtual addresses ***********************************************/
 
 #define A1X_PIO_CFG0(n)           (A1X_PIO_VADDR+A1X_PIO_CFG0_OFFSET(n))
 #define A1X_PIO_CFG1(n)           (A1X_PIO_VADDR+A1X_PIO_CFG1_OFFSET(n))
@@ -118,7 +103,7 @@
 #define A1X_SDR_PAD_DRV           (A1X_PIO_VADDR+A1X_SDR_PAD_DRV_OFFSET)
 #define A1X_SDR_PAD_PUL           (A1X_PIO_VADDR+A1X_SDR_PAD_PUL_OFFSET)
 
-/* Register bit field definitions ***************************************************/
+/* Register bit field definitions *******************************************/
 
 /* Port Configure Register 0, n=0-7 */
 
@@ -212,9 +197,11 @@
 #  define PIO_INT_DEB_CLKPRESC(n)  ((uint32_t)(n) << PIO_INT_DEB_CLKPRESC_SHIFT)
 
 /* SDRAM Pad Multi-Driving Register */
+
 /* REVISIT: Missing register bit definitions */
 
 /* SDRAM Pad Pull Register */
+
 /* REVISIT: Missing register bit definitions */
 
 #endif /* __ARCH_ARM_SRC_A1X_HARDWARE_A1X_PIO_H */

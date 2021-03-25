@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_rng.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -31,24 +31,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_RNG_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_RNG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets for RNG *********************************************************/
+/* Register Offsets for RNG *************************************************/
 
 #define NRF52_RNG_TASKS_START_OFFSET   0x0000  /* RNG Task Start */
 #define NRF52_RNG_TASKS_STOP_OFFSET    0x0004  /* RNG Task Stop */
@@ -59,7 +59,7 @@
 #define NRF52_RNG_CONFIG_OFFSET        0x0504  /* RNG CONFIG Register */
 #define NRF52_RNG_VALUE_OFFSET         0x0508  /* RNG Value Register */
 
-/* Register Addresses for RNG *******************************************************/
+/* Register Addresses for RNG ***********************************************/
 
 #define NRF52_RNG_TASKS_START          (NRF52_RNG_BASE + NRF52_RNG_TASKS_START_OFFSET)
 #define NRF52_RNG_TASKS_STOP           (NRF52_RNG_BASE + NRF52_RNG_TASKS_STOP_OFFSET)
@@ -72,7 +72,7 @@
 #define NRF52_RNG_CONFIG               (NRF52_RNG_BASE + NRF52_RNG_CONFIG_OFFSET)
 #define NRF52_RNG_VALUE                (NRF52_RNG_BASE + NRF52_RNG_VALUE_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* INTSET/INTCLR Register */
 
