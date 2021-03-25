@@ -916,6 +916,8 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET, bytes * 8 - 1);
       esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MOSI_M);
 
+      tp += n;
+
       if (rp)
         {
           esp32_dma_init(s_dma_rxdesc[priv->config->dma_chan - 1],
@@ -927,6 +929,8 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
                             regval | SPI_INLINK_START_M);
           esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET, bytes * 8 - 1);
           esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MISO_M);
+
+          rp += n;
         }
       else
         {
@@ -938,8 +942,6 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       esp32_spi_sem_waitdone(priv);
 
       bytes -= n;
-      tp += n;
-      rp += n;
     }
 
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_INT_EN_M);
