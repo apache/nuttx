@@ -161,7 +161,7 @@ static inline void efm32_setdrive(uintptr_t base, uint8_t pin, uint8_t drive)
   if (drive != _GPIO_DRIVE_STANDARD)
     {
       putreg32((uint32_t)drive << _GPIO_P_CTRL_DRIVEMODE_SHIFT,
-               base + EFM32_GPIO_Pn_CTRL_OFFSET);
+               base + EFM32_GPIO_PN_CTRL_OFFSET);
     }
 }
 
@@ -203,11 +203,11 @@ static inline void efm32_setdout(uintptr_t base, uint8_t pin, bool dout)
 
   if (dout)
     {
-      putreg32(1 << pin, base + EFM32_GPIO_Pn_DOUTSET_OFFSET);
+      putreg32(1 << pin, base + EFM32_GPIO_PN_DOUTSET_OFFSET);
     }
   else
     {
-      putreg32(1 << pin, base + EFM32_GPIO_Pn_DOUTCLR_OFFSET);
+      putreg32(1 << pin, base + EFM32_GPIO_PN_DOUTCLR_OFFSET);
     }
 }
 
@@ -221,7 +221,7 @@ static inline void efm32_setdout(uintptr_t base, uint8_t pin, bool dout)
 
 static inline bool efm32_getdin(uintptr_t base, uint8_t pin)
 {
-  return ((getreg32(base + EFM32_GPIO_Pn_DIN_OFFSET) &
+  return ((getreg32(base + EFM32_GPIO_PN_DIN_OFFSET) &
          ((uint32_t)1 << pin)) != 0);
 }
 
@@ -243,12 +243,12 @@ static inline void efm32_setmode(uintptr_t base, uint8_t pin, uint8_t mode)
 
   if (pin < 8)
     {
-      regaddr = base + EFM32_GPIO_Pn_MODEL_OFFSET;
+      regaddr = base + EFM32_GPIO_PN_MODEL_OFFSET;
       shift = (unsigned int)pin << 2;
     }
   else
     {
-      regaddr = base + EFM32_GPIO_Pn_MODEH_OFFSET;
+      regaddr = base + EFM32_GPIO_PN_MODEH_OFFSET;
       shift = (unsigned int)(pin - 8) << 2;
     }
 
@@ -284,7 +284,7 @@ int efm32_configgpio(gpio_pinset_t cfgset)
   /* Get basic pin configuration information */
 
   port = efm32_getport(cfgset);
-  base = EFM32_GPIO_Pn_BASE(port);
+  base = EFM32_GPIO_PN_BASE(port);
   pin  = efm32_getpin(cfgset);
   mode = efm32_getmode(cfgset);
 
@@ -337,7 +337,7 @@ void efm32_gpiowrite(gpio_pinset_t pinset, bool value)
   /* Get basic pin configuration information */
 
   port = efm32_getport(pinset);
-  base = EFM32_GPIO_Pn_BASE(port);
+  base = EFM32_GPIO_PN_BASE(port);
   pin  = efm32_getpin(pinset);
 
   /* And set the output value */
@@ -362,7 +362,7 @@ bool efm32_gpioread(gpio_pinset_t pinset)
   /* Get basic pin configuration information */
 
   port = efm32_getport(pinset);
-  base = EFM32_GPIO_Pn_BASE(port);
+  base = EFM32_GPIO_PN_BASE(port);
   pin  = efm32_getpin(pinset);
 
   /* And return the input value of the pin */

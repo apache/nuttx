@@ -115,7 +115,7 @@
 #  define EFM32_DMA_RECT0_OFFSET         0x1060  /* Channel 0 Rectangle Register */
 #endif
 
-#define EFM32_DMA_CHn_CTRL_OFFSET(n)     (0x1100+((n)<<2))  /* Channel n Control Register */
+#define EFM32_DMA_CHN_CTRL_OFFSET(n)     (0x1100+((n)<<2))  /* Channel n Control Register */
 
 #define EFM32_DMA_CH0_CTRL_OFFSET        0x1100  /* Channel 0 Control Register */
 #define EFM32_DMA_CH1_CTRL_OFFSET        0x1104  /* Channel 1 Control Register */
@@ -165,7 +165,7 @@
 #  define EFM32_DMA_RECT0                (EFM32_DMA_BASE+EFM32_DMA_RECT0_OFFSET)
 #endif
 
-#define EFM32_DMA_CHn_CTRL(n)            (EFM32_DMA_BASE+EFM32_DMA_CHn_CTRL_OFFSET(n))
+#define EFM32_DMA_CHN_CTRL(n)            (EFM32_DMA_BASE+EFM32_DMA_CHN_CTRL_OFFSET(n))
 #define EFM32_DMA_CH0_CTRL               (EFM32_DMA_BASE+EFM32_DMA_CH0_CTRL_OFFSET)
 #define EFM32_DMA_CH1_CTRL               (EFM32_DMA_BASE+EFM32_DMA_CH1_CTRL_OFFSET)
 #define EFM32_DMA_CH2_CTRL               (EFM32_DMA_BASE+EFM32_DMA_CH2_CTRL_OFFSET)

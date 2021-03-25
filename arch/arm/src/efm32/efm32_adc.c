@@ -223,7 +223,7 @@ static void adc_putreg(struct efm32_dev_s *priv, int offset, uint32_t value)
 }
 
 /****************************************************************************
- * Name: ADC_CalibrateLoadScan
+ * Name: adc_calibrate_load_scan
  *
  * Description:
  *   Load SCAN calibrate register with predefined values for a certain
@@ -241,7 +241,7 @@ static void adc_putreg(struct efm32_dev_s *priv, int offset, uint32_t value)
  *
  ****************************************************************************/
 
-static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
+static void adc_calibrate_load_scan(adc_typedef *adc, adc_ref_typedef ref)
 {
   uint32_t cal;
 
@@ -252,7 +252,7 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
 
   switch (ref)
   {
-  case adcRef1V25:
+  case adc_ref1_v25:
     cal  = adc->CAL & ~(_ADC_CAL_SCANOFFSET_MASK | _ADC_CAL_SCANGAIN_MASK);
     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_GAIN_MASK) >>
             _DEVINFO_ADC0CAL0_1V25_GAIN_SHIFT) << _ADC_CAL_SCANGAIN_SHIFT;
@@ -262,7 +262,7 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
     adc->CAL = cal;
     break;
 
-  case adcRef2V5:
+  case adc_ref2_v5:
     cal  = adc->CAL & ~(_ADC_CAL_SCANOFFSET_MASK | _ADC_CAL_SCANGAIN_MASK);
     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_GAIN_MASK) >>
             _DEVINFO_ADC0CAL0_2V5_GAIN_SHIFT) << _ADC_CAL_SCANGAIN_SHIFT;
@@ -272,7 +272,7 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
     adc->CAL = cal;
     break;
 
-  case adcRefVDD:
+  case adc_ref_vdd:
     cal  = adc->CAL & ~(_ADC_CAL_SCANOFFSET_MASK | _ADC_CAL_SCANGAIN_MASK);
     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_GAIN_MASK) >>
             _DEVINFO_ADC0CAL1_VDD_GAIN_SHIFT) << _ADC_CAL_SCANGAIN_SHIFT;
@@ -282,7 +282,7 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
     adc->CAL = cal;
     break;
 
-  case adcRef5VDIFF:
+  case adc_ref5v_diff:
     cal  = adc->CAL & ~(_ADC_CAL_SCANOFFSET_MASK | _ADC_CAL_SCANGAIN_MASK);
     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_GAIN_MASK) >>
             _DEVINFO_ADC0CAL1_5VDIFF_GAIN_SHIFT) << _ADC_CAL_SCANGAIN_SHIFT;
@@ -292,7 +292,7 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
     adc->CAL = cal;
     break;
 
-  case adcRef2xVDD:
+  case adc_ref2x_vdd:
 
     /* Gain value not of relevance for this reference, leave as is */
 
@@ -313,7 +313,7 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
 }
 
 /****************************************************************************
- * Name: ADC_CalibrateLoadSingle
+ * Name: adc_calibrate_load_single
  *
  * Description:
  *   Load SINGLE calibrate register with predefined values for a certain
@@ -331,7 +331,7 @@ static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
  *
  ****************************************************************************/
 
-static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
+static void adc_calibrate_load_single(adc_typedef *adc, adc_ref_typedef ref)
 {
   uint32_t cal;
 
@@ -342,7 +342,7 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
 
   switch (ref)
   {
-  case adcRef1V25:
+  case adc_ref1_v25:
     cal  = adc->CAL &
            ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_GAIN_MASK) >>
@@ -353,7 +353,7 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
     adc->CAL = cal;
     break;
 
-  case adcRef2V5:
+  case adc_ref2_v5:
     cal  = adc->CAL &
            ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_GAIN_MASK) >>
@@ -364,7 +364,7 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
     adc->CAL = cal;
     break;
 
-  case adcRefVDD:
+  case adc_ref_vdd:
     cal  = adc->CAL &
           ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_GAIN_MASK) >>
@@ -375,7 +375,7 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
     adc->CAL = cal;
     break;
 
-  case adcRef5VDIFF:
+  case adc_ref5v_diff:
     cal  = adc->CAL &
            ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_GAIN_MASK) >>
@@ -387,7 +387,7 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
     adc->CAL = cal;
     break;
 
-  case adcRef2xVDD:
+  case adc_ref2x_vdd:
 
     /* Gain value not of relevance for this reference, leave as is */
 
@@ -412,13 +412,13 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ADC_Init
+ * Name: adc_init
  *   Initialize ADC.
  *
  * Description:
  *   Initializes common parts for both single conversion and scan sequence.
  *   In addition, single and/or scan control configuration must be done,
- *   please refer to ADC_InitSingle() and ADC_InitScan() respectively.
+ *   please refer to adc_init_single() and adc_init_scan() respectively.
  *
  *   NOTE: This function will stop any ongoing conversion.
  *
@@ -428,7 +428,7 @@ static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
  *
  ****************************************************************************/
 
-void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
+void adc_init(adc_typedef *adc, const adc_init_typedef *init)
 {
   uint32_t tmp;
 
@@ -438,13 +438,13 @@ void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
 
   adc->CMD = ADC_CMD_SINGLESTOP | ADC_CMD_SCANSTOP;
 
-  tmp = ((uint32_t)(init->ovsRateSel) << _ADC_CTRL_OVSRSEL_SHIFT) |
+  tmp = ((uint32_t)(init->ovs_ratesel) << _ADC_CTRL_OVSRSEL_SHIFT) |
         (((uint32_t)(init->timebase) << _ADC_CTRL_TIMEBASE_SHIFT) &
           _ADC_CTRL_TIMEBASE_MASK) |
         (((uint32_t)(init->prescale) << _ADC_CTRL_PRESC_SHIFT) &
            _ADC_CTRL_PRESC_MASK) |
-        ((uint32_t)(init->lpfMode) << _ADC_CTRL_LPFMODE_SHIFT) |
-        ((uint32_t)(init->warmUpMode) << _ADC_CTRL_WARMUPMODE_SHIFT);
+        ((uint32_t)(init->lpfmode) << _ADC_CTRL_LPFMODE_SHIFT) |
+        ((uint32_t)(init->warmup_mode) << _ADC_CTRL_WARMUPMODE_SHIFT);
 
   if (init->tailgate)
     {
@@ -455,7 +455,7 @@ void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
 }
 
 /****************************************************************************
- * Name: ADC_InitScan
+ * Name: adc_init_scan
  *
  * Description:
  *   Initialize ADC scan sequence.
@@ -474,7 +474,7 @@ void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
  *
  ****************************************************************************/
 
-void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
+void adc_init_scan(adc_typedef *adc, const adc_init_scan_typedef *init)
 {
   uint32_t tmp;
 
@@ -486,20 +486,20 @@ void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
 
   /* Load proper calibration data depending on selected reference */
 
-  ADC_CalibrateLoadScan(adc, init->reference);
+  adc_calibrate_load_scan(adc, init->reference);
 
-  tmp = ((uint32_t)(init->prsSel) << _ADC_SCANCTRL_PRSSEL_SHIFT) |
-        ((uint32_t)(init->acqTime) << _ADC_SCANCTRL_AT_SHIFT) |
+  tmp = ((uint32_t)(init->prs_sel) << _ADC_SCANCTRL_PRSSEL_SHIFT) |
+        ((uint32_t)(init->acq_time) << _ADC_SCANCTRL_AT_SHIFT) |
         ((uint32_t)(init->reference) << _ADC_SCANCTRL_REF_SHIFT) |
         init->input |
         ((uint32_t)(init->resolution) << _ADC_SCANCTRL_RES_SHIFT);
 
-  if (init->prsEnable)
+  if (init->prs_enable)
     {
       tmp |= ADC_SCANCTRL_PRSEN;
     }
 
-  if (init->leftAdjust)
+  if (init->left_adjust)
     {
       tmp |= ADC_SCANCTRL_ADJ_LEFT;
     }
@@ -518,7 +518,7 @@ void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
 }
 
 /****************************************************************************
- * Name: ADC_InitSingle
+ * Name: adc_init_single
  *
  * Description:
  *   Initialize single ADC sample conversion.
@@ -537,7 +537,7 @@ void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
  *
  ****************************************************************************/
 
-void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
+void adc_init_single(adc_typedef *adc, const adc_init_single_typedef *init)
 {
   uint32_t tmp;
 
@@ -549,20 +549,20 @@ void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
 
   /* Load proper calibration data depending on selected reference */
 
-  ADC_CalibrateLoadSingle(adc, init->reference);
+  adc_calibrate_load_single(adc, init->reference);
 
-  tmp = ((uint32_t)(init->prsSel) << _ADC_SINGLECTRL_PRSSEL_SHIFT) |
-        ((uint32_t)(init->acqTime) << _ADC_SINGLECTRL_AT_SHIFT) |
+  tmp = ((uint32_t)(init->prs_sel) << _ADC_SINGLECTRL_PRSSEL_SHIFT) |
+        ((uint32_t)(init->acq_time) << _ADC_SINGLECTRL_AT_SHIFT) |
         ((uint32_t)(init->reference) << _ADC_SINGLECTRL_REF_SHIFT) |
         ((uint32_t)(init->input) << _ADC_SINGLECTRL_INPUTSEL_SHIFT) |
         ((uint32_t)(init->resolution) << _ADC_SINGLECTRL_RES_SHIFT);
 
-  if (init->prsEnable)
+  if (init->prs_enable)
     {
       tmp |= ADC_SINGLECTRL_PRSEN;
     }
 
-  if (init->leftAdjust)
+  if (init->left_adjust)
     {
       tmp |= ADC_SINGLECTRL_ADJ_LEFT;
     }
@@ -581,7 +581,7 @@ void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
 }
 
 /****************************************************************************
- * Name: ADC_PrescaleCalc
+ * Name: adc_prescale_calc
  *
  * Description:
  *   Calculate prescaler value used to determine ADC clock.
@@ -589,41 +589,41 @@ void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
  *   The ADC clock is given by: HFPERCLK / (prescale + 1).
  *
  * Input Parameters:
- *   adcFreq  ADC frequency wanted. The frequency will automatically
+ *   adc_freq  ADC frequency wanted. The frequency will automatically
  *            be adjusted to be within valid range according to reference
  *            manual.
- *  hfperFreq Frequency in Hz of reference HFPER clock. Set to 0 to
+ *  hfperfreq Frequency in Hz of reference HFPER clock. Set to 0 to
  *            use currently defined HFPER clock setting.
  *
  * Returned Value:
  *   Prescaler value to use for ADC in order to achieve a clock value
- *   <= @p adcFreq.
+ *   <= @p adc_freq.
  *
  ****************************************************************************/
 
-uint8_t ADC_PrescaleCalc(uint32_t adcFreq, uint32_t hfperFreq)
+uint8_t adc_prescale_calc(uint32_t adc_freq, uint32_t hfperfreq)
 {
   uint32_t ret;
 
   /* Make sure selected ADC clock is within valid range */
 
-  if (adcFreq > ADC_MAX_CLOCK)
+  if (adc_freq > ADC_MAX_CLOCK)
     {
-      adcFreq = ADC_MAX_CLOCK;
+      adc_freq = ADC_MAX_CLOCK;
     }
-  else if (adcFreq < ADC_MIN_CLOCK)
+  else if (adc_freq < ADC_MIN_CLOCK)
     {
-      adcFreq = ADC_MIN_CLOCK;
+      adc_freq = ADC_MIN_CLOCK;
     }
 
   /* Use current HFPER frequency? */
 
-  if (!hfperFreq)
+  if (!hfperfreq)
     {
-      hfperFreq = CMU_ClockFreqGet(cmuClock_HFPER);
+      hfperfreq = cmu_clock_freq_get(cmuclock_hfper);
     }
 
-  ret = (hfperFreq + adcFreq - 1) / adcFreq;
+  ret = (hfperfreq + adc_freq - 1) / adc_freq;
   if (ret)
     {
       ret--;
@@ -633,7 +633,7 @@ uint8_t ADC_PrescaleCalc(uint32_t adcFreq, uint32_t hfperFreq)
 }
 
 /****************************************************************************
- * Name: ADC_Reset
+ * Name: adc_reset
  *
  * Description:
  *   Reset ADC to same state as after a HW reset.
@@ -647,7 +647,7 @@ uint8_t ADC_PrescaleCalc(uint32_t adcFreq, uint32_t hfperFreq)
  *
  ****************************************************************************/
 
-void ADC_Reset(ADC_TypeDef *adc)
+void adc_reset(adc_typedef *adc)
 {
   /* Stop conversions, before resetting other registers. */
 
@@ -661,21 +661,21 @@ void ADC_Reset(ADC_TypeDef *adc)
 
   /* Load calibration values for the 1V25 internal reference. */
 
-  ADC_CalibrateLoadSingle(adc, adcRef1V25);
-  ADC_CalibrateLoadScan(adc, adcRef1V25);
+  adc_calibrate_load_single(adc, adc_ref1_v25);
+  adc_calibrate_load_scan(adc, adc_ref1_v25);
 
   /* Do not reset route register, setting should be done independently */
 }
 
 /****************************************************************************
- * Name: ADC_TimebaseCalc
+ * Name: adc_timebasecalc
  *
  * Description:
  *   Calculate timebase value in order to get a timebase providing at least
  *   1us.
  *
  * Input Parameters:
- *   hfperFreq Frequency in Hz of reference HFPER clock. Set to 0 to
+ *   hfperfreq Frequency in Hz of reference HFPER clock. Set to 0 to
  *              use currently defined HFPER clock setting.
  *
  * Returned Value:
@@ -683,42 +683,42 @@ void ADC_Reset(ADC_TypeDef *adc)
  *
  ****************************************************************************/
 
-uint8_t ADC_TimebaseCalc(uint32_t hfperFreq)
+uint8_t adc_timebasecalc(uint32_t hfperfreq)
 {
-  if (!hfperFreq)
+  if (!hfperfreq)
     {
-      hfperFreq = CMU_ClockFreqGet(cmuClock_HFPER);
+      hfperfreq = cmu_clock_freq_get(cmuclock_hfper);
 
       /* Just in case, make sure we get non-zero freq for below calculation */
 
-      if (!hfperFreq)
+      if (!hfperfreq)
         {
-          hfperFreq = 1;
+          hfperfreq = 1;
         }
     }
 
 #if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
   /* Handle errata on Giant Gecko, max TIMEBASE is 5 bits wide or max 0x1F
    * cycles. This will give a warmp up time of e.g. 0.645us, not the
-   * required 1us when operating at 48MHz. One must also increase acqTime
+   * required 1us when operating at 48MHz. One must also increase acq_time
    * to compensate for the missing clock cycles, adding up to 1us in total.
    * See reference manual for details.
    */
 
-  if (hfperFreq > 32000000)
+  if (hfperfreq > 32000000)
     {
-      hfperFreq = 32000000;
+      hfperfreq = 32000000;
     }
 #endif
 
   /* Determine number of HFPERCLK cycle >= 1us */
 
-  hfperFreq += 999999;
-  hfperFreq /= 1000000;
+  hfperfreq += 999999;
+  hfperfreq /= 1000000;
 
   /* Return timebase value (N+1 format) */
 
-  return (uint8_t)(hfperFreq - 1);
+  return (uint8_t)(hfperfreq - 1);
 }
 
 endif /* defined(ADC_COUNT) && (ADC_COUNT > 0) */

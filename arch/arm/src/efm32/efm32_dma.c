@@ -148,7 +148,7 @@ static void efm32_set_chctrl(struct dma_channel_s *dmach,
               EFM32_DMA_SOURCSEL_SHIFT;
   regval  |= (decoded << _DMA_CH_CTRL_SOURCESEL_SHIFT);
 
-  regaddr = EFM32_DMA_CHn_CTRL(dmach->chan);
+  regaddr = EFM32_DMA_CHN_CTRL(dmach->chan);
   putreg32(regval, regaddr);
 }
 
@@ -770,7 +770,7 @@ void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs)
 
   /* Sample channel control register */
 
-  regaddr            = EFM32_DMA_CHn_CTRL(dmach->chan)
+  regaddr            = EFM32_DMA_CHN_CTRL(dmach->chan)
   regs->chnctrl      = getreg32(regaddr);
 
   leave_critical_section(flags);
