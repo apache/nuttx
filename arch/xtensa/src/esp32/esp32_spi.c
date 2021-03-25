@@ -900,7 +900,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       esp32_spi_set_regbits(priv, SPI_SLAVE_OFFSET, SPI_SYNC_RESET_M);
       esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_SYNC_RESET_M);
 
-      esp32_spi_set_reg(priv, SPI_DMA_CONF_OFFSET, SPI_DMA_RESET_MASK);
+      esp32_spi_set_regbits(priv, SPI_DMA_CONF_OFFSET, SPI_DMA_RESET_MASK);
       esp32_spi_reset_regbits(priv, SPI_DMA_CONF_OFFSET, SPI_DMA_RESET_MASK);
 
       n = esp32_dma_init(s_dma_txdesc[priv->config->dma_chan - 1],
