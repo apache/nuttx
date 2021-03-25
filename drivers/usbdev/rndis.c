@@ -97,8 +97,7 @@
 
 #define RNDIS_MXDESCLEN         (128)
 #define RNDIS_MAXSTRLEN         (RNDIS_MXDESCLEN-2)
-#define RNDIS_CTRLREQ_LEN       (256)
-#define RNDIS_RESP_QUEUE_LEN    (256)
+#define RNDIS_CTRLREQ_LEN       (512)
 
 #define RNDIS_BUFFER_SIZE       CONFIG_NET_ETH_PKTSIZE
 #define RNDIS_BUFFER_COUNT      4
@@ -168,14 +167,12 @@ struct rndis_dev_s
   size_t current_rx_msglen;              /* Length of the entire message to be received */
   bool rdreq_submitted;                  /* Indicates if the read request is submitted */
   bool rx_blocked;                       /* Indicates if we can receive packets on bulk in endpoint */
+  bool ctrlreq_has_encap_response;       /* Indicates if ctrlreq buffer holds a response */
   bool connected;                        /* Connection status indicator */
   uint32_t rndis_packet_filter;          /* RNDIS packet filter value */
   uint32_t rndis_host_tx_count;          /* TX packet counter */
   uint32_t rndis_host_rx_count;          /* RX packet counter */
   uint8_t host_mac_address[6];           /* Host side MAC address */
-
-  uint8_t response_queue[RNDIS_RESP_QUEUE_LEN];
-  size_t response_queue_bytes;   /* Count of bytes waiting in response_queue. */
 };
 
 /* The internal version of the class driver */
@@ -1350,28 +1347,26 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
  * Input Parameters:
  *   priv: pointer to RNDIS device driver structure
  *
- * Returns:
- *   pointer to response buffer
- *
  * Assumptions:
  *   Called from critical section
  *
  ****************************************************************************/
 
-static FAR void*
+static bool
 rndis_prepare_response(FAR struct rndis_dev_s *priv, size_t size,
                        FAR struct rndis_command_header *request_hdr)
 {
-  uint8_t *buf = priv->response_queue + priv->response_queue_bytes;
   FAR struct rndis_response_header *hdr =
-    (FAR struct rndis_response_header *)buf;
+    (FAR struct rndis_response_header *)priv->ctrlreq->buf;
 
   hdr->msgtype = request_hdr->msgtype | RNDIS_MSG_COMPLETE;
   hdr->msglen  = size;
   hdr->reqid   = request_hdr->reqid;
   hdr->status  = RNDIS_STATUS_SUCCESS;
 
-  return hdr;
+  priv->ctrlreq_has_encap_response = true;
+
+  return true;
 }
 
 /****************************************************************************
@@ -1389,16 +1384,11 @@ rndis_prepare_response(FAR struct rndis_dev_s *priv, size_t size,
  *
  ****************************************************************************/
 
-static int rndis_send_encapsulated_response(FAR struct rndis_dev_s *priv, size_t size)
+static int rndis_send_encapsulated_response(FAR struct rndis_dev_s *priv)
 {
   FAR struct rndis_notification *notif =
     (FAR struct rndis_notification *)priv->epintin_req->buf;
 
-  /* Mark the response as available in the queue */
-  priv->response_queue_bytes += size;
-  DEBUGASSERT(priv->response_queue_bytes <= RNDIS_RESP_QUEUE_LEN);
-
-  /* Send notification on IRQ endpoint, to tell host to read the data. */
   notif->notification = RNDIS_NOTIFICATION_RESPONSE_AVAILABLE;
   notif->reserved = 0;
   priv->epintin_req->len = sizeof(struct rndis_notification);
@@ -1436,9 +1426,9 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
         {
           FAR struct rndis_initialize_cmplt *resp;
 
-          resp = rndis_prepare_response(priv,
-                                        sizeof(struct rndis_initialize_cmplt),
-                                        cmd_hdr);
+          rndis_prepare_response(priv, sizeof(struct rndis_initialize_cmplt),
+                                 cmd_hdr);
+          resp = (FAR struct rndis_initialize_cmplt *)priv->ctrlreq->buf;
 
           resp->major      = RNDIS_MAJOR_VERSION;
           resp->minor      = RNDIS_MINOR_VERSION;
@@ -1448,7 +1438,7 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
           resp->xfrsize    = (4 + 44 + 22) + RNDIS_BUFFER_SIZE;
           resp->pktalign   = 2;
 
-          rndis_send_encapsulated_response(priv, resp->hdr.msglen);
+          rndis_send_encapsulated_response(priv);
         }
         break;
 
@@ -1463,11 +1453,11 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
           int i;
           size_t max_reply_size = sizeof(struct rndis_query_cmplt) +
                                   sizeof(g_rndis_supported_oids);
-          FAR struct rndis_query_cmplt *resp;
+          rndis_prepare_response(priv, max_reply_size, cmd_hdr);
           FAR struct rndis_query_msg *req =
             (FAR struct rndis_query_msg *)dataout;
-
-          resp = rndis_prepare_response(priv, max_reply_size, cmd_hdr);
+          FAR struct rndis_query_cmplt *resp =
+            (FAR struct rndis_query_cmplt *)priv->ctrlreq->buf;
 
           resp->hdr.msglen = sizeof(struct rndis_query_cmplt);
           resp->bufoffset  = 0;
@@ -1542,7 +1532,7 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
 
           resp->hdr.msglen += resp->buflen;
 
-          rndis_send_encapsulated_response(priv, resp->hdr.msglen);
+          rndis_send_encapsulated_response(priv);
         }
         break;
 
@@ -1551,9 +1541,10 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
           FAR struct rndis_set_msg *req;
           FAR struct rndis_response_header *resp;
 
-          resp = rndis_prepare_response(priv, sizeof(struct rndis_response_header),
-                                        cmd_hdr);
+          rndis_prepare_response(priv, sizeof(struct rndis_response_header),
+                                 cmd_hdr);
           req  = (FAR struct rndis_set_msg *)dataout;
+          resp = (FAR struct rndis_response_header *)priv->ctrlreq->buf;
 
           uinfo("RNDIS SET RID=%08x OID=%08x LEN=%d DAT=%08x",
                 (unsigned)req->hdr.reqid, (unsigned)req->objid,
@@ -1583,7 +1574,7 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
               resp->status = RNDIS_STATUS_NOT_SUPPORTED;
             }
 
-          rndis_send_encapsulated_response(priv, resp->msglen);
+          rndis_send_encapsulated_response(priv);
         }
         break;
 
@@ -1591,11 +1582,12 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
         {
           FAR struct rndis_reset_cmplt *resp;
 
-          resp = rndis_prepare_response(priv, sizeof(struct rndis_reset_cmplt),
-                                        cmd_hdr);
+          rndis_prepare_response(priv, sizeof(struct rndis_reset_cmplt),
+                                 cmd_hdr);
+          resp = (FAR struct rndis_reset_cmplt *)priv->ctrlreq->buf;
           resp->addreset  = 0;
           priv->connected = false;
-          rndis_send_encapsulated_response(priv, resp->hdr.msglen);
+          rndis_send_encapsulated_response(priv);
         }
         break;
 
@@ -1603,7 +1595,7 @@ static int rndis_handle_control_message(FAR struct rndis_dev_s *priv,
         {
           rndis_prepare_response(priv, sizeof(struct rndis_response_header),
                                  cmd_hdr);
-          rndis_send_encapsulated_response(priv, sizeof(struct rndis_response_header));
+          rndis_send_encapsulated_response(priv);
         }
         break;
 
@@ -1746,27 +1738,15 @@ static void rndis_wrcomplete(FAR struct usbdev_ep_s *ep,
 static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
                                    FAR struct usbdev_req_s *req)
 {
-  struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)ep->priv;
   if (req->result || req->xfrd != req->len)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_REQRESULT),
                (uint16_t)-req->result);
     }
-  else if (req->len > 0 && req->priv == priv->response_queue)
+  else if (req->len > 0)
     {
-      /* This transfer was from the response queue, subtract remaining byte count. */
-      req->priv = 0;
-      if (req->len >= priv->response_queue_bytes)
-      {
-        /* Queue now empty */
-        priv->response_queue_bytes = 0;
-      }
-      else
-      {
-        /* Copy the remaining responses to beginning of buffer. */
-        priv->response_queue_bytes -= req->len;
-        memcpy(priv->response_queue, priv->response_queue + req->len, priv->response_queue_bytes);
-      }
+      struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)ep->priv;
+      priv->ctrlreq_has_encap_response = false;
     }
 }
 
@@ -2214,9 +2194,6 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
       leave_critical_section(flags);
     }
 
-  /* Initialize response queue to empty */
-  priv->response_queue_bytes = 0;
-
   /* Report if we are selfpowered */
 
 #ifndef CONFIG_RNDIS_COMPOSITE
@@ -2395,7 +2372,6 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
     }
 #endif
   ctrlreq = priv->ctrlreq;
-  ctrlreq->priv = 0;
 
   /* Extract the little-endian 16-bit values to host order */
 
@@ -2498,19 +2474,20 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
               }
             else if (ctrl->req == RNDIS_GET_ENCAPSULATED_RESPONSE)
               {
-                if (priv->response_queue_bytes == 0)
+                if (!priv->ctrlreq_has_encap_response)
                   {
-                    /* No reply available is indicated with a single 0x00 byte. */
                     ret = 1;
                     ctrlreq->buf[0] = 0;
                   }
                 else
                   {
-                    /* Retrieve a single reply from the response queue to control request buffer. */
+                    /* There is data prepared in the ctrlreq buffer.
+                     * Just assign the length.
+                     */
+
                     FAR struct rndis_response_header *hdr =
-                      (struct rndis_response_header *)priv->response_queue;
-                    memcpy(ctrlreq->buf, hdr, hdr->msglen);
-                    ctrlreq->priv = priv->response_queue;
+                      (struct rndis_response_header *)ctrlreq->buf;
+
                     ret = hdr->msglen;
                   }
               }
