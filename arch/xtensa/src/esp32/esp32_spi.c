@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 #include <time.h>
@@ -855,6 +856,8 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
   uint8_t *allocrp;
 #endif
 
+  DEBUGASSERT((txbuffer != NULL) || (rxbuffer != NULL));
+
   /* If the buffer comes from PSRAM, allocate a new one from DRAM */
 
 #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
@@ -911,14 +914,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       esp32_spi_set_reg(priv, SPI_DMA_OUT_LINK_OFFSET,
                         regval | SPI_OUTLINK_START_M);
       esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET, bytes * 8 - 1);
-      if (tp)
-        {
-          esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MOSI_M);
-        }
-      else
-        {
-          esp32_spi_reset_regbits(priv, SPI_USER_OFFSET, SPI_USR_MOSI_M);
-        }
+      esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MOSI_M);
 
       if (rp)
         {
