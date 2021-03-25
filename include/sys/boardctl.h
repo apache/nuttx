@@ -98,7 +98,7 @@
  * DEPENDENCIES:  None
  *
  * CMD:           BOARDIOC_ROMDISK
- * DESCRIPTION:   Register
+ * DESCRIPTION:   Register a ROM disk
  * ARG:           Pointer to read-only instance of struct boardioc_romdisk_s.
  * CONFIGURATION: CONFIG_BOARDCTL_ROMDISK
  * DEPENDENCIES:  None
