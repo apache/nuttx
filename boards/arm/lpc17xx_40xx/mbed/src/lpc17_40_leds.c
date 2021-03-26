@@ -79,7 +79,7 @@
  */
 
 static bool g_initialized;
-static int  g_nestcount;
+static int  g_nestcount = 0;
 
 /****************************************************************************
  * Private Functions
