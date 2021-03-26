@@ -44,13 +44,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_exit
+ * Name: nx_pthread_exit
  *
  * Description:
- *   Terminate execution of a thread started with pthread_create.
+ *   Terminate execution of a thread started with pthread_create.  This
+ *   is an OS interface used only by the C library.  It is called only
+ *   from the standard, user-space pthread_exit() function.  pthread_exit()
+ *   performs the user-space portion of the thread exit; this function
+ *   performs the supervisor-mode portion to complete the thread exit.
  *
  * Input Parameters:
- *   exit_valie
+ *   exit_value
  *
  * Returned Value:
  *   None
@@ -59,7 +63,7 @@
  *
  ****************************************************************************/
 
-void pthread_exit(FAR void *exit_value)
+void nx_pthread_exit(FAR void *exit_value)
 {
   FAR struct tcb_s *tcb = this_task();
   sigset_t set = ALL_SIGNAL_SET;

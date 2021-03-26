@@ -27,6 +27,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <pthread.h>
 #include <sched.h>
@@ -148,6 +149,28 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
 int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
                       FAR const pthread_attr_t *attr,
                       pthread_startroutine_t entry, pthread_addr_t arg);
+
+/****************************************************************************
+ * Name: nx_pthread_exit
+ *
+ * Description:
+ *   Terminate execution of a thread started with pthread_create.  This
+ *   is an OS interface used only by the C library.  It is called only
+ *   from the standard, user-space pthread_exit() function.  pthread_exit()
+ *   performs the user-space portion of the thread exit; this function
+ *   performs the supervisor-mode portion to complete the thread exit.
+ *
+ * Input Parameters:
+ *   exit_value
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+void nx_pthread_exit(FAR void *exit_value) noreturn_function;
 
 #undef EXTERN
 #ifdef __cplusplus
