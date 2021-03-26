@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <sys/types.h>
 #include <inttypes.h>
@@ -122,8 +123,15 @@
 #define SRAM123_START STM32_SRAM123_BASE
 #define SRAM123_END   (SRAM123_START + STM32H7_SRAM123_SIZE)
 
-#define SRAM4_START  STM32_SRAM4_BASE
-#define SRAM4_END    (SRAM4_START + STM32H7_SRAM4_SIZE)
+#undef HAVE_SRAM4
+#if !defined(CONFIG_STM32H7_SRAM4EXCLUDE)
+#  define HAVE_SRAM4 1
+
+#  define SRAM4_START ((uint32_t)(STM32_SRAM4_BASE))
+#  define SRAM4_END   ((uint32_t)(SRAM4_START + STM32H7_SRAM4_SIZE))
+
+#  define SRAM4_HEAP_START ((uint32_t)(&_sram4_heap_start))
+#endif
 
 /* The STM32 H7 has DTCM memory */
 
@@ -137,6 +145,14 @@
 
 #ifdef CONFIG_STM32H7_DTCMEXCLUDE
 #  undef HAVE_DTCM
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef HAVE_SRAM4
+extern const uint32_t _sram4_heap_start;
 #endif
 
 /****************************************************************************
@@ -355,11 +371,13 @@ void arm_addregion(void)
       mm_regions++;
     }
 
+#ifdef HAVE_SRAM4
   if (mm_regions < CONFIG_MM_REGIONS)
     {
-      addregion (SRAM4_START, SRAM4_END - SRAM4_START, "SRAM4");
+      addregion (SRAM4_HEAP_START, SRAM4_END - SRAM4_HEAP_START, "SRAM4");
       mm_regions++;
     }
+#endif
 
 #ifdef HAVE_DTCM
   if (mm_regions < CONFIG_MM_REGIONS)
