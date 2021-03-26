@@ -40,10 +40,24 @@
 
 uint64_t host_gettime(bool rtc)
 {
+  static uint64_t start;
   struct timespec tp;
+  uint64_t current;
 
   clock_gettime(rtc ? CLOCK_REALTIME : CLOCK_MONOTONIC, &tp);
-  return 1000000000ull * tp.tv_sec + tp.tv_nsec;
+  current = 1000000000ull * tp.tv_sec + tp.tv_nsec;
+
+  if (rtc)
+    {
+      return current;
+    }
+
+  if (start == 0)
+    {
+      start = current;
+    }
+
+  return current - start;
 }
 
 /****************************************************************************
@@ -61,17 +75,9 @@ void host_sleep(uint64_t nsec)
 
 void host_sleepuntil(uint64_t nsec)
 {
-  static uint64_t base;
   uint64_t now;
 
   now = host_gettime(false);
-  if (base == 0)
-    {
-      base = now;
-    }
-
-  now -= base;
-
   if (nsec > now + 1000)
     {
       usleep((nsec - now) / 1000);
