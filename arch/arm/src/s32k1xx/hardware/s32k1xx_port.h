@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_port.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_PORT_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_PORT_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #define S32K1XX_PORTA               0
 #define S32K1XX_PORTB               1
@@ -39,9 +39,10 @@
 #define S32K1XX_PORTE               4
 #define S32K1XX_NPORTS              5
 
-/* PORT Register Offsets ****************************************************************************/
+/* PORT Register Offsets ****************************************************/
 
 #define S32K1XX_PORT_PCR_OFFSET(n)  (0 + ((n) << 2)) /* Pin Control Register n=0..31 */
+
 #define S32K1XX_PORT_GPCLR_OFFSET   0x0080  /* Global Pin Control Low Register */
 #define S32K1XX_PORT_GPCHR_OFFSET   0x0084  /* Global Pin Control High Register */
 #define S32K1XX_PORT_GICLR_OFFSET   0x0088  /* Global Interrupt Control Low Register */
@@ -51,7 +52,7 @@
 #define S32K1XX_PORT_DFCR_OFFSET    0x00c4  /* Digital Filter Clock Register */
 #define S32K1XX_PORT_DFWR_OFFSET    0x00c8  /* Digital Filter Width Register */
 
-/* PORT Register Addresses **************************************************************************/
+/* PORT Register Addresses **************************************************/
 
 #define S32K1XX_PORT_PCR_BASE(p,n)  (S32K1XX_PORT_BASE(p) + S32K1XX_PORT_PCR_OFFSET(n))
 #define S32K1XX_PORT_GPCLR(p)       (S32K1XX_PORT_BASE(p) + S32K1XX_PORT_GPCLR_OFFSET)
@@ -113,7 +114,7 @@
 #define S32K1XX_PORTE_DFCR          (S32K1XX_PORTE_BASE + S32K1XX_PORT_DFCR_OFFSET)
 #define S32K1XX_PORTE_DFWR          (S32K1XX_PORTE_BASE + S32K1XX_PORT_DFWR_OFFSET)
 
-/* PORT Register Bitfield Definitions ***************************************************************/
+/* PORT Register Bitfield Definitions ***************************************/
 
 /* Pin Control Register n=0..31 */
 
@@ -133,6 +134,7 @@
 #  define PORT_PCR_MUX_ALT5         (5 << PORT_PCR_MUX_SHIFT) /* Alternative 5 (chip-specific) */
 #  define PORT_PCR_MUX_ALT6         (6 << PORT_PCR_MUX_SHIFT) /* Alternative 6 (chip-specific) */
 #  define PORT_PCR_MUX_ALT7         (7 << PORT_PCR_MUX_SHIFT) /* Alternative 7 (chip-specific) */
+
 #define PORT_PCR_LK                 (1 << 15) /* Bit 15: Lock Register */
 #define PORT_PCR_IRQC_SHIFT         (16)      /* Bits 16-19:  Interrupt Configuration */
 #define PORT_PCR_IRQC_MASK          (15 << PORT_PCR_IRQC_SHIFT)
@@ -145,6 +147,7 @@
 #  define PORT_PCR_IRQC_FALLING     (10 << PORT_PCR_IRQC_SHIFT) /* ISF flag and Interrupt on falling-edge */
 #  define PORT_PCR_IRQC_BOTH        (11 << PORT_PCR_IRQC_SHIFT) /* ISF flag and Interrupt on either edge */
 #  define PORT_PCR_IRQC_ONE         (12 << PORT_PCR_IRQC_SHIFT) /* ISF flag and Interrupt when logic 1 */
+
 #define PORT_PCR_ISF                (1 << 24) /* Bit 24: Interrupt Status Flag */
 
 /* Global Pin Control Low Register */
@@ -152,6 +155,7 @@
 #define PORT_GPCLR_GPWD_SHIFT       (0)       /* Bits 0-15: Global Pin Write Data */
 #define PORT_GPCLR_GPWD_MASK        (0xffff << PORT_GPCLR_GPWD_SHIFT)
 #  define PORT_GPCLR_GPWD_PIN(n)    ((uint32_t)(n) << PORT_GPCLR_GPWD_SHIFT) /* Pin n=0..15 */
+
 #define PORT_GPCLR_GPWE_SHIFT       (16)      /* Bits 16-31: Global Pin Write Enable */
 #define PORT_GPCLR_GPWE_MASK        (0xffff << PORT_GPCLR_GPWE_SHIFT)
 #  define PORT_GPCLR_GPWE_PIN(n)    ((uint32_t)(n) << PORT_GPCLR_GPWE_SHIFT) /* Pin n=0..15 */
@@ -161,6 +165,7 @@
 #define PORT_GPCHR_GPWD_SHIFT       (0)       /* Bits 0-15: Global Pin Write Data */
 #define PORT_GPCHR_GPWD_MASK        (0xffff << PORT_GPCHR_GPWD_SHIFT)
 #  define PORT_GPCHR_GPWD_PIN(n)    ((uint32_t)((n) - 16) << PORT_GPCHR_GPWD_SHIFT) /* Pin n=16..31 */
+
 #define PORT_GPCHR_GPWE_SHIFT       (16)      /* Bits 16-31: Global Pin Write Enable */
 #define PORT_GPCHR_GPWE_MASK        (0xffff << PORT_GPCHR_GPWE_SHIFT)
 #  define PORT_GPCHR_GPWE_PIN(n)    ((uint32_t)((n) - 16) << PORT_GPCHR_GPWE_SHIFT) /* Pin n=16..31 */
@@ -170,6 +175,7 @@
 #define PORT_GICLR_GIWD_SHIFT       (0)       /* Bits 0-15: Global Interrupt Write Data */
 #define PORT_GICLR_GIWD_MASK        (0xffff << PORT_GICLR_GIWD_SHIFT)
 #  define PORT_GICLR_GIWD_PIN(n)    ((uint32_t)(n) << PORT_GICLR_GIWD_SHIFT) /* Pin n=0..15 */
+
 #define PORT_GICLR_GIWE_SHIFT       (16)      /* Bits 16-31: Global Interrupt Write Enable */
 #define PORT_GICLR_GIWE_MASK        (0xffff << PORT_GICLR_GIWE_SHIFT)
 #  define PORT_GICLR_GIWE_PIN(n)    ((uint32_t)(n) << PORT_GICLR_GIWE_SHIFT) /* Pin n=0..15 */
@@ -179,6 +185,7 @@
 #define PORT_GICHR_GIWD_SHIFT       (0)       /* Bits 0-15: Global Interrupt Write Data */
 #define PORT_GICHR_GIWD_MASK        (0xffff << PORT_GICHR_GIWD_SHIFT)
 #  define PORT_GICHR_GIWD_PIN(n)    ((uint32_t)((n) - 16) << PORT_GICHR_GIWD_SHIFT) /* Pin n=16..31 */
+
 #define PORT_GICHR_GIWE_SHIFT       (16)      /* Bits 16-31: Global Interrupt Write Enable */
 #define PORT_GICHR_GIWE_MASK        (0xffff << PORT_GICHR_GIWE_SHIFT)
 #  define PORT_GICHR_GIWE_PIN(n)    ((uint32_t)((n) - 16) << PORT_GICHR_GIWE_SHIFT) /* Pin n=16..31 */

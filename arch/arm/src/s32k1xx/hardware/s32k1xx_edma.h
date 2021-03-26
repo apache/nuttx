@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_edma.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_EDMA_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_EDMA_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/s32k1xx_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_S32K11X)
 #  define S32K1XX_EDMA_NCHANNELS              4
@@ -40,7 +40,7 @@
 #  error "Unknown number of DMA channels for this S32K1xx part"
 #endif
 
-/* eDMA Register Offsets ****************************************************************************/
+/* eDMA Register Offsets ****************************************************/
 
 #define S32K1XX_EDMA_CR_OFFSET                0x0000  /* Control */
 #define S32K1XX_EDMA_ES_OFFSET                0x0004  /* Error Status */
@@ -297,7 +297,7 @@
 #define S32K1XX_EDMA_TCD15_CSR_OFFSET         0x11fc  /* TCD Control and Status */
 #define S32K1XX_EDMA_TCD15_BITER_ELINK_OFFSET 0x11fe  /* TCD Beginning Minor Loop Link, Major Loop Count */
 
-/* eDMA Register Addresses **************************************************************************/
+/* eDMA Register Addresses **************************************************/
 
 #define S32K1XX_EDMA_CR                       (S32K1XX_EDMA_BASE + S32K1XX_EDMA_CR_OFFSET)
 #define S32K1XX_EDMA_ES                       (S32K1XX_EDMA_BASE + S32K1XX_EDMA_ES_OFFSET)
@@ -542,9 +542,10 @@
 #define S32K1XX_EDMA_TCD15_CSR                (S32K1XX_EDMA_BASE + S32K1XX_EDMA_TCD15_CSR_OFFSET)
 #define S32K1XX_EDMA_TCD15_BITER_ELINK        (S32K1XX_EDMA_BASE + S32K1XX_EDMA_TCD15_BITER_ELINK_OFFSET)
 
-/* eDMA Bit-Field Definitions ***********************************************************************/
+/* eDMA Bit-Field Definitions ***********************************************/
 
 /* Control */
+
                                                       /* Bit 0:  Reserved */
 #define EDMA_CR_EDBG                        (1 << 1)  /* Bit 1:  Enable Debug */
 #define EDMA_CR_ERCA                        (1 << 2)  /* Bit 2:  Enable Round Robin Channel Arbitration */
@@ -672,10 +673,12 @@
 
 #define EDMA_HRS(n)                         ((uint32_t)1 << (n)) /* Bit n:  Hardware Request Status
                                                                   * Channel n */
+
 /* Enable Asynchronous Request in Stop */
 
 #define EDMA_EARS(n)                        ((uint32_t)1 << (n)) /* Bit n:  Enable asynchronous DMA
                                                                   * request in stop mode for channel n */
+
 /* Channel n Priority */
 
 #define EDMA_DCHPRI_CHPRI_SHIFT             (0)       /* Bits 0-3: Channel n Arbitration Priority */
@@ -686,6 +689,7 @@
 #define EDMA_DCHPRI_ECP                     (1 << 7)  /* Bit 7:  Enable Channel Preemption */
 
 /* TCD Source Address (32-bit address) */
+
 /* TCD Signed Source Address Offset (16-bit offset) */
 
 /* TCD Transfer Attributes */
@@ -704,6 +708,7 @@
 #  define EDMA_TCD_ATTR_DSIZE_32BIT         (TCD_ATTR_SIZE_32BIT  << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 32-bit */
 #  define EDMA_TCD_ATTR_DSIZE_64BIT         (TCD_ATTR_SIZE_64BIT  << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 64-bit */
 #  define EDMA_TCD_ATTR_DSIZE_256BIT        (TCD_ATTR_SIZE_256BIT << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 32-byte burst */
+
 #define EDMA_TCD_ATTR_DMOD_SHIFT            (3)       /* Bits 3-7: Destination Address Modulo */
 #define EDMA_TCD_ATTR_DMOD_MASK             (31 << EDMA_TCD_ATTR_DMOD_SHIFT)
 #  define EDMA_TCD_ATTR_DMOD(n)             ((uint32_t)(n) << EDMA_TCD_ATTR_DMOD_SHIFT)
@@ -715,14 +720,17 @@
 #  define EDMA_TCD_ATTR_SSIZE_32BIT         (TCD_ATTR_SIZE_32BIT  << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 32-bit */
 #  define EDMA_TCD_ATTR_SSIZE_64BIT         (TCD_ATTR_SIZE_64BIT  << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 64-bit */
 #  define EDMA_TCD_ATTR_SSIZE_256BIT        (TCD_ATTR_SIZE_256BIT << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 32-byte burst */
+
 #define EDMA_TCD_ATTR_SMOD_SHIFT            (11)      /* Bits 11-15: Source Address Modulo */
 #define EDMA_TCD_ATTR_SMOD_MASK             (31 << EDMA_TCD_ATTR_SMOD_SHIFT)
 #  define EDMA_TCD_ATTR_SMOD(n)             ((uint32_t)(n) << EDMA_TCD_ATTR_SMOD_SHIFT)
 
 /* TCD Signed Minor Loop Offset / Byte Count */
+
 /* Minor Byte Count (Minor Loop Mapping Disabled -- 32-bit byte count) */
 
 /* TCD Signed Minor Loop Offset / Byte Count */
+
 /* Minor Byte Count (Minor Loop Mapping Enabled, offset disabled) */
 
 #define EDMA_TCD_NBYTES_ML_NBYTES_SHIFT     (0)       /* Bits 0-29: Minor Byte Transfer Count */
@@ -732,6 +740,7 @@
 #define EDMA_TCD_NBYTES_ML_SMLOE            (1 << 31) /* Bit 31: Source Minor Loop Offset Enable */
 
 /* TCD Signed Minor Loop Offset / Byte Count */
+
 /* Minor Byte Count (Minor Loop Mapping Enabled, offset enabled) */
 
 #define EDMA_TCD_NBYTES_MLOFF_NBYTES_SHIFT  (0)      /* Bits 0-9: Minor Byte Transfer Count */
@@ -744,7 +753,9 @@
 #define EDMA_TCD_NBYTES_MLOFF_SMLOE         (1 << 31) /* Bit 31: Source Minor Loop Offset Enable */
 
 /* TCD Last Source Address Adjustment (32-bit address adjustment) */
+
 /* TCD Destination Address (32-bit address) */
+
 /* TCD Signed Destination Address Offset (16-bit signed address offset) */
 
 /* TCD Current Minor Loop Link, Major Loop Count (Channel linking disabled) */
@@ -755,7 +766,9 @@
 #define EDMA_TCD_CITER_ELINK                (1 << 15) /* Bit 15: Enable channel-to-channel linking
                                                        * on minor-loop complete */
 
-/* TCD Current Minor Loop Link, Major Loop Count (Channel linking enabled) */
+/* TCD Current Minor Loop Link, Major Loop Count
+ * (Channel linking enabled)
+ */
 
 #define EDMA_TCD_CITER_ELINK_CITER_SHIFT    (0)       /* Bit 0-8: Current major iteration count */
 #define EDMA_TCD_CITER_ELINK_CITER_MASK     (0x1ff << EDMA_TCD_CITER_ELINK_CITER_SHIFT)
@@ -767,7 +780,9 @@
 #define EDMA_TCD_CITER_ELINK_ELINK          (1 << 15) /* Bit 15: Enable channel-to-channel linking
                                                        * on minor-loop complete */
 
-/* TCD Last Destination Address Adjustment/Scatter Gather Address (32-bit address) */
+/* TCD Last Destination Address Adjustment/Scatter Gather Address
+ * (32-bit address)
+ */
 
 /* TCD Control and Status */
 
@@ -794,7 +809,9 @@
 #  define EDMA_TCD_CSR_BWC_8CYCLES          (3 << EDMA_TCD_CSR_BWC_SHIFT) /* eDMA engine stalls for 8
                                                                            * cycles after each R/W */
 
-/* TCD Beginning Minor Loop Link, Major Loop Count (Channel linking disabled) */
+/* TCD Beginning Minor Loop Link, Major Loop Count
+ * (Channel linking disabled)
+ */
 
 #define EDMA_TCD_BITER_BITER_SHIFT          (0)       /* Bit 0-14: Starting Major Iteration Count */
 #define EDMA_TCD_BITER_BITER_MASK           (0x7fff << EDMA_TCD_BITER_BITER_SHIFT)
@@ -802,7 +819,9 @@
 #define EDMA_TCD_BITER_ELINK                (1 << 15) /* Bit 15: Enable channel-to-channel linking
                                                        * on minor-loop complete */
 
-/* TCD Beginning Minor Loop Link, Major Loop Count (Channel linking enabled) */
+/* TCD Beginning Minor Loop Link, Major Loop Count
+ * (Channel linking enabled)
+ */
 
 #define EDMA_TCD_BITER_ELINK_BITER_SHIFT    (0)       /* Bit 0-8: Current major iteration count */
 #define EDMA_TCD_BITER_ELINK_BITER_MASK     (0x1ff << EDMA_TCD_BITER_ELINK_BITER_SHIFT)
@@ -814,11 +833,13 @@
 #define EDMA_TCD_BITER_ELINK_ELINK          (1 << 15) /* Bit 15: Enable channel-to-channel linking
                                                        * on minor-loop complete */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* In-memory representation of the 32-byte Transfer Control Descriptor (TCD) */
+/* In-memory representation of the 32-byte Transfer Control Descriptor
+ * (TCD)
+ */
 
 struct s32k1xx_edmatcd_s
 {

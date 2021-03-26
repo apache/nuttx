@@ -53,3 +53,8 @@ const uint8_t g_flashcfg[16]  __attribute__((section(".flashcfg"))) =
   (uint8_t)CONFIG_S32K1XX_FLASHCFG_FEPROT,                     /* 0x040e */
   (uint8_t)CONFIG_S32K1XX_FLASHCFG_FDPROT                      /* 0x040f */
 };
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+

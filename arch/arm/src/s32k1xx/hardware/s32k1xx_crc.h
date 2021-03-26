@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_crc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,35 +16,35 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_CRC_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_CRC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* CRC Register Offsets *************************************************************/
+/* CRC Register Offsets *****************************************************/
 
 #define S32K1XX_CRC_DATA_OFFSET     0x0000  /* CRC Data register */
 #define S32K1XX_CRC_GPOLY_OFFSET    0x0004  /* CRC Polynomial register */
 #define S32K1XX_CRC_CTRL_OFFSET     0x0008  /* CRC Control register */
 
-/* CRC Register Addresses ***********************************************************/
+/* CRC Register Addresses ***************************************************/
 
 #define S32K1XX_CRC_DATA            (S32K1XX_CRC_BASE + S32K1XX_CRC_DATA_OFFSET)
 #define S32K1XX_CRC_GPOLY           (S32K1XX_CRC_BASE + S32K1XX_CRC_GPOLY_OFFSET)
 #define S32K1XX_CRC_CTRL            (S32K1XX_CRC_BASE + S32K1XX_CRC_CTRL_OFFSET)
 
-/* CRC Register Bitfield Definitions ************************************************/
+/* CRC Register Bitfield Definitions ****************************************/
 
 /* CRC Data register */
 
@@ -83,6 +83,7 @@
 #  define CRC_CTRL_TOTR_BITS        (1 << CRC_CTRL_TOTR_SHIFT) /* Bits in bytes are transposed */
 #  define CRC_CTRL_TOTR_BOTH        (2 << CRC_CTRL_TOTR_SHIFT) /* Both bits in bytes and bytes transposed */
 #  define CRC_CTRL_TOTR_BYTES       (3 << CRC_CTRL_TOTR_SHIFT) /* Bytes are transposed */
+
 #define CRC_CTRL_TOT_SHIFT          (30)      /* Bits 30-31: Type Of Transpose For Writes */
 #define CRC_CTRL_TOT_MASK           (3 << CRC_CTRL_TOT_SHIFT)
 #  define CRC_CTRL_TOT_NONE         (0 << CRC_CTRL_TOT_SHIFT)  /* No transposition */

@@ -1,4 +1,4 @@
-/*********************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_pmc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,37 +16,37 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_PMC_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_PMC_H
 
-/*********************************************************************************************
+/****************************************************************************
  * Included Files
- *********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/*********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *********************************************************************************************/
+ ****************************************************************************/
 
-/* PMC Register Offsets **********************************************************************/
+/* PMC Register Offsets *****************************************************/
 
 #define S32K1XX_PMC_LVDSC1_OFFSET   0x0000  /* Low Voltage Detect Status and Control 1 Register */
 #define S32K1XX_PMC_LVDSC2_OFFSET   0x0001  /* Low Voltage Detect Status and Control 2 Register */
 #define S32K1XX_PMC_REGSC_OFFSET    0x0002  /* Regulator Status and Control Register */
 #define S32K1XX_PMC_LPOTRIM_OFFSET  0x0004  /* Low Power Oscillator Trim Register */
 
-/* PMC Register Addresses ********************************************************************/
+/* PMC Register Addresses ***************************************************/
 
 #define S32K1XX_PMC_LVDSC1          (S32K1XX_PMC_BASE + S32K1XX_PMC_LVDSC1_OFFSET)
 #define S32K1XX_PMC_LVDSC2          (S32K1XX_PMC_BASE + S32K1XX_PMC_LVDSC2_OFFSET)
 #define S32K1XX_PMC_REGSC           (S32K1XX_PMC_BASE + S32K1XX_PMC_REGSC_OFFSET)
 #define S32K1XX_PMC_LPOTRIM         (S32K1XX_PMC_BASE + S32K1XX_PMC_LPOTRIM_OFFSET)
 
-/* PMC Register Bitfield Definitions *********************************************************/
+/* PMC Register Bitfield Definitions ****************************************/
 
 /* Low Voltage Detect Status and Control 1 Register */
 

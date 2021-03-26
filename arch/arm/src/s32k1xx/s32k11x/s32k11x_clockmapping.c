@@ -111,3 +111,7 @@ const uint16_t g_clkname_mapping[] =
   PCC_INVALID_INDEX,                  /* End of ASYNCH DIV2 clocks       68 */
   PCC_INVALID_INDEX,                  /* End of PCC clocks               69 */
 };
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_lpspi.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_S32K1XX_LPSPI_H
 #define __ARCH_ARM_SRC_S32K1XX_S32K1XX_LPSPI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,9 +49,9 @@
 #include "chip.h"
 #include "hardware/s32k1xx_lpspi.h"
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -66,7 +66,7 @@ extern "C"
 
 struct spi_dev_s; /* Forward reference */
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_lpspibus_initialize
  *
  * Description:
@@ -78,67 +78,74 @@ struct spi_dev_s; /* Forward reference */
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct spi_dev_s *s32k1xx_lpspibus_initialize(int bus);
 
-/************************************************************************************
+/****************************************************************************
  * Name:  s32k1xx_lpspi0/1/2/select and s32k1xx_lpspi0/1/2/status
  *
  * Description:
- *   The external functions, s32k1xx_lpspi001/2/select, s32k1xx_lpspi0/1/2/status,
- *   and s32k1xx_lpspi0/1/2/cmddata must be provided by board-specific logic.
- *   These are implementations of the select, status, and cmddata methods of the SPI
- *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other
- *   methods (including s32k1xx_lpspibus_initialize()) are provided by common
+ *   The external functions, s32k1xx_lpspi001/2/select,
+ *   s32k1xx_lpspi0/1/2/status, and s32k1xx_lpspi0/1/2/cmddata must be
+ *   provided by board-specific logic. These are implementations of the
+ *   select, status, and cmddata methods of the SPI interface defined by
+ *   struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
+ *   (including s32k1xx_lpspibus_initialize()) are provided by common
  *   S32K1XX logic.  To use this common SPI logic on your board:
  *
- *   1. Provide logic in s32k1xx_boardinitialize() to configure SPI chip select
- *      pins.
+ *   1. Provide logic in s32k1xx_boardinitialize() to configure SPI chip
+ *      select pins.
  *   2. Provide s32k1xx_lpspi0/1/2/select() and s32k1xx_lpspi0/1/2/status()
- *      functions in your  board-specific logic.  These functions will perform chip
- *      selection and status operations using GPIOs in the way your board is
- *       configured.
- *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration file, then
- *      provide s32k1xx_lpspi0/1/2/cmddata() functions in your board-specific logic.
- *      These functions will perform cmd/data selection operations using GPIOs in
- *      the way your board is configured.
- *   4. Add a calls to s32k1xx_lpspibus_initialize() in your low level application
- *      initialization logic
- *   5. The handle returned by s32k1xx_lpspibus_initialize() may then be used to
- *      bind the SPI driver to higher level logic (e.g., calling
+ *      functions in your  board-specific logic.  These functions will
+ *      perform chip selection and status operations using GPIOs in the way
+ *      your board is configured.
+ *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration file,
+ *      then provide s32k1xx_lpspi0/1/2/cmddata() functions in your
+ *      board-specific logic. These functions will perform cmd/data selection
+ *      operations using GPIOs in the way your board is configured.
+ *   4. Add a calls to s32k1xx_lpspibus_initialize() in your low level
+ *      application initialization logic
+ *   5. The handle returned by s32k1xx_lpspibus_initialize() may then be
+ *      used to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_LPSPI0
-void s32k1xx_lpspi0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void s32k1xx_lpspi0select(FAR struct spi_dev_s *dev,
+                          uint32_t devid, bool selected);
 uint8_t s32k1xx_lpspi0status(FAR struct spi_dev_s *dev, uint32_t devid);
-int s32k1xx_lpspi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int s32k1xx_lpspi0cmddata(FAR struct spi_dev_s *dev,
+                          uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_S32K1XX_LPSPI1
-void s32k1xx_lpspi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void s32k1xx_lpspi1select(FAR struct spi_dev_s *dev,
+                          uint32_t devid, bool selected);
 uint8_t s32k1xx_lpspi1status(FAR struct spi_dev_s *dev, uint32_t devid);
-int s32k1xx_lpspi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int s32k1xx_lpspi1cmddata(FAR struct spi_dev_s *dev,
+                          uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_S32K1XX_LPSPI2
-void s32k1xx_lpspi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void s32k1xx_lpspi2select(FAR struct spi_dev_s *dev,
+                          uint32_t devid, bool selected);
 uint8_t s32k1xx_lpspi2status(FAR struct spi_dev_s *dev, uint32_t devid);
-int s32k1xx_lpspi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int s32k1xx_lpspi2cmddata(FAR struct spi_dev_s *dev,
+                          uint32_t devid, bool cmd);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_lpspi0/1/2/register
  *
  * Description:
- *   If the board supports a card detect callback to inform the SPI-based MMC/SD
- *   driver when an SD card is inserted or removed, then CONFIG_SPI_CALLBACK should
- *   be defined and the following function(s) must be implemented.  These functions
- *   implements the registercallback method of the SPI interface (see
- *   include/nuttx/spi/spi.h for details)
+ *   If the board supports a card detect callback to inform the SPI-based
+ *   MMC/SD driver when an SD card is inserted or removed, then
+ *   CONFIG_SPI_CALLBACK should be defined and the following function(s)
+ *   must be implemented.  These functions implements the registercallback
+ *   method of the SPI interface (see include/nuttx/spi/spi.h for details)
  *
  * Input Parameters:
  *   dev -      Device-specific state data
@@ -152,18 +159,21 @@ int s32k1xx_lpspi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_S32K1XX_LPSPI0
-int s32k1xx_lpspi0register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int s32k1xx_lpspi0register(FAR struct spi_dev_s *dev,
+                           spi_mediachange_t callback,
+                           FAR void *arg);
 #endif
 
 #ifdef CONFIG_S32K1XX_LPSPI1
-int s32k1xx_lpspi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int s32k1xx_lpspi1register(FAR struct spi_dev_s *dev,
+                           spi_mediachange_t callback,
+                           FAR void *arg);
 #endif
 
 #ifdef CONFIG_S32K1XX_LPSPI2
-int s32k1xx_lpspi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int s32k1xx_lpspi2register(FAR struct spi_dev_s *dev,
+                           spi_mediachange_t callback,
+                           FAR void *arg);
 #endif
 #endif
 

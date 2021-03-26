@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_rtc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_RTC_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_RTC_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* RTC Register Offsets *****************************************************************************/
+/* RTC Register Offsets *****************************************************/
 
 #define S32K1XX_RTC_TSR_OFFSET                  0x0000  /* Time Seconds register */
 #define S32K1XX_RTC_TPR_OFFSET                  0x0004  /* Time Prescaler Register */
@@ -43,7 +43,7 @@
 #define S32K1XX_RTC_LR_OFFSET                   0x0018  /* Lock Register */
 #define S32K1XX_RTC_IER_OFFSET                  0x001C  /* Interrupt Enable Register */
 
-/* RTC Register Addresses ***************************************************************************/
+/* RTC Register Addresses ***************************************************/
 
 #define S32K1XX_RTC_TSR                         (S32K1XX_RTC_BASE + S32K1XX_RTC_TSR_OFFSET)
 #define S32K1XX_RTC_TPR                         (S32K1XX_RTC_BASE + S32K1XX_RTC_TPR_OFFSET)
@@ -54,7 +54,7 @@
 #define S32K1XX_RTC_LR                          (S32K1XX_RTC_BASE + S32K1XX_RTC_LR_OFFSET)
 #define S32K1XX_RTC_IER                         (S32K1XX_RTC_BASE + S32K1XX_RTC_IER_OFFSET)
 
-/* RTC Register Bitfield Definitions ****************************************************************/
+/* RTC Register Bitfield Definitions ****************************************/
 
 /* TSR Bit Fields */
 

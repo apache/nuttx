@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_flashcfg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_FLASHCFG_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_FLASHCFG_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* FLASHCFG Register Offsets ****************************************************************/
+/* FLASHCFG Register Offsets ************************************************/
 
 #define S32K1XX_FLASHCFG_BACKDOOR1_OFFSET 0x0000 /* Backdoor Comparison Key 1 */
 #define S32K1XX_FLASHCFG_BACKDOOR2_OFFSET 0x0004 /* Backdoor Comparison Key 2 */
@@ -42,7 +42,7 @@
 #define S32K1XX_FLASHCFG_FEPROT_OFFSET    0x000e /* EEPROM protection byte */
 #define S32K1XX_FLASHCFG_FDPROT_OFFSET    0x000f /* Data flash protection byte */
 
-/* FLASHCFG Register Addresses ***************************************************************/
+/* FLASHCFG Register Addresses **********************************************/
 
 #define S32K1XX_FLASHCFG_BACKDOOR1        (S32K1XX_FLASHCFG_BASE + S32K1XX_FLASHCFG_BACKDOOR1_OFFSET)
 #define S32K1XX_FLASHCFG_BACKDOOR2        (S32K1XX_FLASHCFG_BASE + S32K1XX_FLASHCFG_BACKDOOR2_OFFSET)
@@ -52,9 +52,10 @@
 #define S32K1XX_FLASHCFG_FEPROT           (S32K1XX_FLASHCFG_BASE + S32K1XX_FLASHCFG_FEPROT_OFFSET)
 #define S32K1XX_FLASHCFG_FDPROT           (S32K1XX_FLASHCFG_BASE + S32K1XX_FLASHCFG_FDPROT_OFFSET)
 
-/* FLASHCFG Register Bitfield Definitions ***************************************************/
+/* FLASHCFG Register Bitfield Definitions ***********************************/
 
 /* Backdoor Comparison Key 1 (32-bits) */
+
 /* Backdoor Comparison Key 2 (32-bits) */
 
 /* Program flash protection bytes
@@ -96,22 +97,25 @@
 #  define FLASHCFG_FSEC_KEYEN_ENABLED     (2 << FLASHCFG_FSEC_KEYEN_SHIFT)
 #  define FLASHCFG_FSEC_KEYEN_DISABLED3   (3 << FLASHCFG_FSEC_KEYEN_SHIFT)
 
-/* Flash nonvolatile option byte (8-bits, Refer to the device's Chip Configuration details
- * for the definition and use of these bits.
+/* Flash nonvolatile option byte (8-bits, Refer to the device's Chip
+ * Configuration details for the definition and use of these bits.
  */
 
-/* EEPROM protection byte.  Each EPROT bit covers one-eighth of the configured EEPROM data */
+/* EEPROM protection byte.
+ * Each EPROT bit covers one-eighth of the configured EEPROM data
+ */
 
 #define FLASHCFG_FEPROT(n)               (1 << (n))
 
-/* Data flash protection byte.  Each DPROT bit protects one-eighth of the partitioned data
+/* Data flash protection byte.
+ * Each DPROT bit protects one-eighth of the partitioned data
  * flash memory space.
  */
 
 #define FLASHCFG_FDPROT(n)               (1 << (n))
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_FLASHCFG_H */

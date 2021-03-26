@@ -1,4 +1,4 @@
-/************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_lpi2c.h
  *
  *    Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -32,23 +32,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_LPI2C_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_LPI2C_H
 
-/************************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/s32k1xx_memorymap.h"
 
-/************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************************************/
+/* Register offsets *********************************************************/
 
 #define S32K1XX_LPI2C_VERID_OFFSET          0x0000  /* Version ID Register offset */
 #define S32K1XX_LPI2C_PARAM_OFFSET          0x0004  /* Parameter Register offset */
@@ -79,7 +79,7 @@
 #define S32K1XX_LPI2C_STDR_OFFSET           0x0160  /* Slave Transmit Data Register offset */
 #define S32K1XX_LPI2C_SRDR_OFFSET           0x0170  /* Slave Receive Data Register offset */
 
-/* Register addresses ***************************************************************************************/
+/* Register addresses *******************************************************/
 
 /* LPI2C0 Registers */
 
@@ -143,7 +143,7 @@
 #define S32K1XX_LPI2C1_STDR                 (S32K1XX_LPI2C1_BASE + S32K1XX_LPI2C_STDR_OFFSET)    /* Slave Transmit Data Register  */
 #define S32K1XX_LPI2C1_SRDR                 (S32K1XX_LPI2C1_BASE + S32K1XX_LPI2C_SRDR_OFFSET)    /* Slave Receive Data Register  */
 
-/* Register bit definitions *********************************************************************************/
+/* Register bit definitions *************************************************/
 
 /* LPI2C Version ID Register */
 
@@ -267,7 +267,7 @@
 #define LPI2C_MCFGR1_AUTOSTOP               (1 << 8)  /* Automatic STOP Generation Bit */
 #define LPI2C_MCFGR1_IGNACK                 (1 << 9)  /* Ignore NACK Bit */
 #define LPI2C_MCFGR1_TIMECFG                (1 << 10) /* Timeout Configuration Bit */
-                                                     /* Bits 15-11 Reserved */
+                                                      /* Bits 15-11 Reserved */
 #define LPI2C_MCFGR1_MATCFG_SHIFT           (16)
 #define LPI2C_MCFGR1_MATCFG_MASK            (7 << LPI2C_MCFGR1_MATCFG_SHIFT)  /* Match Configuration Bit Mask */
 #  define LPI2C_MCFGR1_MATCFG(n)            ((n << LPI2C_MCFGR1_MATCFG_SHIFT) & LPI2C_MCFGR1_MATCFG_MASK)
@@ -309,6 +309,7 @@
 #define LPI2C_MCFG2_FILTSDA_DISABLE         (0 << LPI2C_MCFG2_FILTSDA_SHIFT)
 #  define LPI2C_MCFG2_FILTSDA_CYCLES(n)     ((n << LPI2C_MCFG2_FILTSDA_SHIFT) & LPI2C_MCFG2_FILTSDA_MASK)
                                                      /* Bits 31-28 Reserved */
+
 /* LPI2C Master Config Register 3  */
 
                                                      /* Bits 7-0 Reserved */
@@ -370,20 +371,26 @@
 
 #define LPI2C_MFCR_TXWATER_SHIFT            (0)
 #define LPI2C_MFCR_TXWATER_MASK             (3 << LPI2C_MFCR_TXWATER_SHIFT)  /* Transmit FIFO Watermark*/
+
 #  define LPI2C_MFCR_TXWATER(n)             ((n << LPI2C_MFCR_TXWATER_SHIFT) &  LPI2C_MFCR_TXWATER_MASK)  /* Transmit FIFO Watermark*/
+
                                                      /* Bits 15-2 Reserved */
 #define LPI2C_MFCR_RXWATER_SHIFT            (16)
 #define LPI2C_MFCR_RXWATER_MASK             (3 << LPI2C_MFCR_RXWATER_SHIFT)  /* Receive FIFO Watermark */
+
 #  define LPI2C_MFCR_RXWATER(n)             ((n << LPI2C_MFCR_RXWATER_SHIFT) &  LPI2C_MFCR_RXWATER_MASK)  /* Transmit FIFO Watermark*/
+
                                                      /* Bits 31-18 Reserved */
 
 /* LPI2C Master FIFO Status Register */
 
 #define LPI2C_MFSR_TXCOUNT_SHIFT            (0)
 #define LPI2C_MFSR_TXCOUNT_MASK             (3 << LPI2C_MFSR_TXCOUNT_SHIFT)  /* Transmit FIFO Count */
+
                                                      /* Bits 15-2 Reserved */
 #define LPI2C_MFSR_RXCOUNT_SHIFT            (16)
 #define LPI2C_MFSR_RXCOUNT_MASK             (3 << LPI2C_MFSR_RXCOUNT_SHIFT)  /* Receive FIFO Count */
+
                                                      /* Bits 31-18 Reserved */
 
 /* LPI2C Master Transmit Data Register */
@@ -408,9 +415,11 @@
 
 #define LPI2C_MRDR_DATA_SHIFT               (0)
 #define LPI2C_MRDR_DATA_MASK                (0xff << LPI2C_MRDR_DATA_SHIFT)  /* Receive Data */
+
                                                      /* Bits 13-8 Reserved */
 #define LPI2C_MRDR_RXEMPTY_SHIFT            (14)
 #define LPI2C_MRDR_RXEMPTY_MASK             (1 << LPI2C_MRDR_RXEMPTY_SHIFT)  /* Rx Empty */
+
                                                      /* Bits 31-15 Reserved */
 
 /* LPI2C Slave Control Register */
@@ -531,7 +540,8 @@
 /* LPI2C Slave Address Status Register  */
 
 #define LPI2C_SASR_RADDR_MASK               (0x7ff << 0) /* Received Address */
-                                                      /* Bits 16-11 Reserved */
+
+                                                    /* Bits 16-11 Reserved */
 #define LPI2C_SASR_ANV                      (1 << 14) /* Address Not Valid */
                                                       /* Bits 31-15 Reserved */
 

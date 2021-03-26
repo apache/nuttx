@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_pin.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_S32K1XX_PIN_H
 #define __ARCH_ARM_SRC_S32K1XX_S32K1XX_PIN_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -37,11 +37,11 @@
 #include "arm_internal.h"
 #include "hardware/s32k1xx_port.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Bit-encoded input to s32k1xx_pinconfig() *****************************************/
+/* Bit-encoded input to s32k1xx_pinconfig() *********************************/
 
 /* General form (32-bits, only 22 bits are unused in the encoding):
  *
@@ -86,8 +86,8 @@
 #define _PIN_MODE_ALT6          (6 << _PIN_MODE_SHIFT)  /*   110 Alternative 6 */
 #define _PIN_MODE_ALT7          (7 << _PIN_MODE_SHIFT)  /*   111 Alternative 7 */
 
-/* Options for all digital modes (Alternatives 1-7).  None of the digital
- * options apply if the analog mode is selected.
+/* Options for all digital modes (Alternatives 1-7).
+ * None of the digital options apply if the analog mode is selected.
  */
 
 #define _PIN_IO_MASK            (1 << _PIN_OPTIONS_SHIFT) /* xxx1 Digital input/output mask */
@@ -102,9 +102,11 @@
 #  define _PIN_OUTPUT_LOWDRIVE  (1 << _PIN_OPTIONS_SHIFT) /* 0xx1 Output with low drive strength */
 #  define _PIN_OUTPUT_HIGHDRIVE (9 << _PIN_OPTIONS_SHIFT) /* 1xx1 Output with high drive strength */
 
-/* End-user pin modes and configurations.  Notes:  (1) None of the digital options
- * are available for the analog mode, (2) digital settings may be combined (OR'ed)
- * provided that input-only and output-only options are not intermixed.
+/* End-user pin modes and configurations.
+ * Notes:
+ * (1) None of the digital options are available for the analog mode,
+ * (2) digital settings may be combined (OR'ed) provided that input-only
+ * and output-only options are not intermixed.
  */
 
 #define PIN_ANALOG              _PIN_MODE_ANALOG
@@ -276,15 +278,15 @@
 #define PIN30                   (30 << _PIN_SHIFT)
 #define PIN31                   (31 << _PIN_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -295,26 +297,27 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_pinconfig
  *
  * Description:
  *   Configure a pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int s32k1xx_pinconfig(uint32_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_pinfilter
  *
  * Description:
  *   Configure the digital filter associated with a port. The digital filter
- *   capabilities of the PORT module are available in all digital pin muxing modes.
+ *   capabilities of the PORT module are available in all digital pin muxing
+ *   modes.
  *
  * Input Parameters:
  *   port  - See S32K1XX_PORTn definitions in s32k1xx_port.h
@@ -322,37 +325,38 @@ int s32k1xx_pinconfig(uint32_t cfgset);
  *           false: Digital Filters are clocked by the 1 kHz LPO clock
  *   width - Filter Length
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int s32k1xx_pinfilter(unsigned int port, bool lpo, unsigned int width);
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void s32k1xx_gpiowrite(uint32_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool s32k1xx_gpioread(uint32_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_pinirq_initialize
  *
  * Description:
- *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_GPIOIRQ
 void s32k1xx_pinirq_initialize(void);
@@ -360,37 +364,39 @@ void s32k1xx_pinirq_initialize(void);
 #  define s32k1xx_pinirq_initialize()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_pinirqattach
  *
  * Description:
  *   Attach a pin interrupt handler.  The normal initialization sequence is:
  *
- *   1. Call s32k1xx_pinconfig() to configure the interrupting pin (pin interrupts
- *      will be disabled.
- *   2. Call s32k1xx_pinirqattach() to attach the pin interrupt handling function.
+ *   1. Call s32k1xx_pinconfig() to configure the interrupting pin
+ *      (pin interrupts will be disabled.
+ *   2. Call s32k1xx_pinirqattach() to attach the pin interrupt handling
+ *      function.
  *   3. Call s32k1xx_pinirqenable() to enable interrupts on the pin.
  *
  * Input Parameters:
  *   pinset -  Pin configuration
  *   pinisr -  Pin interrupt service routine
- *   arg    -  An argument that will be provided to the interrupt service routine.
+ *   arg    -  An argument that will be provided to the interrupt service
+ *             routine.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on any
- *   failure to indicate the nature of the failure.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int s32k1xx_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg);
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_pinirqenable
  *
  * Description:
  *   Enable the interrupt for specified pin IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_GPIOIRQ
 void s32k1xx_pinirqenable(uint32_t pinset);
@@ -398,13 +404,13 @@ void s32k1xx_pinirqenable(uint32_t pinset);
 #  define s32k1xx_pinirqenable(pinset)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_pinirqdisable
  *
  * Description:
  *   Disable the interrupt for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_GPIOIRQ
 void s32k1xx_pinirqdisable(uint32_t pinset);
@@ -412,37 +418,38 @@ void s32k1xx_pinirqdisable(uint32_t pinset);
 #  define s32k1xx_pinirqdisable(pinset)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_pindmaenable
  *
  * Description:
  *   Enable DMA for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_DMA
 void s32k1xx_pindmaenable(uint32_t pinset);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_pindmadisable
  *
  * Description:
  *   Disable DMA for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_DMA
 void s32k1xx_pindmadisable(uint32_t pinset);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function:  s32k1xx_pindump
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Dump all GPIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 void s32k1xx_pindump(uint32_t pinset, const char *msg);

@@ -1,4 +1,4 @@
-/*****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_ftm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_FTM_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_FTM_H
 
-/*****************************************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************************************/
+ ****************************************************************************/
 
 #include "hardware/s32k1xx_memorymap.h"
 
-/*****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets **********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define S32K1XX_FTM_SC_OFFSET            0x0000 /* Status And Control register offset */
 #define S32K1XX_FTM_CNT_OFFSET           0x0004 /* Counter register offset */
@@ -92,7 +92,7 @@
 #define S32K1XX_FTM_CNSC_OFFSET(n)       (0x000c + (n) * 0x0008) /* Channel (n) Status And Control register offset */
 #define S32K1XX_FTM_CNV_OFFSET(n)        (0x0010 + (n) * 0x0008) /* Channel (n) Value register offset */
 
-/* Register Addresses ********************************************************************************/
+/* Register Addresses *******************************************************/
 
 /* FTM0 registers */
 
@@ -558,7 +558,7 @@
 #define S32K1XX_FTM7_C6V_MIRROR          (S32K1XX_FTM7_BASE + S32K1XX_FTM_C6V_MIRROR_OFFSET) /* FTM7 Mirror of Channel 6 Match Value register */
 #define S32K1XX_FTM7_C7V_MIRROR          (S32K1XX_FTM7_BASE + S32K1XX_FTM_C7V_MIRROR_OFFSET) /* FTM7 Mirror of Channel 7 Match Value register */
 
-/* Register Bit Definitions **************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Status And Control register */
 

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_cmu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_CMU_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_CMU_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* CMU Register Offsets *************************************************************/
+/* CMU Register Offsets *****************************************************/
 
 #define S32K1XX_CMU_GCR_OFFSET   0x0000  /* Global Configuration Register */
 #define S32K1XX_CMU_RCCR_OFFSET  0x0004  /* Reference Count Configuration Register */
@@ -41,7 +41,7 @@
 #define S32K1XX_CMU_SR_OFFSET    0x0010  /* Status Register */
 #define S32K1XX_CMU_IER_OFFSET   0x0014  /* Interrupt Enable Register */
 
-/* CMU Register Addresses ***********************************************************/
+/* CMU Register Addresses ***************************************************/
 
 #define S32K1XX_CMU_GCR          (S32K1XX_CMU_BASE + S32K1XX_CMU_GCR_OFFSET)
 #define S32K1XX_CMU_RCCR         (S32K1XX_CMU_BASE + S32K1XX_CMU_RCCR_OFFSET)
@@ -50,7 +50,7 @@
 #define S32K1XX_CMU_SR           (S32K1XX_CMU_BASE + S32K1XX_CMU_SR_OFFSET)
 #define S32K1XX_CMU_IER          (S32K1XX_CMU_BASE + S32K1XX_CMU_IER_OFFSET)
 
-/* CMU Register Bitfield Definitions ************************************************/
+/* CMU Register Bitfield Definitions ****************************************/
 
 /* Global Configuration Register */
 
@@ -83,6 +83,7 @@
 #  define CMU_SR_STATE_INIT      (1 << CMU_SR_STATE_SHIFT)  /* Initialization state */
 #  define CMU_SR_STATE_INITWAIT  (2 << CMU_SR_STATE_SHIFT)  /* Initialization wait state */
 #  define CMU_SR_STATE_FREQCHECK (3 << CMU_SR_STATE_SHIFT)  /* Frequency check state */
+
 #define CMU_SR_RS                (1 << 4)  /* Bit 4: Run Status */
 
 /* Interrupt Enable Register */

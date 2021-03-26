@@ -39,12 +39,12 @@
  * Name: s32k14x_clrpend
  *
  * Description:
- *   Clear a pending interrupt at the NVIC.  This does not seem to be required
- *   for most interrupts.  Don't know why... but the S32K14x Ethernet EMAC
- *   interrupt definitely needs it!
+ *   Clear a pending interrupt at the NVIC.  This does not seem to be
+ *   required for most interrupts.  Don't know why...
+ *   but the S32K14x Ethernet EMAC interrupt definitely needs it!
  *
- *   This function is logically a part of s32k14x_irq.c, but I will keep it in
- *   a separate file so that it will not increase the footprint on S32K14x
+ *   This function is logically a part of s32k14x_irq.c, but I will keep it
+ *   in a separate file so that it will not increase the footprint on S32K14x
  *   platforms that do not need this function.
  *
  ****************************************************************************/
