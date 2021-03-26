@@ -24,13 +24,8 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
-#include <debug.h>
-#include <errno.h>
 #include <assert.h>
 #include <sys/types.h>
-#include <nuttx/kmalloc.h>
-#include <nuttx/irq.h>
 
 #include "hardware/esp32_dma.h"
 #include "esp32_dma.h"
