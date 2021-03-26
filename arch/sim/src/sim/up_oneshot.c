@@ -85,7 +85,6 @@ static int sim_current(FAR struct oneshot_lowerhalf_s *lower,
  * Private Data
  ****************************************************************************/
 
-static struct timespec g_current;
 static sq_queue_t g_oneshot_list;
 
 /* Lower half operations */
@@ -103,6 +102,27 @@ static const struct oneshot_operations_s g_oneshot_ops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: sim_timer_current
+ *
+ * Description:
+ *   Get current time from host.
+ *
+ ****************************************************************************/
+
+static inline void sim_timer_current(FAR struct timespec *ts)
+{
+  uint64_t nsec;
+  time_t sec;
+
+  nsec  = host_gettime(false);
+  sec   = nsec / NSEC_PER_SEC;
+  nsec -= sec * NSEC_PER_SEC;
+
+  ts->tv_sec  = sec;
+  ts->tv_nsec = nsec;
+}
+
+/****************************************************************************
  * Name: sim_timer_update
  *
  * Description:
@@ -113,15 +133,7 @@ static const struct oneshot_operations_s g_oneshot_ops =
 
 static void sim_timer_update(void)
 {
-  static const struct timespec tick =
-  {
-    .tv_sec  = 0,
-    .tv_nsec = NSEC_PER_TICK,
-  };
-
   FAR sq_entry_t *entry;
-
-  clock_timespec_add(&g_current, &tick, &g_current);
 
   for (entry = sq_peek(&g_oneshot_list); entry; entry = sq_next(entry))
     {
@@ -154,7 +166,10 @@ static void sim_process_tick(sq_entry_t *entry)
 
   if (priv->callback)
     {
-      if (clock_timespec_compare(&priv->alarm, &g_current) > 0)
+      struct timespec current;
+
+      sim_timer_current(&current);
+      if (clock_timespec_compare(&priv->alarm, &current) > 0)
         {
           return; /* Alarm doesn't expire yet */
         }
@@ -228,10 +243,12 @@ static int sim_start(FAR struct oneshot_lowerhalf_s *lower,
 {
   FAR struct sim_oneshot_lowerhalf_s *priv =
     (FAR struct sim_oneshot_lowerhalf_s *)lower;
+  struct timespec current;
 
   DEBUGASSERT(priv != NULL && callback != NULL && ts != NULL);
 
-  clock_timespec_add(&g_current, ts, &priv->alarm);
+  sim_timer_current(&current);
+  clock_timespec_add(&current, ts, &priv->alarm);
 
   priv->callback = callback;
   priv->arg      = arg;
@@ -268,10 +285,12 @@ static int sim_cancel(FAR struct oneshot_lowerhalf_s *lower,
 {
   FAR struct sim_oneshot_lowerhalf_s *priv =
     (FAR struct sim_oneshot_lowerhalf_s *)lower;
+  struct timespec current;
 
   DEBUGASSERT(priv != NULL && ts != NULL);
 
-  clock_timespec_subtract(&priv->alarm, &g_current, ts);
+  sim_timer_current(&current);
+  clock_timespec_subtract(&priv->alarm, &current, ts);
 
   priv->callback = NULL;
   priv->arg      = NULL;
@@ -303,7 +322,8 @@ static int sim_current(FAR struct oneshot_lowerhalf_s *lower,
 {
   DEBUGASSERT(ts != NULL);
 
-  *ts = g_current;
+  sim_timer_current(ts);
+
   return OK;
 }
 
@@ -417,15 +437,14 @@ void up_timer_initialize(void)
 
 void up_timer_update(void)
 {
-#ifdef CONFIG_SIM_WALLTIME_SLEEP
+  static uint64_t until;
 
   /* Wait a bit so that the timing is close to the correct rate. */
 
-  host_sleepuntil(g_current.tv_nsec +
-    (uint64_t)g_current.tv_sec * NSEC_PER_SEC);
-#endif
+  until += NSEC_PER_TICK;
+  host_sleepuntil(until);
 
-#ifndef CONFIG_SIM_WALLTIME_SIGNAL
+#ifdef CONFIG_SIM_WALLTIME_SLEEP
   sim_timer_update();
 #endif
 }
