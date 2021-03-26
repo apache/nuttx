@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_rcm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_RCM_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_RCM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* RCM Register Offsets *************************************************************/
+/* RCM Register Offsets *****************************************************/
 
 #define S32K1XX_RCM_VERID_OFFSET    0x0000  /* Version ID Register */
 #define S32K1XX_RCM_PARAM_OFFSET    0x0004  /* Parameter Register */
@@ -41,7 +41,7 @@
 #define S32K1XX_RCM_SSRS_OFFSET     0x0018  /* Sticky System Reset Status Register */
 #define S32K1XX_RCM_SRIE_OFFSET     0x001c  /* System Reset Interrupt Enable Register */
 
-/* RCM Register Addresses ***********************************************************/
+/* RCM Register Addresses ***************************************************/
 
 #define S32K1XX_RCM_VERID           (S32K1XX_RCM_BASE + S32K1XX_RCM_VERID_OFFSET)
 #define S32K1XX_RCM_PARAM           (S32K1XX_RCM_BASE + S32K1XX_RCM_PARAM_OFFSET)
@@ -50,13 +50,14 @@
 #define S32K1XX_RCM_SSRS            (S32K1XX_RCM_BASE + S32K1XX_RCM_SSRS_OFFSET)
 #define S32K1XX_RCM_SRIE            (S32K1XX_RCM_BASE + S32K1XX_RCM_SRIE_OFFSET)
 
-/* RCM Register Bitfield Definitions ************************************************/
+/* RCM Register Bitfield Definitions ****************************************/
 
 /* Version ID Register */
 
 #define RCM_VERID_FEATURE_SHIFT     (0)       /* Bits 0-15:  Feature Specification Number */
 #define RCM_VERID_FEATURE_MASK      (0xffff << RCM_VERID_FEATURE_SHIFT)
 #  define RCM_VERID_FEATURE_STD     (3 << RCM_VERID_FEATURE_SHIFT) /* Standard feature set*/
+
 #define RCM_VERID_MINOR_SHIFT       (16)      /* Bits 16-23:  Minor Version Number */
 #define RCM_VERID_MINOR_MASK        (0xff << RCM_VERID_MINOR_SHIFT)
 #define RCM_VERID_MAJOR_SHIFT       (24)      /* Bits 24-31: Major Version Number */
@@ -102,6 +103,7 @@
 #  define RCM_RPC_RSTFLTSRW_DISABLE (0 << RCM_RPC_RSTFLTSRW_SHIFT) /* All filtering disabled */
 #  define RCM_RPC_RSTFLTSRW_BUSCLK  (1 << RCM_RPC_RSTFLTSRW_SHIFT) /* Bus clock filter enabled for normal operation */
 #  define RCM_RPC_RSTFLTSRW_LPOCLK  (2 << RCM_RPC_RSTFLTSRW_SHIFT) /* LPO clock filter enabled for normal operation */
+
 #define RCM_RPC_RSTFLTSS            (1 << 2)  /* Bit 2:  Reset Pin Filter Select in Stop Mode */
 #define RCM_RPC_RSTFLTSEL_SHIFT     (8)       /* Bits 8-12: Reset Pin Filter Bus Clock Select */
 #define RCM_RPC_RSTFLTSEL_MASK      (31 << RCM_RPC_RSTFLTSEL_SHIFT)
@@ -130,6 +132,7 @@
 #  define RCM_SRIE_DELAY_34         (1 << RCM_SRIE_DELAY_SHIFT) /* 34 LPO cycles */
 #  define RCM_SRIE_DELAY_130        (2 << RCM_SRIE_DELAY_SHIFT) /* 130 LPO cycles */
 #  define RCM_SRIE_DELAY_514        (3 << RCM_SRIE_DELAY_SHIFT) /* 514 LPO cycles */
+
 #define RCM_SRIE_LOC                (1 << 2)  /* Bit 2:  Loss-of-Clock Interrupt */
 #define RCM_SRIE_LOL                (1 << 3)  /* Bit 3:  Loss-of-Lock Interrupt */
 #define RCM_SRIE_CMU_LOC            (1 << 4)  /* Bit 4:  CMU Loss-of-Clock Reset Interrupt */

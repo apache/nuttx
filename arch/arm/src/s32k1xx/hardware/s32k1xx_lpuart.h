@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_lpuart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_LPUART_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_LPUART_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/s32k1xx_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *************************************************************************/
+/* Register offsets *********************************************************/
 
 #define S32K1XX_LPUART_VERID_OFFSET      0x0000  /* Version ID Register */
 #define S32K1XX_LPUART_PARAM_OFFSET      0x0004  /* Parameter Register */
@@ -47,7 +47,7 @@
 #define S32K1XX_LPUART_FIFO_OFFSET       0x0028  /* LPUART FIFO Register */
 #define S32K1XX_LPUART_WATER_OFFSET      0x002c  /* LPUART Watermark Register */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 #define S32K1XX_LPUART0_VERID            (S32K1XX_LPUART0_BASE + S32K1XX_LPUART_VERID_OFFSET)
 #define S32K1XX_LPUART0_PARAM            (S32K1XX_LPUART0_BASE + S32K1XX_LPUART_PARAM_OFFSET)
@@ -88,7 +88,7 @@
 #define S32K1XX_LPUART2_FIFO             (S32K1XX_LPUART2_BASE + S32K1XX_LPUART_FIFO_OFFSET)
 #define S32K1XX_LPUART2_WATER            (S32K1XX_LPUART2_BASE + S32K1XX_LPUART_WATER_OFFSET)
 
-/* Register bit definitions *****************************************************************/
+/* Register bit definitions *************************************************/
 
 /* Version ID Register */
 
@@ -96,6 +96,7 @@
 #define LPUART_VERID_FEATURE_MASK      (0xffff << LPUART_VERID_FEATURE_SHIFT)
 #  define LPUART_VERID_FEATURE_STD     (1 << LPUART_VERID_FEATURE_SHIFT) /* Standard feature set */
 #  define LPUART_VERID_FEATURE_MODEM   (3 << LPUART_VERID_FEATURE_SHIFT) /* MODEM/IrDA support */
+
 #define LPUART_VERID_MINOR_SHIFT       (16)       /* Bits 16-23: Minor Version Number */
 #define LPUART_VERID_MINOR_MASK        (0xff << LPUART_VERID_MINOR_SHIFT)
 #define LPUART_VERID_MAJOR_SHIFT       (24)       /* Bits 24-31: Major Version Number */
@@ -123,6 +124,7 @@
 #  define LPUART_PINCFG_TRGSEL_RXD     (1 << LPUART_PINCFG_TRGSEL_SHIFT) /* Trigger used instead of RXD pin */
 #  define LPUART_PINCFG_TRGSEL_CTSB    (2 << LPUART_PINCFG_TRGSEL_SHIFT) /* Trigger used instead of CTS_B pin */
 #  define LPUART_PINCFG_TRGSEL_TXDMOD  (3 << LPUART_PINCFG_TRGSEL_SHIFT) /* Trigger used to modulate the TXD output */
+
                                                  /* Bits 2-31:  Reserved */
 
 /* LPUART Baud Rate Register */
@@ -142,6 +144,7 @@
 #  define LPUART_BAUD_MATCFG_ONOFF     (2 << LPUART_BAUD_MATCFG_SHIFT) /* Match On and Match Off */
 #  define LPUART_BAUD_MATCFG_RWUENAB   (3 << LPUART_BAUD_MATCFG_SHIFT) /* Enables RWU on Data Match and Match
                                                                         * On/Off for transmitter CTS input */
+
                                                  /* Bit 20: Reserved */
 #define LPUART_BAUD_RDMAE              (1 << 21) /* Bit 21: Receiver Full DMA Enable */
                                                  /* Bit 22: Reserved */
@@ -149,6 +152,7 @@
 #define LPUART_BAUD_OSR_SHIFT          (24)      /* Bits 24-28: Oversampling Ratio */
 #define LPUART_BAUD_OSR_MASK           (15 << LPUART_BAUD_OSR_SHIFT)
 #  define LPUART_BAUD_OSR(n)           ((uint32_t)((n) - 1) << LPUART_BAUD_OSR_SHIFT) /* n=4..32 */
+
 #define LPUART_BAUD_M10                (1 << 29) /* Bit 20: 10-bit Mode select */
 #define LPUART_BAUD_MAEN2              (1 << 30) /* Bit 30: Match Address Mode Enable 2 */
 #define LPUART_BAUD_MAEN1              (1 << 31) /* Bit 31: Match Address Mode Enable 1 */
@@ -197,6 +201,7 @@
 #  define LPUART_CTRL_IDLECFG_32       (5 << LPUART_CTRL_IDLECFG_SHIFT) /* 32 idle characters */
 #  define LPUART_CTRL_IDLECFG_64       (6 << LPUART_CTRL_IDLECFG_SHIFT) /* 64 idle characters */
 #  define LPUART_CTRL_IDLECFG_128      (7 << LPUART_CTRL_IDLECFG_SHIFT) /* 128 idle characters */
+
 #define LPUART_CTRL_M7                 (1 << 11) /* Bit 11: 7-Bit Mode Select */
                                                  /* Bits 12-13:  Reserved */
 #define LPUART_CTRL_MA2IE              (1 << 14) /* Bit 14: Match 2 Interrupt Enable */
@@ -267,6 +272,7 @@
 #define LPUART_MODIR_TNP_SHIFT         (16)      /* Bits 16-17: Transmitter narrow pulse */
 #define LPUART_MODIR_TNP_MASK          (3 << LPUART_MODIR_TNP_SHIFT)
 #  define LPUART_MODIR_TNP(n)          ((uint32_t)((n) - 1) << LPUART_MODIR_TNP_SHIFT) /* n/OSR */
+
 #define LPUART_MODIR_IREN              (1 << 18) /* Bit nn: Infrared enable */
                                                  /* Bits 19-31:  Reserved */
 
@@ -282,6 +288,7 @@
 #  define LPUART_FIFO_RXFIFOSIZE_64    (5 << LPUART_FIFO_RXFIFOSIZE_SHIFT) /* 64 datawords */
 #  define LPUART_FIFO_RXFIFOSIZE_128   (6 << LPUART_FIFO_RXFIFOSIZE_SHIFT) /* 128 datawords */
 #  define LPUART_FIFO_RXFIFOSIZE_256   (7 << LPUART_FIFO_RXFIFOSIZE_SHIFT) /* 256 datawords */
+
 #define LPUART_FIFO_RXFE               (1 << 3)  /* Bit 3:  Receive FIFO Enable */
 #define LPUART_FIFO_TXFIFOSIZE_SHIFT   (4)       /* Bits 4-6: Transmit FIFO. Buffer Depth */
 #define LPUART_FIFO_TXFIFOSIZE_MASK    (7 << LPUART_FIFO_TXFIFOSIZE_SHIFT)

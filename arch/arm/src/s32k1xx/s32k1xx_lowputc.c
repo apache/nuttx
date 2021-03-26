@@ -269,9 +269,11 @@ int s32k1xx_lpuart_configure(uint32_t base,
 
       /* Select the better value between srb and (sbr + 1) */
 
-      if (temp_diff > (config->baud - (lpuart_freq / (temp_osr * (temp_sbr + 1)))))
+      if (temp_diff >
+          (config->baud - (lpuart_freq / (temp_osr * (temp_sbr + 1)))))
         {
-          temp_diff = config->baud - (lpuart_freq / (temp_osr * (temp_sbr + 1)));
+          temp_diff = config->baud -
+                      (lpuart_freq / (temp_osr * (temp_sbr + 1)));
           temp_sbr++;
         }
 
@@ -394,13 +396,16 @@ void s32k1xx_lowputc(int ch)
     {
     }
 
-  /* If the character to output is a newline, then pre-pend a carriage return */
+  /* If the character to output is a newline,
+   * then pre-pend a carriage return
+   */
 
   if (ch == '\n')
     {
       /* Send the carriage return by writing it into the UART_TXD register. */
 
-      putreg32((uint32_t)'\r', S32K1XX_CONSOLE_BASE + S32K1XX_LPUART_DATA_OFFSET);
+      putreg32((uint32_t)'\r',
+                S32K1XX_CONSOLE_BASE + S32K1XX_LPUART_DATA_OFFSET);
 
       /* Wait for the transmit register to be emptied. When the TXFE bit is
        * non-zero, the TX Buffer FIFO is empty.

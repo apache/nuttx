@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_eeeprom.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,9 +46,9 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 
-/******************************************************************************
+/****************************************************************************
  * Private Types
- ******************************************************************************/
+ ****************************************************************************/
 
 struct eeed_struct_s
 {
@@ -60,9 +60,9 @@ struct eeed_struct_s
   FAR uint8_t *eeed_buffer;       /* FlexRAM memory */
 };
 
-/******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     eeed_open(FAR struct inode *inode);
@@ -84,9 +84,9 @@ static int     eeed_ioctl(FAR struct inode *inode, int cmd,
 static int     eeed_unlink(FAR struct inode *inode);
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Private Data
- ******************************************************************************/
+ ****************************************************************************/
 
 static const struct block_operations g_bops =
 {
@@ -106,9 +106,9 @@ static const struct block_operations g_bops =
 #endif
 };
 
-/******************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline void wait_ftfc_ready()
 {
@@ -142,12 +142,12 @@ static uint32_t execute_ftfc_command()
   return retval;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_open
  *
  * Description: Open the block device
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int eeed_open(FAR struct inode *inode)
@@ -167,12 +167,12 @@ static int eeed_open(FAR struct inode *inode)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_close
  *
  * Description: close the block device
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int eeed_close(FAR struct inode *inode)
@@ -192,12 +192,12 @@ static int eeed_close(FAR struct inode *inode)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_read
  *
  * Description:  Read the specified number of sectors
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t eeed_read(FAR struct inode *inode, unsigned char *buffer,
                        blkcnt_t start_sector, unsigned int nsectors)
@@ -228,15 +228,16 @@ static ssize_t eeed_read(FAR struct inode *inode, unsigned char *buffer,
   return -EINVAL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_write
  *
  * Description: Write the specified number of sectors
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-static ssize_t eeed_write(FAR struct inode *inode, const unsigned char *buffer,
-                        blkcnt_t start_sector, unsigned int nsectors)
+static ssize_t eeed_write(FAR struct inode *inode,
+                          const unsigned char *buffer,
+                          blkcnt_t start_sector, unsigned int nsectors)
 {
   struct eeed_struct_s *dev;
 
@@ -272,12 +273,12 @@ static ssize_t eeed_write(FAR struct inode *inode, const unsigned char *buffer,
   return -EFBIG;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_geometry
  *
  * Description: Return device geometry
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int eeed_geometry(FAR struct inode *inode, struct geometry *geometry)
 {
@@ -306,13 +307,13 @@ static int eeed_geometry(FAR struct inode *inode, struct geometry *geometry)
   return -EINVAL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_ioctl
  *
  * Description:
  *   Return device geometry
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int eeed_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 {
@@ -336,13 +337,13 @@ static int eeed_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   return -ENOTTY;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_unlink
  *
  * Description:
  *   The block driver has been unlinked.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int eeed_unlink(FAR struct inode *inode)
@@ -360,24 +361,24 @@ static int eeed_unlink(FAR struct inode *inode)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: s32k1xx_eeeprom_register
  *
  * Description:
  *   Non-standard function to register a eeeprom
  *
  * Input Parameters:
- *   minor:         Selects suffix of device named /dev/eeepromN, N={1,2,3...}
- *   size:          The size of eeprom in bytes
+ *   minor:     Selects suffix of device named /dev/eeepromN, N={1,2,3...}
+ *   size:      The size of eeprom in bytes
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int s32k1xx_eeeprom_register(int minor, uint32_t size)
 {
@@ -413,14 +414,14 @@ int s32k1xx_eeeprom_register(int minor, uint32_t size)
   return ret;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: s32k1xx_eeeprom_init
  *
  * Description:
  *   Init FTFC flash controller to run in Enhanced EEPROM mode
  *
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void s32k1xx_eeeprom_init()
 {

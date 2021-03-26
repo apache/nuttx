@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k118_pinmux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,36 +16,37 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K118_PINMUX_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K118_PINMUX_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* In most cases, there are alternative configurations for various pins. Those alternative
- * pins are labeled with a suffix like _1, _2, etc. in order to distinguish them.  Logic in
- * the board.h file must select the correct pin configuration for the board by defining a pin
+/* In most cases, there are alternative configurations for various pins.
+ * Those alternative pins are labeled with a suffix like _1, _2, etc. in
+ * order to distinguish them.  Logic in the board.h file must select the
+ * correct pin configuration for the board by defining a pin
  * configuration (with no suffix) that maps to the correct alternative.
  *
- * WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific GPIO options such as frequency,
- * and pull-up/down!  Just the basics are defined for most pins in the initial version of
+ * WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific GPIO options such as
+ * frequency, and pull-up/down!
+ *  Just the basics are defined for most pins in the initial version of
  * this file.
  */
 
 /* ADC */
-
 
 #define PIN_ADC0_SE0              (PIN_ANALOG | PIN_PORTA | PIN0)
 #define PIN_ADC0_SE1              (PIN_ANALOG | PIN_PORTA | PIN1)

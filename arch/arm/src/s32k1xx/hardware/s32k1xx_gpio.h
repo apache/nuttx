@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_GPIO_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define S32K1XX_GPIOA               (0)
 #define S32K1XX_GPIOB               (1)
@@ -39,7 +39,7 @@
 #define S32K1XX_GPIOE               (4)
 #define S32K1XX_NGPIO               (5)
 
-/* GPIO Register Offsets *************************************************************/
+/* GPIO Register Offsets ****************************************************/
 
 #define S32K1XX_GPIO_PDOR_OFFSET    0x0000  /* Port Data Output Register */
 #define S32K1XX_GPIO_PSOR_OFFSET    0x0004  /* Port Set Output Register */
@@ -49,7 +49,7 @@
 #define S32K1XX_GPIO_PDDR_OFFSET    0x0014  /* Port Data Direction Register */
 #define S32K1XX_GPIO_PIDR_OFFSET    0x0018  /* Port Input Disable Register */
 
-/* GPIO Register Addresses ***********************************************************/
+/* GPIO Register Addresses **************************************************/
 
 #define S32K1XX_GPIO_PDOR(g)        (S32K1XX_GPIO_BASE(g) + S32K1XX_GPIO_PDOR_OFFSET)
 #define S32K1XX_GPIO_PSOR(g)        (S32K1XX_GPIO_BASE(g) + S32K1XX_GPIO_PSOR_OFFSET)
@@ -99,7 +99,7 @@
 #define S32K1XX_GPIOE_PDDR          (S32K1XX_GPIOE_BASE + S32K1XX_GPIO_PDDR_OFFSET)
 #define S32K1XX_GPIOE_PIDR          (S32K1XX_GPIOE_BASE + S32K1XX_GPIO_PIDR_OFFSET)
 
-/* GPIO Register Bitfield Definitions ************************************************/
+/* GPIO Register Bitfield Definitions ***************************************/
 
 /* Port Data Output Register */
 

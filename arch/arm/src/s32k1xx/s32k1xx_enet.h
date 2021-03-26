@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_enet.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_S32K1XX_ENET_H
 #define __ARCH_ARM_SRC_S32K1XX_S32K1XX_ENET_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,17 +31,17 @@
 
 #ifdef CONFIG_S32K1XX_ENET
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Definitions for use with s32k1xx_phy_boardinitialize */
 
 #define EMAC_INTF 0
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -56,7 +56,7 @@ extern "C"
 
 #if !defined(CONFIG_NETDEV_LATEINIT)
 
-/************************************************************************************
+/****************************************************************************
  * Function: arm_netinitialize
  *
  * Description:
@@ -74,13 +74,13 @@ extern "C"
  * Assumptions:
  *   Called very early in the initialization sequence.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void arm_netinitialize(void);
 
 #else
 
-/************************************************************************************
+/****************************************************************************
  * Function: s32k1xx_netinitialize
  *
  * Description:
@@ -95,21 +95,22 @@ void arm_netinitialize(void);
  *
  * Assumptions:
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int s32k1xx_netinitialize(int intf);
 
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function: s32k1xx_phy_boardinitialize
  *
  * Description:
- *   Some boards require specialized initialization of the PHY before it can be
- *   used.  This may include such things as configuring GPIOs, resetting the PHY,
- *   etc.  If CONFIG_S32K1XX_ENET_PHYINIT is defined in the configuration then the
- *   board specific logic must provide s32k1xx_phyinitialize();  The i.MX RT Ethernet
- *   driver will call this function one time before it first uses the PHY.
+ *   Some boards require specialized initialization of the PHY before it can
+ *   be be used.  This may include such things as configuring GPIOs,
+ *   resetting the PHY, etc.  If CONFIG_S32K1XX_ENET_PHYINIT is defined in
+ *   the configuration then the board specific logic must provide
+ *   s32k1xx_phyinitialize();  The i.MX RT Ethernet driver will call this
+ *   function one time before it first uses the PHY.
  *
  * Input Parameters:
  *   intf - Always zero for now.
@@ -117,7 +118,7 @@ int s32k1xx_netinitialize(int intf);
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_ENET_PHYINIT
 int s32k1xx_phy_boardinitialize(int intf);

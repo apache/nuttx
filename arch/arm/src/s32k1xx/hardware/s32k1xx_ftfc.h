@@ -1,4 +1,4 @@
-/*****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_ftfc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_FTFC_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_FTFC_H
 
-/*****************************************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/*****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************************************/
+ ****************************************************************************/
 
-/* FTFC Register Offsets *****************************************************************************/
+/* FTFC Register Offsets ****************************************************/
 
-/* FTFC Register Offsets *****************************************************************************/
+/* FTFC Register Offsets ****************************************************/
 
 #define S32K1XX_FTFC_FSTAT_OFFSET	                     0x0000
 #define S32K1XX_FTFC_FCNFG_OFFSET	                     0x0001
@@ -59,10 +59,10 @@
 #define S32K1XX_FTFC_FEPROT_OFFSET	                     0x0016
 #define S32K1XX_FTFC_FDPROT_OFFSET	                     0x0017
 #define S32K1XX_FTFC_FCSESTAT_OFFSET                     0x002c
-#define S32K1XX_FTFC_FERSTAT_OFFSET	                     0x002e
-#define S32K1XX_FTFC_FERCNFG_OFFSET	                     0x002f
+#define S32K1XX_FTFC_FERSTAT_OFFSET                      0x002e
+#define S32K1XX_FTFC_FERCNFG_OFFSET                      0x002f
 
-/* FTFC Register Addresses ***************************************************************************/
+/* FTFC Register Addresses **************************************************/
 
 #define S32K1XX_FTFC_FSTAT                               (S32K1XX_FTFC_BASE + S32K1XX_FTFC_FSTAT_OFFSET)
 #define S32K1XX_FTFC_FCNFG                               (S32K1XX_FTFC_BASE + S32K1XX_FTFC_FCNFG_OFFSET)
@@ -90,7 +90,7 @@
 #define S32K1XX_FTFC_FERSTAT                             (S32K1XX_FTFC_BASE + S32K1XX_FTFC_FERSTAT_OFFSET)
 #define S32K1XX_FTFC_FERCNFG                             (S32K1XX_FTFC_BASE + S32K1XX_FTFC_FERCNFG_OFFSET)
 
-/* FTFC Register Bitfield Definitions ****************************************************************/
+/* FTFC Register Bitfield Definitions ***************************************/
 
 #define FTTC_FSTAT_MGSTAT0                               (1 << 0)
 #define FTTC_FSTAT_FPVIOL                                (1 << 4)
@@ -101,7 +101,7 @@
 #define FTTC_FCNFG_EEERDY                                (1 << 0)
 #define FTTC_FCNFG_RAMRDY                                (1 << 1)
 
-/* Flash controller command numbers ******************************************************************/
+/* Flash controller command numbers *****************************************/
 
 #define S32K1XX_FTFC_VERIFY_BLOCK                        0x00 /* RD1BLK*/
 #define S32K1XX_FTFC_VERIFY_SECTION                      0x01 /* RD1SEC*/

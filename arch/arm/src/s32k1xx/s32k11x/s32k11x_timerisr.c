@@ -136,7 +136,8 @@ void up_timer_initialize(void)
 
   /* Enable SysTick interrupts */
 
-  putreg32((SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE |SYSTICK_CSR_CLKSOURCE),
+  putreg32((SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE |
+            SYSTICK_CSR_CLKSOURCE),
            ARMV6M_SYSTICK_CSR);
 
   /* And enable the timer interrupt */

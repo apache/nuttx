@@ -115,5 +115,6 @@ bool s32k1xx_gpioread(uint32_t pinset)
       regval = getreg32(base + S32K1XX_GPIO_PDIR_OFFSET);
       ret    = ((regval & (1 << pin)) != 0);
     }
+
   return ret;
 }

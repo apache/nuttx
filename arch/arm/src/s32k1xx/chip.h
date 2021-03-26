@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,26 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_CHIP_H
 #define __ARCH_ARM_SRC_S32K1XX_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/* Include the memory map and the chip definitions file.  Other chip hardware files
- * should then include this file for the proper setup.
+/* Include the memory map and the chip definitions file.
+ * Other chip hardware files should then include this file for the proper
+ * setup.
  */
 
 #include <arch/irq.h>
 #include "hardware/s32k1xx_memorymap.h"
 
-/* The common ARMv6/7-M vector handling logic expects the following definitions in
- * this file.  ARMV6/7M_PERIPHERAL_INTERRUPTS provides the number of supported
+/* The common ARMv6/7-M vector handling logic expects the following
+ * definitions in this file.
+ * ARMV6/7M_PERIPHERAL_INTERRUPTS provides the number of supported
  * external interrupts which, for this architecture, is provided in the
  * arch/s32k1xx/irq.h header file.
  */
@@ -48,20 +50,20 @@
 #define ARMV7M_DCACHE_LINESIZE 16  /* 16 bytes (4 words) */
 #define ARMV7M_ICACHE_LINESIZE 16  /* 16 bytes (4 words) */
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_S32K1XX_CHIP_H */

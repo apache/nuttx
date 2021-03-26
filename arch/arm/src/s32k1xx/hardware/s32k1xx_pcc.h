@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_pcc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_PCC_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_PCC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* PCC Register Offsets *************************************************************/
+/* PCC Register Offsets *****************************************************/
 
 #define S32K1XX_PCC_FTFC_OFFSET      0x0080  /* PCC FTFC Register */
 #define S32K1XX_PCC_DMAMUX_OFFSET    0x0084  /* PCC DMAMUX Register */
@@ -78,7 +78,7 @@
 #define S32K1XX_PCC_QSPI_OFFSET      0x01d8  /* PCC QSPI Register */
 #define S32K1XX_PCC_ENET_OFFSET      0x01e4  /* PCC ENET Register */
 
-/* PCC Register Addresses ***********************************************************/
+/* PCC Register Addresses ***************************************************/
 
 #define S32K1XX_PCC_FTFC             (S32K1XX_PCC_BASE + S32K1XX_PCC_FTFC_OFFSET)
 #define S32K1XX_PCC_DMAMUX           (S32K1XX_PCC_BASE + S32K1XX_PCC_DMAMUX_OFFSET)
@@ -124,15 +124,16 @@
 #define S32K1XX_PCC_QSPI             (S32K1XX_PCC_BASE + S32K1XX_PCC_QSPI_OFFSET)
 #define S32K1XX_PCC_ENET             (S32K1XX_PCC_BASE + S32K1XX_PCC_ENET_OFFSET)
 
-/* PCC Register Bitfield Definitions ************************************************/
+/* PCC Register Bitfield Definitions ****************************************/
 
-/* The form of each PCC register is the same as follows.  Some register, however, do
- * not support all of the fields:
+/* The form of each PCC register is the same as follows.
+ *  Some register, however, do not support all of the fields:
  *
  * PCD  - ENET
  * FRAC - ENET
- * PCS  - FTM3, ADC0, ADC1, LPSPI0, LPSPI1, LPSPI2, LPIT, FTM0, FTM2, FTM4, FTM6,
- *        FTM7, LPTMR0, FLEXIO, LPI2C0, LPCI2C1, UART0, UART1, UART2, ENET
+ * PCS  - FTM3, ADC0, ADC1, LPSPI0, LPSPI1, LPSPI2, LPIT,
+ *        FTM0, FTM2, FTM4, FTM6, FTM7, LPTMR0, FLEXIO, LPI2C0, LPCI2C1,
+ *        UART0, UART1, UART2, ENET
  * CGC  - All PCC registers
  * PR   - All PCC registers
  */

@@ -42,13 +42,13 @@
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_pindmaenable
  *
  * Description:
  *   Enable DMA for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void s32k1xx_pindmaenable(uint32_t pinset)
 {
@@ -69,7 +69,9 @@ void s32k1xx_pindmaenable(uint32_t pinset)
 
       base =  S32K1XX_PORT_BASE(port);
 
-      /* Modify the IRQC field of the port PCR register in order to enable DMA. */
+      /* Modify the IRQC field of the port PCR register in order to
+       * enable DMA.
+       */
 
       regval = getreg32(base + S32K1XX_PORT_PCR_OFFSET(pin));
       regval &= ~PORT_PCR_IRQC_MASK;
@@ -96,13 +98,13 @@ void s32k1xx_pindmaenable(uint32_t pinset)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_pindmadisable
  *
  * Description:
  *   Disable DMA for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void s32k1xx_pindmadisable(uint32_t pinset)
 {
@@ -123,7 +125,9 @@ void s32k1xx_pindmadisable(uint32_t pinset)
 
       base =  S32K1XX_PORT_BASE(port);
 
-      /* Clear the IRQC field of the port PCR register in order to disable DMA. */
+      /* Clear the IRQC field of the port PCR register in order to
+       * disable DMA.
+       */
 
       regval = getreg32(base + S32K1XX_PORT_PCR_OFFSET(pin));
       regval &= ~PORT_PCR_IRQC_MASK;

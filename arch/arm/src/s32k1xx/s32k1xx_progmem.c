@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_progmem.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -39,17 +39,17 @@
 
 #include <arch/board/board.h> /* Include last:  has dependencies */
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 #ifdef CONFIG_MTD_SMART
 #  warning FlexNVM does not support back-to-back programming \
          thus SmartFS willt not work
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Private Data
- ******************************************************************************/
+ ****************************************************************************/
 
 union fccob_flash_addr
 {
@@ -63,9 +63,9 @@ union fccob_flash_addr
     } fccobs;
 };
 
-/******************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline void wait_ftfc_ready()
 {
@@ -101,70 +101,71 @@ static uint32_t execute_ftfc_command()
     }
 }
 
-/******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_neraseblocks
  *
  * Description:
  *   Return number of erase blocks
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 size_t up_progmem_neraseblocks(void)
 {
   return S32K1XX_PROGMEM_SECTOR_COUNT;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_isuniform
  *
  * Description:
  *   Is program memory uniform or page size differs?
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 bool up_progmem_isuniform(void)
 {
   return true;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_pagesize
  *
  * Description:
  *   Return read/write page size
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 size_t up_progmem_pagesize(size_t page)
 {
   return (size_t)S32K1XX_PROGMEM_PAGE_SIZE;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_erasesize
  *
  * Description:
  *   Return erase block size
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 size_t up_progmem_erasesize(size_t block)
 {
   return (size_t)S32K1XX_PROGMEM_BLOCK_SECTOR_SIZE;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_getpage
  *
  * Description:
  *   Address to read/write page conversion
  *
  * Input Parameters:
- *   addr - Address with or without flash offset (absolute or aligned to page0)
+ *   addr - Address with or without flash offset (absolute or aligned to
+ *          page0)
  *
  * Returned Value:
  *   Page or negative value on error.  The following errors are reported
@@ -172,7 +173,7 @@ size_t up_progmem_erasesize(size_t block)
  *
  *     -EFAULT: On invalid address
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 ssize_t up_progmem_getpage(size_t addr)
 {
@@ -184,7 +185,7 @@ ssize_t up_progmem_getpage(size_t addr)
   return (size_t)(addr / S32K1XX_PROGMEM_PAGE_SIZE);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_getaddress
  *
  * Description:
@@ -196,7 +197,7 @@ ssize_t up_progmem_getpage(size_t addr)
  * Returned Value:
  *   Base address of given page, SIZE_MAX if page index is not valid.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 size_t up_progmem_getaddress(size_t page)
 {
@@ -204,7 +205,7 @@ size_t up_progmem_getaddress(size_t page)
            + (page * S32K1XX_PROGMEM_PAGE_SIZE));
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_eraseblock
  *
  * Description:
@@ -214,8 +215,8 @@ size_t up_progmem_getaddress(size_t page)
  *   block - The erase block index to be erased.
  *
  * Returned Value:
- *   block size or negative value on error.  The following errors are reported
- *   (errno is not set!):
+ *   block size or negative value on error.  The following errors are
+ *   reported (errno is not set!):
  *
  *     -EFAULT: On invalid page
  *     -EIO:    On unsuccessful erase
@@ -224,7 +225,7 @@ size_t up_progmem_getaddress(size_t page)
  *     -EPERM:  If operation is not permitted due to some other constraints
  *              (i.e. some internal block is not running etc.)
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 ssize_t up_progmem_eraseblock(size_t block)
 {
@@ -258,7 +259,7 @@ ssize_t up_progmem_eraseblock(size_t block)
   return (ssize_t)S32K1XX_PROGMEM_BLOCK_SECTOR_SIZE;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_ispageerased
  *
  * Description:
@@ -274,7 +275,7 @@ ssize_t up_progmem_eraseblock(size_t block)
  *   The following errors are reported:
  *     -EFAULT: On invalid page
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 ssize_t up_progmem_ispageerased(size_t page)
 {
@@ -299,7 +300,7 @@ ssize_t up_progmem_ispageerased(size_t page)
   return (ssize_t)(S32K1XX_PROGMEM_PAGE_SIZE - i);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: up_progmem_write
  *
  * Description:
@@ -328,7 +329,7 @@ ssize_t up_progmem_ispageerased(size_t page)
  *     EPERM:  If operation is not permitted due to some other constraints
  *             (i.e. some internal block is not running etc.)
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 ssize_t up_progmem_write(size_t addr, FAR const void *buf, size_t count)
 {

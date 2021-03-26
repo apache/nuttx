@@ -1,4 +1,4 @@
-/************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_flexcan.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_FLEXCAN_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_FLEXCAN_H
 
-/************************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define S32K1XX_CAN_MCR_OFFSET        0x0000  /* Module Configuration Register */
 #define S32K1XX_CAN_CTRL1_OFFSET      0x0004  /* Control 1 Register */
@@ -132,7 +132,7 @@
 #define S32K1XX_CAN_FDCBT_OFFSET      0x0c04  /* CAN FD Bit Timing register */
 #define S32K1XX_CAN_FDCRC_OFFSET      0x0c08  /* CAN FD CRC register */
 
-/* Register Addresses ***************************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define S32K1XX_CAN0_MCR              (S32K1XX_FLEXCAN0_BASE + S32K1XX_CAN_MCR_OFFSET)
 #define S32K1XX_CAN0_CTRL1            (S32K1XX_FLEXCAN0_BASE + S32K1XX_CAN_CTRL1_OFFSET)
@@ -321,7 +321,7 @@
 #define S32K1XX_CAN1_FDCBT            (S32K1XX_FLEXCAN1_BASE + S32K1XX_CAN_FDCBT_OFFSET)
 #define S32K1XX_CAN1_FDCRC            (S32K1XX_FLEXCAN1_BASE + S32K1XX_CAN_FDCRC_OFFSET)
 
-/* Register Bit Definitions *********************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Module Configuration Register */
 
@@ -579,7 +579,9 @@
 /* Pretended Networking Payload Low Filter 2 Payload Low Mask register */
 #define CAN_PL2_PLMASK_LO_
 
-/* Pretended Networking Payload High Filter 2 low order bits / Payload High Mask register */
+/* Pretended Networking Payload High Filter 2 low order bits /
+ * Payload High Mask register
+ */
 #define CAN_PL2_PLMASK_HI_
 
 /* Wake Up Message Buffer register for C/S */
