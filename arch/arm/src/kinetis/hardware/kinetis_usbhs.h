@@ -774,25 +774,25 @@
 
 #define USBPHY_CTRLN_SFTRST               (1 << 31) /* Bit 31: Soft-reset the USBPHY_PWD, USBPHY_TX, USBPHY_RX, and USBPHY_CTRL */
 #define USBPHY_CTRLN_CLKGATE              (1 << 30) /* Bit 30: Gate UTMI Clocks */
-#define USBPHY_CTRLn_UTMI_SUSPENDM        (1 << 29) /* Bit 29: Indicats powered-down state */
-#define USBPHY_CTRLn_HOST_FORCE_LS_SE0    (1 << 28) /* Bit 28: Forces next FS packet tohave a EOP with low-speed timing */
-#define USBPHY_CTRLn_OTG_ID_VALUE         (1 << 27) /* Bit 27: Indicates the results of USB_ID pin  */
+#define USBPHY_CTRLN_UTMI_SUSPENDM        (1 << 29) /* Bit 29: Indicats powered-down state */
+#define USBPHY_CTRLN_HOST_FORCE_LS_SE0    (1 << 28) /* Bit 28: Forces next FS packet tohave a EOP with low-speed timing */
+#define USBPHY_CTRLN_OTG_ID_VALUE         (1 << 27) /* Bit 27: Indicates the results of USB_ID pin  */
                                                     /* Bit 25-26: Reserved */
-#define USBPHY_CTRLn_FSDLL_RST_EN         (1 << 24) /* Bit 24: Reset of the FSDLL lock detection logic at the end of each TX packet */
+#define USBPHY_CTRLN_FSDLL_RST_EN         (1 << 24) /* Bit 24: Reset of the FSDLL lock detection logic at the end of each TX packet */
                                                     /* Bit 21-23: Reserved */
-#define USBPHY_CTRLn_ENAUTOCLR_PHY_PWD    (1 << 20) /* Bit 20: Auto-clear the PWD register bits in USBPHY_PWD if wakeup event while suspended */
-#define USBPHY_CTRLn_ENAUTOCLR_CLKGATE    (1 << 19) /* Bit 19: Auto-clear the CLKGATE bit if wakeup event while suspended */
-#define USBPHY_CTRLn_AUTORESUME_EN        (1 << 18) /* Bit 18: Auto resume, HW will send Resume to respond to the device remote wakeup */
+#define USBPHY_CTRLN_ENAUTOCLR_PHY_PWD    (1 << 20) /* Bit 20: Auto-clear the PWD register bits in USBPHY_PWD if wakeup event while suspended */
+#define USBPHY_CTRLN_ENAUTOCLR_CLKGATE    (1 << 19) /* Bit 19: Auto-clear the CLKGATE bit if wakeup event while suspended */
+#define USBPHY_CTRLN_AUTORESUME_EN        (1 << 18) /* Bit 18: Auto resume, HW will send Resume to respond to the device remote wakeup */
                                                     /* Bit 16-17: Reserved */
 #define USBPHY_CTRLN_ENUTMILEVEL3         (1 << 15) /* Bit 15: Enables UTMI+ Level 3 operation for the USB HS PHY */
 #define USBPHY_CTRLN_ENUTMILEVEL2         (1 << 14) /* Bit 14: Enables UTMI+ Level 2 operation for the USB HS PHY */
                                                     /* Bit 13: Reserved */
-#define USBPHY_CTRLn_DEVPLUGIN_IRQ        (1 << 12) /* Bit 12: Indicates device is connected */
+#define USBPHY_CTRLN_DEVPLUGIN_IRQ        (1 << 12) /* Bit 12: Indicates device is connected */
                                                     /* Bits 5-11: Reserved */
-#define USBPHY_CTRLn_ENDEVPLUGINDET       (1 << 4)  /* Bit 4:  Enables non-standard resistive plugged-in detection */
-#define USBPHY_CTRLn_HOSTDISCONDETECT_IRQ (1 << 3)  /* Bit 3:  Indicates that the device has disconnected in High-Speed mode */
+#define USBPHY_CTRLN_ENDEVPLUGINDET       (1 << 4)  /* Bit 4:  Enables non-standard resistive plugged-in detection */
+#define USBPHY_CTRLN_HOSTDISCONDETECT_IRQ (1 << 3)  /* Bit 3:  Indicates that the device has disconnected in High-Speed mode */
                                                     /* Bit 2:  Reserved */
-#define USBPHY_CTRLn_ENHOSTDISCONDETECT   (1 << 1)  /* Bit 1:  For host mode, enables high-speed disconnect detector */
+#define USBPHY_CTRLN_ENHOSTDISCONDETECT   (1 << 1)  /* Bit 1:  For host mode, enables high-speed disconnect detector */
                                                     /* Bit 0:  Reserved */
 
 /* USB PHY Status Register */

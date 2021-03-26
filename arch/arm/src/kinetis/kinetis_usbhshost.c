@@ -3311,13 +3311,13 @@ static inline void kinetis_portsc_bottomhalf(void)
 
                   hport = &rhport->hport.hport;
 
-#ifdef USBPHY_CTRLn_ENHOSTDISCONDETECT
+#ifdef USBPHY_CTRLN_ENHOSTDISCONDETECT
                   /* Highspeed needs special handling */
 
                   if (hport->speed == USB_SPEED_HIGH)
                     {
                       uint32_t regval = getreg32(KINETIS_USBHSPHY_CTRL);
-                      regval &= ~(USBPHY_CTRLn_ENHOSTDISCONDETECT);
+                      regval &= ~(USBPHY_CTRLN_ENHOSTDISCONDETECT);
                       putreg32(regval, KINETIS_USBHSPHY_CTRL);
                     }
 #endif
@@ -3900,11 +3900,11 @@ static int kinetis_rh_enumerate(FAR struct usbhost_connection_s *conn,
 
       hport->speed = USB_SPEED_HIGH;
 
-#ifdef USBPHY_CTRLn_ENHOSTDISCONDETECT
+#ifdef USBPHY_CTRLN_ENHOSTDISCONDETECT
       /* Highspeed needs special handling */
 
       regval  = getreg32(KINETIS_USBHSPHY_CTRL);
-      regval |= USBPHY_CTRLn_ENHOSTDISCONDETECT;
+      regval |= USBPHY_CTRLN_ENHOSTDISCONDETECT;
       putreg32(regval, KINETIS_USBHSPHY_CTRL);
 #endif
     }
