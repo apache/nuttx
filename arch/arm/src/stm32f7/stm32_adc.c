@@ -735,8 +735,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
    *   position.
    */
 
-  ainfo("Initializing timers extsel = 0x%08" PRIx32 "\n", priv->extsel);
-
+  ainfo("Initializing timers extsel = 0x%08lx\n", priv->extsel);
   adc_modifyreg(priv, STM32_ADC_EXTREG_OFFSET,
                 ADC_EXTREG_EXTEN_MASK | ADC_EXTREG_EXTSEL_MASK,
                 ADC_EXTREG_EXTEN_DEFAULT | priv->extsel);
