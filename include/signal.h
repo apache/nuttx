@@ -249,6 +249,14 @@
                                   * (always assumed) */
 #define SA_NOCLDWAIT    (1 << 2) /* If signo=SIGCHLD, exit status of child
                                   * processes will be discarded */
+#define SA_ONSTACK      (1 << 3) /* Indicates that a registered stack_t
+                                  * will be used */
+#define SA_RESTART      (1 << 4) /* Flag to get restarting signals
+                                  * (which were the default long ago) */
+#define SA_NODEFER      (1 << 5) /* Prevents the current signal from
+                                  * being masked in the handler */
+#define SA_RESETHAND    (1 << 6) /* Clears the handler when the signal
+                                  * is delivered */
 
 /* These are the possible values of the signfo si_code field */
 
