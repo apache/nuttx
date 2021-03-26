@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_allocpage.c
- * Allocate a new page and map it to the fault address of a task.
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -88,11 +72,11 @@ typedef uint32_t L1ndx_t;
 static pgndx_t g_pgndx;
 
 /* After CONFIG_PAGING_NPAGED have been allocated, the pages will be re-used.
- * In order to re-used the page, we will have un-map the page from its previous
- * mapping.  In order to that, we need to be able to map a physical address to
- * to an index into the PTE where it was mapped.  The following table supports
- * this backward lookup - it is indexed by the page number index, and holds
- * another index to the mapped virtual page.
+ * In order to re-used the page, we will have un-map the page from its
+ * previous mapping.  In order to that, we need to be able to map a physical
+ * address to to an index into the PTE where it was mapped.  The following
+ * table supports this backward lookup - it is indexed by the page number
+ * index, and holds another index to the mapped virtual page.
  */
 
 static L1ndx_t g_ptemap[CONFIG_PAGING_NPPAGED];
@@ -127,11 +111,12 @@ static bool g_pgwrap;
  *  NOTE 2: If an in-use page is un-mapped, it may be necessary to flush the
  *  instruction cache in some architectures.
  *
- *  NOTE 3: Allocating and filling a page is a two step process.  arm_allocpage()
- *  allocates the page, and up_fillpage() fills it with data from some non-
- *  volatile storage device.  This distinction is made because arm_allocpage()
- *  can probably be implemented in board-independent logic whereas up_fillpage()
- *  probably must be implemented as board-specific logic.
+ *  NOTE 3: Allocating and filling a page is a two step process.
+ *  arm_allocpage() allocates the page, and up_fillpage() fills it with data
+ *  from some non- volatile storage device.  This distinction is made because
+ *  arm_allocpage() can probably be implemented in board-independent logic
+ *  whereas up_fillpage() probably must be implemented as board-specific
+ *  logic.
  *
  *  NOTE 4: The initial mapping of vpage should be read-able and write-
  *  able (but not cached).  No special actions will be required of
@@ -197,14 +182,16 @@ int arm_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
        pte = arm_va2pte(oldvaddr);
       *pte = 0;
 
-      /* Invalidate the instruction TLB corresponding to the virtual address */
+      /* Invalidate the instruction TLB corresponding to the virtual
+       * address
+       */
 
       tlb_inst_invalidate_single(oldvaddr);
 
       /* I do not believe that it is necessary to flush the I-Cache in this
-       * case:  The I-Cache uses a virtual address index and, hence, since the
-       * NuttX address space is flat, the cached instruction value should be
-       * correct even if the page mapping is no longer in place.
+       * case:  The I-Cache uses a virtual address index and, hence, since
+       * the NuttX address space is flat, the cached instruction value should
+       * be correct even if the page mapping is no longer in place.
        */
     }
 

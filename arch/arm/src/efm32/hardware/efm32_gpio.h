@@ -1,4 +1,4 @@
-/*******************************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/hardware/efm32_gpio.h
  *
  *    (C) Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -56,14 +56,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_GPIO_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_GPIO_H
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/efm32_memorymap.h"
@@ -72,11 +72,11 @@
 #  warning This is the EFM32GG/G header file; Review/modification needed for this architecture
 #endif
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
-/* GPIO Register Offsets *******************************************************************************************************/
+/* GPIO Register Offsets ****************************************************/
 
 #define EFM32_GPIIO_PA                                    0
 #define EFM32_GPIIO_PB                                    1
@@ -85,7 +85,7 @@
 #define EFM32_GPIIO_PE                                    4
 #define EFM32_GPIIO_PF                                    5
 
-#define EFM32_GPIO_Pn_OFFSET(n)                           (0x0024*(n))
+#define EFM32_GPIO_PN_OFFSET(n)                           (0x0024*(n))
 #define EFM32_GPIO_PA_OFFSET                              0x0000
 #define EFM32_GPIO_PB_OFFSET                              0x0024
 #define EFM32_GPIO_PC_OFFSET                              0x0048
@@ -93,75 +93,75 @@
 #define EFM32_GPIO_PE_OFFSET                              0x0090
 #define EFM32_GPIO_PF_OFFSET                              0x00b4
 
-#define EFM32_GPIO_Pn_CTRL_OFFSET                         0x0000  /* Port Control Register */
-#define EFM32_GPIO_Pn_MODEL_OFFSET                        0x0004  /* Port Pin Mode Low Register */
-#define EFM32_GPIO_Pn_MODEH_OFFSET                        0x0008  /* Port Pin Mode High Register */
-#define EFM32_GPIO_Pn_DOUT_OFFSET                         0x000C  /* Port Data Out Register */
-#define EFM32_GPIO_Pn_DOUTSET_OFFSET                      0x0010  /* Port Data Out Set Register */
-#define EFM32_GPIO_Pn_DOUTCLR_OFFSET                      0x0014  /* Port Data Out Clear Register */
-#define EFM32_GPIO_Pn_DOUTTGL_OFFSET                      0x0018  /* Port Data Out Toggle Register */
-#define EFM32_GPIO_Pn_DIN_OFFSET                          0x001C  /* Port Data In Register */
-#define EFM32_GPIO_Pn_PINLOCKN_OFFSET                     0x0020  /* Port Unlocked Pins Register */
+#define EFM32_GPIO_PN_CTRL_OFFSET                         0x0000  /* Port Control Register */
+#define EFM32_GPIO_PN_MODEL_OFFSET                        0x0004  /* Port Pin Mode Low Register */
+#define EFM32_GPIO_PN_MODEH_OFFSET                        0x0008  /* Port Pin Mode High Register */
+#define EFM32_GPIO_PN_DOUT_OFFSET                         0x000C  /* Port Data Out Register */
+#define EFM32_GPIO_PN_DOUTSET_OFFSET                      0x0010  /* Port Data Out Set Register */
+#define EFM32_GPIO_PN_DOUTCLR_OFFSET                      0x0014  /* Port Data Out Clear Register */
+#define EFM32_GPIO_PN_DOUTTGL_OFFSET                      0x0018  /* Port Data Out Toggle Register */
+#define EFM32_GPIO_PN_DIN_OFFSET                          0x001C  /* Port Data In Register */
+#define EFM32_GPIO_PN_PINLOCKN_OFFSET                     0x0020  /* Port Unlocked Pins Register */
 
-#define EFM32_GPIO_PA_CTRL_OFFSET                         (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_Pn_CTRL_OFFSET)
-#define EFM32_GPIO_PA_MODEL_OFFSET                        (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_Pn_MODEL_OFFSET)
-#define EFM32_GPIO_PA_MODEH_OFFSET                        (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_Pn_MODEH_OFFSET)
-#define EFM32_GPIO_PA_DOUT_OFFSET                         (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_Pn_DOUT_OFFSET)
-#define EFM32_GPIO_PA_DOUTSET_OFFSET                      (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_Pn_DOUTSET_OFFSET)
-#define EFM32_GPIO_PA_DOUTCLR_OFFSET                      (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_Pn_DOUTCLR_OFFSET)
-#define EFM32_GPIO_PA_DOUTTGL_OFFSET                      (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_Pn_DOUTTGL_OFFSET)
-#define EFM32_GPIO_PA_DIN_OFFSET                          (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_Pn_DIN_OFFSET)
-#define EFM32_GPIO_PA_PINLOCKN_OFFSET                     (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_Pn_PINLOCKN_OFFSET)
+#define EFM32_GPIO_PA_CTRL_OFFSET                         (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_PN_CTRL_OFFSET)
+#define EFM32_GPIO_PA_MODEL_OFFSET                        (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_PN_MODEL_OFFSET)
+#define EFM32_GPIO_PA_MODEH_OFFSET                        (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_PN_MODEH_OFFSET)
+#define EFM32_GPIO_PA_DOUT_OFFSET                         (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_PN_DOUT_OFFSET)
+#define EFM32_GPIO_PA_DOUTSET_OFFSET                      (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_PN_DOUTSET_OFFSET)
+#define EFM32_GPIO_PA_DOUTCLR_OFFSET                      (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_PN_DOUTCLR_OFFSET)
+#define EFM32_GPIO_PA_DOUTTGL_OFFSET                      (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_PN_DOUTTGL_OFFSET)
+#define EFM32_GPIO_PA_DIN_OFFSET                          (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_PN_DIN_OFFSET)
+#define EFM32_GPIO_PA_PINLOCKN_OFFSET                     (EFM32_GPIO_PA_OFFSET+EFM32_GPIO_PN_PINLOCKN_OFFSET)
 
-#define EFM32_GPIO_PB_CTRL_OFFSET                         (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_Pn_CTRL_OFFSET)
-#define EFM32_GPIO_PB_MODEL_OFFSET                        (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_Pn_MODEL_OFFSET)
-#define EFM32_GPIO_PB_MODEH_OFFSET                        (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_Pn_MODEH_OFFSET)
-#define EFM32_GPIO_PB_DOUT_OFFSET                         (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_Pn_DOUT_OFFSET)
-#define EFM32_GPIO_PB_DOUTSET_OFFSET                      (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_Pn_DOUTSET_OFFSET)
-#define EFM32_GPIO_PB_DOUTCLR_OFFSET                      (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_Pn_DOUTCLR_OFFSET)
-#define EFM32_GPIO_PB_DOUTTGL_OFFSET                      (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_Pn_DOUTTGL_OFFSET)
-#define EFM32_GPIO_PB_DIN_OFFSET                          (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_Pn_DIN_OFFSET)
-#define EFM32_GPIO_PB_PINLOCKN_OFFSET                     (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_Pn_PINLOCKN_OFFSET)
+#define EFM32_GPIO_PB_CTRL_OFFSET                         (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_PN_CTRL_OFFSET)
+#define EFM32_GPIO_PB_MODEL_OFFSET                        (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_PN_MODEL_OFFSET)
+#define EFM32_GPIO_PB_MODEH_OFFSET                        (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_PN_MODEH_OFFSET)
+#define EFM32_GPIO_PB_DOUT_OFFSET                         (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_PN_DOUT_OFFSET)
+#define EFM32_GPIO_PB_DOUTSET_OFFSET                      (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_PN_DOUTSET_OFFSET)
+#define EFM32_GPIO_PB_DOUTCLR_OFFSET                      (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_PN_DOUTCLR_OFFSET)
+#define EFM32_GPIO_PB_DOUTTGL_OFFSET                      (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_PN_DOUTTGL_OFFSET)
+#define EFM32_GPIO_PB_DIN_OFFSET                          (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_PN_DIN_OFFSET)
+#define EFM32_GPIO_PB_PINLOCKN_OFFSET                     (EFM32_GPIO_PB_OFFSET+EFM32_GPIO_PN_PINLOCKN_OFFSET)
 
-#define EFM32_GPIO_PC_CTRL_OFFSET                         (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_Pn_CTRL_OFFSET)
-#define EFM32_GPIO_PC_MODEL_OFFSET                        (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_Pn_MODEL_OFFSET)
-#define EFM32_GPIO_PC_MODEH_OFFSET                        (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_Pn_MODEH_OFFSET)
-#define EFM32_GPIO_PC_DOUT_OFFSET                         (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_Pn_DOUT_OFFSET)
-#define EFM32_GPIO_PC_DOUTSET_OFFSET                      (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_Pn_DOUTSET_OFFSET)
-#define EFM32_GPIO_PC_DOUTCLR_OFFSET                      (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_Pn_DOUTCLR_OFFSET)
-#define EFM32_GPIO_PC_DOUTTGL_OFFSET                      (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_Pn_DOUTTGL_OFFSET)
-#define EFM32_GPIO_PC_DIN_OFFSET                          (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_Pn_DIN_OFFSET)
-#define EFM32_GPIO_PC_PINLOCKN_OFFSET                     (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_Pn_PINLOCKN_OFFSET)
+#define EFM32_GPIO_PC_CTRL_OFFSET                         (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_PN_CTRL_OFFSET)
+#define EFM32_GPIO_PC_MODEL_OFFSET                        (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_PN_MODEL_OFFSET)
+#define EFM32_GPIO_PC_MODEH_OFFSET                        (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_PN_MODEH_OFFSET)
+#define EFM32_GPIO_PC_DOUT_OFFSET                         (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_PN_DOUT_OFFSET)
+#define EFM32_GPIO_PC_DOUTSET_OFFSET                      (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_PN_DOUTSET_OFFSET)
+#define EFM32_GPIO_PC_DOUTCLR_OFFSET                      (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_PN_DOUTCLR_OFFSET)
+#define EFM32_GPIO_PC_DOUTTGL_OFFSET                      (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_PN_DOUTTGL_OFFSET)
+#define EFM32_GPIO_PC_DIN_OFFSET                          (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_PN_DIN_OFFSET)
+#define EFM32_GPIO_PC_PINLOCKN_OFFSET                     (EFM32_GPIO_PC_OFFSET+EFM32_GPIO_PN_PINLOCKN_OFFSET)
 
-#define EFM32_GPIO_PD_CTRL_OFFSET                         (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_Pn_CTRL_OFFSET)
-#define EFM32_GPIO_PD_MODEL_OFFSET                        (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_Pn_MODEL_OFFSET)
-#define EFM32_GPIO_PD_MODEH_OFFSET                        (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_Pn_MODEH_OFFSET)
-#define EFM32_GPIO_PD_DOUT_OFFSET                         (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_Pn_DOUT_OFFSET)
-#define EFM32_GPIO_PD_DOUTSET_OFFSET                      (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_Pn_DOUTSET_OFFSET)
-#define EFM32_GPIO_PD_DOUTCLR_OFFSET                      (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_Pn_DOUTCLR_OFFSET)
-#define EFM32_GPIO_PD_DOUTTGL_OFFSET                      (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_Pn_DOUTTGL_OFFSET)
-#define EFM32_GPIO_PD_DIN_OFFSET                          (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_Pn_DIN_OFFSET)
-#define EFM32_GPIO_PD_PINLOCKN_OFFSET                     (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_Pn_PINLOCKN_OFFSET)
+#define EFM32_GPIO_PD_CTRL_OFFSET                         (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_PN_CTRL_OFFSET)
+#define EFM32_GPIO_PD_MODEL_OFFSET                        (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_PN_MODEL_OFFSET)
+#define EFM32_GPIO_PD_MODEH_OFFSET                        (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_PN_MODEH_OFFSET)
+#define EFM32_GPIO_PD_DOUT_OFFSET                         (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_PN_DOUT_OFFSET)
+#define EFM32_GPIO_PD_DOUTSET_OFFSET                      (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_PN_DOUTSET_OFFSET)
+#define EFM32_GPIO_PD_DOUTCLR_OFFSET                      (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_PN_DOUTCLR_OFFSET)
+#define EFM32_GPIO_PD_DOUTTGL_OFFSET                      (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_PN_DOUTTGL_OFFSET)
+#define EFM32_GPIO_PD_DIN_OFFSET                          (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_PN_DIN_OFFSET)
+#define EFM32_GPIO_PD_PINLOCKN_OFFSET                     (EFM32_GPIO_PD_OFFSET+EFM32_GPIO_PN_PINLOCKN_OFFSET)
 
-#define EFM32_GPIO_PE_CTRL_OFFSET                         (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_Pn_CTRL_OFFSET)
-#define EFM32_GPIO_PE_MODEL_OFFSET                        (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_Pn_MODEL_OFFSET)
-#define EFM32_GPIO_PE_MODEH_OFFSET                        (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_Pn_MODEH_OFFSET)
-#define EFM32_GPIO_PE_DOUT_OFFSET                         (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_Pn_DOUT_OFFSET)
-#define EFM32_GPIO_PE_DOUTSET_OFFSET                      (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_Pn_DOUTSET_OFFSET)
-#define EFM32_GPIO_PE_DOUTCLR_OFFSET                      (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_Pn_DOUTCLR_OFFSET)
-#define EFM32_GPIO_PE_DOUTTGL_OFFSET                      (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_Pn_DOUTTGL_OFFSET)
-#define EFM32_GPIO_PE_DIN_OFFSET                          (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_Pn_DIN_OFFSET)
-#define EFM32_GPIO_PE_PINLOCKN_OFFSET                     (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_Pn_PINLOCKN_OFFSET)
+#define EFM32_GPIO_PE_CTRL_OFFSET                         (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_PN_CTRL_OFFSET)
+#define EFM32_GPIO_PE_MODEL_OFFSET                        (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_PN_MODEL_OFFSET)
+#define EFM32_GPIO_PE_MODEH_OFFSET                        (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_PN_MODEH_OFFSET)
+#define EFM32_GPIO_PE_DOUT_OFFSET                         (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_PN_DOUT_OFFSET)
+#define EFM32_GPIO_PE_DOUTSET_OFFSET                      (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_PN_DOUTSET_OFFSET)
+#define EFM32_GPIO_PE_DOUTCLR_OFFSET                      (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_PN_DOUTCLR_OFFSET)
+#define EFM32_GPIO_PE_DOUTTGL_OFFSET                      (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_PN_DOUTTGL_OFFSET)
+#define EFM32_GPIO_PE_DIN_OFFSET                          (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_PN_DIN_OFFSET)
+#define EFM32_GPIO_PE_PINLOCKN_OFFSET                     (EFM32_GPIO_PE_OFFSET+EFM32_GPIO_PN_PINLOCKN_OFFSET)
 
-#define EFM32_GPIO_PF_CTRL_OFFSET                         (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_Pn_CTRL_OFFSET)
-#define EFM32_GPIO_PF_MODEL_OFFSET                        (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_Pn_MODEL_OFFSET)
-#define EFM32_GPIO_PF_MODEH_OFFSET                        (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_Pn_MODEH_OFFSET)
-#define EFM32_GPIO_PF_DOUT_OFFSET                         (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_Pn_DOUT_OFFSET)
-#define EFM32_GPIO_PF_DOUTSET_OFFSET                      (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_Pn_DOUTSET_OFFSET)
-#define EFM32_GPIO_PF_DOUTCLR_OFFSET                      (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_Pn_DOUTCLR_OFFSET)
-#define EFM32_GPIO_PF_DOUTTGL_OFFSET                      (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_Pn_DOUTTGL_OFFSET)
-#define EFM32_GPIO_PF_DIN_OFFSET                          (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_Pn_DIN_OFFSET)
-#define EFM32_GPIO_PF_PINLOCKN_OFFSET                     (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_Pn_PINLOCKN_OFFSET)
+#define EFM32_GPIO_PF_CTRL_OFFSET                         (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_PN_CTRL_OFFSET)
+#define EFM32_GPIO_PF_MODEL_OFFSET                        (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_PN_MODEL_OFFSET)
+#define EFM32_GPIO_PF_MODEH_OFFSET                        (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_PN_MODEH_OFFSET)
+#define EFM32_GPIO_PF_DOUT_OFFSET                         (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_PN_DOUT_OFFSET)
+#define EFM32_GPIO_PF_DOUTSET_OFFSET                      (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_PN_DOUTSET_OFFSET)
+#define EFM32_GPIO_PF_DOUTCLR_OFFSET                      (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_PN_DOUTCLR_OFFSET)
+#define EFM32_GPIO_PF_DOUTTGL_OFFSET                      (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_PN_DOUTTGL_OFFSET)
+#define EFM32_GPIO_PF_DIN_OFFSET                          (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_PN_DIN_OFFSET)
+#define EFM32_GPIO_PF_PINLOCKN_OFFSET                     (EFM32_GPIO_PF_OFFSET+EFM32_GPIO_PN_PINLOCKN_OFFSET)
 
 #define EFM32_GPIO_EXTIPSELL_OFFSET                       0x100  /* External Interrupt Port Select Low Register */
 #define EFM32_GPIO_EXTIPSELH_OFFSET                       0x104  /* External Interrupt Port Select High Register */
@@ -183,9 +183,9 @@
 #  define EFM32_GPIO_EM4WUCAUSE_OFFSET                    0x13c  /* EM4 Wake-up Cause Register */
 #endif
 
-/* GPIO Register Addresses *****************************************************************************************************/
+/* GPIO Register Addresses **************************************************/
 
-#define EFM32_GPIO_Pn_BASE(n)                             (EFM32_GPIO_BASE+EFM32_GPIO_Pn_OFFSET(n))
+#define EFM32_GPIO_PN_BASE(n)                             (EFM32_GPIO_BASE+EFM32_GPIO_PN_OFFSET(n))
 #define EFM32_GPIO_PA_BASE                                (EFM32_GPIO_BASE+EFM32_GPIO_PA_OFFSET)
 #define EFM32_GPIO_PB_BASE                                (EFM32_GPIO_BASE+EFM32_GPIO_PB_OFFSET)
 #define EFM32_GPIO_PC_BASE                                (EFM32_GPIO_BASE+EFM32_GPIO_PC_OFFSET)
@@ -193,15 +193,15 @@
 #define EFM32_GPIO_PE_BASE                                (EFM32_GPIO_BASE+EFM32_GPIO_PE_OFFSET)
 #define EFM32_GPIO_PF_BASE                                (EFM32_GPIO_BASE+EFM32_GPIO_PF_OFFSET)
 
-#define EFM32_GPIO_Pn_CTRL(n)                             (EFM32_GPIO_Pn_BASE(n)+EFM32_GPIO_Pn_CTRL_OFFSET )
-#define EFM32_GPIO_Pn_MODEL(n)                            (EFM32_GPIO_Pn_BASE(n)+EFM32_GPIO_Pn_MODEL_OFFSET)
-#define EFM32_GPIO_Pn_MODEH(n)                            (EFM32_GPIO_Pn_BASE(n)+EFM32_GPIO_Pn_MODEH_OFFSET)
-#define EFM32_GPIO_Pn_DOUT(n)                             (EFM32_GPIO_Pn_BASE(n)+EFM32_GPIO_Pn_DOUT_OFFSET)
-#define EFM32_GPIO_Pn_DOUTSET(n)                          (EFM32_GPIO_Pn_BASE(n)+EFM32_GPIO_Pn_DOUTSET_OFFSET)
-#define EFM32_GPIO_Pn_DOUTCLR(n)                          (EFM32_GPIO_Pn_BASE(n)+EFM32_GPIO_Pn_DOUTCLR_OFFSET)
-#define EFM32_GPIO_Pn_DOUTTGL(n)                          (EFM32_GPIO_Pn_BASE(n)+EFM32_GPIO_Pn_DOUTTGL_OFFSET)
-#define EFM32_GPIO_Pn_DIN(n)                              (EFM32_GPIO_Pn_BASE(n)+EFM32_GPIO_Pn_DIN_OFFSET)
-#define EFM32_GPIO_Pn_PINLOCKN(n)                         (EFM32_GPIO_Pn_BASE(n)+EFM32_GPIO_Pn_PINLOCKN_OFFSET)
+#define EFM32_GPIO_PN_CTRL(n)                             (EFM32_GPIO_PN_BASE(n)+EFM32_GPIO_PN_CTRL_OFFSET )
+#define EFM32_GPIO_PN_MODEL(n)                            (EFM32_GPIO_PN_BASE(n)+EFM32_GPIO_PN_MODEL_OFFSET)
+#define EFM32_GPIO_PN_MODEH(n)                            (EFM32_GPIO_PN_BASE(n)+EFM32_GPIO_PN_MODEH_OFFSET)
+#define EFM32_GPIO_PN_DOUT(n)                             (EFM32_GPIO_PN_BASE(n)+EFM32_GPIO_PN_DOUT_OFFSET)
+#define EFM32_GPIO_PN_DOUTSET(n)                          (EFM32_GPIO_PN_BASE(n)+EFM32_GPIO_PN_DOUTSET_OFFSET)
+#define EFM32_GPIO_PN_DOUTCLR(n)                          (EFM32_GPIO_PN_BASE(n)+EFM32_GPIO_PN_DOUTCLR_OFFSET)
+#define EFM32_GPIO_PN_DOUTTGL(n)                          (EFM32_GPIO_PN_BASE(n)+EFM32_GPIO_PN_DOUTTGL_OFFSET)
+#define EFM32_GPIO_PN_DIN(n)                              (EFM32_GPIO_PN_BASE(n)+EFM32_GPIO_PN_DIN_OFFSET)
+#define EFM32_GPIO_PN_PINLOCKN(n)                         (EFM32_GPIO_PN_BASE(n)+EFM32_GPIO_PN_PINLOCKN_OFFSET)
 
 #define EFM32_GPIO_PA_CTRL                                (EFM32_GPIO_BASE+EFM32_GPIO_PA_CTRL_OFFSET)
 #define EFM32_GPIO_PA_MODEL                               (EFM32_GPIO_BASE+EFM32_GPIO_PA_MODEL_OFFSET)
@@ -283,7 +283,7 @@
 #  define EFM32_GPIO_EM4WUCAUSE                           (EFM32_GPIO_BASE+EFM32_GPIO_EM4WUCAUSE_OFFSET)
 #endif
 
-/* GPIO Register Bit Field Definitions *****************************************************************************************/
+/* GPIO Register Bit Field Definitions **************************************/
 
 /* Bit fields for GPIO P_CTRL */
 

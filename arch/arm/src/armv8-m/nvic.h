@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/armv8-m/nvic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,26 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_COMMON_ARMV8_M_NVIC_H
 #define __ARCH_ARM_SRC_COMMON_ARMV8_M_NVIC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Exception/interrupt vector numbers *******************************************************/
+/* Exception/interrupt vector numbers ***************************************/
 
-                                               /* Vector  0: Reset stack pointer value */
+                                              /* Vector  0:
+                                               * Reset stack pointer value
+                                               */
 
                                                /* Vector  1: Reset */
 #define NVIC_IRQ_NMI                    (2)    /* Vector  2: Non-Maskable Interrupt (NMI) */
@@ -48,15 +50,17 @@
 #define NVIC_IRQ_PENDSV                 (14)   /* Vector 14: Pendable system service request */
 #define NVIC_IRQ_SYSTICK                (15)   /* Vector 15: System tick */
 
-/* External interrupts (vectors >= 16).  These definitions are chip-specific */
+/* External interrupts (vectors >= 16).
+ * These definitions are chip-specific
+ */
 
 #define NVIC_IRQ_FIRST                  (16)    /* Vector number of the first interrupt */
 
-/* NVIC base address ************************************************************************/
+/* NVIC base address ********************************************************/
 
 #define ARMV8M_NVIC_BASE                0xe000e000
 
-/* NVIC register offsets ********************************************************************/
+/* NVIC register offsets ****************************************************/
 
 #define NVIC_ICTR_OFFSET                0x0004 /* Interrupt controller type register */
 #define NVIC_SYSTICK_CTRL_OFFSET        0x0010 /* SysTick control and status register */
@@ -253,7 +257,7 @@
 #define NVIC_CID2_OFFSET                0x0ff8 /* Component identification register bits 23:16 (CID0) */
 #define NVIC_CID3_OFFSET                0x0ffc /* Component identification register bits 23:16 (CID0) */
 
-/* NVIC register addresses ******************************************************************/
+/* NVIC register addresses **************************************************/
 
 #define NVIC_ICTR                       (ARMV8M_NVIC_BASE + NVIC_ICTR_OFFSET)
 #define NVIC_SYSTICK_CTRL               (ARMV8M_NVIC_BASE + NVIC_SYSTICK_CTRL_OFFSET)
@@ -442,7 +446,7 @@
 #define NVIC_CID2                       (ARMV8M_NVIC_BASE + NVIC_CID2_OFFSET)
 #define NVIC_CID3                       (ARMV8M_NVIC_BASE + NVIC_CID3_OFFSET)
 
-/* NVIC register bit definitions ************************************************************/
+/* NVIC register bit definitions ********************************************/
 
 /* Interrupt controller type (INCTCTL_TYPE) */
 
@@ -682,16 +686,16 @@
 #define NVIC_CACR_ECCDIS                (1 << 1)  /* Bit 1:  Enables ECC in the instruction and data cache */
 #define NVIC_CACR_FORCEWT               (1 << 2)  /* Bit 2:  Enables Force Write-Through in the data cache */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_COMMON_ARMV8_M_NVIC_H */

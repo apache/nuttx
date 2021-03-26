@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/chip.h
  *
  *   Copyright (C) 2009, 2011-2014, 2018 Gregory Nutt. All rights reserved.
@@ -33,14 +33,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -52,13 +52,13 @@
 
 #include <arch/efm32/irq.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Provide the required number of peripheral interrupt vector definitions as well.
- * The definition EFM32_PERIPH_INTS simply comes from the chip-specific IRQ header
- * file included by arch/efm32/irq.h.
+/* Provide the required number of peripheral interrupt vector definitions as
+ * well. The definition EFM32_PERIPH_INTS simply comes from the chip-specific
+ * IRQ header file included by arch/efm32/irq.h.
  */
 
 #define ARMV7M_PERIPHERAL_INTERRUPTS  EFM32_PERIPH_INTS

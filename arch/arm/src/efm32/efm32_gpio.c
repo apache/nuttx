@@ -1,41 +1,26 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/efm32_gpio.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,18 +33,18 @@
 #include "hardware/efm32_gpio.h"
 #include "efm32_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define __GPIO_INPUT  (1 << 0) /* Bit 0: GPIO is an input */
 #define __GPIO_OUTPUT (1 << 1) /* Bit 1: GPIO is an output */
 #define __GPIO_DOUT   (1 << 2) /* Bit 2: An input modified with DOUT setting */
 #define __GPIO_DRIVE  (1 << 3) /* Bit 3: An output with drive selection */
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static const uint8_t g_gpiomode[16] =
 {
@@ -92,56 +77,56 @@ static const uint8_t g_gpiomode[16] =
                                    *    by DRIVEMODE */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_getport
  *
  * Description:
  *   Extract the encoded port number
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline uint8_t efm32_getport(gpio_pinset_t cfgset)
 {
   return (uint8_t)((cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_getpin
  *
  * Description:
  *   Extract the encoded pin number
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline uint8_t efm32_getpin(gpio_pinset_t cfgset)
 {
   return (uint8_t)((cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_getmode
  *
  * Description:
  *   Extract the encoded pin mode
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline uint8_t efm32_getmode(gpio_pinset_t cfgset)
 {
   return (uint8_t)((cfgset & GPIO_MODE_MASK) >> GPIO_MODE_SHIFT);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_getdrive
  *
  * Description:
  *   Extract the output drive strength from the encoded configuration
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint8_t efm32_getdrive(uint8_t mode, gpio_pinset_t cfgset)
 {
@@ -155,36 +140,38 @@ static uint8_t efm32_getdrive(uint8_t mode, gpio_pinset_t cfgset)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_setdrive
  *
  * Description:
  *   Set the GPIO output drive strength
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_setdrive(uintptr_t base, uint8_t pin, uint8_t drive)
 {
   /* Select drive mode for all pins on port configured with alternate drive
    * strength.
    *
-   * REVISIT: Is there any sane way to manage this for multiple pins in the port
+   * REVISIT:
+   * Is there any sane way to manage this for multiple pins in the port
    * with different drive values?
    */
+
   if (drive != _GPIO_DRIVE_STANDARD)
     {
       putreg32((uint32_t)drive << _GPIO_P_CTRL_DRIVEMODE_SHIFT,
-               base + EFM32_GPIO_Pn_CTRL_OFFSET);
+               base + EFM32_GPIO_PN_CTRL_OFFSET);
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_getdout
  *
  * Description:
  *   Extract the encoded port number
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline bool efm32_getdout(uint8_t mode, gpio_pinset_t cfgset)
 {
@@ -202,13 +189,13 @@ static inline bool efm32_getdout(uint8_t mode, gpio_pinset_t cfgset)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_setdout
  *
  * Description:
  *   Set the GPIO output data value
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_setdout(uintptr_t base, uint8_t pin, bool dout)
 {
@@ -216,34 +203,35 @@ static inline void efm32_setdout(uintptr_t base, uint8_t pin, bool dout)
 
   if (dout)
     {
-      putreg32(1 << pin, base + EFM32_GPIO_Pn_DOUTSET_OFFSET);
+      putreg32(1 << pin, base + EFM32_GPIO_PN_DOUTSET_OFFSET);
     }
   else
     {
-      putreg32(1 << pin, base + EFM32_GPIO_Pn_DOUTCLR_OFFSET);
+      putreg32(1 << pin, base + EFM32_GPIO_PN_DOUTCLR_OFFSET);
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_getdin
  *
  * Description:
  *   Get the GPIO input value
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline bool efm32_getdin(uintptr_t base, uint8_t pin)
 {
-  return ((getreg32(base + EFM32_GPIO_Pn_DIN_OFFSET) & ((uint32_t)1 << pin)) != 0);
+  return ((getreg32(base + EFM32_GPIO_PN_DIN_OFFSET) &
+         ((uint32_t)1 << pin)) != 0);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_setmode
  *
  * Description:
  *   Set the GPIO mode
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void efm32_setmode(uintptr_t base, uint8_t pin, uint8_t mode)
 {
@@ -255,12 +243,12 @@ static inline void efm32_setmode(uintptr_t base, uint8_t pin, uint8_t mode)
 
   if (pin < 8)
     {
-      regaddr = base + EFM32_GPIO_Pn_MODEL_OFFSET;
+      regaddr = base + EFM32_GPIO_PN_MODEL_OFFSET;
       shift = (unsigned int)pin << 2;
     }
   else
     {
-      regaddr = base + EFM32_GPIO_Pn_MODEH_OFFSET;
+      regaddr = base + EFM32_GPIO_PN_MODEH_OFFSET;
       shift = (unsigned int)(pin - 8) << 2;
     }
 
@@ -272,17 +260,17 @@ static inline void efm32_setmode(uintptr_t base, uint8_t pin, uint8_t mode)
   putreg32(regval, regaddr);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_configgpio
  *
  * Description:
  *   Configure a PIO pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int efm32_configgpio(gpio_pinset_t cfgset)
 {
@@ -296,7 +284,7 @@ int efm32_configgpio(gpio_pinset_t cfgset)
   /* Get basic pin configuration information */
 
   port = efm32_getport(cfgset);
-  base = EFM32_GPIO_Pn_BASE(port);
+  base = EFM32_GPIO_PN_BASE(port);
   pin  = efm32_getpin(cfgset);
   mode = efm32_getmode(cfgset);
 
@@ -316,13 +304,13 @@ int efm32_configgpio(gpio_pinset_t cfgset)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_unconfiggpio
  *
  * Description:
  *   unConfigure a PIO pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int efm32_unconfiggpio(gpio_pinset_t cfgset)
 {
@@ -332,13 +320,13 @@ int efm32_unconfiggpio(gpio_pinset_t cfgset)
   return efm32_configgpio(cfgset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected PIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void efm32_gpiowrite(gpio_pinset_t pinset, bool value)
 {
@@ -349,7 +337,7 @@ void efm32_gpiowrite(gpio_pinset_t pinset, bool value)
   /* Get basic pin configuration information */
 
   port = efm32_getport(pinset);
-  base = EFM32_GPIO_Pn_BASE(port);
+  base = EFM32_GPIO_PN_BASE(port);
   pin  = efm32_getpin(pinset);
 
   /* And set the output value */
@@ -357,13 +345,13 @@ void efm32_gpiowrite(gpio_pinset_t pinset, bool value)
   efm32_setdout(base, pin, value);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_gpioread
  *
  * Description:
  *   Read one or zero from the selected PIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool efm32_gpioread(gpio_pinset_t pinset)
 {
@@ -374,7 +362,7 @@ bool efm32_gpioread(gpio_pinset_t pinset)
   /* Get basic pin configuration information */
 
   port = efm32_getport(pinset);
-  base = EFM32_GPIO_Pn_BASE(port);
+  base = EFM32_GPIO_PN_BASE(port);
   pin  = efm32_getpin(pinset);
 
   /* And return the input value of the pin */
@@ -382,13 +370,14 @@ bool efm32_gpioread(gpio_pinset_t pinset)
   return efm32_getdin(base, pin);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Function:  efm32_dumpgpio
  *
  * Description:
- *   Dump all PIO registers associated with the base address of the provided pinset.
+ *   Dump all PIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int efm32_dumpgpio(uint32_t pinset, const char *msg)

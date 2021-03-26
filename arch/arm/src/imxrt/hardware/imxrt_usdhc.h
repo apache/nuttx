@@ -1,54 +1,39 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_usdhc.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org> & Contributors
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USDHC_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USDHC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define IMXRT_USDHC_DSADDR_OFFSET        0x0000 /* DMA System Address Register */
 #define IMXRT_USDHC_BLKATTR_OFFSET       0x0004 /* Block Attributes Register */
@@ -80,7 +65,7 @@
 #define IMXRT_USDHC_VENDOR2_OFFSET       0x00c8 /* Vendor 2 Register */
 #define IMXRT_USDHC_TC_OFFSET            0x00cc /* Tuning Control Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 /* For USDHC1 ... */
 
@@ -145,7 +130,7 @@
 #define IMXRT_USDHC2_VENDOR2             (IMXRT_USDHC2_BASE + IMXRT_USDHC_VENDOR2_OFFSET)
 #define IMXRT_USDHC2_TC                  (IMXRT_USDHC2_BASE + IMXRT_USDHC_TC_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* DMA System Address Register */
 
@@ -166,13 +151,16 @@
 
 /* Transfer Type Register */
 
-                                                       /* Bits 0-15: Reserved */
+/*                                                        Bits 0-15:
+ *                                                                 Reserved
+ */
 #define USDHC_XFERTYP_RSPTYP_SHIFT       (16)          /* Bits 16-17: Response Type Select */
 #define USDHC_XFERTYP_RSPTYP_MASK        (3 << USDHC_XFERTYP_RSPTYP_SHIFT)
 #  define USDHC_XFERTYP_RSPTYP_NONE      (0 << USDHC_XFERTYP_RSPTYP_SHIFT) /* No response */
 #  define USDHC_XFERTYP_RSPTYP_LEN136    (1 << USDHC_XFERTYP_RSPTYP_SHIFT) /* Response length 136 */
 #  define USDHC_XFERTYP_RSPTYP_LEN48     (2 << USDHC_XFERTYP_RSPTYP_SHIFT) /* Response length 48 */
 #  define USDHC_XFERTYP_RSPTYP_LEN48BSY  (3 << USDHC_XFERTYP_RSPTYP_SHIFT) /* Response length 48, check busy */
+
                                                        /* Bit 18: Reserved */
 #define USDHC_XFERTYP_CCCEN              (1 << 19)     /* Bit 19: Command CRC Check Enable */
 #define USDHC_XFERTYP_CICEN              (1 << 20)     /* Bit 20: Command Index Check Enable */
@@ -183,6 +171,7 @@
 #  define USDHC_XFERTYP_CMDTYP_SUSPEND   (1 << USDHC_XFERTYP_CMDTYP_SHIFT) /* Suspend CMD52 for writing bus suspend in CCCR */
 #  define USDHC_XFERTYP_CMDTYP_RESUME    (2 << USDHC_XFERTYP_CMDTYP_SHIFT) /* Resume CMD52 for writing function select in CCCR */
 #  define USDHC_XFERTYP_CMDTYP_ABORT     (3 << USDHC_XFERTYP_CMDTYP_SHIFT) /* Abort CMD12, CMD52 for writing I/O abort in CCCR */
+
 #define USDHC_XFERTYP_CMDINX_SHIFT       (24)          /* Bits 24-29: Command Index */
 #define USDHC_XFERTYP_CMDINX_MASK        (0x3f << USDHC_XFERTYP_CMDINX_SHIFT)
                                                        /* Bits 30-31: Reserved */
@@ -233,12 +222,14 @@
 #  define USDHC_PROCTL_DTW_1BIT          (0 << USDHC_PROCTL_DTW_SHIFT) /* 1-bit mode */
 #  define USDHC_PROCTL_DTW_4BIT          (1 << USDHC_PROCTL_DTW_SHIFT) /* 4-bit mode */
 #  define USDHC_PROCTL_DTW_8BIT          (2 << USDHC_PROCTL_DTW_SHIFT) /* 8-bit mode */
+
 #define USDHC_PROCTL_D3CD                (1 << 3)     /* Bit 3: DAT3 as Card Detection Pin */
 #define USDHC_PROCTL_EMODE_SHIFT         (4)          /* Bits 4-5: Endian mode */
 #define USDHC_PROCTL_EMODE_MASK          (3 << USDHC_PROCTL_EMODE_SHIFT)
 #  define USDHC_PROCTL_EMODE_BE          (0 << USDHC_PROCTL_EMODE_SHIFT) /* Big endian mode */
 #  define USDHC_PROCTL_EMODE_HWBE        (1 << USDHC_PROCTL_EMODE_SHIFT) /* Half word big endian mode */
 #  define USDHC_PROCTL_EMODE_LE          (2 << USDHC_PROCTL_EMODE_SHIFT) /* Little endian mode */
+
 #define USDHC_PROCTL_CDTL                (1 << 6)     /* Bit 6:  Card Detect Test Level */
 #define USDHC_PROCTL_CDSS                (1 << 7)     /* Bit 7:  Card Detect Signal Selection */
 #define USDHC_PROCTL_DMAS_SHIFT          (8)          /* Bits 8-9: DMA Select */
@@ -246,7 +237,10 @@
 #  define USDHC_PROCTL_DMAS_NODMA        (0 << USDHC_PROCTL_DMAS_SHIFT) /* No DMA or simple DMA is selected */
 #  define USDHC_PROCTL_DMAS_ADMA1        (1 << USDHC_PROCTL_DMAS_SHIFT) /* ADMA1 is selected */
 #  define USDHC_PROCTL_DMAS_ADMA2        (2 << USDHC_PROCTL_DMAS_SHIFT) /* ADMA2 is selected */
-                                                      /* Bits 10-15: Reserved */
+
+/*                                                      Bits 10-15:
+ *                                                             Reserved
+ */
 #define USDHC_PROCTL_SABGREQ             (1 << 16)    /* Bit 16: Stop At Block Gap Request */
 #define USDHC_PROCTL_CREQ                (1 << 17)    /* Bit 17: Continue Request */
 #define USDHC_PROCTL_RWCTL               (1 << 18)    /* Bit 18: Read Wait Control */
@@ -261,14 +255,17 @@
 #  define USDHC_PROCTL_BURST_INCR        (1 << USDHC_PROCTL_BURST_SHIFT) /* Burst for Incr */
 #  define USDHC_PROCTL_BURST_4816        (2 << USDHC_PROCTL_BURST_SHIFT) /* Burst for 4/8/16 */
 #  define USDHC_PROCTL_BURST_4W8W16W     (4 << USDHC_PROCTL_BURST_SHIFT) /* Burst for 4w/8w/16w */
+
 #define USDHC_PROTCTL_NEBLKRD            (1 << 30)    /* Bit 30: Non-exect block read */
                                                       /* Bit 31: Reserved */
+
 /* System Control Register */
 
 #define USDHC_SYSCTL_RES0                (0x0F << 0)  /* Bit 0-3:  Reserved, set to 1 */
 #define USDHC_SYSCTL_DVS_SHIFT           (4)          /* Bits 4-7: Divisor */
 #define USDHC_SYSCTL_DVS_MASK            (0x0f << USDHC_SYSCTL_DVS_SHIFT)
 #  define USDHC_SYSCTL_DVS_DIV(n)        (((n) - 1) << USDHC_SYSCTL_DVS_SHIFT) /* Divide by n, n=1..16 */
+
 #define USDHC_SYSCTL_SDCLKFS_SHIFT       (8)          /* Bits 8-15: SDCLK Frequency Select */
 #define USDHC_SYSCTL_SDCLKFS_MASK        (0xff << USDHC_SYSCTL_SDCLKFS_SHIFT)
 #  define USDHC_SYSCTL_SDCLKFS_BYPASS    (0x00 << USDHC_SYSCTL_SDCLKFS_SHIFT) /* Bypass the prescaler */
@@ -280,10 +277,14 @@
 #  define USDHC_SYSCTL_SDCLKFS_DIV64     (0x20 << USDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 64 */
 #  define USDHC_SYSCTL_SDCLKFS_DIV128    (0x40 << USDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 128 */
 #  define USDHC_SYSCTL_SDCLKFS_DIV256    (0x80 << USDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 256 */
+
 #define USDHC_SYSCTL_DTOCV_SHIFT         (16)         /* Bits 16-19: Data Timeout Counter Value */
 #define USDHC_SYSCTL_DTOCV_MASK          (0x0f << USDHC_SYSCTL_DTOCV_SHIFT)
 #  define USDHC_SYSCTL_DTOCV_MUL(n)      (((n) - 213) << USDHC_SYSCTL_DTOCV_SHIFT) /* SDCLK x n, n=213..227 */
-                                                      /* Bits 20-22: Reserved */
+
+/*                                                       Bits 20-22:
+ *                                                                Reserved
+ */
 #define USDHC_SYSCTL_IPPRSTN             (1 << 23)    /* Bit 23: Card /reset (default 1) */
 #define USDHC_SYSCTL_RSTA                (1 << 24)    /* Bit 24: Software Reset For ALL */
 #define USDHC_SYSCTL_RSTC                (1 << 25)    /* Bit 25: Software Reset For CMD Line */
@@ -292,7 +293,8 @@
 #define USDHC_SYSCTL_RSTT                (1 << 28)    /* Bit 28: Reset tuning */
                                                       /* Bits 29-31: Reserved */
 
-/* Interrupt Status Register, Interrupt Status Enable Register and Interrupt Signal Enable Register
+/* Interrupt Status Register, Interrupt Status Enable Register and
+ * Interrupt Signal Enable Register
  * Common interrupt bit definitions
  */
 
@@ -440,9 +442,11 @@
 #  define USDHC_ADMAES_FDS               (1 << USDHC_ADMAES_ADMAES_SHIFT) /* Fetch descriptor */
 #  define USDHC_ADMAES_CADR              (2 << USDHC_ADMAES_ADMAES_SHIFT) /* Change address */
 #  define USDHC_ADMAES_TFR               (3 << USDHC_ADMAES_ADMAES_SHIFT) /* Transfer data */
+
 #define USDHC_ADMAES_LME                 (1 << 2)     /* Bit 2:  ADMA Length Mismatch Error */
 #define USDHC_ADMAES_DCE                 (1 << 3)     /* Bit 3:  ADMA Descriptor Error */
                                                       /* Bits 4-31: Reserved */
+
 /* ADMA System Address Register */
 
 #define USDHC_ADSADDR_SHIFT              (0)          /* Bits 1-31: ADMA System Address */
@@ -487,6 +491,7 @@
 /* Clk tuning control and status */
 
 /* Vendor Specific Register */
+
                                                       /* Bit 0: Reserved */
 #define SHDC_VENDOR_VSELECT18           (1 << 1)      /* Bit 1: 1.8V signalling */
 #define USDHC_VENDOR_CONFICTCHK_SHIFT    (1 << 2)     /* Bit 2: Conflict Check Enable .. not implemented */
@@ -503,6 +508,7 @@
 #define USDHC_MMCBOOT_DTOCVACK_SHIFT     (0)          /* Bits 0-3: Boot ACK time out counter value */
 #define USDHC_MMCBOOT_DTOCVACK_MASK      (0x0f << USDHC_MMCBOOT_DTOCVACK_SHIFT)
 #  define USDHC_MMCBOOT_DTOCVACK_MUL(n)  ((n - 8) << USDHC_MMCBOOT_DTOCVACK_SHIFT) /* SDCLK x 2^n, n=8..22 */
+
 #define USDHC_MMCBOOT_BOOTACK            (1 << 4)     /* Bit 4:  Boot ack mode select */
 #define USDHC_MMCBOOT_BOOTMODE           (1 << 5)     /* Bit 5:  Boot mode select */
 #define USDHC_MMCBOOT_BOOTEN             (1 << 6)     /* Bit 6:  Boot mode enable */
@@ -513,6 +519,7 @@
 #define USDHC_MMCBOOT_BOOTBLKCNT_MASK    (0xffff << USDHC_MMCBOOT_BOOTBLKCNT_SHIFT)
 
 /* Vendor specific register 2 */
+
                                                       /* Bits 0-2: Reserved */
 #define USDHC_VS2_CARDINTD3              (1 << 3)     /* Bit 3: Card interrupt detection test */
 #define USDHC_VS2_TUNING8BITEN           (1 << 4)     /* Bit 4: Tuning 8 bit enable */
@@ -540,16 +547,16 @@
 #define USDHC_TC_TUNINGEN                (1 << 24)    /* Bit 24: Tuning enable */
                                                       /* Bits 25-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USDHC_H */

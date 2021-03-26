@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_enc.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -31,24 +31,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_ENC_H
 #define __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_ENC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define IMXRT_ENC_CTRL_OFFSET           0x0000  /* Control Register Offset */
 #define IMXRT_ENC_FILT_OFFSET           0x0002  /* Input Filter Register Offset */
@@ -71,7 +71,7 @@
 #define IMXRT_ENC_UCOMP_OFFSET          0x0024  /* Upper Compare Register Offset */
 #define IMXRT_ENC_LCOMP_OFFSET          0x0026  /* Lower Compare Register Offset */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 /* ENC1 Registers */
 
@@ -165,7 +165,7 @@
 #define IMXRT_ENC4_UCOMP                (IMXRT_ENC4_BASE + IMXRT_ENC_UCOMP_OFFSET)  /* Upper Compare Register */
 #define IMXRT_ENC4_LCOMP                (IMXRT_ENC4_BASE + IMXRT_ENC_LCOMP_OFFSET)  /* Lower Compare Register */
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Control Register */
 

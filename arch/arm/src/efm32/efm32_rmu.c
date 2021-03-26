@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/efm32_rmu.c
  *
  *   Copyright (C) 2015 Pierre-Noel Bouteville. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -55,13 +55,13 @@
 
 #include "efm32_rmu.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_EFM32_RMU_DEBUG) && defined(CONFIG_DEBUG_WARN)
 typedef struct
@@ -72,9 +72,9 @@ typedef struct
 } efm32_reset_cause_list_t;
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_EFM32_RMU_DEBUG) && defined(CONFIG_DEBUG_WARN)
 static efm32_reset_cause_list_t efm32_reset_cause_list[] =
@@ -91,12 +91,12 @@ static efm32_reset_cause_list_t efm32_reset_cause_list[] =
   },
   {
     0x0004, /* 0bXXXX XXXX XXX0 0100 */
-    0x001F, /* 0bXXXX XXXX XXX1 1111 */
+    0x001f, /* 0bXXXX XXXX XXX1 1111 */
     "A Brown-out has been detected on the regulated power."
   },
   {
     0x0008, /* 0bXXXX XXXX XXXX 1X00 */
-    0x000B, /* 0bXXXX XXXX XXXX 1X11 */
+    0x000b, /* 0bXXXX XXXX XXXX 1X11 */
     "An external reset has been applied."
   },
   {
@@ -106,12 +106,12 @@ static efm32_reset_cause_list_t efm32_reset_cause_list[] =
   },
   {
     0x0020, /* 0bXXXX X000 0010 0000 */
-    0x07FF, /* 0bXXXX X111 1111 1111 */
+    0x07ff, /* 0bXXXX X111 1111 1111 */
     "A lockup reset has occurred."
   },
   {
     0x0040, /* 0bXXXX X000 01X0 0000 */
-    0x07DF, /* 0bXXXX X111 11X1 1111 */
+    0x07df, /* 0bXXXX X111 11X1 1111 */
     "A system request reset has occurred."
   },
   {
@@ -122,16 +122,16 @@ static efm32_reset_cause_list_t efm32_reset_cause_list[] =
   {
     0x0180, /* 0bXXXX X001 1XX0 0XX0 */
     0x0799, /* 0bXXXX X111 1XX1 1XX1 */
-    "The system has woken up from EM4 on an EM4 wakeup reset request from pin."
+    "The system woke up from EM4 on an EM4 wakeup reset request from pin."
   },
   {
     0x0200, /* 0bXXXX X01X XXX0 0000 */
-    0x061F, /* 0bXXXX X11X XXX1 1111 */
+    0x061f, /* 0bXXXX X11X XXX1 1111 */
     "A Brown-out has been detected on Analog Power Domain 0 (AVDD0)."
   },
   {
     0x0400, /* 0bXXXX X10X XXX0 0000 */
-    0x061F, /* 0bXXXX X11X XXX1 1111 */
+    0x061f, /* 0bXXXX X11X XXX1 1111 */
     "A Brown-out has been detected on Analog Power Domain 1 (AVDD1)."
   },
   {
@@ -162,23 +162,23 @@ static efm32_reset_cause_list_t efm32_reset_cause_list[] =
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Variable old last reset cause of cpu. */
 
 uint32_t g_efm32_rstcause;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_reset_cause_list_str
  *
  * Description:
@@ -189,12 +189,13 @@ uint32_t g_efm32_rstcause;
  *   idx: Use to keep in maind reset cause decoding position.
  *        set *idx to zero before first call.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_EFM32_RMU_DEBUG) && defined(CONFIG_DEBUG_WARN)
 const char *efm32_reset_cause_list_str(uint32_t reg, unsigned int *idx)
 {
-  int len = sizeof(efm32_reset_cause_list)/sizeof(efm32_reset_cause_list[0]);
+  int len = sizeof(efm32_reset_cause_list) /
+            sizeof(efm32_reset_cause_list[0]);
   efm32_reset_cause_list_t *ptr = NULL;
 
   do
@@ -218,13 +219,14 @@ const char *efm32_reset_cause_list_str(uint32_t reg, unsigned int *idx)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_rmu_initialize
  *
  * Description:
- *    Store reset cause into g_efm32_rstcause then clear reset cause register.
+ *    Store reset cause into g_efm32_rstcause then clear reset cause
+ *    register.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void efm32_rmu_initialize(void)
 {

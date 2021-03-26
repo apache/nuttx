@@ -373,7 +373,9 @@ static const uint8_t * const g_gpio_padmux[IMXRT_GPIO_NPORTS + 1] =
  * Public Data
  ****************************************************************************/
 
-/* Look-up table that maps GPIO1..GPIOn indexes into GPIO register base addresses */
+/* Look-up table that maps GPIO1..GPIOn indexes into GPIO register base
+ * addresses
+ */
 
 const uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS] =
 {
@@ -422,13 +424,15 @@ static uintptr_t imxrt_padmux_address(unsigned int index)
 #if defined(IMXRT_PAD1MUX_OFFSET)
   if (index >= IMXRT_PADMUX_GPIO_SPI_B0_00_INDEX)
     {
-      return (IMXRT_PAD1MUX_OFFSET(index - IMXRT_PADMUX_GPIO_SPI_B0_00_INDEX));
+      return (IMXRT_PAD1MUX_OFFSET(index -
+                                   IMXRT_PADMUX_GPIO_SPI_B0_00_INDEX));
     }
 
 #endif
   if (index >= IMXRT_PADMUX_WAKEUP_INDEX)
     {
-      return (IMXRT_PADMUX_ADDRESS_SNVS(index - IMXRT_PADMUX_WAKEUP_INDEX));
+      return (IMXRT_PADMUX_ADDRESS_SNVS(index -
+                                        IMXRT_PADMUX_WAKEUP_INDEX));
     }
 
   return (IMXRT_PADMUX_ADDRESS(index));
@@ -443,13 +447,15 @@ static uintptr_t imxrt_padctl_address(unsigned int index)
 #if defined(IMXRT_PAD1CTL_OFFSET)
   if (index >= IMXRT_PADCTL_GPIO_SPI_B0_00_INDEX)
     {
-      return (IMXRT_PAD1CTL_OFFSET(index - IMXRT_PADCTL_GPIO_SPI_B0_00_INDEX));
+      return (IMXRT_PAD1CTL_OFFSET(index -
+                                   IMXRT_PADCTL_GPIO_SPI_B0_00_INDEX));
     }
 
 #endif
   if (index >= IMXRT_PADCTL_WAKEUP_INDEX)
     {
-      return (IMXRT_PADCTL_ADDRESS_SNVS(index - IMXRT_PADCTL_WAKEUP_INDEX));
+      return (IMXRT_PADCTL_ADDRESS_SNVS(index -
+                                        IMXRT_PADCTL_WAKEUP_INDEX));
     }
 
   return (IMXRT_PADCTL_ADDRESS(index));
@@ -678,7 +684,7 @@ static inline int imxrt_gpio_configperiph(gpio_pinset_t pinset)
 
   imxrt_daisy_select(index, alt);
 
-  /* Configure pin pad settings SW PAD Control Register*/
+  /* Configure pin pad settings SW PAD Control Register */
 
   index = imxrt_padmux_map(index);
   if (index >= IMXRT_PADCTL_NREGISTERS)

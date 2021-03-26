@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/imxrt_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_GPIO_H
 #define __ARCH_ARM_SRC_IMXRT_IMXRT_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -33,9 +33,9 @@
 #include "chip.h"
 #include "hardware/imxrt_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* 32-bit Encoding:
  *
@@ -230,17 +230,17 @@
 #define IMXRT_GPIO_CLEAR(n)      (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_CLEAR_OFFSET)
 #define IMXRT_GPIO_TOGGLE(n)     (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_TOGGLE_OFFSET)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* The smallest integer type that can hold the GPIO encoding */
 
 typedef uint32_t gpio_pinset_t;
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -251,21 +251,24 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Look-up table that maps GPIO1..GPIOn indexes into GPIO register base addresses */
+/* Look-up table that maps GPIO1..GPIOn indexes into GPIO register base
+ * addresses
+ */
 
 EXTERN const uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS];
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_gpioirq_initialize
  *
  * Description:
- *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_GPIO_IRQ
 void imxrt_gpioirq_initialize(void);
@@ -273,43 +276,43 @@ void imxrt_gpioirq_initialize(void);
 #  define imxrt_gpioirq_initialize()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_config_gpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int imxrt_config_gpio(gpio_pinset_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_gpio_write
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void imxrt_gpio_write(gpio_pinset_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_gpio_read
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool imxrt_gpio_read(gpio_pinset_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_gpioirq_configure
  *
  * Description:
  *   Configure an interrupt for the specified GPIO pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_GPIO_IRQ
 int imxrt_gpioirq_configure(gpio_pinset_t pinset);
@@ -317,13 +320,13 @@ int imxrt_gpioirq_configure(gpio_pinset_t pinset);
 #  define imxrt_gpioirq_configure(pinset)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_gpioirq_enable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_GPIO_IRQ
 int imxrt_gpioirq_enable(int irq);
@@ -331,13 +334,13 @@ int imxrt_gpioirq_enable(int irq);
 #  define imxrt_gpioirq_enable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_gpioirq_disable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_GPIO_IRQ
 int imxrt_gpioirq_disable(int irq);
@@ -345,13 +348,14 @@ int imxrt_gpioirq_disable(int irq);
 #  define imxrt_gpioirq_disable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function:  imxrt_dump_gpio
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Dump all GPIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int imxrt_dump_gpio(uint32_t pinset, const char *msg);

@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/rt102x/imxrt102x_pinmux.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -32,21 +32,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_PINMUX_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_PINMUX_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "imxrt_iomuxc.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
 /* Alternate Pin Functions.
  *
@@ -119,7 +119,6 @@
 #define GPIO_ENET_MDIO_3               (GPIO_PERIPH | GPIO_ALT6 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_SD_B0_02_INDEX))
 #define GPIO_ENET_REF_CLK_1            (GPIO_PERIPH | GPIO_ALT3 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_SD_B1_04_INDEX))
 #define GPIO_ENET_REF_CLK_2            (GPIO_PERIPH | GPIO_ALT4 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_AD_B0_08_INDEX))
-
 
 #define GPIO_ENET_RX_CLK_1             (GPIO_PERIPH | GPIO_ALT6 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC36_INDEX))
 #define GPIO_ENET_RX_DATA00_1          (GPIO_PERIPH | GPIO_ALT2 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_SD_B1_06_INDEX))
@@ -250,7 +249,6 @@
 #define GPIO_FLEXPWM2_PWMX01_1         (GPIO_PERIPH | GPIO_ALT6 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_11_INDEX))
 #define GPIO_FLEXPWM2_PWMX02_1         (GPIO_PERIPH | GPIO_ALT6 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_12_INDEX))
 #define GPIO_FLEXPWM2_PWMX03_1         (GPIO_PERIPH | GPIO_ALT6 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_13_INDEX))
-
 
 /* Flexible SPI (FlexSPI) */
 
@@ -773,7 +771,6 @@
 #define GPIO_USB_OTG_PWR_1            (GPIO_PERIPH | GPIO_ALT0 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_AD_B1_10_INDEX))
 #define GPIO_USB_OTG_PWR_2            (GPIO_PERIPH | GPIO_ALT3 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_41_INDEX))
 #define GPIO_USB_OTG_PWR_3            (GPIO_PERIPH | GPIO_ALT6 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_AD_B0_04_INDEX))
-
 
 #define GPIO_USBPHY1_TSTI_TX_DN_1     (GPIO_PERIPH | GPIO_ALT6 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_06_INDEX))
 #define GPIO_USBPHY1_TSTI_TX_DP_1     (GPIO_PERIPH | GPIO_ALT6 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_33_INDEX))

@@ -1,55 +1,42 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/armv7-r/sctlr.h
- * CP15 System Control Registers
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *  "ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition", Copyright
- *   1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM DDI 0406C.c (ID051414)
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ ****************************************************************************/
+
+/* References:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ *  "ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
+ *  Copyright 1996-1998, 2000, 2004-2012 ARM.
+ *  All rights reserved. ARM DDI 0406C.c (ID051414)
+ */
 
 #ifndef __ARCH_ARM_SRC_ARMV7_R_SCTLR_H
 #define __ARCH_ARM_SRC_ARMV7_R_SCTLR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* CP15 c0 Registers ****************************************************************/
+ ****************************************************************************/
+
+/* CP15 c0 Registers ********************************************************/
 
 /* Main ID Register (MIDR): CRn=c0, opc1=0, CRm=c0, opc2=0
  * TODO: To be provided
@@ -92,26 +79,38 @@
  * TODO: To be provided
  */
 
-/* Memory Model Features Register 0 (ID_MMFR0): CRn=c0, opc1=0, CRm=c1, opc2=4
- * Memory Model Features Register 1 (ID_MMFR1): CRn=c0, opc1=0, CRm=c1, opc2=5
- * Memory Model Features Register 2 (ID_MMFR2): CRn=c0, opc1=0, CRm=c1, opc2=6
- * Memory Model Features Register 3 (ID_MMFR3): CRn=c0, opc1=0, CRm=c1, opc2=7
+/* Memory Model Features Register 0 (ID_MMFR0):
+ * CRn=c0, opc1=0, CRm=c1, opc2=4
+ * Memory Model Features Register 1 (ID_MMFR1):
+ * CRn=c0, opc1=0, CRm=c1, opc2=5
+ * Memory Model Features Register 2 (ID_MMFR2):
+ * CRn=c0, opc1=0, CRm=c1, opc2=6
+ * Memory Model Features Register 3 (ID_MMFR3):
+ * CRn=c0, opc1=0, CRm=c1, opc2=7
  * TODO: To be provided
  */
 
-/* Instruction Set Attributes Register 0 (ID_ISAR0): CRn=c0, opc1=0, CRm=c2, opc2=0
- * Instruction Set Attributes Register 1 (ID_ISAR1): CRn=c0, opc1=0, CRm=c2, opc2=1
- * Instruction Set Attributes Register 2 (ID_ISAR2): CRn=c0, opc1=0, CRm=c2, opc2=2
- * Instruction Set Attributes Register 3 (ID_ISAR3): CRn=c0, opc1=0, CRm=c2, opc2=3
- * Instruction Set Attributes Register 4 (ID_ISAR4): CRn=c0, opc1=0, CRm=c2, opc2=4
- * Instruction Set Attributes Register 5 (ID_ISAR5): CRn=c0, opc1=0, CRm=c2, opc2=5
- * Instruction Set Attributes Register 6-7 (ID_ISAR6-7).  Reserved.
+/* Instruction Set Attributes Register 0 (ID_ISAR0):
+ * CRn=c0, opc1=0, CRm=c2, opc2=0
+ * Instruction Set Attributes Register 1 (ID_ISAR1):
+ * CRn=c0, opc1=0, CRm=c2, opc2=1
+ * Instruction Set Attributes Register 2 (ID_ISAR2):
+ * CRn=c0, opc1=0, CRm=c2, opc2=2
+ * Instruction Set Attributes Register 3 (ID_ISAR3):
+ * CRn=c0, opc1=0, CRm=c2, opc2=3
+ * Instruction Set Attributes Register 4 (ID_ISAR4):
+ * CRn=c0, opc1=0, CRm=c2, opc2=4
+ * Instruction Set Attributes Register 5 (ID_ISAR5):
+ * CRn=c0, opc1=0, CRm=c2, opc2=5
+ * Instruction Set Attributes Register 6-7 (ID_ISAR6-7).
+ *  Reserved.
  * TODO: Others to be provided
  */
 
 /* Reserved: CRn=c0, opc1=0, CRm=c3-c7, opc2=* */
 
-/* Cache Size Identification Register (CCSIDR): CRn=c0, opc1=1, CRm=c0, opc2=0
+/* Cache Size Identification Register (CCSIDR):
+ * CRn=c0, opc1=1, CRm=c0, opc2=0
  * TODO: To be provided
  */
 
@@ -127,7 +126,8 @@
  * TODO: To be provided
  */
 
-/* CP15 c1 Registers ****************************************************************/
+/* CP15 c1 Registers ********************************************************/
+
 /* System Control Register (SCTLR): CRn=c1, opc1=0, CRm=c0, opc2=0
  */
 
@@ -162,14 +162,17 @@
  * Implementation defined
  */
 
-/* Coprocessor Access Control Register (CPACR): CRn=c1, opc1=0, CRm=c0, opc2=2
+/* Coprocessor Access Control Register (CPACR):
+ * CRn=c1, opc1=0, CRm=c0, opc2=2
  * TODO: To be provided
  */
 
-/* CP15 c2-c4 Registers *************************************************************/
+/* CP15 c2-c4 Registers *****************************************************/
+
 /* Not used on ARMv7-R */
 
-/* CP15 c5 Registers ****************************************************************/
+/* CP15 c5 Registers ********************************************************/
+
 /* Data Fault Status Register (DFSR): CRn=c5, opc1=0, CRm=c0, opc2=0
  * TODO: To be provided
  */
@@ -186,7 +189,7 @@
  * TODO: To be provided
  */
 
-/* CP15 c6 Registers ****************************************************************/
+/* CP15 c6 Registers ********************************************************/
 
 /* Data Fault Address Register(DFAR): CRn=c6, opc1=0, CRm=c0, opc2=0
  *
@@ -195,46 +198,56 @@
 
 /* Instruction Fault Address Register(IFAR): CRn=c6, opc1=0, CRm=c0, opc2=1
  *
- *   Holds the MVA of the faulting address of the instruction that caused a prefetch
- *   abort.
+ *   Holds the MVA of the faulting address of the instruction that caused a
+ *   prefetch abort.
  */
 
 /* Data Region Base Address Register (DRBAR): CRn=c6, opc1=0, CRm=c1, opc2=0
  * TODO: To be provided
  */
 
-/* Instruction Region Base Address Register (IRBAR): CRn=c6, opc1=0, CRm=c1, opc2=1
+/* Instruction Region Base Address Register (IRBAR):
+ * CRn=c6, opc1=0, CRm=c1, opc2=1
  * TODO: To be provided
  */
 
-/* Data Region Size and Enable Register (DRSR): CRn=c6, opc1=0, CRm=c1, opc2=2
+/* Data Region Size and Enable Register (DRSR):
+ * CRn=c6, opc1=0, CRm=c1, opc2=2
  * TODO: To be provided
  */
 
-/* Instruction Region Size and Enable Register (IRSR): CRn=c6, opc1=0, CRm=c1, opc2=3
+/* Instruction Region Size and Enable Register (IRSR):
+ * CRn=c6, opc1=0, CRm=c1, opc2=3
  * TODO: To be provided
  */
 
-/* Data Region Access Control Register (DRACR): CRn=c6, opc1=0, CRm=c1, opc2=4
+/* Data Region Access Control Register (DRACR):
+ * CRn=c6, opc1=0, CRm=c1, opc2=4
  * TODO: To be provided
  */
 
-/* Instruction Region Access Control Register (IRACR): CRn=c6, opc1=0, CRm=c1, opc2=5
+/* Instruction Region Access Control Register (IRACR):
+ * CRn=c6, opc1=0, CRm=c1, opc2=5
  * TODO: To be provided
  */
 
-/* MPU Region Number Register (RGNR): CRn=c6, opc1=0, CRm=c2, opc2=0
+/* MPU Region Number Register (RGNR):
+ * CRn=c6, opc1=0, CRm=c2, opc2=0
  * TODO: To be provided
  */
 
-/* CP15 c7 Registers ****************************************************************/
+/* CP15 c7 Registers ********************************************************/
+
 /* See cp15_cacheops.h */
 
-/* CP15 c8 Registers ****************************************************************/
+/* CP15 c8 Registers ********************************************************/
+
 /* Not used on ARMv7-R */
 
-/* CP15 c9 Registers ****************************************************************/
-/* 32-bit Performance Monitors Control Register (PMCR): CRn=c9, opc1=0, CRm=c12, opc2=0
+/* CP15 c9 Registers ********************************************************/
+
+/* 32-bit Performance Monitors Control Register (PMCR):
+ * CRn=c9, opc1=0, CRm=c12, opc2=0
  * TODO: To be provided
  */
 
@@ -251,68 +264,84 @@
 #define PCMR_IMP_SHIFT     (24)      /* Bits 24-31: Implementer code */
 #define PCMR_IMP_MASK      (0xff << PCMR_IMP_SHIFT)
 
-/* 32-bit Performance Monitors Count Enable Set register (PMCNTENSET): CRn=c9, opc1=0, CRm=c12, opc2=1
+/* 32-bit Performance Monitors Count Enable Set register (PMCNTENSET):
+ * CRn=c9, opc1=0, CRm=c12, opc2=1
  * TODO: To be provided
  */
 
-/* 32-bit Performance Monitors Count Enable Clear register (PMCNTENCLR): CRn=c9, opc1=0, CRm=c12, opc2=2
+/* 32-bit Performance Monitors Count Enable Clear register (PMCNTENCLR):
+ * CRn=c9, opc1=0, CRm=c12, opc2=2
  * TODO: To be provided
  */
 
-/* 32-bit Performance Monitors Overflow Flag Status Register (PMOVSR): CRn=c9, opc1=0, CRm=c12, opc2=3
+/* 32-bit Performance Monitors Overflow Flag Status Register (PMOVSR):
+ * CRn=c9, opc1=0, CRm=c12, opc2=3
  * TODO: To be provided
  */
 
-/* 32-bit Performance Monitors Software Increment register (PMSWINC): CRn=c9, opc1=0, CRm=c12, opc2=4
+/* 32-bit Performance Monitors Software Increment register (PMSWINC):
+ * CRn=c9, opc1=0, CRm=c12, opc2=4
  * TODO: To be provided
  */
 
-/* 32-bit Performance Monitors Event Counter Selection Register (PMSELR): CRn=c9, opc1=0, CRm=c12, opc2=5
+/* 32-bit Performance Monitors Event Counter Selection Register (PMSELR):
+ * CRn=c9, opc1=0, CRm=c12, opc2=5
  * TODO: To be provided
  */
 
-/* 32-bit Performance Monitors Common Event Identification (PMCEID0): CRn=c9, opc1=0, CRm=c12, opc2=6
+/* 32-bit Performance Monitors Common Event Identification (PMCEID0):
+ * CRn=c9, opc1=0, CRm=c12, opc2=6
  * TODO: To be provided
  */
 
-/* 32-bit Performance Monitors Common Event Identification (PMCEID1): CRn=c9, opc1=0, CRm=c12, opc2=7
+/* 32-bit Performance Monitors Common Event Identification (PMCEID1):
+ * CRn=c9, opc1=0, CRm=c12, opc2=7
  * TODO: To be provided
  */
 
-/* 32-bit Performance Monitors Cycle Count Register (PMCCNTR): CRn=c9, opc1=0, CRm=c13, opc2=0
+/* 32-bit Performance Monitors Cycle Count Register (PMCCNTR):
+ * CRn=c9, opc1=0, CRm=c13, opc2=0
  * TODO: To be provided
  */
 
-/* 32-bit Performance Monitors Event Type Select Register (PMXEVTYPER): CRn=c9, opc1=0, CRm=c13, opc2=1
+/* 32-bit Performance Monitors Event Type Select Register (PMXEVTYPER):
+ * CRn=c9, opc1=0, CRm=c13, opc2=1
  * TODO: To be provided
  */
 
-/* 32-bit Performance Monitors Event Count Register (PMXEVCNTR): CRn=c9, opc1=0, CRm=c13, opc2=2
+/* 32-bit Performance Monitors Event Count Register (PMXEVCNTR):
+ * CRn=c9, opc1=0, CRm=c13, opc2=2
  * TODO: To be provided
  */
 
-/* 32-bit Performance Monitors User Enable Register (PMUSERENR): CRn=c9, opc1=0, CRm=c14, opc2=0
+/* 32-bit Performance Monitors User Enable Register (PMUSERENR):
+ * CRn=c9, opc1=0, CRm=c14, opc2=0
  * TODO: To be provided
  */
 
-/* 32-bit Performance Monitors Interrupt Enable Set register (PMINTENSET): CRn=c9, opc1=0, CRm=c14, opc2=1
+/* 32-bit Performance Monitors Interrupt Enable Set register (PMINTENSET):
+ * CRn=c9, opc1=0, CRm=c14, opc2=1
  * TODO: To be provided
  */
 
-/* 32-bit Performance Monitors Interrupt Enable Clear register (PMINTENCLR): CRn=c9, opc1=0, CRm=c14, opc2=2
+/* 32-bit Performance Monitors Interrupt Enable Clear register (PMINTENCLR):
+ * CRn=c9, opc1=0, CRm=c14, opc2=2
  * TODO: To be provided
  */
 
-/* CP15 c10 Registers ***************************************************************/
+/* CP15 c10 Registers *******************************************************/
+
 /* Not used on ARMv7-R */
 
-/* CP15 c11 Registers ***************************************************************/
+/* CP15 c11 Registers *******************************************************/
+
 /* Reserved for implementation defined DMA functions */
 
-/* CP15 c12 Registers ***************************************************************/
+/* CP15 c12 Registers *******************************************************/
+
 /* Not used on ARMv7-R */
 
-/* CP15 c13 Registers ***************************************************************/
+/* CP15 c13 Registers *******************************************************/
 
 /* Context ID Register (CONTEXTIDR): CRn=c13, opc1=0, CRm=c0, opc2=1
  * 32-Bit ContextID value.
@@ -330,7 +359,7 @@
  * TODO: To be provided
  */
 
-/* CP15 c14 Registers ***************************************************************/
+/* CP15 c14 Registers *******************************************************/
 
 /* Counter Frequency register (CNTFRQ): CRn=c14, opc1=0, CRm=c0, opc2=0
  * TODO: To be provided
@@ -340,11 +369,13 @@
  * TODO: To be provided
  */
 
-/* PL1 Physical TimerValue register (CNTP_TVAL): CRn=c14, opc1=0, CRm=c2, opc2=0
+/* PL1 Physical TimerValue register (CNTP_TVAL):
+ * CRn=c14, opc1=0, CRm=c2, opc2=0
  * TODO: To be provided
  */
 
-/* PL1 Physical Timer Control register (CNTP_CTL): CRn=c14, opc1=0, CRm=c2, opc2=0
+/* PL1 Physical Timer Control register (CNTP_CTL):
+ * CRn=c14, opc1=0, CRm=c2, opc2=0
  * TODO: To be provided
  */
 
@@ -364,20 +395,23 @@
  * TODO: To be provided
  */
 
-/* PL1 Physical Timer CompareValue register (CNTP_CVAL): CRn=c14, opc1=2, CRm=c14, opc2=n
+/* PL1 Physical Timer CompareValue register (CNTP_CVAL):
+ * CRn=c14, opc1=2, CRm=c14, opc2=n
  * TODO: To be provided
  */
 
-/* Virtual Timer CompareValue register (CNTV_CVAL): CRn=c14, opc1=3, CRm=c14, opc2=n
+/* Virtual Timer CompareValue register (CNTV_CVAL):
+ * CRn=c14, opc1=3, CRm=c14, opc2=n
  * TODO: To be provided
  */
 
-/* CP15 c15 Registers ***************************************************************/
+/* CP15 c15 Registers *******************************************************/
+
 /* Implementation defined */
 
-/************************************************************************************
+/****************************************************************************
  * Assembly Macros
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __ASSEMBLY__
 
@@ -406,9 +440,9 @@
 	.endm
 #endif /* __ASSEMBLY__ */
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 

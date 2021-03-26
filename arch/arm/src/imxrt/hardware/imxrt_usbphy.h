@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #define IMXRT_USBPHY_BASE_OFFSET            0x1000  /* USB PHY Base */
+
 #define IMXRT_USBPHY_BASE                   (IMXRT_ANATOP_BASE + IMXRT_USBPHY_BASE_OFFSET)  /* USB PHY Base */
 
 /* Register Offsets *********************************************************/
@@ -44,10 +45,10 @@
 
 /* Register addresses *******************************************************/
 
-#define IMXRT_USBPHY1_PWD                   (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_PWD_OFFSET)  /* USBPHY1 USB PHY Power-Down Register */
+#define IMXRT_USBPHY1_PWD                   (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_PWD_OFFSET)      /* USBPHY1 USB PHY Power-Down Register */
 #define IMXRT_USBPHY1_PWD_CLR               (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_PWD_CLR_OFFSET)  /* USBPHY1 USB PHY Power-Down Register Clear */
-#define IMXRT_USBPHY1_CTRL                  (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_CTRL_OFFSET)  /* USBPHY1 USB PHY General Control Register */
-#define IMXRT_USBPHY1_CTRL_CLR              (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_CTRL_CLR_OFFSET)  /* USBPHY1 USB PHY General Control Register Clear */
+#define IMXRT_USBPHY1_CTRL                  (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_CTRL_OFFSET)     /* USBPHY1 USB PHY General Control Register */
+#define IMXRT_USBPHY1_CTRL_CLR              (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_CTRL_CLR_OFFSET) /* USBPHY1 USB PHY General Control Register Clear */
 
 /* Register Bit Definitions *************************************************/
 

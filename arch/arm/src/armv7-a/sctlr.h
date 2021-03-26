@@ -1,73 +1,62 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/armv7-a/sctlr.h
- * CP15 System Control Registers
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *  "Cortex-A5™ MPCore, Technical Reference Manual", Revision: r0p1, Copyright © 2010
- *   ARM. All rights reserved. ARM DDI 0434B (ID101810)
- *  "ARM® Architecture Reference Manual, ARMv7-A and ARMv7-R edition", Copyright ©
- *   1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM DDI 0406C.b (ID072512)
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
+
+/* References:
+ *  "Cortex-A5™ MPCore, Technical Reference Manual",
+ *   Revision: r0p1, Copyright © 2010 ARM.
+ *   All rights reserved. ARM DDI 0434B (ID101810)
+ *  "ARM® Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
+ *   Copyright © 1996-1998, 2000, 2004-2012 ARM.
+ *  All rights reserved. ARM DDI 0406C.b (ID072512)
+ */
 
 #ifndef __ARCH_ARM_SRC_ARMV7_A_SCTLR_H
 #define __ARCH_ARM_SRC_ARMV7_A_SCTLR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Reference: Cortex-A5™ MPCore Paragraph 4.2, "Register summary." */
 
 /* Main ID Register (MIDR) */
+
 /* TODO: To be provided */
 
 /* Cache Type Register (CTR) */
+
 /* TODO: To be provided */
 
 /* TCM Type Register
  *
- * The Cortex-A5 MPCore processor does not implement instruction or data Tightly
- * Coupled Memory (TCM), so this register always Reads-As-Zero (RAZ).
+ * The Cortex-A5 MPCore processor does not implement instruction or data
+ * Tightly Coupled Memory (TCM), so this register always Reads-As-Zero (RAZ).
  *
  * TLB Type Register
  *
- * The Cortex-A5 MPCore processor does not implement instruction or data Tightly
- * CoupledMemory (TCM), so this register always Reads-As-Zero (RAZ).
+ * The Cortex-A5 MPCore processor does not implement instruction or data
+ * Tightly CoupledMemory (TCM), so this register always Reads-As-Zero (RAZ).
  */
 
 /* Multiprocessor Affinity Register (MPIDR) */
@@ -85,42 +74,61 @@
 #define MPIDR_U                  (1 << 30) /* Bit 30: Multiprocessing Extensions. */
 
 /* Processor Feature Register 0 (ID_PFR0) */
+
 /* TODO: To be provided */
 
 /* Processor Feature Register 1 (ID_PFR1) */
+
 /* TODO: To be provided */
 
 /* Debug Feature Register 0 (ID_DFR0) */
+
 /* TODO: To be provided */
 
 /* Auxiliary Feature Register 0 (ID_AFR0) */
+
 /* TODO: To be provided */
 
 /* Memory Model Features Register 0 (ID_MMFR0) */
+
 /* Memory Model Features Register 1 (ID_MMFR1) */
+
 /* Memory Model Features Register 2 (ID_MMFR2) */
+
 /* Memory Model Features Register 3 (ID_MMFR3) */
+
 /* TODO: To be provided */
 
 /* Instruction Set Attributes Register 0 (ID_ISAR0) */
+
 /* Instruction Set Attributes Register 1 (ID_ISAR1) */
+
 /* Instruction Set Attributes Register 2 (ID_ISAR2) */
+
 /* Instruction Set Attributes Register 3 (ID_ISAR3) */
+
 /* Instruction Set Attributes Register 4 (ID_ISAR4) */
+
 /* Instruction Set Attributes Register 5 (ID_ISAR5) */
+
 /* Instruction Set Attributes Register 6-7 (ID_ISAR6-7).  Reserved. */
+
 /* TODO: Others to be provided */
 
 /* Cache Size Identification Register (CCSIDR) */
+
 /* TODO: To be provided */
 
 /* Cache Level ID Register (CLIDR) */
+
 /* TODO: To be provided */
 
 /* Auxiliary ID Register (AIDR) */
+
 /* TODO: To be provided */
 
 /* Cache Size Selection Register (CSSELR) */
+
 /* TODO: To be provided */
 
 /* System Control Register (SCTLR)
@@ -164,6 +172,7 @@
                                            /* Bits 10-31: Reserved */
 
 /* Coprocessor Access Control Register (CPACR) */
+
 /* TODO: To be provided */
 
 /* Secure Configuration Register (SCR) */
@@ -182,6 +191,7 @@
                                            /* Bits 10-31: Reserved */
 
 /* Secure Debug Enable Register (SDER) */
+
 /* TODO: To be provided */
 
 /* Non-secure Access Control Register (NSACR) */
@@ -197,16 +207,24 @@
                                            /* Bits 19-31: Reserved */
 
 /* Virtualization Control Register (VCR) */
+
 /* TODO: To be provided */
 
 /* Translation Table Base Register 0 (TTBR0).  See mmu.h */
+
 /* Translation Table Base Register 1 (TTBR1).  See mmu.h */
+
 /* Translation Table Base Control Register (TTBCR).  See mmu.h */
+
 /* Domain Access Control Register (DACR).  See mmu.h */
+
 /* Data Fault Status Register (DFSR).  See mmu.h */
+
 /* Instruction Fault Status Register (IFSR).  See mmu.h */
 
-/* Auxiliary Data Fault Status Register (ADFSR).  Not used in this implementation. */
+/* Auxiliary Data Fault Status Register (ADFSR).
+ * Not used in this implementation.
+ */
 
 /* Data Fault Address Register(DFAR)
  *
@@ -214,13 +232,13 @@
  *
  * Instruction Fault Address Register(IFAR)
  *
- *   Holds the MVA of the faulting address of the instruction that caused a prefetch
- *   abort.
+ *   Holds the MVA of the faulting address of the instruction that caused a
+ *   prefetch abort.
  *
  * NOP Register
  *
- *   The use of this register is optional and deprecated. Use the NOP instruction
- *   instead.
+ *   The use of this register is optional and deprecated.
+ *   Use the NOP instruction instead.
  *
  * Physical Address Register (PAR)
  *
@@ -230,11 +248,12 @@
  *
  * Instruction Synchronization Barrier
  *
- *   The use of ISB is optional and deprecated. Use the instruction ISB instead.
+ *   The use of ISB is optional and deprecated.
+ *   Use the instruction ISB instead.
  *
  * Data Memory Barrier
- *   The use of DMB is deprecated and, on Cortex-A5 MPCore, behaves as NOP. Use the
- *   instruction DMB instead.
+ *   The use of DMB is deprecated and, on Cortex-A5 MPCore, behaves as NOP.
+ *   Use the instruction DMB instead.
  */
 
 /* Vector Base Address Register (VBAR) */
@@ -242,12 +261,15 @@
 #define VBAR_MASK                (0xffffffe0)
 
 /* Monitor Vector Base Address Register (MVBAR) */
+
 /* TODO: To be provided */
 
 /* Interrupt Status Register (ISR) */
+
 /* TODO: To be provided */
 
 /* Virtualization Interrupt Register (VIR) */
+
 /* TODO: To be provided */
 
 /* Context ID Register (CONTEXTIDR) */
@@ -258,28 +280,29 @@
 #define CONTEXTIDR_PROCID_MASK   (0x00ffffff << CONTEXTIDR_PROCID_SHIFT)
 
 /* Configuration Base Address Register (CBAR) */
+
 /* TODO: To be provided */
 
-/************************************************************************************
+/****************************************************************************
  * Assembly Macros
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __ASSEMBLY__
 
 /* Get the device ID */
 
 	.macro	cp15_rdid, id
-	mrc		p15, 0, \id, c0, c0, 0
+	mrc	p15, 0, \id, c0, c0, 0
 	.endm
 
 /* Read/write the system control register (SCTLR) */
 
 	.macro	cp15_rdsctlr, sctlr
-	mrc		p15, 0, \sctlr, c1, c0, 0
+	mrc	p15, 0, \sctlr, c1, c0, 0
 	.endm
 
 	.macro	cp15_wrsctlr, sctlr
-	mcr		p15, 0, \sctlr, c1, c0, 0
+	mcr	p15, 0, \sctlr, c1, c0, 0
 	nop
 	nop
 	nop
@@ -291,9 +314,9 @@
 	.endm
 #endif /* __ASSEMBLY__ */
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 

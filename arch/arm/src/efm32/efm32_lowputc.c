@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/efm32/efm32_lowputc.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -196,7 +181,8 @@ static void efm32_uart_setbaud(uintptr_t base,  uint32_t baud)
    *   CLKDIV = (256 * fHFPERCLK) / (oversample * baud) - 256
    */
 
-  clkdiv = ((uint64_t)BOARD_HFPERCLK_FREQUENCY << 8) / ((uint64_t)baud * oversample);
+  clkdiv = ((uint64_t)BOARD_HFPERCLK_FREQUENCY << 8) /
+           ((uint64_t)baud * oversample);
   if (clkdiv > 256)
     {
       clkdiv -= 256;
@@ -505,7 +491,8 @@ void efm32_lowputc(uint32_t ch)
    * buffer is half-full or empty.
    */
 
-  while ((getreg32(CONSOLE_BASE + EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) == 0);
+  while ((getreg32(CONSOLE_BASE + EFM32_USART_STATUS_OFFSET) &
+         USART_STATUS_TXBL) == 0);
 
   /* Then send the character */
 
@@ -520,7 +507,8 @@ void efm32_lowputc(uint32_t ch)
    * buffer is half-full or empty.
    */
 
-  while ((getreg32(CONSOLE_BASE + EFM32_LEUART_STATUS_OFFSET) & LEUART_STATUS_TXBL) == 0);
+  while ((getreg32(CONSOLE_BASE + EFM32_LEUART_STATUS_OFFSET) &
+          LEUART_STATUS_TXBL) == 0);
 
   /* Then send the character */
 
@@ -643,7 +631,8 @@ void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
 
   /* Enable the U[S]ART */
 
-  putreg32(USART_CMD_RXEN | USART_CMD_TXEN, base + EFM32_USART_CMD_OFFSET);
+  putreg32(USART_CMD_RXEN | USART_CMD_TXEN,
+           base + EFM32_USART_CMD_OFFSET);
 }
 #endif
 
@@ -656,7 +645,8 @@ void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
  ****************************************************************************/
 
 #ifdef HAVE_LEUART_DEVICE
-void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
+void efm32_leuartconfigure(uintptr_t base,
+                           uint32_t baud, unsigned int parity,
                            unsigned int nbits, bool stop2)
 {
   uint32_t regval = 0;
@@ -697,7 +687,6 @@ void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
     case 2:
       regval |= LEUART_CTRL_PARITY_EVEN;
       break;
-
     }
 
   /* Configure stop bits */
@@ -719,7 +708,8 @@ void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
 
   /* Enable the LEUART */
 
-  putreg32(LEUART_CMD_RXEN | LEUART_CMD_TXEN, base + EFM32_LEUART_CMD_OFFSET);
+  putreg32(LEUART_CMD_RXEN | LEUART_CMD_TXEN,
+           base + EFM32_LEUART_CMD_OFFSET);
 }
 #endif
 
@@ -774,11 +764,14 @@ void efm32_leuart_reset(uintptr_t base)
            base + EFM32_LEUART_CMD_OFFSET);
   putreg32(_LEUART_CTRL_RESETVALUE, base + EFM32_LEUART_CTRL_OFFSET);
   putreg32(_LEUART_CLKDIV_RESETVALUE, base + EFM32_LEUART_CLKDIV_OFFSET);
-  putreg32(_LEUART_STARTFRAME_RESETVALUE, base + EFM32_LEUART_STARTFRAME_OFFSET);
-  putreg32(_LEUART_SIGFRAME_RESETVALUE, base + EFM32_LEUART_SIGFRAME_OFFSET);
+  putreg32(_LEUART_STARTFRAME_RESETVALUE,
+           base + EFM32_LEUART_STARTFRAME_OFFSET);
+  putreg32(_LEUART_SIGFRAME_RESETVALUE,
+           base + EFM32_LEUART_SIGFRAME_OFFSET);
   putreg32(_LEUART_IEN_RESETVALUE, base + EFM32_LEUART_IEN_OFFSET);
   putreg32(_LEUART_IFC_MASK, base + EFM32_LEUART_IFC_OFFSET);
-  putreg32(_LEUART_PULSECTRL_RESETVALUE, base + EFM32_LEUART_PULSECTRL_OFFSET);
+  putreg32(_LEUART_PULSECTRL_RESETVALUE,
+           base + EFM32_LEUART_PULSECTRL_OFFSET);
 #if defined(EFM32_LEUART_INPUT_OFFSET)
   putreg32(_LEUART_INPUT_RESETVALUE, base + EFM32_LEUART_INPUT_OFFSET);
 #endif

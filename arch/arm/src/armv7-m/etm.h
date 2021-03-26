@@ -1,4 +1,4 @@
-/*******************************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/armv7-m/etm.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -56,23 +56,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_ARMV7_M_ETM_H
 #define __ARCH_ARM_SRC_ARMV7_M_ETM_H
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************************************************/
-/* ETM Register Base Address ***************************************************************************************************/
+ ****************************************************************************/
+
+/* ETM Register Base Address ************************************************/
 
 #define ETM_BASE                                      (0xe0041000ul)
 
-/* ETM Register Offsets ********************************************************************************************************/
+/* ETM Register Offsets *****************************************************/
 
 #define ETM_ETMCR_OFFSET                              0x0000 /* Main Control Register  */
 #define ETM_ETMCCR_OFFSET                             0x0004 /* Configuration Code Register  */
@@ -115,7 +116,7 @@
 #define ETM_ETMCIDR2_OFFSET                           0x0ff8 /* Component ID2 Register  */
 #define ETM_ETMCIDR3_OFFSET                           0x0ffc /* Component ID3 Register  */
 
-/* ETM Register Addresses ******************************************************************************************************/
+/* ETM Register Addresses ***************************************************/
 
 #define ETM_ETMCR                                     (ETM_BASE+ETM_ETMCR_OFFSET)
 #define ETM_ETMCCR                                    (ETM_BASE+ETM_ETMCCR_OFFSET)
@@ -158,7 +159,7 @@
 #define ETM_ETMCIDR2                                  (ETM_BASE+ETM_ETMCIDR2_OFFSET)
 #define ETM_ETMCIDR3                                  (ETM_BASE+ETM_ETMCIDR3_OFFSET)
 
-/* ETM Register Bit Field Definitions ******************************************************************************************/
+/* ETM Register Bit Field Definitions ***************************************/
 
 /* Bit fields for ETM ETMCR */
 

@@ -1,56 +1,41 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx1/imx_system.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_IMX_SYSTEM_H
 #define __ARCH_ARM_IMX_SYSTEM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* AIPI Register Offsets ************************************************************/
+/* AIPI Register Offsets ****************************************************/
 
 #define AIPI_PSR0_OFFSET        0x0000 /* Peripheral Size Register 0 */
 #define AIPI_PSR1_OFFSET        0x0004 /* Peripheral Size Register 1 */
 #define AIPI_PAR_OFFSET         0x0008 /* Peripheral Access Register */
 
-/* AIPI Register Addresses **********************************************************/
+/* AIPI Register Addresses **************************************************/
 
 #define IMX_AIPI1_PSR0          (IMX_AIPI1_VBASE + AIPI_PSR0_OFFSET)
 #define IMX_AIPI1_PSR1          (IMX_AIPI1_VBASE + AIPI_PSR1_OFFSET)
@@ -60,9 +45,9 @@
 #define IMX_AIPI2_PSR1          (IMX_AIP2_VBASE + AIPI_PSR1_OFFSET)
 #define IMX_AIPI2_PAR           (IMX_AIP2_VBASE + 0xAIPI_PAR_OFFSET)
 
-/* AIPI Register Bit Definitions ****************************************************/
+/* AIPI Register Bit Definitions ********************************************/
 
-/* PLL Register Offsets *************************************************************/
+/* PLL Register Offsets *****************************************************/
 
 #define PLL_CSCR_OFFSET         0x0000 /* Clock Source Control Register */
 #define PLL_MPCTL0_OFFSET       0x0004 /* MCU PLL Control Register 0 */
@@ -71,7 +56,7 @@
 #define PLL_SPCTL1_OFFSET       0x0010 /* System PLL Control Register 1 */
 #define PLL_PCDR_OFFSET         0x0020 /* Peripheral Clock Divider Register */
 
-/* PLL Register Addresses ***********************************************************/
+/* PLL Register Addresses ***************************************************/
 
 #define IMX_PLL_CSCR            (IMX_PLL_VBASE + PLL_CSCR_OFFSET)
 #define IMX_PLL_MPCTL0          (IMX_PLL_VBASE + PLL_MPCTL0_OFFSET)
@@ -80,10 +65,10 @@
 #define IMX_PLL_SPCTL1          (IMX_PLL_VBASE + PLL_SPCTL1_OFFSET)
 #define IMX_PLL_PCDR            (IMX_PLL_VBASE + PLL_PCDR_OFFSET)
 
-/* PLL Register Bit Definitions *****************************************************/
+/* PLL Register Bit Definitions *********************************************/
 
-#define PLL_CSCR_MPEN           (1 << 0) /* Bit 0: 1 = MCU PLL enabled */
-#define PLL_CSCR_SPEN           (1 << 1) /* Bit 1: System PLL Enable */
+#define PLL_CSCR_MPEN           (1 << 0)  /* Bit 0: 1 = MCU PLL enabled */
+#define PLL_CSCR_SPEN           (1 << 1)  /* Bit 1: System PLL Enable */
 #define PLL_CSCR_BCLKDIV_SHIFT  10        /* Bits 13–10: BClock Divider */
 #define PLL_CSCR_BCLKDIV_MASK   (15 << PLL_CSCR_BCLK_DIV_SHIFT)
 #define PLL_CSCR_PRESC          (1 << 15) /* Bit 15: MPU PLL clock prescaler */
@@ -138,24 +123,23 @@
 #define PLL_PCDR_PCLKDIV3_SHIFT 16        /* Bits 22–16: Peripheral Clock Divider 3 */
 #define PLL_PCDR_PCLKDIV3_MASK  (0x7f << PLL_PCDR_PCLKDIV3_SHIFT)
 
-/* PLL Helper Macros ****************************************************************/
+/* PLL Helper Macros ********************************************************/
 
-/* SC Register Offsets **************************************************************/
+/* SC Register Offsets ******************************************************/
 
 #define SC_RSR_OFFSET           0x0000 /* Reset Source Register */
 #define SC_SIDR_OFFSET          0x0004 /* Silicon ID Register */
 #define SC_FMCR_OFFSET          0x0008 /* Function Muxing Control Register */
 #define SC_GPCR_OFFSET          0x000c /* Global Peripheral Control Register */
 
-/* SC Register Addresses ************************************************************/
+/* SC Register Addresses ****************************************************/
 
 #define IMX_SC_RSR              (IMX_SC_VBASE + SC_RSR_OFFSET)
 #define IMX_SC_SIDR             (IMX_SC_VBASE + SC_SIDR_OFFSET)
 #define IMX_SC_FMCR             (IMX_SC_VBASE + SC_FMCR_OFFSET)
 #define IMX_SC_GPCR             (IMX_SC_VBASE + SC_GPCR_OFFSET)
 
-/* SC Register Bit Definitions ******************************************************/
-
+/* SC Register Bit Definitions **********************************************/
 
 #define FMCR_SDCS_SEL           (1 << 0) /* Bit 0: 1:CSD0 selected */
 #define FMCR_SDCS1_SEL          (1 << 1) /* Bit 1: 1:CSD1 selected */
@@ -168,20 +152,20 @@
 #define FMCR_SPI2_RXDSEL        (1 << 8) /* Bit 8: 1:Input from SPI2_RXD_1 pin
                                           * (AOUT of Port D[9]) */
 
-/* SDRAMC Register Offsets **********************************************************/
+/* SDRAMC Register Offsets **************************************************/
 
 #define SDRAMC_SDCTL0_OFFSET    0x0000
 #define SDRAMC_SDCTL1_OFFSET    0x0004
 
-/* SDRAMC Register Addresses ********************************************************/
+/* SDRAMC Register Addresses ************************************************/
 
 #define IMX_SDRAMC_SDCTL0       (IMX_SDRAMC_VBASE + SDRAMC_SDCTL0_OFFSET)
 #define IMX_SDRAMC_SDCTL1       (IMX_SDRAMC_VBASE + SDRAMC_SDCTL1_OFFSET))
 
-/* SDRAMC Register Bit Definitions **************************************************/
+/* SDRAMC Register Bit Definitions ******************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_IMX_SYSTEM_H */

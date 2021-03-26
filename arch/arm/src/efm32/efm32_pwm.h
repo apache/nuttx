@@ -53,12 +53,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration **************************************************************/
+
+/* Configuration ************************************************************/
+
 /* Timer devices may be used for different purposes.  One special purpose is
  * to generate modulated outputs for such things as motor control.
- * If CONFIG_EFM32_TIMERn is defined then the CONFIG_EFM32_TIMERn_PWM must also
- * be defined to indicate that timer "n" is intended to be used for pulsed
- * output signal generation.
+ * If CONFIG_EFM32_TIMERn is defined then the CONFIG_EFM32_TIMERn_PWM must
+ * also be defined to indicate that timer "n" is intended to be used for
+ * pulsed output signal generation.
  */
 
 #ifndef CONFIG_EFM32_TIMER0
@@ -84,8 +86,8 @@
 #include <arch/board/board.h>
 #include "hardware/efm32_timer.h"
 
-/* For each timer that is enabled for PWM usage, we need the following additional
- * configuration settings:
+/* For each timer that is enabled for PWM usage, we need the following
+ * additional configuration settings:
  *
  * CONFIG_EFM32_TIMERx_CHANNEL - Specifies the timer output channel {0,1,3}
  * BOARD_PWM_TIMERx_PINCFG - Specifies the timer output pin configuration.
@@ -94,21 +96,21 @@
  * BOARD_PWM_TIMERx_PINLOC - Specifies the timer output pin location.
  *                 example : _TIMER_ROUTE_LOCATION_LOC4
  *
- * BOARD_PWM_TIMERx_CLKIN  - Specifies the timer input clock frequency (in Hz).
- *                 example : 48e6 for 48MHz
+ * BOARD_PWM_TIMERx_CLKIN  - Specifies the timer input clock frequency
+ *                           (in Hz). example : 48e6 for 48MHz
  *
  * NOTE: The EFM32 timers are each capable of generating different signals on
  * each of the four channels with different duty cycles.  That capability is
  * not supported by this driver:  Only one output channel per timer.
  */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -121,11 +123,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_pwminitialize
  *
  * Description:
@@ -140,7 +142,7 @@ extern "C"
  *   On success, a pointer to the EFM32 lower half PWM driver is returned.
  *   NULL is returned on any failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct pwm_lowerhalf_s *efm32_pwminitialize(int timer);
 

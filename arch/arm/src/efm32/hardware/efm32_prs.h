@@ -1,4 +1,4 @@
-/*******************************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/hardware/efm32_prs.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -56,14 +56,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_PRS_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_PRS_H
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/efm32_memorymap.h"
@@ -72,14 +72,15 @@
 #  warning This is the EFM32GG header file; Review/modification needed for this architecture
 #endif
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************************************************/
-/* PRS Register Offsets ********************************************************************************************************/
+ ****************************************************************************/
+
+/* PRS Register Offsets *****************************************************/
 
 #define EFM32_PRS_SWPULSE_OFFSET                0x0000  /* Software Pulse Register */
 #define EFM32_PRS_SWLEVEL_OFFSET                0x0004  /* Software Level Register */
-#define EFM32_PRS_ROUTE_OFFSET                  0x0008  /* I/O Routing Register
+#define EFM32_PRS_ROUTE_OFFSET                  0x0008  /* I/O Routing Register */
 
 #define EFM32_PRS_CH_CTRL_OFFSET(n)             (0x0010 + ((n) << 2))
 #define EFM32_PRS_CH0_CTRL_OFFSET               0x0010  /* Channel 0 Control Register */
@@ -95,7 +96,7 @@
 #define EFM32_PRS_CH10_CTRL_OFFSET              0x0018  /* Channel 10 Control Register */
 #define EFM32_PRS_CH11_CTRL_OFFSET              0x003c  /* Channel 11 Control Register */
 
-/* PRS Register Addresses ******************************************************************************************************/
+/* PRS Register Addresses ***************************************************/
 
 #define EFM32_PRS_SWPULSE                       (EFM32_PRS_BASE+EFM32_PRS_SWPULSE_OFFSET)
 #define EFM32_PRS_SWLEVEL                       (EFM32_PRS_BASE+EFM32_PRS_SWLEVEL_OFFSET)
@@ -115,7 +116,7 @@
 #define EFM32_PRS_CH10_CTRL                     (EFM32_PRS_BASE+EFM32_PRS_CH10_CTRL_OFFSET)
 #define EFM32_PRS_CH11_CTRL                     (EFM32_PRS_BASE+EFM32_PRS_CH11_CTRL_OFFSET)
 
-/* PRS Register Bit Field Definitions ******************************************************************************************/
+/* PRS Register Bit Field Definitions ***************************************/
 
 /* Bit fields for PRS SWPULSE */
 
@@ -522,7 +523,7 @@
 #define _PRS_CH_CTRL_ASYNC_DEFAULT              0x00000000UL                                /* Mode DEFAULT for PRS_CH_CTRL */
 #define PRS_CH_CTRL_ASYNC_DEFAULT               (_PRS_CH_CTRL_ASYNC_DEFAULT << 28)          /* Shifted mode DEFAULT for PRS_CH_CTRL */
 
-/* PRS Signals *****************************************************************************************************************/
+/* PRS Signals **************************************************************/
 
 #define PRS_VCMP_OUT                            ((1 << 16) + 0)  /* PRS Voltage comparator output */
 #define PRS_ACMP0_OUT                           ((2 << 16) + 0)  /* PRS Analog comparator output */

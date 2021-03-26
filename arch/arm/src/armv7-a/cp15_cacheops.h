@@ -1,18 +1,11 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/armv7-a/cp15_cacheops.h
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *
- *  "Cortex-A5™ MPCore, Technical Reference Manual", Revision: r0p1, Copyright © 2010
- *   ARM. All rights reserved. ARM DDI 0434B (ID101810)
- *  "ARM® Architecture Reference Manual, ARMv7-A and ARMv7-R edition", Copyright ©
- *   1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM DDI 0406C.b (ID072512)
- *
- * Portions of this file derive from Atmel sample code for the SAMA5D3 Cortex-A5
- * which also has a modified BSD-style license:
+ * Portions of this file derive from Atmel sample code for the SAMA5D3
+ * Cortex-A5 which also has a modified BSD-style license:
  *
  *   Copyright (c) 2012, Atmel Corporation
  *   All rights reserved.
@@ -44,34 +37,47 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
+
+/* References:
+ *
+ *  "Cortex-A5™ MPCore, Technical Reference Manual", Revision: r0p1,
+ *   Copyright © 2010 ARM. All rights reserved. ARM DDI 0434B (ID101810)
+ *  "ARM® Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
+ *   Copyright © 1996-1998, 2000, 2004-2012 ARM.
+ * All rights reserved. ARM DDI 0406C.b (ID072512)
+ */
 
 #ifndef __ARCH_ARM_SRC_ARMV7_A_CP15_CACHEOPS_H
 #define __ARCH_ARM_SRC_ARMV7_A_CP15_CACHEOPS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Cache definitions ****************************************************************/
+ ****************************************************************************/
+
+/* Cache definitions ********************************************************/
+
 /* L1 Memory */
 
 #define CP15_L1_LINESIZE 32
 
-/* CP15 Registers *******************************************************************/
-/* Reference: Cortex-A5™ MPCore Paragraph 4.1.5, "Cache Operations Registers."
+/* CP15 Registers ***********************************************************/
+
+/* Reference: Cortex-A5™ MPCore
+ * Paragraph 4.1.5, "Cache Operations Registers."
  *
  * Terms:
  * 1) Point of coherency (PoC)
- *    The PoC is the point at which all agents that can access memory are guaranteed
- *    to see the same copy of a memory location
+ *    The PoC is the point at which all agents that can access memory are
+ *    guaranteed to see the same copy of a memory location
  * 2) Point of unification (PoU)
  *    The PoU is the point by which the instruction and data caches and the
- *    translation table walks of the processor are guaranteed to see the same copy
- *    of a memory location.
+ *    translation table walks of the processor are guaranteed to see the same
+ *    copy of a memory location.
  *
  * Cache Operations:
  *
@@ -80,12 +86,13 @@
  *   Register Format: Should be zero (SBZ)
  *   Instruction:     MCR p15, 0, <Rd>, c7, c1, 0
  * CP15 Register:     BPIALLIS
- *   Description:     Invalidate entire branch predictor array Inner Shareable.
+ *   Description:     Invalidate entire branch predictor array Inner
+ *                    Shareable.
  *   Register Format: Should be zero (SBZ)
  *   Instruction:     MCR p15, 0, <Rd>, c7, c1, 6
  * CP15 Register:     ICIALLU
- *   Description:     Invalidate all instruction caches to PoU. Also flushes branch
- *                    target cache.
+ *   Description:     Invalidate all instruction caches to PoU. Also flushes
+ *                    branch target cache.
  *   Register Format: Should be zero (SBZ)
  *   Instruction:     MCR p15, 0, <Rd>, c7, c5, 0
  * CP15 Register:     ICIMVAU
@@ -157,9 +164,10 @@
 #define CACHE_SBZ_MASK      (31 << TLB_SBZ_SHIFT)
 #define CACHE_VA_MASK       (0xfffffffe0) /* Bits 5-31: Virtual address */
 
-/************************************************************************************
+/****************************************************************************
  * Assembly Macros
- ************************************************************************************/
+ ****************************************************************************/
+
 /* cp15_cache Cache Operations
  *
  * Usage
@@ -193,7 +201,7 @@
 
 #ifdef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_enable_dcache
  *
  * Description:
@@ -205,7 +213,7 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_enable_dcache, tmp
 	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
@@ -213,7 +221,7 @@
 	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_disable_dcache
  *
  * Description:
@@ -225,7 +233,7 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_disable_dcache, tmp
 	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
@@ -233,7 +241,7 @@
 	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_enable_icache
  *
  * Description:
@@ -245,7 +253,7 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_enable_icache, tmp
 	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
@@ -253,7 +261,7 @@
 	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_disable_icache
  *
  * Description:
@@ -265,7 +273,7 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_disable_icache, tmp
 	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
@@ -273,7 +281,7 @@
 	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_invalidate_icache_inner_sharable
  *
  * Description:
@@ -285,14 +293,14 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_invalidate_icache_inner_sharable, tmp
 	mov		\tmp, #0
 	mrc		p15, 0, \tmp, c7, c1, 0 /* ICIALLUIS */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_invalidate_btb_inner_sharable
  *
  * Description:
@@ -304,18 +312,19 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_invalidate_btb_inner_sharable, tmp
 	mov		\tmp, #0
 	mrc		p15, 0, \tmp, c7, c1, 6 /* BPIALLIS */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_invalidate_icache
  *
  * Description:
- *   Invalidate all instruction caches to PoU, also flushes branch target cache
+ *   Invalidate all instruction caches to PoU, also flushes branch target
+ *    cache
  *
  * Input Parameters:
  *   None
@@ -323,14 +332,14 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_invalidate_icache, tmp
 	mov		\tmp, #0
 	mrc		p15, 0, \tmp, c7, c5, 0 /* ICIALLU */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_invalidate_icache_bymva
  *
  * Description:
@@ -342,13 +351,13 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_invalidate_icache_bymva, va
 	mrc		p15, 0, \va, c7, c5, 1 /* ICIMVAU */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_flush_btb
  *
  * Description:
@@ -360,14 +369,14 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_flush_btb, tmp
 	mov		\tmp, #0
 	mrc		p15, 0, \tmp, c7, c5, 6 /* BPIALL */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_flush_btb_bymva
  *
  * Description:
@@ -379,14 +388,14 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_flush_btb_bymva, tmp
 	mov		\tmp, #0
 	mrc		p15, 0, \tmp, c7, c5, 7 /* BPIMVA */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_invalidate_dcacheline_bymva
  *
  * Description:
@@ -398,13 +407,13 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_invalidate_dcacheline_bymva, va
 	mrc		p15, 0, \va, c7, c6, 1 /* DCIMVAC */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_invalidate_dcacheline_bysetway
  *
  * Description:
@@ -416,13 +425,13 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_invalidate_dcacheline_bysetway, setway
 	mrc		p15, 0, \setway, c7, c6, 2 /* DCISW */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_clean_dcache_bymva
  *
  * Description:
@@ -434,13 +443,13 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_clean_dcache_bymva, va
 	mrc		p15, 0, \va, c7, c10, 1 /* DCCMVAC */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_clean_dcache_bysetway
  *
  * Description:
@@ -452,13 +461,13 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_clean_dcache_bysetway, setway
 	mrc		p15, 0, \setway, c7, c10, 2 /* DCCSW */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_clean_ucache_bymva
  *
  * Description:
@@ -470,13 +479,13 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_clean_ucache_bymva, setway
 	mrc		p15, 0, \setway, c7, c11, 1 /* DCCMVAU */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_cleaninvalidate_dcacheline_bymva
  *
  * Description:
@@ -488,13 +497,13 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_cleaninvalidate_dcacheline_bymva, va
 	mrc		p15, 0, \va, c7, c14, 1 /* DCCIMVAC */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_cleaninvalidate_dcacheline
  *
  * Description:
@@ -506,7 +515,7 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.macro	cp15_cleaninvalidate_dcacheline, setway
 	mrc		p15, 0, \setway, c7, c14, 2 /* DCCISW */
@@ -514,13 +523,13 @@
 
 #endif /* __ASSEMBLY__ */
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_enable_dcache
  *
  * Description:
@@ -532,7 +541,7 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_enable_dcache(void)
 {
@@ -547,7 +556,7 @@ static inline void cp15_enable_dcache(void)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_disable_dcache
  *
  * Description:
@@ -559,7 +568,7 @@ static inline void cp15_enable_dcache(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_disable_dcache(void)
 {
@@ -574,7 +583,7 @@ static inline void cp15_disable_dcache(void)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_enable_icache
  *
  * Description:
@@ -586,7 +595,7 @@ static inline void cp15_disable_dcache(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_enable_icache(void)
 {
@@ -601,7 +610,7 @@ static inline void cp15_enable_icache(void)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_disable_icache
  *
  * Description:
@@ -613,7 +622,7 @@ static inline void cp15_enable_icache(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_disable_icache(void)
 {
@@ -628,7 +637,7 @@ static inline void cp15_disable_icache(void)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_invalidate_icache_inner_sharable
  *
  * Description:
@@ -640,7 +649,7 @@ static inline void cp15_disable_icache(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_invalidate_icache_inner_sharable(void)
 {
@@ -654,7 +663,7 @@ static inline void cp15_invalidate_icache_inner_sharable(void)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_invalidate_btb_inner_sharable
  *
  * Description:
@@ -666,7 +675,7 @@ static inline void cp15_invalidate_icache_inner_sharable(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_invalidate_btb_inner_sharable(void)
 {
@@ -680,11 +689,12 @@ static inline void cp15_invalidate_btb_inner_sharable(void)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_invalidate_icache
  *
  * Description:
- *   Invalidate all instruction caches to PoU, also flushes branch target cache
+ *   Invalidate all instruction caches to PoU, also flushes branch target
+ *   cache
  *
  * Input Parameters:
  *   None
@@ -692,7 +702,7 @@ static inline void cp15_invalidate_btb_inner_sharable(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_invalidate_icache(void)
 {
@@ -706,7 +716,7 @@ static inline void cp15_invalidate_icache(void)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_invalidate_icache_bymva
  *
  * Description:
@@ -718,7 +728,7 @@ static inline void cp15_invalidate_icache(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_invalidate_icache_bymva(unsigned int va)
 {
@@ -731,7 +741,7 @@ static inline void cp15_invalidate_icache_bymva(unsigned int va)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_flush_btb
  *
  * Description:
@@ -743,7 +753,7 @@ static inline void cp15_invalidate_icache_bymva(unsigned int va)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_flush_btb(void)
 {
@@ -757,7 +767,7 @@ static inline void cp15_flush_btb(void)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_flush_btb_bymva
  *
  * Description:
@@ -769,7 +779,7 @@ static inline void cp15_flush_btb(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_flush_btb_bymva(void)
 {
@@ -783,7 +793,7 @@ static inline void cp15_flush_btb_bymva(void)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_invalidate_dcacheline_bymva
  *
  * Description:
@@ -795,7 +805,7 @@ static inline void cp15_flush_btb_bymva(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Invalidate data cache line by VA to PoC */
 
@@ -810,7 +820,7 @@ static inline void cp15_invalidate_dcacheline_bymva(unsigned int va)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_invalidate_dcacheline_bysetway
  *
  * Description:
@@ -822,7 +832,7 @@ static inline void cp15_invalidate_dcacheline_bymva(unsigned int va)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Invalidate data cache line by set/way */
 
@@ -837,7 +847,7 @@ static inline void cp15_invalidate_dcacheline_bysetway(unsigned int setway)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_clean_dcache_bymva
  *
  * Description:
@@ -849,7 +859,7 @@ static inline void cp15_invalidate_dcacheline_bysetway(unsigned int setway)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clean data cache line by MVA */
 
@@ -864,7 +874,7 @@ static inline void cp15_clean_dcache_bymva(unsigned int va)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_clean_dcache_bysetway
  *
  * Description:
@@ -876,7 +886,7 @@ static inline void cp15_clean_dcache_bymva(unsigned int va)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_clean_dcache_bysetway(unsigned int setway)
 {
@@ -889,7 +899,7 @@ static inline void cp15_clean_dcache_bysetway(unsigned int setway)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_clean_ucache_bymva
  *
  * Description:
@@ -901,7 +911,7 @@ static inline void cp15_clean_dcache_bysetway(unsigned int setway)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_clean_ucache_bymva(unsigned int setway)
 {
@@ -914,7 +924,7 @@ static inline void cp15_clean_ucache_bymva(unsigned int setway)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_cleaninvalidate_dcacheline_bymva
  *
  * Description:
@@ -926,7 +936,7 @@ static inline void cp15_clean_ucache_bymva(unsigned int setway)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_cleaninvalidate_dcacheline_bymva(unsigned int va)
 {
@@ -939,7 +949,7 @@ static inline void cp15_cleaninvalidate_dcacheline_bymva(unsigned int va)
     );
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cp15_cleaninvalidate_dcacheline
  *
  * Description:
@@ -951,7 +961,7 @@ static inline void cp15_cleaninvalidate_dcacheline_bymva(unsigned int va)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void cp15_cleaninvalidate_dcacheline(unsigned int setway)
 {

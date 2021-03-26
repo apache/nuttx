@@ -1,55 +1,44 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx1/imx_memorymap.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_IMX_MEMORYMAP_H
 #define __ARCH_ARM_IMX_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include "arm.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Physical Memory Map **************************************************************/
+/* Physical Memory Map ******************************************************/
 
-                                             /* -0x000fffff Double Map Image    1Mb */
-                                             /* -0x001fffff Bootstrap ROM       1Mb */
+/*                                             -0x000fffff
+ *                                                       Double Map Image 1Mb
+ *                                             -0x001fffff
+ *                                                       Bootstrap ROM  1Mb
+ */
+
 #define IMX_PERIPHERALS_PSECTION  0x00200000 /* -0x002fffff Peripherals         1Mb */
 #define IMX_ESRAM_PSECTION        0x00300000 /* -0x003fffff Embedded SRAM     128Kb */
 #define IMX_SDRAM0_PSECTION       0x08000000 /* -0x0bffffff SDRAM0 (CSD0)      64Mb */
@@ -61,11 +50,11 @@
 #define IMX_CS4_PSECTION          0x15000000 /* -0x15ffffff CS4                16Mb */
 #define IMX_CS5_PSECTION          0x16000000 /* -0x16ffffff CS5                16Mb */
 
-/* Sizes of Address Sections ********************************************************/
+/* Sizes of Address Sections ************************************************/
 
 /* Mapped sections */
 #define IMX_PERIPHERALS_NSECTIONS 1          /*  1Mb  1 section                     */
-#define IMX_SDRAM0_NSECTIONS      16         /* 16Mb Based on CONFIG_RAM_SIZE      */
+#define IMX_SDRAM0_NSECTIONS      16         /* 16Mb Based on CONFIG_RAM_SIZE       */
 #define IMX_SDRAM1_NSECTIONS      0          /* 64Mb (Not mapped)                   */
 #define IMX_FLASH_NSECTIONS       32         /* 64Mb Based on CONFIG_FLASH_SIZE     */
 #define IMX_CS1_NSECTIONS         16         /* 16Mb                                */
@@ -74,14 +63,16 @@
 #define IMX_CS4_NSECTIONS         16         /* 16Mb                                */
 #define IMX_CS5_NSECTIONS         16         /* 16Mb                                */
 
-/* Virtual Memory Map ***************************************************************/
+/* Virtual Memory Map *******************************************************/
 
 /* There are three operational memory configurations:
  *
- * 1. We execute in place in FLASH (CONFIG_BOOT_RUNFROMFLASH=y).  In this case:
+ * 1. We execute in place in FLASH (CONFIG_BOOT_RUNFROMFLASH=y).
+ *    In this case:
  *
  *    - Our vectors must be located at the beginning of FLASH and will
- *      also be mapped to address zero (because of the i.MX's "double map image."
+ *      also be mapped to address zero (because of the i.MX's "double map
+ *      image."
  *    - All vector addresses are FLASH absolute addresses,
  *    - DRAM cannot reside at address zero,
  *    - Vectors at address zero (CR_V is not set),
@@ -95,30 +86,33 @@
  *      ourself to DRAM,
  *    - DRAM will be mapped to address zero,
  *    - The RESET vector is a FLASH absolute address,
- *    - All other vectors are absulte and reference functions in the final mapped SDRAM address
+ *    - All other vectors are absulte and reference functions in the final
+ *      mapped SDRAM address
  *    - Vectors at address zero (CR_V is not set), and
  *    - The boot logic must configure SDRAM.
  *
- * 3. There is bootloader that copies us to DRAM, but probably not to the beginning
- *    of DRAM (say to 0x0900:0000) (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=n).
+ * 3. There is bootloader that copies us to DRAM, but probably not to the
+ *    beginning of DRAM (say to 0x0900:0000)
+ *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=n).
  *    In this case:
  *
  *    - DRAM will be mapped to address zero,
  *    - Interrupt vectors will be copied to address zero,
- *    - Memory between the end of the vector area (say 0x0800:0400) and the beginning
- *      of the page table (0x0900:0000) will be given to the memory manager as a second
- *      memory region,
- *    - All vectors are absulte and reference functions in the final mapped SDRAM address
+ *    - Memory between the end of the vector area (say 0x0800:0400) and the
+ *      beginning of the page table (0x0900:0000) will be given to the memory
+ *      manager as a second memory region,
+ *    - All vectors are absulte and reference functions in the final mapped
+ *      SDRAM address
  *    - Vectors at address zero (CR_V is not set), and
  *    - We must assume that the bootloader has configured SDRAM.
  */
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
-   /* Use the identity mapping */
+/* Use the identity mapping */
 
 #  define IMX_SDRAM_VSECTION      0x08000000 /* -(+CONFIG_RAM_SIZE)                 */
 #else
-   /* Map SDRAM to address zero */
+/* Map SDRAM to address zero */
 
 #  define IMX_SDRAM_VSECTION      0x00000000 /* -(+CONFIG_RAM_SIZE)                 */
 #endif
@@ -137,7 +131,7 @@
 
 #define VECTOR_BASE               0x00000000
 
-/* Peripheral Register Offsets ******************************************************/
+/* Peripheral Register Offsets **********************************************/
 
 #define IMX_AIPI1_OFFSET          0x00000000 /* -0x00000fff AIPI1               4Kb */
 #define IMX_WDOG_OFFSET           0x00001000 /* -0x00001fff WatchDog            4Kb */
@@ -175,7 +169,7 @@
 #define IMX_CSI_OFFSET            0x00024000 /* -0x00024fff CSI                 4Kb */
                                              /* -0x000fffff Reserved          876Kb */
 
-/* Peripheral Register Offsets ******************************************************/
+/* Peripheral Register Offsets **********************************************/
 
 #define IMX_AIPI1_VBASE           (IMX_PERIPHERALS_VSECTION + IMX_AIPI1_OFFSET)
 #define IMX_WDOG_VBASE            (IMX_PERIPHERALS_VSECTION + IMX_WDOG_OFFSET)
@@ -210,10 +204,10 @@
 #define IMX_AITC_VBASE            (IMX_PERIPHERALS_VSECTION + IMX_AITC_OFFSET)
 #define IMX_CSI_VBASE             (IMX_PERIPHERALS_VSECTION + IMX_CSI_OFFSET)
 
-/* Memory Mapping Info **************************************************************/
+/* Memory Mapping Info ******************************************************/
 
-/* The NuttX entry point starts at an offset from the virtual beginning of DRAM.
- * This offset reserves space for the MMU page cache.
+/* The NuttX entry point starts at an offset from the virtual beginning of
+ * DRAM. This offset reserves space for the MMU page cache.
  */
 
 #define NUTTX_START_VADDR         ((CONFIG_RAM_NUTTXENTRY & 0xfff00000) | PGTABLE_SIZE)
@@ -252,8 +246,8 @@
 #define PGTABLE_COARSE_ALLOC      (PGTABLE_COARSE_VEND-PGTABLE_COARSE_VBASE)
 #define PGTABLE_NCOARSE_TABLES    (PGTABLE_COARSE_SIZE / PGTBALE_COARSE_TABLE_ALLOC)
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_IMX_MEMORYMAP_H */

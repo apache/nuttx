@@ -1,41 +1,26 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/armv7-a/arm_vectors.S
  *
- *   Copyright (C) 2013-2014, 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
@@ -46,9 +31,9 @@
 
 	.file	"arm_vectors.S"
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 	.data
 g_irqtmp:
@@ -82,18 +67,18 @@ g_nestlevel:
 
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 && CONFIG_ARMV7A_HAVE_GICv2 */
 
-/************************************************************************************
+/****************************************************************************
  * Macro Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: cpuindex
  *
  * Description:
  *   Return an index idenifying the current CPU.  Single CPU case.  Must be
  *   provided by MCU-specific logic in chip.h for the SMP case.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 	.macro	cpuindex, index
@@ -101,14 +86,14 @@ g_nestlevel:
 	.endm
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: setirqstack
  *
  * Description:
  *   Set the current stack pointer to the "top" of the IRQ interrupt stack.  Single
  *   CPU case.  Must be provided by MCU-specific logic in chip.h for the SMP case.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 	.macro	setirqstack, tmp1, tmp2
@@ -116,14 +101,14 @@ g_nestlevel:
 	.endm
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: setfiqstack
  *
  * Description:
  *   Set the current stack pointer to the "top" of the FIQ interrupt stack.  Single
  *   CPU case.  Must be provided by MCU-specific logic in chip.h for the SMP case.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 	.macro	setfiqstack, tmp1, tmp2
@@ -131,23 +116,23 @@ g_nestlevel:
 	.endm
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 	.text
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: arm_vectorirq
  *
  * Description:
  *   Interrupt exception. Entered in IRQ mode with spsr = SVC CPSR, lr = SVC PC
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.globl	arm_decodeirq
 	.globl	arm_vectorirq
@@ -351,13 +336,13 @@ arm_vectorirq:
 	.size	arm_vectorirq, . - arm_vectorirq
 	.align	5
 
-/************************************************************************************
+/****************************************************************************
  * Function: arm_vectorsvc
  *
  * Description:
  *   SVC interrupt. We enter the SVC in SVC mode.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.globl	arm_syscall
 	.globl	arm_vectorsvc
@@ -475,7 +460,7 @@ arm_vectorsvc:
 
 	.align	5
 
-/************************************************************************************
+/****************************************************************************
  * Name: arm_vectordata
  *
  * Description:
@@ -484,7 +469,7 @@ arm_vectorsvc:
  *   current processor state and gives control to data abort handler.  This function
  *   is entered in ABORT mode with spsr = SVC CPSR, lr = SVC PC
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.globl	arm_dataabort
 	.globl	arm_vectordata
@@ -621,7 +606,7 @@ arm_vectordata:
 
 	.align	5
 
-/************************************************************************************
+/****************************************************************************
  * Name: arm_vectorprefetch
  *
  * Description:
@@ -630,7 +615,7 @@ arm_vectordata:
  *   handler saves the current processor state and gives control to prefetch abort
  *   handler.  This function is entered in ABT mode with spsr = SVC CPSR, lr = SVC PC.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.globl	arm_prefetchabort
 	.globl	arm_vectorprefetch
@@ -767,14 +752,14 @@ arm_vectorprefetch:
 
 	.align	5
 
-/************************************************************************************
+/****************************************************************************
  * Name: arm_vectorundefinsn
  *
  * Description:
  *   Undefined instruction entry exception.  Entered in UND mode, spsr = SVC  CPSR,
  *   lr = SVC PC
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 	.globl	arm_undefinedinsn
 	.globl	arm_vectorundefinsn
@@ -908,14 +893,14 @@ arm_vectorundefinsn:
 
 	.align	5
 
-/************************************************************************************
+/****************************************************************************
  * Name: arm_vectorfiq
  *
  * Description:
  *   Shouldn't happen unless a arm_decodefiq() is provided.  FIQ is primarily used
  *   with the TrustZone feature in order to handle secure interrupts.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARMV7A_DECODEFIQ
 	.globl	arm_decodefiq
@@ -1066,9 +1051,9 @@ arm_vectorfiq:
 #endif
 	.size	arm_vectorfiq, . - arm_vectorfiq
 
-/************************************************************************************
+/****************************************************************************
  *  Name: g_intstackalloc/g_intstackbase
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 	.bss
@@ -1086,9 +1071,9 @@ g_intstackbase:
 	.size	g_intstackbase, 4
 	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
 
-/************************************************************************************
+/****************************************************************************
  *  Name: g_fiqstackalloc/g_fiqstackbase
- ************************************************************************************/
+ ****************************************************************************/
 
 	.globl	g_fiqstackalloc
 	.type	g_fiqstackalloc, object

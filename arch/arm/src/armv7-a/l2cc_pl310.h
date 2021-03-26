@@ -1,50 +1,33 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/armv7-a/l2cc_pl310.h
  *
- * Register definitions for the L2 Cache Controller (L2CC) is based on the
- * L2CC-PL310 ARM multi-way cache macrocell, version r3p2.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Reference: "CoreLink™ Level 2 Cache Controller L2C-310", Revision r3p2,
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* Reference: "CoreLink™ Level 2 Cache Controller L2C-310", Revision r3p2,
  *   Technical Reference Manual, ARM DDI 0246F (ID011711), ARM
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ */
 
 #ifndef __ARCH_ARM_SRC_ARMV7_A_L2CC_PL310_H
 #define __ARCH_ARM_SRC_ARMV7_A_L2CC_PL310_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,11 +37,11 @@
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* General Definitions **************************************************************/
+/* General Definitions ******************************************************/
 
 #define PL310_CACHE_LINE_SIZE      32
 
@@ -68,7 +51,7 @@
 #  define PL310_NLOCKREGS          1
 #endif
 
-/* L2CC Register Offsets ************************************************************/
+/* L2CC Register Offsets ****************************************************/
 
 #define L2CC_IDR_OFFSET            0x0000 /* Cache ID Register */
 #define L2CC_TYPR_OFFSET           0x0004 /* Cache Type Register */
@@ -104,9 +87,10 @@
 #define L2CC_CIWR_OFFSET           0x07fc /* Clean Invalidate Way Register */
                                           /* 0x0800-0x08fc Reserved */
 
-/* Data and Instruction Lockdown registers where n=0-7.  The registers for n > 0 are
- * implemented if the option pl310_LOCKDOWN_BY_MASTER is enabled. Otherwise, they are
- * unused
+/* Data and Instruction Lockdown registers where n=0-7.
+ * The registers for n > 0 are implemented if the option
+ * pl310_LOCKDOWN_BY_MASTER is enabled.
+ * Otherwise, they are unused
  */
 
 #define L2CC_DLKR_OFFSET(n)        (0x0900 + ((n) << 3)) /* Data Lockdown Register */
@@ -126,7 +110,7 @@
                                           /* 0x0f64-0x0f7c Reserved */
 #define L2CC_POWCR_OFFSET          0x0f80 /* Power Control Register */
 
-/* L2CC Register Addresses **********************************************************/
+/* L2CC Register Addresses **************************************************/
 
 #define L2CC_IDR                   (L2CC_VBASE+L2CC_IDR_OFFSET)
 #define L2CC_TYPR                  (L2CC_VBASE+L2CC_TYPR_OFFSET)
@@ -166,7 +150,7 @@
 #define L2CC_PCR                   (L2CC_VBASE+L2CC_PCR_OFFSET)
 #define L2CC_POWCR                 (L2CC_VBASE+L2CC_POWCR_OFFSET)
 
-/* L2CC Register Bit Definitions ****************************************************/
+/* L2CC Register Bit Definitions ********************************************/
 
 /* Cache ID Register (32-bit ID) */
 
@@ -316,8 +300,8 @@
 
 /* Event Counter 0 Value Register (32-bit value) */
 
-/* Interrupt Mask Register, Masked Interrupt Status Register, Raw Interrupt Status
- * Register, and Interrupt Clear Register.
+/* Interrupt Mask Register, Masked Interrupt Status Register,
+ * Raw Interrupt Status Register, and Interrupt Clear Register.
  */
 
 #define L2CC_INT_ECNTR             (1 << 0)  /* Bit 0:  Event Counter 1/0 Overflow Increment */

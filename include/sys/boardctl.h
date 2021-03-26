@@ -98,7 +98,7 @@
  * DEPENDENCIES:  None
  *
  * CMD:           BOARDIOC_ROMDISK
- * DESCRIPTION:   Register
+ * DESCRIPTION:   Register a ROM disk
  * ARG:           Pointer to read-only instance of struct boardioc_romdisk_s.
  * CONFIGURATION: CONFIG_BOARDCTL_ROMDISK
  * DEPENDENCIES:  None
@@ -226,7 +226,8 @@ enum boardioc_action_e
   BOARDIOC_PM_RELAX,
   BOARDIOC_PM_STAYCOUNT,
   BOARDIOC_PM_QUERYSTATE,
-  BOARDIOC_PM_CHANGESTATE
+  BOARDIOC_PM_CHANGESTATE,
+  BOARDIOC_PM_CHECKSTATE
 };
 
 struct boardioc_pm_ctrl_s

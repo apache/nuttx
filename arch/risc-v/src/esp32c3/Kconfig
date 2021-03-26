@@ -156,6 +156,10 @@ config ESP32C3_RT_TIMER
 	bool "Real-time Timer"
 	default n
 
+config ESP32C3_DISABLE_STDC_ATOMIC
+	bool "Disable standard C atomic"
+	default n
+
 menu "ESP32-C3 Peripheral Support"
 
 config ESP32C3_UART

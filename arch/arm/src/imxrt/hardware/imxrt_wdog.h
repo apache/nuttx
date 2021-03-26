@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_wdog.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_WDOG_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_WDOG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define IMXRT_WDOG_WCR_OFFSET       0x0000  /* Watchdog control register */
 #define IMXRT_WDOG_WSR_OFFSET       0x0002  /* Watchdog service register */
@@ -60,7 +60,7 @@
 #define IMXRT_RTWDOG_TOVAL_OFFSET   0x0008  /* Watchdog timeout value register */
 #define IMXRT_RTWDOG_WIN_OFFSET     0x000c  /* Watchdog window register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_WDOG1_WCR             (IMXRT_WDOG1_BASE + IMXRT_WDOG_WCR_OFFSET)
 #define IMXRT_WDOG1_WSR             (IMXRT_WDOG1_BASE + IMXRT_WDOG_WSR_OFFSET)
@@ -78,7 +78,7 @@
 #define IMXRT_RTWDOG_TOVAL          (IMXRT_WDOG3_BASE + IMXRT_RTWDOG_TOVAL_OFFSET)
 #define IMXRT_RTWDOG_WIN            (IMXRT_WDOG3_BASE + IMXRT_RTWDOG_WIN_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* Watchdog control and status register */
 
@@ -102,7 +102,8 @@
                                               /* Bits 2-3: reserved */
 #define WDOG_WRSR_POR               (1 << 4)  /* Bit 4:  Power on reset */
                                               /* Bits 5-15: Reserved */
-/* Watchdog interrupt control  */
+
+/* Watchdog interrupt control */
 
 #define WDOG_WICR_WICT_SHIFT        (0)       /* Bits 0-7: Watchdog Interrupt Count Time-out */
 #define WDOG_WICR_WICT_MASK         (0xff << WDOG_WCR_WT_SHIFT)
@@ -115,6 +116,7 @@
 
 #define WDOG_WMCR_PDE               (1 << 0)  /* Bit 0:  Power Down Enable */
                                               /* Bits 1-15: Reserved */
+
 /* RT Watchdog Control and Status Register */
 
 #define RTWDOG_CS_STOP              (1 << 0)  /* Bit 0:  Stop enable */
