@@ -50,11 +50,11 @@ typedef uint32_t pgndx_t;
 #endif
 
 #if PG_POOL_MAXL1NDX < 256
-typedef uint8_t  L1ndx_t;
+typedef uint8_t  l1ndx_t;
 #elif PG_POOL_MAXL1NDX < 65536
-typedef uint16_t L1ndx_t;
+typedef uint16_t l1ndx_t;
 #else
-typedef uint32_t L1ndx_t;
+typedef uint32_t l1ndx_t;
 #endif
 
 /****************************************************************************
@@ -79,7 +79,7 @@ static pgndx_t g_pgndx;
  * index, and holds another index to the mapped virtual page.
  */
 
-static L1ndx_t g_ptemap[CONFIG_PAGING_NPPAGED];
+static l1ndx_t g_ptemap[CONFIG_PAGING_NPPAGED];
 
 /* The contents of g_ptemap[] are not valid until g_pgndx has wrapped at
  * least one time.
