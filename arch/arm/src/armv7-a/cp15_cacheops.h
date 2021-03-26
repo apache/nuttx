@@ -41,10 +41,10 @@
 
 /* References:
  *
- *  "Cortex-A5™ MPCore, Technical Reference Manual", Revision: r0p1,
- *   Copyright © 2010 ARM. All rights reserved. ARM DDI 0434B (ID101810)
- *  "ARM® Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
- *   Copyright © 1996-1998, 2000, 2004-2012 ARM.
+ *  "Cortex-A5 MPCore, Technical Reference Manual", Revision: r0p1,
+ *   Copyright 2010 ARM. All rights reserved. ARM DDI 0434B (ID101810)
+ *  "ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
+ *   Copyright 1996-1998, 2000, 2004-2012 ARM.
  * All rights reserved. ARM DDI 0406C.b (ID072512)
  */
 
@@ -67,7 +67,7 @@
 
 /* CP15 Registers ***********************************************************/
 
-/* Reference: Cortex-A5™ MPCore
+/* Reference: Cortex-A5 MPCore
  * Paragraph 4.1.5, "Cache Operations Registers."
  *
  * Terms:
@@ -215,11 +215,11 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_enable_dcache, tmp
-	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
-	orr		\tmp, \tmp, #(0x1 << 2)		/* Enable D cache */
-	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
-	.endm
+.macro cp15_enable_dcache, tmp
+  mrc p15, 0, \tmp, c1, c0, 0 /* Read SCTLR */
+  orr \tmp, \tmp, #(0x1 << 2) /* Enable D cache */
+  mcr p15, 0, \tmp, c1, c0, 0 /* Update the SCTLR */
+.endm
 
 /****************************************************************************
  * Name: cp15_disable_dcache
@@ -235,11 +235,11 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_disable_dcache, tmp
-	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
-	bic		\tmp, \tmp, #(0x1 << 2)		/* Disable D cache */
-	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
-	.endm
+.macro cp15_disable_dcache, tmp
+  mrc p15, 0, \tmp, c1, c0, 0 /* Read SCTLR */
+  bic \tmp, \tmp, #(0x1 << 2) /* Disable D cache */
+  mcr p15, 0, \tmp, c1, c0, 0 /* Update the SCTLR */
+.endm
 
 /****************************************************************************
  * Name: cp15_enable_icache
@@ -255,11 +255,11 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_enable_icache, tmp
-	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
-	orr		\tmp, \tmp, #(0x1 << 12)	/* Enable I cache */
-	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
-	.endm
+.macro cp15_enable_icache, tmp
+  mrc p15, 0, \tmp, c1, c0, 0  /* Read SCTLR */
+  orr \tmp, \tmp, #(0x1 << 12) /* Enable I cache */
+  mcr p15, 0, \tmp, c1, c0, 0  /* Update the SCTLR */
+.endm
 
 /****************************************************************************
  * Name: cp15_disable_icache
@@ -275,11 +275,11 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_disable_icache, tmp
-	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
-	bic		\tmp, \tmp, #(0x1 << 12)	/* Disable I cache */
-	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
-	.endm
+.macro cp15_disable_icache, tmp
+  mrc p15, 0, \tmp, c1, c0, 0  /* Read SCTLR */
+  bic \tmp, \tmp, #(0x1 << 12) /* Disable I cache */
+  mcr p15, 0, \tmp, c1, c0, 0  /* Update the SCTLR */
+.endm
 
 /****************************************************************************
  * Name: cp15_invalidate_icache_inner_sharable
@@ -295,10 +295,10 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_invalidate_icache_inner_sharable, tmp
-	mov		\tmp, #0
-	mrc		p15, 0, \tmp, c7, c1, 0 /* ICIALLUIS */
-	.endm
+.macro cp15_invalidate_icache_inner_sharable, tmp
+  mov \tmp, #0
+  mrc p15, 0, \tmp, c7, c1, 0 /* ICIALLUIS */
+.endm
 
 /****************************************************************************
  * Name: cp15_invalidate_btb_inner_sharable
@@ -314,10 +314,10 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_invalidate_btb_inner_sharable, tmp
-	mov		\tmp, #0
-	mrc		p15, 0, \tmp, c7, c1, 6 /* BPIALLIS */
-	.endm
+.macro cp15_invalidate_btb_inner_sharable, tmp
+  mov \tmp, #0
+  mrc p15, 0, \tmp, c7, c1, 6 /* BPIALLIS */
+.endm
 
 /****************************************************************************
  * Name: cp15_invalidate_icache
@@ -334,10 +334,10 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_invalidate_icache, tmp
-	mov		\tmp, #0
-	mrc		p15, 0, \tmp, c7, c5, 0 /* ICIALLU */
-	.endm
+.macro cp15_invalidate_icache, tmp
+  mov \tmp, #0
+  mrc p15, 0, \tmp, c7, c5, 0 /* ICIALLU */
+.endm
 
 /****************************************************************************
  * Name: cp15_invalidate_icache_bymva
@@ -353,9 +353,9 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_invalidate_icache_bymva, va
-	mrc		p15, 0, \va, c7, c5, 1 /* ICIMVAU */
-	.endm
+.macro cp15_invalidate_icache_bymva, va
+  mrc p15, 0, \va, c7, c5, 1 /* ICIMVAU */
+.endm
 
 /****************************************************************************
  * Name: cp15_flush_btb
@@ -371,10 +371,10 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_flush_btb, tmp
-	mov		\tmp, #0
-	mrc		p15, 0, \tmp, c7, c5, 6 /* BPIALL */
-	.endm
+.macro cp15_flush_btb, tmp
+  mov \tmp, #0
+  mrc p15, 0, \tmp, c7, c5, 6 /* BPIALL */
+.endm
 
 /****************************************************************************
  * Name: cp15_flush_btb_bymva
@@ -390,10 +390,10 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_flush_btb_bymva, tmp
-	mov		\tmp, #0
-	mrc		p15, 0, \tmp, c7, c5, 7 /* BPIMVA */
-	.endm
+.macro cp15_flush_btb_bymva, tmp
+  mov \tmp, #0
+  mrc p15, 0, \tmp, c7, c5, 7 /* BPIMVA */
+.endm
 
 /****************************************************************************
  * Name: cp15_invalidate_dcacheline_bymva
@@ -409,9 +409,9 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_invalidate_dcacheline_bymva, va
-	mrc		p15, 0, \va, c7, c6, 1 /* DCIMVAC */
-	.endm
+.macro cp15_invalidate_dcacheline_bymva, va
+  mrc p15, 0, \va, c7, c6, 1 /* DCIMVAC */
+.endm
 
 /****************************************************************************
  * Name: cp15_invalidate_dcacheline_bysetway
@@ -427,9 +427,9 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_invalidate_dcacheline_bysetway, setway
-	mrc		p15, 0, \setway, c7, c6, 2 /* DCISW */
-	.endm
+.macro cp15_invalidate_dcacheline_bysetway, setway
+  mrc p15, 0, \setway, c7, c6, 2 /* DCISW */
+.endm
 
 /****************************************************************************
  * Name: cp15_clean_dcache_bymva
@@ -445,9 +445,9 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_clean_dcache_bymva, va
-	mrc		p15, 0, \va, c7, c10, 1 /* DCCMVAC */
-	.endm
+.macro cp15_clean_dcache_bymva, va
+  mrc p15, 0, \va, c7, c10, 1 /* DCCMVAC */
+.endm
 
 /****************************************************************************
  * Name: cp15_clean_dcache_bysetway
@@ -463,9 +463,9 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_clean_dcache_bysetway, setway
-	mrc		p15, 0, \setway, c7, c10, 2 /* DCCSW */
-	.endm
+.macro cp15_clean_dcache_bysetway, setway
+  mrc p15, 0, \setway, c7, c10, 2 /* DCCSW */
+.endm
 
 /****************************************************************************
  * Name: cp15_clean_ucache_bymva
@@ -481,9 +481,9 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_clean_ucache_bymva, setway
-	mrc		p15, 0, \setway, c7, c11, 1 /* DCCMVAU */
-	.endm
+.macro cp15_clean_ucache_bymva, setway
+  mrc p15, 0, \setway, c7, c11, 1 /* DCCMVAU */
+.endm
 
 /****************************************************************************
  * Name: cp15_cleaninvalidate_dcacheline_bymva
@@ -499,9 +499,9 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_cleaninvalidate_dcacheline_bymva, va
-	mrc		p15, 0, \va, c7, c14, 1 /* DCCIMVAC */
-	.endm
+.macro cp15_cleaninvalidate_dcacheline_bymva, va
+  mrc p15, 0, \va, c7, c14, 1 /* DCCIMVAC */
+.endm
 
 /****************************************************************************
  * Name: cp15_cleaninvalidate_dcacheline
@@ -517,9 +517,9 @@
  *
  ****************************************************************************/
 
-	.macro	cp15_cleaninvalidate_dcacheline, setway
-	mrc		p15, 0, \setway, c7, c14, 2 /* DCCISW */
-	.endm
+.macro cp15_cleaninvalidate_dcacheline, setway
+  mrc p15, 0, \setway, c7, c14, 2 /* DCCISW */
+.endm
 
 #endif /* __ASSEMBLY__ */
 
