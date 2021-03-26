@@ -167,23 +167,23 @@
  */
 
 #if defined(CONFIG_NET_IPv6)
-#define	_INET_ADDRSTRLEN	INET6_ADDRSTRLEN
+#define _INET_ADDRSTRLEN INET6_ADDRSTRLEN
 #else
-#define	_INET_ADDRSTRLEN	INET_ADDRSTRLEN
+#define _INET_ADDRSTRLEN INET_ADDRSTRLEN
 #endif
 
 #if defined(CONFIG_NETDB_DNSCLIENT) && \
     (CONFIG_NETDB_DNSCLIENT_NAMESIZE + 1) > _INET_ADDRSTRLEN
-#define	NI_MAXHOST	(CONFIG_NETDB_DNSCLIENT_NAMESIZE + 1)
+#define NI_MAXHOST (CONFIG_NETDB_DNSCLIENT_NAMESIZE + 1)
 #else
-#define	NI_MAXHOST	_INET_ADDRSTRLEN
+#define NI_MAXHOST _INET_ADDRSTRLEN
 #endif
 
 /* Right now, g_services_db[] only has "ntp".
  * 16 should be large enough.
  */
 
-#define	NI_MAXSERV	16
+#define NI_MAXSERV 16
 
 /****************************************************************************
  * Public Types
