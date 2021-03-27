@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32h7/nucleo-h743zi/src/stm32_usb.c
+ * boards/arm/stm32h7/nucleo-h743zi2/src/stm32_usb.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -41,7 +41,7 @@
 #include "chip.h"
 #include "stm32_gpio.h"
 #include "stm32_otg.h"
-#include "nucleo-h743zi.h"
+#include "nucleo-h743zi2.h"
 
 #ifdef CONFIG_STM32H7_OTGFS
 
@@ -56,12 +56,12 @@
 #  undef HAVE_USB
 #endif
 
-#ifndef CONFIG_NUCLEOH743ZI_USBHOST_PRIO
-#  define CONFIG_NUCLEOH743ZI_USBHOST_PRIO 100
+#ifndef CONFIG_USBHOST_DEFPRIO
+#  define CONFIG_USBHOST_DEFPRIO 100
 #endif
 
-#ifndef CONFIG_NUCLEOH743ZI_USBHOST_STACKSIZE
-#  define CONFIG_NUCLEOH743ZI_USBHOST_STACKSIZE 1024
+#ifndef CONFIG_USBHOST_STACKSIZE
+#  define CONFIG_USBHOST_STACKSIZE 2048
 #endif
 
 /****************************************************************************
@@ -229,8 +229,8 @@ int stm32_usbhost_initialize(void)
 
       uinfo("Start usbhost_waiter\n");
 
-      pid = kthread_create("usbhost", CONFIG_NUCLEOH743ZI_USBHOST_PRIO,
-                           CONFIG_NUCLEOH743ZI_USBHOST_STACKSIZE,
+      pid = kthread_create("usbhost", CONFIG_USBHOST_DEFPRIO,
+                           CONFIG_USBHOST_STACKSIZE,
                            (main_t)usbhost_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }
@@ -273,9 +273,9 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
 {
   DEBUGASSERT(iface == 0);
 
-  /* Set the Power Switch by driving the active high enable pin */
+  /* Set the Power Switch by driving the active low enable pin */
 
-  stm32_gpiowrite(GPIO_OTGFS_PWRON, enable);
+  stm32_gpiowrite(GPIO_OTGFS_PWRON, !enable);
 }
 #endif
 
