@@ -28,14 +28,9 @@
 
 #include <sys/types.h>
 #include <inttypes.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
+#include <stdlib.h>
 #include <time.h>
 
 #include <nuttx/arch.h>
@@ -85,6 +80,14 @@
  */
 
 #define VALUE_MASK(_val, _field) ((_val & (_field##_V)) << (_field##_S))
+
+/* SPI Maximum buffer size in bytes */
+
+#define SPI_MAX_BUF_SIZE (64)
+
+#ifndef MIN
+#  define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 
 /****************************************************************************
  * Private Types
@@ -1021,38 +1024,105 @@ static void esp32_spi_poll_exchange(FAR struct esp32_spi_priv_s *priv,
                                     FAR void *rxbuffer,
                                     size_t nwords)
 {
-  int i;
+  const uintptr_t spi_user_reg = SPI_USER_REG(priv->config->id);
+  const uintptr_t spi_w0_reg = SPI_W0_REG(priv->config->id);
+  const uintptr_t spi_cmd_reg = SPI_CMD_REG(priv->config->id);
+  const uintptr_t spi_miso_dlen_reg = SPI_MISO_DLEN_REG(priv->config->id);
+  const uintptr_t spi_mosi_dlen_reg = SPI_MOSI_DLEN_REG(priv->config->id);
+  const uint32_t total_bytes = nwords * (priv->nbits / 8);
+  uintptr_t bytes_remaining = total_bytes;
+  uint8_t *tp = (uint8_t *)txbuffer;
+  uint8_t *rp = (uint8_t *)rxbuffer;
 
-  for (i = 0 ; i < nwords; i++)
+  while (bytes_remaining != 0)
     {
-      uint32_t w_wd = 0xffff;
-      uint32_t r_wd;
+      /* Initialize data_buf_reg with the address of the first data buffer
+       * register (W0).
+       */
 
-      if (txbuffer != NULL)
+      uintptr_t data_buf_reg = spi_w0_reg;
+      uint32_t transfer_size = MIN(SPI_MAX_BUF_SIZE, bytes_remaining);
+
+      /* Write data words to data buffer registers.
+       * SPI peripheral contains 16 registers (W0 - W15).
+       */
+
+      for (int i = 0 ; i < transfer_size; i += sizeof(uint32_t))
         {
-          if (priv->nbits == 8)
+          uint32_t w_wd = UINT32_MAX;
+
+          if (tp != NULL)
             {
-              w_wd = ((uint8_t *)txbuffer)[i];
+              memcpy(&w_wd, tp, sizeof(uint32_t));
+
+              tp += sizeof(uintptr_t);
             }
-          else
+
+          putreg32(w_wd, data_buf_reg);
+
+          spiinfo("send=0x%" PRIx32 " data_reg=0x%" PRIx32 "\n",
+                  w_wd, data_buf_reg);
+
+          /* Update data_buf_reg to point to the next data buffer register. */
+
+          data_buf_reg += sizeof(uintptr_t);
+        }
+
+      esp32_spi_set_regbits(spi_user_reg, SPI_USR_MOSI_M);
+
+      if (rp == NULL)
+        {
+          esp32_spi_reset_regbits(spi_user_reg, SPI_USR_MISO_M);
+        }
+      else
+        {
+          esp32_spi_set_regbits(spi_user_reg, SPI_USR_MISO_M);
+        }
+
+      putreg32((transfer_size * 8) - 1, spi_mosi_dlen_reg);
+      putreg32((transfer_size * 8) - 1, spi_miso_dlen_reg);
+
+      /* Trigger start of user-defined transaction for master. */
+
+      esp32_spi_set_regbits(spi_cmd_reg, SPI_USR_M);
+
+      /* Wait for the user-defined transaction to finish. */
+
+      while ((getreg32(spi_cmd_reg) & SPI_USR_M) != 0)
+        {
+          ;
+        }
+
+      if (rp != NULL)
+        {
+          /* Set data_buf_reg with the address of the first data buffer
+           * register (W0).
+           */
+
+          data_buf_reg = spi_w0_reg;
+
+          /* Read received data words from SPI data buffer registers. */
+
+          for (int i = 0 ; i < transfer_size; i += sizeof(uint32_t))
             {
-              w_wd = ((uint16_t *)txbuffer)[i];
+              uint32_t r_wd = getreg32(data_buf_reg);
+
+              spiinfo("recv=0x%" PRIx32 " data_reg=0x%" PRIx32 "\n",
+                      r_wd, data_buf_reg);
+
+              memcpy(rp, &r_wd, sizeof(uint32_t));
+
+              rp += sizeof(uintptr_t);
+
+              /* Update data_buf_reg to point to the next data buffer
+               * register.
+               */
+
+              data_buf_reg += sizeof(uintptr_t);
             }
         }
 
-      r_wd = esp32_spi_poll_send(priv, w_wd);
-
-      if (rxbuffer != NULL)
-        {
-          if (priv->nbits == 8)
-            {
-              ((uint8_t *)rxbuffer)[i] = r_wd;
-            }
-          else
-            {
-              ((uint16_t *)rxbuffer)[i] = r_wd;
-            }
-        }
+      bytes_remaining -= transfer_size;
     }
 }
 
