@@ -1409,7 +1409,7 @@ static bool stm32can_txready(FAR struct can_dev_s *dev)
   /* Return true if any mailbox is available */
 
   regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
-  caninfo("CAN%d TSR: %08lx\n", priv->port, regval);
+  caninfo("CAN%d TSR: %08" PRIx32 "\n", priv->port, regval);
 
   return stm32can_txmb0empty(regval) || stm32can_txmb1empty(regval) ||
          stm32can_txmb2empty(regval);
@@ -1441,7 +1441,7 @@ static bool stm32can_txempty(FAR struct can_dev_s *dev)
   /* Return true if all mailboxes are available */
 
   regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
-  caninfo("CAN%d TSR: %08lx\n", priv->port, regval);
+  caninfo("CAN%d TSR: %08" PRIx32 "\n", priv->port, regval);
 
   return stm32can_txmb0empty(regval) && stm32can_txmb1empty(regval) &&
          stm32can_txmb2empty(regval);
@@ -1918,7 +1918,8 @@ static int stm32can_exitinitmode(FAR struct stm32_can_s *priv)
 
   if (timeout < 1)
     {
-      canerr("ERROR: Timed out waiting to exit initialization mode: %08lx\n",
+      canerr("ERROR: Timed out waiting to exit initialization mode: %08"
+	     PRIx32 "\n",
              regval);
       return -ETIMEDOUT;
     }
