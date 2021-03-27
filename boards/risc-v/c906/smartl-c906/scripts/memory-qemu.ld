@@ -20,15 +20,16 @@
 
 /* Reg   Access        Start addr    End addr     Size
  * QEMU  CPU w/  cache  0x00000000 - 0x003fffff : 4MB
+ * QEMU  CPU w/o cache  0x1f000000 - 0x1f01ffff : 128KB
  */
 
 MEMORY
 {
-  kflash (rx)  : ORIGIN = 0x00000000, LENGTH = 512K  /* w/ cache */
-  uflash (rx)  : ORIGIN = 0x00080000, LENGTH = 512K  /* w/ cache */
-  xflash (rx)  : ORIGIN = 0x00100000, LENGTH = 512K  /* w/ cache */
+  uflash (rx)  : ORIGIN = 0x00001000, LENGTH = 1020K /* w/ cache */
+  usram (rwx)  : ORIGIN = 0x00100000, LENGTH = 1024K /* w/ cache */
+  xflash (rx)  : ORIGIN = 0x1f000000, LENGTH = 64K   /* w/o cache */
 
-  ksram (rwx)  : ORIGIN = 0x00180000, LENGTH = 512K  /* w/ cache */
-  usram (rwx)  : ORIGIN = 0x00200000, LENGTH = 512K  /* w/ cache */
-  xsram (rwx)  : ORIGIN = 0x00280000, LENGTH = 512K  /* w/ cache */
+  kflash (rx)  : ORIGIN = 0x00200000, LENGTH = 1024K /* w/ cache */
+  ksram (rwx)  : ORIGIN = 0x00300000, LENGTH = 1024K /* w/ cache */
+  xsram (rwx)  : ORIGIN = 0x1f010000, LENGTH = 64K   /* w/o cache */
 }

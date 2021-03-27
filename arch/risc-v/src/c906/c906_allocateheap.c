@@ -37,7 +37,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SRAM1_END CONFIG_RAM_END
+#define KRAM_END CONFIG_RAM_END
 
 /****************************************************************************
  * Public Functions
@@ -61,54 +61,45 @@
  *   .data region.  Size determined at link time.
  *   .bss  region  Size determined at link time.
  *   IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
- *   Heap.  Extends to the end of SRAM.
+ *   Heap.  Extends to the end of User SRAM.
  *
- *   The following memory map is assumed for the kernel build:
+ *   The following memory map is assumed for the protect build.
+ *   The kernel and user space have it's own dedicated heap space.
  *
+ *   User .data region         Size determined at link time
+ *   User .bss region          Size determined at link time
+ *   User heap                 Extends to the end of User SRAM
  *   Kernel .data region       Size determined at link time
  *   Kernel .bss  region       Size determined at link time
  *   Kernel IDLE thread stack  Size determined by CONFIG_IDLETHREAD_STACKSIZE
- *   Padding for alignment
- *   User .data region         Size determined at link time
- *   User .bss region          Size determined at link time
  *   Kernel heap               Size determined by CONFIG_MM_KERNEL_HEAPSIZE
- *   User heap                 Extends to the end of SRAM
  *
  ****************************************************************************/
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
-  /* Get the unaligned size and position of the user-space heap.
-   * This heap begins after the user-space .bss section at an offset
-   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
+  /* Get the size and position of the user-space heap.
+   * This heap begins after the user-space .bss section.
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
-    CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = SRAM1_END - ubase;
-
-  DEBUGASSERT(ubase < (uintptr_t)SRAM1_END);
-
-  /* Adjust that size to account for MPU alignment requirements.
-   * NOTE that there is an implicit assumption that the SRAM1_END
-   * is aligned to the MPU requirement.
-   */
-
-  ubase = SRAM1_END - usize;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend;
+  size_t    usize = (uintptr_t)USERSPACE->us_heapend - ubase;
 
   /* Return the user-space heap settings */
 
   *heap_start = (FAR void *)ubase;
   *heap_size  = usize;
 
-  /* TODO: Allow user-mode access to the user heap memory in PMP */
+  /* Allow user-mode access to the user heap memory in PMP
+   * is already done in c906_userspace().
+   */
 
 #else
   /* Return the heap settings */
 
   *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
+  *heap_size = KRAM_END - g_idle_topstack;
 #endif
 }
 
@@ -125,31 +116,10 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 {
-  /* Get the unaligned size and position of the user-space heap.
-   * This heap begins after the user-space .bss section at an offset
-   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
-   */
+  /* Return the kernel heap settings. */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend;
-  ubase          += CONFIG_MM_KERNEL_HEAPSIZE;
-
-  size_t    usize = SRAM1_END - ubase;
-
-  DEBUGASSERT(ubase < (uintptr_t)SRAM1_END);
-
-  /* TODO: Adjust that size to account for MPU alignment requirements.
-   * NOTE that there is an implicit assumption that the SRAM1_END
-   * is aligned to the MPU requirement.
-   */
-
-  ubase = SRAM1_END - usize;
-
-  /* Return the kernel heap settings (i.e., the part of the heap region
-   * that was not dedicated to the user heap).
-   */
-
-  *heap_start = (FAR void *)USERSPACE->us_bssend;
-  *heap_size  = ubase - (uintptr_t)USERSPACE->us_bssend;
+  *heap_start = (FAR void *)g_idle_topstack;
+  *heap_size = KRAM_END - g_idle_topstack;
 }
 #endif
 

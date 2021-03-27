@@ -29,9 +29,30 @@
 
 #include <nuttx/userspace.h>
 
+#include "riscv_internal.h"
 #include "c906_userspace.h"
 
 #ifdef CONFIG_BUILD_PROTECTED
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* TODO: get user space mem layout info from ld script or Configuration ? */
+
+#ifndef CONFIG_NUTTX_USERSPACE_SIZE
+#  define CONFIG_NUTTX_USERSPACE_SIZE        (0x00100000)
+#endif
+
+#ifndef CONFIG_NUTTX_USERSPACE_RAM_START
+#  define CONFIG_NUTTX_USERSPACE_RAM_START   (0x00100000)
+#endif
+
+#ifndef CONFIG_NUTTX_USERSPACE_RAM_SIZE
+#  define CONFIG_NUTTX_USERSPACE_RAM_SIZE    (0x00100000)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -82,9 +103,25 @@ void c906_userspace(void)
       *dest++ = *src++;
     }
 
-  /* TODO:
-   * Configure the PMP to permit user-space access to its ROM and RAM
+  /* Configure the PMP to permit user-space access to its ROM and RAM.
+   * Now this is done by simply adding the whole memory area to PMP.
+   * 1. no access for the 1st 4KB
+   * 2. "RX" for the left space until 1MB
+   * 3. "RW" for the user RAM area
+   * TODO: more accurate memory size control.
    */
+
+  riscv_config_pmp_region(0, PMPCFG_A_NAPOT,
+                          0,
+                          0x1000);
+
+  riscv_config_pmp_region(1, PMPCFG_A_TOR | PMPCFG_X | PMPCFG_R,
+                          0 + CONFIG_NUTTX_USERSPACE_SIZE,
+                          0);
+
+  riscv_config_pmp_region(2, PMPCFG_A_NAPOT | PMPCFG_W | PMPCFG_R,
+                          CONFIG_NUTTX_USERSPACE_RAM_START,
+                          CONFIG_NUTTX_USERSPACE_RAM_SIZE);
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */
