@@ -1919,8 +1919,7 @@ static int stm32can_exitinitmode(FAR struct stm32_can_s *priv)
   if (timeout < 1)
     {
       canerr("ERROR: Timed out waiting to exit initialization mode: %08"
-	     PRIx32 "\n",
-             regval);
+                  PRIx32 "\n", regval);
       return -ETIMEDOUT;
     }
 
